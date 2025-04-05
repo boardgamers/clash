@@ -18,6 +18,7 @@ use crate::movement::{
     CurrentMove, MoveState, MovementAction, get_move_state, has_movable_units,
     move_units_destinations,
 };
+use crate::objective_card::on_objective_cards;
 use crate::playing_actions::PlayingAction;
 use crate::recruit::on_recruit;
 use crate::resource::check_for_waste;
@@ -178,6 +179,9 @@ pub(crate) fn execute_custom_phase_action(
         Incident(i) => on_trigger_incident(game, i),
         ActionCard(a) => on_play_action_card(game, player_index, a),
         WonderCard(w) => on_play_wonder_card(game, player_index, w),
+        SelectObjectives(c) => {
+            on_objective_cards(game, player_index, c);
+        }
     }
 
     if let Some(mut s) = game.events.pop() {

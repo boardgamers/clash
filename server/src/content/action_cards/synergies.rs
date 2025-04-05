@@ -1,16 +1,15 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action::Action;
-use crate::action_card::{
-    ActionCard, ActionCardBuilder, ActionCardInfo, CivilCardMatch, CivilCardOpportunity,
-    CivilCardRequirement, CivilCardTarget,
-};
+use crate::action_card::{ActionCard, ActionCardBuilder, CivilCardTarget, discard_action_card};
 use crate::advance::gain_advance_without_payment;
-use crate::content::action_cards::inspiration;
+use crate::card::HandCard;
+use crate::content::action_cards::{get_action_card, inspiration};
 use crate::content::advances;
 use crate::content::advances::get_advance;
 use crate::content::advances::theocracy::cities_that_can_add_units;
+use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{
-    AdvanceRequest, EventResponse, PaymentRequest, PlayerRequest, PositionRequest,
+    AdvanceRequest, EventResponse, HandCardsRequest, PaymentRequest, PlayerRequest, PositionRequest,
 };
 use crate::content::tactics_cards::{
     TacticsCardFactory, archers, defensive_formation, flanking, high_ground, high_morale, surprise,
@@ -169,22 +168,61 @@ fn teach_us(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "If you just captured a city: Gain 1 advance from the loser for free \
          without changing the Game Event counter.",
         ActionType::free(),
-        |game, player, a| !advances_to_copy_for_loser(game, player, a).is_empty(),
+        // is played by "use_teach_us"
+        |_game, _player, _a| true,
     )
-    .requirement(CivilCardRequirement::new(
-        vec![CivilCardOpportunity::CaptureCity],
-        true,
-    ))
     .tactics_card(tactics_card)
+    .build()
+}
+
+pub(crate) fn use_teach_us() -> Builtin {
+    // this action card is special - it's played directly after a battle - like objective cards
+    Builtin::builder(
+        "Teach us",
+        "If you just captured a city: Gain 1 advance from the loser for free \
+             without changing the Game Event counter.",
+    )
+    .add_hand_card_request(
+        |e| &mut e.combat_end,
+        1,
+        |game, player_index, e| {
+            let stats = &e.combat.stats;
+            if e.result.winner() == Some(e.combat.role(player_index))
+                && stats.battleground.is_city()
+            {
+                let p = game.player(player_index);
+                let cards = p
+                    .action_cards
+                    .iter()
+                    .filter(|a| get_action_card(**a).civil_card.name == "Teach Us")
+                    .map(|a| HandCard::ActionCard(*a))
+                    .collect_vec();
+                return Some(HandCardsRequest::new(cards, 0..=1, "Select Teach Us card"));
+            }
+            None
+        },
+        |game, s, e| {
+            if s.choice.is_empty() {
+                return;
+            }
+            let HandCard::ActionCard(id) = s.choice[0] else {
+                panic!("Teach Us card not found");
+            };
+            discard_action_card(game, s.player_index, id);
+
+            game.add_info_log_item(&format!("{} selected to use Teach Us.", s.player_name));
+            e.selected_card = Some(id);
+        },
+    )
     .add_advance_request(
-        |e| &mut e.play_action_card,
+        |e| &mut e.combat_end,
         0,
-        |game, player, a| {
-            Some(AdvanceRequest::new(advances_to_copy_for_loser(
-                game,
-                game.player(player),
-                a,
-            )))
+        |game, player, e| {
+            e.selected_card.map(|_| {
+                let vec =
+                    teachable_advances(game.player(e.combat.opponent(player)), game.player(player));
+                AdvanceRequest::new(vec)
+            })
         },
         |game, sel, _| {
             let advance = &sel.choice;
@@ -202,22 +240,6 @@ fn teach_us(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         },
     )
     .build()
-}
-
-fn advances_to_copy_for_loser(game: &Game, winner: &Player, a: &ActionCardInfo) -> Vec<String> {
-    let Some(action_log_index) = a.satisfying_action else {
-        panic!("Satisfying action not found");
-    };
-    let Some(CivilCardMatch {
-        opportunity: _,
-        played_cards: _,
-        opponent: Some(loser),
-    }) = &current_player_turn_log(game).items[action_log_index].civil_card_match
-    else {
-        panic!("Capture city opportunity not found");
-    };
-
-    teachable_advances(game.player(*loser), winner)
 }
 
 pub(crate) fn teachable_advances(teacher: &Player, student: &Player) -> Vec<String> {

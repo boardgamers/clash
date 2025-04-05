@@ -261,6 +261,27 @@
                     "Response": {
                       "SelectAdvance": "Storage"
                     }
+                  },
+                  "combat_stats": {
+                    "position": "C2",
+                    "battleground": "CityWithFortress",
+                    "attacker": {
+                      "player": 2,
+                      "fighters": {
+                        "infantry": 2,
+                        "elephants": 1
+                      },
+                      "losses": {
+                        "elephants": 1
+                      }
+                    },
+                    "defender": {
+                      "player": 0,
+                      "fighters": {
+                        "settlers": 4
+                      }
+                    },
+                    "result": "AttackerWins"
                   }
                 }
               ]
@@ -319,9 +340,7 @@
     10,
     10
   ],
-  "dropped_players": [],
   "wonders_left": [
     "Pyramids"
-  ],
-  "action_cards_left": []
+  ]
 }

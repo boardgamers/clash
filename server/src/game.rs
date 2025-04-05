@@ -1,39 +1,34 @@
 use crate::ability_initializer::AbilityListeners;
-use crate::action_card::gain_action_card_from_pile;
 use crate::combat_roll::{COMBAT_DIE_SIDES, CombatDieRoll};
-use crate::consts::{ACTIONS, NON_HUMAN_PLAYERS};
-use crate::content::civilizations::{BARBARIANS, PIRATES};
+use crate::consts::ACTIONS;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{
     PersistentEventHandler, PersistentEventPlayer, PersistentEventState, PersistentEventType,
 };
-use crate::content::{action_cards, advances, builtin, incidents};
 use crate::events::{Event, EventOrigin};
 use crate::log::{
     ActionLogAge, ActionLogPlayer, ActionLogRound, current_player_turn_log,
     current_player_turn_log_mut,
 };
 use crate::movement::MoveState;
+use crate::objective_card::present_instant_objective_cards;
 use crate::pirates::get_pirates_player;
 use crate::player_events::{
     PersistentEvent, PersistentEventInfo, PersistentEvents, PlayerEvents, TransientEvents,
 };
 use crate::resource::check_for_waste;
-use crate::resource_pile::ResourcePile;
 use crate::status_phase::enter_status_phase;
 use crate::utils;
 use crate::utils::Rng;
-use crate::utils::Shuffle;
 use crate::{
     city::City,
-    content::{civilizations, custom_actions::CustomActionType, wonders},
+    content::custom_actions::CustomActionType,
     map::{Map, MapData},
     player::{Player, PlayerData},
     position::Position,
 };
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use std::vec;
 
 pub struct Game {
@@ -62,6 +57,7 @@ pub struct Game {
     pub dropped_players: Vec<usize>,
     pub wonders_left: Vec<String>,
     pub action_cards_left: Vec<u8>,
+    pub objective_cards_left: Vec<u8>,
     pub incidents_left: Vec<u8>,
     pub permanent_effects: Vec<PermanentEffect>,
 }
@@ -79,123 +75,6 @@ impl PartialEq for Game {
 }
 
 impl Game {
-    /// Creates a new [`Game`].
-    ///
-    /// # Panics
-    ///
-    /// Panics only if there is an internal bug
-    #[must_use]
-    pub fn new(player_amount: usize, seed: String, setup: bool) -> Self {
-        let seed_length = seed.len();
-        let seed = if seed_length < 32 {
-            seed + &" ".repeat(32 - seed_length)
-        } else {
-            String::from(&seed[..32])
-        };
-        let seed: &[u8] = seed.as_bytes();
-        let mut buffer = [0u8; 16];
-        buffer[..].copy_from_slice(&seed[..16]);
-        let seed1 = u128::from_be_bytes(buffer);
-        let mut buffer = [0u8; 16];
-        buffer[..].copy_from_slice(&seed[16..]);
-        let seed2 = u128::from_be_bytes(buffer);
-        let seed = seed1 ^ seed2;
-        let mut rng = Rng::from_seed(seed);
-
-        let mut players = Vec::new();
-        let mut civilizations = civilizations::get_all();
-        for player_index in 0..player_amount {
-            let civilization = rng.range(NON_HUMAN_PLAYERS, civilizations.len());
-            let mut player = Player::new(civilizations.remove(civilization), player_index);
-            player.resource_limit = ResourcePile::new(2, 7, 7, 7, 7, 0, 0);
-            player.gain_resources(ResourcePile::food(2));
-            player.advances.push(advances::get_advance("Farming"));
-            player.advances.push(advances::get_advance("Mining"));
-            player.incident_tokens = 3;
-            players.push(player);
-        }
-
-        let starting_player = rng.range(0, players.len());
-
-        players.push(Player::new(
-            civilizations::get_civilization(BARBARIANS).expect("civ not found"),
-            players.len(),
-        ));
-        players.push(Player::new(
-            civilizations::get_civilization(PIRATES).expect("civ not found"),
-            players.len(),
-        ));
-
-        let map = if setup {
-            Map::random_map(&mut players, &mut rng)
-        } else {
-            Map::new(HashMap::new())
-        };
-
-        let wonders_left = wonders::get_all()
-            .shuffled(&mut rng)
-            .iter()
-            .map(|w| w.name.clone())
-            .collect();
-        let action_cards_left = action_cards::get_all()
-            .shuffled(&mut rng)
-            .iter()
-            .map(|a| a.id)
-            .collect();
-        let incidents_left = incidents::get_all()
-            .shuffled(&mut rng)
-            .iter()
-            .map(|i| i.id)
-            .collect();
-        let mut game = Self {
-            state: GameState::Playing,
-            events: Vec::new(),
-            players,
-            map,
-            starting_player_index: starting_player,
-            current_player_index: starting_player,
-            action_log: Vec::new(),
-            action_log_index: 0,
-            current_action_log_index: None,
-            log: [String::from("The game has started")]
-                .iter()
-                .map(|s| vec![s.clone()])
-                .collect(),
-            undo_limit: 0,
-            actions_left: ACTIONS,
-            successful_cultural_influence: false,
-            round: 1,
-            age: 0,
-            messages: vec![String::from("The game has started")],
-            rng,
-            dice_roll_outcomes: Vec::new(),
-            dice_roll_log: Vec::new(),
-            dropped_players: Vec::new(),
-            wonders_left,
-            action_cards_left,
-            incidents_left,
-            permanent_effects: Vec::new(),
-        };
-        for i in 0..game.players.len() {
-            builtin::init_player(&mut game, i);
-        }
-
-        for player_index in 0..player_amount {
-            let p = game.player(player_index);
-            game.add_info_log_group(format!(
-                "{} is playing as {}",
-                p.get_name(),
-                p.civilization.name
-            ));
-            gain_action_card_from_pile(&mut game, player_index);
-            // todo draw 1 objective card
-        }
-
-        game.next_age();
-        game.start_turn();
-        game
-    }
-
     ///
     ///
     /// # Panics
@@ -225,6 +104,7 @@ impl Game {
             dropped_players: data.dropped_players,
             wonders_left: data.wonders_left,
             action_cards_left: data.action_cards_left,
+            objective_cards_left: data.objective_cards_left,
             incidents_left: data.incidents_left,
             permanent_effects: data.permanent_effects,
             events: data.events,
@@ -259,6 +139,7 @@ impl Game {
             dropped_players: self.dropped_players,
             wonders_left: self.wonders_left,
             action_cards_left: self.action_cards_left,
+            objective_cards_left: self.objective_cards_left,
             incidents_left: self.incidents_left,
             permanent_effects: self.permanent_effects,
         }
@@ -288,6 +169,7 @@ impl Game {
             dropped_players: self.dropped_players.clone(),
             wonders_left: self.wonders_left.clone(),
             action_cards_left: self.action_cards_left.clone(),
+            objective_cards_left: self.objective_cards_left.clone(),
             incidents_left: self.incidents_left.clone(),
             permanent_effects: self.permanent_effects.clone(),
         }
@@ -463,6 +345,11 @@ impl Game {
             }
         }
         self.events.pop();
+
+        if self.events.is_empty() {
+            present_instant_objective_cards(self);
+        }
+
         Some(value)
     }
 
@@ -664,7 +551,6 @@ impl Game {
         self.player_mut(self.current_player_index).end_turn();
         for i in &mut current_player_turn_log_mut(self).items {
             i.undo.clear();
-            i.civil_card_match = None;
         }
         check_for_waste(self);
         self.increment_player_index();
@@ -784,6 +670,8 @@ pub struct GameData {
     map: MapData,
     starting_player_index: usize,
     current_player_index: usize,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     action_log: Vec<ActionLogAge>,
     action_log_index: usize,
     log: Vec<Vec<String>>,
@@ -801,10 +689,21 @@ pub struct GameData {
     #[serde(default)]
     #[serde(skip_serializing_if = "is_string_zero")]
     rng: String,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     dice_roll_log: Vec<u8>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     dropped_players: Vec<usize>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     wonders_left: Vec<String>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     action_cards_left: Vec<u8>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    objective_cards_left: Vec<u8>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     incidents_left: Vec<u8>,

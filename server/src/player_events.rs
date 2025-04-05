@@ -10,6 +10,7 @@ use crate::explore::ExploreResolutionState;
 use crate::game::Game;
 use crate::incident::PassedIncident;
 use crate::map::Terrain;
+use crate::objective_card::SelectObjectivesInfo;
 use crate::payment::PaymentOptions;
 use crate::playing_actions::{PlayingActionType, Recruit};
 use crate::status_phase::StatusPhaseState;
@@ -74,6 +75,7 @@ pub(crate) struct PersistentEvents {
     pub combat_round_end_tactics: PersistentEvent<CombatRoundEnd>,
     pub combat_end: PersistentEvent<CombatEnd>,
     pub units_killed: PersistentEvent<KilledUnits>,
+    pub select_objective_cards: PersistentEvent<SelectObjectivesInfo>,
 }
 
 impl PlayerEvents {

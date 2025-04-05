@@ -273,6 +273,29 @@
                         }
                       }
                     }
+                  },
+                  "combat_stats": {
+                    "position": "B1",
+                    "battleground": "Land",
+                    "attacker": {
+                      "player": 0,
+                      "fighters": {
+                        "infantry": 1
+                      },
+                      "losses": {
+                        "infantry": 1
+                      }
+                    },
+                    "defender": {
+                      "player": 1,
+                      "fighters": {
+                        "infantry": 1
+                      },
+                      "losses": {
+                        "infantry": 1
+                      }
+                    },
+                    "result": "Draw"
                   }
                 }
               ]
@@ -336,9 +359,7 @@
     10,
     10
   ],
-  "dropped_players": [],
   "wonders_left": [
     "Pyramids"
-  ],
-  "action_cards_left": []
+  ]
 }

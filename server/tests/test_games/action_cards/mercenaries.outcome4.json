@@ -287,6 +287,30 @@
                         "A3"
                       ]
                     }
+                  },
+                  "combat_stats": {
+                    "position": "B2",
+                    "battleground": "Land",
+                    "attacker": {
+                      "player": 2,
+                      "fighters": {
+                        "infantry": 2,
+                        "elephants": 1
+                      },
+                      "losses": {
+                        "elephants": 1
+                      }
+                    },
+                    "defender": {
+                      "player": 0,
+                      "fighters": {
+                        "infantry": 1
+                      },
+                      "losses": {
+                        "infantry": 1
+                      }
+                    },
+                    "result": "AttackerWins"
                   }
                 },
                 {
@@ -425,11 +449,9 @@
     10,
     10
   ],
-  "dropped_players": [],
   "wonders_left": [
     "Pyramids"
   ],
-  "action_cards_left": [],
   "incidents_left": [
     28
   ]

@@ -7,6 +7,7 @@ use crate::combat_listeners::{
 use crate::content::action_cards::cultural_takeover::use_cultural_takeover;
 use crate::content::action_cards::development::collect_only;
 use crate::content::action_cards::negotiation::{use_assassination, use_negotiations};
+use crate::content::action_cards::synergies::use_teach_us;
 use crate::content::incidents::famine::pestilence_permanent_effect;
 use crate::content::incidents::great_builders::construct_only;
 use crate::content::incidents::great_diplomat::use_diplomatic_relations;
@@ -18,6 +19,7 @@ use crate::cultural_influence::cultural_influence_resolution;
 use crate::events::EventOrigin;
 use crate::explore::explore_resolution;
 use crate::game::Game;
+use crate::objective_card::select_objectives;
 use crate::pirates::{pirates_bonus, pirates_round_bonus};
 use crate::status_phase::{
     StatusPhaseState, complete_objectives, determine_first_player, draw_cards, free_advance,
@@ -82,6 +84,7 @@ pub fn get_all() -> Vec<Builtin> {
         on_draw_wonder_card(),
         build_wonder(),
         choose_carried_units_to_remove(),
+        select_objectives(),
         // combat related
         place_settler(),
         choose_fighter_casualties(),
@@ -103,6 +106,7 @@ pub fn get_all() -> Vec<Builtin> {
         use_cultural_takeover(),
         use_negotiations(),
         use_assassination(),
+        use_teach_us(),
     ]
 }
 

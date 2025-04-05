@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::action_card::{ActionCardInfo, play_action_card};
+use crate::action_card::{ActionCardInfo, land_battle_won_action, play_action_card};
 use crate::advance::gain_advance_without_payment;
 use crate::city::MoodState;
 use crate::collect::{PositionCollection, collect};
@@ -13,7 +13,7 @@ use crate::cultural_influence::influence_culture_attempt;
 use crate::game::GameState;
 use crate::player::Player;
 use crate::player_events::PlayingActionInfo;
-use crate::recruit::{recruit, recruit_cost};
+use crate::recruit::recruit;
 use crate::unit::Units;
 use crate::wonder::{WonderCardInfo, WonderDiscount, cities_for_wonder, on_play_wonder_card};
 use crate::{
@@ -38,6 +38,31 @@ pub struct Recruit {
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub replaced_units: Vec<u32>,
+}
+
+impl Recruit {
+    #[must_use]
+    pub fn new(units: &Units, city_position: Position, payment: ResourcePile) -> Self {
+        Self {
+            units: units.clone(),
+            city_position,
+            payment,
+            leader_name: None,
+            replaced_units: Vec::new(),
+        }
+    }
+
+    #[must_use]
+    pub fn with_leader(mut self, leader_name: &str) -> Self {
+        self.leader_name = Some(leader_name.to_string());
+        self
+    }
+
+    #[must_use]
+    pub fn with_replaced_units(mut self, replaced_units: &[u32]) -> Self {
+        self.replaced_units = replaced_units.to_vec();
+        self
+    }
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
@@ -95,8 +120,9 @@ impl PlayingActionType {
 
                 let civil_card = get_civil_card(*id);
                 let mut satisfying_action: Option<usize> = None;
-                if let Some(requirement) = civil_card.requirement {
-                    if let Some(action_log_index) = requirement.satisfying_action(game, *id) {
+                if civil_card.requirement_land_battle_won {
+                    if let Some(action_log_index) = land_battle_won_action(game, player_index, *id)
+                    {
                         satisfying_action = Some(action_log_index);
                     } else {
                         return Err("Requirement not met".to_string());
@@ -199,35 +225,14 @@ impl PlayingAction {
                 }
                 build_city(game.player_mut(player_index), settler.position);
             }
-            Construct(c) => {
-                construct::construct(game, player_index, &c)?;
-            }
-            Collect(c) => {
-                collect(game, player_index, &c)?;
-            }
-            Recruit(r) => {
-                let player = &mut game.players[player_index];
-                if let Some(cost) = recruit_cost(
-                    player,
-                    &r.units,
-                    r.city_position,
-                    r.leader_name.as_ref(),
-                    &r.replaced_units,
-                    Some(&r.payment),
-                ) {
-                    cost.pay(game, &r.payment);
-                } else {
-                    return Err("Cannot pay for units".to_string());
-                }
-                recruit(game, player_index, r);
-            }
+            Construct(c) => construct::construct(game, player_index, &c)?,
+            Collect(c) => collect(game, player_index, &c)?,
+            Recruit(r) => recruit(game, player_index, r)?,
             IncreaseHappiness(i) => {
                 increase_happiness(game, player_index, &i.happiness_increases, Some(i.payment));
             }
             InfluenceCultureAttempt(c) => influence_culture_attempt(game, player_index, &c),
-            ActionCard(a) => {
-                play_action_card(game, player_index, a);
-            }
+            ActionCard(a) => play_action_card(game, player_index, a),
             WonderCard(name) => {
                 on_play_wonder_card(
                     game,
@@ -235,9 +240,7 @@ impl PlayingAction {
                     WonderCardInfo::new(name, WonderDiscount::default()),
                 );
             }
-            Custom(custom_action) => {
-                custom(game, player_index, custom_action)?;
-            }
+            Custom(custom_action) => custom(game, player_index, custom_action)?,
             EndTurn => game.next_turn(),
         }
         Ok(())

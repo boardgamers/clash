@@ -412,9 +412,25 @@
                       }
                     }
                   },
-                  "civil_card_match": {
-                    "opportunity": "WinLandBattle",
-                    "opponent": 0
+                  "combat_stats": {
+                    "position": "C8",
+                    "battleground": "Land",
+                    "attacker": {
+                      "player": 1,
+                      "fighters": {
+                        "infantry": 1
+                      }
+                    },
+                    "defender": {
+                      "player": 0,
+                      "fighters": {
+                        "infantry": 1
+                      },
+                      "losses": {
+                        "infantry": 1
+                      }
+                    },
+                    "result": "AttackerWins"
                   }
                 }
               ]
@@ -668,9 +684,7 @@
     8,
     2
   ],
-  "dropped_players": [],
   "wonders_left": [
     "Pyramids"
-  ],
-  "action_cards_left": []
+  ]
 }

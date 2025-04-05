@@ -201,6 +201,29 @@
                         "destination": "C1"
                       }
                     }
+                  },
+                  "combat_stats": {
+                    "position": "C1",
+                    "battleground": "City",
+                    "attacker": {
+                      "player": 0,
+                      "fighters": {
+                        "infantry": 1
+                      },
+                      "losses": {
+                        "infantry": 1
+                      }
+                    },
+                    "defender": {
+                      "player": 1,
+                      "fighters": {
+                        "infantry": 2
+                      },
+                      "losses": {
+                        "infantry": 1
+                      }
+                    },
+                    "result": "DefenderWins"
                   }
                 }
               ]
@@ -245,9 +268,7 @@
     10,
     10
   ],
-  "dropped_players": [],
   "wonders_left": [
     "Pyramids"
-  ],
-  "action_cards_left": []
+  ]
 }

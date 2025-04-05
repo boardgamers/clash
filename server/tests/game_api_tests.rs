@@ -1,6 +1,7 @@
 use crate::common::*;
 use server::collect::PositionCollection;
 use server::content::persistent_events::{EventResponse, SelectedStructure, Structure};
+use server::game_setup::setup_game;
 use server::log::current_player_turn_log;
 use server::unit::Units;
 use server::{
@@ -25,14 +26,14 @@ const JSON: JsonTest = JsonTest::new("base");
 #[test]
 fn new_game() {
     let seed = String::new();
-    let game = Game::new(2, seed, true);
+    let game = setup_game(2, seed, true);
     JSON.compare_game("new_game", &game);
 }
 
 #[test]
 fn basic_actions() {
     let seed = String::new();
-    let mut game = Game::new(1, seed, false);
+    let mut game = setup_game(1, seed, false);
 
     game.wonders_left.retain(|w| w == "Pyramids");
     let founded_city_position = Position::new(0, 1);
@@ -150,13 +151,11 @@ fn basic_actions() {
     let mut game = game_api::execute(game, Action::Playing(EndTurn), 0);
     let player = &mut game.players[0];
     player.gain_resources(ResourcePile::food(1));
-    let recruit_action = Action::Playing(Recruit(playing_actions::Recruit {
-        units: Units::new(1, 0, 0, 0, 0, 0),
+    let recruit_action = Action::Playing(Recruit(playing_actions::Recruit::new(
+        &Units::new(1, 0, 0, 0, 0, 0),
         city_position,
-        payment: ResourcePile::food(2),
-        leader_name: None,
-        replaced_units: Vec::new(),
-    }));
+        ResourcePile::food(2),
+    )));
     let mut game = game_api::execute(game, recruit_action, 0);
     let player = &mut game.players[0];
     assert_eq!(1, player.units.len());
@@ -209,7 +208,7 @@ fn increase_happiness(game: Game) -> Game {
 
 #[test]
 fn undo() {
-    let mut game = Game::new(1, String::new(), false);
+    let mut game = setup_game(1, String::new(), false);
     game.players[0]
         .cities
         .push(City::new(0, Position::new(0, 0)));
@@ -349,13 +348,14 @@ fn test_recruit() {
         "recruit",
         vec![TestAction::undoable(
             0,
-            Action::Playing(Recruit(playing_actions::Recruit {
-                units: Units::new(1, 1, 0, 0, 0, 0),
-                city_position: Position::from_offset("A1"),
-                payment: ResourcePile::food(1) + ResourcePile::ore(1) + ResourcePile::gold(2),
-                leader_name: None,
-                replaced_units: vec![4],
-            })),
+            Action::Playing(Recruit(
+                playing_actions::Recruit::new(
+                    &Units::new(1, 1, 0, 0, 0, 0),
+                    Position::from_offset("A1"),
+                    ResourcePile::food(1) + ResourcePile::ore(1) + ResourcePile::gold(2),
+                )
+                .with_replaced_units(&[4]),
+            )),
         )],
     );
 }
@@ -366,13 +366,14 @@ fn test_recruit_leader() {
         "recruit_leader",
         vec![TestAction::undoable(
             0,
-            Action::Playing(Recruit(playing_actions::Recruit {
-                units: Units::new(0, 0, 0, 0, 0, 1),
-                city_position: Position::from_offset("A1"),
-                payment: ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1),
-                leader_name: Some("Alexander".to_string()),
-                replaced_units: vec![],
-            })),
+            Action::Playing(Recruit(
+                playing_actions::Recruit::new(
+                    &Units::new(0, 0, 0, 0, 0, 1),
+                    Position::from_offset("A1"),
+                    ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1),
+                )
+                .with_leader("Alexander"),
+            )),
         )],
     );
 }
@@ -383,13 +384,15 @@ fn test_replace_leader() {
         "replace_leader",
         vec![TestAction::undoable(
             0,
-            Action::Playing(Recruit(playing_actions::Recruit {
-                units: Units::new(0, 0, 0, 0, 0, 1),
-                city_position: Position::from_offset("A1"),
-                payment: ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1),
-                leader_name: Some("Kleopatra".to_string()),
-                replaced_units: vec![10],
-            })),
+            Action::Playing(Recruit(
+                playing_actions::Recruit::new(
+                    &Units::new(0, 0, 0, 0, 0, 1),
+                    Position::from_offset("A1"),
+                    ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1),
+                )
+                .with_leader("Kleopatra")
+                .with_replaced_units(&[10]),
+            )),
         )],
     );
 }

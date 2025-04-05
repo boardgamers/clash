@@ -3,12 +3,14 @@ use crate::city_pieces::{DestroyedStructures, DestroyedStructuresData};
 use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::content::advances::get_advance;
 use crate::content::builtin;
+use crate::content::objective_cards::get_objective_card;
 use crate::events::{Event, EventOrigin};
 use crate::payment::PaymentOptions;
 use crate::player_events::{CostInfo, TransientEvents};
 use crate::resource::ResourceType;
 use crate::unit::{UnitData, UnitType};
 use crate::{
+    advance,
     city::{City, CityData},
     city_pieces::Building::{self},
     civilization::Civilization,
@@ -66,10 +68,12 @@ pub struct Player {
     pub custom_actions: HashMap<CustomActionType, EventOrigin>,
     pub wonder_cards: Vec<String>,
     pub action_cards: Vec<u8>,
+    pub objective_cards: Vec<u8>,
     pub next_unit_id: u32,
     pub played_once_per_turn_actions: Vec<CustomActionType>,
     pub event_info: HashMap<String, String>,
     pub secrets: Vec<String>,
+    pub(crate) objective_opportunities: Vec<String>, // transient
 }
 
 impl Clone for Player {
@@ -93,39 +97,31 @@ impl Player {
     /// Panics if elements like wonders or advances don't exist
     pub fn initialize_player(data: PlayerData, game: &mut Game) {
         let leader = data.active_leader.clone();
+        let objective_cards = data.objective_cards.clone();
         let player = Self::from_data(data);
         let player_index = player.index;
         game.players.push(player);
         builtin::init_player(game, player_index);
-        let advances = mem::take(&mut game.players[player_index].advances);
-        for advance in &advances {
-            advance.listeners.init(game, player_index);
-            for i in 0..game.players[player_index]
-                .civilization
-                .special_advances
-                .len()
-            {
-                if game.players[player_index].civilization.special_advances[i].required_advance
-                    == advance.name
-                {
-                    let special_advance = game.players[player_index]
-                        .civilization
-                        .special_advances
-                        .remove(i);
-                    special_advance.listeners.init(game, player_index);
-                    game.players[player_index]
-                        .civilization
-                        .special_advances
-                        .insert(i, special_advance);
-                    break;
-                }
-            }
-        }
+        advance::init_player(game, player_index);
+
         if let Some(leader) = leader {
             Self::with_leader(&leader, game, player_index, |game, leader| {
                 leader.listeners.init(game, player_index);
             });
         }
+
+        let mut objectives = vec![];
+        for id in objective_cards {
+            for o in get_objective_card(id).objectives {
+                if objectives.contains(&o.name) {
+                    // can't fulfill 2 objectives with the same name, so we can skip it here
+                    continue;
+                }
+                objectives.push(o.name.clone());
+                o.listeners.init(game, player_index);
+            }
+        }
+
         let mut cities = mem::take(&mut game.players[player_index].cities);
         for city in &mut cities {
             for wonder in &city.pieces.wonders {
@@ -133,7 +129,6 @@ impl Player {
             }
         }
         game.players[player_index].cities = cities;
-        game.players[player_index].advances = advances;
     }
 
     fn from_data(data: PlayerData) -> Player {
@@ -153,7 +148,7 @@ impl Player {
                     data.id
                 );
             });
-        let player = Self {
+        Self {
             name: data.name,
             index: data.id,
             resources: data.resources,
@@ -181,12 +176,13 @@ impl Player {
             custom_actions: HashMap::new(),
             wonder_cards: data.wonder_cards,
             action_cards: data.action_cards,
+            objective_cards: data.objective_cards,
             next_unit_id: data.next_unit_id,
             played_once_per_turn_actions: data.played_once_per_turn_actions,
             event_info: data.event_info,
             secrets: data.secrets,
-        };
-        player
+            objective_opportunities: Vec::new(),
+        }
     }
 
     #[must_use]
@@ -225,6 +221,7 @@ impl Player {
             event_victory_points: self.event_victory_points,
             wonder_cards: self.wonder_cards,
             action_cards: self.action_cards,
+            objective_cards: self.objective_cards,
             next_unit_id: self.next_unit_id,
             played_once_per_turn_actions: self.played_once_per_turn_actions,
             event_info: self.event_info,
@@ -266,6 +263,7 @@ impl Player {
             event_victory_points: self.event_victory_points,
             wonder_cards: self.wonder_cards.clone(),
             action_cards: self.action_cards.clone(),
+            objective_cards: self.objective_cards.clone(),
             next_unit_id: self.next_unit_id,
             played_once_per_turn_actions: self.played_once_per_turn_actions.clone(),
             event_info: self.event_info.clone(),
@@ -304,11 +302,13 @@ impl Player {
             custom_actions: HashMap::new(),
             wonder_cards: Vec::new(),
             action_cards: Vec::new(),
+            objective_cards: Vec::new(),
             wonders_build: Vec::new(),
             next_unit_id: 0,
             played_once_per_turn_actions: Vec::new(),
             event_info: HashMap::new(),
             secrets: Vec::new(),
+            objective_opportunities: Vec::new(),
         }
     }
 
@@ -543,8 +543,8 @@ impl Player {
     pub fn strip_secret(&mut self) {
         self.wonder_cards = self.wonder_cards.iter().map(|_| String::new()).collect();
         self.action_cards = self.action_cards.iter().map(|_| 0).collect();
+        self.objective_cards = self.objective_cards.iter().map(|_| 0).collect();
         self.secrets = Vec::new();
-        //todo strip information about other hand cards
     }
 
     #[must_use]
@@ -862,6 +862,9 @@ pub struct PlayerData {
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     action_cards: Vec<u8>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    objective_cards: Vec<u8>,
     next_unit_id: u32,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]

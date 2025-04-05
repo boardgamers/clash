@@ -496,11 +496,8 @@
     "The game has started"
   ],
   "rng": "175288996178563520907356813494494136334",
-  "dice_roll_log": [],
-  "dropped_players": [],
   "wonders_left": [
     "Great Gardens",
     "Pyramids"
-  ],
-  "action_cards_left": []
+  ]
 }

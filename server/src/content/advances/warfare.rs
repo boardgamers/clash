@@ -13,6 +13,7 @@ use crate::content::advances::{
 use crate::content::persistent_events::PaymentRequest;
 use crate::game::Game;
 use crate::payment::{PaymentConversion, PaymentOptions};
+use crate::player::Player;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use crate::tactics_card::{CombatRole, play_tactics_card};
@@ -153,11 +154,7 @@ fn draft() -> AdvanceBuilder {
             if units.infantry > 0 {
                 // insert at beginning so that it's preferred over gold
 
-                let pile = ResourcePile::mood_tokens(if player.has_advance("Civil Liberties") {
-                    2
-                } else {
-                    1
-                });
+                let pile = ResourcePile::mood_tokens(draft_cost(player));
                 cost.info
                     .log
                     .push(format!("Draft reduced the cost of 1 Infantry to {pile}"));
@@ -168,6 +165,14 @@ fn draft() -> AdvanceBuilder {
             }
         },
     )
+}
+
+pub(crate) fn draft_cost(player: &Player) -> u32 {
+    if player.has_advance("Civil Liberties") {
+        2
+    } else {
+        1
+    }
 }
 
 fn add_steel_weapons(player_index: usize, c: &mut Combat) {

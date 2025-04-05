@@ -4,7 +4,7 @@ use crate::game::Game;
 use crate::unit::UnitType::{Cavalry, Elephant, Infantry, Leader};
 use crate::unit::{UnitType, Units};
 
-pub(crate) struct CombatStats {
+pub(crate) struct CombatRoundStats {
     player: usize,
     opponent_str: String,
     pub(crate) fighters: u8,
@@ -15,13 +15,13 @@ pub(crate) struct CombatStats {
     strength: CombatStrength,
 }
 
-impl CombatStats {
+impl CombatRoundStats {
     pub(crate) fn roll(
         player: usize,
         c: &Combat,
         game: &mut Game,
         strength: CombatStrength,
-    ) -> CombatStats {
+    ) -> CombatRoundStats {
         let fighting = c.fighting_units(game, player);
         let mut log = vec![];
         let rolls = roll(
@@ -44,7 +44,7 @@ impl CombatStats {
         }
         .to_string();
 
-        CombatStats {
+        CombatRoundStats {
             opponent_str,
             strength,
             player,
@@ -56,7 +56,7 @@ impl CombatStats {
         }
     }
 
-    pub(crate) fn determine_hits(&mut self, opponent: &CombatStats, game: &mut Game) {
+    pub(crate) fn determine_hits(&mut self, opponent: &CombatRoundStats, game: &mut Game) {
         self.hits = (self.combat_value / 5)
             .saturating_sub(opponent.hit_cancels)
             .min(opponent.fighters);

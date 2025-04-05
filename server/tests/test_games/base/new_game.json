@@ -41,6 +41,9 @@
       "action_cards": [
         17
       ],
+      "objective_cards": [
+        1
+      ],
       "next_unit_id": 1
     },
     {
@@ -83,6 +86,9 @@
       "incident_tokens": 3,
       "action_cards": [
         7
+      ],
+      "objective_cards": [
+        99
       ],
       "next_unit_id": 1
     },
@@ -402,11 +408,13 @@
     ],
     [
       "Player1 is playing as Maya",
-      "Player1 gained an action card from the pile"
+      "Player1 gained an action card from the pile",
+      "Player1 gained an objective card from the pile"
     ],
     [
       "Player2 is playing as test0",
-      "Player2 gained an action card from the pile"
+      "Player2 gained an action card from the pile",
+      "Player2 gained an objective card from the pile"
     ],
     [
       "Age 1 has started"
@@ -428,9 +436,7 @@
   "messages": [
     "The game has started"
   ],
-  "rng": "52735038349100117798753101867641051915",
-  "dice_roll_log": [],
-  "dropped_players": [],
+  "rng": "229816063739941872283454204191959824436",
   "wonders_left": [
     "Great Gardens",
     "Pyramids"
@@ -475,62 +481,66 @@
     1,
     40
   ],
+  "objective_cards_left": [
+    2,
+    3
+  ],
   "incidents_left": [
-    1,
-    24,
-    6,
-    53,
-    18,
-    31,
-    5,
-    23,
-    21,
-    10,
-    39,
     27,
-    48,
-    33,
+    17,
+    50,
+    16,
+    23,
+    39,
+    41,
+    34,
+    42,
+    49,
+    56,
+    44,
+    11,
+    13,
+    45,
+    35,
+    9,
+    19,
+    32,
+    53,
+    51,
+    52,
+    37,
+    38,
+    55,
+    4,
+    30,
     40,
     20,
-    51,
-    56,
-    8,
-    54,
-    45,
-    44,
-    19,
-    34,
-    9,
-    46,
-    29,
-    50,
-    35,
-    3,
-    4,
+    36,
+    48,
     28,
-    7,
-    2,
-    22,
-    42,
-    11,
-    37,
-    30,
-    52,
-    16,
-    32,
-    26,
-    38,
-    12,
-    49,
-    17,
+    54,
     25,
-    15,
-    47,
+    26,
+    8,
     14,
-    13,
-    41,
+    12,
+    5,
+    47,
+    21,
+    3,
+    31,
+    33,
+    6,
+    10,
     57,
-    55,
-    36
+    22,
+    46,
+    24,
+    2,
+    1,
+    15,
+    29,
+    7,
+    18
   ]
 }

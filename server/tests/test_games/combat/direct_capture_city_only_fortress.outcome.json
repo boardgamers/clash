@@ -219,9 +219,22 @@
                       }
                     }
                   },
-                  "civil_card_match": {
-                    "opportunity": "CaptureCity",
-                    "opponent": 1
+                  "combat_stats": {
+                    "position": "C1",
+                    "battleground": "CityWithFortress",
+                    "attacker": {
+                      "player": 0,
+                      "fighters": {
+                        "infantry": 1,
+                        "cavalry": 1,
+                        "elephants": 1,
+                        "leaders": 1
+                      }
+                    },
+                    "defender": {
+                      "player": 1
+                    },
+                    "result": "AttackerWins"
                   }
                 }
               ]
@@ -267,9 +280,7 @@
     11,
     1
   ],
-  "dropped_players": [],
   "wonders_left": [
     "Pyramids"
-  ],
-  "action_cards_left": []
+  ]
 }

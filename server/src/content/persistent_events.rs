@@ -9,6 +9,7 @@ use crate::events::EventOrigin;
 use crate::explore::ExploreResolutionState;
 use crate::game::Game;
 use crate::map::Rotation;
+use crate::objective_card::SelectObjectivesInfo;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::player_events::{AdvanceInfo, IncidentInfo};
@@ -112,6 +113,7 @@ pub enum PersistentEventType {
     ActionCard(ActionCardInfo),
     WonderCard(WonderCardInfo),
     DrawWonderCard,
+    SelectObjectives(SelectObjectivesInfo),
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]

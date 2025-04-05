@@ -305,6 +305,12 @@ impl Units {
     }
 }
 
+impl Default for Units {
+    fn default() -> Self {
+        Self::empty()
+    }
+}
+
 impl AddAssign<&UnitType> for Units {
     fn add_assign(&mut self, rhs: &UnitType) {
         match *rhs {
@@ -590,20 +596,32 @@ pub(crate) fn choose_carried_units_to_remove() -> Builtin {
                 "Choose which carried units to remove",
             ))
         },
-        |game, units, e| {
-            if !units.choice.is_empty() {
-                let p = game.player(units.player_index);
+        |game, s, e| {
+            if !s.choice.is_empty() {
+                let p = game.player(s.player_index);
+                let units = s
+                    .choice
+                    .iter()
+                    .map(|id| p.get_unit(*id).unit_type)
+                    .collect_vec();
+
+                for event in &mut game.events {
+                    if let PersistentEventType::CombatRoundEnd(e) = &mut event.event_type {
+                        let c = &mut e.combat;
+
+                        c.stats
+                            .player_mut(c.role(s.player_index))
+                            .add_losses(&units);
+                    }
+                }
+
                 game.add_info_log_item(&format!(
                     "{} killed carried units: {}",
-                    units.player_name,
-                    units
-                        .choice
-                        .iter()
-                        .map(|id| p.get_unit(*id).unit_type)
-                        .collect::<Units>()
+                    s.player_name,
+                    units.into_iter().collect::<Units>()
                 ));
             }
-            kill_units_without_event(game, &units.choice, units.player_index, e.killer);
+            kill_units_without_event(game, &s.choice, s.player_index, e.killer);
         },
     )
     .build()

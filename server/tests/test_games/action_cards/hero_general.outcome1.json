@@ -221,9 +221,29 @@
                       "SelectHandCards": []
                     }
                   },
-                  "civil_card_match": {
-                    "opportunity": "CaptureCity",
-                    "opponent": 1
+                  "combat_stats": {
+                    "position": "C1",
+                    "battleground": "City",
+                    "attacker": {
+                      "player": 0,
+                      "fighters": {
+                        "settlers": 2,
+                        "infantry": 1,
+                        "cavalry": 1,
+                        "elephants": 1,
+                        "leaders": 1
+                      }
+                    },
+                    "defender": {
+                      "player": 1,
+                      "fighters": {
+                        "infantry": 2
+                      },
+                      "losses": {
+                        "infantry": 2
+                      }
+                    },
+                    "result": "AttackerWins"
                   }
                 }
               ]
@@ -273,9 +293,7 @@
     1,
     1
   ],
-  "dropped_players": [],
   "wonders_left": [
     "Pyramids"
-  ],
-  "action_cards_left": []
+  ]
 }

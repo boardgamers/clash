@@ -7,6 +7,9 @@ use crate::content::persistent_events::{
     AdvanceRequest, ChangeGovernmentRequest, EventResponse, PersistentEventRequest,
     PersistentEventType, PlayerRequest, PositionRequest,
 };
+use crate::objective_card::{
+    gain_objective_card_from_pile, present_objective_cards, status_phase_completable,
+};
 use crate::payment::PaymentOptions;
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::{content::advances, game::Game, player::Player, resource_pile::ResourcePile, utils};
@@ -104,8 +107,24 @@ pub(crate) fn play_status_phase(game: &mut Game, mut phase: StatusPhaseState) {
 }
 
 pub(crate) fn complete_objectives() -> Builtin {
-    // not implemented
-    Builtin::builder("Complete Objectives", "Complete objectives").build()
+    Builtin::builder(
+        "Complete Objectives",
+        "Select Status Phase Objectives to Complete",
+    )
+    .add_simple_persistent_event_listener(
+        |event| &mut event.status_phase,
+        0,
+        |game, player_index, _name, _s| {
+            let player = game.player(player_index);
+            let opportunities = player
+                .objective_cards
+                .iter()
+                .flat_map(|o| status_phase_completable(game, player, *o))
+                .collect_vec();
+            present_objective_cards(game, player_index, opportunities);
+        },
+    )
+    .build()
 }
 
 pub(crate) fn free_advance() -> Builtin {
@@ -145,7 +164,7 @@ pub(crate) fn draw_cards() -> Builtin {
             0,
             |game, p, _name, _s| {
                 gain_action_card_from_pile(game, p);
-                // todo every player draws 1 objective card
+                gain_objective_card_from_pile(game, p);
             },
         )
         .build()

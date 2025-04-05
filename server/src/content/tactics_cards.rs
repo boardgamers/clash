@@ -23,6 +23,7 @@ pub fn get_tactics_card(id: u8) -> TacticsCard {
         .tactics_card
         .expect("tactics card not found")
 }
+
 pub(crate) type TacticsCardFactory = fn(u8) -> TacticsCard;
 
 pub(crate) fn peltasts(id: u8) -> TacticsCard {

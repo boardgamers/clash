@@ -34,7 +34,26 @@
               2,
               3
             ],
-            "retreat": "CanRetreat"
+            "retreat": "CanRetreat",
+            "stats": {
+              "position": "C1",
+              "battleground": "City",
+              "attacker": {
+                "player": 0,
+                "fighters": {
+                  "infantry": 1,
+                  "cavalry": 1,
+                  "elephants": 1,
+                  "leaders": 1
+                }
+              },
+              "defender": {
+                "player": 1,
+                "fighters": {
+                  "infantry": 2
+                }
+              }
+            }
           }
         }
       },
@@ -283,10 +302,6 @@
                         "destination": "C1"
                       }
                     }
-                  },
-                  "civil_card_match": {
-                    "opportunity": "WinLandBattle",
-                    "opponent": 1
                   }
                 }
               ]
@@ -331,9 +346,7 @@
     10,
     10
   ],
-  "dropped_players": [],
   "wonders_left": [
     "Pyramids"
-  ],
-  "action_cards_left": []
+  ]
 }

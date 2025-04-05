@@ -1,4 +1,8 @@
+use crate::content::action_cards::spy::validate_spy_cards;
+use crate::content::persistent_events::PersistentEventType;
+use crate::events::EventOrigin;
 use crate::game::Game;
+use crate::objective_card::match_objective_cards;
 use crate::player::Player;
 use crate::utils::Shuffle;
 use itertools::Itertools;
@@ -20,6 +24,7 @@ impl HandCardType {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Ord, Debug, PartialOrd)]
 pub enum HandCard {
     ActionCard(u8),
+    ObjectiveCard(u8),
     Wonder(String),
 }
 
@@ -80,4 +85,29 @@ pub fn hand_cards(player: &Player, types: &[HandCardType]) -> Vec<HandCard> {
                 .collect(),
         })
         .collect()
+}
+
+///
+/// Validates the selection of cards in the hand.
+///
+/// # Errors
+///
+/// If the selection is invalid, an error message is returned.
+pub fn validate_card_selection(cards: &[HandCard], game: &Game) -> Result<(), String> {
+    let s = game.current_event();
+    let player = &s.player;
+    let Some(h) = player.handler.as_ref() else {
+        return Err("no selection handler".to_string());
+    };
+    match &h.origin {
+        EventOrigin::CivilCard(id) if *id == 7 || *id == 8 => validate_spy_cards(cards, game),
+        EventOrigin::Builtin(b) if b == "Select Objective Cards to Complete" => {
+            let PersistentEventType::SelectObjectives(c) = &s.event_type else {
+                return Err("no selection handler".to_string());
+            };
+
+            match_objective_cards(cards, &c.objective_opportunities).map(|_| ())
+        }
+        _ => Ok(()),
+    }
 }

@@ -4,6 +4,7 @@ use crate::action::execute_action;
 use crate::content::persistent_events::{
     EventResponse, PersistentEventRequest, PersistentEventType,
 };
+use crate::game_setup::setup_game;
 use crate::log::current_player_turn_log_mut;
 use crate::utils::Shuffle;
 use crate::{
@@ -16,7 +17,7 @@ use crate::{
 
 #[must_use]
 pub fn init(player_amount: usize, seed: String) -> Game {
-    Game::new(player_amount, seed, true)
+    setup_game(player_amount, seed, true)
 }
 
 #[must_use]
@@ -108,6 +109,7 @@ pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
     game.incidents_left.shuffle(&mut game.rng);
     game.wonders_left.shuffle(&mut game.rng);
     game.action_cards_left.shuffle(&mut game.rng);
+    game.objective_cards_left.shuffle(&mut game.rng);
     game.rng = Rng::default();
     for (i, player) in game.players.iter_mut().enumerate() {
         if player_index != Some(i) {
@@ -116,11 +118,18 @@ pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
     }
     game.map.strip_secret();
     for s in &mut game.events {
-        if let PersistentEventType::CombatRoundStart(r) = &mut s.event_type {
-            if r.attacker_strength.tactics_card.is_some() {
-                // defender shouldn't see attacker's tactics card
-                r.attacker_strength.tactics_card = Some(0);
+        match &mut s.event_type {
+            PersistentEventType::CombatRoundStart(r) => {
+                if r.attacker_strength.tactics_card.is_some() {
+                    // defender shouldn't see attacker's tactics card
+                    r.attacker_strength.tactics_card = Some(0);
+                }
             }
+            PersistentEventType::SelectObjectives(o) if Some(s.player.index) != player_index => {
+                // player shouldn't see other player's objectives
+                o.strip_secret();
+            }
+            _ => {}
         }
         let current_event_player = &mut s.player;
         if player_index != Some(current_event_player.index) {

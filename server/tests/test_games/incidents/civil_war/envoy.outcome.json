@@ -290,9 +290,6 @@
   "dice_roll_log": [
     10
   ],
-  "dropped_players": [],
-  "wonders_left": [],
-  "action_cards_left": [],
   "permanent_effects": [
     {
       "PublicWonderCard": "Pyramids"

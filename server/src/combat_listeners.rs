@@ -1,16 +1,17 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::action_card::{CivilCardMatch, CivilCardOpportunity};
 use crate::combat::{Combat, CombatRetreatState, capture_position};
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{PersistentEventType, PositionRequest, UnitsRequest};
 use crate::content::tactics_cards;
 use crate::game::Game;
+use crate::log::current_player_turn_log_mut;
 use crate::movement::move_units;
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::position::Position;
 use crate::tactics_card::{CombatRole, TacticsCard, TacticsCardTarget};
 use crate::unit::{UnitType, Units, kill_units};
 use crate::utils;
+use itertools::Itertools;
 use num::Zero;
 use serde::{Deserialize, Serialize};
 
@@ -122,12 +123,19 @@ impl CombatResult {
 pub struct CombatEnd {
     pub result: CombatResult,
     pub combat: Combat,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub selected_card: Option<u8>,
 }
 
 impl CombatEnd {
     #[must_use]
     pub fn new(result: CombatResult, combat: Combat) -> Self {
-        Self { result, combat }
+        Self {
+            result,
+            combat,
+            selected_card: None,
+        }
     }
 
     #[must_use]
@@ -609,7 +617,7 @@ pub(crate) fn place_settler() -> Builtin {
     )
     .add_position_request(
         |event| &mut event.combat_end,
-        0,
+        2,
         |game, player_index, i| {
             let p = game.player(player_index);
             if i.is_defender(player_index)
@@ -663,6 +671,13 @@ pub(crate) fn kill_combat_units(
     player: usize,
     killed_unit_ids: &[u32],
 ) {
+    let p = game.player(player);
+    c.stats.player_mut(c.role(player)).add_losses(
+        &killed_unit_ids
+            .iter()
+            .map(|id| p.get_unit(*id).unit_type)
+            .collect_vec(),
+    );
     kill_units(game, killed_unit_ids, player, Some(c.opponent(player)));
     for unit in killed_unit_ids {
         if player == c.attacker {
@@ -674,22 +689,16 @@ pub(crate) fn kill_combat_units(
 pub(crate) fn combat_stats() -> Builtin {
     Builtin::builder("Combat stats", "")
         .add_simple_persistent_event_listener(
-            |event| &mut event.combat_round_end,
+            |event| &mut event.combat_end,
             11,
             |game, _player, _name, e| {
-                if let Some(r) = &e.final_result {
-                    let c = &e.combat;
-                    if let Some(winner) = r.winner() {
-                        let p = c.player(winner);
-                        if p == game.current_player_index && !c.is_sea_battle(game) {
-                            CivilCardMatch::new(
-                                CivilCardOpportunity::WinLandBattle,
-                                Some(c.opponent(p)),
-                            )
-                            .store(game);
-                        }
-                    }
-                }
+                let i = current_player_turn_log_mut(game)
+                    .items
+                    .last_mut()
+                    .expect("last item");
+                let mut stats = e.combat.stats.clone();
+                stats.result = Some(e.result.clone());
+                i.combat_stats = Some(stats);
             },
         )
         .build()

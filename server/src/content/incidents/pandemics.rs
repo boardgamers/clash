@@ -1,3 +1,4 @@
+use crate::action_card::discard_action_card;
 use crate::card::{HandCard, HandCardType, hand_cards};
 use crate::city::City;
 use crate::content::incidents::famine::{
@@ -9,6 +10,7 @@ use crate::content::persistent_events::{
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, MoodModifier};
 use crate::map::{Map, Terrain};
+use crate::objective_card::discard_objective_card;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::player_events::{IncidentInfo, IncidentTarget};
@@ -66,7 +68,6 @@ fn pandemics() -> Incident {
         |game, p, i| {
             let player = game.player(p);
             Some(HandCardsRequest::new(
-                // todo also objective cards
                 hand_cards(player, &[HandCardType::Action]),
                 PandemicsContributions::range(player, i, 1),
                 "Select cards to lose",
@@ -76,11 +77,16 @@ fn pandemics() -> Incident {
             for id in &s.choice {
                 match id {
                     HandCard::ActionCard(a) => {
-                        game.player_mut(s.player_index)
-                            .action_cards
-                            .retain(|c| c != a);
+                        discard_action_card(game, s.player_index, *a);
                         game.add_info_log_item(&format!(
                             "{} discarded an action card",
+                            s.player_name
+                        ));
+                    }
+                    HandCard::ObjectiveCard(o) => {
+                        discard_objective_card(game, s.player_index, *o);
+                        game.add_info_log_item(&format!(
+                            "{} discarded an objective card",
                             s.player_name
                         ));
                     }

@@ -5,6 +5,8 @@ pub mod civilizations;
 pub mod custom_actions;
 pub mod effects;
 pub mod incidents;
+pub mod objective_cards;
+pub mod objectives;
 pub mod persistent_events;
 pub mod tactics_cards;
 pub mod wonders;
