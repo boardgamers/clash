@@ -4,7 +4,6 @@ use crate::advance::{do_advance, gain_advance_without_payment, remove_advance};
 use crate::card::HandCard;
 use crate::consts::AGES;
 use crate::content::builtin::{Builtin, status_phase_handler};
-use crate::content::objective_cards::get_objective_card;
 use crate::content::persistent_events::{
     AdvanceRequest, ChangeGovernmentRequest, EventResponse, HandCardsRequest,
     PersistentEventRequest, PersistentEventType, PlayerRequest, PositionRequest,
@@ -121,7 +120,7 @@ pub(crate) fn complete_objectives() -> Builtin {
             let objectives = player
                 .objective_cards
                 .iter()
-                .filter(|o| status_phase_completable(game, player, o).is_some())
+                .filter(|o| status_phase_completable(game, player, **o).is_some())
                 .map(|o| HandCard::ObjectiveCard(*o))
                 .collect_vec();
             let max = objectives.len() as u8;
@@ -132,14 +131,14 @@ pub(crate) fn complete_objectives() -> Builtin {
             ))
         },
         |game, s, _| {
-            for c in s.choice {
+            for c in &s.choice {
                 if let HandCard::ObjectiveCard(id) = c {
                     let p = s.player_index;
                     complete_objective_card(
                         game,
                         p,
-                        id,
-                        status_phase_completable(game, game.player(p), id)
+                        *id,
+                        status_phase_completable(game, game.player(p), *id)
                             .expect("Objective should be completable"),
                     );
                 } else {

@@ -5,7 +5,6 @@ use crate::content::advances::get_advance;
 use crate::content::builtin;
 use crate::content::objective_cards::get_objective_card;
 use crate::events::{Event, EventOrigin};
-use crate::objective_card::ObjectiveOpportunity;
 use crate::payment::PaymentOptions;
 use crate::player_events::{CostInfo, TransientEvents};
 use crate::resource::ResourceType;
@@ -74,7 +73,7 @@ pub struct Player {
     pub played_once_per_turn_actions: Vec<CustomActionType>,
     pub event_info: HashMap<String, String>,
     pub secrets: Vec<String>,
-    pub(crate) objective_opportunities: Vec<ObjectiveOpportunity>, // transient
+    pub(crate) objective_opportunities: Vec<String>, // transient
 }
 
 impl Clone for Player {
