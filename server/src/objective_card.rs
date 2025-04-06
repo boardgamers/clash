@@ -28,7 +28,6 @@ impl Objective {
         ObjectiveBuilder::new(name, description)
     }
 }
-
 pub struct ObjectiveCard {
     pub id: u8,
     pub objectives: [Objective; 2],

@@ -2,10 +2,6 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::content::advances::warfare::draft_cost;
 use crate::objective_card::{Objective, objective_is_ready};
 
-pub(crate) fn non_combat_objectives() -> Vec<Objective> {
-    vec![draft()]
-}
-
 pub(crate) fn draft() -> Objective {
     let name = "Draft";
     Objective::builder(name, "You've recruited twice using Draft this turn.")

@@ -2,23 +2,19 @@ pub(crate) mod combat;
 pub(crate) mod non_combat;
 pub(crate) mod status_phase_objectives;
 
+use crate::content::objective_cards;
 use crate::objective_card::Objective;
-use combat::combat_objectives;
 use itertools::Itertools;
-use non_combat::non_combat_objectives;
-use status_phase_objectives::status_phase_objectives;
-use std::vec;
 
 #[must_use]
 pub(crate) fn get_all() -> Vec<Objective> {
-    let all = vec![
-        combat_objectives(),
-        non_combat_objectives(),
-        status_phase_objectives(),
-    ]
-    .into_iter()
-    .flatten()
-    .collect_vec();
+    let mut all = objective_cards::get_all()
+        .into_iter()
+        .flat_map(|card| card.objectives.map(|o| (o.name.clone(), o)))
+        .collect_vec();
+    all.sort_by_key(|(name, _)| name.clone());
+    all.dedup_by_key(|(name, _)| name.clone());
+    let all = all.into_iter().map(|(_, o)| o).collect_vec();
     assert_eq!(
         all.iter().unique_by(|i| &i.name).count(),
         all.len(),
