@@ -4,6 +4,7 @@ use crate::content::advances;
 use crate::game::Game;
 use crate::objective_card::{Objective, ObjectiveBuilder};
 use crate::player::Player;
+use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
 
@@ -48,23 +49,24 @@ pub(crate) fn religious_fervor() -> Objective {
 
 fn building_lead(b: ObjectiveBuilder, building: Building) -> ObjectiveBuilder {
     b.status_phase_check(move |game, player| {
-        leading_player(game, player, move |p| buildings(p, building))
+        leading_player(game, player, 1, move |p| buildings(p, building))
     })
 }
 
 fn leading_player(
     game: &Game,
     player: &Player,
+    margin: usize,
     value: impl Fn(&Player) -> usize + 'static,
 ) -> bool {
     value(player)
-        > game
+        >= game
             .players
             .iter()
             .filter(|p| p.index != player.index && p.is_human())
             .map(value)
             .max()
-            .unwrap_or(0)
+            .unwrap_or(0) + margin
 }
 
 fn buildings(p: &Player, b: Building) -> usize {
@@ -80,7 +82,7 @@ pub(crate) fn advanced_culture() -> Objective {
         "You have more advances than any other player - at least 6.",
     )
     .status_phase_check(|game, player| {
-        player.advances.len() >= 6 && leading_player(game, player, move |p| p.advances.len())
+        player.advances.len() >= 6 && leading_player(game, player, 1, move |p| p.advances.len())
     })
     .build()
 }
@@ -109,7 +111,11 @@ pub(crate) fn education_lead() -> Objective {
 }
 
 pub(crate) fn eureka() -> Objective {
-    pay_resources("Eureka!", ResourcePile::ideas(5), ResourcePile::ideas(2))
+    supplies("Eureka!", ResourceType::Ideas)
+}
+
+pub(crate) fn supplies(objective: &'static str, r: ResourceType) -> Objective {
+    pay_resources(objective, ResourcePile::of(r, 5), ResourcePile::of(r, 2))
 }
 
 pub(crate) fn pay_resources(
@@ -186,7 +192,11 @@ pub(crate) fn optimized_storage() -> Objective {
 }
 
 pub(crate) fn wealth() -> Objective {
-    pay_resources("Eureka!", ResourcePile::gold(5), ResourcePile::gold(2))
+    supplies("Wealth", ResourceType::Gold)
+}
+
+pub(crate) fn ore_supplies() -> Objective {
+    supplies("Ore Supplies", ResourceType::Ore)
 }
 
 pub(crate) fn large_fleet() -> Objective {
@@ -196,11 +206,27 @@ pub(crate) fn large_fleet() -> Objective {
     )
     .status_phase_check(|_game, player| {
         let ships = ship_count(player);
-        ships >= 4 || (ships >= 2 && leading_player(_game, player, ship_count))
+        ships >= 4 || (ships >= 2 && leading_player(_game, player,1, ship_count))
     })
     .build()
 }
 
 fn ship_count(p: &Player) -> usize {
     p.units.iter().filter(|u| u.unit_type.is_ship()).count()
+}
+
+pub(crate) fn large_army() -> Objective {
+    Objective::builder(
+        "Large Army",
+        "You have at least 4 more army units than any other player.",
+    )
+    .status_phase_check(|_game, player| {
+        leading_player(_game, player,4, |p| {
+            p.units
+                .iter()
+                .filter(|u| u.unit_type.is_army_unit())
+                .count()
+        })
+    })
+    .build()
 }
