@@ -118,7 +118,8 @@
       ],
       "incident_tokens": 2,
       "completed_objectives": [
-        "Conqueror"
+        "Conqueror",
+        "General"
       ],
       "next_unit_id": 8
     },
@@ -237,10 +238,10 @@
                     "defender": {
                       "player": 1,
                       "fighters": {
-                        "infantry": 2
+                        "infantry": 3
                       },
                       "losses": {
-                        "infantry": 2
+                        "infantry": 3
                       }
                     },
                     "result": "AttackerWins"
@@ -252,6 +253,9 @@
                       "SelectHandCards": [
                         {
                           "ObjectiveCard": 2
+                        },
+                        {
+                          "ObjectiveCard": 5
                         }
                       ]
                     }
@@ -267,10 +271,14 @@
                               "cards": [
                                 {
                                   "ObjectiveCard": 2
+                                },
+                                {
+                                  "ObjectiveCard": 5
                                 }
                               ],
                               "objective_opportunities": [
-                                "Conqueror"
+                                "Conqueror",
+                                "General"
                               ]
                             }
                           },
@@ -284,11 +292,14 @@
                                 "choices": [
                                   {
                                     "ObjectiveCard": 2
+                                  },
+                                  {
+                                    "ObjectiveCard": 5
                                   }
                                 ],
                                 "description": "Select cards to complete",
                                 "needed": {
-                                  "end": 1,
+                                  "end": 2,
                                   "start": 0
                                 }
                               }
@@ -303,7 +314,8 @@
                       "op": "add",
                       "path": "/players/0/objective_cards",
                       "value": [
-                        2
+                        2,
+                        5
                       ]
                     },
                     {
@@ -327,17 +339,18 @@
     [
       "Combat round 1",
       "Attackers: 1 infantry, 1 cavalry, 1 elephant and a leader",
-      "Defenders: 2 infantry",
-      "Player1 rolled 6 (Infantry, +1 combat value), 6 (Infantry, no bonus), 6 (Infantry, no bonus), 6 (Infantry, no bonus) for combined combat value of 25 and gets 2 hits against defending units.",
-      "Player2 rolled 1 (Leader, no bonus), 1 (Leader, no bonus), 1 (Leader, no bonus) for combined combat value of 3 and gets 0 hits against attacking units.",
+      "Defenders: 3 infantry",
+      "Player1 rolled 6 (Infantry, +1 combat value), 6 (Infantry, no bonus), 6 (Infantry, no bonus), 6 (Infantry, no bonus) for combined combat value of 25 and gets 3 hits against defending units.",
+      "Player2 rolled 1 (Leader, no bonus), 1 (Leader, no bonus), 1 (Leader, no bonus), 1 (Leader, no bonus) for combined combat value of 4 and gets 0 hits against attacking units.",
       "Player2 used the following combat modifiers: fortress added one extra die, fortress cancelled one hit",
       "Player2 has to remove all of their defending units",
-      "Player2 removed 2 infantry",
+      "Player2 removed 3 infantry",
       "Attacker wins and captured Player2's city at C1",
       "Player1 could not store 1 gold"
     ],
     [
-      "Player1 completed objective Conqueror"
+      "Player1 completed objective Conqueror",
+      "Player1 completed objective General"
     ]
   ],
   "undo_limit": 1,
@@ -348,7 +361,6 @@
     "The game has started"
   ],
   "dice_roll_outcomes": [
-    1,
     1
   ],
   "dice_roll_log": [
@@ -356,6 +368,7 @@
     11,
     11,
     11,
+    1,
     1,
     1,
     1

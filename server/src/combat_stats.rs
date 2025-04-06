@@ -97,8 +97,16 @@ impl CombatStats {
     }
 
     #[must_use]
-    pub fn player(&self, role: CombatRole) -> &CombatPlayerStats {
-        match role {
+    pub fn player(&self, player: usize) -> &CombatPlayerStats {
+        match self.role(player) {
+            CombatRole::Attacker => &self.attacker,
+            CombatRole::Defender => &self.defender,
+        }
+    }
+    
+    #[must_use]
+    pub fn opponent(&self, player: usize) -> &CombatPlayerStats {
+        match self.opponent_role(player) {
             CombatRole::Attacker => &self.attacker,
             CombatRole::Defender => &self.defender,
         }
@@ -110,6 +118,15 @@ impl CombatStats {
             CombatRole::Attacker
         } else {
             CombatRole::Defender
+        }
+    }
+    
+    #[must_use]
+    pub fn opponent_role(&self, player: usize) -> CombatRole {
+        if player == self.attacker.player {
+            CombatRole::Defender
+        } else {
+            CombatRole::Attacker
         }
     }
 

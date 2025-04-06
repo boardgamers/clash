@@ -55,15 +55,21 @@ pub(crate) fn general() -> Objective {
     let name = "General";
     Objective::builder(
         name,
-        "You killed at least 3 enemy units in a single combat this turn.",
+        "You killed at least 3 enemy units in a single land combat this turn.",
     )
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
-        1,
+        3,
         |game, player, _, e| {
-            //todo
             let stats = &e.combat.stats;
-            if stats.is_winner(player) && stats.battleground.is_city() {
+            let army_units_killed: u8 = stats
+                .opponent(player)
+                .losses
+                .clone()
+                .into_iter()
+                .filter_map(|(u, loss)| u.is_army_unit().then_some(loss))
+                .sum();
+            if stats.battleground.is_land() && army_units_killed >= 3 {
                 objective_is_ready(game.player_mut(player), name);
             }
         },
