@@ -12,9 +12,7 @@ use custom_phase_ui::multi_select_tooltip;
 use itertools::Itertools;
 use macroquad::color::BLACK;
 use macroquad::math::{Rect, Vec2, vec2};
-use macroquad::prelude::{
-    BEIGE, BLUE, Color, GREEN, LIME, RED, YELLOW, draw_rectangle, draw_rectangle_lines,
-};
+use macroquad::prelude::{BEIGE, Color, GREEN, RED, YELLOW, draw_rectangle, draw_rectangle_lines};
 use server::action::Action;
 use server::card::{HandCard, HandCardType, hand_cards, validate_card_selection};
 use server::content::action_cards::{get_action_card, get_civil_card};
@@ -68,7 +66,7 @@ pub(crate) fn show_cards(rc: &RenderContext) -> StateUpdate {
     let selection = match &rc.state.active_dialog {
         ActiveDialog::HandCardsRequest(r) => Some(SelectionInfo::new(
             r.clone(),
-            validate_card_selection(&r.selected, rc.game).unwrap_or_default(),
+            validate_card_selection(&r.request.choices, rc.game).unwrap_or_default(),
         )),
         _ => None,
     };
@@ -76,7 +74,8 @@ pub(crate) fn show_cards(rc: &RenderContext) -> StateUpdate {
     let swap_cards = selection
         .iter()
         .flat_map(|s| {
-            s.selection.request
+            s.selection
+                .request
                 .choices
                 .clone()
                 .into_iter()
@@ -84,10 +83,10 @@ pub(crate) fn show_cards(rc: &RenderContext) -> StateUpdate {
         })
         .collect_vec();
 
-    if let Some(value) = draw_cards(rc, &cards, &selection, size, 0.) {
+    if let Some(value) = draw_cards(rc, &cards, selection.as_ref(), size, 0.) {
         return value;
     }
-    if let Some(value) = draw_cards(rc, &swap_cards, &selection, size, -300.) {
+    if let Some(value) = draw_cards(rc, &swap_cards, selection.as_ref(), size, -300.) {
         return value;
     }
     StateUpdate::None
@@ -96,7 +95,7 @@ pub(crate) fn show_cards(rc: &RenderContext) -> StateUpdate {
 fn draw_cards(
     rc: &RenderContext,
     cards: &Vec<HandCard>,
-    selection: &Option<SelectionInfo>,
+    selection: Option<&SelectionInfo>,
     size: Vec2,
     x_offset: f32,
 ) -> Option<StateUpdate> {
@@ -124,12 +123,12 @@ fn draw_cards(
 fn draw_card(
     rc: &RenderContext,
     size: Vec2,
-    selection: &Option<SelectionInfo>,
+    selection: Option<&SelectionInfo>,
     pass: i32,
     pos: Vec2,
     card: &HandCard,
 ) -> Option<StateUpdate> {
-    let c = get_card_object(rc, card);
+    let c = get_card_object(rc, card, selection);
 
     if pass == 0 {
         draw_rectangle(pos.x, pos.y, size.x, size.y, c.color);
@@ -179,7 +178,7 @@ fn play_card(card: &HandCard) -> StateUpdate {
 fn highlight(
     rc: &RenderContext,
     c: &HandCardObject,
-    selection: &Option<SelectionInfo>,
+    selection: Option<&SelectionInfo>,
 ) -> (f32, Color) {
     if let Some(s) = selection {
         if s.selection.selected.contains(&c.id) {
@@ -194,7 +193,11 @@ fn highlight(
     (2.0, BLACK)
 }
 
-fn get_card_object(rc: &RenderContext, card: &HandCard) -> HandCardObject {
+fn get_card_object(
+    rc: &RenderContext,
+    card: &HandCard,
+    selection: Option<&SelectionInfo>,
+) -> HandCardObject {
     match card {
         HandCard::ActionCard(a) if *a == 0 => HandCardObject::new(
             card.clone(),
@@ -209,7 +212,7 @@ fn get_card_object(rc: &RenderContext, card: &HandCard) -> HandCardObject {
             "Objective Card".to_string(),
             vec!["Hidden Objective Card".to_string()],
         ),
-        HandCard::ObjectiveCard(id) => objective_card_object(*id),
+        HandCard::ObjectiveCard(id) => objective_card_object(*id, selection),
         HandCard::Wonder(n) if n.is_empty() => HandCardObject::new(
             card.clone(),
             WONDER_CARD_COLOR,
@@ -288,7 +291,7 @@ fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
     )
 }
 
-fn objective_card_object(id: u8) -> HandCardObject {
+fn objective_card_object(id: u8, selection: Option<&SelectionInfo>) -> HandCardObject {
     let card = get_objective_card(id);
 
     let mut description = vec![];
@@ -297,10 +300,19 @@ fn objective_card_object(id: u8) -> HandCardObject {
         break_text(o.description.as_str(), 30, &mut description);
     }
 
+    let name = selection
+        .as_ref()
+        .and_then(|s| {
+            s.show_names
+                .iter()
+                .find_map(|(i, n)| (i == &id).then_some(n.clone()))
+        })
+        .unwrap_or_else(|| card.objectives.iter().map(|o| o.name.clone()).join(", "));
+    
     HandCardObject::new(
         HandCard::ObjectiveCard(id),
         OBJECTIVE_CARD_COLOR,
-        card.objectives.map(|o| o.name.clone()).join(", "),
+        name,
         description,
     )
 }
