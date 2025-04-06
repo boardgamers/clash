@@ -127,6 +127,10 @@ pub(crate) fn culture_focus() -> Objective {
     advance_group_complete("Culture Focus", "Culture")
 }
 
+pub(crate) fn science_focus() -> Objective {
+    advance_group_complete("Science Focus", "Science")
+}
+
 pub(crate) fn eureka() -> Objective {
     supplies("Eureka!", ResourceType::Ideas)
 }
