@@ -135,6 +135,10 @@ pub(crate) fn trade_focus() -> Objective {
     advance_group_complete("Trade Focus", "Economy")
 }
 
+pub(crate) fn seafarers() -> Objective {
+    advance_group_complete("Seafarers", "Seafaring")
+}
+
 pub(crate) fn eureka() -> Objective {
     supplies("Eureka!", ResourceType::Ideas)
 }

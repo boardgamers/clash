@@ -71,7 +71,7 @@ pub(crate) fn general() -> Objective {
             let s = &e.combat.stats;
             let army_units_killed_by_you: u8 = s
                 .opponent(player)
-                .losses
+                .fighter_losses(s.battleground)
                 .clone()
                 .into_iter()
                 .filter_map(|(u, loss)| u.is_army_unit().then_some(loss))
@@ -224,7 +224,7 @@ pub(crate) fn scavenger() -> Objective {
     )
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
-        8,
+        9,
         |game, player, _, e| {
             let s = &e.combat.stats;
             let o = s.opponent(player);
@@ -240,6 +240,28 @@ pub(crate) fn scavenger() -> Objective {
                 if !find_trade_route_for_unit(game, opponent, &unit).is_empty() {
                     objective_is_ready(game.player_mut(player), name);
                 }
+            }
+        },
+    )
+    .build()
+}
+
+pub(crate) fn aggressor() -> Objective {
+    let name = "Aggressor";
+    Objective::builder(
+        name,
+        "You won a land battle as attacker in which you killed at least 2 army units.",
+    )
+    .add_simple_persistent_event_listener(
+        |event| &mut event.combat_end,
+        10,
+        |game, player, _, e| {
+            let s = &e.combat.stats;
+            if s.is_winner(player)
+                && s.battleground.is_land()
+                && s.opponent(player).fighter_losses(s.battleground).sum() >= 2
+            {
+                objective_is_ready(game.player_mut(player), name);
             }
         },
     )
