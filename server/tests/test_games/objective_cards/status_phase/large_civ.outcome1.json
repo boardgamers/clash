@@ -15,9 +15,7 @@
               "Arts",
               "Astronomy",
               "Bartering",
-              "Civil Liberties",
               "Fishing",
-              "Free Economy",
               "Free Education",
               "Husbandry",
               "Irrigation",
@@ -26,7 +24,6 @@
               "Myths",
               "Philosophy",
               "Public Education",
-              "Separation of Power",
               "Storage",
               "Tactics"
             ]
@@ -166,13 +163,16 @@
       ],
       "civilization": "test0",
       "advances": [
+        "Civil Liberties",
         "Draft",
         "Engineering",
         "Farming",
+        "Free Economy",
         "Math",
         "Mining",
         "Roads",
         "Sanitation",
+        "Separation of Power",
         "Voting",
         "Writing"
       ],
@@ -183,10 +183,11 @@
         "Religious Fervor",
         "City Planner",
         "Eureka!",
-        "Sea Blockade"
+        "Sea Blockade",
+        "Government"
       ],
       "objective_cards": [
-        99
+        25
       ],
       "next_unit_id": 10
     },
@@ -329,6 +330,9 @@
                         },
                         {
                           "ObjectiveCard": 9
+                        },
+                        {
+                          "ObjectiveCard": 24
                         }
                       ]
                     }
@@ -373,13 +377,17 @@
                                 "ObjectiveCard": 9
                               },
                               {
-                                "ObjectiveCard": 99
+                                "ObjectiveCard": 24
+                              },
+                              {
+                                "ObjectiveCard": 25
                               }
                             ],
                             "objective_opportunities": [
                               "Advanced Culture",
                               "City Planner",
                               "Eureka!",
+                              "Government",
                               "Large Civilization",
                               "Religious Fervor",
                               "Sea Blockade"
@@ -413,12 +421,15 @@
                                   "ObjectiveCard": 9
                                 },
                                 {
-                                  "ObjectiveCard": 99
+                                  "ObjectiveCard": 24
+                                },
+                                {
+                                  "ObjectiveCard": 25
                                 }
                               ],
                               "description": "Select cards to complete",
                               "needed": {
-                                "end": 7,
+                                "end": 8,
                                 "start": 0
                               }
                             }
@@ -461,7 +472,12 @@
                     {
                       "op": "add",
                       "path": "/players/0/objective_cards/6",
-                      "value": 99
+                      "value": 24
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/objective_cards/7",
+                      "value": 25
                     },
                     {
                       "op": "replace",
@@ -496,7 +512,8 @@
       "Player1 completed objective City Planner",
       "Player1 completed objective Eureka!",
       "Player1 paid 2 ideas for Eureka!",
-      "Player1 completed objective Sea Blockade"
+      "Player1 completed objective Sea Blockade",
+      "Player1 completed objective Government"
     ]
   ],
   "undo_limit": 1,

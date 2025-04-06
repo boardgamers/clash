@@ -128,13 +128,16 @@
       ],
       "civilization": "test0",
       "advances": [
+        "Civil Liberties",
         "Draft",
         "Engineering",
         "Farming",
+        "Free Economy",
         "Math",
         "Mining",
         "Roads",
         "Sanitation",
+        "Separation of Power",
         "Voting",
         "Writing"
       ],
@@ -146,7 +149,8 @@
         6,
         7,
         9,
-        99
+        24,
+        25
       ],
       "next_unit_id": 10
     },

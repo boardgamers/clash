@@ -102,13 +102,15 @@ pub(crate) fn advanced_culture() -> Objective {
 
 fn advance_group_complete(objective: &str, group: &'static str) -> Objective {
     Objective::builder(objective, &format!("You have all {group} advances."))
-        .status_phase_check(move |_game, player| {
-            advances::get_group(group)
-                .advances
-                .iter()
-                .all(|a| player.has_advance(&a.name))
-        })
+        .status_phase_check(move |_game, player| all_advances_in_group(player, group))
         .build()
+}
+
+fn all_advances_in_group(player: &Player, group: &str) -> bool {
+    advances::get_group(group)
+        .advances
+        .iter()
+        .all(|a| player.has_advance(&a.name))
 }
 
 pub(crate) fn city_planner() -> Objective {
@@ -137,6 +139,19 @@ pub(crate) fn trade_focus() -> Objective {
 
 pub(crate) fn seafarers() -> Objective {
     advance_group_complete("Seafarers", "Seafaring")
+}
+
+pub(crate) fn government() -> Objective {
+    Objective::builder(
+        "Government",
+        "You have all advances in one government type.",
+    )
+    .status_phase_check(|game, player| {
+        advances::get_governments()
+            .iter()
+            .any(|g| all_advances_in_group(player, &g.name))
+    })
+    .build()
 }
 
 pub(crate) fn eureka() -> Objective {

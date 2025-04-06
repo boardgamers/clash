@@ -267,3 +267,25 @@ pub(crate) fn aggressor() -> Objective {
     )
     .build()
 }
+
+pub(crate) fn barbarian_conquest() -> Objective {
+    let name = "Barbarian Conquest";
+    Objective::builder(
+        name,
+        "You captured a barbarian city with at least 2 army units.",
+    )
+    .add_simple_persistent_event_listener(
+        |event| &mut event.combat_end,
+        11,
+        |game, player, _, e| {
+            let s = &e.combat.stats;
+            if s.is_winner(player)
+                && s.battleground.is_city()
+                && !s.opponent_is_human(player, game)
+            {
+                objective_is_ready(game.player_mut(player), name);
+            }
+        },
+    )
+    .build()
+}
