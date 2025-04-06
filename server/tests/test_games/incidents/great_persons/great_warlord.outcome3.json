@@ -417,13 +417,13 @@
                     "battleground": "Land",
                     "attacker": {
                       "player": 1,
-                      "fighters": {
+                      "present": {
                         "infantry": 1
                       }
                     },
                     "defender": {
                       "player": 0,
-                      "fighters": {
+                      "present": {
                         "infantry": 1
                       },
                       "losses": {

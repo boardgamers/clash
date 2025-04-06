@@ -299,23 +299,23 @@
                                 "round": 1,
                                 "stats": {
                                   "attacker": {
-                                    "fighters": {
-                                      "ships": 3
-                                    },
                                     "losses": {
                                       "ships": 2
                                     },
-                                    "player": 0
+                                    "player": 0,
+                                    "present": {
+                                      "ships": 3
+                                    }
                                   },
                                   "battleground": "Sea",
                                   "defender": {
-                                    "fighters": {
-                                      "ships": 2
-                                    },
                                     "losses": {
                                       "ships": 2
                                     },
-                                    "player": 2
+                                    "player": 2,
+                                    "present": {
+                                      "ships": 2
+                                    }
                                   },
                                   "position": "C3"
                                 }
@@ -368,7 +368,7 @@
                     "battleground": "Sea",
                     "attacker": {
                       "player": 0,
-                      "fighters": {
+                      "present": {
                         "ships": 3
                       },
                       "losses": {
@@ -377,7 +377,7 @@
                     },
                     "defender": {
                       "player": 2,
-                      "fighters": {
+                      "present": {
                         "ships": 2
                       },
                       "losses": {

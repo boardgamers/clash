@@ -316,7 +316,7 @@
                     "battleground": "Sea",
                     "attacker": {
                       "player": 0,
-                      "fighters": {
+                      "present": {
                         "ships": 2
                       },
                       "losses": {
@@ -325,7 +325,7 @@
                     },
                     "defender": {
                       "player": 1,
-                      "fighters": {
+                      "present": {
                         "ships": 1
                       },
                       "losses": {

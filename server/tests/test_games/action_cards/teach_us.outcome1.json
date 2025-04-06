@@ -217,7 +217,7 @@
                     "battleground": "City",
                     "attacker": {
                       "player": 0,
-                      "fighters": {
+                      "present": {
                         "settlers": 2,
                         "infantry": 1,
                         "cavalry": 1,
@@ -227,7 +227,7 @@
                     },
                     "defender": {
                       "player": 1,
-                      "fighters": {
+                      "present": {
                         "infantry": 2
                       },
                       "losses": {
@@ -272,24 +272,24 @@
                                 "round": 1,
                                 "stats": {
                                   "attacker": {
-                                    "fighters": {
+                                    "player": 0,
+                                    "present": {
                                       "cavalry": 1,
                                       "elephants": 1,
                                       "infantry": 1,
                                       "leaders": 1,
                                       "settlers": 2
-                                    },
-                                    "player": 0
+                                    }
                                   },
                                   "battleground": "City",
                                   "defender": {
-                                    "fighters": {
-                                      "infantry": 2
-                                    },
                                     "losses": {
                                       "infantry": 2
                                     },
-                                    "player": 1
+                                    "player": 1,
+                                    "present": {
+                                      "infantry": 2
+                                    }
                                   },
                                   "position": "C1",
                                   "result": "AttackerWins"
@@ -355,7 +355,7 @@
                     "battleground": "City",
                     "attacker": {
                       "player": 0,
-                      "fighters": {
+                      "present": {
                         "settlers": 2,
                         "infantry": 1,
                         "cavalry": 1,
@@ -365,7 +365,7 @@
                     },
                     "defender": {
                       "player": 1,
-                      "fighters": {
+                      "present": {
                         "infantry": 2
                       },
                       "losses": {

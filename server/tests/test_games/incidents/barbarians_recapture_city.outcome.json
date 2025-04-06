@@ -236,7 +236,7 @@
                     "battleground": "CityWithFortress",
                     "attacker": {
                       "player": 0,
-                      "fighters": {
+                      "present": {
                         "elephants": 4
                       },
                       "losses": {
@@ -245,7 +245,7 @@
                     },
                     "defender": {
                       "player": 2,
-                      "fighters": {
+                      "present": {
                         "infantry": 3
                       },
                       "losses": {

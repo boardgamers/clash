@@ -244,17 +244,17 @@
                                 "round": 1,
                                 "stats": {
                                   "attacker": {
-                                    "fighters": {
+                                    "player": 0,
+                                    "present": {
                                       "infantry": 1
-                                    },
-                                    "player": 0
+                                    }
                                   },
                                   "battleground": "City",
                                   "defender": {
-                                    "fighters": {
+                                    "player": 1,
+                                    "present": {
                                       "infantry": 2
-                                    },
-                                    "player": 1
+                                    }
                                   },
                                   "position": "C1"
                                 }

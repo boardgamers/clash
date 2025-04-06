@@ -27,7 +27,7 @@
               "battleground": "CityWithFortress",
               "attacker": {
                 "player": 0,
-                "fighters": {
+                "present": {
                   "leaders": 1
                 }
               },
@@ -368,7 +368,7 @@
                     "battleground": "CityWithFortress",
                     "attacker": {
                       "player": 0,
-                      "fighters": {
+                      "present": {
                         "leaders": 1
                       }
                     },

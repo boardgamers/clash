@@ -211,7 +211,7 @@
                     "battleground": "City",
                     "attacker": {
                       "player": 0,
-                      "fighters": {
+                      "present": {
                         "infantry": 1
                       },
                       "losses": {
@@ -220,7 +220,7 @@
                     },
                     "defender": {
                       "player": 1,
-                      "fighters": {
+                      "present": {
                         "infantry": 2
                       },
                       "losses": {
