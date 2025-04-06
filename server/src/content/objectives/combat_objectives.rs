@@ -1,13 +1,13 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::combat_stats::CombatStats;
 use crate::content::advances;
+use crate::content::advances::trade_routes::find_trade_route_for_unit;
 use crate::game::Game;
 use crate::log::current_player_turn_log;
 use crate::objective_card::{Objective, objective_is_ready};
 use crate::player::Player;
-use itertools::Itertools;
-use crate::content::advances::trade_routes::find_trade_route_for_unit;
 use crate::unit::{Unit, UnitType};
+use itertools::Itertools;
 
 pub(crate) fn conqueror() -> Objective {
     let name = "Conqueror";
@@ -245,4 +245,3 @@ pub(crate) fn scavenger() -> Objective {
     )
     .build()
 }
-

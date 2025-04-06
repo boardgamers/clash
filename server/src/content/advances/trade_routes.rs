@@ -103,7 +103,11 @@ fn find_most_trade_routes(
         .unwrap_or_else(Vec::new)
 }
 
-pub(crate) fn find_trade_route_for_unit(game: &Game, player: &Player, unit: &Unit) -> Vec<TradeRoute> {
+pub(crate) fn find_trade_route_for_unit(
+    game: &Game,
+    player: &Player,
+    unit: &Unit,
+) -> Vec<TradeRoute> {
     let expected_type = unit.unit_type.is_ship() || unit.unit_type.is_settler();
     if !expected_type {
         return vec![];
