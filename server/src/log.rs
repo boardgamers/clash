@@ -4,7 +4,7 @@ use crate::cultural_influence::format_cultural_influence_attempt_log_item;
 use crate::player::Player;
 
 use super::collect::PositionCollection;
-use crate::combat::CombatStats;
+use crate::combat_stats::CombatStats;
 use crate::movement::{MoveUnits, MovementAction};
 use crate::playing_actions::{Collect, IncreaseHappiness, Recruit};
 use crate::{

@@ -29,13 +29,13 @@
               "battleground": "City",
               "attacker": {
                 "player": 0,
-                "fighters": {
+                "present": {
                   "infantry": 1
                 }
               },
               "defender": {
                 "player": 1,
-                "fighters": {
+                "present": {
                   "infantry": 2
                 }
               }

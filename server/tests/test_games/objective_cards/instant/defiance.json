@@ -1,10 +1,7 @@
 {
   "state": {
     "Movement": {
-      "movement_actions_left": 1,
-      "moved_units": [
-        0
-      ]
+      "movement_actions_left": 2
     }
   },
   "players": [
@@ -48,9 +45,6 @@
         {
           "position": "C2",
           "unit_type": "Infantry",
-          "movement_restrictions": [
-            "Battle"
-          ],
           "id": 0
         },
         {
@@ -96,6 +90,12 @@
         "Tactics"
       ],
       "incident_tokens": 2,
+      "objective_cards": [
+        2,
+        5,
+        6,
+        7
+      ],
       "next_unit_id": 8
     },
     {
@@ -142,7 +142,8 @@
       "civilization": "test1",
       "advances": [
         "Farming",
-        "Mining"
+        "Mining",
+        "Tactics"
       ],
       "incident_tokens": 3,
       "next_unit_id": 2
@@ -203,106 +204,16 @@
           "players": [
             {
               "index": 0,
-              "items": [
-                {
-                  "action": {
-                    "Movement": {
-                      "Move": {
-                        "units": [
-                          0
-                        ],
-                        "destination": "C1"
-                      }
-                    }
-                  }
-                },
-                {
-                  "action": {
-                    "Response": {
-                      "Bool": true
-                    }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "CombatRoundEnd": {
-                              "attacker_casualties": {},
-                              "can_retreat": true,
-                              "combat": {
-                                "attacker": 0,
-                                "attacker_position": "C2",
-                                "attackers": [
-                                  0
-                                ],
-                                "defender": 1,
-                                "defender_position": "C1",
-                                "retreat": "CanRetreat",
-                                "round": 1,
-                                "stats": {
-                                  "attacker": {
-                                    "player": 0,
-                                    "present": {
-                                      "infantry": 1
-                                    }
-                                  },
-                                  "battleground": "City",
-                                  "defender": {
-                                    "player": 1,
-                                    "present": {
-                                      "infantry": 2
-                                    }
-                                  },
-                                  "position": "C1"
-                                }
-                              },
-                              "defender_casualties": {}
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Builtin": "Offer Retreat"
-                            },
-                            "priority": 0,
-                            "request": {
-                              "BoolRequest": "Do you want to retreat?"
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 0
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
+              "items": []
             }
           ]
         }
       ]
     }
   ],
-  "action_log_index": 2,
-  "log": [
-    [
-      "Player1 marched 1 infantry from C2 to C1"
-    ],
-    [
-      "Combat round 1",
-      "Attackers: 1 infantry",
-      "Defenders: 2 infantry",
-      "Player1 rolled 1 (Leader, no bonus) for combined combat value of 1 and gets 0 hits against defending units.",
-      "Player2 rolled 1 (Leader, no bonus), 1 (Leader, no bonus) for combined combat value of 2 and gets 0 hits against attacking units.",
-      "Player1 can retreat"
-    ],
-    [
-      "Player1 retreats"
-    ]
-  ],
-  "undo_limit": 1,
+  "action_log_index": 0,
+  "log": [],
+  "undo_limit": 0,
   "actions_left": 1,
   "round": 1,
   "age": 1,
@@ -312,15 +223,15 @@
   "dice_roll_outcomes": [
     1,
     1,
-    10,
-    10,
-    10,
-    10
-  ],
-  "dice_roll_log": [
+    1,
+    11,
+    11,
     1,
     1,
-    1
+    11,
+    1,
+    1,
+    11
   ],
   "wonders_left": [
     "Pyramids"

@@ -15,11 +15,15 @@ use serde::{Deserialize, Serialize};
 
 type StatusPhaseCheck = Box<dyn Fn(&Game, &Player) -> bool>;
 
+type StatusPhaseUpdate = Box<dyn Fn(&mut Game, usize)>;
+
 pub struct Objective {
     pub name: String,
     pub description: String,
     pub(crate) listeners: AbilityListeners,
     pub(crate) status_phase_check: Option<StatusPhaseCheck>,
+    pub(crate) status_phase_update: Option<StatusPhaseUpdate>,
+    pub(crate) contradicting_status_phase_objective: Option<String>,
 }
 
 impl Objective {
@@ -28,7 +32,6 @@ impl Objective {
         ObjectiveBuilder::new(name, description)
     }
 }
-
 pub struct ObjectiveCard {
     pub id: u8,
     pub objectives: [Objective; 2],
@@ -53,6 +56,8 @@ pub struct ObjectiveBuilder {
     name: String,
     description: String,
     status_phase_check: Option<StatusPhaseCheck>,
+    status_phase_update: Option<StatusPhaseUpdate>,
+    contradicting_status_phase_objective: Option<String>,
     builder: AbilityInitializerBuilder,
 }
 
@@ -63,6 +68,8 @@ impl ObjectiveBuilder {
             name: name.to_string(),
             description: description.to_string(),
             status_phase_check: None,
+            status_phase_update: None,
+            contradicting_status_phase_objective: None,
             builder: AbilityInitializerBuilder::new(),
         }
     }
@@ -77,12 +84,29 @@ impl ObjectiveBuilder {
     }
 
     #[must_use]
+    pub fn status_phase_update<F>(mut self, f: F) -> Self
+    where
+        F: Fn(&mut Game, usize) + 'static,
+    {
+        self.status_phase_update = Some(Box::new(f));
+        self
+    }
+
+    #[must_use]
+    pub fn contradicting_status_phase_objective(mut self, name: &str) -> Self {
+        self.contradicting_status_phase_objective = Some(name.to_string());
+        self
+    }
+
+    #[must_use]
     pub fn build(self) -> Objective {
         Objective {
             name: self.name,
             description: self.description,
             listeners: self.builder.build(),
             status_phase_check: self.status_phase_check,
+            status_phase_update: self.status_phase_update,
+            contradicting_status_phase_objective: self.contradicting_status_phase_objective,
         }
     }
 }
@@ -222,29 +246,60 @@ pub(crate) fn complete_objective_card(game: &mut Game, player: usize, id: u8, ob
         "{} completed objective {objective}",
         game.player_name(player),
     ));
+    let card = get_objective_card(id);
+    if let Some(s) = card
+        .objectives
+        .iter()
+        .find(|o| o.name == objective)
+        .and_then(|o| o.status_phase_update.as_ref())
+    {
+        s(game, player);
+    }
+
     discard_objective_card(game, player, id);
     game.player_mut(player).completed_objectives.push(objective);
 }
 
 pub(crate) fn match_objective_cards(
-    cards: &[HandCard],
+    hand_cards: &[HandCard],
     opportunities: &[String],
 ) -> Result<Vec<(u8, String)>, String> {
-    let mut res = vec![];
+    if hand_cards.is_empty() {
+        // is checked by needed range
+        return Ok(Vec::new());
+    }
 
-    for card in cards {
+    let mut cards = vec![];
+
+    for card in hand_cards {
         match card {
             HandCard::ObjectiveCard(id) => {
-                res.push(get_objective_card(*id));
+                cards.push(get_objective_card(*id));
             }
             _ => return Err(format!("Invalid hand card: {card:?}"))?,
         }
     }
 
-    combinations(&res, opportunities)
+    for c in &cards {
+        for o in &c.objectives {
+            if let Some(contradict) = &o.contradicting_status_phase_objective {
+                if cards
+                    .iter()
+                    .any(|c2| c2.objectives.iter().any(|o2| &o2.name == contradict))
+                {
+                    return Err(format!(
+                        "Cannot select {} and {} at the same time",
+                        c.objectives[0].name, contradict
+                    ));
+                }
+            }
+        }
+    }
+
+    combinations(&cards, opportunities)
         .into_iter()
         .find(|v| {
-            v.iter().zip(cards).all(|((id, _), card)| match card {
+            v.iter().zip(hand_cards).all(|((id, _), card)| match card {
                 HandCard::ObjectiveCard(c) => c == id,
                 _ => false,
             })

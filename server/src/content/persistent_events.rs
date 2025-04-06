@@ -5,6 +5,7 @@ use crate::city_pieces::Building;
 use crate::collect::CollectInfo;
 use crate::combat::Combat;
 use crate::combat_listeners::{CombatEnd, CombatRoundEnd, CombatRoundStart};
+use crate::combat_stats::CombatStats;
 use crate::events::EventOrigin;
 use crate::explore::ExploreResolutionState;
 use crate::game::Game;
@@ -104,6 +105,7 @@ pub enum PersistentEventType {
     CombatRoundStart(CombatRoundStart),
     CombatRoundEnd(CombatRoundEnd),
     CombatEnd(CombatEnd),
+    CaptureUndefendedPosition(CombatStats),
     StatusPhase(StatusPhaseState),
     TurnStart,
     Advance(AdvanceInfo),

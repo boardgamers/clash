@@ -293,7 +293,7 @@
                     "battleground": "Land",
                     "attacker": {
                       "player": 2,
-                      "fighters": {
+                      "present": {
                         "infantry": 2,
                         "elephants": 1
                       },
@@ -303,7 +303,7 @@
                     },
                     "defender": {
                       "player": 0,
-                      "fighters": {
+                      "present": {
                         "infantry": 1
                       },
                       "losses": {

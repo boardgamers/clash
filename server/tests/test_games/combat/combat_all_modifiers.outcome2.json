@@ -39,7 +39,7 @@
             "battleground": "CityWithFortress",
             "attacker": {
               "player": 0,
-              "fighters": {
+              "present": {
                 "settlers": 2,
                 "infantry": 1,
                 "cavalry": 1,
@@ -49,7 +49,7 @@
             },
             "defender": {
               "player": 1,
-              "fighters": {
+              "present": {
                 "infantry": 2
               }
             }

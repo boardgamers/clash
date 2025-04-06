@@ -224,7 +224,7 @@
                     "battleground": "CityWithFortress",
                     "attacker": {
                       "player": 0,
-                      "fighters": {
+                      "present": {
                         "infantry": 1,
                         "cavalry": 1,
                         "elephants": 1,

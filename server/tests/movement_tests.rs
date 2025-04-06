@@ -1,5 +1,6 @@
 use crate::common::{JsonTest, TestAction, move_action};
 use server::action::Action;
+use server::card::HandCard;
 use server::content::persistent_events::EventResponse;
 use server::game::Game;
 use server::movement::MoveUnits;
@@ -147,10 +148,16 @@ fn test_ship_disembark() {
 fn test_ship_disembark_capture_empty_city() {
     JSON.test(
         "ship_disembark_capture_empty_city",
-        vec![TestAction::undoable(
-            0,
-            move_action(vec![1, 2], Position::from_offset("B2")),
-        )],
+        vec![
+            TestAction::undoable(0, move_action(vec![1, 2], Position::from_offset("B2")))
+                .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectHandCards(vec![
+                    HandCard::ObjectiveCard(10),
+                ])),
+            ),
+        ],
     );
 }
 

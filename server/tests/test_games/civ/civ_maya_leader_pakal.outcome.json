@@ -27,13 +27,14 @@
               "battleground": "CityWithFortress",
               "attacker": {
                 "player": 0,
-                "fighters": {
+                "present": {
                   "leaders": 1
                 }
               },
               "defender": {
                 "player": 1
-              }
+              },
+              "result": "AttackerWins"
             }
           }
         }
@@ -42,9 +43,9 @@
         0
       ],
       "player": 1,
-      "last_priority_used": 2,
+      "last_priority_used": 102,
       "handler": {
-        "priority": 2,
+        "priority": 102,
         "request": {
           "SelectPositions": {
             "choices": [
@@ -367,7 +368,7 @@
                     "battleground": "CityWithFortress",
                     "attacker": {
                       "player": 0,
-                      "fighters": {
+                      "present": {
                         "leaders": 1
                       }
                     },

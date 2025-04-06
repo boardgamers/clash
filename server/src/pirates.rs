@@ -52,7 +52,7 @@ pub(crate) fn pirates_bonus() -> Builtin {
     )
     .add_resource_request(
         |event| &mut event.combat_end,
-        3,
+        103,
         |game, player_index, i| {
             if game
                 .player(i.opponent(player_index))

@@ -91,7 +91,9 @@
       ],
       "incident_tokens": 2,
       "objective_cards": [
-        2
+        2,
+        5,
+        6
       ],
       "next_unit_id": 8
     },
@@ -136,6 +138,11 @@
           "position": "C1",
           "unit_type": "Infantry",
           "id": 1
+        },
+        {
+          "position": "C1",
+          "unit_type": "Infantry",
+          "id": 2
         }
       ],
       "civilization": "test1",

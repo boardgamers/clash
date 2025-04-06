@@ -315,7 +315,7 @@
                     "battleground": "CityWithFortress",
                     "attacker": {
                       "player": 0,
-                      "fighters": {
+                      "present": {
                         "leaders": 1
                       }
                     },
@@ -332,6 +332,20 @@
                         "B2"
                       ]
                     }
+                  },
+                  "combat_stats": {
+                    "position": "B1",
+                    "battleground": "CityWithFortress",
+                    "attacker": {
+                      "player": 0,
+                      "present": {
+                        "leaders": 1
+                      }
+                    },
+                    "defender": {
+                      "player": 1
+                    },
+                    "result": "AttackerWins"
                   }
                 }
               ]

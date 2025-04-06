@@ -29,24 +29,7 @@ fn test_draft() {
                 Action::Response(EventResponse::SelectHandCards(vec![
                     HandCard::ObjectiveCard(1),
                 ])),
-            )
-            .with_pre_assert(|game| {
-                let PersistentEventRequest::SelectHandCards(c) = &game
-                    .events
-                    .last()
-                    .expect("last event")
-                    .player
-                    .handler
-                    .as_ref()
-                    .expect("handler")
-                    .request
-                else {
-                    panic!("Expected SelectHandCards request");
-                };
-                //can't fulfill both objectives with same name
-                assert_eq!(c.choices.len(), 2);
-                assert!(validate_card_selection(&c.choices, game).is_err());
-            }),
+            ),
         ],
     )
 }
@@ -65,8 +48,65 @@ fn test_conqueror() {
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![
                     HandCard::ObjectiveCard(2),
+                    HandCard::ObjectiveCard(5),
+                    HandCard::ObjectiveCard(6),
                 ])),
             ),
+        ],
+    );
+}
+
+#[test]
+fn test_defiance() {
+    JSON.test(
+        "defiance",
+        vec![
+            TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("C1")))
+                .without_json_comparison(),
+            TestAction::not_undoable(0, Action::Response(EventResponse::Bool(false)))
+                .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectHandCards(vec![
+                    HandCard::ObjectiveCard(7),
+                ])),
+            ),
+        ],
+    );
+}
+
+#[test]
+fn test_warmonger() {
+    JSON.test(
+        "warmonger",
+        vec![
+            TestAction::not_undoable(0, move_action(vec![0, 1], Position::from_offset("C1")))
+                .without_json_comparison(),
+            TestAction::not_undoable(0, move_action(vec![2, 3], Position::from_offset("B1")))
+                .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectHandCards(vec![
+                    HandCard::ObjectiveCard(3),
+                ])),
+            )
+            .with_pre_assert(|game| {
+                let PersistentEventRequest::SelectHandCards(c) = &game
+                    .events
+                    .last()
+                    .expect("last event")
+                    .player
+                    .handler
+                    .as_ref()
+                    .expect("handler")
+                    .request
+                else {
+                    panic!("Expected SelectHandCards request");
+                };
+                //can't fulfill both objectives with same name
+                assert_eq!(c.choices.len(), 2);
+                assert!(validate_card_selection(&c.choices, game).is_err());
+            }),
         ],
     );
 }

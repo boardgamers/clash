@@ -285,6 +285,11 @@ impl Units {
     }
 
     #[must_use]
+    pub fn sum(&self) -> u8 {
+        self.settlers + self.infantry + self.ships + self.cavalry + self.elephants + self.leaders
+    }
+
+    #[must_use]
     pub fn to_vec(self) -> Vec<UnitType> {
         self.into_iter()
             .flat_map(|(u, c)| std::iter::repeat_n(u, c as usize))

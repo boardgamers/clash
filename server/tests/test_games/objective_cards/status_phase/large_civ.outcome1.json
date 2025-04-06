@@ -15,19 +15,20 @@
               "Arts",
               "Astronomy",
               "Bartering",
-              "Engineering",
+              "Civil Liberties",
               "Fishing",
+              "Free Economy",
+              "Free Education",
               "Husbandry",
               "Irrigation",
               "Medicine",
               "Metallurgy",
               "Myths",
-              "Nationalism",
-              "Roads",
-              "Sanitation",
+              "Philosophy",
+              "Public Education",
+              "Separation of Power",
               "Storage",
-              "Tactics",
-              "Writing"
+              "Tactics"
             ]
           }
         },
@@ -44,7 +45,7 @@
         "food": 1,
         "wood": 7,
         "ore": 7,
-        "ideas": 5,
+        "ideas": 3,
         "gold": 7,
         "mood_tokens": 6,
         "culture_tokens": 7
@@ -60,7 +61,9 @@
       },
       "cities": [
         {
-          "city_pieces": {},
+          "city_pieces": {
+            "temple": 1
+          },
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
@@ -149,18 +152,38 @@
           "position": "A1",
           "unit_type": "Infantry",
           "id": 9
+        },
+        {
+          "position": "D1",
+          "unit_type": "Ship",
+          "id": 10
+        },
+        {
+          "position": "D1",
+          "unit_type": "Ship",
+          "id": 11
         }
       ],
       "civilization": "test0",
       "advances": [
         "Draft",
+        "Engineering",
         "Farming",
         "Math",
-        "Mining"
+        "Mining",
+        "Roads",
+        "Sanitation",
+        "Voting",
+        "Writing"
       ],
       "incident_tokens": 2,
       "completed_objectives": [
-        "Large Civilization"
+        "Large Civilization",
+        "Advanced Culture",
+        "Religious Fervor",
+        "City Planner",
+        "Eureka!",
+        "Sea Blockade"
       ],
       "objective_cards": [
         99
@@ -189,11 +212,14 @@
       },
       "cities": [
         {
-          "city_pieces": {},
+          "city_pieces": {
+            "port": 1
+          },
           "mood_state": "Angry",
           "activations": 0,
           "angry_activation": false,
-          "position": "C1"
+          "position": "C1",
+          "port_position": "D1"
         }
       ],
       "units": [
@@ -258,6 +284,10 @@
         "Water"
       ],
       [
+        "D1",
+        "Water"
+      ],
+      [
         "D2",
         "Water"
       ]
@@ -284,6 +314,21 @@
                       "SelectHandCards": [
                         {
                           "ObjectiveCard": 1
+                        },
+                        {
+                          "ObjectiveCard": 4
+                        },
+                        {
+                          "ObjectiveCard": 5
+                        },
+                        {
+                          "ObjectiveCard": 6
+                        },
+                        {
+                          "ObjectiveCard": 7
+                        },
+                        {
+                          "ObjectiveCard": 9
                         }
                       ]
                     }
@@ -313,11 +358,31 @@
                                 "ObjectiveCard": 1
                               },
                               {
+                                "ObjectiveCard": 4
+                              },
+                              {
+                                "ObjectiveCard": 5
+                              },
+                              {
+                                "ObjectiveCard": 6
+                              },
+                              {
+                                "ObjectiveCard": 7
+                              },
+                              {
+                                "ObjectiveCard": 9
+                              },
+                              {
                                 "ObjectiveCard": 99
                               }
                             ],
                             "objective_opportunities": [
-                              "Large Civilization"
+                              "Advanced Culture",
+                              "City Planner",
+                              "Eureka!",
+                              "Large Civilization",
+                              "Religious Fervor",
+                              "Sea Blockade"
                             ]
                           }
                         },
@@ -333,12 +398,27 @@
                                   "ObjectiveCard": 1
                                 },
                                 {
+                                  "ObjectiveCard": 4
+                                },
+                                {
+                                  "ObjectiveCard": 5
+                                },
+                                {
+                                  "ObjectiveCard": 6
+                                },
+                                {
+                                  "ObjectiveCard": 7
+                                },
+                                {
+                                  "ObjectiveCard": 9
+                                },
+                                {
                                   "ObjectiveCard": 99
                                 }
                               ],
                               "description": "Select cards to complete",
                               "needed": {
-                                "end": 2,
+                                "end": 7,
                                 "start": 0
                               }
                             }
@@ -356,7 +436,37 @@
                     {
                       "op": "add",
                       "path": "/players/0/objective_cards/1",
+                      "value": 4
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/objective_cards/2",
+                      "value": 5
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/objective_cards/3",
+                      "value": 6
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/objective_cards/4",
+                      "value": 7
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/objective_cards/5",
+                      "value": 9
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/objective_cards/6",
                       "value": 99
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/ideas",
+                      "value": 5
                     },
                     {
                       "op": "remove",
@@ -380,7 +490,13 @@
       "The game has entered the 1st status phase"
     ],
     [
-      "Player1 completed objective Large Civilization"
+      "Player1 completed objective Large Civilization",
+      "Player1 completed objective Advanced Culture",
+      "Player1 completed objective Religious Fervor",
+      "Player1 completed objective City Planner",
+      "Player1 completed objective Eureka!",
+      "Player1 paid 2 ideas for Eureka!",
+      "Player1 completed objective Sea Blockade"
     ]
   ],
   "undo_limit": 1,

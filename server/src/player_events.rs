@@ -4,6 +4,7 @@ use crate::barbarians::BarbariansEventState;
 use crate::collect::{CollectContext, CollectInfo};
 use crate::combat::Combat;
 use crate::combat_listeners::{CombatEnd, CombatRoundEnd, CombatRoundStart};
+use crate::combat_stats::CombatStats;
 use crate::content::persistent_events::{KilledUnits, Structure};
 use crate::events::Event;
 use crate::explore::ExploreResolutionState;
@@ -74,6 +75,7 @@ pub(crate) struct PersistentEvents {
     pub combat_round_end: PersistentEvent<CombatRoundEnd>,
     pub combat_round_end_tactics: PersistentEvent<CombatRoundEnd>,
     pub combat_end: PersistentEvent<CombatEnd>,
+    pub capture_undefended_position: PersistentEvent<CombatStats>,
     pub units_killed: PersistentEvent<KilledUnits>,
     pub select_objective_cards: PersistentEvent<SelectObjectivesInfo>,
 }
