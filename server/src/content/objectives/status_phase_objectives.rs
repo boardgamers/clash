@@ -61,7 +61,7 @@ fn leading_player(
         > game
             .players
             .iter()
-            .filter(|p| p.index != player.index)
+            .filter(|p| p.index != player.index && p.is_human())
             .map(value)
             .max()
             .unwrap_or(0)
@@ -109,16 +109,24 @@ pub(crate) fn education_lead() -> Objective {
 }
 
 pub(crate) fn eureka() -> Objective {
+    pay_resources("Eureka!", ResourcePile::ideas(5), ResourcePile::ideas(2))
+}
+
+pub(crate) fn pay_resources(
+    objective: &'static str,
+    want: ResourcePile,
+    pay: ResourcePile,
+) -> Objective {
+    let suffix = if pay.gold > 0 { " (not gold)" } else { "" };
     Objective::builder(
-        "Eureka!",
-        "You have at least 5 ideas: Pay 2 ideas (not gold).",
+        objective,
+        &format!("You have at least {want}: Pay {pay}{suffix}."),
     )
-    .status_phase_check(|_game, player| player.resources.ideas >= 5)
+    .status_phase_check(move |_game, player| player.resources.has_at_least(&want))
     .status_phase_update(move |game, player| {
-        game.player_mut(player)
-            .lose_resources(ResourcePile::ideas(2));
+        game.player_mut(player).lose_resources(pay.clone());
         game.add_info_log_item(&format!(
-            "{} paid 2 ideas for Eureka!",
+            "{} paid {pay} for {objective}",
             game.player_name(player)
         ));
     })
@@ -175,4 +183,24 @@ pub(crate) fn optimized_storage() -> Objective {
         r.food >= 3 && r.ore >= 3 && r.wood >= 3
     })
     .build()
+}
+
+pub(crate) fn wealth() -> Objective {
+    pay_resources("Eureka!", ResourcePile::gold(5), ResourcePile::gold(2))
+}
+
+pub(crate) fn large_fleet() -> Objective {
+    Objective::builder(
+        "Large Fleet",
+        "You have at least 4 ships - or 2 ships and more than any other player.",
+    )
+    .status_phase_check(|_game, player| {
+        let ships = ship_count(player);
+        ships >= 4 || (ships >= 2 && leading_player(_game, player, ship_count))
+    })
+    .build()
+}
+
+fn ship_count(p: &Player) -> usize {
+    p.units.iter().filter(|u| u.unit_type.is_ship()).count()
 }
