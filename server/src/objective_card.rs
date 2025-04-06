@@ -23,6 +23,7 @@ pub struct Objective {
     pub(crate) listeners: AbilityListeners,
     pub(crate) status_phase_check: Option<StatusPhaseCheck>,
     pub(crate) status_phase_update: Option<StatusPhaseUpdate>,
+    pub(crate) contradicting_status_phase_objective: Option<String>,
 }
 
 impl Objective {
@@ -56,6 +57,7 @@ pub struct ObjectiveBuilder {
     description: String,
     status_phase_check: Option<StatusPhaseCheck>,
     status_phase_update: Option<StatusPhaseUpdate>,
+    contradicting_status_phase_objective: Option<String>,
     builder: AbilityInitializerBuilder,
 }
 
@@ -67,6 +69,7 @@ impl ObjectiveBuilder {
             description: description.to_string(),
             status_phase_check: None,
             status_phase_update: None,
+            contradicting_status_phase_objective: None,
             builder: AbilityInitializerBuilder::new(),
         }
     }
@@ -90,6 +93,12 @@ impl ObjectiveBuilder {
     }
 
     #[must_use]
+    pub fn contradicting_status_phase_objective(mut self, name: &str) -> Self {
+        self.contradicting_status_phase_objective = Some(name.to_string());
+        self
+    }
+
+    #[must_use]
     pub fn build(self) -> Objective {
         Objective {
             name: self.name,
@@ -97,6 +106,7 @@ impl ObjectiveBuilder {
             listeners: self.builder.build(),
             status_phase_check: self.status_phase_check,
             status_phase_update: self.status_phase_update,
+            contradicting_status_phase_objective: self.contradicting_status_phase_objective,
         }
     }
 }
@@ -237,39 +247,59 @@ pub(crate) fn complete_objective_card(game: &mut Game, player: usize, id: u8, ob
         game.player_name(player),
     ));
     let card = get_objective_card(id);
-    if let Some(s) = card.objectives
+    if let Some(s) = card
+        .objectives
         .iter()
         .find(|o| o.name == objective)
-        .and_then(|o| o.status_phase_update.as_ref()) { s(game, player) }
+        .and_then(|o| o.status_phase_update.as_ref())
+    {
+        s(game, player)
+    }
 
     discard_objective_card(game, player, id);
     game.player_mut(player).completed_objectives.push(objective);
 }
 
 pub(crate) fn match_objective_cards(
-    cards: &[HandCard],
+    hand_cards: &[HandCard],
     opportunities: &[String],
 ) -> Result<Vec<(u8, String)>, String> {
-    if cards.is_empty() {
+    if hand_cards.is_empty() {
         // is checked by needed range
         return Ok(Vec::new());
     }
 
-    let mut res = vec![];
+    let mut cards = vec![];
 
-    for card in cards {
+    for card in hand_cards {
         match card {
             HandCard::ObjectiveCard(id) => {
-                res.push(get_objective_card(*id));
+                cards.push(get_objective_card(*id));
             }
             _ => return Err(format!("Invalid hand card: {card:?}"))?,
         }
     }
 
-    combinations(&res, opportunities)
+    for c in &cards {
+        for o in &c.objectives {
+            if let Some(contradict) = &o.contradicting_status_phase_objective {
+                if cards
+                    .iter()
+                    .any(|c2| c2.objectives.iter().any(|o2| &o2.name == contradict))
+                {
+                    return Err(format!(
+                        "Cannot select {} and {} at the same time",
+                        c.objectives[0].name, contradict
+                    ));
+                }
+            }
+        }
+    }
+
+    combinations(&cards, opportunities)
         .into_iter()
         .find(|v| {
-            v.iter().zip(cards).all(|((id, _), card)| match card {
+            v.iter().zip(hand_cards).all(|((id, _), card)| match card {
                 HandCard::ObjectiveCard(c) => c == id,
                 _ => false,
             })
@@ -384,15 +414,12 @@ mod tests {
 
         let mut got = combinations(&cards, &opportunities);
         got.sort();
-        assert_eq!(
-            got,
+        assert_eq!(got, vec![
             vec![
-                vec![
-                    (0, "Objective 1".to_string()),
-                    (1, "Objective 4".to_string()),
-                ],
-                vec![(1, "Objective 1".to_string()),],
-            ]
-        );
+                (0, "Objective 1".to_string()),
+                (1, "Objective 4".to_string()),
+            ],
+            vec![(1, "Objective 1".to_string()),],
+        ]);
     }
 }

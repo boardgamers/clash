@@ -77,7 +77,8 @@ fn leading_player(
             .filter(|p| p.index != player.index && p.is_human())
             .map(value)
             .max()
-            .unwrap_or(0) + margin
+            .unwrap_or(0)
+            + margin
 }
 
 fn buildings(p: &Player, b: Building) -> usize {
@@ -214,6 +215,10 @@ pub(crate) fn wood_supplies() -> Objective {
     supplies("Wood Supplies", ResourceType::Wood)
 }
 
+pub(crate) fn food_supplies() -> Objective {
+    supplies("Food Supplies", ResourceType::Food)
+}
+
 pub(crate) fn large_fleet() -> Objective {
     Objective::builder(
         "Large Fleet",
@@ -221,7 +226,7 @@ pub(crate) fn large_fleet() -> Objective {
     )
     .status_phase_check(|_game, player| {
         let ships = ship_count(player);
-        ships >= 4 || (ships >= 2 && leading_player(_game, player,1, ship_count))
+        ships >= 4 || (ships >= 2 && leading_player(_game, player, 1, ship_count))
     })
     .build()
 }
@@ -236,12 +241,35 @@ pub(crate) fn large_army() -> Objective {
         "You have at least 4 more army units than any other player.",
     )
     .status_phase_check(|_game, player| {
-        leading_player(_game, player,4, |p| {
+        leading_player(_game, player, 4, |p| {
             p.units
                 .iter()
                 .filter(|u| u.unit_type.is_army_unit())
                 .count()
         })
+    })
+    .build()
+}
+
+pub(crate) fn standing_army() -> Objective {
+    Objective::builder(
+        "Standing Army",
+        "You have at least 4 cities with army units. \
+        Cannot be completed together with Military Might.",
+    )
+    .contradicting_status_phase_objective("Military Might")
+    .status_phase_check(|_game, player| {
+        player
+            .cities
+            .iter()
+            .filter(|c| {
+                player
+                    .get_units(c.position)
+                    .iter()
+                    .any(|u| u.unit_type.is_army_unit())
+            })
+            .count()
+            >= 4
     })
     .build()
 }
