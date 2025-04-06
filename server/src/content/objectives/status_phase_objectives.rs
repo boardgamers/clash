@@ -47,6 +47,17 @@ pub(crate) fn religious_fervor() -> Objective {
     .build()
 }
 
+pub(crate) fn fortifications() -> Objective {
+    building_lead(
+        Objective::builder(
+            "Fortifications",
+            "You have more fortresses than any other player",
+        ),
+        Building::Fortress,
+    )
+    .build()
+}
+
 fn building_lead(b: ObjectiveBuilder, building: Building) -> ObjectiveBuilder {
     b.status_phase_check(move |game, player| {
         leading_player(game, player, 1, move |p| buildings(p, building))
@@ -197,6 +208,10 @@ pub(crate) fn wealth() -> Objective {
 
 pub(crate) fn ore_supplies() -> Objective {
     supplies("Ore Supplies", ResourceType::Ore)
+}
+
+pub(crate) fn wood_supplies() -> Objective {
+    supplies("Wood Supplies", ResourceType::Wood)
 }
 
 pub(crate) fn large_fleet() -> Objective {
