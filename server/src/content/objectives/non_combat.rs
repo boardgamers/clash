@@ -1,4 +1,6 @@
+use city::MoodState;
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::city;
 use crate::content::advances::warfare::draft_cost;
 use crate::content::objectives::status_phase_objectives::home_position;
 use crate::objective_card::{Objective, objective_is_ready};
@@ -30,16 +32,40 @@ pub(crate) fn draft() -> Objective {
 
 pub(crate) fn city_founder() -> Objective {
     let name = "City Founder";
-    Objective::builder(name, "You founded a city this at least 5 spaces away from your starting city position.")
+    Objective::builder(
+        name,
+        "You founded a city this at least 5 spaces away from your starting city position.",
+    )
+    .add_simple_persistent_event_listener(
+        |event| &mut event.found_city,
+        0,
+        |game, player, _, p| {
+            if home_position(game, game.player(player)).distance(*p) >= 5 {
+                objective_is_ready(game.player_mut(player), name);
+            }
+        },
+    )
+    .build()
+}
+
+pub(crate) fn terror_regime() -> Objective {
+    let name = "Terror Regime";
+    Objective::builder(name, "At least 4 cities are Angry.")
         .add_simple_persistent_event_listener(
-            |event| &mut event.found_city,
+            |event| &mut event.mood_change,
             0,
             |game, player, _, p| {
-                if home_position(game, game.player(player)).distance(*p) >= 5 {
+                if game
+                    .player(player)
+                    .cities
+                    .iter()
+                    .filter(|c| c.mood_state == MoodState::Angry)
+                    .count()
+                    >= 4
+                {
                     objective_is_ready(game.player_mut(player), name);
                 }
-            }
-
+            },
         )
         .build()
 }
