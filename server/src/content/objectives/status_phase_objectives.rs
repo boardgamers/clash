@@ -146,7 +146,7 @@ pub(crate) fn government() -> Objective {
         "Government",
         "You have all advances in one government type.",
     )
-    .status_phase_check(|game, player| {
+    .status_phase_check(|_game, player| {
         advances::get_governments()
             .iter()
             .any(|g| all_advances_in_group(player, &g.name))
@@ -289,7 +289,6 @@ pub(crate) fn standing_army() -> Objective {
         "You have at least 4 cities with army units. \
         Cannot be completed together with Military Might.",
     )
-    // todo test when Military Might is implemented
     .contradicting_status_phase_objective("Military Might")
     .status_phase_check(|_game, player| {
         player
@@ -403,8 +402,47 @@ pub(crate) fn consulate() -> Objective {
 
 pub(crate) fn metropolis() -> Objective {
     Objective::builder("Metropolis", "You have at least 1 city with size 5.")
-        .status_phase_check(|game, player| {
+        .status_phase_check(|_game, player| {
             player.cities.iter().filter(|c| c.size() >= 5).count() >= 1
         })
         .build()
+}
+
+pub(crate) fn expansionist() -> Objective {
+    Objective::builder(
+        "Expansionist",
+        "You have at least 4 cities that are not adjacent to other cities.",
+    )
+    .status_phase_check(|game, player| {
+        player
+            .cities
+            .iter()
+            .filter(|c| {
+                c.position
+                    .neighbors()
+                    .iter()
+                    .all(|n| game.try_get_any_city(*n).is_none())
+            })
+            .count()
+            >= 4
+    })
+    .build()
+}
+
+pub(crate) fn military_might() -> Objective {
+    Objective::builder(
+        "Military Might",
+        "You have at least 12 army units and ships combined. \
+        Cannot be completed together with Standing Army.",
+    )
+    .contradicting_status_phase_objective("Standing Army")
+    .status_phase_check(|_game, player| {
+        player
+            .units
+            .iter()
+            .filter(|u| u.unit_type.is_military())
+            .count()
+            >= 12
+    })
+    .build()
 }

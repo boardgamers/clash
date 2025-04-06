@@ -194,12 +194,14 @@ impl UnitType {
         matches!(self, Infantry | Cavalry | Elephant | Leader)
     }
 
-    /// Returns `true` if the unit type is [`Settler`].
-    ///
-    /// [`Settler`]: UnitType::Settler
     #[must_use]
     pub fn is_settler(&self) -> bool {
         matches!(self, Self::Settler)
+    }
+
+    #[must_use]
+    pub fn is_military(&self) -> bool {
+        !self.is_settler()
     }
 }
 

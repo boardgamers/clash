@@ -9,7 +9,8 @@ use crate::{
     position::Position,
 };
 use MoodState::*;
-
+use num::Zero;
+use crate::utils;
 pub struct City {
     pub pieces: CityPieces,
     pub mood_state: MoodState,
@@ -162,7 +163,11 @@ impl City {
 pub struct CityData {
     city_pieces: CityPiecesData,
     mood_state: MoodState,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "u32::is_zero")]
     activations: u32,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "utils::is_false")]
     angry_activation: bool,
     position: Position,
     #[serde(skip_serializing_if = "Option::is_none")]
