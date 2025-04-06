@@ -360,20 +360,16 @@ pub(crate) fn threat() -> Objective {
     .build()
 }
 
-pub(crate) fn colony() -> Objective {
-    Objective::builder(
-        "Colony",
-        "You have at least 1 city at least 5 spaces away from your starting city position.",
-    )
-    .contradicting_status_phase_objective("City Founder")
-    .status_phase_check(|game, player| {
-        let setup = get_map_setup(game.human_players_count());
-
-        let h = &setup.home_positions[player.index];
-        let home = h.block.tiles(&h.position, h.position.rotation)[0].0;
-
-        player.cities.iter().any(|c| c.position.distance(home) >= 5)
-    })
-    .build()
+pub(crate) fn consulate() -> Objective {
+    Objective::builder("Consulate", "2 cities are culturally influenced by you.")
+        .status_phase_check(|game, player| {
+            game.players
+                .iter()
+                .filter(|p| p.index != player.index)
+                .flat_map(|p| &p.cities)
+                .filter(|c| !c.pieces.buildings(Some(player.index)).is_empty())
+                .count()
+                >= 2
+        })
+        .build()
 }
-
