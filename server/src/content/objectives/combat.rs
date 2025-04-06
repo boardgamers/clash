@@ -89,7 +89,8 @@ pub(crate) fn great_battle() -> Objective {
         |game, player, _, e| {
             let stats = &e.combat.stats;
             let b = stats.battleground;
-            let army_units_present: u8 = stats.attacker.fighters(b).sum() + stats.defender.fighters(b).sum();
+            let army_units_present: u8 =
+                stats.attacker.fighters(b).sum() + stats.defender.fighters(b).sum();
             if stats.battleground.is_land() && army_units_present >= 6 {
                 objective_is_ready(game.player_mut(player), name);
             }

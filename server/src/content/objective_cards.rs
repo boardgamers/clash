@@ -1,9 +1,11 @@
 use crate::content::objectives::combat::{conqueror, general, great_battle, warmonger};
 use crate::content::objectives::non_combat::draft;
-use crate::content::objectives::status_phase_objectives::{advanced_culture, city_planner, coastal_lead, large_civ, religious_fervor, science_lead};
+use crate::content::objectives::status_phase_objectives::{
+    advanced_culture, city_planner, coastal_lead, large_civ, religious_fervor, science_lead,
+};
 use crate::objective_card::ObjectiveCard;
-use std::vec;
 use itertools::Itertools;
+use std::vec;
 
 #[must_use]
 pub(crate) fn get_all() -> Vec<ObjectiveCard> {
