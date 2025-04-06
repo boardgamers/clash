@@ -21,7 +21,7 @@ use crate::movement::{
     move_units_destinations,
 };
 use crate::objective_card::on_objective_cards;
-use crate::playing_actions::PlayingAction;
+use crate::playing_actions::{on_found_city, PlayingAction};
 use crate::recruit::on_recruit;
 use crate::resource::check_for_waste;
 use crate::resource_pile::ResourcePile;
@@ -181,6 +181,7 @@ pub(crate) fn execute_custom_phase_action(
         Recruit(r) => {
             on_recruit(game, player_index, r);
         }
+        FoundCity(p) => on_found_city(game, player_index, p),
         Incident(i) => on_trigger_incident(game, i),
         ActionCard(a) => on_play_action_card(game, player_index, a),
         WonderCard(w) => on_play_wonder_card(game, player_index, w),

@@ -10,7 +10,7 @@ use crate::game::Game;
 use crate::log::current_player_turn_log;
 use crate::map::{BlockPosition, UNEXPLORED_BLOCK, get_map_setup};
 use crate::payment::PaymentOptions;
-use crate::playing_actions::{ActionType, build_city};
+use crate::playing_actions::{ActionType, found_city};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
@@ -69,11 +69,11 @@ pub(crate) fn great_explorer() -> ActionCard {
             },
             |game, s, a| {
                 let pos = a.selected_position.expect("position not found");
-                build_city(game.player_mut(s.player_index), pos);
                 game.add_info_log_item(&format!(
                     "{} built a city at {pos} for {}",
                     s.player_name, s.choice[0]
                 ));
+                found_city(game, s.player_index, pos);
             },
         )
         .build()

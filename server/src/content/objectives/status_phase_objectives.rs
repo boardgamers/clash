@@ -5,6 +5,7 @@ use crate::game::Game;
 use crate::map::get_map_setup;
 use crate::objective_card::{Objective, ObjectiveBuilder};
 use crate::player::Player;
+use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
@@ -343,18 +344,33 @@ pub(crate) fn goal_focused() -> Objective {
 pub(crate) fn colony() -> Objective {
     Objective::builder(
         "Colony",
-        "You have at least 1 city at least 5 spaces away from your starting city position.",
+        "You have at least 1 city at least 5 spaces away from your starting city position. \
+        Cannot be completed if you completed City Founder this age.",
     )
     .contradicting_status_phase_objective("City Founder")
     .status_phase_check(|game, player| {
-        let setup = get_map_setup(game.human_players_count());
+        let home = home_position(game, &player);
+        if player.cities.iter().any(|c| c.position.distance(home) >= 5) {
+            let city_founder_played = game
+                .action_log
+                .last()
+                .iter()
+                .flat_map(|a| a.rounds.iter().flat_map(|r| r.players.iter()))
+                .filter(|p| p.index == player.index)
+                .flat_map(|p| p.items.iter())
+                .any(|i| i.completed_objectives.contains(&"City Founder".to_string()));
 
-        let h = &setup.home_positions[player.index];
-        let home = h.block.tiles(&h.position, h.position.rotation)[0].0;
-
-        player.cities.iter().any(|c| c.position.distance(home) >= 5)
+            return !city_founder_played;
+        }
+        false
     })
     .build()
+}
+
+pub(crate) fn home_position(game: &Game, player: &Player) -> Position {
+    let setup = get_map_setup(game.human_players_count());
+    let h = &setup.home_positions[player.index];
+    h.block.tiles(&h.position, h.position.rotation)[0].0
 }
 
 pub(crate) fn threat() -> Objective {

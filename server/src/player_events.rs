@@ -60,6 +60,7 @@ pub(crate) struct PersistentEvents {
     pub draw_wonder_card: PersistentEvent,
     pub advance: PersistentEvent<AdvanceInfo>,
     pub recruit: PersistentEvent<Recruit>,
+    pub found_city: PersistentEvent<Position>,
     pub influence_culture_resolution: PersistentEvent<ResourcePile>,
     pub explore_resolution: PersistentEvent<ExploreResolutionState>,
     pub play_action_card: PersistentEvent<ActionCardInfo>,
