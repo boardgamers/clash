@@ -45,7 +45,7 @@
         "food": 1,
         "wood": 7,
         "ore": 7,
-        "ideas": 5,
+        "ideas": 3,
         "gold": 7,
         "mood_tokens": 6,
         "culture_tokens": 7
@@ -171,7 +171,8 @@
         "Large Civilization",
         "Advanced Culture",
         "Religious Fervor",
-        "City Planner"
+        "City Planner",
+        "Eureka!"
       ],
       "objective_cards": [
         99
@@ -304,6 +305,9 @@
                         },
                         {
                           "ObjectiveCard": 6
+                        },
+                        {
+                          "ObjectiveCard": 7
                         }
                       ]
                     }
@@ -342,12 +346,16 @@
                                 "ObjectiveCard": 6
                               },
                               {
+                                "ObjectiveCard": 7
+                              },
+                              {
                                 "ObjectiveCard": 99
                               }
                             ],
                             "objective_opportunities": [
                               "Advanced Culture",
                               "City Planner",
+                              "Eureka!",
                               "Large Civilization",
                               "Religious Fervor"
                             ]
@@ -374,12 +382,15 @@
                                   "ObjectiveCard": 6
                                 },
                                 {
+                                  "ObjectiveCard": 7
+                                },
+                                {
                                   "ObjectiveCard": 99
                                 }
                               ],
                               "description": "Select cards to complete",
                               "needed": {
-                                "end": 5,
+                                "end": 6,
                                 "start": 0
                               }
                             }
@@ -412,7 +423,17 @@
                     {
                       "op": "add",
                       "path": "/players/0/objective_cards/4",
+                      "value": 7
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/objective_cards/5",
                       "value": 99
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/ideas",
+                      "value": 5
                     },
                     {
                       "op": "remove",
@@ -439,7 +460,9 @@
       "Player1 completed objective Large Civilization",
       "Player1 completed objective Advanced Culture",
       "Player1 completed objective Religious Fervor",
-      "Player1 completed objective City Planner"
+      "Player1 completed objective City Planner",
+      "Player1 completed objective Eureka!",
+      "Player1 paid 2 ideas for Eureka!"
     ]
   ],
   "undo_limit": 1,

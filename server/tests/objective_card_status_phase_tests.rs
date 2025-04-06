@@ -39,7 +39,7 @@ fn test_large_civ() {
                     panic!("Expected SelectHandCards request");
                 };
                 //can't fulfill all objectives with same name
-                assert_eq!(c.choices.len(), 5);
+                assert_eq!(c.choices.len(), 6);
                 assert!(validate_card_selection(&c.choices, game).is_err());
             }),
         ],
