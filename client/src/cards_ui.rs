@@ -12,7 +12,9 @@ use custom_phase_ui::multi_select_tooltip;
 use itertools::Itertools;
 use macroquad::color::BLACK;
 use macroquad::math::{Rect, Vec2, vec2};
-use macroquad::prelude::{BLUE, Color, GREEN, RED, YELLOW, draw_rectangle, draw_rectangle_lines, LIME, BEIGE};
+use macroquad::prelude::{
+    BEIGE, BLUE, Color, GREEN, LIME, RED, YELLOW, draw_rectangle, draw_rectangle_lines,
+};
 use server::action::Action;
 use server::card::{HandCard, HandCardType, hand_cards, validate_card_selection};
 use server::content::action_cards::{get_action_card, get_civil_card};
@@ -44,20 +46,37 @@ const ACTION_CARD_COLOR: Color = RED;
 const OBJECTIVE_CARD_COLOR: Color = BEIGE;
 const WONDER_CARD_COLOR: Color = YELLOW;
 
+struct SelectionInfo {
+    selection: MultiSelection<HandCard>,
+    show_names: Vec<(u8, String)>,
+}
+
+impl SelectionInfo {
+    fn new(selection: MultiSelection<HandCard>, show_names: Vec<(u8, String)>) -> Self {
+        Self {
+            selection,
+            show_names,
+        }
+    }
+}
+
 pub(crate) fn show_cards(rc: &RenderContext) -> StateUpdate {
     let p = rc.shown_player;
     let cards = hand_cards(p, &HandCardType::get_all());
     let size = vec2(180., 30.);
 
     let selection = match &rc.state.active_dialog {
-        ActiveDialog::HandCardsRequest(r) => Some(r),
+        ActiveDialog::HandCardsRequest(r) => Some(SelectionInfo::new(
+            r.clone(),
+            validate_card_selection(&r.selected, rc.game).unwrap_or_default(),
+        )),
         _ => None,
     };
 
     let swap_cards = selection
         .iter()
         .flat_map(|s| {
-            s.request
+            s.selection.request
                 .choices
                 .clone()
                 .into_iter()
@@ -65,10 +84,10 @@ pub(crate) fn show_cards(rc: &RenderContext) -> StateUpdate {
         })
         .collect_vec();
 
-    if let Some(value) = draw_cards(rc, &cards, selection, size, 0.) {
+    if let Some(value) = draw_cards(rc, &cards, &selection, size, 0.) {
         return value;
     }
-    if let Some(value) = draw_cards(rc, &swap_cards, selection, size, -300.) {
+    if let Some(value) = draw_cards(rc, &swap_cards, &selection, size, -300.) {
         return value;
     }
     StateUpdate::None
@@ -77,7 +96,7 @@ pub(crate) fn show_cards(rc: &RenderContext) -> StateUpdate {
 fn draw_cards(
     rc: &RenderContext,
     cards: &Vec<HandCard>,
-    selection: Option<&MultiSelection<HandCard>>,
+    selection: &Option<SelectionInfo>,
     size: Vec2,
     x_offset: f32,
 ) -> Option<StateUpdate> {
@@ -105,7 +124,7 @@ fn draw_cards(
 fn draw_card(
     rc: &RenderContext,
     size: Vec2,
-    selection: Option<&MultiSelection<HandCard>>,
+    selection: &Option<SelectionInfo>,
     pass: i32,
     pos: Vec2,
     card: &HandCard,
@@ -127,7 +146,7 @@ fn draw_card(
         if left_mouse_button_pressed_in_rect(rect, rc) {
             if let Some(s) = selection {
                 return Some(StateUpdate::OpenDialog(ActiveDialog::HandCardsRequest(
-                    s.clone().toggle(c.id),
+                    s.selection.clone().toggle(c.id),
                 )));
             }
             if can_play_card(rc, card) {
@@ -160,13 +179,13 @@ fn play_card(card: &HandCard) -> StateUpdate {
 fn highlight(
     rc: &RenderContext,
     c: &HandCardObject,
-    selection: Option<&MultiSelection<HandCard>>,
+    selection: &Option<SelectionInfo>,
 ) -> (f32, Color) {
     if let Some(s) = selection {
-        if s.selected.contains(&c.id) {
+        if s.selection.selected.contains(&c.id) {
             return (8.0, GREEN);
         }
-        if s.request.choices.contains(&c.id) {
+        if s.selection.request.choices.contains(&c.id) {
             return (8.0, HighlightType::Choices.color());
         }
     } else if can_play_card(rc, &c.id) {
@@ -199,16 +218,11 @@ fn get_card_object(rc: &RenderContext, card: &HandCard) -> HandCardObject {
         ),
         HandCard::Wonder(name) => {
             let w = get_wonder(name);
-            HandCardObject::new(
-                card.clone(),
-                WONDER_CARD_COLOR,
-                w.name.clone(),
-                vec![
-                    w.description.clone(),
-                    format!("Cost: {}", w.cost.to_string()),
-                    format!("Required advances: {}", w.required_advances.join(", ")),
-                ],
-            )
+            HandCardObject::new(card.clone(), WONDER_CARD_COLOR, w.name.clone(), vec![
+                w.description.clone(),
+                format!("Cost: {}", w.cost.to_string()),
+                format!("Required advances: {}", w.required_advances.join(", ")),
+            ])
         }
     }
 }
@@ -252,23 +266,17 @@ fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
                     .map(|f| format!("{f:?}"))
                     .join(", ")
             ),
-            format!(
-                "Role: {:?}",
-                match t.role_requirement {
-                    None => "Attacker or Defender".to_string(),
-                    Some(r) => match r {
-                        CombatRole::Attacker => "Attacker".to_string(),
-                        CombatRole::Defender => "Defender".to_string(),
-                    },
-                }
-            ),
-            format!(
-                "Location: {:?}",
-                match t.location_requirement {
-                    None => "Any".to_string(),
-                    Some(l) => format!("{l:?}"),
-                }
-            ),
+            format!("Role: {:?}", match t.role_requirement {
+                None => "Attacker or Defender".to_string(),
+                Some(r) => match r {
+                    CombatRole::Attacker => "Attacker".to_string(),
+                    CombatRole::Defender => "Defender".to_string(),
+                },
+            }),
+            format!("Location: {:?}", match t.location_requirement {
+                None => "Any".to_string(),
+                Some(l) => format!("{l:?}"),
+            }),
         ]);
         break_text(t.description.as_str(), 30, &mut description);
     }
