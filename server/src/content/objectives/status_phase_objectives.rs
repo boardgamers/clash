@@ -1,7 +1,7 @@
 use crate::city::MoodState;
 use crate::city_pieces::Building;
 use crate::content::advances;
-use crate::content::advances::trade_routes::{find_trade_route_for_unit, find_trade_routes};
+use crate::content::advances::trade_routes::find_trade_routes;
 use crate::game::Game;
 use crate::map::get_map_setup;
 use crate::objective_card::{Objective, ObjectiveBuilder};

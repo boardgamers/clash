@@ -1,6 +1,4 @@
-use city::MoodState;
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::city;
 use crate::content::advances::warfare::draft_cost;
 use crate::content::objectives::status_phase_objectives::home_position;
 use crate::objective_card::{Objective, objective_is_ready};
@@ -49,23 +47,6 @@ pub(crate) fn city_founder() -> Objective {
 }
 
 pub(crate) fn terror_regime() -> Objective {
-    let name = "Terror Regime";
-    Objective::builder(name, "At least 4 cities are Angry.")
-        .add_simple_persistent_event_listener(
-            |event| &mut event.mood_change,
-            0,
-            |game, player, _, p| {
-                if game
-                    .player(player)
-                    .cities
-                    .iter()
-                    .filter(|c| c.mood_state == MoodState::Angry)
-                    .count()
-                    >= 4
-                {
-                    objective_is_ready(game.player_mut(player), name);
-                }
-            },
-        )
-        .build()
+    // is handled explicitly
+    Objective::builder("Terror Regime", "At least 4 cities are Angry.").build()
 }

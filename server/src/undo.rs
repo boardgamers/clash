@@ -50,7 +50,6 @@ pub(crate) fn to_serde_value(game: &Game) -> Value {
 
 pub fn redo(game: &mut Game, player_index: usize) -> Result<(), String> {
     let copy = current_player_turn_log(game).item(game).clone();
-    game.current_action_log_index = Some(game.action_log_index);
     game.action_log_index += 1;
     add_log_item_from_action(game, &copy.action);
 
@@ -62,6 +61,5 @@ pub fn redo(game: &mut Game, player_index: usize) -> Result<(), String> {
         Action::Redo => return Err("redo action can't be redone".to_string()),
     }?;
     check_for_waste(game);
-    game.current_action_log_index = None;
     Ok(())
 }

@@ -42,8 +42,6 @@ pub struct Game {
     pub action_log: Vec<ActionLogAge>,
     // index for the next action log
     pub action_log_index: usize,
-    // transient to know what is the current action log
-    pub(crate) current_action_log_index: Option<usize>,
     pub log: Vec<Vec<String>>,
     pub undo_limit: usize,
     pub actions_left: u32,
@@ -92,7 +90,6 @@ impl Game {
             successful_cultural_influence: data.successful_cultural_influence,
             action_log: data.action_log,
             action_log_index: data.action_log_index,
-            current_action_log_index: None,
             log: data.log,
             undo_limit: data.undo_limit,
             round: data.round,

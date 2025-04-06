@@ -1,5 +1,6 @@
 use crate::action_card::on_play_action_card;
 use crate::advance::on_advance;
+use crate::city::MoodState;
 use crate::collect::on_collect;
 use crate::combat::{
     combat_loop, move_with_possible_combat, on_capture_undefended_position, start_combat,
@@ -20,8 +21,10 @@ use crate::movement::{
     CurrentMove, MoveState, MovementAction, get_move_state, has_movable_units,
     move_units_destinations,
 };
-use crate::objective_card::on_objective_cards;
-use crate::playing_actions::{on_found_city, PlayingAction};
+use crate::objective_card::{
+    on_objective_cards,  present_objective_cards,
+};
+use crate::playing_actions::{PlayingAction, on_found_city};
 use crate::recruit::on_recruit;
 use crate::resource::check_for_waste;
 use crate::resource_pile::ResourcePile;
@@ -116,7 +119,6 @@ fn execute_without_undo(
         return Ok(game);
     }
 
-    game.current_action_log_index = Some(game.action_log_index);
     add_log_item_from_action(&mut game, &action);
     add_action_log_item(&mut game, action.clone());
 
@@ -129,7 +131,19 @@ fn execute_without_undo(
         _ => execute_regular_action(&mut game, action, player_index),
     }?;
     check_for_waste(&mut game);
-    game.current_action_log_index = None;
+
+    if game
+        .player(player_index)
+        .cities
+        .iter()
+        .filter(|c| c.mood_state == MoodState::Angry)
+        .count()
+        >= 4
+    {
+        // todo test with regular increase mood and with persistent events
+        present_objective_cards(&mut game, player_index, vec!["Terror Regime".to_string()])
+    }
+
     Ok(game)
 }
 

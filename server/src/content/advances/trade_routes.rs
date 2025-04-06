@@ -121,7 +121,7 @@ pub(crate) fn find_trade_route_for_unit(
 
     game.players
         .iter()
-        .filter(|p| p.is_human() & &p.index != player.index)
+        .filter(|p| p.is_human() && p.index != player.index)
         .flat_map(|p| p.cities.iter())
         .filter_map(|c| find_trade_route_to_city(game, player, unit, c))
         .collect()

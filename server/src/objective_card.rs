@@ -160,7 +160,7 @@ pub(crate) fn present_instant_objective_cards(game: &mut Game) {
     };
 
     let opportunities = std::mem::take(&mut game.player_mut(player).objective_opportunities);
-
+    
     present_objective_cards(game, player, opportunities);
 }
 
