@@ -114,6 +114,16 @@
           "position": "A1",
           "unit_type": "Infantry",
           "id": 9
+        },
+        {
+          "position": "D1",
+          "unit_type": "Ship",
+          "id": 10
+        },
+        {
+          "position": "D1",
+          "unit_type": "Ship",
+          "id": 11
         }
       ],
       "civilization": "test0",
@@ -135,6 +145,7 @@
         5,
         6,
         7,
+        9,
         99
       ],
       "next_unit_id": 10
@@ -161,11 +172,14 @@
       },
       "cities": [
         {
-          "city_pieces": {},
+          "city_pieces": {
+            "port": 1
+          },
           "mood_state": "Angry",
           "activations": 0,
           "angry_activation": false,
-          "position": "C1"
+          "position": "C1",
+          "port_position": "D1"
         }
       ],
       "units": [
@@ -227,6 +241,10 @@
       ],
       [
         "C3",
+        "Water"
+      ],
+      [
+        "D1",
         "Water"
       ],
       [
