@@ -692,13 +692,13 @@ pub(crate) fn combat_stats() -> Builtin {
             |event| &mut event.combat_end,
             100,
             |game, _player, _name, e| {
+                e.combat.stats.result = Some(e.result.clone());
+                
                 let i = current_player_turn_log_mut(game)
                     .items
                     .last_mut()
                     .expect("last item");
-                let mut stats = e.combat.stats.clone();
-                stats.result = Some(e.result.clone());
-                i.combat_stats = Some(stats);
+                i.combat_stats = Some(e.combat.stats.clone());
             },
         )
         .build()

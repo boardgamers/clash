@@ -87,6 +87,9 @@
       "completed_objectives": [
         "Warmonger"
       ],
+      "objective_cards": [
+        4
+      ],
       "next_unit_id": 8
     },
     {
@@ -279,6 +282,9 @@
                               "cards": [
                                 {
                                   "ObjectiveCard": 3
+                                },
+                                {
+                                  "ObjectiveCard": 4
                                 }
                               ],
                               "objective_opportunities": [
@@ -296,11 +302,14 @@
                                 "choices": [
                                   {
                                     "ObjectiveCard": 3
+                                  },
+                                  {
+                                    "ObjectiveCard": 4
                                   }
                                 ],
                                 "description": "Select cards to complete",
                                 "needed": {
-                                  "end": 1,
+                                  "end": 2,
                                   "start": 0
                                 }
                               }
@@ -312,11 +321,14 @@
                       ]
                     },
                     {
+                      "op": "replace",
+                      "path": "/players/0/objective_cards/0",
+                      "value": 3
+                    },
+                    {
                       "op": "add",
-                      "path": "/players/0/objective_cards",
-                      "value": [
-                        3
-                      ]
+                      "path": "/players/0/objective_cards/1",
+                      "value": 4
                     },
                     {
                       "op": "remove",

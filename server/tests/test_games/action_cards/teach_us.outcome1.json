@@ -291,7 +291,8 @@
                                     },
                                     "player": 1
                                   },
-                                  "position": "C1"
+                                  "position": "C1",
+                                  "result": "AttackerWins"
                                 }
                               },
                               "result": "AttackerWins"
@@ -301,7 +302,7 @@
                             "origin": {
                               "Builtin": "Teach us"
                             },
-                            "priority": 1,
+                            "priority": 91,
                             "request": {
                               "SelectHandCards": {
                                 "choices": [
@@ -317,7 +318,7 @@
                               }
                             }
                           },
-                          "last_priority_used": 1,
+                          "last_priority_used": 91,
                           "player": 0
                         }
                       ]

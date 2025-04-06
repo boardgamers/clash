@@ -11,7 +11,7 @@ pub(crate) fn get_all() -> Vec<ObjectiveCard> {
         ObjectiveCard::new(2, science_lead(), conqueror()),
         ObjectiveCard::new(3, coastal_lead(), warmonger()),
         ObjectiveCard::new(4, advanced_culture(), warmonger()),
-        // todo replace when we have a real repeated objective
+        // todo replace when we have a real repeated objective - only needed for large civ
         ObjectiveCard::new(99, large_civ(), draft()),
     ]
 }
