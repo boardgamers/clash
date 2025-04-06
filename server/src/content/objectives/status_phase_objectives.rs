@@ -99,27 +99,25 @@ pub(crate) fn advanced_culture() -> Objective {
     .build()
 }
 
-fn advance_group_complete(b: ObjectiveBuilder, group: &'static str) -> ObjectiveBuilder {
-    b.status_phase_check(move |_game, player| {
-        let g = advances::get_group(group);
-        g.advances.iter().all(|a| player.has_advance(&a.name))
-    })
+fn advance_group_complete(objective: &str, group: &'static str) -> Objective {
+    Objective::builder(objective, &format!("You have all {group} advances."))
+        .status_phase_check(move |_game, player| {
+            let g = advances::get_group(group);
+            g.advances.iter().all(|a| player.has_advance(&a.name))
+        })
+        .build()
 }
 
 pub(crate) fn city_planner() -> Objective {
-    advance_group_complete(
-        Objective::builder("City Planner", "You have all 4 construction advances"),
-        "Construction",
-    )
-    .build()
+    advance_group_complete("City Planner", "Construction")
 }
 
 pub(crate) fn education_lead() -> Objective {
-    advance_group_complete(
-        Objective::builder("Education Lead", "You have all 4 education advances"),
-        "Education",
-    )
-    .build()
+    advance_group_complete("Education Lead", "Education")
+}
+
+pub(crate) fn militarized() -> Objective {
+    advance_group_complete("Militarized", "Warfare")
 }
 
 pub(crate) fn eureka() -> Objective {
@@ -257,6 +255,7 @@ pub(crate) fn standing_army() -> Objective {
         "You have at least 4 cities with army units. \
         Cannot be completed together with Military Might.",
     )
+    // todo test when Military Might is implemented
     .contradicting_status_phase_objective("Military Might")
     .status_phase_check(|_game, player| {
         player
@@ -268,6 +267,24 @@ pub(crate) fn standing_army() -> Objective {
                     .iter()
                     .any(|u| u.unit_type.is_army_unit())
             })
+            .count()
+            >= 4
+    })
+    .build()
+}
+
+pub(crate) fn diversity() -> Objective {
+    Objective::builder(
+        "Diversity",
+        "You have at least 4 different types of buildings \
+        (that are not influenced by another player).",
+    )
+    .status_phase_check(|_game, player| {
+        player
+            .cities
+            .iter()
+            .flat_map(|c| c.pieces.buildings(Some(player.index)))
+            .unique()
             .count()
             >= 4
     })

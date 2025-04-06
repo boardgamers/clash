@@ -1,6 +1,6 @@
 use crate::content::objectives::combat_objectives::{conqueror, defiance, general, great_battle, naval_assault, warmonger};
 use crate::content::objectives::non_combat::draft;
-use crate::content::objectives::status_phase_objectives::{advanced_culture, city_planner, coastal_lead, education_lead, eureka, food_supplies, fortifications, happy_population, large_army, large_civ, large_fleet, optimized_storage, ore_supplies, religious_fervor, science_lead, sea_blockade, standing_army, wealth, wood_supplies};
+use crate::content::objectives::status_phase_objectives::{advanced_culture, city_planner, coastal_lead, diversity, education_lead, eureka, food_supplies, fortifications, happy_population, large_army, large_civ, large_fleet, militarized, optimized_storage, ore_supplies, religious_fervor, science_lead, sea_blockade, standing_army, wealth, wood_supplies};
 use crate::objective_card::ObjectiveCard;
 use itertools::Itertools;
 use std::vec;
@@ -22,6 +22,7 @@ pub(crate) fn get_all() -> Vec<ObjectiveCard> {
         ObjectiveCard::new(12, ore_supplies(), large_army()),
         ObjectiveCard::new(13, wood_supplies(), fortifications()),
         ObjectiveCard::new(14, food_supplies(), standing_army()),
+        ObjectiveCard::new(15, diversity(), militarized()),
         // todo replace when we have a real repeated objective - only needed for large civ
         // todo use ID 24 later
         ObjectiveCard::new(99, large_civ(), draft()),
