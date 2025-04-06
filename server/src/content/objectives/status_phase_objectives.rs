@@ -102,8 +102,10 @@ pub(crate) fn advanced_culture() -> Objective {
 fn advance_group_complete(objective: &str, group: &'static str) -> Objective {
     Objective::builder(objective, &format!("You have all {group} advances."))
         .status_phase_check(move |_game, player| {
-            let g = advances::get_group(group);
-            g.advances.iter().all(|a| player.has_advance(&a.name))
+            advances::get_group(group)
+                .advances
+                .iter()
+                .all(|a| player.has_advance(&a.name))
         })
         .build()
 }
@@ -287,6 +289,22 @@ pub(crate) fn diversity() -> Objective {
             .unique()
             .count()
             >= 4
+    })
+    .build()
+}
+
+pub(crate) fn goal_focused() -> Objective {
+    Objective::builder(
+        "Goal Focused",
+        "You have more complete advance groups than any other player.",
+    )
+    .status_phase_check(|_game, player| {
+        leading_player(_game, player, 1, |p| {
+            advances::get_groups()
+                .iter()
+                .filter(|g| g.advances.iter().all(|a| p.has_advance(&a.name)))
+                .count()
+        })
     })
     .build()
 }

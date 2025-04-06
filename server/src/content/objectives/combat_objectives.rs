@@ -4,6 +4,8 @@ use crate::game::Game;
 use crate::log::current_player_turn_log;
 use crate::objective_card::{objective_is_ready, Objective};
 use itertools::Itertools;
+use crate::content::advances;
+use crate::player::Player;
 
 pub(crate) fn conqueror() -> Objective {
     let name = "Conqueror";
@@ -153,4 +155,36 @@ fn eval_naval_assault(game: &mut Game, player: usize, s: &CombatStats) {
     {
         objective_is_ready(game.player_mut(player), "Naval Assault");
     }
+}
+
+pub(crate) fn bold() -> Objective {
+    let name = "Bold";
+    Objective::builder(
+        name,
+        "You won a battle against a player that has more Warfare advances - or despite having fewer units than them.",
+    )
+    .add_simple_persistent_event_listener(
+        |event| &mut event.combat_end,
+        5,
+        |game, player, _, e| {
+            let s = &e.combat.stats;
+            let b = s.battleground;
+            let o = s.opponent(player);
+            let fewer_fighters =
+                s.player(player).fighters(b).sum() < o.fighters(b).sum();
+            let fewer_warfare = warfare_advances(game.player(player)) < warfare_advances(game.player(o.player));
+            if (fewer_fighters && s.is_winner(player)) || fewer_warfare {
+                objective_is_ready(game.player_mut(player), name);
+            } 
+        },
+    )
+    .build()
+}
+
+fn warfare_advances(player: &Player) -> usize {
+    advances::get_group("Warfare")
+        .advances
+        .iter()
+        .filter(|a| player.has_advance(&a.name))
+        .count()
 }
