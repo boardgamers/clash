@@ -16,7 +16,6 @@
               "Astronomy",
               "Bartering",
               "Civil Liberties",
-              "Engineering",
               "Fishing",
               "Free Economy",
               "Free Education",
@@ -27,8 +26,6 @@
               "Myths",
               "Philosophy",
               "Public Education",
-              "Roads",
-              "Sanitation",
               "Separation of Power",
               "Storage",
               "Tactics"
@@ -64,7 +61,9 @@
       },
       "cities": [
         {
-          "city_pieces": {},
+          "city_pieces": {
+            "temple": 1
+          },
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
@@ -158,16 +157,21 @@
       "civilization": "test0",
       "advances": [
         "Draft",
+        "Engineering",
         "Farming",
         "Math",
         "Mining",
+        "Roads",
+        "Sanitation",
         "Voting",
         "Writing"
       ],
       "incident_tokens": 2,
       "completed_objectives": [
         "Large Civilization",
-        "Advanced Culture"
+        "Advanced Culture",
+        "Religious Fervor",
+        "City Planner"
       ],
       "objective_cards": [
         99
@@ -294,6 +298,12 @@
                         },
                         {
                           "ObjectiveCard": 4
+                        },
+                        {
+                          "ObjectiveCard": 5
+                        },
+                        {
+                          "ObjectiveCard": 6
                         }
                       ]
                     }
@@ -326,12 +336,20 @@
                                 "ObjectiveCard": 4
                               },
                               {
+                                "ObjectiveCard": 5
+                              },
+                              {
+                                "ObjectiveCard": 6
+                              },
+                              {
                                 "ObjectiveCard": 99
                               }
                             ],
                             "objective_opportunities": [
                               "Advanced Culture",
-                              "Large Civilization"
+                              "City Planner",
+                              "Large Civilization",
+                              "Religious Fervor"
                             ]
                           }
                         },
@@ -350,12 +368,18 @@
                                   "ObjectiveCard": 4
                                 },
                                 {
+                                  "ObjectiveCard": 5
+                                },
+                                {
+                                  "ObjectiveCard": 6
+                                },
+                                {
                                   "ObjectiveCard": 99
                                 }
                               ],
                               "description": "Select cards to complete",
                               "needed": {
-                                "end": 3,
+                                "end": 5,
                                 "start": 0
                               }
                             }
@@ -378,6 +402,16 @@
                     {
                       "op": "add",
                       "path": "/players/0/objective_cards/2",
+                      "value": 5
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/objective_cards/3",
+                      "value": 6
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/objective_cards/4",
                       "value": 99
                     },
                     {
@@ -403,7 +437,9 @@
     ],
     [
       "Player1 completed objective Large Civilization",
-      "Player1 completed objective Advanced Culture"
+      "Player1 completed objective Advanced Culture",
+      "Player1 completed objective Religious Fervor",
+      "Player1 completed objective City Planner"
     ]
   ],
   "undo_limit": 1,
