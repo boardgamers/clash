@@ -135,7 +135,7 @@ impl CombatStats {
             CombatRole::Defender => &self.defender,
         }
     }
-    
+
     #[must_use]
     pub fn opponent_is_human(&self, player: usize, game: &Game) -> bool {
         game.player(self.opponent(player).player).is_human()

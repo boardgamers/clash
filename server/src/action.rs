@@ -1,7 +1,9 @@
 use crate::action_card::on_play_action_card;
 use crate::advance::on_advance;
 use crate::collect::on_collect;
-use crate::combat::{combat_loop, move_with_possible_combat, on_capture_undefended_position, start_combat};
+use crate::combat::{
+    combat_loop, move_with_possible_combat, on_capture_undefended_position, start_combat,
+};
 use crate::combat_listeners::{combat_round_end, combat_round_start, end_combat};
 use crate::construct::on_construct;
 use crate::content::persistent_events::{EventResponse, PersistentEventType};

@@ -225,9 +225,9 @@ pub(crate) fn large_fleet() -> Objective {
         "Large Fleet",
         "You have at least 4 ships - or 2 ships and more than any other player.",
     )
-    .status_phase_check(|_game, player| {
+    .status_phase_check(|game, player| {
         let ships = ship_count(player);
-        ships >= 4 || (ships >= 2 && leading_player(_game, player, 1, ship_count))
+        ships >= 4 || (ships >= 2 && leading_player(game, player, 1, ship_count))
     })
     .build()
 }
@@ -299,8 +299,8 @@ pub(crate) fn goal_focused() -> Objective {
         "Goal Focused",
         "You have more complete advance groups than any other player.",
     )
-    .status_phase_check(|_game, player| {
-        leading_player(_game, player, 1, |p| {
+    .status_phase_check(|game, player| {
+        leading_player(game, player, 1, |p| {
             advances::get_groups()
                 .iter()
                 .filter(|g| g.advances.iter().all(|a| p.has_advance(&a.name)))

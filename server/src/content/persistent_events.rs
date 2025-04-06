@@ -5,6 +5,7 @@ use crate::city_pieces::Building;
 use crate::collect::CollectInfo;
 use crate::combat::Combat;
 use crate::combat_listeners::{CombatEnd, CombatRoundEnd, CombatRoundStart};
+use crate::combat_stats::CombatStats;
 use crate::events::EventOrigin;
 use crate::explore::ExploreResolutionState;
 use crate::game::Game;
@@ -23,7 +24,6 @@ use crate::wonder::WonderCardInfo;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::ops::RangeInclusive;
-use crate::combat_stats::CombatStats;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum PersistentEventRequest {

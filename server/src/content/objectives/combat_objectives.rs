@@ -1,11 +1,11 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::combat_stats::CombatStats;
+use crate::content::advances;
 use crate::game::Game;
 use crate::log::current_player_turn_log;
-use crate::objective_card::{objective_is_ready, Objective};
-use itertools::Itertools;
-use crate::content::advances;
+use crate::objective_card::{Objective, objective_is_ready};
 use crate::player::Player;
+use itertools::Itertools;
 
 pub(crate) fn conqueror() -> Objective {
     let name = "Conqueror";
@@ -175,7 +175,7 @@ pub(crate) fn bold() -> Objective {
             let fewer_warfare = warfare_advances(game.player(player)) < warfare_advances(game.player(o.player));
             if (fewer_fighters && s.is_winner(player)) || fewer_warfare {
                 objective_is_ready(game.player_mut(player), name);
-            } 
+            }
         },
     )
     .build()

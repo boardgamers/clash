@@ -4,6 +4,7 @@ use crate::barbarians::BarbariansEventState;
 use crate::collect::{CollectContext, CollectInfo};
 use crate::combat::Combat;
 use crate::combat_listeners::{CombatEnd, CombatRoundEnd, CombatRoundStart};
+use crate::combat_stats::CombatStats;
 use crate::content::persistent_events::{KilledUnits, Structure};
 use crate::events::Event;
 use crate::explore::ExploreResolutionState;
@@ -25,7 +26,6 @@ use itertools::Itertools;
 use num::Zero;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
-use crate::combat_stats::CombatStats;
 
 pub(crate) type PersistentEvent<V = ()> = Event<Game, PersistentEventInfo, (), V>;
 
