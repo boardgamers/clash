@@ -15,11 +15,14 @@ use serde::{Deserialize, Serialize};
 
 type StatusPhaseCheck = Box<dyn Fn(&Game, &Player) -> bool>;
 
+type StatusPhaseUpdate = Box<dyn Fn(&mut Game, usize)>;
+
 pub struct Objective {
     pub name: String,
     pub description: String,
     pub(crate) listeners: AbilityListeners,
     pub(crate) status_phase_check: Option<StatusPhaseCheck>,
+    pub(crate) status_phase_update: Option<StatusPhaseUpdate>,
 }
 
 impl Objective {
@@ -52,6 +55,7 @@ pub struct ObjectiveBuilder {
     name: String,
     description: String,
     status_phase_check: Option<StatusPhaseCheck>,
+    status_phase_update: Option<StatusPhaseUpdate>,
     builder: AbilityInitializerBuilder,
 }
 
@@ -62,6 +66,7 @@ impl ObjectiveBuilder {
             name: name.to_string(),
             description: description.to_string(),
             status_phase_check: None,
+            status_phase_update: None,
             builder: AbilityInitializerBuilder::new(),
         }
     }
@@ -76,12 +81,22 @@ impl ObjectiveBuilder {
     }
 
     #[must_use]
+    pub fn status_phase_update<F>(mut self, f: F) -> Self
+    where
+        F: Fn(&mut Game, usize) + 'static,
+    {
+        self.status_phase_update = Some(Box::new(f));
+        self
+    }
+
+    #[must_use]
     pub fn build(self) -> Objective {
         Objective {
             name: self.name,
             description: self.description,
             listeners: self.builder.build(),
             status_phase_check: self.status_phase_check,
+            status_phase_update: self.status_phase_update,
         }
     }
 }
@@ -221,6 +236,13 @@ pub(crate) fn complete_objective_card(game: &mut Game, player: usize, id: u8, ob
         "{} completed objective {objective}",
         game.player_name(player),
     ));
+    let card = get_objective_card(id);
+    card.objectives
+        .iter()
+        .find(|o| o.name == objective)
+        .and_then(|o| o.status_phase_update.as_ref())
+        .map(|s| s(game, player));
+
     discard_objective_card(game, player, id);
     game.player_mut(player).completed_objectives.push(objective);
 }
@@ -363,15 +385,12 @@ mod tests {
 
         let mut got = combinations(&cards, &opportunities);
         got.sort();
-        assert_eq!(
-            got,
+        assert_eq!(got, vec![
             vec![
-                vec![
-                    (0, "Objective 1".to_string()),
-                    (1, "Objective 4".to_string()),
-                ],
-                vec![(1, "Objective 1".to_string()),],
-            ]
-        );
+                (0, "Objective 1".to_string()),
+                (1, "Objective 4".to_string()),
+            ],
+            vec![(1, "Objective 1".to_string()),],
+        ]);
     }
 }

@@ -1,15 +1,19 @@
 {
-  "state": "Playing",
+  "state": {
+    "Movement": {
+      "movement_actions_left": 2
+    }
+  },
   "players": [
     {
       "id": 0,
       "resources": {
-        "food": 1,
+        "food": 2,
         "wood": 7,
         "ore": 7,
         "ideas": 5,
         "gold": 7,
-        "mood_tokens": 6,
+        "mood_tokens": 7,
         "culture_tokens": 7
       },
       "resource_limit": {
@@ -23,9 +27,7 @@
       },
       "cities": [
         {
-          "city_pieces": {
-            "temple": 1
-          },
+          "city_pieces": {},
           "mood_state": "Happy",
           "activations": 0,
           "angry_activation": false,
@@ -33,38 +35,8 @@
         },
         {
           "city_pieces": {},
-          "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
-          "position": "A2"
-        },
-        {
-          "city_pieces": {},
-          "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
-          "position": "A3"
-        },
-        {
-          "city_pieces": {},
-          "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
-          "position": "A4"
-        },
-        {
-          "city_pieces": {},
-          "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
-          "position": "A5"
-        },
-        {
-          "city_pieces": {
-            "observatory": 0
-          },
           "mood_state": "Neutral",
-          "activations": 1,
+          "activations": 8,
           "angry_activation": false,
           "position": "C2"
         }
@@ -109,35 +81,22 @@
           "position": "C2",
           "unit_type": "Settler",
           "id": 7
-        },
-        {
-          "position": "A1",
-          "unit_type": "Infantry",
-          "id": 9
         }
       ],
       "civilization": "test0",
       "advances": [
-        "Draft",
-        "Engineering",
         "Farming",
-        "Math",
         "Mining",
-        "Roads",
-        "Sanitation",
-        "Voting",
-        "Writing"
+        "Tactics"
       ],
       "incident_tokens": 2,
       "objective_cards": [
-        1,
-        4,
+        2,
         5,
         6,
-        7,
-        99
+        7
       ],
-      "next_unit_id": 10
+      "next_unit_id": 8
     },
     {
       "id": 1,
@@ -163,7 +122,7 @@
         {
           "city_pieces": {},
           "mood_state": "Angry",
-          "activations": 0,
+          "activations": 2,
           "angry_activation": false,
           "position": "C1"
         }
@@ -183,7 +142,8 @@
       "civilization": "test1",
       "advances": [
         "Farming",
-        "Mining"
+        "Mining",
+        "Tactics"
       ],
       "incident_tokens": 3,
       "next_unit_id": 2
@@ -236,7 +196,7 @@
     ]
   },
   "starting_player_index": 0,
-  "current_player_index": 1,
+  "current_player_index": 0,
   "action_log": [
     {
       "rounds": [
@@ -254,8 +214,8 @@
   "action_log_index": 0,
   "log": [],
   "undo_limit": 0,
-  "actions_left": 2,
-  "round": 3,
+  "actions_left": 1,
+  "round": 1,
   "age": 1,
   "messages": [
     "The game has started"
@@ -263,14 +223,15 @@
   "dice_roll_outcomes": [
     1,
     1,
-    10,
-    10,
-    10,
-    10,
-    10,
-    10,
-    10,
-    10
+    1,
+    11,
+    11,
+    1,
+    1,
+    11,
+    1,
+    1,
+    11
   ],
   "wonders_left": [
     "Pyramids"

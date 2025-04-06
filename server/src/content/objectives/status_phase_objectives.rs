@@ -3,6 +3,7 @@ use crate::content::advances;
 use crate::game::Game;
 use crate::objective_card::{Objective, ObjectiveBuilder};
 use crate::player::Player;
+use crate::resource_pile::ResourcePile;
 
 pub(crate) fn large_civ() -> Objective {
     Objective::builder("Large Civilization", "You have at least 6 cities")
@@ -94,5 +95,20 @@ pub(crate) fn city_planner() -> Objective {
         Objective::builder("City Planner", "You have all 4 construction advances"),
         "Construction",
     )
+    .build()
+}
+
+pub(crate) fn eureka() -> Objective {
+    Objective::builder(
+        "Eureka!",
+        "You have at least 5 ideas: Pay 2 ideas (not gold).",
+    )
+    .status_phase_check(|_game, player| {
+        player.resources.ideas >= 5
+    })
+        .status_phase_update(move |game, player| {
+            game.player_mut(player).lose_resources(ResourcePile::ideas(2));
+            game.add_info_log_item(&format!("{} paid 2 ideas for Eureka!", game.player_name(player)));
+        })
     .build()
 }

@@ -22,6 +22,7 @@ fn test_large_civ() {
                     HandCard::ObjectiveCard(4),
                     HandCard::ObjectiveCard(5),
                     HandCard::ObjectiveCard(6),
+                    HandCard::ObjectiveCard(7),
                 ])),
             )
             .with_pre_assert(|game| {

@@ -98,3 +98,26 @@ pub(crate) fn great_battle() -> Objective {
     )
     .build()
 }
+
+pub(crate) fn defiance() -> Objective {
+    let name = "Defiance";
+    Objective::builder(
+        name,
+        "You won a battle against a human player despite having fewer units than them.",
+    )
+    .add_simple_persistent_event_listener(
+        |event| &mut event.combat_end,
+        5,
+        |game, player, _, e| {
+            let stats = &e.combat.stats;
+            let b = stats.battleground;
+            let o = stats.opponent(player);
+            let fewer_fighters =
+                stats.player(player).fighters(b).sum() < o.fighters(b).sum();
+            if  fewer_fighters && game.player(o.player).is_human() && stats.is_winner(player) {
+                objective_is_ready(game.player_mut(player), name);
+            }
+        },
+    )
+    .build()
+}
