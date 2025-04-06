@@ -1,8 +1,11 @@
+use crate::combat::can_remove_after_combat;
 use crate::combat_listeners::CombatResult;
 use crate::game::Game;
+use crate::player::Player;
 use crate::position::Position;
 use crate::tactics_card::CombatRole;
 use crate::unit::{UnitType, Units};
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::mem;
 
@@ -14,15 +17,19 @@ pub struct CombatPlayerStats {
     pub fighters: Units,
     #[serde(default)]
     #[serde(skip_serializing_if = "Units::is_empty")]
+    pub present: Units,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Units::is_empty")]
     pub losses: Units,
 }
 
 impl CombatPlayerStats {
     #[must_use]
-    pub fn new(player: usize, fighters: Units) -> Self {
+    pub fn new(player: usize, fighters: Units, present: Units) -> Self {
         Self {
             player,
             fighters,
+            present,
             losses: Units::empty(),
         }
     }
@@ -103,7 +110,7 @@ impl CombatStats {
             CombatRole::Defender => &self.defender,
         }
     }
-    
+
     #[must_use]
     pub fn opponent(&self, player: usize) -> &CombatPlayerStats {
         match self.opponent_role(player) {
@@ -120,7 +127,7 @@ impl CombatStats {
             CombatRole::Defender
         }
     }
-    
+
     #[must_use]
     pub fn opponent_role(&self, player: usize) -> CombatRole {
         if player == self.attacker.player {
@@ -167,24 +174,58 @@ pub(crate) fn new_combat_stats(
     };
 
     let a = game.player(attacker);
+    let d = game.player(defender);
     let stats = CombatStats::new(
         defender_position,
         battleground,
         CombatPlayerStats::new(
             attacker,
-            attackers
-                .iter()
-                .map(|id| a.get_unit(*id).unit_type)
-                .collect(),
+            to_units(
+                &active_attackers(game, attacker, attackers, defender_position),
+                a,
+            ),
+            to_units(attackers, a),
         ),
         CombatPlayerStats::new(
             defender,
-            game.player(defender)
-                .get_units(defender_position)
+            to_units(&active_defenders(game, defender, defender_position), d),
+            d.get_units(defender_position)
                 .iter()
                 .map(|unit| unit.unit_type)
                 .collect(),
         ),
     );
     stats
+}
+
+fn to_units(units: &[u32], p: &Player) -> Units {
+    units.iter().map(|id| p.get_unit(*id).unit_type).collect()
+}
+
+#[must_use]
+pub(crate) fn active_attackers(
+    game: &Game,
+    attacker: usize,
+    attackers: &[u32],
+    defender_position: Position,
+) -> Vec<u32> {
+    let player = &game.players[attacker];
+
+    let on_water = game.map.is_sea(defender_position);
+    attackers
+        .iter()
+        .copied()
+        .filter(|u| can_remove_after_combat(on_water, &player.get_unit(*u).unit_type))
+        .collect_vec()
+}
+
+#[must_use]
+pub fn active_defenders(game: &Game, defender: usize, defender_position: Position) -> Vec<u32> {
+    let p = &game.players[defender];
+    let on_water = game.map.is_sea(defender_position);
+    p.get_units(defender_position)
+        .into_iter()
+        .filter(|u| can_remove_after_combat(on_water, &u.unit_type))
+        .map(|u| u.id)
+        .collect_vec()
 }

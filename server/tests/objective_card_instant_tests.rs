@@ -49,6 +49,7 @@ fn test_conqueror() {
                 Action::Response(EventResponse::SelectHandCards(vec![
                     HandCard::ObjectiveCard(2),
                     HandCard::ObjectiveCard(5),
+                    HandCard::ObjectiveCard(6),
                 ])),
             ),
         ],

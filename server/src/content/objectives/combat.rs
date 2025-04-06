@@ -36,7 +36,7 @@ pub(crate) fn warmonger() -> Objective {
             let stat = current_player_turn_log(game)
                 .items
                 .iter()
-                .filter_map(|i| i.combat_stats.as_ref())
+                .filter_map(|i| i.combat_stats.as_ref().filter(|s| s.battleground.is_land()))
                 .collect_vec();
             if stat.len() < 2
                 || !stat.iter().any(|s| s.is_winner(player))
@@ -62,14 +62,34 @@ pub(crate) fn general() -> Objective {
         3,
         |game, player, _, e| {
             let stats = &e.combat.stats;
-            let army_units_killed: u8 = stats
+            let army_units_killed_by_you: u8 = stats
                 .opponent(player)
                 .losses
                 .clone()
                 .into_iter()
                 .filter_map(|(u, loss)| u.is_army_unit().then_some(loss))
                 .sum();
-            if stats.battleground.is_land() && army_units_killed >= 3 {
+            if stats.battleground.is_land() && army_units_killed_by_you >= 3 {
+                objective_is_ready(game.player_mut(player), name);
+            }
+        },
+    )
+    .build()
+}
+
+pub(crate) fn great_battle() -> Objective {
+    let name = "Great Battle";
+    Objective::builder(
+        name,
+        "You participated in a land battle with at least 6 army units",
+    )
+    .add_simple_persistent_event_listener(
+        |event| &mut event.combat_end,
+        3,
+        |game, player, _, e| {
+            let stats = &e.combat.stats;
+            let army_units_present: u8 = stats.attacker.fighters.sum() + stats.defender.fighters.sum();
+            if stats.battleground.is_land() && army_units_present >= 6 {
                 objective_is_ready(game.player_mut(player), name);
             }
         },

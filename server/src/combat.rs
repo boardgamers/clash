@@ -6,7 +6,7 @@ use crate::combat_listeners::{
     combat_round_end, combat_round_start,
 };
 use crate::combat_roll::CombatRoundStats;
-use crate::combat_stats::{CombatStats, new_combat_stats};
+use crate::combat_stats::{CombatStats, new_combat_stats, active_defenders};
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
 use crate::movement::{MoveUnits, MovementRestriction, move_units, stop_current_move};
@@ -16,6 +16,8 @@ use crate::tactics_card::CombatRole;
 use crate::unit::{UnitType, Units, carried_units};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use combat_stats::active_attackers;
+use crate::combat_stats;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Copy)]
 pub enum CombatModifier {
@@ -89,30 +91,12 @@ impl Combat {
 
     #[must_use]
     pub(crate) fn active_attackers(&self, game: &Game) -> Vec<u32> {
-        let attacker = self.attacker;
-        let attackers = &self.attackers;
-        let defender_position = self.defender_position;
-        let player = &game.players[attacker];
-
-        let on_water = game.map.is_sea(defender_position);
-        attackers
-            .iter()
-            .copied()
-            .filter(|u| can_remove_after_combat(on_water, &player.get_unit(*u).unit_type))
-            .collect_vec()
+        active_attackers(game, self.attacker, &self.attackers, self.defender_position)
     }
 
     #[must_use]
     pub fn active_defenders(&self, game: &Game) -> Vec<u32> {
-        let defender = self.defender;
-        let defender_position = self.defender_position;
-        let p = &game.players[defender];
-        let on_water = game.map.is_sea(defender_position);
-        p.get_units(defender_position)
-            .into_iter()
-            .filter(|u| can_remove_after_combat(on_water, &u.unit_type))
-            .map(|u| u.id)
-            .collect_vec()
+        active_defenders(game, self.defender, self.defender_position)
     }
 
     #[must_use]

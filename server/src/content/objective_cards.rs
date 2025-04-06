@@ -1,4 +1,4 @@
-use crate::content::objectives::combat::{conqueror, general, warmonger};
+use crate::content::objectives::combat::{conqueror, general, great_battle, warmonger};
 use crate::content::objectives::non_combat::draft;
 use crate::content::objectives::status_phase_objectives::{
     advanced_culture, coastal_lead, large_civ, religious_fervor, science_lead,
@@ -14,6 +14,7 @@ pub(crate) fn get_all() -> Vec<ObjectiveCard> {
         ObjectiveCard::new(3, coastal_lead(), warmonger()),
         ObjectiveCard::new(4, advanced_culture(), warmonger()),
         ObjectiveCard::new(5, religious_fervor(), general()),
+        ObjectiveCard::new(5, city_planner(), great_battle()),
         // todo replace when we have a real repeated objective - only needed for large civ
         ObjectiveCard::new(99, large_civ(), draft()),
     ]

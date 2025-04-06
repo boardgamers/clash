@@ -80,3 +80,9 @@ pub(crate) fn advanced_culture() -> Objective {
     })
     .build()
 }
+
+fn advance_group_complete(b: ObjectiveBuilder, building: Building) -> ObjectiveBuilder {
+    b.status_phase_check(move |game, player| {
+        leading_player(game, player, move |p| buildings(p, building))
+    })
+}
