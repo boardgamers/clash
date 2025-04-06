@@ -241,8 +241,8 @@ pub(crate) fn large_army() -> Objective {
         "Large Army",
         "You have at least 4 more army units than any other player.",
     )
-    .status_phase_check(|_game, player| {
-        leading_player(_game, player, 4, |p| {
+    .status_phase_check(|game, player| {
+        leading_player(game, player, 4, |p| {
             p.units
                 .iter()
                 .filter(|u| u.unit_type.is_army_unit())
