@@ -6,6 +6,8 @@ use crate::log::current_player_turn_log;
 use crate::objective_card::{Objective, objective_is_ready};
 use crate::player::Player;
 use itertools::Itertools;
+use crate::content::advances::trade_routes::find_trade_route_for_unit;
+use crate::unit::{Unit, UnitType};
 
 pub(crate) fn conqueror() -> Objective {
     let name = "Conqueror";
@@ -213,3 +215,34 @@ pub(crate) fn legendary_battle() -> Objective {
     )
     .build()
 }
+
+pub(crate) fn scavenger() -> Objective {
+    let name = "Scavenger";
+    Objective::builder(
+        name,
+        "You killed a settler or ship that could have been used for Trade Routes.",
+    )
+    .add_simple_persistent_event_listener(
+        |event| &mut event.combat_end,
+        8,
+        |game, player, _, e| {
+            let s = &e.combat.stats;
+            let o = s.opponent(player);
+            let opponent = game.player(o.player);
+            if !opponent.has_advance("Trade Routes") {
+                return;
+            }
+
+            let units = &o.losses;
+            if units.settlers > 0 || units.ships > 0 {
+                // just the position and type matter
+                let unit = Unit::new(o.player, s.position, UnitType::Settler, 0);
+                if !find_trade_route_for_unit(game, opponent, &unit).is_empty() {
+                    objective_is_ready(game.player_mut(player), name);
+                }
+            }
+        },
+    )
+    .build()
+}
+

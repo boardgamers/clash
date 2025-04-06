@@ -1,0 +1,416 @@
+{
+  "state": "Playing",
+  "players": [
+    {
+      "id": 0,
+      "resources": {
+        "food": 2,
+        "wood": 1,
+        "ore": 1,
+        "ideas": 1,
+        "mood_tokens": 1
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {
+            "market": 0
+          },
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "D6"
+        },
+        {
+          "city_pieces": {
+            "market": 0
+          },
+          "mood_state": "Happy",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "E6"
+        }
+      ],
+      "units": [
+        {
+          "position": "F6",
+          "unit_type": "Ship",
+          "id": 0
+        },
+        {
+          "position": "F6",
+          "unit_type": "Ship",
+          "id": 1
+        }
+      ],
+      "civilization": "test0",
+      "advances": [
+        "Farming",
+        "Mining",
+        "Philosophy"
+      ],
+      "incident_tokens": 2,
+      "objective_cards": [
+        21
+      ],
+      "next_unit_id": 1
+    },
+    {
+      "id": 1,
+      "resources": {
+        "food": 1,
+        "wood": 1,
+        "ore": 1,
+        "mood_tokens": 1
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {},
+          "mood_state": "Neutral",
+          "activations": 0,
+          "angry_activation": false,
+          "position": "D8"
+        }
+      ],
+      "units": [
+        {
+          "position": "D8",
+          "unit_type": "Infantry",
+          "id": 0
+        },
+        {
+          "position": "D8",
+          "unit_type": "Infantry",
+          "id": 1
+        },
+        {
+          "position": "D8",
+          "unit_type": "Infantry",
+          "id": 2
+        },
+        {
+          "position": "C8",
+          "unit_type": "Settler",
+          "id": 3
+        },
+        {
+          "position": "C8",
+          "unit_type": "Infantry",
+          "id": 4
+        },
+        {
+          "position": "E8",
+          "unit_type": "Infantry",
+          "id": 6
+        },
+        {
+          "position": "E7",
+          "unit_type": "Ship",
+          "id": 7
+        }
+      ],
+      "civilization": "test1",
+      "advances": [
+        "Farming",
+        "Mining",
+        "Philosophy",
+        "Roads",
+        "Tactics",
+        "Trade Routes"
+      ],
+      "incident_tokens": 1,
+      "next_unit_id": 1
+    },
+    {
+      "id": 2,
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "civilization": "Pirates",
+      "incident_tokens": 3,
+      "next_unit_id": 9
+    }
+  ],
+  "map": {
+    "tiles": [
+      [
+        "A3",
+        "Unexplored"
+      ],
+      [
+        "A5",
+        "Unexplored"
+      ],
+      [
+        "A7",
+        "Water"
+      ],
+      [
+        "B2",
+        "Unexplored"
+      ],
+      [
+        "B3",
+        "Unexplored"
+      ],
+      [
+        "B4",
+        "Unexplored"
+      ],
+      [
+        "B5",
+        "Unexplored"
+      ],
+      [
+        "B6",
+        "Fertile"
+      ],
+      [
+        "B7",
+        "Barren"
+      ],
+      [
+        "C2",
+        "Forest"
+      ],
+      [
+        "C3",
+        "Unexplored"
+      ],
+      [
+        "C4",
+        "Forest"
+      ],
+      [
+        "C5",
+        "Unexplored"
+      ],
+      [
+        "C6",
+        "Fertile"
+      ],
+      [
+        "C7",
+        "Unexplored"
+      ],
+      [
+        "C8",
+        "Mountain"
+      ],
+      [
+        "D1",
+        "Fertile"
+      ],
+      [
+        "D2",
+        "Barren"
+      ],
+      [
+        "D3",
+        "Fertile"
+      ],
+      [
+        "D4",
+        "Water"
+      ],
+      [
+        "D5",
+        "Unexplored"
+      ],
+      [
+        "D6",
+        "Fertile"
+      ],
+      [
+        "D7",
+        "Unexplored"
+      ],
+      [
+        "D8",
+        "Fertile"
+      ],
+      [
+        "E2",
+        "Mountain"
+      ],
+      [
+        "E3",
+        "Unexplored"
+      ],
+      [
+        "E4",
+        "Barren"
+      ],
+      [
+        "E5",
+        "Unexplored"
+      ],
+      [
+        "E6",
+        "Fertile"
+      ],
+      [
+        "E7",
+        "Water"
+      ],
+      [
+        "E8",
+        "Forest"
+      ],
+      [
+        "F2",
+        "Unexplored"
+      ],
+      [
+        "F3",
+        "Unexplored"
+      ],
+      [
+        "F4",
+        "Unexplored"
+      ],
+      [
+        "F5",
+        "Unexplored"
+      ],
+      [
+        "F6",
+        "Water"
+      ],
+      [
+        "F7",
+        "Fertile"
+      ],
+      [
+        "G3",
+        "Unexplored"
+      ],
+      [
+        "G5",
+        "Unexplored"
+      ],
+      [
+        "G7",
+        "Mountain"
+      ]
+    ],
+    "unexplored_blocks": [
+      {
+        "position": {
+          "top_tile": "B2",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Water",
+            "Fertile",
+            "Fertile",
+            "Barren"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "B4",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Water",
+            "Water",
+            "Forest",
+            "Forest"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "D5",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Water",
+            "Mountain",
+            "Mountain",
+            "Forest"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "F2",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Forest",
+            "Water",
+            "Fertile",
+            "Forest"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "F4",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Fertile",
+            "Mountain",
+            "Forest",
+            "Fertile"
+          ]
+        }
+      }
+    ]
+  },
+  "starting_player_index": 1,
+  "current_player_index": 0,
+  "action_log": [
+    {
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "action_log_index": 0,
+  "log": [],
+  "undo_limit": 0,
+  "actions_left": 3,
+  "round": 2,
+  "age": 2,
+  "messages": [
+    "The game has started"
+  ],
+  "rng": "216866240505556079347337134957831925981",
+  "wonders_left": [
+    "Pyramids"
+  ]
+}
