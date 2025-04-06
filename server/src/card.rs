@@ -95,9 +95,9 @@ pub fn hand_cards(player: &Player, types: &[HandCardType]) -> Vec<HandCard> {
 
 ///
 /// Validates the selection of cards in the hand.
-/// 
+///
 /// # Returns
-/// 
+///
 /// Card names to show in the UI - if possible.
 ///
 /// # Errors

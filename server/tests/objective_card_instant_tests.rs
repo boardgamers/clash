@@ -78,13 +78,18 @@ fn test_warmonger() {
         vec![
             TestAction::not_undoable(
                 0,
-                move_action(vec![0, 1, 2, 3], Position::from_offset("C1")),
+                move_action(vec![0, 1], Position::from_offset("C1")),
+            )
+            .without_json_comparison(),
+            TestAction::not_undoable(
+                0,
+                move_action(vec![2, 3], Position::from_offset("B1")),
             )
             .without_json_comparison(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![
-                    HandCard::ObjectiveCard(2),
+                    HandCard::ObjectiveCard(3),
                 ])),
             ),
         ],

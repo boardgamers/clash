@@ -230,6 +230,11 @@ pub(crate) fn match_objective_cards(
     cards: &[HandCard],
     opportunities: &[String],
 ) -> Result<Vec<(u8, String)>, String> {
+    if cards.is_empty() {
+        // is checked by needed range
+        return Ok(Vec::new());
+    }
+    
     let mut res = vec![];
 
     for card in cards {
