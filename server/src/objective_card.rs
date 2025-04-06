@@ -237,11 +237,10 @@ pub(crate) fn complete_objective_card(game: &mut Game, player: usize, id: u8, ob
         game.player_name(player),
     ));
     let card = get_objective_card(id);
-    card.objectives
+    if let Some(s) = card.objectives
         .iter()
         .find(|o| o.name == objective)
-        .and_then(|o| o.status_phase_update.as_ref())
-        .map(|s| s(game, player));
+        .and_then(|o| o.status_phase_update.as_ref()) { s(game, player) }
 
     discard_objective_card(game, player, id);
     game.player_mut(player).completed_objectives.push(objective);
@@ -385,12 +384,15 @@ mod tests {
 
         let mut got = combinations(&cards, &opportunities);
         got.sort();
-        assert_eq!(got, vec![
+        assert_eq!(
+            got,
             vec![
-                (0, "Objective 1".to_string()),
-                (1, "Objective 4".to_string()),
-            ],
-            vec![(1, "Objective 1".to_string()),],
-        ]);
+                vec![
+                    (0, "Objective 1".to_string()),
+                    (1, "Objective 4".to_string()),
+                ],
+                vec![(1, "Objective 1".to_string()),],
+            ]
+        );
     }
 }

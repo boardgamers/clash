@@ -112,9 +112,8 @@ pub(crate) fn defiance() -> Objective {
             let stats = &e.combat.stats;
             let b = stats.battleground;
             let o = stats.opponent(player);
-            let fewer_fighters =
-                stats.player(player).fighters(b).sum() < o.fighters(b).sum();
-            if  fewer_fighters && game.player(o.player).is_human() && stats.is_winner(player) {
+            let fewer_fighters = stats.player(player).fighters(b).sum() < o.fighters(b).sum();
+            if fewer_fighters && game.player(o.player).is_human() && stats.is_winner(player) {
                 objective_is_ready(game.player_mut(player), name);
             }
         },

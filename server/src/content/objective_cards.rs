@@ -1,6 +1,9 @@
 use crate::content::objectives::combat::{conqueror, defiance, general, great_battle, warmonger};
 use crate::content::objectives::non_combat::draft;
-use crate::content::objectives::status_phase_objectives::{advanced_culture, city_planner, coastal_lead, education_lead, eureka, happy_population, large_civ, religious_fervor, science_lead, sea_blockade};
+use crate::content::objectives::status_phase_objectives::{
+    advanced_culture, city_planner, coastal_lead, education_lead, eureka, happy_population,
+    large_civ, religious_fervor, science_lead, sea_blockade,
+};
 use crate::objective_card::ObjectiveCard;
 use itertools::Itertools;
 use std::vec;
