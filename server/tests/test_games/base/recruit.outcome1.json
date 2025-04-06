@@ -22,18 +22,36 @@
       },
       "cities": [
         {
-          "city_pieces": {},
-          "mood_state": "Happy",
-          "activations": 1,
+          "city_pieces": {
+            "observatory": 0
+          },
+          "mood_state": "Angry",
+          "activations": 2,
           "position": "A1"
         },
         {
           "city_pieces": {
             "observatory": 0
           },
-          "mood_state": "Neutral",
+          "mood_state": "Angry",
           "activations": 1,
           "position": "C2"
+        },
+        {
+          "city_pieces": {
+            "observatory": 0
+          },
+          "mood_state": "Angry",
+          "activations": 1,
+          "position": "C3"
+        },
+        {
+          "city_pieces": {
+            "observatory": 0
+          },
+          "mood_state": "Angry",
+          "activations": 1,
+          "position": "C4"
         }
       ],
       "units": [
@@ -95,6 +113,9 @@
         "Mining"
       ],
       "incident_tokens": 2,
+      "completed_objectives": [
+        "Terror Regime"
+      ],
       "next_unit_id": 12
     },
     {
@@ -228,8 +249,14 @@
                       "value": 2
                     },
                     {
-                      "op": "remove",
-                      "path": "/players/0/cities/0/activations"
+                      "op": "replace",
+                      "path": "/players/0/cities/0/activations",
+                      "value": 1
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/cities/0/mood_state",
+                      "value": "Neutral"
                     },
                     {
                       "op": "replace",
@@ -294,7 +321,80 @@
                     {
                       "op": "remove",
                       "path": "/players/0/units/9"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events"
                     }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ObjectiveCard": 29
+                        }
+                      ]
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "SelectObjectives": {
+                              "cards": [
+                                {
+                                  "ObjectiveCard": 29
+                                }
+                              ],
+                              "objective_opportunities": [
+                                "Terror Regime"
+                              ]
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "Builtin": "Select Objective Cards to Complete"
+                            },
+                            "priority": 0,
+                            "request": {
+                              "SelectHandCards": {
+                                "choices": [
+                                  {
+                                    "ObjectiveCard": 29
+                                  }
+                                ],
+                                "description": "Select cards to complete",
+                                "needed": {
+                                  "end": 1,
+                                  "start": 0
+                                }
+                              }
+                            }
+                          },
+                          "last_priority_used": 0,
+                          "player": 0
+                        }
+                      ]
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/objective_cards",
+                      "value": [
+                        29
+                      ]
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/completed_objectives"
+                    }
+                  ],
+                  "completed_objectives": [
+                    "Terror Regime"
                   ]
                 }
               ]
@@ -304,10 +404,13 @@
       ]
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 2,
   "log": [
     [
-      "Player1 paid 1 food, 1 ore and 2 gold to recruit 1 settler and 1 infantry in the city at A1 and replaces the unit at C2"
+      "Player1 paid 1 food, 1 ore and 2 gold to recruit 1 settler and 1 infantry in the city at A1 making it Angry and replaces the unit at C2"
+    ],
+    [
+      "Player1 completed objective Terror Regime"
     ]
   ],
   "undo_limit": 0,
