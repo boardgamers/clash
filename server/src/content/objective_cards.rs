@@ -1,6 +1,8 @@
 use crate::content::objectives::combat::{conqueror, warmonger};
 use crate::content::objectives::non_combat::draft;
-use crate::content::objectives::status_phase_objectives::{advanced_culture, coastal_lead, large_civ, science_lead};
+use crate::content::objectives::status_phase_objectives::{
+    advanced_culture, coastal_lead, large_civ, science_lead,
+};
 use crate::objective_card::ObjectiveCard;
 use std::vec;
 

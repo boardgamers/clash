@@ -51,7 +51,7 @@ fn leading_player(
             .players
             .iter()
             .filter(|p| p.index != player.index)
-            .map(|p| value(p))
+            .map(value)
             .max()
             .unwrap_or(0)
 }

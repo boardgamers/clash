@@ -234,7 +234,7 @@ pub(crate) fn match_objective_cards(
         // is checked by needed range
         return Ok(Vec::new());
     }
-    
+
     let mut res = vec![];
 
     for card in cards {

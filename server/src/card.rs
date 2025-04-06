@@ -18,7 +18,11 @@ pub enum HandCardType {
 impl HandCardType {
     #[must_use]
     pub fn get_all() -> Vec<HandCardType> {
-        vec![HandCardType::Action, HandCardType::Objective, HandCardType::Wonder]
+        vec![
+            HandCardType::Action,
+            HandCardType::Objective,
+            HandCardType::Wonder,
+        ]
     }
 }
 
@@ -103,14 +107,19 @@ pub fn hand_cards(player: &Player, types: &[HandCardType]) -> Vec<HandCard> {
 /// # Errors
 ///
 /// If the selection is invalid, an error message is returned.
-pub fn validate_card_selection(cards: &[HandCard], game: &Game) -> Result<Vec<(u8, String)>, String> {
+pub fn validate_card_selection(
+    cards: &[HandCard],
+    game: &Game,
+) -> Result<Vec<(u8, String)>, String> {
     let s = game.current_event();
     let player = &s.player;
     let Some(h) = player.handler.as_ref() else {
         return Err("no selection handler".to_string());
     };
     match &h.origin {
-        EventOrigin::CivilCard(id) if *id == 7 || *id == 8 => validate_spy_cards(cards, game).map(|_|Vec::new()),
+        EventOrigin::CivilCard(id) if *id == 7 || *id == 8 => {
+            validate_spy_cards(cards, game).map(|()| Vec::new())
+        }
         EventOrigin::Builtin(b) if b == "Select Objective Cards to Complete" => {
             let PersistentEventType::SelectObjectives(c) = &s.event_type else {
                 return Err("no selection handler".to_string());

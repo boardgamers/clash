@@ -2,18 +2,18 @@ use crate::city::City;
 use crate::city::MoodState::Angry;
 use crate::city_pieces::Building;
 use crate::combat_listeners::{
-    combat_round_end, combat_round_start, Casualties, CombatEventPhase, CombatRoundEnd,
-    CombatRoundStart, CombatStrength,
+    Casualties, CombatEventPhase, CombatRoundEnd, CombatRoundStart, CombatStrength,
+    combat_round_end, combat_round_start,
 };
 use crate::combat_roll::CombatRoundStats;
-use crate::combat_stats::{new_combat_stats, CombatStats};
+use crate::combat_stats::{CombatStats, new_combat_stats};
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
-use crate::movement::{move_units, stop_current_move, MoveUnits, MovementRestriction};
+use crate::movement::{MoveUnits, MovementRestriction, move_units, stop_current_move};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::tactics_card::CombatRole;
-use crate::unit::{carried_units, UnitType, Units};
+use crate::unit::{UnitType, Units, carried_units};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
@@ -497,7 +497,7 @@ pub(crate) fn move_with_possible_combat(
 pub mod tests {
     use std::collections::HashMap;
 
-    use super::{conquer_city, Game};
+    use super::{Game, conquer_city};
 
     use crate::action::Action;
     use crate::game::GameState;

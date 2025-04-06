@@ -1,10 +1,10 @@
-use std::mem;
-use serde::{Deserialize, Serialize};
 use crate::combat_listeners::CombatResult;
 use crate::game::Game;
 use crate::position::Position;
 use crate::tactics_card::CombatRole;
 use crate::unit::{UnitType, Units};
+use serde::{Deserialize, Serialize};
+use std::mem;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CombatPlayerStats {
@@ -103,7 +103,7 @@ impl CombatStats {
             CombatRole::Defender => &self.defender,
         }
     }
-    
+
     #[must_use]
     pub fn role(&self, player: usize) -> CombatRole {
         if player == self.attacker.player {
@@ -112,7 +112,7 @@ impl CombatStats {
             CombatRole::Defender
         }
     }
-    
+
     #[must_use]
     pub fn winner(&self) -> Option<CombatRole> {
         self.result.as_ref().and_then(|result| match result {
@@ -121,10 +121,10 @@ impl CombatStats {
             CombatResult::Draw => None,
         })
     }
-    
+
     #[must_use]
     pub fn is_winner(&self, player: usize) -> bool {
-        Some(self.role(player)) == self.winner() 
+        Some(self.role(player)) == self.winner()
     }
 }
 
@@ -133,7 +133,7 @@ pub(crate) fn new_combat_stats(
     defender: usize,
     defender_position: Position,
     attacker: usize,
-    attackers: &Vec<u32>,
+    attackers: &[u32],
 ) -> CombatStats {
     let city = game.try_get_any_city(defender_position);
 

@@ -693,7 +693,7 @@ pub(crate) fn combat_stats() -> Builtin {
             100,
             |game, _player, _name, e| {
                 e.combat.stats.result = Some(e.result.clone());
-                
+
                 let i = current_player_turn_log_mut(game)
                     .items
                     .last_mut()
