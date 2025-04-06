@@ -381,3 +381,11 @@ pub(crate) fn consulate() -> Objective {
         })
         .build()
 }
+
+pub(crate) fn metropolis() -> Objective {
+    Objective::builder("Metropolis", "You have at least 1 city with size 5.")
+        .status_phase_check(|game, player| {
+            player.cities.iter().filter(|c| c.size() >= 5).count() >= 1
+        })
+        .build()
+}
