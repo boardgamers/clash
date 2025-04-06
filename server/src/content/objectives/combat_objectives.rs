@@ -230,10 +230,6 @@ pub(crate) fn scavenger() -> Objective {
             let s = &e.combat.stats;
             let o = s.opponent(player);
             let opponent = game.player(o.player);
-            if !opponent.has_advance("Trade Routes") {
-                return;
-            }
-
             let units = &o.losses;
             if units.settlers > 0 || units.ships > 0 {
                 // just the position and type matter
@@ -297,7 +293,7 @@ pub(crate) fn resistance() -> Objective {
     )
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
-        11,
+        12,
         |game, player, _, e| {
             let s = &e.combat.stats;
             let b = s.battleground;

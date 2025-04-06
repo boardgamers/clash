@@ -1,6 +1,7 @@
 use crate::city::MoodState;
 use crate::city_pieces::Building;
 use crate::content::advances;
+use crate::content::advances::trade_routes::{find_trade_route_for_unit, find_trade_routes};
 use crate::game::Game;
 use crate::map::get_map_setup;
 use crate::objective_card::{Objective, ObjectiveBuilder};
@@ -347,7 +348,6 @@ pub(crate) fn colony() -> Objective {
         "You have at least 1 city at least 5 spaces away from your starting city position. \
         Cannot be completed if you completed City Founder this age.",
     )
-    .contradicting_status_phase_objective("City Founder")
     .status_phase_check(|game, player| {
         let home = home_position(game, &player);
         if player.cities.iter().any(|c| c.position.distance(home) >= 5) {
@@ -460,5 +460,27 @@ pub(crate) fn military_might() -> Objective {
             .count()
             >= 12
     })
+    .build()
+}
+
+pub(crate) fn trade_power() -> Objective {
+    Objective::builder(
+        "Trade Power",
+        "You could form at least 3 trade routes if you wanted to.\
+        Cannot be completed together with Shipping Routes.",
+    )
+    .contradicting_status_phase_objective("Shipping Routes")
+    .status_phase_check(|game, player| find_trade_routes(game, player, false).len() >= 3)
+    .build()
+}
+
+pub(crate) fn shipping_routes() -> Objective {
+    Objective::builder(
+        "Shipping Routes",
+        "You could form at least 2 trade routes only with ships if you wanted to.\
+        Cannot be completed together with Trade Power.",
+    )
+    .contradicting_status_phase_objective("Trade Power")
+    .status_phase_check(|game, player| find_trade_routes(game, player, true).len() >= 2)
     .build()
 }
