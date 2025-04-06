@@ -6,6 +6,7 @@ use crate::game::Game;
 use crate::log::current_player_turn_log;
 use crate::objective_card::{Objective, objective_is_ready};
 use crate::player::Player;
+use crate::tactics_card::CombatRole;
 use crate::unit::{Unit, UnitType};
 use itertools::Itertools;
 
@@ -279,9 +280,30 @@ pub(crate) fn barbarian_conquest() -> Objective {
         11,
         |game, player, _, e| {
             let s = &e.combat.stats;
-            if s.is_winner(player)
-                && s.battleground.is_city()
-                && !s.opponent_is_human(player, game)
+            if s.is_winner(player) && s.battleground.is_city() && !s.opponent_is_human(player, game)
+            {
+                objective_is_ready(game.player_mut(player), name);
+            }
+        },
+    )
+    .build()
+}
+
+pub(crate) fn resistance() -> Objective {
+    let name = "Resistance";
+    Objective::builder(
+        name,
+        "You captured a barbarian city with at least 2 army units.",
+    )
+    .add_simple_persistent_event_listener(
+        |event| &mut event.combat_end,
+        11,
+        |game, player, _, e| {
+            let s = &e.combat.stats;
+            let b = s.battleground;
+            if b.is_land()
+                && s.role(player) == CombatRole::Defender
+                && s.opponent(player).fighter_losses(b).sum() >= 2
             {
                 objective_is_ready(game.player_mut(player), name);
             }

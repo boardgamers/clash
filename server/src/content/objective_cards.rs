@@ -1,7 +1,4 @@
-use crate::content::objectives::combat_objectives::{
-    aggressor, barbarian_conquest, bold, conqueror, defiance, general, great_battle,
-    legendary_battle, naval_assault, scavenger, warmonger,
-};
+use crate::content::objectives::combat_objectives::{aggressor, barbarian_conquest, bold, conqueror, defiance, general, great_battle, legendary_battle, naval_assault, resistance, scavenger, warmonger};
 use crate::content::objectives::non_combat::{city_founder, draft};
 use crate::content::objectives::status_phase_objectives::{advanced_culture, city_planner, coastal_lead, colony, consulate, culture_focus, diversity, education_lead, eureka, expansionist, food_supplies, fortifications, goal_focused, government, happy_population, large_army, large_civ, large_fleet, metropolis, militarized, military_might, optimized_storage, ore_supplies, religious_fervor, science_focus, science_lead, sea_blockade, seafarers, standing_army, threat, trade_focus, wealth, wood_supplies};
 use crate::objective_card::ObjectiveCard;
@@ -37,7 +34,7 @@ pub(crate) fn get_all() -> Vec<ObjectiveCard> {
         ObjectiveCard::new(24, government(), barbarian_conquest()),
         ObjectiveCard::new(25, government(), aggressor()),
         ObjectiveCard::new(26, expansionist(), military_might()),
-        ObjectiveCard::new(27, city_founder(), military_might()), //todo update second
+        ObjectiveCard::new(27, city_founder(), resistance()),
     ];
     assert_eq!(
         all.iter().unique_by(|i| i.id).count(),
