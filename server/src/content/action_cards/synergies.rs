@@ -184,12 +184,10 @@ pub(crate) fn use_teach_us() -> Builtin {
     )
     .add_hand_card_request(
         |e| &mut e.combat_end,
-        1,
+        91,
         |game, player_index, e| {
             let stats = &e.combat.stats;
-            if e.result.winner() == Some(e.combat.role(player_index))
-                && stats.battleground.is_city()
-            {
+            if stats.is_winner(player_index) && stats.battleground.is_city() {
                 let p = game.player(player_index);
                 let cards = p
                     .action_cards
@@ -216,7 +214,7 @@ pub(crate) fn use_teach_us() -> Builtin {
     )
     .add_advance_request(
         |e| &mut e.combat_end,
-        0,
+        90,
         |game, player, e| {
             e.selected_card.map(|_| {
                 let vec =

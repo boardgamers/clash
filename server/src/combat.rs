@@ -2,20 +2,20 @@ use crate::city::City;
 use crate::city::MoodState::Angry;
 use crate::city_pieces::Building;
 use crate::combat_listeners::{
-    Casualties, CombatEventPhase, CombatResult, CombatRoundEnd, CombatRoundStart, CombatStrength,
-    combat_round_end, combat_round_start,
+    combat_round_end, combat_round_start, Casualties, CombatEventPhase, CombatRoundEnd,
+    CombatRoundStart, CombatStrength,
 };
 use crate::combat_roll::CombatRoundStats;
+use crate::combat_stats::{new_combat_stats, CombatStats};
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
-use crate::movement::{MoveUnits, MovementRestriction, move_units, stop_current_move};
+use crate::movement::{move_units, stop_current_move, MoveUnits, MovementRestriction};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::tactics_card::CombatRole;
-use crate::unit::{UnitType, Units, carried_units};
+use crate::unit::{carried_units, UnitType, Units};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use std::mem;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Copy)]
 pub enum CombatModifier {
@@ -32,105 +32,6 @@ pub enum CombatRetreatState {
     CanRetreat,
     CannotRetreat,
     EndAfterCurrentRound,
-}
-
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub struct CombatPlayerStats {
-    pub player: usize,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Units::is_empty")]
-    pub fighters: Units,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Units::is_empty")]
-    pub losses: Units,
-}
-
-impl CombatPlayerStats {
-    #[must_use]
-    pub fn new(player: usize, fighters: Units) -> Self {
-        Self {
-            player,
-            fighters,
-            losses: Units::empty(),
-        }
-    }
-
-    pub fn add_losses(&mut self, units: &[UnitType]) {
-        let mut losses = mem::replace(&mut self.losses, Units::empty());
-        for t in units {
-            losses += t;
-        }
-        self.losses = losses;
-    }
-}
-
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Copy)]
-pub enum Battleground {
-    Land,
-    Sea,
-    City,
-    CityWithFortress,
-}
-
-impl Battleground {
-    #[must_use]
-    pub(crate) fn is_land(self) -> bool {
-        !matches!(self, Battleground::Sea)
-    }
-
-    #[must_use]
-    pub fn is_city(self) -> bool {
-        matches!(self, Battleground::City | Battleground::CityWithFortress)
-    }
-}
-
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub struct CombatStats {
-    pub position: Position,
-    pub battleground: Battleground,
-    pub attacker: CombatPlayerStats,
-    pub defender: CombatPlayerStats,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub result: Option<CombatResult>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub claimed_action_cards: Vec<u8>,
-}
-
-impl CombatStats {
-    #[must_use]
-    pub fn new(
-        position: Position,
-        battleground: Battleground,
-        attacker: CombatPlayerStats,
-        defender: CombatPlayerStats,
-    ) -> Self {
-        Self {
-            position,
-            battleground,
-            attacker,
-            defender,
-            result: None,
-            claimed_action_cards: Vec::new(),
-        }
-    }
-
-    #[must_use]
-    pub fn player_mut(&mut self, role: CombatRole) -> &mut CombatPlayerStats {
-        match role {
-            CombatRole::Attacker => &mut self.attacker,
-            CombatRole::Defender => &mut self.defender,
-        }
-    }
-
-    #[must_use]
-    pub fn player(&self, role: CombatRole) -> &CombatPlayerStats {
-        match role {
-            CombatRole::Attacker => &self.attacker,
-            CombatRole::Defender => &self.defender,
-        }
-    }
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -286,41 +187,7 @@ pub fn initiate_combat(
     attackers: Vec<u32>,
     can_retreat: bool,
 ) {
-    let city = game.try_get_any_city(defender_position);
-
-    let battleground = if let Some(city) = city {
-        if city.pieces.fortress.is_some() {
-            Battleground::CityWithFortress
-        } else {
-            Battleground::City
-        }
-    } else if game.map.is_sea(defender_position) {
-        Battleground::Sea
-    } else {
-        Battleground::Land
-    };
-
-    let a = game.player(attacker);
-    let stats = CombatStats::new(
-        defender_position,
-        battleground,
-        CombatPlayerStats::new(
-            attacker,
-            attackers
-                .iter()
-                .map(|id| a.get_unit(*id).unit_type)
-                .collect(),
-        ),
-        CombatPlayerStats::new(
-            defender,
-            game.player(defender)
-                .get_units(defender_position)
-                .iter()
-                .map(|unit| unit.unit_type)
-                .collect(),
-        ),
-    );
-
+    let stats = new_combat_stats(game, defender, defender_position, attacker, &attackers);
     let combat = Combat::new(
         1,
         defender,
@@ -630,7 +497,7 @@ pub(crate) fn move_with_possible_combat(
 pub mod tests {
     use std::collections::HashMap;
 
-    use super::{Game, conquer_city};
+    use super::{conquer_city, Game};
 
     use crate::action::Action;
     use crate::game::GameState;

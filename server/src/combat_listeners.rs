@@ -617,7 +617,7 @@ pub(crate) fn place_settler() -> Builtin {
     )
     .add_position_request(
         |event| &mut event.combat_end,
-        2,
+        102,
         |game, player_index, i| {
             let p = game.player(player_index);
             if i.is_defender(player_index)
@@ -690,7 +690,7 @@ pub(crate) fn combat_stats() -> Builtin {
     Builtin::builder("Combat stats", "")
         .add_simple_persistent_event_listener(
             |event| &mut event.combat_end,
-            11,
+            100,
             |game, _player, _name, e| {
                 let i = current_player_turn_log_mut(game)
                     .items

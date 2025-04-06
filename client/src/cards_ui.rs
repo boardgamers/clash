@@ -12,7 +12,7 @@ use custom_phase_ui::multi_select_tooltip;
 use itertools::Itertools;
 use macroquad::color::BLACK;
 use macroquad::math::{Rect, Vec2, vec2};
-use macroquad::prelude::{BLUE, Color, GREEN, RED, YELLOW, draw_rectangle, draw_rectangle_lines};
+use macroquad::prelude::{BLUE, Color, GREEN, RED, YELLOW, draw_rectangle, draw_rectangle_lines, LIME, BEIGE};
 use server::action::Action;
 use server::card::{HandCard, HandCardType, hand_cards, validate_card_selection};
 use server::content::action_cards::{get_action_card, get_civil_card};
@@ -41,7 +41,7 @@ impl HandCardObject {
 }
 
 const ACTION_CARD_COLOR: Color = RED;
-const OBJECTIVE_CARD_COLOR: Color = BLUE;
+const OBJECTIVE_CARD_COLOR: Color = BEIGE;
 const WONDER_CARD_COLOR: Color = YELLOW;
 
 pub(crate) fn show_cards(rc: &RenderContext) -> StateUpdate {
