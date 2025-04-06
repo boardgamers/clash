@@ -46,3 +46,20 @@ fn test_large_civ() {
         ],
     )
 }
+
+#[test]
+fn test_colony() {
+    JSON.test(
+        "colony",
+        vec![
+            TestAction::not_undoable(0, Action::Playing(PlayingAction::EndTurn))
+                .without_json_comparison(),
+            TestAction::undoable(
+                1,
+                Action::Response(EventResponse::SelectHandCards(vec![
+                    HandCard::ObjectiveCard(17),
+                ])),
+            ),
+        ],
+    )
+}

@@ -2,6 +2,7 @@ use crate::city::MoodState;
 use crate::city_pieces::Building;
 use crate::content::advances;
 use crate::game::Game;
+use crate::map::get_map_setup;
 use crate::objective_card::{Objective, ObjectiveBuilder};
 use crate::player::Player;
 use crate::resource::ResourceType;
@@ -305,6 +306,52 @@ pub(crate) fn goal_focused() -> Objective {
                 .filter(|g| g.advances.iter().all(|a| p.has_advance(&a.name)))
                 .count()
         })
+    })
+    .build()
+}
+
+pub(crate) fn colony() -> Objective {
+    Objective::builder(
+        "Colony",
+        "You have at least 1 city at least 5 spaces away from your starting city position.",
+    )
+    .contradicting_status_phase_objective("City Founder")
+    .status_phase_check(|game, player| {
+        let setup = get_map_setup(game.human_players_count());
+
+        let h = &setup.home_positions[player.index];
+        let home = h.block.tiles(&h.position, h.position.rotation)[0].0;
+
+        player.cities.iter().any(|c| c.position.distance(home) >= 5)
+    })
+    .build()
+}
+
+pub(crate) fn threat() -> Objective {
+    Objective::builder(
+        "Threat",
+        "At least 4 of your army units are adjacent to another human player's city.",
+    )
+    .status_phase_check(|game, player| {
+        let enemy_cities = game
+            .players
+            .iter()
+            .filter(|p| p.index != player.index && p.is_human())
+            .flat_map(|p| p.cities.iter().map(|c| c.position).collect_vec())
+            .collect_vec();
+
+        player
+            .units
+            .iter()
+            .filter(|u| {
+                u.unit_type.is_army_unit()
+                    && u.position
+                        .neighbors()
+                        .iter()
+                        .any(|n| enemy_cities.contains(n))
+            })
+            .count()
+            >= 4
     })
     .build()
 }
