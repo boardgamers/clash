@@ -5,6 +5,7 @@ use crate::player::Player;
 use crate::position::Position;
 use crate::tactics_card::CombatRole;
 use crate::unit::{UnitType, Units};
+use crate::utils;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::mem;
@@ -78,6 +79,9 @@ impl Battleground {
 pub struct CombatStats {
     pub position: Position,
     pub battleground: Battleground,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "utils::is_false")]
+    pub disembarked: bool,
     pub attacker: CombatPlayerStats,
     pub defender: CombatPlayerStats,
     #[serde(default)]
@@ -93,12 +97,14 @@ impl CombatStats {
     pub fn new(
         position: Position,
         battleground: Battleground,
+        disembarked: bool,
         attacker: CombatPlayerStats,
         defender: CombatPlayerStats,
     ) -> Self {
         Self {
             position,
             battleground,
+            disembarked,
             attacker,
             defender,
             result: None,
@@ -128,6 +134,11 @@ impl CombatStats {
             CombatRole::Attacker => &self.attacker,
             CombatRole::Defender => &self.defender,
         }
+    }
+    
+    #[must_use]
+    pub fn opponent_is_human(&self, player: usize, game: &Game) -> bool {
+        game.player(self.opponent(player).player).is_human()
     }
 
     #[must_use]
@@ -189,6 +200,7 @@ pub(crate) fn new_combat_stats(
     let stats = CombatStats::new(
         defender_position,
         battleground,
+        battleground.is_land() && game.map.is_sea(a.get_unit(attackers[0]).position),
         CombatPlayerStats::new(attacker, to_units(attackers, a)),
         CombatPlayerStats::new(
             defender,

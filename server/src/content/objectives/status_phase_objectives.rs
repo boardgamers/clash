@@ -164,3 +164,15 @@ pub(crate) fn sea_blockade() -> Objective {
     })
     .build()
 }
+
+pub(crate) fn optimized_storage() -> Objective {
+    Objective::builder(
+        "Optimized Storage",
+        "You have at least 3 food, 3 ore, and 3 wood.",
+    )
+    .status_phase_check(|_game, player| {
+        let r = &player.resources;
+        r.food >= 3 && r.ore >= 3 && r.wood >= 3
+    })
+    .build()
+}

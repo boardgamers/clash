@@ -13,8 +13,11 @@ pub(crate) fn conqueror() -> Objective {
         |event| &mut event.combat_end,
         1,
         |game, player, _, e| {
-            let stats = &e.combat.stats;
-            if stats.is_winner(player) && stats.battleground.is_city() {
+            let s = &e.combat.stats;
+            if s.is_winner(player)
+                && s.battleground.is_city()
+                && s.opponent_is_human(player, game)
+            {
                 objective_is_ready(game.player_mut(player), name);
             }
         },
@@ -61,15 +64,15 @@ pub(crate) fn general() -> Objective {
         |event| &mut event.combat_end,
         3,
         |game, player, _, e| {
-            let stats = &e.combat.stats;
-            let army_units_killed_by_you: u8 = stats
+            let s = &e.combat.stats;
+            let army_units_killed_by_you: u8 = s
                 .opponent(player)
                 .losses
                 .clone()
                 .into_iter()
                 .filter_map(|(u, loss)| u.is_army_unit().then_some(loss))
                 .sum();
-            if stats.battleground.is_land() && army_units_killed_by_you >= 3 {
+            if s.battleground.is_land() && army_units_killed_by_you >= 3 {
                 objective_is_ready(game.player_mut(player), name);
             }
         },
@@ -87,11 +90,11 @@ pub(crate) fn great_battle() -> Objective {
         |event| &mut event.combat_end,
         4,
         |game, player, _, e| {
-            let stats = &e.combat.stats;
-            let b = stats.battleground;
+            let s = &e.combat.stats;
+            let b = s.battleground;
             let army_units_present: u8 =
-                stats.attacker.fighters(b).sum() + stats.defender.fighters(b).sum();
-            if stats.battleground.is_land() && army_units_present >= 6 {
+                s.attacker.fighters(b).sum() + s.defender.fighters(b).sum();
+            if s.battleground.is_land() && army_units_present >= 6 {
                 objective_is_ready(game.player_mut(player), name);
             }
         },
@@ -109,11 +112,34 @@ pub(crate) fn defiance() -> Objective {
         |event| &mut event.combat_end,
         5,
         |game, player, _, e| {
-            let stats = &e.combat.stats;
-            let b = stats.battleground;
-            let o = stats.opponent(player);
-            let fewer_fighters = stats.player(player).fighters(b).sum() < o.fighters(b).sum();
-            if fewer_fighters && game.player(o.player).is_human() && stats.is_winner(player) {
+            let s = &e.combat.stats;
+            let b = s.battleground;
+            let fewer_fighters =
+                s.player(player).fighters(b).sum() < s.opponent(player).fighters(b).sum();
+            if fewer_fighters && s.opponent_is_human(player, game) && s.is_winner(player) {
+                objective_is_ready(game.player_mut(player), name);
+            }
+        },
+    )
+    .build()
+}
+
+pub(crate) fn naval_assault() -> Objective {
+    let name = "Naval Assault";
+    Objective::builder(
+        name,
+        "You captured a city with army units that disembarked from a ship.",
+    )
+    .add_simple_persistent_event_listener(
+        |event| &mut event.combat_end,
+        6,
+        |game, player, _, e| {
+            let s = &e.combat.stats;
+            if s.disembarked
+                && s.opponent_is_human(player, game)
+                && s.is_winner(player)
+                && s.battleground.is_city()
+            {
                 objective_is_ready(game.player_mut(player), name);
             }
         },
