@@ -27,36 +27,26 @@
             "temple": 1
           },
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "A1"
         },
         {
           "city_pieces": {},
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "A2"
         },
         {
           "city_pieces": {},
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "A3"
         },
         {
           "city_pieces": {},
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "A4"
         },
         {
           "city_pieces": {},
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "A5"
         },
         {
@@ -65,7 +55,6 @@
           },
           "mood_state": "Neutral",
           "activations": 1,
-          "angry_activation": false,
           "position": "C2"
         }
       ],
@@ -180,8 +169,6 @@
             "port": 1
           },
           "mood_state": "Angry",
-          "activations": 0,
-          "angry_activation": false,
           "position": "C1",
           "port_position": "D1"
         }

@@ -24,8 +24,6 @@
             "market": 0
           },
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "D6"
         },
         {
@@ -33,8 +31,6 @@
             "market": 0
           },
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "E6"
         }
       ],
@@ -73,8 +69,6 @@
         {
           "city_pieces": {},
           "mood_state": "Neutral",
-          "activations": 0,
-          "angry_activation": false,
           "position": "D8"
         }
       ],

@@ -33,8 +33,6 @@
             "market": 1
           },
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "A1"
         },
         {
@@ -44,7 +42,6 @@
           },
           "mood_state": "Angry",
           "activations": 4,
-          "angry_activation": false,
           "position": "C2",
           "port_position": "C3"
         },
@@ -56,8 +53,6 @@
             "temple": 1
           },
           "mood_state": "Neutral",
-          "activations": 0,
-          "angry_activation": false,
           "position": "B1"
         },
         {
@@ -72,8 +67,6 @@
             "port": 0
           },
           "mood_state": "Angry",
-          "activations": 0,
-          "angry_activation": false,
           "position": "B2",
           "port_position": "C3"
         }
@@ -173,7 +166,6 @@
           "city_pieces": {},
           "mood_state": "Angry",
           "activations": 2,
-          "angry_activation": false,
           "position": "C1"
         }
       ],
@@ -303,8 +295,6 @@
                       "op": "add",
                       "path": "/players/1/cities/1",
                       "value": {
-                        "activations": 0,
-                        "angry_activation": false,
                         "city_pieces": {
                           "port": 1
                         },

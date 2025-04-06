@@ -25,8 +25,6 @@
         {
           "city_pieces": {},
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "A1"
         },
         {
@@ -35,7 +33,6 @@
           },
           "mood_state": "Neutral",
           "activations": 1,
-          "angry_activation": false,
           "position": "C2"
         }
       ],
@@ -119,8 +116,6 @@
         {
           "city_pieces": {},
           "mood_state": "Angry",
-          "activations": 0,
-          "angry_activation": false,
           "position": "C1"
         }
       ],
@@ -229,9 +224,8 @@
                   },
                   "undo": [
                     {
-                      "op": "replace",
-                      "path": "/players/0/cities/1/activations",
-                      "value": 0
+                      "op": "remove",
+                      "path": "/players/0/cities/1/activations"
                     },
                     {
                       "op": "replace",

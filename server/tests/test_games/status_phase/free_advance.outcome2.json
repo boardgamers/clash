@@ -52,8 +52,6 @@
             "market": 1
           },
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "A1"
         },
         {
@@ -62,8 +60,6 @@
             "port": 1
           },
           "mood_state": "Angry",
-          "activations": 0,
-          "angry_activation": false,
           "position": "C2",
           "port_position": "C3"
         },
@@ -75,15 +71,11 @@
             "temple": 1
           },
           "mood_state": "Neutral",
-          "activations": 0,
-          "angry_activation": false,
           "position": "B1"
         },
         {
           "city_pieces": {},
           "mood_state": "Angry",
-          "activations": 0,
-          "angry_activation": false,
           "position": "B3"
         }
       ],
@@ -188,8 +180,6 @@
         {
           "city_pieces": {},
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "C1"
         },
         {
@@ -197,8 +187,6 @@
             "port": 1
           },
           "mood_state": "Neutral",
-          "activations": 0,
-          "angry_activation": false,
           "position": "B2",
           "port_position": "C3"
         }
@@ -233,7 +221,7 @@
         1
       ],
       "objective_cards": [
-        13
+        5
       ],
       "next_unit_id": 2
     }
@@ -393,29 +381,34 @@
     10,
     10
   ],
-  "rng": "213753097409224944643247869297039876114",
+  "rng": "114347087413172179335816429726876017366",
   "wonders_left": [
     "Pyramids"
   ],
   "objective_cards_left": [
-    5,
     2,
-    17,
-    12,
-    7,
-    18,
-    8,
-    1,
-    99,
-    19,
-    4,
-    3,
-    15,
-    14,
+    25,
     20,
-    9,
-    10,
+    22,
+    26,
+    4,
+    1,
+    6,
+    3,
+    23,
+    7,
+    19,
+    17,
+    8,
+    13,
+    12,
     11,
-    6
+    14,
+    21,
+    15,
+    24,
+    10,
+    18,
+    9
   ]
 }
