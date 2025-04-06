@@ -19,6 +19,7 @@ fn test_large_civ() {
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![
                     HandCard::ObjectiveCard(1),
+                    HandCard::ObjectiveCard(4),
                 ])),
             )
             .with_pre_assert(|game| {
@@ -35,7 +36,7 @@ fn test_large_civ() {
                     panic!("Expected SelectHandCards request");
                 };
                 //can't fulfill both objectives with same name
-                assert_eq!(c.choices.len(), 2);
+                assert_eq!(c.choices.len(), 3);
                 assert!(validate_card_selection(&c.choices, game).is_err());
             }),
         ],

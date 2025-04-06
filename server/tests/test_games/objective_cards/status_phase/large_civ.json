@@ -119,11 +119,14 @@
         "Draft",
         "Farming",
         "Math",
-        "Mining"
+        "Mining",
+        "Voting",
+        "Writing"
       ],
       "incident_tokens": 2,
       "objective_cards": [
         1,
+        4,
         99
       ],
       "next_unit_id": 10

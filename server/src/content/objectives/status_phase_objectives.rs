@@ -1,4 +1,5 @@
 use crate::city_pieces::Building;
+use crate::game::Game;
 use crate::objective_card::{Objective, ObjectiveBuilder};
 use crate::player::Player;
 
@@ -36,15 +37,23 @@ pub(crate) fn coastal_lead() -> Objective {
 
 fn building_lead(b: ObjectiveBuilder, building: Building) -> ObjectiveBuilder {
     b.status_phase_check(move |game, player| {
-        buildings(player, building)
-            > game
-                .players
-                .iter()
-                .filter(|p| p.index != player.index)
-                .map(|p| buildings(p, building))
-                .max()
-                .unwrap_or(0)
+        leading_player(game, player, move |p| buildings(p, building))
     })
+}
+
+fn leading_player(
+    game: &Game,
+    player: &Player,
+    value: impl Fn(&Player) -> usize + 'static,
+) -> bool {
+    value(player)
+        > game
+            .players
+            .iter()
+            .filter(|p| p.index != player.index)
+            .map(|p| value(p))
+            .max()
+            .unwrap_or(0)
 }
 
 fn buildings(p: &Player, b: Building) -> usize {
@@ -52,4 +61,15 @@ fn buildings(p: &Player, b: Building) -> usize {
         .iter()
         .filter(|c| c.pieces.building_owner(b).is_some())
         .count()
+}
+
+pub(crate) fn advanced_culture() -> Objective {
+    Objective::builder(
+        "Advanced Culture",
+        "You have more advances than any other player - at least 6.",
+    )
+    .status_phase_check(|game, player| {
+        player.advances.len() >= 6 && leading_player(game, player, move |p| p.advances.len())
+    })
+    .build()
 }

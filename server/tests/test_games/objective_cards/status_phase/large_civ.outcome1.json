@@ -15,19 +15,23 @@
               "Arts",
               "Astronomy",
               "Bartering",
+              "Civil Liberties",
               "Engineering",
               "Fishing",
+              "Free Economy",
+              "Free Education",
               "Husbandry",
               "Irrigation",
               "Medicine",
               "Metallurgy",
               "Myths",
-              "Nationalism",
+              "Philosophy",
+              "Public Education",
               "Roads",
               "Sanitation",
+              "Separation of Power",
               "Storage",
-              "Tactics",
-              "Writing"
+              "Tactics"
             ]
           }
         },
@@ -156,11 +160,14 @@
         "Draft",
         "Farming",
         "Math",
-        "Mining"
+        "Mining",
+        "Voting",
+        "Writing"
       ],
       "incident_tokens": 2,
       "completed_objectives": [
-        "Large Civilization"
+        "Large Civilization",
+        "Advanced Culture"
       ],
       "objective_cards": [
         99
@@ -284,6 +291,9 @@
                       "SelectHandCards": [
                         {
                           "ObjectiveCard": 1
+                        },
+                        {
+                          "ObjectiveCard": 4
                         }
                       ]
                     }
@@ -313,10 +323,14 @@
                                 "ObjectiveCard": 1
                               },
                               {
+                                "ObjectiveCard": 4
+                              },
+                              {
                                 "ObjectiveCard": 99
                               }
                             ],
                             "objective_opportunities": [
+                              "Advanced Culture",
                               "Large Civilization"
                             ]
                           }
@@ -333,12 +347,15 @@
                                   "ObjectiveCard": 1
                                 },
                                 {
+                                  "ObjectiveCard": 4
+                                },
+                                {
                                   "ObjectiveCard": 99
                                 }
                               ],
                               "description": "Select cards to complete",
                               "needed": {
-                                "end": 2,
+                                "end": 3,
                                 "start": 0
                               }
                             }
@@ -356,6 +373,11 @@
                     {
                       "op": "add",
                       "path": "/players/0/objective_cards/1",
+                      "value": 4
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/objective_cards/2",
                       "value": 99
                     },
                     {
@@ -380,7 +402,8 @@
       "The game has entered the 1st status phase"
     ],
     [
-      "Player1 completed objective Large Civilization"
+      "Player1 completed objective Large Civilization",
+      "Player1 completed objective Advanced Culture"
     ]
   ],
   "undo_limit": 1,
