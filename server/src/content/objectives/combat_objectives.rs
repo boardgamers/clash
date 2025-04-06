@@ -1,6 +1,8 @@
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::combat_stats::CombatStats;
+use crate::game::Game;
 use crate::log::current_player_turn_log;
-use crate::objective_card::{Objective, objective_is_ready};
+use crate::objective_card::{objective_is_ready, Objective};
 use itertools::Itertools;
 
 pub(crate) fn conqueror() -> Objective {
@@ -14,9 +16,7 @@ pub(crate) fn conqueror() -> Objective {
         1,
         |game, player, _, e| {
             let s = &e.combat.stats;
-            if s.is_winner(player)
-                && s.battleground.is_city()
-                && s.opponent_is_human(player, game)
+            if s.is_winner(player) && s.battleground.is_city() && s.opponent_is_human(player, game)
             {
                 objective_is_ready(game.player_mut(player), name);
             }
@@ -131,18 +131,26 @@ pub(crate) fn naval_assault() -> Objective {
         "You captured a city with army units that disembarked from a ship.",
     )
     .add_simple_persistent_event_listener(
+        |event| &mut event.capture_undefended_position,
+        0,
+        |game, p, _, s| eval_naval_assault(game, p, s),
+    )
+    .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
         6,
-        |game, player, _, e| {
-            let s = &e.combat.stats;
-            if s.disembarked
-                && s.opponent_is_human(player, game)
-                && s.is_winner(player)
-                && s.battleground.is_city()
-            {
-                objective_is_ready(game.player_mut(player), name);
-            }
+        |game, p, _, e| {
+            eval_naval_assault(game, p, &e.combat.stats);
         },
     )
     .build()
+}
+
+fn eval_naval_assault(game: &mut Game, player: usize, s: &CombatStats) {
+    if s.disembarked
+        && s.opponent_is_human(player, game)
+        && s.is_winner(player)
+        && s.battleground.is_city()
+    {
+        objective_is_ready(game.player_mut(player), "Naval Assault");
+    }
 }

@@ -175,7 +175,7 @@ impl CombatStats {
 }
 
 pub(crate) fn new_combat_stats(
-    game: &mut Game,
+    game: &Game,
     defender: usize,
     defender_position: Position,
     attacker: usize,

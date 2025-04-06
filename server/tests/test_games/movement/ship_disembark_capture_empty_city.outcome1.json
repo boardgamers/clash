@@ -142,6 +142,9 @@
         "Voting"
       ],
       "incident_tokens": 3,
+      "completed_objectives": [
+        "Naval Assault"
+      ],
       "wonder_cards": [
         "Pyramids"
       ],
@@ -318,6 +321,76 @@
                     {
                       "op": "remove",
                       "path": "/state/Movement/moved_units"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events"
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ObjectiveCard": 10
+                        }
+                      ]
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "SelectObjectives": {
+                              "cards": [
+                                {
+                                  "ObjectiveCard": 10
+                                }
+                              ],
+                              "objective_opportunities": [
+                                "Naval Assault"
+                              ]
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "Builtin": "Select Objective Cards to Complete"
+                            },
+                            "priority": 0,
+                            "request": {
+                              "SelectHandCards": {
+                                "choices": [
+                                  {
+                                    "ObjectiveCard": 10
+                                  }
+                                ],
+                                "description": "Select cards to complete",
+                                "needed": {
+                                  "end": 1,
+                                  "start": 0
+                                }
+                              }
+                            }
+                          },
+                          "last_priority_used": 0,
+                          "player": 0
+                        }
+                      ]
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/objective_cards",
+                      "value": [
+                        10
+                      ]
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/completed_objectives"
                     }
                   ]
                 }
@@ -328,11 +401,14 @@
       ]
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 2,
   "log": [
     [
       "Player1 disembarked 1 cavalry and 1 elephant from C3 to B2 and captured Player2's city at B2",
       "Player1 could not store 2 gold"
+    ],
+    [
+      "Player1 completed objective Naval Assault"
     ]
   ],
   "undo_limit": 0,

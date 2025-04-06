@@ -2,7 +2,7 @@ use crate::city::City;
 use crate::city::MoodState::Angry;
 use crate::city_pieces::Building;
 use crate::combat_listeners::{
-    Casualties, CombatEventPhase, CombatRoundEnd, CombatRoundStart, CombatStrength,
+    Casualties, CombatEventPhase, CombatResult, CombatRoundEnd, CombatRoundStart, CombatStrength,
     combat_round_end, combat_round_start,
 };
 use crate::combat_roll::CombatRoundStats;
@@ -471,10 +471,23 @@ pub(crate) fn move_with_possible_combat(
         );
     }
 
-    if let Some(enemy) = enemy {
-        capture_position(game, enemy, m.destination, player_index);
+    if let Some(defender) = enemy {
+        capture_position(game, defender, m.destination, player_index);
+
+        let mut s = new_combat_stats(game, defender, m.destination, player_index, &m.units);
+        s.result = Some(CombatResult::AttackerWins);
+        on_capture_undefended_position(game, player_index, s);
     }
     false
+}
+
+pub(crate) fn on_capture_undefended_position(game: &mut Game, player_index: usize, s: CombatStats) {
+    let _ = game.trigger_persistent_event(
+        &[player_index],
+        |events| &mut events.capture_undefended_position,
+        s,
+        PersistentEventType::CaptureUndefendedPosition,
+    );
 }
 
 #[cfg(test)]

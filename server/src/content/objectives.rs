@@ -1,4 +1,4 @@
-pub(crate) mod combat;
+pub(crate) mod combat_objectives;
 pub(crate) mod non_combat;
 pub(crate) mod status_phase_objectives;
 

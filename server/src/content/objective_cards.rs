@@ -1,4 +1,4 @@
-use crate::content::objectives::combat::{conqueror, defiance, general, great_battle, naval_assault, warmonger};
+use crate::content::objectives::combat_objectives::{conqueror, defiance, general, great_battle, naval_assault, warmonger};
 use crate::content::objectives::non_combat::draft;
 use crate::content::objectives::status_phase_objectives::{advanced_culture, city_planner, coastal_lead, education_lead, eureka, happy_population, large_civ, optimized_storage, religious_fervor, science_lead, sea_blockade};
 use crate::objective_card::ObjectiveCard;

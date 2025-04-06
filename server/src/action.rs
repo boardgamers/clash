@@ -1,7 +1,7 @@
 use crate::action_card::on_play_action_card;
 use crate::advance::on_advance;
 use crate::collect::on_collect;
-use crate::combat::{combat_loop, move_with_possible_combat, start_combat};
+use crate::combat::{combat_loop, move_with_possible_combat, on_capture_undefended_position, start_combat};
 use crate::combat_listeners::{combat_round_end, combat_round_start, end_combat};
 use crate::construct::on_construct;
 use crate::content::persistent_events::{EventResponse, PersistentEventType};
@@ -164,6 +164,9 @@ pub(crate) fn execute_custom_phase_action(
         }
         CombatEnd(r) => {
             end_combat(game, r);
+        }
+        CaptureUndefendedPosition(c) => {
+            on_capture_undefended_position(game, player_index, c);
         }
         StatusPhase(s) => play_status_phase(game, s),
         TurnStart => game.on_start_turn(),

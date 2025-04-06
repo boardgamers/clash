@@ -23,6 +23,7 @@ use crate::wonder::WonderCardInfo;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::ops::RangeInclusive;
+use crate::combat_stats::CombatStats;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum PersistentEventRequest {
@@ -104,6 +105,7 @@ pub enum PersistentEventType {
     CombatRoundStart(CombatRoundStart),
     CombatRoundEnd(CombatRoundEnd),
     CombatEnd(CombatEnd),
+    CaptureUndefendedPosition(CombatStats),
     StatusPhase(StatusPhaseState),
     TurnStart,
     Advance(AdvanceInfo),
