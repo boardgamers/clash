@@ -123,6 +123,10 @@ pub(crate) fn militarized() -> Objective {
     advance_group_complete("Militarized", "Warfare")
 }
 
+pub(crate) fn culture_focus() -> Objective {
+    advance_group_complete("Culture Focus", "Culture")
+}
+
 pub(crate) fn eureka() -> Objective {
     supplies("Eureka!", ResourceType::Ideas)
 }
@@ -355,3 +359,21 @@ pub(crate) fn threat() -> Objective {
     })
     .build()
 }
+
+pub(crate) fn colony() -> Objective {
+    Objective::builder(
+        "Colony",
+        "You have at least 1 city at least 5 spaces away from your starting city position.",
+    )
+    .contradicting_status_phase_objective("City Founder")
+    .status_phase_check(|game, player| {
+        let setup = get_map_setup(game.human_players_count());
+
+        let h = &setup.home_positions[player.index];
+        let home = h.block.tiles(&h.position, h.position.rotation)[0].0;
+
+        player.cities.iter().any(|c| c.position.distance(home) >= 5)
+    })
+    .build()
+}
+

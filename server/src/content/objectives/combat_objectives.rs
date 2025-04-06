@@ -165,7 +165,7 @@ pub(crate) fn bold() -> Objective {
     )
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
-        5,
+        7,
         |game, player, _, e| {
             let s = &e.combat.stats;
             let b = s.battleground;
@@ -188,3 +188,29 @@ fn warfare_advances(player: &Player) -> usize {
         .filter(|a| player.has_advance(&a.name))
         .count()
 }
+
+pub(crate) fn legendary_battle() -> Objective {
+    let name = "Legendary Battle";
+    Objective::builder(
+        name,
+        "You fought a battle against a city of size 5 or larger with at least 1 wonder.",
+    )
+    .add_simple_persistent_event_listener(
+        |event| &mut event.combat_end,
+        8,
+        |game, player, _, e| {
+            let s = &e.combat.stats;
+            if let Some(city) = game.try_get_any_city(s.position) {
+                let fighters = s.player(player).fighters(s.battleground).sum() >= 3;
+                let city_size = city.size() >= 5;
+                let wonders = !city.pieces.wonders.is_empty();
+                let is_attacker = s.attacker.player == player;
+                if fighters && city_size && wonders && is_attacker {
+                    objective_is_ready(game.player_mut(player), name);
+                }
+            }
+        },
+    )
+    .build()
+}
+
