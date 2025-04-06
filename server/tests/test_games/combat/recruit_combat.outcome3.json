@@ -269,29 +269,6 @@
                         "gold": 1
                       }
                     }
-                  },
-                  "combat_stats": {
-                    "position": "C3",
-                    "battleground": "Sea",
-                    "attacker": {
-                      "player": 0,
-                      "fighters": {
-                        "ships": 3
-                      },
-                      "losses": {
-                        "ships": 2
-                      }
-                    },
-                    "defender": {
-                      "player": 2,
-                      "fighters": {
-                        "ships": 2
-                      },
-                      "losses": {
-                        "ships": 2
-                      }
-                    },
-                    "result": "AttackerWins"
                   }
                 },
                 {
@@ -350,7 +327,7 @@
                             "origin": {
                               "Builtin": "Barbarians bonus"
                             },
-                            "priority": 3,
+                            "priority": 103,
                             "request": {
                               "ResourceReward": {
                                 "name": "Select a reward for fighting the Pirates",
@@ -375,7 +352,7 @@
                               }
                             }
                           },
-                          "last_priority_used": 3,
+                          "last_priority_used": 103,
                           "player": 0
                         }
                       ]
