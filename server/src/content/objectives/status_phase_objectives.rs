@@ -1,4 +1,5 @@
 use crate::city_pieces::Building;
+use crate::content::advances;
 use crate::game::Game;
 use crate::objective_card::{Objective, ObjectiveBuilder};
 use crate::player::Player;
@@ -81,8 +82,17 @@ pub(crate) fn advanced_culture() -> Objective {
     .build()
 }
 
-fn advance_group_complete(b: ObjectiveBuilder, building: Building) -> ObjectiveBuilder {
-    b.status_phase_check(move |game, player| {
-        leading_player(game, player, move |p| buildings(p, building))
+fn advance_group_complete(b: ObjectiveBuilder, group: &'static str) -> ObjectiveBuilder {
+    b.status_phase_check(move |_game, player| {
+        let g = advances::get_group(group);
+        g.advances.iter().all(|a| player.has_advance(&a.name))
     })
+}
+
+pub(crate) fn city_planner() -> Objective {
+    advance_group_complete(
+        Objective::builder("City Planner", "You have all 4 construction advances"),
+        "Construction",
+    )
+    .build()
 }

@@ -14,9 +14,6 @@ pub struct CombatPlayerStats {
     pub player: usize,
     #[serde(default)]
     #[serde(skip_serializing_if = "Units::is_empty")]
-    pub fighters: Units,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Units::is_empty")]
     pub present: Units,
     #[serde(default)]
     #[serde(skip_serializing_if = "Units::is_empty")]
@@ -25,10 +22,9 @@ pub struct CombatPlayerStats {
 
 impl CombatPlayerStats {
     #[must_use]
-    pub fn new(player: usize, fighters: Units, present: Units) -> Self {
+    pub fn new(player: usize, present: Units) -> Self {
         Self {
             player,
-            fighters,
             present,
             losses: Units::empty(),
         }
@@ -40,6 +36,21 @@ impl CombatPlayerStats {
             losses += t;
         }
         self.losses = losses;
+    }
+
+    pub fn fighters(&self, battleground: Battleground) -> Units {
+        self.present
+            .clone()
+            .to_vec()
+            .into_iter()
+            .filter(|u| {
+                if battleground.is_land() {
+                    u.is_army_unit()
+                } else {
+                    u.is_ship()
+                }
+            })
+            .collect()
     }
 }
 
@@ -178,17 +189,9 @@ pub(crate) fn new_combat_stats(
     let stats = CombatStats::new(
         defender_position,
         battleground,
-        CombatPlayerStats::new(
-            attacker,
-            to_units(
-                &active_attackers(game, attacker, attackers, defender_position),
-                a,
-            ),
-            to_units(attackers, a),
-        ),
+        CombatPlayerStats::new(attacker, to_units(attackers, a)),
         CombatPlayerStats::new(
             defender,
-            to_units(&active_defenders(game, defender, defender_position), d),
             d.get_units(defender_position)
                 .iter()
                 .map(|unit| unit.unit_type)

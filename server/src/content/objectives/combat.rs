@@ -85,10 +85,11 @@ pub(crate) fn great_battle() -> Objective {
     )
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
-        3,
+        4,
         |game, player, _, e| {
             let stats = &e.combat.stats;
-            let army_units_present: u8 = stats.attacker.fighters.sum() + stats.defender.fighters.sum();
+            let b = stats.battleground;
+            let army_units_present: u8 = stats.attacker.fighters(b).sum() + stats.defender.fighters(b).sum();
             if stats.battleground.is_land() && army_units_present >= 6 {
                 objective_is_ready(game.player_mut(player), name);
             }
