@@ -23,7 +23,9 @@
       },
       "cities": [
         {
-          "city_pieces": {},
+          "city_pieces": {
+            "observatory": 0
+          },
           "mood_state": "Neutral",
           "activations": 1,
           "position": "A1"

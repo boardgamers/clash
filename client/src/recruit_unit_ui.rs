@@ -95,7 +95,7 @@ fn selectable_unit(
         unit.leader_name.as_ref().or(leader_name),
         None,
     )
-    .is_some()
+    .is_ok()
     {
         u32::from(current + 1)
     } else {
