@@ -1,6 +1,14 @@
-use crate::content::objectives::combat_objectives::{bold, conqueror, defiance, general, great_battle, legendary_battle, naval_assault, warmonger};
+use crate::content::objectives::combat_objectives::{
+    bold, conqueror, defiance, general, great_battle, legendary_battle, naval_assault, warmonger,
+};
 use crate::content::objectives::non_combat::draft;
-use crate::content::objectives::status_phase_objectives::{advanced_culture, city_planner, coastal_lead, colony, consulate, culture_focus, diversity, education_lead, eureka, food_supplies, fortifications, goal_focused, happy_population, large_army, large_civ, large_fleet, militarized, optimized_storage, ore_supplies, religious_fervor, science_focus, science_lead, sea_blockade, standing_army, threat, wealth, wood_supplies};
+use crate::content::objectives::status_phase_objectives::{
+    advanced_culture, city_planner, coastal_lead, colony, consulate, culture_focus, diversity,
+    education_lead, eureka, food_supplies, fortifications, goal_focused, happy_population,
+    large_army, large_civ, large_fleet, militarized, optimized_storage, ore_supplies,
+    religious_fervor, science_focus, science_lead, sea_blockade, standing_army, threat, wealth,
+    wood_supplies,
+};
 use crate::objective_card::ObjectiveCard;
 use itertools::Itertools;
 use std::vec;

@@ -213,4 +213,3 @@ pub(crate) fn legendary_battle() -> Objective {
     )
     .build()
 }
-
