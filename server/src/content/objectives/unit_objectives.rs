@@ -218,3 +218,13 @@ pub(crate) fn horse_power() -> Objective {
     })
     .build()
 }
+
+pub(crate) fn versatility() -> Objective {
+    Objective::builder(
+        "Versatility",
+        "You have at least 1 of each unit \
+        (ship, infantry, cavalry, elephant, leader, settler)",
+    )
+    .status_phase_check(|_game, player| player.units.iter().unique_by(|u| u.unit_type).count() >= 6)
+    .build()
+}

@@ -97,9 +97,9 @@ pub(crate) fn happy_population() -> Objective {
         .build()
 }
 
-pub(crate) fn diversity() -> Objective {
+pub(crate) fn architecture() -> Objective {
     Objective::builder(
-        "Diversity",
+        "Architecture",
         "You have at least 4 different types of buildings \
         (that are not influenced by another player).",
     )

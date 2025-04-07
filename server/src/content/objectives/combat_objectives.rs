@@ -321,16 +321,37 @@ pub(crate) fn great_commander() -> Objective {
             let s = &e.combat.stats;
             let b = s.battleground;
             let o = s.opponent(player);
-            let not_more_fighters =
-                s.player(player).fighters(b).sum() <= o.fighters(b).sum();
-            
-            if s.is_winner(player)
-                && s.player(player).present.leaders > 0
-                && not_more_fighters
-            {
+            let not_more_fighters = s.player(player).fighters(b).sum() <= o.fighters(b).sum();
+
+            if s.is_winner(player) && s.player(player).present.leaders > 0 && not_more_fighters {
                 objective_is_ready(game.player_mut(player), name);
             }
         },
     )
     .build()
+}
+
+pub(crate) fn brutus() -> Objective {
+    let name = "Brutus";
+    Objective::builder(name, "You killed a leader and 2 army units in a battle.")
+        .add_simple_persistent_event_listener(
+            |event| &mut event.combat_end,
+            13,
+            |game, player, _, e| {
+                let s = &e.combat.stats;
+                let l = &s.opponent(player).losses;
+
+                if l.leaders > 0
+                    && l.clone()
+                        .to_vec()
+                        .iter()
+                        .filter(|u| u.is_army_unit() || u.is_ship())
+                        .count()
+                        >= 3
+                {
+                    objective_is_ready(game.player_mut(player), name);
+                }
+            },
+        )
+        .build()
 }
