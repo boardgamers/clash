@@ -183,7 +183,7 @@ impl RecruitSelection {
     }
 
     pub fn confirm(&self, game: &Game) -> OkTooltip {
-        if recruit_cost(
+        recruit_cost(
             game.player(self.amount.player_index),
             &self.amount.units,
             self.amount.city_position,
@@ -191,12 +191,10 @@ impl RecruitSelection {
             self.replaced_units.as_slice(),
             None,
         )
-        .is_some()
-        {
-            OkTooltip::Valid("Recruit units".to_string())
-        } else {
-            OkTooltip::Invalid("Replace exact amount of units".to_string())
-        }
+        .map_or_else(
+            |_| OkTooltip::Invalid("Replace exact amount of units".to_string()),
+            |_| OkTooltip::Valid("Recruit units".to_string()),
+        )
     }
 }
 

@@ -138,6 +138,10 @@ pub fn recruit_cost(
     recruit_cost_without_replaced(player, units, city_position, leader_name, execute)
 }
 
+///
+/// # Errors
+///
+/// Errors if the cost cannot be paid
 pub fn recruit_cost_without_replaced(
     player: &Player,
     units: &Units,
