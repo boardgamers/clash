@@ -63,7 +63,7 @@ pub(crate) fn fortifications() -> Objective {
 
 fn building_lead(b: ObjectiveBuilder, building: Building) -> ObjectiveBuilder {
     b.status_phase_check(move |game, player| {
-        leading_player(game, player, 1, move |p| buildings(p, building))
+        leading_player(game, player, 1, move |p, _| buildings(p, building))
     })
 }
 
@@ -71,14 +71,14 @@ fn leading_player(
     game: &Game,
     player: &Player,
     margin: usize,
-    value: impl Fn(&Player) -> usize + 'static,
+    value: impl Fn(&Player, &Game) -> usize + 'static,
 ) -> bool {
-    value(player)
+    value(player, game)
         >= game
             .players
             .iter()
             .filter(|p| p.index != player.index && p.is_human())
-            .map(value)
+            .map(|p| value(p, game))
             .max()
             .unwrap_or(0)
             + margin
@@ -97,7 +97,7 @@ pub(crate) fn advanced_culture() -> Objective {
         "You have more advances than any other player - at least 6.",
     )
     .status_phase_check(|game, player| {
-        player.advances.len() >= 6 && leading_player(game, player, 1, move |p| p.advances.len())
+        player.advances.len() >= 6 && leading_player(game, player, 1, move |p, _| p.advances.len())
     })
     .build()
 }
@@ -260,7 +260,7 @@ pub(crate) fn large_fleet() -> Objective {
     )
     .status_phase_check(|game, player| {
         let ships = ship_count(player);
-        ships >= 4 || (ships >= 2 && leading_player(game, player, 1, ship_count))
+        ships >= 4 || (ships >= 2 && leading_player(game, player, 1, |p, _| ship_count(p)))
     })
     .build()
 }
@@ -275,7 +275,7 @@ pub(crate) fn large_army() -> Objective {
         "You have at least 4 more army units than any other player.",
     )
     .status_phase_check(|game, player| {
-        leading_player(game, player, 4, |p| {
+        leading_player(game, player, 4, |p, _| {
             p.units
                 .iter()
                 .filter(|u| u.unit_type.is_army_unit())
@@ -332,7 +332,7 @@ pub(crate) fn goal_focused() -> Objective {
         "You have more complete advance groups than any other player.",
     )
     .status_phase_check(|game, player| {
-        leading_player(game, player, 1, |p| {
+        leading_player(game, player, 1, |p, _| {
             advances::get_groups()
                 .iter()
                 .filter(|g| g.advances.iter().all(|a| p.has_advance(&a.name)))
@@ -484,4 +484,37 @@ pub(crate) fn shipping_routes() -> Objective {
     .contradicting_status_phase_objective("Trade Power")
     .status_phase_check(|game, player| find_trade_routes(game, player, true).len() >= 2)
     .build()
+}
+
+pub(crate) fn diversified_research() -> Objective {
+    Objective::builder(
+        "Diversified Research",
+        "You have at least 1 advance in 9 different advance groups.",
+    )
+    .status_phase_check(|_game, player| {
+        advances::get_groups()
+            .iter()
+            .filter(|g| g.advances.iter().any(|a| player.has_advance(&a.name)))
+            .count()
+            >= 9
+    })
+    .build()
+}
+
+pub(crate) fn culture_power() -> Objective {
+    Objective::builder(
+        "Culture Power",
+        "You have influenced more buildings than any other player.",
+    )
+    .status_phase_check(|game, player| leading_player(game, player, 1, influenced_buildings))
+    .build()
+}
+
+fn influenced_buildings(player: &Player, game: &Game) -> usize {
+    game.players
+        .iter()
+        .filter(|p| p.index != player.index)
+        .flat_map(|p| &p.cities)
+        .map(|c| c.pieces.buildings(Some(player.index)).len())
+        .sum()
 }
