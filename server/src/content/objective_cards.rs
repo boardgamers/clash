@@ -10,11 +10,18 @@ use crate::content::objectives::advance_objectives::{
     city_planner, culture_focus, diversified_research, education_lead, goal_focused, government,
     militarized, science_focus, seafarers, trade_focus,
 };
-use crate::content::objectives::city_objectives::{advanced_culture, coastal_lead, consulate, culture_power, diversity, expansionist, fortifications, happy_population, large_civ, metropolis, religious_fervor, science_lead, star_gazers};
+use crate::content::objectives::city_objectives::{
+    advanced_culture, coastal_lead, consulate, culture_power, diversity, expansionist,
+    fortifications, happy_population, large_civ, metropolis, religious_fervor, science_lead,
+    star_gazers,
+};
 use crate::content::objectives::resource_objectives::{
     eureka, food_supplies, optimized_storage, ore_supplies, wealth, wood_supplies,
 };
-use crate::content::objectives::unit_objectives::{colony, horse_power, large_army, large_fleet, military_might, outpost, sea_blockade, shipping_routes, standing_army, threat, trade_power};
+use crate::content::objectives::unit_objectives::{
+    colony, horse_power, large_army, large_fleet, military_might, outpost, sea_blockade,
+    shipping_routes, standing_army, threat, trade_power,
+};
 use crate::objective_card::ObjectiveCard;
 use itertools::Itertools;
 use std::vec;
