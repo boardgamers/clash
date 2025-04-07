@@ -202,15 +202,23 @@ pub(crate) fn shipping_routes() -> Objective {
 }
 
 pub(crate) fn horse_power() -> Objective {
+    unit_versatility("Horse Power", UnitType::Cavalry)
+}
+
+pub(crate) fn ivory_tower() -> Objective {
+    unit_versatility("Ivory Tower", UnitType::Elephant)
+}
+
+pub(crate) fn unit_versatility(objective: &str, unit_type: UnitType) -> Objective {
     Objective::builder(
-        "Horse Power",
-        "You have at least 3 army groups with at least 1 cavalry unit each.",
+        objective,
+        &format!("You have at least 3 army groups with at least 1 {} unit each.", unit_type.name())
     )
-    .status_phase_check(|_game, player| {
+    .status_phase_check(move|_game, player| {
         player
             .units
             .iter()
-            .filter(|u| u.unit_type == UnitType::Cavalry)
+            .filter(|u| u.unit_type == unit_type)
             .map(|u| u.position)
             .unique()
             .count()

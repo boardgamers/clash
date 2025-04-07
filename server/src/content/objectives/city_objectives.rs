@@ -29,6 +29,10 @@ pub(crate) fn traders() -> Objective {
     building_lead("Traders", Building::Market)
 }
 
+pub(crate) fn legacy() -> Objective {
+    building_lead("Legacy", Building::Obelisk)
+}
+
 fn building_lead(objective: &'static str, building: Building) -> Objective {
     Objective::builder(
         objective,

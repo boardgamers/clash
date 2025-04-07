@@ -7,11 +7,11 @@ use crate::content::objectives::advance_objectives::{
     city_planner, culture_focus, diversified_research, education_lead, goal_focused, government,
     militarized, science_focus, seafarers, trade_focus,
 };
-use crate::content::objectives::city_objectives::{advanced_culture, coastal_lead, consulate, culture_power, architecture, expansionist, fortifications, happy_population, large_civ, metropolis, religious_fervor, science_lead, star_gazers, traders};
+use crate::content::objectives::city_objectives::{advanced_culture, coastal_lead, consulate, culture_power, architecture, expansionist, fortifications, happy_population, large_civ, metropolis, religious_fervor, science_lead, star_gazers, traders, legacy};
 use crate::content::objectives::resource_objectives::{
     eureka, food_supplies, optimized_storage, ore_supplies, wealth, wood_supplies,
 };
-use crate::content::objectives::unit_objectives::{colony, horse_power, large_army, large_fleet, military_might, outpost, sea_blockade, shipping_routes, standing_army, threat, trade_power, versatility};
+use crate::content::objectives::unit_objectives::{colony, horse_power, ivory_tower, large_army, large_fleet, military_might, outpost, sea_blockade, shipping_routes, standing_army, threat, trade_power, versatility};
 use crate::objective_card::ObjectiveCard;
 use itertools::Itertools;
 use std::vec;
@@ -54,6 +54,7 @@ pub(crate) fn get_all() -> Vec<ObjectiveCard> {
         ObjectiveCard::new(33, star_gazers(), horse_power()),
         ObjectiveCard::new(34, traders(), great_commander()),
         ObjectiveCard::new(35, versatility(), brutus()),
+        ObjectiveCard::new(36, legacy(), ivory_tower()),
     ];
     assert_eq!(
         all.iter().unique_by(|i| i.id).count(),
