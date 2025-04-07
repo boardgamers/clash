@@ -367,15 +367,13 @@ fn custom(game: &mut Game, player_index: usize, custom_action: CustomAction) -> 
 }
 
 pub(crate) fn found_city(game: &mut Game, player: usize, position: Position) {
-    game.player_mut(player).cities.push(City::new(player, position));
+    game.player_mut(player)
+        .cities
+        .push(City::new(player, position));
     on_found_city(game, player, position);
 }
 
-pub(crate) fn on_found_city(
-    game: &mut Game,
-    player_index: usize,
-    position: Position,
-) {
+pub(crate) fn on_found_city(game: &mut Game, player_index: usize, position: Position) {
     let _ = game.trigger_persistent_event(
         &[player_index],
         |e| &mut e.found_city,

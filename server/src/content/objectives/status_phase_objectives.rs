@@ -346,16 +346,17 @@ pub(crate) fn colony() -> Objective {
     Objective::builder(
         "Colony",
         "You have at least 1 city at least 5 spaces away from your starting city position. \
-        Cannot be completed if you completed City Founder this age.",
+        Cannot be completed if you completed City Founder in the last round.",
     )
     .status_phase_check(|game, player| {
-        let home = home_position(game, &player);
+        let home = home_position(game, player);
         if player.cities.iter().any(|c| c.position.distance(home) >= 5) {
             let city_founder_played = game
                 .action_log
                 .last()
+                .and_then(|a| a.rounds.last())
                 .iter()
-                .flat_map(|a| a.rounds.iter().flat_map(|r| r.players.iter()))
+                .flat_map(|r| r.players.iter())
                 .filter(|p| p.index == player.index)
                 .flat_map(|p| p.items.iter())
                 .any(|i| i.completed_objectives.contains(&"City Founder".to_string()));

@@ -1,6 +1,16 @@
-use crate::content::objectives::combat_objectives::{aggressor, barbarian_conquest, bold, conqueror, defiance, general, great_battle, legendary_battle, naval_assault, resistance, scavenger, warmonger};
+use crate::content::objectives::combat_objectives::{
+    aggressor, barbarian_conquest, bold, conqueror, defiance, general, great_battle,
+    legendary_battle, naval_assault, resistance, scavenger, warmonger,
+};
 use crate::content::objectives::non_combat::{city_founder, draft, terror_regime};
-use crate::content::objectives::status_phase_objectives::{advanced_culture, city_planner, coastal_lead, colony, consulate, culture_focus, diversity, education_lead, eureka, expansionist, food_supplies, fortifications, goal_focused, government, happy_population, large_army, large_civ, large_fleet, metropolis, militarized, military_might, optimized_storage, ore_supplies, religious_fervor, science_focus, science_lead, sea_blockade, seafarers, shipping_routes, standing_army, threat, trade_focus, trade_power, wealth, wood_supplies};
+use crate::content::objectives::status_phase_objectives::{
+    advanced_culture, city_planner, coastal_lead, colony, consulate, culture_focus, diversity,
+    education_lead, eureka, expansionist, food_supplies, fortifications, goal_focused, government,
+    happy_population, large_army, large_civ, large_fleet, metropolis, militarized, military_might,
+    optimized_storage, ore_supplies, religious_fervor, science_focus, science_lead, sea_blockade,
+    seafarers, shipping_routes, standing_army, threat, trade_focus, trade_power, wealth,
+    wood_supplies,
+};
 use crate::objective_card::ObjectiveCard;
 use itertools::Itertools;
 use std::vec;

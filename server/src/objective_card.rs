@@ -160,7 +160,7 @@ pub(crate) fn present_instant_objective_cards(game: &mut Game) {
     };
 
     let opportunities = std::mem::take(&mut game.player_mut(player).objective_opportunities);
-    
+
     present_objective_cards(game, player, opportunities);
 }
 
@@ -423,12 +423,15 @@ mod tests {
 
         let mut got = combinations(&cards, &opportunities);
         got.sort();
-        assert_eq!(got, vec![
+        assert_eq!(
+            got,
             vec![
-                (0, "Objective 1".to_string()),
-                (1, "Objective 4".to_string()),
-            ],
-            vec![(1, "Objective 1".to_string()),],
-        ]);
+                vec![
+                    (0, "Objective 1".to_string()),
+                    (1, "Objective 4".to_string()),
+                ],
+                vec![(1, "Objective 1".to_string()),],
+            ]
+        );
     }
 }

@@ -330,6 +330,11 @@
                       "op": "remove",
                       "path": "/players/0/completed_objectives"
                     }
+                  ],
+                  "completed_objectives": [
+                    "Conqueror",
+                    "General",
+                    "Great Battle"
                   ]
                 }
               ]

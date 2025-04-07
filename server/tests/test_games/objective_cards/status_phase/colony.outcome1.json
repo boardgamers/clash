@@ -506,6 +506,9 @@
                       "op": "remove",
                       "path": "/players/1/completed_objectives"
                     }
+                  ],
+                  "completed_objectives": [
+                    "Colony"
                   ]
                 }
               ]

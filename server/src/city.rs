@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::ops::{Add, Sub};
 
 use crate::content::custom_actions::CustomActionType::ForcedLabor;
+use crate::utils;
 use crate::{
     city_pieces::{CityPieces, CityPiecesData},
     game::Game,
@@ -10,7 +11,6 @@ use crate::{
 };
 use MoodState::*;
 use num::Zero;
-use crate::utils;
 pub struct City {
     pub pieces: CityPieces,
     pub mood_state: MoodState,

@@ -21,9 +21,7 @@ use crate::movement::{
     CurrentMove, MoveState, MovementAction, get_move_state, has_movable_units,
     move_units_destinations,
 };
-use crate::objective_card::{
-    on_objective_cards,  present_objective_cards,
-};
+use crate::objective_card::{on_objective_cards, present_objective_cards};
 use crate::playing_actions::{PlayingAction, on_found_city};
 use crate::recruit::on_recruit;
 use crate::resource::check_for_waste;
@@ -140,8 +138,7 @@ fn execute_without_undo(
         .count()
         >= 4
     {
-        // todo test with regular increase mood and with persistent events
-        present_objective_cards(&mut game, player_index, vec!["Terror Regime".to_string()])
+        present_objective_cards(&mut game, player_index, vec!["Terror Regime".to_string()]);
     }
 
     Ok(game)

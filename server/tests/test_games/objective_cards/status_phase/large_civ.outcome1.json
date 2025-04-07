@@ -475,6 +475,15 @@
                       "op": "remove",
                       "path": "/players/0/completed_objectives"
                     }
+                  ],
+                  "completed_objectives": [
+                    "Large Civilization",
+                    "Advanced Culture",
+                    "Religious Fervor",
+                    "City Planner",
+                    "Eureka!",
+                    "Sea Blockade",
+                    "Government"
                   ]
                 }
               ]

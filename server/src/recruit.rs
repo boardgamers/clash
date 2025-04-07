@@ -111,7 +111,7 @@ pub(crate) fn on_recruit(game: &mut Game, player_index: usize, r: Recruit) {
 
 ///
 /// # Errors
-/// 
+///
 /// Errors if the cost cannot be paid
 pub fn recruit_cost(
     player: &Player,

@@ -303,6 +303,9 @@
                       "op": "remove",
                       "path": "/players/0/completed_objectives"
                     }
+                  ],
+                  "completed_objectives": [
+                    "Defiance"
                   ]
                 }
               ]
