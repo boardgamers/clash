@@ -7,13 +7,13 @@ use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{PaymentRequest, PersistentEventType, PositionRequest};
 use crate::content::wonders::get_wonder;
 use crate::events::EventOrigin;
+use crate::log::current_action_log_item;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::utils::remove_element;
 use crate::{ability_initializer::AbilityInitializerSetup, game::Game, position::Position};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use crate::log::{current_action_log_item, current_player_turn_log};
 
 type PlacementChecker = Box<dyn Fn(Position, &Game) -> bool>;
 

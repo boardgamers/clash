@@ -425,4 +425,3 @@ pub(crate) fn current_action_log_item(game: &mut Game) -> &mut ActionLogItem {
         .last_mut()
         .expect("items empty")
 }
-

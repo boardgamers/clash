@@ -2,8 +2,8 @@ use crate::city::MoodState;
 use crate::city_pieces::Building;
 use crate::content::advances;
 use crate::content::advances::trade_routes::find_trade_routes;
+use crate::content::objectives::non_combat::last_player_round;
 use crate::game::Game;
-use crate::log::{ActionLogItem, ActionLogPlayer, ActionLogRound};
 use crate::map::get_map_setup;
 use crate::objective_card::{Objective, ObjectiveBuilder};
 use crate::player::Player;
@@ -11,7 +11,6 @@ use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
-use crate::content::objectives::non_combat::last_player_round;
 
 pub(crate) fn large_civ() -> Objective {
     Objective::builder("Large Civilization", "You have at least 6 cities")
@@ -515,3 +514,26 @@ fn influenced_buildings(player: &Player, game: &Game) -> usize {
         .sum()
 }
 
+pub(crate) fn outpost() -> Objective {
+    Objective::builder(
+        "Outpost",
+        "You have army units on at least 3 spaces outside, and not adjacent to cities",
+    )
+    .status_phase_check(|_game, player| {
+        player
+            .units
+            .iter()
+            .filter_map(|u| {
+                (u.unit_type.is_army_unit()
+                    && player
+                        .cities
+                        .iter()
+                        .all(|c| c.position.distance(u.position) > 0))
+                .then_some(u.position)
+            })
+            .unique()
+            .count()
+            >= 3
+    })
+    .build()
+}

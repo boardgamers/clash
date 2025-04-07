@@ -104,9 +104,19 @@
       ],
       "units": [
         {
-          "position": "D8",
-          "unit_type": "Settler",
+          "position": "B3",
+          "unit_type": "Infantry",
           "id": 0
+        },
+        {
+          "position": "B4",
+          "unit_type": "Infantry",
+          "id": 1
+        },
+        {
+          "position": "B5",
+          "unit_type": "Infantry",
+          "id": 2
         }
       ],
       "civilization": "test1",
@@ -116,7 +126,8 @@
       ],
       "incident_tokens": 3,
       "completed_objectives": [
-        "Colony"
+        "Colony",
+        "Outpost"
       ],
       "action_cards": [
         42
@@ -437,6 +448,9 @@
                       "SelectHandCards": [
                         {
                           "ObjectiveCard": 17
+                        },
+                        {
+                          "ObjectiveCard": 32
                         }
                       ]
                     }
@@ -464,10 +478,14 @@
                             "cards": [
                               {
                                 "ObjectiveCard": 17
+                              },
+                              {
+                                "ObjectiveCard": 32
                               }
                             ],
                             "objective_opportunities": [
-                              "Colony"
+                              "Colony",
+                              "Outpost"
                             ]
                           }
                         },
@@ -481,11 +499,14 @@
                               "choices": [
                                 {
                                   "ObjectiveCard": 17
+                                },
+                                {
+                                  "ObjectiveCard": 32
                                 }
                               ],
                               "description": "Select cards to complete",
                               "needed": {
-                                "end": 1,
+                                "end": 2,
                                 "start": 0
                               }
                             }
@@ -499,7 +520,8 @@
                       "op": "add",
                       "path": "/players/1/objective_cards",
                       "value": [
-                        17
+                        17,
+                        32
                       ]
                     },
                     {
@@ -508,7 +530,8 @@
                     }
                   ],
                   "completed_objectives": [
-                    "Colony"
+                    "Colony",
+                    "Outpost"
                   ]
                 }
               ]
@@ -552,7 +575,8 @@
       "The game has entered the 1st status phase"
     ],
     [
-      "Player2 completed objective Colony"
+      "Player2 completed objective Colony",
+      "Player2 completed objective Outpost"
     ]
   ],
   "undo_limit": 1,

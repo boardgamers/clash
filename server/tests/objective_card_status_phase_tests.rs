@@ -59,6 +59,7 @@ fn test_colony() {
                 1,
                 Action::Response(EventResponse::SelectHandCards(vec![
                     HandCard::ObjectiveCard(17),
+                    HandCard::ObjectiveCard(32),
                 ])),
             ),
         ],

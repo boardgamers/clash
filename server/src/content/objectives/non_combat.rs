@@ -64,22 +64,22 @@ pub(crate) fn magnificent_culture() -> Objective {
     .status_phase_check(|game, player| {
         let wonders = last_round(game)
             .iter()
-            .flat_map(|p| {
+            .filter_map(|p| {
                 p.items
                     .iter()
                     .find_map(|i| i.wonder_built.as_ref().map(|n| (n, p.index)))
             })
             .collect_vec();
-        
+
         wonders.len() == 1 && wonders[0].1 == player.index
     })
-        .add_simple_persistent_event_listener(
-            |event| &mut event.play_wonder_card,
-            0,
-            |game, player, _, _| {
-                objective_is_ready(game.player_mut(player), name);
-            },
-        )
+    .add_simple_persistent_event_listener(
+        |event| &mut event.play_wonder_card,
+        0,
+        |game, player, _, _| {
+            objective_is_ready(game.player_mut(player), name);
+        },
+    )
     .build()
 }
 

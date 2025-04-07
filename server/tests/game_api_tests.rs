@@ -327,13 +327,14 @@ fn test_wonder() {
                 Action::Response(EventResponse::Payment(vec![ResourcePile::new(
                     2, 3, 3, 0, 0, 0, 4,
                 )])),
-            ).without_json_comparison(),
+            )
+            .without_json_comparison(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![
                     HandCard::ObjectiveCard(32),
                 ])),
-            )
+            ),
         ],
     );
 }
