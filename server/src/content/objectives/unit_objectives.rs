@@ -3,6 +3,7 @@ use crate::content::objectives::city_objectives::leading_player;
 use crate::content::objectives::non_combat::{home_position, last_player_round};
 use crate::objective_card::Objective;
 use crate::player::Player;
+use crate::unit::UnitType;
 use itertools::Itertools;
 
 pub(crate) fn sea_blockade() -> Objective {
@@ -197,5 +198,23 @@ pub(crate) fn shipping_routes() -> Objective {
     )
     .contradicting_status_phase_objective("Trade Power")
     .status_phase_check(|game, player| find_trade_routes(game, player, true).len() >= 2)
+    .build()
+}
+
+pub(crate) fn horse_power() -> Objective {
+    Objective::builder(
+        "Horse Power",
+        "You have at least 3 army groups with at least 1 cavalry unit each.",
+    )
+    .status_phase_check(|_game, player| {
+        player
+            .units
+            .iter()
+            .filter(|u| u.unit_type == UnitType::Cavalry)
+            .map(|u| u.position)
+            .unique()
+            .count()
+            >= 3
+    })
     .build()
 }

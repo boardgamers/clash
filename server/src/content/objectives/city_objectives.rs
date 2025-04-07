@@ -1,58 +1,42 @@
 use crate::city::MoodState;
 use crate::city_pieces::Building;
 use crate::game::Game;
-use crate::objective_card::{Objective, ObjectiveBuilder};
+use crate::objective_card::Objective;
 use crate::player::Player;
 use itertools::Itertools;
 
 pub(crate) fn science_lead() -> Objective {
-    building_lead(
-        Objective::builder(
-            "Scientific Lead",
-            "You have more academies than any other player",
-        ),
-        Building::Academy,
-    )
-    .build()
+    building_lead("Scientific Lead", Building::Academy)
 }
 
 pub(crate) fn coastal_lead() -> Objective {
-    building_lead(
-        Objective::builder(
-            "Coastal Culture",
-            "You have more ports than any other player",
-        ),
-        Building::Port,
-    )
-    .build()
+    building_lead("Coastal Culture", Building::Port)
 }
 
 pub(crate) fn religious_fervor() -> Objective {
-    building_lead(
-        Objective::builder(
-            "Religious Fervor",
-            "You have more temples than any other player",
-        ),
-        Building::Temple,
-    )
-    .build()
+    building_lead("Religious Fervor", Building::Temple)
 }
 
 pub(crate) fn fortifications() -> Objective {
-    building_lead(
-        Objective::builder(
-            "Fortifications",
-            "You have more fortresses than any other player",
-        ),
-        Building::Fortress,
-    )
-    .build()
+    building_lead("Fortifications", Building::Fortress)
 }
 
-fn building_lead(b: ObjectiveBuilder, building: Building) -> ObjectiveBuilder {
-    b.status_phase_check(move |game, player| {
+pub(crate) fn star_gazers() -> Objective {
+    building_lead("Star Gazers", Building::Observatory)
+}
+
+fn building_lead(objective: &'static str, building: Building) -> Objective {
+    Objective::builder(
+        objective,
+        &format!(
+            "You have more cities with a {} than any other player",
+            building.name()
+        ),
+    )
+    .status_phase_check(move |game, player| {
         leading_player(game, player, 1, move |p, _| buildings(p, building))
     })
+    .build()
 }
 
 fn buildings(p: &Player, b: Building) -> usize {
