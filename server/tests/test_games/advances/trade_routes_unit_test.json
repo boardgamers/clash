@@ -25,29 +25,21 @@
         {
           "city_pieces": {},
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "D6"
         },
         {
           "city_pieces": {},
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "C6"
         },
         {
           "city_pieces": {},
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "B6"
         },
         {
           "city_pieces": {},
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "E6"
         }
       ],
@@ -86,8 +78,6 @@
         {
           "city_pieces": {},
           "mood_state": "Neutral",
-          "activations": 0,
-          "angry_activation": false,
           "position": "D8"
         }
       ],
@@ -145,7 +135,8 @@
         "Mining",
         "Philosophy",
         "Roads",
-        "Tactics"
+        "Tactics",
+        "Trade Routes"
       ],
       "incident_tokens": 1,
       "next_unit_id": 1

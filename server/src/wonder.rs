@@ -7,6 +7,7 @@ use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{PaymentRequest, PersistentEventType, PositionRequest};
 use crate::content::wonders::get_wonder;
 use crate::events::EventOrigin;
+use crate::log::current_action_log_item;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::utils::remove_element;
@@ -274,7 +275,7 @@ pub(crate) fn build_wonder() -> Builtin {
     Builtin::builder("Build Wonder", "Build a wonder")
         .add_position_request(
             |e| &mut e.play_wonder_card,
-            1,
+            11,
             move |game, player_index, i| {
                 let p = game.player(player_index);
                 let choices = cities_for_wonder(&i.name, game, p, &i.discount);
@@ -297,7 +298,7 @@ pub(crate) fn build_wonder() -> Builtin {
         )
         .add_payment_request_listener(
             |e| &mut e.play_wonder_card,
-            0,
+            10,
             move |game, player_index, i| {
                 let p = game.player(player_index);
                 let city = p.get_city(i.selected_position.expect("city not selected"));
@@ -318,6 +319,7 @@ pub(crate) fn build_wonder() -> Builtin {
                     "{} built {} in city {pos} for {}",
                     s.player_name, name, s.choice[0]
                 ));
+                current_action_log_item(game).wonder_built = Some(name.clone());
                 remove_element(&mut game.player_mut(s.player_index).wonder_cards, name);
                 construct_wonder(game, get_wonder(name), pos, s.player_index);
             },

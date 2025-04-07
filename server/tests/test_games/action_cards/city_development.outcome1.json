@@ -27,28 +27,21 @@
           },
           "mood_state": "Neutral",
           "activations": 1,
-          "angry_activation": false,
           "position": "C2"
         },
         {
           "city_pieces": {},
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "C1"
         },
         {
           "city_pieces": {},
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "B2"
         },
         {
           "city_pieces": {},
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "B3"
         }
       ],
@@ -130,15 +123,11 @@
             "fortress": 0
           },
           "mood_state": "Angry",
-          "activations": 0,
-          "angry_activation": false,
           "position": "A1"
         },
         {
           "city_pieces": {},
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "A3"
         },
         {
@@ -146,8 +135,6 @@
             "fortress": 0
           },
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "A4"
         }
       ],
@@ -283,13 +270,12 @@
                       ]
                     },
                     {
-                      "op": "replace",
-                      "path": "/players/0/cities/0/activations",
-                      "value": 0
+                      "op": "remove",
+                      "path": "/players/0/cities/0/city_pieces/fortress"
                     },
                     {
                       "op": "remove",
-                      "path": "/players/0/cities/0/city_pieces/fortress"
+                      "path": "/players/0/cities/0/activations"
                     }
                   ]
                 }

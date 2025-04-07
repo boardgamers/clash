@@ -1,4 +1,5 @@
 use crate::common::*;
+use server::card::HandCard;
 use server::collect::PositionCollection;
 use server::content::persistent_events::{EventResponse, SelectedStructure, Structure};
 use server::game_setup::setup_game;
@@ -301,10 +302,16 @@ fn test_cultural_influence() {
 fn test_found_city() {
     JSON.test(
         "found_city",
-        vec![TestAction::undoable(
-            0,
-            Action::Playing(FoundCity { settler: 4 }),
-        )],
+        vec![
+            TestAction::undoable(0, Action::Playing(FoundCity { settler: 4 }))
+                .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectHandCards(vec![
+                    HandCard::ObjectiveCard(27),
+                ])),
+            ),
+        ],
     );
 }
 
@@ -320,6 +327,13 @@ fn test_wonder() {
                 Action::Response(EventResponse::Payment(vec![ResourcePile::new(
                     2, 3, 3, 0, 0, 0, 4,
                 )])),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectHandCards(vec![
+                    HandCard::ObjectiveCard(32),
+                ])),
             ),
         ],
     );
@@ -346,17 +360,26 @@ fn test_increase_happiness() {
 fn test_recruit() {
     JSON.test(
         "recruit",
-        vec![TestAction::undoable(
-            0,
-            Action::Playing(Recruit(
-                playing_actions::Recruit::new(
-                    &Units::new(1, 1, 0, 0, 0, 0),
-                    Position::from_offset("A1"),
-                    ResourcePile::food(1) + ResourcePile::ore(1) + ResourcePile::gold(2),
-                )
-                .with_replaced_units(&[4]),
-            )),
-        )],
+        vec![
+            TestAction::undoable(
+                0,
+                Action::Playing(Recruit(
+                    playing_actions::Recruit::new(
+                        &Units::new(1, 1, 0, 0, 0, 0),
+                        Position::from_offset("A1"),
+                        ResourcePile::food(1) + ResourcePile::ore(1) + ResourcePile::gold(2),
+                    )
+                    .with_replaced_units(&[4]),
+                )),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectHandCards(vec![
+                    HandCard::ObjectiveCard(29),
+                ])),
+            ),
+        ],
     );
 }
 

@@ -408,14 +408,14 @@ fn move_to_enemy_player_tile(
         .player(defender)
         .get_units(destination)
         .iter()
-        .any(|unit| !unit.unit_type.is_settler());
+        .any(|unit| unit.unit_type.is_military());
     let city = game.player(defender).try_get_city(destination);
     let has_fortress = city.is_some_and(|city| city.pieces.fortress.is_some());
 
     let mut military = false;
     for unit_id in unit_ids {
         let unit = game.player_mut(player_index).get_unit_mut(*unit_id);
-        if !unit.unit_type.is_settler() {
+        if unit.unit_type.is_military() {
             if unit
                 .movement_restrictions
                 .contains(&MovementRestriction::Battle)
@@ -532,7 +532,6 @@ pub mod tests {
             current_player_index: 0,
             action_log: vec![age],
             action_log_index: 0,
-            current_action_log_index: None,
             log: Vec::new(),
             undo_limit: 0,
             actions_left: 3,

@@ -17,8 +17,6 @@
         {
           "city_pieces": {},
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "D1"
         }
       ],
@@ -62,23 +60,29 @@
         {
           "city_pieces": {},
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "D8"
         },
         {
           "city_pieces": {},
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "D3"
         }
       ],
       "units": [
         {
-          "position": "D8",
-          "unit_type": "Settler",
+          "position": "B3",
+          "unit_type": "Infantry",
           "id": 0
+        },
+        {
+          "position": "B4",
+          "unit_type": "Infantry",
+          "id": 1
+        },
+        {
+          "position": "B5",
+          "unit_type": "Infantry",
+          "id": 2
         }
       ],
       "civilization": "test1",
@@ -91,7 +95,8 @@
         42
       ],
       "objective_cards": [
-        17
+        17,
+        32
       ],
       "next_unit_id": 1
     },

@@ -28,29 +28,21 @@
             "temple": 1
           },
           "mood_state": "Angry",
-          "activations": 0,
-          "angry_activation": false,
           "position": "C2"
         },
         {
           "city_pieces": {},
-          "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
+          "mood_state": "Angry",
           "position": "C1"
         },
         {
           "city_pieces": {},
-          "mood_state": "Neutral",
-          "activations": 0,
-          "angry_activation": false,
+          "mood_state": "Angry",
           "position": "B2"
         },
         {
           "city_pieces": {},
-          "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
+          "mood_state": "Angry",
           "position": "B3"
         }
       ],
@@ -105,6 +97,9 @@
         "Voting"
       ],
       "incident_tokens": 3,
+      "completed_objectives": [
+        "Terror Regime"
+      ],
       "next_unit_id": 8
     },
     {
@@ -132,8 +127,6 @@
             "fortress": 0
           },
           "mood_state": "Neutral",
-          "activations": 0,
-          "angry_activation": false,
           "position": "A1"
         }
       ],
@@ -238,6 +231,75 @@
                       ]
                     }
                   }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ObjectiveCard": 29
+                        }
+                      ]
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "SelectObjectives": {
+                              "cards": [
+                                {
+                                  "ObjectiveCard": 29
+                                }
+                              ],
+                              "objective_opportunities": [
+                                "Terror Regime"
+                              ]
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "Builtin": "Select Objective Cards to Complete"
+                            },
+                            "priority": 0,
+                            "request": {
+                              "SelectHandCards": {
+                                "choices": [
+                                  {
+                                    "ObjectiveCard": 29
+                                  }
+                                ],
+                                "description": "Select cards to complete",
+                                "needed": {
+                                  "end": 1,
+                                  "start": 0
+                                }
+                              }
+                            }
+                          },
+                          "last_priority_used": 0,
+                          "player": 0
+                        }
+                      ]
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/objective_cards",
+                      "value": [
+                        29
+                      ]
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/completed_objectives"
+                    }
+                  ],
+                  "completed_objectives": [
+                    "Terror Regime"
+                  ]
                 }
               ]
             }
@@ -246,7 +308,7 @@
       ]
     }
   ],
-  "action_log_index": 2,
+  "action_log_index": 3,
   "log": [
     [
       "Player1 paid 2 gold to get the Storage advance",
@@ -257,9 +319,12 @@
       "Player1 gained 2 gold from a Gold Mine"
     ],
     [
-      "Player1 decreased the mood in city B2 to Neutral",
+      "Player1 decreased the mood in city B2 to Angry",
       "Player1 decreased the mood in city C2 to Angry",
       "Player2 decreased the mood in city A1 to Neutral"
+    ],
+    [
+      "Player1 completed objective Terror Regime"
     ]
   ],
   "undo_limit": 2,

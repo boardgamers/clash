@@ -34,8 +34,6 @@
         {
           "city_pieces": {},
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "D1"
         },
         {
@@ -43,8 +41,6 @@
             "port": 0
           },
           "mood_state": "Neutral",
-          "activations": 0,
-          "angry_activation": false,
           "position": "C3",
           "port_position": "B3"
         }
@@ -76,8 +72,6 @@
         {
           "city_pieces": {},
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "D8"
         },
         {
@@ -85,8 +79,6 @@
             "port": 1
           },
           "mood_state": "Neutral",
-          "activations": 0,
-          "angry_activation": false,
           "position": "E6",
           "port_position": "D5"
         }

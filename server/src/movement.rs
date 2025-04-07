@@ -212,7 +212,7 @@ pub fn move_units_destinations(
     for unit in &units {
         movement_restrictions.extend(unit.movement_restrictions.iter());
         check_can_move(player, start, embark_carrier_id, unit)?;
-        if unit.unit_type.is_army_unit() && !unit.unit_type.is_settler() {
+        if unit.unit_type.is_army_unit() {
             stack_size += 1;
         }
     }

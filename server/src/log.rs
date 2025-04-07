@@ -76,6 +76,12 @@ pub struct ActionLogItem {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub combat_stats: Option<CombatStats>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub wonder_built: Option<String>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub completed_objectives: Vec<String>,
 }
 
 impl ActionLogItem {
@@ -85,6 +91,8 @@ impl ActionLogItem {
             action,
             undo: Vec::new(),
             combat_stats: None,
+            completed_objectives: Vec::new(),
+            wonder_built: None,
         }
     }
 }
@@ -409,4 +417,11 @@ pub fn current_player_turn_log_mut(game: &mut Game) -> &mut ActionLogPlayer {
         .players
         .last_mut()
         .expect("player log should exist")
+}
+
+pub(crate) fn current_action_log_item(game: &mut Game) -> &mut ActionLogItem {
+    current_player_turn_log_mut(game)
+        .items
+        .last_mut()
+        .expect("items empty")
 }

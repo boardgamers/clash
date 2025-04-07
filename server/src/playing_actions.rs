@@ -8,10 +8,9 @@ use crate::construct::Construct;
 use crate::content::action_cards::get_civil_card;
 use crate::content::advances::get_advance;
 use crate::content::custom_actions::CustomActionInfo;
-use crate::content::persistent_events::SelectedStructure;
+use crate::content::persistent_events::{PersistentEventType, SelectedStructure};
 use crate::cultural_influence::influence_culture_attempt;
 use crate::game::GameState;
-use crate::player::Player;
 use crate::player_events::PlayingActionInfo;
 use crate::recruit::recruit;
 use crate::unit::Units;
@@ -223,7 +222,7 @@ impl PlayingAction {
                 if !settler.can_found_city(game) {
                     return Err("Cannot found city".to_string());
                 }
-                build_city(game.player_mut(player_index), settler.position);
+                found_city(game, player_index, settler.position);
             }
             Construct(c) => construct::construct(game, player_index, &c)?,
             Collect(c) => collect(game, player_index, &c)?,
@@ -367,6 +366,18 @@ fn custom(game: &mut Game, player_index: usize, custom_action: CustomAction) -> 
     custom_action.execute(game, player_index)
 }
 
-pub(crate) fn build_city(player: &mut Player, position: Position) {
-    player.cities.push(City::new(player.index, position));
+pub(crate) fn found_city(game: &mut Game, player: usize, position: Position) {
+    game.player_mut(player)
+        .cities
+        .push(City::new(player, position));
+    on_found_city(game, player, position);
+}
+
+pub(crate) fn on_found_city(game: &mut Game, player_index: usize, position: Position) {
+    let _ = game.trigger_persistent_event(
+        &[player_index],
+        |e| &mut e.found_city,
+        position,
+        PersistentEventType::FoundCity,
+    );
 }

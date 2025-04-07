@@ -40,18 +40,11 @@ impl CombatPlayerStats {
     }
 
     pub fn fighters(&self, battleground: Battleground) -> Units {
-        self.present
-            .clone()
-            .to_vec()
-            .into_iter()
-            .filter(|u| {
-                if battleground.is_land() {
-                    u.is_army_unit()
-                } else {
-                    u.is_ship()
-                }
-            })
-            .collect()
+        filter_fighters(battleground, &self.present)
+    }
+
+    pub fn fighter_losses(&self, battleground: Battleground) -> Units {
+        filter_fighters(battleground, &self.losses)
     }
 }
 
@@ -243,4 +236,19 @@ pub fn active_defenders(game: &Game, defender: usize, defender_position: Positio
         .filter(|u| can_remove_after_combat(on_water, &u.unit_type))
         .map(|u| u.id)
         .collect_vec()
+}
+
+fn filter_fighters(battleground: Battleground, units: &Units) -> Units {
+    units
+        .clone()
+        .to_vec()
+        .into_iter()
+        .filter(|u| {
+            if battleground.is_land() {
+                u.is_army_unit()
+            } else {
+                u.is_ship()
+            }
+        })
+        .collect()
 }

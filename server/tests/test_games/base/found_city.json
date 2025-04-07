@@ -25,15 +25,12 @@
         {
           "city_pieces": {},
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "A1"
         },
         {
           "city_pieces": {},
           "mood_state": "Neutral",
           "activations": 8,
-          "angry_activation": false,
           "position": "C2"
         }
       ],
@@ -59,7 +56,7 @@
           "id": 3
         },
         {
-          "position": "B2",
+          "position": "B6",
           "unit_type": "Settler",
           "id": 4
         },
@@ -85,6 +82,9 @@
         "Mining"
       ],
       "incident_tokens": 3,
+      "objective_cards": [
+        27
+      ],
       "next_unit_id": 8
     },
     {
@@ -112,7 +112,6 @@
           "city_pieces": {},
           "mood_state": "Angry",
           "activations": 2,
-          "angry_activation": false,
           "position": "C1"
         }
       ],
@@ -163,6 +162,18 @@
       ],
       [
         "B3",
+        "Fertile"
+      ],
+      [
+        "B4",
+        "Fertile"
+      ],
+      [
+        "B5",
+        "Fertile"
+      ],
+      [
+        "B6",
         "Fertile"
       ],
       [

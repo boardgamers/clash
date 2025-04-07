@@ -1,13 +1,26 @@
 use crate::content::objectives::combat_objectives::{
-    bold, conqueror, defiance, general, great_battle, legendary_battle, naval_assault, warmonger,
+    aggressor, barbarian_conquest, bold, conqueror, defiance, general, great_battle,
+    legendary_battle, naval_assault, resistance, scavenger, warmonger,
 };
-use crate::content::objectives::non_combat::draft;
-use crate::content::objectives::status_phase_objectives::{
-    advanced_culture, city_planner, coastal_lead, colony, consulate, culture_focus, diversity,
-    education_lead, eureka, food_supplies, fortifications, goal_focused, happy_population,
-    large_army, large_civ, large_fleet, militarized, optimized_storage, ore_supplies,
-    religious_fervor, science_focus, science_lead, sea_blockade, standing_army, threat, wealth,
-    wood_supplies,
+use crate::content::objectives::non_combat::{
+    city_founder, draft, magnificent_culture, terror_regime,
+};
+
+use crate::content::objectives::advance_objectives::{
+    city_planner, culture_focus, diversified_research, education_lead, goal_focused, government,
+    militarized, science_focus, seafarers, trade_focus,
+};
+use crate::content::objectives::city_objectives::{
+    advanced_culture, coastal_lead, consulate, culture_power, diversity, expansionist,
+    fortifications, happy_population, large_civ, metropolis, religious_fervor, science_lead,
+    star_gazers,
+};
+use crate::content::objectives::resource_objectives::{
+    eureka, food_supplies, optimized_storage, ore_supplies, wealth, wood_supplies,
+};
+use crate::content::objectives::unit_objectives::{
+    colony, horse_power, large_army, large_fleet, military_might, outpost, sea_blockade,
+    shipping_routes, standing_army, threat, trade_power,
 };
 use crate::objective_card::ObjectiveCard;
 use itertools::Itertools;
@@ -36,9 +49,19 @@ pub(crate) fn get_all() -> Vec<ObjectiveCard> {
         ObjectiveCard::new(18, culture_focus(), legendary_battle()),
         ObjectiveCard::new(19, consulate(), great_battle()),
         ObjectiveCard::new(20, science_focus(), naval_assault()),
-        // todo replace when we have a real repeated objective - only needed for large civ
-        // todo use ID 24 later
-        ObjectiveCard::new(99, large_civ(), draft()),
+        ObjectiveCard::new(21, trade_focus(), scavenger()),
+        ObjectiveCard::new(22, metropolis(), general()),
+        ObjectiveCard::new(23, seafarers(), aggressor()),
+        ObjectiveCard::new(24, government(), barbarian_conquest()),
+        ObjectiveCard::new(25, government(), aggressor()),
+        ObjectiveCard::new(26, expansionist(), military_might()),
+        ObjectiveCard::new(27, city_founder(), resistance()),
+        ObjectiveCard::new(28, trade_power(), resistance()),
+        ObjectiveCard::new(29, shipping_routes(), terror_regime()),
+        ObjectiveCard::new(30, diversified_research(), bold()),
+        ObjectiveCard::new(31, culture_power(), barbarian_conquest()),
+        ObjectiveCard::new(32, magnificent_culture(), outpost()),
+        ObjectiveCard::new(33, star_gazers(), horse_power()),
     ];
     assert_eq!(
         all.iter().unique_by(|i| i.id).count(),

@@ -1,0 +1,541 @@
+{
+  "state": {
+    "Movement": {
+      "movement_actions_left": 2,
+      "moved_units": [
+        0,
+        1
+      ]
+    }
+  },
+  "players": [
+    {
+      "id": 0,
+      "resources": {
+        "food": 2,
+        "wood": 1,
+        "ore": 1,
+        "ideas": 1,
+        "mood_tokens": 1
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {
+            "market": 0
+          },
+          "mood_state": "Happy",
+          "position": "D6"
+        },
+        {
+          "city_pieces": {
+            "market": 0
+          },
+          "mood_state": "Happy",
+          "position": "E6"
+        }
+      ],
+      "units": [
+        {
+          "position": "E7",
+          "unit_type": "Ship",
+          "movement_restrictions": [
+            "Battle"
+          ],
+          "id": 1
+        }
+      ],
+      "civilization": "test0",
+      "advances": [
+        "Farming",
+        "Mining",
+        "Philosophy"
+      ],
+      "incident_tokens": 2,
+      "completed_objectives": [
+        "Scavenger"
+      ],
+      "next_unit_id": 1
+    },
+    {
+      "id": 1,
+      "resources": {
+        "food": 1,
+        "wood": 1,
+        "ore": 1,
+        "mood_tokens": 1
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {},
+          "mood_state": "Neutral",
+          "position": "D8"
+        }
+      ],
+      "units": [
+        {
+          "position": "D8",
+          "unit_type": "Infantry",
+          "id": 0
+        },
+        {
+          "position": "D8",
+          "unit_type": "Infantry",
+          "id": 1
+        },
+        {
+          "position": "D8",
+          "unit_type": "Infantry",
+          "id": 2
+        },
+        {
+          "position": "C8",
+          "unit_type": "Settler",
+          "id": 3
+        },
+        {
+          "position": "C8",
+          "unit_type": "Infantry",
+          "id": 4
+        },
+        {
+          "position": "E8",
+          "unit_type": "Infantry",
+          "id": 6
+        }
+      ],
+      "civilization": "test1",
+      "advances": [
+        "Farming",
+        "Mining",
+        "Philosophy",
+        "Roads",
+        "Tactics",
+        "Trade Routes"
+      ],
+      "incident_tokens": 1,
+      "next_unit_id": 1
+    },
+    {
+      "id": 2,
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "civilization": "Pirates",
+      "incident_tokens": 3,
+      "next_unit_id": 9
+    }
+  ],
+  "map": {
+    "tiles": [
+      [
+        "A3",
+        "Unexplored"
+      ],
+      [
+        "A5",
+        "Unexplored"
+      ],
+      [
+        "A7",
+        "Water"
+      ],
+      [
+        "B2",
+        "Unexplored"
+      ],
+      [
+        "B3",
+        "Unexplored"
+      ],
+      [
+        "B4",
+        "Unexplored"
+      ],
+      [
+        "B5",
+        "Unexplored"
+      ],
+      [
+        "B6",
+        "Fertile"
+      ],
+      [
+        "B7",
+        "Barren"
+      ],
+      [
+        "C2",
+        "Forest"
+      ],
+      [
+        "C3",
+        "Unexplored"
+      ],
+      [
+        "C4",
+        "Forest"
+      ],
+      [
+        "C5",
+        "Unexplored"
+      ],
+      [
+        "C6",
+        "Fertile"
+      ],
+      [
+        "C7",
+        "Unexplored"
+      ],
+      [
+        "C8",
+        "Mountain"
+      ],
+      [
+        "D1",
+        "Fertile"
+      ],
+      [
+        "D2",
+        "Barren"
+      ],
+      [
+        "D3",
+        "Fertile"
+      ],
+      [
+        "D4",
+        "Water"
+      ],
+      [
+        "D5",
+        "Unexplored"
+      ],
+      [
+        "D6",
+        "Fertile"
+      ],
+      [
+        "D7",
+        "Unexplored"
+      ],
+      [
+        "D8",
+        "Fertile"
+      ],
+      [
+        "E2",
+        "Mountain"
+      ],
+      [
+        "E3",
+        "Unexplored"
+      ],
+      [
+        "E4",
+        "Barren"
+      ],
+      [
+        "E5",
+        "Unexplored"
+      ],
+      [
+        "E6",
+        "Fertile"
+      ],
+      [
+        "E7",
+        "Water"
+      ],
+      [
+        "E8",
+        "Forest"
+      ],
+      [
+        "F2",
+        "Unexplored"
+      ],
+      [
+        "F3",
+        "Unexplored"
+      ],
+      [
+        "F4",
+        "Unexplored"
+      ],
+      [
+        "F5",
+        "Unexplored"
+      ],
+      [
+        "F6",
+        "Water"
+      ],
+      [
+        "F7",
+        "Fertile"
+      ],
+      [
+        "G3",
+        "Unexplored"
+      ],
+      [
+        "G5",
+        "Unexplored"
+      ],
+      [
+        "G7",
+        "Mountain"
+      ]
+    ],
+    "unexplored_blocks": [
+      {
+        "position": {
+          "top_tile": "B2",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Water",
+            "Fertile",
+            "Fertile",
+            "Barren"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "B4",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Water",
+            "Water",
+            "Forest",
+            "Forest"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "D5",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Water",
+            "Mountain",
+            "Mountain",
+            "Forest"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "F2",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Forest",
+            "Water",
+            "Fertile",
+            "Forest"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "F4",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Fertile",
+            "Mountain",
+            "Forest",
+            "Fertile"
+          ]
+        }
+      }
+    ]
+  },
+  "starting_player_index": 1,
+  "current_player_index": 0,
+  "action_log": [
+    {
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          0,
+                          1
+                        ],
+                        "destination": "E7"
+                      }
+                    }
+                  },
+                  "combat_stats": {
+                    "position": "E7",
+                    "battleground": "Sea",
+                    "attacker": {
+                      "player": 0,
+                      "present": {
+                        "ships": 2
+                      },
+                      "losses": {
+                        "ships": 1
+                      }
+                    },
+                    "defender": {
+                      "player": 1,
+                      "present": {
+                        "ships": 1
+                      },
+                      "losses": {
+                        "ships": 1
+                      }
+                    },
+                    "result": "AttackerWins"
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ObjectiveCard": 21
+                        }
+                      ]
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "SelectObjectives": {
+                              "cards": [
+                                {
+                                  "ObjectiveCard": 21
+                                }
+                              ],
+                              "objective_opportunities": [
+                                "Scavenger"
+                              ]
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "Builtin": "Select Objective Cards to Complete"
+                            },
+                            "priority": 0,
+                            "request": {
+                              "SelectHandCards": {
+                                "choices": [
+                                  {
+                                    "ObjectiveCard": 21
+                                  }
+                                ],
+                                "description": "Select cards to complete",
+                                "needed": {
+                                  "end": 1,
+                                  "start": 0
+                                }
+                              }
+                            }
+                          },
+                          "last_priority_used": 0,
+                          "player": 0
+                        }
+                      ]
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/objective_cards",
+                      "value": [
+                        21
+                      ]
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/completed_objectives"
+                    }
+                  ],
+                  "completed_objectives": [
+                    "Scavenger"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "action_log_index": 2,
+  "log": [
+    [
+      "Player1 sailed 2 ships from F6 to E7"
+    ],
+    [
+      "Combat round 1",
+      "Attackers: 2 ships",
+      "Defenders: 1 ship",
+      "Player1 rolled 2 (Cavalry, no bonus), 5 (Cavalry, no bonus) for combined combat value of 7 and gets 1 hits against defending units.",
+      "Player2 rolled 5 (Cavalry, no bonus) for combined combat value of 5 and gets 1 hits against attacking units.",
+      "Player1 has to remove 1 of their attacking units",
+      "Player1 removed 1 ship",
+      "Player2 has to remove all of their defending units",
+      "Player2 removed 1 ship",
+      "Attacker wins"
+    ],
+    [
+      "Player1 completed objective Scavenger"
+    ]
+  ],
+  "undo_limit": 1,
+  "actions_left": 2,
+  "round": 2,
+  "age": 2,
+  "messages": [
+    "The game has started"
+  ],
+  "rng": "332723183825420182671536539164951704180",
+  "dice_roll_log": [
+    2,
+    8,
+    8
+  ],
+  "wonders_left": [
+    "Pyramids"
+  ]
+}

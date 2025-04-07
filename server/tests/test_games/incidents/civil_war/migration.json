@@ -31,8 +31,6 @@
             ]
           },
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "C2"
         }
       ],
@@ -116,8 +114,6 @@
             "fortress": 0
           },
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "A4"
         }
       ],

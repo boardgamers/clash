@@ -35,8 +35,6 @@
             "port": 1
           },
           "mood_state": "Neutral",
-          "activations": 0,
-          "angry_activation": false,
           "position": "C2",
           "port_position": "C3"
         },
@@ -48,15 +46,11 @@
             "temple": 1
           },
           "mood_state": "Neutral",
-          "activations": 0,
-          "angry_activation": false,
           "position": "B1"
         },
         {
           "city_pieces": {},
           "mood_state": "Neutral",
-          "activations": 0,
-          "angry_activation": false,
           "position": "B3"
         }
       ],
@@ -136,8 +130,6 @@
         {
           "city_pieces": {},
           "mood_state": "Angry",
-          "activations": 0,
-          "angry_activation": false,
           "position": "C1"
         },
         {
@@ -145,8 +137,6 @@
             "port": 1
           },
           "mood_state": "Neutral",
-          "activations": 0,
-          "angry_activation": false,
           "position": "B2",
           "port_position": "C3"
         }
@@ -291,14 +281,12 @@
                       "value": 1
                     },
                     {
-                      "op": "replace",
-                      "path": "/players/0/cities/0/activations",
-                      "value": 0
+                      "op": "remove",
+                      "path": "/players/0/cities/0/activations"
                     },
                     {
-                      "op": "replace",
-                      "path": "/players/0/cities/0/angry_activation",
-                      "value": false
+                      "op": "remove",
+                      "path": "/players/0/cities/0/angry_activation"
                     }
                   ]
                 }

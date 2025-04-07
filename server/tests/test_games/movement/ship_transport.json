@@ -29,8 +29,6 @@
             "market": 1
           },
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "A1"
         },
         {
@@ -40,7 +38,6 @@
           },
           "mood_state": "Angry",
           "activations": 4,
-          "angry_activation": false,
           "position": "C2",
           "port_position": "C3"
         },
@@ -52,8 +49,6 @@
             "temple": 1
           },
           "mood_state": "Neutral",
-          "activations": 0,
-          "angry_activation": false,
           "position": "B1"
         },
         {
@@ -143,7 +138,6 @@
           "city_pieces": {},
           "mood_state": "Angry",
           "activations": 2,
-          "angry_activation": false,
           "position": "C1"
         },
         {
@@ -151,8 +145,6 @@
             "port": 1
           },
           "mood_state": "Neutral",
-          "activations": 0,
-          "angry_activation": false,
           "position": "B2",
           "port_position": "C3"
         }

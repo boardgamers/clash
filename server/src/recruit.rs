@@ -11,18 +11,15 @@ use crate::resource_pile::ResourcePile;
 use crate::unit::{UnitType, Units, kill_units};
 
 pub(crate) fn recruit(game: &mut Game, player_index: usize, r: Recruit) -> Result<(), String> {
-    if let Some(cost) = recruit_cost(
+    let cost = recruit_cost(
         game.player(player_index),
         &r.units,
         r.city_position,
         r.leader_name.as_ref(),
         &r.replaced_units,
         Some(&r.payment),
-    ) {
-        cost.pay(game, &r.payment);
-    } else {
-        return Err("Cannot pay for units".to_string());
-    }
+    )?;
+    cost.pay(game, &r.payment);
     for unit in &r.replaced_units {
         // kill separately, because they may be on different positions
         kill_units(game, &[*unit], player_index, None);
@@ -113,11 +110,9 @@ pub(crate) fn on_recruit(game: &mut Game, player_index: usize, r: Recruit) {
 }
 
 ///
+/// # Errors
 ///
-/// # Panics
-///
-/// Panics if city does not exist
-#[must_use]
+/// Errors if the cost cannot be paid
 pub fn recruit_cost(
     player: &Player,
     units: &Units,
@@ -125,7 +120,7 @@ pub fn recruit_cost(
     leader_name: Option<&String>,
     replaced_units: &[u32],
     execute: Option<&ResourcePile>,
-) -> Option<CostInfo> {
+) -> Result<CostInfo, String> {
     let mut require_replace = units.clone();
     for t in player.available_units().to_vec() {
         let a = require_replace.get_mut(&t);
@@ -138,27 +133,25 @@ pub fn recruit_cost(
         .map(|id| player.get_unit(*id).unit_type)
         .collect();
     if require_replace != replaced_units {
-        return None;
+        return Err("Invalid replacement".to_string());
     }
     recruit_cost_without_replaced(player, units, city_position, leader_name, execute)
 }
 
 ///
+/// # Errors
 ///
-/// # Panics
-///
-/// Panics if city does not exist
-#[must_use]
+/// Errors if the cost cannot be paid
 pub fn recruit_cost_without_replaced(
     player: &Player,
     units: &Units,
     city_position: Position,
     leader_name: Option<&String>,
     execute: Option<&ResourcePile>,
-) -> Option<CostInfo> {
+) -> Result<CostInfo, String> {
     let city = player.get_city(city_position);
     if !city.can_activate() {
-        return None;
+        return Err("City cannot be activated".to_string());
     }
     let vec = units.clone().to_vec();
     let cost = player.trigger_cost_event(
@@ -169,20 +162,20 @@ pub fn recruit_cost_without_replaced(
         execute,
     );
     if !player.can_afford(&cost.cost) {
-        return None;
+        return Err("Cannot afford".to_string());
     }
     if vec.len() > city.mood_modified_size(player) {
-        return None;
+        return Err("Too many units".to_string());
     }
     if vec
         .iter()
         .any(|unit| matches!(unit, UnitType::Cavalry | UnitType::Elephant))
         && city.pieces.market.is_none()
     {
-        return None;
+        return Err("No market".to_string());
     }
     if vec.iter().any(|unit| matches!(unit, UnitType::Ship)) && city.pieces.port.is_none() {
-        return None;
+        return Err("No port".to_string());
     }
     if player
         .get_units(city_position)
@@ -192,7 +185,7 @@ pub fn recruit_cost_without_replaced(
         + vec.iter().filter(|unit| unit.is_army_unit()).count()
         > STACK_LIMIT
     {
-        return None;
+        return Err("Too many units in stack".to_string());
     }
 
     let leaders = vec
@@ -205,7 +198,7 @@ pub fn recruit_cost_without_replaced(
         _ => false,
     };
     if !match_leader {
-        return None;
+        return Err("Invalid leader".to_string());
     }
-    Some(cost)
+    Ok(cost)
 }

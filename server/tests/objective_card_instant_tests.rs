@@ -110,3 +110,20 @@ fn test_warmonger() {
         ],
     );
 }
+
+#[test]
+fn test_scavenger() {
+    JSON.test(
+        "scavenger",
+        vec![
+            TestAction::not_undoable(0, move_action(vec![0, 1], Position::from_offset("E7")))
+                .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectHandCards(vec![
+                    HandCard::ObjectiveCard(21),
+                ])),
+            ),
+        ],
+    );
+}

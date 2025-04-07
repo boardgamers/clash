@@ -123,7 +123,6 @@ fn new_game(
         current_player_index: starting_player,
         action_log: Vec::new(),
         action_log_index: 0,
-        current_action_log_index: None,
         log: [String::from("The game has started")]
             .iter()
             .map(|s| vec![s.clone()])

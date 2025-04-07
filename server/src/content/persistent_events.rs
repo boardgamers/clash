@@ -111,6 +111,7 @@ pub enum PersistentEventType {
     Advance(AdvanceInfo),
     Construct(Building),
     Recruit(Recruit),
+    FoundCity(Position),
     Incident(IncidentInfo),
     ActionCard(ActionCardInfo),
     WonderCard(WonderCardInfo),

@@ -25,15 +25,12 @@
         {
           "city_pieces": {},
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "A1"
         },
         {
           "city_pieces": {},
           "mood_state": "Neutral",
           "activations": 8,
-          "angry_activation": false,
           "position": "C2"
         }
       ],
@@ -119,7 +116,6 @@
           },
           "mood_state": "Angry",
           "activations": 2,
-          "angry_activation": false,
           "position": "C1"
         }
       ],
@@ -334,6 +330,9 @@
                       "op": "remove",
                       "path": "/players/0/completed_objectives"
                     }
+                  ],
+                  "completed_objectives": [
+                    "Warmonger"
                   ]
                 }
               ]

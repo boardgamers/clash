@@ -52,8 +52,6 @@
             "market": 1
           },
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "A1"
         },
         {
@@ -62,8 +60,6 @@
             "port": 1
           },
           "mood_state": "Angry",
-          "activations": 0,
-          "angry_activation": false,
           "position": "C2",
           "port_position": "C3"
         },
@@ -75,15 +71,11 @@
             "temple": 1
           },
           "mood_state": "Neutral",
-          "activations": 0,
-          "angry_activation": false,
           "position": "B1"
         },
         {
           "city_pieces": {},
           "mood_state": "Angry",
-          "activations": 0,
-          "angry_activation": false,
           "position": "B3"
         }
       ],
@@ -162,7 +154,7 @@
         2
       ],
       "objective_cards": [
-        16
+        19
       ],
       "next_unit_id": 10
     },
@@ -188,8 +180,6 @@
         {
           "city_pieces": {},
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "C1"
         },
         {
@@ -197,8 +187,6 @@
             "port": 1
           },
           "mood_state": "Neutral",
-          "activations": 0,
-          "angry_activation": false,
           "position": "B2",
           "port_position": "C3"
         }
@@ -233,7 +221,7 @@
         1
       ],
       "objective_cards": [
-        13
+        28
       ],
       "next_unit_id": 2
     }
@@ -393,29 +381,41 @@
     10,
     10
   ],
-  "rng": "213753097409224944643247869297039876114",
+  "rng": "218821409962744444859706442890779924045",
   "wonders_left": [
     "Pyramids"
   ],
   "objective_cards_left": [
-    5,
-    2,
-    17,
-    12,
-    7,
-    18,
-    8,
-    1,
-    99,
-    19,
-    4,
-    3,
-    15,
     14,
+    29,
+    22,
     20,
-    9,
-    10,
+    24,
     11,
-    6
+    7,
+    16,
+    31,
+    1,
+    10,
+    21,
+    26,
+    17,
+    33,
+    15,
+    3,
+    23,
+    32,
+    4,
+    25,
+    13,
+    5,
+    27,
+    6,
+    8,
+    12,
+    2,
+    18,
+    9,
+    30
   ]
 }

@@ -392,7 +392,7 @@ fn test_trade_route_coordinates() {
     // 1 settler is at C8, but the path is not explored (or blocked by a pirate at C7)
     // 1 ship is at A7, but the pirate at A8 blocks trading in its zone of control
 
-    let found = find_trade_routes(game, game.player(1));
+    let found = find_trade_routes(game, game.player(1), false);
     assert_eq!(found.len(), 2);
 }
 

@@ -18,7 +18,7 @@ pub struct TradeRoute {
 #[must_use]
 pub fn trade_route_reward(game: &Game) -> Option<(PaymentOptions, Vec<TradeRoute>)> {
     let p = game.current_player_index;
-    let trade_routes = find_trade_routes(game, &game.players[p]);
+    let trade_routes = find_trade_routes(game, &game.players[p], false);
     if trade_routes.is_empty() {
         return None;
     }
@@ -63,10 +63,11 @@ pub(crate) fn trade_route_log(
 }
 
 #[must_use]
-pub fn find_trade_routes(game: &Game, player: &Player) -> Vec<TradeRoute> {
+pub fn find_trade_routes(game: &Game, player: &Player, only_ships: bool) -> Vec<TradeRoute> {
     let all: Vec<Vec<TradeRoute>> = player
         .units
         .iter()
+        .filter(|u| !only_ships || u.unit_type.is_ship())
         .map(|u| find_trade_route_for_unit(game, player, u))
         .filter(|r| !r.is_empty())
         .collect();
@@ -103,7 +104,16 @@ fn find_most_trade_routes(
         .unwrap_or_else(Vec::new)
 }
 
-fn find_trade_route_for_unit(game: &Game, player: &Player, unit: &Unit) -> Vec<TradeRoute> {
+pub(crate) fn find_trade_route_for_unit(
+    game: &Game,
+    player: &Player,
+    unit: &Unit,
+) -> Vec<TradeRoute> {
+    if !player.has_advance("Trade Routes") {
+        // not only used from the regular Trade Routes method, so we need to check the advance
+        return vec![];
+    }
+
     let expected_type = unit.unit_type.is_ship() || unit.unit_type.is_settler();
     if !expected_type {
         return vec![];

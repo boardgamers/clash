@@ -4,11 +4,12 @@
     {
       "id": 0,
       "resources": {
+        "food": 2,
         "wood": 7,
-        "ore": 6,
-        "ideas": 5,
-        "gold": 5,
-        "mood_tokens": 6,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
         "culture_tokens": 7
       },
       "resource_limit": {
@@ -24,18 +25,18 @@
         {
           "city_pieces": {},
           "mood_state": "Happy",
-          "activations": 1,
-          "angry_activation": false,
           "position": "A1"
         },
         {
-          "city_pieces": {
-            "observatory": 0
-          },
+          "city_pieces": {},
           "mood_state": "Neutral",
-          "activations": 1,
-          "angry_activation": false,
+          "activations": 8,
           "position": "C2"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Neutral",
+          "position": "B6"
         }
       ],
       "units": [
@@ -73,31 +74,18 @@
           "position": "C2",
           "unit_type": "Settler",
           "id": 7
-        },
-        {
-          "position": "A1",
-          "unit_type": "Infantry",
-          "id": 9
-        },
-        {
-          "position": "A1",
-          "unit_type": "Settler",
-          "id": 10
-        },
-        {
-          "position": "A1",
-          "unit_type": "Infantry",
-          "id": 11
         }
       ],
       "civilization": "test0",
       "advances": [
         "Farming",
-        "Math",
         "Mining"
       ],
-      "incident_tokens": 2,
-      "next_unit_id": 12
+      "incident_tokens": 3,
+      "completed_objectives": [
+        "City Founder"
+      ],
+      "next_unit_id": 8
     },
     {
       "id": 1,
@@ -123,8 +111,7 @@
         {
           "city_pieces": {},
           "mood_state": "Angry",
-          "activations": 0,
-          "angry_activation": false,
+          "activations": 2,
           "position": "C1"
         }
       ],
@@ -178,6 +165,18 @@
         "Fertile"
       ],
       [
+        "B4",
+        "Fertile"
+      ],
+      [
+        "B5",
+        "Fertile"
+      ],
+      [
+        "B6",
+        "Fertile"
+      ],
+      [
         "C1",
         "Barren"
       ],
@@ -208,20 +207,8 @@
                 {
                   "action": {
                     "Playing": {
-                      "Recruit": {
-                        "units": {
-                          "settlers": 1,
-                          "infantry": 1
-                        },
-                        "city_position": "A1",
-                        "payment": {
-                          "food": 1,
-                          "ore": 1,
-                          "gold": 2
-                        },
-                        "replaced_units": [
-                          4
-                        ]
+                      "FoundCity": {
+                        "settler": 4
                       }
                     }
                   },
@@ -232,34 +219,18 @@
                       "value": 2
                     },
                     {
-                      "op": "replace",
-                      "path": "/players/0/cities/0/activations",
-                      "value": 0
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/next_unit_id",
-                      "value": 10
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/resources/food",
-                      "value": 1
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/gold",
-                      "value": 7
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/ore",
-                      "value": 7
+                      "op": "remove",
+                      "path": "/players/0/cities/2"
                     },
                     {
                       "op": "replace",
                       "path": "/players/0/units/4/id",
                       "value": 4
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/4/position",
+                      "value": "B6"
                     },
                     {
                       "op": "replace",
@@ -272,34 +243,87 @@
                       "value": 6
                     },
                     {
-                      "op": "replace",
-                      "path": "/players/0/units/7/id",
-                      "value": 7
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/7/position",
-                      "value": "C2"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/7/unit_type",
-                      "value": "Settler"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/8/id",
-                      "value": 9
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/8/unit_type",
-                      "value": "Infantry"
+                      "op": "add",
+                      "path": "/players/0/units/7",
+                      "value": {
+                        "id": 7,
+                        "position": "C2",
+                        "unit_type": "Settler"
+                      }
                     },
                     {
                       "op": "remove",
-                      "path": "/players/0/units/9"
+                      "path": "/events"
                     }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ObjectiveCard": 27
+                        }
+                      ]
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "SelectObjectives": {
+                              "cards": [
+                                {
+                                  "ObjectiveCard": 27
+                                }
+                              ],
+                              "objective_opportunities": [
+                                "City Founder"
+                              ]
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "Builtin": "Select Objective Cards to Complete"
+                            },
+                            "priority": 0,
+                            "request": {
+                              "SelectHandCards": {
+                                "choices": [
+                                  {
+                                    "ObjectiveCard": 27
+                                  }
+                                ],
+                                "description": "Select cards to complete",
+                                "needed": {
+                                  "end": 1,
+                                  "start": 0
+                                }
+                              }
+                            }
+                          },
+                          "last_priority_used": 0,
+                          "player": 0
+                        }
+                      ]
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/objective_cards",
+                      "value": [
+                        27
+                      ]
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/completed_objectives"
+                    }
+                  ],
+                  "completed_objectives": [
+                    "City Founder"
                   ]
                 }
               ]
@@ -309,15 +333,18 @@
       ]
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 2,
   "log": [
     [
-      "Player1 paid 1 food, 1 ore and 2 gold to recruit 1 settler and 1 infantry in the city at A1 and replaces the unit at C2"
+      "Player1 founded a city at B6"
+    ],
+    [
+      "Player1 completed objective City Founder"
     ]
   ],
   "undo_limit": 0,
   "actions_left": 1,
-  "round": 2,
+  "round": 1,
   "age": 1,
   "messages": [
     "The game has started"

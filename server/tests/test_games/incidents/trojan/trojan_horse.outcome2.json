@@ -37,8 +37,6 @@
         {
           "city_pieces": {},
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "A1"
         },
         {
@@ -46,8 +44,6 @@
             "temple": 0
           },
           "mood_state": "Angry",
-          "activations": 0,
-          "angry_activation": false,
           "position": "C1"
         }
       ],
@@ -140,8 +136,6 @@
         {
           "city_pieces": {},
           "mood_state": "Neutral",
-          "activations": 0,
-          "angry_activation": false,
           "position": "C2"
         }
       ],

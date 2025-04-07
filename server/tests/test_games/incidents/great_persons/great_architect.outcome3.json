@@ -28,8 +28,6 @@
             ]
           },
           "mood_state": "Happy",
-          "activations": 0,
-          "angry_activation": false,
           "position": "A1"
         }
       ],
@@ -115,15 +113,11 @@
             "temple": 1
           },
           "mood_state": "Angry",
-          "activations": 0,
-          "angry_activation": false,
           "position": "C1"
         },
         {
           "city_pieces": {},
           "mood_state": "Neutral",
-          "activations": 0,
-          "angry_activation": false,
           "position": "C2"
         }
       ],
@@ -291,7 +285,7 @@
                             "origin": {
                               "Builtin": "Build Wonder"
                             },
-                            "priority": 0,
+                            "priority": 10,
                             "request": {
                               "Payment": [
                                 {
@@ -351,7 +345,7 @@
                               ]
                             }
                           },
-                          "last_priority_used": 0,
+                          "last_priority_used": 10,
                           "player": 0
                         }
                       ]
@@ -391,7 +385,8 @@
                       "op": "remove",
                       "path": "/players/0/wonders_build"
                     }
-                  ]
+                  ],
+                  "wonder_built": "Pyramids"
                 }
               ]
             }

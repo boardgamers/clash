@@ -1,10 +1,13 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::combat_stats::CombatStats;
 use crate::content::advances;
+use crate::content::advances::trade_routes::find_trade_route_for_unit;
 use crate::game::Game;
 use crate::log::current_player_turn_log;
 use crate::objective_card::{Objective, objective_is_ready};
 use crate::player::Player;
+use crate::tactics_card::CombatRole;
+use crate::unit::{Unit, UnitType};
 use itertools::Itertools;
 
 pub(crate) fn conqueror() -> Objective {
@@ -69,7 +72,7 @@ pub(crate) fn general() -> Objective {
             let s = &e.combat.stats;
             let army_units_killed_by_you: u8 = s
                 .opponent(player)
-                .losses
+                .fighter_losses(s.battleground)
                 .clone()
                 .into_iter()
                 .filter_map(|(u, loss)| u.is_army_unit().then_some(loss))
@@ -208,6 +211,97 @@ pub(crate) fn legendary_battle() -> Objective {
                 if fighters && city_size && wonders && is_attacker {
                     objective_is_ready(game.player_mut(player), name);
                 }
+            }
+        },
+    )
+    .build()
+}
+
+pub(crate) fn scavenger() -> Objective {
+    let name = "Scavenger";
+    Objective::builder(
+        name,
+        "You killed a settler or ship that could have been used for Trade Routes.",
+    )
+    .add_simple_persistent_event_listener(
+        |event| &mut event.combat_end,
+        9,
+        |game, player, _, e| {
+            let s = &e.combat.stats;
+            let o = s.opponent(player);
+            let opponent = game.player(o.player);
+            let units = &o.losses;
+            if units.settlers > 0 || units.ships > 0 {
+                // just the position and type matter
+                let unit = Unit::new(o.player, s.position, UnitType::Settler, 0);
+                if !find_trade_route_for_unit(game, opponent, &unit).is_empty() {
+                    objective_is_ready(game.player_mut(player), name);
+                }
+            }
+        },
+    )
+    .build()
+}
+
+pub(crate) fn aggressor() -> Objective {
+    let name = "Aggressor";
+    Objective::builder(
+        name,
+        "You won a land battle as attacker in which you killed at least 2 army units.",
+    )
+    .add_simple_persistent_event_listener(
+        |event| &mut event.combat_end,
+        10,
+        |game, player, _, e| {
+            let s = &e.combat.stats;
+            if s.is_winner(player)
+                && s.battleground.is_land()
+                && s.opponent(player).fighter_losses(s.battleground).sum() >= 2
+            {
+                objective_is_ready(game.player_mut(player), name);
+            }
+        },
+    )
+    .build()
+}
+
+pub(crate) fn barbarian_conquest() -> Objective {
+    let name = "Barbarian Conquest";
+    Objective::builder(
+        name,
+        "You captured a barbarian city with at least 2 army units.",
+    )
+    .add_simple_persistent_event_listener(
+        |event| &mut event.combat_end,
+        11,
+        |game, player, _, e| {
+            let s = &e.combat.stats;
+            if s.is_winner(player) && s.battleground.is_city() && !s.opponent_is_human(player, game)
+            {
+                objective_is_ready(game.player_mut(player), name);
+            }
+        },
+    )
+    .build()
+}
+
+pub(crate) fn resistance() -> Objective {
+    let name = "Resistance";
+    Objective::builder(
+        name,
+        "You captured a barbarian city with at least 2 army units.",
+    )
+    .add_simple_persistent_event_listener(
+        |event| &mut event.combat_end,
+        12,
+        |game, player, _, e| {
+            let s = &e.combat.stats;
+            let b = s.battleground;
+            if b.is_land()
+                && s.role(player) == CombatRole::Defender
+                && s.opponent(player).fighter_losses(b).sum() >= 2
+            {
+                objective_is_ready(game.player_mut(player), name);
             }
         },
     )
