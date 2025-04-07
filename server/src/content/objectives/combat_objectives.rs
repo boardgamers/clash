@@ -307,3 +307,30 @@ pub(crate) fn resistance() -> Objective {
     )
     .build()
 }
+
+pub(crate) fn great_commander() -> Objective {
+    let name = "Great Commander";
+    Objective::builder(
+        name,
+        "You won a battle with a leader where you did not have more army units than your opponent.",
+    )
+    .add_simple_persistent_event_listener(
+        |event| &mut event.combat_end,
+        13,
+        |game, player, _, e| {
+            let s = &e.combat.stats;
+            let b = s.battleground;
+            let o = s.opponent(player);
+            let not_more_fighters =
+                s.player(player).fighters(b).sum() <= o.fighters(b).sum();
+            
+            if s.is_winner(player)
+                && s.player(player).present.leaders > 0
+                && not_more_fighters
+            {
+                objective_is_ready(game.player_mut(player), name);
+            }
+        },
+    )
+    .build()
+}

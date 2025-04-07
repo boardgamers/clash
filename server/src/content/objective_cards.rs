@@ -1,7 +1,4 @@
-use crate::content::objectives::combat_objectives::{
-    aggressor, barbarian_conquest, bold, conqueror, defiance, general, great_battle,
-    legendary_battle, naval_assault, resistance, scavenger, warmonger,
-};
+use crate::content::objectives::combat_objectives::{aggressor, barbarian_conquest, bold, conqueror, defiance, general, great_battle, great_commander, legendary_battle, naval_assault, resistance, scavenger, warmonger};
 use crate::content::objectives::non_combat::{
     city_founder, draft, magnificent_culture, terror_regime,
 };
@@ -10,11 +7,7 @@ use crate::content::objectives::advance_objectives::{
     city_planner, culture_focus, diversified_research, education_lead, goal_focused, government,
     militarized, science_focus, seafarers, trade_focus,
 };
-use crate::content::objectives::city_objectives::{
-    advanced_culture, coastal_lead, consulate, culture_power, diversity, expansionist,
-    fortifications, happy_population, large_civ, metropolis, religious_fervor, science_lead,
-    star_gazers,
-};
+use crate::content::objectives::city_objectives::{advanced_culture, coastal_lead, consulate, culture_power, diversity, expansionist, fortifications, happy_population, large_civ, metropolis, religious_fervor, science_lead, star_gazers, traders};
 use crate::content::objectives::resource_objectives::{
     eureka, food_supplies, optimized_storage, ore_supplies, wealth, wood_supplies,
 };
@@ -62,6 +55,7 @@ pub(crate) fn get_all() -> Vec<ObjectiveCard> {
         ObjectiveCard::new(31, culture_power(), barbarian_conquest()),
         ObjectiveCard::new(32, magnificent_culture(), outpost()),
         ObjectiveCard::new(33, star_gazers(), horse_power()),
+        ObjectiveCard::new(34, traders(), great_commander()),
     ];
     assert_eq!(
         all.iter().unique_by(|i| i.id).count(),
