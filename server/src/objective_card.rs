@@ -8,7 +8,7 @@ use crate::content::objective_cards::get_objective_card;
 use crate::content::persistent_events::{HandCardsRequest, PersistentEventType};
 use crate::events::EventOrigin;
 use crate::game::Game;
-use crate::log::current_player_turn_log_mut;
+use crate::log::{ActionLogItem, current_action_log_item, current_player_turn_log_mut};
 use crate::player::Player;
 use crate::utils::remove_element_by;
 use itertools::Itertools;
@@ -261,10 +261,7 @@ pub(crate) fn complete_objective_card(game: &mut Game, player: usize, id: u8, ob
     game.player_mut(player)
         .completed_objectives
         .push(objective.clone());
-    current_player_turn_log_mut(game)
-        .items
-        .last_mut()
-        .expect("items empty")
+    current_action_log_item(game)
         .completed_objectives
         .push(objective);
 }
@@ -423,15 +420,12 @@ mod tests {
 
         let mut got = combinations(&cards, &opportunities);
         got.sort();
-        assert_eq!(
-            got,
+        assert_eq!(got, vec![
             vec![
-                vec![
-                    (0, "Objective 1".to_string()),
-                    (1, "Objective 4".to_string()),
-                ],
-                vec![(1, "Objective 1".to_string()),],
-            ]
-        );
+                (0, "Objective 1".to_string()),
+                (1, "Objective 4".to_string()),
+            ],
+            vec![(1, "Objective 1".to_string()),],
+        ]);
     }
 }

@@ -3,6 +3,7 @@ use crate::city_pieces::Building;
 use crate::content::advances;
 use crate::content::advances::trade_routes::find_trade_routes;
 use crate::game::Game;
+use crate::log::{ActionLogItem, ActionLogPlayer, ActionLogRound};
 use crate::map::get_map_setup;
 use crate::objective_card::{Objective, ObjectiveBuilder};
 use crate::player::Player;
@@ -10,6 +11,7 @@ use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
+use crate::content::objectives::non_combat::last_player_round;
 
 pub(crate) fn large_civ() -> Objective {
     Objective::builder("Large Civilization", "You have at least 6 cities")
@@ -351,14 +353,8 @@ pub(crate) fn colony() -> Objective {
     .status_phase_check(|game, player| {
         let home = home_position(game, player);
         if player.cities.iter().any(|c| c.position.distance(home) >= 5) {
-            let city_founder_played = game
-                .action_log
-                .last()
-                .and_then(|a| a.rounds.last())
+            let city_founder_played = last_player_round(game, player.index)
                 .iter()
-                .flat_map(|r| r.players.iter())
-                .filter(|p| p.index == player.index)
-                .flat_map(|p| p.items.iter())
                 .any(|i| i.completed_objectives.contains(&"City Founder".to_string()));
 
             return !city_founder_played;
@@ -518,3 +514,4 @@ fn influenced_buildings(player: &Player, game: &Game) -> usize {
         .map(|c| c.pieces.buildings(Some(player.index)).len())
         .sum()
 }
+

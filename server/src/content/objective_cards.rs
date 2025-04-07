@@ -2,7 +2,7 @@ use crate::content::objectives::combat_objectives::{
     aggressor, barbarian_conquest, bold, conqueror, defiance, general, great_battle,
     legendary_battle, naval_assault, resistance, scavenger, warmonger,
 };
-use crate::content::objectives::non_combat::{city_founder, draft, terror_regime};
+use crate::content::objectives::non_combat::{city_founder, draft, magnificent_culture, terror_regime};
 use crate::content::objectives::status_phase_objectives::{
     advanced_culture, city_planner, coastal_lead, colony, consulate, culture_focus, culture_power,
     diversified_research, diversity, education_lead, eureka, expansionist, food_supplies,
@@ -49,6 +49,7 @@ pub(crate) fn get_all() -> Vec<ObjectiveCard> {
         ObjectiveCard::new(29, shipping_routes(), terror_regime()),
         ObjectiveCard::new(30, diversified_research(), bold()),
         ObjectiveCard::new(31, culture_power(), barbarian_conquest()),
+        ObjectiveCard::new(32, magnificent_culture(), barbarian_conquest()), //todo second
     ];
     assert_eq!(
         all.iter().unique_by(|i| i.id).count(),

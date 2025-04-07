@@ -89,6 +89,9 @@
         "Pyramids"
       ],
       "incident_tokens": 2,
+      "completed_objectives": [
+        "Magnificent Culture"
+      ],
       "next_unit_id": 8
     },
     {
@@ -230,87 +233,98 @@
                   "undo": [
                     {
                       "op": "add",
-                      "path": "/events",
+                      "path": "/events/0/event_type/WonderCard",
+                      "value": {
+                        "discount": {
+                          "culture_tokens": 0,
+                          "ignore_required_advances": false
+                        },
+                        "name": "Pyramids",
+                        "selected_position": "A1"
+                      }
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events/0/event_type/SelectObjectives"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/events/0/handler/origin/Builtin",
+                      "value": "Build Wonder"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/events/0/handler/priority",
+                      "value": 10
+                    },
+                    {
+                      "op": "add",
+                      "path": "/events/0/handler/request/Payment",
                       "value": [
                         {
-                          "event_type": {
-                            "WonderCard": {
-                              "discount": {
-                                "culture_tokens": 0,
-                                "ignore_required_advances": false
-                              },
-                              "name": "Pyramids",
-                              "selected_position": "A1"
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Builtin": "Build Wonder"
-                            },
-                            "priority": 0,
-                            "request": {
-                              "Payment": [
-                                {
-                                  "cost": {
-                                    "conversions": [
-                                      {
-                                        "from": [
-                                          {
-                                            "food": 1
-                                          },
-                                          {
-                                            "wood": 1
-                                          },
-                                          {
-                                            "ore": 1
-                                          },
-                                          {
-                                            "ideas": 1
-                                          }
-                                        ],
-                                        "to": {
-                                          "gold": 1
-                                        },
-                                        "type": "Unlimited"
-                                      },
-                                      {
-                                        "from": [
-                                          {
-                                            "food": 1
-                                          },
-                                          {
-                                            "wood": 1
-                                          },
-                                          {
-                                            "ore": 1
-                                          },
-                                          {
-                                            "ideas": 1
-                                          }
-                                        ],
-                                        "to": {},
-                                        "type": {
-                                          "MayNotOverpay": 1
-                                        }
-                                      }
-                                    ],
-                                    "default": {
-                                      "culture_tokens": 4,
-                                      "food": 3,
-                                      "ore": 3,
-                                      "wood": 3
-                                    }
+                          "cost": {
+                            "conversions": [
+                              {
+                                "from": [
+                                  {
+                                    "food": 1
                                   },
-                                  "name": "Pay to build wonder",
-                                  "optional": false
+                                  {
+                                    "wood": 1
+                                  },
+                                  {
+                                    "ore": 1
+                                  },
+                                  {
+                                    "ideas": 1
+                                  }
+                                ],
+                                "to": {
+                                  "gold": 1
+                                },
+                                "type": "Unlimited"
+                              },
+                              {
+                                "from": [
+                                  {
+                                    "food": 1
+                                  },
+                                  {
+                                    "wood": 1
+                                  },
+                                  {
+                                    "ore": 1
+                                  },
+                                  {
+                                    "ideas": 1
+                                  }
+                                ],
+                                "to": {},
+                                "type": {
+                                  "MayNotOverpay": 1
                                 }
-                              ]
+                              }
+                            ],
+                            "default": {
+                              "culture_tokens": 4,
+                              "food": 3,
+                              "ore": 3,
+                              "wood": 3
                             }
                           },
-                          "last_priority_used": 0,
-                          "player": 0
+                          "name": "Pay to build wonder",
+                          "optional": false
                         }
                       ]
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events/0/handler/request/SelectHandCards"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/events/0/last_priority_used",
+                      "value": 10
                     },
                     {
                       "op": "remove",
@@ -347,6 +361,76 @@
                       "op": "remove",
                       "path": "/players/0/wonders_build"
                     }
+                  ],
+                  "wonder_built": "Pyramids"
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ObjectiveCard": 32
+                        }
+                      ]
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "SelectObjectives": {
+                              "cards": [
+                                {
+                                  "ObjectiveCard": 32
+                                }
+                              ],
+                              "objective_opportunities": [
+                                "Magnificent Culture"
+                              ]
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "Builtin": "Select Objective Cards to Complete"
+                            },
+                            "priority": 0,
+                            "request": {
+                              "SelectHandCards": {
+                                "choices": [
+                                  {
+                                    "ObjectiveCard": 32
+                                  }
+                                ],
+                                "description": "Select cards to complete",
+                                "needed": {
+                                  "end": 1,
+                                  "start": 0
+                                }
+                              }
+                            }
+                          },
+                          "last_priority_used": 0,
+                          "player": 0
+                        }
+                      ]
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/objective_cards",
+                      "value": [
+                        32
+                      ]
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/completed_objectives"
+                    }
+                  ],
+                  "completed_objectives": [
+                    "Magnificent Culture"
                   ]
                 }
               ]
@@ -356,7 +440,7 @@
       ]
     }
   ],
-  "action_log_index": 2,
+  "action_log_index": 3,
   "log": [
     [
       "Player1 played the wonder card Pyramids",
@@ -364,6 +448,9 @@
     ],
     [
       "Player1 built Pyramids in city A1 for 2 food, 3 wood, 3 ore and 4 culture tokens"
+    ],
+    [
+      "Player1 completed objective Magnificent Culture"
     ]
   ],
   "undo_limit": 0,

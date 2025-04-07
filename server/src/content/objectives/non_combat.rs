@@ -1,7 +1,10 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::content::advances::warfare::draft_cost;
 use crate::content::objectives::status_phase_objectives::home_position;
+use crate::game::Game;
+use crate::log::{ActionLogItem, ActionLogPlayer};
 use crate::objective_card::{Objective, objective_is_ready};
+use itertools::Itertools;
 
 pub(crate) fn draft() -> Objective {
     let name = "Draft";
@@ -49,4 +52,50 @@ pub(crate) fn city_founder() -> Objective {
 pub(crate) fn terror_regime() -> Objective {
     // is handled explicitly
     Objective::builder("Terror Regime", "At least 4 cities are Angry.").build()
+}
+
+pub(crate) fn magnificent_culture() -> Objective {
+    let name = "Magnificent Culture";
+    Objective::builder(
+        name,
+        "You just built a wonder OR \
+        you built have built the only wonder in the last round.",
+    )
+    .status_phase_check(|game, player| {
+        let wonders = last_round(game)
+            .iter()
+            .flat_map(|p| {
+                p.items
+                    .iter()
+                    .find_map(|i| i.wonder_built.as_ref().map(|n| (n, p.index)))
+            })
+            .collect_vec();
+        
+        wonders.len() == 1 && wonders[0].1 == player.index
+    })
+        .add_simple_persistent_event_listener(
+            |event| &mut event.play_wonder_card,
+            0,
+            |game, player, _, _| {
+                objective_is_ready(game.player_mut(player), name);
+            },
+        )
+    .build()
+}
+
+pub(crate) fn last_player_round(game: &Game, player: usize) -> Vec<&ActionLogItem> {
+    last_round(game)
+        .iter()
+        .filter(|p| p.index == player)
+        .flat_map(|p| p.items.iter())
+        .collect()
+}
+
+fn last_round(game: &Game) -> Vec<&ActionLogPlayer> {
+    game.action_log
+        .last()
+        .and_then(|a| a.rounds.last())
+        .iter()
+        .flat_map(|r| r.players.iter())
+        .collect_vec()
 }

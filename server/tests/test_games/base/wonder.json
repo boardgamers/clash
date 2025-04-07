@@ -86,6 +86,9 @@
       "wonder_cards": [
         "Pyramids"
       ],
+      "objective_cards": [
+        32
+      ],
       "next_unit_id": 8
     },
     {
