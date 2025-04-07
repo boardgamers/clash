@@ -5,13 +5,21 @@ use crate::content::objectives::combat_objectives::{
 use crate::content::objectives::non_combat::{
     city_founder, draft, magnificent_culture, terror_regime,
 };
-use crate::content::objectives::status_phase_objectives::{
-    advanced_culture, city_planner, coastal_lead, colony, consulate, culture_focus, culture_power,
-    diversified_research, diversity, education_lead, eureka, expansionist, food_supplies,
-    fortifications, goal_focused, government, happy_population, large_army, large_civ, large_fleet,
-    metropolis, militarized, military_might, optimized_storage, ore_supplies, outpost,
-    religious_fervor, science_focus, science_lead, sea_blockade, seafarers, shipping_routes,
-    standing_army, threat, trade_focus, trade_power, wealth, wood_supplies,
+
+use crate::content::objectives::advance_objectives::{
+    city_planner, culture_focus, diversified_research, education_lead, goal_focused, government,
+    militarized, science_focus, seafarers, trade_focus,
+};
+use crate::content::objectives::city_objectives::{
+    advanced_culture, coastal_lead, consulate, culture_power, diversity, expansionist,
+    fortifications, happy_population, large_civ, metropolis, religious_fervor, science_lead,
+};
+use crate::content::objectives::resource_objectives::{
+    eureka, food_supplies, optimized_storage, ore_supplies, wealth, wood_supplies,
+};
+use crate::content::objectives::unit_objectives::{
+    colony, large_army, large_fleet, military_might, outpost, sea_blockade, shipping_routes,
+    standing_army, threat, trade_power,
 };
 use crate::objective_card::ObjectiveCard;
 use itertools::Itertools;

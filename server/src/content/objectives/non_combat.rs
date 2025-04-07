@@ -1,9 +1,11 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::content::advances::warfare::draft_cost;
-use crate::content::objectives::status_phase_objectives::home_position;
 use crate::game::Game;
 use crate::log::{ActionLogItem, ActionLogPlayer};
+use crate::map::get_map_setup;
 use crate::objective_card::{Objective, objective_is_ready};
+use crate::player::Player;
+use crate::position::Position;
 use itertools::Itertools;
 
 pub(crate) fn draft() -> Objective {
@@ -98,4 +100,10 @@ fn last_round(game: &Game) -> Vec<&ActionLogPlayer> {
         .iter()
         .flat_map(|r| r.players.iter())
         .collect_vec()
+}
+
+pub(crate) fn home_position(game: &Game, player: &Player) -> Position {
+    let setup = get_map_setup(game.human_players_count());
+    let h = &setup.home_positions[player.index];
+    h.block.tiles(&h.position, h.position.rotation)[0].0
 }

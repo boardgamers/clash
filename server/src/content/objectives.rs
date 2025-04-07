@@ -1,6 +1,9 @@
+pub(crate) mod advance_objectives;
+pub(crate) mod city_objectives;
 pub(crate) mod combat_objectives;
 pub(crate) mod non_combat;
-pub(crate) mod status_phase_objectives;
+pub(crate) mod resource_objectives;
+pub(crate) mod unit_objectives;
 
 use crate::content::objective_cards;
 use crate::objective_card::Objective;
