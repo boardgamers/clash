@@ -212,9 +212,12 @@ pub(crate) fn ivory_tower() -> Objective {
 pub(crate) fn unit_versatility(objective: &str, unit_type: UnitType) -> Objective {
     Objective::builder(
         objective,
-        &format!("You have at least 3 army groups with at least 1 {} unit each.", unit_type.name())
+        &format!(
+            "You have at least 3 army groups with at least 1 {} unit each.",
+            unit_type.name()
+        ),
     )
-    .status_phase_check(move|_game, player| {
+    .status_phase_check(move |_game, player| {
         player
             .units
             .iter()
