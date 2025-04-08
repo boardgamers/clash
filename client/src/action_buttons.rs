@@ -165,10 +165,9 @@ pub fn base_or_custom_available(
     action: &PlayingActionType,
     custom: &CustomActionType,
 ) -> bool {
-    let self1 = &rc.game;
     let player_index = rc.shown_player.index;
     rc.can_play_action(action)
-        || (rc.game.state == GameState::Playing && custom.is_available(self1, player_index))
+        || (rc.game.state == GameState::Playing && custom.is_available(&rc.game, player_index))
 }
 
 pub fn base_or_custom_action(
@@ -190,9 +189,7 @@ pub fn base_or_custom_action(
     let special = custom
         .iter()
         .find(|(_, a)| {
-            let self1 = &rc.game;
-            let player_index = rc.shown_player.index;
-            a.is_available(self1, player_index)
+            a.is_available(&rc.game, rc.shown_player.index)
         })
         .map(|(origin, a)| {
             let dialog = execute(BaseOrCustomDialog {
