@@ -2,7 +2,9 @@ use crate::action::Action;
 use crate::city::MoodState;
 use crate::content::advances;
 use crate::content::custom_actions::{CustomAction, CustomActionInfo, CustomActionType};
-use crate::content::persistent_events::{EventResponse, PersistentEventRequest, PersistentEventState, SelectedStructure};
+use crate::content::persistent_events::{
+    EventResponse, PersistentEventRequest, PersistentEventState, SelectedStructure,
+};
 use crate::game::Game;
 use crate::playing_actions::{Collect, IncreaseHappiness, PlayingAction, PlayingActionType};
 use crate::position::Position;
@@ -62,11 +64,16 @@ fn base_actions(game: &Game) -> Vec<Action> {
     // IncreaseHappiness
     let happiness = available_happiness_actions(game, p.index);
     if !happiness.is_empty() {
-        // let happiness1 = calculate_increase_happiness();
-        // happiness1
+        let action = happiness_action(
+            &prefer_custom_action(happiness),
+            calculate_increase_happiness(),
+        );
+        actions.push(action);
     }
 
     // InfluenceCultureAttempt,
+    // available_influence_actions(game, p.index)
+    
     // ActionCard(u8),
     // WonderCard(String),
     // Custom(CustomActionInfo),
@@ -78,10 +85,14 @@ fn calculate_increase_happiness() -> IncreaseHappiness {
     todo!()
 }
 
-fn prefer_custom_action(actions: Vec<PlayingActionType>) {
+fn prefer_custom_action(actions: Vec<PlayingActionType>) -> PlayingActionType {
     let (action, custom) = base_and_custom_action(actions);
+    action.unwrap_or_else(|| {
+        PlayingActionType::Custom(custom.expect("custom action should be present").info())
+    })
 }
 
+#[must_use]
 pub fn base_and_custom_action(
     actions: Vec<PlayingActionType>,
 ) -> (Option<PlayingActionType>, Option<CustomActionType>) {
@@ -184,12 +195,12 @@ pub fn collect_action(action: &PlayingActionType, collect: Collect) -> Action {
     match action {
         PlayingActionType::Collect => Action::Playing(PlayingAction::Collect(collect)),
         PlayingActionType::Custom(c)
-        if c.custom_action_type == CustomActionType::FreeEconomyCollect =>
-            {
-                Action::Playing(PlayingAction::Custom(
-                    CustomAction::FreeEconomyCollect(collect),
-                ))
-            }
+            if c.custom_action_type == CustomActionType::FreeEconomyCollect =>
+        {
+            Action::Playing(PlayingAction::Custom(CustomAction::FreeEconomyCollect(
+                collect,
+            )))
+        }
         _ => panic!("illegal type {action:?}"),
     }
 }
@@ -219,18 +230,21 @@ pub fn available_happiness_actions(game: &Game, player: usize) -> Vec<PlayingAct
 }
 
 #[must_use]
-pub fn happiness_action(action: &PlayingActionType, include_happiness: IncreaseHappiness) -> Action {
+pub fn happiness_action(
+    action: &PlayingActionType,
+    include_happiness: IncreaseHappiness,
+) -> Action {
     match action {
         PlayingActionType::IncreaseHappiness => {
             Action::Playing(PlayingAction::IncreaseHappiness(include_happiness))
         }
         PlayingActionType::Custom(c)
-        if c.custom_action_type == CustomActionType::VotingIncreaseHappiness =>
-            {
-                Action::Playing(PlayingAction::Custom(
-                    CustomAction::VotingIncreaseHappiness(include_happiness),
-                ))
-            }
+            if c.custom_action_type == CustomActionType::VotingIncreaseHappiness =>
+        {
+            Action::Playing(PlayingAction::Custom(
+                CustomAction::VotingIncreaseHappiness(include_happiness),
+            ))
+        }
         _ => panic!("illegal type {action:?}"),
     }
 }
@@ -252,12 +266,12 @@ pub fn influence_action(action: &PlayingActionType, target: SelectedStructure) -
             Action::Playing(PlayingAction::InfluenceCultureAttempt(target))
         }
         PlayingActionType::Custom(c)
-        if c.custom_action_type == CustomActionType::ArtsInfluenceCultureAttempt =>
-            {
-                Action::Playing(PlayingAction::Custom(
-                    CustomAction::ArtsInfluenceCultureAttempt(target),
-                ))
-            }
+            if c.custom_action_type == CustomActionType::ArtsInfluenceCultureAttempt =>
+        {
+            Action::Playing(PlayingAction::Custom(
+                CustomAction::ArtsInfluenceCultureAttempt(target),
+            ))
+        }
         _ => panic!("illegal type {action:?}"),
     }
 }
