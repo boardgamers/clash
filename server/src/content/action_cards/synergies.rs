@@ -244,7 +244,7 @@ pub(crate) fn teachable_advances(teacher: &Player, student: &Player) -> Vec<Stri
     teacher
         .advances
         .iter()
-        .filter(|a| !student.has_advance(&a.name) && student.can_advance_free(a))
+        .filter(|a| student.can_advance_free(a))
         .map(|a| a.name.clone())
         .collect()
 }

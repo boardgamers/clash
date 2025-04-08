@@ -15,7 +15,7 @@ use crate::select_ui::HighlightType;
 use crate::tooltip::show_tooltip_for_circle;
 use macroquad::math::f32;
 use macroquad::prelude::*;
-use server::available_actions::{available_collect_actions, available_happiness_actions_for_city};
+use server::available_actions::{available_collect_actions_for_city, available_happiness_actions_for_city};
 use server::city::{City, MoodState};
 use server::city_pieces::Building;
 use server::collect::possible_resource_collections;
@@ -144,7 +144,7 @@ fn recruit_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconActio
 }
 
 fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconAction<'a>> {
-    let actions = available_collect_actions(rc.game, rc.shown_player.index, city.position);
+    let actions = available_collect_actions_for_city(rc.game, rc.shown_player.index, city.position);
     if actions.is_empty() {
         return None;
     }

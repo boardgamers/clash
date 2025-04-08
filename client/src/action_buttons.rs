@@ -1,6 +1,6 @@
 use crate::city_ui::{IconAction, IconActionVec};
 use crate::client_state::{ActiveDialog, StateUpdate};
-use crate::dialog_ui::{BaseOrCustomAction, BaseOrCustomDialog};
+use crate::dialog_ui::{BaseOrCustomDialog};
 use crate::event_ui::event_help;
 use crate::happiness_ui::open_increase_happiness_dialog;
 use crate::influence_ui::new_cultural_influence_dialog;
@@ -8,9 +8,8 @@ use crate::layout_ui::{bottom_left_texture, icon_pos};
 use crate::move_ui::MoveIntent;
 use crate::payment_ui::Payment;
 use crate::render_context::RenderContext;
-use itertools::{Either, Itertools};
 use server::action::Action;
-use server::available_actions::{available_happiness_actions, available_influence_actions};
+use server::available_actions::{available_happiness_actions, available_influence_actions, base_and_custom_action};
 use server::city::City;
 use server::content::advances::culture::{sports_options, theaters_options};
 use server::content::advances::economy::tax_options;
@@ -21,7 +20,7 @@ use server::resource::ResourceType;
 pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
     let assets = rc.assets();
     let game = rc.game;
-    
+
     let happiness = available_happiness_actions(rc.game, rc.shown_player.index);
     if !happiness.is_empty()
         && bottom_left_texture(
@@ -46,11 +45,8 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
         return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
     }
 
-    let influence = available_influence_actions(
-        game,
-        rc.shown_player.index,
-    );
-    
+    let influence = available_influence_actions(game, rc.shown_player.index);
+
     if !influence.is_empty()
         && bottom_left_texture(
             rc,
@@ -59,12 +55,9 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
             "Cultural Influence",
         )
     {
-        return base_or_custom_action(
-            rc,
-            influence,
-            "Influence culture",
-            |d| new_cultural_influence_dialog(rc.game, rc.shown_player.index, d),
-        );
+        return base_or_custom_action(rc, influence, "Influence culture", |d| {
+            new_cultural_influence_dialog(rc.game, rc.shown_player.index, d)
+        });
     }
     let mut i = 0;
     for (a, origin) in &game.available_custom_actions(rc.shown_player.index) {
@@ -170,32 +163,19 @@ pub fn base_or_custom_action(
     title: &str,
     execute: impl Fn(BaseOrCustomDialog) -> ActiveDialog,
 ) -> StateUpdate {
-    let (custom, action): (Vec<_>, Vec<_>) = actions.iter().partition_map(
-        |a| {
-            if let PlayingActionType::Custom(c) = a {
-                Either::Left(c.custom_action_type.clone())
-            } else {
-                Either::Right(a)
-            }
-        },
-    );
+    let (action, custom) = base_and_custom_action(actions);
 
-    let base = if action.first().is_some() {
-        Some(execute(BaseOrCustomDialog {
-            custom: BaseOrCustomAction::Base,
+    let base = action.map(|action_type| {
+        execute(BaseOrCustomDialog {
+            action_type,
             title: title.to_string(),
-        }))
-    } else {
-        None
-    };
+        })
+    });
 
-    let special = custom.first().map(|a| {
-        let origin = &rc.shown_player.custom_actions[a];
+    let special = custom.map(|a| {
+        let origin = &rc.shown_player.custom_actions[&a];
         let dialog = execute(BaseOrCustomDialog {
-            custom: BaseOrCustomAction::Custom {
-                custom: a.clone(),
-                origin: origin.clone(),
-            },
+            action_type: PlayingActionType::Custom(a.info()),
             title: format!("{title} with {}", origin.name()),
         });
 

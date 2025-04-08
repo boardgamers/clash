@@ -1,25 +1,101 @@
 use crate::action::Action;
 use crate::city::MoodState;
-use crate::content::custom_actions::CustomActionType;
-use crate::content::persistent_events::{
-    EventResponse, PersistentEventRequest, PersistentEventState,
-};
+use crate::content::advances;
+use crate::content::custom_actions::{CustomAction, CustomActionInfo, CustomActionType};
+use crate::content::persistent_events::{EventResponse, PersistentEventRequest, PersistentEventState, SelectedStructure};
 use crate::game::Game;
-use crate::playing_actions::PlayingActionType;
+use crate::playing_actions::{Collect, IncreaseHappiness, PlayingAction, PlayingActionType};
 use crate::position::Position;
+use itertools::{Either, Itertools};
 
+///
+/// Returns a list of available actions for the current player.
+///
+/// Some simplifications are made to help AI implementations:
+/// - custom actions are preferred over basic actions if available.
+/// - always pay default payment
+/// - collect and select as much as possible (which is not always the best choice,
+///   e.g. selecting to sacrifice a unit for an incident)
+/// - move actions are not returned at all - this required special handling
+#[must_use]
 pub fn get_available_actions(game: &Game) -> Vec<Action> {
     if let Some(event) = game.events.last() {
         responses(game, event)
     } else {
-        base_actions(game)
+        let actions = base_actions(game);
+        if actions.is_empty() {
+            return vec![Action::Playing(PlayingAction::EndTurn)];
+        }
+        actions
     }
 }
 
+#[must_use]
 fn base_actions(game: &Game) -> Vec<Action> {
+    let p = game.player(game.current_player_index);
+
+    let mut actions: Vec<Action> = vec![];
+
+    // Advance
+    for a in advances::get_all() {
+        if p.can_advance(&a) {
+            actions.push(Action::Playing(PlayingAction::Advance {
+                advance: a.name.clone(),
+                payment: p.advance_cost(&a, None).cost.default,
+            }));
+        }
+    }
+
+    // FoundCity
+    for u in &p.units {
+        if u.can_found_city(game) {
+            actions.push(Action::Playing(PlayingAction::FoundCity { settler: u.id }));
+        }
+    }
+
+    // Construct,
+    // Collect,
+    // Recruit,
+
+    // MoveUnits -> special handling
+
+    // IncreaseHappiness
+    let happiness = available_happiness_actions(game, p.index);
+    if !happiness.is_empty() {
+        // let happiness1 = calculate_increase_happiness();
+        // happiness1
+    }
+
+    // InfluenceCultureAttempt,
+    // ActionCard(u8),
+    // WonderCard(String),
+    // Custom(CustomActionInfo),
+
+    actions
+}
+
+fn calculate_increase_happiness() -> IncreaseHappiness {
     todo!()
 }
 
+fn prefer_custom_action(actions: Vec<PlayingActionType>) {
+    let (action, custom) = base_and_custom_action(actions);
+}
+
+pub fn base_and_custom_action(
+    actions: Vec<PlayingActionType>,
+) -> (Option<PlayingActionType>, Option<CustomActionType>) {
+    let (mut custom, mut action): (Vec<_>, Vec<_>) = actions.into_iter().partition_map(|a| {
+        if let PlayingActionType::Custom(c) = a {
+            Either::Left(c.custom_action_type.clone())
+        } else {
+            Either::Right(a.clone())
+        }
+    });
+    (action.pop(), custom.pop())
+}
+
+#[must_use]
 fn responses(game: &Game, event: &PersistentEventState) -> Vec<Action> {
     let request = &event.player.handler.as_ref().expect("handler").request;
     match request {
@@ -81,21 +157,40 @@ fn responses(game: &Game, event: &PersistentEventState) -> Vec<Action> {
 }
 
 #[must_use]
-pub fn available_collect_actions(
+pub fn available_collect_actions_for_city(
     game: &Game,
     player: usize,
     position: Position,
 ) -> Vec<PlayingActionType> {
-    // todo should we pull the city from the arg list - since it's the same for all cities?
     if game.player(player).get_city(position).can_activate() {
-        base_or_custom_available(
-            game,
-            player,
-            PlayingActionType::Collect,
-            CustomActionType::FreeEconomyCollect,
-        )
+        available_collect_actions(game, player)
     } else {
         vec![]
+    }
+}
+
+#[must_use]
+pub fn available_collect_actions(game: &Game, player: usize) -> Vec<PlayingActionType> {
+    base_or_custom_available(
+        game,
+        player,
+        PlayingActionType::Collect,
+        &CustomActionType::FreeEconomyCollect,
+    )
+}
+
+#[must_use]
+pub fn collect_action(action: &PlayingActionType, collect: Collect) -> Action {
+    match action {
+        PlayingActionType::Collect => Action::Playing(PlayingAction::Collect(collect)),
+        PlayingActionType::Custom(c)
+        if c.custom_action_type == CustomActionType::FreeEconomyCollect =>
+            {
+                Action::Playing(PlayingAction::Custom(
+                    CustomAction::FreeEconomyCollect(collect),
+                ))
+            }
+        _ => panic!("illegal type {action:?}"),
     }
 }
 
@@ -119,8 +214,25 @@ pub fn available_happiness_actions(game: &Game, player: usize) -> Vec<PlayingAct
         game,
         player,
         PlayingActionType::IncreaseHappiness,
-        CustomActionType::VotingIncreaseHappiness,
+        &CustomActionType::VotingIncreaseHappiness,
     )
+}
+
+#[must_use]
+pub fn happiness_action(action: &PlayingActionType, include_happiness: IncreaseHappiness) -> Action {
+    match action {
+        PlayingActionType::IncreaseHappiness => {
+            Action::Playing(PlayingAction::IncreaseHappiness(include_happiness))
+        }
+        PlayingActionType::Custom(c)
+        if c.custom_action_type == CustomActionType::VotingIncreaseHappiness =>
+            {
+                Action::Playing(PlayingAction::Custom(
+                    CustomAction::VotingIncreaseHappiness(include_happiness),
+                ))
+            }
+        _ => panic!("illegal type {action:?}"),
+    }
 }
 
 #[must_use]
@@ -129,8 +241,25 @@ pub fn available_influence_actions(game: &Game, player: usize) -> Vec<PlayingAct
         game,
         player,
         PlayingActionType::InfluenceCultureAttempt,
-        CustomActionType::ArtsInfluenceCultureAttempt,
+        &CustomActionType::ArtsInfluenceCultureAttempt,
     )
+}
+
+#[must_use]
+pub fn influence_action(action: &PlayingActionType, target: SelectedStructure) -> Action {
+    match action {
+        PlayingActionType::InfluenceCultureAttempt => {
+            Action::Playing(PlayingAction::InfluenceCultureAttempt(target))
+        }
+        PlayingActionType::Custom(c)
+        if c.custom_action_type == CustomActionType::ArtsInfluenceCultureAttempt =>
+            {
+                Action::Playing(PlayingAction::Custom(
+                    CustomAction::ArtsInfluenceCultureAttempt(target),
+                ))
+            }
+        _ => panic!("illegal type {action:?}"),
+    }
 }
 
 #[must_use]
@@ -138,7 +267,7 @@ pub fn base_or_custom_available(
     game: &Game,
     player: usize,
     action: PlayingActionType,
-    custom: CustomActionType,
+    custom: &CustomActionType,
 ) -> Vec<PlayingActionType> {
     vec![action, custom.playing_action()]
         .into_iter()

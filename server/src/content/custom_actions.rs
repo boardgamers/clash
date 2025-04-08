@@ -32,7 +32,7 @@ pub enum CustomAction {
     Theaters(ResourcePile),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CustomActionInfo {
     pub custom_action_type: CustomActionType,
     pub action_type: ActionType,
@@ -55,7 +55,7 @@ impl CustomActionInfo {
     }
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Hash)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Hash, Debug)]
 pub enum CustomActionType {
     AbsolutePower,
     ForcedLabor,

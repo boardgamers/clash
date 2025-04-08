@@ -1,6 +1,6 @@
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::{
-    BaseOrCustomAction, BaseOrCustomDialog, OkTooltip, cancel_button, ok_button,
+    BaseOrCustomDialog, OkTooltip, cancel_button, ok_button,
 };
 use crate::event_ui::event_help;
 use crate::hex_ui;
@@ -13,6 +13,7 @@ use macroquad::math::{Vec2, vec2};
 use macroquad::prelude::WHITE;
 use macroquad::shapes::draw_circle;
 use server::action::Action;
+use server::available_actions::collect_action;
 use server::collect::{
     CollectInfo, PositionCollection, get_total_collection, possible_resource_collections,
     tiles_used,
@@ -99,14 +100,9 @@ pub fn collect_dialog(rc: &RenderContext, collect: &CollectResources) -> StateUp
             city_position: collect.city_position,
             collections: collect.collections.clone(),
         };
-        let action = match collect.custom.custom {
-            BaseOrCustomAction::Base => PlayingAction::Collect(c),
-            BaseOrCustomAction::Custom { .. } => {
-                PlayingAction::Custom(CustomAction::FreeEconomyCollect(c))
-            }
-        };
+
         return StateUpdate::execute_activation(
-            Action::Playing(action),
+            collect_action(&collect.custom.action_type, c),
             if extra > 0 {
                 vec![format!("{extra} more tiles can be collected")]
             } else {

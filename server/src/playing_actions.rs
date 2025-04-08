@@ -70,7 +70,7 @@ pub struct IncreaseHappiness {
     pub payment: ResourcePile,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum PlayingActionType {
     Advance,
     FoundCity,
@@ -263,7 +263,7 @@ impl PlayingAction {
     }
 }
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Debug)]
 pub struct ActionType {
     pub free: bool,
     pub cost: ResourcePile,
