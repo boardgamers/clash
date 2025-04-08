@@ -203,7 +203,7 @@ impl Game {
     /// # Panics
     /// Panics if the city does not exist
     #[must_use]
-    pub fn any_city(&self, position: Position) -> &City {
+    pub fn get_any_city(&self, position: Position) -> &City {
         self.try_get_any_city(position).expect("city not found")
     }
 

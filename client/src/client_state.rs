@@ -5,7 +5,7 @@ use crate::construct_ui::ConstructionPayment;
 use crate::custom_phase_ui::{
     MultiSelection, SelectedStructureInfo, SelectedStructureStatus, UnitsSelection,
 };
-use crate::dialog_ui::{BaseOrCustomDialog};
+use crate::dialog_ui::BaseOrCustomDialog;
 use crate::event_ui::{custom_phase_event_help, custom_phase_event_origin, event_help, pay_help};
 use crate::happiness_ui::IncreaseHappinessConfig;
 use crate::layout_ui::FONT_SIZE;
@@ -615,11 +615,16 @@ impl State {
     }
 
     pub fn draw_text_with_color(&self, text: &str, x: f32, y: f32, color: Color) {
-        draw_text_ex(text, x, y, TextParams {
-            font: Some(&self.assets.font),
-            font_size: FONT_SIZE,
-            color,
-            ..Default::default()
-        });
+        draw_text_ex(
+            text,
+            x,
+            y,
+            TextParams {
+                font: Some(&self.assets.font),
+                font_size: FONT_SIZE,
+                color,
+                ..Default::default()
+            },
+        );
     }
 }

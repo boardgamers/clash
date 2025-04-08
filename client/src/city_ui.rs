@@ -1,11 +1,9 @@
 use crate::action_buttons::{base_or_custom_action, custom_action_buttons};
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::collect_ui::CollectResources;
-use crate::construct_ui::{new_building_positions, ConstructionPayment, ConstructionProject};
+use crate::construct_ui::{ConstructionPayment, ConstructionProject, new_building_positions};
 use crate::custom_phase_ui::{SelectedStructureInfo, SelectedStructureStatus};
-use crate::happiness_ui::{
-    add_increase_happiness,  open_increase_happiness_dialog,
-};
+use crate::happiness_ui::{add_increase_happiness, open_increase_happiness_dialog};
 use crate::hex_ui;
 use crate::layout_ui::{draw_scaled_icon, is_in_circle};
 use crate::map_ui::{move_units_buttons, show_map_action_buttons};
@@ -15,7 +13,9 @@ use crate::select_ui::HighlightType;
 use crate::tooltip::show_tooltip_for_circle;
 use macroquad::math::f32;
 use macroquad::prelude::*;
-use server::available_actions::{available_collect_actions_for_city, available_happiness_actions_for_city};
+use server::available_actions::{
+    available_collect_actions_for_city, available_happiness_actions_for_city,
+};
 use server::city::{City, MoodState};
 use server::city_pieces::Building;
 use server::collect::possible_resource_collections;
@@ -54,11 +54,12 @@ pub fn show_city_menu<'a>(rc: &'a RenderContext, city: &'a City) -> StateUpdate 
 }
 
 fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconAction<'a>> {
-    let actions = available_happiness_actions_for_city(rc.game, rc.shown_player.index, city.position);
+    let actions =
+        available_happiness_actions_for_city(rc.game, rc.shown_player.index, city.position);
     if actions.is_empty() {
         return None;
     }
-    
+
     Some((
         &rc.assets().resources[&ResourceType::MoodTokens],
         "Increase happiness".to_string(),

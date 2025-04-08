@@ -445,7 +445,7 @@ impl Player {
         if self.has_advance(&advance.name) {
             return false;
         }
-        
+
         for contradicting_advance in &advance.contradicting {
             if self.has_advance(contradicting_advance) {
                 return false;

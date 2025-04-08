@@ -1,8 +1,6 @@
 use crate::advance_ui::{AdvanceState, show_advance_menu};
 use crate::client_state::{ActiveDialog, StateUpdate};
-use crate::dialog_ui::{
-    BaseOrCustomDialog, OkTooltip, cancel_button_with_tooltip, ok_button,
-};
+use crate::dialog_ui::{BaseOrCustomDialog, OkTooltip, cancel_button_with_tooltip, ok_button};
 use crate::layout_ui::{bottom_center_anchor, bottom_centered_text, icon_pos};
 use crate::payment_ui::{Payment, multi_payment_dialog, payment_dialog};
 use crate::player_ui::choose_player_dialog;
@@ -14,13 +12,11 @@ use itertools::Itertools;
 use macroquad::math::vec2;
 use server::action::Action;
 use server::available_actions::influence_action;
-use server::content::custom_actions::CustomAction;
 use server::content::persistent_events::{
     AdvanceRequest, EventResponse, MultiRequest, PlayerRequest, SelectedStructure, Structure,
     UnitTypeRequest, UnitsRequest, is_selected_structures_valid,
 };
 use server::game::Game;
-use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::unit::Unit;
 

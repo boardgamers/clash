@@ -1,7 +1,7 @@
 use crate::action_buttons::base_or_custom_action;
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::BaseOrCustomDialog;
-use crate::payment_ui::{payment_dialog, Payment};
+use crate::payment_ui::{Payment, payment_dialog};
 use crate::render_context::RenderContext;
 use server::available_actions::happiness_action;
 use server::city::City;
@@ -48,17 +48,9 @@ pub fn open_increase_happiness_dialog(
     actions: Vec<PlayingActionType>,
     init: impl Fn(IncreaseHappinessConfig) -> IncreaseHappinessConfig,
 ) -> StateUpdate {
-    base_or_custom_action(
-        rc,
-        actions,
-        "Increase happiness",
-        |custom| {
-            ActiveDialog::IncreaseHappiness(init(IncreaseHappinessConfig::new(
-                rc.shown_player,
-                custom,
-            )))
-        },
-    )
+    base_or_custom_action(rc, actions, "Increase happiness", |custom| {
+        ActiveDialog::IncreaseHappiness(init(IncreaseHappinessConfig::new(rc.shown_player, custom)))
+    })
 }
 
 pub fn increase_happiness_click(
@@ -131,10 +123,13 @@ pub fn increase_happiness_menu(rc: &RenderContext, h: &IncreaseHappinessConfig) 
             })
         },
         |payment| {
-            StateUpdate::execute(happiness_action(&h.custom.action_type, IncreaseHappiness {
-                happiness_increases: h.steps.clone(),
-                payment,
-            }))
+            StateUpdate::execute(happiness_action(
+                &h.custom.action_type,
+                IncreaseHappiness {
+                    happiness_increases: h.steps.clone(),
+                    payment,
+                },
+            ))
         },
     )
 }

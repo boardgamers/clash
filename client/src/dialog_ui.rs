@@ -2,8 +2,6 @@ use crate::client_state::{PendingUpdate, StateUpdate};
 use crate::layout_ui::{bottom_centered_text, bottom_right_texture, icon_pos};
 use crate::render_context::RenderContext;
 use macroquad::math::Vec2;
-use server::content::custom_actions::CustomActionType;
-use server::events::EventOrigin;
 use server::playing_actions::PlayingActionType;
 
 #[derive(Clone)]

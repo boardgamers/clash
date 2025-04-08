@@ -1,6 +1,6 @@
 use crate::city_ui::{IconAction, IconActionVec};
 use crate::client_state::{ActiveDialog, StateUpdate};
-use crate::dialog_ui::{BaseOrCustomDialog};
+use crate::dialog_ui::BaseOrCustomDialog;
 use crate::event_ui::event_help;
 use crate::happiness_ui::open_increase_happiness_dialog;
 use crate::influence_ui::new_cultural_influence_dialog;
@@ -9,7 +9,9 @@ use crate::move_ui::MoveIntent;
 use crate::payment_ui::Payment;
 use crate::render_context::RenderContext;
 use server::action::Action;
-use server::available_actions::{available_happiness_actions, available_influence_actions, base_and_custom_action};
+use server::available_actions::{
+    available_happiness_actions, available_influence_actions, base_and_custom_action,
+};
 use server::city::City;
 use server::content::advances::culture::{sports_options, theaters_options};
 use server::content::advances::economy::tax_options;

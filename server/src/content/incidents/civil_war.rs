@@ -94,7 +94,7 @@ fn civil_war(id: u8) -> Incident {
         },
         |game, s, i| {
             let position = s.choice[0];
-            let mood = game.any_city(position).mood_state.clone();
+            let mood = game.get_any_city(position).mood_state.clone();
             if i.player.payment.is_empty() && !matches!(mood, MoodState::Angry) {
                 decrease_mod_and_log(game, s, MoodModifier::Decrease);
             }
