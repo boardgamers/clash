@@ -1,14 +1,12 @@
-use crate::action_buttons::{base_or_custom_action, base_or_custom_available};
+use crate::action_buttons::base_or_custom_action;
 use crate::client_state::{ActiveDialog, StateUpdate};
-use crate::dialog_ui::{BaseOrCustomAction, BaseOrCustomDialog};
+use crate::dialog_ui::BaseOrCustomDialog;
 use crate::payment_ui::{Payment, payment_dialog};
 use crate::render_context::RenderContext;
-use server::action::Action;
+use server::available_actions::happiness_action;
 use server::city::City;
-use server::content::custom_actions::{CustomAction, CustomActionType};
-use server::events::EventOrigin;
 use server::player::Player;
-use server::playing_actions::{IncreaseHappiness, PlayingAction, PlayingActionType};
+use server::playing_actions::{IncreaseHappiness, PlayingActionType};
 use server::position::Position;
 
 #[derive(Clone)]
@@ -45,33 +43,14 @@ impl IncreaseHappinessConfig {
     }
 }
 
-pub fn can_play_increase_happiness(rc: &RenderContext) -> bool {
-    base_or_custom_available(
-        rc,
-        &PlayingActionType::IncreaseHappiness,
-        &CustomActionType::VotingIncreaseHappiness,
-    )
-}
-
 pub fn open_increase_happiness_dialog(
     rc: &RenderContext,
+    actions: Vec<PlayingActionType>,
     init: impl Fn(IncreaseHappinessConfig) -> IncreaseHappinessConfig,
 ) -> StateUpdate {
-    base_or_custom_action(
-        rc,
-        &PlayingActionType::IncreaseHappiness,
-        "Increase happiness",
-        &[(
-            EventOrigin::advance("Voting"),
-            CustomActionType::VotingIncreaseHappiness,
-        )],
-        |custom| {
-            ActiveDialog::IncreaseHappiness(init(IncreaseHappinessConfig::new(
-                rc.shown_player,
-                custom,
-            )))
-        },
-    )
+    base_or_custom_action(rc, actions, "Increase happiness", |custom| {
+        ActiveDialog::IncreaseHappiness(init(IncreaseHappinessConfig::new(rc.shown_player, custom)))
+    })
 }
 
 pub fn increase_happiness_click(
@@ -144,17 +123,13 @@ pub fn increase_happiness_menu(rc: &RenderContext, h: &IncreaseHappinessConfig) 
             })
         },
         |payment| {
-            let i = IncreaseHappiness {
-                happiness_increases: h.steps.clone(),
-                payment,
-            };
-            let action = match &h.custom.custom {
-                BaseOrCustomAction::Base => PlayingAction::IncreaseHappiness(i),
-                BaseOrCustomAction::Custom { .. } => {
-                    PlayingAction::Custom(CustomAction::VotingIncreaseHappiness(i))
-                }
-            };
-            StateUpdate::execute(Action::Playing(action))
+            StateUpdate::execute(happiness_action(
+                &h.custom.action_type,
+                IncreaseHappiness {
+                    happiness_increases: h.steps.clone(),
+                    payment,
+                },
+            ))
         },
     )
 }

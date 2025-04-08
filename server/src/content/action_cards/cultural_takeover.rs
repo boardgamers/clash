@@ -131,7 +131,7 @@ pub(crate) fn use_cultural_takeover() -> Builtin {
 }
 
 fn is_barbarian_takeover(game: &Game, c: &InfluenceCultureInfo) -> bool {
-    let city = game.any_city(c.position);
+    let city = game.get_any_city(c.position);
     city.player_index == get_barbarians_player(game).index
         && city.size() == 1
         && game

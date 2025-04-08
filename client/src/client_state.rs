@@ -5,7 +5,7 @@ use crate::construct_ui::ConstructionPayment;
 use crate::custom_phase_ui::{
     MultiSelection, SelectedStructureInfo, SelectedStructureStatus, UnitsSelection,
 };
-use crate::dialog_ui::{BaseOrCustomAction, BaseOrCustomDialog};
+use crate::dialog_ui::BaseOrCustomDialog;
 use crate::event_ui::{custom_phase_event_help, custom_phase_event_origin, event_help, pay_help};
 use crate::happiness_ui::IncreaseHappinessConfig;
 use crate::layout_ui::FONT_SIZE;
@@ -26,6 +26,7 @@ use server::content::persistent_events::{
 use server::events::EventOrigin;
 use server::game::{Game, GameState};
 use server::movement::CurrentMove;
+use server::playing_actions::PlayingActionType;
 use server::position::Position;
 
 #[derive(Clone)]
@@ -154,9 +155,12 @@ impl ActiveDialog {
             ActiveDialog::StructuresRequest(d, r) => {
                 if let Some(b) = d {
                     let v = vec!["Click on a building to influence its culture".to_string()];
-                    if let BaseOrCustomAction::Custom { origin, custom: _ } = &b.custom {
+                    if let PlayingActionType::Custom(c) = &b.action_type {
                         let mut r = v.clone();
-                        r.extend(event_help(rc, origin));
+                        r.extend(event_help(
+                            rc,
+                            &rc.shown_player.custom_actions[&c.custom_action_type],
+                        ));
                     }
                     v
                 } else {

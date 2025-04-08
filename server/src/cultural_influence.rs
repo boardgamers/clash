@@ -20,7 +20,7 @@ pub(crate) fn influence_culture_attempt(
     c: &SelectedStructure,
 ) {
     let target_city_position = c.position;
-    let target_city = game.any_city(target_city_position);
+    let target_city = game.get_any_city(target_city_position);
 
     let info = influence_culture_boost_cost(game, player_index, c);
     assert!(info.blockers.is_empty(), "Impossible to influence culture");
@@ -168,7 +168,7 @@ pub fn influence_culture_boost_cost(
 ) -> InfluenceCultureInfo {
     let target_city_position = selected.position;
     let structure = &selected.structure;
-    let target_city = game.any_city(target_city_position);
+    let target_city = game.get_any_city(target_city_position);
     let target_player_index = target_city.player_index;
 
     let attacker = game.player(player_index);
@@ -184,7 +184,7 @@ pub fn influence_culture_boost_cost(
         i.add_blocker("No starting city available");
         return i;
     };
-    let starting_city = game.any_city(starting_city_position);
+    let starting_city = game.get_any_city(starting_city_position);
 
     let self_influence = starting_city_position == target_city_position;
     let target_city_owner = target_city.player_index;
@@ -248,7 +248,7 @@ pub fn influence_culture_boost_cost(
 
 fn influence_culture(game: &mut Game, influencer_index: usize, structure: &SelectedStructure) {
     let city_position = structure.position;
-    let city_owner = game.any_city(city_position).player_index;
+    let city_owner = game.get_any_city(city_position).player_index;
     match structure.structure {
         Structure::CityCenter => {
             let mut city = game
@@ -310,7 +310,7 @@ pub(crate) fn format_cultural_influence_attempt_log_item(
     c: &SelectedStructure,
 ) -> String {
     let target_city_position = c.position;
-    let target_city = game.any_city(target_city_position);
+    let target_city = game.get_any_city(target_city_position);
     let target_player_index = target_city.player_index;
     let starting_city_position = start_city(game, player_index, target_city)
         .expect("there should be a starting city")

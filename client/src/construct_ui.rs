@@ -35,7 +35,7 @@ pub fn new_building_positions(
 }
 
 pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> StateUpdate {
-    let city = rc.game.any_city(cp.city_position);
+    let city = rc.game.get_any_city(cp.city_position);
     payment_dialog(
         rc,
         &cp.payment.clone(),

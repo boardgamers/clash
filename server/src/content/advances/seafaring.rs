@@ -94,7 +94,7 @@ fn is_enemy_player_or_pirate_zone(game: &Game, player_index: usize, position: Po
 }
 
 fn fishing_collect(i: &mut CollectInfo, c: &CollectContext, game: &Game) {
-    let city = game.any_city(c.city_position);
+    let city = game.get_any_city(c.city_position);
     let port = city.port_position;
     if let Some(position) = port
         .filter(|p| !is_enemy_player_or_pirate_zone(game, c.player_index, *p))

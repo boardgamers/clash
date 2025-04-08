@@ -1,8 +1,6 @@
 use crate::advance_ui::{AdvanceState, show_advance_menu};
 use crate::client_state::{ActiveDialog, StateUpdate};
-use crate::dialog_ui::{
-    BaseOrCustomAction, BaseOrCustomDialog, OkTooltip, cancel_button_with_tooltip, ok_button,
-};
+use crate::dialog_ui::{BaseOrCustomDialog, OkTooltip, cancel_button_with_tooltip, ok_button};
 use crate::layout_ui::{bottom_center_anchor, bottom_centered_text, icon_pos};
 use crate::payment_ui::{Payment, multi_payment_dialog, payment_dialog};
 use crate::player_ui::choose_player_dialog;
@@ -13,13 +11,12 @@ use crate::unit_ui::{UnitSelection, draw_unit_type};
 use itertools::Itertools;
 use macroquad::math::vec2;
 use server::action::Action;
-use server::content::custom_actions::CustomAction;
+use server::available_actions::influence_action;
 use server::content::persistent_events::{
     AdvanceRequest, EventResponse, MultiRequest, PlayerRequest, SelectedStructure, Structure,
     UnitTypeRequest, UnitsRequest, is_selected_structures_valid,
 };
 use server::game::Game;
-use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::unit::Unit;
 
@@ -255,15 +252,7 @@ pub fn select_structures_dialog(
             if s.selected.is_empty() {
                 return StateUpdate::CloseDialog;
             }
-            let s = s.selected[0].selected();
-            match d.custom {
-                BaseOrCustomAction::Base => {
-                    StateUpdate::execute(Action::Playing(PlayingAction::InfluenceCultureAttempt(s)))
-                }
-                BaseOrCustomAction::Custom { .. } => StateUpdate::execute(Action::Playing(
-                    PlayingAction::Custom(CustomAction::ArtsInfluenceCultureAttempt(s)),
-                )),
-            }
+            StateUpdate::execute(influence_action(&d.action_type, s.selected[0].selected()))
         } else {
             StateUpdate::response(EventResponse::SelectStructures(sel))
         }
