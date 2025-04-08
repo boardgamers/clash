@@ -1,12 +1,10 @@
-use crate::action_buttons::{
-    base_or_custom_action, base_or_custom_available, custom_action_buttons,
-};
+use crate::action_buttons::{base_or_custom_action, custom_action_buttons};
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::collect_ui::CollectResources;
-use crate::construct_ui::{ConstructionPayment, ConstructionProject, new_building_positions};
+use crate::construct_ui::{new_building_positions, ConstructionPayment, ConstructionProject};
 use crate::custom_phase_ui::{SelectedStructureInfo, SelectedStructureStatus};
 use crate::happiness_ui::{
-    add_increase_happiness, can_play_increase_happiness, open_increase_happiness_dialog,
+    add_increase_happiness,  open_increase_happiness_dialog,
 };
 use crate::hex_ui;
 use crate::layout_ui::{draw_scaled_icon, is_in_circle};
@@ -17,13 +15,12 @@ use crate::select_ui::HighlightType;
 use crate::tooltip::show_tooltip_for_circle;
 use macroquad::math::f32;
 use macroquad::prelude::*;
+use server::available_actions::{available_collect_actions, available_happiness_actions_for_city};
 use server::city::{City, MoodState};
 use server::city_pieces::Building;
 use server::collect::possible_resource_collections;
 use server::construct::can_construct;
-use server::content::custom_actions::CustomActionType;
 use server::content::persistent_events::Structure;
-use server::events::EventOrigin;
 use server::game::Game;
 use server::playing_actions::PlayingActionType;
 use server::resource::ResourceType;
@@ -57,14 +54,16 @@ pub fn show_city_menu<'a>(rc: &'a RenderContext, city: &'a City) -> StateUpdate 
 }
 
 fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconAction<'a>> {
-    if city.mood_state == MoodState::Happy || !can_play_increase_happiness(rc) {
+    let actions = available_happiness_actions_for_city(rc.game, rc.shown_player.index, city.position);
+    if actions.is_empty() {
         return None;
     }
+    
     Some((
         &rc.assets().resources[&ResourceType::MoodTokens],
         "Increase happiness".to_string(),
         Box::new(move || {
-            open_increase_happiness_dialog(rc, |mut happiness| {
+            open_increase_happiness_dialog(rc, actions.clone(), |mut happiness| {
                 let mut target = city.mood_state.clone();
                 while target != MoodState::Happy {
                     happiness = add_increase_happiness(rc, city, happiness);
@@ -145,43 +144,30 @@ fn recruit_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconActio
 }
 
 fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconAction<'a>> {
-    if !city.can_activate()
-        || !base_or_custom_available(
-            rc,
-            &PlayingActionType::Collect,
-            &CustomActionType::FreeEconomyCollect,
-        )
-    {
+    let actions = available_collect_actions(rc.game, rc.shown_player.index, city.position);
+    if actions.is_empty() {
         return None;
     }
+
     Some((
         &rc.assets().resources[&ResourceType::Food],
         "Collect Resources".to_string(),
-        Box::new(|| {
-            base_or_custom_action(
-                rc,
-                &PlayingActionType::Collect,
-                "Collect resources",
-                &[(
-                    EventOrigin::advance("Free Economy"),
-                    CustomActionType::FreeEconomyCollect,
-                )],
-                |custom| {
-                    let i = possible_resource_collections(
-                        rc.game,
-                        city.position,
-                        city.player_index,
-                        &Vec::new(),
-                        &[],
-                    );
-                    ActiveDialog::CollectResources(CollectResources::new(
-                        city.player_index,
-                        city.position,
-                        custom,
-                        i,
-                    ))
-                },
-            )
+        Box::new(move || {
+            base_or_custom_action(rc, actions.clone(), "Collect resources", |custom| {
+                let i = possible_resource_collections(
+                    rc.game,
+                    city.position,
+                    city.player_index,
+                    &Vec::new(),
+                    &[],
+                );
+                ActiveDialog::CollectResources(CollectResources::new(
+                    city.player_index,
+                    city.position,
+                    custom,
+                    i,
+                ))
+            })
         }),
     ))
 }

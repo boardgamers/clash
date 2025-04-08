@@ -1,12 +1,11 @@
-use crate::action_buttons::{base_or_custom_action, base_or_custom_available};
+use crate::action_buttons::base_or_custom_action;
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::{BaseOrCustomAction, BaseOrCustomDialog};
-use crate::payment_ui::{Payment, payment_dialog};
+use crate::payment_ui::{payment_dialog, Payment};
 use crate::render_context::RenderContext;
 use server::action::Action;
 use server::city::City;
-use server::content::custom_actions::{CustomAction, CustomActionType};
-use server::events::EventOrigin;
+use server::content::custom_actions::CustomAction;
 use server::player::Player;
 use server::playing_actions::{IncreaseHappiness, PlayingAction, PlayingActionType};
 use server::position::Position;
@@ -45,26 +44,15 @@ impl IncreaseHappinessConfig {
     }
 }
 
-pub fn can_play_increase_happiness(rc: &RenderContext) -> bool {
-    base_or_custom_available(
-        rc,
-        &PlayingActionType::IncreaseHappiness,
-        &CustomActionType::VotingIncreaseHappiness,
-    )
-}
-
 pub fn open_increase_happiness_dialog(
     rc: &RenderContext,
+    actions: Vec<PlayingActionType>,
     init: impl Fn(IncreaseHappinessConfig) -> IncreaseHappinessConfig,
 ) -> StateUpdate {
     base_or_custom_action(
         rc,
-        &PlayingActionType::IncreaseHappiness,
+        actions,
         "Increase happiness",
-        &[(
-            EventOrigin::advance("Voting"),
-            CustomActionType::VotingIncreaseHappiness,
-        )],
         |custom| {
             ActiveDialog::IncreaseHappiness(init(IncreaseHappinessConfig::new(
                 rc.shown_player,

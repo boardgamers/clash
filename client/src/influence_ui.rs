@@ -1,15 +1,11 @@
-use crate::action_buttons::base_or_custom_available;
 use crate::client_state::ActiveDialog;
 use crate::custom_phase_ui::{MultiSelection, SelectedStructureInfo, SelectedStructureStatus};
 use crate::dialog_ui::BaseOrCustomDialog;
-use crate::render_context::RenderContext;
 use itertools::Itertools;
 use server::city::City;
-use server::content::custom_actions::CustomActionType;
 use server::content::persistent_events::{MultiRequest, SelectedStructure, Structure};
 use server::cultural_influence::influence_culture_boost_cost;
 use server::game::Game;
-use server::playing_actions::PlayingActionType;
 
 pub fn new_cultural_influence_dialog(
     game: &Game,
@@ -80,12 +76,4 @@ fn structures(city: &City) -> Vec<SelectedStructure> {
         ));
     }
     structures
-}
-
-pub fn can_play_influence_culture(rc: &RenderContext) -> bool {
-    base_or_custom_available(
-        rc,
-        &PlayingActionType::InfluenceCultureAttempt,
-        &CustomActionType::ArtsInfluenceCultureAttempt,
-    )
 }

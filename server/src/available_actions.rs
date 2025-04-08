@@ -1,10 +1,10 @@
-use itertools::Either;
 use crate::action::Action;
+use crate::city::MoodState;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::{
     EventResponse, PersistentEventRequest, PersistentEventState,
 };
-use crate::game::{Game, GameState};
+use crate::game::Game;
 use crate::playing_actions::PlayingActionType;
 use crate::position::Position;
 
@@ -81,7 +81,12 @@ fn responses(game: &Game, event: &PersistentEventState) -> Vec<Action> {
 }
 
 #[must_use]
-pub fn can_collect(game: &Game, player: usize, position: Position) -> Vec<PlayingActionType> {
+pub fn available_collect_actions(
+    game: &Game,
+    player: usize,
+    position: Position,
+) -> Vec<PlayingActionType> {
+    // todo should we pull the city from the arg list - since it's the same for all cities?
     if game.player(player).get_city(position).can_activate() {
         base_or_custom_available(
             game,
@@ -95,12 +100,36 @@ pub fn can_collect(game: &Game, player: usize, position: Position) -> Vec<Playin
 }
 
 #[must_use]
-pub fn can_increase_happiness(game: &Game, player: usize) -> Vec<PlayingActionType> {
+pub fn available_happiness_actions_for_city(
+    game: &Game,
+    player: usize,
+    position: Position,
+) -> Vec<PlayingActionType> {
+    let city = game.player(player).get_city(position);
+    if city.can_activate() && city.mood_state != MoodState::Happy {
+        available_happiness_actions(game, player)
+    } else {
+        vec![]
+    }
+}
+
+#[must_use]
+pub fn available_happiness_actions(game: &Game, player: usize) -> Vec<PlayingActionType> {
     base_or_custom_available(
         game,
         player,
         PlayingActionType::IncreaseHappiness,
         CustomActionType::VotingIncreaseHappiness,
+    )
+}
+
+#[must_use]
+pub fn available_influence_actions(game: &Game, player: usize) -> Vec<PlayingActionType> {
+    base_or_custom_available(
+        game,
+        player,
+        PlayingActionType::InfluenceCultureAttempt,
+        CustomActionType::ArtsInfluenceCultureAttempt,
     )
 }
 
@@ -111,19 +140,6 @@ pub fn base_or_custom_available(
     action: PlayingActionType,
     custom: CustomActionType,
 ) -> Vec<PlayingActionType> {
-    // let mut actions: Vec<PlayingActionType> = vec![];
-    // let option = action.is_available(game, player).map(|_| action).ok();
-    // can_play_action(game, player, action)
-    //     || 
-    //     (game.state == GameState::Playing && 
-    //         custom.is_available(game, player))
-    // let action_type = custom.playing_action();
-    // 
-    // if custom.is_available(game, player) {
-    //     actions.push(custom.clone());
-    // }
-    // actions
-    
     vec![action, custom.playing_action()]
         .into_iter()
         .filter_map(|a| a.is_available(game, player).map(|_| a).ok())
