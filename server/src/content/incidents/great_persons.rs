@@ -16,7 +16,7 @@ use crate::incident::{Incident, IncidentBaseEffect, IncidentBuilder};
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::player_events::IncidentTarget;
-use crate::playing_actions::ActionType;
+use crate::playing_actions::ActionCost;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use crate::utils::format_list;
@@ -130,7 +130,7 @@ pub(crate) fn great_person_action_card<F, S: AsRef<str> + Clone>(
     incident_id: u8,
     name: &str,
     description: &str,
-    action_type: ActionType,
+    action_type: ActionCost,
     free_advance_groups: &[S],
     can_play: F,
 ) -> ActionCardBuilder
@@ -179,7 +179,7 @@ fn great_artist() -> ActionCard {
             "{} Then, you make one of your cities Happy.",
             great_person_description(groups)
         ),
-        ActionType::regular(),
+        ActionCost::regular(),
         groups,
         |_game, _player| true,
     )
@@ -223,7 +223,7 @@ fn great_prophet() -> ActionCard {
             "{} Then, you build a Temple without activating the city.",
             great_person_description(groups)
         ),
-        ActionType::regular(),
+        ActionCost::regular(),
         groups,
         |_game, _player| true,
     )
@@ -315,7 +315,7 @@ fn great_philosopher() -> ActionCard {
         21,
         "Great Philosopher",
         &format!("{} Then, gain 2 ideas.", great_person_description(groups)),
-        ActionType::regular(),
+        ActionCost::regular(),
         groups,
         |_game, _player| true,
     )
@@ -340,7 +340,7 @@ fn great_scientist() -> ActionCard {
             "{} Then, gain 1 idea and 1 Action Card.",
             great_person_description(groups)
         ),
-        ActionType::regular(),
+        ActionCost::regular(),
         groups,
         |_game, _player| true,
     )
@@ -369,7 +369,7 @@ fn elder_statesman() -> ActionCard {
             "{} Then, draw 2 Action Cards.",
             great_person_description(&groups)
         ),
-        ActionType::regular(),
+        ActionCost::regular(),
         &groups,
         |_game, _player| true,
     )
@@ -394,7 +394,7 @@ fn great_merchant() -> ActionCard {
                 "{} Then, if you have the Trade Routes advance, gain the Trade Routes income.",
                 great_person_description(groups)
             ),
-            ActionType::regular(),
+            ActionCost::regular(),
             groups,
             |_game, _player| true,
         ),
@@ -412,7 +412,7 @@ fn great_athlete() -> ActionCard {
             "{} Then, you may convert any amount of culture tokens to mood tokens or vice versa.",
             great_person_description(groups)
         ),
-        ActionType::regular(),
+        ActionCost::regular(),
         groups,
         |_game, player| player.resources.culture_tokens > 0 || player.resources.mood_tokens > 0,
     )

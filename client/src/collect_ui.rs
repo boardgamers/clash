@@ -10,9 +10,8 @@ use macroquad::color::BLACK;
 use macroquad::math::{Vec2, vec2};
 use macroquad::prelude::WHITE;
 use macroquad::shapes::draw_circle;
-use server::available_actions::collect_action;
 use server::collect::{
-    CollectInfo, PositionCollection, add_collect, get_total_collection,
+    CollectInfo, PositionCollection, add_collect, collect_action, get_total_collection,
     possible_resource_collections, tiles_used,
 };
 use server::playing_actions::Collect;
@@ -92,10 +91,7 @@ pub fn collect_dialog(rc: &RenderContext, collect: &CollectResources) -> StateUp
     if ok_button(rc, tooltip) {
         let extra = collect.extra_resources();
 
-        let c = Collect {
-            city_position: collect.city_position,
-            collections: collect.collections.clone(),
-        };
+        let c = Collect::new(collect.city_position, collect.collections.clone());
 
         return StateUpdate::execute_activation(
             collect_action(&collect.custom.action_type, c),

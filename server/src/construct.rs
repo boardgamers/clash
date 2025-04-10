@@ -3,12 +3,13 @@ use crate::city_pieces::Building;
 use crate::consts::MAX_CITY_SIZE;
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
+use crate::map::Terrain;
 use crate::player::Player;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub struct Construct {
     pub city_position: Position,
     pub city_piece: Building,
@@ -113,4 +114,42 @@ pub(crate) fn on_construct(game: &mut Game, player_index: usize, building: Build
         building,
         PersistentEventType::Construct,
     );
+}
+
+#[must_use]
+pub fn available_buildings(
+    game: &Game,
+    player: usize,
+    city: Position,
+) -> Vec<(Building, Option<Position>)> {
+    let player = game.player(player);
+    let city = player.get_city(city);
+    Building::all()
+        .into_iter()
+        .filter_map(|b| can_construct(city, b, player, game).ok().map(|()| b))
+        .flat_map(|b| new_building_positions(game, b, city))
+        .collect()
+}
+
+#[must_use]
+pub fn new_building_positions(
+    game: &Game,
+    building: Building,
+    city: &City,
+) -> Vec<(Building, Option<Position>)> {
+    if building != Building::Port {
+        return vec![(building, None)];
+    }
+
+    game.map
+        .tiles
+        .iter()
+        .filter_map(|(p, t)| {
+            if *t == Terrain::Water && city.position.is_neighbor(*p) {
+                Some((building, Some(*p)))
+            } else {
+                None
+            }
+        })
+        .collect()
 }

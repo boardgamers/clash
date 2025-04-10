@@ -12,7 +12,7 @@ use crate::content::tactics_cards::{
     improved_defenses, peltasts, tactical_retreat,
 };
 use crate::player_events::PlayingActionInfo;
-use crate::playing_actions::{ActionType, PlayingActionType};
+use crate::playing_actions::{ActionCost, PlayingActionType};
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
 use crate::utils::remove_element_by;
@@ -37,7 +37,7 @@ fn city_development(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         id,
         "City Development",
         "Construct a building without paying resources.",
-        ActionType::regular_with_cost(ResourcePile::culture_tokens(1)),
+        ActionCost::regular_with_cost(ResourcePile::culture_tokens(1)),
         |_game, _player, _| true,
     )
     .tactics_card(tactics_card)
@@ -63,7 +63,7 @@ fn production_focus(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Production Focus",
         "For the next collect action, you may collect multiple times from the same tile. \
         The total amount of resources does not change.",
-        ActionType::regular(),
+        ActionCost::regular(),
         |_game, _player, _| true,
     )
     .tactics_card(tactics_card)
@@ -147,7 +147,7 @@ fn explorer(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         id,
         "Explorer",
         "Construct a building without paying resources.",
-        ActionType::regular_with_cost(ResourcePile::culture_tokens(1)),
+        ActionCost::regular_with_cost(ResourcePile::culture_tokens(1)),
         |game, player, _| {
             !action_explore_request(game, player.index)
                 .choices

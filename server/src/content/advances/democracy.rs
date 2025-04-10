@@ -37,9 +37,11 @@ fn separation_of_power() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.on_influence_culture_attempt,
         2,
-        |info, city, _| {
-            if matches!(city.mood_state, MoodState::Happy) {
-                info.set_no_boost();
+        |r, city, _| {
+            if let Ok(info) = r {
+                if matches!(city.mood_state, MoodState::Happy) {
+                    info.set_no_boost();
+                }
             }
         },
     )

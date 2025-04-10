@@ -9,14 +9,13 @@ use crate::move_ui::MoveIntent;
 use crate::payment_ui::Payment;
 use crate::render_context::RenderContext;
 use server::action::Action;
-use server::available_actions::{
-    available_happiness_actions, available_influence_actions, base_and_custom_action,
-};
 use server::city::City;
 use server::content::advances::culture::{sports_options, theaters_options};
 use server::content::advances::economy::tax_options;
 use server::content::custom_actions::{CustomAction, CustomActionType};
-use server::playing_actions::{PlayingAction, PlayingActionType};
+use server::cultural_influence::available_influence_actions;
+use server::happiness::available_happiness_actions;
+use server::playing_actions::{PlayingAction, PlayingActionType, base_and_custom_action};
 use server::resource::ResourceType;
 
 pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
@@ -148,7 +147,7 @@ fn generic_custom_action(
             PlayingAction::Custom(CustomAction::ForcedLabor),
         ))),
         CustomActionType::CivilLiberties => Some(StateUpdate::execute(Action::Playing(
-            PlayingAction::Custom(CustomAction::CivilRights),
+            PlayingAction::Custom(CustomAction::CivilLiberties),
         ))),
         CustomActionType::Taxes => Some(StateUpdate::OpenDialog(ActiveDialog::Taxes(
             Payment::new_gain(&tax_options(rc.shown_player), "Collect taxes"),

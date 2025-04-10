@@ -19,7 +19,7 @@ use crate::unit::{carried_units, get_current_move};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct MoveUnits {
     pub units: Vec<u32>,
     pub destination: Position,
@@ -48,7 +48,7 @@ impl MoveUnits {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub enum MovementAction {
     Move(MoveUnits),
     Stop,

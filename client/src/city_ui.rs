@@ -1,7 +1,7 @@
 use crate::action_buttons::{base_or_custom_action, custom_action_buttons};
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::collect_ui::CollectResources;
-use crate::construct_ui::{ConstructionPayment, ConstructionProject, new_building_positions};
+use crate::construct_ui::{ConstructionPayment, ConstructionProject};
 use crate::custom_phase_ui::{SelectedStructureInfo, SelectedStructureStatus};
 use crate::happiness_ui::{add_increase_happiness, open_increase_happiness_dialog};
 use crate::hex_ui;
@@ -13,15 +13,13 @@ use crate::select_ui::HighlightType;
 use crate::tooltip::show_tooltip_for_circle;
 use macroquad::math::f32;
 use macroquad::prelude::*;
-use server::available_actions::{
-    available_collect_actions_for_city, available_happiness_actions_for_city,
-};
 use server::city::{City, MoodState};
 use server::city_pieces::Building;
-use server::collect::possible_resource_collections;
-use server::construct::can_construct;
+use server::collect::{available_collect_actions_for_city, possible_resource_collections};
+use server::construct::available_buildings;
 use server::content::persistent_events::Structure;
 use server::game::Game;
+use server::happiness::available_happiness_actions_for_city;
 use server::playing_actions::PlayingActionType;
 use server::resource::ResourceType;
 use server::unit::{UnitType, Units};
@@ -81,16 +79,9 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
         return vec![];
     }
     let owner = rc.shown_player;
-    Building::all()
-        .iter()
-        .filter_map(|b| {
-            if can_construct(city, *b, owner, rc.game).is_ok() {
-                Some(*b)
-            } else {
-                None
-            }
-        })
-        .flat_map(|b| new_building_positions(b, rc, city))
+
+    available_buildings(rc.game, rc.shown_player.index, city.position)
+        .into_iter()
         .map(|(b, pos)| {
             let name = b.name();
             let cost_info = owner.construct_cost(rc.game, b, None);

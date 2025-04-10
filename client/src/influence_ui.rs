@@ -1,10 +1,8 @@
 use crate::client_state::ActiveDialog;
 use crate::custom_phase_ui::{MultiSelection, SelectedStructureInfo, SelectedStructureStatus};
 use crate::dialog_ui::BaseOrCustomDialog;
-use itertools::Itertools;
-use server::city::City;
-use server::content::persistent_events::{MultiRequest, SelectedStructure, Structure};
-use server::cultural_influence::influence_culture_boost_cost;
+use server::content::persistent_events::MultiRequest;
+use server::cultural_influence::available_influence_culture;
 use server::game::Game;
 
 pub fn new_cultural_influence_dialog(
@@ -12,50 +10,36 @@ pub fn new_cultural_influence_dialog(
     player: usize,
     d: BaseOrCustomDialog,
 ) -> ActiveDialog {
-    let a = game
-        .players
-        .iter()
-        .flat_map(|p| {
-            p.cities
-                .iter()
-                .flat_map(|city| {
-                    structures(city)
-                        .iter()
-                        .map(|s| {
-                            let info = influence_culture_boost_cost(game, player, s);
-                            let mut tooltip = info.blockers.clone();
-                            let status = if info.blockers.is_empty() {
-                                if info.prevent_boost {
-                                    tooltip.push("You cannot boost the dice roll".to_string());
-                                    SelectedStructureStatus::Warn
-                                } else {
-                                    SelectedStructureStatus::Valid
-                                }
-                            } else {
-                                SelectedStructureStatus::Invalid
-                            };
+    let a = available_influence_culture(game, player)
+        .into_iter()
+        .map(|(s, info)| {
+            let (status, label, tooltip) = match info {
+                Ok(i) => {
+                    let boost = i.range_boost_cost.default.amount().to_string();
+                    let mut tooltip = format!("Range boost cost: {boost}");
+                    (
+                        if i.prevent_boost {
+                            tooltip += " - you cannot boost the dice roll";
+                            SelectedStructureStatus::Warn
+                        } else {
+                            SelectedStructureStatus::Valid
+                        },
+                        Some(boost),
+                        tooltip,
+                    )
+                }
+                Err(e) => (SelectedStructureStatus::Invalid, None, e),
+            };
 
-                            let mut boost = info.range_boost_cost.default.amount();
-                            if status == SelectedStructureStatus::Invalid {
-                                boost = 0;
-                            }
-                            let label = (boost > 0).then_some(boost.to_string());
-                            SelectedStructureInfo::new(
-                                s.position,
-                                s.structure.clone(),
-                                status,
-                                label.clone(),
-                                (!tooltip.is_empty())
-                                    .then_some(tooltip.join(", "))
-                                    .or(label.map(|l| format!("Range boost cost: {l}"))),
-                            )
-                        })
-                        .collect_vec()
-                })
-                .collect_vec()
+            SelectedStructureInfo::new(
+                s.position,
+                s.structure,
+                status,
+                label.clone(),
+                Some(tooltip),
+            )
         })
-        .collect_vec();
-
+        .collect();
     ActiveDialog::StructuresRequest(
         Some(d),
         MultiSelection::new(MultiRequest::new(
@@ -64,16 +48,4 @@ pub fn new_cultural_influence_dialog(
             "Select structure to influence culture",
         )),
     )
-}
-
-fn structures(city: &City) -> Vec<SelectedStructure> {
-    let mut structures: Vec<SelectedStructure> =
-        vec![SelectedStructure::new(city.position, Structure::CityCenter)];
-    for b in city.pieces.buildings(None) {
-        structures.push(SelectedStructure::new(
-            city.position,
-            Structure::Building(b),
-        ));
-    }
-    structures
 }

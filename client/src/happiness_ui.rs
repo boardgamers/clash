@@ -3,8 +3,8 @@ use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::BaseOrCustomDialog;
 use crate::payment_ui::{Payment, payment_dialog};
 use crate::render_context::RenderContext;
-use server::available_actions::happiness_action;
 use server::city::City;
+use server::happiness::{happiness_action, increase_happiness_cost};
 use server::player::Player;
 use server::playing_actions::{IncreaseHappiness, PlayingActionType};
 use server::position::Position;
@@ -31,7 +31,7 @@ impl IncreaseHappinessConfig {
             .iter()
             .map(|(pos, steps)| {
                 let city = p.get_city(*pos);
-                p.increase_happiness_cost(city, *steps).unwrap().cost
+                increase_happiness_cost(p, city, *steps).unwrap().cost
             })
             .reduce(|mut a, b| {
                 a.default += b.default;
@@ -105,9 +105,7 @@ fn increase_happiness_steps(rc: &RenderContext, city: &City, old_steps: u32) -> 
 }
 
 fn increase_happiness_new_steps(rc: &RenderContext, city: &City, new_steps: u32) -> Option<u32> {
-    rc.shown_player
-        .increase_happiness_cost(city, new_steps)
-        .map(|_| new_steps)
+    increase_happiness_cost(rc.shown_player, city, new_steps).map(|_| new_steps)
 }
 
 pub fn increase_happiness_menu(rc: &RenderContext, h: &IncreaseHappinessConfig) -> StateUpdate {
@@ -125,10 +123,7 @@ pub fn increase_happiness_menu(rc: &RenderContext, h: &IncreaseHappinessConfig) 
         |payment| {
             StateUpdate::execute(happiness_action(
                 &h.custom.action_type,
-                IncreaseHappiness {
-                    happiness_increases: h.steps.clone(),
-                    payment,
-                },
+                IncreaseHappiness::new(h.steps.clone(), payment),
             ))
         },
     )

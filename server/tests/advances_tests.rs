@@ -6,8 +6,8 @@ use server::consts::CONSTRUCT_COST;
 use server::content::advances::trade_routes::find_trade_routes;
 use server::content::custom_actions::CustomAction;
 use server::content::custom_actions::CustomAction::{
-    AbsolutePower, ArtsInfluenceCultureAttempt, CivilRights, ForcedLabor, Sports, Taxes, Theaters,
-    VotingIncreaseHappiness,
+    AbsolutePower, ArtsInfluenceCultureAttempt, CivilLiberties, ForcedLabor, Sports, Taxes,
+    Theaters, VotingIncreaseHappiness,
 };
 use server::content::persistent_events::{EventResponse, SelectedStructure, Structure};
 use server::events::EventOrigin;
@@ -274,7 +274,7 @@ fn test_civil_liberties() {
     JSON.test(
         "civil_liberties",
         vec![
-            TestAction::undoable(0, Action::Playing(Custom(CivilRights))),
+            TestAction::undoable(0, Action::Playing(Custom(CivilLiberties))),
             TestAction::undoable(
                 0,
                 Action::Playing(Recruit(playing_actions::Recruit::new(

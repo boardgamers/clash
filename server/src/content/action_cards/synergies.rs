@@ -18,7 +18,7 @@ use crate::content::tactics_cards::{
 use crate::game::Game;
 use crate::log::current_player_turn_log;
 use crate::player::Player;
-use crate::playing_actions::ActionType;
+use crate::playing_actions::ActionCost;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
 use inspiration::possible_inspiration_advances;
@@ -46,7 +46,7 @@ fn synergies(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Synergies",
         "Gain 2 advances from the same category without changing the Game Event counter. \
         Pay the price as usual.",
-        ActionType::regular(),
+        ActionCost::regular(),
         move |_game, p, _| !categories_with_2_affordable_advances(p).is_empty(),
     )
     .tactics_card(tactics_card)
@@ -167,7 +167,7 @@ fn teach_us(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Teach Us",
         "If you just captured a city: Gain 1 advance from the loser for free \
          without changing the Game Event counter.",
-        ActionType::free(),
+        ActionCost::free(),
         // is played by "use_teach_us"
         |_game, _player, _a| true,
     )
@@ -254,7 +254,7 @@ fn militia(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         id,
         "Militia",
         "Gain 1 infantry in one of your cities.",
-        ActionType::cost(ResourcePile::culture_tokens(1)),
+        ActionCost::cost(ResourcePile::culture_tokens(1)),
         |_game, player, _a| {
             player.available_units().infantry > 0 && !cities_that_can_add_units(player).is_empty()
         },
@@ -293,7 +293,7 @@ fn tech_trade(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Gain 1 advance for free (without changing the Game Event counter) \
                 that a player owns who has a unit or city within range 2 of your units or cities. \
                 Then that player gains 1 advance from you for free the same way.",
-        ActionType::cost(ResourcePile::culture_tokens(1)),
+        ActionCost::cost(ResourcePile::culture_tokens(1)),
         |game, player, _a| !possible_inspiration_advances(game, player).is_empty(),
     )
     .tactics_card(tactics_card)
@@ -370,7 +370,7 @@ fn new_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "New Ideas",
         "Gain 1 advance for the regular price (without changing the Game Event counter), \
         then gain 2 ideas.",
-        ActionType::regular(),
+        ActionCost::regular(),
         |_game, player, _a| !advances_that_can_be_gained(player).is_empty(),
     )
     .tactics_card(tactics_card)

@@ -205,7 +205,7 @@ impl UnitType {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub struct Units {
     #[serde(default)]
     #[serde(skip_serializing_if = "u8::is_zero")]

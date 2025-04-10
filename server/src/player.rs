@@ -597,32 +597,6 @@ impl Player {
     }
 
     #[must_use]
-    pub fn increase_happiness_cost(&self, city: &City, steps: u32) -> Option<CostInfo> {
-        let max_steps = 2 - city.mood_state.clone() as u32;
-        let cost = city.size() as u32 * steps;
-        if steps > max_steps {
-            None
-        } else {
-            Some(self.increase_happiness_total_cost(cost, None))
-        }
-    }
-
-    #[must_use]
-    pub(crate) fn increase_happiness_total_cost(
-        &self,
-        cost: u32,
-        execute: Option<&ResourcePile>,
-    ) -> CostInfo {
-        self.trigger_cost_event(
-            |e| &e.happiness_cost,
-            &PaymentOptions::sum(cost, &[ResourceType::MoodTokens]),
-            &(),
-            &(),
-            execute,
-        )
-    }
-
-    #[must_use]
     pub fn advance_cost(&self, advance: &Advance, execute: Option<&ResourcePile>) -> CostInfo {
         self.trigger_cost_event(
             |e| &e.advance_cost,
