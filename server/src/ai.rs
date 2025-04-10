@@ -18,7 +18,7 @@ pub struct AI {
 
 impl AI {
     /// 0 <= difficulty <= 1
-    #[must_use] 
+    #[must_use]
     pub fn new(difficulty: f32, thinking_time: Duration) -> Self {
         assert!((0.0..=1.0).contains(&difficulty));
         let rng = Rng::new();
