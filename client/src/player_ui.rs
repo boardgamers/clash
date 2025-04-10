@@ -2,12 +2,9 @@ use crate::action_buttons::action_buttons;
 use crate::city_ui::city_labels;
 use crate::client::Features;
 use crate::client_state::StateUpdate;
-use crate::dialog_ui::{OkTooltip, ok_button};
+use crate::dialog_ui::{ok_button, OkTooltip};
 use crate::event_ui::event_help;
-use crate::layout_ui::{
-    ICON_SIZE, bottom_center_texture, bottom_centered_text, bottom_right_texture, icon_pos,
-    left_mouse_button_pressed_in_rect, top_center_texture,
-};
+use crate::layout_ui::{bottom_center_texture, bottom_centered_text, bottom_right_texture, icon_pos, left_mouse_button_pressed_in_rect, top_center_texture, ICON_SIZE};
 use crate::log_ui::multiline_label;
 use crate::map_ui::terrain_name;
 use crate::render_context::RenderContext;
@@ -327,6 +324,23 @@ pub fn show_global_controls(rc: &RenderContext, features: &Features) -> StateUpd
         }
         if bottom_right_texture(rc, &assets.import, icon_pos(-2, -3), "Import") {
             return StateUpdate::Import;
+        }
+    }
+
+    if features.ai_autoplay {
+        let tooltip = if rc.state.ai_autoplay {
+            "Pause AI autoplay"
+        } else {
+            "Start AI autoplay"
+        };
+        let assets = rc.assets();
+        let texture = if rc.state.ai_autoplay {
+            &assets.pause
+        } else {
+            &assets.play
+        };
+        if bottom_right_texture(rc, texture, icon_pos(-3, -3), tooltip) {
+            return StateUpdate::ToggleAiPlay;
         }
     }
 
