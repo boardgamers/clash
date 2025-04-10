@@ -330,6 +330,23 @@ pub fn show_global_controls(rc: &RenderContext, features: &Features) -> StateUpd
         }
     }
 
+    if features.ai_autoplay {
+        let tooltip = if rc.state.ai_autoplay {
+            "Pause AI autoplay"
+        } else {
+            "Start AI autoplay"
+        };
+        let assets = rc.assets();
+        let texture = if rc.state.ai_autoplay {
+            &assets.pause
+        } else {
+            &assets.play
+        };
+        if bottom_right_texture(rc, texture, icon_pos(-3, -3), tooltip) {
+            return StateUpdate::ToggleAiPlay;
+        }
+    }
+
     StateUpdate::None
 }
 

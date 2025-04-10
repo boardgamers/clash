@@ -51,7 +51,10 @@ pub fn get_available_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
     if let Some(event) = game.events.last() {
         vec![(
             ActionType::Response,
-            responses(event).into_iter().map(Action::Response).collect(),
+            responses(event, game.player(game.active_player()))
+                .into_iter()
+                .map(Action::Response)
+                .collect(),
         )]
     } else {
         base_actions(game)
@@ -170,7 +173,7 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
             CustomActionType::AbsolutePower => Some(CustomAction::AbsolutePower),
             CustomActionType::ForcedLabor => Some(CustomAction::ForcedLabor),
             CustomActionType::CivilLiberties => Some(CustomAction::CivilLiberties),
-            CustomActionType::Taxes => Some(CustomAction::Taxes(tax_options(p).default)),
+            CustomActionType::Taxes => try_payment(&tax_options(p), p).map(CustomAction::Taxes),
         };
 
         if let Some(action) = option {
@@ -184,15 +187,28 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
     actions
 }
 
+fn payment(o: &PaymentOptions, p: &Player) -> ResourcePile {
+    o.first_valid_payment(&p.resources)
+        .expect("expected payment")
+}
+
+fn try_payment(o: &PaymentOptions, p: &Player) -> Option<ResourcePile> {
+    o.first_valid_payment(&p.resources)
+}
+
 fn advances(p: &Player, _game: &Game) -> Vec<Action> {
     advances::get_all()
         .iter()
         .filter_map(|a| {
-            p.can_advance(a)
-                .then_some(Action::Playing(PlayingAction::Advance {
+            if !p.can_advance_free(a) {
+                return None;
+            }
+            try_payment(&p.advance_cost(a, None).cost, p).map(|r| {
+                Action::Playing(PlayingAction::Advance {
                     advance: a.name.clone(),
-                    payment: p.advance_cost(a, None).cost.default,
-                }))
+                    payment: r,
+                })
+            })
         })
         .collect()
 }
@@ -240,7 +256,7 @@ fn recruit_actions(player: &Player, city: &City) -> Vec<Action> {
                 next += &unit_type;
                 match recruit_cost(player, &next, city.position, None, &[], None) {
                     Ok(c) => {
-                        cost = c.cost.default;
+                        cost = payment(&c.cost, player);
                         units = next;
                     }
                     Err(_) => {
@@ -283,14 +299,14 @@ fn calculate_increase_happiness(player: &Player) -> Option<IncreaseHappiness> {
         let mut new_city_cost =
             increase_happiness_cost(player, c, steps).expect("cost should be available");
         new_city_cost.cost.default += cost.default.clone();
-        if !player.can_afford(&new_city_cost.cost) {
+        if try_payment(&new_city_cost.cost, player).is_none() {
             break;
         }
         cost = new_city_cost.cost;
         cities.push((c.position, steps));
     }
 
-    (!cities.is_empty()).then_some(IncreaseHappiness::new(cities, cost.default))
+    (!cities.is_empty()).then_some(IncreaseHappiness::new(cities, payment(&cost, player)))
 }
 
 fn prefer_custom_action(actions: Vec<PlayingActionType>) -> PlayingActionType {
@@ -302,7 +318,7 @@ fn prefer_custom_action(actions: Vec<PlayingActionType>) -> PlayingActionType {
 
 #[allow(clippy::match_same_arms)]
 #[must_use]
-fn responses(event: &PersistentEventState) -> Vec<EventResponse> {
+fn responses(event: &PersistentEventState, player: &Player) -> Vec<EventResponse> {
     match event
         .player
         .handler
@@ -313,7 +329,7 @@ fn responses(event: &PersistentEventState) -> Vec<EventResponse> {
     {
         PersistentEventRequest::Payment(p) => {
             vec![EventResponse::Payment(
-                p.into_iter().map(|p| p.cost.default).collect(),
+                p.into_iter().map(|p| payment(&p.cost, player)).collect(),
             )]
         }
         PersistentEventRequest::ResourceReward(r) => {
@@ -471,7 +487,7 @@ pub(crate) fn get_construct_actions(game: &Game, p: &Player, city: &City) -> Vec
                 Construct::new(
                     city.position,
                     *building,
-                    p.construct_cost(game, *building, None).cost.default,
+                    payment(&p.construct_cost(game, *building, None).cost, p),
                 )
                 .with_port_position(*port),
             ))
