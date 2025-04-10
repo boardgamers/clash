@@ -34,6 +34,9 @@ use std::vec;
 //mehr möglichkeiten für collect (aber immer maximale resourcen)
 //stadt aktivieren auch wenn es sie unglücklich macht
 //nicht nur maximale anzahl rekrutieren
+//bewegung:
+//Siedler: nur von stadt wegbewegen wo er gebaut wurde
+//militär
 
 ///
 /// Returns a list of available actions for the current player.
