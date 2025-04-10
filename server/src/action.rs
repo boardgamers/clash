@@ -1,6 +1,6 @@
 use crate::action_card::on_play_action_card;
 use crate::advance::on_advance;
-use crate::city::MoodState;
+use crate::city::{MoodState, on_found_city};
 use crate::collect::on_collect;
 use crate::combat::{
     combat_loop, move_with_possible_combat, on_capture_undefended_position, start_combat,
@@ -22,7 +22,7 @@ use crate::movement::{
     move_units_destinations,
 };
 use crate::objective_card::{on_objective_cards, present_objective_cards};
-use crate::playing_actions::{PlayingAction, on_found_city};
+use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::recruit::on_recruit;
 use crate::resource::check_for_waste;
 use crate::resource_pile::ResourcePile;
@@ -33,7 +33,7 @@ use crate::wonder::{draw_wonder_card, on_play_wonder_card};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub enum Action {
     Playing(PlayingAction),
     Movement(MovementAction),
@@ -69,6 +69,13 @@ impl Action {
             None
         }
     }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum ActionType {
+    Playing(PlayingActionType),
+    Movement,
+    Response,
 }
 
 ///

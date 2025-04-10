@@ -11,11 +11,11 @@ use crate::unit_ui::{UnitSelection, draw_unit_type};
 use itertools::Itertools;
 use macroquad::math::vec2;
 use server::action::Action;
-use server::available_actions::influence_action;
 use server::content::persistent_events::{
     AdvanceRequest, EventResponse, MultiRequest, PlayerRequest, SelectedStructure, Structure,
     UnitTypeRequest, UnitsRequest, is_selected_structures_valid,
 };
+use server::cultural_influence::influence_action;
 use server::game::Game;
 use server::position::Position;
 use server::unit::Unit;
@@ -271,8 +271,8 @@ pub(crate) fn multi_select_tooltip<T: Clone + PartialEq + Ord>(
     } else {
         OkTooltip::Invalid(format!(
             "Need to select {} to {} {name}",
-            s.request.needed.clone().min().unwrap(),
-            s.request.needed.clone().max().unwrap()
+            s.request.needed.start(),
+            s.request.needed.end()
         ))
     }
 }

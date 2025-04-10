@@ -6,7 +6,7 @@ use crate::content::persistent_events::{HandCardsRequest, PersistentEventType, P
 use crate::content::tactics_cards::TacticsCardFactory;
 use crate::game::Game;
 use crate::player::Player;
-use crate::playing_actions::ActionType;
+use crate::playing_actions::ActionCost;
 use crate::resource_pile::ResourcePile;
 use crate::utils::remove_element;
 use itertools::Itertools;
@@ -17,7 +17,7 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Spy",
         "Look at all Wonder, Action, and Objective cards of another player. \
         You may swap one card of the same type.",
-        ActionType::regular_with_cost(ResourcePile::culture_tokens(1)),
+        ActionCost::regular_with_cost(ResourcePile::culture_tokens(1)),
         |game, player, _| !players_with_cards(game, player.index).is_empty(),
     )
     .add_player_request(

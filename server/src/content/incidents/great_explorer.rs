@@ -1,6 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action::Action;
 use crate::action_card::{ActionCard, ActionCardBuilder};
+use crate::city::found_city;
 use crate::content::incidents::great_persons::{
     great_person_action_card, great_person_description,
 };
@@ -10,7 +11,7 @@ use crate::game::Game;
 use crate::log::current_player_turn_log;
 use crate::map::{BlockPosition, UNEXPLORED_BLOCK, get_map_setup};
 use crate::payment::PaymentOptions;
-use crate::playing_actions::{ActionType, found_city};
+use crate::playing_actions::ActionCost;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
@@ -26,7 +27,7 @@ pub(crate) fn great_explorer() -> ActionCard {
             without using a Settler.",
             great_person_description(groups)
         ),
-        ActionType::regular(),
+        ActionCost::regular(),
         groups,
         |game, player| {
             !action_explore_request(game, player.index)

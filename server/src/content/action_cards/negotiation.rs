@@ -10,7 +10,7 @@ use crate::content::tactics_cards::{
 };
 use crate::game::Game;
 use crate::log::current_player_turn_log;
-use crate::playing_actions::{ActionType, PlayingAction};
+use crate::playing_actions::{ActionCost, PlayingAction};
 use crate::resource_pile::ResourcePile;
 use crate::utils::remove_element_by;
 
@@ -33,7 +33,7 @@ fn negotiations(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Negotiations",
         "Select another player. This turn, you may not attack that player. \
         In their next turn, they may not attack you.",
-        ActionType::cost(ResourcePile::culture_tokens(1)),
+        ActionCost::cost(ResourcePile::culture_tokens(1)),
         move |game, _player, _| {
             !current_player_turn_log(game)
                 .items
@@ -129,7 +129,7 @@ fn leadership(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         id,
         "Leadership",
         "Gain 1 action.",
-        ActionType::cost(ResourcePile::culture_tokens(1)),
+        ActionCost::cost(ResourcePile::culture_tokens(1)),
         move |_game, _player, _| true,
     )
     .tactics_card(tactics_card)
@@ -150,7 +150,7 @@ fn assassination(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Assassination",
         "Select a player (not affected by Assassination already) \
         to lose an action in their next turn.",
-        ActionType::cost(ResourcePile::culture_tokens(1)),
+        ActionCost::cost(ResourcePile::culture_tokens(1)),
         move |game, p, _| !opponents_not_affected_by_assassination(game, p.index).is_empty(),
     )
     .tactics_card(tactics_card)
@@ -223,7 +223,7 @@ fn overproduction(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Overproduction",
         "You may collect from 2 additional tiles this turn. \
         (Cannot combine with Production Focus or another Overproduction.)",
-        ActionType::cost(ResourcePile::culture_tokens(1)),
+        ActionCost::cost(ResourcePile::culture_tokens(1)),
         move |game, _p, _| {
             !game
                 .permanent_effects

@@ -13,7 +13,7 @@ use crate::content::tactics_cards::{
 use crate::game::Game;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
-use crate::playing_actions::ActionType;
+use crate::playing_actions::ActionCost;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
@@ -41,7 +41,7 @@ fn advance(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         id,
         "Advance",
         "Pay 1 culture token: Gain 1 advance without changing the Game Event counter.",
-        ActionType::free(),
+        ActionCost::free(),
         |_game, player, _| {
             player.resources.culture_tokens >= 1 && !possible_advances(player).is_empty()
         },
@@ -83,7 +83,7 @@ fn inspiration(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Inspiration",
         "Gain 1 advance for free (without changing the Game Event counter) \
         that a player owns who has a unit or city within range 2 of your units or cities.",
-        ActionType::free(),
+        ActionCost::free(),
         |game, player, _| !possible_inspiration_advances(game, player).is_empty(),
     )
     .tactics_card(tactics_card)
@@ -159,7 +159,7 @@ fn hero_general(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Hero General",
         "If you won a land battle this turn: Increase the mood in a city by 1. \
         You may pay 1 mood token to increase the mood in a city by 1.",
-        ActionType::free(),
+        ActionCost::free(),
         |_game, player, _| !cities_where_mood_can_increase(player).is_empty(),
     )
     .requirement_land_battle_won()
@@ -238,7 +238,7 @@ fn ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         id,
         "Ideas",
         "Gain 1 idea per Academy you own.",
-        ActionType::free(),
+        ActionCost::free(),
         |_game, player, _| academies(player) > 0,
     )
     .tactics_card(tactics_card)
@@ -268,7 +268,7 @@ fn great_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         id,
         "Great Ideas",
         "After capturing a city or winning a land battle: Gain 2 ideas.",
-        ActionType::free(),
+        ActionCost::free(),
         |_game, player, _| player.resources.ideas < player.resource_limit.ideas,
     )
     .requirement_land_battle_won()

@@ -11,7 +11,7 @@ use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::log::{current_player_turn_log, current_player_turn_log_mut};
 use crate::player::Player;
-use crate::playing_actions::ActionType;
+use crate::playing_actions::ActionCost;
 use crate::position::Position;
 use crate::tactics_card::TacticsCard;
 use crate::utils::remove_element_by;
@@ -31,7 +31,7 @@ pub struct CivilCard {
     pub description: String,
     pub can_play: CanPlayCard,
     pub listeners: AbilityListeners,
-    pub action_type: ActionType,
+    pub action_type: ActionCost,
     pub requirement_land_battle_won: bool,
     pub(crate) target: CivilCardTarget,
 }
@@ -57,7 +57,7 @@ impl ActionCard {
         id: u8,
         name: &str,
         description: &str,
-        action_type: ActionType,
+        action_type: ActionCost,
         can_play: F,
     ) -> ActionCardBuilder
     where
@@ -81,7 +81,7 @@ pub struct ActionCardBuilder {
     id: u8,
     name: String,
     description: String,
-    action_type: ActionType,
+    action_type: ActionCost,
     can_play: CanPlayCard,
     requirement_land_battle_won: bool,
     tactics_card: Option<TacticsCard>,
