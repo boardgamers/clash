@@ -1,7 +1,11 @@
 use std::time::Duration;
 
 use crate::{
-    action::{self, Action, ActionType}, ai_actions, game::{Game, GameState}, playing_actions::PlayingAction, utils::{self, Rng}
+    action::{self, Action, ActionType},
+    ai_actions,
+    game::{Game, GameState},
+    playing_actions::PlayingAction,
+    utils::{self, Rng},
 };
 
 const ACTION_SCORE_WEIGHTING: f32 = 1.0;
@@ -14,6 +18,7 @@ pub struct AI {
 
 impl AI {
     /// 0 <= difficulty <= 1
+    #[must_use] 
     pub fn new(difficulty: f32, thinking_time: Duration) -> Self {
         assert!((0.0..=1.0).contains(&difficulty));
         let rng = Rng::new();
@@ -47,7 +52,14 @@ impl AI {
         let evaluations = actions
             .iter()
             .map(|(action_group, action)| {
-                evaluate_action(game, action, action_group, &mut self.rng, &thinking_time_per_action).powf(self.difficulty / (1.0 - self.difficulty))
+                evaluate_action(
+                    game,
+                    action,
+                    action_group,
+                    &mut self.rng,
+                    &thinking_time_per_action,
+                )
+                .powf(self.difficulty / (1.0 - self.difficulty))
             })
             .collect::<Vec<f32>>();
 
@@ -70,7 +82,13 @@ impl AI {
     }
 }
 
-fn evaluate_action(game: &Game, action: &Action, action_group: &ActionType, rng: &mut Rng, thinking_time: &Duration) -> f32 {
+fn evaluate_action(
+    game: &Game,
+    action: &Action,
+    action_group: &ActionType,
+    rng: &mut Rng,
+    thinking_time: &Duration,
+) -> f32 {
     let action_score = get_action_score(game, action);
     let action_group_score = get_action_group_score(game, action_group);
     let player_index = game.current_player_index;
