@@ -45,6 +45,8 @@ pub struct Assets {
     // Admin
     pub import: Texture2D,
     pub export: Texture2D,
+    pub play: Texture2D,
+    pub pause: Texture2D,
 
     pub resources: HashMap<ResourceType, Texture2D>,
     pub buildings: HashMap<Building, Texture2D>,
@@ -94,6 +96,8 @@ impl Assets {
             // Admin
             import: load_png(include_bytes!("../assets/import-3-svgrepo-com.png")),
             export: load_png(include_bytes!("../assets/export-2-svgrepo-com.png")),
+            play: load_png(include_bytes!("../assets/play-1003-svgrepo-com.png")),
+            pause: load_png(include_bytes!("../assets/pause-1006-svgrepo-com.png")),
         }
     }
 

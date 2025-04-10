@@ -255,6 +255,7 @@ pub enum StateUpdate {
     SetShownPlayer(usize),
     SetFocusedTile(Position),
     ToggleShowPermanentEffects,
+    ToggleAiPlay,
 }
 
 impl StateUpdate {
@@ -405,6 +406,7 @@ pub struct State {
     pub log_scroll: f32,
     pub focused_tile: Option<Position>,
     pub show_permanent_effects: bool,
+    pub ai_autoplay: bool,
     pub pan_map: bool,
 }
 
@@ -432,6 +434,7 @@ impl State {
             focused_tile: None,
             pan_map: false,
             show_permanent_effects: false,
+            ai_autoplay: false,
         }
     }
 
@@ -507,6 +510,14 @@ impl State {
             StateUpdate::ToggleShowPermanentEffects => {
                 self.show_permanent_effects = !self.show_permanent_effects;
                 GameSyncRequest::None
+            }
+            StateUpdate::ToggleAiPlay => {
+                self.ai_autoplay = !self.ai_autoplay;
+                if self.ai_autoplay {
+                    GameSyncRequest::StartAutoplay
+                } else {
+                    GameSyncRequest::None
+                }
             }
         }
     }

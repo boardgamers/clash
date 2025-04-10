@@ -6,6 +6,7 @@ use macroquad::prelude::{next_frame, screen_width, vec2};
 use macroquad::window::screen_height;
 use server::action::execute_action;
 use server::advance::do_advance;
+use server::ai::AI;
 use server::city::City;
 use server::content::advances::get_advance;
 use server::game::{Game, GameData};
@@ -18,32 +19,54 @@ use server::utils::remove_element;
 use std::env;
 use std::fs::File;
 use std::io::BufReader;
+use std::time::Duration;
+
+#[derive(PartialEq)]
+enum Mode {
+    Local,
+    AI,
+    Test,
+}
 
 #[macroquad::main("Clash")]
 async fn main() {
     set_window_size(1200, 600);
 
-    let features = Features {
+    let args: Vec<String> = env::args().collect();
+    let mode = get_mode(&args);
+
+    let mut features = Features {
         import_export: true,
         assets_url: "assets/".to_string(),
+        ai_autoplay: mode == Mode::AI,
+        ai: (mode == Mode::AI).then(|| AI::new(1., Duration::from_secs(5))),
     };
 
-    let args: Vec<String> = env::args().collect();
-    let game = if args.len() > 1 && args[1] == "generate" {
+    let game = if mode == Mode::Test {
+        setup_local_game()
+    } else {
         let seed = if args.len() > 2 {
             args[2].parse().unwrap()
         } else {
             "a".repeat(32)
         };
         setup_game(2, seed, true)
-    } else {
-        setup_local_game()
     };
 
-    run(game, &features).await;
+    run(game, &mut features).await;
 }
 
-pub async fn run(mut game: Game, features: &Features) {
+fn get_mode(args: &[String]) -> Mode {
+    if args.len() > 1 && args[1] == "ai" {
+        Mode::AI
+    } else if args.len() > 1 && args[1] == "generate" {
+        Mode::Local
+    } else {
+        Mode::Test
+    }
+}
+
+async fn run(mut game: Game, features: &mut Features) {
     let mut state = init(features).await;
 
     let mut sync_result = GameSyncResult::None;
@@ -56,9 +79,15 @@ pub async fn run(mut game: Game, features: &Features) {
         sync_result = GameSyncResult::None;
         match message {
             GameSyncRequest::None => {}
+            GameSyncRequest::StartAutoplay => {
+                game = ai_autoplay(game, features);
+                state.show_player = game.active_player();
+                sync_result = GameSyncResult::Update;
+            }
             GameSyncRequest::ExecuteAction(a) => {
                 let p = game.active_player();
                 game = execute_action(game, a, p);
+                game = ai_autoplay(game, features);
                 state.show_player = game.active_player();
                 sync_result = GameSyncResult::Update;
             }
@@ -75,8 +104,20 @@ pub async fn run(mut game: Game, features: &Features) {
     }
 }
 
+fn ai_autoplay(game: Game, f: &mut Features) -> Game {
+    if let Some(ai) = &mut f.ai {
+        if f.ai_autoplay {
+            // todo does this block the ui?
+            let action = ai.next_action(&game);
+            let player_index = game.active_player();
+            return execute_action(game, action, player_index);
+        }
+    }
+    game
+}
+
 #[must_use]
-pub fn setup_local_game() -> Game {
+fn setup_local_game() -> Game {
     let mut game = setup_game(2, "0".to_string(), false);
     game.round = 6;
     game.dice_roll_outcomes = vec![1, 1, 10, 10, 10, 10, 10, 10, 10, 10];
