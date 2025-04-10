@@ -1,6 +1,6 @@
 #![allow(clippy::missing_panics_doc)]
 
-use client::client::{init, render_and_update, Features, GameSyncRequest, GameSyncResult};
+use client::client::{Features, GameSyncRequest, GameSyncResult, init, render_and_update};
 use macroquad::miniquad::window::set_window_size;
 use macroquad::prelude::{next_frame, screen_width, vec2};
 use macroquad::window::screen_height;
@@ -25,7 +25,7 @@ use std::time::Duration;
 enum Mode {
     Local,
     AI,
-    Test
+    Test,
 }
 
 #[macroquad::main("Clash")]
@@ -110,7 +110,7 @@ fn ai_autoplay(game: Game, f: &mut Features) -> Game {
             // todo does this block the ui?
             let action = ai.next_action(&game);
             let player_index = game.active_player();
-            return execute_action(game, action, player_index)
+            return execute_action(game, action, player_index);
         }
     }
     game

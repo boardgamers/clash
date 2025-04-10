@@ -51,7 +51,10 @@ pub fn get_available_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
     if let Some(event) = game.events.last() {
         vec![(
             ActionType::Response,
-            responses(event, game.player(game.active_player())).into_iter().map(Action::Response).collect(),
+            responses(event, game.player(game.active_player()))
+                .into_iter()
+                .map(Action::Response)
+                .collect(),
         )]
     } else {
         base_actions(game)
@@ -91,9 +94,10 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
         let action_type = prefer_custom_action(collect);
 
         if let Some(c) = biggest_non_activated_city(p).map(|city| city_collection(game, p, city)) {
-            actions.push((ActionType::Playing(PlayingActionType::Collect), vec![
-                collect_action(&action_type, c),
-            ]));
+            actions.push((
+                ActionType::Playing(PlayingActionType::Collect),
+                vec![collect_action(&action_type, c)],
+            ));
         }
     }
 
@@ -115,9 +119,10 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
     if !influence.is_empty() {
         let action_type = prefer_custom_action(influence);
         if let Some(i) = calculate_influence(game, p) {
-            actions.push((ActionType::Playing(PlayingActionType::Collect), vec![
-                influence_action(&action_type, i),
-            ]));
+            actions.push((
+                ActionType::Playing(PlayingActionType::Collect),
+                vec![influence_action(&action_type, i)],
+            ));
         }
     }
 
@@ -183,7 +188,8 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
 }
 
 fn payment(o: &PaymentOptions, p: &Player) -> ResourcePile {
-    o.first_valid_payment(&p.resources).expect("expected payment")
+    o.first_valid_payment(&p.resources)
+        .expect("expected payment")
 }
 
 fn try_payment(o: &PaymentOptions, p: &Player) -> Option<ResourcePile> {
