@@ -6,9 +6,10 @@ use crate::content::custom_actions::CustomActionType;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{Structure, UnitTypeRequest};
 use crate::content::tactics_cards::TacticsCardFactory;
+use crate::cultural_influence::InfluenceCultureInfo;
 use crate::game::Game;
-use crate::player_events::{InfluenceCultureInfo, PlayingActionInfo};
-use crate::playing_actions::{ActionType, PlayingActionType};
+use crate::player_events::PlayingActionInfo;
+use crate::playing_actions::{ActionCost, PlayingActionType};
 use crate::unit::UnitType;
 use crate::utils::remove_element;
 use itertools::Itertools;
@@ -21,7 +22,7 @@ pub(crate) fn cultural_takeover(id: u8, tactics_card: TacticsCardFactory) -> Act
         If successful, replace the Barbarian city with a city of your color. \
         Replace one of the Barbarian units with a Settler or Infantry of your color. \
         Remove the other Barbarian units.",
-        ActionType::free(),
+        ActionCost::free(),
         |_game, _p, _| true,
     )
     .add_unit_type_request(
@@ -102,12 +103,12 @@ pub(crate) fn use_cultural_takeover() -> Builtin {
             |event| &mut event.on_influence_culture_attempt,
             5,
             |c, _, game| {
-                if c.is_defender
-                    && matches!(c.structure, Structure::CityCenter)
-                    && !is_barbarian_takeover(game, c)
-                {
-                    // only add in is_defender to avoid double messages
-                    c.add_blocker("City center can't be influenced");
+                if let Ok(i) = c {
+                    if matches!(i.structure, Structure::CityCenter)
+                        && !is_barbarian_takeover(game, i)
+                    {
+                        *c = Err("City center can't be influenced".to_string());
+                    }
                 }
             },
         )
@@ -131,7 +132,7 @@ pub(crate) fn use_cultural_takeover() -> Builtin {
 }
 
 fn is_barbarian_takeover(game: &Game, c: &InfluenceCultureInfo) -> bool {
-    let city = game.any_city(c.position);
+    let city = game.get_any_city(c.position);
     city.player_index == get_barbarians_player(game).index
         && city.size() == 1
         && game

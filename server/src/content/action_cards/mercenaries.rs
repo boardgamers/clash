@@ -11,7 +11,7 @@ use crate::log::move_action_log;
 use crate::movement::MoveUnits;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
-use crate::playing_actions::ActionType;
+use crate::playing_actions::ActionCost;
 use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
@@ -26,7 +26,7 @@ pub(crate) fn mercenaries(id: u8, tactics_card: TacticsCardFactory) -> ActionCar
         The armies must be within range 2 of your cities or army units. \
         Pay 1 food, wood, ore, or culture token for each army up front. \
         Reinforce all Barbarian cities where you moved units out of according to the usual rules.",
-        ActionType::regular(),
+        ActionCost::regular(),
         |game, p, _| {
             !barbarian_army_positions_in_range2(game, p).is_empty() && max_mercenary_payment(p) > 0
         },

@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::ops::{Add, Sub};
 
 use crate::content::custom_actions::CustomActionType::ForcedLabor;
+use crate::content::persistent_events::PersistentEventType;
 use crate::utils;
 use crate::{
     city_pieces::{CityPieces, CityPiecesData},
@@ -11,6 +12,7 @@ use crate::{
 };
 use MoodState::*;
 use num::Zero;
+
 pub struct City {
     pub pieces: CityPieces,
     pub mood_state: MoodState,
@@ -231,4 +233,20 @@ impl Sub<u32> for MoodState {
             2.. => Angry,
         }
     }
+}
+
+pub(crate) fn found_city(game: &mut Game, player: usize, position: Position) {
+    game.player_mut(player)
+        .cities
+        .push(City::new(player, position));
+    on_found_city(game, player, position);
+}
+
+pub(crate) fn on_found_city(game: &mut Game, player_index: usize, position: Position) {
+    let _ = game.trigger_persistent_event(
+        &[player_index],
+        |e| &mut e.found_city,
+        position,
+        PersistentEventType::FoundCity,
+    );
 }

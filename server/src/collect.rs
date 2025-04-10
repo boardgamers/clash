@@ -1,3 +1,5 @@
+use crate::action::Action;
+use crate::content::custom_actions::{CustomAction, CustomActionType};
 use crate::content::persistent_events::PersistentEventType;
 use crate::events::EventOrigin;
 use crate::game::Game;
@@ -5,7 +7,7 @@ use crate::map::Terrain;
 use crate::map::Terrain::{Fertile, Forest, Mountain};
 use crate::player::Player;
 use crate::player_events::ActionInfo;
-use crate::playing_actions::Collect;
+use crate::playing_actions::{Collect, PlayingAction, PlayingActionType, base_or_custom_available};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
@@ -13,7 +15,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::iter;
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Hash)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Hash, Debug)]
 pub struct PositionCollection {
     pub position: Position,
     pub pile: ResourcePile,
@@ -256,4 +258,72 @@ pub fn possible_resource_collections(
             && game.enemy_player(player_index, *p).is_none()
     });
     i
+}
+
+#[must_use]
+pub fn add_collect(
+    info: &CollectInfo,
+    collect_position: Position,
+    pile: &ResourcePile,
+    current: &[PositionCollection],
+) -> Vec<PositionCollection> {
+    let old = current
+        .iter()
+        .position(|old| old.position == collect_position && &old.pile == pile);
+
+    let mut new: Vec<PositionCollection> = current.to_vec();
+
+    if let Some(i) = old {
+        if new[i].times < info.max_per_tile {
+            new[i].times += 1;
+        } else {
+            new.remove(i);
+        }
+    } else {
+        new.push(PositionCollection::new(collect_position, pile.clone()));
+    }
+
+    new
+}
+
+#[must_use]
+pub fn available_collect_actions_for_city(
+    game: &Game,
+    player: usize,
+    position: Position,
+) -> Vec<PlayingActionType> {
+    if game.player(player).get_city(position).can_activate() {
+        available_collect_actions(game, player)
+    } else {
+        vec![]
+    }
+}
+
+#[must_use]
+pub fn available_collect_actions(game: &Game, player: usize) -> Vec<PlayingActionType> {
+    base_or_custom_available(
+        game,
+        player,
+        PlayingActionType::Collect,
+        &CustomActionType::FreeEconomyCollect,
+    )
+}
+
+///
+/// # Panics
+///
+/// If the action is illegal
+#[must_use]
+pub fn collect_action(action: &PlayingActionType, collect: Collect) -> Action {
+    match action {
+        PlayingActionType::Collect => Action::Playing(PlayingAction::Collect(collect)),
+        PlayingActionType::Custom(c)
+            if c.custom_action_type == CustomActionType::FreeEconomyCollect =>
+        {
+            Action::Playing(PlayingAction::Custom(CustomAction::FreeEconomyCollect(
+                collect,
+            )))
+        }
+        _ => panic!("illegal type {action:?}"),
+    }
 }

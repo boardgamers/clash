@@ -2,8 +2,7 @@ use crate::client_state::{PendingUpdate, StateUpdate};
 use crate::layout_ui::{bottom_centered_text, bottom_right_texture, icon_pos};
 use crate::render_context::RenderContext;
 use macroquad::math::Vec2;
-use server::content::custom_actions::CustomActionType;
-use server::events::EventOrigin;
+use server::playing_actions::PlayingActionType;
 
 #[derive(Clone)]
 pub enum OkTooltip {
@@ -12,18 +11,9 @@ pub enum OkTooltip {
 }
 
 #[derive(Clone)]
-pub enum BaseOrCustomAction {
-    Base,
-    Custom {
-        custom: CustomActionType,
-        origin: EventOrigin,
-    },
-}
-
-#[derive(Clone)]
 pub struct BaseOrCustomDialog {
     pub title: String,
-    pub custom: BaseOrCustomAction,
+    pub action_type: PlayingActionType,
 }
 
 pub fn show_pending_update(update: &PendingUpdate, rc: &RenderContext) -> StateUpdate {

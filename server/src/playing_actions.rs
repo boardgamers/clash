@@ -1,29 +1,41 @@
+use itertools::{Either, Itertools};
 use serde::{Deserialize, Serialize};
 
 use crate::action_card::{ActionCardInfo, land_battle_won_action, play_action_card};
 use crate::advance::gain_advance_without_payment;
-use crate::city::MoodState;
+use crate::city::found_city;
 use crate::collect::{PositionCollection, collect};
 use crate::construct::Construct;
 use crate::content::action_cards::get_civil_card;
 use crate::content::advances::get_advance;
-use crate::content::custom_actions::CustomActionInfo;
-use crate::content::persistent_events::{PersistentEventType, SelectedStructure};
+use crate::content::custom_actions::{CustomActionInfo, CustomActionType};
+use crate::content::persistent_events::SelectedStructure;
 use crate::cultural_influence::influence_culture_attempt;
 use crate::game::GameState;
+use crate::happiness::increase_happiness;
 use crate::player_events::PlayingActionInfo;
 use crate::recruit::recruit;
 use crate::unit::Units;
 use crate::wonder::{WonderCardInfo, WonderDiscount, cities_for_wonder, on_play_wonder_card};
 use crate::{
-    city::City, content::custom_actions::CustomAction, game::Game, position::Position,
+    content::custom_actions::CustomAction, game::Game, position::Position,
     resource_pile::ResourcePile,
 };
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub struct Collect {
     pub city_position: Position,
     pub collections: Vec<PositionCollection>,
+}
+
+impl Collect {
+    #[must_use]
+    pub fn new(city_position: Position, collections: Vec<PositionCollection>) -> Self {
+        Self {
+            city_position,
+            collections,
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -64,13 +76,23 @@ impl Recruit {
     }
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub struct IncreaseHappiness {
     pub happiness_increases: Vec<(Position, u32)>,
     pub payment: ResourcePile,
 }
 
-#[derive(Clone)]
+impl IncreaseHappiness {
+    #[must_use]
+    pub fn new(happiness_increases: Vec<(Position, u32)>, payment: ResourcePile) -> Self {
+        Self {
+            happiness_increases,
+            payment,
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
 pub enum PlayingActionType {
     Advance,
     FoundCity,
@@ -95,7 +117,7 @@ impl PlayingActionType {
             return Err("Game is not in playing state".to_string());
         }
 
-        self.action_type().is_available(game, player_index)?;
+        self.cost().is_available(game, player_index)?;
 
         let p = game.player(player_index);
 
@@ -161,17 +183,17 @@ impl PlayingActionType {
     }
 
     #[must_use]
-    pub fn action_type(&self) -> ActionType {
+    pub fn cost(&self) -> ActionCost {
         match self {
             PlayingActionType::Custom(custom_action) => custom_action.action_type.clone(),
             PlayingActionType::ActionCard(id) => get_civil_card(*id).action_type.clone(),
-            PlayingActionType::EndTurn => ActionType::cost(ResourcePile::empty()),
-            _ => ActionType::regular(),
+            PlayingActionType::EndTurn => ActionCost::cost(ResourcePile::empty()),
+            _ => ActionCost::regular(),
         }
     }
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub enum PlayingAction {
     Advance {
         advance: String,
@@ -204,7 +226,7 @@ impl PlayingAction {
         if !redo {
             playing_action_type.is_available(game, player_index)?;
         }
-        playing_action_type.action_type().pay(game, player_index);
+        playing_action_type.cost().pay(game, player_index);
 
         match self {
             Advance { advance, payment } => {
@@ -263,13 +285,13 @@ impl PlayingAction {
     }
 }
 
-#[derive(Default, Clone)]
-pub struct ActionType {
+#[derive(Default, Clone, Debug, PartialEq)]
+pub struct ActionCost {
     pub free: bool,
     pub cost: ResourcePile,
 }
 
-impl ActionType {
+impl ActionCost {
     pub(crate) fn is_available(&self, game: &Game, player_index: usize) -> Result<(), String> {
         let p = game.player(player_index);
         if !p.resources.has_at_least(&self.cost) {
@@ -292,7 +314,7 @@ impl ActionType {
     }
 }
 
-impl ActionType {
+impl ActionCost {
     #[must_use]
     pub fn cost(cost: ResourcePile) -> Self {
         Self::new(true, cost)
@@ -319,39 +341,6 @@ impl ActionType {
     }
 }
 
-pub(crate) fn increase_happiness(
-    game: &mut Game,
-    player_index: usize,
-    happiness_increases: &[(Position, u32)],
-    payment: Option<ResourcePile>,
-) {
-    let player = &mut game.players[player_index];
-    let mut angry_activations = vec![];
-    let mut count = 0;
-    for &(city_position, steps) in happiness_increases {
-        let city = player.get_city(city_position);
-        if steps == 0 {
-            continue;
-        }
-
-        count += steps * city.size() as u32;
-
-        if city.mood_state == MoodState::Angry {
-            angry_activations.push(city_position);
-        }
-        let city = player.get_city_mut(city_position);
-        for _ in 0..steps {
-            city.increase_mood_state();
-        }
-    }
-
-    if let Some(r) = payment {
-        player
-            .increase_happiness_total_cost(count, Some(&r))
-            .pay(game, &r);
-    }
-}
-
 pub(crate) fn roll_boost_cost(roll: u8) -> ResourcePile {
     ResourcePile::culture_tokens(5 - roll as u32)
 }
@@ -366,18 +355,29 @@ fn custom(game: &mut Game, player_index: usize, custom_action: CustomAction) -> 
     custom_action.execute(game, player_index)
 }
 
-pub(crate) fn found_city(game: &mut Game, player: usize, position: Position) {
-    game.player_mut(player)
-        .cities
-        .push(City::new(player, position));
-    on_found_city(game, player, position);
+#[must_use]
+pub fn base_and_custom_action(
+    actions: Vec<PlayingActionType>,
+) -> (Option<PlayingActionType>, Option<CustomActionType>) {
+    let (mut custom, mut action): (Vec<_>, Vec<_>) = actions.into_iter().partition_map(|a| {
+        if let PlayingActionType::Custom(c) = a {
+            Either::Left(c.custom_action_type.clone())
+        } else {
+            Either::Right(a.clone())
+        }
+    });
+    (action.pop(), custom.pop())
 }
 
-pub(crate) fn on_found_city(game: &mut Game, player_index: usize, position: Position) {
-    let _ = game.trigger_persistent_event(
-        &[player_index],
-        |e| &mut e.found_city,
-        position,
-        PersistentEventType::FoundCity,
-    );
+#[must_use]
+pub(crate) fn base_or_custom_available(
+    game: &Game,
+    player: usize,
+    action: PlayingActionType,
+    custom: &CustomActionType,
+) -> Vec<PlayingActionType> {
+    vec![action, custom.playing_action()]
+        .into_iter()
+        .filter_map(|a| a.is_available(game, player).map(|()| a).ok())
+        .collect()
 }

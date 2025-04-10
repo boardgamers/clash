@@ -1,32 +1,5 @@
 {
   "state": "Playing",
-  "events": [
-    {
-      "event_type": {
-        "StatusPhase": "RazeSize1City"
-      },
-      "player": 1,
-      "last_priority_used": 0,
-      "handler": {
-        "priority": 0,
-        "request": {
-          "SelectPositions": {
-            "choices": [
-              "C1"
-            ],
-            "needed": {
-              "start": 0,
-              "end": 1
-            },
-            "description": "May raze a size 1 city for 1 gold"
-          }
-        },
-        "origin": {
-          "Builtin": "Raze city"
-        }
-      }
-    }
-  ],
   "players": [
     {
       "id": 0,
@@ -34,10 +7,10 @@
         "food": 7,
         "wood": 5,
         "ore": 5,
-        "ideas": 2,
+        "ideas": 5,
         "gold": 5,
-        "mood_tokens": 13,
-        "culture_tokens": 10
+        "mood_tokens": 10,
+        "culture_tokens": 9
       },
       "resource_limit": {
         "food": 7,
@@ -59,7 +32,7 @@
             "academy": 1,
             "port": 1
           },
-          "mood_state": "Angry",
+          "mood_state": "Happy",
           "position": "C2",
           "port_position": "C3"
         },
@@ -75,7 +48,7 @@
         },
         {
           "city_pieces": {},
-          "mood_state": "Angry",
+          "mood_state": "Neutral",
           "position": "B3"
         }
       ],
@@ -106,27 +79,12 @@
           "id": 6
         },
         {
-          "position": "C3",
-          "unit_type": "Ship",
-          "id": 7,
-          "carried_units": [
-            {
-              "unit_type": "Cavalry",
-              "id": 1
-            },
-            {
-              "unit_type": "Elephant",
-              "id": 2
-            }
-          ]
-        },
-        {
-          "position": "C3",
+          "position": "C2",
           "unit_type": "Ship",
           "id": 8
         },
         {
-          "position": "C3",
+          "position": "C2",
           "unit_type": "Ship",
           "id": 9
         }
@@ -139,22 +97,19 @@
         "Farming",
         "Fishing",
         "Free Economy",
-        "Free Education",
         "Mining",
-        "Philosophy",
         "Storage",
-        "Voting",
-        "Writing"
+        "Voting"
       ],
-      "incident_tokens": 2,
+      "incident_tokens": 3,
       "wonder_cards": [
         "Great Gardens"
       ],
       "action_cards": [
-        2
+        27
       ],
       "objective_cards": [
-        31
+        1
       ],
       "next_unit_id": 10
     },
@@ -164,13 +119,13 @@
         "food": 2,
         "wood": 5,
         "ore": 5,
-        "ideas": 6,
+        "ideas": 5,
         "gold": 5,
-        "mood_tokens": 10,
+        "mood_tokens": 9,
         "culture_tokens": 9
       },
       "resource_limit": {
-        "food": 7,
+        "food": 2,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -179,7 +134,7 @@
       "cities": [
         {
           "city_pieces": {},
-          "mood_state": "Happy",
+          "mood_state": "Neutral",
           "position": "C1"
         },
         {
@@ -210,20 +165,26 @@
       ],
       "advances": [
         "Farming",
-        "Fishing",
-        "Mining",
-        "Myths",
-        "State Religion",
-        "Storage"
+        "Mining"
       ],
-      "incident_tokens": 2,
+      "incident_tokens": 3,
       "action_cards": [
-        1
+        22
       ],
       "objective_cards": [
-        19
+        29
       ],
       "next_unit_id": 2
+    },
+    {
+      "id": 2,
+      "civilization": "Barbarians",
+      "next_unit_id": 0
+    },
+    {
+      "id": 3,
+      "civilization": "Pirates",
+      "next_unit_id": 0
     }
   ],
   "map": {
@@ -304,8 +265,8 @@
       ]
     ]
   },
-  "starting_player_index": 1,
-  "current_player_index": 1,
+  "starting_player_index": 0,
+  "current_player_index": 0,
   "action_log": [
     {
       "rounds": [
@@ -313,59 +274,50 @@
           "players": [
             {
               "index": 0,
-              "items": [
-                {
-                  "action": {
-                    "Playing": "EndTurn"
-                  }
-                },
-                {
-                  "action": {
-                    "Response": {
-                      "SelectAdvance": "Storage"
-                    }
-                  }
-                },
-                {
-                  "action": {
-                    "Response": {
-                      "SelectAdvance": "Philosophy"
-                    }
-                  }
-                }
-              ]
+              "items": []
+            },
+            {
+              "index": 0,
+              "items": []
             }
           ]
         }
       ]
     }
   ],
-  "action_log_index": 3,
+  "action_log_index": 0,
   "log": [
     [
-      "Player1 ended their turn"
+      "The game has started"
     ],
     [
-      "The game has entered the 2nd status phase"
-    ],
-    [
-      "Player2 advanced Storage for free",
-      "Player gained 1 mood token as advance bonus"
-    ],
-    [
-      "Player1 advanced Philosophy for free",
-      "Player gained 1 mood token as advance bonus",
-      "Player2 gained an action card from the pile",
-      "Reshuffling Objective Card pile",
-      "Player2 gained an objective card from the pile",
+      "Player1 is playing as Maya",
       "Player1 gained an action card from the pile",
       "Player1 gained an objective card from the pile"
+    ],
+    [
+      "Player2 is playing as test0",
+      "Player2 gained an action card from the pile",
+      "Player2 gained an objective card from the pile"
+    ],
+    [
+      "Age 1 has started"
+    ],
+    [
+      "Round 1/3"
+    ],
+    [
+      "It's Player1's turn"
+    ],
+    [
+      "It's Player1's turn",
+      "Player gained 1 mood token as advance bonus"
     ]
   ],
-  "undo_limit": 3,
-  "actions_left": 0,
-  "round": 1,
-  "age": 2,
+  "undo_limit": 0,
+  "actions_left": 3,
+  "round": 6,
+  "age": 1,
   "messages": [
     "The game has started"
   ],
@@ -381,44 +333,142 @@
     10,
     10
   ],
-  "rng": "303541482290173932954602973887277754917",
+  "rng": "278440689371051171469446074846778715107",
   "wonders_left": [
     "Pyramids"
   ],
-  "objective_cards_left": [
+  "action_cards_left": [
+    25,
+    20,
+    9,
+    12,
+    24,
+    3,
     16,
+    13,
+    39,
+    14,
+    1,
+    10,
+    2,
     18,
+    41,
     33,
     28,
-    23,
+    36,
+    34,
+    37,
+    26,
+    15,
+    19,
+    35,
+    5,
+    40,
+    8,
+    11,
+    21,
+    29,
     30,
-    32,
-    22,
+    42,
+    17,
     7,
-    10,
+    38,
+    4,
+    6,
+    23
+  ],
+  "objective_cards_left": [
+    12,
+    30,
+    27,
     24,
     15,
-    1,
-    35,
-    25,
-    14,
-    17,
-    21,
-    4,
-    12,
+    18,
+    19,
+    31,
     6,
+    13,
+    33,
+    17,
+    20,
+    35,
+    14,
+    10,
+    11,
+    32,
+    36,
+    25,
+    4,
+    16,
+    7,
+    21,
+    23,
     26,
+    9,
+    34,
+    28,
+    5,
+    22,
+    8,
+    3,
+    2
+  ],
+  "incidents_left": [
+    11,
+    16,
+    51,
+    22,
+    52,
+    30,
+    35,
+    53,
+    36,
+    26,
+    8,
+    25,
+    56,
+    55,
+    27,
+    3,
+    6,
+    57,
+    54,
+    2,
+    10,
+    28,
+    23,
+    46,
+    34,
+    39,
+    29,
+    31,
+    24,
+    40,
+    14,
     20,
     5,
-    29,
-    3,
-    11,
-    13,
-    34,
     9,
-    8,
-    36,
-    27,
-    2
+    1,
+    41,
+    17,
+    21,
+    37,
+    38,
+    18,
+    50,
+    7,
+    32,
+    49,
+    12,
+    45,
+    19,
+    15,
+    47,
+    44,
+    48,
+    33,
+    4,
+    13,
+    42
   ]
 }

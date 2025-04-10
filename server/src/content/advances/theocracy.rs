@@ -84,9 +84,11 @@ fn devotion() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.on_influence_culture_attempt,
         4,
-        |info, city, _| {
-            if info.is_defender && city.pieces.temple.is_some() {
-                info.set_no_boost();
+        |r, city, _| {
+            if let Ok(info) = r {
+                if info.is_defender && city.pieces.temple.is_some() {
+                    info.set_no_boost();
+                }
             }
         },
     )
@@ -101,12 +103,15 @@ fn conversion() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.on_influence_culture_attempt,
         3,
-        |info, _, _| {
-            if !info.is_defender {
-                info.roll_boost += 1;
-                info.info.log.push(
-                    "Player gets +1 to Influence Culture roll for Conversion Advance".to_string(),
-                );
+        |r, _, _| {
+            if let Ok(info) = r {
+                if !info.is_defender {
+                    info.roll_boost += 1;
+                    info.info.log.push(
+                        "Player gets +1 to Influence Culture roll for Conversion Advance"
+                            .to_string(),
+                    );
+                }
             }
         },
     )

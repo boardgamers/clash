@@ -175,7 +175,7 @@ fn destroyable_structures(city: &City) -> Vec<SelectedStructure> {
 }
 
 fn destroy_city_center(game: &mut Game, position: Position) {
-    let city = game.any_city(position);
+    let city = game.get_any_city(position);
     let owner = city.player_index;
     let p = game.player_mut(owner);
     p.cities.remove(
@@ -194,7 +194,7 @@ fn destroy_city_center(game: &mut Game, position: Position) {
 }
 
 fn destroy_building(game: &mut Game, b: Building, position: Position) {
-    let city = game.any_city(position);
+    let city = game.get_any_city(position);
     let city_owner = city.player_index;
     let owner = city
         .pieces
@@ -216,7 +216,7 @@ fn destroy_building(game: &mut Game, b: Building, position: Position) {
 }
 
 fn destroy_wonder(game: &mut Game, position: Position, name: &str) {
-    let owner = game.any_city(position).player_index;
+    let owner = game.get_any_city(position).player_index;
     let wonder = get_wonder(name);
     wonder.listeners.deinit(game, owner);
 

@@ -6,8 +6,8 @@ use crate::city_pieces::Building::Obelisk;
 use crate::content::advances::{AdvanceGroup, advance_group_builder};
 use crate::content::custom_actions::CustomActionType;
 use crate::game::Game;
+use crate::happiness::increase_happiness;
 use crate::payment::PaymentOptions;
-use crate::playing_actions::increase_happiness;
 use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
@@ -50,11 +50,14 @@ fn monuments() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.on_influence_culture_attempt,
         1,
-        |info, city, _| {
-            if info.is_defender && !city.pieces.wonders.is_empty() {
-                info.add_blocker(
-                    "Monuments prevent influence culture attempts on cities with wonders",
-                );
+        |r, city, _| {
+            if let Ok(info) = r {
+                if info.is_defender && !city.pieces.wonders.is_empty() {
+                    *r = Err(
+                        "Monuments prevent influence culture attempts on cities with wonders"
+                            .to_string(),
+                    );
+                }
             }
         },
     )

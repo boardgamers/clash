@@ -6,36 +6,12 @@ use server::action::Action;
 use server::city::City;
 use server::city_pieces::Building;
 use server::construct::Construct;
-use server::map::Terrain;
 use server::playing_actions::{PlayingAction, Recruit};
 use server::position::Position;
 use server::recruit::recruit_cost;
 
-pub fn new_building_positions(
-    building: Building,
-    rc: &RenderContext,
-    city: &City,
-) -> Vec<(Building, Option<Position>)> {
-    if building != Building::Port {
-        return vec![(building, None)];
-    }
-
-    rc.game
-        .map
-        .tiles
-        .iter()
-        .filter_map(|(p, t)| {
-            if *t == Terrain::Water && city.position.is_neighbor(*p) {
-                Some((building, Some(*p)))
-            } else {
-                None
-            }
-        })
-        .collect()
-}
-
 pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> StateUpdate {
-    let city = rc.game.any_city(cp.city_position);
+    let city = rc.game.get_any_city(cp.city_position);
     payment_dialog(
         rc,
         &cp.payment.clone(),

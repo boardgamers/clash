@@ -236,7 +236,7 @@ pub fn is_selected_structures_valid(game: &Game, selected: &[SelectedStructure])
         .into_iter()
         .all(|(p, g)| {
             let v = g.collect_vec();
-            v.len() == game.any_city(p).size()
+            v.len() == game.get_any_city(p).size()
                 || !v
                     .iter()
                     .any(|s| matches!(s.structure, Structure::CityCenter))

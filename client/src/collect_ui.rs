@@ -1,7 +1,5 @@
 use crate::client_state::{ActiveDialog, StateUpdate};
-use crate::dialog_ui::{
-    BaseOrCustomAction, BaseOrCustomDialog, OkTooltip, cancel_button, ok_button,
-};
+use crate::dialog_ui::{BaseOrCustomDialog, OkTooltip, cancel_button, ok_button};
 use crate::event_ui::event_help;
 use crate::hex_ui;
 use crate::layout_ui::{draw_scaled_icon, is_in_circle, left_mouse_button_pressed};
@@ -12,13 +10,11 @@ use macroquad::color::BLACK;
 use macroquad::math::{Vec2, vec2};
 use macroquad::prelude::WHITE;
 use macroquad::shapes::draw_circle;
-use server::action::Action;
 use server::collect::{
-    CollectInfo, PositionCollection, get_total_collection, possible_resource_collections,
-    tiles_used,
+    CollectInfo, PositionCollection, add_collect, collect_action, get_total_collection,
+    possible_resource_collections, tiles_used,
 };
-use server::content::custom_actions::CustomAction;
-use server::playing_actions::{Collect, PlayingAction};
+use server::playing_actions::Collect;
 use server::position::Position;
 use server::resource::ResourceType;
 use server::resource_pile::ResourcePile;
@@ -95,18 +91,10 @@ pub fn collect_dialog(rc: &RenderContext, collect: &CollectResources) -> StateUp
     if ok_button(rc, tooltip) {
         let extra = collect.extra_resources();
 
-        let c = Collect {
-            city_position: collect.city_position,
-            collections: collect.collections.clone(),
-        };
-        let action = match collect.custom.custom {
-            BaseOrCustomAction::Base => PlayingAction::Collect(c),
-            BaseOrCustomAction::Custom { .. } => {
-                PlayingAction::Custom(CustomAction::FreeEconomyCollect(c))
-            }
-        };
+        let c = Collect::new(collect.city_position, collect.collections.clone());
+
         return StateUpdate::execute_activation(
-            Action::Playing(action),
+            collect_action(&collect.custom.action_type, c),
             if extra > 0 {
                 vec![format!("{extra} more tiles can be collected")]
             } else {
@@ -126,28 +114,14 @@ fn click_collect_option(
     col: &CollectResources,
     p: Position,
     pile: &ResourcePile,
-    max: u32,
 ) -> StateUpdate {
+    let c = add_collect(&col.info, p, pile, &col.collections);
+
+    let used = c.clone().into_iter().collect_vec();
+    let i = possible_resource_collections(rc.game, col.info.city, col.player_index, &used, &[]);
     let mut new = col.clone();
-    let old = col
-        .collections
-        .iter()
-        .position(|old| old.position == p && &old.pile == pile);
-
-    if let Some(i) = old {
-        if new.collections[i].times < max {
-            new.collections[i].times += 1;
-        } else {
-            new.collections.remove(i);
-        }
-    } else {
-        new.collections
-            .push(PositionCollection::new(p, pile.clone()));
-    }
-
-    let used = new.collections.clone().into_iter().collect_vec();
-    let i = possible_resource_collections(rc.game, col.city_position, col.player_index, &used, &[]);
     new.info = i;
+    new.collections = c;
     StateUpdate::OpenDialog(ActiveDialog::CollectResources(new))
 }
 
@@ -188,7 +162,7 @@ pub fn draw_resource_collect_tile(rc: &RenderContext, pos: Position) -> StateUpd
         draw_circle(center.x, center.y, radius, color);
         if let Some(p) = left_mouse_button_pressed(rc) {
             if is_in_circle(p, center, radius) {
-                return click_collect_option(rc, collect, pos, pile, collect.info.max_per_tile);
+                return click_collect_option(rc, collect, pos, pile);
             }
         }
 
