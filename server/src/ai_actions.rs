@@ -30,6 +30,11 @@ use crate::unit::{UnitType, Units};
 use itertools::Itertools;
 use std::vec;
 
+//todo
+//mehr möglichkeiten für collect (aber immer maximale resourcen)
+//stadt aktivieren auch wenn es sie unglücklich macht
+//nicht nur maximale anzahl rekrutieren
+
 ///
 /// Returns a list of available actions for the current player.
 ///
@@ -49,14 +54,7 @@ pub fn get_available_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
             responses(event).into_iter().map(Action::Response).collect(),
         )]
     } else {
-        let actions = base_actions(game);
-        if actions.is_empty() {
-            return vec![(
-                ActionType::Playing(PlayingActionType::EndTurn),
-                vec![Action::Playing(PlayingAction::EndTurn)],
-            )];
-        }
-        actions
+        base_actions(game)
     }
 }
 

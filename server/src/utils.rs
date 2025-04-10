@@ -1,3 +1,5 @@
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
+
 use itertools::Itertools;
 
 #[must_use]
@@ -83,6 +85,13 @@ pub fn ordinal_number(value: u32) -> String {
     )
 }
 
+fn get_current_time() -> Duration {
+    let start = SystemTime::now();
+    start
+        .duration_since(UNIX_EPOCH)
+        .expect("Time went backwards")
+}
+
 #[derive(Clone, Default)]
 pub struct Rng {
     pub(crate) seed: u128,
@@ -104,11 +113,24 @@ impl Rng {
         Self { seed }
     }
 
+    #[must_use]
+    pub fn new() -> Self {
+        let seed = get_current_time().as_nanos();
+        let seed = next_seed(seed);
+        Self { seed }
+    }
+
     pub(crate) fn range(&mut self, start: usize, end: usize) -> usize {
         self.seed = next_seed(self.seed);
         let range = (end - start) as u128;
         let random_value = self.seed % range;
         start + random_value as usize
+    }
+
+    pub fn gen_bool(&mut self, probability: f32) -> bool {
+        self.seed = next_seed(self.seed);
+        let random_value = self.seed % 10000;
+        random_value < (probability * 10000.0) as u128
     }
 }
 
@@ -148,14 +170,35 @@ impl<T> Shuffle for Vec<T> {
     }
 }
 
+///
+///
+/// # Panics
+///
+/// Panics if the probability distribution is empty or if all probabilities are zero.
+pub fn weighted_random_selection(probability_distribution: &[f32], rng: &mut Rng) -> usize {
+    if probability_distribution.len() == 1 {
+        return 0;
+    }
+    assert!(
+        !probability_distribution.is_empty(),
+        "probability distribution is empty"
+    );
+    let mut sum = probability_distribution.iter().sum::<f32>();
+    assert!(sum <= f32::EPSILON, "all probabilities are zero");
+    for (i, p) in probability_distribution.iter().enumerate() {
+        let probability = *p / sum;
+        if rng.gen_bool(probability) {
+            return i;
+        }
+        sum -= p;
+    }
+    unreachable!();
+}
+
 #[cfg(test)]
 pub mod tests {
-    use std::{
-        collections::HashMap,
-        time::{Duration, SystemTime, UNIX_EPOCH},
-    };
-
     use itertools::Itertools;
+    use std::collections::HashMap;
 
     use crate::utils::Rng;
 
@@ -175,16 +218,10 @@ pub mod tests {
         }
     }
 
-    fn get_current_time() -> Duration {
-        let start = SystemTime::now();
-        start
-            .duration_since(UNIX_EPOCH)
-            .expect("Time went backwards")
-    }
-
     #[test]
-    fn test_rng() {
+    fn test_rng_many_iterations() {
         const ITERATIONS: usize = 10_000;
+        const INITIAL_ITERATIONS: usize = 1_000_000;
         const MODULO: usize = 12;
         const TOLERANCE_PERCENTAGE: f32 = 15.;
 
@@ -192,9 +229,13 @@ pub mod tests {
         const TOLERANCE: usize =
             (EXPECTED_OCCURRENCES as f32 * TOLERANCE_PERCENTAGE * 0.01) as usize;
 
-        let initial_seed = get_current_time().as_nanos();
-        let mut rng = Rng::from_seed(initial_seed);
+        let mut rng = Rng::new();
+        let initial_seed = rng.seed;
         let mut results = HashMap::new();
+
+        for _ in 0..INITIAL_ITERATIONS {
+            rng.seed = super::next_seed(rng.seed);
+        }
 
         for _ in 0..ITERATIONS {
             let result = rng.range(0, MODULO);
@@ -207,7 +248,56 @@ pub mod tests {
             }
 
             panic!(
-                "random number generator does not create an even distribution of seeds with modulo 12 on initial seed {initial_seed}.\nHere is the actual distribution (expected count: {EXPECTED_OCCURRENCES}, acceptable range: {} - {}):\nvalue | count\n{}",
+                "random number generator does not create an even distribution of seeds with modulo {MODULO} on initial seed {initial_seed}.\nHere is the actual distribution (expected count: {EXPECTED_OCCURRENCES}, acceptable range: {} - {}):\nvalue | count\n{}",
+                EXPECTED_OCCURRENCES - TOLERANCE,
+                EXPECTED_OCCURRENCES + TOLERANCE,
+                results
+                    .into_iter()
+                    .sorted_by_key(|(value, _)| *value)
+                    .map(|(value, count)| format!(
+                        "{}{value} | {}{count}{}",
+                        " ".repeat(5 - value.to_string().len()),
+                        " ".repeat(5 - count.to_string().len()),
+                        if (count as isize - EXPECTED_OCCURRENCES as isize).unsigned_abs()
+                            > TOLERANCE
+                        {
+                            " <-- outside of range"
+                        } else {
+                            ""
+                        }
+                    ))
+                    .collect::<Vec<String>>()
+                    .join("\n")
+            )
+        }
+    }
+
+    #[test]
+    fn test_rng_many_seeds() {
+        const ITERATIONS: usize = 10_000;
+        const MODULO: usize = 12;
+        const TOLERANCE_PERCENTAGE: f32 = 15.;
+
+        const EXPECTED_OCCURRENCES: usize = ITERATIONS / MODULO;
+        const TOLERANCE: usize =
+            (EXPECTED_OCCURRENCES as f32 * TOLERANCE_PERCENTAGE * 0.01) as usize;
+
+        let mut results = HashMap::new();
+
+        for i in 0..ITERATIONS {
+            let mut rng = Rng::new();
+            rng.seed = rng.seed.wrapping_add(i as u128);
+            let result = rng.range(0, MODULO);
+            *results.entry(result).or_insert(0) += 1_usize;
+        }
+
+        for count in results.values() {
+            if count.abs_diff(EXPECTED_OCCURRENCES) < TOLERANCE {
+                continue;
+            }
+
+            panic!(
+                "random number generator does not create an even distribution of seeds with modulo {MODULO}.\nHere is the actual distribution (expected count: {EXPECTED_OCCURRENCES}, acceptable range: {} - {}):\nvalue | count\n{}",
                 EXPECTED_OCCURRENCES - TOLERANCE,
                 EXPECTED_OCCURRENCES + TOLERANCE,
                 results
