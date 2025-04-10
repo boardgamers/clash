@@ -30,6 +30,8 @@ jobs:
       working-directory: ./server
       run: |
         sed -i '1 i\#![allow(clippy::all)]' server/src/ai.rs # todo remove when AI is done
+        sed -i '1 i\#![allow(clippy::pedantic)]' server/src/ai.rs # todo remove when AI is done
+        sed -i '1 i\#![allow(unused_variables)]' server/src/ai.rs # todo remove when AI is done
         cargo build
     - name: Run tests server
       working-directory: ./server
