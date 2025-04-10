@@ -17,7 +17,12 @@ pub struct AI {
 }
 
 impl AI {
-    /// 0 <= difficulty <= 1
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if the difficulty is not between 0 and 1
+    #[must_use]
     pub fn new(difficulty: f32, thinking_time: Duration) -> Self {
         assert!((0.0..=1.0).contains(&difficulty));
         let rng = Rng::new();
@@ -28,6 +33,11 @@ impl AI {
         }
     }
 
+    /// Returns the next action for the AI to take.
+    ///
+    /// # Panics
+    ///
+    /// May panic if the game is in an invalid state or if `ai_actions` provides an invalid action.
     pub fn next_action(&mut self, game: &Game) -> Action {
         //todo: handle movement phase actions
         let actions = ai_actions::get_available_actions(game);
@@ -42,6 +52,13 @@ impl AI {
             .collect::<Vec<(ActionType, Action)>>();
         if actions.is_empty() {
             return Action::Playing(PlayingAction::EndTurn);
+        }
+        if actions.len() == 1 {
+            return actions
+                .into_iter()
+                .next()
+                .expect("there should be 1 available action")
+                .1;
         }
         //todo: dynamic thinking time
         let thinking_time_per_action = self.thinking_time / actions.len() as u32;

@@ -13,7 +13,7 @@ pub mod ability_initializer;
 pub mod action;
 pub mod action_card;
 pub mod advance;
-mod ai;
+pub mod ai;
 pub mod ai_actions;
 mod barbarians;
 pub mod card;
