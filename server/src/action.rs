@@ -69,7 +69,7 @@ impl Action {
             None
         }
     }
-    
+
     #[must_use]
     pub fn get_type(&self) -> ActionType {
         match self {
@@ -99,7 +99,8 @@ pub enum ActionType {
 #[must_use]
 pub fn execute_action(mut game: Game, action: Action, player_index: usize) -> Game {
     if !game.supports_undo {
-        return execute_without_undo(game, action, player_index).expect("action should be executed");
+        return execute_without_undo(game, action, player_index)
+            .expect("action should be executed");
     }
     let add_undo = !matches!(&action, Action::Undo);
     let old = to_serde_value(&game);

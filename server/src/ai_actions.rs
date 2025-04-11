@@ -92,9 +92,10 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
         let action_type = prefer_custom_action(collect);
 
         for city in p.cities.iter().filter(|city| city.can_activate()) {
-            actions.push((ActionType::Playing(PlayingActionType::Collect), vec![
-                collect_action(&action_type, city_collection(game, p, city)),
-            ]));
+            actions.push((
+                ActionType::Playing(PlayingActionType::Collect),
+                vec![collect_action(&action_type, city_collection(game, p, city))],
+            ));
         }
     }
 
@@ -116,9 +117,10 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
     if !influence.is_empty() {
         let action_type = prefer_custom_action(influence);
         if let Some(i) = calculate_influence(game, p) {
-            actions.push((ActionType::Playing(PlayingActionType::Collect), vec![
-                influence_action(&action_type, i),
-            ]));
+            actions.push((
+                ActionType::Playing(PlayingActionType::Collect),
+                vec![influence_action(&action_type, i)],
+            ));
         }
     }
 
