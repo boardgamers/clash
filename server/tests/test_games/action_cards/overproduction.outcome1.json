@@ -10,7 +10,7 @@
         "ideas": 5,
         "gold": 7,
         "mood_tokens": 9,
-        "culture_tokens": 6
+        "culture_tokens": 7
       },
       "resource_limit": {
         "food": 7,
@@ -228,11 +228,6 @@
                       ]
                     },
                     {
-                      "op": "replace",
-                      "path": "/players/0/resources/culture_tokens",
-                      "value": 7
-                    },
-                    {
                       "op": "remove",
                       "path": "/permanent_effects"
                     }
@@ -319,7 +314,7 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 played the action card Overproduction for 1 culture token",
+      "Player1 played the action card Overproduction as a regular action",
       "Player1 can use Overproduction to collect from 2 additional tiles."
     ],
     [

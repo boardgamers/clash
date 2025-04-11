@@ -35,11 +35,12 @@ async fn main() {
     let args: Vec<String> = env::args().collect();
     let mode = get_mode(&args);
 
+    let ai = mode == Mode::AI;
     let mut features = Features {
         import_export: true,
         assets_url: "assets/".to_string(),
-        ai_autoplay: mode == Mode::AI,
-        ai: (mode == Mode::AI).then(|| AI::new(1., Duration::from_secs(5))),
+        ai_autoplay: ai,
+        ai: (ai).then(|| AI::new(1., Duration::from_secs(5))),
     };
 
     let game = if mode == Mode::Test {
@@ -108,6 +109,7 @@ fn ai_autoplay(game: Game, f: &mut Features) -> Game {
     if let Some(ai) = &mut f.ai {
         if f.ai_autoplay {
             // todo does this block the ui?
+            f.ai_autoplay = false;
             let action = ai.next_action(&game);
             let player_index = game.active_player();
             return execute_action(game, action, player_index);

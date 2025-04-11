@@ -22,7 +22,7 @@ use crate::{
     resource_pile::ResourcePile,
 };
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug, Hash)]
 pub struct Collect {
     pub city_position: Position,
     pub collections: Vec<PositionCollection>,
@@ -35,6 +35,14 @@ impl Collect {
             city_position,
             collections,
         }
+    }
+
+    #[must_use]
+    pub fn total(&self) -> ResourcePile {
+        self.collections
+            .iter()
+            .map(PositionCollection::total)
+            .fold(ResourcePile::empty(), |a, b| a + b)
     }
 }
 

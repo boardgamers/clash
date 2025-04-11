@@ -128,6 +128,7 @@ fn new_game(
             .map(|s| vec![s.clone()])
             .collect(),
         undo_limit: 0,
+        supports_undo: true,
         actions_left: ACTIONS,
         successful_cultural_influence: false,
         round: 1,

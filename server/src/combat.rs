@@ -534,6 +534,7 @@ pub mod tests {
             action_log_index: 0,
             log: Vec::new(),
             undo_limit: 0,
+            supports_undo: true,
             actions_left: 3,
             successful_cultural_influence: false,
             round: 1,
