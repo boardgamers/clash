@@ -44,6 +44,7 @@ pub struct Game {
     pub action_log_index: usize,
     pub log: Vec<Vec<String>>,
     pub undo_limit: usize,
+    pub supports_undo: bool,
     pub actions_left: u32,
     pub successful_cultural_influence: bool,
     pub round: u32, // starts at 1
@@ -92,6 +93,7 @@ impl Game {
             action_log_index: data.action_log_index,
             log: data.log,
             undo_limit: data.undo_limit,
+            supports_undo: true,
             round: data.round,
             age: data.age,
             messages: data.messages,
@@ -394,12 +396,12 @@ impl Game {
 
     #[must_use]
     pub fn can_undo(&self) -> bool {
-        self.undo_limit < self.action_log_index
+        self.supports_undo && self.undo_limit < self.action_log_index
     }
 
     #[must_use]
     pub fn can_redo(&self) -> bool {
-        self.action_log_index < current_player_turn_log(self).items.len()
+        self.supports_undo && self.action_log_index < current_player_turn_log(self).items.len()
     }
 
     pub(crate) fn is_pirate_zone(&self, position: Position) -> bool {

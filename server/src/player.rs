@@ -422,7 +422,7 @@ impl Player {
     pub(crate) fn lose_resources(&mut self, resources: ResourcePile) {
         assert!(
             self.resources.has_at_least(&resources),
-            "player should be able to afford the resources"
+            "player should be able to pay {resources} - got {}", self.resources
         );
         self.resources -= resources;
     }

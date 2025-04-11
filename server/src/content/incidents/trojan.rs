@@ -167,13 +167,13 @@ fn anarchy() -> Incident {
                     "{player_name} lost {lost} government advances due to Anarchy -\
                      adding {lost} victory points",
                 ));
-            }
 
-            game.permanent_effects
-                .push(PermanentEffect::Anarchy(Anarchy {
-                    player: player_index,
-                    advances_lost: lost,
-                }));
+                game.permanent_effects
+                    .push(PermanentEffect::Anarchy(Anarchy {
+                        player: player_index,
+                        advances_lost: lost,
+                    }));
+            }
         },
     )
     .build()

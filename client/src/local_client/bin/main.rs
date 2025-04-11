@@ -35,11 +35,12 @@ async fn main() {
     let args: Vec<String> = env::args().collect();
     let mode = get_mode(&args);
 
+    let ai = mode == Mode::AI;
     let mut features = Features {
         import_export: true,
         assets_url: "assets/".to_string(),
-        ai_autoplay: mode == Mode::AI,
-        ai: (mode == Mode::AI).then(|| AI::new(1., Duration::from_secs(5))),
+        ai_autoplay: ai,
+        ai: (ai).then(|| AI::new(1., Duration::from_secs(5))),
     };
 
     let game = if mode == Mode::Test {
