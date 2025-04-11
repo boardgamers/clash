@@ -184,7 +184,7 @@ pub fn weighted_random_selection(probability_distribution: &[f32], rng: &mut Rng
         "probability distribution is empty"
     );
     let mut sum = probability_distribution.iter().sum::<f32>();
-    assert!(sum <= f32::EPSILON, "all probabilities are zero");
+    assert!(sum > f32::EPSILON, "all probabilities are zero");
     for (i, p) in probability_distribution.iter().enumerate() {
         let probability = *p / sum;
         if rng.gen_bool(probability) {

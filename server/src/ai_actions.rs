@@ -93,7 +93,7 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
     if !collect.is_empty() {
         let action_type = prefer_custom_action(collect);
 
-        if let Some(c) = biggest_non_activated_city(p).map(|city| city_collection(game, p, city)) {
+        if let Some(c) = biggest_city_for_activation(p).map(|city| city_collection(game, p, city)) {
             actions.push((
                 ActionType::Playing(PlayingActionType::Collect),
                 vec![collect_action(&action_type, c)],
@@ -234,7 +234,7 @@ fn recruit_strategies() -> Vec<Vec<UnitType>> {
 }
 
 fn recruit(p: &Player, _game: &Game) -> Vec<Action> {
-    biggest_non_activated_city(p)
+    biggest_city_for_activation(p)
         .map(|city| recruit_actions(p, city))
         .unwrap_or_default()
 }
@@ -459,11 +459,11 @@ fn calculate_influence(game: &Game, player: &Player) -> Option<SelectedStructure
 }
 
 #[must_use]
-fn biggest_non_activated_city(player: &Player) -> Option<&City> {
+fn biggest_city_for_activation(player: &Player) -> Option<&City> {
     player
         .cities
         .iter()
-        .filter(|city| !city.is_activated())
+        .filter(|city| city.can_activate())
         .max_by_key(|city| city.mood_modified_size(player))
 }
 
@@ -471,7 +471,7 @@ fn construct(p: &Player, game: &Game) -> Vec<Action> {
     p.cities
         .iter()
         .flat_map(|city| {
-            if city.is_activated() || city.mood_state != MoodState::Happy {
+            if city.can_activate() {
                 return vec![];
             }
             get_construct_actions(game, p, city)

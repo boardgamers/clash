@@ -1,6 +1,8 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
 use crate::card::HandCard;
+use crate::city_pieces::Building;
+use crate::construct::can_construct;
 use crate::content::builtin::Builtin;
 use crate::content::effects::ConstructEffect;
 use crate::content::effects::PermanentEffect::Construct;
@@ -26,7 +28,7 @@ pub(crate) fn great_engineer() -> ActionCard {
         ),
         ActionCost::regular(),
         groups,
-        |_game, _player| true,
+        can_construct_anything,
     )
         .add_bool_request(
             |e| &mut e.play_action_card,
@@ -43,7 +45,15 @@ pub(crate) fn great_engineer() -> ActionCard {
                 }
             },
         )
-    .build()
+        .build()
+}
+
+pub(crate) fn can_construct_anything(game: &Game, p: &Player) -> bool {
+    p.cities.iter().any(|city| {
+        Building::all()
+            .iter()
+            .any(|b| can_construct(city, *b, p, game).is_ok())
+    })
 }
 
 pub(crate) fn construct_only() -> Builtin {
