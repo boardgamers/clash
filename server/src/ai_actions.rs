@@ -410,7 +410,7 @@ pub fn city_collections(game: &Game, player: &Player, city: &City) -> Vec<Collec
             info.choices
                 .iter()
                 .any(|(_, choices)| choices.iter().any(|pile| pile.get(r) > 0))
-                && can_gain_resource(player, r)
+                && can_gain_resource(player, *r)
         })
         .collect_vec();
     let l = all.len();
@@ -421,10 +421,10 @@ pub fn city_collections(game: &Game, player: &Player, city: &City) -> Vec<Collec
         .collect_vec()
 }
 
-fn can_gain_resource(p: &Player, r: &ResourceType) -> bool {
+fn can_gain_resource(p: &Player, r: ResourceType) -> bool {
     match r {
         ResourceType::MoodTokens | ResourceType::CultureTokens => true,
-        _ => p.resources.get(r) < p.resource_limit.get(r),
+        _ => p.resources.get(&r) < p.resource_limit.get(&r),
     }
 }
 
@@ -482,7 +482,7 @@ fn pick_resource(
         .collect_vec();
 
     priority.iter().find_map(|r| {
-        if !can_gain_resource(player, r) {
+        if !can_gain_resource(player, *r) {
             return None;
         }
 
