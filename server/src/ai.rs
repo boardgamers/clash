@@ -130,6 +130,8 @@ fn monte_carlo_run(mut game: Game, rng: &mut Rng) -> Game {
         }
         let current_player = game.active_player();
         let action = choose_monte_carlo_action(&game, rng);
+        // uncomment for debugging
+        // println!("execute action for {current_player} {:?}", action.get_type());
         game = action::execute_action(game, action, current_player);
     }
 }

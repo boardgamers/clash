@@ -93,11 +93,10 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
     if !collect.is_empty() {
         let action_type = prefer_custom_action(collect);
 
-        if let Some(c) = biggest_city_for_activation(p).map(|city| city_collection(game, p, city)) {
-            actions.push((
-                ActionType::Playing(PlayingActionType::Collect),
-                vec![collect_action(&action_type, c)],
-            ));
+        for city in p.cities.iter().filter(|city| city.can_activate()) {
+            actions.push((ActionType::Playing(PlayingActionType::Collect), vec![
+                collect_action(&action_type, city_collection(game, p, city)),
+            ]));
         }
     }
 
@@ -119,10 +118,9 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
     if !influence.is_empty() {
         let action_type = prefer_custom_action(influence);
         if let Some(i) = calculate_influence(game, p) {
-            actions.push((
-                ActionType::Playing(PlayingActionType::Collect),
-                vec![influence_action(&action_type, i)],
-            ));
+            actions.push((ActionType::Playing(PlayingActionType::Collect), vec![
+                influence_action(&action_type, i),
+            ]));
         }
     }
 
@@ -234,9 +232,16 @@ fn recruit_strategies() -> Vec<Vec<UnitType>> {
 }
 
 fn recruit(p: &Player, _game: &Game) -> Vec<Action> {
-    biggest_city_for_activation(p)
-        .map(|city| recruit_actions(p, city))
-        .unwrap_or_default()
+    p.cities
+        .iter()
+        .flat_map(|city| {
+            if city.can_activate() {
+                recruit_actions(p, city)
+            } else {
+                vec![]
+            }
+        })
+        .collect()
 }
 
 fn recruit_actions(player: &Player, city: &City) -> Vec<Action> {
@@ -456,15 +461,6 @@ fn calculate_influence(game: &Game, player: &Player) -> Option<SelectedStructure
         .sorted_by_key(|(_, roll, prevent)| roll + u8::from(*prevent) / 2)
         .next()
         .map(|(s, _, _)| s)
-}
-
-#[must_use]
-fn biggest_city_for_activation(player: &Player) -> Option<&City> {
-    player
-        .cities
-        .iter()
-        .filter(|city| city.can_activate())
-        .max_by_key(|city| city.mood_modified_size(player))
 }
 
 fn construct(p: &Player, game: &Game) -> Vec<Action> {

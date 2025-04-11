@@ -69,6 +69,17 @@ impl Action {
             None
         }
     }
+    
+    #[must_use]
+    pub fn get_type(&self) -> ActionType {
+        match self {
+            Self::Playing(v) => ActionType::Playing(v.playing_action_type()),
+            Self::Movement(_) => ActionType::Movement,
+            Self::Response(_) => ActionType::Response,
+            Self::Undo => ActionType::Undo,
+            Self::Redo => ActionType::Redo,
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -76,6 +87,8 @@ pub enum ActionType {
     Playing(PlayingActionType),
     Movement,
     Response,
+    Undo,
+    Redo,
 }
 
 ///
