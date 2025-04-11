@@ -418,7 +418,7 @@ pub fn city_collections(game: &Game, player: &Player, city: &City) -> Vec<Collec
         .permutations(l)
         .map(|priority| city_collection(game, player, city, &priority))
         .unique_by(Collect::total)
-        .filter(|c|c.total().amount() > 0) // todo check earlier?
+        .filter(|c| c.total().amount() > 0) // todo check earlier?
         .collect_vec()
 }
 
