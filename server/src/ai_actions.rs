@@ -32,7 +32,6 @@ use std::vec;
 
 //todo
 //mehr möglichkeiten für collect (aber immer maximale resourcen)
-//stadt aktivieren auch wenn es sie unglücklich macht
 //nicht nur maximale anzahl rekrutieren
 
 ///
@@ -44,7 +43,6 @@ use std::vec;
 /// - collect and select as much as possible (which is not always the best choice,
 ///   e.g. selecting to sacrifice a unit for an incident)
 /// - move actions are not returned at all - this required special handling
-/// - never activate a city when it decreases happiness
 ///
 #[must_use]
 pub fn get_available_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
