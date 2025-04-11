@@ -9,11 +9,13 @@ use crate::{
 };
 
 const ACTION_SCORE_WEIGHTING: f32 = 1.0;
+const ADAPTIVE_DIFFICULTY_SCORE_THRESHOLD: f32 = 10.0;
 
 pub struct AI {
     rng: Rng,
-    difficulty: f32,
-    thinking_time: Duration,
+    pub difficulty: f32,
+    pub thinking_time: Duration,
+    pub adaptive_difficulty: bool,
 }
 
 impl AI {
@@ -23,13 +25,14 @@ impl AI {
     ///
     /// Panics if the difficulty is not between 0 and 1
     #[must_use]
-    pub fn new(difficulty: f32, thinking_time: Duration) -> Self {
+    pub fn new(difficulty: f32, thinking_time: Duration, adaptive_difficulty: bool) -> Self {
         assert!((0.0..=1.0).contains(&difficulty));
         let rng = Rng::new();
         AI {
             rng,
             difficulty,
             thinking_time,
+            adaptive_difficulty,
         }
     }
 
@@ -65,6 +68,11 @@ impl AI {
 
         //todo: handle going into movement phase
 
+        let difficulty_factor = if self.difficulty >= 1.0 - f32::EPSILON {
+            1.0
+        } else {
+            self.difficulty / (1.0 - self.difficulty)
+        };
         let evaluations = actions
             .iter()
             .map(|(action_group, action)| {
@@ -75,7 +83,7 @@ impl AI {
                     &mut self.rng,
                     &thinking_time_per_action,
                 )
-                .powf(self.difficulty / (1.0 - self.difficulty))
+                .powf(difficulty_factor)
             })
             .collect::<Vec<f32>>();
 
@@ -90,11 +98,51 @@ impl AI {
             utils::weighted_random_selection(&evaluations, &mut self.rng)
         };
 
+        if self.difficulty > 0.0 + f32::EPSILON {
+            let final_evaluation = evaluations
+                .into_iter()
+                .nth(index)
+                .expect("there are no possible actions")
+                .powf(1.0 / difficulty_factor);
+            println!("average final relative score: {final_evaluation}");
+            if self.adaptive_difficulty {
+                if final_evaluation > ADAPTIVE_DIFFICULTY_SCORE_THRESHOLD {
+                    println!("increasing difficulty");
+                    self.increase_difficulty();
+                } else if final_evaluation < -ADAPTIVE_DIFFICULTY_SCORE_THRESHOLD {
+                    println!("decreasing difficulty");
+                    self.decrease_difficulty();
+                }
+            }
+        } else {
+            println!("can't get action score or adapt difficulty because the AI's difficulty is 0");
+        }
+
         actions
             .into_iter()
             .nth(index)
             .expect("there are no possible actions")
             .1
+    }
+
+    fn increase_difficulty(&mut self) {
+        if self.difficulty < 1.0 - f32::EPSILON {
+            self.difficulty += 0.25;
+            self.difficulty = self.difficulty.max(1.0);
+            return;
+        }
+        self.thinking_time += Duration::from_millis(500);
+        self.thinking_time = self.thinking_time.max(Duration::from_millis(5000));
+    }
+
+    fn decrease_difficulty(&mut self) {
+        if self.thinking_time > Duration::from_millis(250) {
+            self.thinking_time -= Duration::from_millis(250);
+            self.thinking_time = self.thinking_time.min(Duration::from_millis(250));
+            return;
+        }
+        self.difficulty -= 0.25;
+        self.difficulty = self.difficulty.min(0.25);
     }
 }
 
@@ -108,12 +156,14 @@ fn evaluate_action(
     let action_score = get_action_score(game, action);
     let action_group_score = get_action_group_score(game, action_group);
     let player_index = game.active_player();
-    let game = action::execute_action(clone_game(game), action.clone(), player_index);
+    let mut game = game.clone();
+    game.supports_undo = false;
+    let game = action::execute_action(game, action.clone(), player_index);
     let mut monte_carlo_score = 0.0;
     let mut iterations = 0;
     let start_time = std::time::Instant::now();
     loop {
-        let new_game = monte_carlo_run(clone_game(&game), rng);
+        let new_game = monte_carlo_run(game.clone(), rng);
         let ai_score = new_game.players[player_index].victory_points(&new_game);
         let mut max_opponent_score = 0.0;
         for (i, player) in new_game.players.iter().enumerate() {
@@ -130,13 +180,8 @@ fn evaluate_action(
             break;
         }
     }
-    monte_carlo_score / iterations as f32 * action_score * action_group_score
-}
-
-fn clone_game(game: &Game) -> Game {
-    let mut g = game.clone();
-    g.supports_undo = false;
-    g
+    println!("Monte Carlo iterations: {iterations}");
+    (monte_carlo_score / iterations as f32) * action_score * action_group_score
 }
 
 fn monte_carlo_run(mut game: Game, rng: &mut Rng) -> Game {
@@ -146,8 +191,6 @@ fn monte_carlo_run(mut game: Game, rng: &mut Rng) -> Game {
         }
         let current_player = game.active_player();
         let action = choose_monte_carlo_action(&game, rng);
-        // uncomment for debugging
-        // println!("execute action for {current_player} {:?}", action.get_type());
         game = action::execute_action(game, action, current_player);
     }
 }
@@ -194,4 +237,90 @@ fn get_action_score(game: &Game, action: &Action) -> f32 {
 
 fn get_action_group_score(game: &Game, action_group: &ActionType) -> f32 {
     1_f32.powf(ACTION_SCORE_WEIGHTING)
+}
+
+/// Returns the win probability of each player in the game in the order listed in the game.
+///
+/// # Panics
+///
+/// Panics if the game is in an invalid state.
+#[must_use]
+pub fn evaluate_position(game: &Game, evaluation_time: Duration) -> Vec<f32> {
+    let mut rng = Rng::new();
+    let mut game = game.clone();
+    game.supports_undo = false;
+    let start_time = std::time::Instant::now();
+    let mut wins = vec![0; game.players.len()];
+    let mut iterations = 0;
+    loop {
+        let new_game = monte_carlo_run(game.clone(), &mut rng);
+        let max_score = new_game
+            .players
+            .iter()
+            .map(|player| player.victory_points(&new_game))
+            .max_by(|a, b| a.partial_cmp(b).expect("floating point error"))
+            .expect("there are no players");
+        for (i, player) in new_game.players.iter().enumerate() {
+            let score = player.victory_points(&new_game);
+            if (score - max_score).abs() < f32::EPSILON {
+                wins[i] += 1;
+            }
+        }
+        iterations += 1;
+        if start_time.elapsed() >= evaluation_time {
+            return wins
+                .iter()
+                .map(|win| *win as f32 / iterations as f32)
+                .collect();
+        }
+    }
+}
+
+/// Returns a score between 0 and 1 for the given action. with 0 being the worst possible action and 1 being the best.
+///
+/// # Panics
+///
+/// Panics if the game is in an invalid state.
+#[must_use]
+pub fn rate_action(game: &Game, action: &Action, evaluation_time: Duration) -> f32 {
+    let all_actions = ai_actions::get_available_actions(game);
+    let all_actions = all_actions
+        .into_iter()
+        .flat_map(|(action_group, actions)| {
+            actions
+                .into_iter()
+                .map(|action| (action_group.clone(), action))
+                .collect::<Vec<(ActionType, Action)>>()
+        })
+        .collect::<Vec<(ActionType, Action)>>();
+    if all_actions.is_empty() {
+        return 1.0;
+    }
+    let action_index = all_actions
+        .iter()
+        .position(|(_, a)| a == action)
+        .expect("action not found in available actions");
+    let mut rng = Rng::new();
+    let thinking_time_per_action = evaluation_time / all_actions.len() as u32;
+    let evaluations = all_actions
+        .iter()
+        .map(|(action_group, action)| {
+            evaluate_action(
+                game,
+                action,
+                action_group,
+                &mut rng,
+                &thinking_time_per_action,
+            )
+        })
+        .collect::<Vec<f32>>();
+    let max_evaluation = evaluations
+        .iter()
+        .max_by(|a, b| a.partial_cmp(b).expect("floating point error"))
+        .expect("there are no possible actions");
+    let min_evaluation = evaluations
+        .iter()
+        .min_by(|a, b| a.partial_cmp(b).expect("floating point error"))
+        .expect("there are no possible actions");
+    evaluations[action_index] - *min_evaluation / (*max_evaluation - *min_evaluation)
 }
