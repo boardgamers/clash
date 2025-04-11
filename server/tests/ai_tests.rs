@@ -24,13 +24,13 @@ fn collect_city() {
     for c in &mut collect {
         c.collections.sort_by_key(|x| x.position);
     }
-    let got = collect.into_iter().map(|c| c.collections).collect_vec();
-    assert_eq!(got.len(), 4);
+    assert_eq!(collect.len(), 2);
+    let got = collect.into_iter().map(|c| c.total()).collect_vec();
     assert_eq!(
-        got[0],
+        got,
         vec![
-            PositionCollection::new(Position::from_offset("C2"), ResourcePile::wood(1)),
-            PositionCollection::new(Position::from_offset("C3"), ResourcePile::gold(1)),
+            ResourcePile::wood(1) + ResourcePile::gold(1),
+            ResourcePile::wood(1) + ResourcePile::mood_tokens(1),
         ]
     )
 }

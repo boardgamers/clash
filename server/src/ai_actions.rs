@@ -402,13 +402,30 @@ fn select_max<T: Clone>(r: &MultiRequest<T>) -> Vec<T> {
 
 #[must_use]
 pub fn city_collections(game: &Game, player: &Player, city: &City) -> Vec<Collect> {
-    let all = ResourceType::all();
+    let info = possible_resource_collections(game, city.position, player.index, &[], &[]);
+
+    let all = ResourceType::all()
+        .into_iter()
+        .filter(|r| {
+            info.choices
+                .iter()
+                .any(|(_, choices)| choices.iter().any(|pile| pile.get(r) > 0))
+                && can_gain_resource(player, r)
+        })
+        .collect_vec();
     let l = all.len();
     all.into_iter()
         .permutations(l)
         .map(|priority| city_collection(game, player, city, &priority))
         .unique_by(Collect::total)
         .collect_vec()
+}
+
+fn can_gain_resource(p: &Player, r: &ResourceType) -> bool {
+    match r {
+        ResourceType::MoodTokens | ResourceType::CultureTokens => true,
+        _ => p.resources.get(r) < p.resource_limit.get(r),
+    }
 }
 
 fn city_collection(
@@ -465,7 +482,7 @@ fn pick_resource(
         .collect_vec();
 
     priority.iter().find_map(|r| {
-        if player.resources.get(r) == player.resource_limit.get(r) {
+        if !can_gain_resource(player, r) {
             return None;
         }
 
