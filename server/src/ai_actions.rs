@@ -31,7 +31,6 @@ use itertools::Itertools;
 use std::vec;
 
 //todo
-//mehr möglichkeiten für collect (aber immer maximale resourcen)
 //nicht nur maximale anzahl rekrutieren
 
 ///
@@ -91,11 +90,19 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
     if !collect.is_empty() {
         let action_type = prefer_custom_action(collect);
 
-        for city in p.cities.iter().filter(|city| city.can_activate()) {
-            actions.push((
-                ActionType::Playing(PlayingActionType::Collect),
-                vec![collect_action(&action_type, city_collection(game, p, city))],
-            ));
+        let a = p
+            .cities
+            .iter()
+            .filter(|city| city.can_activate())
+            .flat_map(|city| {
+                city_collections(game, p, city)
+                    .into_iter()
+                    .map(|c| collect_action(&action_type, c))
+            })
+            .collect_vec();
+
+        if !a.is_empty() {
+            actions.push((ActionType::Playing(PlayingActionType::Collect), a));
         }
     }
 
@@ -117,10 +124,9 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
     if !influence.is_empty() {
         let action_type = prefer_custom_action(influence);
         if let Some(i) = calculate_influence(game, p) {
-            actions.push((
-                ActionType::Playing(PlayingActionType::Collect),
-                vec![influence_action(&action_type, i)],
-            ));
+            actions.push((ActionType::Playing(PlayingActionType::Collect), vec![
+                influence_action(&action_type, i),
+            ]));
         }
     }
 
@@ -391,13 +397,28 @@ fn select_max<T: Clone>(r: &MultiRequest<T>) -> Vec<T> {
 }
 
 #[must_use]
-pub fn city_collection(game: &Game, player: &Player, city: &City) -> Collect {
+pub fn city_collections(game: &Game, player: &Player, city: &City) -> Vec<Collect> {
+    let all = ResourceType::all();
+    let l = all.len();
+    all.into_iter()
+        .permutations(l)
+        .map(|priority| city_collection(game, player, city, &priority))
+        .unique_by(Collect::total)
+        .collect_vec()
+}
+
+fn city_collection(
+    game: &Game,
+    player: &Player,
+    city: &City,
+    priority: &[ResourceType],
+) -> Collect {
     let mut c: Vec<PositionCollection> = vec![];
 
     loop {
         let info = possible_resource_collections(game, city.position, player.index, &c, &c);
 
-        let Some((pos, pile)) = pick_resource(player, &info, &c) else {
+        let Some((pos, pile)) = pick_resource(player, &info, &c, priority) else {
             break;
         };
         let new = add_collect(&info, pos, &pile, &c);
@@ -416,6 +437,7 @@ fn pick_resource(
     player: &Player,
     info: &CollectInfo,
     collected: &[PositionCollection],
+    priority: &[ResourceType],
 ) -> Option<(Position, ResourcePile)> {
     let used = collected
         .iter()
@@ -438,9 +460,7 @@ fn pick_resource(
         })
         .collect_vec();
 
-    //todo take what can be stored and is most valuable and has least in store
-
-    ResourceType::all().iter().find_map(|r| {
+    priority.iter().find_map(|r| {
         if player.resources.get(r) == player.resource_limit.get(r) {
             return None;
         }
