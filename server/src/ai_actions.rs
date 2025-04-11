@@ -86,24 +86,9 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
     // MoveUnits -> special handling
 
     // Collect,
-    let collect = available_collect_actions(game, p.index);
+    let collect = collect_actions(p, game);
     if !collect.is_empty() {
-        let action_type = prefer_custom_action(collect);
-
-        let a = p
-            .cities
-            .iter()
-            .filter(|city| city.can_activate())
-            .flat_map(|city| {
-                city_collections(game, p, city)
-                    .into_iter()
-                    .map(|c| collect_action(&action_type, c))
-            })
-            .collect_vec();
-
-        if !a.is_empty() {
-            actions.push((ActionType::Playing(PlayingActionType::Collect), a));
-        }
+        actions.push((ActionType::Playing(PlayingActionType::Collect), collect));
     }
 
     // IncreaseHappiness
@@ -124,9 +109,10 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
     if !influence.is_empty() {
         let action_type = prefer_custom_action(influence);
         if let Some(i) = calculate_influence(game, p) {
-            actions.push((ActionType::Playing(PlayingActionType::Collect), vec![
-                influence_action(&action_type, i),
-            ]));
+            actions.push((
+                ActionType::Playing(PlayingActionType::Collect),
+                vec![influence_action(&action_type, i)],
+            ));
         }
     }
 
@@ -215,6 +201,24 @@ fn advances(p: &Player, _game: &Game) -> Vec<Action> {
             })
         })
         .collect()
+}
+
+fn collect_actions(p: &Player, game: &Game) -> Vec<Action> {
+    let collect = available_collect_actions(game, p.index);
+    if collect.is_empty() {
+        return vec![];
+    }
+    let action_type = prefer_custom_action(collect);
+
+    p.cities
+        .iter()
+        .filter(|city| city.can_activate())
+        .flat_map(|city| {
+            city_collections(game, p, city)
+                .into_iter()
+                .map(|c| collect_action(&action_type, c))
+        })
+        .collect_vec()
 }
 
 fn found_city(p: &Player, game: &Game) -> Vec<Action> {

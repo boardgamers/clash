@@ -26,10 +26,13 @@ fn collect_city() {
     }
     let got = collect.into_iter().map(|c| c.collections).collect_vec();
     assert_eq!(got.len(), 4);
-    assert_eq!(got[0], vec![
-        PositionCollection::new(Position::from_offset("C2"), ResourcePile::wood(1)),
-        PositionCollection::new(Position::from_offset("C3"), ResourcePile::gold(1)),
-    ])
+    assert_eq!(
+        got[0],
+        vec![
+            PositionCollection::new(Position::from_offset("C2"), ResourcePile::wood(1)),
+            PositionCollection::new(Position::from_offset("C3"), ResourcePile::gold(1)),
+        ]
+    )
 }
 
 #[test]
@@ -42,41 +45,49 @@ fn all_actions() {
     .unwrap();
     assert_eq!(advances.len(), 13);
 
-    assert_eq!(all, vec![
-        (ActionType::Playing(PlayingActionType::Recruit), vec![
-            Action::Playing(PlayingAction::Recruit(Recruit::new(
-                &Units::new(1, 0, 0, 0, 0, 0),
-                Position::from_offset("D8"),
-                ResourcePile::food(2)
-            )))
-        ]),
-        (ActionType::Playing(PlayingActionType::Collect), vec![
-            Action::Playing(PlayingAction::Collect(Collect::new(
-                Position::from_offset("D8"),
-                vec![PositionCollection::new(
-                    Position::from_offset("E8"),
-                    ResourcePile::wood(1)
-                )]
-            ))),
-            Action::Playing(PlayingAction::Collect(Collect::new(
-                Position::from_offset("D8"),
-                vec![PositionCollection::new(
-                    Position::from_offset("C8"),
-                    ResourcePile::ore(1)
-                )]
-            )))
-        ]),
-        (
-            ActionType::Playing(PlayingActionType::IncreaseHappiness),
-            vec![Action::Playing(PlayingAction::IncreaseHappiness(
-                IncreaseHappiness::new(
-                    vec![(Position::from_offset("D8"), 1)],
-                    ResourcePile::mood_tokens(1)
-                )
-            ))]
-        ),
-        (ActionType::Playing(PlayingActionType::ActionCard(0)), vec![
-            Action::Playing(PlayingAction::ActionCard(42))
-        ]),
-    ])
+    assert_eq!(
+        all,
+        vec![
+            (
+                ActionType::Playing(PlayingActionType::Recruit),
+                vec![Action::Playing(PlayingAction::Recruit(Recruit::new(
+                    &Units::new(1, 0, 0, 0, 0, 0),
+                    Position::from_offset("D8"),
+                    ResourcePile::food(2)
+                )))]
+            ),
+            (
+                ActionType::Playing(PlayingActionType::Collect),
+                vec![
+                    Action::Playing(PlayingAction::Collect(Collect::new(
+                        Position::from_offset("D8"),
+                        vec![PositionCollection::new(
+                            Position::from_offset("E8"),
+                            ResourcePile::wood(1)
+                        )]
+                    ))),
+                    Action::Playing(PlayingAction::Collect(Collect::new(
+                        Position::from_offset("D8"),
+                        vec![PositionCollection::new(
+                            Position::from_offset("C8"),
+                            ResourcePile::ore(1)
+                        )]
+                    )))
+                ]
+            ),
+            (
+                ActionType::Playing(PlayingActionType::IncreaseHappiness),
+                vec![Action::Playing(PlayingAction::IncreaseHappiness(
+                    IncreaseHappiness::new(
+                        vec![(Position::from_offset("D8"), 1)],
+                        ResourcePile::mood_tokens(1)
+                    )
+                ))]
+            ),
+            (
+                ActionType::Playing(PlayingActionType::ActionCard(0)),
+                vec![Action::Playing(PlayingAction::ActionCard(42))]
+            ),
+        ]
+    )
 }

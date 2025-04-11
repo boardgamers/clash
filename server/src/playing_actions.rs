@@ -36,12 +36,12 @@ impl Collect {
             collections,
         }
     }
-    
+
     #[must_use]
     pub fn total(&self) -> ResourcePile {
         self.collections
             .iter()
-            .map(|c| c.total())
+            .map(PositionCollection::total)
             .fold(ResourcePile::empty(), |a, b| a + b)
     }
 }
