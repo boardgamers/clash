@@ -389,6 +389,15 @@ pub(crate) fn discard_objective_card(game: &mut Game, player: usize, card: u8) {
     })
     .expect("should be able to discard objective card");
     for o in get_objective_card(card).objectives {
+        if game.player(player).objective_cards.iter().any(|c| {
+            get_objective_card(*c)
+                .objectives
+                .iter()
+                .any(|o2| o2.name == o.name)
+        }) {
+            // this objective is still in play
+            continue;
+        }
         o.listeners.deinit(game, player);
     }
 }

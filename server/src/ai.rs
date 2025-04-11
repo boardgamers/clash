@@ -107,13 +107,13 @@ fn evaluate_action(
 ) -> f32 {
     let action_score = get_action_score(game, action);
     let action_group_score = get_action_group_score(game, action_group);
-    let player_index = game.current_player_index;
-    let game = action::execute_action(game.clone(), action.clone(), player_index);
+    let player_index = game.active_player();
+    let game = action::execute_action(clone_game(game), action.clone(), player_index);
     let mut monte_carlo_score = 0.0;
     let mut iterations = 0;
     let start_time = std::time::Instant::now();
     loop {
-        let new_game = monte_carlo_run(game.clone(), rng);
+        let new_game = monte_carlo_run(clone_game(&game), rng);
         let ai_score = new_game.players[player_index].victory_points(&new_game);
         let mut max_opponent_score = 0.0;
         for (i, player) in new_game.players.iter().enumerate() {
@@ -133,19 +133,40 @@ fn evaluate_action(
     monte_carlo_score / iterations as f32 * action_score * action_group_score
 }
 
+fn clone_game(game: &Game) -> Game {
+    let mut g = game.clone();
+    g.supports_undo = false;
+    g
+}
+
 fn monte_carlo_run(mut game: Game, rng: &mut Rng) -> Game {
     loop {
         if matches!(game.state, GameState::Finished) {
             return game;
         }
-        let current_player = game.current_player_index;
+        let current_player = game.active_player();
         let action = choose_monte_carlo_action(&game, rng);
+        // uncomment for debugging
+        // println!("execute action for {current_player} {:?}", action.get_type());
         game = action::execute_action(game, action, current_player);
     }
 }
 
 fn choose_monte_carlo_action(game: &Game, rng: &mut Rng) -> Action {
     let action_groups = ai_actions::get_available_actions(game);
+    if action_groups.is_empty() {
+        return Action::Playing(PlayingAction::EndTurn);
+    }
+    if action_groups.len() == 1 && action_groups[0].1.len() == 1 {
+        return action_groups
+            .into_iter()
+            .next()
+            .expect("there are no possible actions")
+            .1
+            .into_iter()
+            .next()
+            .expect("there are no possible actions");
+    }
     let group_evaluations = action_groups
         .iter()
         .map(|(action_group, _)| get_action_group_score(game, action_group))

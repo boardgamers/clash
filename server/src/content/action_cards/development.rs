@@ -5,6 +5,7 @@ use crate::content::action_cards::mercenaries::mercenaries;
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::effects::{CollectEffect, ConstructEffect, PermanentEffect};
+use crate::content::incidents::great_builders::can_construct_anything;
 use crate::content::incidents::great_explorer::{action_explore_request, explore_adjacent_block};
 use crate::content::persistent_events::PositionRequest;
 use crate::content::tactics_cards::{
@@ -38,7 +39,7 @@ fn city_development(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "City Development",
         "Construct a building without paying resources.",
         ActionCost::regular_with_cost(ResourcePile::culture_tokens(1)),
-        |_game, _player, _| true,
+        |game, player, _| can_construct_anything(game, player),
     )
     .tactics_card(tactics_card)
     .add_simple_persistent_event_listener(

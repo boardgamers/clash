@@ -31,8 +31,6 @@ use itertools::Itertools;
 use std::vec;
 
 //todo
-//mehr möglichkeiten für collect (aber immer maximale resourcen)
-//stadt aktivieren auch wenn es sie unglücklich macht
 //nicht nur maximale anzahl rekrutieren
 //bewegung:
 //Siedler: nur von stadt wegbewegen wo er gebaut wurde
@@ -47,7 +45,6 @@ use std::vec;
 /// - collect and select as much as possible (which is not always the best choice,
 ///   e.g. selecting to sacrifice a unit for an incident)
 /// - move actions are not returned at all - this required special handling
-/// - never activate a city when it decreases happiness
 ///
 #[must_use]
 pub fn get_available_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
@@ -92,16 +89,9 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
     // MoveUnits -> special handling
 
     // Collect,
-    let collect = available_collect_actions(game, p.index);
+    let collect = collect_actions(p, game);
     if !collect.is_empty() {
-        let action_type = prefer_custom_action(collect);
-
-        if let Some(c) = biggest_non_activated_city(p).map(|city| city_collection(game, p, city)) {
-            actions.push((
-                ActionType::Playing(PlayingActionType::Collect),
-                vec![collect_action(&action_type, c)],
-            ));
-        }
+        actions.push((ActionType::Playing(PlayingActionType::Collect), collect));
     }
 
     // IncreaseHappiness
@@ -216,6 +206,24 @@ fn advances(p: &Player, _game: &Game) -> Vec<Action> {
         .collect()
 }
 
+fn collect_actions(p: &Player, game: &Game) -> Vec<Action> {
+    let collect = available_collect_actions(game, p.index);
+    if collect.is_empty() {
+        return vec![];
+    }
+    let action_type = prefer_custom_action(collect);
+
+    p.cities
+        .iter()
+        .filter(|city| city.can_activate())
+        .flat_map(|city| {
+            city_collections(game, p, city)
+                .into_iter()
+                .map(|c| collect_action(&action_type, c))
+        })
+        .collect_vec()
+}
+
 fn found_city(p: &Player, game: &Game) -> Vec<Action> {
     p.units
         .iter()
@@ -237,9 +245,16 @@ fn recruit_strategies() -> Vec<Vec<UnitType>> {
 }
 
 fn recruit(p: &Player, _game: &Game) -> Vec<Action> {
-    biggest_non_activated_city(p)
-        .map(|city| recruit_actions(p, city))
-        .unwrap_or_default()
+    p.cities
+        .iter()
+        .flat_map(|city| {
+            if city.can_activate() {
+                recruit_actions(p, city)
+            } else {
+                vec![]
+            }
+        })
+        .collect()
 }
 
 fn recruit_actions(player: &Player, city: &City) -> Vec<Action> {
@@ -389,13 +404,46 @@ fn select_max<T: Clone>(r: &MultiRequest<T>) -> Vec<T> {
 }
 
 #[must_use]
-pub fn city_collection(game: &Game, player: &Player, city: &City) -> Collect {
+pub fn city_collections(game: &Game, player: &Player, city: &City) -> Vec<Collect> {
+    let info = possible_resource_collections(game, city.position, player.index, &[], &[]);
+
+    let all = ResourceType::all()
+        .into_iter()
+        .filter(|r| {
+            info.choices
+                .iter()
+                .any(|(_, choices)| choices.iter().any(|pile| pile.get(r) > 0))
+                && can_gain_resource(player, *r)
+        })
+        .collect_vec();
+    let l = all.len();
+    all.into_iter()
+        .permutations(l)
+        .map(|priority| city_collection(game, player, city, &priority))
+        .unique_by(Collect::total)
+        .filter(|c| c.total().amount() > 0) // todo check earlier?
+        .collect_vec()
+}
+
+fn can_gain_resource(p: &Player, r: ResourceType) -> bool {
+    match r {
+        ResourceType::MoodTokens | ResourceType::CultureTokens => true,
+        _ => p.resources.get(&r) < p.resource_limit.get(&r),
+    }
+}
+
+fn city_collection(
+    game: &Game,
+    player: &Player,
+    city: &City,
+    priority: &[ResourceType],
+) -> Collect {
     let mut c: Vec<PositionCollection> = vec![];
 
     loop {
         let info = possible_resource_collections(game, city.position, player.index, &c, &c);
 
-        let Some((pos, pile)) = pick_resource(player, &info, &c) else {
+        let Some((pos, pile)) = pick_resource(player, &info, &c, priority) else {
             break;
         };
         let new = add_collect(&info, pos, &pile, &c);
@@ -414,6 +462,7 @@ fn pick_resource(
     player: &Player,
     info: &CollectInfo,
     collected: &[PositionCollection],
+    priority: &[ResourceType],
 ) -> Option<(Position, ResourcePile)> {
     let used = collected
         .iter()
@@ -436,10 +485,8 @@ fn pick_resource(
         })
         .collect_vec();
 
-    //todo take what can be stored and is most valuable and has least in store
-
-    ResourceType::all().iter().find_map(|r| {
-        if player.resources.get(r) == player.resource_limit.get(r) {
+    priority.iter().find_map(|r| {
+        if !can_gain_resource(player, *r) {
             return None;
         }
 
@@ -461,20 +508,11 @@ fn calculate_influence(game: &Game, player: &Player) -> Option<SelectedStructure
         .map(|(s, _, _)| s)
 }
 
-#[must_use]
-fn biggest_non_activated_city(player: &Player) -> Option<&City> {
-    player
-        .cities
-        .iter()
-        .filter(|city| !city.is_activated())
-        .max_by_key(|city| city.mood_modified_size(player))
-}
-
 fn construct(p: &Player, game: &Game) -> Vec<Action> {
     p.cities
         .iter()
         .flat_map(|city| {
-            if city.is_activated() || city.mood_state != MoodState::Happy {
+            if city.can_activate() {
                 return vec![];
             }
             get_construct_actions(game, p, city)

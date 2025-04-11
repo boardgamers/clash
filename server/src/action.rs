@@ -69,6 +69,17 @@ impl Action {
             None
         }
     }
+
+    #[must_use]
+    pub fn get_type(&self) -> ActionType {
+        match self {
+            Self::Playing(v) => ActionType::Playing(v.playing_action_type()),
+            Self::Movement(_) => ActionType::Movement,
+            Self::Response(_) => ActionType::Response,
+            Self::Undo => ActionType::Undo,
+            Self::Redo => ActionType::Redo,
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -76,6 +87,8 @@ pub enum ActionType {
     Playing(PlayingActionType),
     Movement,
     Response,
+    Undo,
+    Redo,
 }
 
 ///
@@ -85,6 +98,10 @@ pub enum ActionType {
 /// Panics if the action is illegal
 #[must_use]
 pub fn execute_action(mut game: Game, action: Action, player_index: usize) -> Game {
+    if !game.supports_undo {
+        return execute_without_undo(game, action, player_index)
+            .expect("action should be executed");
+    }
     let add_undo = !matches!(&action, Action::Undo);
     let old = to_serde_value(&game);
     let old_player = game.active_player();
