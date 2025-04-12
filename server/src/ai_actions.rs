@@ -101,7 +101,7 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
     if !happiness.is_empty() {
         let action_type = prefer_custom_action(happiness);
 
-        if let Some(h) = calculate_increase_happiness(p) {
+        if let Some(h) = calculate_increase_happiness(p, &action_type) {
             actions.push((
                 ActionType::Playing(PlayingActionType::IncreaseHappiness),
                 vec![happiness_action(&action_type, h)],
@@ -299,10 +299,10 @@ fn recruit_actions(player: &Player, city: &City) -> Vec<Action> {
         .collect()
 }
 
-fn calculate_increase_happiness(player: &Player) -> Option<IncreaseHappiness> {
+fn calculate_increase_happiness(player: &Player, action_type: &PlayingActionType) -> Option<IncreaseHappiness> {
     // try to make the biggest cities happy - that's usually the best choice
     let mut cities = vec![];
-    let mut cost = PaymentOptions::resources(ResourcePile::empty());
+    let mut cost = PaymentOptions::resources(action_type.cost().cost);
 
     for c in player
         .cities

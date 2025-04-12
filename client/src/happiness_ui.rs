@@ -21,12 +21,12 @@ impl IncreaseHappinessConfig {
         let steps = p.cities.iter().map(|c| (c.position, 0)).collect();
         IncreaseHappinessConfig {
             steps,
-            payment: Self::happiness_payment(p, &[(p.cities[0].position, 0)]),
+            payment: Self::happiness_payment(p, &[(p.cities[0].position, 0)], &custom),
             custom,
         }
     }
 
-    fn happiness_payment(p: &Player, new_steps: &[(Position, u32)]) -> Payment {
+    fn happiness_payment(p: &Player, new_steps: &[(Position, u32)], custom: &BaseOrCustomDialog) -> Payment {
         let payment = new_steps
             .iter()
             .map(|(pos, steps)| {
@@ -39,7 +39,9 @@ impl IncreaseHappinessConfig {
             })
             .unwrap();
 
-        Payment::new(&payment, &p.resources, "Increase happiness", false)
+        let mut pile = p.resources.clone();
+        pile -= custom.action_type.cost().cost; 
+        Payment::new(&payment, &pile, "Increase happiness", false)
     }
 }
 
@@ -89,7 +91,7 @@ pub fn add_increase_happiness(
         .collect();
 
     increase_happiness.payment =
-        IncreaseHappinessConfig::happiness_payment(rc.shown_player, &new_steps);
+        IncreaseHappinessConfig::happiness_payment(rc.shown_player, &new_steps, &increase_happiness.custom);
     increase_happiness.steps = new_steps;
     increase_happiness
 }
