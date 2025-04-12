@@ -111,9 +111,7 @@ pub fn validate_card_selection(
     cards: &[HandCard],
     game: &Game,
 ) -> Result<Vec<(u8, String)>, String> {
-    let s = game.current_event();
-    let player = &s.player;
-    let Some(h) = player.handler.as_ref() else {
+    let Some(h) = &game.current_event().player.handler.as_ref() else {
         return Err("no selection handler".to_string());
     };
     match &h.origin {
@@ -121,7 +119,7 @@ pub fn validate_card_selection(
             validate_spy_cards(cards, game).map(|()| Vec::new())
         }
         EventOrigin::Builtin(b) if b == "Select Objective Cards to Complete" => {
-            let PersistentEventType::SelectObjectives(c) = &s.event_type else {
+            let PersistentEventType::SelectObjectives(c) = &game.current_event().event_type else {
                 return Err("no selection handler".to_string());
             };
 

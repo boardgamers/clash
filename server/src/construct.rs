@@ -45,6 +45,9 @@ pub fn can_construct(
     game: &Game,
 ) -> Result<(), String> {
     can_construct_anything(city, player)?;
+    if !city.can_activate() {
+        return Err("Can't activate".to_string());
+    }
     if city.mood_state == MoodState::Angry {
         return Err("City is angry".to_string());
     }

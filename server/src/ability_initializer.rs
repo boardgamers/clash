@@ -783,7 +783,10 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                 );
                 assert!(
                     needed.contains(&(selected.len() as u8)),
-                    "Invalid choice count"
+                    "Invalid choice count: {} (min: {}, max: {})",
+                    selected.len(),
+                    needed.start(),
+                    needed.end(),
                 );
                 gain_reward(
                     game,

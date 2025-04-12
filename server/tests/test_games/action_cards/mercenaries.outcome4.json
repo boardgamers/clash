@@ -165,7 +165,6 @@
           "position": "B2",
           "unit_type": "Infantry",
           "movement_restrictions": [
-            "Battle",
             "Forest"
           ],
           "id": 3
@@ -174,7 +173,6 @@
           "position": "B2",
           "unit_type": "Infantry",
           "movement_restrictions": [
-            "Battle",
             "Forest"
           ],
           "id": 4
