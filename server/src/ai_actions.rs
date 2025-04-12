@@ -326,6 +326,7 @@ fn calculate_increase_happiness(player: &Player, action_type: &PlayingActionType
         cities.push((c.position, steps));
     }
 
+    cost.default -= action_type.cost().cost;
     (!cities.is_empty()).then_some(IncreaseHappiness::new(cities, payment(&cost, player)))
 }
 
