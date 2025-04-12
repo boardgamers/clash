@@ -9,10 +9,7 @@ use crate::construct::{Construct, available_buildings};
 use crate::content::advances;
 use crate::content::advances::economy::tax_options;
 use crate::content::custom_actions::{CustomAction, CustomActionType};
-use crate::content::persistent_events::{
-    EventResponse, MultiRequest, PersistentEventRequest, PersistentEventState, PositionRequest,
-    SelectedStructure, is_selected_structures_valid,
-};
+use crate::content::persistent_events::{EventResponse, MultiRequest, PersistentEventRequest, PersistentEventState, PositionRequest, SelectedStructure, is_selected_structures_valid, HandCardsRequest};
 use crate::cultural_influence::{
     available_influence_actions, available_influence_culture, influence_action,
 };
@@ -384,7 +381,7 @@ fn responses(event: &PersistentEventState, player: &Player, game: &Game) -> Vec<
             .collect()
         }
         PersistentEventRequest::SelectHandCards(r) => {
-            select_multi(&r, SelectMultiStrategy::All, |v| {
+            select_multi(&r, hand_card_strategy(&h.origin, &r), |v| {
                 validate_card_selection(v, game).is_ok()
             })
             .into_iter()
@@ -405,6 +402,15 @@ fn responses(event: &PersistentEventState, player: &Player, game: &Game) -> Vec<
                 EventResponse::ExploreResolution(3),
             ]
         }
+    }
+}
+
+fn hand_card_strategy(o: &EventOrigin, _r: &HandCardsRequest) -> SelectMultiStrategy {
+    match o { 
+        EventOrigin::Builtin(n) if n == "Select Objective Cards to Complete" => {
+            SelectMultiStrategy::Max
+        }
+        _ => SelectMultiStrategy::All,
     }
 }
 
@@ -440,17 +446,6 @@ fn select_multi<T: Clone>(
         SelectMultiStrategy::All => filter.collect(),
         SelectMultiStrategy::Max => filter.last().map_or(Vec::new(), |v| vec![v]),
     }
-
-    // filter
-    //     })
-    //     .filter(|p| {
-    //         match strategy {
-    //             SelectMultiStrategy::Min => p.len() == *r.needed.start() as usize,
-    //             SelectMultiStrategy::All => r.needed.contains(&(p.len() as u8)),
-    //             SelectMultiStrategy::Max => p.len() == *r.needed.end() as usize,
-    //         }
-    //     })
-    //     .collect()
 }
 
 #[must_use]

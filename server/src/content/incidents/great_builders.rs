@@ -2,7 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
 use crate::card::HandCard;
 use crate::city_pieces::Building;
-use crate::construct::can_construct;
+use crate::construct::{available_buildings, can_construct};
 use crate::content::builtin::Builtin;
 use crate::content::effects::ConstructEffect;
 use crate::content::effects::PermanentEffect::Construct;
@@ -50,9 +50,11 @@ pub(crate) fn great_engineer() -> ActionCard {
 
 pub(crate) fn can_construct_anything(game: &Game, p: &Player) -> bool {
     p.cities.iter().any(|city| {
-        Building::all()
-            .iter()
-            .any(|b| can_construct(city, *b, p, game).is_ok())
+        !available_buildings(
+            game,
+            p.index,
+            city.position,
+        ).is_empty()
     })
 }
 

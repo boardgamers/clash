@@ -3,7 +3,6 @@ use crate::city_pieces::{DestroyedStructures, DestroyedStructuresData};
 use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::content::advances::get_advance;
 use crate::content::builtin;
-use crate::content::objective_cards::get_objective_card;
 use crate::events::{Event, EventOrigin};
 use crate::payment::PaymentOptions;
 use crate::player_events::{CostInfo, TransientEvents};
