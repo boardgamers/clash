@@ -1,5 +1,4 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::action::Action;
 use crate::action_card::{ActionCard, ActionCardBuilder, CivilCardTarget, discard_action_card};
 use crate::advance::gain_advance_without_payment;
 use crate::card::HandCard;
@@ -9,14 +8,12 @@ use crate::content::advances::get_advance;
 use crate::content::advances::theocracy::cities_that_can_add_units;
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{
-    AdvanceRequest, EventResponse, HandCardsRequest, PaymentRequest, PlayerRequest, PositionRequest,
+    AdvanceRequest, HandCardsRequest, PaymentRequest, PlayerRequest, PositionRequest,
 };
 use crate::content::tactics_cards::{
     TacticsCardFactory, archers, defensive_formation, flanking, high_ground, high_morale, surprise,
     wedge_formation,
 };
-use crate::game::Game;
-use crate::log::current_player_turn_log;
 use crate::player::Player;
 use crate::playing_actions::ActionCost;
 use crate::resource_pile::ResourcePile;
@@ -58,23 +55,25 @@ fn synergies(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                 game.player(p),
             )))
         },
-        |game, sel, _| {
+        |game, sel, i| {
+            let advance = &sel.choice;
             game.add_info_log_item(&format!(
                 "{} selected {} as first advance for Synergies.",
-                sel.player_name, sel.choice
+                sel.player_name, advance
             ));
+            i.selected_advance = Some(advance.clone());
         },
     );
     b = pay_for_advance(b, 2);
     b = b.add_advance_request(
         |e| &mut e.play_action_card,
         1,
-        |game, p, _| {
-            let first = last_advance(game);
+        |game, p, i| {
+            let first = i.selected_advance.as_ref().expect("advance not found");
             Some(AdvanceRequest::new(
                 advances::get_groups()
                     .iter()
-                    .find(|g| g.advances.iter().any(|a| a.name == first))
+                    .find(|g| g.advances.iter().any(|a| a.name == *first))
                     .expect("Advance group not found")
                     .advances
                     .iter()
@@ -83,11 +82,13 @@ fn synergies(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                     .collect_vec(),
             ))
         },
-        |game, sel, _| {
+        |game, sel, i| {
+            let advance = &sel.choice;
             game.add_info_log_item(&format!(
                 "{} selected {} as second advance for Synergies.",
-                sel.player_name, sel.choice
+                sel.player_name, advance
             ));
+            i.selected_advance = Some(advance.clone());
         },
     );
     b = pay_for_advance(b, 0);
@@ -99,39 +100,24 @@ fn pay_for_advance(b: ActionCardBuilder, priority: i32) -> ActionCardBuilder {
     b.add_payment_request_listener(
         |e| &mut e.play_action_card,
         priority,
-        |game, player_index, _| {
+        |game, player_index, i| {
             let p = game.player(player_index);
-            let a = last_advance(game);
+            let advance = i.selected_advance.as_ref().expect("advance not found");
             Some(vec![PaymentRequest::new(
-                p.advance_cost(&get_advance(&a), None).cost,
-                &format!("Pay for {a}"),
+                p.advance_cost(&get_advance(advance), None).cost,
+                &format!("Pay for {advance}"),
                 false,
             )])
         },
-        |game, s, _| {
-            let advance = last_advance(game);
+        |game, s, i| {
+            let advance = i.selected_advance.as_ref().expect("advance not found");
             game.add_info_log_item(&format!(
                 "{} paid {} for advance {advance}",
                 s.player_name, s.choice[0]
             ));
-            gain_advance_without_payment(
-                game,
-                &advance,
-                s.player_index,
-                s.choice[0].clone(),
-                false,
-            );
+            gain_advance_without_payment(game, advance, s.player_index, s.choice[0].clone(), false);
         },
     )
-}
-
-fn last_advance(game: &Game) -> String {
-    for i in current_player_turn_log(game).items.iter().rev() {
-        if let Action::Response(EventResponse::SelectAdvance(a)) = &i.action {
-            return a.clone();
-        }
-    }
-    panic!("Advance action not found");
 }
 
 fn categories_with_2_affordable_advances(p: &Player) -> Vec<String> {
@@ -381,12 +367,13 @@ fn new_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             let player = game.player(player_index);
             Some(AdvanceRequest::new(advances_that_can_be_gained(player)))
         },
-        |game, sel, _| {
+        |game, sel, i| {
             let advance = &sel.choice;
             game.add_info_log_item(&format!(
                 "{} selected {advance} as advance for New Ideas.",
                 sel.player_name,
             ));
+            i.selected_advance = Some(advance.clone());
         },
     );
     pay_for_advance(b, 1)

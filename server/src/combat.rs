@@ -412,21 +412,23 @@ fn move_to_enemy_player_tile(
     let city = game.player(defender).try_get_city(destination);
     let has_fortress = city.is_some_and(|city| city.pieces.fortress.is_some());
 
-    let mut military = false;
-    for unit_id in unit_ids {
-        let unit = game.player_mut(player_index).get_unit_mut(*unit_id);
-        if unit.unit_type.is_military() {
-            if unit
-                .movement_restrictions
-                .contains(&MovementRestriction::Battle)
-            {
-                panic!("unit can't attack");
+    if game.player(player_index).is_human() {
+        let mut military = false;
+        for unit_id in unit_ids {
+            let unit = game.player_mut(player_index).get_unit_mut(*unit_id);
+            if unit.unit_type.is_military() {
+                if unit
+                    .movement_restrictions
+                    .contains(&MovementRestriction::Battle)
+                {
+                    panic!("unit can't attack");
+                }
+                unit.movement_restrictions.push(MovementRestriction::Battle);
+                military = true;
             }
-            unit.movement_restrictions.push(MovementRestriction::Battle);
-            military = true;
         }
+        assert!(military, "Need military units to attack");
     }
-    assert!(military, "Need military units to attack");
 
     if has_defending_units || has_fortress {
         initiate_combat(

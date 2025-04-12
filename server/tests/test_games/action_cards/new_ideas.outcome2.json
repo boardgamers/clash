@@ -225,6 +225,10 @@
                   },
                   "undo": [
                     {
+                      "op": "remove",
+                      "path": "/events/0/event_type/ActionCard/selected_advance"
+                    },
+                    {
                       "op": "replace",
                       "path": "/events/0/handler/priority",
                       "value": 2
@@ -281,7 +285,8 @@
                         {
                           "event_type": {
                             "ActionCard": {
-                              "id": 41
+                              "id": 41,
+                              "selected_advance": "Storage"
                             }
                           },
                           "handler": {

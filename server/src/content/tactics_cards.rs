@@ -21,7 +21,7 @@ use std::vec;
 pub fn get_tactics_card(id: u8) -> TacticsCard {
     get_action_card(id)
         .tactics_card
-        .expect("tactics card not found")
+        .unwrap_or_else(|| panic!("tactics card not found for action card {id}"))
 }
 
 pub(crate) type TacticsCardFactory = fn(u8) -> TacticsCard;

@@ -3,8 +3,8 @@ use crate::city_pieces::{DestroyedStructures, DestroyedStructuresData};
 use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::content::advances::get_advance;
 use crate::content::builtin;
-use crate::content::objective_cards::get_objective_card;
 use crate::events::{Event, EventOrigin};
+use crate::objective_card::init_objective_card;
 use crate::payment::PaymentOptions;
 use crate::player_events::{CostInfo, TransientEvents};
 use crate::resource::ResourceType;
@@ -112,14 +112,7 @@ impl Player {
 
         let mut objectives = vec![];
         for id in objective_cards {
-            for o in get_objective_card(id).objectives {
-                if objectives.contains(&o.name) {
-                    // can't fulfill 2 objectives with the same name, so we can skip it here
-                    continue;
-                }
-                objectives.push(o.name.clone());
-                o.listeners.init(game, player_index);
-            }
+            init_objective_card(game, player_index, &mut objectives, id);
         }
 
         let mut cities = mem::take(&mut game.players[player_index].cities);

@@ -26,6 +26,11 @@ impl AI {
     /// # Panics
     ///
     /// Panics if the difficulty is not between 0 and 1
+    ///
+    ///
+    /// # Panics
+    ///
+    /// Panics if the difficulty is not between 0 and 1
     #[must_use]
     pub fn new(difficulty: f64, thinking_time: Duration, adaptive_difficulty: bool) -> Self {
         assert!((0.0..=1.0).contains(&difficulty));
@@ -39,6 +44,11 @@ impl AI {
         }
     }
 
+    /// Returns the next action for the AI to take.
+    ///
+    /// # Panics
+    ///
+    /// May panic if the game is in an invalid state or if `ai_actions` provides an invalid action.
     /// Returns the next action for the AI to take.
     ///
     /// # Panics
@@ -58,6 +68,13 @@ impl AI {
             .collect::<Vec<(ActionType, Action)>>();
         if actions.is_empty() {
             return Action::Playing(PlayingAction::EndTurn);
+        }
+        if actions.len() == 1 {
+            return actions
+                .into_iter()
+                .next()
+                .expect("there should be 1 available action")
+                .1;
         }
         if actions.len() == 1 {
             return actions
@@ -86,6 +103,7 @@ impl AI {
                     &mut self.rng,
                     &thinking_time_per_action,
                 )
+                .powf(difficulty_factor)
                 .powf(difficulty_factor)
             })
             .collect::<Vec<f64>>();
@@ -159,6 +177,9 @@ fn evaluate_action(
     let action_score = get_action_score(game, action);
     let action_group_score = get_action_group_score(game, action_group);
     let player_index = game.active_player();
+    let mut game = game.clone();
+    game.supports_undo = false;
+    let game = action::execute_action(game, action.clone(), player_index);
     let mut game = game.clone();
     game.supports_undo = false;
     let game = action::execute_action(game, action.clone(), player_index);
