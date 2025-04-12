@@ -410,11 +410,14 @@ fn responses(event: &PersistentEventState, player: &Player, game: &Game) -> Vec<
     }
 }
 
-fn hand_card_strategy(o: &EventOrigin, _r: &HandCardsRequest) -> SelectMultiStrategy {
+fn hand_card_strategy(o: &EventOrigin, r: &HandCardsRequest) -> SelectMultiStrategy {
     match o {
         EventOrigin::Builtin(n) if n == "Select Objective Cards to Complete" => {
             SelectMultiStrategy::Max
         }
+        EventOrigin::CivilCard(_) if r.description == "Select a Wonder, Action, or Objective card to swap" => {
+            SelectMultiStrategy::Min // powerset takes too long
+        } 
         _ => SelectMultiStrategy::All,
     }
 }
