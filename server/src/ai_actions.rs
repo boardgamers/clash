@@ -1,4 +1,5 @@
 use crate::action::{Action, ActionType};
+use crate::card::validate_card_selection;
 use crate::city::{City, MoodState};
 use crate::collect::{
     CollectInfo, PositionCollection, add_collect, available_collect_actions, collect_action,
@@ -9,11 +10,13 @@ use crate::content::advances;
 use crate::content::advances::economy::tax_options;
 use crate::content::custom_actions::{CustomAction, CustomActionType};
 use crate::content::persistent_events::{
-    EventResponse, MultiRequest, PersistentEventRequest, PersistentEventState, SelectedStructure,
+    EventResponse, MultiRequest, PersistentEventRequest, PersistentEventState, PositionRequest,
+    SelectedStructure,
 };
 use crate::cultural_influence::{
     available_influence_actions, available_influence_culture, influence_action,
 };
+use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::happiness::{available_happiness_actions, happiness_action, increase_happiness_cost};
 use crate::payment::PaymentOptions;
@@ -29,7 +32,6 @@ use crate::status_phase::ChangeGovernmentType;
 use crate::unit::{UnitType, Units};
 use itertools::Itertools;
 use std::vec;
-
 //todo
 //nicht nur maximale anzahl rekrutieren
 //bewegung:
@@ -51,7 +53,7 @@ pub fn get_available_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
     if let Some(event) = game.events.last() {
         vec![(
             ActionType::Response,
-            responses(event, game.player(game.active_player()))
+            responses(event, game.player(game.active_player()), game)
                 .into_iter()
                 .map(Action::Response)
                 .collect(),
@@ -112,10 +114,9 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
     if !influence.is_empty() {
         let action_type = prefer_custom_action(influence);
         if let Some(i) = calculate_influence(game, p) {
-            actions.push((
-                ActionType::Playing(PlayingActionType::Collect),
-                vec![influence_action(&action_type, i)],
-            ));
+            actions.push((ActionType::Playing(PlayingActionType::Collect), vec![
+                influence_action(&action_type, i),
+            ]));
         }
     }
 
@@ -336,15 +337,9 @@ fn prefer_custom_action(actions: Vec<PlayingActionType>) -> PlayingActionType {
 
 #[allow(clippy::match_same_arms)]
 #[must_use]
-fn responses(event: &PersistentEventState, player: &Player) -> Vec<EventResponse> {
-    match event
-        .player
-        .handler
-        .as_ref()
-        .expect("handler")
-        .request
-        .clone()
-    {
+fn responses(event: &PersistentEventState, player: &Player, game: &Game) -> Vec<EventResponse> {
+    let h = event.player.handler.as_ref().expect("handler");
+    match h.request.clone() {
         PersistentEventRequest::Payment(p) => {
             vec![EventResponse::Payment(
                 p.into_iter().map(|p| payment(&p.cost, player)).collect(),
@@ -364,7 +359,10 @@ fn responses(event: &PersistentEventState, player: &Player) -> Vec<EventResponse
             .map(|c| EventResponse::SelectPlayer(*c))
             .collect(),
         PersistentEventRequest::SelectPositions(p) => {
-            vec![EventResponse::SelectPositions(select_max(&p))]
+            select_multi(&p, select_position_strategy(&h.origin, &p), |_| true)
+                .into_iter()
+                .map(EventResponse::SelectPositions)
+                .collect()
         }
         PersistentEventRequest::SelectUnitType(t) => t
             .choices
@@ -372,15 +370,26 @@ fn responses(event: &PersistentEventState, player: &Player) -> Vec<EventResponse
             .map(|c| EventResponse::SelectUnitType(*c))
             .collect(),
         PersistentEventRequest::SelectUnits(r) => {
-            vec![EventResponse::SelectUnits(select_max(&r.request))]
+            select_multi(&r.request, SelectMultiStrategy::All, |_| true)
+                .into_iter()
+                .map(EventResponse::SelectUnits)
+                .collect()
         }
         PersistentEventRequest::SelectStructures(r) => {
             // todo validate
-            vec![EventResponse::SelectStructures(select_max(&r))]
+            select_multi(&r, SelectMultiStrategy::All, |_| true)
+                .into_iter()
+                .map(EventResponse::SelectStructures)
+                .collect()
         }
         PersistentEventRequest::SelectHandCards(r) => {
             // todo call validate_card_selection
-            vec![EventResponse::SelectHandCards(select_max(&r))]
+            select_multi(&r, SelectMultiStrategy::All, |v| {
+                validate_card_selection(v, &game).is_ok()
+            })
+            .into_iter()
+            .map(EventResponse::SelectHandCards)
+            .collect()
         }
         PersistentEventRequest::BoolRequest(_) => {
             vec![EventResponse::Bool(false), EventResponse::Bool(true)]
@@ -399,8 +408,39 @@ fn responses(event: &PersistentEventState, player: &Player) -> Vec<EventResponse
     }
 }
 
-fn select_max<T: Clone>(r: &MultiRequest<T>) -> Vec<T> {
-    r.choices[0..(*r.needed.end() as usize)].to_vec()
+fn select_position_strategy(o: &EventOrigin, _r: &PositionRequest) -> SelectMultiStrategy {
+    match o {
+        EventOrigin::Builtin(n) if n == "Raze city" => SelectMultiStrategy::Min,
+        _ => SelectMultiStrategy::All,
+    }
+}
+
+#[must_use]
+#[derive(Clone, Debug, Copy)]
+enum SelectMultiStrategy {
+    Min,
+    Max,
+    All,
+}
+
+fn select_multi<T: Clone>(
+    r: &MultiRequest<T>,
+    strategy: SelectMultiStrategy,
+    validator: impl Fn(&[T]) -> bool,
+) -> Vec<Vec<T>> {
+    r.choices
+        .clone()
+        .into_iter()
+        .powerset()
+        .filter(|p| {
+            validator(p)
+                && match strategy {
+                    SelectMultiStrategy::Min => p.len() == *r.needed.start() as usize,
+                    SelectMultiStrategy::All => true,
+                    SelectMultiStrategy::Max => p.len() == *r.needed.end() as usize,
+                }
+        })
+        .collect()
 }
 
 #[must_use]
