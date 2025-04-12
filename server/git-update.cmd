@@ -1,3 +1,4 @@
+cargo fmt
 cd ..
 git add .
 git commit -m "wip"

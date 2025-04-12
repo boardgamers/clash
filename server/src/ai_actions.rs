@@ -32,6 +32,9 @@ use std::vec;
 
 //todo
 //nicht nur maximale anzahl rekrutieren
+//bewegung:
+//Siedler: nur von stadt wegbewegen wo er gebaut wurde
+//militär
 
 ///
 /// Returns a list of available actions for the current player.

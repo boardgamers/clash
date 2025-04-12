@@ -40,7 +40,7 @@ async fn main() {
         import_export: true,
         assets_url: "assets/".to_string(),
         ai_autoplay: ai,
-        ai: (ai).then(|| AI::new(1., Duration::from_secs(5))),
+        ai: ai.then(|| AI::new(1., Duration::from_secs(5), true)),
     };
 
     let game = if mode == Mode::Test {
