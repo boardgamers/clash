@@ -126,6 +126,11 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
         .action_cards
         .iter()
         .filter_map(|card| {
+            if *card == 126 || *card == 17 || *card == 18 {
+                // construct only is buggy
+                return None;
+            }
+            
             PlayingActionType::ActionCard(*card)
                 .is_available(game, p.index)
                 .is_ok()
