@@ -246,6 +246,10 @@
                   },
                   "undo": [
                     {
+                      "op": "remove",
+                      "path": "/events/0/event_type/ActionCard/selected_advance"
+                    },
+                    {
                       "op": "replace",
                       "path": "/events/0/handler/priority",
                       "value": 3
@@ -394,6 +398,11 @@
                   "undo": [
                     {
                       "op": "replace",
+                      "path": "/events/0/event_type/ActionCard/selected_advance",
+                      "value": "Cartography"
+                    },
+                    {
+                      "op": "replace",
                       "path": "/events/0/handler/priority",
                       "value": 1
                     },
@@ -436,7 +445,8 @@
                         {
                           "event_type": {
                             "ActionCard": {
-                              "id": 34
+                              "id": 34,
+                              "selected_advance": "War Ships"
                             }
                           },
                           "handler": {
