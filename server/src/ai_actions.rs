@@ -9,7 +9,10 @@ use crate::construct::{Construct, available_buildings};
 use crate::content::advances;
 use crate::content::advances::economy::tax_options;
 use crate::content::custom_actions::{CustomAction, CustomActionType};
-use crate::content::persistent_events::{EventResponse, MultiRequest, PersistentEventRequest, PersistentEventState, PositionRequest, SelectedStructure, is_selected_structures_valid, HandCardsRequest};
+use crate::content::persistent_events::{
+    EventResponse, HandCardsRequest, MultiRequest, PersistentEventRequest, PersistentEventState,
+    PositionRequest, SelectedStructure, is_selected_structures_valid,
+};
 use crate::cultural_influence::{
     available_influence_actions, available_influence_culture, influence_action,
 };
@@ -111,9 +114,10 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
     if !influence.is_empty() {
         let action_type = prefer_custom_action(influence);
         if let Some(i) = calculate_influence(game, p) {
-            actions.push((ActionType::Playing(PlayingActionType::Collect), vec![
-                influence_action(&action_type, i),
-            ]));
+            actions.push((
+                ActionType::Playing(PlayingActionType::Collect),
+                vec![influence_action(&action_type, i)],
+            ));
         }
     }
 
@@ -406,7 +410,7 @@ fn responses(event: &PersistentEventState, player: &Player, game: &Game) -> Vec<
 }
 
 fn hand_card_strategy(o: &EventOrigin, _r: &HandCardsRequest) -> SelectMultiStrategy {
-    match o { 
+    match o {
         EventOrigin::Builtin(n) if n == "Select Objective Cards to Complete" => {
             SelectMultiStrategy::Max
         }

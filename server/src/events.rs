@@ -99,7 +99,7 @@ where
             self.listeners
                 .iter()
                 .position(|(_, _, _, value)| value == key)
-                .unwrap_or_else(||panic!("Listeners should include the key {key:?} to remove")),
+                .unwrap_or_else(|| panic!("Listeners should include the key {key:?} to remove")),
         );
     }
 

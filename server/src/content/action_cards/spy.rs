@@ -1,4 +1,3 @@
-use std::fmt::Display;
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
 use crate::card::{HandCard, HandCardType, hand_cards};
@@ -11,6 +10,7 @@ use crate::playing_actions::ActionCost;
 use crate::resource_pile::ResourcePile;
 use crate::utils::remove_element;
 use itertools::Itertools;
+use std::fmt::Display;
 
 pub(crate) fn spy(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     ActionCard::builder(
@@ -175,7 +175,8 @@ fn swap_card<T: PartialEq + Ord + Display>(
 fn get_swap_card(swap: &[HandCard], p: &Player) -> Result<HandCard, String> {
     hand_cards(p, &HandCardType::get_all())
         .iter()
-        .find(|c| swap.contains(c)).ok_or("card not found".to_string())
+        .find(|c| swap.contains(c))
+        .ok_or("card not found".to_string())
         .cloned()
 }
 

@@ -4,6 +4,7 @@ use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::content::advances::get_advance;
 use crate::content::builtin;
 use crate::events::{Event, EventOrigin};
+use crate::objective_card::init_objective_card;
 use crate::payment::PaymentOptions;
 use crate::player_events::{CostInfo, TransientEvents};
 use crate::resource::ResourceType;
@@ -36,7 +37,6 @@ use std::{
     cmp::Ordering::{self, *},
     mem,
 };
-use crate::objective_card::init_objective_card;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq)]
 pub enum PlayerType {
