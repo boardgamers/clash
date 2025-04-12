@@ -180,9 +180,6 @@ fn evaluate_action(
     let mut game = game.clone();
     game.supports_undo = false;
     let game = action::execute_action(game, action.clone(), player_index);
-    let mut game = game.clone();
-    game.supports_undo = false;
-    let game = action::execute_action(game, action.clone(), player_index);
     let mut monte_carlo_score = 0.0;
     let mut iterations = 0;
     let start_time = std::time::Instant::now();
