@@ -1,13 +1,12 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
 use crate::card::HandCard;
-use crate::city_pieces::Building;
-use crate::construct::{available_buildings, can_construct};
+use crate::construct::available_buildings;
 use crate::content::builtin::Builtin;
 use crate::content::effects::ConstructEffect;
 use crate::content::effects::PermanentEffect::Construct;
 use crate::content::incidents::great_persons::{
-    GREAT_PERSON_DESCRIPTION, great_person_action_card, great_person_description,
+    great_person_action_card, great_person_description, GREAT_PERSON_DESCRIPTION,
 };
 use crate::content::persistent_events::HandCardsRequest;
 use crate::game::Game;
@@ -15,7 +14,7 @@ use crate::player::Player;
 use crate::playing_actions::{ActionCost, PlayingActionType};
 use crate::resource_pile::ResourcePile;
 use crate::utils::remove_element_by;
-use crate::wonder::{WonderCardInfo, WonderDiscount, cities_for_wonder, on_play_wonder_card};
+use crate::wonder::{cities_for_wonder, on_play_wonder_card, WonderCardInfo, WonderDiscount};
 
 pub(crate) fn great_engineer() -> ActionCard {
     let groups = &["Construction"];

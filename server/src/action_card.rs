@@ -219,6 +219,9 @@ pub struct ActionCardInfo {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub selected_position: Option<Position>,
     #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub selected_advance: Option<String>,
+    #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub selected_positions: Vec<Position>,
     #[serde(default)]
@@ -243,6 +246,7 @@ impl ActionCardInfo {
             selected_position: None,
             selected_positions: Vec::new(),
             selected_player: None,
+            selected_advance: None,
             answer: None,
             satisfying_action,
             active_player,
