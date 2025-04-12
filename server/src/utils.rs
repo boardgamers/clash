@@ -127,7 +127,7 @@ impl Rng {
         start + random_value as usize
     }
 
-    pub fn gen_bool(&mut self, probability: f32) -> bool {
+    pub fn gen_bool(&mut self, probability: f64) -> bool {
         self.seed = next_seed(self.seed);
         let random_value = self.seed % 10000;
         random_value < (probability * 10000.0) as u128
@@ -175,7 +175,7 @@ impl<T> Shuffle for Vec<T> {
 /// # Panics
 ///
 /// Panics if the probability distribution is empty or if all probabilities are zero.
-pub fn weighted_random_selection(probability_distribution: &[f32], rng: &mut Rng) -> usize {
+pub fn weighted_random_selection(probability_distribution: &[f64], rng: &mut Rng) -> usize {
     if probability_distribution.len() == 1 {
         return 0;
     }
@@ -183,8 +183,8 @@ pub fn weighted_random_selection(probability_distribution: &[f32], rng: &mut Rng
         !probability_distribution.is_empty(),
         "probability distribution is empty"
     );
-    let mut sum = probability_distribution.iter().sum::<f32>();
-    assert!(sum > f32::EPSILON, "all probabilities are zero");
+    let mut sum = probability_distribution.iter().sum::<f64>();
+    assert!(sum > f64::EPSILON, "all probabilities are zero");
     for (i, p) in probability_distribution.iter().enumerate() {
         let probability = *p / sum;
         if rng.gen_bool(probability) {

@@ -5,17 +5,19 @@ use crate::{
     ai_actions,
     game::{Game, GameState},
     playing_actions::PlayingAction,
+    position::Position,
     utils::{self, Rng},
 };
 
-const ACTION_SCORE_WEIGHTING: f32 = 1.0;
-const ADAPTIVE_DIFFICULTY_SCORE_THRESHOLD: f32 = 10.0;
+const ACTION_SCORE_WEIGHTING: f64 = 1.0;
+const ADAPTIVE_DIFFICULTY_SCORE_THRESHOLD: f64 = 10.0;
 
 pub struct AI {
     rng: Rng,
-    pub difficulty: f32,
+    pub difficulty: f64,
     pub thinking_time: Duration,
     pub adaptive_difficulty: bool,
+    active_missions: Vec<Mission>,
 }
 
 impl AI {
@@ -25,7 +27,7 @@ impl AI {
     ///
     /// Panics if the difficulty is not between 0 and 1
     #[must_use]
-    pub fn new(difficulty: f32, thinking_time: Duration, adaptive_difficulty: bool) -> Self {
+    pub fn new(difficulty: f64, thinking_time: Duration, adaptive_difficulty: bool) -> Self {
         assert!((0.0..=1.0).contains(&difficulty));
         let rng = Rng::new();
         AI {
@@ -33,6 +35,7 @@ impl AI {
             difficulty,
             thinking_time,
             adaptive_difficulty,
+            active_missions: Vec::new(),
         }
     }
 
@@ -68,7 +71,7 @@ impl AI {
 
         //todo: handle going into movement phase
 
-        let difficulty_factor = if self.difficulty >= 1.0 - f32::EPSILON {
+        let difficulty_factor = if self.difficulty >= 1.0 - f64::EPSILON {
             1.0
         } else {
             self.difficulty / (1.0 - self.difficulty)
@@ -85,9 +88,9 @@ impl AI {
                 )
                 .powf(difficulty_factor)
             })
-            .collect::<Vec<f32>>();
+            .collect::<Vec<f64>>();
 
-        let index = if self.difficulty >= 1.0 - f32::EPSILON {
+        let index = if self.difficulty >= 1.0 - f64::EPSILON {
             evaluations
                 .iter()
                 .enumerate()
@@ -98,7 +101,7 @@ impl AI {
             utils::weighted_random_selection(&evaluations, &mut self.rng)
         };
 
-        if self.difficulty > 0.0 + f32::EPSILON {
+        if self.difficulty > 0.0 + f64::EPSILON {
             let final_evaluation = evaluations
                 .into_iter()
                 .nth(index)
@@ -126,7 +129,7 @@ impl AI {
     }
 
     fn increase_difficulty(&mut self) {
-        if self.difficulty < 1.0 - f32::EPSILON {
+        if self.difficulty < 1.0 - f64::EPSILON {
             self.difficulty += 0.25;
             self.difficulty = self.difficulty.max(1.0);
             return;
@@ -152,7 +155,7 @@ fn evaluate_action(
     action_group: &ActionType,
     rng: &mut Rng,
     thinking_time: &Duration,
-) -> f32 {
+) -> f64 {
     let action_score = get_action_score(game, action);
     let action_group_score = get_action_group_score(game, action_group);
     let player_index = game.active_player();
@@ -164,11 +167,11 @@ fn evaluate_action(
     let start_time = std::time::Instant::now();
     loop {
         let new_game = monte_carlo_run(game.clone(), rng);
-        let ai_score = new_game.players[player_index].victory_points(&new_game);
+        let ai_score = new_game.players[player_index].victory_points(&new_game) as f64;
         let mut max_opponent_score = 0.0;
         for (i, player) in new_game.players.iter().enumerate() {
             if i != player_index {
-                let opponent_score = player.victory_points(&new_game);
+                let opponent_score = player.victory_points(&new_game) as f64;
                 if opponent_score > max_opponent_score {
                     max_opponent_score = opponent_score;
                 }
@@ -180,8 +183,11 @@ fn evaluate_action(
             break;
         }
     }
-    println!("Monte Carlo iterations: {iterations}");
-    (monte_carlo_score / iterations as f32) * action_score * action_group_score
+    println!(
+        "Monte Carlo iterations: {iterations}. Score: {}, {action_score}, {action_group_score}",
+        monte_carlo_score / iterations as f64
+    );
+    (monte_carlo_score / iterations as f64) * action_score * action_group_score
 }
 
 fn monte_carlo_run(mut game: Game, rng: &mut Rng) -> Game {
@@ -213,7 +219,7 @@ fn choose_monte_carlo_action(game: &Game, rng: &mut Rng) -> Action {
     let group_evaluations = action_groups
         .iter()
         .map(|(action_group, _)| get_action_group_score(game, action_group))
-        .collect::<Vec<f32>>();
+        .collect::<Vec<f64>>();
     let group_index = utils::weighted_random_selection(&group_evaluations, rng);
     let action_group = action_groups
         .into_iter()
@@ -223,7 +229,7 @@ fn choose_monte_carlo_action(game: &Game, rng: &mut Rng) -> Action {
     let action_evaluations = action_group
         .iter()
         .map(|action| get_action_score(game, action))
-        .collect::<Vec<f32>>();
+        .collect::<Vec<f64>>();
     let action_index = utils::weighted_random_selection(&action_evaluations, rng);
     action_group
         .into_iter()
@@ -231,12 +237,65 @@ fn choose_monte_carlo_action(game: &Game, rng: &mut Rng) -> Action {
         .expect("index out of bounds")
 }
 
-fn get_action_score(game: &Game, action: &Action) -> f32 {
-    1_f32.powf(ACTION_SCORE_WEIGHTING)
+fn get_action_score(game: &Game, action: &Action) -> f64 {
+    1_f64.powf(ACTION_SCORE_WEIGHTING)
 }
 
-fn get_action_group_score(game: &Game, action_group: &ActionType) -> f32 {
-    1_f32.powf(ACTION_SCORE_WEIGHTING)
+fn get_action_group_score(game: &Game, action_group: &ActionType) -> f64 {
+    1_f64.powf(ACTION_SCORE_WEIGHTING)
+}
+
+struct Mission {
+    units_under_management: Vec<usize>,
+    target: Position,
+    mission_type: MissionType,
+}
+
+impl Mission {
+    fn new(
+        units_under_management: Vec<usize>,
+        target: Position,
+        mission_type: MissionType,
+    ) -> Self {
+        Self {
+            units_under_management,
+            target,
+            mission_type,
+        }
+    }
+
+    fn priority(&self, game: &Game) -> f64 {
+        match self.mission_type {
+            MissionType::Explore => 0.5,
+            MissionType::DefendCity => 1.0,
+            MissionType::FoundCity => 1.5,
+            MissionType::CapturePlayerCity => 1.0,
+            MissionType::CaptureBarbarianCamp => 1.0,
+            MissionType::FightPlayerForces { .. } => 1.0,
+            MissionType::FightBarbarians { .. } => 1.0,
+            MissionType::FightPirates { .. } => 1.0,
+            MissionType::Transport => 1.0,
+        }
+    }
+}
+
+enum MissionType {
+    Explore,
+    DefendCity,
+    FoundCity,
+    CapturePlayerCity,
+    CaptureBarbarianCamp,
+    FightPlayerForces {
+        player_index: usize,
+        units: Vec<usize>,
+    },
+    FightBarbarians {
+        units: Vec<usize>,
+    },
+    FightPirates {
+        units: Vec<usize>,
+    },
+    Transport,
 }
 
 /// Returns the win probability of each player in the game in the order listed in the game.
@@ -245,7 +304,7 @@ fn get_action_group_score(game: &Game, action_group: &ActionType) -> f32 {
 ///
 /// Panics if the game is in an invalid state.
 #[must_use]
-pub fn evaluate_position(game: &Game, evaluation_time: Duration) -> Vec<f32> {
+pub fn evaluate_position(game: &Game, evaluation_time: Duration) -> Vec<f64> {
     let mut rng = Rng::new();
     let mut game = game.clone();
     game.supports_undo = false;
@@ -257,12 +316,12 @@ pub fn evaluate_position(game: &Game, evaluation_time: Duration) -> Vec<f32> {
         let max_score = new_game
             .players
             .iter()
-            .map(|player| player.victory_points(&new_game))
+            .map(|player| player.victory_points(&new_game) as f64)
             .max_by(|a, b| a.partial_cmp(b).expect("floating point error"))
             .expect("there are no players");
         for (i, player) in new_game.players.iter().enumerate() {
-            let score = player.victory_points(&new_game);
-            if (score - max_score).abs() < f32::EPSILON {
+            let score = player.victory_points(&new_game) as f64;
+            if (score - max_score).abs() < f64::EPSILON {
                 wins[i] += 1;
             }
         }
@@ -270,7 +329,7 @@ pub fn evaluate_position(game: &Game, evaluation_time: Duration) -> Vec<f32> {
         if start_time.elapsed() >= evaluation_time {
             return wins
                 .iter()
-                .map(|win| *win as f32 / iterations as f32)
+                .map(|win| *win as f64 / iterations as f64)
                 .collect();
         }
     }
@@ -282,7 +341,7 @@ pub fn evaluate_position(game: &Game, evaluation_time: Duration) -> Vec<f32> {
 ///
 /// Panics if the game is in an invalid state.
 #[must_use]
-pub fn rate_action(game: &Game, action: &Action, evaluation_time: Duration) -> f32 {
+pub fn rate_action(game: &Game, action: &Action, evaluation_time: Duration) -> f64 {
     let all_actions = ai_actions::get_available_actions(game);
     let all_actions = all_actions
         .into_iter()
@@ -313,7 +372,7 @@ pub fn rate_action(game: &Game, action: &Action, evaluation_time: Duration) -> f
                 &thinking_time_per_action,
             )
         })
-        .collect::<Vec<f32>>();
+        .collect::<Vec<f64>>();
     let max_evaluation = evaluations
         .iter()
         .max_by(|a, b| a.partial_cmp(b).expect("floating point error"))
