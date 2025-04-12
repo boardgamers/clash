@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
 use crate::card::{HandCard, HandCardType, hand_cards};
@@ -111,8 +112,8 @@ fn swap_cards(
 
     let p = game.player(player);
     let o = game.player(other);
-    let our_card = get_swap_card(swap, p);
-    let other_card = get_swap_card(swap, o);
+    let our_card = get_swap_card(swap, p)?;
+    let other_card = get_swap_card(swap, o)?;
 
     let t = match our_card {
         HandCard::ActionCard(id) => {
@@ -150,7 +151,7 @@ fn swap_cards(
     Ok(())
 }
 
-fn swap_card<T: PartialEq + Ord>(
+fn swap_card<T: PartialEq + Ord + Display>(
     game: &mut Game,
     player: usize,
     other: usize,
@@ -158,9 +159,11 @@ fn swap_card<T: PartialEq + Ord>(
     other_id: &T,
     get_list: impl Fn(&mut Player) -> &mut Vec<T>,
 ) {
-    let card = remove_element(get_list(game.player_mut(player)), id).expect("card not found");
+    let card = remove_element(get_list(game.player_mut(player)), id)
+        .unwrap_or_else(|| panic!("card not found {id}"));
     let o = game.player_mut(other);
-    let other_card = remove_element(get_list(o), other_id).expect("card not found");
+    let other_card = remove_element(get_list(o), other_id)
+        .unwrap_or_else(|| panic!("other card not found {other_id}"));
 
     get_list(o).push(card);
     get_list(o).sort();
@@ -169,12 +172,11 @@ fn swap_card<T: PartialEq + Ord>(
     get_list(p).sort();
 }
 
-fn get_swap_card(swap: &[HandCard], p: &Player) -> HandCard {
+fn get_swap_card(swap: &[HandCard], p: &Player) -> Result<HandCard, String> {
     hand_cards(p, &HandCardType::get_all())
-        .into_iter()
-        .find(|c| swap.contains(c))
-        .expect("card not found")
-        .clone()
+        .iter()
+        .find(|c| swap.contains(c)).ok_or("card not found".to_string())
+        .cloned()
 }
 
 fn has_any_card(p: &Player) -> bool {

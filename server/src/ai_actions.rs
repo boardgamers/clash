@@ -11,7 +11,7 @@ use crate::content::advances::economy::tax_options;
 use crate::content::custom_actions::{CustomAction, CustomActionType};
 use crate::content::persistent_events::{
     EventResponse, MultiRequest, PersistentEventRequest, PersistentEventState, PositionRequest,
-    SelectedStructure,
+    SelectedStructure, is_selected_structures_valid,
 };
 use crate::cultural_influence::{
     available_influence_actions, available_influence_culture, influence_action,
@@ -376,16 +376,16 @@ fn responses(event: &PersistentEventState, player: &Player, game: &Game) -> Vec<
                 .collect()
         }
         PersistentEventRequest::SelectStructures(r) => {
-            // todo validate
-            select_multi(&r, SelectMultiStrategy::All, |_| true)
-                .into_iter()
-                .map(EventResponse::SelectStructures)
-                .collect()
+            select_multi(&r, SelectMultiStrategy::All, |s| {
+                is_selected_structures_valid(game, s)
+            })
+            .into_iter()
+            .map(EventResponse::SelectStructures)
+            .collect()
         }
         PersistentEventRequest::SelectHandCards(r) => {
-            // todo call validate_card_selection
             select_multi(&r, SelectMultiStrategy::All, |v| {
-                validate_card_selection(v, &game).is_ok()
+                validate_card_selection(v, game).is_ok()
             })
             .into_iter()
             .map(EventResponse::SelectHandCards)
@@ -428,19 +428,29 @@ fn select_multi<T: Clone>(
     strategy: SelectMultiStrategy,
     validator: impl Fn(&[T]) -> bool,
 ) -> Vec<Vec<T>> {
-    r.choices
+    let mut filter = r
+        .choices
         .clone()
         .into_iter()
         .powerset()
-        .filter(|p| {
-            validator(p)
-                && match strategy {
-                    SelectMultiStrategy::Min => p.len() == *r.needed.start() as usize,
-                    SelectMultiStrategy::All => true,
-                    SelectMultiStrategy::Max => p.len() == *r.needed.end() as usize,
-                }
-        })
-        .collect()
+        .filter(|p| validator(p) && r.needed.contains(&(p.len() as u8)));
+
+    match strategy {
+        SelectMultiStrategy::Min => filter.next().map_or(Vec::new(), |v| vec![v]),
+        SelectMultiStrategy::All => filter.collect(),
+        SelectMultiStrategy::Max => filter.last().map_or(Vec::new(), |v| vec![v]),
+    }
+
+    // filter
+    //     })
+    //     .filter(|p| {
+    //         match strategy {
+    //             SelectMultiStrategy::Min => p.len() == *r.needed.start() as usize,
+    //             SelectMultiStrategy::All => r.needed.contains(&(p.len() as u8)),
+    //             SelectMultiStrategy::Max => p.len() == *r.needed.end() as usize,
+    //         }
+    //     })
+    //     .collect()
 }
 
 #[must_use]

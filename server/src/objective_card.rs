@@ -378,9 +378,32 @@ pub(crate) fn gain_objective_card(
     player_index: usize,
     objective_card: &ObjectiveCard,
 ) {
+    let mut o = game
+        .player(player_index)
+        .objective_cards
+        .iter()
+        .flat_map(|&id| get_objective_card(id).objectives.map(|o| o.name.clone()))
+        .collect_vec();
+    init_objective_card(game, player_index, &mut o, objective_card.id);
     game.players[player_index]
         .objective_cards
         .push(objective_card.id);
+}
+
+pub(crate) fn init_objective_card(
+    game: &mut Game,
+    player_index: usize,
+    objectives: &mut Vec<String>,
+    id: u8,
+) {
+    for o in get_objective_card(id).objectives {
+        if objectives.contains(&o.name) {
+            // can't fulfill 2 objectives with the same name, so we can skip it here
+            continue;
+        }
+        objectives.push(o.name.clone());
+        o.listeners.init(game, player_index);
+    }
 }
 
 pub(crate) fn discard_objective_card(game: &mut Game, player: usize, card: u8) {
@@ -429,15 +452,12 @@ mod tests {
 
         let mut got = combinations(&cards, &opportunities);
         got.sort();
-        assert_eq!(
-            got,
+        assert_eq!(got, vec![
             vec![
-                vec![
-                    (0, "Objective 1".to_string()),
-                    (1, "Objective 4".to_string()),
-                ],
-                vec![(1, "Objective 1".to_string()),],
-            ]
-        );
+                (0, "Objective 1".to_string()),
+                (1, "Objective 4".to_string()),
+            ],
+            vec![(1, "Objective 1".to_string()),],
+        ]);
     }
 }
