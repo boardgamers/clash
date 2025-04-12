@@ -130,7 +130,7 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
                 // construct only is buggy
                 return None;
             }
-            
+
             PlayingActionType::ActionCard(*card)
                 .is_available(game, p.index)
                 .is_ok()
@@ -304,7 +304,10 @@ fn recruit_actions(player: &Player, city: &City) -> Vec<Action> {
         .collect()
 }
 
-fn calculate_increase_happiness(player: &Player, action_type: &PlayingActionType) -> Option<IncreaseHappiness> {
+fn calculate_increase_happiness(
+    player: &Player,
+    action_type: &PlayingActionType,
+) -> Option<IncreaseHappiness> {
     // try to make the biggest cities happy - that's usually the best choice
     let mut cities = vec![];
     let mut cost = PaymentOptions::resources(action_type.cost().cost);
@@ -420,9 +423,11 @@ fn hand_card_strategy(o: &EventOrigin, r: &HandCardsRequest) -> SelectMultiStrat
         EventOrigin::Builtin(n) if n == "Select Objective Cards to Complete" => {
             SelectMultiStrategy::Max
         }
-        EventOrigin::CivilCard(_) if r.description == "Select a Wonder, Action, or Objective card to swap" => {
+        EventOrigin::CivilCard(_)
+            if r.description == "Select a Wonder, Action, or Objective card to swap" =>
+        {
             SelectMultiStrategy::Min // powerset takes too long
-        } 
+        }
         _ => SelectMultiStrategy::All,
     }
 }
