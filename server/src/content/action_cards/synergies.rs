@@ -115,13 +115,7 @@ fn pay_for_advance(b: ActionCardBuilder, priority: i32) -> ActionCardBuilder {
                 "{} paid {} for advance {advance}",
                 s.player_name, s.choice[0]
             ));
-            gain_advance_without_payment(
-                game,
-                advance,
-                s.player_index,
-                s.choice[0].clone(),
-                false,
-            );
+            gain_advance_without_payment(game, advance, s.player_index, s.choice[0].clone(), false);
         },
     )
 }
@@ -373,12 +367,13 @@ fn new_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             let player = game.player(player_index);
             Some(AdvanceRequest::new(advances_that_can_be_gained(player)))
         },
-        |game, sel, _| {
+        |game, sel, i| {
             let advance = &sel.choice;
             game.add_info_log_item(&format!(
                 "{} selected {advance} as advance for New Ideas.",
                 sel.player_name,
             ));
+            i.selected_advance = Some(advance.clone());
         },
     );
     pay_for_advance(b, 1)
