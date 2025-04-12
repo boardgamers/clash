@@ -296,6 +296,7 @@ impl Mission {
             MissionType::FightBarbarians { .. } => 1.0,
             MissionType::FightPirates { .. } => 1.0,
             MissionType::Transport => 1.0,
+            MissionType::Cartography => 0.5,
         }
     }
 }
@@ -317,6 +318,7 @@ enum MissionType {
         units: Vec<usize>,
     },
     Transport,
+    Cartography,
 }
 
 /// Returns the win probability of each player in the game in the order listed in the game.
