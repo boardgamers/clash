@@ -126,7 +126,11 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
         .iter()
         .filter_map(|card| {
             if *card == 126 || *card == 17 || *card == 18 {
-                // construct only is buggy
+                // todo construct only is buggy
+                return None;
+            }
+            if *card == 19 || *card == 20 || *card == 29 || *card == 30 {
+                // todo collect only is buggy
                 return None;
             }
 

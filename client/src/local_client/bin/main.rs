@@ -108,7 +108,7 @@ fn ai_autoplay(game: Game, f: &mut Features, state: &mut State) -> Game {
     if let Some(ai) = &mut f.ai {
         if state.ai_autoplay {
             // todo does this block the ui?
-            state.ai_autoplay = false;
+            // state.ai_autoplay = false;
             let action = ai.next_action(&game);
             let player_index = game.active_player();
             return execute_action(game, action, player_index);
