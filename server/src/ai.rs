@@ -177,7 +177,8 @@ fn evaluate_action(
     let action_score = get_action_score(game, action);
     let action_group_score = get_action_group_score(game, action_group);
     let player_index = game.active_player();
-    let game = game.clone();
+    let mut game = game.clone();
+    game.supports_undo = false;
     let game = action::execute_action(game, action.clone(), player_index);
     let mut monte_carlo_score = 0.0;
     let mut iterations = 0;
