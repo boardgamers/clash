@@ -1,3 +1,3 @@
 cd ..\client
-cargo run -- ai
+cargo run --release -- ai
 cd ..\server

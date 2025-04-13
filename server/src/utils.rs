@@ -120,7 +120,7 @@ impl Rng {
         Self { seed }
     }
 
-    pub(crate) fn range(&mut self, start: usize, end: usize) -> usize {
+    pub fn range(&mut self, start: usize, end: usize) -> usize {
         self.seed = next_seed(self.seed);
         let range = (end - start) as u128;
         let random_value = self.seed % range;
@@ -147,13 +147,15 @@ fn next_seed(seed: u128) -> u128 {
         .wrapping_add(INCREMENT)
 }
 
-pub(crate) trait Shuffle {
+pub trait Shuffle<T> {
     #[must_use]
     fn shuffled(self, rng: &mut Rng) -> Self;
     fn shuffle(&mut self, rng: &mut Rng);
+    fn random_element(&self, rng: &mut Rng) -> Option<&T>;
+    fn take_random_element(self, rng: &mut Rng) -> Option<T>;
 }
 
-impl<T> Shuffle for Vec<T> {
+impl<T> Shuffle<T> for Vec<T> {
     fn shuffled(mut self, rng: &mut Rng) -> Self {
         self.shuffle(rng);
         self
@@ -167,6 +169,22 @@ impl<T> Shuffle for Vec<T> {
             new.push(self.remove(index));
         }
         *self = new;
+    }
+
+    fn random_element(&self, rng: &mut Rng) -> Option<&T> {
+        if self.is_empty() {
+            return None;
+        }
+        let index = rng.range(0, self.len());
+        Some(&self[index])
+    }
+
+    fn take_random_element(self, rng: &mut Rng) -> Option<T> {
+        if self.is_empty() {
+            return None;
+        }
+        let index = rng.range(0, self.len());
+        self.into_iter().nth(index)
     }
 }
 

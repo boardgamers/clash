@@ -5,8 +5,6 @@ use client::client_state::State;
 use macroquad::miniquad::window::set_window_size;
 use macroquad::prelude::{next_frame, screen_width, vec2};
 use macroquad::window::screen_height;
-use pyroscope::PyroscopeAgent;
-use pyroscope_pprofrs::{PprofConfig, pprof_backend};
 use server::action::execute_action;
 use server::advance::do_advance;
 use server::ai::AI;
@@ -38,17 +36,6 @@ async fn main() {
 
     let args: Vec<String> = env::args().collect();
     let modes = get_modes(&args);
-
-    if modes.contains(&Mode::Profile) {
-        let pprof_config = PprofConfig::new().sample_rate(100);
-        let backend_impl = pprof_backend(pprof_config);
-
-        let agent = PyroscopeAgent::builder("http://localhost:4040", "clash")
-            .backend(backend_impl)
-            .build()
-            .expect("Failed to initialize pyroscope");
-        let _ = agent.start().unwrap();
-    }
 
     let mut features = Features {
         import_export: true,
