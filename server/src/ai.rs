@@ -295,6 +295,16 @@ impl Mission {
             MissionType::Transport => 1.0,
         }
     }
+
+    fn update(&mut self, game: &Game) {}
+
+    fn is_complete(&self, game: &Game) -> bool {
+        false
+    }
+
+    fn next_movement(&self, game: &Game) -> Position {
+        todo!()
+    }
 }
 
 enum MissionType {

@@ -1,3 +1,3 @@
 cd ..\client
-cargo run -- ai bb
+cargo run -- ai
 cd ..\server
