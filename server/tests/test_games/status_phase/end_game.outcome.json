@@ -1,5 +1,5 @@
 {
-  "state": "Playing",
+  "state": "Finished",
   "players": [
     {
       "id": 0,
@@ -299,7 +299,7 @@
   ],
   "undo_limit": 1,
   "actions_left": 0,
-  "round": 1,
+  "round": 7,
   "age": 6,
   "messages": [
     "The game has started",
