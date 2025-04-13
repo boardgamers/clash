@@ -565,7 +565,6 @@ impl Game {
         self.round += 1;
         self.skip_dropped_players();
         if self.round > 3 {
-            self.round = 1;
             enter_status_phase(self);
             return;
         }
@@ -598,6 +597,7 @@ impl Game {
         let winner_name = self.player_name(winner_player_index);
         self.add_info_log_group(format!("The game has ended. {winner_name} has won"));
         self.add_message("The game has ended");
+        self.state = GameState::Finished;
     }
 
     pub(crate) fn next_dice_roll(&mut self) -> CombatDieRoll {
