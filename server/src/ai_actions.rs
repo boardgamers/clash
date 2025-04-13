@@ -98,9 +98,9 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
 
     // IncreaseHappiness
     let happiness = available_happiness_actions(game, p.index);
-    if !happiness.is_empty() {
-        let action_type = prefer_custom_action(happiness);
-
+    // if !happiness.is_empty() {
+    // let action_type = prefer_custom_action(happiness); // todo custom action is buggy
+    if let Some(action_type) = base_and_custom_action(happiness).0 {
         if let Some(h) = calculate_increase_happiness(p, &action_type) {
             actions.push((
                 ActionType::Playing(PlayingActionType::IncreaseHappiness),
@@ -127,7 +127,11 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
         .iter()
         .filter_map(|card| {
             if *card == 126 || *card == 17 || *card == 18 {
-                // construct only is buggy
+                // todo construct only is buggy
+                return None;
+            }
+            if *card == 19 || *card == 20 || *card == 29 || *card == 30 {
+                // todo collect only is buggy
                 return None;
             }
 

@@ -324,8 +324,6 @@ enum MissionType {
 #[must_use]
 pub fn evaluate_position(game: &Game, evaluation_time: Duration) -> Vec<f64> {
     let mut rng = Rng::new();
-    let mut game = game.clone();
-    game.supports_undo = false;
     let start_time = std::time::Instant::now();
     let mut wins = vec![0; game.players.len()];
     let mut iterations = 0;

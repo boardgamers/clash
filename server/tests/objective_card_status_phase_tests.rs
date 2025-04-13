@@ -50,6 +50,7 @@ fn test_large_civ() {
 
 #[test]
 fn test_colony() {
+    // Game ends after this step
     JSON.test(
         "colony",
         vec![
