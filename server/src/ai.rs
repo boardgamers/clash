@@ -177,13 +177,13 @@ fn evaluate_action(
     let action_score = get_action_score(game, action);
     let action_group_score = get_action_group_score(game, action_group);
     let player_index = game.active_player();
-    let game = clone_game(game);
+    let game = game.clone();
     let game = action::execute_action(game, action.clone(), player_index);
     let mut monte_carlo_score = 0.0;
     let mut iterations = 0;
     let start_time = std::time::Instant::now();
     loop {
-        let new_game = monte_carlo_run(clone_game(&game), rng);
+        let new_game = monte_carlo_run(game.clone(), rng);
         let ai_score = new_game.players[player_index].victory_points(&new_game) as f64;
         let mut max_opponent_score = 0.0;
         for (i, player) in new_game.players.iter().enumerate() {
@@ -205,12 +205,6 @@ fn evaluate_action(
         monte_carlo_score / iterations as f64
     );
     (monte_carlo_score / iterations as f64) * action_score * action_group_score
-}
-
-fn clone_game(game: &Game) -> Game {
-    let mut game = game.clone();
-    game.supports_undo = false;
-    game
 }
 
 fn monte_carlo_run(mut game: Game, rng: &mut Rng) -> Game {
@@ -333,7 +327,7 @@ pub fn evaluate_position(game: &Game, evaluation_time: Duration) -> Vec<f64> {
     let mut wins = vec![0; game.players.len()];
     let mut iterations = 0;
     loop {
-        let new_game = monte_carlo_run(clone_game(game), &mut rng);
+        let new_game = monte_carlo_run(game.clone(), &mut rng);
         let max_score = new_game
             .players
             .iter()

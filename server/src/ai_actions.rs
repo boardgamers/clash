@@ -114,9 +114,10 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
     if !influence.is_empty() {
         let action_type = prefer_custom_action(influence);
         if let Some(i) = calculate_influence(game, p) {
-            actions.push((ActionType::Playing(PlayingActionType::Collect), vec![
-                influence_action(&action_type, i),
-            ]));
+            actions.push((
+                ActionType::Playing(PlayingActionType::Collect),
+                vec![influence_action(&action_type, i)],
+            ));
         }
     }
 

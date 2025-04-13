@@ -1,9 +1,12 @@
 #![allow(clippy::missing_panics_doc)]
 
 use client::client::{Features, GameSyncRequest, GameSyncResult, init, render_and_update};
+use client::client_state::State;
 use macroquad::miniquad::window::set_window_size;
 use macroquad::prelude::{next_frame, screen_width, vec2};
 use macroquad::window::screen_height;
+use pyroscope::PyroscopeAgent;
+use pyroscope_pprofrs::{PprofConfig, pprof_backend};
 use server::action::execute_action;
 use server::advance::do_advance;
 use server::ai::AI;
@@ -16,16 +19,16 @@ use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::unit::UnitType;
 use server::utils::remove_element;
-use std::env;
 use std::fs::File;
 use std::io::BufReader;
 use std::time::Duration;
-use client::client_state::State;
+use std::{env, vec};
 
 #[derive(PartialEq)]
 enum Mode {
     Local,
     AI,
+    Profile,
     Test,
 }
 
@@ -34,15 +37,28 @@ async fn main() {
     set_window_size(1200, 600);
 
     let args: Vec<String> = env::args().collect();
-    let mode = get_mode(&args);
+    let modes = get_modes(&args);
+
+    if modes.contains(&Mode::Profile) {
+        let pprof_config = PprofConfig::new().sample_rate(100);
+        let backend_impl = pprof_backend(pprof_config);
+
+        let agent = PyroscopeAgent::builder("http://localhost:4040", "clash")
+            .backend(backend_impl)
+            .build()
+            .expect("Failed to initialize pyroscope");
+        let _ = agent.start().unwrap();
+    }
 
     let mut features = Features {
         import_export: true,
         assets_url: "assets/".to_string(),
-        ai: (mode == Mode::AI).then(|| AI::new(1., Duration::from_secs(5), false)),
+        ai: modes
+            .contains(&Mode::AI)
+            .then(|| AI::new(1., Duration::from_secs(5), false)),
     };
 
-    let game = if mode == Mode::Test {
+    let game = if modes.contains(&Mode::Test) {
         setup_local_game()
     } else {
         let seed = if args.len() > 2 {
@@ -56,13 +72,17 @@ async fn main() {
     run(game, &mut features).await;
 }
 
-fn get_mode(args: &[String]) -> Mode {
-    if args.len() > 1 && args[1] == "ai" {
-        Mode::AI
-    } else if args.len() > 1 && args[1] == "generate" {
-        Mode::Local
-    } else {
-        Mode::Test
+fn get_modes(args: &[String]) -> Vec<Mode> {
+    match args.get(1) {
+        Some(arg) => match arg.as_str() {
+            "generate" => vec![Mode::Local],
+            "ai" => vec![Mode::AI],
+            "profile" => vec![Mode::AI, Mode::Profile],
+            _ => {
+                panic!("Unknown argument: {}", arg);
+            }
+        },
+        _ => vec![Mode::Test],
     }
 }
 
