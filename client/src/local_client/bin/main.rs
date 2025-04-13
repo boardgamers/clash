@@ -20,6 +20,7 @@ use std::env;
 use std::fs::File;
 use std::io::BufReader;
 use std::time::Duration;
+use client::client_state::State;
 
 #[derive(PartialEq)]
 enum Mode {
@@ -35,12 +36,10 @@ async fn main() {
     let args: Vec<String> = env::args().collect();
     let mode = get_mode(&args);
 
-    let ai = mode == Mode::AI;
     let mut features = Features {
         import_export: true,
         assets_url: "assets/".to_string(),
-        ai_autoplay: ai,
-        ai: ai.then(|| AI::new(1., Duration::from_secs(5), false)),
+        ai: (mode == Mode::AI).then(|| AI::new(1., Duration::from_secs(5), false)),
     };
 
     let game = if mode == Mode::Test {
@@ -81,14 +80,14 @@ async fn run(mut game: Game, features: &mut Features) {
         match message {
             GameSyncRequest::None => {}
             GameSyncRequest::StartAutoplay => {
-                game = ai_autoplay(game, features);
+                game = ai_autoplay(game, features, &mut state);
                 state.show_player = game.active_player();
                 sync_result = GameSyncResult::Update;
             }
             GameSyncRequest::ExecuteAction(a) => {
                 let p = game.active_player();
                 game = execute_action(game, a, p);
-                game = ai_autoplay(game, features);
+                game = ai_autoplay(game, features, &mut state);
                 state.show_player = game.active_player();
                 sync_result = GameSyncResult::Update;
             }
@@ -105,11 +104,11 @@ async fn run(mut game: Game, features: &mut Features) {
     }
 }
 
-fn ai_autoplay(game: Game, f: &mut Features) -> Game {
+fn ai_autoplay(game: Game, f: &mut Features, state: &mut State) -> Game {
     if let Some(ai) = &mut f.ai {
-        if f.ai_autoplay {
+        if state.ai_autoplay {
             // todo does this block the ui?
-            f.ai_autoplay = false;
+            state.ai_autoplay = false;
             let action = ai.next_action(&game);
             let player_index = game.active_player();
             return execute_action(game, action, player_index);

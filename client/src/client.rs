@@ -239,7 +239,6 @@ fn controlling_player_click(rc: &RenderContext, mouse_pos: Vec2, pos: Position) 
 pub struct Features {
     pub import_export: bool,
     pub assets_url: String,
-    pub ai_autoplay: bool,
     pub ai: Option<AI>,
 }
 
