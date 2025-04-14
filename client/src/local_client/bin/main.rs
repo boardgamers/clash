@@ -26,12 +26,13 @@ use std::{env, vec};
 enum Mode {
     Local,
     AI,
-    Profile,
     Test,
 }
 
 #[macroquad::main("Clash")]
 async fn main() {
+    start_profiling();
+
     set_window_size(1200, 600);
 
     let args: Vec<String> = env::args().collect();
@@ -59,12 +60,31 @@ async fn main() {
     run(game, &mut features).await;
 }
 
+#[cfg(not(feature = "profiling"))]
+fn start_profiling() {
+    // do nothing
+}
+
+#[cfg(feature = "profiling")]
+fn start_profiling() {
+    use pyroscope::PyroscopeAgent;
+    use pyroscope_pprofrs::{PprofConfig, pprof_backend};
+
+    let pprof_config = PprofConfig::new().sample_rate(100);
+    let backend_impl = pprof_backend(pprof_config);
+
+    let agent = PyroscopeAgent::builder("http://localhost:4040", "clash")
+        .backend(backend_impl)
+        .build()
+        .expect("Failed to initialize pyroscope");
+    let _ = agent.start().unwrap();
+}
+
 fn get_modes(args: &[String]) -> Vec<Mode> {
     match args.get(1) {
         Some(arg) => match arg.as_str() {
             "generate" => vec![Mode::Local],
-            "ai" => vec![Mode::AI],
-            "profile" => vec![Mode::AI, Mode::Profile],
+            "ai" => vec![Mode::AI, Mode::Local],
             _ => {
                 panic!("Unknown argument: {}", arg);
             }
