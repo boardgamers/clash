@@ -404,6 +404,10 @@
                   },
                   "undo": [
                     {
+                      "op": "remove",
+                      "path": "/events/0/event_type/ActionCard/selected_position"
+                    },
+                    {
                       "op": "add",
                       "path": "/events/0/handler",
                       "value": {
@@ -504,7 +508,8 @@
                         {
                           "event_type": {
                             "ActionCard": {
-                              "id": 21
+                              "id": 21,
+                              "selected_position": "B6"
                             }
                           },
                           "handler": {

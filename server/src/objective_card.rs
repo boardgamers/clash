@@ -329,13 +329,13 @@ fn combinations(cards: &[ObjectiveCard], opportunities: &[String]) -> Vec<Vec<(u
         .collect_vec();
     let rest_combinations = combinations(rest, opportunities);
     if rest_combinations.is_empty() {
-        return vec![first];
+        return filter_duplicated_objectives(vec![first]);
     }
 
-    rest_combinations
+    let result = rest_combinations
         .iter()
         .flat_map(|rest_objectives| {
-            let vec1 = first
+            first
                 .iter()
                 .map(|first_objective| {
                     let name = &first_objective.1;
@@ -345,8 +345,35 @@ fn combinations(cards: &[ObjectiveCard], opportunities: &[String]) -> Vec<Vec<(u
                     }
                     r
                 })
-                .collect_vec();
-            vec1
+                .collect_vec()
+        })
+        .collect_vec();
+    filter_duplicated_objectives(result)
+}
+
+fn filter_duplicated_objectives(o: Vec<Vec<(u8, String)>>) -> Vec<Vec<(u8, String)>> {
+    o.into_iter()
+        .map(|mut v| {
+            for (id, group) in &v.clone().iter().chunk_by(|(id, _name)| *id) {
+                if group.into_iter().count() == 1 {
+                    continue;
+                }
+                let card = get_objective_card(id);
+                let remove = card
+                    .objectives
+                    .iter()
+                    .find_map(
+                        |o| o.status_phase_update.is_some().then_some(o.name.clone()), // update means we have to pay
+                    )
+                    .unwrap_or(card.objectives[0].name.clone());
+
+                remove_element_by(&mut v, |(id2, name)| id == *id2 && name == &remove)
+                    .unwrap_or_else(|| {
+                        panic!("should be able to remove objective card {id} with name {remove}")
+                    });
+            }
+
+            v
         })
         .collect_vec()
 }
@@ -410,7 +437,7 @@ pub(crate) fn discard_objective_card(game: &mut Game, player: usize, card: u8) {
     let card = remove_element_by(&mut game.player_mut(player).objective_cards, |&id| {
         id == card
     })
-    .expect("should be able to discard objective card");
+    .unwrap_or_else(|| panic!("should be able to discard objective card {card}"));
     for o in get_objective_card(card).objectives {
         if game.player(player).objective_cards.iter().any(|c| {
             get_objective_card(*c)
@@ -430,36 +457,37 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_combinations() {
-        let o1 = ObjectiveCard::new(
-            0,
-            Objective::builder("Objective 1", "Description 1").build(),
-            Objective::builder("Objective 2", "Description 2").build(),
-        );
-        let o2 = ObjectiveCard::new(
-            1,
-            Objective::builder("Objective 1", "Description 3").build(),
-            Objective::builder("Objective 4", "Description 4").build(),
-        );
-        let o3 = ObjectiveCard::new(
-            2,
-            Objective::builder("Objective 5", "Description 5").build(),
-            Objective::builder("Objective 6", "Description 6").build(),
-        );
-        let cards = vec![o1, o2, o3];
+    fn test_combinations_single_card() {
+        // avoid ore supplies - because that costs ore to complete
+        let o1 = get_objective_card(12);
+        let cards = vec![o1];
 
-        let opportunities = vec!["Objective 1".to_string(), "Objective 4".to_string()];
+        let opportunities = vec!["Ore Supplies".to_string(), "Large Army".to_string()];
+
+        let mut got = combinations(&cards, &opportunities);
+        got.sort();
+        assert_eq!(got, vec![vec![(12, "Large Army".to_string())]]);
+    }
+
+    #[test]
+    fn test_combinations() {
+        // ObjectiveCard::new(23, seafarers(), aggressor()),
+        // ObjectiveCard::new(25, government(), aggressor()),
+
+        let o1 = get_objective_card(23);
+        let o2 = get_objective_card(25);
+
+        let cards = vec![o1, o2];
+
+        let opportunities = vec!["Seafarers".to_string(), "Aggressor".to_string()];
 
         let mut got = combinations(&cards, &opportunities);
         got.sort();
         assert_eq!(
             got,
             vec![
-                vec![
-                    (0, "Objective 1".to_string()),
-                    (1, "Objective 4".to_string()),
-                ],
-                vec![(1, "Objective 1".to_string()),],
+                vec![(23, "Seafarers".to_string()), (25, "Aggressor".to_string()),],
+                vec![(25, "Aggressor".to_string())],
             ]
         );
     }

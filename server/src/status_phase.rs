@@ -33,7 +33,8 @@ pub struct ChangeGovernment {
 }
 
 impl ChangeGovernment {
-    #[must_use] pub fn new(government: String, additional_advances: Vec<String>) -> Self {
+    #[must_use]
+    pub fn new(government: String, additional_advances: Vec<String>) -> Self {
         Self {
             new_government: government,
             additional_advances,
