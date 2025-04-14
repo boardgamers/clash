@@ -122,29 +122,7 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
     }
 
     // ActionCard,
-    let action_cards = p
-        .action_cards
-        .iter()
-        .filter_map(|card| {
-            if *card == 126 || *card == 17 || *card == 18 {
-                // todo construct only is buggy
-                return None;
-            }
-            if *card == 19 || *card == 20 || *card == 29 || *card == 30 {
-                // todo collect only is buggy
-                return None;
-            }
-            if *card == 15 || *card == 16 {
-                // todo influence only is buggy
-                return None;
-            }
-
-            PlayingActionType::ActionCard(*card)
-                .is_available(game, p.index)
-                .is_ok()
-                .then_some(Action::Playing(PlayingAction::ActionCard(*card)))
-        })
-        .collect_vec();
+    let action_cards = available_action_cards(game, p);
 
     if !action_cards.is_empty() {
         actions.push((
@@ -193,6 +171,37 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
     }
 
     actions
+}
+
+fn available_action_cards(game: &Game, p: &Player) -> Vec<Action> {
+    let action_cards = p
+        .action_cards
+        .iter()
+        .filter_map(|card| {
+            if *card == 126 || *card == 17 || *card == 18 {
+                // todo construct only is buggy
+                return None;
+            }
+            if *card == 124 {
+                // todo great warlord needs movement to work
+                return None;
+            }
+            if *card == 19 || *card == 20 || *card == 29 || *card == 30 {
+                // todo collect only is buggy
+                return None;
+            }
+            if *card == 15 || *card == 16 {
+                // todo influence only is buggy
+                return None;
+            }
+
+            PlayingActionType::ActionCard(*card)
+                .is_available(game, p.index)
+                .is_ok()
+                .then_some(Action::Playing(PlayingAction::ActionCard(*card)))
+        })
+        .collect_vec();
+    action_cards
 }
 
 fn payment(o: &PaymentOptions, p: &Player) -> ResourcePile {
