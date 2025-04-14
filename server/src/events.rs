@@ -55,6 +55,7 @@ use serde::{Deserialize, Serialize};
 type Listener<T, U, V, W> = (Box<dyn Fn(&mut T, &U, &V, &mut W)>, i32, usize, EventOrigin);
 
 pub struct EventMut<T, U = (), V = (), W = ()> {
+    name: String, // for debugging
     listeners: Vec<Listener<T, U, V, W>>,
     next_id: usize,
 }
@@ -64,8 +65,9 @@ where
     T: Clone + PartialEq,
     W: Clone + PartialEq,
 {
-    fn new() -> Self {
+    fn new(name: &str) -> Self {
         Self {
+            name: name.to_string(),
             listeners: Vec::new(),
             next_id: 0,
         }
@@ -82,10 +84,12 @@ where
         F: Fn(&mut T, &U, &V, &mut W) + 'static,
     {
         let id = self.next_id;
-        assert!(
-            !self.listeners.iter().any(|(_, p, _, _)| &priority == p),
-            "Priority {priority} already used by listener with key {key:?}"
-        );
+        if let Some(old) = self.listeners.iter().find(|(_, p, _, _)| &priority == p) {
+            panic!(
+                "Event {}: Priority {priority} already used by listener with key {:?} when adding {key:?}",
+                self.name, old.3
+            )
+        }
         self.listeners
             .push((Box::new(new_listener), priority, id, key));
         self.listeners.sort_by_key(|(_, priority, _, _)| *priority);
@@ -184,19 +188,22 @@ where
     }
 }
 
-impl<T: Clone + PartialEq, U, V, W: Clone + PartialEq> Default for Event<T, U, V, W> {
-    fn default() -> Self {
-        Self {
-            inner: Some(EventMut::new()),
-        }
-    }
-}
-
 pub struct Event<T, U = (), V = (), W = ()> {
     pub inner: Option<EventMut<T, U, V, W>>,
 }
 
 impl<T, U, V, W> Event<T, U, V, W> {
+    #[must_use]
+    pub fn new(name: &str) -> Self
+    where
+        T: Clone + PartialEq,
+        W: Clone + PartialEq,
+    {
+        Self {
+            inner: Some(EventMut::new(name)),
+        }
+    }
+
     pub(crate) fn get(&self) -> &EventMut<T, U, V, W> {
         self.inner.as_ref().expect("Event should be initialized")
     }
@@ -216,7 +223,7 @@ mod tests {
 
     #[test]
     fn mutable_event() {
-        let mut event = EventMut::new();
+        let mut event = EventMut::new("test");
         event.add_listener_mut(
             |item, constant, _, ()| *item += constant,
             0,
@@ -268,7 +275,7 @@ mod tests {
             pub modifiers: Vec<EventOrigin>,
         }
 
-        let mut event = EventMut::new();
+        let mut event = EventMut::new("test");
         event.add_listener_mut(
             |value: &mut Info, (), (), ()| value.value += 1,
             0,

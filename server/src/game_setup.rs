@@ -100,7 +100,6 @@ pub fn setup_game(player_amount: usize, seed: String, setup: bool) -> Game {
     }
 
     game.next_age();
-    game.start_turn();
     game
 }
 
