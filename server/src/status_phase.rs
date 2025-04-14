@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::gain_action_card_from_pile;
-use crate::advance::{do_advance, gain_advance_without_payment, remove_advance};
+use crate::advance::{Advance, do_advance, gain_advance_without_payment, remove_advance};
 use crate::consts::AGES;
 use crate::content::builtin::{Builtin, status_phase_handler};
 use crate::content::persistent_events::{
@@ -30,6 +30,15 @@ pub enum StatusPhaseState {
 pub struct ChangeGovernment {
     pub new_government: String,
     pub additional_advances: Vec<String>,
+}
+
+impl ChangeGovernment {
+    #[must_use] pub fn new(government: String, additional_advances: Vec<String>) -> Self {
+        Self {
+            new_government: government,
+            additional_advances,
+        }
+    }
 }
 
 // Can't use Option<String> because of mongo stips null values
@@ -283,21 +292,14 @@ where
 
 fn change_government_type(game: &mut Game, player_index: usize, new_government: &ChangeGovernment) {
     let government = &new_government.new_government;
-    let a = advances::get_government(government).expect("government should exist");
+    let a = advances::get_government(government);
     assert!(
-        game.players[player_index].can_advance_in_change_government(&a.advances[0]),
+        game.player(player_index)
+            .can_advance_in_change_government(&a.advances[0]),
         "Cannot advance in change government"
     );
 
-    let current_player_government = game.players[player_index]
-        .government()
-        .expect("player should have a government");
-    let player_government_advances = advances::get_government(&current_player_government)
-        .expect("player should have a government")
-        .advances
-        .into_iter()
-        .filter(|advance| game.players[player_index].has_advance(&advance.name))
-        .collect_vec();
+    let player_government_advances = government_advances(game.player(player_index));
 
     assert_eq!(
         player_government_advances.len() - 1,
@@ -309,9 +311,7 @@ fn change_government_type(game: &mut Game, player_index: usize, new_government: 
         remove_advance(game, &a, player_index);
     }
 
-    let new_government_advances = advances::get_government(government)
-        .expect("government should exist")
-        .advances;
+    let new_government_advances = advances::get_government(government).advances;
     do_advance(game, &new_government_advances[0], player_index);
     for name in &new_government.additional_advances {
         let (pos, advance) = new_government_advances
@@ -326,6 +326,12 @@ fn change_government_type(game: &mut Game, player_index: usize, new_government: 
         );
         do_advance(game, advance, player_index);
     }
+}
+
+pub(crate) fn government_advances(p: &Player) -> Vec<Advance> {
+    let current = p.government().expect("player should have a government");
+
+    advances::get_government(&current).owned_advances(p)
 }
 
 #[must_use]

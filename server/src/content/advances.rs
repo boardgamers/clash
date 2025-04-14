@@ -67,6 +67,16 @@ pub struct AdvanceGroup {
     pub government: Option<String>,
 }
 
+impl AdvanceGroup {
+    #[must_use]
+    pub fn owned_advances(self, p: &crate::player::Player) -> Vec<Advance> {
+        self.advances
+            .into_iter()
+            .filter(|a| p.has_advance(&a.name))
+            .collect()
+    }
+}
+
 #[must_use]
 pub fn get_all() -> Vec<Advance> {
     get_groups().into_iter().flat_map(|g| g.advances).collect()
@@ -163,12 +173,15 @@ pub fn get_governments() -> Vec<AdvanceGroup> {
 ///
 /// # Panics
 ///
-/// Panics if government doesn't have a leading government advance or if some of the government advances do no have their government tier specified
+/// Panics if government doesn't exist
 #[must_use]
-pub fn get_government(government: &str) -> Option<AdvanceGroup> {
-    get_groups().into_iter().find(|g| {
-        g.government
-            .as_ref()
-            .is_some_and(|value| value.as_str() == government)
-    })
+pub fn get_government(government: &str) -> AdvanceGroup {
+    get_groups()
+        .into_iter()
+        .find(|g| {
+            g.government
+                .as_ref()
+                .is_some_and(|value| value.as_str() == government)
+        })
+        .unwrap_or_else(|| panic!("Government not found {government}"))
 }

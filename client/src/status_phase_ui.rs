@@ -61,14 +61,12 @@ pub fn change_government_type_dialog(
         |a| {
             let g = a.government.as_ref().expect("should have government");
             let additional = get_government(g)
-                .unwrap()
                 .advances
                 .iter()
                 .skip(1) // the government advance itself is always chosen
                 .map(|a| a.name.clone())
                 .collect::<Vec<_>>();
             let needed = get_government(&rc.shown_player.government().unwrap())
-                .unwrap()
                 .advances
                 .iter()
                 .filter(|a| rc.shown_player.has_advance(&a.name))
@@ -92,10 +90,10 @@ pub fn choose_additional_advances_dialog(
     };
     if ok_button(rc, t) {
         return StateUpdate::response(EventResponse::ChangeGovernmentType(
-            ChangeGovernmentType::ChangeGovernment(ChangeGovernment {
-                new_government: choose.government.clone(),
-                additional_advances: choose.selected.clone(),
-            }),
+            ChangeGovernmentType::ChangeGovernment(ChangeGovernment::new(
+                choose.government.clone(),
+                choose.selected.clone(),
+            )),
         ));
     }
 
