@@ -10,8 +10,8 @@ use crate::content::advances;
 use crate::content::advances::economy::tax_options;
 use crate::content::custom_actions::{CustomAction, CustomActionType};
 use crate::content::persistent_events::{
-    EventResponse, HandCardsRequest, MultiRequest, PersistentEventRequest, PersistentEventState,
-    PositionRequest, SelectedStructure, is_selected_structures_valid,
+    ChangeGovernmentRequest, EventResponse, HandCardsRequest, MultiRequest, PersistentEventRequest,
+    PersistentEventState, PositionRequest, SelectedStructure, is_selected_structures_valid,
 };
 use crate::cultural_influence::{
     available_influence_actions, available_influence_culture, influence_action,
@@ -28,7 +28,7 @@ use crate::position::Position;
 use crate::recruit::recruit_cost;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
-use crate::status_phase::ChangeGovernmentType;
+use crate::status_phase::{ChangeGovernment, ChangeGovernmentType, government_advances};
 use crate::unit::{UnitType, Units};
 use itertools::Itertools;
 use std::vec;
@@ -122,25 +122,7 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
     }
 
     // ActionCard,
-    let action_cards = p
-        .action_cards
-        .iter()
-        .filter_map(|card| {
-            if *card == 126 || *card == 17 || *card == 18 {
-                // todo construct only is buggy
-                return None;
-            }
-            if *card == 19 || *card == 20 || *card == 29 || *card == 30 {
-                // todo collect only is buggy
-                return None;
-            }
-
-            PlayingActionType::ActionCard(*card)
-                .is_available(game, p.index)
-                .is_ok()
-                .then_some(Action::Playing(PlayingAction::ActionCard(*card)))
-        })
-        .collect_vec();
+    let action_cards = available_action_cards(game, p);
 
     if !action_cards.is_empty() {
         actions.push((
@@ -189,6 +171,41 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
     }
 
     actions
+}
+
+fn available_action_cards(game: &Game, p: &Player) -> Vec<Action> {
+    let action_cards = p
+        .action_cards
+        .iter()
+        .filter_map(|card| {
+            if *card == 126 || *card == 17 || *card == 18 {
+                // todo construct only is buggy
+                return None;
+            }
+            if *card == 120 {
+                // todo great prophet is buggy
+                return None;
+            }
+            if *card == 124 {
+                // todo great warlord needs movement to work
+                return None;
+            }
+            if *card == 19 || *card == 20 || *card == 29 || *card == 30 {
+                // todo collect only is buggy
+                return None;
+            }
+            if *card == 15 || *card == 16 {
+                // todo influence only is buggy
+                return None;
+            }
+
+            PlayingActionType::ActionCard(*card)
+                .is_available(game, p.index)
+                .is_ok()
+                .then_some(Action::Playing(PlayingAction::ActionCard(*card)))
+        })
+        .collect_vec();
+    action_cards
 }
 
 fn payment(o: &PaymentOptions, p: &Player) -> ResourcePile {
@@ -408,17 +425,41 @@ fn responses(event: &PersistentEventState, player: &Player, game: &Game) -> Vec<
         PersistentEventRequest::BoolRequest(_) => {
             vec![EventResponse::Bool(false), EventResponse::Bool(true)]
         }
-        PersistentEventRequest::ChangeGovernment(_c) => {
-            vec![EventResponse::ChangeGovernmentType(
-                ChangeGovernmentType::KeepGovernment,
-            )]
-        }
+        PersistentEventRequest::ChangeGovernment(c) => change_government(player, &c),
         PersistentEventRequest::ExploreResolution => {
             vec![
                 EventResponse::ExploreResolution(0),
                 EventResponse::ExploreResolution(3),
             ]
         }
+    }
+}
+
+fn change_government(p: &Player, c: &ChangeGovernmentRequest) -> Vec<EventResponse> {
+    if c.optional {
+        vec![EventResponse::ChangeGovernmentType(
+            ChangeGovernmentType::KeepGovernment,
+        )]
+    } else {
+        // change to the first available government and take the first advances
+        let new = advances::get_governments()
+            .into_iter()
+            .find(|g| p.can_advance_in_change_government(&g.advances[0]))
+            .expect("government not found");
+
+        let advances = new
+            .advances
+            .iter()
+            .take(government_advances(p).len())
+            .map(|a| a.name.clone())
+            .collect_vec();
+
+        vec![EventResponse::ChangeGovernmentType(
+            ChangeGovernmentType::ChangeGovernment(ChangeGovernment::new(
+                new.name.clone(),
+                advances,
+            )),
+        )]
     }
 }
 

@@ -29,8 +29,11 @@ serde-wasm-bindgen = "0.6.5"
 console_error_panic_hook = "0.1.7"
 web-sys = { version = "0.3.72", features = ["Window"] }
 js-sys = "0.3.72"
-pyroscope = "0.5.8"
-pyroscope_pprofrs = "0.2.8"
+pyroscope = { version = "0.5.8", optional = true }
+pyroscope_pprofrs = { version = "0.2.8", optional = true }
+
+[features]
+profiling = ["dep:pyroscope", "dep:pyroscope_pprofrs"]
 
 [[bin]]
 name = "local_client"

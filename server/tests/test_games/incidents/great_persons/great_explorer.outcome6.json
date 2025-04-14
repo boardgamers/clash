@@ -445,6 +445,10 @@
                   },
                   "undo": [
                     {
+                      "op": "remove",
+                      "path": "/events/0/event_type/ActionCard/selected_position"
+                    },
+                    {
                       "op": "add",
                       "path": "/events/0/handler",
                       "value": {
@@ -538,10 +542,6 @@
                     }
                   },
                   "undo": [
-                    {
-                      "op": "remove",
-                      "path": "/events/0/event_type/ActionCard/selected_position"
-                    },
                     {
                       "op": "replace",
                       "path": "/events/0/handler/priority",

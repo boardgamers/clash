@@ -4,7 +4,8 @@
     {
       "event_type": {
         "ActionCard": {
-          "id": 118
+          "id": 118,
+          "selected_position": "B6"
         }
       },
       "player": 1,
@@ -472,6 +473,10 @@
                     }
                   },
                   "undo": [
+                    {
+                      "op": "remove",
+                      "path": "/events/0/event_type/ActionCard/selected_position"
+                    },
                     {
                       "op": "add",
                       "path": "/events/0/handler",

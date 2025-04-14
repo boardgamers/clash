@@ -336,7 +336,7 @@ pub(crate) fn brutus() -> Objective {
     Objective::builder(name, "You killed a leader and 2 army units in a battle.")
         .add_simple_persistent_event_listener(
             |event| &mut event.combat_end,
-            13,
+            14,
             |game, player, _, e| {
                 let s = &e.combat.stats;
                 let l = &s.opponent(player).losses;

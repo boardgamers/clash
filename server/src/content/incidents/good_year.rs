@@ -60,7 +60,7 @@ fn awesome_years() -> Vec<Incident> {
         good_year(
             Incident::builder(
                 12,
-                "An awsome year",
+                "An awesome year",
                 "You gain 2 food",
                 IncidentBaseEffect::BarbariansSpawn,
             ),
@@ -70,7 +70,7 @@ fn awesome_years() -> Vec<Incident> {
         good_year(
             Incident::builder(
                 13,
-                "An awsome year",
+                "An awesome year",
                 "Every player gains 2 food",
                 IncidentBaseEffect::ExhaustedLand,
             ),
@@ -80,7 +80,7 @@ fn awesome_years() -> Vec<Incident> {
         good_year(
             Incident::builder(
                 14,
-                "An awsome year",
+                "An awesome year",
                 "You gain 2 food. Distribute 2 food among other players.",
                 IncidentBaseEffect::ExhaustedLand,
             ),

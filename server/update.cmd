@@ -7,13 +7,10 @@ cargo update
 rustup update
 cargo update
 cargo fmt
-cd ..\server
-cargo nextest run
-cargo clippy
-cd ..\client
-cargo clippy
-cd ..\server
+cd ..
 git stash
 git fetch
 git merge origin/main
 git stash apply
+cd ..\server
+cargo nextest run
