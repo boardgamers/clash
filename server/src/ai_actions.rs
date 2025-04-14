@@ -450,7 +450,8 @@ fn change_government(p: &Player, c: &ChangeGovernmentRequest) -> Vec<EventRespon
         let advances = new
             .advances
             .iter()
-            .take(government_advances(p).len())
+            .dropping(1) // is taken implicitly
+            .take(government_advances(p).len() - 1)
             .map(|a| a.name.clone())
             .collect_vec();
 

@@ -30,13 +30,20 @@ use std::collections::{HashMap, HashSet};
 
 pub(crate) type PersistentEvent<V = ()> = Event<Game, PersistentEventInfo, (), V>;
 
-#[derive(Default)]
 pub(crate) struct PlayerEvents {
     pub persistent: PersistentEvents,
     pub transient: TransientEvents,
 }
 
-#[derive(Default)]
+impl PlayerEvents {
+    pub fn new() -> PlayerEvents {
+        Self {
+            persistent: PersistentEvents::new(),
+            transient: TransientEvents::new(),
+        }
+    }
+}
+
 pub(crate) struct TransientEvents {
     pub on_influence_culture_attempt: Event<Result<InfluenceCultureInfo, String>, City, Game>,
     pub on_influence_culture_resolve: Event<Game, InfluenceCultureOutcome>,
@@ -54,7 +61,27 @@ pub(crate) struct TransientEvents {
     pub collect_total: Event<CollectInfo>,
 }
 
-#[derive(Default)]
+impl TransientEvents {
+    pub fn new() -> TransientEvents {
+        TransientEvents {
+            on_influence_culture_attempt: Event::new("on_influence_culture_attempt"),
+            on_influence_culture_resolve: Event::new("on_influence_culture_resolve"),
+            before_move: Event::new("before_move"),
+
+            construct_cost: Event::new("construct_cost"),
+            advance_cost: Event::new("advance_cost"),
+            happiness_cost: Event::new("happiness_cost"),
+            recruit_cost: Event::new("recruit_cost"),
+
+            is_playing_action_available: Event::new("is_playing_action_available"),
+
+            terrain_collect_options: Event::new("terrain_collect_options"),
+            collect_options: Event::new("collect_options"),
+            collect_total: Event::new("collect_total"),
+        }
+    }
+}
+
 pub(crate) struct PersistentEvents {
     pub collect: PersistentEvent<CollectInfo>,
     pub construct: PersistentEvent<Building>,
@@ -82,9 +109,35 @@ pub(crate) struct PersistentEvents {
     pub select_objective_cards: PersistentEvent<SelectObjectivesInfo>,
 }
 
-impl PlayerEvents {
-    pub fn new() -> PlayerEvents {
-        Self::default()
+impl PersistentEvents {
+    #[must_use]
+    pub fn new() -> PersistentEvents {
+        PersistentEvents {
+            collect: Event::new("collect"),
+            construct: Event::new("construct"),
+            draw_wonder_card: Event::new("draw_wonder_card"),
+            advance: Event::new("advance"),
+            recruit: Event::new("recruit"),
+            found_city: Event::new("found_city"),
+            influence_culture_resolution: Event::new("influence_culture_resolution"),
+            explore_resolution: Event::new("explore_resolution"),
+            play_action_card: Event::new("play_action_card"),
+            play_wonder_card: Event::new("play_wonder_card"),
+
+            status_phase: Event::new("status_phase"),
+            turn_start: Event::new("turn_start"),
+            incident: Event::new("incident"),
+            combat_start: Event::new("combat_start"),
+            combat_round_start: Event::new("combat_round_start"),
+            combat_round_start_reveal_tactics: Event::new("combat_round_start_reveal_tactics"),
+            combat_round_start_tactics: Event::new("combat_round_start_tactics"),
+            combat_round_end: Event::new("combat_round_end"),
+            combat_round_end_tactics: Event::new("combat_round_end_tactics"),
+            combat_end: Event::new("combat_end"),
+            capture_undefended_position: Event::new("capture_undefended_position"),
+            units_killed: Event::new("units_killed"),
+            select_objective_cards: Event::new("select_objective_cards"),
+        }
     }
 }
 

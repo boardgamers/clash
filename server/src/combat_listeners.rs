@@ -229,12 +229,27 @@ impl CombatRoundEnd {
         combat: Combat,
         game: &Game,
     ) -> Self {
-        let attackers_dead =
-            combat.active_attackers(game).len() - attacker_casualties.fighters as usize == 0;
-        let defenders_dead =
-            combat.active_defenders(game).len() - defender_casualties.fighters as usize == 0;
+        let mut combat_round_end = Self {
+            attacker_casualties,
+            defender_casualties,
+            can_retreat,
+            final_result: None,
+            combat,
+            phase: CombatEventPhase::TacticsCard,
+        };
+        combat_round_end.set_final_result(game);
+        combat_round_end
+    }
 
-        let final_result = if attackers_dead && defenders_dead {
+    pub(crate) fn set_final_result(&mut self, game: &Game) {
+        let attackers_dead = self.combat.active_attackers(game).len()
+            - self.attacker_casualties.fighters as usize
+            == 0;
+        let defenders_dead = self.combat.active_defenders(game).len()
+            - self.defender_casualties.fighters as usize
+            == 0;
+
+        self.final_result = if attackers_dead && defenders_dead {
             Some(CombatResult::Draw)
         } else if attackers_dead {
             Some(CombatResult::DefenderWins)
@@ -243,15 +258,6 @@ impl CombatRoundEnd {
         } else {
             None
         };
-
-        Self {
-            attacker_casualties,
-            defender_casualties,
-            can_retreat,
-            final_result,
-            combat,
-            phase: CombatEventPhase::TacticsCard,
-        }
     }
 
     #[must_use]

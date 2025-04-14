@@ -77,6 +77,7 @@ pub(crate) fn encircled(id: u8) -> TacticsCard {
                     "Encircled rolled a 5 or 6 and added a hit that cannot be ignored",
                 );
                 e.casualties_mut(opponent_role).fighters += 1;
+                e.set_final_result(game);
             } else {
                 game.add_info_log_item("Encircled rolled no 5 or 6");
             }
