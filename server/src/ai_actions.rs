@@ -134,6 +134,10 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
                 // todo collect only is buggy
                 return None;
             }
+            if *card == 15 || *card == 16 {
+                // todo influence only is buggy
+                return None;
+            }
 
             PlayingActionType::ActionCard(*card)
                 .is_available(game, p.index)

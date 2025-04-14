@@ -86,7 +86,10 @@ pub(crate) fn explore_adjacent_block(builder: ActionCardBuilder) -> ActionCardBu
         9,
         |game, player_index, _| Some(action_explore_request(game, player_index)),
         |game, s, _| {
-            let position = s.choice[0];
+            let Some(&position) = s.choice.first() else {
+                game.add_info_log_item(&format!("{} decided not to explore", s.player_name));
+                return;
+            };
             game.add_info_log_item(&format!("{} explored {}", s.player_name, position));
             let dest = game
                 .map
