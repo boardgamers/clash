@@ -7,7 +7,7 @@ use crate::content::incidents::great_persons::{
 use crate::content::persistent_events::{PaymentRequest, PositionRequest};
 use crate::explore::move_to_unexplored_block;
 use crate::game::Game;
-use crate::map::{get_map_setup, BlockPosition, UNEXPLORED_BLOCK};
+use crate::map::{BlockPosition, UNEXPLORED_BLOCK, get_map_setup};
 use crate::payment::PaymentOptions;
 use crate::playing_actions::ActionCost;
 use crate::position::Position;
