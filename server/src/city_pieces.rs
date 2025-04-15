@@ -13,7 +13,7 @@ pub struct CityPieces {
     pub fortress: Option<usize>,
     pub port: Option<usize>,
     pub temple: Option<usize>,
-    pub wonders: Vec<Wonder>,
+    pub wonders: Vec<&'static Wonder>,
 }
 
 impl CityPieces {
@@ -50,7 +50,11 @@ impl CityPieces {
             fortress: self.fortress,
             port: self.port,
             temple: self.temple,
-            wonders: self.wonders.into_iter().map(|wonder| wonder.name).collect(),
+            wonders: self
+                .wonders
+                .into_iter()
+                .map(|wonder| wonder.name.clone())
+                .collect(),
         }
     }
 

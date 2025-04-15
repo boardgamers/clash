@@ -14,6 +14,7 @@ pub(crate) mod warfare;
 
 use crate::advance::Advance;
 use crate::advance::AdvanceBuilder;
+use crate::cache;
 use crate::content::advances::agriculture::agriculture;
 use crate::content::advances::autocracy::autocracy;
 use crate::content::advances::construction::construction;
@@ -67,23 +68,26 @@ pub struct AdvanceGroup {
     pub government: Option<String>,
 }
 
-impl AdvanceGroup {
-    #[must_use]
-    pub fn owned_advances(self, p: &crate::player::Player) -> Vec<Advance> {
-        self.advances
-            .into_iter()
-            .filter(|a| p.has_advance(&a.name))
-            .collect()
-    }
+#[must_use]
+pub(crate) fn get_all_uncached() -> Vec<Advance> {
+    get_groups_uncached()
+        .into_iter()
+        .flat_map(|g| g.advances)
+        .collect()
 }
 
 #[must_use]
-pub fn get_all() -> Vec<Advance> {
-    get_groups().into_iter().flat_map(|g| g.advances).collect()
+pub fn get_all() -> &'static Vec<Advance> {
+    cache::get().get_advances()
 }
 
 #[must_use]
-pub fn get_groups() -> Vec<AdvanceGroup> {
+pub fn get_groups() -> &'static Vec<AdvanceGroup> {
+    cache::get().get_advance_groups()
+}
+
+#[must_use]
+pub fn get_groups_uncached() -> Vec<AdvanceGroup> {
     vec![
         agriculture(),
         construction(),
@@ -145,28 +149,29 @@ pub(crate) fn advance_group_builder(name: &str, advances: Vec<AdvanceBuilder>) -
 ///
 /// Panics if advance with name doesn't exist
 #[must_use]
-pub fn get_advance(name: &str) -> Advance {
-    get_all()
-        .into_iter()
-        .find(|advance| advance.name == name)
-        .unwrap_or_else(|| {
-            panic!("Advance with name {name} not found");
-        })
+pub fn get_advance(name: &str) -> &'static Advance {
+    cache::get().get_advance(name).unwrap_or_else(|| {
+        panic!("Advance with name {name} not found");
+    })
 }
 
-pub(crate) fn get_group(group: &str) -> AdvanceGroup {
-    get_groups()
-        .into_iter()
-        .find(|g| g.name == group)
-        .expect("Group not found")
+pub(crate) fn get_group(group: &str) -> &'static AdvanceGroup {
+    cache::get()
+        .get_advance_group(group)
+        .unwrap_or_else(|| panic!("Advance group {group} not found"))
 }
 
 #[must_use]
-pub fn get_governments() -> Vec<AdvanceGroup> {
-    get_groups()
+pub fn get_governments() -> &'static Vec<AdvanceGroup> {
+    cache::get().get_governments()
+}
+
+#[must_use]
+pub fn get_governments_uncached() -> Vec<AdvanceGroup> {
+    get_groups_uncached()
         .into_iter()
         .filter(|g| g.government.is_some())
-        .collect::<Vec<AdvanceGroup>>()
+        .collect()
 }
 
 ///
@@ -175,13 +180,8 @@ pub fn get_governments() -> Vec<AdvanceGroup> {
 ///
 /// Panics if government doesn't exist
 #[must_use]
-pub fn get_government(government: &str) -> AdvanceGroup {
-    get_groups()
-        .into_iter()
-        .find(|g| {
-            g.government
-                .as_ref()
-                .is_some_and(|value| value.as_str() == government)
-        })
-        .unwrap_or_else(|| panic!("Government not found {government}"))
+pub fn get_government(government: &str) -> &'static AdvanceGroup {
+    cache::get().get_government(government).unwrap_or_else(|| {
+        panic!("Government {government} not found");
+    })
 }

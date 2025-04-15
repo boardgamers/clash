@@ -16,9 +16,9 @@ use crate::{content::custom_actions::CustomActionType, game::Game, player_events
 use std::collections::HashMap;
 use std::ops::RangeInclusive;
 
-pub(crate) type AbilityInitializer = Box<dyn Fn(&mut Game, usize)>;
+pub(crate) type AbilityInitializer = Box<dyn Fn(&mut Game, usize) + Sync + Send>;
 
-pub(crate) type AbilityInitializerWithPrioDelta = Box<dyn Fn(&mut Game, usize, i32)>;
+pub(crate) type AbilityInitializerWithPrioDelta = Box<dyn Fn(&mut Game, usize, i32) + Sync + Send>;
 
 pub struct SelectedChoice<C> {
     pub player_index: usize,
@@ -88,28 +88,28 @@ impl AbilityInitializerBuilder {
 
     pub(crate) fn add_ability_initializer<F>(&mut self, initializer: F)
     where
-        F: Fn(&mut Game, usize, i32) + 'static,
+        F: Fn(&mut Game, usize, i32) + 'static + Sync + Send,
     {
         self.initializers.push(Box::new(initializer));
     }
 
     pub(crate) fn add_ability_deinitializer<F>(&mut self, deinitializer: F)
     where
-        F: Fn(&mut Game, usize) + 'static,
+        F: Fn(&mut Game, usize) + 'static + Sync + Send,
     {
         self.deinitializers.push(Box::new(deinitializer));
     }
 
     pub(crate) fn add_one_time_ability_initializer<F>(&mut self, initializer: F)
     where
-        F: Fn(&mut Game, usize) + 'static,
+        F: Fn(&mut Game, usize) + 'static + Sync + Send,
     {
         self.one_time_initializers.push(Box::new(initializer));
     }
 
     pub(crate) fn add_ability_undo_deinitializer<F>(&mut self, deinitializer: F)
     where
-        F: Fn(&mut Game, usize) + 'static,
+        F: Fn(&mut Game, usize) + 'static + Sync + Send,
     {
         self.undo_deinitializers.push(Box::new(deinitializer));
     }
@@ -131,7 +131,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
 
     fn add_ability_initializer<F>(mut self, initializer: F) -> Self
     where
-        F: Fn(&mut Game, usize, i32) + 'static,
+        F: Fn(&mut Game, usize, i32) + 'static + Sync + Send,
     {
         self.builder().add_ability_initializer(initializer);
         self
@@ -139,7 +139,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
 
     fn add_ability_deinitializer<F>(mut self, deinitializer: F) -> Self
     where
-        F: Fn(&mut Game, usize) + 'static,
+        F: Fn(&mut Game, usize) + 'static + Sync + Send,
     {
         self.builder().add_ability_deinitializer(deinitializer);
         self
@@ -147,7 +147,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
 
     fn add_one_time_ability_initializer<F>(mut self, initializer: F) -> Self
     where
-        F: Fn(&mut Game, usize) + 'static,
+        F: Fn(&mut Game, usize) + 'static + Sync + Send,
     {
         self.builder().add_one_time_ability_initializer(initializer);
         self
@@ -155,7 +155,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
 
     fn add_ability_undo_deinitializer<F>(mut self, deinitializer: F) -> Self
     where
-        F: Fn(&mut Game, usize) + 'static,
+        F: Fn(&mut Game, usize) + 'static + Sync + Send,
     {
         self.builder().add_ability_undo_deinitializer(deinitializer);
         self
@@ -169,8 +169,8 @@ pub(crate) trait AbilityInitializerSetup: Sized {
     ) -> Self
     where
         T: Clone + PartialEq,
-        E: Fn(&mut TransientEvents) -> &mut Event<T, U, V> + 'static + Clone,
-        F: Fn(&mut T, &U, &V) + 'static + Clone,
+        E: Fn(&mut TransientEvents) -> &mut Event<T, U, V> + 'static + Clone + Sync + Send,
+        F: Fn(&mut T, &U, &V) + 'static + Clone + Sync + Send,
     {
         add_player_event_listener(
             self,
@@ -183,7 +183,11 @@ pub(crate) trait AbilityInitializerSetup: Sized {
     fn add_combat_round_start_listener(
         self,
         priority: i32,
-        listener: impl Fn(&Game, &Combat, &mut CombatStrength, CombatRole) + Clone + 'static,
+        listener: impl Fn(&Game, &Combat, &mut CombatStrength, CombatRole)
+        + Clone
+        + 'static
+        + Sync
+        + Send,
     ) -> Self {
         self.add_simple_persistent_event_listener(
             |event| &mut event.combat_round_start,
@@ -202,12 +206,12 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         event: E,
         priority: i32,
         listener: F,
-        get_info: impl Fn(&mut T) -> &mut HashMap<String, String> + 'static + Clone,
+        get_info: impl Fn(&mut T) -> &mut HashMap<String, String> + 'static + Clone + Sync + Send,
     ) -> Self
     where
         T: Clone + PartialEq,
-        E: Fn(&mut TransientEvents) -> &mut Event<T, U, V, ()> + 'static + Clone,
-        F: Fn(&mut T, &U, &V) + 'static + Clone,
+        E: Fn(&mut TransientEvents) -> &mut Event<T, U, V, ()> + 'static + Clone + Sync + Send,
+        F: Fn(&mut T, &U, &V) + 'static + Clone + Sync + Send,
     {
         let id = self.get_key().id();
         self.add_transient_event_listener(event, priority, move |value, u, v| {
@@ -221,13 +225,17 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         priority: i32,
         start_custom_phase: impl Fn(&mut Game, usize, &str, &mut V) -> Option<PersistentEventRequest>
         + 'static
-        + Clone,
+        + Clone
+        + Sync
+        + Send,
         end_custom_phase: impl Fn(&mut Game, usize, &str, EventResponse, PersistentEventRequest, &mut V)
         + 'static
-        + Clone,
+        + Clone
+        + Sync
+        + Send,
     ) -> Self
     where
-        E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone,
+        E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone + Sync + Send,
         V: Clone + PartialEq,
     {
         let origin = self.get_key();
@@ -311,8 +319,8 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         listener: F,
     ) -> Self
     where
-        E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone,
-        F: Fn(&mut Game, usize, &str, &mut V) + 'static + Clone,
+        E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone + Sync + Send,
+        F: Fn(&mut Game, usize, &str, &mut V) + 'static + Clone + Sync + Send,
         V: Clone + PartialEq,
     {
         self.add_persistent_event_listener(
@@ -331,11 +339,19 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &mut V) -> Option<Vec<PaymentRequest>> + 'static + Clone,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<ResourcePile>>, &mut V) + 'static + Clone,
+        request: impl Fn(&mut Game, usize, &mut V) -> Option<Vec<PaymentRequest>>
+        + 'static
+        + Clone
+        + Sync
+        + Send,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<ResourcePile>>, &mut V)
+        + 'static
+        + Clone
+        + Sync
+        + Send,
     ) -> Self
     where
-        E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone,
+        E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone + Sync + Send,
         V: Clone + PartialEq,
     {
         self.add_persistent_event_listener(
@@ -376,13 +392,19 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &mut V) -> Option<ResourceRewardRequest> + 'static + Clone,
+        request: impl Fn(&mut Game, usize, &mut V) -> Option<ResourceRewardRequest>
+        + 'static
+        + Clone
+        + Sync
+        + Send,
         gain_reward_log: impl Fn(&Game, &SelectedChoice<ResourcePile>, &mut V) -> Vec<String>
         + 'static
-        + Clone,
+        + Clone
+        + Sync
+        + Send,
     ) -> Self
     where
-        E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone,
+        E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone + Sync + Send,
         V: Clone + PartialEq,
     {
         let g = gain_reward_log.clone();
@@ -432,11 +454,11 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &mut V) -> Option<String> + 'static + Clone,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<bool>, &mut V) + 'static + Clone,
+        request: impl Fn(&mut Game, usize, &mut V) -> Option<String> + 'static + Clone + Sync + Send,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<bool>, &mut V) + 'static + Clone + Sync + Send,
     ) -> Self
     where
-        E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone,
+        E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone + Sync + Send,
         V: Clone + PartialEq,
     {
         self.add_persistent_event_listener(
@@ -465,11 +487,15 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &mut V) -> Option<AdvanceRequest> + 'static + Clone,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<String>, &mut V) + 'static + Clone,
+        request: impl Fn(&mut Game, usize, &mut V) -> Option<AdvanceRequest>
+        + 'static
+        + Clone
+        + Sync
+        + Send,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<String>, &mut V) + 'static + Clone + Sync + Send,
     ) -> Self
     where
-        E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone,
+        E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone + Sync + Send,
         V: Clone + PartialEq,
     {
         self.add_choice_reward_request_listener::<E, String, AdvanceRequest, V>(
@@ -494,11 +520,19 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &mut V) -> Option<PositionRequest> + 'static + Clone,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<Position>>, &mut V) + 'static + Clone,
+        request: impl Fn(&mut Game, usize, &mut V) -> Option<PositionRequest>
+        + 'static
+        + Clone
+        + Sync
+        + Send,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<Position>>, &mut V)
+        + 'static
+        + Clone
+        + Sync
+        + Send,
     ) -> Self
     where
-        E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone,
+        E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone + Sync + Send,
         V: Clone + PartialEq,
     {
         self.add_multi_choice_reward_request_listener::<E, Position, PositionRequest, V>(
@@ -523,11 +557,15 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &mut V) -> Option<PlayerRequest> + 'static + Clone,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<usize>, &mut V) + 'static + Clone,
+        request: impl Fn(&mut Game, usize, &mut V) -> Option<PlayerRequest>
+        + 'static
+        + Clone
+        + Sync
+        + Send,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<usize>, &mut V) + 'static + Clone + Sync + Send,
     ) -> Self
     where
-        E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone,
+        E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone + Sync + Send,
         V: Clone + PartialEq,
     {
         self.add_choice_reward_request_listener::<E, usize, PlayerRequest, V>(
@@ -552,11 +590,19 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &mut V) -> Option<UnitTypeRequest> + 'static + Clone,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<UnitType>, &mut V) + 'static + Clone,
+        request: impl Fn(&mut Game, usize, &mut V) -> Option<UnitTypeRequest>
+        + 'static
+        + Clone
+        + Sync
+        + Send,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<UnitType>, &mut V)
+        + 'static
+        + Clone
+        + Sync
+        + Send,
     ) -> Self
     where
-        E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone,
+        E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone + Sync + Send,
         V: Clone + PartialEq,
     {
         self.add_choice_reward_request_listener::<E, UnitType, UnitTypeRequest, V>(
@@ -581,11 +627,19 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &mut V) -> Option<HandCardsRequest> + 'static + Clone,
-        cards_selected: impl Fn(&mut Game, &SelectedChoice<Vec<HandCard>>, &mut V) + 'static + Clone,
+        request: impl Fn(&mut Game, usize, &mut V) -> Option<HandCardsRequest>
+        + 'static
+        + Clone
+        + Sync
+        + Send,
+        cards_selected: impl Fn(&mut Game, &SelectedChoice<Vec<HandCard>>, &mut V)
+        + 'static
+        + Clone
+        + Sync
+        + Send,
     ) -> Self
     where
-        E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone,
+        E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone + Sync + Send,
         V: Clone + PartialEq,
     {
         self.add_multi_choice_reward_request_listener::<E, HandCard, HandCardsRequest, V>(
@@ -610,11 +664,19 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &mut V) -> Option<UnitsRequest> + 'static + Clone,
-        units_selected: impl Fn(&mut Game, &SelectedChoice<Vec<u32>>, &mut V) + 'static + Clone,
+        request: impl Fn(&mut Game, usize, &mut V) -> Option<UnitsRequest>
+        + 'static
+        + Clone
+        + Sync
+        + Send,
+        units_selected: impl Fn(&mut Game, &SelectedChoice<Vec<u32>>, &mut V)
+        + 'static
+        + Clone
+        + Sync
+        + Send,
     ) -> Self
     where
-        E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone,
+        E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone + Sync + Send,
         V: Clone + PartialEq,
     {
         self.add_multi_choice_reward_request_listener::<E, u32, UnitsRequest, V>(
@@ -645,13 +707,19 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &mut V) -> Option<StructuresRequest> + 'static + Clone,
+        request: impl Fn(&mut Game, usize, &mut V) -> Option<StructuresRequest>
+        + 'static
+        + Clone
+        + Sync
+        + Send,
         structures_selected: impl Fn(&mut Game, &SelectedChoice<Vec<SelectedStructure>>, &mut V)
         + 'static
-        + Clone,
+        + Clone
+        + Sync
+        + Send,
     ) -> Self
     where
-        E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone,
+        E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone + Sync + Send,
         V: Clone + PartialEq,
     {
         self.add_multi_choice_reward_request_listener::<E, SelectedStructure, StructuresRequest, V>(
@@ -676,15 +744,19 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        get_choices: impl Fn(&R) -> &Vec<C> + 'static + Clone,
-        to_request: impl Fn(R) -> PersistentEventRequest + 'static + Clone,
-        from_request: impl Fn(&PersistentEventRequest, EventResponse) -> (Vec<C>, C) + 'static + Clone,
-        request: impl Fn(&mut Game, usize, &mut V) -> Option<R> + 'static + Clone,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<C>, &mut V) + 'static + Clone,
+        get_choices: impl Fn(&R) -> &Vec<C> + 'static + Clone + Sync + Send,
+        to_request: impl Fn(R) -> PersistentEventRequest + 'static + Clone + Sync + Send,
+        from_request: impl Fn(&PersistentEventRequest, EventResponse) -> (Vec<C>, C)
+        + 'static
+        + Clone
+        + Sync
+        + Send,
+        request: impl Fn(&mut Game, usize, &mut V) -> Option<R> + 'static + Clone + Sync + Send,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<C>, &mut V) + 'static + Clone + Sync + Send,
     ) -> Self
     where
         C: Clone + PartialEq,
-        E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone,
+        E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone + Sync + Send,
         V: Clone + PartialEq,
     {
         let g = gain_reward.clone();
@@ -730,20 +802,22 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        get_request: impl Fn(&R) -> &MultiRequest<C> + 'static + Clone,
-        to_request: impl Fn(R) -> PersistentEventRequest + 'static + Clone,
+        get_request: impl Fn(&R) -> &MultiRequest<C> + 'static + Clone + Sync + Send,
+        to_request: impl Fn(R) -> PersistentEventRequest + 'static + Clone + Sync + Send,
         from_request: impl Fn(
             &PersistentEventRequest,
             EventResponse,
         ) -> (Vec<C>, Vec<C>, RangeInclusive<u8>)
         + 'static
-        + Clone,
-        request: impl Fn(&mut Game, usize, &mut V) -> Option<R> + 'static + Clone,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<C>>, &mut V) + 'static + Clone,
+        + Clone
+        + Sync
+        + Send,
+        request: impl Fn(&mut Game, usize, &mut V) -> Option<R> + 'static + Clone + Sync + Send,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<C>>, &mut V) + 'static + Clone + Sync + Send,
     ) -> Self
     where
         C: Clone + PartialEq,
-        E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone,
+        E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone + Sync + Send,
         V: Clone + PartialEq,
     {
         let g = gain_reward.clone();
@@ -841,8 +915,8 @@ where
     S: AbilityInitializerSetup,
     T: Clone + PartialEq,
     W: Clone + PartialEq,
-    E: Fn(&mut PlayerEvents) -> &mut Event<T, U, V, W> + 'static + Clone,
-    F: Fn(&mut T, &U, &V, &mut W) + 'static + Clone,
+    E: Fn(&mut PlayerEvents) -> &mut Event<T, U, V, W> + 'static + Clone + Sync + Send,
+    F: Fn(&mut T, &U, &V, &mut W) + 'static + Clone + Sync + Send,
 {
     let key = setup.get_key().clone();
     let deinitialize_event = event.clone();
@@ -871,10 +945,10 @@ pub(crate) fn do_once_per_turn<F, T, U, V>(
     value: &mut T,
     u: &U,
     v: &V,
-    get_info: impl Fn(&mut T) -> &mut HashMap<String, String> + Clone + 'static,
+    get_info: impl Fn(&mut T) -> &mut HashMap<String, String> + Clone + 'static + Sync + Send,
     listener: F,
 ) where
-    F: Fn(&mut T, &U, &V) + 'static + Clone,
+    F: Fn(&mut T, &U, &V) + 'static + Clone + Sync + Send,
 {
     if !get_info(value).contains_key(id) {
         listener(value, u, v);

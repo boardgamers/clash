@@ -168,7 +168,7 @@ fn anarchy() -> Incident {
                 .filter_map(|a| a.government.is_some().then_some(a.name.clone()))
                 .collect_vec();
             for a in remove {
-                remove_advance(game, &get_advance(&a), player_index);
+                remove_advance(game, get_advance(&a), player_index);
             }
 
             let p = game.player_mut(player_index);

@@ -140,11 +140,11 @@ pub(crate) fn barbarian_reinforcement<E, S, V>(
     b: S,
     event: E,
     prio: i32,
-    filter: impl Fn(&Game, usize, &V) -> bool + 'static + Clone,
-    get_barbarian_city: impl Fn(&V) -> Option<Position> + 'static + Clone,
+    filter: impl Fn(&Game, usize, &V) -> bool + 'static + Clone + Sync + Send,
+    get_barbarian_city: impl Fn(&V) -> Option<Position> + 'static + Clone + Sync + Send,
 ) -> S
 where
-    E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone,
+    E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone + Sync + Send,
     S: AbilityInitializerSetup,
     V: Clone + PartialEq,
 {
@@ -326,7 +326,7 @@ fn barbarian_march_steps(
 pub(crate) fn set_info(
     builder: IncidentBuilder,
     event_name: &str,
-    init: impl Fn(&mut BarbariansEventState, &mut Game, usize) + 'static + Clone,
+    init: impl Fn(&mut BarbariansEventState, &mut Game, usize) + 'static + Clone + Sync + Send,
 ) -> IncidentBuilder {
     let name = event_name.to_string();
     builder.add_simple_incident_listener(

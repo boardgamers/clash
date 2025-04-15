@@ -13,7 +13,7 @@ use crate::{
 
 const ACTION_SCORE_WEIGHTING: f64 = 1.0;
 const ADAPTIVE_DIFFICULTY_SCORE_THRESHOLD: f64 = 10.0;
-const PARALLELIZATION: usize = 24;
+extern crate num_cpus;
 
 pub struct AI {
     rng: Rng,
@@ -191,7 +191,8 @@ async fn evaluate_action(
     let mut score = 0.0;
     loop {
         let mut handles = Vec::new();
-        for _ in 0..PARALLELIZATION {
+        let num_cores = num_cpus::get();
+        for _ in 0..num_cores {
             rng.seed = rng.seed.wrapping_add(1);
             rng.next_seed();
             let thread_rng = rng.clone();
@@ -203,7 +204,7 @@ async fn evaluate_action(
         for handle in handles {
             score += handle.await.expect("multi-threading error");
         }
-        iterations += PARALLELIZATION;
+        iterations += num_cores;
         if start_time.elapsed() >= *thinking_time {
             break;
         }
@@ -216,7 +217,9 @@ async fn evaluate_action(
 }
 
 fn monte_carlo_score(mut rng: Rng, player_index: usize, game_data: GameData) -> f64 {
-    let new_game = monte_carlo_run(Game::from_data(game_data), &mut rng);
+    let mut game = Game::from_data(game_data);
+    game.supports_undo = false;
+    let new_game = monte_carlo_run(game, &mut rng);
     let ai_score = new_game.players[player_index].victory_points(&new_game) as f64;
     let mut max_opponent_score = 0.0;
     for (i, player) in new_game.players.iter().enumerate() {

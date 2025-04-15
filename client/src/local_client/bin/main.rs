@@ -67,6 +67,8 @@ fn start_profiling() {
 
 #[cfg(feature = "profiling")]
 fn start_profiling() {
+    println!("start profiling");
+
     use pyroscope::PyroscopeAgent;
     use pyroscope_pprofrs::{PprofConfig, pprof_backend};
 
@@ -289,9 +291,9 @@ fn setup_local_game() -> Game {
         .pieces
         .market = Some(1);
 
-    do_advance(&mut game, &get_advance("Voting"), player_index1);
-    do_advance(&mut game, &get_advance("Free Economy"), player_index1);
-    do_advance(&mut game, &get_advance("Storage"), player_index1);
+    do_advance(&mut game, get_advance("Voting"), player_index1);
+    do_advance(&mut game, get_advance("Free Economy"), player_index1);
+    do_advance(&mut game, get_advance("Storage"), player_index1);
     game.players[player_index1].gain_resources(ResourcePile::food(5));
 
     game

@@ -198,6 +198,10 @@ fn available_action_cards(game: &Game, p: &Player) -> Vec<Action> {
                 // todo influence only is buggy
                 return None;
             }
+            if *card == 33 || *card == 34 {
+                // todo synergies is slow
+                return None;
+            }
 
             PlayingActionType::ActionCard(*card)
                 .is_available(game, p.index)
@@ -443,7 +447,7 @@ fn change_government(p: &Player, c: &ChangeGovernmentRequest) -> Vec<EventRespon
     } else {
         // change to the first available government and take the first advances
         let new = advances::get_governments()
-            .into_iter()
+            .iter()
             .find(|g| p.can_advance_in_change_government(&g.advances[0]))
             .expect("government not found");
 
@@ -514,7 +518,7 @@ fn select_multi<T: Clone>(
 
 #[must_use]
 pub fn city_collections(game: &Game, player: &Player, city: &City) -> Vec<Collect> {
-    let info = possible_resource_collections(game, city.position, player.index, &[], &[]);
+    let info = possible_resource_collections(game, city.position, player.index, &[], &[], false);
 
     let all = ResourceType::all()
         .into_iter()
@@ -550,14 +554,14 @@ fn city_collection(
     let mut c: Vec<PositionCollection> = vec![];
 
     loop {
-        let info = possible_resource_collections(game, city.position, player.index, &c, &c);
+        let info = possible_resource_collections(game, city.position, player.index, &c, &c, false);
 
         let Some((pos, pile)) = pick_resource(player, &info, &c, priority) else {
             break;
         };
         let new = add_collect(&info, pos, &pile, &c);
 
-        if get_total_collection(game, player.index, city.position, &new).is_err() {
+        if get_total_collection(game, player.index, city.position, &new, false).is_err() {
             break;
         }
 

@@ -5,13 +5,14 @@ pub(crate) mod non_combat;
 pub(crate) mod resource_objectives;
 pub(crate) mod unit_objectives;
 
+use crate::cache;
 use crate::content::objective_cards;
 use crate::objective_card::Objective;
 use itertools::Itertools;
 
 #[must_use]
-pub(crate) fn get_all() -> Vec<Objective> {
-    let mut all = objective_cards::get_all()
+pub(crate) fn get_all_uncached() -> Vec<Objective> {
+    let mut all = objective_cards::get_all_uncached()
         .into_iter()
         .flat_map(|card| card.objectives.map(|o| (o.name.clone(), o)))
         .collect_vec();
@@ -30,9 +31,8 @@ pub(crate) fn get_all() -> Vec<Objective> {
 /// # Panics
 /// Panics if incident does not exist
 #[must_use]
-pub fn get_objective(name: &str) -> Objective {
-    get_all()
-        .into_iter()
-        .find(|c| c.name == name)
+pub fn get_objective(name: &str) -> &'static Objective {
+    cache::get()
+        .get_objective(name)
         .expect("objective not found")
 }

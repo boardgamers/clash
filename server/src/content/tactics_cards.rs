@@ -18,9 +18,10 @@ use std::vec;
 /// # Panics
 /// Panics if action card does not exist
 #[must_use]
-pub fn get_tactics_card(id: u8) -> TacticsCard {
+pub fn get_tactics_card(id: u8) -> &'static TacticsCard {
     get_action_card(id)
         .tactics_card
+        .as_ref()
         .unwrap_or_else(|| panic!("tactics card not found for action card {id}"))
 }
 
@@ -333,10 +334,10 @@ pub(crate) fn scout(id: u8) -> TacticsCard {
                     update_combat_strength(game, s.combat.opponent(p), s, |game, _combat, st, _role| {
                         if let Some(tactics_card) = st.tactics_card.take() {
                             let card = get_action_card(tactics_card);
-                            gain_action_card(game, p, &card);
+                            gain_action_card(game, p, card);
                             game.add_info_log_item(&format!(
                                 "{name} ignores the enemy tactics {} and takes it to their hand using Scout",
-                                card.tactics_card.expect("tactics card not found").name
+                                card.tactics_card.as_ref().expect("tactics card not found").name
                             ));
                         } else {
                             game.add_info_log_item(&format!(

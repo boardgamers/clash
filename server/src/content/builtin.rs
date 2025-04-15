@@ -1,6 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::barbarians::barbarians_bonus;
+use crate::cache;
 use crate::combat_listeners::{
     choose_fighter_casualties, combat_stats, offer_retreat, place_settler,
 };
@@ -21,10 +22,6 @@ use crate::explore::explore_resolution;
 use crate::game::Game;
 use crate::objective_card::select_objectives;
 use crate::pirates::{pirates_bonus, pirates_round_bonus};
-use crate::status_phase::{
-    StatusPhaseState, complete_objectives, determine_first_player, draw_cards, free_advance,
-    get_status_phase, may_change_government, raze_city,
-};
 use crate::unit::choose_carried_units_to_remove;
 use crate::wonder::{build_wonder, on_draw_wonder_card};
 
@@ -76,8 +73,23 @@ impl AbilityInitializerSetup for BuiltinBuilder {
     }
 }
 
+///
+/// # Panics
+/// Panics if builtin does not exist
 #[must_use]
-pub fn get_all() -> Vec<Builtin> {
+pub fn get_builtin(game: &Game, name: &str) -> &'static Builtin {
+    cache::get()
+        .get_builtin(name, game)
+        .unwrap_or_else(|| panic!("builtin not found: {name}"))
+}
+
+#[must_use]
+pub fn get_all() -> &'static Vec<Builtin> {
+    cache::get().get_builtins()
+}
+
+#[must_use]
+pub fn get_all_uncached() -> Vec<Builtin> {
     vec![
         cultural_influence_resolution(),
         explore_resolution(),
@@ -108,39 +120,6 @@ pub fn get_all() -> Vec<Builtin> {
         use_assassination(),
         use_teach_us(),
     ]
-}
-
-///
-/// # Panics
-/// Panics if builtin does not exist
-#[must_use]
-pub fn get_builtin(game: &Game, name: &str) -> Builtin {
-    get_all()
-        .into_iter()
-        .find(|builtin| builtin.name == name)
-        .or_else(|| {
-            if let Some(p) = get_status_phase(game) {
-                let handler = status_phase_handler(p);
-                if handler.name == name {
-                    return Some(handler);
-                }
-            }
-            None
-        })
-        .unwrap_or_else(|| panic!("builtin not found: {name}"))
-}
-
-pub(crate) fn status_phase_handler(phase: &StatusPhaseState) -> Builtin {
-    use StatusPhaseState::*;
-
-    match phase {
-        CompleteObjectives => complete_objectives(),
-        FreeAdvance => free_advance(),
-        DrawCards => draw_cards(),
-        RazeSize1City => raze_city(),
-        ChangeGovernmentType => may_change_government(),
-        DetermineFirstPlayer(_) => determine_first_player(),
-    }
 }
 
 pub(crate) fn init_player(game: &mut Game, player_index: usize) {

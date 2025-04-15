@@ -9,15 +9,15 @@ use server::{
 };
 
 const ITERATIONS: usize = 96;
-const PARALLELIZATION: usize = 24;
 
 #[tokio::test]
 async fn test_random_actions() {
+    let num_cores = num_cpus::get();
     let mut rng = Rng::new();
     let mut iterations = 0;
     loop {
         let mut handles = Vec::new();
-        for _ in 0..PARALLELIZATION {
+        for _ in 0..num_cores {
             rng.seed = rng.seed.wrapping_add(1);
             rng.next_seed();
             let thread_rng = rng.clone();
@@ -27,7 +27,7 @@ async fn test_random_actions() {
         for handle in handles {
             handle.await;
         }
-        iterations += PARALLELIZATION;
+        iterations += num_cores;
         if iterations >= ITERATIONS {
             break;
         }

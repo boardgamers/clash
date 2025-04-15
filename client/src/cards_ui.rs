@@ -250,7 +250,7 @@ fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
     };
 
     let mut description = vec![format!("Civil: {}", a.civil_card.name)];
-    let action_type = a.civil_card.action_type;
+    let action_type = &a.civil_card.action_type;
     description.push(
         if action_type.free {
             "As a free action"
@@ -259,18 +259,18 @@ fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
         }
         .to_string(),
     );
-    let cost = action_type.cost;
+    let cost = &action_type.cost;
     if !cost.is_empty() {
         description.push(format!("Cost: {cost}"));
     }
     break_text(a.civil_card.description.as_str(), 30, &mut description);
-    if let Some(t) = a.tactics_card {
+    if let Some(t) = &a.tactics_card {
         description.extend(vec![
             format!("Tactics: {}", t.name),
             format!(
                 "Unit Types: {}",
                 t.fighter_requirement
-                    .into_iter()
+                    .iter()
                     .map(|f| format!("{f:?}"))
                     .join(", ")
             ),
@@ -286,7 +286,7 @@ fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
             ),
             format!(
                 "Location: {:?}",
-                match t.location_requirement {
+                match &t.location_requirement {
                     None => "Any".to_string(),
                     Some(l) => format!("{l:?}"),
                 }

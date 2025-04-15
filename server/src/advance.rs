@@ -176,7 +176,7 @@ pub(crate) fn gain_advance_without_payment(
     payment: ResourcePile,
     take_incident_token: bool,
 ) {
-    do_advance(game, &get_advance(name), player_index);
+    do_advance(game, get_advance(name), player_index);
     on_advance(
         game,
         player_index,
@@ -236,7 +236,9 @@ pub(crate) fn remove_advance(game: &mut Game, advance: &Advance, player_index: u
     if let Some(advance_bonus) = &advance.bonus {
         player.lose_resources(advance_bonus.resources());
     }
-    utils::remove_element(&mut game.players[player_index].advances, advance);
+    utils::remove_element_by(game.players[player_index].advances.as_mut(), |a| {
+        a.name == advance.name
+    });
 }
 
 fn unlock_special_advance(game: &mut Game, special_advance: &SpecialAdvance, player_index: usize) {

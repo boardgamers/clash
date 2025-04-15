@@ -237,7 +237,7 @@ pub(crate) fn update_combat_strength(
     game: &mut Game,
     player: usize,
     e: &mut CombatRoundStart,
-    update: impl Fn(&mut Game, &Combat, &mut CombatStrength, CombatRole) + Clone,
+    update: impl Fn(&mut Game, &Combat, &mut CombatStrength, CombatRole) + Clone + Sync + Send,
 ) {
     if player == e.combat.attacker {
         update(
@@ -499,10 +499,11 @@ pub mod tests {
     use super::{Game, conquer_city};
 
     use crate::action::Action;
+
+    use crate::content::wonders;
     use crate::game::GameState;
     use crate::log::{ActionLogAge, ActionLogItem, ActionLogPlayer, ActionLogRound};
     use crate::movement::MovementAction;
-    use crate::payment::PaymentOptions;
     use crate::utils::tests::FloatEq;
     use crate::wonder::construct_wonder;
     use crate::{
@@ -513,7 +514,6 @@ pub mod tests {
         player::Player,
         position::Position,
         utils::Rng,
-        wonder::Wonder,
     };
 
     #[must_use]
@@ -559,7 +559,6 @@ pub mod tests {
         let old = Player::new(civilizations::tests::get_test_civilization(), 0);
         let new = Player::new(civilizations::tests::get_test_civilization(), 1);
 
-        let wonder = Wonder::builder("wonder", "test", PaymentOptions::free(), vec![]).build();
         let mut game = test_game();
         game.add_info_log_group("combat".into()); // usually filled in combat
         game.players.push(old);
@@ -569,7 +568,7 @@ pub mod tests {
 
         let position = Position::new(0, 0);
         game.players[old].cities.push(City::new(old, position));
-        construct_wonder(&mut game, wonder, position, old);
+        construct_wonder(&mut game, wonders::get_wonder("Pyramids"), position, old);
         game.players[old].construct(Academy, position, None, true);
         game.players[old].construct(Obelisk, position, None, true);
 

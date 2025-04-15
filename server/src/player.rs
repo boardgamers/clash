@@ -58,7 +58,7 @@ pub struct Player {
     pub civilization: Civilization,
     pub active_leader: Option<String>,
     pub available_leaders: Vec<String>,
-    pub advances: Vec<Advance>,
+    pub advances: Vec<&'static Advance>,
     pub unlocked_special_advances: Vec<String>,
     pub wonders_build: Vec<String>,
     pub incident_tokens: u8,
@@ -205,7 +205,12 @@ impl Player {
             civilization: self.civilization.name,
             active_leader: self.active_leader,
             available_leaders: self.available_leaders.into_iter().collect(),
-            advances: self.advances.into_iter().map(|a| a.name).sorted().collect(),
+            advances: self
+                .advances
+                .into_iter()
+                .map(|a| a.name.clone())
+                .sorted()
+                .collect(),
             unlocked_special_advance: self.unlocked_special_advances,
             wonders_build: self.wonders_build,
             incident_tokens: self.incident_tokens,

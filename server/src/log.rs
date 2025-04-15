@@ -147,7 +147,7 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
         PlayingAction::Custom(action) => action.format_log_item(game, player, &player_name),
         PlayingAction::ActionCard(a) => {
             let card = get_civil_card(*a);
-            let pile = card.action_type.cost;
+            let pile = &card.action_type.cost;
             let cost = if pile.is_empty() {
                 ""
             } else {

@@ -31,6 +31,11 @@ dir = "client"
 [tasks.format-and-lint]
 depends = ["server-format-and-lint", "client-format-and-lint"]
 
+[tasks.profile]
+description = "Run AI client with profiling"
+run = ["cargo run --release --package client --features profiling --bin local_client -- ai"]
+dir = "client"
+
 [tools]
 rust = { version = "latest", components = "clippy,rustfmt" }
 

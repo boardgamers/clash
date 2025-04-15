@@ -56,6 +56,7 @@ pub fn get_total_collection(
     player_index: usize,
     city_position: Position,
     collections: &[PositionCollection],
+    min_modifiers: bool,
 ) -> Result<CollectInfo, String> {
     let player = &game.players[player_index];
     let city = player.get_city(city_position);
@@ -64,8 +65,14 @@ pub fn get_total_collection(
         return Err("Not your city".to_string());
     }
 
-    let mut i =
-        possible_resource_collections(game, city_position, player_index, &Vec::new(), collections);
+    let mut i = possible_resource_collections(
+        game,
+        city_position,
+        player_index,
+        &Vec::new(),
+        collections,
+        min_modifiers,
+    );
     if i.max_selection < tiles_used(collections) {
         return Err(format!(
             "You can only collect {} resources - got {}",
@@ -114,7 +121,7 @@ pub fn tiles_used(collections: &[PositionCollection]) -> u32 {
 }
 
 pub(crate) fn collect(game: &mut Game, player_index: usize, c: &Collect) -> Result<(), String> {
-    let i = get_total_collection(game, player_index, c.city_position, &c.collections)?;
+    let i = get_total_collection(game, player_index, c.city_position, &c.collections, true)?;
     let city = game.players[player_index].get_city_mut(c.city_position);
     if !city.can_activate() {
         return Err("City can't be activated".to_string());
@@ -185,6 +192,7 @@ pub fn possible_resource_collections(
     player_index: usize,
     used: &[PositionCollection],
     min: &[PositionCollection],
+    min_modifiers: bool,
 ) -> CollectInfo {
     let set = [
         (Mountain, HashSet::from([ResourcePile::ore(1)])),
@@ -215,49 +223,63 @@ pub fn possible_resource_collections(
         })
         .collect();
 
-    let mut i = game.players[player_index]
-        .events
-        .transient
-        .collect_options
-        .get()
-        .trigger_with_minimal_modifiers(
-            &CollectInfo::new(collect_options, &game.players[player_index], city_pos),
-            &CollectContext {
-                player_index,
-                city_position: city_pos,
-                used: used.to_vec(),
-                terrain_options,
-            },
-            game,
-            &mut (),
-            |i| {
-                if min.is_empty() {
-                    // always get as many as possible if no expectations
-                    return false;
-                }
-                i.choices.iter().all(|(pos, options)| {
-                    min.iter()
-                        .any(|e| pos == &e.position && options.contains(&e.pile))
-                })
-            },
-            |i, m| i.modifiers = m,
-        );
+    let mut collect_info = CollectInfo::new(collect_options, &game.players[player_index], city_pos);
+    let collect_context = CollectContext {
+        player_index,
+        city_position: city_pos,
+        used: used.to_vec(),
+        terrain_options,
+    };
 
-    i.modifiers.extend(modifiers);
+    if min_modifiers {
+        collect_info = game
+            .player(player_index)
+            .events
+            .transient
+            .collect_options
+            .get()
+            .trigger_with_minimal_modifiers(
+                &collect_info,
+                &collect_context,
+                game,
+                &mut (),
+                |i| {
+                    if min.is_empty() {
+                        // always get as many as possible if no expectations
+                        return false;
+                    }
+                    i.choices.iter().all(|(pos, options)| {
+                        min.iter()
+                            .any(|e| pos == &e.position && options.contains(&e.pile))
+                    })
+                },
+                |i, m| i.modifiers = m,
+            );
+    } else {
+        game.player(player_index).trigger_event(
+            |e| &e.collect_options,
+            &mut collect_info,
+            &collect_context,
+            game,
+        );
+    }
+
+    collect_info.modifiers.extend(modifiers);
 
     for u in used {
-        i.choices
+        collect_info
+            .choices
             .entry(u.position)
             .or_default()
             .insert(u.pile.clone());
     }
 
-    i.choices.retain(|p, _| {
+    collect_info.choices.retain(|p, _| {
         game.try_get_any_city(*p)
             .is_none_or(|c| c.position == city_pos)
             && game.enemy_player(player_index, *p).is_none()
     });
-    i
+    collect_info
 }
 
 #[must_use]
