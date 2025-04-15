@@ -38,9 +38,9 @@ impl EventOrigin {
             | EventOrigin::Leader(name)
             | EventOrigin::Objective(name)
             | EventOrigin::Builtin(name) => name.to_string(),
-            EventOrigin::CivilCard(id) => get_civil_card(*id).name,
-            EventOrigin::TacticsCard(id) => get_tactics_card(*id).name,
-            EventOrigin::Incident(id) => get_incident(*id).name,
+            EventOrigin::CivilCard(id) => get_civil_card(*id).name.clone(),
+            EventOrigin::TacticsCard(id) => get_tactics_card(*id).name.clone(),
+            EventOrigin::Incident(id) => get_incident(*id).name.clone(),
         }
     }
 }
@@ -52,7 +52,12 @@ use incidents::get_incident;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
-type Listener<T, U, V, W> = (Box<dyn Fn(&mut T, &U, &V, &mut W)>, i32, usize, EventOrigin);
+type Listener<T, U, V, W> = (
+    Box<dyn Fn(&mut T, &U, &V, &mut W) + Sync + Send>,
+    i32,
+    usize,
+    EventOrigin,
+);
 
 pub struct EventMut<T, U = (), V = (), W = ()> {
     name: String, // for debugging
@@ -81,7 +86,7 @@ where
         key: EventOrigin,
     ) -> usize
     where
-        F: Fn(&mut T, &U, &V, &mut W) + 'static,
+        F: Fn(&mut T, &U, &V, &mut W) + 'static + Sync + Send,
     {
         let id = self.next_id;
         if let Some(old) = self.listeners.iter().find(|(_, p, _, _)| &priority == p) {

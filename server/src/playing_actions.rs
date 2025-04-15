@@ -239,11 +239,11 @@ impl PlayingAction {
         match self {
             Advance { advance, payment } => {
                 let a = get_advance(&advance);
-                if !game.player(player_index).can_advance(&a) {
+                if !game.player(player_index).can_advance(a) {
                     return Err("Cannot advance".to_string());
                 }
                 game.player(player_index)
-                    .advance_cost(&a, Some(&payment))
+                    .advance_cost(a, Some(&payment))
                     .pay(game, &payment);
                 gain_advance_without_payment(game, &advance, player_index, payment, true);
             }

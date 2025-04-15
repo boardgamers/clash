@@ -64,7 +64,7 @@ pub(crate) fn leading_player(
     game: &Game,
     player: &Player,
     margin: usize,
-    value: impl Fn(&Player, &Game) -> usize + 'static,
+    value: impl Fn(&Player, &Game) -> usize + 'static + Sync + Send,
 ) -> bool {
     value(player, game)
         >= game

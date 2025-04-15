@@ -77,7 +77,7 @@ fn trade_routes() -> AdvanceBuilder {
 
 pub(crate) fn add_trade_routes<E, S, V>(b: S, event: E) -> S
 where
-    E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone,
+    E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone + Sync + Send,
     S: AbilityInitializerSetup,
     V: Clone + PartialEq,
 {

@@ -10,6 +10,7 @@ use crate::objective_card::gain_objective_card_from_pile;
 use crate::player::Player;
 use crate::resource_pile::ResourcePile;
 use crate::utils::{Rng, Shuffle};
+use itertools::Itertools;
 use std::collections::HashMap;
 
 /// Creates a new [`Game`].
@@ -55,25 +56,25 @@ pub fn setup_game(player_amount: usize, seed: String, setup: bool) -> Game {
     };
 
     let wonders_left = wonders::get_all()
-        .shuffled(&mut rng)
         .iter()
         .map(|w| w.name.clone())
-        .collect();
+        .collect_vec()
+        .shuffled(&mut rng);
     let action_cards_left = action_cards::get_all()
-        .shuffled(&mut rng)
         .iter()
         .map(|a| a.id)
-        .collect();
+        .collect_vec()
+        .shuffled(&mut rng);
     let objective_cards_left = objective_cards::get_all()
-        .shuffled(&mut rng)
         .iter()
         .map(|a| a.id)
-        .collect();
+        .collect_vec()
+        .shuffled(&mut rng);
     let incidents_left = incidents::get_all()
-        .shuffled(&mut rng)
         .iter()
         .map(|i| i.id)
-        .collect();
+        .collect_vec()
+        .shuffled(&mut rng);
     let mut game = new_game(
         rng,
         players,

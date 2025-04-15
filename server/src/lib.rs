@@ -16,6 +16,7 @@ pub mod advance;
 pub mod ai;
 pub mod ai_actions;
 mod barbarians;
+pub mod cache;
 pub mod card;
 pub mod city;
 pub mod city_pieces;

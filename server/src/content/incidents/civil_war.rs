@@ -164,7 +164,7 @@ fn kill_unit_for_revolution(
     b: IncidentBuilder,
     priority: i32,
     description: &str,
-    pred: impl Fn(&Game, &Player) -> bool + 'static + Clone,
+    pred: impl Fn(&Game, &Player) -> bool + 'static + Clone + Sync + Send,
 ) -> IncidentBuilder {
     let description = description.to_string();
     b.add_incident_units_request(
@@ -285,7 +285,7 @@ fn envoy() -> Incident {
                     wonder.name
                 ));
                 game.permanent_effects
-                    .push(PermanentEffect::PublicWonderCard(wonder.name));
+                    .push(PermanentEffect::PublicWonderCard(wonder.name.clone()));
             }
         },
     )
