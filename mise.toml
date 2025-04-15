@@ -1,3 +1,6 @@
+[env]
+RUST_BACKTRACE = '1'
+
 [tasks.test]
 description = "Run server tests"
 run = 'cargo test {{arg(name="test", default="")}}'

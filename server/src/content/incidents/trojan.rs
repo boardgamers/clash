@@ -1,4 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::advance::remove_advance;
 use crate::combat::{Combat, CombatModifier, CombatRetreatState};
 use crate::combat_listeners::CombatResult;
 use crate::content::advances::get_advance;
@@ -11,6 +12,7 @@ use crate::payment::PaymentOptions;
 use crate::player_events::IncidentTarget;
 use crate::resource_pile::ResourcePile;
 use crate::utils::remove_and_map_element_by;
+use itertools::Itertools;
 
 pub(crate) fn trojan_incidents() -> Vec<Incident> {
     vec![trojan_horse(), solar_eclipse(), anarchy()]
@@ -157,14 +159,24 @@ fn anarchy() -> Incident {
         IncidentTarget::ActivePlayer,
         0,
         |game, player_index, player_name, _| {
+            let old = game.player(player_index).advances.len();
+
+            let remove = game
+                .player(player_index)
+                .advances
+                .iter()
+                .filter_map(|a| a.government.is_some().then_some(a.name.clone()))
+                .collect_vec();
+            for a in remove {
+                remove_advance(game, &get_advance(&a), player_index);
+            }
+
             let p = game.player_mut(player_index);
-            let old = p.advances.len();
-            p.advances.retain(|a| a.government.is_none());
             let lost = old - p.advances.len();
             p.event_victory_points += lost as f32;
             if lost > 0 {
                 game.add_info_log_item(&format!(
-                    "{player_name} lost {lost} government advances due to Anarchy -\
+                    "{player_name} lost {lost} government advances due to Anarchy - \
                      adding {lost} victory points",
                 ));
 

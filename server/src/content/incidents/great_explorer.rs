@@ -1,14 +1,12 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::action::Action;
 use crate::action_card::{ActionCard, ActionCardBuilder};
 use crate::city::found_city;
 use crate::content::incidents::great_persons::{
     great_person_action_card, great_person_description,
 };
-use crate::content::persistent_events::{EventResponse, PaymentRequest, PositionRequest};
+use crate::content::persistent_events::{PaymentRequest, PositionRequest};
 use crate::explore::move_to_unexplored_block;
 use crate::game::Game;
-use crate::log::current_player_turn_log;
 use crate::map::{BlockPosition, UNEXPLORED_BLOCK, get_map_setup};
 use crate::payment::PaymentOptions;
 use crate::playing_actions::ActionCost;
@@ -40,7 +38,10 @@ pub(crate) fn great_explorer() -> ActionCard {
         .add_position_request(
             |e| &mut e.play_action_card,
             8,
-            |game, player_index, _| Some(place_city_request(game, player_index)),
+            |game, player_index, a| {
+                a.selected_position
+                    .map(|pos| place_city_request(game, player_index, pos))
+            },
             |game, s, a| {
                 let pos = s.choice.first().copied();
                 if let Some(pos) = pos {
@@ -85,8 +86,12 @@ pub(crate) fn explore_adjacent_block(builder: ActionCardBuilder) -> ActionCardBu
         |e| &mut e.play_action_card,
         9,
         |game, player_index, _| Some(action_explore_request(game, player_index)),
-        |game, s, _| {
-            let position = s.choice[0];
+        |game, s, a| {
+            let Some(&position) = s.choice.first() else {
+                game.add_info_log_item(&format!("{} decided not to explore", s.player_name));
+                return;
+            };
+            a.selected_position = Some(position);
             game.add_info_log_item(&format!("{} explored {}", s.player_name, position));
             let dest = game
                 .map
@@ -101,23 +106,10 @@ pub(crate) fn explore_adjacent_block(builder: ActionCardBuilder) -> ActionCardBu
     builder1
 }
 
-fn place_city_request(game: &mut Game, player_index: usize) -> PositionRequest {
+fn place_city_request(game: &mut Game, player_index: usize, position: Position) -> PositionRequest {
     if !game.player(player_index).can_afford(&city_cost()) {
         game.add_info_log_item("Player cannot afford to build a city");
     }
-
-    let a = current_player_turn_log(game)
-        .items
-        .iter()
-        .rev()
-        .find_map(|l| {
-            if let Action::Response(EventResponse::SelectPositions(p)) = &l.action {
-                Some(p[0])
-            } else {
-                None
-            }
-        })
-        .expect("position not found");
 
     let setup = get_map_setup(game.human_players_count());
     let choices = setup
@@ -125,7 +117,7 @@ fn place_city_request(game: &mut Game, player_index: usize) -> PositionRequest {
         .into_iter()
         .find_map(|p| {
             let t = tiles(&p);
-            t.contains(&a).then_some(t)
+            t.contains(&position).then_some(t)
         })
         .expect("position not found");
 

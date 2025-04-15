@@ -223,7 +223,7 @@
                         "infantry": 2
                       }
                     },
-                    "result": "DefenderWins"
+                    "result": "Draw"
                   }
                 }
               ]
@@ -253,7 +253,7 @@
       "Player1 removed 1 infantry",
       "Player2 has to remove all of their defending units",
       "Player2 removed 2 infantry",
-      "Defender wins"
+      "Battle ends in a draw"
     ]
   ],
   "undo_limit": 2,

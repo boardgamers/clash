@@ -92,10 +92,10 @@ fn test_change_government() {
         vec![TestAction::not_undoable(
             0,
             Action::Response(EventResponse::ChangeGovernmentType(
-                ChangeGovernmentType::ChangeGovernment(ChangeGovernment {
-                    new_government: String::from("Theocracy"),
-                    additional_advances: vec![String::from("Devotion")],
-                }),
+                ChangeGovernmentType::ChangeGovernment(ChangeGovernment::new(
+                    String::from("Theocracy"),
+                    vec![String::from("Devotion")],
+                )),
             )),
         )],
     );
