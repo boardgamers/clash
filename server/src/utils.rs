@@ -94,17 +94,22 @@ fn get_current_time() -> Duration {
 
 #[derive(Clone, Default)]
 pub struct Rng {
-    pub(crate) seed: u128,
+    pub seed: u128,
 }
 
 impl Rng {
     #[must_use]
-    pub(crate) fn from_seed(seed: u128) -> Self {
+    pub fn from_seed(seed: u128) -> Self {
         Self { seed }
     }
 
+    /// Generates a random number generator from a string seed, which has t be a number.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the seed is not a number.
     #[must_use]
-    pub(crate) fn from_seed_string(seed: &str) -> Self {
+    pub fn from_seed_string(seed: &str) -> Self {
         let seed = if seed.is_empty() {
             0
         } else {
@@ -118,6 +123,10 @@ impl Rng {
         let seed = get_current_time().as_nanos();
         let seed = next_seed(seed);
         Self { seed }
+    }
+
+    pub fn next_seed(&mut self) {
+        self.seed = next_seed(self.seed);
     }
 
     pub fn range(&mut self, start: usize, end: usize) -> usize {
@@ -238,10 +247,10 @@ pub mod tests {
 
     #[test]
     fn test_rng_many_iterations() {
-        const ITERATIONS: usize = 10_000;
+        const ITERATIONS: usize = 100_000;
         const INITIAL_ITERATIONS: usize = 1_000_000;
         const MODULO: usize = 12;
-        const TOLERANCE_PERCENTAGE: f32 = 15.;
+        const TOLERANCE_PERCENTAGE: f32 = 10.;
 
         const EXPECTED_OCCURRENCES: usize = ITERATIONS / MODULO;
         const TOLERANCE: usize =
@@ -274,8 +283,8 @@ pub mod tests {
                     .sorted_by_key(|(value, _)| *value)
                     .map(|(value, count)| format!(
                         "{}{value} | {}{count}{}",
-                        " ".repeat(5 - value.to_string().len()),
-                        " ".repeat(5 - count.to_string().len()),
+                        " ".repeat(6 - value.to_string().len()),
+                        " ".repeat(6 - count.to_string().len()),
                         if (count as isize - EXPECTED_OCCURRENCES as isize).unsigned_abs()
                             > TOLERANCE
                         {
@@ -292,20 +301,22 @@ pub mod tests {
 
     #[test]
     fn test_rng_many_seeds() {
-        const ITERATIONS: usize = 10_000;
+        const ITERATIONS: usize = 100_000;
         const MODULO: usize = 12;
-        const TOLERANCE_PERCENTAGE: f32 = 15.;
+        const TOLERANCE_PERCENTAGE: f32 = 10.;
 
         const EXPECTED_OCCURRENCES: usize = ITERATIONS / MODULO;
         const TOLERANCE: usize =
             (EXPECTED_OCCURRENCES as f32 * TOLERANCE_PERCENTAGE * 0.01) as usize;
 
         let mut results = HashMap::new();
+        let rng = Rng::new();
 
         for i in 0..ITERATIONS {
-            let mut rng = Rng::new();
-            rng.seed = rng.seed.wrapping_add(i as u128);
-            let result = rng.range(0, MODULO);
+            let mut new_rng = rng.clone();
+            new_rng.seed = new_rng.seed.wrapping_add(i as u128);
+            new_rng.next_seed();
+            let result = new_rng.range(0, MODULO);
             *results.entry(result).or_insert(0) += 1_usize;
         }
 
@@ -323,8 +334,8 @@ pub mod tests {
                     .sorted_by_key(|(value, _)| *value)
                     .map(|(value, count)| format!(
                         "{}{value} | {}{count}{}",
-                        " ".repeat(5 - value.to_string().len()),
-                        " ".repeat(5 - count.to_string().len()),
+                        " ".repeat(6 - value.to_string().len()),
+                        " ".repeat(6 - count.to_string().len()),
                         if (count as isize - EXPECTED_OCCURRENCES as isize).unsigned_abs()
                             > TOLERANCE
                         {

@@ -1,9 +1,11 @@
 use std::time::Duration;
 
+use tokio::runtime::Runtime;
+
 use crate::{
     action::{self, Action, ActionType},
     ai_actions,
-    game::{Game, GameState},
+    game::{Game, GameData, GameState},
     playing_actions::PlayingAction,
     position::Position,
     utils::{self, Rng},
@@ -11,6 +13,7 @@ use crate::{
 
 const ACTION_SCORE_WEIGHTING: f64 = 1.0;
 const ADAPTIVE_DIFFICULTY_SCORE_THRESHOLD: f64 = 10.0;
+const PARALLELIZATION: usize = 24;
 
 pub struct AI {
     rng: Rng,
@@ -83,6 +86,9 @@ impl AI {
                 .expect("there should be 1 available action")
                 .1;
         }
+
+        let runtime = Runtime::new().expect("failed to create runtime");
+
         //todo: dynamic thinking time
         let thinking_time_per_action = self.thinking_time / actions.len() as u32;
 
@@ -96,15 +102,15 @@ impl AI {
         let evaluations = actions
             .iter()
             .map(|(action_group, action)| {
-                evaluate_action(
-                    game,
-                    action,
-                    action_group,
-                    &mut self.rng,
-                    &thinking_time_per_action,
-                )
-                .powf(difficulty_factor)
-                .powf(difficulty_factor)
+                runtime
+                    .block_on(evaluate_action(
+                        game,
+                        action,
+                        action_group,
+                        &mut self.rng,
+                        &thinking_time_per_action,
+                    ))
+                    .powf(difficulty_factor)
             })
             .collect::<Vec<f64>>();
 
@@ -167,7 +173,7 @@ impl AI {
     }
 }
 
-fn evaluate_action(
+async fn evaluate_action(
     game: &Game,
     action: &Action,
     action_group: &ActionType,
@@ -180,32 +186,48 @@ fn evaluate_action(
     let mut game = game.clone();
     game.supports_undo = false;
     let game = action::execute_action(game, action.clone(), player_index);
-    let mut monte_carlo_score = 0.0;
     let mut iterations = 0;
     let start_time = std::time::Instant::now();
+    let mut score = 0.0;
     loop {
-        let new_game = monte_carlo_run(game.clone(), rng);
-        let ai_score = new_game.players[player_index].victory_points(&new_game) as f64;
-        let mut max_opponent_score = 0.0;
-        for (i, player) in new_game.players.iter().enumerate() {
-            if i != player_index {
-                let opponent_score = player.victory_points(&new_game) as f64;
-                if opponent_score > max_opponent_score {
-                    max_opponent_score = opponent_score;
-                }
-            }
+        let mut handles = Vec::new();
+        for _ in 0..PARALLELIZATION {
+            rng.seed = rng.seed.wrapping_add(1);
+            rng.next_seed();
+            let thread_rng = rng.clone();
+            let new_game = game.cloned_data();
+            let handle =
+                tokio::spawn(async move { monte_carlo_score(thread_rng, player_index, new_game) });
+            handles.push(handle);
         }
-        monte_carlo_score += ai_score - max_opponent_score;
-        iterations += 1;
+        for handle in handles {
+            score += handle.await.expect("multi-threading error");
+        }
+        iterations += PARALLELIZATION;
         if start_time.elapsed() >= *thinking_time {
             break;
         }
     }
     println!(
         "Monte Carlo iterations: {iterations}. Score: {}, {action_score}, {action_group_score}",
-        monte_carlo_score / iterations as f64
+        score / iterations as f64
     );
-    (monte_carlo_score / iterations as f64) * action_score * action_group_score
+    (score / iterations as f64) * action_score * action_group_score
+}
+
+fn monte_carlo_score(mut rng: Rng, player_index: usize, game_data: GameData) -> f64 {
+    let new_game = monte_carlo_run(Game::from_data(game_data), &mut rng);
+    let ai_score = new_game.players[player_index].victory_points(&new_game) as f64;
+    let mut max_opponent_score = 0.0;
+    for (i, player) in new_game.players.iter().enumerate() {
+        if i != player_index {
+            let opponent_score = player.victory_points(&new_game) as f64;
+            if opponent_score > max_opponent_score {
+                max_opponent_score = opponent_score;
+            }
+        }
+    }
+    ai_score - max_opponent_score
 }
 
 fn monte_carlo_run(mut game: Game, rng: &mut Rng) -> Game {
@@ -386,17 +408,18 @@ pub fn rate_action(game: &Game, action: &Action, evaluation_time: Duration) -> f
         .position(|(_, a)| a == action)
         .expect("action not found in available actions");
     let mut rng = Rng::new();
+    let runtime = Runtime::new().expect("failed to create runtime");
     let thinking_time_per_action = evaluation_time / all_actions.len() as u32;
     let evaluations = all_actions
         .iter()
         .map(|(action_group, action)| {
-            evaluate_action(
+            runtime.block_on(evaluate_action(
                 game,
                 action,
                 action_group,
                 &mut rng,
                 &thinking_time_per_action,
-            )
+            ))
         })
         .collect::<Vec<f64>>();
     let max_evaluation = evaluations
