@@ -240,6 +240,13 @@ fn test_great_architect() {
                 .without_json_comparison(),
             TestAction::undoable(
                 0,
+                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+                    "A1",
+                )])),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(
+                0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::new(
                     2, 3, 3, 0, 0, 0, 1,
                 )])),
