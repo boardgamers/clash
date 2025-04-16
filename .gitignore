@@ -6,5 +6,6 @@ wbindgen/
 .history/
 *.cmd/
 *.result.json
+failure*.json
 game.json
 node_modules/

@@ -26,6 +26,11 @@
           "city_pieces": {},
           "mood_state": "Happy",
           "position": "A1"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "position": "A2"
         }
       ],
       "units": [

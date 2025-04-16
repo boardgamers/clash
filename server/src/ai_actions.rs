@@ -1,10 +1,7 @@
 use crate::action::{Action, ActionType};
 use crate::card::validate_card_selection;
 use crate::city::{City, MoodState};
-use crate::collect::{
-    CollectInfo, PositionCollection, add_collect, available_collect_actions, collect_action,
-    get_total_collection, possible_resource_collections,
-};
+use crate::collect::{available_collect_actions, collect_action};
 use crate::construct::{Construct, available_buildings};
 use crate::content::advances;
 use crate::content::advances::economy::tax_options;
@@ -22,11 +19,9 @@ use crate::happiness::{available_happiness_actions, happiness_action, increase_h
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::playing_actions::{
-    Collect, IncreaseHappiness, PlayingAction, PlayingActionType, Recruit, base_and_custom_action,
+    IncreaseHappiness, PlayingAction, PlayingActionType, Recruit, base_and_custom_action,
 };
-use crate::position::Position;
 use crate::recruit::recruit_cost;
-use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::{ChangeGovernment, ChangeGovernmentType, government_advances};
 use crate::unit::{UnitType, Units};
@@ -186,6 +181,10 @@ fn available_action_cards(game: &Game, p: &Player) -> Vec<Action> {
                 // todo great prophet is buggy
                 return None;
             }
+            if *card == 13 || *card == 14 {
+                // todo mercenaries is buggy
+                return None;
+            }
             if *card == 124 {
                 // todo great warlord needs movement to work
                 return None;
@@ -249,9 +248,13 @@ fn collect_actions(p: &Player, game: &Game) -> Vec<Action> {
         .iter()
         .filter(|city| city.can_activate())
         .flat_map(|city| {
-            city_collections(game, p, city)
-                .into_iter()
-                .map(|c| collect_action(&action_type, c))
+            city.possible_collections.iter().filter_map({
+                let value = action_type.clone();
+                move |c| {
+                    p.can_gain(c.total.clone())
+                        .then_some(collect_action(&value, c.clone()))
+                }
+            })
         })
         .collect_vec()
 }
@@ -376,8 +379,18 @@ fn responses(event: &PersistentEventState, player: &Player, game: &Game) -> Vec<
     let h = event.player.handler.as_ref().expect("handler");
     match h.request.clone() {
         PersistentEventRequest::Payment(p) => {
+            let mut available = player.resources.clone();
             vec![EventResponse::Payment(
-                p.into_iter().map(|p| payment(&p.cost, player)).collect(),
+                p.into_iter()
+                    .map(|p| {
+                        let o = &p.cost;
+                        let pile = o
+                            .first_valid_payment(&available)
+                            .unwrap_or(ResourcePile::empty());
+                        available -= pile.clone();
+                        pile
+                    })
+                    .collect(),
             )]
         }
         PersistentEventRequest::ResourceReward(r) => {
@@ -517,101 +530,6 @@ fn select_multi<T: Clone>(
 }
 
 #[must_use]
-pub fn city_collections(game: &Game, player: &Player, city: &City) -> Vec<Collect> {
-    let info = possible_resource_collections(game, city.position, player.index, &[], &[], false);
-
-    let all = ResourceType::all()
-        .into_iter()
-        .filter(|r| {
-            info.choices
-                .iter()
-                .any(|(_, choices)| choices.iter().any(|pile| pile.get(r) > 0))
-                && can_gain_resource(player, *r)
-        })
-        .collect_vec();
-    let l = all.len();
-    all.into_iter()
-        .permutations(l)
-        .map(|priority| city_collection(game, player, city, &priority))
-        .unique_by(Collect::total)
-        .filter(|c| c.total().amount() > 0) // todo check earlier?
-        .collect_vec()
-}
-
-fn can_gain_resource(p: &Player, r: ResourceType) -> bool {
-    match r {
-        ResourceType::MoodTokens | ResourceType::CultureTokens => true,
-        _ => p.resources.get(&r) < p.resource_limit.get(&r),
-    }
-}
-
-fn city_collection(
-    game: &Game,
-    player: &Player,
-    city: &City,
-    priority: &[ResourceType],
-) -> Collect {
-    let mut c: Vec<PositionCollection> = vec![];
-
-    loop {
-        let info = possible_resource_collections(game, city.position, player.index, &c, &c, false);
-
-        let Some((pos, pile)) = pick_resource(player, &info, &c, priority) else {
-            break;
-        };
-        let new = add_collect(&info, pos, &pile, &c);
-
-        if get_total_collection(game, player.index, city.position, &new, false).is_err() {
-            break;
-        }
-
-        c = new;
-    }
-
-    Collect::new(city.position, c)
-}
-
-fn pick_resource(
-    player: &Player,
-    info: &CollectInfo,
-    collected: &[PositionCollection],
-    priority: &[ResourceType],
-) -> Option<(Position, ResourcePile)> {
-    let used = collected
-        .iter()
-        .chunk_by(|c| c.position)
-        .into_iter()
-        .map(|(p, group)| (p, group.map(|c| c.times).sum::<u32>()))
-        .collect_vec();
-
-    let available = info
-        .choices
-        .iter()
-        // .sorted_by_key(|(pos, _)| **pos)
-        .filter(|(pos, _)| {
-            let u = used
-                .iter()
-                .find_map(|(p, u)| (*p == **pos).then_some(*u))
-                .unwrap_or(0);
-
-            u < info.max_per_tile
-        })
-        .collect_vec();
-
-    priority.iter().find_map(|r| {
-        if !can_gain_resource(player, *r) {
-            return None;
-        }
-
-        available.iter().find_map(|(pos, choices)| {
-            choices
-                .iter()
-                .find_map(|pile| (pile.get(r) > 0).then_some((**pos, pile.clone())))
-        })
-    })
-}
-
-#[must_use]
 fn calculate_influence(game: &Game, player: &Player) -> Option<SelectedStructure> {
     available_influence_culture(game, player.index)
         .into_iter()
@@ -625,7 +543,7 @@ fn construct(p: &Player, game: &Game) -> Vec<Action> {
     p.cities
         .iter()
         .flat_map(|city| {
-            if city.can_activate() {
+            if !city.can_activate() {
                 return vec![];
             }
             get_construct_actions(game, p, city)
@@ -636,14 +554,10 @@ fn construct(p: &Player, game: &Game) -> Vec<Action> {
 pub(crate) fn get_construct_actions(game: &Game, p: &Player, city: &City) -> Vec<Action> {
     available_buildings(game, p.index, city.position)
         .iter()
-        .map(|(building, port)| {
+        .map(|(building, cost, port)| {
             Action::Playing(PlayingAction::Construct(
-                Construct::new(
-                    city.position,
-                    *building,
-                    payment(&p.construct_cost(game, *building, None).cost, p),
-                )
-                .with_port_position(*port),
+                Construct::new(city.position, *building, payment(&cost.cost, p))
+                    .with_port_position(*port),
             ))
         })
         .collect()

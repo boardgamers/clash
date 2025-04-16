@@ -208,7 +208,7 @@ fn great_artist() -> ActionCard {
             ));
             game.player_mut(s.player_index)
                 .get_city_mut(position)
-                .mood_state = MoodState::Happy;
+                .set_mood_state(MoodState::Happy);
         },
     )
     .build()

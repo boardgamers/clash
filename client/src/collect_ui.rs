@@ -77,22 +77,23 @@ pub fn collect_dialog(rc: &RenderContext, collect: &CollectResources) -> StateUp
     let game = rc.game;
     let city = game.city(collect.player_index, collect.city_position);
 
-    let tooltip = get_total_collection(
+    let result = get_total_collection(
         game,
         collect.player_index,
         collect.city_position,
         &collect.collections,
         true,
-    )
-    .map_or(
+    );
+    let tooltip = result.as_ref().map_or(
         OkTooltip::Invalid("Too many resources selected".to_string()),
         |i| OkTooltip::Valid(format!("Collect {}", i.total)),
     );
+    let total = result.map_or(ResourcePile::empty(), |i| i.total);
 
     if ok_button(rc, tooltip) {
         let extra = collect.extra_resources();
 
-        let c = Collect::new(collect.city_position, collect.collections.clone());
+        let c = Collect::new(collect.city_position, collect.collections.clone(), total);
 
         return StateUpdate::execute_activation(
             collect_action(&collect.custom.action_type, c),

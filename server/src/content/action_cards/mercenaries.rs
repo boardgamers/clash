@@ -34,7 +34,7 @@ pub(crate) fn mercenaries(id: u8, tactics_card: TacticsCardFactory) -> ActionCar
     .tactics_card(tactics_card)
     .add_position_request(
         |e| &mut e.play_action_card,
-        100,
+        2,
         |game, player, _| {
             let p = game.player(player);
             let r = barbarian_army_positions_in_range2(game, p);
@@ -59,7 +59,7 @@ pub(crate) fn mercenaries(id: u8, tactics_card: TacticsCardFactory) -> ActionCar
     )
     .add_payment_request_listener(
         |e| &mut e.play_action_card,
-        99,
+        1,
         |_game, _player, a| {
             Some(vec![PaymentRequest::new(
                 PaymentOptions::sum(
@@ -93,9 +93,10 @@ pub(crate) fn mercenaries(id: u8, tactics_card: TacticsCardFactory) -> ActionCar
 }
 
 fn move_army(b: ActionCardBuilder, i: i32) -> ActionCardBuilder {
-    let src_prio = i * 3 + 2;
-    let dst_prio = i * 3 + 1;
-    let reinforce_prio = i * 3;
+    let base_prio = i * -5;
+    let src_prio = base_prio - 2;
+    let dst_prio = base_prio - 4;
+    let reinforce_prio = base_prio - 6;
     let b = b
         .add_position_request(
             |e| &mut e.play_action_card,

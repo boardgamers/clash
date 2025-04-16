@@ -1,5 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::city::City;
+use crate::collect::reset_collect_within_range_for_all;
 use crate::combat::move_with_possible_combat;
 use crate::consts::STACK_LIMIT;
 use crate::content::advances::theocracy::cities_that_can_add_units;
@@ -372,6 +373,7 @@ fn add_barbarians_city(builder: IncidentBuilder) -> IncidentBuilder {
             let p = game.player_mut(b);
             p.cities.push(City::new(b, pos));
             p.add_unit(pos, UnitType::Infantry);
+            reset_collect_within_range_for_all(game, pos);
         },
     )
 }

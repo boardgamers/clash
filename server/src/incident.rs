@@ -4,6 +4,7 @@ use crate::action_card::ActionCard;
 use crate::barbarians::{barbarians_move, barbarians_spawn};
 use crate::card::{HandCard, draw_card_from_pile};
 use crate::city::MoodState;
+use crate::collect::reset_collect_within_range_for_all;
 use crate::content::incidents;
 use crate::content::incidents::great_persons::GREAT_PERSON_OFFSET;
 use crate::content::persistent_events::{
@@ -697,6 +698,7 @@ fn exhausted_land(builder: IncidentBuilder) -> IncidentBuilder {
             ));
             let t = game.map.tiles.get_mut(&pos).expect("tile should exist");
             *t = Terrain::Exhausted(Box::new(t.clone()));
+            reset_collect_within_range_for_all(game, pos);
         },
     )
 }
@@ -745,7 +747,9 @@ pub(crate) fn decrease_mod_and_log(
             }
             MoodModifier::MakeAngry => {
                 game.add_info_log_item(&format!("{name} made city {pos} Angry"));
-                game.player_mut(s.player_index).get_city_mut(pos).mood_state = MoodState::Angry;
+                game.player_mut(s.player_index)
+                    .get_city_mut(pos)
+                    .set_mood_state(MoodState::Angry);
             }
         }
     }

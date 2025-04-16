@@ -426,6 +426,17 @@ impl Player {
         self.resources -= resources;
     }
 
+    pub(crate) fn can_gain_resource(&self, r: ResourceType, amount: u32) -> bool {
+        match r {
+            ResourceType::MoodTokens | ResourceType::CultureTokens => true,
+            _ => self.resources.get(&r) + amount <= self.resource_limit.get(&r),
+        }
+    }
+
+    pub(crate) fn can_gain(&self, r: ResourcePile) -> bool {
+        r.into_iter().all(|(t, a)| self.can_gain_resource(t, a))
+    }
+
     #[must_use]
     pub fn can_advance_in_change_government(&self, advance: &Advance) -> bool {
         if self.has_advance(&advance.name) {

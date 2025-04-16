@@ -132,10 +132,11 @@ fn basic_actions() {
     let tile_position = Position::new(1, 0);
     game.map.tiles.insert(tile_position, Mountain);
     game.map.tiles.insert(city_position, Fertile);
-    let collect_action = Action::Playing(Collect(playing_actions::Collect {
+    let collect_action = Action::Playing(Collect(playing_actions::Collect::new(
         city_position,
-        collections: vec![PositionCollection::new(tile_position, ResourcePile::ore(1))],
-    }));
+        vec![PositionCollection::new(tile_position, ResourcePile::ore(1))],
+        ResourcePile::ore(1),
+    )));
     let game = game_api::execute(game, collect_action, 0);
     let player = &game.players[0];
     assert_eq!(
@@ -426,13 +427,14 @@ fn test_collect() {
         "collect",
         vec![TestAction::undoable(
             0,
-            Action::Playing(Collect(playing_actions::Collect {
-                city_position: Position::from_offset("C2"),
-                collections: vec![
+            Action::Playing(Collect(playing_actions::Collect::new(
+                Position::from_offset("C2"),
+                vec![
                     PositionCollection::new(Position::from_offset("B1"), ResourcePile::ore(1)),
                     PositionCollection::new(Position::from_offset("B2"), ResourcePile::wood(1)),
                 ],
-            })),
+                ResourcePile::ore(1) + ResourcePile::wood(1),
+            ))),
         )],
     );
 }

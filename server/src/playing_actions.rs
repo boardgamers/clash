@@ -26,23 +26,21 @@ use crate::{
 pub struct Collect {
     pub city_position: Position,
     pub collections: Vec<PositionCollection>,
+    pub total: ResourcePile,
 }
 
 impl Collect {
     #[must_use]
-    pub fn new(city_position: Position, collections: Vec<PositionCollection>) -> Self {
+    pub fn new(
+        city_position: Position,
+        collections: Vec<PositionCollection>,
+        total: ResourcePile,
+    ) -> Self {
         Self {
             city_position,
             collections,
+            total,
         }
-    }
-
-    #[must_use]
-    pub fn total(&self) -> ResourcePile {
-        self.collections
-            .iter()
-            .map(PositionCollection::total)
-            .fold(ResourcePile::empty(), |a, b| a + b)
     }
 }
 
