@@ -58,6 +58,7 @@ pub(crate) fn move_to_unexplored_block(
     let ship_explore = is_any_ship(game, player_index, units);
 
     let instant_explore = |game: &mut Game, rotation: Rotation, ship_can_teleport| {
+        add_block_tiles_with_log(game, &move_to.position, &move_to.block, rotation);
         if let Some(destination) = destination {
             move_to_explored_tile(
                 game,
@@ -162,8 +163,6 @@ fn move_to_explored_tile(
     destination: Position,
     ship_can_teleport: bool,
 ) {
-    add_block_tiles_with_log(game, &block.position, &block.block, rotation);
-
     if is_any_ship(game, player_index, units) && game.map.is_land(destination) {
         let player = game.player(player_index);
         let used_navigation = player.has_advance(NAVIGATION)
@@ -294,6 +293,7 @@ pub(crate) fn explore_resolution() -> Builtin {
             let valid_rotation = rotate_by == 0 || rotate_by == 3;
             assert!(valid_rotation, "Invalid rotation {rotate_by}");
 
+            add_block_tiles_with_log(game, &unexplored_block.position, &unexplored_block.block, rotation);
             if let Some(destination) = r.destination {
                 move_to_explored_tile(
                     game,

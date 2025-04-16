@@ -90,7 +90,7 @@
       ],
       [
         "A7",
-        "Unexplored"
+        "Fertile"
       ],
       [
         "B2",
@@ -110,11 +110,11 @@
       ],
       [
         "B6",
-        "Unexplored"
+        "Fertile"
       ],
       [
         "B7",
-        "Unexplored"
+        "Barren"
       ],
       [
         "C2",
@@ -138,7 +138,7 @@
       ],
       [
         "C7",
-        "Unexplored"
+        "Fertile"
       ],
       [
         "C8",
@@ -330,20 +330,6 @@
       },
       {
         "position": {
-          "top_tile": "B6",
-          "rotation": 0
-        },
-        "block": {
-          "terrain": [
-            "Fertile",
-            "Fertile",
-            "Fertile",
-            "Barren"
-          ]
-        }
-      },
-      {
-        "position": {
           "top_tile": "F6",
           "rotation": 0
         },
@@ -530,6 +516,54 @@
                         "last_priority_used": 0,
                         "player": 1
                       }
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/map/tiles/2/1",
+                      "value": "Unexplored"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/map/tiles/7/1",
+                      "value": "Unexplored"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/map/tiles/8/1",
+                      "value": "Unexplored"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/map/tiles/14/1",
+                      "value": "Unexplored"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/map/unexplored_blocks/6/block/terrain/3",
+                      "value": "Barren"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/map/unexplored_blocks/6/position/top_tile",
+                      "value": "B6"
+                    },
+                    {
+                      "op": "add",
+                      "path": "/map/unexplored_blocks/7",
+                      "value": {
+                        "block": {
+                          "terrain": [
+                            "Fertile",
+                            "Fertile",
+                            "Fertile",
+                            "Forest"
+                          ]
+                        },
+                        "position": {
+                          "rotation": 0,
+                          "top_tile": "F6"
+                        }
+                      }
                     }
                   ]
                 },
@@ -683,7 +717,8 @@
       "Player2 explored B6"
     ],
     [
-      "Player2 chose the orientation of the newly explored tiles"
+      "Player2 chose the orientation of the newly explored tiles",
+      "Explored tiles A7=Fertile, B6=Fertile, B7=Barren, C7=Fertile"
     ],
     [
       "Player2 decided to build a city at B6"
