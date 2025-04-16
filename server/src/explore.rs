@@ -10,6 +10,7 @@ use crate::movement::{move_units, stop_current_move};
 use crate::position::Position;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use crate::collect::reset_collect_within_range_for_all;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct ExploreResolutionState {
@@ -258,8 +259,14 @@ fn add_block_tiles_with_log(
         .unexplored_blocks
         .retain(|b| b.position.top_tile != pos.top_tile);
 
-    let s = block
-        .tiles(pos, rotation)
+    let tiles = block
+        .tiles(pos, rotation);
+    
+    for (p, _) in &tiles {
+        reset_collect_within_range_for_all(game, *p);
+    }
+    
+    let s = tiles
         .into_iter()
         .map(|(position, tile)| format!("{position}={tile:?}"))
         .sorted()
