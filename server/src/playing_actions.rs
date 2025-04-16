@@ -25,7 +25,7 @@ use crate::{
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug, Hash)]
 pub struct Collect {
     pub city_position: Position,
-    pub collections: Vec<PositionCollection>, //todo do we need this?
+    pub collections: Vec<PositionCollection>,
     pub total: ResourcePile,
 }
 

@@ -106,13 +106,14 @@ pub fn get_total_collection(
         }
     }
 
-    apply_total_collect(collections, player, i)
+    apply_total_collect(collections, player, i, game)
 }
 
 fn apply_total_collect(
     collections: &[PositionCollection],
     player: &Player,
     mut i: CollectInfo,
+    game: &Game,
 ) -> Result<CollectInfo, String> {
     let Some(total) = collections
         .iter()
@@ -124,7 +125,7 @@ fn apply_total_collect(
     };
 
     i.total = total;
-    player.trigger_event(|e| &e.collect_total, &mut i, &(), &());
+    player.trigger_event(|e| &e.collect_total, &mut i, game, &());
     Ok(i)
 }
 
@@ -405,7 +406,7 @@ fn city_collection_uncached(
         let info = possible_resource_collections(game, city.position, player.index, &c, &c, false);
 
         let Some((pos, pile)) = pick_resource(&info, &c, priority) else {
-            return apply_total_collect(&c, player, info)
+            return apply_total_collect(&c, player, info, game)
                 .ok()
                 .map(|i| Collect::new(city.position, c, i.total));
         };
