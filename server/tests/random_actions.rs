@@ -1,8 +1,6 @@
 use crate::common::{GamePath, to_json, write_result};
 use async_std::task;
-use server::city::City;
 use server::game::Game;
-use server::map::Terrain;
 use server::{
     action::{self, Action},
     ai_actions,
@@ -76,17 +74,19 @@ fn random_actions_iterations(mut rng: Rng) {
     }
 }
 
-fn build_adjacent_cities(game: &mut Game) {
+fn build_adjacent_cities(_game: &mut Game) {
     // only until move works
     // this way we can test constructing buildings
-    for i in game.human_players(0) {
-        let city = &game.player(i).cities[0];
-        let pos = city
-            .position
-            .neighbors()
-            .into_iter()
-            .find(|p| game.map.get(*p) == Some(&Terrain::Barren))
-            .expect("no barren space");
-        game.player_mut(i).cities.push(City::new(i, pos));
-    }
+
+    // todo makes it too slow
+    // for i in game.human_players(0) {
+    //     let city = &game.player(i).cities[0];
+    //     let pos = city
+    //         .position
+    //         .neighbors()
+    //         .into_iter()
+    //         .find(|p| game.map.get(*p) == Some(&Terrain::Barren))
+    //         .expect("no barren space");
+    //     game.player_mut(i).cities.push(City::new(i, pos));
+    // }
 }
