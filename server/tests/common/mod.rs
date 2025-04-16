@@ -133,7 +133,7 @@ fn clean_json(expected: &str) -> String {
     expected.replace([' ', '\t', '\n', '\r'], "")
 }
 
-fn write_result(actual: &str, result_path: &GamePath) {
+pub(crate) fn write_result(actual: &str, result_path: &GamePath) {
     let mut file = OpenOptions::new()
         .write(true)
         .create(true)
@@ -355,7 +355,7 @@ fn assert_illegal_action(game: Game, player: usize, action: Action) {
     assert!(err.is_err(), "execute action should panic");
 }
 
-fn to_json(game: &Game) -> String {
+pub(crate) fn to_json(game: &Game) -> String {
     serde_json::to_string_pretty(&game.cloned_data()).expect("game data should be serializable")
 }
 

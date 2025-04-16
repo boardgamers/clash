@@ -1,4 +1,8 @@
+use crate::common::{GamePath, to_json, write_result};
 use async_std::task;
+use server::city::City;
+use server::game::Game;
+use server::map::Terrain;
 use server::{
     action::{self, Action},
     ai_actions,
@@ -7,6 +11,9 @@ use server::{
     playing_actions::PlayingAction,
     utils::{Rng, Shuffle},
 };
+use std::panic::{AssertUnwindSafe, catch_unwind};
+
+mod common;
 
 const ITERATIONS: usize = 96;
 
@@ -38,6 +45,7 @@ fn random_actions_iterations(mut rng: Rng) {
     let seed = rng.range(0, 10_usize.pow(15)).to_string();
     let mut game = game_setup::setup_game(2, seed, true);
     game.supports_undo = false;
+    build_adjacent_cities(&mut game);
     loop {
         if matches!(game.state, GameState::Finished) {
             break;
@@ -52,6 +60,33 @@ fn random_actions_iterations(mut rng: Rng) {
         let action = actions
             .take_random_element(&mut rng)
             .unwrap_or(Action::Playing(PlayingAction::EndTurn));
-        game = action::execute_action(game, action, player_index);
+
+        game = catch_unwind(AssertUnwindSafe(|| {
+            action::execute_action(game.clone(), action.clone(), player_index)
+        }))
+        .unwrap_or_else(move |e| {
+            use chrono::Utc;
+            let rfc_format = Utc::now().to_rfc3339();
+            let file = format!("failure{rfc_format}");
+
+            write_result(&to_json(&game), &GamePath::new(".", &file));
+
+            panic!("action {action:?}\nresult stored in {file}.json: {e:?}")
+        });
+    }
+}
+
+fn build_adjacent_cities(game: &mut Game) {
+    // only until move works
+    // this way we can test constructing buildings
+    for i in game.human_players(0) {
+        let city = &game.player(i).cities[0];
+        let pos = city
+            .position
+            .neighbors()
+            .into_iter()
+            .find(|p| game.map.get(*p) == Some(&Terrain::Barren))
+            .expect("no barren space");
+        game.player_mut(i).cities.push(City::new(i, pos));
     }
 }

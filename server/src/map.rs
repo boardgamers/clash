@@ -3,8 +3,7 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use crate::city::City;
-use crate::city::MoodState::Happy;
+use crate::city::{City, MoodState};
 use crate::consts::NON_HUMAN_PLAYERS;
 use crate::player::Player;
 use crate::position::Position;
@@ -494,7 +493,7 @@ pub(crate) fn get_map_setup(player_count: usize) -> MapSetup {
 
 pub fn setup_home_city(player: &mut Player, pos: Position) {
     let mut city = City::new(player.index, pos);
-    city.mood_state = Happy;
+    city.set_mood_state(MoodState::Happy);
     player.cities.push(city);
     player.add_unit(pos, UnitType::Settler);
 }

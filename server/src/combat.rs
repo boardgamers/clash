@@ -343,7 +343,7 @@ pub(crate) fn conquer_city(
 
     if take_over {
         city.player_index = new_player_index;
-        city.mood_state = Angry;
+        city.set_mood_state(Angry);
         if attacker_is_human {
             for wonder in &city.pieces.wonders {
                 wonder.listeners.deinit(game, old_player_index);

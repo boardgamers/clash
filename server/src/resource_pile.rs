@@ -310,6 +310,43 @@ impl Sum for ResourcePile {
     }
 }
 
+impl IntoIterator for ResourcePile {
+    type Item = (ResourceType, u32);
+    type IntoIter = ResourceIntoIterator;
+
+    fn into_iter(self) -> Self::IntoIter {
+        ResourceIntoIterator {
+            pile: self,
+            index: 0,
+        }
+    }
+}
+
+pub struct ResourceIntoIterator {
+    pile: ResourcePile,
+    index: u8,
+}
+
+impl Iterator for ResourceIntoIterator {
+    type Item = (ResourceType, u32);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let index = self.index;
+        self.index += 1;
+        let p = &self.pile;
+        match index {
+            0 => Some((ResourceType::Food, p.food)),
+            1 => Some((ResourceType::Wood, p.wood)),
+            2 => Some((ResourceType::Ore, p.ore)),
+            3 => Some((ResourceType::Ideas, p.ideas)),
+            4 => Some((ResourceType::Gold, p.gold)),
+            5 => Some((ResourceType::MoodTokens, p.mood_tokens)),
+            6 => Some((ResourceType::CultureTokens, p.culture_tokens)),
+            _ => None,
+        }
+    }
+}
+
 impl Display for ResourcePile {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut resources = Vec::new();

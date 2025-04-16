@@ -191,6 +191,16 @@
       "event_info": {
         "State Religion": "used"
       }
+    },
+    {
+      "id": 2,
+      "civilization": "Barbarians",
+      "next_unit_id": 0
+    },
+    {
+      "id": 3,
+      "civilization": "Pirates",
+      "next_unit_id": 0
     }
   ],
   "map": {

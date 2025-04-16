@@ -2,6 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::barbarians::barbarians_bonus;
 use crate::cache;
+use crate::collect::invalidate_collect_cache;
 use crate::combat_listeners::{
     choose_fighter_casualties, combat_stats, offer_retreat, place_settler,
 };
@@ -97,6 +98,7 @@ pub fn get_all_uncached() -> Vec<Builtin> {
         build_wonder(),
         choose_carried_units_to_remove(),
         select_objectives(),
+        invalidate_collect_cache(),
         // combat related
         place_settler(),
         choose_fighter_casualties(),

@@ -327,7 +327,7 @@
                             "origin": {
                               "CivilCard": 13
                             },
-                            "priority": 79,
+                            "priority": -9,
                             "request": {
                               "SelectPositions": {
                                 "choices": [
@@ -342,7 +342,7 @@
                               }
                             }
                           },
-                          "last_priority_used": 79,
+                          "last_priority_used": -9,
                           "player": 0
                         }
                       ]

@@ -1,4 +1,5 @@
 use crate::card::HandCard;
+use crate::collect::reset_collection_stats;
 use crate::combat::{Combat, update_combat_strength};
 use crate::combat_listeners::CombatStrength;
 use crate::content::persistent_events::{
@@ -124,6 +125,7 @@ impl AbilityInitializerBuilder {
     }
 }
 
+#[must_use]
 pub(crate) trait AbilityInitializerSetup: Sized {
     fn builder(&mut self) -> &mut AbilityInitializerBuilder;
 
@@ -178,6 +180,12 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             priority,
             move |value, u, v, ()| listener(value, u, v),
         )
+    }
+
+    fn with_reset_collect_stats(self) -> Self {
+        self.add_one_time_ability_initializer(|game, player_index| {
+            reset_collection_stats(game.player_mut(player_index));
+        })
     }
 
     fn add_combat_round_start_listener(

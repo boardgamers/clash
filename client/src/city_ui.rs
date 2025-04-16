@@ -78,13 +78,10 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
     if !city.can_activate() || !rc.can_play_action(&PlayingActionType::Construct) {
         return vec![];
     }
-    let owner = rc.shown_player;
-
     available_buildings(rc.game, rc.shown_player.index, city.position)
         .into_iter()
-        .map(|(b, pos)| {
+        .map(|(b, cost_info, pos)| {
             let name = b.name();
-            let cost_info = owner.construct_cost(rc.game, b, None);
             let tooltip = format!(
                 "Built {}{} for {}{}",
                 name,
@@ -106,6 +103,7 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
                             city,
                             name,
                             ConstructionProject::Building(b, pos),
+                            &cost_info,
                         ),
                     ))
                 }),

@@ -1,3 +1,4 @@
+use crate::action::update_stats;
 use crate::action_card::gain_action_card_from_pile;
 use crate::consts::{ACTIONS, NON_HUMAN_PLAYERS};
 use crate::content::civilizations::{BARBARIANS, PIRATES};
@@ -100,6 +101,7 @@ pub fn setup_game(player_amount: usize, seed: String, setup: bool) -> Game {
         gain_objective_card_from_pile(&mut game, player_index);
     }
 
+    update_stats(&mut game);
     game.next_age();
     game
 }

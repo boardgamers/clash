@@ -274,6 +274,15 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
 
 fn open_dialog(rc: &RenderContext, city: Position, sel: RecruitSelection) -> StateUpdate {
     let p = rc.shown_player.index;
+    let cost = recruit_cost(
+        rc.shown_player,
+        &sel.amount.units,
+        city,
+        sel.amount.leader_name.as_ref(),
+        &sel.replaced_units,
+        None,
+    )
+    .unwrap();
     StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
         rc,
         rc.game.city(p, city),
@@ -287,6 +296,7 @@ fn open_dialog(rc: &RenderContext, city: Position, sel: RecruitSelection) -> Sta
             city
         ),
         ConstructionProject::Units(sel),
+        &cost,
     )))
 }
 
