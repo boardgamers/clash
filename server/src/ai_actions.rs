@@ -181,6 +181,10 @@ fn available_action_cards(game: &Game, p: &Player) -> Vec<Action> {
                 // todo great prophet is buggy
                 return None;
             }
+            if *card == 13 || *card == 14 {
+                // todo mercenaries is buggy
+                return None;
+            }
             if *card == 124 {
                 // todo great warlord needs movement to work
                 return None;
