@@ -411,44 +411,7 @@
                     "Playing": {
                       "ActionCard": 118
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 2
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/1/action_cards",
-                      "value": [
-                        118
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/1",
-                      "value": "Mining"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/2",
-                      "value": "Storage"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/1/advances/3"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/resources/mood_tokens",
-                      "value": 1
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -457,41 +420,7 @@
                         "B6"
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "remove",
-                      "path": "/events/0/event_type/ActionCard/selected_position"
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/0/handler",
-                      "value": {
-                        "origin": {
-                          "CivilCard": 118
-                        },
-                        "priority": 9,
-                        "request": {
-                          "SelectPositions": {
-                            "choices": [
-                              "B6",
-                              "D5",
-                              "F6"
-                            ],
-                            "description": "Choose a region to explore",
-                            "needed": {
-                              "end": 1,
-                              "start": 0
-                            }
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/1"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -629,7 +558,7 @@
       "Explored tiles A7=Fertile, B6=Fertile, B7=Barren, C7=Fertile"
     ]
   ],
-  "undo_limit": 2,
+  "undo_limit": 4,
   "actions_left": 1,
   "round": 1,
   "age": 1,

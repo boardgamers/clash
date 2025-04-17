@@ -430,6 +430,7 @@
                           "event_type": {
                             "StatusPhase": "CompleteObjectives"
                           },
+                          "last_priority_used": 0,
                           "player": 1
                         },
                         {

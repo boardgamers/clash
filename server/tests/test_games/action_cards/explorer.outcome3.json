@@ -355,30 +355,7 @@
                     "Playing": {
                       "ActionCard": 21
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 3
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/1/action_cards",
-                      "value": [
-                        21
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/resources/culture_tokens",
-                      "value": 2
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -387,41 +364,7 @@
                         "B6"
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "remove",
-                      "path": "/events/0/event_type/ActionCard/selected_position"
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/0/handler",
-                      "value": {
-                        "origin": {
-                          "CivilCard": 21
-                        },
-                        "priority": 9,
-                        "request": {
-                          "SelectPositions": {
-                            "choices": [
-                              "B6",
-                              "D5",
-                              "F6"
-                            ],
-                            "description": "Choose a region to explore",
-                            "needed": {
-                              "end": 1,
-                              "start": 0
-                            }
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/1"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -603,7 +546,7 @@
       "Player2 decided to gain a free settler at D8"
     ]
   ],
-  "undo_limit": 0,
+  "undo_limit": 2,
   "actions_left": 2,
   "round": 1,
   "age": 1,
