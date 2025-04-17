@@ -230,7 +230,7 @@ fn test_explorer() {
         vec![
             TestAction::undoable(1, Action::Playing(PlayingAction::ActionCard(21)))
                 .without_json_comparison(),
-            TestAction::undoable(
+            TestAction::not_undoable(
                 1,
                 Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
                     "B6",

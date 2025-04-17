@@ -1,4 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::collect::reset_collect_within_range_for_all;
 use crate::content::advances::NAVIGATION;
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{
@@ -10,7 +11,6 @@ use crate::movement::{move_units, stop_current_move};
 use crate::position::Position;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use crate::collect::reset_collect_within_range_for_all;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct ExploreResolutionState {
@@ -28,7 +28,6 @@ pub(crate) fn move_to_unexplored_tile(
     start: Position,
     destination: Position,
 ) {
-    game.lock_undo(); // tile is revealed, so we can't undo the move
     stop_current_move(game);
 
     for b in &game.map.unexplored_blocks.clone() {
@@ -50,6 +49,8 @@ pub(crate) fn move_to_unexplored_block(
     start: Position,
     destination: Option<Position>,
 ) -> bool {
+    game.lock_undo(); // tile is revealed, so we can't undo the move
+    
     let base = move_to.position.rotation;
     let opposite = (base + 3) as Rotation;
 
@@ -259,13 +260,12 @@ fn add_block_tiles_with_log(
         .unexplored_blocks
         .retain(|b| b.position.top_tile != pos.top_tile);
 
-    let tiles = block
-        .tiles(pos, rotation);
-    
+    let tiles = block.tiles(pos, rotation);
+
     for (p, _) in &tiles {
         reset_collect_within_range_for_all(game, *p);
     }
-    
+
     let s = tiles
         .into_iter()
         .map(|(position, tile)| format!("{position}={tile:?}"))
@@ -300,7 +300,12 @@ pub(crate) fn explore_resolution() -> Builtin {
             let valid_rotation = rotate_by == 0 || rotate_by == 3;
             assert!(valid_rotation, "Invalid rotation {rotate_by}");
 
-            add_block_tiles_with_log(game, &unexplored_block.position, &unexplored_block.block, rotation);
+            add_block_tiles_with_log(
+                game,
+                &unexplored_block.position,
+                &unexplored_block.block,
+                rotation,
+            );
             if let Some(destination) = r.destination {
                 move_to_explored_tile(
                     game,

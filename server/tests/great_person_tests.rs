@@ -32,7 +32,7 @@ fn test_great_explorer() {
                 )])),
             ),
             TestAction::undoable(1, Action::Playing(PlayingAction::ActionCard(118))),
-            TestAction::undoable(
+            TestAction::not_undoable(
                 1,
                 Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
                     "B6",
