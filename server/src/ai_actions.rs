@@ -109,9 +109,10 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
     if !influence.is_empty() {
         let action_type = prefer_custom_action(influence);
         if let Some(i) = calculate_influence(game, p, &action_type) {
-            actions.push((ActionType::Playing(PlayingActionType::Collect), vec![
-                influence_action(&action_type, i),
-            ]));
+            actions.push((
+                ActionType::Playing(PlayingActionType::Collect),
+                vec![influence_action(&action_type, i)],
+            ));
         }
     }
 
@@ -537,7 +538,11 @@ fn select_multi<T: Clone>(
 }
 
 #[must_use]
-fn calculate_influence(game: &Game, player: &Player, action_type: &PlayingActionType) -> Option<SelectedStructure> {
+fn calculate_influence(
+    game: &Game,
+    player: &Player,
+    action_type: &PlayingActionType,
+) -> Option<SelectedStructure> {
     available_influence_culture(game, player.index, action_type)
         .into_iter()
         .filter_map(|(s, info)| info.ok().map(|i| (s, i.roll_boost, i.prevent_boost)))

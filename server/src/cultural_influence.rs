@@ -82,8 +82,8 @@ pub(crate) fn influence_culture_attempt(
     action_type: &PlayingActionType,
 ) {
     let target_city_position = c.position;
-    let info =
-        influence_culture_boost_cost(game, player_index, c, action_type).expect("this should be a valid action");
+    let info = influence_culture_boost_cost(game, player_index, c, action_type)
+        .expect("this should be a valid action");
     let self_influence = info.starting_city_position == target_city_position;
 
     // currently, there is no way to have different costs for this
@@ -296,7 +296,8 @@ pub fn available_influence_culture(
                     structures(city)
                         .into_iter()
                         .map(|s| {
-                            let result = influence_culture_boost_cost(game, player, &s, action_type);
+                            let result =
+                                influence_culture_boost_cost(game, player, &s, action_type);
                             (s, result)
                         })
                         .collect_vec()
@@ -405,8 +406,8 @@ pub(crate) fn format_cultural_influence_attempt_log_item(
     let target_city_position = c.position;
     let target_city = game.get_any_city(target_city_position);
     let target_player_index = target_city.player_index;
-    let info =
-        influence_culture_boost_cost(game, player_index, c, action_type).expect("this should be a valid action");
+    let info = influence_culture_boost_cost(game, player_index, c, action_type)
+        .expect("this should be a valid action");
 
     let player = if target_player_index == game.active_player() {
         String::from("themselves")

@@ -258,7 +258,12 @@ impl PlayingAction {
             IncreaseHappiness(i) => {
                 increase_happiness(game, player_index, &i.happiness_increases, Some(i.payment));
             }
-            InfluenceCultureAttempt(c) => influence_culture_attempt(game, player_index, &c, &PlayingActionType::InfluenceCultureAttempt),
+            InfluenceCultureAttempt(c) => influence_culture_attempt(
+                game,
+                player_index,
+                &c,
+                &PlayingActionType::InfluenceCultureAttempt,
+            ),
             ActionCard(a) => play_action_card(game, player_index, a),
             WonderCard(name) => {
                 on_play_wonder_card(

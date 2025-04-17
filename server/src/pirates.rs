@@ -1,6 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::barbarians;
 use crate::city::MoodState;
+use crate::collect::reset_collect_within_range_for_all;
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{
     PaymentRequest, PositionRequest, ResourceRewardRequest, UnitsRequest,
@@ -15,7 +16,6 @@ use crate::resource::ResourceType;
 use crate::tactics_card::CombatRole;
 use crate::unit::UnitType;
 use itertools::Itertools;
-use crate::collect::reset_collect_within_range_for_all;
 
 pub(crate) fn pirates_round_bonus() -> Builtin {
     Builtin::builder("Pirates bonus", "-")

@@ -141,9 +141,13 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
         PlayingAction::Collect(c) => format_collect_log_item(player, &player_name, c),
         PlayingAction::Recruit(r) => format_recruit_log_item(player, &player_name, r),
         PlayingAction::IncreaseHappiness(i) => format_happiness_increase(player, &player_name, i),
-        PlayingAction::InfluenceCultureAttempt(c) => {
-            format_cultural_influence_attempt_log_item(game, player.index, &player_name, c, &PlayingActionType::InfluenceCultureAttempt)
-        }
+        PlayingAction::InfluenceCultureAttempt(c) => format_cultural_influence_attempt_log_item(
+            game,
+            player.index,
+            &player_name,
+            c,
+            &PlayingActionType::InfluenceCultureAttempt,
+        ),
         PlayingAction::Custom(action) => action.format_log_item(game, player, &player_name),
         PlayingAction::ActionCard(a) => {
             let card = get_civil_card(*a);
