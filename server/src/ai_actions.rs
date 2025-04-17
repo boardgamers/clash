@@ -224,6 +224,11 @@ fn advances(p: &Player, _game: &Game) -> Vec<Action> {
     advances::get_all()
         .iter()
         .filter_map(|a| {
+            if a.name == "Husbandry" {
+                //todo collect cache doesn't work, because husbandry can only be used once per turn
+                return None;
+            }
+            
             if !p.can_advance_free(a) {
                 return None;
             }
