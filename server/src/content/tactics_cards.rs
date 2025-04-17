@@ -35,7 +35,7 @@ pub(crate) fn peltasts(id: u8) -> TacticsCard {
         If you rolled a 5 or 6, ignore 1 hit",
     )
     .fighter_requirement(FighterRequirement::Army)
-    .add_reveal_listener(0, |player, game, combat, s| {
+    .add_reveal_listener(7, |player, game, combat, s| {
         for _ in &combat.fighting_units(game, player) {
             let roll = game.next_dice_roll().value;
             if roll >= 5 {
@@ -97,7 +97,7 @@ pub(crate) fn wedge_formation(id: u8) -> TacticsCard {
     )
     .fighter_requirement(FighterRequirement::Army)
     .role_requirement(CombatRole::Attacker)
-    .add_reveal_listener(0, |_player, game, c, s| {
+    .add_reveal_listener(10, |_player, game, c, s| {
         let v = c.fighting_units(game, c.defender).len() as i8;
         s.extra_combat_value += v;
         s.roll_log
@@ -108,7 +108,7 @@ pub(crate) fn wedge_formation(id: u8) -> TacticsCard {
 
 pub(crate) fn high_morale(id: u8) -> TacticsCard {
     TacticsCard::builder(id, "High Morale", "Gain 2 combat value.")
-        .add_reveal_listener(0, |_player, _game, _c, s| {
+        .add_reveal_listener(5, |_player, _game, _c, s| {
             s.extra_combat_value += 2;
             s.roll_log
                 .push("High Morale added 2 combat value".to_string());
@@ -124,7 +124,7 @@ pub(crate) fn heavy_resistance(id: u8) -> TacticsCard {
     )
     .target(TacticsCardTarget::Opponent)
     .role_requirement(CombatRole::Defender)
-    .add_reveal_listener(0, |player, game, c, s| {
+    .add_reveal_listener(3, |player, game, c, s| {
         let v = c.fighting_units(game, player).len() as i8;
         s.extra_combat_value -= v;
         s.roll_log.push(format!(
@@ -145,7 +145,7 @@ pub(crate) fn high_ground(id: u8) -> TacticsCard {
         combat.role(player) == CombatRole::Defender || combat.defender_city(game).is_none()
     })
     .target(TacticsCardTarget::Opponent)
-    .add_reveal_listener(0, |_player, _game, _combat, s| {
+    .add_reveal_listener(4, |_player, _game, _combat, s| {
         s.roll_log
             .push("High Ground prevents opponent from using combat abilities".to_string());
         s.deny_combat_abilities = true;
@@ -159,12 +159,12 @@ pub(crate) fn surprise(id: u8) -> TacticsCard {
         "Surprise",
         "Add 1 to combat value. Draw 1 action card if you killed at least 1 unit.",
     )
-    .add_reveal_listener(0, |_player, _game, _c, s| {
+    .add_reveal_listener(9, |_player, _game, _c, s| {
         s.extra_combat_value += 1;
         s.roll_log
             .push("Surprise added 1 to combat value".to_string());
     })
-    .add_resolve_listener(0, |player, game, e| {
+    .add_resolve_listener(1, |player, game, e| {
         let c = &e.combat;
         if e.casualties(c.role(c.opponent(player))).fighters > 0 {
             game.add_info_log_item(&format!(
@@ -187,7 +187,7 @@ pub(crate) fn siege(id: u8) -> TacticsCard {
     .fighter_requirement(FighterRequirement::Army)
     .role_requirement(CombatRole::Attacker)
     .location_requirement(CombatLocation::City)
-    .add_reveal_listener(1, |_player, _game, _combat, s| {
+    .add_reveal_listener(8, |_player, _game, _combat, s| {
         s.extra_combat_value += 1;
         s.roll_log.push("Siege added 1 to combat value".to_string());
     })
@@ -240,7 +240,7 @@ pub(crate) fn for_the_people(id: u8) -> TacticsCard {
     TacticsCard::builder(id, "For the People", "Add 1 die to your roll.")
         .role_requirement(CombatRole::Defender)
         .location_requirement(CombatLocation::City)
-        .add_reveal_listener(0, |_player, _game, _c, s| {
+        .add_reveal_listener(2, |_player, _game, _c, s| {
             s.extra_dies += 1;
             s.roll_log
                 .push("For The People added 1 extra die".to_string());
@@ -252,7 +252,7 @@ pub(crate) fn improved_defenses(id: u8) -> TacticsCard {
     TacticsCard::builder(id, "Improved Defenses", "Ignore 1 hit.")
         .role_requirement(CombatRole::Defender)
         .location_requirement(CombatLocation::City)
-        .add_reveal_listener(0, |_player, _game, _c, s| {
+        .add_reveal_listener(6, |_player, _game, _c, s| {
             s.hit_cancels += 1;
             s.roll_log
                 .push("Improved Defenses ignored 1 hit.".to_string());
@@ -433,7 +433,7 @@ pub(crate) fn archers(id: u8) -> TacticsCard {
 pub(crate) fn flanking(id: u8) -> TacticsCard {
     TacticsCard::builder(id, "Flanking", "Add 1 die to your roll.")
         .role_requirement(CombatRole::Attacker)
-        .add_reveal_listener(0, |_player, _game, _c, s| {
+        .add_reveal_listener(1, |_player, _game, _c, s| {
             s.extra_dies += 1;
             s.roll_log.push("Flanking added 1 extra die".to_string());
         })
