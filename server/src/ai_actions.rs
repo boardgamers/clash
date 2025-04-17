@@ -226,6 +226,7 @@ fn advances(p: &Player, _game: &Game) -> Vec<Action> {
         .filter_map(|a| {
             if a.name == "Husbandry" {
                 //todo collect cache doesn't work, because husbandry can only be used once per turn
+                //correct cache: 1) only store total in cache 2) sort by distance 3) add husbandry flag
                 return None;
             }
             
