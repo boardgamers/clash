@@ -229,7 +229,7 @@ fn advances(p: &Player, _game: &Game) -> Vec<Action> {
                 //correct cache: 1) only store total in cache 2) sort by distance 3) add husbandry flag
                 return None;
             }
-            
+
             if !p.can_advance_free(a) {
                 return None;
             }

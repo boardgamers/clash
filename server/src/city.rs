@@ -3,6 +3,7 @@ use std::ops::{Add, Sub};
 
 use crate::content::custom_actions::CustomActionType::ForcedLabor;
 use crate::content::persistent_events::PersistentEventType;
+use crate::map::Terrain;
 use crate::playing_actions::Collect;
 use crate::utils;
 use crate::{
@@ -13,7 +14,6 @@ use crate::{
 };
 use MoodState::*;
 use num::Zero;
-use crate::map::Terrain;
 
 #[readonly::make]
 pub struct City {

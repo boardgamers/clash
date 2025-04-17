@@ -7,7 +7,7 @@ use crate::content::incidents::great_persons::{
 use crate::content::persistent_events::{PaymentRequest, PositionRequest};
 use crate::explore::move_to_unexplored_block;
 use crate::game::Game;
-use crate::map::{BlockPosition, Terrain, UNEXPLORED_BLOCK, get_map_setup};
+use crate::map::{BlockPosition, UNEXPLORED_BLOCK, get_map_setup};
 use crate::payment::PaymentOptions;
 use crate::playing_actions::ActionCost;
 use crate::position::Position;
@@ -39,7 +39,11 @@ pub(crate) fn great_explorer() -> ActionCard {
             |e| &mut e.play_action_card,
             8,
             |game, player_index, a| {
-                Some(place_city_request(game, player_index, a.selected_positions.clone()))
+                Some(place_city_request(
+                    game,
+                    player_index,
+                    a.selected_positions.clone(),
+                ))
             },
             |game, s, a| {
                 let pos = s.choice.first().copied();

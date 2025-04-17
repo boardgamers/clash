@@ -793,7 +793,10 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             },
             move |game, player_index, player_name, action, request, details| {
                 let (choices, selected) = from_request(&request, action);
-                assert!(choices.contains(&selected), "Invalid choice {selected:?} - available: {choices:?}");
+                assert!(
+                    choices.contains(&selected),
+                    "Invalid choice {selected:?} - available: {choices:?}"
+                );
                 gain_reward(
                     game,
                     &SelectedChoice::new(player_index, player_name, true, selected),
