@@ -13,6 +13,7 @@ use crate::{
 };
 use MoodState::*;
 use num::Zero;
+use crate::map::Terrain;
 
 #[readonly::make]
 pub struct City {
@@ -253,6 +254,10 @@ impl Sub<u32> for MoodState {
             2.. => Angry,
         }
     }
+}
+
+pub(crate) fn is_valid_city_terrain(t: &Terrain) -> bool {
+    t.is_land() && !matches!(t, Terrain::Exhausted(_) | Terrain::Barren)
 }
 
 pub(crate) fn found_city(game: &mut Game, player: usize, position: Position) {

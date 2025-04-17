@@ -486,7 +486,12 @@
                           "event_type": {
                             "ActionCard": {
                               "id": 21,
-                              "selected_position": "B6"
+                              "selected_positions": [
+                                "B6",
+                                "A7",
+                                "C7",
+                                "B7"
+                              ]
                             }
                           },
                           "handler": {

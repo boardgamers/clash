@@ -8,6 +8,7 @@ use std::{
 };
 
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::city::is_valid_city_terrain;
 use crate::consts::SHIP_CAPACITY;
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{KilledUnits, PersistentEventType, UnitsRequest};
@@ -76,11 +77,11 @@ impl Unit {
         if player.try_get_city(self.position).is_some() {
             return false;
         }
-        if matches!(
+
+        if !is_valid_city_terrain(
             game.map
                 .get(self.position)
                 .expect("The unit should be at a valid position"),
-            Barren | Exhausted(_)
         ) {
             return false;
         }
@@ -642,26 +643,22 @@ mod tests {
     #[test]
     fn into_iter() {
         let units = Units::new(0, 1, 0, 2, 1, 1);
-        assert_eq!(
-            units.into_iter().collect::<Vec<_>>(),
-            vec![
-                (Settler, 0),
-                (Infantry, 1),
-                (Ship, 0),
-                (Cavalry, 2),
-                (Elephant, 1),
-                (Leader, 1),
-            ]
-        );
+        assert_eq!(units.into_iter().collect::<Vec<_>>(), vec![
+            (Settler, 0),
+            (Infantry, 1),
+            (Ship, 0),
+            (Cavalry, 2),
+            (Elephant, 1),
+            (Leader, 1),
+        ]);
     }
 
     #[test]
     fn to_vec() {
         let units = Units::new(0, 1, 0, 2, 1, 1);
-        assert_eq!(
-            units.to_vec(),
-            vec![Infantry, Cavalry, Cavalry, Elephant, Leader]
-        );
+        assert_eq!(units.to_vec(), vec![
+            Infantry, Cavalry, Cavalry, Elephant, Leader
+        ]);
     }
 
     #[test]
