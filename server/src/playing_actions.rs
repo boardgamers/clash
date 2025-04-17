@@ -258,7 +258,7 @@ impl PlayingAction {
             IncreaseHappiness(i) => {
                 increase_happiness(game, player_index, &i.happiness_increases, Some(i.payment));
             }
-            InfluenceCultureAttempt(c) => influence_culture_attempt(game, player_index, &c),
+            InfluenceCultureAttempt(c) => influence_culture_attempt(game, player_index, &c, &PlayingActionType::InfluenceCultureAttempt),
             ActionCard(a) => play_action_card(game, player_index, a),
             WonderCard(name) => {
                 on_play_wonder_card(
@@ -382,7 +382,7 @@ pub(crate) fn base_or_custom_available(
     action: PlayingActionType,
     custom: &CustomActionType,
 ) -> Vec<PlayingActionType> {
-    vec![action, custom.playing_action()]
+    vec![action, custom.playing_action_type()]
         .into_iter()
         .filter_map(|a| a.is_available(game, player).map(|()| a).ok())
         .collect()

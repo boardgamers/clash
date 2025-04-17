@@ -10,7 +10,7 @@ pub fn new_cultural_influence_dialog(
     player: usize,
     d: BaseOrCustomDialog,
 ) -> ActiveDialog {
-    let a = available_influence_culture(game, player)
+    let a = available_influence_culture(game, player, &d.action_type)
         .into_iter()
         .map(|(s, info)| {
             let (status, label, tooltip) = match info {

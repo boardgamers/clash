@@ -79,10 +79,11 @@ pub(crate) fn influence_culture_attempt(
     game: &mut Game,
     player_index: usize,
     c: &SelectedStructure,
+    action_type: &PlayingActionType,
 ) {
     let target_city_position = c.position;
     let info =
-        influence_culture_boost_cost(game, player_index, c).expect("this should be a valid action");
+        influence_culture_boost_cost(game, player_index, c, action_type).expect("this should be a valid action");
     let self_influence = info.starting_city_position == target_city_position;
 
     // currently, there is no way to have different costs for this
@@ -214,6 +215,7 @@ pub fn influence_culture_boost_cost(
     game: &Game,
     player_index: usize,
     selected: &SelectedStructure,
+    action_type: &PlayingActionType,
 ) -> Result<InfluenceCultureInfo, String> {
     let target_city_position = selected.position;
     let structure = &selected.structure;
@@ -244,7 +246,7 @@ pub fn influence_culture_boost_cost(
 
     let target_player_index = target_city.player_index;
 
-    let (start, range_boost) = affordable_start_city(game, player_index, target_city)?;
+    let (start, range_boost) = affordable_start_city(game, player_index, target_city, action_type)?;
 
     let mut info = Ok(InfluenceCultureInfo::new(
         PaymentOptions::resources(ResourcePile::culture_tokens(range_boost)),
@@ -283,6 +285,7 @@ pub fn influence_culture_boost_cost(
 pub fn available_influence_culture(
     game: &Game,
     player: usize,
+    action_type: &PlayingActionType,
 ) -> Vec<(SelectedStructure, Result<InfluenceCultureInfo, String>)> {
     game.players
         .iter()
@@ -293,7 +296,7 @@ pub fn available_influence_culture(
                     structures(city)
                         .into_iter()
                         .map(|s| {
-                            let result = influence_culture_boost_cost(game, player, &s);
+                            let result = influence_culture_boost_cost(game, player, &s, action_type);
                             (s, result)
                         })
                         .collect_vec()
@@ -357,11 +360,14 @@ fn affordable_start_city(
     game: &Game,
     player_index: usize,
     target_city: &City,
+    action_type: &PlayingActionType,
 ) -> Result<(Position, u32), String> {
     if target_city.player_index == player_index {
         Ok((target_city.position, 0))
     } else {
         let player = game.player(player_index);
+        let mut available = player.resources.clone();
+        available -= action_type.cost().cost;
 
         player
             .cities
@@ -372,14 +378,14 @@ fn affordable_start_city(
                 }
 
                 let min_cost = c.position.distance(target_city.position);
-                if min_cost > player.resources.culture_tokens {
+                if min_cost > available.culture_tokens {
                     // avoid unnecessary calculations
                     return None;
                 }
 
                 let boost = influence_distance(game, c.position, target_city.position)
                     .saturating_sub(c.size() as u32);
-                if boost > player.resources.culture_tokens {
+                if boost > available.culture_tokens {
                     return None;
                 }
                 Some((c.position, boost))
@@ -394,12 +400,13 @@ pub(crate) fn format_cultural_influence_attempt_log_item(
     player_index: usize,
     player_name: &str,
     c: &SelectedStructure,
+    action_type: &PlayingActionType,
 ) -> String {
     let target_city_position = c.position;
     let target_city = game.get_any_city(target_city_position);
     let target_player_index = target_city.player_index;
     let info =
-        influence_culture_boost_cost(game, player_index, c).expect("this should be a valid action");
+        influence_culture_boost_cost(game, player_index, c, action_type).expect("this should be a valid action");
 
     let player = if target_player_index == game.active_player() {
         String::from("themselves")
