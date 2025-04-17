@@ -82,7 +82,7 @@ pub(crate) fn great_explorer() -> ActionCard {
 }
 
 pub(crate) fn explore_adjacent_block(builder: ActionCardBuilder) -> ActionCardBuilder {
-    let builder1 = builder.add_position_request(
+    builder.add_position_request(
         |e| &mut e.play_action_card,
         9,
         |game, player_index, _| Some(action_explore_request(game, player_index)),
@@ -102,8 +102,7 @@ pub(crate) fn explore_adjacent_block(builder: ActionCardBuilder) -> ActionCardBu
                 .expect("Block not found");
             move_to_unexplored_block(game, s.player_index, &dest, &[], position, None);
         },
-    );
-    builder1
+    )
 }
 
 fn place_city_request(game: &mut Game, player_index: usize, position: Position) -> PositionRequest {
