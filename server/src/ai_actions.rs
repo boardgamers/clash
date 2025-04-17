@@ -108,7 +108,7 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
     let influence = available_influence_actions(game, p.index);
     if !influence.is_empty() {
         let action_type = prefer_custom_action(influence);
-        if let Some(i) = calculate_influence(game, p) {
+        if let Some(i) = calculate_influence(game, p, &action_type) {
             actions.push((
                 ActionType::Playing(PlayingActionType::Collect),
                 vec![influence_action(&action_type, i)],
@@ -181,10 +181,6 @@ fn available_action_cards(game: &Game, p: &Player) -> Vec<Action> {
                 // todo great prophet is buggy
                 return None;
             }
-            if *card == 13 || *card == 14 {
-                // todo mercenaries is buggy
-                return None;
-            }
             if *card == 124 {
                 // todo great warlord needs movement to work
                 return None;
@@ -224,6 +220,10 @@ fn advances(p: &Player, _game: &Game) -> Vec<Action> {
     advances::get_all()
         .iter()
         .filter_map(|a| {
+            if deny_advance(&a.name) {
+                return None;
+            }
+
             if !p.can_advance_free(a) {
                 return None;
             }
@@ -235,6 +235,13 @@ fn advances(p: &Player, _game: &Game) -> Vec<Action> {
             })
         })
         .collect()
+}
+
+fn deny_advance(name: &str) -> bool {
+    //todo collect cache doesn't work, because husbandry can only be used once per turn
+    //correct cache: 1) only store total in cache 2) sort by distance 3) add husbandry flag
+
+    name == "Husbandry"
 }
 
 fn collect_actions(p: &Player, game: &Game) -> Vec<Action> {
@@ -399,6 +406,7 @@ fn responses(event: &PersistentEventState, player: &Player, game: &Game) -> Vec<
         PersistentEventRequest::SelectAdvance(a) => a
             .choices
             .iter()
+            .filter(|c| !deny_advance(c.as_str()))
             .map(|c| EventResponse::SelectAdvance(c.clone()))
             .collect(),
         PersistentEventRequest::SelectPlayer(p) => p
@@ -530,8 +538,12 @@ fn select_multi<T: Clone>(
 }
 
 #[must_use]
-fn calculate_influence(game: &Game, player: &Player) -> Option<SelectedStructure> {
-    available_influence_culture(game, player.index)
+fn calculate_influence(
+    game: &Game,
+    player: &Player,
+    action_type: &PlayingActionType,
+) -> Option<SelectedStructure> {
+    available_influence_culture(game, player.index, action_type)
         .into_iter()
         .filter_map(|(s, info)| info.ok().map(|i| (s, i.roll_boost, i.prevent_boost)))
         .sorted_by_key(|(_, roll, prevent)| roll + u8::from(*prevent) / 2)

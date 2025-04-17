@@ -8,6 +8,7 @@ use std::{
 };
 
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::city::is_valid_city_terrain;
 use crate::consts::SHIP_CAPACITY;
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{KilledUnits, PersistentEventType, UnitsRequest};
@@ -15,7 +16,7 @@ use crate::explore::is_any_ship;
 use crate::game::GameState;
 use crate::movement::{CurrentMove, MovementRestriction};
 use crate::player::Player;
-use crate::{game::Game, map::Terrain::*, position::Position, resource_pile::ResourcePile, utils};
+use crate::{game::Game, position::Position, resource_pile::ResourcePile, utils};
 
 #[derive(Clone)]
 pub struct Unit {
@@ -76,11 +77,11 @@ impl Unit {
         if player.try_get_city(self.position).is_some() {
             return false;
         }
-        if matches!(
+
+        if !is_valid_city_terrain(
             game.map
                 .get(self.position)
                 .expect("The unit should be at a valid position"),
-            Barren | Exhausted(_)
         ) {
             return false;
         }

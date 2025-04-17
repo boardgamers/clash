@@ -88,7 +88,7 @@
       ],
       [
         "A7",
-        "Unexplored"
+        "Fertile"
       ],
       [
         "B2",
@@ -108,11 +108,11 @@
       ],
       [
         "B6",
-        "Unexplored"
+        "Fertile"
       ],
       [
         "B7",
-        "Unexplored"
+        "Barren"
       ],
       [
         "C2",
@@ -136,7 +136,7 @@
       ],
       [
         "C7",
-        "Unexplored"
+        "Fertile"
       ],
       [
         "C8",
@@ -326,20 +326,6 @@
       },
       {
         "position": {
-          "top_tile": "B6",
-          "rotation": 0
-        },
-        "block": {
-          "terrain": [
-            "Fertile",
-            "Fertile",
-            "Fertile",
-            "Barren"
-          ]
-        }
-      },
-      {
-        "position": {
           "top_tile": "F6",
           "rotation": 0
         },
@@ -369,30 +355,7 @@
                     "Playing": {
                       "ActionCard": 21
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 3
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/1/action_cards",
-                      "value": [
-                        21
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/resources/culture_tokens",
-                      "value": 2
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -401,41 +364,7 @@
                         "B6"
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "remove",
-                      "path": "/events/0/event_type/ActionCard/selected_position"
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/0/handler",
-                      "value": {
-                        "origin": {
-                          "CivilCard": 21
-                        },
-                        "priority": 9,
-                        "request": {
-                          "SelectPositions": {
-                            "choices": [
-                              "B6",
-                              "D5",
-                              "F6"
-                            ],
-                            "description": "Choose a region to explore",
-                            "needed": {
-                              "end": 1,
-                              "start": 0
-                            }
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/1"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -489,6 +418,54 @@
                         "last_priority_used": 0,
                         "player": 1
                       }
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/map/tiles/2/1",
+                      "value": "Unexplored"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/map/tiles/7/1",
+                      "value": "Unexplored"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/map/tiles/8/1",
+                      "value": "Unexplored"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/map/tiles/14/1",
+                      "value": "Unexplored"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/map/unexplored_blocks/6/block/terrain/3",
+                      "value": "Barren"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/map/unexplored_blocks/6/position/top_tile",
+                      "value": "B6"
+                    },
+                    {
+                      "op": "add",
+                      "path": "/map/unexplored_blocks/7",
+                      "value": {
+                        "block": {
+                          "terrain": [
+                            "Fertile",
+                            "Fertile",
+                            "Fertile",
+                            "Forest"
+                          ]
+                        },
+                        "position": {
+                          "rotation": 0,
+                          "top_tile": "F6"
+                        }
+                      }
                     }
                   ]
                 },
@@ -509,7 +486,12 @@
                           "event_type": {
                             "ActionCard": {
                               "id": 21,
-                              "selected_position": "B6"
+                              "selected_positions": [
+                                "B6",
+                                "A7",
+                                "C7",
+                                "B7"
+                              ]
                             }
                           },
                           "handler": {
@@ -562,13 +544,14 @@
       "Player2 explored B6"
     ],
     [
-      "Player2 chose the orientation of the newly explored tiles"
+      "Player2 chose the orientation of the newly explored tiles",
+      "Explored tiles A7=Fertile, B6=Fertile, B7=Barren, C7=Fertile"
     ],
     [
       "Player2 decided to gain a free settler at D8"
     ]
   ],
-  "undo_limit": 0,
+  "undo_limit": 2,
   "actions_left": 2,
   "round": 1,
   "age": 1,

@@ -80,7 +80,12 @@ impl CustomAction {
                 game.players[player_index].gain_resources(ResourcePile::mood_tokens(3));
             }
             CustomAction::ArtsInfluenceCultureAttempt(c) => {
-                influence_culture_attempt(game, player_index, &c);
+                influence_culture_attempt(
+                    game,
+                    player_index,
+                    &c,
+                    &CustomActionType::ArtsInfluenceCultureAttempt.playing_action_type(),
+                );
             }
             CustomAction::VotingIncreaseHappiness(i) => {
                 increase_happiness(game, player_index, &i.happiness_increases, Some(i.payment));
@@ -129,7 +134,13 @@ impl CustomAction {
             }
             CustomAction::ArtsInfluenceCultureAttempt(c) => format!(
                 "{} using Arts",
-                format_cultural_influence_attempt_log_item(game, player.index, player_name, c)
+                format_cultural_influence_attempt_log_item(
+                    game,
+                    player.index,
+                    player_name,
+                    c,
+                    &CustomActionType::ArtsInfluenceCultureAttempt.playing_action_type()
+                )
             ),
             CustomAction::VotingIncreaseHappiness(i) => format!(
                 "{} using Voting",
@@ -178,13 +189,13 @@ impl CustomActionType {
 
     #[must_use]
     pub fn is_available(&self, game: &Game, player_index: usize) -> bool {
-        self.playing_action()
+        self.playing_action_type()
             .is_available(game, player_index)
             .is_ok()
     }
 
     #[must_use]
-    pub fn playing_action(&self) -> PlayingActionType {
+    pub fn playing_action_type(&self) -> PlayingActionType {
         PlayingActionType::Custom(self.info())
     }
 

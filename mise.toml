@@ -1,14 +1,19 @@
 [env]
 RUST_BACKTRACE = '1'
 
+[tasks.random-actions]
+description = "Run server tests"
+run = 'cargo nextest run --nocapture random_actions'
+dir = "server"
+
 [tasks.test]
 description = "Run server tests"
-run = 'cargo test {{arg(name="test", default="")}}'
+run = 'cargo nextest run {{arg(name="test", default="")}}'
 dir = "server"
 
 [tasks.update-tests]
-description = "Run server tests and update json files"
-run = 'cargo test {{arg(name="test", default="")}}'
+description = "Run server tests and update JSON files"
+run = 'cargo nextest run {{arg(name="test", default="")}}'
 env = { UPDATE_EXPECTED = "true" }
 dir = "server"
 
@@ -37,5 +42,6 @@ run = ["cargo run --release --package client --features profiling --bin local_cl
 dir = "client"
 
 [tools]
+"cargo:cargo-nextest" = "latest"
 rust = { version = "latest", components = "clippy,rustfmt" }
 

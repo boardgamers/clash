@@ -3,7 +3,7 @@ use crate::ability_initializer::{AbilityInitializerSetup, SelectedChoice};
 use crate::action_card::ActionCard;
 use crate::barbarians::{barbarians_move, barbarians_spawn};
 use crate::card::{HandCard, draw_card_from_pile};
-use crate::city::MoodState;
+use crate::city::{MoodState, is_valid_city_terrain};
 use crate::collect::reset_collect_within_range_for_all;
 use crate::content::incidents;
 use crate::content::incidents::great_persons::GREAT_PERSON_OFFSET;
@@ -678,9 +678,7 @@ fn exhausted_land(builder: IncidentBuilder) -> IncidentBuilder {
                 .filter(|p| {
                     game.try_get_any_city(*p).is_none()
                         && !enemy_units_present(game, *p, player_index)
-                        && game.map.get(*p).is_some_and(|t| {
-                            t.is_land() && !matches!(t, Terrain::Exhausted(_) | Terrain::Barren)
-                        })
+                        && game.map.get(*p).is_some_and(is_valid_city_terrain)
                 })
                 .collect_vec();
             let needed = 1..=1;

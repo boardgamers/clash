@@ -226,13 +226,8 @@ pub(crate) fn execute_custom_phase_action(
         }
     }
 
-    if let Some(mut s) = game.events.pop() {
+    if let Some(s) = game.events.pop() {
         if s.player.handler.is_none() {
-            if let Some(l) = s.player.last_priority_used.as_mut() {
-                *l -= 1;
-            } else {
-                s.player.skip_first_priority = true;
-            }
             let p = s.player.index;
             let event_type = s.event_type.clone();
             game.events.push(s);
