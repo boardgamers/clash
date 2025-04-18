@@ -339,7 +339,7 @@ fn recruit_actions(player: &Player, city: &City) -> Vec<Action> {
             }
             (units, cost)
         })
-        .filter(|(units, _cost)| units.sum() > 0)
+        .filter(|(units, _cost)| units.amount() > 0)
         .unique()
         .map(|(units, cost)| {
             Action::Playing(PlayingAction::Recruit(Recruit::new(

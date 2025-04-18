@@ -291,7 +291,7 @@ impl Units {
     }
 
     #[must_use]
-    pub fn sum(&self) -> u8 {
+    pub fn amount(&self) -> u8 {
         self.settlers + self.infantry + self.ships + self.cavalry + self.elephants + self.leaders
     }
 

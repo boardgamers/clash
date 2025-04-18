@@ -160,10 +160,9 @@ pub fn recruit_cost_without_replaced(
     if !city.can_activate() {
         return Err("City cannot be activated".to_string());
     }
-    let vec = units.clone().to_vec();
     let cost = player.trigger_cost_event(
         |e| &e.recruit_cost,
-        &PaymentOptions::resources(vec.iter().map(UnitType::cost).sum()),
+        &PaymentOptions::resources(units.clone().into_iter().map(|t|t.cost()).sum()),
         units,
         player,
         execute,
@@ -171,35 +170,32 @@ pub fn recruit_cost_without_replaced(
     if !player.can_afford(&cost.cost) {
         return Err("Cannot afford".to_string());
     }
-    if vec.len() > city.mood_modified_size(player) {
+    if units.amount() > city.mood_modified_size(player) as u8 {
         return Err("Too many units".to_string());
     }
-    if vec
-        .iter()
-        .any(|unit| matches!(unit, UnitType::Cavalry | UnitType::Elephant))
-        && city.pieces.market.is_none()
-    {
+    if (units.cavalry > 0 || units.elephants > 0) && city.pieces.market.is_none() {
         return Err("No market".to_string());
     }
-    if vec.iter().any(|unit| matches!(unit, UnitType::Ship)) && city.pieces.port.is_none() {
-        return Err("No port".to_string());
+    if units.ships > 0 {
+        if city.pieces.port.is_none() {
+            return Err("No port".to_string());
+        }
+        // if
     }
     if player
         .get_units(city_position)
         .iter()
         .filter(|unit| unit.unit_type.is_army_unit())
-        .count()
-        + vec.iter().filter(|unit| unit.is_army_unit()).count()
-        > STACK_LIMIT
+        .count() as u8
+        + units.amount()
+        - units.settlers
+        - units.ships
+        > STACK_LIMIT as u8
     {
         return Err("Too many units in stack".to_string());
     }
 
-    let leaders = vec
-        .iter()
-        .filter(|unit| matches!(unit, UnitType::Leader))
-        .count();
-    let match_leader = match leaders {
+    let match_leader = match units.leaders {
         0 => leader_name.is_none(),
         1 => leader_name.is_some_and(|n| player.available_leaders.contains(n)),
         _ => false,
