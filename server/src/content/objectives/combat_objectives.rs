@@ -196,7 +196,7 @@ pub(crate) fn legendary_battle() -> Objective {
     let name = "Legendary Battle";
     Objective::builder(
         name,
-        "You fought a battle against a city of size 5 or larger with at least 1 wonder.",
+        "You fought a battle against a city of size 5 with at least 1 wonder.",
     )
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
@@ -299,10 +299,10 @@ pub(crate) fn resistance() -> Objective {
         12,
         |game, player, _, e| {
             let s = &e.combat.stats;
-            let b = s.battleground;
-            if b.is_land()
-                && s.role(player) == CombatRole::Defender
-                && s.opponent(player).fighter_losses(b).amount() >= 2
+            if s.is_winner(player)
+                && !s.opponent_is_human(player, game)
+                && s.battleground.is_city()
+                && s.opponent(player).losses.amount() >= 2
             {
                 objective_is_ready(game.player_mut(player), name);
             }
