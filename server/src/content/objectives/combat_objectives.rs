@@ -6,7 +6,6 @@ use crate::game::Game;
 use crate::log::current_player_turn_log;
 use crate::objective_card::{Objective, objective_is_ready};
 use crate::player::Player;
-use crate::tactics_card::CombatRole;
 use crate::unit::{Unit, UnitType};
 use itertools::Itertools;
 

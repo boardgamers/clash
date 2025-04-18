@@ -222,7 +222,7 @@ fn draw_selected_state(
     if let Some(tooltip) = &info.tooltip {
         show_tooltip_for_circle(rc, tooltip, center, size);
     }
-    
+
     if info.status != SelectedStructureStatus::Invalid
         && is_mouse_button_pressed(MouseButton::Left)
         && is_in_circle(rc.mouse_pos(), center, size)
@@ -318,7 +318,7 @@ fn draw_buildings(
                 p + vec2(-8., -8.),
                 16.,
             );
-            
+
             if let Some(h) = highlighted.iter().find(|s| {
                 s.position == city.position
                     && matches!(s.structure, Structure::Building(bb) if bb == *b)
@@ -326,7 +326,7 @@ fn draw_buildings(
                 if let Some(u) = draw_selected_state(rc, p, BUILDING_SIZE, h) {
                     return Some(u);
                 }
-            } 
+            }
             i += 1;
         }
     }

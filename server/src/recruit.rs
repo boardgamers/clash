@@ -162,7 +162,7 @@ pub fn recruit_cost_without_replaced(
             return Err(format!("Only have {avail} {t:?} - not {a}"));
         }
     }
-    
+
     let city = player.get_city(city_position);
     if !city.can_activate() {
         return Err("City cannot be activated".to_string());

@@ -158,10 +158,13 @@ fn description(p: &Player, a: &Advance) -> Vec<String> {
         parts.push(format!("Contradicts: {}", a.contradicting.join(", ")));
     }
     if let Some(b) = &a.bonus {
-        parts.push(format!("Bonus: {}", match b {
-            Bonus::MoodToken => "Mood Token",
-            Bonus::CultureToken => "Culture Token",
-        }));
+        parts.push(format!(
+            "Bonus: {}",
+            match b {
+                Bonus::MoodToken => "Mood Token",
+                Bonus::CultureToken => "Culture Token",
+            }
+        ));
     }
     if let Some(g) = &a.government {
         parts.push(format!("Government: {g}"));
