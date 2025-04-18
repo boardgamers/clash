@@ -156,13 +156,20 @@ pub fn recruit_cost_without_replaced(
     leader_name: Option<&String>,
     execute: Option<&ResourcePile>,
 ) -> Result<CostInfo, String> {
+    for (t, a) in units.clone() {
+        let avail = player.available_units().get(&t);
+        if a > avail {
+            return Err(format!("Only have {avail} {t:?} - not {a}"));
+        }
+    }
+    
     let city = player.get_city(city_position);
     if !city.can_activate() {
         return Err("City cannot be activated".to_string());
     }
     let cost = player.trigger_cost_event(
         |e| &e.recruit_cost,
-        &PaymentOptions::resources(units.clone().into_iter().map(|t|t.cost()).sum()),
+        &PaymentOptions::resources(units.clone().to_vec().iter().map(UnitType::cost).sum()),
         units,
         player,
         execute,
@@ -176,11 +183,8 @@ pub fn recruit_cost_without_replaced(
     if (units.cavalry > 0 || units.elephants > 0) && city.pieces.market.is_none() {
         return Err("No market".to_string());
     }
-    if units.ships > 0 {
-        if city.pieces.port.is_none() {
-            return Err("No port".to_string());
-        }
-        // if
+    if units.ships > 0 && city.pieces.port.is_none() {
+        return Err("No port".to_string());
     }
     if player
         .get_units(city_position)

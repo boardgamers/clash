@@ -39,10 +39,9 @@ fn war_ships() -> AdvanceBuilder {
         when attacking with Ships or disembarking from Ships",
     )
     .add_combat_round_start_listener(5, |g, c, s, role| {
-        let at = role.is_attacker();
-        let attacker = at && g.map.is_sea(c.attacker_position);
-        let defender = !at && g.map.is_sea(c.defender_position);
-        if c.round == 1 && (attacker || defender) {
+        let disembark = role.is_attacker() && g.map.is_sea(c.attacker_position); 
+        let sea_battle = g.map.is_sea(c.defender_position);
+        if c.round == 1 && (disembark || sea_battle) {
             s.hit_cancels += 1;
             s.roll_log
                 .push("War Ships ignore the first hit in the first round of combat".to_string());
