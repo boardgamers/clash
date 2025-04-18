@@ -7,7 +7,6 @@ use crate::city::{City, MoodState};
 use crate::consts::NON_HUMAN_PLAYERS;
 use crate::player::Player;
 use crate::position::Position;
-use crate::unit::UnitType;
 use crate::utils::{Rng, Shuffle};
 
 #[derive(Clone)]

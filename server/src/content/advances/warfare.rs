@@ -20,12 +20,10 @@ use crate::tactics_card::{CombatRole, play_tactics_card};
 use crate::unit::UnitType;
 
 pub(crate) fn warfare() -> AdvanceGroup {
-    advance_group_builder("Warfare", vec![
-        tactics(),
-        siegecraft(),
-        steel_weapons(),
-        draft(),
-    ])
+    advance_group_builder(
+        "Warfare",
+        vec![tactics(), siegecraft(), steel_weapons(), draft()],
+    )
 }
 
 fn tactics() -> AdvanceBuilder {

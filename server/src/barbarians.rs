@@ -1,6 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::city::City;
-use crate::collect::reset_collect_within_range_for_all;
 use crate::combat::move_with_possible_combat;
 use crate::consts::STACK_LIMIT;
 use crate::content::advances::theocracy::cities_that_can_add_units;
@@ -11,7 +10,7 @@ use crate::incident::{BASE_EFFECT_PRIORITY, IncidentBuilder, IncidentFilter, pla
 use crate::map::Terrain;
 use crate::movement::MoveUnits;
 use crate::payment::PaymentOptions;
-use crate::player::{add_unit, Player};
+use crate::player::{Player, add_unit};
 use crate::player_events::{IncidentTarget, PersistentEvent, PersistentEvents};
 use crate::position::Position;
 use crate::resource::ResourceType;
@@ -169,7 +168,7 @@ where
             let position = get_barbarian_city2(v).expect("barbarians should exist");
             let units = Units::from_iter(vec![s.choice]);
             game.add_info_log_item(&format!("Barbarians reinforced with {units} at {position}",));
-            add_unit(get_barbarians_player(game).index, position, s.choice, game)
+            add_unit(get_barbarians_player(game).index, position, s.choice, game);
         },
     )
 }

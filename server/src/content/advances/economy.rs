@@ -15,12 +15,10 @@ use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
 
 pub(crate) fn economy() -> AdvanceGroup {
-    advance_group_builder("Economy", vec![
-        bartering(),
-        trade_routes(),
-        taxes(),
-        currency(),
-    ])
+    advance_group_builder(
+        "Economy",
+        vec![bartering(), trade_routes(), taxes(), currency()],
+    )
 }
 
 fn currency() -> AdvanceBuilder {

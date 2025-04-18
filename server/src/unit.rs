@@ -9,6 +9,7 @@ use std::{
 
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::city::is_valid_city_terrain;
+use crate::collect::reset_collect_within_range_for_all;
 use crate::consts::SHIP_CAPACITY;
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{KilledUnits, PersistentEventType, UnitsRequest};
@@ -17,7 +18,6 @@ use crate::game::GameState;
 use crate::movement::{CurrentMove, MovementRestriction};
 use crate::player::Player;
 use crate::{game::Game, position::Position, resource_pile::ResourcePile, utils};
-use crate::collect::reset_collect_within_range_for_all;
 
 #[readonly::make]
 #[derive(Clone)]
@@ -62,7 +62,7 @@ impl Unit {
             carrier_id: None,
         }
     }
-    
+
     ///
     ///
     /// # Panics
@@ -639,9 +639,7 @@ pub(crate) fn choose_carried_units_to_remove() -> Builtin {
 }
 
 pub fn set_unit_position(player: usize, unit_id: u32, position: Position, game: &mut Game) {
-    let unit = game
-        .player_mut(player)
-        .get_unit_mut(unit_id);
+    let unit = game.player_mut(player).get_unit_mut(unit_id);
     unit.position = position;
     reset_collect_within_range_for_all(game, position);
 }
@@ -686,4 +684,3 @@ mod tests {
         );
     }
 }
-

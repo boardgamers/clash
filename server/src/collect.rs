@@ -74,8 +74,6 @@ pub fn get_total_collection(
         city_position,
         player_index,
         &Vec::new(),
-        collections,
-        min_modifiers,
     );
     if i.max_selection < tiles_used(collections) {
         return Err(format!(
@@ -205,8 +203,6 @@ pub fn possible_resource_collections(
     city_pos: Position,
     player_index: usize,
     used: &[PositionCollection],
-    min: &[PositionCollection],
-    min_modifiers: bool,
 ) -> CollectInfo {
     let set = [
         (Mountain, HashSet::from([ResourcePile::ore(1)])),
@@ -350,7 +346,7 @@ pub fn set_city_collections(game: &mut Game, city_position: Position) {
 
 #[must_use]
 pub fn city_collections_uncached(game: &Game, player: &Player, city: &City) -> Vec<Collect> {
-    let info = possible_resource_collections(game, city.position, player.index, &[], &[], false);
+    let info = possible_resource_collections(game, city.position, player.index, &[]);
 
     let all = ResourceType::all()
         .into_iter()
@@ -377,7 +373,7 @@ fn city_collection_uncached(
     let mut c: Vec<PositionCollection> = vec![];
 
     loop {
-        let info = possible_resource_collections(game, city.position, player.index, &c, &c, false);
+        let info = possible_resource_collections(game, city.position, player.index, &c);
 
         let Some((pos, pile)) = pick_resource(&info, &c, priority) else {
             return apply_total_collect(&c, player, info, game)

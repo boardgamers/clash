@@ -1,5 +1,6 @@
 use crate::advance::Advance;
 use crate::city_pieces::{DestroyedStructures, DestroyedStructuresData};
+use crate::collect::reset_collect_within_range_for_all;
 use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::content::advances::get_advance;
 use crate::content::builtin;
@@ -37,7 +38,6 @@ use std::{
     cmp::Ordering::{self, *},
     mem,
 };
-use crate::collect::reset_collect_within_range_for_all;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq)]
 pub enum PlayerType {
@@ -790,7 +790,7 @@ pub fn add_unit(player: usize, position: Position, unit_type: UnitType, game: &m
     let unit = Unit::new(player, position, unit_type, p.next_unit_id);
     p.units.push(unit);
     p.next_unit_id += 1;
-    reset_collect_within_range_for_all(game, position)
+    reset_collect_within_range_for_all(game, position);
 }
 
 #[derive(Serialize, Deserialize, PartialEq)]
@@ -862,4 +862,3 @@ pub struct PlayerData {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     secrets: Vec<String>,
 }
-

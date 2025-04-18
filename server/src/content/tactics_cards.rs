@@ -13,8 +13,8 @@ use crate::tactics_card::{
 };
 use crate::unit::set_unit_position;
 use crate::utils::a_or_an;
-use std::vec;
 use itertools::Itertools;
+use std::vec;
 
 ///
 /// # Panics

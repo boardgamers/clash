@@ -10,12 +10,10 @@ use crate::resource::ResourceType::{CultureTokens, MoodTokens};
 use crate::resource_pile::ResourcePile;
 
 pub(crate) fn spirituality() -> AdvanceGroup {
-    advance_group_builder("Spirituality", vec![
-        myths(),
-        rituals(),
-        priesthood(),
-        state_religion(),
-    ])
+    advance_group_builder(
+        "Spirituality",
+        vec![myths(), rituals(), priesthood(), state_religion()],
+    )
 }
 
 fn myths() -> AdvanceBuilder {

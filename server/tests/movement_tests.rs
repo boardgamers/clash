@@ -227,12 +227,7 @@ fn test_ship_navigate_coordinates() {
 }
 
 fn assert_navigate(game: &mut Game, from: Position, to: Position) {
-    set_unit_position(
-        1,
-        1,
-        from,
-        game,
-    );
+    set_unit_position(1, 1, from, game);
     let result = move_units_destinations(game.player(1), game, &[1], from, None)
         .is_ok_and(|d| d.iter().any(|route| route.destination == to));
     assert!(

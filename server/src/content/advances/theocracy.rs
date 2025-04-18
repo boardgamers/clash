@@ -4,7 +4,7 @@ use crate::city_pieces::Building::Temple;
 use crate::consts::STACK_LIMIT;
 use crate::content::advances::{AdvanceGroup, advance_group_builder, get_group};
 use crate::content::persistent_events::{AdvanceRequest, PositionRequest};
-use crate::player::{add_unit, Player};
+use crate::player::{Player, add_unit};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;

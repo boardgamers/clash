@@ -8,12 +8,12 @@ use crate::content::{
 use crate::game::{Game, GameState};
 use crate::map::Map;
 use crate::objective_card::gain_objective_card_from_pile;
-use crate::player::{add_unit, Player};
+use crate::player::{Player, add_unit};
 use crate::resource_pile::ResourcePile;
+use crate::unit::UnitType;
 use crate::utils::{Rng, Shuffle};
 use itertools::Itertools;
 use std::collections::HashMap;
-use crate::unit::UnitType;
 
 /// Creates a new [`Game`].
 ///

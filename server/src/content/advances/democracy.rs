@@ -53,7 +53,7 @@ fn civil_liberties() -> AdvanceBuilder {
         "As a free action, you may gain 3 mood tokens. \
         The cost of Draft is increased to 2 mood token",
     )
-        .add_custom_action(CivilLiberties)
+    .add_custom_action(CivilLiberties)
 }
 
 fn free_economy() -> AdvanceBuilder {

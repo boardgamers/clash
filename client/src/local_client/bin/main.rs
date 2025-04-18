@@ -13,15 +13,15 @@ use server::content::advances::get_advance;
 use server::game::{Game, GameData};
 use server::game_setup::setup_game;
 use server::map::Terrain;
+use server::player::add_unit;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
-use server::unit::{set_unit_position, UnitType};
+use server::unit::{UnitType, set_unit_position};
 use server::utils::remove_element;
 use std::fs::File;
 use std::io::BufReader;
 use std::time::Duration;
 use std::{env, vec};
-use server::player::add_unit;
 
 #[derive(PartialEq)]
 enum Mode {

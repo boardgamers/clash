@@ -8,12 +8,15 @@ use crate::payment::PaymentOptions;
 use crate::resource_pile::ResourcePile;
 
 pub(crate) fn education() -> AdvanceGroup {
-    advance_group_builder("Education", vec![
-        writing(),
-        public_education(),
-        free_education(),
-        philosophy(),
-    ])
+    advance_group_builder(
+        "Education",
+        vec![
+            writing(),
+            public_education(),
+            free_education(),
+            philosophy(),
+        ],
+    )
 }
 
 fn writing() -> AdvanceBuilder {
@@ -56,7 +59,7 @@ fn public_education() -> AdvanceBuilder {
                             .log
                             .push("Public Education gained 1 idea".to_string());
                     },
-                )
+                );
             }
         },
     )

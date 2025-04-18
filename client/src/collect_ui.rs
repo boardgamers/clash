@@ -121,7 +121,7 @@ fn click_collect_option(
 
     let used = c.clone().into_iter().collect_vec();
     let i =
-        possible_resource_collections(rc.game, col.info.city, col.player_index, &used, &[], false);
+        possible_resource_collections(rc.game, col.info.city, col.player_index, &used);
     let mut new = col.clone();
     new.info = i;
     new.collections = c;

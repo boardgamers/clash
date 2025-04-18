@@ -6,6 +6,7 @@ use crate::content::tactics_cards;
 use crate::game::Game;
 use crate::log::current_player_turn_log_mut;
 use crate::movement::move_units;
+use crate::player::add_unit;
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::position::Position;
 use crate::tactics_card::{CombatRole, TacticsCard, TacticsCardTarget};
@@ -14,7 +15,6 @@ use crate::utils;
 use itertools::Itertools;
 use num::Zero;
 use serde::{Deserialize, Serialize};
-use crate::player::add_unit;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CombatStrength {

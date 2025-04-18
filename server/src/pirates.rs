@@ -1,7 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::barbarians;
 use crate::city::MoodState;
-use crate::collect::reset_collect_within_range_for_all;
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{
     PaymentRequest, PositionRequest, ResourceRewardRequest, UnitsRequest,
@@ -9,7 +8,7 @@ use crate::content::persistent_events::{
 use crate::game::Game;
 use crate::incident::{BASE_EFFECT_PRIORITY, IncidentBuilder};
 use crate::payment::PaymentOptions;
-use crate::player::{add_unit, Player};
+use crate::player::{Player, add_unit};
 use crate::player_events::IncidentTarget;
 use crate::position::Position;
 use crate::resource::ResourceType;
@@ -250,7 +249,7 @@ fn place_pirate_ship(builder: IncidentBuilder, priority: i32, blockade: bool) ->
             let pirate = get_pirates_player(game).index;
             let pos = s.choice[0];
             game.add_info_log_item(&format!("Pirates spawned a Pirate Ship at {pos}"));
-            add_unit(pirate, pos, UnitType::Ship, game)
+            add_unit(pirate, pos, UnitType::Ship, game);
         },
     )
 }

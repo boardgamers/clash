@@ -53,10 +53,9 @@ pub fn show_city_menu<'a>(rc: &'a RenderContext, city: &'a City) -> StateUpdate 
 
 fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconAction<'a>> {
     let p = rc.shown_player;
-    let actions =
-        available_happiness_actions_for_city(rc.game, p.index, city.position);
+    let actions = available_happiness_actions_for_city(rc.game, p.index, city.position);
     let min_cost = increase_happiness_cost(p, city, 1);
-    
+
     if actions.is_empty() || min_cost.is_none() {
         return None;
     }
@@ -152,8 +151,6 @@ fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option
                     city.position,
                     city.player_index,
                     &Vec::new(),
-                    &[],
-                    false,
                 );
                 ActiveDialog::CollectResources(CollectResources::new(
                     city.player_index,
