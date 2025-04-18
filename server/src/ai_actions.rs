@@ -16,7 +16,7 @@ use crate::cultural_influence::{
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::happiness::{
-    available_happiness_actions, happiness_action, happiness_cost_for_all_cities,
+    available_happiness_actions, happiness_action, happiness_cost,
 };
 use crate::payment::PaymentOptions;
 use crate::player::Player;
@@ -358,6 +358,7 @@ fn calculate_increase_happiness(
     // try to make the biggest cities happy - that's usually the best choice
     let mut all_steps: Vec<(Position, u32)> = vec![];
     let mut cost = PaymentOptions::free();
+    let available = action_type.remaining_resources(player);
 
     for c in player
         .cities
@@ -373,11 +374,12 @@ fn calculate_increase_happiness(
         let mut new_steps = all_steps.clone();
         new_steps.push((c.position, steps));
 
-        let Some(new_cost) = happiness_cost_for_all_cities(player, &new_steps, action_type) else {
+        let info = happiness_cost(player, &new_steps, None);
+        if !info.cost.can_afford(&available) {
             break;
-        };
+        }
         all_steps = new_steps;
-        cost = new_cost;
+        cost = info.cost;
     }
 
     (!all_steps.is_empty()).then_some(IncreaseHappiness::new(

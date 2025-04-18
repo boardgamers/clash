@@ -6,9 +6,9 @@ use crate::content::persistent_events::{
     PaymentRequest, PositionRequest, ResourceRewardRequest, UnitsRequest,
 };
 use crate::game::Game;
-use crate::incident::{BASE_EFFECT_PRIORITY, IncidentBuilder};
+use crate::incident::{IncidentBuilder, BASE_EFFECT_PRIORITY};
 use crate::payment::PaymentOptions;
-use crate::player::{Player, add_unit};
+use crate::player::{add_unit, Player};
 use crate::player_events::IncidentTarget;
 use crate::position::Position;
 use crate::resource::ResourceType;
