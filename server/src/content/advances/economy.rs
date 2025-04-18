@@ -15,10 +15,12 @@ use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
 
 pub(crate) fn economy() -> AdvanceGroup {
-    advance_group_builder(
-        "Economy",
-        vec![bartering(), trade_routes(), taxes(), currency()],
-    )
+    advance_group_builder("Economy", vec![
+        bartering(),
+        trade_routes(),
+        taxes(),
+        currency(),
+    ])
 }
 
 fn currency() -> AdvanceBuilder {
@@ -38,8 +40,11 @@ fn bartering() -> AdvanceBuilder {
 fn taxes() -> AdvanceBuilder {
     Advance::builder(
         "Taxes",
-        "Once per turn, as an action, you may spend 1 mood token to gain food, wood, or ore equal to the number of cities you control. If you have the Currency advance, you may gain gold instead of food, wood, or ore.")
-        .add_custom_action(Taxes)
+        "Once per turn, as an action, you may spend 1 mood token to gain \
+        food, wood, or ore equal to the number of cities you control. \
+        If you have the Currency advance, you may gain gold instead of food, wood, or ore.",
+    )
+    .add_custom_action(Taxes)
 }
 
 #[must_use]

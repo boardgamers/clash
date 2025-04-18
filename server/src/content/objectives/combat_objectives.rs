@@ -276,7 +276,10 @@ pub(crate) fn barbarian_conquest() -> Objective {
         11,
         |game, player, _, e| {
             let s = &e.combat.stats;
-            if s.is_winner(player) && s.battleground.is_city() && !s.opponent_is_human(player, game)
+            if s.is_winner(player)
+                && s.battleground.is_city()
+                && !s.opponent_is_human(player, game)
+                && s.defender.present.sum() >= 2
             {
                 objective_is_ready(game.player_mut(player), name);
             }
