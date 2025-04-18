@@ -444,14 +444,18 @@ fn is_base_barbarian_spawn_pos(game: &Game, pos: Position, player: &Player) -> b
     game.map
         .get(pos)
         .is_some_and(|t| t.is_land() && !matches!(t, Terrain::Barren))
-        && !units_present(game, pos)
+        && !anything_present(game, pos)
         && cities_in_range(game, |p| p.index != player.index, pos, 2).is_empty()
 }
 
-fn units_present(game: &Game, pos: Position) -> bool {
+fn anything_present(game: &Game, pos: Position) -> bool {
     game.players
         .iter()
         .any(|p| p.units.iter().any(|u| u.position == pos))
+        || game
+            .players
+            .iter()
+            .any(|p| p.cities.iter().any(|c| c.position == pos))
 }
 
 fn steps_towards_land_range2_cites(game: &Game, player: &Player, start: Position) -> Vec<Position> {
