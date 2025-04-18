@@ -8,6 +8,7 @@ use crate::content::persistent_events::{Structure, UnitTypeRequest};
 use crate::content::tactics_cards::TacticsCardFactory;
 use crate::cultural_influence::InfluenceCultureInfo;
 use crate::game::Game;
+use crate::player::add_unit;
 use crate::player_events::PlayingActionInfo;
 use crate::playing_actions::{ActionCost, PlayingActionType};
 use crate::unit::UnitType;
@@ -61,8 +62,12 @@ pub(crate) fn cultural_takeover(id: u8, tactics_card: TacticsCardFactory) -> Act
                 "{} selected unit to gain: {:?}",
                 s.player_name, s.choice,
             ));
-            game.player_mut(s.player_index)
-                .add_unit(a.selected_position.expect("unit position"), s.choice);
+            add_unit(
+                s.player_index,
+                a.selected_position.expect("unit position"),
+                s.choice,
+                game,
+            );
         },
     )
     .add_simple_persistent_event_listener(

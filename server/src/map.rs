@@ -495,5 +495,4 @@ pub fn setup_home_city(player: &mut Player, pos: Position) {
     let mut city = City::new(player.index, pos);
     city.set_mood_state(MoodState::Happy);
     player.cities.push(city);
-    player.add_unit(pos, UnitType::Settler);
 }

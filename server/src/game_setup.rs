@@ -8,11 +8,12 @@ use crate::content::{
 use crate::game::{Game, GameState};
 use crate::map::Map;
 use crate::objective_card::gain_objective_card_from_pile;
-use crate::player::Player;
+use crate::player::{add_unit, Player};
 use crate::resource_pile::ResourcePile;
 use crate::utils::{Rng, Shuffle};
 use itertools::Itertools;
 use std::collections::HashMap;
+use crate::unit::UnitType;
 
 /// Creates a new [`Game`].
 ///
@@ -99,6 +100,10 @@ pub fn setup_game(player_amount: usize, seed: String, setup: bool) -> Game {
         ));
         gain_action_card_from_pile(&mut game, player_index);
         gain_objective_card_from_pile(&mut game, player_index);
+        let p = game.player(player_index);
+        if setup {
+            add_unit(p.index, p.cities[0].position, UnitType::Settler, &mut game);
+        }
     }
 
     update_stats(&mut game);

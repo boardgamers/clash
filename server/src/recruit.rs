@@ -1,14 +1,15 @@
+use itertools::Itertools;
 use crate::combat;
 use crate::consts::STACK_LIMIT;
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
 use crate::payment::PaymentOptions;
-use crate::player::Player;
+use crate::player::{add_unit, Player};
 use crate::player_events::CostInfo;
 use crate::playing_actions::Recruit;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
-use crate::unit::{UnitType, Units, kill_units};
+use crate::unit::{UnitType, Units, kill_units, set_unit_position};
 
 pub(crate) fn recruit(game: &mut Game, player_index: usize, r: Recruit) -> Result<(), String> {
     let cost = recruit_cost(
@@ -40,18 +41,16 @@ pub(crate) fn recruit(game: &mut Game, player_index: usize, r: Recruit) -> Resul
     let player = game.player_mut(player_index);
     let vec = r.units.clone().to_vec();
     player.units.reserve_exact(vec.len());
+    player.get_city_mut(r.city_position).activate();
     for unit_type in vec {
-        let city = player.get_city(r.city_position);
         let position = match &unit_type {
-            UnitType::Ship => city
+            UnitType::Ship => game.player(player_index).get_city(r.city_position)
                 .port_position
                 .expect("there should be a port in the city"),
             _ => r.city_position,
         };
-        player.add_unit(position, unit_type);
+        add_unit(player_index, position, unit_type, game);
     }
-    let city = player.get_city_mut(r.city_position);
-    city.activate();
     on_recruit(game, player_index, r);
     Ok(())
 }
@@ -92,8 +91,15 @@ pub(crate) fn on_recruit(game: &mut Game, player_index: usize, r: Recruit) {
             .collect::<Vec<_>>();
         if !ships.is_empty() {
             if let Some(defender) = game.enemy_player(player_index, port_position) {
-                for ship in game.players[player_index].get_units_mut(port_position) {
-                    ship.position = city_position;
+                for ship in game.player(player_index).get_units(port_position).iter().map(
+                    |unit| unit.id,
+                ).collect_vec() {
+                    set_unit_position(
+                        player_index,
+                        ship,
+                        city_position,
+                        game,
+                    );
                 }
                 combat::initiate_combat(
                     game,

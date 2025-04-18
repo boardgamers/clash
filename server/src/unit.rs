@@ -17,10 +17,13 @@ use crate::game::GameState;
 use crate::movement::{CurrentMove, MovementRestriction};
 use crate::player::Player;
 use crate::{game::Game, position::Position, resource_pile::ResourcePile, utils};
+use crate::collect::reset_collect_within_range_for_all;
 
+#[readonly::make]
 #[derive(Clone)]
 pub struct Unit {
     pub player_index: usize,
+    #[readonly]
     pub position: Position,
     pub unit_type: UnitType,
     pub movement_restrictions: Vec<MovementRestriction>,
@@ -59,7 +62,7 @@ impl Unit {
             carrier_id: None,
         }
     }
-
+    
     ///
     ///
     /// # Panics
@@ -635,6 +638,14 @@ pub(crate) fn choose_carried_units_to_remove() -> Builtin {
     .build()
 }
 
+pub fn set_unit_position(player: usize, unit_id: u32, position: Position, game: &mut Game) {
+    let unit = game
+        .player_mut(player)
+        .get_unit_mut(unit_id);
+    unit.position = position;
+    reset_collect_within_range_for_all(game, position);
+}
+
 #[cfg(test)]
 mod tests {
     use crate::unit::UnitType::*;
@@ -675,3 +686,4 @@ mod tests {
         );
     }
 }
+

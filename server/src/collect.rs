@@ -135,7 +135,7 @@ pub fn tiles_used(collections: &[PositionCollection]) -> u32 {
 }
 
 pub(crate) fn collect(game: &mut Game, player_index: usize, c: &Collect) -> Result<(), String> {
-    let i = get_total_collection(game, player_index, c.city_position, &c.collections, true)?;
+    let i = get_total_collection(game, player_index, c.city_position, &c.collections, false)?;
     let city = game.players[player_index].get_city_mut(c.city_position);
     if !city.can_activate() {
         return Err("City can't be activated".to_string());
@@ -245,38 +245,12 @@ pub fn possible_resource_collections(
         terrain_options,
     };
 
-    if min_modifiers {
-        collect_info = game
-            .player(player_index)
-            .events
-            .transient
-            .collect_options
-            .get()
-            .trigger_with_minimal_modifiers(
-                &collect_info,
-                &collect_context,
-                game,
-                &mut (),
-                |i| {
-                    if min.is_empty() {
-                        // always get as many as possible if no expectations
-                        return false;
-                    }
-                    i.choices.iter().all(|(pos, options)| {
-                        min.iter()
-                            .any(|e| pos == &e.position && options.contains(&e.pile))
-                    })
-                },
-                |i, m| i.modifiers = m,
-            );
-    } else {
-        game.player(player_index).trigger_event(
-            |e| &e.collect_options,
-            &mut collect_info,
-            &collect_context,
-            game,
-        );
-    }
+    game.player(player_index).trigger_event(
+        |e| &e.collect_options,
+        &mut collect_info,
+        &collect_context,
+        game,
+    );
 
     collect_info.modifiers.extend(modifiers);
 
@@ -455,23 +429,18 @@ fn pick_resource(
 
 pub(crate) fn invalidate_collect_cache() -> Builtin {
     Builtin::builder("InvalidateCollectCache", "-")
-        .add_transient_event_listener(
-            |event| &mut event.before_move,
-            1,
-            |game, i, ()| {
-                for p in &mut game.players {
-                    if p.index != i.player {
-                        reset_collect_within_range(p, i.from);
-                        reset_collect_within_range(p, i.to);
-                    }
-                }
-            },
-        )
         .add_simple_persistent_event_listener(
             |event| &mut event.found_city,
             1,
             |game, player, _, p| {
                 reset_collect_within_range(game.player_mut(player), *p);
+            },
+        )
+        .add_simple_persistent_event_listener(
+            |event| &mut event.combat_end,
+            0,
+            |game, _player, _, p| {
+                reset_collect_within_range_for_all(game, p.combat.defender_position);
             },
         )
         .build()

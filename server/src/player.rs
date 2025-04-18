@@ -37,6 +37,7 @@ use std::{
     cmp::Ordering::{self, *},
     mem,
 };
+use crate::collect::reset_collect_within_range_for_all;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq)]
 pub enum PlayerType {
@@ -686,12 +687,6 @@ impl Player {
         }
     }
 
-    pub fn add_unit(&mut self, position: Position, unit_type: UnitType) {
-        let unit = Unit::new(self.index, position, unit_type, self.next_unit_id);
-        self.units.push(unit);
-        self.next_unit_id += 1;
-    }
-
     #[must_use]
     pub fn try_get_unit(&self, id: u32) -> Option<&Unit> {
         self.units.iter().find(|unit| unit.id == id)
@@ -795,6 +790,14 @@ impl Player {
     }
 }
 
+pub fn add_unit(player: usize, position: Position, unit_type: UnitType, game: &mut Game) {
+    let p = game.player_mut(player);
+    let unit = Unit::new(player, position, unit_type, p.next_unit_id);
+    p.units.push(unit);
+    p.next_unit_id += 1;
+    reset_collect_within_range_for_all(game, position)
+}
+
 #[derive(Serialize, Deserialize, PartialEq)]
 pub struct PlayerData {
     #[serde(default)]
@@ -864,3 +867,4 @@ pub struct PlayerData {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     secrets: Vec<String>,
 }
+

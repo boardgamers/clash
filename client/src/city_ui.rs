@@ -150,7 +150,7 @@ fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option
                     city.player_index,
                     &Vec::new(),
                     &[],
-                    true,
+                    false,
                 );
                 ActiveDialog::CollectResources(CollectResources::new(
                     city.player_index,

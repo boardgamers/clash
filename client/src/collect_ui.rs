@@ -82,7 +82,7 @@ pub fn collect_dialog(rc: &RenderContext, collect: &CollectResources) -> StateUp
         collect.player_index,
         collect.city_position,
         &collect.collections,
-        true,
+        false,
     );
     let tooltip = result.as_ref().map_or(
         OkTooltip::Invalid("Too many resources selected".to_string()),
@@ -121,7 +121,7 @@ fn click_collect_option(
 
     let used = c.clone().into_iter().collect_vec();
     let i =
-        possible_resource_collections(rc.game, col.info.city, col.player_index, &used, &[], true);
+        possible_resource_collections(rc.game, col.info.city, col.player_index, &used, &[], false);
     let mut new = col.clone();
     new.info = i;
     new.collections = c;

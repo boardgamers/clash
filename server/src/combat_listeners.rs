@@ -14,6 +14,7 @@ use crate::utils;
 use itertools::Itertools;
 use num::Zero;
 use serde::{Deserialize, Serialize};
+use crate::player::add_unit;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CombatStrength {
@@ -650,8 +651,7 @@ pub(crate) fn place_settler() -> Builtin {
                 "{} gained 1 free Settler Unit at {} for losing a city",
                 s.player_name, pos
             ));
-            game.player_mut(s.player_index)
-                .add_unit(pos, UnitType::Settler);
+            add_unit(s.player_index, pos, UnitType::Settler, game);
         },
     )
     .build()
