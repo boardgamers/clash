@@ -109,10 +109,9 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
     if !influence.is_empty() {
         let action_type = prefer_custom_action(influence);
         if let Some(i) = calculate_influence(game, p, &action_type) {
-            actions.push((
-                ActionType::Playing(PlayingActionType::Collect),
-                vec![influence_action(&action_type, i)],
-            ));
+            actions.push((ActionType::Playing(PlayingActionType::Collect), vec![
+                influence_action(&action_type, i),
+            ]));
         }
     }
 
@@ -359,12 +358,10 @@ fn calculate_increase_happiness(
             MoodState::Happy => 0,
         };
 
-        let mut new_city_cost =
-            increase_happiness_cost(player, c, steps).expect("cost should be available");
-        new_city_cost.cost.default += cost.default.clone();
-        if try_payment(&new_city_cost.cost, player).is_none() {
+        let Some(mut new_city_cost) = increase_happiness_cost(player, c, steps)  else {
             break;
-        }
+        };
+        new_city_cost.cost.default += cost.default.clone();
         cost = new_city_cost.cost;
         cities.push((c.position, steps));
     }
@@ -435,17 +432,17 @@ fn responses(event: &PersistentEventState, player: &Player, game: &Game) -> Vec<
             select_multi(&r, SelectMultiStrategy::All, |s| {
                 is_selected_structures_valid(game, s)
             })
-            .into_iter()
-            .map(EventResponse::SelectStructures)
-            .collect()
+                .into_iter()
+                .map(EventResponse::SelectStructures)
+                .collect()
         }
         PersistentEventRequest::SelectHandCards(r) => {
             select_multi(&r, hand_card_strategy(&h.origin, &r), |v| {
                 validate_card_selection(v, game).is_ok()
             })
-            .into_iter()
-            .map(EventResponse::SelectHandCards)
-            .collect()
+                .into_iter()
+                .map(EventResponse::SelectHandCards)
+                .collect()
         }
         PersistentEventRequest::BoolRequest(_) => {
             vec![EventResponse::Bool(false), EventResponse::Bool(true)]
@@ -495,10 +492,10 @@ fn hand_card_strategy(o: &EventOrigin, r: &HandCardsRequest) -> SelectMultiStrat
             SelectMultiStrategy::Max
         }
         EventOrigin::CivilCard(_)
-            if r.description == "Select a Wonder, Action, or Objective card to swap" =>
-        {
-            SelectMultiStrategy::Min // powerset takes too long
-        }
+        if r.description == "Select a Wonder, Action, or Objective card to swap" =>
+            {
+                SelectMultiStrategy::Min // powerset takes too long
+            }
         _ => SelectMultiStrategy::All,
     }
 }
