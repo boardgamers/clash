@@ -17,7 +17,9 @@ use crate::log;
 use crate::log::{add_action_log_item, current_player_turn_log_mut};
 use crate::map::Terrain::Unexplored;
 use crate::movement::MovementAction::{Move, Stop};
-use crate::movement::{CurrentMove, MoveState, MovementAction, get_move_state, has_movable_units, move_units_destinations, MoveUnits};
+use crate::movement::{
+    CurrentMove, MoveState, MoveUnits, MovementAction, has_movable_units, move_units_destinations,
+};
 use crate::objective_card::{on_objective_cards, present_objective_cards};
 use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::recruit::on_recruit;
@@ -301,11 +303,12 @@ pub(crate) fn execute_movement_action(
 
 fn execute_move_action(game: &mut Game, player_index: usize, m: &MoveUnits) -> Result<(), String> {
     let player = &game.players[player_index];
-    let starting_position = player
-        .get_unit(*m.units.first().expect(
-            "instead of providing no units to move a stop movement actions should be done",
-        ))
-        .position;
+    let starting_position =
+        player
+            .get_unit(*m.units.first().expect(
+                "instead of providing no units to move a stop movement actions should be done",
+            ))
+            .position;
     let destinations = move_units_destinations(
         player,
         game,
@@ -337,8 +340,7 @@ fn execute_move_action(game: &mut Game, player_index: usize, m: &MoveUnits) -> R
     move_state.moved_units.extend(m.units.iter());
     move_state.moved_units = move_state.moved_units.iter().unique().copied().collect();
 
-    if matches!(current_move, CurrentMove::None) || move_state.current_move != current_move
-    {
+    if matches!(current_move, CurrentMove::None) || move_state.current_move != current_move {
         move_state.movement_actions_left -= 1;
         move_state.current_move = current_move;
     }
