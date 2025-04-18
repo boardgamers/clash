@@ -29,6 +29,11 @@
           },
           "mood_state": "Happy",
           "position": "A1"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "position": "A2"
         }
       ],
       "units": [
@@ -247,6 +252,50 @@
                 {
                   "action": {
                     "Response": {
+                      "SelectPositions": [
+                        "A1"
+                      ]
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "remove",
+                      "path": "/events/1/event_type/WonderCard/selected_position"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/events/1/handler/priority",
+                      "value": 11
+                    },
+                    {
+                      "op": "add",
+                      "path": "/events/1/handler/request/SelectPositions",
+                      "value": {
+                        "choices": [
+                          "A1",
+                          "A2"
+                        ],
+                        "description": "Select city to build wonder",
+                        "needed": {
+                          "end": 1,
+                          "start": 1
+                        }
+                      }
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events/1/handler/request/Payment"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/events/1/last_priority_used",
+                      "value": 11
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
                       "Payment": [
                         {
                           "food": 2,
@@ -268,6 +317,7 @@
                               "id": 155
                             }
                           },
+                          "last_priority_used": 0,
                           "player": 0
                         },
                         {
@@ -395,7 +445,7 @@
       ]
     }
   ],
-  "action_log_index": 4,
+  "action_log_index": 5,
   "log": [
     [
       "Player1 paid 2 food to get the Storage advance",
@@ -410,7 +460,9 @@
       "Player1 gained Great Architect for 1 culture token"
     ],
     [
-      "Player1 played the action card Great Architect",
+      "Player1 played the action card Great Architect"
+    ],
+    [
       "Player1 decided to build Pyramids in city A1"
     ],
     [

@@ -1,19 +1,56 @@
 {
   "state": "Playing",
+  "events": [
+    {
+      "event_type": {
+        "StatusPhase": "FreeAdvance"
+      },
+      "players_used": [
+        0
+      ],
+      "player": 1,
+      "last_priority_used": 0,
+      "handler": {
+        "priority": 0,
+        "request": {
+          "SelectAdvance": {
+            "choices": [
+              "Arts",
+              "Bartering",
+              "Engineering",
+              "Fishing",
+              "Husbandry",
+              "Irrigation",
+              "Math",
+              "Myths",
+              "Roads",
+              "Sanitation",
+              "Storage",
+              "Tactics",
+              "Writing"
+            ]
+          }
+        },
+        "origin": {
+          "Builtin": "Free Advance"
+        }
+      }
+    }
+  ],
   "players": [
     {
       "id": 0,
       "resources": {
         "food": 1,
         "wood": 6,
-        "ore": 7,
+        "ore": 6,
         "ideas": 5,
         "gold": 7,
-        "mood_tokens": 5,
+        "mood_tokens": 8,
         "culture_tokens": 7
       },
       "resource_limit": {
-        "food": 2,
+        "food": 7,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -29,10 +66,9 @@
         },
         {
           "city_pieces": {
-            "observatory": 0
+            "fortress": 1
           },
-          "mood_state": "Neutral",
-          "activations": 1,
+          "mood_state": "Angry",
           "position": "C2"
         }
       ],
@@ -81,16 +117,12 @@
       "civilization": "test0",
       "advances": [
         "Farming",
-        "Free Economy",
-        "Math",
-        "Metallurgy",
-        "Mining"
+        "Mining",
+        "Storage",
+        "Tactics"
       ],
-      "incident_tokens": 2,
-      "next_unit_id": 8,
-      "played_once_per_turn_actions": [
-        "FreeEconomyCollect"
-      ]
+      "incident_tokens": 3,
+      "next_unit_id": 8
     },
     {
       "id": 1,
@@ -138,6 +170,24 @@
       ],
       "incident_tokens": 3,
       "next_unit_id": 2
+    },
+    {
+      "id": 2,
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "civilization": "Barbarians",
+      "incident_tokens": 3,
+      "next_unit_id": 0
+    },
+    {
+      "id": 3,
+      "civilization": "Pirates",
+      "next_unit_id": 0
     }
   ],
   "map": {
@@ -148,13 +198,11 @@
       ],
       [
         "A2",
-        "Water"
+        "Mountain"
       ],
       [
         "A3",
-        {
-          "Exhausted": "Forest"
-        }
+        "Mountain"
       ],
       [
         "B1",
@@ -162,7 +210,7 @@
       ],
       [
         "B2",
-        "Mountain"
+        "Forest"
       ],
       [
         "B3",
@@ -178,11 +226,11 @@
       ],
       [
         "C3",
-        "Water"
+        "Mountain"
       ],
       [
         "D2",
-        "Water"
+        "Mountain"
       ]
     ]
   },
@@ -198,48 +246,10 @@
               "items": [
                 {
                   "action": {
-                    "Playing": {
-                      "Custom": {
-                        "FreeEconomyCollect": {
-                          "city_position": "C2",
-                          "collections": [
-                            {
-                              "position": "B1",
-                              "pile": {
-                                "ore": 1
-                              },
-                              "times": 1
-                            },
-                            {
-                              "position": "B2",
-                              "pile": {
-                                "ore": 1
-                              },
-                              "times": 1
-                            }
-                          ],
-                          "total": {
-                            "ore": 2
-                          }
-                        }
-                      }
+                    "Response": {
+                      "SelectAdvance": "Storage"
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "remove",
-                      "path": "/players/0/cities/1/activations"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 6
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/played_once_per_turn_actions"
-                    }
-                  ]
+                  }
                 }
               ]
             }
@@ -251,14 +261,19 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 collects 1 ore and 1 ore for a total of 2 ore in the city at C2 using Free Economy",
-      "Metallurgy converted 1 ore to 1 gold",
-      "Player1 could not store 1 ore and 1 gold"
+      "Player1 advanced Storage for free",
+      "Player gained 1 mood token as advance bonus"
+    ],
+    [
+      "A new game event has been triggered: A successful year",
+      "Base effect: Pirates spawn",
+      "No valid positions for Pirate Ship",
+      "Player2 gained 1 food from A successful year"
     ]
   ],
-  "undo_limit": 0,
+  "undo_limit": 1,
   "actions_left": 3,
-  "round": 2,
+  "round": 1,
   "age": 1,
   "messages": [
     "The game has started"
@@ -272,7 +287,9 @@
     10,
     10,
     10,
-    10,
+    10
+  ],
+  "dice_roll_log": [
     10
   ],
   "wonders_left": [

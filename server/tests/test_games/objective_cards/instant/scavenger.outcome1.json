@@ -1,13 +1,5 @@
 {
-  "state": {
-    "Movement": {
-      "movement_actions_left": 2,
-      "moved_units": [
-        0,
-        1
-      ]
-    }
-  },
+  "state": "Playing",
   "players": [
     {
       "id": 0,

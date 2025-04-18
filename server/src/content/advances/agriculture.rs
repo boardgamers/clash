@@ -30,6 +30,7 @@ fn storage() -> AdvanceBuilder {
     .add_one_time_ability_initializer(|game, player_index| {
         game.players[player_index].resource_limit.food = 7;
     })
+    .with_reset_collect_stats()
     .with_advance_bonus(MoodToken)
 }
 
@@ -38,6 +39,7 @@ fn irrigation() -> AdvanceBuilder {
         IRRIGATION,
         "Your cities may Collect food from Barren spaces, Ignore Famine events",
     )
+    .with_reset_collect_stats()
     .add_transient_event_listener(
         |event| &mut event.terrain_collect_options,
         0,
@@ -57,6 +59,7 @@ fn husbandry() -> AdvanceBuilder {
         spaces away. This Advance can only be used once per turn.",
     )
     .with_advance_bonus(MoodToken)
+    .with_reset_collect_stats()
     .add_once_per_turn_listener(
         |event| &mut event.collect_options,
         0,

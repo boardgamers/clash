@@ -15,7 +15,7 @@ use crate::{ability_initializer::AbilityInitializerSetup, game::Game, position::
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
-type PlacementChecker = Box<dyn Fn(Position, &Game) -> bool>;
+type PlacementChecker = Box<dyn Fn(Position, &Game) -> bool + Sync + Send>;
 
 pub struct Wonder {
     pub name: String,
@@ -108,7 +108,7 @@ pub(crate) fn draw_wonder_card(game: &mut Game, player_index: usize) {
     );
 }
 
-pub(crate) fn draw_wonder_from_pile(game: &mut Game) -> Option<Wonder> {
+pub(crate) fn draw_wonder_from_pile(game: &mut Game) -> Option<&'static Wonder> {
     draw_card_from_pile(
         game,
         "Wonders",
@@ -120,8 +120,10 @@ pub(crate) fn draw_wonder_from_pile(game: &mut Game) -> Option<Wonder> {
     .map(|n| get_wonder(&n))
 }
 
-fn gain_wonder(game: &mut Game, player_index: usize, wonder: Wonder) {
-    game.players[player_index].wonder_cards.push(wonder.name);
+fn gain_wonder(game: &mut Game, player_index: usize, wonder: &Wonder) {
+    game.players[player_index]
+        .wonder_cards
+        .push(wonder.name.clone());
 }
 
 pub(crate) fn on_draw_wonder_card() -> Builtin {
@@ -303,7 +305,7 @@ pub(crate) fn build_wonder() -> Builtin {
                 let p = game.player(player_index);
                 let city = p.get_city(i.selected_position.expect("city not selected"));
                 let wonder = get_wonder(&i.name);
-                let cost = can_construct_wonder(city, &wonder, p, game, &i.discount)
+                let cost = can_construct_wonder(city, wonder, p, game, &i.discount)
                     .expect("can't construct wonder");
                 Some(vec![PaymentRequest::new(
                     cost,
@@ -336,7 +338,7 @@ pub(crate) fn cities_for_wonder(
     p.cities
         .iter()
         .filter_map(|c| {
-            can_construct_wonder(c, &get_wonder(name), p, game, discount)
+            can_construct_wonder(c, get_wonder(name), p, game, discount)
                 .ok()
                 .map(|_| c.position)
         })
@@ -345,7 +347,7 @@ pub(crate) fn cities_for_wonder(
 
 pub(crate) fn construct_wonder(
     game: &mut Game,
-    wonder: Wonder,
+    wonder: &'static Wonder,
     city_position: Position,
     player_index: usize,
 ) {

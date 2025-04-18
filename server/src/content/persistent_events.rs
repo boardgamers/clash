@@ -19,7 +19,6 @@ use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::{ChangeGovernmentType, StatusPhaseState};
 use crate::unit::UnitType;
-use crate::utils;
 use crate::wonder::WonderCardInfo;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -76,9 +75,6 @@ pub struct PersistentEventPlayer {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub last_priority_used: Option<i32>,
     #[serde(default)]
-    #[serde(skip_serializing_if = "utils::is_false")]
-    pub skip_first_priority: bool,
-    #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub handler: Option<PersistentEventHandler>,
 }
@@ -89,7 +85,6 @@ impl PersistentEventPlayer {
         Self {
             index: current_player,
             last_priority_used: None,
-            skip_first_priority: false,
             handler: None,
         }
     }

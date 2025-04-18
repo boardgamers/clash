@@ -204,9 +204,9 @@ fn test_production_focus() {
                 .without_json_comparison(),
             TestAction::undoable(
                 0,
-                Action::Playing(PlayingAction::Collect(playing_actions::Collect {
-                    city_position: Position::from_offset("C2"),
-                    collections: vec![
+                Action::Playing(PlayingAction::Collect(playing_actions::Collect::new(
+                    Position::from_offset("C2"),
+                    vec![
                         PositionCollection::new(Position::from_offset("B1"), ResourcePile::ore(1))
                             .times(2),
                         PositionCollection::new(
@@ -216,7 +216,8 @@ fn test_production_focus() {
                         .times(2),
                         PositionCollection::new(Position::from_offset("C3"), ResourcePile::gold(1)),
                     ],
-                })),
+                    ResourcePile::mood_tokens(1) + ResourcePile::ore(1) + ResourcePile::gold(1),
+                ))),
             ),
         ],
     );
@@ -229,7 +230,7 @@ fn test_explorer() {
         vec![
             TestAction::undoable(1, Action::Playing(PlayingAction::ActionCard(21)))
                 .without_json_comparison(),
-            TestAction::undoable(
+            TestAction::not_undoable(
                 1,
                 Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
                     "B6",
@@ -321,9 +322,9 @@ fn test_overproduction() {
                 .without_json_comparison(),
             TestAction::undoable(
                 0,
-                Action::Playing(PlayingAction::Collect(playing_actions::Collect {
-                    city_position: Position::from_offset("C2"),
-                    collections: vec![
+                Action::Playing(PlayingAction::Collect(playing_actions::Collect::new(
+                    Position::from_offset("C2"),
+                    vec![
                         PositionCollection::new(Position::from_offset("B1"), ResourcePile::ore(1)),
                         PositionCollection::new(Position::from_offset("B2"), ResourcePile::wood(1)),
                         PositionCollection::new(
@@ -331,7 +332,8 @@ fn test_overproduction() {
                             ResourcePile::mood_tokens(1),
                         ),
                     ],
-                })),
+                    ResourcePile::mood_tokens(1) + ResourcePile::ore(1) + ResourcePile::wood(1),
+                ))),
             ),
         ],
     );

@@ -4,7 +4,7 @@ use crate::city_pieces::Building::Temple;
 use crate::consts::STACK_LIMIT;
 use crate::content::advances::{AdvanceGroup, advance_group_builder, get_group};
 use crate::content::persistent_events::{AdvanceRequest, PositionRequest};
-use crate::player::Player;
+use crate::player::{Player, add_unit};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
@@ -172,8 +172,7 @@ fn fanaticism() -> AdvanceBuilder {
                 "{} gained 1 free Infantry Unit at {} for Fanaticism Advance",
                 s.player_name, pos
             ));
-            game.player_mut(s.player_index)
-                .add_unit(pos, UnitType::Infantry);
+            add_unit(s.player_index, pos, UnitType::Infantry, game);
         },
     )
 }

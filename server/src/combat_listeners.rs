@@ -6,6 +6,7 @@ use crate::content::tactics_cards;
 use crate::game::Game;
 use crate::log::current_player_turn_log_mut;
 use crate::movement::move_units;
+use crate::player::add_unit;
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::position::Position;
 use crate::tactics_card::{CombatRole, TacticsCard, TacticsCardTarget};
@@ -399,11 +400,11 @@ pub(crate) type GetCombatEvent<T> = fn(&mut PersistentEvents) -> &mut Persistent
 pub(crate) fn event_with_tactics<T: Clone + PartialEq>(
     game: &mut Game,
     mut event_type: T,
-    store_type: impl Fn(T) -> PersistentEventType + Clone + 'static,
+    store_type: impl Fn(T) -> PersistentEventType + Clone + 'static + Sync + Send,
     round_types: &[CombatEventPhase],
     event: fn(&CombatEventPhase) -> GetCombatEvent<T>,
     get_round_type: impl Fn(&mut T) -> &mut CombatEventPhase,
-    get_combat: impl Fn(&T) -> &Combat + Clone + 'static,
+    get_combat: impl Fn(&T) -> &Combat + Clone + 'static + Sync + Send,
     attacker_tactics_card: impl Fn(&T) -> Option<&u8>,
     defender_tactics_card: impl Fn(&T) -> Option<&u8>,
 ) -> Option<T> {
@@ -472,14 +473,14 @@ where
     add_tactics_listener(
         game,
         reveal_card,
-        attacker_card.as_ref(),
+        attacker_card,
         combat,
         CombatRole::Attacker,
     );
     add_tactics_listener(
         game,
         reveal_card,
-        defender_card.as_ref(),
+        defender_card,
         combat,
         CombatRole::Defender,
     );
@@ -650,8 +651,7 @@ pub(crate) fn place_settler() -> Builtin {
                 "{} gained 1 free Settler Unit at {} for losing a city",
                 s.player_name, pos
             ));
-            game.player_mut(s.player_index)
-                .add_unit(pos, UnitType::Settler);
+            add_unit(s.player_index, pos, UnitType::Settler, game);
         },
     )
     .build()

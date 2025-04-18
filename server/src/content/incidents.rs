@@ -11,6 +11,7 @@ mod pandemics;
 mod trade;
 pub(crate) mod trojan;
 
+use crate::cache;
 use crate::content::incidents::civil_war::civil_war_incidents;
 use crate::content::incidents::earthquake::earthquake_incidents;
 use crate::content::incidents::famine::pestilence_incidents;
@@ -24,7 +25,12 @@ use itertools::Itertools;
 use std::vec;
 
 #[must_use]
-pub(crate) fn get_all() -> Vec<Incident> {
+pub(crate) fn get_all() -> &'static Vec<Incident> {
+    cache::get().get_incidents()
+}
+
+#[must_use]
+pub(crate) fn get_all_uncached() -> Vec<Incident> {
     let all = vec![
         // 1+
         pestilence_incidents(),
@@ -58,9 +64,6 @@ pub(crate) fn get_all() -> Vec<Incident> {
 /// # Panics
 /// Panics if incident does not exist
 #[must_use]
-pub fn get_incident(id: u8) -> Incident {
-    get_all()
-        .into_iter()
-        .find(|incident| incident.id == id)
-        .expect("incident not found")
+pub fn get_incident(id: u8) -> &'static Incident {
+    cache::get().get_incident(id).expect("incident not found")
 }

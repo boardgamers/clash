@@ -3,6 +3,8 @@ use std::ops::{Add, Sub};
 
 use crate::content::custom_actions::CustomActionType::ForcedLabor;
 use crate::content::persistent_events::PersistentEventType;
+use crate::map::Terrain;
+use crate::playing_actions::Collect;
 use crate::utils;
 use crate::{
     city_pieces::{CityPieces, CityPiecesData},
@@ -13,14 +15,17 @@ use crate::{
 use MoodState::*;
 use num::Zero;
 
+#[readonly::make]
 pub struct City {
     pub pieces: CityPieces,
+    #[readonly]
     pub mood_state: MoodState,
     pub activations: u32,
     pub angry_activation: bool,
     pub player_index: usize,
     pub position: Position,
     pub port_position: Option<Position>,
+    pub(crate) possible_collections: Vec<Collect>,
 }
 
 impl City {
@@ -34,6 +39,7 @@ impl City {
             player_index,
             position: data.position,
             port_position: data.port_position,
+            possible_collections: data.possible_collections,
         }
     }
 
@@ -46,6 +52,7 @@ impl City {
             self.angry_activation,
             self.position,
             self.port_position,
+            self.possible_collections,
         )
     }
 
@@ -58,6 +65,7 @@ impl City {
             self.angry_activation,
             self.position,
             self.port_position,
+            self.possible_collections.clone(),
         )
     }
 
@@ -71,6 +79,7 @@ impl City {
             player_index,
             position,
             port_position: None,
+            possible_collections: vec![],
         }
     }
 
@@ -141,13 +150,20 @@ impl City {
             Angry => Neutral,
         };
         self.angry_activation = false;
+        self.possible_collections.clear();
     }
 
     pub fn decrease_mood_state(&mut self) {
         self.mood_state = match self.mood_state {
             Happy => Neutral,
             Neutral | Angry => Angry,
-        }
+        };
+        self.possible_collections.clear();
+    }
+
+    pub fn set_mood_state(&mut self, mood_state: MoodState) {
+        self.mood_state = mood_state;
+        self.possible_collections.clear();
     }
 
     #[must_use]
@@ -175,6 +191,9 @@ pub struct CityData {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     port_position: Option<Position>,
+    #[serde(default)]
+    #[serde(skip_serializing)]
+    pub(crate) possible_collections: Vec<Collect>, // only for AI performance
 }
 
 impl CityData {
@@ -186,6 +205,7 @@ impl CityData {
         angry_activation: bool,
         position: Position,
         port_position: Option<Position>,
+        possible_collections: Vec<Collect>,
     ) -> Self {
         Self {
             city_pieces,
@@ -194,6 +214,7 @@ impl CityData {
             angry_activation,
             position,
             port_position,
+            possible_collections,
         }
     }
 }
@@ -233,6 +254,10 @@ impl Sub<u32> for MoodState {
             2.. => Angry,
         }
     }
+}
+
+pub(crate) fn is_valid_city_terrain(t: &Terrain) -> bool {
+    t.is_land() && !matches!(t, Terrain::Exhausted(_) | Terrain::Barren)
 }
 
 pub(crate) fn found_city(game: &mut Game, player: usize, position: Position) {

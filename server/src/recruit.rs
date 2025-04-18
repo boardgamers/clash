@@ -3,12 +3,13 @@ use crate::consts::STACK_LIMIT;
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
 use crate::payment::PaymentOptions;
-use crate::player::Player;
+use crate::player::{Player, add_unit};
 use crate::player_events::CostInfo;
 use crate::playing_actions::Recruit;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
-use crate::unit::{UnitType, Units, kill_units};
+use crate::unit::{UnitType, Units, kill_units, set_unit_position};
+use itertools::Itertools;
 
 pub(crate) fn recruit(game: &mut Game, player_index: usize, r: Recruit) -> Result<(), String> {
     let cost = recruit_cost(
@@ -40,18 +41,18 @@ pub(crate) fn recruit(game: &mut Game, player_index: usize, r: Recruit) -> Resul
     let player = game.player_mut(player_index);
     let vec = r.units.clone().to_vec();
     player.units.reserve_exact(vec.len());
+    player.get_city_mut(r.city_position).activate();
     for unit_type in vec {
-        let city = player.get_city(r.city_position);
         let position = match &unit_type {
-            UnitType::Ship => city
+            UnitType::Ship => game
+                .player(player_index)
+                .get_city(r.city_position)
                 .port_position
                 .expect("there should be a port in the city"),
             _ => r.city_position,
         };
-        player.add_unit(position, unit_type);
+        add_unit(player_index, position, unit_type, game);
     }
-    let city = player.get_city_mut(r.city_position);
-    city.activate();
     on_recruit(game, player_index, r);
     Ok(())
 }
@@ -92,8 +93,14 @@ pub(crate) fn on_recruit(game: &mut Game, player_index: usize, r: Recruit) {
             .collect::<Vec<_>>();
         if !ships.is_empty() {
             if let Some(defender) = game.enemy_player(player_index, port_position) {
-                for ship in game.players[player_index].get_units_mut(port_position) {
-                    ship.position = city_position;
+                for ship in game
+                    .player(player_index)
+                    .get_units(port_position)
+                    .iter()
+                    .map(|unit| unit.id)
+                    .collect_vec()
+                {
+                    set_unit_position(player_index, ship, city_position, game);
                 }
                 combat::initiate_combat(
                     game,
@@ -149,14 +156,20 @@ pub fn recruit_cost_without_replaced(
     leader_name: Option<&String>,
     execute: Option<&ResourcePile>,
 ) -> Result<CostInfo, String> {
+    for (t, a) in units.clone() {
+        let avail = player.unit_limit().get(&t);
+        if a > avail {
+            return Err(format!("Only have {avail} {t:?} - not {a}"));
+        }
+    }
+
     let city = player.get_city(city_position);
     if !city.can_activate() {
         return Err("City cannot be activated".to_string());
     }
-    let vec = units.clone().to_vec();
     let cost = player.trigger_cost_event(
         |e| &e.recruit_cost,
-        &PaymentOptions::resources(vec.iter().map(UnitType::cost).sum()),
+        &PaymentOptions::resources(units.clone().to_vec().iter().map(UnitType::cost).sum()),
         units,
         player,
         execute,
@@ -164,35 +177,29 @@ pub fn recruit_cost_without_replaced(
     if !player.can_afford(&cost.cost) {
         return Err("Cannot afford".to_string());
     }
-    if vec.len() > city.mood_modified_size(player) {
+    if units.amount() > city.mood_modified_size(player) as u8 {
         return Err("Too many units".to_string());
     }
-    if vec
-        .iter()
-        .any(|unit| matches!(unit, UnitType::Cavalry | UnitType::Elephant))
-        && city.pieces.market.is_none()
-    {
+    if (units.cavalry > 0 || units.elephants > 0) && city.pieces.market.is_none() {
         return Err("No market".to_string());
     }
-    if vec.iter().any(|unit| matches!(unit, UnitType::Ship)) && city.pieces.port.is_none() {
+    if units.ships > 0 && city.pieces.port.is_none() {
         return Err("No port".to_string());
     }
     if player
         .get_units(city_position)
         .iter()
         .filter(|unit| unit.unit_type.is_army_unit())
-        .count()
-        + vec.iter().filter(|unit| unit.is_army_unit()).count()
-        > STACK_LIMIT
+        .count() as u8
+        + units.amount()
+        - units.settlers
+        - units.ships
+        > STACK_LIMIT as u8
     {
         return Err("Too many units in stack".to_string());
     }
 
-    let leaders = vec
-        .iter()
-        .filter(|unit| matches!(unit, UnitType::Leader))
-        .count();
-    let match_leader = match leaders {
+    let match_leader = match units.leaders {
         0 => leader_name.is_none(),
         1 => leader_name.is_some_and(|n| player.available_leaders.contains(n)),
         _ => false,

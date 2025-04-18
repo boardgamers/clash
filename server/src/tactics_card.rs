@@ -73,7 +73,7 @@ impl CombatRole {
     }
 }
 
-type TacticsChecker = Box<dyn Fn(usize, &Game, &Combat) -> bool>;
+type TacticsChecker = Box<dyn Fn(usize, &Game, &Combat) -> bool + Sync + Send>;
 
 pub struct TacticsCard {
     pub id: u8,
@@ -151,7 +151,7 @@ impl TacticsCardBuilder {
 
     pub(crate) fn checker(
         mut self,
-        checker: impl Fn(usize, &Game, &Combat) -> bool + Clone + 'static,
+        checker: impl Fn(usize, &Game, &Combat) -> bool + Clone + 'static + Sync + Send,
     ) -> Self {
         self.checker = Some(Box::new(checker));
         self
@@ -160,7 +160,11 @@ impl TacticsCardBuilder {
     pub(crate) fn add_reveal_listener(
         self,
         priority: i32,
-        listener: impl Fn(usize, &mut Game, &Combat, &mut CombatStrength) + Clone + 'static,
+        listener: impl Fn(usize, &mut Game, &Combat, &mut CombatStrength)
+        + Clone
+        + 'static
+        + Sync
+        + Send,
     ) -> Self {
         self.add_combat_strength_listener(
             |event| &mut event.combat_round_start_tactics,
@@ -173,10 +177,18 @@ impl TacticsCardBuilder {
         self,
         event: E,
         priority: i32,
-        listener: impl Fn(usize, &mut Game, &Combat, &mut CombatStrength) + Clone + 'static,
+        listener: impl Fn(usize, &mut Game, &Combat, &mut CombatStrength)
+        + Clone
+        + 'static
+        + Sync
+        + Send,
     ) -> Self
     where
-        E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<CombatRoundStart> + 'static + Clone,
+        E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<CombatRoundStart>
+            + 'static
+            + Clone
+            + Sync
+            + Send,
     {
         let target = self.target;
         let id = self.id;
@@ -193,7 +205,7 @@ impl TacticsCardBuilder {
     pub(crate) fn add_resolve_listener(
         self,
         priority: i32,
-        listener: impl Fn(usize, &mut Game, &mut CombatRoundEnd) + Clone + 'static,
+        listener: impl Fn(usize, &mut Game, &mut CombatRoundEnd) + Clone + 'static + Sync + Send,
     ) -> Self {
         let target = self.target;
         let id = self.id;

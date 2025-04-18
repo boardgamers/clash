@@ -13,13 +13,13 @@ use server::events::EventOrigin;
 pub fn event_help(rc: &RenderContext, origin: &EventOrigin) -> Vec<String> {
     let mut h = vec![origin.name()];
     h.extend(match origin {
-        EventOrigin::Advance(a) => vec![get_advance(a).description],
-        EventOrigin::Wonder(w) => vec![get_wonder(w).description],
-        EventOrigin::Builtin(b) => vec![get_builtin(rc.game, b).description],
-        EventOrigin::CivilCard(id) => vec![get_civil_card(*id).description],
-        EventOrigin::TacticsCard(id) => vec![get_tactics_card(*id).description],
+        EventOrigin::Advance(a) => vec![get_advance(a).description.clone()],
+        EventOrigin::Wonder(w) => vec![get_wonder(w).description.clone()],
+        EventOrigin::Builtin(b) => vec![get_builtin(rc.game, b).description.clone()],
+        EventOrigin::CivilCard(id) => vec![get_civil_card(*id).description.clone()],
+        EventOrigin::TacticsCard(id) => vec![get_tactics_card(*id).description.clone()],
         EventOrigin::Incident(id) => get_incident(*id).description(),
-        EventOrigin::Objective(name) => vec![get_objective(name).description],
+        EventOrigin::Objective(name) => vec![get_objective(name).description.clone()],
         EventOrigin::Leader(l) => vec![{
             let l = rc.shown_player.get_leader(l).unwrap();
             // todo: leader should have a 2 event sources - no each event source should have a description

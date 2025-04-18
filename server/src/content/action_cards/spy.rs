@@ -197,7 +197,9 @@ fn get_swap_secrets(other: &Player) -> Vec<String> {
                     format!(
                         "{}/{}",
                         a.civil_card.name,
-                        a.tactics_card.map_or("-".to_string(), |c| c.name.clone())
+                        a.tactics_card
+                            .as_ref()
+                            .map_or("-".to_string(), |c| c.name.clone())
                     )
                 })
                 .join(", ")

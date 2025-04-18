@@ -4,7 +4,7 @@ use crate::map::Map;
 use crate::map::Terrain::{Forest, Mountain};
 use crate::payment::PaymentOptions;
 use crate::resource_pile::ResourcePile;
-use crate::unit::Unit;
+use crate::unit::{Unit, set_unit_position};
 use crate::utils;
 
 use crate::consts::{ARMY_MOVEMENT_REQUIRED_ADVANCE, MOVEMENT_ACTIONS, SHIP_CAPACITY, STACK_LIMIT};
@@ -113,17 +113,8 @@ impl MoveState {
     }
 }
 
-pub(crate) fn get_move_state(game: &mut Game) -> &mut MoveState {
-    if let Movement(m) = &mut game.state {
-        m
-    } else {
-        panic!("no move state");
-    }
-}
-
 pub(crate) fn stop_current_move(game: &mut Game) {
-    if let Movement(_) = game.state {
-        let move_state = get_move_state(game);
+    if let Movement(move_state) = &mut game.state {
         move_state.current_move = CurrentMove::None;
 
         if move_state.movement_actions_left == 0 {
@@ -156,8 +147,8 @@ fn move_unit(
     destination: Position,
     embark_carrier_id: Option<u32>,
 ) {
+    set_unit_position(player_index, unit_id, destination, game);
     let unit = game.players[player_index].get_unit_mut(unit_id);
-    unit.position = destination;
     unit.carrier_id = embark_carrier_id;
 
     if let Some(terrain) = terrain_movement_restriction(&game.map, destination, unit) {
@@ -165,7 +156,7 @@ fn move_unit(
     }
 
     for id in carried_units(unit_id, &game.players[player_index]) {
-        game.players[player_index].get_unit_mut(id).position = destination;
+        set_unit_position(player_index, id, destination, game);
     }
 }
 

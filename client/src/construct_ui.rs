@@ -6,9 +6,9 @@ use server::action::Action;
 use server::city::City;
 use server::city_pieces::Building;
 use server::construct::Construct;
+use server::player_events::CostInfo;
 use server::playing_actions::{PlayingAction, Recruit};
 use server::position::Position;
-use server::recruit::recruit_cost;
 
 pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> StateUpdate {
     let city = rc.game.get_any_city(cp.city_position);
@@ -66,28 +66,13 @@ impl ConstructionPayment {
         city: &City,
         name: &str,
         project: ConstructionProject,
+        cost: &CostInfo,
     ) -> ConstructionPayment {
-        let p = rc.game.player(city.player_index);
-        let cost = match &project {
-            ConstructionProject::Building(b, _) => p.construct_cost(rc.game, *b, None),
-            ConstructionProject::Units(sel) => recruit_cost(
-                rc.shown_player,
-                &sel.amount.units,
-                city.position,
-                sel.amount.leader_name.as_ref(),
-                &sel.replaced_units,
-                None,
-            )
-            .unwrap(),
-        }
-        .cost;
-
-        let payment = rc.new_payment(&cost, name, false);
         ConstructionPayment {
             player_index: city.player_index,
             city_position: city.position,
             project,
-            payment,
+            payment: rc.new_payment(&cost.cost, name, false),
         }
     }
 }

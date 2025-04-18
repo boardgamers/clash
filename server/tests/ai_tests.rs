@@ -1,8 +1,8 @@
 use crate::common::JsonTest;
 use itertools::Itertools;
 use server::action::{Action, ActionType};
-use server::ai_actions::{city_collections, get_available_actions};
-use server::collect::PositionCollection;
+use server::ai_actions::get_available_actions;
+use server::collect::{PositionCollection, city_collections_uncached};
 use server::playing_actions::{
     Collect, IncreaseHappiness, PlayingAction, PlayingActionType, Recruit,
 };
@@ -20,17 +20,18 @@ const JSON: JsonTest = JsonTest::new("ai");
 fn collect_city() {
     let game = &JSON.load_game("collect");
     let p = game.player(0);
-    let mut collect = city_collections(game, p, p.get_city(Position::from_offset("C2")));
+    let mut collect = city_collections_uncached(game, p, p.get_city(Position::from_offset("C2")));
     for c in &mut collect {
         c.collections.sort_by_key(|x| x.position);
     }
-    assert_eq!(collect.len(), 2);
-    let got = collect.into_iter().map(|c| c.total()).collect_vec();
+    assert_eq!(collect.len(), 3);
+    let got = collect.into_iter().map(|c| c.total).collect_vec();
     assert_eq!(
         got,
         vec![
-            ResourcePile::wood(1) + ResourcePile::gold(1),
-            ResourcePile::wood(1) + ResourcePile::mood_tokens(1),
+            ResourcePile::wood(1) + ResourcePile::food(2),
+            ResourcePile::food(1) + ResourcePile::wood(1) + ResourcePile::gold(1),
+            ResourcePile::food(1) + ResourcePile::wood(1) + ResourcePile::mood_tokens(1),
         ]
     )
 }
@@ -43,7 +44,7 @@ fn all_actions() {
         matches!(t, ActionType::Playing(PlayingActionType::Advance))
     })
     .unwrap();
-    assert_eq!(advances.len(), 13);
+    assert_eq!(advances.len(), 12);
 
     assert_eq!(
         all,
@@ -64,14 +65,16 @@ fn all_actions() {
                         vec![PositionCollection::new(
                             Position::from_offset("E8"),
                             ResourcePile::wood(1)
-                        )]
+                        )],
+                        ResourcePile::wood(1)
                     ))),
                     Action::Playing(PlayingAction::Collect(Collect::new(
                         Position::from_offset("D8"),
                         vec![PositionCollection::new(
                             Position::from_offset("C8"),
                             ResourcePile::ore(1)
-                        )]
+                        )],
+                        ResourcePile::ore(1)
                     )))
                 ]
             ),

@@ -5,6 +5,7 @@ use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
 use crate::map::Terrain;
 use crate::player::Player;
+use crate::player_events::CostInfo;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use serde::{Deserialize, Serialize};
@@ -43,7 +44,7 @@ pub fn can_construct(
     building: Building,
     player: &Player,
     game: &Game,
-) -> Result<(), String> {
+) -> Result<CostInfo, String> {
     can_construct_anything(city, player)?;
     if !city.can_activate() {
         return Err("Can't activate".to_string());
@@ -64,11 +65,12 @@ pub fn can_construct(
     if !player.is_building_available(building, game) {
         return Err("All non-destroyed buildings are built".to_string());
     }
-    if !player.can_afford(&player.construct_cost(game, building, None).cost) {
+    let cost_info = player.construct_cost(game, building, None);
+    if !player.can_afford(&cost_info.cost) {
         // construct cost event listener?
         return Err("Not enough resources".to_string());
     }
-    Ok(())
+    Ok(cost_info)
 }
 
 pub(crate) fn can_construct_anything(city: &City, player: &Player) -> Result<(), String> {
@@ -78,7 +80,7 @@ pub(crate) fn can_construct_anything(city: &City, player: &Player) -> Result<(),
     if city.pieces.amount() >= MAX_CITY_SIZE {
         return Err("City is full".to_string());
     }
-    if city.pieces.amount() >= player.cities.len() {
+    if city.size() >= player.cities.len() {
         return Err("Need more cities".to_string());
     }
 
@@ -88,8 +90,7 @@ pub(crate) fn can_construct_anything(city: &City, player: &Player) -> Result<(),
 pub(crate) fn construct(game: &mut Game, player_index: usize, c: &Construct) -> Result<(), String> {
     let player = &game.players[player_index];
     let city = player.get_city(c.city_position);
-    let cost = player.construct_cost(game, c.city_piece, Some(&c.payment));
-    can_construct(city, c.city_piece, player, game)?;
+    let cost = can_construct(city, c.city_piece, player, game)?;
     if matches!(c.city_piece, Building::Port) {
         let port_position = c.port_position.as_ref().expect("Illegal action");
         assert!(
@@ -124,24 +125,27 @@ pub fn available_buildings(
     game: &Game,
     player: usize,
     city: Position,
-) -> Vec<(Building, Option<Position>)> {
+) -> Vec<(Building, CostInfo, Option<Position>)> {
     let player = game.player(player);
     let city = player.get_city(city);
     Building::all()
         .into_iter()
-        .filter_map(|b| can_construct(city, b, player, game).ok().map(|()| b))
-        .flat_map(|b| new_building_positions(game, b, city))
+        .flat_map(|b| {
+            can_construct(city, b, player, game)
+                .map_or(Vec::new(), |i| new_building_positions(game, b, city, &i))
+        })
         .collect()
 }
 
 #[must_use]
-pub fn new_building_positions(
+fn new_building_positions(
     game: &Game,
     building: Building,
     city: &City,
-) -> Vec<(Building, Option<Position>)> {
+    cost_info: &CostInfo,
+) -> Vec<(Building, CostInfo, Option<Position>)> {
     if building != Building::Port {
-        return vec![(building, None)];
+        return vec![(building, cost_info.clone(), None)];
     }
 
     game.map
@@ -149,7 +153,7 @@ pub fn new_building_positions(
         .iter()
         .filter_map(|(p, t)| {
             if *t == Terrain::Water && city.position.is_neighbor(*p) {
-                Some((building, Some(*p)))
+                Some((building, cost_info.clone(), Some(*p)))
             } else {
                 None
             }

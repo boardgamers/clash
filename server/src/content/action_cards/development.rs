@@ -1,5 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
+use crate::collect::reset_collection_stats;
 use crate::content::action_cards::cultural_takeover::cultural_takeover;
 use crate::content::action_cards::mercenaries::mercenaries;
 use crate::content::builtin::Builtin;
@@ -12,6 +13,7 @@ use crate::content::tactics_cards::{
     TacticsCardFactory, defensive_formation, encircled, for_the_people, heavy_resistance,
     improved_defenses, peltasts, tactical_retreat,
 };
+use crate::player::add_unit;
 use crate::player_events::PlayingActionInfo;
 use crate::playing_actions::{ActionCost, PlayingActionType};
 use crate::resource_pile::ResourcePile;
@@ -71,13 +73,14 @@ fn production_focus(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_simple_persistent_event_listener(
         |e| &mut e.play_action_card,
         0,
-        |game, _player, _name, _| {
+        |game, player, _name, _| {
             game.permanent_effects
                 .push(PermanentEffect::Collect(CollectEffect::ProductionFocus));
             game.actions_left += 1; // to offset the action spent for collecting
             game.add_info_log_item(
                 "Production Focus: You may collect multiple times from the same tile.",
             );
+            reset_collection_stats(game.player_mut(player));
         },
     )
     .build()
@@ -122,10 +125,14 @@ pub(crate) fn collect_only() -> Builtin {
         .add_simple_persistent_event_listener(
             |event| &mut event.collect,
             2,
-            |game, _, _, _| {
-                remove_element_by(&mut game.permanent_effects, |e| {
+            |game, player, _, _| {
+                if remove_element_by(&mut game.permanent_effects, |e| {
                     matches!(e, &PermanentEffect::Collect(_))
-                });
+                })
+                .is_some()
+                {
+                    reset_collection_stats(game.player_mut(player));
+                }
             },
         )
         .build()
@@ -147,7 +154,8 @@ fn explorer(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     let b = ActionCard::builder(
         id,
         "Explorer",
-        "Construct a building without paying resources.",
+        "Explore a tile adjacent to a one of your cities - \
+        AND/OR gain a free settler in one of your cities.",
         ActionCost::regular_with_cost(ResourcePile::culture_tokens(1)),
         |game, player, _| {
             !action_explore_request(game, player.index)
@@ -184,8 +192,7 @@ fn explorer(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                         "{} decided to gain a free settler at {}",
                         s.player_name, pos
                     ));
-                    game.player_mut(s.player_index)
-                        .add_unit(pos, UnitType::Settler);
+                    add_unit(s.player_index, pos, UnitType::Settler, game);
                 }
             },
         )

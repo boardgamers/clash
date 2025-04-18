@@ -1,5 +1,6 @@
 use crate::advance::Advance;
 use crate::city_pieces::{DestroyedStructures, DestroyedStructuresData};
+use crate::collect::reset_collect_within_range_for_all;
 use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::content::advances::get_advance;
 use crate::content::builtin;
@@ -58,7 +59,7 @@ pub struct Player {
     pub civilization: Civilization,
     pub active_leader: Option<String>,
     pub available_leaders: Vec<String>,
-    pub advances: Vec<Advance>,
+    pub advances: Vec<&'static Advance>,
     pub unlocked_special_advances: Vec<String>,
     pub wonders_build: Vec<String>,
     pub incident_tokens: u8,
@@ -205,7 +206,12 @@ impl Player {
             civilization: self.civilization.name,
             active_leader: self.active_leader,
             available_leaders: self.available_leaders.into_iter().collect(),
-            advances: self.advances.into_iter().map(|a| a.name).sorted().collect(),
+            advances: self
+                .advances
+                .into_iter()
+                .map(|a| a.name.clone())
+                .sorted()
+                .collect(),
             unlocked_special_advance: self.unlocked_special_advances,
             wonders_build: self.wonders_build,
             incident_tokens: self.incident_tokens,
@@ -421,6 +427,17 @@ impl Player {
         self.resources -= resources;
     }
 
+    pub(crate) fn can_gain_resource(&self, r: ResourceType, amount: u32) -> bool {
+        match r {
+            ResourceType::MoodTokens | ResourceType::CultureTokens => true,
+            _ => self.resources.get(&r) + amount <= self.resource_limit.get(&r),
+        }
+    }
+
+    pub(crate) fn can_gain(&self, r: ResourcePile) -> bool {
+        r.into_iter().all(|(t, a)| self.can_gain_resource(t, a))
+    }
+
     #[must_use]
     pub fn can_advance_in_change_government(&self, advance: &Advance) -> bool {
         if self.has_advance(&advance.name) {
@@ -516,26 +533,26 @@ impl Player {
 
     #[must_use]
     pub fn available_units(&self) -> Units {
-        let mut units = if self.is_human() {
-            UNIT_LIMIT.clone()
-        } else if self.civilization.is_barbarian() {
-            UNIT_LIMIT_BARBARIANS.clone()
-        } else {
-            UNIT_LIMIT_PIRATES.clone()
-        };
+        let mut units = self.unit_limit();
         for u in &self.units {
             units -= &u.unit_type;
         }
         units
     }
 
-    pub fn remove_wonder(&mut self, wonder: &Wonder) {
-        utils::remove_element(&mut self.wonders_build, &wonder.name);
+    #[must_use]
+    pub fn unit_limit(&self) -> Units {
+        if self.is_human() {
+            UNIT_LIMIT.clone()
+        } else if self.civilization.is_barbarian() {
+            UNIT_LIMIT_BARBARIANS.clone()
+        } else {
+            UNIT_LIMIT_PIRATES.clone()
+        }
     }
 
-    #[must_use]
-    pub fn incident_tokens(&self) -> u8 {
-        self.incident_tokens
+    pub fn remove_wonder(&mut self, wonder: &Wonder) {
+        utils::remove_element(&mut self.wonders_build, &wonder.name);
     }
 
     pub fn strip_secret(&mut self) {
@@ -670,12 +687,6 @@ impl Player {
         }
     }
 
-    pub fn add_unit(&mut self, position: Position, unit_type: UnitType) {
-        let unit = Unit::new(self.index, position, unit_type, self.next_unit_id);
-        self.units.push(unit);
-        self.next_unit_id += 1;
-    }
-
     #[must_use]
     pub fn try_get_unit(&self, id: u32) -> Option<&Unit> {
         self.units.iter().find(|unit| unit.id == id)
@@ -777,6 +788,14 @@ impl Player {
             cost_info
         }
     }
+}
+
+pub fn add_unit(player: usize, position: Position, unit_type: UnitType, game: &mut Game) {
+    let p = game.player_mut(player);
+    let unit = Unit::new(player, position, unit_type, p.next_unit_id);
+    p.units.push(unit);
+    p.next_unit_id += 1;
+    reset_collect_within_range_for_all(game, position);
 }
 
 #[derive(Serialize, Deserialize, PartialEq)]

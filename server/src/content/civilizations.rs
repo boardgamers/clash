@@ -27,6 +27,7 @@ pub fn get_all() -> Vec<Civilization> {
             vec![
                 // todo add other effects
                 SpecialAdvance::builder("Terrace", IRRIGATION)
+                    .with_reset_collect_stats()
                     .add_transient_event_listener(
                         |events| &mut events.terrain_collect_options,
                         2,

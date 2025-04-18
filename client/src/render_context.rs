@@ -5,7 +5,7 @@ use macroquad::camera::set_default_camera;
 use macroquad::color::{Color, PINK, YELLOW};
 use macroquad::input::mouse_position;
 use macroquad::math::{Vec2, bool};
-use macroquad::prelude::{BLACK, GRAY, LIME, SKYBLUE, set_camera};
+use macroquad::prelude::{BLACK, LIME, SKYBLUE, WHITE, set_camera};
 use server::game::Game;
 use server::payment::PaymentOptions;
 use server::player::Player;
@@ -90,7 +90,7 @@ impl RenderContext<'_> {
     pub fn player_color(&self, player_index: usize) -> Color {
         let c = &self.game.player(player_index).civilization;
         if c.is_barbarian() {
-            return GRAY;
+            return WHITE;
         }
         if c.is_pirates() {
             return BLACK;

@@ -13,6 +13,7 @@ use crate::content::persistent_events::SelectedStructure;
 use crate::cultural_influence::influence_culture_attempt;
 use crate::game::GameState;
 use crate::happiness::increase_happiness;
+use crate::player::Player;
 use crate::player_events::PlayingActionInfo;
 use crate::recruit::recruit;
 use crate::unit::Units;
@@ -26,23 +27,21 @@ use crate::{
 pub struct Collect {
     pub city_position: Position,
     pub collections: Vec<PositionCollection>,
+    pub total: ResourcePile,
 }
 
 impl Collect {
     #[must_use]
-    pub fn new(city_position: Position, collections: Vec<PositionCollection>) -> Self {
+    pub fn new(
+        city_position: Position,
+        collections: Vec<PositionCollection>,
+        total: ResourcePile,
+    ) -> Self {
         Self {
             city_position,
             collections,
+            total,
         }
-    }
-
-    #[must_use]
-    pub fn total(&self) -> ResourcePile {
-        self.collections
-            .iter()
-            .map(PositionCollection::total)
-            .fold(ResourcePile::empty(), |a, b| a + b)
     }
 }
 
@@ -199,6 +198,13 @@ impl PlayingActionType {
             _ => ActionCost::regular(),
         }
     }
+
+    #[must_use]
+    pub fn remaining_resources(&self, p: &Player) -> ResourcePile {
+        let mut r = p.resources.clone();
+        r -= self.cost().cost.clone();
+        r
+    }
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
@@ -239,11 +245,11 @@ impl PlayingAction {
         match self {
             Advance { advance, payment } => {
                 let a = get_advance(&advance);
-                if !game.player(player_index).can_advance(&a) {
+                if !game.player(player_index).can_advance(a) {
                     return Err("Cannot advance".to_string());
                 }
                 game.player(player_index)
-                    .advance_cost(&a, Some(&payment))
+                    .advance_cost(a, Some(&payment))
                     .pay(game, &payment);
                 gain_advance_without_payment(game, &advance, player_index, payment, true);
             }
@@ -260,7 +266,12 @@ impl PlayingAction {
             IncreaseHappiness(i) => {
                 increase_happiness(game, player_index, &i.happiness_increases, Some(i.payment));
             }
-            InfluenceCultureAttempt(c) => influence_culture_attempt(game, player_index, &c),
+            InfluenceCultureAttempt(c) => influence_culture_attempt(
+                game,
+                player_index,
+                &c,
+                &PlayingActionType::InfluenceCultureAttempt,
+            ),
             ActionCard(a) => play_action_card(game, player_index, a),
             WonderCard(name) => {
                 on_play_wonder_card(
@@ -384,7 +395,7 @@ pub(crate) fn base_or_custom_available(
     action: PlayingActionType,
     custom: &CustomActionType,
 ) -> Vec<PlayingActionType> {
-    vec![action, custom.playing_action()]
+    vec![action, custom.playing_action_type()]
         .into_iter()
         .filter_map(|a| a.is_available(game, player).map(|()| a).ok())
         .collect()

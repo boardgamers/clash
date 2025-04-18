@@ -18,7 +18,7 @@ use crate::utils::remove_element_by;
 use action_cards::get_action_card;
 use serde::{Deserialize, Serialize};
 
-pub type CanPlayCard = Box<dyn Fn(&Game, &Player, &ActionCardInfo) -> bool>;
+pub type CanPlayCard = Box<dyn Fn(&Game, &Player, &ActionCardInfo) -> bool + Sync + Send>;
 
 #[derive(PartialEq, Eq)]
 pub enum CivilCardTarget {
@@ -61,7 +61,7 @@ impl ActionCard {
         can_play: F,
     ) -> ActionCardBuilder
     where
-        F: Fn(&Game, &Player, &ActionCardInfo) -> bool + 'static,
+        F: Fn(&Game, &Player, &ActionCardInfo) -> bool + 'static + Sync + Send,
     {
         ActionCardBuilder {
             id,
@@ -185,11 +185,11 @@ pub(crate) fn gain_action_card_from_pile(game: &mut Game, player: usize) {
             "{} gained an action card from the pile",
             game.player_name(player)
         ));
-        gain_action_card(game, player, &c);
+        gain_action_card(game, player, c);
     }
 }
 
-fn draw_action_card_from_pile(game: &mut Game) -> Option<ActionCard> {
+fn draw_action_card_from_pile(game: &mut Game) -> Option<&'static ActionCard> {
     draw_card_from_pile(
         game,
         "Action Card",

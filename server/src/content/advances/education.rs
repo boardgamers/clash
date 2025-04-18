@@ -41,26 +41,26 @@ fn public_education() -> AdvanceBuilder {
         "Once per turn, when you collect resources in a city with an Academy, gain 1 idea",
     )
     .with_advance_bonus(MoodToken)
-    .add_simple_persistent_event_listener(
-        |event| &mut event.collect,
-        0,
-        |game, player_index, _player_name, i| {
-            do_once_per_turn(
-                "Public Education",
-                i,
-                game,
-                &(),
-                |i| &mut i.info.info,
-                move |i, game, ()| {
-                    let player = game.player(player_index);
-                    if player.get_city(i.city).pieces.academy.is_some() {
+    .add_transient_event_listener(
+        |event| &mut event.collect_total,
+        1,
+        |i, game, ()| {
+            let city = game.get_any_city(i.city);
+            if city.pieces.academy.is_some() {
+                do_once_per_turn(
+                    "Public Education",
+                    i,
+                    &(),
+                    &(),
+                    |i| &mut i.info.info,
+                    |i, (), ()| {
                         i.total += ResourcePile::ideas(1);
                         i.info
                             .log
                             .push("Public Education gained 1 idea".to_string());
-                    }
-                },
-            );
+                    },
+                );
+            }
         },
     )
 }
@@ -68,8 +68,8 @@ fn public_education() -> AdvanceBuilder {
 fn free_education() -> AdvanceBuilder {
     Advance::builder(
         "Free Education",
-        "After you buy an Advance by paying for it with at least 1 gold or 1 idea, you may pay
-        an extra 1 idea to gain 1 mood token",
+        "After you buy an Advance by paying for it with at least 1 gold or 1 idea, \
+        you may pay an extra 1 idea to gain 1 mood token",
     )
     .with_advance_bonus(MoodToken)
     .add_payment_request_listener(

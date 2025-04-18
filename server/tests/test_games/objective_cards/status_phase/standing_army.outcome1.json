@@ -295,10 +295,6 @@
                       "path": "/events/0/handler"
                     },
                     {
-                      "op": "remove",
-                      "path": "/events/0/last_priority_used"
-                    },
-                    {
                       "op": "add",
                       "path": "/events/1",
                       "value": {

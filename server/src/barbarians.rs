@@ -10,7 +10,7 @@ use crate::incident::{BASE_EFFECT_PRIORITY, IncidentBuilder, IncidentFilter, pla
 use crate::map::Terrain;
 use crate::movement::MoveUnits;
 use crate::payment::PaymentOptions;
-use crate::player::Player;
+use crate::player::{Player, add_unit};
 use crate::player_events::{IncidentTarget, PersistentEvent, PersistentEvents};
 use crate::position::Position;
 use crate::resource::ResourceType;
@@ -140,11 +140,11 @@ pub(crate) fn barbarian_reinforcement<E, S, V>(
     b: S,
     event: E,
     prio: i32,
-    filter: impl Fn(&Game, usize, &V) -> bool + 'static + Clone,
-    get_barbarian_city: impl Fn(&V) -> Option<Position> + 'static + Clone,
+    filter: impl Fn(&Game, usize, &V) -> bool + 'static + Clone + Sync + Send,
+    get_barbarian_city: impl Fn(&V) -> Option<Position> + 'static + Clone + Sync + Send,
 ) -> S
 where
-    E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone,
+    E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone + Sync + Send,
     S: AbilityInitializerSetup,
     V: Clone + PartialEq,
 {
@@ -168,8 +168,7 @@ where
             let position = get_barbarian_city2(v).expect("barbarians should exist");
             let units = Units::from_iter(vec![s.choice]);
             game.add_info_log_item(&format!("Barbarians reinforced with {units} at {position}",));
-            game.player_mut(get_barbarians_player(game).index)
-                .add_unit(position, s.choice);
+            add_unit(get_barbarians_player(game).index, position, s.choice, game);
         },
     )
 }
@@ -277,7 +276,7 @@ fn reinforce_after_move(game: &mut Game, player_index: usize) {
         .take(available)
         .collect();
     for pos in cities {
-        game.player_mut(barbarian).add_unit(pos, UnitType::Infantry);
+        add_unit(barbarian, pos, UnitType::Infantry, game);
         game.add_info_log_item(&format!("Barbarians spawned a new Infantry unit at {pos}",));
     }
 }
@@ -326,7 +325,7 @@ fn barbarian_march_steps(
 pub(crate) fn set_info(
     builder: IncidentBuilder,
     event_name: &str,
-    init: impl Fn(&mut BarbariansEventState, &mut Game, usize) + 'static + Clone,
+    init: impl Fn(&mut BarbariansEventState, &mut Game, usize) + 'static + Clone + Sync + Send,
 ) -> IncidentBuilder {
     let name = event_name.to_string();
     builder.add_simple_incident_listener(
@@ -371,7 +370,7 @@ fn add_barbarians_city(builder: IncidentBuilder) -> IncidentBuilder {
             let b = get_barbarians_player(game).index;
             let p = game.player_mut(b);
             p.cities.push(City::new(b, pos));
-            p.add_unit(pos, UnitType::Infantry);
+            add_unit(b, pos, UnitType::Infantry, game);
         },
     )
 }
@@ -445,14 +444,18 @@ fn is_base_barbarian_spawn_pos(game: &Game, pos: Position, player: &Player) -> b
     game.map
         .get(pos)
         .is_some_and(|t| t.is_land() && !matches!(t, Terrain::Barren))
-        && !units_present(game, pos)
+        && !anything_present(game, pos)
         && cities_in_range(game, |p| p.index != player.index, pos, 2).is_empty()
 }
 
-fn units_present(game: &Game, pos: Position) -> bool {
+fn anything_present(game: &Game, pos: Position) -> bool {
     game.players
         .iter()
         .any(|p| p.units.iter().any(|u| u.position == pos))
+        || game
+            .players
+            .iter()
+            .any(|p| p.cities.iter().any(|c| c.position == pos))
 }
 
 fn steps_towards_land_range2_cites(game: &Game, player: &Player, start: Position) -> Vec<Position> {

@@ -11,6 +11,7 @@ use crate::recruit_unit_ui::RecruitAmount;
 use crate::render_context::RenderContext;
 use crate::select_ui::HighlightType;
 use crate::tooltip::show_tooltip_for_circle;
+use itertools::Itertools;
 use macroquad::math::f32;
 use macroquad::prelude::*;
 use server::city::{City, MoodState};
@@ -19,7 +20,7 @@ use server::collect::{available_collect_actions_for_city, possible_resource_coll
 use server::construct::available_buildings;
 use server::content::persistent_events::Structure;
 use server::game::Game;
-use server::happiness::available_happiness_actions_for_city;
+use server::happiness::{available_happiness_actions_for_city, increase_happiness_cost};
 use server::playing_actions::PlayingActionType;
 use server::resource::ResourceType;
 use server::unit::{UnitType, Units};
@@ -52,8 +53,12 @@ pub fn show_city_menu<'a>(rc: &'a RenderContext, city: &'a City) -> StateUpdate 
 }
 
 fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconAction<'a>> {
-    let actions =
-        available_happiness_actions_for_city(rc.game, rc.shown_player.index, city.position);
+    let p = rc.shown_player;
+    let actions = available_happiness_actions_for_city(rc.game, p.index, city.position)
+        .into_iter()
+        .filter(|a| increase_happiness_cost(p, city, 1, a).is_some())
+        .collect_vec();
+
     if actions.is_empty() {
         return None;
     }
@@ -65,7 +70,8 @@ fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Optio
             open_increase_happiness_dialog(rc, actions.clone(), |mut happiness| {
                 let mut target = city.mood_state.clone();
                 while target != MoodState::Happy {
-                    happiness = add_increase_happiness(rc, city, happiness);
+                    happiness = add_increase_happiness(rc, city, happiness)
+                        .expect("Happiness action failed");
                     target = target.clone().add(1);
                 }
                 happiness
@@ -78,13 +84,10 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
     if !city.can_activate() || !rc.can_play_action(&PlayingActionType::Construct) {
         return vec![];
     }
-    let owner = rc.shown_player;
-
     available_buildings(rc.game, rc.shown_player.index, city.position)
         .into_iter()
-        .map(|(b, pos)| {
+        .map(|(b, cost_info, pos)| {
             let name = b.name();
-            let cost_info = owner.construct_cost(rc.game, b, None);
             let tooltip = format!(
                 "Built {}{} for {}{}",
                 name,
@@ -106,6 +109,7 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
                             city,
                             name,
                             ConstructionProject::Building(b, pos),
+                            &cost_info,
                         ),
                     ))
                 }),
@@ -151,7 +155,6 @@ fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option
                     city.position,
                     city.player_index,
                     &Vec::new(),
-                    &[],
                 );
                 ActiveDialog::CollectResources(CollectResources::new(
                     city.player_index,
@@ -218,9 +221,6 @@ fn draw_selected_state(
 
     if let Some(tooltip) = &info.tooltip {
         show_tooltip_for_circle(rc, tooltip, center, size);
-    }
-    if let Some(label) = &info.label {
-        rc.state.draw_text(label, center.x - 5., center.y + 5.);
     }
 
     if info.status != SelectedStructureStatus::Invalid
@@ -310,6 +310,15 @@ fn draw_buildings(
         for b in &city.pieces.buildings(Some(player_index)) {
             let p = building_position(city, center, i, *b);
             draw_circle(p.x, p.y, BUILDING_SIZE, rc.player_color(player_index));
+
+            draw_scaled_icon(
+                rc,
+                &rc.assets().buildings[b],
+                b.name(),
+                p + vec2(-8., -8.),
+                16.,
+            );
+
             if let Some(h) = highlighted.iter().find(|s| {
                 s.position == city.position
                     && matches!(s.structure, Structure::Building(bb) if bb == *b)
@@ -317,14 +326,6 @@ fn draw_buildings(
                 if let Some(u) = draw_selected_state(rc, p, BUILDING_SIZE, h) {
                     return Some(u);
                 }
-            } else {
-                draw_scaled_icon(
-                    rc,
-                    &rc.assets().buildings[b],
-                    b.name(),
-                    p + vec2(-8., -8.),
-                    16.,
-                );
             }
             i += 1;
         }

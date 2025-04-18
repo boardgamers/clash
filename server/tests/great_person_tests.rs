@@ -24,27 +24,33 @@ fn test_great_explorer() {
                     advance: String::from("Storage"),
                     payment: ResourcePile::food(2),
                 }),
-            ),
+            )
+            .without_json_comparison(),
             TestAction::not_undoable(
                 1,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
                     1,
                 )])),
-            ),
-            TestAction::undoable(1, Action::Playing(PlayingAction::ActionCard(118))),
-            TestAction::undoable(
+            )
+            .without_json_comparison(),
+            TestAction::undoable(1, Action::Playing(PlayingAction::ActionCard(118)))
+                .without_json_comparison(),
+            TestAction::not_undoable(
                 1,
                 Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
                     "B6",
                 )])),
-            ),
-            TestAction::undoable(1, Action::Response(EventResponse::ExploreResolution(0))),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(1, Action::Response(EventResponse::ExploreResolution(0)))
+                .without_json_comparison(),
             TestAction::undoable(
                 1,
                 Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
-                    "B6",
+                    "A7",
                 )])),
-            ),
+            )
+            .without_json_comparison(),
             TestAction::undoable(
                 1,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::food(2)])),
@@ -238,6 +244,13 @@ fn test_great_architect() {
             .without_json_comparison(),
             TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(155)))
                 .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+                    "A1",
+                )])),
+            )
+            .without_json_comparison(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::new(

@@ -6,7 +6,6 @@ use crate::game::Game;
 use crate::log::current_player_turn_log;
 use crate::objective_card::{Objective, objective_is_ready};
 use crate::player::Player;
-use crate::tactics_card::CombatRole;
 use crate::unit::{Unit, UnitType};
 use itertools::Itertools;
 
@@ -98,7 +97,7 @@ pub(crate) fn great_battle() -> Objective {
             let s = &e.combat.stats;
             let b = s.battleground;
             let army_units_present: u8 =
-                s.attacker.fighters(b).sum() + s.defender.fighters(b).sum();
+                s.attacker.fighters(b).amount() + s.defender.fighters(b).amount();
             if s.battleground.is_land() && army_units_present >= 6 {
                 objective_is_ready(game.player_mut(player), name);
             }
@@ -120,7 +119,7 @@ pub(crate) fn defiance() -> Objective {
             let s = &e.combat.stats;
             let b = s.battleground;
             let fewer_fighters =
-                s.player(player).fighters(b).sum() < s.opponent(player).fighters(b).sum();
+                s.player(player).fighters(b).amount() < s.opponent(player).fighters(b).amount();
             if fewer_fighters && s.opponent_is_human(player, game) && s.is_winner(player) {
                 objective_is_ready(game.player_mut(player), name);
             }
@@ -174,7 +173,7 @@ pub(crate) fn bold() -> Objective {
             let b = s.battleground;
             let o = s.opponent(player);
             let fewer_fighters =
-                s.player(player).fighters(b).sum() < o.fighters(b).sum();
+                s.player(player).fighters(b).amount() < o.fighters(b).amount();
             let fewer_warfare = warfare_advances(game.player(player)) < warfare_advances(game.player(o.player));
             if (fewer_fighters && s.is_winner(player)) || fewer_warfare {
                 objective_is_ready(game.player_mut(player), name);
@@ -196,7 +195,7 @@ pub(crate) fn legendary_battle() -> Objective {
     let name = "Legendary Battle";
     Objective::builder(
         name,
-        "You fought a battle against a city of size 5 or larger with at least 1 wonder.",
+        "You fought a battle against a city of size 5 with at least 1 wonder.",
     )
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
@@ -204,7 +203,7 @@ pub(crate) fn legendary_battle() -> Objective {
         |game, player, _, e| {
             let s = &e.combat.stats;
             if let Some(city) = game.try_get_any_city(s.position) {
-                let fighters = s.player(player).fighters(s.battleground).sum() >= 3;
+                let fighters = s.player(player).fighters(s.battleground).amount() >= 3;
                 let city_size = city.size() >= 5;
                 let wonders = !city.pieces.wonders.is_empty();
                 let is_attacker = s.attacker.player == player;
@@ -256,7 +255,7 @@ pub(crate) fn aggressor() -> Objective {
             let s = &e.combat.stats;
             if s.is_winner(player)
                 && s.battleground.is_land()
-                && s.opponent(player).fighter_losses(s.battleground).sum() >= 2
+                && s.opponent(player).fighter_losses(s.battleground).amount() >= 2
             {
                 objective_is_ready(game.player_mut(player), name);
             }
@@ -276,7 +275,10 @@ pub(crate) fn barbarian_conquest() -> Objective {
         11,
         |game, player, _, e| {
             let s = &e.combat.stats;
-            if s.is_winner(player) && s.battleground.is_city() && !s.opponent_is_human(player, game)
+            if s.is_winner(player)
+                && s.battleground.is_city()
+                && !s.opponent_is_human(player, game)
+                && s.defender.present.amount() >= 2
             {
                 objective_is_ready(game.player_mut(player), name);
             }
@@ -296,10 +298,10 @@ pub(crate) fn resistance() -> Objective {
         12,
         |game, player, _, e| {
             let s = &e.combat.stats;
-            let b = s.battleground;
-            if b.is_land()
-                && s.role(player) == CombatRole::Defender
-                && s.opponent(player).fighter_losses(b).sum() >= 2
+            if s.is_winner(player)
+                && !s.opponent_is_human(player, game)
+                && s.battleground.is_city()
+                && s.opponent(player).losses.amount() >= 2
             {
                 objective_is_ready(game.player_mut(player), name);
             }
@@ -321,7 +323,7 @@ pub(crate) fn great_commander() -> Objective {
             let s = &e.combat.stats;
             let b = s.battleground;
             let o = s.opponent(player);
-            let not_more_fighters = s.player(player).fighters(b).sum() <= o.fighters(b).sum();
+            let not_more_fighters = s.player(player).fighters(b).amount() <= o.fighters(b).amount();
 
             if s.is_winner(player) && s.player(player).present.leaders > 0 && not_more_fighters {
                 objective_is_ready(game.player_mut(player), name);

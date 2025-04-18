@@ -237,7 +237,7 @@ pub(crate) fn update_combat_strength(
     game: &mut Game,
     player: usize,
     e: &mut CombatRoundStart,
-    update: impl Fn(&mut Game, &Combat, &mut CombatStrength, CombatRole) + Clone,
+    update: impl Fn(&mut Game, &Combat, &mut CombatStrength, CombatRole) + Clone + Sync + Send,
 ) {
     if player == e.combat.attacker {
         update(
@@ -343,7 +343,7 @@ pub(crate) fn conquer_city(
 
     if take_over {
         city.player_index = new_player_index;
-        city.mood_state = Angry;
+        city.set_mood_state(Angry);
         if attacker_is_human {
             for wonder in &city.pieces.wonders {
                 wonder.listeners.deinit(game, old_player_index);
@@ -450,7 +450,7 @@ pub(crate) fn move_with_possible_combat(
     player_index: usize,
     starting_position: Position,
     m: &MoveUnits,
-) -> bool {
+) {
     let enemy = game.enemy_player(player_index, m.destination);
     if let Some(defender) = enemy {
         if move_to_enemy_player_tile(
@@ -461,7 +461,7 @@ pub(crate) fn move_with_possible_combat(
             starting_position,
             defender,
         ) {
-            return true;
+            return;
         }
     } else {
         move_units(
@@ -480,7 +480,6 @@ pub(crate) fn move_with_possible_combat(
         s.result = Some(CombatResult::AttackerWins);
         on_capture_undefended_position(game, player_index, s);
     }
-    false
 }
 
 pub(crate) fn on_capture_undefended_position(game: &mut Game, player_index: usize, s: CombatStats) {
@@ -499,10 +498,11 @@ pub mod tests {
     use super::{Game, conquer_city};
 
     use crate::action::Action;
+
+    use crate::content::wonders;
     use crate::game::GameState;
     use crate::log::{ActionLogAge, ActionLogItem, ActionLogPlayer, ActionLogRound};
     use crate::movement::MovementAction;
-    use crate::payment::PaymentOptions;
     use crate::utils::tests::FloatEq;
     use crate::wonder::construct_wonder;
     use crate::{
@@ -513,7 +513,6 @@ pub mod tests {
         player::Player,
         position::Position,
         utils::Rng,
-        wonder::Wonder,
     };
 
     #[must_use]
@@ -559,7 +558,6 @@ pub mod tests {
         let old = Player::new(civilizations::tests::get_test_civilization(), 0);
         let new = Player::new(civilizations::tests::get_test_civilization(), 1);
 
-        let wonder = Wonder::builder("wonder", "test", PaymentOptions::free(), vec![]).build();
         let mut game = test_game();
         game.add_info_log_group("combat".into()); // usually filled in combat
         game.players.push(old);
@@ -569,7 +567,7 @@ pub mod tests {
 
         let position = Position::new(0, 0);
         game.players[old].cities.push(City::new(old, position));
-        construct_wonder(&mut game, wonder, position, old);
+        construct_wonder(&mut game, wonders::get_wonder("Pyramids"), position, old);
         game.players[old].construct(Academy, position, None, true);
         game.players[old].construct(Obelisk, position, None, true);
 

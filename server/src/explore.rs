@@ -1,4 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::collect::reset_collect_within_range_for_all;
 use crate::content::advances::NAVIGATION;
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{
@@ -27,7 +28,6 @@ pub(crate) fn move_to_unexplored_tile(
     start: Position,
     destination: Position,
 ) {
-    game.lock_undo(); // tile is revealed, so we can't undo the move
     stop_current_move(game);
 
     for b in &game.map.unexplored_blocks.clone() {
@@ -49,6 +49,8 @@ pub(crate) fn move_to_unexplored_block(
     start: Position,
     destination: Option<Position>,
 ) -> bool {
+    game.lock_undo(); // tile is revealed, so we can't undo the move
+
     let base = move_to.position.rotation;
     let opposite = (base + 3) as Rotation;
 
@@ -58,6 +60,7 @@ pub(crate) fn move_to_unexplored_block(
     let ship_explore = is_any_ship(game, player_index, units);
 
     let instant_explore = |game: &mut Game, rotation: Rotation, ship_can_teleport| {
+        add_block_tiles_with_log(game, &move_to.position, &move_to.block, rotation);
         if let Some(destination) = destination {
             move_to_explored_tile(
                 game,
@@ -162,8 +165,6 @@ fn move_to_explored_tile(
     destination: Position,
     ship_can_teleport: bool,
 ) {
-    add_block_tiles_with_log(game, &block.position, &block.block, rotation);
-
     if is_any_ship(game, player_index, units) && game.map.is_land(destination) {
         let player = game.player(player_index);
         let used_navigation = player.has_advance(NAVIGATION)
@@ -259,8 +260,13 @@ fn add_block_tiles_with_log(
         .unexplored_blocks
         .retain(|b| b.position.top_tile != pos.top_tile);
 
-    let s = block
-        .tiles(pos, rotation)
+    let tiles = block.tiles(pos, rotation);
+
+    for (p, _) in &tiles {
+        reset_collect_within_range_for_all(game, *p);
+    }
+
+    let s = tiles
         .into_iter()
         .map(|(position, tile)| format!("{position}={tile:?}"))
         .sorted()
@@ -294,6 +300,12 @@ pub(crate) fn explore_resolution() -> Builtin {
             let valid_rotation = rotate_by == 0 || rotate_by == 3;
             assert!(valid_rotation, "Invalid rotation {rotate_by}");
 
+            add_block_tiles_with_log(
+                game,
+                &unexplored_block.position,
+                &unexplored_block.block,
+                rotation,
+            );
             if let Some(destination) = r.destination {
                 move_to_explored_tile(
                     game,

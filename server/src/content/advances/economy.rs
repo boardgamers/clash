@@ -38,8 +38,11 @@ fn bartering() -> AdvanceBuilder {
 fn taxes() -> AdvanceBuilder {
     Advance::builder(
         "Taxes",
-        "Once per turn, as an action, you may spend 1 mood token to gain food, wood, or ore equal to the number of cities you control. If you have the Currency advance, you may gain gold instead of food, wood, or ore.")
-        .add_custom_action(Taxes)
+        "Once per turn, as an action, you may spend 1 mood token to gain \
+        food, wood, or ore equal to the number of cities you control. \
+        If you have the Currency advance, you may gain gold instead of food, wood, or ore.",
+    )
+    .add_custom_action(Taxes)
 }
 
 #[must_use]
@@ -77,7 +80,7 @@ fn trade_routes() -> AdvanceBuilder {
 
 pub(crate) fn add_trade_routes<E, S, V>(b: S, event: E) -> S
 where
-    E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone,
+    E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone + Sync + Send,
     S: AbilityInitializerSetup,
     V: Clone + PartialEq,
 {

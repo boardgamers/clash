@@ -8,6 +8,8 @@ use std::{
 };
 
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::city::is_valid_city_terrain;
+use crate::collect::reset_collect_within_range_for_all;
 use crate::consts::SHIP_CAPACITY;
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{KilledUnits, PersistentEventType, UnitsRequest};
@@ -15,11 +17,13 @@ use crate::explore::is_any_ship;
 use crate::game::GameState;
 use crate::movement::{CurrentMove, MovementRestriction};
 use crate::player::Player;
-use crate::{game::Game, map::Terrain::*, position::Position, resource_pile::ResourcePile, utils};
+use crate::{game::Game, position::Position, resource_pile::ResourcePile, utils};
 
+#[readonly::make]
 #[derive(Clone)]
 pub struct Unit {
     pub player_index: usize,
+    #[readonly]
     pub position: Position,
     pub unit_type: UnitType,
     pub movement_restrictions: Vec<MovementRestriction>,
@@ -76,11 +80,11 @@ impl Unit {
         if player.try_get_city(self.position).is_some() {
             return false;
         }
-        if matches!(
+
+        if !is_valid_city_terrain(
             game.map
                 .get(self.position)
                 .expect("The unit should be at a valid position"),
-            Barren | Exhausted(_)
         ) {
             return false;
         }
@@ -287,7 +291,7 @@ impl Units {
     }
 
     #[must_use]
-    pub fn sum(&self) -> u8 {
+    pub fn amount(&self) -> u8 {
         self.settlers + self.infantry + self.ships + self.cavalry + self.elephants + self.leaders
     }
 
@@ -632,6 +636,12 @@ pub(crate) fn choose_carried_units_to_remove() -> Builtin {
         },
     )
     .build()
+}
+
+pub fn set_unit_position(player: usize, unit_id: u32, position: Position, game: &mut Game) {
+    let unit = game.player_mut(player).get_unit_mut(unit_id);
+    unit.position = position;
+    reset_collect_within_range_for_all(game, position);
 }
 
 #[cfg(test)]

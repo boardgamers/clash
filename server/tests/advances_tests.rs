@@ -257,13 +257,14 @@ fn test_forced_labor() {
             TestAction::undoable(0, Action::Playing(Custom(ForcedLabor))),
             TestAction::undoable(
                 0,
-                Action::Playing(Collect(playing_actions::Collect {
-                    city_position: Position::from_offset("A1"),
-                    collections: vec![
+                Action::Playing(Collect(playing_actions::Collect::new(
+                    Position::from_offset("A1"),
+                    vec![
                         PositionCollection::new(Position::from_offset("A1"), ResourcePile::food(1)),
                         PositionCollection::new(Position::from_offset("A2"), ResourcePile::wood(1)),
                     ],
-                })),
+                    ResourcePile::food(1) + ResourcePile::wood(1),
+                ))),
             ),
         ],
     );
@@ -520,13 +521,14 @@ fn test_free_education() {
 
 #[test]
 fn test_collect_husbandry() {
-    let action = Action::Playing(Collect(playing_actions::Collect {
-        city_position: Position::from_offset("B3"),
-        collections: vec![PositionCollection::new(
+    let action = Action::Playing(Collect(playing_actions::Collect::new(
+        Position::from_offset("B3"),
+        vec![PositionCollection::new(
             Position::from_offset("B5"),
             ResourcePile::food(1),
         )],
-    }));
+        ResourcePile::food(1),
+    )));
     JSON.test(
         "collect_husbandry",
         vec![
@@ -543,13 +545,14 @@ fn test_collect_free_economy() {
         vec![TestAction::undoable(
             0,
             Action::Playing(Custom(CustomAction::FreeEconomyCollect(
-                playing_actions::Collect {
-                    city_position: Position::from_offset("C2"),
-                    collections: vec![
+                playing_actions::Collect::new(
+                    Position::from_offset("C2"),
+                    vec![
                         PositionCollection::new(Position::from_offset("B1"), ResourcePile::ore(1)),
                         PositionCollection::new(Position::from_offset("B2"), ResourcePile::ore(1)),
                     ],
-                },
+                    ResourcePile::ore(2),
+                ),
             ))),
         )],
     );

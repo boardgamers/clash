@@ -1,8 +1,9 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::gain_action_card_from_pile;
-use crate::advance::{Advance, do_advance, gain_advance_without_payment, remove_advance};
+use crate::advance::{do_advance, gain_advance_without_payment, remove_advance};
 use crate::consts::AGES;
-use crate::content::builtin::{Builtin, status_phase_handler};
+use crate::content::advances::get_advance;
+use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{
     AdvanceRequest, ChangeGovernmentRequest, EventResponse, PersistentEventRequest,
     PersistentEventType, PlayerRequest, PositionRequest,
@@ -12,11 +13,13 @@ use crate::objective_card::{
 };
 use crate::payment::PaymentOptions;
 use crate::player_events::{PersistentEvent, PersistentEvents};
-use crate::{content::advances, game::Game, player::Player, resource_pile::ResourcePile, utils};
+use crate::{
+    cache, content::advances, game::Game, player::Player, resource_pile::ResourcePile, utils,
+};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub enum StatusPhaseState {
     CompleteObjectives,
     FreeAdvance,
@@ -74,7 +77,7 @@ pub(crate) fn play_status_phase(game: &mut Game, mut phase: StatusPhaseState) {
         phase = match game.trigger_persistent_event_with_listener(
             &game.human_players(game.starting_player_index),
             |events| &mut events.status_phase,
-            &status_phase_handler(&phase).listeners,
+            &cache::get().status_phase_handler(&phase).listeners,
             phase,
             PersistentEventType::StatusPhase,
             None,
@@ -144,9 +147,9 @@ pub(crate) fn free_advance() -> Builtin {
             0,
             |game, player_index, _player_name| {
                 let choices = advances::get_all()
-                    .into_iter()
+                    .iter()
                     .filter(|advance| game.player(player_index).can_advance_free(advance))
-                    .map(|a| a.name)
+                    .map(|a| a.name.clone())
                     .collect_vec();
                 Some(AdvanceRequest::new(choices))
             },
@@ -237,7 +240,7 @@ pub(crate) fn add_change_government<A, E, V>(
     cost: ResourcePile,
 ) -> A
 where
-    E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone,
+    E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone + Sync + Send,
     A: AbilityInitializerSetup,
     V: Clone + PartialEq,
 {
@@ -309,10 +312,10 @@ fn change_government_type(game: &mut Game, player_index: usize, new_government: 
     );
 
     for a in player_government_advances {
-        remove_advance(game, &a, player_index);
+        remove_advance(game, get_advance(&a), player_index);
     }
 
-    let new_government_advances = advances::get_government(government).advances;
+    let new_government_advances = &advances::get_government(government).advances;
     do_advance(game, &new_government_advances[0], player_index);
     for name in &new_government.additional_advances {
         let (pos, advance) = new_government_advances
@@ -329,10 +332,15 @@ fn change_government_type(game: &mut Game, player_index: usize, new_government: 
     }
 }
 
-pub(crate) fn government_advances(p: &Player) -> Vec<Advance> {
+pub(crate) fn government_advances(p: &Player) -> Vec<String> {
     let current = p.government().expect("player should have a government");
 
-    advances::get_government(&current).owned_advances(p)
+    advances::get_government(&current)
+        .advances
+        .iter()
+        .filter(|a| p.has_advance(&a.name))
+        .map(|a| a.name.clone())
+        .collect_vec()
 }
 
 #[must_use]

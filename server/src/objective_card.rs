@@ -14,9 +14,9 @@ use crate::utils::remove_element_by;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
-type StatusPhaseCheck = Box<dyn Fn(&Game, &Player) -> bool>;
+type StatusPhaseCheck = Box<dyn Fn(&Game, &Player) -> bool + Sync + Send>;
 
-type StatusPhaseUpdate = Box<dyn Fn(&mut Game, usize)>;
+type StatusPhaseUpdate = Box<dyn Fn(&mut Game, usize) + Sync + Send>;
 
 pub struct Objective {
     pub name: String,
@@ -78,7 +78,7 @@ impl ObjectiveBuilder {
     #[must_use]
     pub fn status_phase_check<F>(mut self, f: F) -> Self
     where
-        F: Fn(&Game, &Player) -> bool + 'static,
+        F: Fn(&Game, &Player) -> bool + 'static + Sync + Send,
     {
         self.status_phase_check = Some(Box::new(f));
         self
@@ -87,7 +87,7 @@ impl ObjectiveBuilder {
     #[must_use]
     pub fn status_phase_update<F>(mut self, f: F) -> Self
     where
-        F: Fn(&mut Game, usize) + 'static,
+        F: Fn(&mut Game, usize) + 'static + Sync + Send,
     {
         self.status_phase_update = Some(Box::new(f));
         self
@@ -313,7 +313,7 @@ pub(crate) fn match_objective_cards(
         .ok_or("Invalid selection of objective cards".to_string())
 }
 
-fn combinations(cards: &[ObjectiveCard], opportunities: &[String]) -> Vec<Vec<(u8, String)>> {
+fn combinations(cards: &[&ObjectiveCard], opportunities: &[String]) -> Vec<Vec<(u8, String)>> {
     let Some((first, rest)) = cards.split_first() else {
         return vec![];
     };
@@ -384,11 +384,11 @@ pub(crate) fn gain_objective_card_from_pile(game: &mut Game, player: usize) {
             "{} gained an objective card from the pile",
             game.player_name(player)
         ));
-        gain_objective_card(game, player, &c);
+        gain_objective_card(game, player, c);
     }
 }
 
-fn draw_objective_card_from_pile(game: &mut Game) -> Option<ObjectiveCard> {
+fn draw_objective_card_from_pile(game: &mut Game) -> Option<&'static ObjectiveCard> {
     draw_card_from_pile(
         game,
         "Objective Card",
@@ -409,7 +409,12 @@ pub(crate) fn gain_objective_card(
         .player(player_index)
         .objective_cards
         .iter()
-        .flat_map(|&id| get_objective_card(id).objectives.map(|o| o.name.clone()))
+        .flat_map(|&id| {
+            get_objective_card(id)
+                .objectives
+                .iter()
+                .map(|o| o.name.clone())
+        })
         .collect_vec();
     init_objective_card(game, player_index, &mut o, objective_card.id);
     game.players[player_index]
@@ -423,7 +428,7 @@ pub(crate) fn init_objective_card(
     objectives: &mut Vec<String>,
     id: u8,
 ) {
-    for o in get_objective_card(id).objectives {
+    for o in &get_objective_card(id).objectives {
         if objectives.contains(&o.name) {
             // can't fulfill 2 objectives with the same name, so we can skip it here
             continue;
@@ -438,7 +443,7 @@ pub(crate) fn discard_objective_card(game: &mut Game, player: usize, card: u8) {
         id == card
     })
     .unwrap_or_else(|| panic!("should be able to discard objective card {card}"));
-    for o in get_objective_card(card).objectives {
+    for o in &get_objective_card(card).objectives {
         if game.player(player).objective_cards.iter().any(|c| {
             get_objective_card(*c)
                 .objectives

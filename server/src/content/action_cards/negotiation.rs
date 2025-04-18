@@ -2,6 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action::Action;
 use crate::action_card::ActionCard;
 use crate::city::City;
+use crate::collect::reset_collection_stats;
 use crate::content::builtin::Builtin;
 use crate::content::effects::{CollectEffect, PermanentEffect};
 use crate::content::incidents::great_diplomat::{DiplomaticRelations, Negotiations};
@@ -237,13 +238,14 @@ fn overproduction(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_simple_persistent_event_listener(
         |e| &mut e.play_action_card,
         0,
-        |game, _player_index, player_name, _| {
+        |game, player_index, player_name, _| {
             game.permanent_effects
                 .push(PermanentEffect::Collect(CollectEffect::Overproduction));
             game.actions_left += 1; // to offset the action spent for collecting
             game.add_info_log_item(&format!(
                 "{player_name} can use Overproduction to collect from 2 additional tiles."
             ));
+            reset_collection_stats(game.player_mut(player_index));
         },
     )
     .build()

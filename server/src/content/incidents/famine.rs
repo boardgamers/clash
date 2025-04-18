@@ -188,9 +188,9 @@ pub(crate) fn famine(
     description: &str,
     target: IncidentTarget,
     incident_base_effect: IncidentBaseEffect,
-    amount: impl Fn(&Player, &Game) -> u8 + Clone + 'static,
-    player_pred: impl Fn(&Player) -> bool + Clone + 'static,
-    city_pred: impl Fn(&City, &Game) -> bool + Clone + 'static,
+    amount: impl Fn(&Player, &Game) -> u8 + Clone + 'static + Sync + Send,
+    player_pred: impl Fn(&Player) -> bool + Clone + 'static + Sync + Send,
+    city_pred: impl Fn(&City, &Game) -> bool + Clone + 'static + Sync + Send,
 ) -> Incident {
     let player_pred2 = player_pred.clone();
     let city_pred2 = city_pred.clone();

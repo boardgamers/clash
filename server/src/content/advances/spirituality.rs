@@ -17,49 +17,63 @@ pub(crate) fn spirituality() -> AdvanceGroup {
 }
 
 fn myths() -> AdvanceBuilder {
-    Advance::builder("Myths", "Whenever an Event card asks you have to reduce the mood in a city, you may pay 1 mood token instead of reducing the mood (does not apply for Pirates).")
-        .with_advance_bonus(MoodToken)
-        .with_unlocked_building(Temple)
-        .add_resource_request(
-            |event| &mut event.construct,
-            1,
-            |_game, _player_index, building| {
-                if matches!(building, Temple) {
-                    return Some(ResourceRewardRequest::new(
-                        PaymentOptions::sum(1, &[MoodTokens, CultureTokens]),
-                        "Select Temple bonus".to_string(),
-                    ));
-                }
-                None
-            },
-            |_game, p,_| {
-                vec![format!(
-                    "{} selected {} as a reward for constructing a Temple",
-                    p.player_name, p.choice
-                )]
-            },
-        )
+    Advance::builder(
+        "Myths",
+        "Whenever an Event card asks you have to reduce the mood in a city, \
+        you may pay 1 mood token instead of reducing the mood (does not apply for Pirates).",
+    )
+    .with_advance_bonus(MoodToken)
+    .with_unlocked_building(Temple)
+    .add_resource_request(
+        |event| &mut event.construct,
+        1,
+        |_game, _player_index, building| {
+            if matches!(building, Temple) {
+                return Some(ResourceRewardRequest::new(
+                    PaymentOptions::sum(1, &[MoodTokens, CultureTokens]),
+                    "Select Temple bonus".to_string(),
+                ));
+            }
+            None
+        },
+        |_game, p, _| {
+            vec![format!(
+                "{} selected {} as a reward for constructing a Temple",
+                p.player_name, p.choice
+            )]
+        },
+    )
 }
 
 fn rituals() -> AdvanceBuilder {
-    Advance::builder("Rituals", "When you perform the Increase Happiness Action you may spend any Resources as a substitute for mood tokens. This is done at a 1:1 ratio")
-        .with_advance_bonus(CultureToken)
-        .add_transient_event_listener(
-            |event| &mut event.happiness_cost,
-            0,
-            |cost, (), ()| {
-                for r in &[
-                    ResourceType::Food,
-                    ResourceType::Wood,
-                    ResourceType::Ore,
-                    ResourceType::Ideas,
-                    ResourceType::Gold,
-                ] {
-                    cost.info.log.push("Rituals allows spending any resource as a substitute for mood tokens".to_string());
-                    cost.cost.conversions.push(PaymentConversion::unlimited(ResourcePile::mood_tokens(1), ResourcePile::of(*r, 1)));
-                }
-            },
-        )
+    Advance::builder(
+        "Rituals",
+        "When you perform the Increase Happiness Action \
+        you may spend any Resources as a substitute for mood tokens. This is done at a 1:1 ratio",
+    )
+    .with_advance_bonus(CultureToken)
+    .add_transient_event_listener(
+        |event| &mut event.happiness_cost,
+        0,
+        |cost, (), ()| {
+            for r in &[
+                ResourceType::Food,
+                ResourceType::Wood,
+                ResourceType::Ore,
+                ResourceType::Ideas,
+                ResourceType::Gold,
+            ] {
+                cost.info.log.push(
+                    "Rituals allows spending any resource as a substitute for mood tokens"
+                        .to_string(),
+                );
+                cost.cost.conversions.push(PaymentConversion::unlimited(
+                    ResourcePile::mood_tokens(1),
+                    ResourcePile::of(*r, 1),
+                ));
+            }
+        },
+    )
 }
 
 fn priesthood() -> AdvanceBuilder {
@@ -82,8 +96,7 @@ fn priesthood() -> AdvanceBuilder {
 fn state_religion() -> AdvanceBuilder {
     Advance::builder(
         "State Religion",
-        "Once per turn, when constructing a Temple,
-            do not pay any Food.",
+        "Once per turn, when constructing a Temple, do not pay any Food.",
     )
     .with_advance_bonus(MoodToken)
     .add_once_per_turn_listener(

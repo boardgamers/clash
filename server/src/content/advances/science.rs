@@ -1,7 +1,8 @@
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::action_card::gain_action_card_from_pile;
 use crate::advance::Bonus::CultureToken;
 use crate::advance::{Advance, AdvanceBuilder};
-use crate::city_pieces::Building::Observatory;
+use crate::city_pieces::Building;
 use crate::content::advances::{AdvanceGroup, METALLURGY, advance_group_builder};
 use crate::content::persistent_events::ResourceRewardRequest;
 use crate::payment::PaymentOptions;
@@ -29,8 +30,18 @@ fn math() -> AdvanceBuilder {
             }
         },
     )
+    .add_simple_persistent_event_listener(
+        |event| &mut event.construct,
+        4,
+        |game, player_index, _player_name, b| {
+            if matches!(b, Building::Observatory) {
+                gain_action_card_from_pile(game, player_index);
+                game.add_info_log_item("Observatory gained 1 action card");
+            }
+        },
+    )
     .with_advance_bonus(CultureToken)
-    .with_unlocked_building(Observatory)
+    .with_unlocked_building(Building::Observatory)
 }
 
 fn astronomy() -> AdvanceBuilder {
@@ -94,17 +105,22 @@ fn medicine() -> AdvanceBuilder {
 fn metallurgy() -> AdvanceBuilder {
     Advance::builder(
         METALLURGY,
-        "If you have the Steel Weapons Advance, you no longer have to pay 1 ore to activate it against enemies without Steel Weapons. If you collect at least 2 ore, replace 1 ore with 1 gold",)
-        .with_advance_bonus(CultureToken)
-        .add_transient_event_listener(
-            |event| &mut event.collect_total,
-            0,
-            |i, (), ()| {
-                if i.total.ore >= 2 {
-                    i.total.ore -= 1;
-                    i.total.gold += 1;
-                    i.info.log.push("Metallurgy converted 1 ore to 1 gold".to_string());
-                }
-            },
-        )
+        "If you have the Steel Weapons Advance, \
+        you no longer have to pay 1 ore to activate it against enemies without Steel Weapons. \
+        If you collect at least 2 ore, replace 1 ore with 1 gold",
+    )
+    .with_advance_bonus(CultureToken)
+    .add_transient_event_listener(
+        |event| &mut event.collect_total,
+        0,
+        |i, _, ()| {
+            if i.total.ore >= 2 {
+                i.total.ore -= 1;
+                i.total.gold += 1;
+                i.info
+                    .log
+                    .push("Metallurgy converted 1 ore to 1 gold".to_string());
+            }
+        },
+    )
 }

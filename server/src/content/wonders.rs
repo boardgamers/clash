@@ -2,11 +2,16 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::content::advances::IRRIGATION;
 use crate::map::Terrain::Fertile;
 use crate::payment::{PaymentConversionType, PaymentOptions};
-use crate::{resource_pile::ResourcePile, wonder::Wonder};
+use crate::{cache, resource_pile::ResourcePile, wonder::Wonder};
 use std::collections::HashSet;
 
 #[must_use]
-pub fn get_all() -> Vec<Wonder> {
+pub fn get_all() -> &'static Vec<Wonder> {
+    cache::get().get_wonders()
+}
+
+#[must_use]
+pub fn get_all_uncached() -> Vec<Wonder> {
     vec![
         // todo add effects
         Wonder::builder(
@@ -23,6 +28,7 @@ pub fn get_all() -> Vec<Wonder> {
             PaymentOptions::resources(ResourcePile::new(5, 5, 2, 0, 0, 0, 5)),
             vec![IRRIGATION],
         )
+            .with_reset_collect_stats()
             .add_transient_event_listener(
                 |events| &mut events.terrain_collect_options,
                 1,
@@ -44,9 +50,8 @@ pub fn get_all() -> Vec<Wonder> {
 /// # Panics
 /// Panics if wonder does not exist
 #[must_use]
-pub fn get_wonder(name: &str) -> Wonder {
-    get_all()
-        .into_iter()
-        .find(|wonder| wonder.name == name)
-        .expect("wonder not found")
+pub fn get_wonder(name: &str) -> &'static Wonder {
+    cache::get()
+        .get_wonder(name)
+        .unwrap_or_else(|| panic!("wonder not found: {name}"))
 }

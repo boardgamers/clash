@@ -30,10 +30,10 @@ pub struct HandCardObject {
 }
 
 impl HandCardObject {
-    pub fn new(id: HandCard, color: Color, name: String, description: Vec<String>) -> Self {
+    pub fn new(id: HandCard, color: Color, name: &str, description: Vec<String>) -> Self {
         Self {
             id,
-            name,
+            name: name.chars().take(17).collect(),
             description,
             color,
         }
@@ -83,7 +83,7 @@ pub(crate) fn show_cards(rc: &RenderContext) -> StateUpdate {
         })
         .collect_vec();
 
-    if let Some(value) = draw_cards(rc, &cards, selection.as_ref(), size, 0.) {
+    if let Some(value) = draw_cards(rc, &cards, selection.as_ref(), size, -75.) {
         return value;
     }
     if let Some(value) = draw_cards(rc, &swap_cards, selection.as_ref(), size, -300.) {
@@ -170,7 +170,10 @@ fn play_card(card: &HandCard) -> StateUpdate {
             vec![format!("Play Action Card: {}", get_civil_card(*a).name)],
             Action::Playing(PlayingAction::ActionCard(*a)),
         ),
-        HandCard::Wonder(_) => panic!("wonders are played in the construct menu"),
+        HandCard::Wonder(name) => StateUpdate::execute_with_confirm(
+            vec![format!("Play Wonder Card: {name}")],
+            Action::Playing(PlayingAction::WonderCard(name.clone())),
+        ),
         HandCard::ObjectiveCard(_) => panic!("objective cards are not played as actions"),
     }
 }
@@ -202,21 +205,21 @@ fn get_card_object(
         HandCard::ActionCard(a) if *a == 0 => HandCardObject::new(
             card.clone(),
             ACTION_CARD_COLOR,
-            "Action Card".to_string(),
+            "Action Card",
             vec!["Hidden Action Card".to_string()],
         ),
         HandCard::ActionCard(id) => action_card_object(rc, *id),
         HandCard::ObjectiveCard(o) if *o == 0 => HandCardObject::new(
             card.clone(),
             OBJECTIVE_CARD_COLOR,
-            "Objective Card".to_string(),
+            "Objective Card",
             vec!["Hidden Objective Card".to_string()],
         ),
         HandCard::ObjectiveCard(id) => objective_card_object(*id, selection),
         HandCard::Wonder(n) if n.is_empty() => HandCardObject::new(
             card.clone(),
             WONDER_CARD_COLOR,
-            "Wonder Card".to_string(),
+            "Wonder Card",
             vec!["Hidden Wonder Card".to_string()],
         ),
         HandCard::Wonder(name) => {
@@ -224,7 +227,7 @@ fn get_card_object(
             HandCardObject::new(
                 card.clone(),
                 WONDER_CARD_COLOR,
-                w.name.clone(),
+                &w.name,
                 vec![
                     w.description.clone(),
                     format!("Cost: {}", w.cost.to_string()),
@@ -250,7 +253,7 @@ fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
     };
 
     let mut description = vec![format!("Civil: {}", a.civil_card.name)];
-    let action_type = a.civil_card.action_type;
+    let action_type = &a.civil_card.action_type;
     description.push(
         if action_type.free {
             "As a free action"
@@ -259,18 +262,18 @@ fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
         }
         .to_string(),
     );
-    let cost = action_type.cost;
+    let cost = &action_type.cost;
     if !cost.is_empty() {
         description.push(format!("Cost: {cost}"));
     }
     break_text(a.civil_card.description.as_str(), 30, &mut description);
-    if let Some(t) = a.tactics_card {
+    if let Some(t) = &a.tactics_card {
         description.extend(vec![
             format!("Tactics: {}", t.name),
             format!(
                 "Unit Types: {}",
                 t.fighter_requirement
-                    .into_iter()
+                    .iter()
                     .map(|f| format!("{f:?}"))
                     .join(", ")
             ),
@@ -286,7 +289,7 @@ fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
             ),
             format!(
                 "Location: {:?}",
-                match t.location_requirement {
+                match &t.location_requirement {
                     None => "Any".to_string(),
                     Some(l) => format!("{l:?}"),
                 }
@@ -297,7 +300,7 @@ fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
     HandCardObject::new(
         HandCard::ActionCard(id),
         ACTION_CARD_COLOR,
-        name,
+        &name,
         description,
     )
 }
@@ -323,7 +326,7 @@ fn objective_card_object(id: u8, selection: Option<&SelectionInfo>) -> HandCardO
     HandCardObject::new(
         HandCard::ObjectiveCard(id),
         OBJECTIVE_CARD_COLOR,
-        name,
+        &name,
         description,
     )
 }

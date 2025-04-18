@@ -5,7 +5,7 @@ use crate::city::MoodState;
 use crate::city_pieces::Building;
 use crate::construct::{Construct, construct};
 use crate::content::advances;
-use crate::content::advances::{economy, get_governments};
+use crate::content::advances::{economy, get_governments_uncached};
 use crate::content::incidents::great_builders::{great_architect, great_engineer};
 use crate::content::incidents::great_diplomat::{choose_diplomat_partner, great_diplomat};
 use crate::content::incidents::great_explorer::great_explorer;
@@ -135,7 +135,7 @@ pub(crate) fn great_person_action_card<F, S: AsRef<str> + Clone>(
     can_play: F,
 ) -> ActionCardBuilder
 where
-    F: Fn(&Game, &Player) -> bool + 'static,
+    F: Fn(&Game, &Player) -> bool + 'static + Sync + Send,
 {
     let groups = free_advance_groups
         .iter()
@@ -156,7 +156,7 @@ where
             let p = game.player(player_index);
             let choices = groups
                 .iter()
-                .flat_map(|g| advances::get_group(g.as_ref()).advances)
+                .flat_map(|g| &advances::get_group(g.as_ref()).advances)
                 .filter(|a| p.can_advance_free(a))
                 .map(|a| a.name.clone())
                 .collect();
@@ -208,7 +208,7 @@ fn great_artist() -> ActionCard {
             ));
             game.player_mut(s.player_index)
                 .get_city_mut(position)
-                .mood_state = MoodState::Happy;
+                .set_mood_state(MoodState::Happy);
         },
     )
     .build()
@@ -358,8 +358,8 @@ fn great_scientist() -> ActionCard {
 }
 
 fn elder_statesman() -> ActionCard {
-    let groups = get_governments()
-        .into_iter()
+    let groups = get_governments_uncached() // cache is not ready yet
+        .iter()
         .map(|a| a.name.clone())
         .collect_vec();
     great_person_action_card(
