@@ -158,13 +158,10 @@ fn description(p: &Player, a: &Advance) -> Vec<String> {
         parts.push(format!("Contradicts: {}", a.contradicting.join(", ")));
     }
     if let Some(b) = &a.bonus {
-        parts.push(format!(
-            "Bonus: {}",
-            match b {
-                Bonus::MoodToken => "Mood Token",
-                Bonus::CultureToken => "Culture Token",
-            }
-        ));
+        parts.push(format!("Bonus: {}", match b {
+            Bonus::MoodToken => "Mood Token",
+            Bonus::CultureToken => "Culture Token",
+        }));
     }
     if let Some(g) = &a.government {
         parts.push(format!("Government: {g}"));
@@ -183,9 +180,16 @@ pub fn pay_advance_dialog(ap: &Payment, rc: &RenderContext) -> StateUpdate {
         return update;
     }
     payment_dialog(rc, ap, true, ActiveDialog::AdvancePayment, |payment| {
-        StateUpdate::Execute(Action::Playing(PlayingAction::Advance {
-            advance: ap.name.to_string(),
-            payment,
-        }))
+        StateUpdate::execute_with_warning(
+            Action::Playing(PlayingAction::Advance {
+                advance: ap.name.to_string(),
+                payment,
+            }),
+            if rc.shown_player.incident_tokens == 1 {
+                vec!["A game event will be triggered".to_string()]
+            } else {
+                vec![]
+            },
+        )
     })
 }
