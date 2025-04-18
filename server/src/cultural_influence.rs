@@ -367,8 +367,7 @@ fn affordable_start_city(
         Ok((target_city.position, 0))
     } else {
         let player = game.player(player_index);
-        let mut available = player.resources.clone();
-        available -= action_type.cost().cost;
+        let available = action_type.remaining_resources(player); 
 
         player
             .cities

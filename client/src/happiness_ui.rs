@@ -4,7 +4,7 @@ use crate::dialog_ui::BaseOrCustomDialog;
 use crate::payment_ui::{Payment, payment_dialog};
 use crate::render_context::RenderContext;
 use server::city::City;
-use server::happiness::{happiness_action, increase_happiness_cost};
+use server::happiness::{happiness_action, happiness_cost_for_all_cities, increase_happiness_cost};
 use server::player::Player;
 use server::playing_actions::{IncreaseHappiness, PlayingActionType};
 use server::position::Position;
@@ -31,21 +31,12 @@ impl IncreaseHappinessConfig {
         new_steps: &[(Position, u32)],
         custom: &BaseOrCustomDialog,
     ) -> Payment {
-        let payment = new_steps
-            .iter()
-            .map(|(pos, steps)| {
-                let city = p.get_city(*pos);
-                increase_happiness_cost(p, city, *steps).unwrap().cost
-            })
-            .reduce(|mut a, b| {
-                a.default += b.default;
-                a
-            })
-            .unwrap();
-
-        let mut pile = p.resources.clone();
-        pile -= custom.action_type.cost().cost;
-        Payment::new(&payment, &pile, "Increase happiness", false)
+        Payment::new(
+            &happiness_cost_for_all_cities(p, new_steps),
+            &custom.action_type.remaining_resources(p),
+            "Increase happiness",
+            false,
+        )
     }
 }
 

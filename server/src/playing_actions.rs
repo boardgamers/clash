@@ -21,6 +21,7 @@ use crate::{
     content::custom_actions::CustomAction, game::Game, position::Position,
     resource_pile::ResourcePile,
 };
+use crate::player::Player;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug, Hash)]
 pub struct Collect {
@@ -196,6 +197,13 @@ impl PlayingActionType {
             PlayingActionType::EndTurn => ActionCost::cost(ResourcePile::empty()),
             _ => ActionCost::regular(),
         }
+    }
+    
+    #[must_use]
+    pub fn remaining_resources(&self, p: &Player) -> ResourcePile {
+        let mut r = p.resources.clone();
+        r -= self.cost().cost.clone();
+        r
     }
 }
 

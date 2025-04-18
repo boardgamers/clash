@@ -91,6 +91,23 @@ pub(crate) fn increase_happiness(
     }
 }
 
+pub fn happiness_cost_for_all_cities(
+    p: &Player,
+    new_steps: &[(Position, u32)],
+) -> PaymentOptions {
+    new_steps
+        .iter()
+        .map(|(pos, steps)| {
+            let city = p.get_city(*pos);
+            increase_happiness_cost(p, city, *steps).unwrap().cost
+        })
+        .reduce(|mut a, b| {
+            a.default += b.default;
+            a
+        })
+        .unwrap()
+}
+
 #[must_use]
 pub fn increase_happiness_cost(player: &Player, city: &City, steps: u32) -> Option<CostInfo> {
     let max_steps = 2 - city.mood_state.clone() as u32;
