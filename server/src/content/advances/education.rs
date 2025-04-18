@@ -8,15 +8,12 @@ use crate::payment::PaymentOptions;
 use crate::resource_pile::ResourcePile;
 
 pub(crate) fn education() -> AdvanceGroup {
-    advance_group_builder(
-        "Education",
-        vec![
-            writing(),
-            public_education(),
-            free_education(),
-            philosophy(),
-        ],
-    )
+    advance_group_builder("Education", vec![
+        writing(),
+        public_education(),
+        free_education(),
+        philosophy(),
+    ])
 }
 
 fn writing() -> AdvanceBuilder {
@@ -60,8 +57,8 @@ fn public_education() -> AdvanceBuilder {
 fn free_education() -> AdvanceBuilder {
     Advance::builder(
         "Free Education",
-        "After you buy an Advance by paying for it with at least 1 gold or 1 idea, you may pay
-        an extra 1 idea to gain 1 mood token",
+        "After you buy an Advance by paying for it with at least 1 gold or 1 idea, \
+        you may pay an extra 1 idea to gain 1 mood token",
     )
     .with_advance_bonus(MoodToken)
     .add_payment_request_listener(

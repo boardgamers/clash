@@ -550,11 +550,6 @@ impl Player {
         utils::remove_element(&mut self.wonders_build, &wonder.name);
     }
 
-    #[must_use]
-    pub fn incident_tokens(&self) -> u8 {
-        self.incident_tokens
-    }
-
     pub fn strip_secret(&mut self) {
         self.wonder_cards = self.wonder_cards.iter().map(|_| String::new()).collect();
         self.action_cards = self.action_cards.iter().map(|_| 0).collect();

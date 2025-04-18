@@ -40,6 +40,7 @@ pub struct Assets {
     pub cancel: Texture2D,
 
     pub victory_points: Texture2D,
+    pub event_counter: Texture2D,
     pub active_player: Texture2D,
 
     // Admin
@@ -91,6 +92,7 @@ impl Assets {
             cancel: load_png(include_bytes!("../assets/cancel-svgrepo-com.png")),
 
             victory_points: load_png(include_bytes!("../assets/trophy-cup-svgrepo-com.png")),
+            event_counter: load_png(include_bytes!("../assets/counter-clockwise-clock-svgrepo-com.png")),
             active_player: load_png(include_bytes!("../assets/triangle-svgrepo-com.png")),
 
             // Admin
