@@ -43,7 +43,7 @@ pub(crate) fn pay_resources(
     want: ResourcePile,
     pay: ResourcePile,
 ) -> Objective {
-    let suffix = if pay.gold > 0 { " (not gold)" } else { "" };
+    let suffix = if pay.gold == 0 { " (not gold)" } else { "" };
     Objective::builder(
         objective,
         &format!("You have at least {want}: Pay {pay}{suffix}."),
