@@ -186,7 +186,6 @@ pub struct SelectedStructureInfo {
     pub position: Position,
     pub structure: Structure,
     pub status: SelectedStructureStatus,
-    pub label: Option<String>,
     pub tooltip: Option<String>,
 }
 
@@ -195,14 +194,12 @@ impl SelectedStructureInfo {
         position: Position,
         structure: Structure,
         status: SelectedStructureStatus,
-        label: Option<String>,
         tooltip: Option<String>,
     ) -> Self {
         SelectedStructureInfo {
             position,
             structure,
             status,
-            label,
             tooltip,
         }
     }

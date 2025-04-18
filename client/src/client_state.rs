@@ -573,7 +573,6 @@ impl State {
                                     s.structure.clone(),
                                     SelectedStructureStatus::Valid,
                                     None,
-                                    None,
                                 )
                             })
                             .collect(),

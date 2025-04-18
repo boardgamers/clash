@@ -13,7 +13,7 @@ pub fn new_cultural_influence_dialog(
     let a = available_influence_culture(game, player, &d.action_type)
         .into_iter()
         .map(|(s, info)| {
-            let (status, label, tooltip) = match info {
+            let (status, tooltip) = match info {
                 Ok(i) => {
                     let boost = i.range_boost_cost.default.amount().to_string();
                     let mut tooltip = format!("Range boost cost: {boost}");
@@ -24,20 +24,13 @@ pub fn new_cultural_influence_dialog(
                         } else {
                             SelectedStructureStatus::Valid
                         },
-                        Some(boost),
                         tooltip,
                     )
                 }
-                Err(e) => (SelectedStructureStatus::Invalid, None, e),
+                Err(e) => (SelectedStructureStatus::Invalid, e),
             };
 
-            SelectedStructureInfo::new(
-                s.position,
-                s.structure,
-                status,
-                label.clone(),
-                Some(tooltip),
-            )
+            SelectedStructureInfo::new(s.position, s.structure, status, Some(tooltip))
         })
         .collect();
     ActiveDialog::StructuresRequest(

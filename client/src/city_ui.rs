@@ -222,10 +222,7 @@ fn draw_selected_state(
     if let Some(tooltip) = &info.tooltip {
         show_tooltip_for_circle(rc, tooltip, center, size);
     }
-    if let Some(label) = &info.label {
-        rc.state.draw_text(label, center.x - 5., center.y + 5.);
-    }
-
+    
     if info.status != SelectedStructureStatus::Invalid
         && is_mouse_button_pressed(MouseButton::Left)
         && is_in_circle(rc.mouse_pos(), center, size)
@@ -313,6 +310,15 @@ fn draw_buildings(
         for b in &city.pieces.buildings(Some(player_index)) {
             let p = building_position(city, center, i, *b);
             draw_circle(p.x, p.y, BUILDING_SIZE, rc.player_color(player_index));
+
+            draw_scaled_icon(
+                rc,
+                &rc.assets().buildings[b],
+                b.name(),
+                p + vec2(-8., -8.),
+                16.,
+            );
+            
             if let Some(h) = highlighted.iter().find(|s| {
                 s.position == city.position
                     && matches!(s.structure, Structure::Building(bb) if bb == *b)
@@ -320,15 +326,7 @@ fn draw_buildings(
                 if let Some(u) = draw_selected_state(rc, p, BUILDING_SIZE, h) {
                     return Some(u);
                 }
-            } else {
-                draw_scaled_icon(
-                    rc,
-                    &rc.assets().buildings[b],
-                    b.name(),
-                    p + vec2(-8., -8.),
-                    16.,
-                );
-            }
+            } 
             i += 1;
         }
     }
