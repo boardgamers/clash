@@ -43,15 +43,15 @@ fn render_with_mutable_state(game: &Game, state: &mut State, features: &Features
 }
 
 fn set_y_zoom(state: &mut State) {
-    let w = state.screen_size.x - 470.;
-    let h = state.screen_size.y  - 150.;
+    let w = state.screen_size.x - 530.;
+    let h = state.screen_size.y  - 170.;
     state.camera.viewport = Some((
-        205,
-        70,
+        270,
+        90,
         w as i32,
         h as i32,
     ));
-    
+
     state.camera.zoom.y = state.camera.zoom.x * w / h;
 }
 
