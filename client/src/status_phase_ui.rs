@@ -52,7 +52,7 @@ pub fn change_government_type_dialog(
                 .is_some_and(|_| p.can_advance_in_change_government(a))
             {
                 AdvanceState::Available
-            } else if a.government.as_ref().is_some_and(|g| g == &current) {
+            } else if rc.shown_player.has_advance(&a.name) && a.government.is_some() {
                 AdvanceState::Owned
             } else {
                 AdvanceState::Unavailable

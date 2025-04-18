@@ -10,38 +10,41 @@ use crate::resource::ResourceType::{CultureTokens, MoodTokens};
 use crate::resource_pile::ResourcePile;
 
 pub(crate) fn spirituality() -> AdvanceGroup {
-    advance_group_builder(
-        "Spirituality",
-        vec![myths(), rituals(), priesthood(), state_religion()],
-    )
+    advance_group_builder("Spirituality", vec![
+        myths(),
+        rituals(),
+        priesthood(),
+        state_religion(),
+    ])
 }
 
 fn myths() -> AdvanceBuilder {
     Advance::builder(
-        "Myths", 
+        "Myths",
         "Whenever an Event card asks you have to reduce the mood in a city, \
-                     you may pay 1 mood token instead of reducing the mood (does not apply for Pirates).")
-          .with_advance_bonus(MoodToken)
-        .with_unlocked_building(Temple)
-        .add_resource_request(
-            |event| &mut event.construct,
-            1,
-            |_game, _player_index, building| {
-                if matches!(building, Temple) {
-                    return Some(ResourceRewardRequest::new(
-                        PaymentOptions::sum(1, &[MoodTokens, CultureTokens]),
-                        "Select Temple bonus".to_string(),
-                    ));
-                }
-                None
-            },
-            |_game, p,_| {
-                vec![format!(
-                    "{} selected {} as a reward for constructing a Temple",
-                    p.player_name, p.choice
-                )]
-            },
-        )
+        you may pay 1 mood token instead of reducing the mood (does not apply for Pirates).",
+    )
+    .with_advance_bonus(MoodToken)
+    .with_unlocked_building(Temple)
+    .add_resource_request(
+        |event| &mut event.construct,
+        1,
+        |_game, _player_index, building| {
+            if matches!(building, Temple) {
+                return Some(ResourceRewardRequest::new(
+                    PaymentOptions::sum(1, &[MoodTokens, CultureTokens]),
+                    "Select Temple bonus".to_string(),
+                ));
+            }
+            None
+        },
+        |_game, p, _| {
+            vec![format!(
+                "{} selected {} as a reward for constructing a Temple",
+                p.player_name, p.choice
+            )]
+        },
+    )
 }
 
 fn rituals() -> AdvanceBuilder {
@@ -95,8 +98,7 @@ fn priesthood() -> AdvanceBuilder {
 fn state_religion() -> AdvanceBuilder {
     Advance::builder(
         "State Religion",
-        "Once per turn, when constructing a Temple,
-            do not pay any Food.",
+        "Once per turn, when constructing a Temple, do not pay any Food.",
     )
     .with_advance_bonus(MoodToken)
     .add_once_per_turn_listener(
