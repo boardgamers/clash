@@ -154,7 +154,8 @@ fn explorer(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     let b = ActionCard::builder(
         id,
         "Explorer",
-        "Construct a building without paying resources.",
+        "Explore a tile adjacent to a one of your cities - \
+        AND/OR gain a free settler in one of your cities.",
         ActionCost::regular_with_cost(ResourcePile::culture_tokens(1)),
         |game, player, _| {
             !action_explore_request(game, player.index)
