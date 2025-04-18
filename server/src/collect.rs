@@ -60,7 +60,6 @@ pub fn get_total_collection(
     player_index: usize,
     city_position: Position,
     collections: &[PositionCollection],
-    min_modifiers: bool,
 ) -> Result<CollectInfo, String> {
     let player = &game.players[player_index];
     let city = player.get_city(city_position);
@@ -69,12 +68,7 @@ pub fn get_total_collection(
         return Err("Not your city".to_string());
     }
 
-    let i = possible_resource_collections(
-        game,
-        city_position,
-        player_index,
-        &Vec::new(),
-    );
+    let i = possible_resource_collections(game, city_position, player_index, &Vec::new());
     if i.max_selection < tiles_used(collections) {
         return Err(format!(
             "You can only collect {} resources at {city_position} - got {}",
@@ -133,7 +127,7 @@ pub fn tiles_used(collections: &[PositionCollection]) -> u32 {
 }
 
 pub(crate) fn collect(game: &mut Game, player_index: usize, c: &Collect) -> Result<(), String> {
-    let i = get_total_collection(game, player_index, c.city_position, &c.collections, false)?;
+    let i = get_total_collection(game, player_index, c.city_position, &c.collections)?;
     let city = game.players[player_index].get_city_mut(c.city_position);
     if !city.can_activate() {
         return Err("City can't be activated".to_string());
