@@ -19,7 +19,7 @@ use server::collect::{available_collect_actions_for_city, possible_resource_coll
 use server::construct::available_buildings;
 use server::content::persistent_events::Structure;
 use server::game::Game;
-use server::happiness::available_happiness_actions_for_city;
+use server::happiness::{available_happiness_actions_for_city, increase_happiness_cost};
 use server::playing_actions::PlayingActionType;
 use server::resource::ResourceType;
 use server::unit::{UnitType, Units};
@@ -52,9 +52,12 @@ pub fn show_city_menu<'a>(rc: &'a RenderContext, city: &'a City) -> StateUpdate 
 }
 
 fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconAction<'a>> {
+    let p = rc.shown_player;
     let actions =
-        available_happiness_actions_for_city(rc.game, rc.shown_player.index, city.position);
-    if actions.is_empty() {
+        available_happiness_actions_for_city(rc.game, p.index, city.position);
+    let min_cost = increase_happiness_cost(p, city, 1);
+    
+    if actions.is_empty() || min_cost.is_none() {
         return None;
     }
 

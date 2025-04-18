@@ -95,11 +95,8 @@ pub(crate) fn increase_happiness(
 pub fn increase_happiness_cost(player: &Player, city: &City, steps: u32) -> Option<CostInfo> {
     let max_steps = 2 - city.mood_state.clone() as u32;
     let cost = city.size() as u32 * steps;
-    if steps > max_steps {
-        None
-    } else {
-        Some(increase_happiness_total_cost(player, cost, None))
-    }
+    let total_cost = increase_happiness_total_cost(player, cost, None);
+    (player.can_afford(&total_cost.cost) && steps <= max_steps).then_some(total_cost)
 }
 
 #[must_use]
