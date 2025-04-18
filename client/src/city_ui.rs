@@ -11,6 +11,7 @@ use crate::recruit_unit_ui::RecruitAmount;
 use crate::render_context::RenderContext;
 use crate::select_ui::HighlightType;
 use crate::tooltip::show_tooltip_for_circle;
+use itertools::Itertools;
 use macroquad::math::f32;
 use macroquad::prelude::*;
 use server::city::{City, MoodState};
@@ -53,12 +54,12 @@ pub fn show_city_menu<'a>(rc: &'a RenderContext, city: &'a City) -> StateUpdate 
 
 fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconAction<'a>> {
     let p = rc.shown_player;
-    let actions = available_happiness_actions_for_city(rc.game, p.index, city.position);
-    let can_pay = actions
-        .iter()
-        .filter_map(|a| increase_happiness_cost(p, city, 1, a).is_some());
+    let actions = available_happiness_actions_for_city(rc.game, p.index, city.position)
+        .into_iter()
+        .filter(|a| increase_happiness_cost(p, city, 1, a).is_some())
+        .collect_vec();
 
-    if actions.is_empty() || can_pay {
+    if actions.is_empty() {
         return None;
     }
 

@@ -81,7 +81,12 @@ pub fn add_increase_happiness(
         .map(|(p, steps)| {
             let old_steps = *steps;
             if *p == city.position {
-                if let Some(r) = increase_happiness_steps(rc, city, old_steps) {
+                if let Some(r) = increase_happiness_steps(
+                    rc,
+                    city,
+                    old_steps,
+                    &increase_happiness.custom.action_type,
+                ) {
                     return (*p, r);
                 }
             }
@@ -101,18 +106,28 @@ pub fn add_increase_happiness(
     })
 }
 
-fn increase_happiness_steps(rc: &RenderContext, city: &City, old_steps: u32) -> Option<u32> {
-    if let Some(value) = increase_happiness_new_steps(rc, city, old_steps + 1) {
+fn increase_happiness_steps(
+    rc: &RenderContext,
+    city: &City,
+    old_steps: u32,
+    action_type: &PlayingActionType,
+) -> Option<u32> {
+    if let Some(value) = increase_happiness_new_steps(rc, city, old_steps + 1, action_type) {
         return Some(value);
     }
-    if let Some(value) = increase_happiness_new_steps(rc, city, 0) {
+    if let Some(value) = increase_happiness_new_steps(rc, city, 0, action_type) {
         return Some(value);
     }
     None
 }
 
-fn increase_happiness_new_steps(rc: &RenderContext, city: &City, new_steps: u32) -> Option<u32> {
-    increase_happiness_cost(rc.shown_player, city, new_steps).map(|_| new_steps)
+fn increase_happiness_new_steps(
+    rc: &RenderContext,
+    city: &City,
+    new_steps: u32,
+    action_type: &PlayingActionType,
+) -> Option<u32> {
+    increase_happiness_cost(rc.shown_player, city, new_steps, action_type).map(|_| new_steps)
 }
 
 pub fn increase_happiness_menu(rc: &RenderContext, h: &IncreaseHappinessConfig) -> StateUpdate {
