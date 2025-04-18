@@ -6,7 +6,7 @@ use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::player_events::CostInfo;
 use crate::playing_actions::{
-    base_or_custom_available, IncreaseHappiness, PlayingAction, PlayingActionType,
+    IncreaseHappiness, PlayingAction, PlayingActionType, base_or_custom_available,
 };
 use crate::position::Position;
 use crate::resource::ResourceType;
@@ -82,11 +82,5 @@ pub fn happiness_cost(
 ) -> CostInfo {
     let steps = new_steps.iter().fold(0_u32, |a, (_, b)| a + *b);
     let payment_options = PaymentOptions::sum(steps, &[ResourceType::MoodTokens]);
-    p.trigger_cost_event(
-        |e| &e.happiness_cost,
-        &payment_options,
-        &(),
-        &(),
-        execute,
-    )
+    p.trigger_cost_event(|e| &e.happiness_cost, &payment_options, &(), &(), execute)
 }

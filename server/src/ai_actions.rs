@@ -15,9 +15,7 @@ use crate::cultural_influence::{
 };
 use crate::events::EventOrigin;
 use crate::game::Game;
-use crate::happiness::{
-    available_happiness_actions, happiness_action, happiness_cost,
-};
+use crate::happiness::{available_happiness_actions, happiness_action, happiness_cost};
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::playing_actions::{
