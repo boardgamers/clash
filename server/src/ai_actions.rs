@@ -15,12 +15,15 @@ use crate::cultural_influence::{
 };
 use crate::events::EventOrigin;
 use crate::game::Game;
-use crate::happiness::{available_happiness_actions, happiness_action, increase_happiness_cost};
+use crate::happiness::{
+    available_happiness_actions, happiness_action, happiness_cost_for_all_cities,
+};
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::playing_actions::{
     IncreaseHappiness, PlayingAction, PlayingActionType, Recruit, base_and_custom_action,
 };
+use crate::position::Position;
 use crate::recruit::recruit_cost;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::{ChangeGovernment, ChangeGovernmentType, government_advances};
@@ -212,6 +215,15 @@ fn payment(o: &PaymentOptions, p: &Player) -> ResourcePile {
         .expect("expected payment")
 }
 
+fn payment_with_action(
+    o: &PaymentOptions,
+    p: &Player,
+    playing_action_type: &PlayingActionType,
+) -> ResourcePile {
+    o.first_valid_payment(&playing_action_type.remaining_resources(p))
+        .expect("expected payment")
+}
+
 fn try_payment(o: &PaymentOptions, p: &Player) -> Option<ResourcePile> {
     o.first_valid_payment(&p.resources)
 }
@@ -327,7 +339,7 @@ fn recruit_actions(player: &Player, city: &City) -> Vec<Action> {
             }
             (units, cost)
         })
-        .filter(|(units, _cost)| units.sum() > 0)
+        .filter(|(units, _cost)| units.amount() > 0)
         .unique()
         .map(|(units, cost)| {
             Action::Playing(PlayingAction::Recruit(Recruit::new(
@@ -344,8 +356,8 @@ fn calculate_increase_happiness(
     action_type: &PlayingActionType,
 ) -> Option<IncreaseHappiness> {
     // try to make the biggest cities happy - that's usually the best choice
-    let mut cities = vec![];
-    let mut cost = PaymentOptions::resources(action_type.cost().cost);
+    let mut all_steps: Vec<(Position, u32)> = vec![];
+    let mut cost = PaymentOptions::free();
 
     for c in player
         .cities
@@ -358,19 +370,20 @@ fn calculate_increase_happiness(
             MoodState::Neutral => 1,
             MoodState::Happy => 0,
         };
+        let mut new_steps = all_steps.clone();
+        new_steps.push((c.position, steps));
 
-        let mut new_city_cost =
-            increase_happiness_cost(player, c, steps).expect("cost should be available");
-        new_city_cost.cost.default += cost.default.clone();
-        if try_payment(&new_city_cost.cost, player).is_none() {
+        let Some(new_cost) = happiness_cost_for_all_cities(player, &new_steps, action_type) else {
             break;
-        }
-        cost = new_city_cost.cost;
-        cities.push((c.position, steps));
+        };
+        all_steps = new_steps;
+        cost = new_cost;
     }
 
-    cost.default -= action_type.cost().cost;
-    (!cities.is_empty()).then_some(IncreaseHappiness::new(cities, payment(&cost, player)))
+    (!all_steps.is_empty()).then_some(IncreaseHappiness::new(
+        all_steps,
+        payment_with_action(&cost, player, action_type),
+    ))
 }
 
 fn prefer_custom_action(actions: Vec<PlayingActionType>) -> PlayingActionType {

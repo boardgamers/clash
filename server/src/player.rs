@@ -1,5 +1,6 @@
 use crate::advance::Advance;
 use crate::city_pieces::{DestroyedStructures, DestroyedStructuresData};
+use crate::collect::reset_collect_within_range_for_all;
 use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::content::advances::get_advance;
 use crate::content::builtin;
@@ -532,26 +533,26 @@ impl Player {
 
     #[must_use]
     pub fn available_units(&self) -> Units {
-        let mut units = if self.is_human() {
-            UNIT_LIMIT.clone()
-        } else if self.civilization.is_barbarian() {
-            UNIT_LIMIT_BARBARIANS.clone()
-        } else {
-            UNIT_LIMIT_PIRATES.clone()
-        };
+        let mut units = self.unit_limit();
         for u in &self.units {
             units -= &u.unit_type;
         }
         units
     }
 
-    pub fn remove_wonder(&mut self, wonder: &Wonder) {
-        utils::remove_element(&mut self.wonders_build, &wonder.name);
+    #[must_use]
+    pub fn unit_limit(&self) -> Units {
+        if self.is_human() {
+            UNIT_LIMIT.clone()
+        } else if self.civilization.is_barbarian() {
+            UNIT_LIMIT_BARBARIANS.clone()
+        } else {
+            UNIT_LIMIT_PIRATES.clone()
+        }
     }
 
-    #[must_use]
-    pub fn incident_tokens(&self) -> u8 {
-        self.incident_tokens
+    pub fn remove_wonder(&mut self, wonder: &Wonder) {
+        utils::remove_element(&mut self.wonders_build, &wonder.name);
     }
 
     pub fn strip_secret(&mut self) {
@@ -686,12 +687,6 @@ impl Player {
         }
     }
 
-    pub fn add_unit(&mut self, position: Position, unit_type: UnitType) {
-        let unit = Unit::new(self.index, position, unit_type, self.next_unit_id);
-        self.units.push(unit);
-        self.next_unit_id += 1;
-    }
-
     #[must_use]
     pub fn try_get_unit(&self, id: u32) -> Option<&Unit> {
         self.units.iter().find(|unit| unit.id == id)
@@ -793,6 +788,14 @@ impl Player {
             cost_info
         }
     }
+}
+
+pub fn add_unit(player: usize, position: Position, unit_type: UnitType, game: &mut Game) {
+    let p = game.player_mut(player);
+    let unit = Unit::new(player, position, unit_type, p.next_unit_id);
+    p.units.push(unit);
+    p.next_unit_id += 1;
+    reset_collect_within_range_for_all(game, position);
 }
 
 #[derive(Serialize, Deserialize, PartialEq)]

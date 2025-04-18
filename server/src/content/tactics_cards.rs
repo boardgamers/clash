@@ -11,7 +11,9 @@ use crate::resource_pile::ResourcePile;
 use crate::tactics_card::{
     CombatLocation, CombatRole, FighterRequirement, TacticsCard, TacticsCardTarget,
 };
+use crate::unit::set_unit_position;
 use crate::utils::a_or_an;
+use itertools::Itertools;
 use std::vec;
 
 ///
@@ -292,8 +294,11 @@ pub(crate) fn tactical_retreat(id: u8) -> TacticsCard {
             for unit in game
                 .player_mut(s.player_index)
                 .get_units_mut(r.combat.defender_position)
+                .iter()
+                .map(|u| u.id)
+                .collect_vec()
             {
-                unit.position = to;
+                set_unit_position(s.player_index, unit, to, game);
             }
         },
     )

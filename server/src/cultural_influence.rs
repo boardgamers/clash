@@ -367,8 +367,7 @@ fn affordable_start_city(
         Ok((target_city.position, 0))
     } else {
         let player = game.player(player_index);
-        let mut available = player.resources.clone();
-        available -= action_type.cost().cost;
+        let available = action_type.remaining_resources(player);
 
         player
             .cities
@@ -378,18 +377,21 @@ fn affordable_start_city(
                     return None;
                 }
 
-                let min_cost = c.position.distance(target_city.position);
+                let min_cost = c
+                    .position
+                    .distance(target_city.position)
+                    .saturating_sub(c.size() as u32);
                 if min_cost > available.culture_tokens {
                     // avoid unnecessary calculations
                     return None;
                 }
 
-                let boost = influence_distance(game, c.position, target_city.position)
+                let boost_cost = influence_distance(game, c.position, target_city.position)
                     .saturating_sub(c.size() as u32);
-                if boost > available.culture_tokens {
+                if boost_cost > available.culture_tokens {
                     return None;
                 }
-                Some((c.position, boost))
+                Some((c.position, boost_cost))
             })
             .min_by_key(|(_, boost)| *boost)
             .ok_or("No starting city available".to_string())

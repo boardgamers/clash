@@ -443,7 +443,7 @@ fn test_collect() {
 fn test_construct() {
     JSON.test(
         "construct",
-        vec![TestAction::undoable(
+        vec![TestAction::not_undoable(
             0,
             Action::Playing(Construct(construct::Construct::new(
                 Position::from_offset("C2"),

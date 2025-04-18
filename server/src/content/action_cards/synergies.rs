@@ -14,7 +14,7 @@ use crate::content::tactics_cards::{
     TacticsCardFactory, archers, defensive_formation, flanking, high_ground, high_morale, surprise,
     wedge_formation,
 };
-use crate::player::Player;
+use crate::player::{Player, add_unit};
 use crate::playing_actions::ActionCost;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
@@ -259,14 +259,14 @@ fn militia(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             ))
         },
         |game, s, _| {
-            let city = s.choice[0];
+            let position = s.choice[0];
+            let city = position;
             game.add_info_log_item(&format!(
                 "{} selected {} as city for Militia.",
                 s.player_name, city
             ));
 
-            game.player_mut(s.player_index)
-                .add_unit(city, UnitType::Infantry);
+            add_unit(s.player_index, position, UnitType::Infantry, game);
         },
     )
     .build()

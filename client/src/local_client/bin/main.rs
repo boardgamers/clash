@@ -13,9 +13,10 @@ use server::content::advances::get_advance;
 use server::game::{Game, GameData};
 use server::game_setup::setup_game;
 use server::map::Terrain;
+use server::player::add_unit;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
-use server::unit::UnitType;
+use server::unit::{UnitType, set_unit_position};
 use server::utils::remove_element;
 use std::fs::File;
 use std::io::BufReader;
@@ -152,8 +153,7 @@ fn setup_local_game() -> Game {
     game.round = 6;
     game.dice_roll_outcomes = vec![1, 1, 10, 10, 10, 10, 10, 10, 10, 10];
     let add_unit = |game: &mut Game, pos: &str, player_index: usize, unit_type: UnitType| {
-        game.player_mut(player_index)
-            .add_unit(Position::from_offset(pos), unit_type);
+        add_unit(player_index, Position::from_offset(pos), unit_type, game);
     };
 
     let player_index1 = 0;
@@ -282,9 +282,19 @@ fn setup_local_game() -> Game {
     game.players[player_index1]
         .get_unit_mut(elephant)
         .carrier_id = Some(ship_id);
-    game.players[player_index1].get_unit_mut(elephant).position = Position::from_offset("C3");
+    set_unit_position(
+        player_index1,
+        elephant,
+        Position::from_offset("C3"),
+        &mut game,
+    );
     game.players[player_index1].get_unit_mut(cavalry).carrier_id = Some(ship_id);
-    game.players[player_index1].get_unit_mut(cavalry).position = Position::from_offset("C3");
+    set_unit_position(
+        player_index1,
+        cavalry,
+        Position::from_offset("C3"),
+        &mut game,
+    );
 
     game.players[player_index1]
         .get_city_mut(Position::from_offset("A1"))

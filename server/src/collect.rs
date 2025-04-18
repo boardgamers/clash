@@ -60,7 +60,6 @@ pub fn get_total_collection(
     player_index: usize,
     city_position: Position,
     collections: &[PositionCollection],
-    min_modifiers: bool,
 ) -> Result<CollectInfo, String> {
     let player = &game.players[player_index];
     let city = player.get_city(city_position);
@@ -69,14 +68,7 @@ pub fn get_total_collection(
         return Err("Not your city".to_string());
     }
 
-    let i = possible_resource_collections(
-        game,
-        city_position,
-        player_index,
-        &Vec::new(),
-        collections,
-        min_modifiers,
-    );
+    let i = possible_resource_collections(game, city_position, player_index, &Vec::new());
     if i.max_selection < tiles_used(collections) {
         return Err(format!(
             "You can only collect {} resources at {city_position} - got {}",
@@ -135,7 +127,7 @@ pub fn tiles_used(collections: &[PositionCollection]) -> u32 {
 }
 
 pub(crate) fn collect(game: &mut Game, player_index: usize, c: &Collect) -> Result<(), String> {
-    let i = get_total_collection(game, player_index, c.city_position, &c.collections, true)?;
+    let i = get_total_collection(game, player_index, c.city_position, &c.collections)?;
     let city = game.players[player_index].get_city_mut(c.city_position);
     if !city.can_activate() {
         return Err("City can't be activated".to_string());
@@ -205,8 +197,6 @@ pub fn possible_resource_collections(
     city_pos: Position,
     player_index: usize,
     used: &[PositionCollection],
-    min: &[PositionCollection],
-    min_modifiers: bool,
 ) -> CollectInfo {
     let set = [
         (Mountain, HashSet::from([ResourcePile::ore(1)])),
@@ -245,38 +235,12 @@ pub fn possible_resource_collections(
         terrain_options,
     };
 
-    if min_modifiers {
-        collect_info = game
-            .player(player_index)
-            .events
-            .transient
-            .collect_options
-            .get()
-            .trigger_with_minimal_modifiers(
-                &collect_info,
-                &collect_context,
-                game,
-                &mut (),
-                |i| {
-                    if min.is_empty() {
-                        // always get as many as possible if no expectations
-                        return false;
-                    }
-                    i.choices.iter().all(|(pos, options)| {
-                        min.iter()
-                            .any(|e| pos == &e.position && options.contains(&e.pile))
-                    })
-                },
-                |i, m| i.modifiers = m,
-            );
-    } else {
-        game.player(player_index).trigger_event(
-            |e| &e.collect_options,
-            &mut collect_info,
-            &collect_context,
-            game,
-        );
-    }
+    game.player(player_index).trigger_event(
+        |e| &e.collect_options,
+        &mut collect_info,
+        &collect_context,
+        game,
+    );
 
     collect_info.modifiers.extend(modifiers);
 
@@ -376,7 +340,7 @@ pub fn set_city_collections(game: &mut Game, city_position: Position) {
 
 #[must_use]
 pub fn city_collections_uncached(game: &Game, player: &Player, city: &City) -> Vec<Collect> {
-    let info = possible_resource_collections(game, city.position, player.index, &[], &[], false);
+    let info = possible_resource_collections(game, city.position, player.index, &[]);
 
     let all = ResourceType::all()
         .into_iter()
@@ -403,7 +367,7 @@ fn city_collection_uncached(
     let mut c: Vec<PositionCollection> = vec![];
 
     loop {
-        let info = possible_resource_collections(game, city.position, player.index, &c, &c, false);
+        let info = possible_resource_collections(game, city.position, player.index, &c);
 
         let Some((pos, pile)) = pick_resource(&info, &c, priority) else {
             return apply_total_collect(&c, player, info, game)
@@ -455,23 +419,18 @@ fn pick_resource(
 
 pub(crate) fn invalidate_collect_cache() -> Builtin {
     Builtin::builder("InvalidateCollectCache", "-")
-        .add_transient_event_listener(
-            |event| &mut event.before_move,
-            1,
-            |game, i, ()| {
-                for p in &mut game.players {
-                    if p.index != i.player {
-                        reset_collect_within_range(p, i.from);
-                        reset_collect_within_range(p, i.to);
-                    }
-                }
-            },
-        )
         .add_simple_persistent_event_listener(
             |event| &mut event.found_city,
             1,
             |game, player, _, p| {
                 reset_collect_within_range(game.player_mut(player), *p);
+            },
+        )
+        .add_simple_persistent_event_listener(
+            |event| &mut event.combat_end,
+            0,
+            |game, _player, _, p| {
+                reset_collect_within_range_for_all(game, p.combat.defender_position);
             },
         )
         .build()

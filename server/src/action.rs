@@ -18,8 +18,7 @@ use crate::log::{add_action_log_item, current_player_turn_log_mut};
 use crate::map::Terrain::Unexplored;
 use crate::movement::MovementAction::{Move, Stop};
 use crate::movement::{
-    CurrentMove, MoveState, MovementAction, get_move_state, has_movable_units,
-    move_units_destinations,
+    CurrentMove, MoveState, MoveUnits, MovementAction, has_movable_units, move_units_destinations,
 };
 use crate::objective_card::{on_objective_cards, present_objective_cards};
 use crate::playing_actions::{PlayingAction, PlayingActionType};
@@ -251,15 +250,6 @@ fn execute_regular_action(
     match game.state {
         Playing => {
             if let Some(m) = action.clone().movement() {
-                if let MovementAction::Move(_) = m {
-                } else {
-                    return Err("Expected move action".to_string());
-                }
-                if game.actions_left == 0 {
-                    return Err("No actions left".to_string());
-                }
-                game.actions_left -= 1;
-                game.state = GameState::Movement(MoveState::new());
                 execute_movement_action(game, m, player_index)
             } else {
                 let action = action.playing().expect("action should be a playing action");
@@ -281,85 +271,101 @@ pub(crate) fn execute_movement_action(
     action: MovementAction,
     player_index: usize,
 ) -> Result<(), String> {
+    if let GameState::Playing = game.state {
+        if game.actions_left == 0 {
+            return Err("No actions left".to_string());
+        }
+        game.actions_left -= 1;
+        game.state = GameState::Movement(MoveState::new());
+    }
+
     match action {
         Move(m) => {
-            let player = &game.players[player_index];
-            let starting_position = player
-                .get_unit(*m.units.first().expect(
-                    "instead of providing no units to move a stop movement actions should be done",
-                ))
-                .position;
-            let destinations = move_units_destinations(
-                player,
-                game,
-                &m.units,
-                starting_position,
-                m.embark_carrier_id,
-            )?;
-            let c = &destinations
-                .iter()
-                .find(|route| route.destination == m.destination)
-                .expect("destination should be a valid destination")
-                .cost;
-            if c.is_free() {
-                assert_eq!(m.payment, ResourcePile::empty(), "payment should be empty");
-            } else {
-                game.players[player_index].pay_cost(c, &m.payment);
-            }
+            execute_move_action(game, player_index, &m)?;
 
-            let current_move = get_current_move(
-                game,
-                &m.units,
-                starting_position,
-                m.destination,
-                m.embark_carrier_id,
-            );
-            let move_state = get_move_state(game);
-            move_state.moved_units.extend(m.units.iter());
-            move_state.moved_units = move_state.moved_units.iter().unique().copied().collect();
-
-            if matches!(current_move, CurrentMove::None) || move_state.current_move != current_move
-            {
-                move_state.movement_actions_left -= 1;
-                move_state.current_move = current_move;
-            }
-            if !starting_position.is_neighbor(m.destination) {
-                // roads move ends the current move
-                move_state.current_move = CurrentMove::None;
-            }
-
-            let dest_terrain = game
-                .map
-                .get(m.destination)
-                .expect("destination should be a valid tile");
-
-            if dest_terrain == &Unexplored {
-                move_to_unexplored_tile(
-                    game,
-                    player_index,
-                    &m.units,
-                    starting_position,
-                    m.destination,
-                );
-                return Ok(());
-            }
-
-            if move_with_possible_combat(game, player_index, starting_position, &m) {
-                return Ok(());
+            if let Movement(state) = &game.state {
+                let all_moves_used =
+                    state.movement_actions_left == 0 && state.current_move == CurrentMove::None;
+                if all_moves_used
+                    || !has_movable_units(game, game.player(game.current_player_index))
+                {
+                    game.state = GameState::Playing;
+                }
             }
         }
         Stop => {
             game.state = GameState::Playing;
-            return Ok(());
         }
     }
 
-    let state = get_move_state(game);
-    let all_moves_used =
-        state.movement_actions_left == 0 && state.current_move == CurrentMove::None;
-    if all_moves_used || !has_movable_units(game, game.player(game.current_player_index)) {
-        game.state = GameState::Playing;
+    Ok(())
+}
+
+fn execute_move_action(game: &mut Game, player_index: usize, m: &MoveUnits) -> Result<(), String> {
+    let player = &game.players[player_index];
+    let starting_position =
+        player
+            .get_unit(*m.units.first().expect(
+                "instead of providing no units to move a stop movement actions should be done",
+            ))
+            .position;
+    let destinations = move_units_destinations(
+        player,
+        game,
+        &m.units,
+        starting_position,
+        m.embark_carrier_id,
+    )?;
+    let c = &destinations
+        .iter()
+        .find(|route| route.destination == m.destination)
+        .expect("destination should be a valid destination")
+        .cost;
+    if c.is_free() {
+        assert_eq!(m.payment, ResourcePile::empty(), "payment should be empty");
+    } else {
+        game.players[player_index].pay_cost(c, &m.payment);
     }
+
+    let current_move = get_current_move(
+        game,
+        &m.units,
+        starting_position,
+        m.destination,
+        m.embark_carrier_id,
+    );
+    let Movement(move_state) = &mut game.state else {
+        return Err("no move state".to_string());
+    };
+    move_state.moved_units.extend(m.units.iter());
+    move_state.moved_units = move_state.moved_units.iter().unique().copied().collect();
+
+    if matches!(current_move, CurrentMove::None) || move_state.current_move != current_move {
+        move_state.movement_actions_left -= 1;
+        move_state.current_move = current_move;
+    }
+    if !starting_position.is_neighbor(m.destination) {
+        // roads move ends the current move
+        move_state.current_move = CurrentMove::None;
+    }
+
+    let dest_terrain = game
+        .map
+        .get(m.destination)
+        .expect("destination should be a valid tile");
+
+    if dest_terrain == &Unexplored {
+        move_to_unexplored_tile(
+            game,
+            player_index,
+            &m.units,
+            starting_position,
+            m.destination,
+        );
+    } else {
+        move_with_possible_combat(game, player_index, starting_position, m);
+    }
+
     Ok(())
 }
 

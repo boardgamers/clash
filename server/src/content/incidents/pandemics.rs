@@ -5,7 +5,7 @@ use crate::content::incidents::famine::{
     additional_sanitation_damage, famine, kill_incident_units,
 };
 use crate::content::persistent_events::{
-    HandCardsRequest, PaymentRequest, PositionRequest, ResourceRewardRequest, UnitsRequest,
+    HandCardsRequest, PaymentRequest, PositionRequest, UnitsRequest,
 };
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, MoodModifier};
@@ -20,14 +20,7 @@ use itertools::Itertools;
 use std::ops::RangeInclusive;
 
 pub(crate) fn pandemics_incidents() -> Vec<Incident> {
-    vec![
-        pandemics(),
-        black_death(),
-        vermin(),
-        draught(),
-        fire(),
-        successful_year(),
-    ]
+    vec![pandemics(), black_death(), vermin(), draught(), fire()]
 }
 
 fn pandemics() -> Incident {
@@ -318,54 +311,6 @@ fn spread_fire(p: Position, map: &Map, fire: &mut Vec<Position>) {
             spread_fire(n, map, fire);
         }
     }
-}
-
-pub(crate) fn successful_year() -> Incident {
-    Incident::builder(
-        54,
-        "A successful year",
-        "All players with the fewest cities gains 1 food for every city \
-        they have less than the player with the most cities. \
-        If everyone has the same number of cities, all players gain 1 food.",
-        IncidentBaseEffect::PiratesSpawnAndRaid,
-    )
-    .add_incident_resource_request(
-        IncidentTarget::AllPlayers,
-        0,
-        |game, player_index, _incident| {
-            let player_to_city_num = game
-                .players
-                .iter()
-                .map(|p| p.cities.len())
-                .collect::<Vec<_>>();
-
-            let min_cities = player_to_city_num.iter().min().unwrap_or(&0);
-            let max_cities = player_to_city_num.iter().max().unwrap_or(&0);
-            if min_cities == max_cities {
-                return Some(ResourceRewardRequest::new(
-                    PaymentOptions::sum(1, &[ResourceType::Food]),
-                    "-".to_string(),
-                ));
-            }
-
-            let cities = game.players[player_index].cities.len();
-            if cities == *min_cities {
-                Some(ResourceRewardRequest::new(
-                    PaymentOptions::sum((max_cities - min_cities) as u32, &[ResourceType::Food]),
-                    "-".to_string(),
-                ))
-            } else {
-                None
-            }
-        },
-        |_game, s| {
-            vec![format!(
-                "{} gained {} from A successful year",
-                s.player_name, s.choice
-            )]
-        },
-    )
-    .build()
 }
 
 #[cfg(test)]

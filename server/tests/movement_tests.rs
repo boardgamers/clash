@@ -8,6 +8,7 @@ use server::movement::MovementAction::Move;
 use server::movement::move_units_destinations;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
+use server::unit::set_unit_position;
 
 mod common;
 
@@ -226,7 +227,7 @@ fn test_ship_navigate_coordinates() {
 }
 
 fn assert_navigate(game: &mut Game, from: Position, to: Position) {
-    game.players[1].get_unit_mut(1).position = from;
+    set_unit_position(1, 1, from, game);
     let result = move_units_destinations(game.player(1), game, &[1], from, None)
         .is_ok_and(|d| d.iter().any(|route| route.destination == to));
     assert!(

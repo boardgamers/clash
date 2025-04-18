@@ -1,6 +1,7 @@
 use crate::content::persistent_events::{PositionRequest, ResourceRewardRequest};
 use crate::incident::{Incident, IncidentBaseEffect, IncidentBuilder};
 use crate::payment::PaymentOptions;
+use crate::player::add_unit;
 use crate::player_events::IncidentTarget;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
@@ -17,6 +18,7 @@ pub(crate) fn good_years_incidents() -> Vec<Incident> {
     r.extend(awesome_years());
     r.extend(fantastic_years());
     r.extend(population_booms());
+    r.push(successful_year());
     r
 }
 
@@ -226,8 +228,55 @@ fn select_settler(b: IncidentBuilder, priority: i32, target: IncidentTarget) -> 
         |game, s, _| {
             let pos = s.choice[0];
             game.add_info_log_item(&format!("{} gained 1 settler in {}", s.player_name, pos));
-            game.player_mut(s.player_index)
-                .add_unit(pos, UnitType::Settler);
+            add_unit(s.player_index, pos, UnitType::Settler, game);
         },
     )
+}
+
+pub(crate) fn successful_year() -> Incident {
+    Incident::builder(
+        54,
+        "A successful year",
+        "All players with the fewest cities gain 1 food for every city \
+        they have less than the player with the most cities. \
+        If everyone has the same number of cities, all players gain 1 food.",
+        IncidentBaseEffect::PiratesSpawnAndRaid,
+    )
+    .add_incident_resource_request(
+        IncidentTarget::AllPlayers,
+        0,
+        |game, player_index, _incident| {
+            let player_to_city_num = game
+                .players
+                .iter()
+                .filter_map(|p| p.is_human().then_some(p.cities.len()))
+                .collect::<Vec<_>>();
+
+            let min_cities = player_to_city_num.iter().min().unwrap_or(&0);
+            let max_cities = player_to_city_num.iter().max().unwrap_or(&0);
+            if min_cities == max_cities {
+                return Some(ResourceRewardRequest::new(
+                    PaymentOptions::sum(1, &[ResourceType::Food]),
+                    "-".to_string(),
+                ));
+            }
+
+            let cities = game.players[player_index].cities.len();
+            if cities == *min_cities {
+                Some(ResourceRewardRequest::new(
+                    PaymentOptions::sum((max_cities - min_cities) as u32, &[ResourceType::Food]),
+                    "-".to_string(),
+                ))
+            } else {
+                None
+            }
+        },
+        |_game, s| {
+            vec![format!(
+                "{} gained {} from A successful year",
+                s.player_name, s.choice
+            )]
+        },
+    )
+    .build()
 }

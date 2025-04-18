@@ -129,6 +129,14 @@ pub fn show_top_center(rc: &RenderContext) {
         icon_pos(3, 0),
         "Victory Points",
     );
+    top_icon_with_label(
+        rc,
+        &format!("{}", &player.incident_tokens),
+        &rc.assets().event_counter,
+        icon_pos(4, 0),
+        "Event tokens left",
+    );
+
     let amount = new_resource_map(&player.resources);
     let limit = new_resource_map(&player.resource_limit);
     for (i, r) in ResourceType::all().iter().rev().enumerate() {

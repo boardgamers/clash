@@ -7,7 +7,6 @@ use crate::city::{City, MoodState};
 use crate::consts::NON_HUMAN_PLAYERS;
 use crate::player::Player;
 use crate::position::Position;
-use crate::unit::UnitType;
 use crate::utils::{Rng, Shuffle};
 
 #[derive(Clone)]
@@ -495,5 +494,4 @@ pub fn setup_home_city(player: &mut Player, pos: Position) {
     let mut city = City::new(player.index, pos);
     city.set_mood_state(MoodState::Happy);
     player.cities.push(city);
-    player.add_unit(pos, UnitType::Settler);
 }

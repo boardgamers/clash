@@ -13,6 +13,7 @@ use crate::content::persistent_events::SelectedStructure;
 use crate::cultural_influence::influence_culture_attempt;
 use crate::game::GameState;
 use crate::happiness::increase_happiness;
+use crate::player::Player;
 use crate::player_events::PlayingActionInfo;
 use crate::recruit::recruit;
 use crate::unit::Units;
@@ -196,6 +197,13 @@ impl PlayingActionType {
             PlayingActionType::EndTurn => ActionCost::cost(ResourcePile::empty()),
             _ => ActionCost::regular(),
         }
+    }
+
+    #[must_use]
+    pub fn remaining_resources(&self, p: &Player) -> ResourcePile {
+        let mut r = p.resources.clone();
+        r -= self.cost().cost.clone();
+        r
     }
 }
 

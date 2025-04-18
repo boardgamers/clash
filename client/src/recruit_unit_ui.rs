@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use macroquad::prelude::*;
 
 use server::game::Game;
@@ -140,13 +141,17 @@ impl NewUnit {
 fn new_units(player: &Player) -> Vec<NewUnit> {
     UnitType::get_all()
         .into_iter()
-        .map(|u| NewUnit::new(u, u.name(), None::<String>))
-        .chain(
-            player
-                .available_leaders
-                .iter()
-                .map(|l| NewUnit::new(UnitType::Leader, l.as_str(), Some(l.to_string()))),
-        )
+        .flat_map(|u| {
+            if u == UnitType::Leader {
+                player
+                    .available_leaders
+                    .iter()
+                    .map(|l| NewUnit::new(UnitType::Leader, l.as_str(), Some(l.to_string())))
+                    .collect_vec()
+            } else {
+                vec![NewUnit::new(u, u.name(), None::<String>)]
+            }
+        })
         .collect()
 }
 
