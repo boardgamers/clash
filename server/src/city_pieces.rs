@@ -316,4 +316,26 @@ impl Building {
             Temple => "Temple",
         }
     }
+
+    #[must_use]
+    pub fn description(&self) -> &'static str {
+        match self {
+            Academy => "Gain 2 ideas when constructed",
+            Market => {
+                "May recruit Cavalry or Elephant units in the city. \
+                Gain 1 gold when a player forms a trade route with this city"
+            }
+            Obelisk => "Is immune to cultural influence, even when the city is captured",
+            Observatory => "Gain 1 action card when constructed",
+            Fortress => {
+                "During the first round of combat: add +1 die to your roll and cancel one hit"
+            }
+            Port => {
+                "Is built facing an adjacent sea space: \
+                Can recruit ships in the sea space of the Port. \
+                May collect gold or mood tokens from the sea space of the Port"
+            }
+            Temple => "Gain 1 mood or culture token when constructed",
+        }
+    }
 }
