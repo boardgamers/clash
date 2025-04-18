@@ -113,17 +113,8 @@ impl MoveState {
     }
 }
 
-pub(crate) fn get_move_state(game: &mut Game) -> &mut MoveState {
-    if let Movement(m) = &mut game.state {
-        m
-    } else {
-        panic!("no move state");
-    }
-}
-
 pub(crate) fn stop_current_move(game: &mut Game) {
-    if let Movement(_) = game.state {
-        let move_state = get_move_state(game);
+    if let Movement(move_state) = &mut game.state {
         move_state.current_move = CurrentMove::None;
 
         if move_state.movement_actions_left == 0 {

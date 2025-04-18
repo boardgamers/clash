@@ -85,6 +85,9 @@
         "Mining"
       ],
       "incident_tokens": 2,
+      "action_cards": [
+        1
+      ],
       "next_unit_id": 8
     },
     {
@@ -206,43 +209,7 @@
                         "port_position": null
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 1
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/cities/1/activations",
-                      "value": 8
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/cities/1/city_pieces/observatory"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/cities/1/mood_state",
-                      "value": "Happy"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/food",
-                      "value": 2
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/ore",
-                      "value": 7
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/wood",
-                      "value": 7
-                    }
-                  ]
+                  }
                 }
               ]
             }
@@ -254,10 +221,12 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 paid 1 food, 1 wood and 1 ore to construct a Observatory in the city at C2 making it Neutral"
+      "Player1 paid 1 food, 1 wood and 1 ore to construct a Observatory in the city at C2 making it Neutral",
+      "Player1 gained an action card from the pile",
+      "Observatory gained 1 action card"
     ]
   ],
-  "undo_limit": 0,
+  "undo_limit": 1,
   "actions_left": 0,
   "round": 1,
   "age": 1,
