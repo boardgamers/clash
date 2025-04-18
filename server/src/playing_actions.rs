@@ -13,6 +13,7 @@ use crate::content::persistent_events::SelectedStructure;
 use crate::cultural_influence::influence_culture_attempt;
 use crate::game::GameState;
 use crate::happiness::increase_happiness;
+use crate::player::Player;
 use crate::player_events::PlayingActionInfo;
 use crate::recruit::recruit;
 use crate::unit::Units;
@@ -21,7 +22,6 @@ use crate::{
     content::custom_actions::CustomAction, game::Game, position::Position,
     resource_pile::ResourcePile,
 };
-use crate::player::Player;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug, Hash)]
 pub struct Collect {
@@ -198,7 +198,7 @@ impl PlayingActionType {
             _ => ActionCost::regular(),
         }
     }
-    
+
     #[must_use]
     pub fn remaining_resources(&self, p: &Player) -> ResourcePile {
         let mut r = p.resources.clone();

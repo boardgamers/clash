@@ -21,7 +21,8 @@ impl IncreaseHappinessConfig {
         let steps = p.cities.iter().map(|c| (c.position, 0)).collect();
         IncreaseHappinessConfig {
             steps,
-            payment: Self::happiness_payment(p, &[(p.cities[0].position, 0)], &custom),
+            payment: Self::happiness_payment(p, &[(p.cities[0].position, 0)], &custom)
+                .expect("Happiness payment should be available"),
             custom,
         }
     }
@@ -30,13 +31,15 @@ impl IncreaseHappinessConfig {
         p: &Player,
         new_steps: &[(Position, u32)],
         custom: &BaseOrCustomDialog,
-    ) -> Payment {
-        Payment::new(
-            &happiness_cost_for_all_cities(p, new_steps),
-            &custom.action_type.remaining_resources(p),
-            "Increase happiness",
-            false,
-        )
+    ) -> Option<Payment> {
+        happiness_cost_for_all_cities(p, new_steps, &custom.action_type).map(|cost| {
+            Payment::new(
+                &cost,
+                &custom.action_type.remaining_resources(p),
+                "Increase happiness",
+                false,
+            )
+        })
     }
 }
 
@@ -56,11 +59,12 @@ pub fn increase_happiness_click(
     h: &IncreaseHappinessConfig,
 ) -> StateUpdate {
     if let Some(city) = rc.shown_player.try_get_city(pos) {
-        StateUpdate::OpenDialog(ActiveDialog::IncreaseHappiness(add_increase_happiness(
-            rc,
-            city,
-            h.clone(),
-        )))
+        add_increase_happiness(rc, city, h.clone()).map_or(
+            StateUpdate::None,
+            |increase_happiness| {
+                StateUpdate::OpenDialog(ActiveDialog::IncreaseHappiness(increase_happiness))
+            },
+        )
     } else {
         StateUpdate::None
     }
@@ -70,7 +74,7 @@ pub fn add_increase_happiness(
     rc: &RenderContext,
     city: &City,
     mut increase_happiness: IncreaseHappinessConfig,
-) -> IncreaseHappinessConfig {
+) -> Option<IncreaseHappinessConfig> {
     let new_steps: Vec<(Position, u32)> = increase_happiness
         .steps
         .iter()
@@ -85,13 +89,16 @@ pub fn add_increase_happiness(
         })
         .collect();
 
-    increase_happiness.payment = IncreaseHappinessConfig::happiness_payment(
+    IncreaseHappinessConfig::happiness_payment(
         rc.shown_player,
         &new_steps,
         &increase_happiness.custom,
-    );
-    increase_happiness.steps = new_steps;
-    increase_happiness
+    )
+    .map(|payment| {
+        increase_happiness.payment = payment;
+        increase_happiness.steps = new_steps;
+        increase_happiness
+    })
 }
 
 fn increase_happiness_steps(rc: &RenderContext, city: &City, old_steps: u32) -> Option<u32> {

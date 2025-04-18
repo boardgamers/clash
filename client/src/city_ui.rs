@@ -54,9 +54,11 @@ pub fn show_city_menu<'a>(rc: &'a RenderContext, city: &'a City) -> StateUpdate 
 fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconAction<'a>> {
     let p = rc.shown_player;
     let actions = available_happiness_actions_for_city(rc.game, p.index, city.position);
-    let min_cost = increase_happiness_cost(p, city, 1);
+    let can_pay = actions
+        .iter()
+        .filter_map(|a| increase_happiness_cost(p, city, 1, a).is_some());
 
-    if actions.is_empty() || min_cost.is_none() {
+    if actions.is_empty() || can_pay {
         return None;
     }
 
@@ -67,7 +69,8 @@ fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Optio
             open_increase_happiness_dialog(rc, actions.clone(), |mut happiness| {
                 let mut target = city.mood_state.clone();
                 while target != MoodState::Happy {
-                    happiness = add_increase_happiness(rc, city, happiness);
+                    happiness = add_increase_happiness(rc, city, happiness)
+                        .expect("Happiness action failed");
                     target = target.clone().add(1);
                 }
                 happiness

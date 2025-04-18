@@ -91,29 +91,39 @@ pub(crate) fn increase_happiness(
     }
 }
 
+#[must_use]
 pub fn happiness_cost_for_all_cities(
     p: &Player,
     new_steps: &[(Position, u32)],
-) -> PaymentOptions {
+    action_type: &PlayingActionType,
+) -> Option<PaymentOptions> {
     new_steps
         .iter()
-        .map(|(pos, steps)| {
+        .filter_map(|(pos, steps)| {
             let city = p.get_city(*pos);
-            increase_happiness_cost(p, city, *steps).unwrap().cost
+            increase_happiness_cost(p, city, *steps, action_type).map(|c| c.cost.clone())
         })
         .reduce(|mut a, b| {
             a.default += b.default;
             a
         })
-        .unwrap()
 }
 
 #[must_use]
-pub fn increase_happiness_cost(player: &Player, city: &City, steps: u32) -> Option<CostInfo> {
+pub fn increase_happiness_cost(
+    player: &Player,
+    city: &City,
+    steps: u32,
+    action_type: &PlayingActionType,
+) -> Option<CostInfo> {
     let max_steps = 2 - city.mood_state.clone() as u32;
-    let cost = city.size() as u32 * steps;
-    let total_cost = increase_happiness_total_cost(player, cost, None);
-    (player.can_afford(&total_cost.cost) && steps <= max_steps).then_some(total_cost)
+    let mood_tokens = city.size() as u32 * steps;
+    let total_cost = increase_happiness_total_cost(player, mood_tokens, None);
+    (total_cost
+        .cost
+        .can_afford(&action_type.remaining_resources(player))
+        && steps <= max_steps)
+        .then_some(total_cost)
 }
 
 #[must_use]
