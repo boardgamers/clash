@@ -217,12 +217,24 @@ fn test_good_year_with_player_select() {
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::SelectAdvance("Storage".to_string())),
-            ),
+            )
+            .without_json_comparison(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::SelectUnitType(UnitType::Elephant)),
             ),
         ],
+    );
+}
+
+#[test]
+fn test_successful_year() {
+    GOOD_YEAR.test(
+        "successful_year",
+        vec![TestAction::not_undoable(
+            0,
+            Action::Response(EventResponse::SelectAdvance("Storage".to_string())),
+        )],
     );
 }
 

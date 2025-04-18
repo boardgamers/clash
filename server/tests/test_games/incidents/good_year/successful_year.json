@@ -6,34 +6,19 @@
         "StatusPhase": "FreeAdvance"
       },
       "player": 0,
-      "last_priority_used": 0
-    },
-    {
-      "event_type": {
-        "Incident": {
-          "active_player": 0,
-          "barbarians": {
-            "selected_position": "B3"
-          }
-        }
-      },
-      "player": 0,
-      "last_priority_used": 100,
+      "last_priority_used": 0,
       "handler": {
-        "priority": 100,
+        "priority": 0,
         "request": {
-          "SelectUnitType": {
+          "SelectAdvance": {
             "choices": [
-              "Infantry",
-              "Cavalry",
-              "Elephant"
-            ],
-            "player_index": 2,
-            "description": "Select a unit to reinforce the barbarians"
+              "Storage",
+              "Dogma"
+            ]
           }
         },
         "origin": {
-          "Incident": 11
+          "Builtin": "Free Advance"
         }
       }
     }
@@ -47,11 +32,11 @@
         "ore": 6,
         "ideas": 5,
         "gold": 7,
-        "mood_tokens": 8,
+        "mood_tokens": 7,
         "culture_tokens": 7
       },
       "resource_limit": {
-        "food": 7,
+        "food": 2,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -119,10 +104,9 @@
       "advances": [
         "Farming",
         "Mining",
-        "Storage",
         "Tactics"
       ],
-      "incident_tokens": 3,
+      "incident_tokens": 1,
       "next_unit_id": 8
     },
     {
@@ -181,23 +165,14 @@
         "ideas": 7,
         "gold": 7
       },
-      "cities": [
-        {
-          "city_pieces": {},
-          "mood_state": "Neutral",
-          "position": "B3"
-        }
-      ],
-      "units": [
-        {
-          "position": "B3",
-          "unit_type": "Infantry",
-          "id": 0
-        }
-      ],
       "civilization": "Barbarians",
       "incident_tokens": 3,
-      "next_unit_id": 1
+      "next_unit_id": 0
+    },
+    {
+      "id": 3,
+      "civilization": "Pirates",
+      "next_unit_id": 0
     }
   ],
   "map": {
@@ -208,11 +183,11 @@
       ],
       [
         "A2",
-        "Water"
+        "Mountain"
       ],
       [
         "A3",
-        "Water"
+        "Mountain"
       ],
       [
         "B1",
@@ -236,11 +211,11 @@
       ],
       [
         "C3",
-        "Water"
+        "Mountain"
       ],
       [
         "D2",
-        "Water"
+        "Mountain"
       ]
     ]
   },
@@ -253,34 +228,16 @@
           "players": [
             {
               "index": 0,
-              "items": [
-                {
-                  "action": {
-                    "Response": {
-                      "SelectAdvance": "Storage"
-                    }
-                  }
-                }
-              ]
+              "items": []
             }
           ]
         }
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player1 advanced Storage for free",
-      "Player gained 1 mood token as advance bonus"
-    ],
-    [
-      "A new game event has been triggered: A good year",
-      "Base effect: Barbarians spawn",
-      "Barbarians spawned a new city and a new Infantry unit at B3"
-    ]
-  ],
-  "undo_limit": 1,
+  "action_log_index": 0,
+  "log": [],
+  "undo_limit": 0,
   "actions_left": 3,
   "round": 1,
   "age": 1,
@@ -305,6 +262,6 @@
     "Pyramids"
   ],
   "incidents_left": [
-    11
+    54
   ]
 }
