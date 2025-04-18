@@ -33,7 +33,7 @@ impl HandCardObject {
     pub fn new(id: HandCard, color: Color, name: String, description: Vec<String>) -> Self {
         Self {
             id,
-            name,
+            name: name.chars().take(17).collect(),
             description,
             color,
         }
@@ -83,7 +83,7 @@ pub(crate) fn show_cards(rc: &RenderContext) -> StateUpdate {
         })
         .collect_vec();
 
-    if let Some(value) = draw_cards(rc, &cards, selection.as_ref(), size, 0.) {
+    if let Some(value) = draw_cards(rc, &cards, selection.as_ref(), size, -75.) {
         return value;
     }
     if let Some(value) = draw_cards(rc, &swap_cards, selection.as_ref(), size, -300.) {
