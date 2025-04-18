@@ -1,4 +1,4 @@
-use crate::ability_initializer::AbilityInitializerSetup;
+use crate::ability_initializer::{AbilityInitializerSetup, do_once_per_turn};
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder};
 use crate::city_pieces::Building;
@@ -38,19 +38,27 @@ fn public_education() -> AdvanceBuilder {
         "Once per turn, when you collect resources in a city with an Academy, gain 1 idea",
     )
     .with_advance_bonus(MoodToken)
-    .add_once_per_turn_listener(
+    .add_transient_event_listener(
         |event| &mut event.collect_total,
         1,
         |i, game, ()| {
             let city = game.get_any_city(i.city);
             if city.pieces.academy.is_some() {
-                i.total += ResourcePile::ideas(1);
-                i.info
-                    .log
-                    .push("Public Education gained 1 idea".to_string());
+                do_once_per_turn(
+                    "Public Education",
+                    i,
+                    &(),
+                    &(),
+                    |i| &mut i.info.info,
+                    |i, (), ()| {
+                        i.total += ResourcePile::ideas(1);
+                        i.info
+                            .log
+                            .push("Public Education gained 1 idea".to_string());
+                    },
+                )
             }
         },
-        |e| &mut e.info.info,
     )
 }
 
