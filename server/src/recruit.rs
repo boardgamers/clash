@@ -157,7 +157,7 @@ pub fn recruit_cost_without_replaced(
     execute: Option<&ResourcePile>,
 ) -> Result<CostInfo, String> {
     for (t, a) in units.clone() {
-        let avail = player.available_units().get(&t);
+        let avail = player.unit_limit().get(&t);
         if a > avail {
             return Err(format!("Only have {avail} {t:?} - not {a}"));
         }

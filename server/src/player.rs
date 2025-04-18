@@ -533,17 +533,22 @@ impl Player {
 
     #[must_use]
     pub fn available_units(&self) -> Units {
-        let mut units = if self.is_human() {
+        let mut units = self.unit_limit();
+        for u in &self.units {
+            units -= &u.unit_type;
+        }
+        units
+    }
+
+    #[must_use]
+    pub fn unit_limit(&self) -> Units {
+        if self.is_human() {
             UNIT_LIMIT.clone()
         } else if self.civilization.is_barbarian() {
             UNIT_LIMIT_BARBARIANS.clone()
         } else {
             UNIT_LIMIT_PIRATES.clone()
-        };
-        for u in &self.units {
-            units -= &u.unit_type;
         }
-        units
     }
 
     pub fn remove_wonder(&mut self, wonder: &Wonder) {
