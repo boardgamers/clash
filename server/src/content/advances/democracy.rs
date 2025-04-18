@@ -50,7 +50,8 @@ fn separation_of_power() -> AdvanceBuilder {
 fn civil_liberties() -> AdvanceBuilder {
     Advance::builder(
         "Civil Liberties",
-        "As a free action, you may gain 3 mood tokens. The cost of Draft is increased to 2 mood token",
+        "As a free action, you may gain 3 mood tokens. \
+        The cost of Draft is increased to 2 mood token",
     )
         .add_custom_action(CivilLiberties)
 }

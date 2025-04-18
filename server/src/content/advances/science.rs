@@ -8,10 +8,12 @@ use crate::payment::PaymentOptions;
 use crate::resource::ResourceType;
 
 pub(crate) fn science() -> AdvanceGroup {
-    advance_group_builder(
-        "Science",
-        vec![math(), astronomy(), medicine(), metallurgy()],
-    )
+    advance_group_builder("Science", vec![
+        math(),
+        astronomy(),
+        medicine(),
+        metallurgy(),
+    ])
 }
 
 fn math() -> AdvanceBuilder {
@@ -94,17 +96,22 @@ fn medicine() -> AdvanceBuilder {
 fn metallurgy() -> AdvanceBuilder {
     Advance::builder(
         METALLURGY,
-        "If you have the Steel Weapons Advance, you no longer have to pay 1 ore to activate it against enemies without Steel Weapons. If you collect at least 2 ore, replace 1 ore with 1 gold",)
-        .with_advance_bonus(CultureToken)
-        .add_transient_event_listener(
-            |event| &mut event.collect_total,
-            0,
-            |i, _, ()| {
-                if i.total.ore >= 2 {
-                    i.total.ore -= 1;
-                    i.total.gold += 1;
-                    i.info.log.push("Metallurgy converted 1 ore to 1 gold".to_string());
-                }
-            },
-        )
+        "If you have the Steel Weapons Advance, \
+        you no longer have to pay 1 ore to activate it against enemies without Steel Weapons. \
+        If you collect at least 2 ore, replace 1 ore with 1 gold",
+    )
+    .with_advance_bonus(CultureToken)
+    .add_transient_event_listener(
+        |event| &mut event.collect_total,
+        0,
+        |i, _, ()| {
+            if i.total.ore >= 2 {
+                i.total.ore -= 1;
+                i.total.gold += 1;
+                i.info
+                    .log
+                    .push("Metallurgy converted 1 ore to 1 gold".to_string());
+            }
+        },
+    )
 }

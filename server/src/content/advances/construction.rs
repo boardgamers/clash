@@ -8,10 +8,12 @@ use crate::unit::UnitType;
 use crate::wonder::draw_wonder_card;
 
 pub(crate) fn construction() -> AdvanceGroup {
-    advance_group_builder(
-        "Construction",
-        vec![mining(), engineering(), sanitation(), roads()],
-    )
+    advance_group_builder("Construction", vec![
+        mining(),
+        engineering(),
+        sanitation(),
+        roads(),
+    ])
 }
 
 fn mining() -> AdvanceBuilder {
@@ -29,7 +31,8 @@ fn engineering() -> AdvanceBuilder {
 fn sanitation() -> AdvanceBuilder {
     Advance::builder(
         "Sanitation",
-        "When Recruiting, you may spend 1 mood token to pay for 1 Settler. Ignore Pestilence and Epidemics events.",
+        "When Recruiting, you may spend 1 mood token to pay for 1 Settler. \
+        Ignore Pestilence and Epidemics events.",
     )
     .with_advance_bonus(MoodToken)
     .add_transient_event_listener(
@@ -56,6 +59,11 @@ fn sanitation() -> AdvanceBuilder {
 }
 
 fn roads() -> AdvanceBuilder {
-    Advance::builder(ROADS, "When moving from or to a city, you may pay 1 food and 1 ore to extend the range of a group of land units by 1 and ignore terrain effects. May not be used to embark, disembark, or explore")
-        .with_advance_bonus(CultureToken)
+    Advance::builder(
+        ROADS,
+        "When moving from or to a city, you may pay 1 food and 1 ore \
+    to extend the range of a group of land units by 1 and ignore terrain effects. \
+    May not be used to embark, disembark, or explore",
+    )
+    .with_advance_bonus(CultureToken)
 }

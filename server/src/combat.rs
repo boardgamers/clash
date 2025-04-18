@@ -450,7 +450,7 @@ pub(crate) fn move_with_possible_combat(
     player_index: usize,
     starting_position: Position,
     m: &MoveUnits,
-) -> bool {
+) {
     let enemy = game.enemy_player(player_index, m.destination);
     if let Some(defender) = enemy {
         if move_to_enemy_player_tile(
@@ -461,7 +461,7 @@ pub(crate) fn move_with_possible_combat(
             starting_position,
             defender,
         ) {
-            return true;
+            return;
         }
     } else {
         move_units(
@@ -480,7 +480,6 @@ pub(crate) fn move_with_possible_combat(
         s.result = Some(CombatResult::AttackerWins);
         on_capture_undefended_position(game, player_index, s);
     }
-    false
 }
 
 pub(crate) fn on_capture_undefended_position(game: &mut Game, player_index: usize, s: CombatStats) {

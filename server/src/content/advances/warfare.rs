@@ -20,10 +20,12 @@ use crate::tactics_card::{CombatRole, play_tactics_card};
 use crate::unit::UnitType;
 
 pub(crate) fn warfare() -> AdvanceGroup {
-    advance_group_builder(
-        "Warfare",
-        vec![tactics(), siegecraft(), steel_weapons(), draft()],
-    )
+    advance_group_builder("Warfare", vec![
+        tactics(),
+        siegecraft(),
+        steel_weapons(),
+        draft(),
+    ])
 }
 
 fn tactics() -> AdvanceBuilder {
@@ -41,7 +43,8 @@ fn tactics() -> AdvanceBuilder {
 fn siegecraft() -> AdvanceBuilder {
     Advance::builder(
         "Siegecraft",
-        "When attacking a city with a Fortress, pay 2 wood to cancel the Fortress’ ability to add +1 die and/or pay 2 ore to ignore its ability to cancel a hit.",
+        "When attacking a city with a Fortress, pay 2 wood to cancel the Fortress’ \
+        ability to add +1 die and/or pay 2 ore to ignore its ability to cancel a hit.",
     )
         .add_payment_request_listener(
             |e| &mut e.combat_start,
@@ -102,43 +105,47 @@ fn siegecraft() -> AdvanceBuilder {
 fn steel_weapons() -> AdvanceBuilder {
     Advance::builder(
         STEEL_WEAPONS,
-        "Immediately before a Land battle starts, you may pay 1 ore to get +2 combat value in every Combat Round against an enemy that does not have the Steel Weapons advance, but only +1 combat value against an enemy that does have it (regardless if they use it or not this battle).",
+        "Immediately before a Land battle starts, \
+        you may pay 1 ore to get +2 combat value in every Combat Round against an enemy \
+        that does not have the Steel Weapons advance. \
+        If the enemy also has Steel Weapons, you only +1 combat value, \
+        even if the enemy does not use the ability.",
     )
-        .add_payment_request_listener(
-            |e| &mut e.combat_start,
-            1,
-            |game, player_index, c| {
-                let player = &game.players[player_index];
+    .add_payment_request_listener(
+        |e| &mut e.combat_start,
+        1,
+        |game, player_index, c| {
+            let player = &game.players[player_index];
 
-                let cost = steel_weapons_cost(game, c, player_index);
-                if cost.is_free() {
-                    add_steel_weapons(player_index, c);
-                    return None;
-                }
+            let cost = steel_weapons_cost(game, c, player_index);
+            if cost.is_free() {
+                add_steel_weapons(player_index, c);
+                return None;
+            }
 
-                if player.can_afford(&cost) {
-                    Some(vec![PaymentRequest {
-                        cost,
-                        name: "Use steel weapons".to_string(),
-                        optional: true,
-                    }])
-                } else {
-                    None
-                }
-            },
-            |game, s, c| {
-                let pile = &s.choice[0];
-                game.add_info_log_item(
-                    &format!("{} paid for steel weapons: {}", s.player_name, pile));
-                if pile.is_empty() {
-                    return;
-                }
-                add_steel_weapons(s.player_index, c);
-            },
-        )
-        .add_combat_round_start_listener(2,
-                                         use_steel_weapons,
-        )
+            if player.can_afford(&cost) {
+                Some(vec![PaymentRequest {
+                    cost,
+                    name: "Use steel weapons".to_string(),
+                    optional: true,
+                }])
+            } else {
+                None
+            }
+        },
+        |game, s, c| {
+            let pile = &s.choice[0];
+            game.add_info_log_item(&format!(
+                "{} paid for steel weapons: {}",
+                s.player_name, pile
+            ));
+            if pile.is_empty() {
+                return;
+            }
+            add_steel_weapons(s.player_index, c);
+        },
+    )
+    .add_combat_round_start_listener(2, use_steel_weapons)
 }
 
 fn draft() -> AdvanceBuilder {
