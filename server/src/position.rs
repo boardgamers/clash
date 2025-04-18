@@ -58,19 +58,25 @@ impl Position {
     }
 
     pub fn neighbors(&self) -> Vec<Self> {
-        /*         vec![
-            Position::new(self.q, self.r - 1),
-            Position::new(self.q + 1, self.r),
-            Position::new(self.q + 1, self.r + 1),
-            Position::new(self.q, self.r + 1),
-            Position::new(self.q - 1, self.r + 1),
-            Position::new(self.q - 1, self.r),
-        ] */
         self.coordinate()
             .neighbors()
             .into_iter()
             .map(Position::from_coordinate)
             .collect()
+    }
+
+    #[must_use]
+    pub fn next_position_in_path(&self, target: &Self) -> Option<Self> {
+        if self == target {
+            return None;
+        }
+        let mut neighbors = self.neighbors();
+        neighbors.sort_by_key(|a| a.distance(*target));
+        if neighbors.is_empty() {
+            None
+        } else {
+            Some(neighbors[0])
+        }
     }
 }
 

@@ -1,11 +1,13 @@
 cargo update
 rustup update
 cargo update
+cargo clean
 cargo fmt
 cd ..\client
 cargo update
 rustup update
 cargo update
+cargo clean
 cargo fmt
 cd ..
 git stash

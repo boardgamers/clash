@@ -1,3 +1,4 @@
+use core::panic;
 use std::time::Duration;
 
 use tokio::runtime::Runtime;
@@ -6,8 +7,11 @@ use crate::{
     action::{self, Action, ActionType},
     ai_actions,
     game::{Game, GameData, GameState},
+    movement::{MoveUnits, MovementAction},
     playing_actions::PlayingAction,
     position::Position,
+    resource_pile::ResourcePile,
+    unit::Unit,
     utils::{self, Rng},
 };
 
@@ -109,6 +113,7 @@ impl AI {
                         action_group,
                         &mut self.rng,
                         &thinking_time_per_action,
+                        self.active_missions.clone(),
                     ))
                     .powf(difficulty_factor)
             })
@@ -179,13 +184,17 @@ async fn evaluate_action(
     action_group: &ActionType,
     rng: &mut Rng,
     thinking_time: &Duration,
+    mut active_missions: Vec<Mission>,
 ) -> f64 {
-    let action_score = get_action_score(game, action);
-    let action_group_score = get_action_group_score(game, action_group);
+    let action_score = get_action_score(game, action, &active_missions);
+    let action_group_score = get_action_group_score(game, action_group, &active_missions);
     let player_index = game.active_player();
     let mut game = game.clone();
     game.supports_undo = false;
     let game = action::execute_action(game, action.clone(), player_index);
+    for mission in &mut active_missions {
+        mission.update(&game);
+    }
     let mut iterations = 0;
     let start_time = std::time::Instant::now();
     let mut score = 0.0;
@@ -196,8 +205,10 @@ async fn evaluate_action(
             rng.next_seed();
             let thread_rng = rng.clone();
             let new_game = game.cloned_data();
-            let handle =
-                tokio::spawn(async move { monte_carlo_score(thread_rng, player_index, new_game) });
+            let new_active_missions = active_missions.clone();
+            let handle = tokio::spawn(async move {
+                monte_carlo_score(thread_rng, player_index, new_game, new_active_missions)
+            });
             handles.push(handle);
         }
         for handle in handles {
@@ -215,8 +226,25 @@ async fn evaluate_action(
     (score / iterations as f64) * action_score * action_group_score
 }
 
-fn monte_carlo_score(mut rng: Rng, player_index: usize, game_data: GameData) -> f64 {
-    let new_game = monte_carlo_run(Game::from_data(game_data), &mut rng);
+fn update_active_missions(active_missions: &mut Vec<Mission>, player_index: usize, game: &Game) {
+    let missions = active_missions.clone();
+    active_missions.retain(|mission| !mission.is_complete(game, &missions));
+    let new_missions = allocate_units(
+        &game.players[player_index].units,
+        game,
+        player_index,
+        &*active_missions,
+    );
+    active_missions.extend(new_missions);
+}
+
+fn monte_carlo_score(
+    mut rng: Rng,
+    player_index: usize,
+    game_data: GameData,
+    active_missions: Vec<Mission>,
+) -> f64 {
+    let new_game = monte_carlo_run(Game::from_data(game_data), &mut rng, active_missions);
     let ai_score = new_game.players[player_index].victory_points(&new_game) as f64;
     let mut max_opponent_score = 0.0;
     for (i, player) in new_game.players.iter().enumerate() {
@@ -230,18 +258,18 @@ fn monte_carlo_score(mut rng: Rng, player_index: usize, game_data: GameData) -> 
     ai_score - max_opponent_score
 }
 
-fn monte_carlo_run(mut game: Game, rng: &mut Rng) -> Game {
+fn monte_carlo_run(mut game: Game, rng: &mut Rng, mut active_missions: Vec<Mission>) -> Game {
     loop {
         if matches!(game.state, GameState::Finished) {
             return game;
         }
         let current_player = game.active_player();
-        let action = choose_monte_carlo_action(&game, rng);
+        let action = choose_monte_carlo_action(&game, rng, &active_missions);
         game = action::execute_action(game, action, current_player);
     }
 }
 
-fn choose_monte_carlo_action(game: &Game, rng: &mut Rng) -> Action {
+fn choose_monte_carlo_action(game: &Game, rng: &mut Rng, active_missions: &[Mission]) -> Action {
     let action_groups = ai_actions::get_available_actions(game);
     if action_groups.is_empty() {
         return Action::Playing(PlayingAction::EndTurn);
@@ -258,7 +286,7 @@ fn choose_monte_carlo_action(game: &Game, rng: &mut Rng) -> Action {
     }
     let group_evaluations = action_groups
         .iter()
-        .map(|(action_group, _)| get_action_group_score(game, action_group))
+        .map(|(action_group, _)| get_action_group_score(game, action_group, active_missions))
         .collect::<Vec<f64>>();
     let group_index = utils::weighted_random_selection(&group_evaluations, rng);
     let action_group = action_groups
@@ -268,7 +296,7 @@ fn choose_monte_carlo_action(game: &Game, rng: &mut Rng) -> Action {
         .1;
     let action_evaluations = action_group
         .iter()
-        .map(|action| get_action_score(game, action))
+        .map(|action| get_action_score(game, action, active_missions))
         .collect::<Vec<f64>>();
     let action_index = utils::weighted_random_selection(&action_evaluations, rng);
     action_group
@@ -277,34 +305,74 @@ fn choose_monte_carlo_action(game: &Game, rng: &mut Rng) -> Action {
         .expect("index out of bounds")
 }
 
-fn get_action_score(game: &Game, action: &Action) -> f64 {
-    1_f64.powf(ACTION_SCORE_WEIGHTING)
+fn get_action_score(game: &Game, action: &Action, active_missions: &[Mission]) -> f64 {
+    match action {
+        Action::Playing(action) => 1.0,
+        Action::Movement(action) => {
+            let mission = active_missions
+                .iter()
+                .find(|mission| mission.action == *action)
+                .expect("movement action is not part of any active mission");
+            mission.priority(game, active_missions)
+        }
+        Action::Response(action) => 1.0,
+        _ => panic!("invalid ai action"),
+    }
+    .powf(ACTION_SCORE_WEIGHTING)
 }
 
-fn get_action_group_score(game: &Game, action_group: &ActionType) -> f64 {
-    1_f64.powf(ACTION_SCORE_WEIGHTING)
+fn get_action_group_score(
+    game: &Game,
+    action_group: &ActionType,
+    active_missions: &[Mission],
+) -> f64 {
+    match action_group {
+        ActionType::Playing(action) => 1.0,
+        ActionType::Movement => active_missions.iter().fold(0.0, |acc, mission| {
+            acc + mission.priority(game, active_missions)
+        }),
+        _ => 1.0,
+    }
+    .powf(ACTION_SCORE_WEIGHTING)
 }
 
+#[derive(Clone)]
 struct Mission {
-    units_under_management: Vec<usize>,
-    target: Position,
+    units_under_management: Vec<u32>,
+    player_index: usize,
     mission_type: MissionType,
+    target: Position,
+    current_location: Position,
+    action: MovementAction,
+    id: u32,
 }
 
 impl Mission {
     fn new(
-        units_under_management: Vec<usize>,
+        units_under_management: Vec<u32>,
         target: Position,
         mission_type: MissionType,
+        game: &Game,
+        player_index: usize,
+        id: u32,
     ) -> Self {
-        Self {
+        let current_location = game.players[player_index]
+            .get_unit(units_under_management[0])
+            .position;
+        let mut mission = Self {
             units_under_management,
+            player_index,
             target,
             mission_type,
-        }
+            current_location,
+            action: MovementAction::Stop,
+            id,
+        };
+        mission.action = mission.next_movement(game);
+        mission
     }
 
-    fn priority(&self, game: &Game) -> f64 {
+    fn priority(&self, game: &Game, missions: &[Mission]) -> f64 {
         match self.mission_type {
             MissionType::Explore => 0.5,
             MissionType::DefendCity => 1.0,
@@ -315,20 +383,70 @@ impl Mission {
             MissionType::FightBarbarians { .. } => 1.0,
             MissionType::FightPirates { .. } => 1.0,
             MissionType::Transport => 1.0,
+            MissionType::JoinMission(id) => {
+                let mission = missions
+                    .iter()
+                    .find(|mission| mission.id == id)
+                    .expect("mission not found");
+                let base_priority = mission.priority(game, missions);
+                let distance = self.current_location.distance(mission.current_location);
+                (base_priority - distance as f64 * 0.1).min(0.1)
+            }
         }
     }
 
     fn update(&mut self, game: &Game) {}
 
-    fn is_complete(&self, game: &Game) -> bool {
-        false
+    fn is_complete(&self, game: &Game, missions: &[Mission]) -> bool {
+        self.current_location == self.target
+            || self.units_under_management.is_empty()
+            || match self.mission_type {
+                MissionType::Explore => todo!(),
+                MissionType::DefendCity => game.players[self.player_index]
+                    .try_get_city(self.target)
+                    .is_none(),
+                MissionType::FoundCity => game.players[self.player_index]
+                    .try_get_city(self.target)
+                    .is_some(),
+                MissionType::CapturePlayerCity => todo!(),
+                MissionType::CaptureBarbarianCamp => todo!(),
+                MissionType::FightPlayerForces { .. } => false,
+                MissionType::FightBarbarians { .. } => false,
+                MissionType::FightPirates { .. } => false,
+                MissionType::Transport => false,
+                MissionType::JoinMission(id) => {
+                    let mission = missions
+                        .iter()
+                        .find(|mission| mission.id == id)
+                        .expect("mission not found");
+                    mission.is_complete(game, missions)
+                }
+            }
     }
 
-    fn next_movement(&self, game: &Game) -> Position {
+    fn next_movement(&self, game: &Game) -> Vec<MovementAction> {
+        let next_position = self
+            .current_location
+            .next_position_in_path(&self.target)
+            .expect("missions is at it's target location");
+        let carrier = game.players[self.player_index]
+            .get_unit(self.units_under_management[0])
+            .carrier_id;
+        let payment = self.movement_payment(game);
+        MovementAction::Move(MoveUnits::new(
+            self.units_under_management.clone(),
+            next_position,
+            carrier,
+            payment,
+        ))
+    }
+
+    fn movement_payment(&self, game: &Game) -> ResourcePile {
         todo!()
     }
 }
 
+#[derive(Clone)]
 enum MissionType {
     Explore,
     DefendCity,
@@ -346,6 +464,16 @@ enum MissionType {
         units: Vec<usize>,
     },
     Transport,
+    JoinMission(u32),
+}
+
+fn allocate_units(
+    units: &[Unit],
+    game: &Game,
+    player_index: usize,
+    active_missions: &[Mission],
+) -> Vec<Mission> {
+    todo!()
 }
 
 /// Returns the win probability of each player in the game in the order listed in the game.
@@ -360,7 +488,7 @@ pub fn evaluate_position(game: &Game, evaluation_time: Duration) -> Vec<f64> {
     let mut wins = vec![0; game.players.len()];
     let mut iterations = 0;
     loop {
-        let new_game = monte_carlo_run(game.clone(), &mut rng);
+        let new_game = monte_carlo_run(game.clone(), &mut rng, Vec::new());
         let max_score = new_game
             .players
             .iter()
@@ -419,6 +547,7 @@ pub fn rate_action(game: &Game, action: &Action, evaluation_time: Duration) -> f
                 action_group,
                 &mut rng,
                 &thinking_time_per_action,
+                Vec::new(),
             ))
         })
         .collect::<Vec<f64>>();
