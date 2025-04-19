@@ -89,7 +89,7 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
     StateUpdate::None
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum HighlightType {
     None,
     Primary,

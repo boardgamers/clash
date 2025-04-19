@@ -43,7 +43,12 @@ pub fn draw_unit_type(
     player_index: usize,
     radius: f32,
 ) -> bool {
-    draw_circle(center.x, center.y, radius, unit_highlight_type.color());
+    let r = if unit_highlight_type == HighlightType::None {
+        radius
+    } else {
+        radius + 2.
+    };
+    draw_circle(center.x, center.y, r, unit_highlight_type.color());
     draw_circle(center.x, center.y, radius - 2., rc.player_color(player_index));
     let icon_size = radius * 1.1;
 

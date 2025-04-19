@@ -15,7 +15,7 @@ use crate::render_context::RenderContext;
 use crate::select_ui;
 use crate::select_ui::{CountSelector, HasCountSelectableObject, HighlightType};
 use crate::tooltip::show_tooltip_for_circle;
-use crate::unit_ui::{UnitSelection, draw_unit_type, add_unit_description};
+use crate::unit_ui::{UnitSelection, add_unit_description, draw_unit_type};
 
 #[derive(Clone)]
 pub struct SelectableUnit {
@@ -51,15 +51,7 @@ impl RecruitAmount {
         let player = game.player(player_index);
         let selectable: Vec<SelectableUnit> = new_units(player)
             .into_iter()
-            .map(|u| {
-                selectable_unit(
-                    city_position,
-                    &units,
-                    leader_name,
-                    player,
-                    &u,
-                )
-            })
+            .map(|u| selectable_unit(city_position, &units, leader_name, player, &u))
             .collect();
 
         StateUpdate::OpenDialog(ActiveDialog::RecruitUnitSelection(RecruitAmount {
@@ -95,9 +87,7 @@ fn selectable_unit(
         unit.leader_name.as_ref().or(leader_name),
         None,
     );
-    let max = if cost
-    .is_ok()
-    {
+    let max = if cost.is_ok() {
         u32::from(current + 1)
     } else {
         u32::from(current)
@@ -219,7 +209,11 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
         |s, p| {
             draw_unit_type(
                 rc,
-                HighlightType::None,
+                if s.cost.is_ok() {
+                    HighlightType::None
+                } else {
+                    HighlightType::Warn
+                },
                 p,
                 s.unit_type,
                 rc.shown_player.index,
@@ -231,11 +225,7 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
                 Ok(_) => format!(" ({} available with current resources)", s.selectable.max),
                 Err(e) => format!(" ({e})"),
             };
-            let mut tooltip = vec![format!(
-                "Recruit {}{}",
-                s.unit_type.name(),
-                suffix
-            )];
+            let mut tooltip = vec![format!("Recruit {}{}", s.unit_type.name(), suffix)];
             add_unit_description(&mut tooltip, s.unit_type);
             show_tooltip_for_circle(rc, &tooltip, p, radius);
         },
@@ -313,13 +303,7 @@ fn update_selection(
     units: Units,
     leader_name: Option<&String>,
 ) -> StateUpdate {
-    RecruitAmount::new_selection(
-        game,
-        s.player_index,
-        s.city_position,
-        units,
-        leader_name,
-    )
+    RecruitAmount::new_selection(game, s.player_index, s.city_position, units, leader_name)
 }
 
 pub fn replace_dialog(rc: &RenderContext, sel: &RecruitSelection) -> StateUpdate {
