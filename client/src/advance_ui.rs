@@ -16,6 +16,7 @@ use server::game::GameState;
 use server::player::Player;
 use server::playing_actions::PlayingAction;
 use std::ops::Rem;
+use server::unit::UnitType;
 
 const COLUMNS: usize = 6;
 
@@ -145,11 +146,9 @@ fn border_color(a: &Advance) -> Color {
 }
 
 fn description(p: &Player, a: &Advance) -> Vec<String> {
-    let desc = &a.description;
-
     let mut parts: Vec<String> = vec![];
     parts.push(a.name.clone());
-    break_text(desc, 70, &mut parts);
+    add_description(&mut parts, &a.description);
     parts.push(format!("Cost: {}", p.advance_cost(a, None).cost));
     if let Some(r) = &a.required {
         parts.push(format!("Required: {r}"));
@@ -169,11 +168,26 @@ fn description(p: &Player, a: &Advance) -> Vec<String> {
     if let Some(g) = &a.government {
         parts.push(format!("Government: {g}"));
     }
-    if let Some(u) = &a.unlocked_building {
-        parts.push(format!("Unlocks: {}", u.name()));
+    if let Some(b) = &a.unlocked_building {
+        parts.push(format!("Unlocks building: {}", b.name()));
+        add_description(&mut parts, &b.description());
+    }
+    if a.name == "Market" {
+        add_unit_description(&mut parts, &UnitType::Cavalry);
+        add_unit_description(&mut parts, &UnitType::Elephant);
     }
 
     parts
+}
+
+fn add_unit_description(mut parts: &mut Vec<String>, u: &UnitType) {
+    parts.push(format!("Unlocks unit: {}", u.name()));
+    parts.push(format!("Cost: {}", u.cost()));
+    add_description(&mut parts, &u.description());
+}
+
+fn add_description(mut parts: &mut Vec<String>, label: &str) {
+    break_text(label, 70, &mut parts)
 }
 
 pub fn pay_advance_dialog(ap: &Payment, rc: &RenderContext) -> StateUpdate {

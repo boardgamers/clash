@@ -10,6 +10,7 @@ use std::{
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::city::is_valid_city_terrain;
 use crate::collect::reset_collect_within_range_for_all;
+use crate::combat_roll::COMBAT_DIE_SIDES;
 use crate::consts::SHIP_CAPACITY;
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{KilledUnits, PersistentEventType, UnitsRequest};
@@ -181,6 +182,39 @@ impl UnitType {
             Cavalry => ResourcePile::food(1) + ResourcePile::wood(1),
             Leader => ResourcePile::culture_tokens(1) + ResourcePile::mood_tokens(1),
         }
+    }
+
+    #[must_use]
+    pub fn description(&self) -> String {
+        match self {
+            Settler => "A unit that can found cities.".to_string(),
+            Ship => "Can fight ships. Can carry 2 land units.".to_string(),
+            Infantry => format!(
+                "Army unit. Combat abilities: +1 combat values on {}",
+                Self::sides(Infantry)
+            ),
+            Cavalry => format!(
+                "Army unit. Combat abilities: +2 combat values on {}",
+                Self::sides(Cavalry)
+            ),
+            Elephant => format!(
+                "Army unit. Combat abilities: -1 hit but no combat value on {}",
+                Self::sides(Elephant)
+            ),
+            Leader => format!(
+                "Army unit. Combat abilities: Reroll the die until you get a \
+             non-leader roll on {}",
+                Self::sides(Leader)
+            ),
+        }
+    }
+
+    fn sides(unit_type: UnitType) -> String {
+        COMBAT_DIE_SIDES
+            .iter()
+            .filter(|d| d.bonus == unit_type)
+            .map(|d| d.value.to_string())
+            .join(", ")
     }
 
     #[must_use]
@@ -652,26 +686,22 @@ mod tests {
     #[test]
     fn into_iter() {
         let units = Units::new(0, 1, 0, 2, 1, 1);
-        assert_eq!(
-            units.into_iter().collect::<Vec<_>>(),
-            vec![
-                (Settler, 0),
-                (Infantry, 1),
-                (Ship, 0),
-                (Cavalry, 2),
-                (Elephant, 1),
-                (Leader, 1),
-            ]
-        );
+        assert_eq!(units.into_iter().collect::<Vec<_>>(), vec![
+            (Settler, 0),
+            (Infantry, 1),
+            (Ship, 0),
+            (Cavalry, 2),
+            (Elephant, 1),
+            (Leader, 1),
+        ]);
     }
 
     #[test]
     fn to_vec() {
         let units = Units::new(0, 1, 0, 2, 1, 1);
-        assert_eq!(
-            units.to_vec(),
-            vec![Infantry, Cavalry, Cavalry, Elephant, Leader]
-        );
+        assert_eq!(units.to_vec(), vec![
+            Infantry, Cavalry, Cavalry, Elephant, Leader
+        ]);
     }
 
     #[test]

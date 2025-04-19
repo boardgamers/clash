@@ -20,7 +20,6 @@ use server::collect::{available_collect_actions_for_city, possible_resource_coll
 use server::construct::available_buildings;
 use server::content::persistent_events::Structure;
 use server::game::Game;
-use server::happiness::{available_happiness_actions_for_city, increase_happiness_cost};
 use server::playing_actions::PlayingActionType;
 use server::resource::ResourceType;
 use server::unit::{UnitType, Units};

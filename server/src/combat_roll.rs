@@ -186,7 +186,7 @@ fn dice_roll_with_leader_reroll(
 
     *unit_types -= &Leader;
 
-    // if used, the leader grants unlimited rerolls of 1s and 2s
+    // if used, the leader grants unlimited rerolls of 1s
     loop {
         add_roll_log_effect(roll_log, "re-roll");
         let side = roll_die(game, roll_log);
