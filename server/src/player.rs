@@ -477,19 +477,19 @@ impl Player {
 
     #[must_use]
     pub fn victory_points(&self, game: &Game) -> f32 {
-        self.victory_points_parts(game).iter().sum()
+        self.victory_points_parts(game).iter().map(|(_, v)| v).sum()
     }
 
     #[must_use]
-    pub fn victory_points_parts(&self, game: &Game) -> [f32; 6] {
+    pub fn victory_points_parts(&self, game: &Game) -> [(&'static str, f32); 6] {
         [
-            (self.cities.len() + self.owned_buildings(game)) as f32 * BUILDING_VICTORY_POINTS,
-            (self.advances.len() + self.unlocked_special_advances.len()) as f32
-                * ADVANCE_VICTORY_POINTS,
-            self.completed_objectives.len() as f32 * OBJECTIVE_VICTORY_POINTS,
-            (self.wonders_owned() + self.wonders_build.len()) as f32 * WONDER_VICTORY_POINTS / 2.0,
-            self.event_victory_points,
-            self.captured_leaders.len() as f32 * CAPTURED_LEADER_VICTORY_POINTS,
+            ("City pieces", (self.cities.len() + self.owned_buildings(game)) as f32 * BUILDING_VICTORY_POINTS),
+            ("Advances", (self.advances.len() + self.unlocked_special_advances.len()) as f32
+                * ADVANCE_VICTORY_POINTS),
+            ("Objectives", self.completed_objectives.len() as f32 * OBJECTIVE_VICTORY_POINTS),
+            ("Wonders", (self.wonders_owned() + self.wonders_build.len()) as f32 * WONDER_VICTORY_POINTS / 2.0),
+            ("Events", self.event_victory_points),
+            ("Captured Leaders", self.captured_leaders.len() as f32 * CAPTURED_LEADER_VICTORY_POINTS),
         ]
     }
 
@@ -566,8 +566,8 @@ impl Player {
     pub(crate) fn compare_score(&self, other: &Self, game: &Game) -> Ordering {
         let parts = self.victory_points_parts(game);
         let other_parts = other.victory_points_parts(game);
-        let sum = parts.iter().sum::<f32>();
-        let other_sum = other_parts.iter().sum::<f32>();
+        let sum = parts.iter().map(|(_, v)| v).sum::<f32>();
+        let other_sum = other_parts.iter().map(|(_, v)| v).sum::<f32>();
 
         match sum
             .partial_cmp(&other_sum)

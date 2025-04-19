@@ -2,17 +2,14 @@ use crate::action_buttons::action_buttons;
 use crate::city_ui::city_labels;
 use crate::client::Features;
 use crate::client_state::StateUpdate;
-use crate::dialog_ui::{OkTooltip, ok_button};
+use crate::dialog_ui::{ok_button, OkTooltip};
 use crate::event_ui::event_help;
-use crate::layout_ui::{
-    ICON_SIZE, bottom_center_texture, bottom_centered_text, bottom_right_texture, icon_pos,
-    left_mouse_button_pressed_in_rect, top_center_texture,
-};
+use crate::layout_ui::{bottom_center_texture, bottom_centered_text, bottom_right_texture, icon_pos, left_mouse_button_pressed_in_rect, top_center_anchor, top_center_texture, ICON_SIZE};
 use crate::log_ui::multiline_label;
 use crate::map_ui::terrain_name;
 use crate::render_context::RenderContext;
 use crate::resource_ui::{new_resource_map, resource_name};
-use crate::tooltip::show_tooltip_for_rect;
+use crate::tooltip::{show_tooltip_for_circle, show_tooltip_for_rect};
 use crate::unit_ui;
 use itertools::Itertools;
 use macroquad::math::vec2;
@@ -122,13 +119,21 @@ pub fn bottom_icon_with_label(
 pub fn show_top_center(rc: &RenderContext) {
     let player = rc.shown_player;
 
+    let pos = icon_pos(3, 0);
     top_icon_with_label(
         rc,
         &format!("{}", &player.victory_points(rc.game)),
         &rc.assets().victory_points,
-        icon_pos(3, 0),
-        "Victory Points",
+        pos,
+        "",
     );
+
+    let mut tooltip = vec![];
+    for (name, points) in player.victory_points_parts(rc.game) {
+        tooltip.push(format!("{name}: {points}"));
+    }
+    show_tooltip_for_circle(rc, &tooltip, pos + top_center_anchor(rc) + vec2(15., 15.), 25.);
+
     top_icon_with_label(
         rc,
         &format!("{}", &player.incident_tokens),
