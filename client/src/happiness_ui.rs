@@ -23,7 +23,7 @@ impl IncreaseHappinessConfig {
         let steps = p.cities.iter().map(|c| (c.position, 0)).collect();
         IncreaseHappinessConfig {
             steps,
-            payment: Self::happiness_payment(p, &[(p.cities[0].position, 0)], &custom)
+            payment: Self::happiness_payment(p, 0, &custom)
                 .expect("Happiness payment should be available"),
             custom,
         }
@@ -31,7 +31,7 @@ impl IncreaseHappinessConfig {
 
     fn happiness_payment(
         p: &Player,
-        new_steps: &[(Position, u32)],
+        new_steps: u32,
         custom: &BaseOrCustomDialog,
     ) -> Option<Payment> {
         let c = happiness_cost(p, new_steps, None).cost;
@@ -96,9 +96,14 @@ pub fn add_increase_happiness(
         })
         .collect();
 
+    let step_sum = new_steps
+        .iter()
+        .map(|(p, steps)| rc.shown_player.get_city(*p).size() as u32 * steps)
+        .sum::<u32>();
+
     IncreaseHappinessConfig::happiness_payment(
         rc.shown_player,
-        &new_steps,
+        step_sum,
         &increase_happiness.custom,
     )
     .map(|payment| {
@@ -139,7 +144,7 @@ pub fn increase_happiness_cost(
     steps: u32,
     action_type: &PlayingActionType,
 ) -> Option<CostInfo> {
-    let total_cost = happiness_cost(player, &[(city.position, steps)], None);
+    let total_cost = happiness_cost(player, steps * city.size() as u32, None);
     let max_steps = 2 - city.mood_state.clone() as u32;
     (total_cost
         .cost

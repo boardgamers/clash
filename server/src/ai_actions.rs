@@ -355,6 +355,7 @@ fn calculate_increase_happiness(
 ) -> Option<IncreaseHappiness> {
     // try to make the biggest cities happy - that's usually the best choice
     let mut all_steps: Vec<(Position, u32)> = vec![];
+    let mut step_sum = 0;
     let mut cost = PaymentOptions::free();
     let available = action_type.remaining_resources(player);
 
@@ -369,14 +370,14 @@ fn calculate_increase_happiness(
             MoodState::Neutral => 1,
             MoodState::Happy => 0,
         };
-        let mut new_steps = all_steps.clone();
-        new_steps.push((c.position, steps));
+        let new_steps_sum = step_sum + steps * c.size() as u32;
 
-        let info = happiness_cost(player, &new_steps, None);
+        let info = happiness_cost(player, new_steps_sum, None);
         if !info.cost.can_afford(&available) {
             break;
         }
-        all_steps = new_steps;
+        all_steps.push((c.position, steps));
+        step_sum = new_steps_sum;
         cost = info.cost;
     }
 

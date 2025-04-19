@@ -54,11 +54,13 @@ pub(crate) fn increase_happiness(
 ) {
     let player = &mut game.players[player_index];
     let mut angry_activations = vec![];
+    let mut step_sum = 0;
     for &(city_position, steps) in happiness_increases {
         let city = player.get_city(city_position);
         if steps == 0 {
             continue;
         }
+        step_sum += steps * city.size() as u32;
 
         if city.mood_state == MoodState::Angry {
             angry_activations.push(city_position);
@@ -70,17 +72,16 @@ pub(crate) fn increase_happiness(
     }
 
     if let Some(r) = payment {
-        happiness_cost(player, happiness_increases, Some(&r)).pay(game, &r);
+        happiness_cost(player, step_sum, Some(&r)).pay(game, &r);
     }
 }
 
 #[must_use]
 pub fn happiness_cost(
     p: &Player,
-    new_steps: &[(Position, u32)],
+    city_size_steps: u32, // for each city: size * steps in that city
     execute: Option<&ResourcePile>,
 ) -> CostInfo {
-    let steps = new_steps.iter().fold(0_u32, |a, (_, b)| a + *b);
-    let payment_options = PaymentOptions::sum(steps, &[ResourceType::MoodTokens]);
+    let payment_options = PaymentOptions::sum(city_size_steps, &[ResourceType::MoodTokens]);
     p.trigger_cost_event(|e| &e.happiness_cost, &payment_options, &(), &(), execute)
 }
