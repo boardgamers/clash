@@ -233,7 +233,10 @@
                 {
                   "action": {
                     "Playing": {
-                      "Custom": "ForcedLabor"
+                      "CustomEvent": {
+                        "action": "ForcedLabor",
+                        "city": null
+                      }
                     }
                   },
                   "undo": [
@@ -258,6 +261,7 @@
   "action_log_index": 1,
   "log": [
     [
+      "Player1 started ForcedLabor",
       "Player1 paid 1 mood token to treat Angry cities as neutral"
     ]
   ],

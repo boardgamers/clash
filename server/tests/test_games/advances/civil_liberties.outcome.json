@@ -196,7 +196,10 @@
                 {
                   "action": {
                     "Playing": {
-                      "Custom": "CivilLiberties"
+                      "CustomEvent": {
+                        "action": "CivilLiberties",
+                        "city": null
+                      }
                     }
                   },
                   "undo": [
@@ -222,6 +225,7 @@
   "action_log_index": 1,
   "log": [
     [
+      "Player1 started CivilLiberties",
       "Player1 gained 3 mood tokens using Civil Liberties"
     ]
   ],

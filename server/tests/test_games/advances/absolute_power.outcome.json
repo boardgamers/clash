@@ -233,7 +233,10 @@
                 {
                   "action": {
                     "Playing": {
-                      "Custom": "AbsolutePower"
+                      "CustomEvent": {
+                        "action": "AbsolutePower",
+                        "city": null
+                      }
                     }
                   },
                   "undo": [
@@ -263,7 +266,8 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 paid 2 mood tokens to get an extra action using Forced Labor"
+      "Player1 started AbsolutePower",
+      "Player1 paid 2 mood tokens to get an extra action using Absolute Power"
     ]
   ],
   "undo_limit": 0,

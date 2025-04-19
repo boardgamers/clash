@@ -146,13 +146,23 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
     }
 
     for (a, _) in game.available_custom_actions(p.index) {
-        actions.push((
-            ActionType::Playing(PlayingActionType::Custom(a.clone().info())),
-            // todo find city for sports
-            vec![Action::Playing(PlayingAction::CustomEvent(
-                CustomEventAction::new(a, None),
-            ))],
-        ));
+        let cities = if a.is_city_bound() {
+            p.cities
+                .iter()
+                .filter_map(|city| a.is_available_city(p, city).then_some(Some(city.position)))
+                .collect_vec()
+        } else {
+            vec![None]
+        };
+
+        for c in cities {
+            actions.push((
+                ActionType::Playing(PlayingActionType::Custom(a.clone().info())),
+                vec![Action::Playing(PlayingAction::CustomEvent(
+                    CustomEventAction::new(a.clone(), c),
+                ))],
+            ));
+        }
     }
 
     actions
