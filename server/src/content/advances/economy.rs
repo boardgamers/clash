@@ -1,7 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::discard_action_card;
 use crate::advance::Bonus::{CultureToken, MoodToken};
-use crate::advance::{Advance, AdvanceBuilder};
+use crate::advance::{AdvanceInfo, AdvanceBuilder, Advance};
 use crate::card::HandCard;
 use crate::city_pieces::Building::Market;
 use crate::content::advances::trade_routes::{TradeRoute, trade_route_log, trade_route_reward};
@@ -26,7 +26,8 @@ pub(crate) fn economy() -> AdvanceGroup {
 }
 
 fn currency() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Currency,
         CURRENCY,
         "You may collect gold instead of food for Trade Routes and Taxes",
     )
@@ -37,14 +38,17 @@ const BARTER_DESC: &str = "Once per turn, as a free action, \
         you may spend discard an action card for 1 gold or 1 culture token.";
 
 fn bartering() -> AdvanceBuilder {
-    Advance::builder("Bartering", BARTER_DESC)
+    AdvanceInfo::builder(
+                Advance::Bartering,
+        "Bartering", BARTER_DESC)
         .with_advance_bonus(MoodToken)
         .add_custom_action(CustomActionType::Bartering)
         .with_unlocked_building(Market)
 }
 
 pub(crate) fn use_bartering() -> Builtin {
-    Builtin::builder("Bartering", BARTER_DESC)
+    Builtin::builder(
+        "Bartering", BARTER_DESC)
         .add_hand_card_request(
             |event| &mut event.custom_action,
             1,
@@ -97,7 +101,9 @@ const TAXES_DESCRIPTION: &str = "Once per turn, as an action, you may spend 1 mo
         If you have the Currency advance, you may gain gold instead of food, wood, or ore.";
 
 fn taxes() -> AdvanceBuilder {
-    Advance::builder("Taxes", TAXES_DESCRIPTION).add_custom_action(Taxes)
+    AdvanceInfo::builder(
+                Advance::Taxes,
+        "Taxes", TAXES_DESCRIPTION).add_custom_action(Taxes)
 }
 
 pub(crate) fn use_taxes() -> Builtin {
@@ -133,7 +139,8 @@ pub fn tax_options(player: &Player) -> PaymentOptions {
 
 fn trade_routes() -> AdvanceBuilder {
     add_trade_routes(
-        Advance::builder(
+        AdvanceInfo::builder(
+            Advance::TradeRoutes,
             "Trade Routes",
             "At the beginning of your turn, you gain 1 food for every trade route \
         you can make, to a maximum of 4. A trade route is made between one of your \

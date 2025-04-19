@@ -1,5 +1,5 @@
 use crate::action_card::ActionCard;
-use crate::advance::Advance;
+use crate::advance::AdvanceInfo;
 use crate::content::advances::AdvanceGroup;
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::custom_action_builtins;
@@ -33,8 +33,8 @@ pub struct Cache {
 
     all_advance_groups: Vec<AdvanceGroup>,
     advance_groups_by_name: HashMap<String, AdvanceGroup>,
-    all_advances: Vec<Advance>,
-    advances_by_name: HashMap<String, Advance>,
+    all_advances: Vec<AdvanceInfo>,
+    advances_by_name: HashMap<String, AdvanceInfo>,
     all_governments: Vec<AdvanceGroup>,
     governments_by_name: HashMap<String, AdvanceGroup>,
 
@@ -132,12 +132,12 @@ impl Cache {
     }
 
     #[must_use]
-    pub fn get_advances(&'static self) -> &'static Vec<Advance> {
+    pub fn get_advances(&'static self) -> &'static Vec<AdvanceInfo> {
         &self.all_advances
     }
 
     #[must_use]
-    pub fn get_advance(&'static self, name: &str) -> Option<&'static Advance> {
+    pub fn get_advance(&'static self, name: &str) -> Option<&'static AdvanceInfo> {
         self.advances_by_name.get(name)
     }
 

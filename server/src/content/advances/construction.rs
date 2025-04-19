@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Bonus::{CultureToken, MoodToken};
-use crate::advance::{Advance, AdvanceBuilder};
+use crate::advance::{AdvanceInfo, AdvanceBuilder, Advance};
 use crate::content::advances::{AdvanceGroup, ROADS, advance_group_builder};
 use crate::payment::PaymentConversion;
 use crate::resource_pile::ResourcePile;
@@ -15,11 +15,14 @@ pub(crate) fn construction() -> AdvanceGroup {
 }
 
 fn mining() -> AdvanceBuilder {
-    Advance::builder("Mining", "Your cities may Collect ore from Mountain spaces")
+    AdvanceInfo::builder(
+                Advance::Mining,
+        "Mining", "Your cities may Collect ore from Mountain spaces")
 }
 
 fn engineering() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Engineering,
         "Engineering",
         "Immediately draw 1 wonder card. May Construct wonders in happy cities",
     )
@@ -27,7 +30,8 @@ fn engineering() -> AdvanceBuilder {
 }
 
 fn sanitation() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Sanitation,
         "Sanitation",
         "When Recruiting, you may spend 1 mood token to pay for 1 Settler. \
         Ignore Pestilence and Epidemics events.",
@@ -57,7 +61,8 @@ fn sanitation() -> AdvanceBuilder {
 }
 
 fn roads() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Roads,
         ROADS,
         "When moving from or to a city, you may pay 1 food and 1 ore \
     to extend the range of a group of land units by 1 and ignore terrain effects. \

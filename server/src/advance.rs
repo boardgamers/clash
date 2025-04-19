@@ -8,11 +8,87 @@ use crate::content::persistent_events::PersistentEventType;
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::incident::on_trigger_incident;
-use crate::player_events::{AdvanceInfo, IncidentInfo};
+use crate::player_events::{OnAdvanceInfo, IncidentInfo};
 use crate::special_advance::SpecialAdvance;
 use Bonus::*;
 
-pub struct Advance {
+// id / 4 = advance group
+pub enum Advance {
+    // Farming Group
+    Farming = 0,
+    Storage = 1,
+    Irrigation = 2,
+    Husbandry = 3,
+
+    // Construction Group
+    Mining = 4,
+    Engineering = 5,
+    Sanitation = 6,
+    Roads = 7,
+
+    // Seafaring Group
+    Fishing = 8,
+    Navigation = 9,
+    WarShips = 10,
+    Cartography = 11,
+
+    // Education Group
+    Writing = 12,
+    PublicEducation = 13,
+    FreeEducation = 14,
+    Philosophy = 15,
+
+    // Warfare Group
+    Tactics = 16,
+    Siegecraft = 17,
+    SteelWeapons = 18,
+    Draft = 19,
+
+    // Spirituality Group
+    Myths = 20,
+    Rituals = 21,
+    Priesthood = 22,
+    StateReligion = 23,
+
+    // Economy Group
+    Bartering = 24,
+    TradeRoutes = 25,
+    Taxes = 26,
+    Currency = 27,
+
+    // Culture Group
+    Arts = 28,
+    Sports = 29,
+    Monuments = 30,
+    Theaters = 31,
+
+    // Science Group
+    Math = 32,
+    Astronomy = 33,
+    Medicine = 34,
+    Metallurgy = 35,
+
+    // Democracy Group
+    Voting = 36,
+    SeparationOfPower = 37,
+    CivilLiberties = 38,
+    FreeEconomy = 39,
+
+    // Autocracy Group
+    Nationalism = 40,
+    Totalitarianism = 41,
+    AbsolutePower = 42,
+    ForcedLabor = 43,
+    
+    // Theocracy Group
+    Dogma = 44,
+    Devotion = 45,
+    Conversion = 46,
+    Fanaticism = 47,
+}
+
+pub struct AdvanceInfo {
+    pub advance: Advance,
     pub name: String,
     pub description: String,
     pub bonus: Option<Bonus>,
@@ -23,20 +99,21 @@ pub struct Advance {
     pub listeners: AbilityListeners,
 }
 
-impl Advance {
+impl AdvanceInfo {
     #[must_use]
-    pub(crate) fn builder(name: &str, description: &str) -> AdvanceBuilder {
-        AdvanceBuilder::new(name.to_string(), description.to_string())
+    pub(crate) fn builder(advance: Advance, name: &str, description: &str) -> AdvanceBuilder {
+        AdvanceBuilder::new(advance, name.to_string(), description.to_string())
     }
 }
 
-impl PartialEq for Advance {
+impl PartialEq for AdvanceInfo {
     fn eq(&self, other: &Self) -> bool {
         self.name == other.name
     }
 }
 
 pub(crate) struct AdvanceBuilder {
+    pub advance: Advance,
     pub name: String,
     description: String,
     advance_bonus: Option<Bonus>,
@@ -48,8 +125,9 @@ pub(crate) struct AdvanceBuilder {
 }
 
 impl AdvanceBuilder {
-    fn new(name: String, description: String) -> Self {
+    fn new(advance: Advance, name: String, description: String) -> Self {
         Self {
+            advance, 
             name,
             description,
             advance_bonus: None,
@@ -95,8 +173,9 @@ impl AdvanceBuilder {
     }
 
     #[must_use]
-    pub fn build(self) -> Advance {
-        Advance {
+    pub fn build(self) -> AdvanceInfo {
+        AdvanceInfo {
+            advance: self.advance,
             name: self.name,
             description: self.description,
             bonus: self.advance_bonus,
@@ -139,7 +218,7 @@ impl Bonus {
 /// # Panics
 ///
 /// Panics if advance does not exist
-pub fn do_advance(game: &mut Game, advance: &Advance, player_index: usize) {
+pub fn do_advance(game: &mut Game, advance: &AdvanceInfo, player_index: usize) {
     advance.listeners.one_time_init(game, player_index);
     let name = advance.name.clone();
     for i in 0..game.players[player_index]
@@ -180,7 +259,7 @@ pub(crate) fn gain_advance_without_payment(
     on_advance(
         game,
         player_index,
-        AdvanceInfo {
+        OnAdvanceInfo {
             name: name.to_string(),
             payment,
             take_incident_token,
@@ -188,7 +267,7 @@ pub(crate) fn gain_advance_without_payment(
     );
 }
 
-pub(crate) fn on_advance(game: &mut Game, player_index: usize, info: AdvanceInfo) {
+pub(crate) fn on_advance(game: &mut Game, player_index: usize, info: OnAdvanceInfo) {
     let info = match game.trigger_persistent_event(
         &[player_index],
         |e| &mut e.advance,
@@ -209,7 +288,7 @@ pub(crate) fn on_advance(game: &mut Game, player_index: usize, info: AdvanceInfo
     }
 }
 
-pub(crate) fn remove_advance(game: &mut Game, advance: &Advance, player_index: usize) {
+pub(crate) fn remove_advance(game: &mut Game, advance: &AdvanceInfo, player_index: usize) {
     advance.listeners.undo(game, player_index);
 
     for i in 0..game.players[player_index]

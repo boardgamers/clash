@@ -14,7 +14,7 @@ use crate::map::Rotation;
 use crate::objective_card::SelectObjectivesInfo;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
-use crate::player_events::{AdvanceInfo, IncidentInfo};
+use crate::player_events::{OnAdvanceInfo, IncidentInfo};
 use crate::playing_actions::Recruit;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
@@ -104,7 +104,7 @@ pub enum PersistentEventType {
     CaptureUndefendedPosition(CombatStats),
     StatusPhase(StatusPhaseState),
     TurnStart,
-    Advance(AdvanceInfo),
+    Advance(OnAdvanceInfo),
     Construct(Building),
     Recruit(Recruit),
     FoundCity(Position),

@@ -1,5 +1,5 @@
 use crate::action_card::ActionCardInfo;
-use crate::advance::Advance;
+use crate::advance::AdvanceInfo;
 use crate::barbarians::BarbariansEventState;
 use crate::collect::{CollectContext, CollectInfo};
 use crate::combat::Combat;
@@ -51,7 +51,7 @@ pub(crate) struct TransientEvents {
     pub before_move: Event<Game, MoveInfo>,
 
     pub construct_cost: Event<CostInfo, Building, Game>,
-    pub advance_cost: Event<CostInfo, Advance>,
+    pub advance_cost: Event<CostInfo, AdvanceInfo>,
     pub happiness_cost: Event<CostInfo>,
     pub recruit_cost: Event<CostInfo, Units, Player>,
 
@@ -87,7 +87,7 @@ pub(crate) struct PersistentEvents {
     pub collect: PersistentEvent<CollectInfo>,
     pub construct: PersistentEvent<Building>,
     pub draw_wonder_card: PersistentEvent,
-    pub advance: PersistentEvent<AdvanceInfo>,
+    pub advance: PersistentEvent<OnAdvanceInfo>,
     pub recruit: PersistentEvent<Recruit>,
     pub found_city: PersistentEvent<Position>,
     pub influence_culture_resolution: PersistentEvent<ResourcePile>,
@@ -297,7 +297,7 @@ impl CostInfo {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub struct AdvanceInfo {
+pub struct OnAdvanceInfo {
     pub name: String,
     pub payment: ResourcePile,
     pub take_incident_token: bool,

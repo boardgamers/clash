@@ -1,7 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::gain_action_card_from_pile;
 use crate::advance::Bonus::CultureToken;
-use crate::advance::{Advance, AdvanceBuilder};
+use crate::advance::{AdvanceInfo, AdvanceBuilder, Advance};
 use crate::city_pieces::Building;
 use crate::content::advances::{AdvanceGroup, METALLURGY, advance_group_builder};
 use crate::content::persistent_events::ResourceRewardRequest;
@@ -16,7 +16,8 @@ pub(crate) fn science() -> AdvanceGroup {
 }
 
 fn math() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Math,
         "Math",
         "Engineering and Roads can be bought at no food cost",
     )
@@ -45,7 +46,8 @@ fn math() -> AdvanceBuilder {
 }
 
 fn astronomy() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Astronomy,
         "Astronomy",
         "Navigation and Cartography can be bought at no food cost",
     )
@@ -65,7 +67,8 @@ fn astronomy() -> AdvanceBuilder {
 }
 
 fn medicine() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Medicine,
         "Medicine",
         "After recruiting, gain one of the paid resources back",
     )
@@ -103,7 +106,8 @@ fn medicine() -> AdvanceBuilder {
 }
 
 fn metallurgy() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Metallurgy,
         METALLURGY,
         "If you have the Steel Weapons Advance, \
         you no longer have to pay 1 ore to activate it against enemies without Steel Weapons. \

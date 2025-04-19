@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Bonus::MoodToken;
-use crate::advance::{Advance, AdvanceBuilder};
+use crate::advance::{AdvanceInfo, AdvanceBuilder, Advance};
 use crate::collect::{CollectContext, CollectInfo};
 use crate::content::advances::{AdvanceGroup, IRRIGATION, ROADS, advance_group_builder};
 use crate::game::Game;
@@ -16,14 +16,16 @@ pub(crate) fn agriculture() -> AdvanceGroup {
 }
 
 fn farming() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Farming,
         "Farming",
         "Your cities may Collect food from Grassland and wood from Forest spaces",
     )
 }
 
 fn storage() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Storage,
         "Storage",
         "Your maximum food limit is increased from 2 to 7",
     )
@@ -35,7 +37,8 @@ fn storage() -> AdvanceBuilder {
 }
 
 fn irrigation() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Irrigation,
         IRRIGATION,
         "Your cities may Collect food from Barren spaces, Ignore Famine events",
     )
@@ -51,7 +54,8 @@ fn irrigation() -> AdvanceBuilder {
 }
 
 fn husbandry() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Husbandry,
         "Husbandry",
         "During a Collect Resources Action, \
         you may collect from a Land space that is 2 Land spaces away, rather than 1. \

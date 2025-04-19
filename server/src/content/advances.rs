@@ -12,7 +12,7 @@ pub(crate) mod theocracy;
 pub mod trade_routes;
 pub(crate) mod warfare;
 
-use crate::advance::Advance;
+use crate::advance::AdvanceInfo;
 use crate::advance::AdvanceBuilder;
 use crate::cache;
 use crate::content::advances::agriculture::agriculture;
@@ -64,12 +64,12 @@ const GOVERNMENTS: [GovernmentInfo; 3] = [
 
 pub struct AdvanceGroup {
     pub name: String,
-    pub advances: Vec<Advance>,
+    pub advances: Vec<AdvanceInfo>,
     pub government: Option<String>,
 }
 
 #[must_use]
-pub(crate) fn get_all_uncached() -> Vec<Advance> {
+pub(crate) fn get_all_uncached() -> Vec<AdvanceInfo> {
     get_groups_uncached()
         .into_iter()
         .flat_map(|g| g.advances)
@@ -77,7 +77,7 @@ pub(crate) fn get_all_uncached() -> Vec<Advance> {
 }
 
 #[must_use]
-pub fn get_all() -> &'static Vec<Advance> {
+pub fn get_all() -> &'static Vec<AdvanceInfo> {
     cache::get().get_advances()
 }
 
@@ -108,7 +108,7 @@ pub fn get_groups_uncached() -> Vec<AdvanceGroup> {
 pub(crate) fn advance_group_builder(name: &str, advances: Vec<AdvanceBuilder>) -> AdvanceGroup {
     let first = &advances[0].name.clone();
     let government = GOVERNMENTS.into_iter().find(|i| first == i.leading);
-    let a: Vec<Advance> = advances
+    let a: Vec<AdvanceInfo> = advances
         .into_iter()
         .enumerate()
         .map(|(index, builder)| {
@@ -149,7 +149,7 @@ pub(crate) fn advance_group_builder(name: &str, advances: Vec<AdvanceBuilder>) -
 ///
 /// Panics if advance with name doesn't exist
 #[must_use]
-pub fn get_advance(name: &str) -> &'static Advance {
+pub fn get_advance(name: &str) -> &'static AdvanceInfo {
     cache::get().get_advance(name).unwrap_or_else(|| {
         panic!("Advance with name {name} not found");
     })

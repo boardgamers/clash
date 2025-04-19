@@ -1,7 +1,7 @@
 use crate::ability_initializer::{AbilityInitializerSetup, do_once_per_turn};
 use crate::action_card::gain_action_card_from_pile;
 use crate::advance::Bonus::{CultureToken, MoodToken};
-use crate::advance::{Advance, AdvanceBuilder};
+use crate::advance::{AdvanceInfo, AdvanceBuilder, Advance};
 use crate::city_pieces::Building;
 use crate::content::advances::{AdvanceGroup, advance_group_builder, get_group};
 use crate::content::persistent_events::PaymentRequest;
@@ -22,7 +22,7 @@ pub(crate) fn education() -> AdvanceGroup {
 }
 
 fn writing() -> AdvanceBuilder {
-    Advance::builder("Writing", "Gain 1 action and 1 objective card")
+    AdvanceInfo::builder(Advance::Writing,"Writing", "Gain 1 action and 1 objective card")
         .with_advance_bonus(CultureToken)
         .with_unlocked_building(Building::Academy)
         .add_one_time_ability_initializer(|game, player_index| {
@@ -42,7 +42,8 @@ fn writing() -> AdvanceBuilder {
 }
 
 fn public_education() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::PublicEducation,
         "Public Education",
         "Once per turn, when you collect resources in a city with an Academy, gain 1 idea",
     )
@@ -72,7 +73,8 @@ fn public_education() -> AdvanceBuilder {
 }
 
 fn free_education() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::FreeEducation,
         "Free Education",
         "After you buy an Advance by paying for it with at least 1 gold or 1 idea, \
         you may pay an extra 1 idea to gain 1 mood token",
@@ -116,7 +118,8 @@ fn free_education() -> AdvanceBuilder {
 }
 
 fn philosophy() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Philosophy,
         "Philosophy",
         "Immediately gain 1 idea after getting a Science advance",
     )

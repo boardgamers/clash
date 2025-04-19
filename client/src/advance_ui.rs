@@ -11,7 +11,7 @@ use macroquad::prelude::{
     BLACK, BLUE, GRAY, Rect, WHITE, YELLOW, draw_rectangle, draw_rectangle_lines,
 };
 use server::action::Action;
-use server::advance::{Advance, Bonus};
+use server::advance::{AdvanceInfo, Bonus};
 use server::content::advances;
 use server::game::GameState;
 use server::player::Player;
@@ -28,7 +28,7 @@ pub enum AdvanceState {
     Unavailable,
 }
 
-fn new_advance_payment(rc: &RenderContext, a: &Advance) -> Payment {
+fn new_advance_payment(rc: &RenderContext, a: &AdvanceInfo) -> Payment {
     rc.new_payment(&rc.shown_player.advance_cost(a, None).cost, &a.name, false)
 }
 
@@ -54,8 +54,8 @@ pub fn show_paid_advance_menu(rc: &RenderContext) -> StateUpdate {
 pub fn show_advance_menu(
     rc: &RenderContext,
     title: &str,
-    advance_state: impl Fn(&Advance, &Player) -> AdvanceState,
-    new_update: impl Fn(&Advance) -> StateUpdate,
+    advance_state: impl Fn(&AdvanceInfo, &Player) -> AdvanceState,
+    new_update: impl Fn(&AdvanceInfo) -> StateUpdate,
 ) -> StateUpdate {
     top_centered_text(rc, title, vec2(0., 10.));
     let p = rc.shown_player;
@@ -135,7 +135,7 @@ fn fill_color(rc: &RenderContext, p: &Player, advance_state: &AdvanceState) -> C
     }
 }
 
-fn border_color(a: &Advance) -> Color {
+fn border_color(a: &AdvanceInfo) -> Color {
     if let Some(b) = &a.bonus {
         match b {
             Bonus::MoodToken => YELLOW,
@@ -146,7 +146,7 @@ fn border_color(a: &Advance) -> Color {
     }
 }
 
-fn description(rc: &RenderContext, a: &Advance) -> Vec<String> {
+fn description(rc: &RenderContext, a: &AdvanceInfo) -> Vec<String> {
     let mut parts: Vec<String> = vec![];
     parts.push(a.name.clone());
     add_tooltip_description(&mut parts, &a.description);

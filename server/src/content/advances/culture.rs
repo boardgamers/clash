@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Bonus::{CultureToken, MoodToken};
-use crate::advance::{Advance, AdvanceBuilder};
+use crate::advance::{AdvanceInfo, AdvanceBuilder, Advance};
 use crate::city::{City, MoodState};
 use crate::city_pieces::Building::Obelisk;
 use crate::content::advances::{AdvanceGroup, advance_group_builder};
@@ -19,7 +19,8 @@ pub(crate) fn culture() -> AdvanceGroup {
 }
 
 fn arts() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Arts,
         "Arts",
         "Once per turn, as a free action, you may spend \
         1 culture token to get an influence culture action",
@@ -33,13 +34,16 @@ const SPORTS_DESC: &str = "As an action, you may spend \
         1 or 2 culture tokens to increase the happiness of a city by 1 or 2, respectively";
 
 fn sports() -> AdvanceBuilder {
-    Advance::builder("Sports", SPORTS_DESC)
+    AdvanceInfo::builder(
+                Advance::Sports,
+        "Sports", SPORTS_DESC)
         .with_advance_bonus(MoodToken)
         .add_custom_action(CustomActionType::Sports)
 }
 
 fn monuments() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Monuments,
         "Monuments",
         "Immediately draw 1 wonder card. \
         Your cities with wonders may not be the target of influence culture attempts",
@@ -66,7 +70,9 @@ const THEATERS_DESC: &str = "Once per turn, as a free action, you may convert 1 
         into 1 mood token, or 1 mood token into 1 culture token";
 
 fn theaters() -> AdvanceBuilder {
-    Advance::builder("Theaters", THEATERS_DESC)
+    AdvanceInfo::builder(
+                Advance::Theaters,
+        "Theaters", THEATERS_DESC)
         .with_advance_bonus(MoodToken)
         .add_custom_action(CustomActionType::Theaters)
 }

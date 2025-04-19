@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Bonus::CultureToken;
-use crate::advance::{Advance, AdvanceBuilder};
+use crate::advance::{AdvanceInfo, AdvanceBuilder, Advance};
 use crate::city_pieces::Building::Fortress;
 use crate::combat::CombatModifier::{
     CancelFortressExtraDie, CancelFortressIgnoreHit, SteelWeaponsAttacker, SteelWeaponsDefender,
@@ -28,7 +28,8 @@ pub(crate) fn warfare() -> AdvanceGroup {
 
 fn tactics() -> AdvanceBuilder {
     play_tactics_card(
-        Advance::builder(
+        AdvanceInfo::builder(
+            Advance::Tactics,
             TACTICS,
             "May Move Army units, May use Tactics on Action Cards",
         )
@@ -39,7 +40,8 @@ fn tactics() -> AdvanceBuilder {
 }
 
 fn siegecraft() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Siegecraft,
         "Siegecraft",
         "When attacking a city with a Fortress, pay 2 wood to cancel the Fortress’ \
         ability to add +1 die and/or pay 2 ore to ignore its ability to cancel a hit.",
@@ -101,7 +103,8 @@ fn siegecraft() -> AdvanceBuilder {
 }
 
 fn steel_weapons() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::SteelWeapons,
         STEEL_WEAPONS,
         "Immediately before a Land battle starts, \
         you may pay 1 ore to get +2 combat value in every Combat Round against an enemy \
@@ -147,7 +150,8 @@ fn steel_weapons() -> AdvanceBuilder {
 }
 
 fn draft() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Draft,
         "Draft",
         "When Recruiting, you may spend 1 mood token to pay for 1 Infantry Army Unit.",
     )

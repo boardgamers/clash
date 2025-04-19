@@ -1,4 +1,4 @@
-use crate::advance::Advance;
+use crate::advance::AdvanceInfo;
 use crate::city_pieces::{DestroyedStructures, DestroyedStructuresData};
 use crate::collect::reset_collect_within_range_for_all;
 use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
@@ -59,7 +59,7 @@ pub struct Player {
     pub civilization: Civilization,
     pub active_leader: Option<String>,
     pub available_leaders: Vec<String>,
-    pub advances: Vec<&'static Advance>,
+    pub advances: Vec<&'static AdvanceInfo>,
     pub unlocked_special_advances: Vec<String>,
     pub wonders_build: Vec<String>,
     pub incident_tokens: u8,
@@ -439,7 +439,7 @@ impl Player {
     }
 
     #[must_use]
-    pub fn can_advance_in_change_government(&self, advance: &Advance) -> bool {
+    pub fn can_advance_in_change_government(&self, advance: &AdvanceInfo) -> bool {
         if self.has_advance(&advance.name) {
             return false;
         }
@@ -452,7 +452,7 @@ impl Player {
     }
 
     #[must_use]
-    pub fn can_advance_free(&self, advance: &Advance) -> bool {
+    pub fn can_advance_free(&self, advance: &AdvanceInfo) -> bool {
         if self.has_advance(&advance.name) {
             return false;
         }
@@ -466,7 +466,7 @@ impl Player {
     }
 
     #[must_use]
-    pub fn can_advance(&self, advance: &Advance) -> bool {
+    pub fn can_advance(&self, advance: &AdvanceInfo) -> bool {
         self.can_afford(&self.advance_cost(advance, None).cost) && self.can_advance_free(advance)
     }
 
@@ -624,7 +624,7 @@ impl Player {
     }
 
     #[must_use]
-    pub fn advance_cost(&self, advance: &Advance, execute: Option<&ResourcePile>) -> CostInfo {
+    pub fn advance_cost(&self, advance: &AdvanceInfo, execute: Option<&ResourcePile>) -> CostInfo {
         self.trigger_cost_event(
             |e| &e.advance_cost,
             &PaymentOptions::sum(
