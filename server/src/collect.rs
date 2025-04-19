@@ -1,8 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::action::Action;
 use crate::city::City;
 use crate::content::builtin::Builtin;
-use crate::content::custom_actions::{CustomAction, CustomActionType};
+use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::PersistentEventType;
 use crate::events::EventOrigin;
 use crate::game::Game;
@@ -10,7 +9,7 @@ use crate::map::Terrain;
 use crate::map::Terrain::{Fertile, Forest, Mountain};
 use crate::player::Player;
 use crate::player_events::ActionInfo;
-use crate::playing_actions::{Collect, PlayingAction, PlayingActionType, base_or_custom_available};
+use crate::playing_actions::{base_or_custom_available, Collect, PlayingActionType};
 use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
@@ -309,25 +308,6 @@ pub fn available_collect_actions(game: &Game, player: usize) -> Vec<PlayingActio
     )
 }
 
-///
-/// # Panics
-///
-/// If the action is illegal
-#[must_use]
-pub fn collect_action(action: &PlayingActionType, collect: Collect) -> Action {
-    match action {
-        PlayingActionType::Collect => Action::Playing(PlayingAction::Collect(collect)),
-        PlayingActionType::Custom(c)
-            if c.custom_action_type == CustomActionType::FreeEconomyCollect =>
-        {
-            Action::Playing(PlayingAction::Custom(CustomAction::FreeEconomyCollect(
-                collect,
-            )))
-        }
-        _ => panic!("illegal type {action:?}"),
-    }
-}
-
 pub fn set_city_collections(game: &mut Game, city_position: Position) {
     let city = game.get_any_city(city_position);
     let player = city.player_index;
@@ -372,7 +352,7 @@ fn city_collection_uncached(
         let Some((pos, pile)) = pick_resource(&info, &c, priority) else {
             return apply_total_collect(&c, player, info, game)
                 .ok()
-                .map(|i| Collect::new(city.position, c, i.total));
+                .map(|i| Collect::new(city.position, c, i.total, PlayingActionType::Collect));
         };
         c = add_collect(&info, pos, &pile, &c);
     }

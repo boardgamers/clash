@@ -219,7 +219,8 @@
                         "total": {
                           "wood": 1,
                           "ore": 1
-                        }
+                        },
+                        "action_type": "Collect"
                       }
                     }
                   },

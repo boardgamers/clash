@@ -196,7 +196,7 @@
                 {
                   "action": {
                     "Playing": {
-                      "CustomEvent": {
+                      "Custom": {
                         "action": "CivilLiberties",
                         "city": null
                       }

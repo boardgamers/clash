@@ -12,15 +12,12 @@ use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::resource_pile::ResourcePile;
 
 pub(crate) fn democracy() -> AdvanceGroup {
-    advance_group_builder(
-        "Democracy",
-        vec![
-            voting(),
-            separation_of_power(),
-            civil_liberties(),
-            free_economy(),
-        ],
-    )
+    advance_group_builder("Democracy", vec![
+        voting(),
+        separation_of_power(),
+        civil_liberties(),
+        free_economy(),
+    ])
 }
 
 fn voting() -> AdvanceBuilder {
@@ -94,9 +91,10 @@ fn free_economy() -> AdvanceBuilder {
                         Err("Cannot collect when Free Economy Collect was used".to_string());
                 }
                 PlayingActionType::Custom(i)
-                    if matches!(i.custom_action_type, FreeEconomyCollect)
+                    if *i == FreeEconomyCollect
                         && current_player_turn_log(game).items.iter().any(|item| {
-                            matches!(item.action, Action::Playing(PlayingAction::Collect(_)))
+                            matches!(&item.action, Action::Playing(PlayingAction::Collect(c)) if
+                                c.action_type == PlayingActionType::Collect)
                         }) =>
                 {
                     *available =

@@ -239,8 +239,11 @@
                   "action": {
                     "Playing": {
                       "InfluenceCultureAttempt": {
-                        "position": "B3",
-                        "structure": "CityCenter"
+                        "selected_structure": {
+                          "position": "B3",
+                          "structure": "CityCenter"
+                        },
+                        "action_type": "InfluenceCultureAttempt"
                       }
                     }
                   }

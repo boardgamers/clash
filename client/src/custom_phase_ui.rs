@@ -15,8 +15,9 @@ use server::content::persistent_events::{
     AdvanceRequest, EventResponse, MultiRequest, PlayerRequest, SelectedStructure, Structure,
     UnitTypeRequest, UnitsRequest, is_selected_structures_valid,
 };
-use server::cultural_influence::influence_action;
+use server::cultural_influence::InfluenceCultureAttempt;
 use server::game::Game;
+use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::unit::Unit;
 
@@ -250,7 +251,9 @@ pub fn select_structures_dialog(
             if s.selected.is_empty() {
                 return StateUpdate::CloseDialog;
             }
-            StateUpdate::execute(influence_action(&d.action_type, s.selected[0].selected()))
+            StateUpdate::execute(Action::Playing(PlayingAction::InfluenceCultureAttempt(
+                InfluenceCultureAttempt::new(s.selected[0].selected(), d.action_type.clone()),
+            )))
         } else {
             StateUpdate::response(EventResponse::SelectStructures(sel))
         }

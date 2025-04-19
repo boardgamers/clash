@@ -149,7 +149,7 @@ fn is_influence(i: &PlayingActionInfo) -> bool {
     match &i.action_type {
         PlayingActionType::InfluenceCultureAttempt => true,
         PlayingActionType::Custom(i)
-            if i.custom_action_type == CustomActionType::ArtsInfluenceCultureAttempt =>
+            if *i == CustomActionType::ArtsInfluenceCultureAttempt =>
         {
             true
         }

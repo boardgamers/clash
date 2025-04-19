@@ -266,7 +266,8 @@
                           "ore": 1,
                           "gold": 1,
                           "mood_tokens": 1
-                        }
+                        },
+                        "action_type": "Collect"
                       }
                     }
                   },

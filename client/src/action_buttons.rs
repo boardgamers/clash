@@ -120,7 +120,7 @@ fn generic_custom_action(
         return custom_action_type
             .is_available_city(rc.shown_player, city)
             .then_some(StateUpdate::execute(Action::Playing(
-                PlayingAction::CustomEvent(CustomEventAction::new(
+                PlayingAction::Custom(CustomEventAction::new(
                     custom_action_type,
                     Some(city.position),
                 )),
@@ -128,7 +128,7 @@ fn generic_custom_action(
     }
 
     (!custom_action_type.is_city_bound()).then_some(StateUpdate::execute(Action::Playing(
-        PlayingAction::CustomEvent(CustomEventAction::new(custom_action_type, None)),
+        PlayingAction::Custom(CustomEventAction::new(custom_action_type, None)),
     )))
 }
 
@@ -150,7 +150,7 @@ pub fn base_or_custom_action(
     let special = custom.map(|a| {
         let origin = &rc.shown_player.custom_actions[&a];
         let dialog = execute(BaseOrCustomDialog {
-            action_type: PlayingActionType::Custom(a.info()),
+            action_type: PlayingActionType::Custom(a),
             title: format!("{title} with {}", origin.name()),
         });
 

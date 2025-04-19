@@ -1,24 +1,14 @@
 use crate::common::*;
+use playing_actions::PlayingActionType;
 use server::card::HandCard;
 use server::collect::PositionCollection;
 use server::content::persistent_events::{EventResponse, SelectedStructure, Structure};
 use server::game_setup::setup_game;
 use server::log::current_player_turn_log;
 use server::unit::Units;
-use server::{
-    action::Action,
-    city::{City, MoodState::*},
-    city_pieces::Building::*,
-    construct,
-    game::Game,
-    game_api,
-    map::Terrain::*,
-    playing_actions,
-    playing_actions::PlayingAction::*,
-    position::Position,
-    resource_pile::ResourcePile,
-};
+use server::{action::Action, city::{City, MoodState::*}, city_pieces::Building::*, construct, cultural_influence, game::Game, game_api, map::Terrain::*, playing_actions, playing_actions::PlayingAction::*, position::Position, resource_pile::ResourcePile};
 use std::{collections::HashMap, vec};
+use server::playing_actions::PlayingAction;
 
 mod common;
 
@@ -101,10 +91,11 @@ fn basic_actions() {
     assert_eq!(0, game.active_player());
 
     let increase_happiness_action =
-        Action::Playing(IncreaseHappiness(playing_actions::IncreaseHappiness {
-            happiness_increases: vec![(city_position, 1)],
-            payment: ResourcePile::mood_tokens(2),
-        }));
+        Action::Playing(IncreaseHappiness(playing_actions::IncreaseHappiness::new(
+            vec![(city_position, 1)],
+            ResourcePile::mood_tokens(2),
+            PlayingActionType::IncreaseHappiness,
+        )));
     let mut game = game_api::execute(game, increase_happiness_action, 0);
     let player = &game.players[0];
 
@@ -136,6 +127,7 @@ fn basic_actions() {
         city_position,
         vec![PositionCollection::new(tile_position, ResourcePile::ore(1))],
         ResourcePile::ore(1),
+        PlayingActionType::Collect,
     )));
     let game = game_api::execute(game, collect_action, 0);
     let player = &game.players[0];
@@ -201,10 +193,11 @@ fn assert_undo(
 
 fn increase_happiness(game: Game) -> Game {
     let increase_happiness_action =
-        Action::Playing(IncreaseHappiness(playing_actions::IncreaseHappiness {
-            happiness_increases: vec![(Position::new(0, 0), 1)],
-            payment: ResourcePile::mood_tokens(1),
-        }));
+        Action::Playing(IncreaseHappiness(playing_actions::IncreaseHappiness::new(
+            vec![(Position::new(0, 0), 1)],
+            ResourcePile::mood_tokens(1),
+            PlayingActionType::IncreaseHappiness,
+        )));
     game_api::execute(game, increase_happiness_action, 0)
 }
 
@@ -271,203 +264,179 @@ fn undo() {
 
 #[test]
 fn test_cultural_influence_instant() {
-    JSON.test(
-        "cultural_influence_instant",
-        vec![TestAction::not_undoable(
+    JSON.test("cultural_influence_instant", vec![
+        TestAction::not_undoable(
             1,
-            Action::Playing(InfluenceCultureAttempt(SelectedStructure::new(
-                Position::from_offset("C2"),
-                Structure::Building(Fortress),
-            ))),
-        )],
-    );
+            Action::Playing(InfluenceCultureAttempt(
+                cultural_influence::InfluenceCultureAttempt::new(
+                    SelectedStructure::new(
+                                    Position::from_offset("C2"),
+                                    Structure::Building(Fortress),
+                                ),
+                    PlayingActionType::InfluenceCultureAttempt,
+                ),
+            ))
+        ),
+    ]);
 }
 
 #[test]
 fn test_cultural_influence() {
-    JSON.test(
-        "cultural_influence",
-        vec![
-            TestAction::not_undoable(1, influence_action()),
-            TestAction::undoable(
-                1,
-                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
-                    4,
-                )])),
-            ),
-        ],
-    );
+    JSON.test("cultural_influence", vec![
+        TestAction::not_undoable(1, influence_action()),
+        TestAction::undoable(
+            1,
+            Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
+                4,
+            )])),
+        ),
+    ]);
 }
 
 #[test]
 fn test_found_city() {
-    JSON.test(
-        "found_city",
-        vec![
-            TestAction::undoable(0, Action::Playing(FoundCity { settler: 4 }))
-                .without_json_comparison(),
-            TestAction::undoable(
-                0,
-                Action::Response(EventResponse::SelectHandCards(vec![
-                    HandCard::ObjectiveCard(27),
-                ])),
-            ),
-        ],
-    );
+    JSON.test("found_city", vec![
+        TestAction::undoable(0, Action::Playing(FoundCity { settler: 4 }))
+            .without_json_comparison(),
+        TestAction::undoable(
+            0,
+            Action::Response(EventResponse::SelectHandCards(vec![
+                HandCard::ObjectiveCard(27),
+            ])),
+        ),
+    ]);
 }
 
 #[test]
 fn test_wonder() {
-    JSON.test(
-        "wonder",
-        vec![
-            TestAction::undoable(0, Action::Playing(WonderCard("Pyramids".to_string())))
-                .without_json_comparison(),
-            TestAction::undoable(
-                0,
-                Action::Response(EventResponse::Payment(vec![ResourcePile::new(
-                    2, 3, 3, 0, 0, 0, 4,
-                )])),
-            )
+    JSON.test("wonder", vec![
+        TestAction::undoable(0, Action::Playing(WonderCard("Pyramids".to_string())))
             .without_json_comparison(),
-            TestAction::undoable(
-                0,
-                Action::Response(EventResponse::SelectHandCards(vec![
-                    HandCard::ObjectiveCard(32),
-                ])),
-            ),
-        ],
-    );
+        TestAction::undoable(
+            0,
+            Action::Response(EventResponse::Payment(vec![ResourcePile::new(
+                2, 3, 3, 0, 0, 0, 4,
+            )])),
+        )
+        .without_json_comparison(),
+        TestAction::undoable(
+            0,
+            Action::Response(EventResponse::SelectHandCards(vec![
+                HandCard::ObjectiveCard(32),
+            ])),
+        ),
+    ]);
 }
 
 #[test]
 fn test_increase_happiness() {
-    JSON.test(
-        "increase_happiness",
-        vec![TestAction::undoable(
-            0,
-            Action::Playing(IncreaseHappiness(playing_actions::IncreaseHappiness {
-                happiness_increases: vec![
-                    (Position::from_offset("C2"), 1),
-                    (Position::from_offset("B3"), 2),
-                ],
-                payment: ResourcePile::mood_tokens(5),
-            })),
-        )],
-    );
+    JSON.test("increase_happiness", vec![TestAction::undoable(
+        0,
+        Action::Playing(IncreaseHappiness(playing_actions::IncreaseHappiness::new(
+            vec![
+                (Position::from_offset("C2"), 1),
+                (Position::from_offset("B3"), 2),
+            ],
+            ResourcePile::mood_tokens(5),
+            PlayingActionType::IncreaseHappiness,
+        ))),
+    )]);
 }
 
 #[test]
 fn test_recruit() {
-    JSON.test(
-        "recruit",
-        vec![
-            TestAction::undoable(
-                0,
-                Action::Playing(Recruit(
-                    playing_actions::Recruit::new(
-                        &Units::new(1, 1, 0, 0, 0, 0),
-                        Position::from_offset("A1"),
-                        ResourcePile::food(1) + ResourcePile::ore(1) + ResourcePile::gold(2),
-                    )
-                    .with_replaced_units(&[4]),
-                )),
-            )
-            .without_json_comparison(),
-            TestAction::undoable(
-                0,
-                Action::Response(EventResponse::SelectHandCards(vec![
-                    HandCard::ObjectiveCard(29),
-                ])),
-            ),
-        ],
-    );
+    JSON.test("recruit", vec![
+        TestAction::undoable(
+            0,
+            Action::Playing(Recruit(
+                playing_actions::Recruit::new(
+                    &Units::new(1, 1, 0, 0, 0, 0),
+                    Position::from_offset("A1"),
+                    ResourcePile::food(1) + ResourcePile::ore(1) + ResourcePile::gold(2),
+                )
+                .with_replaced_units(&[4]),
+            )),
+        )
+        .without_json_comparison(),
+        TestAction::undoable(
+            0,
+            Action::Response(EventResponse::SelectHandCards(vec![
+                HandCard::ObjectiveCard(29),
+            ])),
+        ),
+    ]);
 }
 
 #[test]
 fn test_recruit_leader() {
-    JSON.test(
-        "recruit_leader",
-        vec![TestAction::undoable(
-            0,
-            Action::Playing(Recruit(
-                playing_actions::Recruit::new(
-                    &Units::new(0, 0, 0, 0, 0, 1),
-                    Position::from_offset("A1"),
-                    ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1),
-                )
-                .with_leader("Alexander"),
-            )),
-        )],
-    );
+    JSON.test("recruit_leader", vec![TestAction::undoable(
+        0,
+        Action::Playing(Recruit(
+            playing_actions::Recruit::new(
+                &Units::new(0, 0, 0, 0, 0, 1),
+                Position::from_offset("A1"),
+                ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1),
+            )
+            .with_leader("Alexander"),
+        )),
+    )]);
 }
 
 #[test]
 fn test_replace_leader() {
-    JSON.test(
-        "replace_leader",
-        vec![TestAction::undoable(
-            0,
-            Action::Playing(Recruit(
-                playing_actions::Recruit::new(
-                    &Units::new(0, 0, 0, 0, 0, 1),
-                    Position::from_offset("A1"),
-                    ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1),
-                )
-                .with_leader("Kleopatra")
-                .with_replaced_units(&[10]),
-            )),
-        )],
-    );
+    JSON.test("replace_leader", vec![TestAction::undoable(
+        0,
+        Action::Playing(Recruit(
+            playing_actions::Recruit::new(
+                &Units::new(0, 0, 0, 0, 0, 1),
+                Position::from_offset("A1"),
+                ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1),
+            )
+            .with_leader("Kleopatra")
+            .with_replaced_units(&[10]),
+        )),
+    )]);
 }
 
 #[test]
 fn test_collect() {
-    JSON.test(
-        "collect",
-        vec![TestAction::undoable(
-            0,
-            Action::Playing(Collect(playing_actions::Collect::new(
-                Position::from_offset("C2"),
-                vec![
-                    PositionCollection::new(Position::from_offset("B1"), ResourcePile::ore(1)),
-                    PositionCollection::new(Position::from_offset("B2"), ResourcePile::wood(1)),
-                ],
-                ResourcePile::ore(1) + ResourcePile::wood(1),
-            ))),
-        )],
-    );
+    JSON.test("collect", vec![TestAction::undoable(
+        0,
+        Action::Playing(Collect(playing_actions::Collect::new(
+            Position::from_offset("C2"),
+            vec![
+                PositionCollection::new(Position::from_offset("B1"), ResourcePile::ore(1)),
+                PositionCollection::new(Position::from_offset("B2"), ResourcePile::wood(1)),
+            ],
+            ResourcePile::ore(1) + ResourcePile::wood(1),
+            PlayingActionType::Collect,
+        ))),
+    )]);
 }
 
 #[test]
 fn test_construct() {
-    JSON.test(
-        "construct",
-        vec![TestAction::not_undoable(
-            0,
-            Action::Playing(Construct(construct::Construct::new(
-                Position::from_offset("C2"),
-                Observatory,
-                ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
-            ))),
-        )],
-    );
+    JSON.test("construct", vec![TestAction::not_undoable(
+        0,
+        Action::Playing(Construct(construct::Construct::new(
+            Position::from_offset("C2"),
+            Observatory,
+            ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
+        ))),
+    )]);
 }
 
 #[test]
 fn test_construct_port() {
-    JSON.test(
-        "construct_port",
-        vec![TestAction::undoable(
-            0,
-            Action::Playing(Construct(
-                construct::Construct::new(
-                    Position::from_offset("A1"),
-                    Port,
-                    ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
-                )
-                .with_port_position(Some(Position::from_offset("A2"))),
-            )),
-        )],
-    );
+    JSON.test("construct_port", vec![TestAction::undoable(
+        0,
+        Action::Playing(Construct(
+            construct::Construct::new(
+                Position::from_offset("A1"),
+                Port,
+                ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
+            )
+            .with_port_position(Some(Position::from_offset("A2"))),
+        )),
+    )]);
 }

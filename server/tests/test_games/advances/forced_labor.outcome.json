@@ -233,7 +233,7 @@
                 {
                   "action": {
                     "Playing": {
-                      "CustomEvent": {
+                      "Custom": {
                         "action": "ForcedLabor",
                         "city": null
                       }

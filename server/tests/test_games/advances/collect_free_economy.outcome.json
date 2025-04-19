@@ -199,28 +199,29 @@
                 {
                   "action": {
                     "Playing": {
-                      "Custom": {
-                        "FreeEconomyCollect": {
-                          "city_position": "C2",
-                          "collections": [
-                            {
-                              "position": "B1",
-                              "pile": {
-                                "ore": 1
-                              },
-                              "times": 1
+                      "Collect": {
+                        "city_position": "C2",
+                        "collections": [
+                          {
+                            "position": "B1",
+                            "pile": {
+                              "ore": 1
                             },
-                            {
-                              "position": "B2",
-                              "pile": {
-                                "ore": 1
-                              },
-                              "times": 1
-                            }
-                          ],
-                          "total": {
-                            "ore": 2
+                            "times": 1
+                          },
+                          {
+                            "position": "B2",
+                            "pile": {
+                              "ore": 1
+                            },
+                            "times": 1
                           }
+                        ],
+                        "total": {
+                          "ore": 2
+                        },
+                        "action_type": {
+                          "Custom": "FreeEconomyCollect"
                         }
                       }
                     }

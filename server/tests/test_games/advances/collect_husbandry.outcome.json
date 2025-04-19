@@ -291,7 +291,8 @@
                         ],
                         "total": {
                           "food": 1
-                        }
+                        },
+                        "action_type": "Collect"
                       }
                     }
                   },

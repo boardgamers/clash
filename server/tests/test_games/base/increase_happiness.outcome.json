@@ -270,7 +270,8 @@
                         ],
                         "payment": {
                           "mood_tokens": 5
-                        }
+                        },
+                        "action_type": "IncreaseHappiness"
                       }
                     }
                   },

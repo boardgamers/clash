@@ -3,7 +3,7 @@ use crate::action::Action;
 use crate::city::City;
 use crate::city_pieces::Building;
 use crate::content::builtin::Builtin;
-use crate::content::custom_actions::{CustomAction, CustomActionType};
+use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::{
     PaymentRequest, PersistentEventType, SelectedStructure, Structure,
 };
@@ -12,12 +12,29 @@ use crate::log::current_player_turn_log;
 use crate::payment::PaymentOptions;
 use crate::player_events::ActionInfo;
 use crate::playing_actions::{
-    PlayingAction, PlayingActionType, base_or_custom_available, roll_boost_cost,
+    base_or_custom_available, roll_boost_cost, PlayingAction, PlayingActionType,
 };
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
 use pathfinding::prelude::astar;
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
+pub struct InfluenceCultureAttempt {
+    pub selected_structure: SelectedStructure,
+    pub action_type: PlayingActionType,
+}
+
+impl InfluenceCultureAttempt {
+    #[must_use]
+    pub fn new(selected_structure: SelectedStructure, action_type: PlayingActionType) -> Self {
+        Self {
+            selected_structure,
+            action_type,
+        }
+    }
+}
 
 #[derive(Clone, PartialEq)]
 pub struct InfluenceCultureInfo {
@@ -172,7 +189,7 @@ pub(crate) fn cultural_influence_resolution() -> Builtin {
                         cultural influence",
                     s.player_name
                 ));
-                attempt_failed(game, s.player_index, a.position);
+                attempt_failed(game, s.player_index, a.selected_structure.position);
                 return;
             }
 
@@ -182,7 +199,7 @@ pub(crate) fn cultural_influence_resolution() -> Builtin {
                 s.player_name
             ));
 
-            influence_culture(game, s.player_index, &a);
+            influence_culture(game, s.player_index, &a.selected_structure);
         },
     )
     .build()
@@ -402,13 +419,13 @@ pub(crate) fn format_cultural_influence_attempt_log_item(
     game: &Game,
     player_index: usize,
     player_name: &str,
-    c: &SelectedStructure,
-    action_type: &PlayingActionType,
+    i: &InfluenceCultureAttempt,
 ) -> String {
-    let target_city_position = c.position;
+    let s = &i.selected_structure;
+    let target_city_position = s.position;
     let target_city = game.get_any_city(target_city_position);
     let target_player_index = target_city.player_index;
-    let info = influence_culture_boost_cost(game, player_index, c, action_type)
+    let info = influence_culture_boost_cost(game, player_index, s, &i.action_type)
         .expect("this should be a valid action");
 
     let player = if target_player_index == game.active_player() {
@@ -429,13 +446,19 @@ pub(crate) fn format_cultural_influence_attempt_log_item(
     } else {
         format!(" and paid {} to boost the range", range_boost_cost.default)
     };
-    let city_piece = match c.structure {
+    let city_piece = match s.structure {
         Structure::CityCenter => "City Center",
         Structure::Building(b) => b.name(),
         Structure::Wonder(_) => panic!("Wonder is not allowed here"),
     };
+    let suffix = if let PlayingActionType::Custom(_) = i.action_type {
+        " using Arts"
+    } else {
+        ""
+    };
+
     format!(
-        "{player_name} tried to influence culture the {city_piece} in the city at {target_city_position} by {player}{city}{cost}"
+        "{player_name} tried to influence culture the {city_piece} in the city at {target_city_position} by {player}{city}{cost}{suffix}"
     )
 }
 
@@ -447,25 +470,4 @@ pub fn available_influence_actions(game: &Game, player: usize) -> Vec<PlayingAct
         PlayingActionType::InfluenceCultureAttempt,
         &CustomActionType::ArtsInfluenceCultureAttempt,
     )
-}
-
-///
-/// # Panics
-///
-/// If the action is illegal
-#[must_use]
-pub fn influence_action(action: &PlayingActionType, target: SelectedStructure) -> Action {
-    match action {
-        PlayingActionType::InfluenceCultureAttempt => {
-            Action::Playing(PlayingAction::InfluenceCultureAttempt(target))
-        }
-        PlayingActionType::Custom(c)
-            if c.custom_action_type == CustomActionType::ArtsInfluenceCultureAttempt =>
-        {
-            Action::Playing(PlayingAction::Custom(
-                CustomAction::ArtsInfluenceCultureAttempt(target),
-            ))
-        }
-        _ => panic!("illegal type {action:?}"),
-    }
 }

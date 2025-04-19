@@ -258,25 +258,26 @@
                 {
                   "action": {
                     "Playing": {
-                      "Custom": {
-                        "VotingIncreaseHappiness": {
-                          "happiness_increases": [
-                            [
-                              "C2",
-                              1
-                            ],
-                            [
-                              "B3",
-                              2
-                            ]
+                      "IncreaseHappiness": {
+                        "happiness_increases": [
+                          [
+                            "C2",
+                            1
                           ],
-                          "payment": {
-                            "food": 1,
-                            "ore": 1,
-                            "ideas": 1,
-                            "gold": 1,
-                            "mood_tokens": 1
-                          }
+                          [
+                            "B3",
+                            2
+                          ]
+                        ],
+                        "payment": {
+                          "food": 1,
+                          "ore": 1,
+                          "ideas": 1,
+                          "gold": 1,
+                          "mood_tokens": 1
+                        },
+                        "action_type": {
+                          "Custom": "VotingIncreaseHappiness"
                         }
                       }
                     }
