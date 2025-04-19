@@ -147,19 +147,15 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
     }
 
     for (a, _) in game.available_custom_actions(p.index) {
-        let option = match a {
-            CustomActionType::Bartering | // usually a bad idea
-            CustomActionType::Sports | CustomActionType::Theaters | // todo
-            CustomActionType::ArtsInfluenceCultureAttempt
-            | CustomActionType::VotingIncreaseHappiness
-            | CustomActionType::FreeEconomyCollect => None, // handled above
+        let action = match a {
             CustomActionType::AbsolutePower => Some(CustomAction::AbsolutePower),
             CustomActionType::ForcedLabor => Some(CustomAction::ForcedLabor),
             CustomActionType::CivilLiberties => Some(CustomAction::CivilLiberties),
             CustomActionType::Taxes => try_payment(&tax_options(p), p).map(CustomAction::Taxes),
+            _ => None,
         };
 
-        if let Some(action) = option {
+        if let Some(action) = action {
             actions.push((
                 ActionType::Playing(PlayingActionType::Custom(a.clone().info())),
                 vec![Action::Playing(PlayingAction::Custom(action))],

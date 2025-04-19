@@ -8,7 +8,7 @@ use crate::collect::{PositionCollection, collect};
 use crate::construct::Construct;
 use crate::content::action_cards::get_civil_card;
 use crate::content::advances::get_advance;
-use crate::content::custom_actions::{CustomActionInfo, CustomActionType};
+use crate::content::custom_actions::{CustomActionInfo, CustomActionType, execute_custom_action, CustomEventAction};
 use crate::content::persistent_events::SelectedStructure;
 use crate::cultural_influence::influence_culture_attempt;
 use crate::game::GameState;
@@ -228,6 +228,7 @@ pub enum PlayingAction {
     IncreaseHappiness(IncreaseHappiness),
     InfluenceCultureAttempt(SelectedStructure),
     Custom(CustomAction),
+    CustomEvent(CustomEventAction),
     ActionCard(u8),
     WonderCard(String),
     EndTurn,
@@ -287,6 +288,7 @@ impl PlayingAction {
                 );
             }
             Custom(custom_action) => custom(game, player_index, custom_action)?,
+            CustomEvent(custom_action) => custom_event(game, player_index, custom_action),
             EndTurn => game.next_turn(),
         }
         Ok(())
@@ -305,6 +307,7 @@ impl PlayingAction {
             PlayingAction::ActionCard(a) => PlayingActionType::ActionCard(*a),
             PlayingAction::WonderCard(name) => PlayingActionType::WonderCard(name.clone()),
             PlayingAction::Custom(c) => PlayingActionType::Custom(c.custom_action_type().info()),
+            PlayingAction::CustomEvent(c) => PlayingActionType::Custom(c.info()),
             PlayingAction::EndTurn => PlayingActionType::EndTurn,
         }
     }
@@ -371,13 +374,21 @@ pub(crate) fn roll_boost_cost(roll: u8) -> ResourcePile {
 }
 
 fn custom(game: &mut Game, player_index: usize, custom_action: CustomAction) -> Result<(), String> {
-    let c = custom_action.custom_action_type();
+    save_once_per_turn(game, player_index, custom_action.custom_action_type());
+    custom_action.execute(game, player_index)
+}
+
+fn custom_event(game: &mut Game, player_index: usize, action: CustomEventAction) {
+    save_once_per_turn(game, player_index, action.action.clone());
+    execute_custom_action(game, player_index, action);
+}
+
+fn save_once_per_turn(game: &mut Game, player_index: usize, c: CustomActionType) {
     if c.info().once_per_turn {
         game.players[player_index]
             .played_once_per_turn_actions
             .push(c);
     }
-    custom_action.execute(game, player_index)
 }
 
 #[must_use]

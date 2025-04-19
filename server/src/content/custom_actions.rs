@@ -1,35 +1,42 @@
 use serde::{Deserialize, Serialize};
 
+use crate::city::City;
 use crate::collect::collect;
-use crate::content::advances::culture::{execute_sports, execute_theaters};
-use crate::content::advances::economy::{collect_taxes, execute_bartering};
-use crate::content::persistent_events::SelectedStructure;
+use crate::content::advances::culture::{execute_theaters, sports_options, use_sports};
+use crate::content::advances::economy::{collect_taxes, use_bartering};
+use crate::content::builtin::Builtin;
+use crate::content::persistent_events::{PersistentEventType, SelectedStructure};
 use crate::cultural_influence::{
     format_cultural_influence_attempt_log_item, influence_culture_attempt,
 };
 use crate::happiness::increase_happiness;
-use crate::log::{
-    format_city_happiness_increase, format_collect_log_item, format_happiness_increase,
-};
+use crate::log::{format_collect_log_item, format_happiness_increase};
 use crate::player::Player;
 use crate::playing_actions::{Collect, IncreaseHappiness, PlayingActionType};
-use crate::{
-    game::Game, playing_actions::ActionCost, position::Position, resource_pile::ResourcePile,
-};
+use crate::{game::Game, playing_actions::ActionCost, resource_pile::ResourcePile};
+use crate::position::Position;
 
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
+pub struct CustomEventAction {
+    pub action: CustomActionType,
+    pub city: Option<Position>,
+}
+
+impl CustomEventAction {
+    #[must_use]
+    pub fn new(action: CustomActionType, city: Option<Position>) -> Self {
+        Self { action, city }
+    }
+}
+    
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub enum CustomAction {
     AbsolutePower,
     ForcedLabor,
     CivilLiberties,
-    Bartering,
     ArtsInfluenceCultureAttempt(SelectedStructure),
     VotingIncreaseHappiness(IncreaseHappiness),
     FreeEconomyCollect(Collect),
-    Sports {
-        city_position: Position,
-        payment: ResourcePile,
-    },
     Taxes(ResourcePile),
     Theaters(ResourcePile),
 }
@@ -81,7 +88,6 @@ impl CustomAction {
             CustomAction::CivilLiberties => {
                 game.players[player_index].gain_resources(ResourcePile::mood_tokens(3));
             }
-            CustomAction::Bartering => execute_bartering(game, player_index),
             CustomAction::ArtsInfluenceCultureAttempt(c) => {
                 influence_culture_attempt(
                     game,
@@ -94,12 +100,6 @@ impl CustomAction {
                 increase_happiness(game, player_index, &i.happiness_increases, Some(i.payment));
             }
             CustomAction::FreeEconomyCollect(c) => collect(game, player_index, &c)?,
-            CustomAction::Sports {
-                city_position,
-                payment,
-            } => {
-                execute_sports(game, player_index, city_position, &payment);
-            }
             CustomAction::Taxes(r) => collect_taxes(game, player_index, r),
             CustomAction::Theaters(r) => execute_theaters(game, player_index, &r),
         }
@@ -112,13 +112,11 @@ impl CustomAction {
             CustomAction::AbsolutePower => CustomActionType::AbsolutePower,
             CustomAction::ForcedLabor => CustomActionType::ForcedLabor,
             CustomAction::CivilLiberties => CustomActionType::CivilLiberties,
-            CustomAction::Bartering => CustomActionType::Bartering,
             CustomAction::ArtsInfluenceCultureAttempt(_) => {
                 CustomActionType::ArtsInfluenceCultureAttempt
             }
             CustomAction::VotingIncreaseHappiness(_) => CustomActionType::VotingIncreaseHappiness,
             CustomAction::FreeEconomyCollect(_) => CustomActionType::FreeEconomyCollect,
-            CustomAction::Sports { .. } => CustomActionType::Sports,
             CustomAction::Taxes(_) => CustomActionType::Taxes,
             CustomAction::Theaters(_) => CustomActionType::Theaters,
         }
@@ -135,9 +133,6 @@ impl CustomAction {
             }
             CustomAction::CivilLiberties => {
                 format!("{player_name} gained 3 mood tokens using Civil Liberties")
-            }
-            CustomAction::Bartering => {
-                format!("{player_name} started Bartering")
             }
             CustomAction::ArtsInfluenceCultureAttempt(c) => format!(
                 "{} using Arts",
@@ -156,13 +151,6 @@ impl CustomAction {
             CustomAction::FreeEconomyCollect(c) => format!(
                 "{} using Free Economy",
                 format_collect_log_item(player, player_name, c)
-            ),
-            CustomAction::Sports {
-                city_position,
-                payment,
-            } => format!(
-                "{player_name} paid {payment} to increase the happiness in {} using Sports",
-                format_city_happiness_increase(player, *city_position, payment.amount())
             ),
             CustomAction::Taxes(r) => {
                 format!("{player_name} paid 1 mood token to collect {r} using Taxes")
@@ -204,6 +192,21 @@ impl CustomActionType {
     }
 
     #[must_use]
+    pub fn is_available_city(&self, player: &Player, city: &City) -> bool {
+        match self {
+            CustomActionType::Sports => {
+                sports_options(city).is_some_and(|c| c.can_afford(&player.resources))
+            }
+            _ => false,
+        }
+    }
+
+    #[must_use]
+    pub fn is_city_bound(&self) -> bool {
+        matches!(self, CustomActionType::Sports)
+    }
+
+    #[must_use]
     pub fn playing_action_type(&self) -> PlayingActionType {
         PlayingActionType::Custom(self.info())
     }
@@ -227,4 +230,31 @@ impl CustomActionType {
     fn free_and_once_per_turn(&self, cost: ResourcePile) -> CustomActionInfo {
         CustomActionInfo::new(self, true, true, cost)
     }
+
+    #[must_use]
+    pub(crate) fn execute_builtin(&self) -> Builtin {
+        match self {
+            CustomActionType::Sports => use_sports(),
+            CustomActionType::Bartering => use_bartering(),
+            _ => {
+                panic!("CustomActionType::execute_builtin called on non-builtin action")
+            }
+        }
+    }
+}
+
+pub(crate) fn execute_custom_action(
+    game: &mut Game,
+    player_index: usize,
+    action: CustomEventAction,
+) {
+    let _ = game.trigger_persistent_event_with_listener(
+        &[player_index],
+        |e| &mut e.custom_action,
+        &action.action.execute_builtin().listeners,
+        action,
+        PersistentEventType::CustomAction,
+        None,
+        |_| {},
+    );
 }

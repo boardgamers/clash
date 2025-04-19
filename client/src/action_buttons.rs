@@ -6,13 +6,10 @@ use crate::happiness_ui::open_increase_happiness_dialog;
 use crate::influence_ui::new_cultural_influence_dialog;
 use crate::layout_ui::{bottom_left_texture, icon_pos};
 use crate::move_ui::MoveIntent;
-use crate::payment_ui::Payment;
 use crate::render_context::RenderContext;
 use server::action::Action;
 use server::city::City;
-use server::content::advances::culture::{sports_options, theaters_options};
-use server::content::advances::economy::tax_options;
-use server::content::custom_actions::{CustomAction, CustomActionType};
+use server::content::custom_actions::CustomActionType;
 use server::cultural_influence::available_influence_actions;
 use server::happiness::available_happiness_actions;
 use server::playing_actions::{PlayingAction, PlayingActionType, base_and_custom_action};
@@ -120,44 +117,38 @@ fn generic_custom_action(
     city: Option<&City>,
 ) -> Option<StateUpdate> {
     if let Some(city) = city {
-        if matches!(custom_action_type, CustomActionType::Sports) {
-            if let Some(options) = sports_options(city) {
-                return Some(StateUpdate::OpenDialog(ActiveDialog::Sports((
-                    Payment::new_gain(&options, "Increase happiness using sports"),
-                    city.position,
-                ))));
-            }
-        }
-        return None;
+        return custom_action_type
+            .is_available_city(rc.shown_player, city)
+            .then_some(StateUpdate::execute(Action::Playing(
+                PlayingAction::CustomEvent(custom_action_type.clone()),
+            )));
     }
 
-    match custom_action_type {
-        CustomActionType::ArtsInfluenceCultureAttempt
-        | CustomActionType::VotingIncreaseHappiness
-        | CustomActionType::FreeEconomyCollect
-        | CustomActionType::Sports => {
-            // handled explicitly
-            None
-        }
-        CustomActionType::AbsolutePower => Some(StateUpdate::execute(Action::Playing(
-            PlayingAction::Custom(CustomAction::AbsolutePower),
-        ))),
-        CustomActionType::ForcedLabor => Some(StateUpdate::execute(Action::Playing(
-            PlayingAction::Custom(CustomAction::ForcedLabor),
-        ))),
-        CustomActionType::CivilLiberties => Some(StateUpdate::execute(Action::Playing(
-            PlayingAction::Custom(CustomAction::CivilLiberties),
-        ))),
-        CustomActionType::Bartering => Some(StateUpdate::execute(Action::Playing(
-            PlayingAction::Custom(CustomAction::Bartering),
-        ))),
-        CustomActionType::Taxes => Some(StateUpdate::OpenDialog(ActiveDialog::Taxes(
-            Payment::new_gain(&tax_options(rc.shown_player), "Collect taxes"),
-        ))),
-        CustomActionType::Theaters => Some(StateUpdate::OpenDialog(ActiveDialog::Theaters(
-            Payment::new_gain(&theaters_options(), "Convert Resources"),
-        ))),
-    }
+    (!custom_action_type.is_city_bound()).then_some(StateUpdate::execute(Action::Playing(
+        PlayingAction::CustomEvent(custom_action_type.clone()),
+    )))
+
+    // match custom_action_type {
+    //     CustomActionType::AbsolutePower => Some(StateUpdate::execute(Action::Playing(
+    //         PlayingAction::Custom(CustomAction::AbsolutePower),
+    //     ))),
+    //     CustomActionType::ForcedLabor => Some(StateUpdate::execute(Action::Playing(
+    //         PlayingAction::Custom(CustomAction::ForcedLabor),
+    //     ))),
+    //     CustomActionType::CivilLiberties => Some(StateUpdate::execute(Action::Playing(
+    //         PlayingAction::Custom(CustomAction::CivilLiberties),
+    //     ))),
+    //     CustomActionType::Bartering => Some(StateUpdate::execute(Action::Playing(
+    //         PlayingAction::Custom(CustomAction::Bartering),
+    //     ))),
+    //     CustomActionType::Taxes => Some(StateUpdate::OpenDialog(ActiveDialog::Taxes(
+    //         Payment::new_gain(&tax_options(rc.shown_player), "Collect taxes"),
+    //     ))),
+    //     CustomActionType::Theaters => Some(StateUpdate::OpenDialog(ActiveDialog::Theaters(
+    //         Payment::new_gain(&theaters_options(), "Convert Resources"),
+    //     ))),
+    //     _ => None,
+    // }
 }
 
 pub fn base_or_custom_action(

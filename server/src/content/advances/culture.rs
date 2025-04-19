@@ -1,10 +1,14 @@
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::action_card::discard_action_card;
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder};
+use crate::card::HandCard;
 use crate::city::{City, MoodState};
 use crate::city_pieces::Building::Obelisk;
 use crate::content::advances::{AdvanceGroup, advance_group_builder};
+use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
+use crate::content::persistent_events::{HandCardsRequest, ResourceRewardRequest};
 use crate::game::Game;
 use crate::happiness::increase_happiness;
 use crate::payment::PaymentOptions;
@@ -63,14 +67,13 @@ fn monuments() -> AdvanceBuilder {
     )
 }
 
+const SPORTS_DESC: &'static str = "Once per turn, as a free action, you may convert 1 culture token \
+        into 1 mood token, or 1 mood token into 1 culture token";
+
 fn theaters() -> AdvanceBuilder {
-    Advance::builder(
-        "Theaters",
-        "Once per turn, as a free action, you may convert 1 culture token \
-        into 1 mood token, or 1 mood token into 1 culture token",
-    )
-    .with_advance_bonus(MoodToken)
-    .add_custom_action(CustomActionType::Theaters)
+    Advance::builder("Theaters", SPORTS_DESC)
+        .with_advance_bonus(MoodToken)
+        .add_custom_action(CustomActionType::Theaters)
 }
 
 #[must_use]
@@ -94,6 +97,12 @@ pub(crate) fn execute_sports(
     let options = sports_options(game.city(player_index, pos));
     game.players[player_index].pay_cost(&options.expect("sports not possible"), payment);
     increase_happiness(game, player_index, &[(pos, payment.culture_tokens)], None);
+}
+
+pub(crate) fn use_sports() -> Builtin {
+    Builtin::builder("Sports", SPORTS_DESC)
+        
+        .build()
 }
 
 #[must_use]

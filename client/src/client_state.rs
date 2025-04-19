@@ -49,7 +49,6 @@ pub enum ActiveDialog {
     ExploreResolution(ExploreResolutionConfig),
 
     // custom
-    Sports((Payment, Position)),
     Theaters(Payment),
     Taxes(Payment),
     ResourceRewardRequest(Payment),
@@ -89,7 +88,6 @@ impl ActiveDialog {
             ActiveDialog::ExploreResolution(_) => "explore resolution",
             ActiveDialog::ChangeGovernmentType(_) => "change government type",
             ActiveDialog::ChooseAdditionalAdvances(_) => "choose additional advances",
-            ActiveDialog::Sports(_) => "sports",
             ActiveDialog::Theaters(_) => "theaters",
             ActiveDialog::Taxes(_) => "collect taxes",
             ActiveDialog::ResourceRewardRequest(_) => "trade route selection",
@@ -139,7 +137,6 @@ impl ActiveDialog {
                 vec!["Click on an advance to choose it".to_string()]
             }
             ActiveDialog::WaitingForUpdate => vec!["Waiting for server update".to_string()],
-            ActiveDialog::Sports(_) => event_help(rc, &EventOrigin::Advance("Sports".to_string())),
             ActiveDialog::Taxes(_) => event_help(rc, &EventOrigin::Advance("Taxes".to_string())),
             ActiveDialog::Theaters(_) => {
                 event_help(rc, &EventOrigin::Advance("Theaters".to_string()))

@@ -149,6 +149,17 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
             &PlayingActionType::InfluenceCultureAttempt,
         ),
         PlayingAction::Custom(action) => action.format_log_item(game, player, &player_name),
+        PlayingAction::CustomEvent(action) => {
+            format!(
+                "{player_name} played started {:?}{}",
+                action.action,
+                if let Some(p) = action.city {
+                    &format!(" at {p}")
+                } else {
+                    ""
+                }
+            )
+        }
         PlayingAction::ActionCard(a) => {
             let card = get_civil_card(*a);
             let pile = &card.action_type.cost;
@@ -169,13 +180,12 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
             )
         }
         PlayingAction::WonderCard(name) => format!("{player_name} played the wonder card {name}",),
-        PlayingAction::EndTurn => format!(
-            "{player_name} ended their turn{}",
-            match game.actions_left {
-                0 => String::new(),
-                actions_left => format!(" with {actions_left} actions left"),
-            }
-        ),
+        PlayingAction::EndTurn => format!("{player_name} ended their turn{}", match game
+            .actions_left
+        {
+            0 => String::new(),
+            actions_left => format!(" with {actions_left} actions left"),
+        }),
     }
 }
 

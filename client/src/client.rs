@@ -167,7 +167,6 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
         ActiveDialog::ChooseAdditionalAdvances(a) => {
             status_phase_ui::choose_additional_advances_dialog(rc, a)
         }
-        ActiveDialog::Sports((p, pos)) => custom_actions_ui::sports(rc, p, *pos),
         ActiveDialog::Taxes(p) => custom_actions_ui::taxes(rc, p),
         ActiveDialog::Theaters(p) => custom_actions_ui::theaters(rc, p),
 

@@ -5,6 +5,7 @@ use crate::collect::{CollectContext, CollectInfo};
 use crate::combat::Combat;
 use crate::combat_listeners::{CombatEnd, CombatRoundEnd, CombatRoundStart};
 use crate::combat_stats::CombatStats;
+use crate::content::custom_actions::{CustomActionType, CustomEventAction};
 use crate::content::persistent_events::KilledUnits;
 use crate::cultural_influence::{InfluenceCultureInfo, InfluenceCultureOutcome};
 use crate::events::Event;
@@ -107,8 +108,7 @@ pub(crate) struct PersistentEvents {
     pub capture_undefended_position: PersistentEvent<CombatStats>,
     pub units_killed: PersistentEvent<KilledUnits>,
     pub select_objective_cards: PersistentEvent<SelectObjectivesInfo>,
-
-    pub custom_action_bartering: PersistentEvent,
+    pub custom_action: PersistentEvent<CustomEventAction>,
 }
 
 impl PersistentEvents {
@@ -140,7 +140,7 @@ impl PersistentEvents {
             units_killed: Event::new("units_killed"),
             select_objective_cards: Event::new("select_objective_cards"),
 
-            custom_action_bartering: Event::new("custom_action_bartering"),
+            custom_action: Event::new("custom_action_bartering"),
         }
     }
 }

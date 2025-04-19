@@ -9,9 +9,7 @@ use crate::content::advances::{AdvanceGroup, CURRENCY, advance_group_builder};
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::custom_actions::CustomActionType::Taxes;
-use crate::content::persistent_events::{
-    HandCardsRequest, PersistentEventType, ResourceRewardRequest,
-};
+use crate::content::persistent_events::{HandCardsRequest, ResourceRewardRequest};
 use crate::game::Game;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
@@ -45,21 +43,12 @@ fn bartering() -> AdvanceBuilder {
         .with_unlocked_building(Market)
 }
 
-pub(crate) fn execute_bartering(game: &mut Game, player_index: usize) {
-    let _ = game.trigger_persistent_event(
-        &[player_index],
-        |e| &mut e.custom_action_bartering,
-        (),
-        |()| PersistentEventType::Bartering,
-    );
-}
-
 pub(crate) fn use_bartering() -> Builtin {
     Builtin::builder("Bartering", BARTER_DESC)
         .add_hand_card_request(
-            |event| &mut event.custom_action_bartering,
+            |event| &mut event.custom_action,
             1,
-            |game, player_index, ()| {
+            |game, player_index, _| {
                 let cards = game
                     .player(player_index)
                     .action_cards
@@ -85,15 +74,15 @@ pub(crate) fn use_bartering() -> Builtin {
             },
         )
         .add_resource_request(
-            |event| &mut event.custom_action_bartering,
+            |event| &mut event.custom_action,
             0,
-            |_game, _player_index, ()| {
+            |_game, _player_index, _| {
                 Some(ResourceRewardRequest::new(
                     PaymentOptions::sum(1, &[ResourceType::Gold, ResourceType::CultureTokens]),
                     "Select a resource to gain".to_string(),
                 ))
             },
-            |_game, s, ()| {
+            |_game, s, _| {
                 vec![format!(
                     "{} gained {} for discarding an action card",
                     s.player_name, s.choice
