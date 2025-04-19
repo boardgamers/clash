@@ -6,8 +6,8 @@ use server::city_pieces::Building::Fortress;
 use server::collect::PositionCollection;
 use server::content::persistent_events::{EventResponse, SelectedStructure, Structure};
 use server::movement::move_units_destinations;
-use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::playing_actions::PlayingAction::Construct;
+use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::{construct, cultural_influence, playing_actions};
@@ -173,7 +173,7 @@ fn test_cultural_takeover() {
                         SelectedStructure::new(Position::from_offset("B3"), Structure::CityCenter),
                         PlayingActionType::InfluenceCultureAttempt,
                     ),
-                ))
+                )),
             ),
         ],
     );
@@ -219,7 +219,8 @@ fn test_production_focus() {
                         .times(2),
                         PositionCollection::new(Position::from_offset("C3"), ResourcePile::gold(1)),
                     ],
-                    ResourcePile::mood_tokens(1) + ResourcePile::ore(1) + ResourcePile::gold(1), PlayingActionType::Collect,
+                    ResourcePile::mood_tokens(1) + ResourcePile::ore(1) + ResourcePile::gold(1),
+                    PlayingActionType::Collect,
                 ))),
             ),
         ],
@@ -336,7 +337,8 @@ fn test_overproduction() {
                         ),
                     ],
                     ResourcePile::mood_tokens(1) + ResourcePile::ore(1) + ResourcePile::wood(1),
-                     PlayingActionType::Collect))),
+                    PlayingActionType::Collect,
+                ))),
             ),
         ],
     );

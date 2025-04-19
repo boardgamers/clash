@@ -4,9 +4,7 @@ use crate::game::Game;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::player_events::CostInfo;
-use crate::playing_actions::{
-    base_or_custom_available, PlayingActionType,
-};
+use crate::playing_actions::{PlayingActionType, base_or_custom_available};
 use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;

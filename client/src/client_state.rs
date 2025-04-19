@@ -9,6 +9,7 @@ use crate::dialog_ui::BaseOrCustomDialog;
 use crate::event_ui::{custom_phase_event_help, custom_phase_event_origin, event_help, pay_help};
 use crate::happiness_ui::IncreaseHappinessConfig;
 use crate::layout_ui::FONT_SIZE;
+use crate::log_ui::get_log_end;
 use crate::map_ui::ExploreResolutionConfig;
 use crate::move_ui::{MoveDestination, MoveIntent, MovePayment, MoveSelection};
 use crate::payment_ui::Payment;
@@ -27,7 +28,6 @@ use server::game::{Game, GameState};
 use server::movement::CurrentMove;
 use server::playing_actions::PlayingActionType;
 use server::position::Position;
-use crate::log_ui::get_log_end;
 
 #[derive(Clone)]
 pub enum ActiveDialog {
@@ -146,10 +146,7 @@ impl ActiveDialog {
                     let v = vec!["Click on a building to influence its culture".to_string()];
                     if let PlayingActionType::Custom(c) = &b.action_type {
                         let mut r = v.clone();
-                        r.extend(event_help(
-                            rc,
-                            &rc.shown_player.custom_actions[&c],
-                        ));
+                        r.extend(event_help(rc, &rc.shown_player.custom_actions[c]));
                     }
                     v
                 } else {

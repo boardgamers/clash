@@ -232,17 +232,17 @@ fn found_city_button<'a>(rc: &'a RenderContext<'a>, pos: Position) -> Option<Ico
     let game = rc.game;
 
     unit_ui::units_on_tile(game, pos).find_map(|(_index, unit)| {
-        (unit.can_found_city(game) && rc.can_play_action_for_player(&PlayingActionType::FoundCity, unit.player_index)).then_some(
-            IconAction::new(
-                rc.assets().unit(UnitType::Settler, rc.shown_player),
-                "Found a new city".to_string(),
-                Box::new(move || {
-                    StateUpdate::execute(Action::Playing(PlayingAction::FoundCity {
-                        settler: unit.id,
-                    }))
-                }),
-            ),
-        )
+        (unit.can_found_city(game)
+            && rc.can_play_action_for_player(&PlayingActionType::FoundCity, unit.player_index))
+        .then_some(IconAction::new(
+            rc.assets().unit(UnitType::Settler, rc.shown_player),
+            "Found a new city".to_string(),
+            Box::new(move || {
+                StateUpdate::execute(Action::Playing(PlayingAction::FoundCity {
+                    settler: unit.id,
+                }))
+            }),
+        ))
     })
 }
 

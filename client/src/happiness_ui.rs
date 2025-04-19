@@ -1,9 +1,9 @@
-use server::action::Action;
 use crate::action_buttons::base_or_custom_action;
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::BaseOrCustomDialog;
 use crate::payment_ui::{Payment, payment_dialog};
 use crate::render_context::RenderContext;
+use server::action::Action;
 use server::city::{City, MoodState};
 use server::game::Game;
 use server::happiness::{available_happiness_actions, happiness_cost};
@@ -181,8 +181,11 @@ pub fn increase_happiness_menu(rc: &RenderContext, h: &IncreaseHappinessConfig) 
             })
         },
         |payment| {
-            let include_happiness = IncreaseHappiness::new(h.steps.clone(), payment, h.custom.action_type.clone());
-            StateUpdate::execute(Action::Playing(PlayingAction::IncreaseHappiness(include_happiness)))
+            let include_happiness =
+                IncreaseHappiness::new(h.steps.clone(), payment, h.custom.action_type.clone());
+            StateUpdate::execute(Action::Playing(PlayingAction::IncreaseHappiness(
+                include_happiness,
+            )))
         },
     )
 }

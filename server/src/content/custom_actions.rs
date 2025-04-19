@@ -61,20 +61,20 @@ impl CustomActionType {
     pub fn info(&self) -> CustomActionInfo {
         match self {
             CustomActionType::AbsolutePower => {
-                self.free_and_once_per_turn(ResourcePile::mood_tokens(2))
+                CustomActionType::free_and_once_per_turn(ResourcePile::mood_tokens(2))
             }
-            CustomActionType::CivilLiberties | CustomActionType::Sports => self.regular(),
+            CustomActionType::CivilLiberties | CustomActionType::Sports => CustomActionType::regular(),
             CustomActionType::Bartering | CustomActionType::Theaters => {
-                self.free_and_once_per_turn(ResourcePile::empty())
+                CustomActionType::free_and_once_per_turn(ResourcePile::empty())
             }
             CustomActionType::ArtsInfluenceCultureAttempt => {
-                self.free_and_once_per_turn(ResourcePile::culture_tokens(1))
+                CustomActionType::free_and_once_per_turn(ResourcePile::culture_tokens(1))
             }
-            CustomActionType::VotingIncreaseHappiness => self.cost(ResourcePile::mood_tokens(1)),
+            CustomActionType::VotingIncreaseHappiness => CustomActionType::cost(ResourcePile::mood_tokens(1)),
             CustomActionType::FreeEconomyCollect | CustomActionType::ForcedLabor => {
-                self.free_and_once_per_turn(ResourcePile::mood_tokens(1))
+                CustomActionType::free_and_once_per_turn(ResourcePile::mood_tokens(1))
             }
-            CustomActionType::Taxes => self.once_per_turn(ResourcePile::mood_tokens(1)),
+            CustomActionType::Taxes => CustomActionType::once_per_turn(ResourcePile::mood_tokens(1)),
         }
     }
 
@@ -106,22 +106,22 @@ impl CustomActionType {
     }
 
     #[must_use]
-    fn regular(&self) -> CustomActionInfo {
+    fn regular() -> CustomActionInfo {
         CustomActionInfo::new(false, false, ResourcePile::empty())
     }
 
     #[must_use]
-    fn cost(&self, cost: ResourcePile) -> CustomActionInfo {
+    fn cost(cost: ResourcePile) -> CustomActionInfo {
         CustomActionInfo::new(true, false, cost)
     }
 
     #[must_use]
-    fn once_per_turn(&self, cost: ResourcePile) -> CustomActionInfo {
+    fn once_per_turn(cost: ResourcePile) -> CustomActionInfo {
         CustomActionInfo::new(false, true, cost)
     }
 
     #[must_use]
-    fn free_and_once_per_turn(&self, cost: ResourcePile) -> CustomActionInfo {
+    fn free_and_once_per_turn(cost: ResourcePile) -> CustomActionInfo {
         CustomActionInfo::new(true, true, cost)
     }
 }

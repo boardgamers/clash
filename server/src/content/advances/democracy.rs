@@ -12,12 +12,15 @@ use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::resource_pile::ResourcePile;
 
 pub(crate) fn democracy() -> AdvanceGroup {
-    advance_group_builder("Democracy", vec![
-        voting(),
-        separation_of_power(),
-        civil_liberties(),
-        free_economy(),
-    ])
+    advance_group_builder(
+        "Democracy",
+        vec![
+            voting(),
+            separation_of_power(),
+            civil_liberties(),
+            free_economy(),
+        ],
+    )
 }
 
 fn voting() -> AdvanceBuilder {

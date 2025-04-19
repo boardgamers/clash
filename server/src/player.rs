@@ -483,13 +483,29 @@ impl Player {
     #[must_use]
     pub fn victory_points_parts(&self, game: &Game) -> [(&'static str, f32); 6] {
         [
-            ("City pieces", (self.cities.len() + self.owned_buildings(game)) as f32 * BUILDING_VICTORY_POINTS),
-            ("Advances", (self.advances.len() + self.unlocked_special_advances.len()) as f32
-                * ADVANCE_VICTORY_POINTS),
-            ("Objectives", self.completed_objectives.len() as f32 * OBJECTIVE_VICTORY_POINTS),
-            ("Wonders", (self.wonders_owned() + self.wonders_build.len()) as f32 * WONDER_VICTORY_POINTS / 2.0),
+            (
+                "City pieces",
+                (self.cities.len() + self.owned_buildings(game)) as f32 * BUILDING_VICTORY_POINTS,
+            ),
+            (
+                "Advances",
+                (self.advances.len() + self.unlocked_special_advances.len()) as f32
+                    * ADVANCE_VICTORY_POINTS,
+            ),
+            (
+                "Objectives",
+                self.completed_objectives.len() as f32 * OBJECTIVE_VICTORY_POINTS,
+            ),
+            (
+                "Wonders",
+                (self.wonders_owned() + self.wonders_build.len()) as f32 * WONDER_VICTORY_POINTS
+                    / 2.0,
+            ),
             ("Events", self.event_victory_points),
-            ("Captured Leaders", self.captured_leaders.len() as f32 * CAPTURED_LEADER_VICTORY_POINTS),
+            (
+                "Captured Leaders",
+                self.captured_leaders.len() as f32 * CAPTURED_LEADER_VICTORY_POINTS,
+            ),
         ]
     }
 

@@ -2,6 +2,7 @@ use crate::action_card::ActionCard;
 use crate::advance::Advance;
 use crate::content::advances::AdvanceGroup;
 use crate::content::builtin::Builtin;
+use crate::content::custom_actions::custom_action_builtins;
 use crate::content::{
     action_cards, advances, builtin, incidents, objective_cards, objectives, wonders,
 };
@@ -17,7 +18,6 @@ use crate::wonder::Wonder;
 use itertools::Itertools;
 use std::collections::HashMap;
 use std::sync::LazyLock;
-use crate::content::custom_actions::custom_action_builtins;
 
 static CACHE: LazyLock<Cache> = LazyLock::new(Cache::new);
 
@@ -68,9 +68,7 @@ impl Cache {
                 .into_iter()
                 .map(|builtin| (builtin.name.clone(), builtin))
                 .chain(
-                    custom_action_builtins().into_iter().map(
-                        |(_,builtin)| (builtin.name.clone(), builtin),
-                    )
+                    custom_action_builtins().into_values().map(|builtin| (builtin.name.clone(), builtin)),
                 )
                 .collect(),
             status_phase_handlers: status_phase_handlers(),

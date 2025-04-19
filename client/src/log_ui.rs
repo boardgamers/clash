@@ -1,6 +1,6 @@
 use crate::client_state::StateUpdate;
 use crate::render_context::RenderContext;
-use macroquad::math::{vec2, Vec2};
+use macroquad::math::vec2;
 use server::game::Game;
 
 pub fn show_log(rc: &RenderContext) -> StateUpdate {

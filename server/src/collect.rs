@@ -9,7 +9,7 @@ use crate::map::Terrain;
 use crate::map::Terrain::{Fertile, Forest, Mountain};
 use crate::player::Player;
 use crate::player_events::ActionInfo;
-use crate::playing_actions::{base_or_custom_available, Collect, PlayingActionType};
+use crate::playing_actions::{Collect, PlayingActionType, base_or_custom_available};
 use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;

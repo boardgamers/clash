@@ -8,9 +8,7 @@ use crate::collect::{PositionCollection, collect};
 use crate::construct::Construct;
 use crate::content::action_cards::get_civil_card;
 use crate::content::advances::get_advance;
-use crate::content::custom_actions::{
-    CustomActionType, CustomEventAction, execute_custom_action,
-};
+use crate::content::custom_actions::{CustomActionType, CustomEventAction, execute_custom_action};
 use crate::cultural_influence::{InfluenceCultureAttempt, influence_culture_attempt};
 use crate::game::GameState;
 use crate::happiness::increase_happiness;
@@ -19,10 +17,7 @@ use crate::player_events::PlayingActionInfo;
 use crate::recruit::recruit;
 use crate::unit::Units;
 use crate::wonder::{WonderCardInfo, WonderDiscount, cities_for_wonder, on_play_wonder_card};
-use crate::{
-     game::Game, position::Position,
-    resource_pile::ResourcePile,
-};
+use crate::{game::Game, position::Position, resource_pile::ResourcePile};
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub struct Collect {
@@ -262,7 +257,7 @@ impl PlayingAction {
             playing_action_type.is_available(game, player_index)?;
         }
         playing_action_type.cost().pay(game, player_index);
-        
+
         if let PlayingActionType::Custom(c) = playing_action_type {
             if c.info().once_per_turn {
                 game.players[player_index]
@@ -295,12 +290,9 @@ impl PlayingAction {
             IncreaseHappiness(i) => {
                 increase_happiness(game, player_index, &i.happiness_increases, Some(i.payment));
             }
-            InfluenceCultureAttempt(c) => influence_culture_attempt(
-                game,
-                player_index,
-                &c.selected_structure,
-                &c.action_type,
-            ),
+            InfluenceCultureAttempt(c) => {
+                influence_culture_attempt(game, player_index, &c.selected_structure, &c.action_type);
+            }
             ActionCard(a) => play_action_card(game, player_index, a),
             WonderCard(name) => {
                 on_play_wonder_card(
@@ -323,19 +315,28 @@ impl PlayingAction {
             PlayingAction::Advance { .. } => PlayingActionType::Advance,
             PlayingAction::FoundCity { .. } => PlayingActionType::FoundCity,
             PlayingAction::Construct(_) => PlayingActionType::Construct,
-            PlayingAction::Collect(c) => allowed_types(&c.action_type, &[
-                PlayingActionType::Collect,
-                PlayingActionType::Custom(CustomActionType::FreeEconomyCollect),
-            ]),
+            PlayingAction::Collect(c) => allowed_types(
+                &c.action_type,
+                &[
+                    PlayingActionType::Collect,
+                    PlayingActionType::Custom(CustomActionType::FreeEconomyCollect),
+                ],
+            ),
             PlayingAction::Recruit(_) => PlayingActionType::Recruit,
-            PlayingAction::IncreaseHappiness(h) => allowed_types(&h.action_type, &[
-                PlayingActionType::IncreaseHappiness,
-                PlayingActionType::Custom(CustomActionType::VotingIncreaseHappiness),
-            ]),
-            PlayingAction::InfluenceCultureAttempt(i) => allowed_types(&i.action_type, &[
-                PlayingActionType::InfluenceCultureAttempt,
-                PlayingActionType::Custom(CustomActionType::ArtsInfluenceCultureAttempt),
-            ]),
+            PlayingAction::IncreaseHappiness(h) => allowed_types(
+                &h.action_type,
+                &[
+                    PlayingActionType::IncreaseHappiness,
+                    PlayingActionType::Custom(CustomActionType::VotingIncreaseHappiness),
+                ],
+            ),
+            PlayingAction::InfluenceCultureAttempt(i) => allowed_types(
+                &i.action_type,
+                &[
+                    PlayingActionType::InfluenceCultureAttempt,
+                    PlayingActionType::Custom(CustomActionType::ArtsInfluenceCultureAttempt),
+                ],
+            ),
             PlayingAction::ActionCard(a) => PlayingActionType::ActionCard(*a),
             PlayingAction::WonderCard(name) => PlayingActionType::WonderCard(name.clone()),
             PlayingAction::Custom(c) => PlayingActionType::Custom(c.action.clone()),

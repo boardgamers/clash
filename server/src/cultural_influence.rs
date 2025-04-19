@@ -12,7 +12,7 @@ use crate::log::current_player_turn_log;
 use crate::payment::PaymentOptions;
 use crate::player_events::ActionInfo;
 use crate::playing_actions::{
-    base_or_custom_available, roll_boost_cost, PlayingAction, PlayingActionType,
+    PlayingAction, PlayingActionType, base_or_custom_available, roll_boost_cost,
 };
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
