@@ -17,6 +17,7 @@ use crate::wonder::Wonder;
 use itertools::Itertools;
 use std::collections::HashMap;
 use std::sync::LazyLock;
+use crate::content::custom_actions::custom_action_builtins;
 
 static CACHE: LazyLock<Cache> = LazyLock::new(Cache::new);
 
@@ -66,6 +67,11 @@ impl Cache {
             builtins_by_name: builtin::get_all_uncached()
                 .into_iter()
                 .map(|builtin| (builtin.name.clone(), builtin))
+                .chain(
+                    custom_action_builtins().into_iter().map(
+                        |(_,builtin)| (builtin.name.clone(), builtin),
+                    )
+                )
                 .collect(),
             status_phase_handlers: status_phase_handlers(),
 

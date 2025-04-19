@@ -229,14 +229,10 @@ pub fn show_tile_menu(rc: &RenderContext, pos: Position) -> StateUpdate {
 }
 
 fn found_city_button<'a>(rc: &'a RenderContext<'a>, pos: Position) -> Option<IconAction<'a>> {
-    if !rc.can_play_action(&PlayingActionType::FoundCity) {
-        return None;
-    }
     let game = rc.game;
 
-    unit_ui::units_on_tile(game, pos)
-        .find(|(_, unit)| unit.can_found_city(game))
-        .map(|(_index, unit)| {
+    unit_ui::units_on_tile(game, pos).find_map(|(_index, unit)| {
+        (unit.can_found_city(game) && rc.can_play_action_for_player(&PlayingActionType::FoundCity, unit.player_index)).then_some(
             IconAction::new(
                 rc.assets().unit(UnitType::Settler, rc.shown_player),
                 "Found a new city".to_string(),
@@ -245,8 +241,9 @@ fn found_city_button<'a>(rc: &'a RenderContext<'a>, pos: Position) -> Option<Ico
                         settler: unit.id,
                     }))
                 }),
-            )
-        })
+            ),
+        )
+    })
 }
 
 pub fn move_units_button<'a>(

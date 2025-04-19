@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 use crate::city::City;
 use crate::content::advances::autocracy::{use_absolute_power, use_forced_labor};
@@ -33,11 +34,7 @@ pub struct CustomActionInfo {
 
 impl CustomActionInfo {
     #[must_use]
-    fn new(
-        free: bool,
-        once_per_turn: bool,
-        cost: ResourcePile,
-    ) -> CustomActionInfo {
+    fn new(free: bool, once_per_turn: bool, cost: ResourcePile) -> CustomActionInfo {
         CustomActionInfo {
             action_type: ActionCost::new(free, cost),
             once_per_turn,
@@ -127,22 +124,18 @@ impl CustomActionType {
     fn free_and_once_per_turn(&self, cost: ResourcePile) -> CustomActionInfo {
         CustomActionInfo::new(true, true, cost)
     }
+}
 
-    #[must_use]
-    pub(crate) fn execute_builtin(&self) -> Builtin {
-        match self {
-            CustomActionType::Sports => use_sports(),
-            CustomActionType::Theaters => use_theaters(),
-            CustomActionType::Taxes => use_taxes(),
-            CustomActionType::Bartering => use_bartering(),
-            CustomActionType::AbsolutePower => use_absolute_power(),
-            CustomActionType::ForcedLabor => use_forced_labor(),
-            CustomActionType::CivilLiberties => use_civil_liberties(),
-            _ => {
-                panic!("CustomActionType::execute_builtin called on non-builtin action")
-            }
-        }
-    }
+pub(crate) fn custom_action_builtins() -> HashMap<CustomActionType, Builtin> {
+    HashMap::from([
+        (CustomActionType::AbsolutePower, use_absolute_power()),
+        (CustomActionType::ForcedLabor, use_forced_labor()),
+        (CustomActionType::CivilLiberties, use_civil_liberties()),
+        (CustomActionType::Bartering, use_bartering()),
+        (CustomActionType::Sports, use_sports()),
+        (CustomActionType::Taxes, use_taxes()),
+        (CustomActionType::Theaters, use_theaters()),
+    ])
 }
 
 pub(crate) fn execute_custom_action(
@@ -153,7 +146,7 @@ pub(crate) fn execute_custom_action(
     let _ = game.trigger_persistent_event_with_listener(
         &[player_index],
         |e| &mut e.custom_action,
-        &action.action.execute_builtin().listeners,
+        &custom_action_builtins()[&action.action.clone()].listeners,
         action,
         PersistentEventType::CustomAction,
         None,

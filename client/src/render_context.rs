@@ -63,6 +63,10 @@ impl RenderContext<'_> {
         }
     }
 
+    pub fn can_play_action_for_player(&self, action: &PlayingActionType, player: usize) -> bool {
+        self.can_play_action(action) && self.game.active_player() == player
+    }
+    
     pub fn can_play_action(&self, action: &PlayingActionType) -> bool {
         self.can_control_shown_player()
             && action
