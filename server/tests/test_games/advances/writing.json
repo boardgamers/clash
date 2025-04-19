@@ -110,9 +110,6 @@
       "available_leaders": [
         "Kʼinich Janaab Pakal I"
       ],
-      "advances": [
-        "Writing"
-      ],
       "incident_tokens": 2,
       "wonder_cards": [
         "Great Gardens"
@@ -275,7 +272,7 @@
   "action_log_index": 0,
   "log": [],
   "undo_limit": 0,
-  "actions_left": 1,
+  "actions_left": 2,
   "round": 6,
   "age": 1,
   "messages": [
@@ -296,5 +293,11 @@
   "rng": "46312381643103681595563341886777350953",
   "wonders_left": [
     "Pyramids"
+  ],
+  "action_cards_left": [
+    1
+  ],
+  "objective_cards_left": [
+    1
   ]
 }

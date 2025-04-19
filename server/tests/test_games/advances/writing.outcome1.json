@@ -4,13 +4,13 @@
     {
       "id": 0,
       "resources": {
-        "food": 6,
+        "food": 5,
         "wood": 5,
         "ore": 5,
         "ideas": 3,
-        "gold": 6,
+        "gold": 5,
         "mood_tokens": 10,
-        "culture_tokens": 10
+        "culture_tokens": 11
       },
       "resource_limit": {
         "food": 7,
@@ -116,9 +116,15 @@
       "advances": [
         "Writing"
       ],
-      "incident_tokens": 2,
+      "incident_tokens": 1,
       "wonder_cards": [
         "Great Gardens"
+      ],
+      "action_cards": [
+        1
+      ],
+      "objective_cards": [
+        1
       ],
       "next_unit_id": 10
     },
@@ -272,6 +278,19 @@
                 {
                   "action": {
                     "Playing": {
+                      "Advance": {
+                        "advance": "Writing",
+                        "payment": {
+                          "food": 1,
+                          "gold": 1
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Playing": {
                       "Construct": {
                         "city_position": "A1",
                         "city_piece": "Academy",
@@ -301,7 +320,7 @@
                     {
                       "op": "replace",
                       "path": "/players/0/resources/food",
-                      "value": 7
+                      "value": 6
                     },
                     {
                       "op": "replace",
@@ -327,14 +346,20 @@
       ]
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 2,
   "log": [
+    [
+      "Player1 paid 1 food and 1 gold to get the Writing advance",
+      "Player1 gained an action card from the pile",
+      "Player1 gained an objective card from the pile",
+      "Player gained 1 culture token as advance bonus"
+    ],
     [
       "Player1 paid 1 food, 1 wood and 1 ore to construct a Academy in the city at A1",
       "Academy gained 2 ideas"
     ]
   ],
-  "undo_limit": 0,
+  "undo_limit": 1,
   "actions_left": 0,
   "round": 6,
   "age": 1,

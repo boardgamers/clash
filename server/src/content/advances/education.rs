@@ -29,7 +29,6 @@ fn writing() -> AdvanceBuilder {
             |game, player_index| {
                 gain_action_card_from_pile(game, player_index);
                 gain_objective_card_from_pile(game, player_index);
-                game.add_info_log_item("Writing gained 1 action and 1 objective card");
             },
         )
         .add_simple_persistent_event_listener(
