@@ -20,7 +20,7 @@ use server::{
     resource_pile::ResourcePile,
 };
 use std::{collections::HashMap, vec};
- 
+
 mod common;
 
 const JSON: JsonTest = JsonTest::new("base");

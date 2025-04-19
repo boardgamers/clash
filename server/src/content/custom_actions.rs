@@ -63,18 +63,24 @@ impl CustomActionType {
             CustomActionType::AbsolutePower => {
                 CustomActionType::free_and_once_per_turn(ResourcePile::mood_tokens(2))
             }
-            CustomActionType::CivilLiberties | CustomActionType::Sports => CustomActionType::regular(),
+            CustomActionType::CivilLiberties | CustomActionType::Sports => {
+                CustomActionType::regular()
+            }
             CustomActionType::Bartering | CustomActionType::Theaters => {
                 CustomActionType::free_and_once_per_turn(ResourcePile::empty())
             }
             CustomActionType::ArtsInfluenceCultureAttempt => {
                 CustomActionType::free_and_once_per_turn(ResourcePile::culture_tokens(1))
             }
-            CustomActionType::VotingIncreaseHappiness => CustomActionType::cost(ResourcePile::mood_tokens(1)),
+            CustomActionType::VotingIncreaseHappiness => {
+                CustomActionType::cost(ResourcePile::mood_tokens(1))
+            }
             CustomActionType::FreeEconomyCollect | CustomActionType::ForcedLabor => {
                 CustomActionType::free_and_once_per_turn(ResourcePile::mood_tokens(1))
             }
-            CustomActionType::Taxes => CustomActionType::once_per_turn(ResourcePile::mood_tokens(1)),
+            CustomActionType::Taxes => {
+                CustomActionType::once_per_turn(ResourcePile::mood_tokens(1))
+            }
         }
     }
 

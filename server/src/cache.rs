@@ -68,7 +68,9 @@ impl Cache {
                 .into_iter()
                 .map(|builtin| (builtin.name.clone(), builtin))
                 .chain(
-                    custom_action_builtins().into_values().map(|builtin| (builtin.name.clone(), builtin)),
+                    custom_action_builtins()
+                        .into_values()
+                        .map(|builtin| (builtin.name.clone(), builtin)),
                 )
                 .collect(),
             status_phase_handlers: status_phase_handlers(),
