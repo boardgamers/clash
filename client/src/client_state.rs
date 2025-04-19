@@ -27,6 +27,7 @@ use server::game::{Game, GameState};
 use server::movement::CurrentMove;
 use server::playing_actions::PlayingActionType;
 use server::position::Position;
+use crate::log_ui::get_log_end;
 
 #[derive(Clone)]
 pub enum ActiveDialog {
@@ -465,6 +466,9 @@ impl State {
                 }
             }
             StateUpdate::OpenDialog(dialog) => {
+                if matches!(dialog, ActiveDialog::Log) {
+                    self.log_scroll = get_log_end(game, self.screen_size.y);
+                }
                 let d = self.game_state_dialog(game);
                 if matches!(dialog, ActiveDialog::AdvanceMenu) && d.is_advance() {
                     self.set_dialog(d);
@@ -472,7 +476,6 @@ impl State {
                     self.set_dialog(dialog);
                 }
                 self.focused_tile = None;
-                self.log_scroll = 0.0;
                 GameSyncRequest::None
             }
             StateUpdate::CloseDialog => {

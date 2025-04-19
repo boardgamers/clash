@@ -1,21 +1,35 @@
 use crate::client_state::StateUpdate;
 use crate::render_context::RenderContext;
-use macroquad::math::vec2;
+use macroquad::math::{vec2, Vec2};
+use server::game::Game;
 
 pub fn show_log(rc: &RenderContext) -> StateUpdate {
-    let state = rc.state;
-    let mut y = state.log_scroll;
+    draw_log(rc.game, rc.state.log_scroll, |label: &str, y: f32| {
+        let p = vec2(30., y * 25. + 20.);
+        rc.state.draw_text(label, p.x, p.y);
+    });
+    StateUpdate::None
+}
 
-    for l in &rc.game.log {
+pub fn get_log_end(game: &Game, height: f32) -> f32 {
+    let mut end = 0.;
+    draw_log(game, 0., |_label: &str, y: f32| {
+        end = y;
+    });
+    -end + (height - 40.) / 25.
+}
+
+fn draw_log(game: &Game, start_scroll: f32, mut render: impl FnMut(&str, f32)) {
+    let mut y = start_scroll;
+
+    for l in &game.log {
         for e in l {
             multiline_label(e, 90, |label: &str| {
-                let p = vec2(30., y * 25. + 20.);
+                render(label, y);
                 y += 1.;
-                state.draw_text(label, p.x, p.y);
             });
         }
     }
-    StateUpdate::None
 }
 
 pub fn multiline_label(label: &str, len: usize, mut print: impl FnMut(&str)) {
