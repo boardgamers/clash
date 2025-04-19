@@ -4,8 +4,8 @@ use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder};
 use crate::card::HandCard;
 use crate::city_pieces::Building::Market;
-use crate::content::advances::trade_routes::{trade_route_log, trade_route_reward, TradeRoute};
-use crate::content::advances::{advance_group_builder, AdvanceGroup, CURRENCY};
+use crate::content::advances::trade_routes::{TradeRoute, trade_route_log, trade_route_reward};
+use crate::content::advances::{AdvanceGroup, CURRENCY, advance_group_builder};
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::custom_actions::CustomActionType::Taxes;
@@ -19,12 +19,10 @@ use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
 
 pub(crate) fn economy() -> AdvanceGroup {
-    advance_group_builder("Economy", vec![
-        bartering(),
-        trade_routes(),
-        taxes(),
-        currency(),
-    ])
+    advance_group_builder(
+        "Economy",
+        vec![bartering(), trade_routes(), taxes(), currency()],
+    )
 }
 
 fn currency() -> AdvanceBuilder {
@@ -94,7 +92,7 @@ pub(crate) fn use_bartering() -> Builtin {
         .build()
 }
 
-const TAXES_DESCRIPTION: &'static str = "Once per turn, as an action, you may spend 1 mood token to gain \
+const TAXES_DESCRIPTION: &str = "Once per turn, as an action, you may spend 1 mood token to gain \
         food, wood, or ore equal to the number of cities you control. \
         If you have the Currency advance, you may gain gold instead of food, wood, or ore.";
 

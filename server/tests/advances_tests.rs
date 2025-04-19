@@ -5,8 +5,7 @@ use server::collect::PositionCollection;
 use server::consts::BUILDING_COST;
 use server::content::advances::trade_routes::find_trade_routes;
 use server::content::custom_actions::CustomAction::{
-    AbsolutePower, ArtsInfluenceCultureAttempt, CivilLiberties, ForcedLabor,
-    VotingIncreaseHappiness,
+    ArtsInfluenceCultureAttempt, VotingIncreaseHappiness,
 };
 use server::content::custom_actions::{CustomAction, CustomActionType, CustomEventAction};
 use server::content::persistent_events::{EventResponse, SelectedStructure, Structure};
@@ -263,7 +262,10 @@ fn test_absolute_power() {
         "absolute_power",
         vec![TestAction::undoable(
             0,
-            Action::Playing(Custom(AbsolutePower)),
+            Action::Playing(CustomEvent(CustomEventAction::new(
+                CustomActionType::AbsolutePower,
+                None,
+            ))),
         )],
     );
 }
@@ -273,7 +275,13 @@ fn test_forced_labor() {
     JSON.test(
         "forced_labor",
         vec![
-            TestAction::undoable(0, Action::Playing(Custom(ForcedLabor))),
+            TestAction::undoable(
+                0,
+                Action::Playing(CustomEvent(CustomEventAction::new(
+                    CustomActionType::ForcedLabor,
+                    None,
+                ))),
+            ),
             TestAction::undoable(
                 0,
                 Action::Playing(Collect(playing_actions::Collect::new(
@@ -294,7 +302,13 @@ fn test_civil_liberties() {
     JSON.test(
         "civil_liberties",
         vec![
-            TestAction::undoable(0, Action::Playing(Custom(CivilLiberties))),
+            TestAction::undoable(
+                0,
+                Action::Playing(CustomEvent(CustomEventAction::new(
+                    CustomActionType::CivilLiberties,
+                    None,
+                ))),
+            ),
             TestAction::undoable(
                 0,
                 Action::Playing(Recruit(playing_actions::Recruit::new(
@@ -419,7 +433,7 @@ fn test_theaters() {
                     1,
                 )])),
             ),
-        ]
+        ],
     );
 }
 
@@ -438,9 +452,11 @@ fn test_taxes() {
             .without_json_comparison(),
             TestAction::undoable(
                 0,
-                Action::Response(EventResponse::ResourceReward(ResourcePile::new(1, 1, 1, 0, 1, 0, 0))),
+                Action::Response(EventResponse::ResourceReward(ResourcePile::new(
+                    1, 1, 1, 0, 1, 0, 0,
+                ))),
             ),
-        ]
+        ],
     );
 }
 

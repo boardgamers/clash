@@ -1,8 +1,8 @@
 mod agriculture;
-mod autocracy;
+pub(crate) mod autocracy;
 mod construction;
 pub mod culture;
-mod democracy;
+pub(crate) mod democracy;
 pub mod economy;
 mod education;
 mod science;

@@ -2,7 +2,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::city::City;
 use crate::collect::collect;
+use crate::content::advances::autocracy::{use_absolute_power, use_forced_labor};
 use crate::content::advances::culture::{sports_options, use_sports, use_theaters};
+use crate::content::advances::democracy::use_civil_liberties;
 use crate::content::advances::economy::{use_bartering, use_taxes};
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{PersistentEventType, SelectedStructure};
@@ -31,9 +33,6 @@ impl CustomEventAction {
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub enum CustomAction {
-    AbsolutePower,
-    ForcedLabor,
-    CivilLiberties,
     ArtsInfluenceCultureAttempt(SelectedStructure),
     VotingIncreaseHappiness(IncreaseHappiness),
     FreeEconomyCollect(Collect),
@@ -79,13 +78,6 @@ pub enum CustomActionType {
 impl CustomAction {
     pub(crate) fn execute(self, game: &mut Game, player_index: usize) -> Result<(), String> {
         match self {
-            CustomAction::AbsolutePower => game.actions_left += 1,
-            CustomAction::ForcedLabor => {
-                // we check that the action was played
-            }
-            CustomAction::CivilLiberties => {
-                game.players[player_index].gain_resources(ResourcePile::mood_tokens(3));
-            }
             CustomAction::ArtsInfluenceCultureAttempt(c) => {
                 influence_culture_attempt(
                     game,
@@ -105,9 +97,6 @@ impl CustomAction {
     #[must_use]
     pub fn custom_action_type(&self) -> CustomActionType {
         match self {
-            CustomAction::AbsolutePower => CustomActionType::AbsolutePower,
-            CustomAction::ForcedLabor => CustomActionType::ForcedLabor,
-            CustomAction::CivilLiberties => CustomActionType::CivilLiberties,
             CustomAction::ArtsInfluenceCultureAttempt(_) => {
                 CustomActionType::ArtsInfluenceCultureAttempt
             }
@@ -119,15 +108,6 @@ impl CustomAction {
     #[must_use]
     pub fn format_log_item(&self, game: &Game, player: &Player, player_name: &str) -> String {
         match self {
-            CustomAction::AbsolutePower => format!(
-                "{player_name} paid 2 mood tokens to get an extra action using Forced Labor"
-            ),
-            CustomAction::ForcedLabor => {
-                format!("{player_name} paid 1 mood token to treat Angry cities as neutral")
-            }
-            CustomAction::CivilLiberties => {
-                format!("{player_name} gained 3 mood tokens using Civil Liberties")
-            }
             CustomAction::ArtsInfluenceCultureAttempt(c) => format!(
                 "{} using Arts",
                 format_cultural_influence_attempt_log_item(
@@ -226,6 +206,9 @@ impl CustomActionType {
             CustomActionType::Theaters => use_theaters(),
             CustomActionType::Taxes => use_taxes(),
             CustomActionType::Bartering => use_bartering(),
+            CustomActionType::AbsolutePower => use_absolute_power(),
+            CustomActionType::ForcedLabor => use_forced_labor(),
+            CustomActionType::CivilLiberties => use_civil_liberties(),
             _ => {
                 panic!("CustomActionType::execute_builtin called on non-builtin action")
             }

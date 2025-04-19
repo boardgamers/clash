@@ -23,7 +23,6 @@ use server::content::persistent_events::{
     AdvanceRequest, ChangeGovernmentRequest, EventResponse, MultiRequest, PersistentEventRequest,
     PersistentEventType, PlayerRequest, UnitTypeRequest,
 };
-use server::events::EventOrigin;
 use server::game::{Game, GameState};
 use server::movement::CurrentMove;
 use server::playing_actions::PlayingActionType;
