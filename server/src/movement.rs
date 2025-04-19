@@ -1,4 +1,3 @@
-use crate::content::advances::{NAVIGATION, ROADS};
 use crate::events::EventOrigin;
 use crate::map::Map;
 use crate::map::Terrain::{Forest, Mountain};

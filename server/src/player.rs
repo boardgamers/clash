@@ -454,7 +454,7 @@ impl Player {
 
     #[must_use]
     pub fn can_advance_free(&self, advance: &AdvanceInfo) -> bool {
-        if self.has_advance(a.advance) {
+        if self.has_advance(advance.advance) {
             return false;
         }
 

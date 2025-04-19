@@ -134,7 +134,7 @@ pub struct IncidentBuilder {
     pub name: String,
     description: String,
     base_effect: IncidentBaseEffect,
-    protection_advance: Option<String>,
+    protection_advance: Option<Advance>,
     action_card: Option<ActionCard>,
     builder: AbilityInitializerBuilder,
 }
@@ -178,8 +178,8 @@ impl IncidentBuilder {
     }
 
     #[must_use]
-    pub fn with_protection_advance(mut self, advance: &str) -> Self {
-        self.protection_advance = Some(advance.to_string());
+    pub fn with_protection_advance(mut self, advance: Advance) -> Self {
+        self.protection_advance = Some(advance);
         self
     }
 

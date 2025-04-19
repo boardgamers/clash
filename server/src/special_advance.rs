@@ -1,5 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
+use crate::advance::Advance;
 use crate::events::EventOrigin;
 
 pub struct SpecialAdvance {
@@ -11,8 +12,8 @@ pub struct SpecialAdvance {
 
 impl SpecialAdvance {
     #[must_use]
-    pub fn builder(name: &str, required_advance: &str) -> SpecialAdvanceBuilder {
-        SpecialAdvanceBuilder::new(name.to_string(), required_advance.to_string())
+    pub fn builder(name: &str, required_advance: Advance) -> SpecialAdvanceBuilder {
+        SpecialAdvanceBuilder::new(name.to_string(), required_advance)
     }
 
     fn new(
@@ -38,7 +39,7 @@ pub struct SpecialAdvanceBuilder {
 }
 
 impl SpecialAdvanceBuilder {
-    fn new(name: String, required_advance: String) -> Self {
+    fn new(name: String, required_advance: Advance) -> Self {
         Self {
             name,
             descriptions: Vec::new(),

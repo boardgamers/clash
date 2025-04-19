@@ -3,7 +3,7 @@ use crate::action_card::gain_action_card_from_pile;
 use crate::advance::Bonus::CultureToken;
 use crate::advance::{AdvanceInfo, AdvanceBuilder, Advance};
 use crate::city_pieces::Building;
-use crate::content::advances::{AdvanceGroup, METALLURGY, advance_group_builder};
+use crate::content::advances::{AdvanceGroup,  advance_group_builder};
 use crate::content::persistent_events::ResourceRewardRequest;
 use crate::payment::PaymentOptions;
 use crate::resource::ResourceType;

@@ -5,7 +5,7 @@ use crate::advance::{AdvanceInfo, AdvanceBuilder, Advance};
 use crate::card::HandCard;
 use crate::city_pieces::Building::Market;
 use crate::content::advances::trade_routes::{TradeRoute, trade_route_log, trade_route_reward};
-use crate::content::advances::{AdvanceGroup, CURRENCY, advance_group_builder};
+use crate::content::advances::{AdvanceGroup,  advance_group_builder};
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::custom_actions::CustomActionType::Taxes;

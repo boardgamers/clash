@@ -118,8 +118,8 @@ pub(crate) struct AdvanceBuilder {
     pub name: String,
     description: String,
     advance_bonus: Option<Bonus>,
-    pub required_advance: Option<String>,
-    contradicting_advance: Vec<String>,
+    pub required_advance: Option<Advance>,
+    contradicting_advance: Vec<Advance>,
     unlocked_building: Option<Building>,
     government: Option<String>,
     builder: AbilityInitializerBuilder,
@@ -147,8 +147,8 @@ impl AdvanceBuilder {
     }
 
     #[must_use]
-    pub fn with_required_advance(mut self, required_advance: &str) -> Self {
-        self.required_advance = Some(required_advance.to_string());
+    pub fn with_required_advance(mut self, required_advance: Advance) -> Self {
+        self.required_advance = Some(required_advance);
         self
     }
 

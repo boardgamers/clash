@@ -1,5 +1,4 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::content::advances::IRRIGATION;
 use crate::map::Terrain::Fertile;
 use crate::payment::{PaymentConversionType, PaymentOptions};
 use crate::{cache, resource_pile::ResourcePile, wonder::Wonder};

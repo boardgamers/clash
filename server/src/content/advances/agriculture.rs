@@ -2,7 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Bonus::MoodToken;
 use crate::advance::{AdvanceInfo, AdvanceBuilder, Advance};
 use crate::collect::{CollectContext, CollectInfo};
-use crate::content::advances::{AdvanceGroup, IRRIGATION, ROADS, advance_group_builder};
+use crate::content::advances::{AdvanceGroup,  advance_group_builder};
 use crate::game::Game;
 use crate::map::Terrain::Barren;
 use crate::resource_pile::ResourcePile;

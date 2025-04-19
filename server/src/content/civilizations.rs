@@ -1,5 +1,4 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::content::advances::IRRIGATION;
 use crate::map::Terrain;
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::SpecialAdvance;
