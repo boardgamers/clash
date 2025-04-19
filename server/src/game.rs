@@ -432,15 +432,12 @@ impl Game {
     }
 
     pub fn add_info_log_group(&mut self, info: String) {
-        println!("{info}");
         self.log.push(vec![info]);
     }
 
     pub fn add_info_log_item(&mut self, info: &str) {
         let last_item_index = self.log.len() - 1;
         self.log[last_item_index].push(info.to_string());
-        //todo remove
-        println!("{info}");
     }
 
     pub fn add_to_last_log_item(&mut self, edit: &str) {
