@@ -9,6 +9,7 @@ use crate::player_events::CostInfo;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use serde::{Deserialize, Serialize};
+use crate::content::advances;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub struct Construct {
@@ -39,12 +40,25 @@ impl Construct {
 ///
 /// # Errors
 /// Returns an error if the building cannot be built
+///
+/// # Panics
+/// Panics if the required advance is not found
 pub fn can_construct(
     city: &City,
     building: Building,
     player: &Player,
     game: &Game,
 ) -> Result<CostInfo, String> {
+    let advance = advances::get_all().iter().find(
+        |a| a.unlocked_building == Some(building),
+    ).expect("Advance not found");
+    if !player
+        .advances
+        .contains(&advance)
+    {
+        return Err(format!("Missing advance: {}", advance.name));
+    }
+
     can_construct_anything(city, player)?;
     if !city.can_activate() {
         return Err("Can't activate".to_string());
@@ -54,13 +68,6 @@ pub fn can_construct(
     }
     if !city.pieces.can_add_building(building) {
         return Err("Building already exists".to_string());
-    }
-    if !player
-        .advances
-        .iter()
-        .any(|a| a.unlocked_building == Some(building))
-    {
-        return Err("Building not researched".to_string());
     }
     if !player.is_building_available(building, game) {
         return Err("All non-destroyed buildings are built".to_string());
