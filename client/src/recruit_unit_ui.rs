@@ -225,7 +225,11 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
                 Ok(_) => format!(" ({} available with current resources)", s.selectable.max),
                 Err(e) => format!(" ({e})"),
             };
-            let mut tooltip = vec![format!("Recruit {}{}", s.unit_type.name(), suffix)];
+            let name = s
+                .leader_name
+                .as_ref()
+                .map_or(s.unit_type.name().to_string(), ToString::to_string);
+            let mut tooltip = vec![format!("Recruit {}{}", name, suffix)];
             add_unit_description(&mut tooltip, s.unit_type);
             show_tooltip_for_circle(rc, &tooltip, p, radius);
         },

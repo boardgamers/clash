@@ -162,7 +162,7 @@ impl UnitType {
     }
 
     #[must_use]
-    pub fn name(&self) -> &str {
+    pub fn name(&self) -> &'static str {
         match self {
             Settler => "settler",
             Infantry => "infantry",
