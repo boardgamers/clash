@@ -1,10 +1,9 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{ActionCard, ActionCardBuilder, CivilCardTarget, discard_action_card};
-use crate::advance::gain_advance_without_payment;
+use crate::advance::{gain_advance_without_payment, Advance};
 use crate::card::HandCard;
 use crate::content::action_cards::{get_action_card, inspiration};
 use crate::content::advances;
-use crate::content::advances::get_advance;
 use crate::content::advances::theocracy::cities_that_can_add_units;
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{
@@ -20,6 +19,7 @@ use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
 use inspiration::possible_inspiration_advances;
 use itertools::Itertools;
+use crate::content::advances::get_advance;
 
 pub(crate) fn synergies_action_cards() -> Vec<ActionCard> {
     vec![

@@ -160,7 +160,7 @@ impl Player {
                 .expect("player data should have a valid civilization"),
             active_leader: data.active_leader,
             available_leaders: data.available_leaders,
-            advances: data.advances,
+            advances: data.advances.into(),
             unlocked_special_advances: data.unlocked_special_advance,
             wonders_build: data.wonders_build,
             incident_tokens: data.incident_tokens,
@@ -206,7 +206,7 @@ impl Player {
             civilization: self.civilization.name,
             active_leader: self.active_leader,
             available_leaders: self.available_leaders.into_iter().collect(),
-            advances: self.advances,
+            advances: self.advances.into(),
             unlocked_special_advance: self.unlocked_special_advances,
             wonders_build: self.wonders_build,
             incident_tokens: self.incident_tokens,
@@ -243,7 +243,11 @@ impl Player {
             civilization: self.civilization.name.clone(),
             active_leader: self.active_leader.clone(),
             available_leaders: self.available_leaders.clone(),
-            advances: self.advances,
+            advances: self
+                .advances
+                .iter()
+                .sorted()
+                .collect(),
             unlocked_special_advance: self.unlocked_special_advances.clone(),
             wonders_build: self.wonders_build.clone(),
             incident_tokens: self.incident_tokens,
@@ -282,7 +286,7 @@ impl Player {
                 .map(|l| l.name.clone())
                 .collect(),
             civilization,
-            advances: EnumSet::new(),
+            advances: EnumSet::empty(),
             unlocked_special_advances: Vec::new(),
             incident_tokens: 0,
             completed_objectives: Vec::new(),
@@ -379,7 +383,7 @@ impl Player {
     pub fn government(&self) -> Option<String> {
         self.advances
             .iter()
-            .find_map(|advance| advance.government.clone())
+            .find_map(|advance| advance.info().government.clone())
     }
 
     pub fn gain_resources(&mut self, resources: ResourcePile) {
@@ -430,10 +434,10 @@ impl Player {
 
     #[must_use]
     pub fn can_advance_in_change_government(&self, advance: Advance) -> bool {
-        if self.has_advance(advance.advance) {
+        if self.has_advance(advance) {
             return false;
         }
-        if let Some(required_advance) = advance.required {
+        if let Some(required_advance) = advance.info().required {
             if !self.has_advance(required_advance) {
                 return false;
             }
@@ -834,8 +838,8 @@ pub struct PlayerData {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     available_leaders: Vec<String>,
     #[serde(default)]
-    #[serde(skip_serializing_if = "EnumSet::is_empty")]
-    advances: EnumSet<Advance>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    advances: Vec<Advance>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     unlocked_special_advance: Vec<String>,

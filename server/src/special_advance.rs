@@ -6,7 +6,7 @@ use crate::events::EventOrigin;
 pub struct SpecialAdvance {
     pub name: String,
     pub description: String,
-    pub required_advance: String,
+    pub required_advance: Advance,
     pub listeners: AbilityListeners,
 }
 

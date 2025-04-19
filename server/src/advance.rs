@@ -1,6 +1,3 @@
-use crate::{ability_initializer::AbilityInitializerSetup, resource_pile::ResourcePile, utils};
-use std::mem;
-use enumset::EnumSetType;
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::city_pieces::Building;
 use crate::content::advances::get_advance;
@@ -8,13 +5,16 @@ use crate::content::persistent_events::PersistentEventType;
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::incident::on_trigger_incident;
-use crate::player_events::{OnAdvanceInfo, IncidentInfo};
+use crate::player_events::{IncidentInfo, OnAdvanceInfo};
 use crate::special_advance::SpecialAdvance;
+use crate::{ability_initializer::AbilityInitializerSetup, resource_pile::ResourcePile, utils};
 use Bonus::*;
+use enumset::EnumSetType;
+use std::mem;
+use serde::{Deserialize, Serialize};
 
 // id / 4 = advance group
-#[derive(EnumSetType, Debug)]
-#[derive(Hash)]
+#[derive(EnumSetType, Serialize, Deserialize, Debug, Ord, PartialOrd, Hash)]
 pub enum Advance {
     // Farming Group
     Farming = 0,
@@ -91,8 +91,8 @@ pub enum Advance {
 
 impl Advance {
     #[must_use]
-    pub fn info(&self) -> AdvanceInfo {
-        get_advance(**self)
+    pub fn info(&self) -> &'static AdvanceInfo {
+        get_advance(self)
     }
 }
 
@@ -200,7 +200,7 @@ impl AbilityInitializerSetup for AdvanceBuilder {
     }
 
     fn get_key(&self) -> EventOrigin {
-        EventOrigin::Advance(self.name.clone())
+        EventOrigin::Advance(self.advance)
     }
 }
 
@@ -225,14 +225,14 @@ impl Bonus {
 ///
 /// Panics if advance does not exist
 pub fn do_advance(game: &mut Game, advance: Advance, player_index: usize) {
-    advance.listeners.one_time_init(game, player_index);
-    let name = advance.name.clone();
+    let info = advance.info();
+    info.listeners.one_time_init(game, player_index);
     for i in 0..game.players[player_index]
         .civilization
         .special_advances
         .len()
     {
-        if game.players[player_index].civilization.special_advances[i].required_advance == name {
+        if game.players[player_index].civilization.special_advances[i].required_advance == advance {
             let special_advance = game.players[player_index]
                 .civilization
                 .special_advances
@@ -245,7 +245,7 @@ pub fn do_advance(game: &mut Game, advance: Advance, player_index: usize) {
             break;
         }
     }
-    if let Some(advance_bonus) = &advance.bonus {
+    if let Some(advance_bonus) = &info.bonus {
         let pile = advance_bonus.resources();
         game.add_info_log_item(&format!("Player gained {pile} as advance bonus"));
         game.players[player_index].gain_resources(pile);
@@ -262,15 +262,11 @@ pub(crate) fn gain_advance_without_payment(
     take_incident_token: bool,
 ) {
     do_advance(game, advance, player_index);
-    on_advance(
-        game,
-        player_index,
-        OnAdvanceInfo {
-            advance,
-            payment,
-            take_incident_token,
-        },
-    );
+    on_advance(game, player_index, OnAdvanceInfo {
+        advance,
+        payment,
+        take_incident_token,
+    });
 }
 
 pub(crate) fn on_advance(game: &mut Game, player_index: usize, info: OnAdvanceInfo) {
@@ -295,16 +291,15 @@ pub(crate) fn on_advance(game: &mut Game, player_index: usize, info: OnAdvanceIn
 }
 
 pub(crate) fn remove_advance(game: &mut Game, advance: Advance, player_index: usize) {
-    advance.listeners.undo(game, player_index);
+    let info = advance.info();
+    info.listeners.undo(game, player_index);
 
     for i in 0..game.players[player_index]
         .civilization
         .special_advances
         .len()
     {
-        if game.players[player_index].civilization.special_advances[i].required_advance
-            == advance.name
-        {
+        if game.players[player_index].civilization.special_advances[i].required_advance == advance {
             let special_advance = game.players[player_index]
                 .civilization
                 .special_advances
@@ -318,12 +313,10 @@ pub(crate) fn remove_advance(game: &mut Game, advance: Advance, player_index: us
         }
     }
     let player = &mut game.players[player_index];
-    if let Some(advance_bonus) = &advance.bonus {
+    if let Some(advance_bonus) = &info.bonus {
         player.lose_resources(advance_bonus.resources());
     }
-    utils::remove_element_by(game.players[player_index].advances.as_mut(), |a| {
-        a.name == advance.name
-    });
+    game.player_mut(player_index).advances.remove(advance);
 }
 
 fn unlock_special_advance(game: &mut Game, special_advance: &SpecialAdvance, player_index: usize) {
@@ -344,8 +337,9 @@ fn undo_unlock_special_advance(
 
 pub(crate) fn init_player(game: &mut Game, player_index: usize) {
     let advances = mem::take(&mut game.player_mut(player_index).advances);
-    for advance in &advances {
-        advance.listeners.init(game, player_index);
+    for advance in advances.iter() {
+        let info = advance.info();
+        info.listeners.init(game, player_index);
         for i in 0..game
             .player(player_index)
             .civilization
@@ -353,7 +347,7 @@ pub(crate) fn init_player(game: &mut Game, player_index: usize) {
             .len()
         {
             if game.players[player_index].civilization.special_advances[i].required_advance
-                == advance.name
+                == advance
             {
                 let special_advance = game
                     .player_mut(player_index)

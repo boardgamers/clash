@@ -24,6 +24,7 @@ use crate::wonder::WonderCardInfo;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::ops::RangeInclusive;
+use crate::advance::Advance;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum PersistentEventRequest {
@@ -191,12 +192,12 @@ impl ResourceRewardRequest {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct AdvanceRequest {
-    pub choices: Vec<String>,
+    pub choices: Vec<Advance>,
 }
 
 impl AdvanceRequest {
     #[must_use]
-    pub fn new(mut choices: Vec<String>) -> Self {
+    pub fn new(mut choices: Vec<Advance>) -> Self {
         choices.sort();
         choices.dedup();
         Self { choices }
