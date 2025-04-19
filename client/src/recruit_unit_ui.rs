@@ -106,15 +106,13 @@ fn selectable_unit(
 
 struct NewUnit {
     unit_type: UnitType,
-    name: String,
     leader_name: Option<String>,
 }
 
 impl NewUnit {
-    fn new(unit_type: UnitType, name: &str, leader_name: Option<String>) -> NewUnit {
+    fn new(unit_type: UnitType, leader_name: Option<String>) -> NewUnit {
         NewUnit {
             unit_type,
-            name: name.to_string(),
             leader_name,
         }
     }
@@ -128,10 +126,10 @@ fn new_units(player: &Player) -> Vec<NewUnit> {
                 player
                     .available_leaders
                     .iter()
-                    .map(|l| NewUnit::new(UnitType::Leader, l.as_str(), Some(l.to_string())))
+                    .map(|l| NewUnit::new(UnitType::Leader, Some(l.to_string())))
                     .collect_vec()
             } else {
-                vec![NewUnit::new(u, u.name(), None::<String>)]
+                vec![NewUnit::new(u, None::<String>)]
             }
         })
         .collect()
@@ -225,10 +223,10 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
                 Ok(_) => format!(" ({} available with current resources)", s.selectable.max),
                 Err(e) => format!(" ({e})"),
             };
-            let name = s
-                .leader_name
-                .as_ref()
-                .map_or(s.unit_type.name().to_string(), ToString::to_string);
+            let name = match s.leader_name.as_ref() {
+                None => s.unit_type.name().to_string(),
+                Some(n) => n.to_string(),
+            };
             let mut tooltip = vec![format!("Recruit {}{}", name, suffix)];
             add_unit_description(&mut tooltip, s.unit_type);
             show_tooltip_for_circle(rc, &tooltip, p, radius);
