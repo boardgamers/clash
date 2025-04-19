@@ -1,11 +1,15 @@
-use crate::city_ui::{IconAction, IconActionVec, draw_city, show_city_menu, BUILDING_SIZE};
+use crate::city_ui::{BUILDING_SIZE, IconAction, IconActionVec, draw_city, show_city_menu};
 use crate::client_state::{ActiveDialog, MAX_OFFSET, MIN_OFFSET, State, StateUpdate, ZOOM};
 use crate::dialog_ui::{OkTooltip, cancel_button_pos, ok_button};
-use crate::layout_ui::{bottom_center_anchor, bottom_center_texture, bottom_right_texture, icon_pos};
+use crate::layout_ui::{
+    ICON_SIZE, bottom_center_anchor, bottom_center_texture, bottom_right_texture, icon_pos,
+};
 use crate::move_ui::{MoveDestination, MoveIntent, movable_units};
 use crate::player_ui::get_combat;
 use crate::render_context::RenderContext;
+use crate::resource_ui::resource_name;
 use crate::select_ui::HighlightType;
+use crate::tooltip::show_tooltip_for_circle;
 use crate::{collect_ui, hex_ui, unit_ui};
 use macroquad::math::{f32, vec2};
 use macroquad::prelude::*;
@@ -278,19 +282,21 @@ pub fn move_units_buttons<'a>(rc: &'a RenderContext, pos: Position) -> Vec<IconA
 }
 
 pub fn show_map_action_buttons(rc: &RenderContext, icons: &IconActionVec) -> StateUpdate {
-    for (i, icon) in icons.iter().enumerate() {
-        let p = icon_pos(-(icons.len() as i8) / 2 + i as i8, -1);
-        if icon.warning {
-            let a = bottom_center_anchor(rc) + p + vec2(15., 15.);
-            draw_circle(a.x, a.y, 20., RED);
-        }
-        if bottom_center_texture(
-            rc,
-            icon.texture,
-            p,
-            icon.tooltip.as_str(),
-        ) {
-            return (icon.action)();
+    for pass in 0..2 {
+        for (i, icon) in icons.iter().enumerate() {
+            let p = icon_pos(-(icons.len() as i8) / 2 + i as i8, -1);
+            let center = bottom_center_anchor(rc) + p + vec2(15., 15.);
+            let radius = 20.;
+            if pass == 0 {
+                if icon.warning {
+                    draw_circle(center.x, center.y, radius, RED);
+                }
+                if bottom_center_texture(rc, icon.texture, p, "") {
+                    return (icon.action)();
+                }
+            } else {
+                show_tooltip_for_circle(rc, &[icon.tooltip.clone()], center, radius);
+            }
         }
     }
     StateUpdate::None
