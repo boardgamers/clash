@@ -75,7 +75,7 @@ pub struct Negotiations {
 
 pub(crate) fn choose_diplomat_partner(b: IncidentBuilder) -> IncidentBuilder {
     b.add_incident_player_request(
-        IncidentTarget::AllPlayers,
+        IncidentTarget::SelectedPlayer,
         "Select a player to be your diplomat partner",
         |_, _, _| true,
         1,
