@@ -9,7 +9,6 @@ use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::PaymentRequest;
 use crate::happiness::increase_happiness;
 use crate::payment::PaymentOptions;
-use crate::player::Player;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use crate::wonder::draw_wonder_card;
@@ -70,14 +69,6 @@ fn theaters() -> AdvanceBuilder {
     Advance::builder("Theaters", THEATERS_DESC)
         .with_advance_bonus(MoodToken)
         .add_custom_action(CustomActionType::Theaters)
-}
-
-pub(crate) fn can_play_sports(player: &Player) -> bool {
-    player.resources.culture_tokens > 0
-        && player
-            .cities
-            .iter()
-            .any(|city| city.mood_state != MoodState::Happy)
 }
 
 #[must_use]

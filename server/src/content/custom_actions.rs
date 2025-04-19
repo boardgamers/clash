@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::city::City;
 use crate::collect::collect;
 use crate::content::advances::culture::{sports_options, use_sports, use_theaters};
-use crate::content::advances::economy::{collect_taxes, use_bartering};
+use crate::content::advances::economy::{use_bartering, use_taxes};
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{PersistentEventType, SelectedStructure};
 use crate::cultural_influence::{
@@ -37,7 +37,6 @@ pub enum CustomAction {
     ArtsInfluenceCultureAttempt(SelectedStructure),
     VotingIncreaseHappiness(IncreaseHappiness),
     FreeEconomyCollect(Collect),
-    Taxes(ResourcePile),
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -99,7 +98,6 @@ impl CustomAction {
                 increase_happiness(game, player_index, &i.happiness_increases, Some(i.payment));
             }
             CustomAction::FreeEconomyCollect(c) => collect(game, player_index, &c)?,
-            CustomAction::Taxes(r) => collect_taxes(game, player_index, r),
         }
         Ok(())
     }
@@ -115,7 +113,6 @@ impl CustomAction {
             }
             CustomAction::VotingIncreaseHappiness(_) => CustomActionType::VotingIncreaseHappiness,
             CustomAction::FreeEconomyCollect(_) => CustomActionType::FreeEconomyCollect,
-            CustomAction::Taxes(_) => CustomActionType::Taxes,
         }
     }
 
@@ -149,9 +146,6 @@ impl CustomAction {
                 "{} using Free Economy",
                 format_collect_log_item(player, player_name, c)
             ),
-            CustomAction::Taxes(r) => {
-                format!("{player_name} paid 1 mood token to collect {r} using Taxes")
-            }
         }
     }
 }
@@ -230,6 +224,7 @@ impl CustomActionType {
         match self {
             CustomActionType::Sports => use_sports(),
             CustomActionType::Theaters => use_theaters(),
+            CustomActionType::Taxes => use_taxes(),
             CustomActionType::Bartering => use_bartering(),
             _ => {
                 panic!("CustomActionType::execute_builtin called on non-builtin action")

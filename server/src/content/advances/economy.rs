@@ -4,8 +4,8 @@ use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder};
 use crate::card::HandCard;
 use crate::city_pieces::Building::Market;
-use crate::content::advances::trade_routes::{TradeRoute, trade_route_log, trade_route_reward};
-use crate::content::advances::{AdvanceGroup, CURRENCY, advance_group_builder};
+use crate::content::advances::trade_routes::{trade_route_log, trade_route_reward, TradeRoute};
+use crate::content::advances::{advance_group_builder, AdvanceGroup, CURRENCY};
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::custom_actions::CustomActionType::Taxes;
@@ -19,10 +19,12 @@ use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
 
 pub(crate) fn economy() -> AdvanceGroup {
-    advance_group_builder(
-        "Economy",
-        vec![bartering(), trade_routes(), taxes(), currency()],
-    )
+    advance_group_builder("Economy", vec![
+        bartering(),
+        trade_routes(),
+        taxes(),
+        currency(),
+    ])
 }
 
 fn currency() -> AdvanceBuilder {
@@ -92,14 +94,34 @@ pub(crate) fn use_bartering() -> Builtin {
         .build()
 }
 
-fn taxes() -> AdvanceBuilder {
-    Advance::builder(
-        "Taxes",
-        "Once per turn, as an action, you may spend 1 mood token to gain \
+const TAXES_DESCRIPTION: &'static str = "Once per turn, as an action, you may spend 1 mood token to gain \
         food, wood, or ore equal to the number of cities you control. \
-        If you have the Currency advance, you may gain gold instead of food, wood, or ore.",
-    )
-    .add_custom_action(Taxes)
+        If you have the Currency advance, you may gain gold instead of food, wood, or ore.";
+
+fn taxes() -> AdvanceBuilder {
+    Advance::builder("Taxes", TAXES_DESCRIPTION).add_custom_action(Taxes)
+}
+
+pub(crate) fn use_taxes() -> Builtin {
+    Builtin::builder("Taxes", TAXES_DESCRIPTION)
+        .add_resource_request(
+            |event| &mut event.custom_action,
+            0,
+            |game, player_index, _| {
+                let options = tax_options(game.player(player_index));
+                Some(ResourceRewardRequest::new(
+                    options,
+                    "Select a resource to gain".to_string(),
+                ))
+            },
+            |_game, s, _| {
+                vec![format!(
+                    "{} gained {} for using Taxes",
+                    s.player_name, s.choice
+                )]
+            },
+        )
+        .build()
 }
 
 #[must_use]
@@ -109,14 +131,6 @@ pub fn tax_options(player: &Player) -> PaymentOptions {
         c.insert(0, ResourceType::Gold);
     }
     PaymentOptions::sum(player.cities.len() as u32, &c)
-}
-
-pub(crate) fn collect_taxes(game: &mut Game, player_index: usize, gain: ResourcePile) {
-    assert!(
-        tax_options(game.player(player_index)).is_valid_payment(&gain),
-        "Invalid gain for Taxes"
-    );
-    game.players[player_index].gain_resources(gain);
 }
 
 fn trade_routes() -> AdvanceBuilder {

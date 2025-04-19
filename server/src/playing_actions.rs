@@ -3,11 +3,10 @@ use serde::{Deserialize, Serialize};
 
 use crate::action_card::{ActionCardInfo, land_battle_won_action, play_action_card};
 use crate::advance::gain_advance_without_payment;
-use crate::city::found_city;
+use crate::city::{MoodState, found_city};
 use crate::collect::{PositionCollection, collect};
 use crate::construct::Construct;
 use crate::content::action_cards::get_civil_card;
-use crate::content::advances::culture::can_play_sports;
 use crate::content::advances::get_advance;
 use crate::content::custom_actions::{
     CustomActionInfo, CustomActionType, CustomEventAction, execute_custom_action,
@@ -143,9 +142,12 @@ impl PlayingActionType {
                 }
 
                 let can_play = match t {
-                    // todo use event?
                     CustomActionType::Bartering => !p.action_cards.is_empty(),
-                    CustomActionType::Sports => can_play_sports(p),
+                    CustomActionType::Sports => p.resources.culture_tokens > 0 && any_non_happy(p),
+                    CustomActionType::Theaters => {
+                        p.resources.culture_tokens > 0 || p.resources.mood_tokens > 0
+                    }
+                    CustomActionType::ForcedLabor => any_angry(p),
                     _ => true,
                 };
                 if !can_play {
@@ -421,4 +423,18 @@ pub(crate) fn base_or_custom_available(
         .into_iter()
         .filter_map(|a| a.is_available(game, player).map(|()| a).ok())
         .collect()
+}
+
+fn any_non_happy(player: &Player) -> bool {
+    player
+        .cities
+        .iter()
+        .any(|city| city.mood_state != MoodState::Happy)
+}
+
+fn any_angry(player: &Player) -> bool {
+    player
+        .cities
+        .iter()
+        .any(|city| city.mood_state == MoodState::Angry)
 }

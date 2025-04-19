@@ -284,13 +284,9 @@
                 {
                   "action": {
                     "Playing": {
-                      "Custom": {
-                        "Taxes": {
-                          "food": 1,
-                          "wood": 1,
-                          "ore": 1,
-                          "gold": 1
-                        }
+                      "CustomEvent": {
+                        "action": "Taxes",
+                        "city": null
                       }
                     }
                   },
@@ -302,13 +298,102 @@
                     },
                     {
                       "op": "replace",
-                      "path": "/players/0/resources/gold",
-                      "value": 5
+                      "path": "/players/0/resources/mood_tokens",
+                      "value": 11
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/played_once_per_turn_actions"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events"
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "ResourceReward": {
+                        "food": 1,
+                        "wood": 1,
+                        "ore": 1,
+                        "gold": 1
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "CustomAction": {
+                              "action": "Taxes",
+                              "city": null
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "Builtin": "Taxes"
+                            },
+                            "priority": 0,
+                            "request": {
+                              "ResourceReward": {
+                                "name": "Select a resource to gain",
+                                "reward": {
+                                  "conversions": [
+                                    {
+                                      "from": [
+                                        {
+                                          "gold": 1
+                                        }
+                                      ],
+                                      "to": {
+                                        "food": 1
+                                      },
+                                      "type": "Unlimited"
+                                    },
+                                    {
+                                      "from": [
+                                        {
+                                          "food": 1
+                                        }
+                                      ],
+                                      "to": {
+                                        "wood": 1
+                                      },
+                                      "type": "Unlimited"
+                                    },
+                                    {
+                                      "from": [
+                                        {
+                                          "wood": 1
+                                        }
+                                      ],
+                                      "to": {
+                                        "ore": 1
+                                      },
+                                      "type": "Unlimited"
+                                    }
+                                  ],
+                                  "default": {
+                                    "gold": 4
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "last_priority_used": 0,
+                          "player": 0
+                        }
+                      ]
                     },
                     {
                       "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 11
+                      "path": "/players/0/resources/gold",
+                      "value": 5
                     },
                     {
                       "op": "replace",
@@ -319,10 +404,6 @@
                       "op": "replace",
                       "path": "/players/0/resources/wood",
                       "value": 5
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/played_once_per_turn_actions"
                     }
                   ]
                 }
@@ -333,10 +414,13 @@
       ]
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 2,
   "log": [
     [
-      "Player1 paid 1 mood token to collect 1 food, 1 wood, 1 ore and 1 gold using Taxes",
+      "Player1 started Taxes"
+    ],
+    [
+      "Player1 gained 1 food, 1 wood, 1 ore and 1 gold for using Taxes",
       "Player1 could not store 1 food"
     ]
   ],

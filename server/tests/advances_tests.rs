@@ -5,7 +5,7 @@ use server::collect::PositionCollection;
 use server::consts::BUILDING_COST;
 use server::content::advances::trade_routes::find_trade_routes;
 use server::content::custom_actions::CustomAction::{
-    AbsolutePower, ArtsInfluenceCultureAttempt, CivilLiberties, ForcedLabor, Taxes,
+    AbsolutePower, ArtsInfluenceCultureAttempt, CivilLiberties, ForcedLabor,
     VotingIncreaseHappiness,
 };
 use server::content::custom_actions::{CustomAction, CustomActionType, CustomEventAction};
@@ -427,10 +427,20 @@ fn test_theaters() {
 fn test_taxes() {
     JSON.test(
         "taxes",
-        vec![TestAction::undoable(
-            0,
-            Action::Playing(Custom(Taxes(ResourcePile::new(1, 1, 1, 0, 1, 0, 0)))),
-        )],
+        vec![
+            TestAction::undoable(
+                0,
+                Action::Playing(CustomEvent(CustomEventAction::new(
+                    CustomActionType::Taxes,
+                    None,
+                ))),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::ResourceReward(ResourcePile::new(1, 1, 1, 0, 1, 0, 0))),
+            ),
+        ]
     );
 }
 

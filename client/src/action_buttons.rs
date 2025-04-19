@@ -130,28 +130,6 @@ fn generic_custom_action(
     (!custom_action_type.is_city_bound()).then_some(StateUpdate::execute(Action::Playing(
         PlayingAction::CustomEvent(CustomEventAction::new(custom_action_type, None)),
     )))
-
-    // match custom_action_type {
-    //     CustomActionType::AbsolutePower => Some(StateUpdate::execute(Action::Playing(
-    //         PlayingAction::Custom(CustomAction::AbsolutePower),
-    //     ))),
-    //     CustomActionType::ForcedLabor => Some(StateUpdate::execute(Action::Playing(
-    //         PlayingAction::Custom(CustomAction::ForcedLabor),
-    //     ))),
-    //     CustomActionType::CivilLiberties => Some(StateUpdate::execute(Action::Playing(
-    //         PlayingAction::Custom(CustomAction::CivilLiberties),
-    //     ))),
-    //     CustomActionType::Bartering => Some(StateUpdate::execute(Action::Playing(
-    //         PlayingAction::Custom(CustomAction::Bartering),
-    //     ))),
-    //     CustomActionType::Taxes => Some(StateUpdate::OpenDialog(ActiveDialog::Taxes(
-    //         Payment::new_gain(&tax_options(rc.shown_player), "Collect taxes"),
-    //     ))),
-    //     CustomActionType::Theaters => Some(StateUpdate::OpenDialog(ActiveDialog::Theaters(
-    //         Payment::new_gain(&theaters_options(), "Convert Resources"),
-    //     ))),
-    //     _ => None,
-    // }
 }
 
 pub fn base_or_custom_action(
