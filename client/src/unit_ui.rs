@@ -49,7 +49,12 @@ pub fn draw_unit_type(
         radius + 2.
     };
     draw_circle(center.x, center.y, r, unit_highlight_type.color());
-    draw_circle(center.x, center.y, radius - 2., rc.player_color(player_index));
+    draw_circle(
+        center.x,
+        center.y,
+        radius - 2.,
+        rc.player_color(player_index),
+    );
     let icon_size = radius * 1.1;
 
     draw_scaled_icon_with_tooltip(

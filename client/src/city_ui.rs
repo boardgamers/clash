@@ -20,7 +20,7 @@ use macroquad::prelude::*;
 use server::city::{City, MoodState};
 use server::city_pieces::Building;
 use server::collect::{available_collect_actions_for_city, possible_resource_collections};
-use server::construct::available_buildings;
+use server::construct::{can_construct, new_building_positions};
 use server::consts::BUILDING_COST;
 use server::content::persistent_events::Structure;
 use server::game::Game;
@@ -87,34 +87,53 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
     if !city.can_activate() || !rc.can_play_action(&PlayingActionType::Construct) {
         return vec![];
     }
-    available_buildings(rc.game, rc.shown_player.index, city.position)
+    let game = rc.game;
+    Building::all()
         .into_iter()
-        .map(|(b, cost_info, pos)| {
+        .flat_map(|b| {
+            let can = can_construct(city, b, rc.shown_player, game);
+
+            can.as_ref()
+                .ok()
+                .iter()
+                .flat_map(|_| new_building_positions(game, b, city))
+                .map(|pos| (b, can.clone(), pos))
+                .collect::<Vec<_>>()
+        })
+        .map(|(b, can, pos)| {
             let name = b.name();
+            let cost = can.clone().map_or(String::new(), |c| {
+                format!(
+                    " for {}{}",
+                    c.cost,
+                    if c.activate_city {
+                        ""
+                    } else {
+                        " (without city activation)"
+                    }
+                )
+            });
             let tooltip = format!(
-                "Built {}{} for {}{}",
+                "Built {}{}{}",
                 name,
                 pos.map_or(String::new(), |p| format!(" at {p}")),
-                cost_info.cost,
-                if cost_info.activate_city {
-                    ""
-                } else {
-                    " (without city activation)"
-                }
+                cost
             );
             let a: IconAction<'a> = (
                 &rc.assets().buildings[&b],
                 tooltip,
                 Box::new(move || {
-                    StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(
-                        ConstructionPayment::new(
-                            rc,
-                            city,
-                            name,
-                            ConstructionProject::Building(b, pos),
-                            &cost_info,
-                        ),
-                    ))
+                    can.clone().map_or(StateUpdate::None, |cost_info| {
+                        StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(
+                            ConstructionPayment::new(
+                                rc,
+                                city,
+                                name,
+                                ConstructionProject::Building(b, pos),
+                                &cost_info,
+                            ),
+                        ))
+                    })
                 }),
             );
             a

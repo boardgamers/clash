@@ -163,7 +163,7 @@ pub fn recruit_cost_without_replaced(
     if units.ships > 0 && city.pieces.port.is_none() {
         return Err("No port".to_string());
     }
-    
+
     for (t, a) in units.clone() {
         let avail = player.unit_limit().get(&t);
         if a > avail {

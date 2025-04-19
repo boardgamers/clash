@@ -125,27 +125,23 @@ pub fn available_buildings(
     game: &Game,
     player: usize,
     city: Position,
-) -> Vec<(Building, CostInfo, Option<Position>)> {
+) -> Vec<(Building, CostInfo)> {
     let player = game.player(player);
     let city = player.get_city(city);
     Building::all()
         .into_iter()
-        .flat_map(|b| {
-            can_construct(city, b, player, game)
-                .map_or(Vec::new(), |i| new_building_positions(game, b, city, &i))
-        })
+        .filter_map(|b| can_construct(city, b, player, game).ok().map(|i| (b, i)))
         .collect()
 }
 
 #[must_use]
-fn new_building_positions(
+pub fn new_building_positions(
     game: &Game,
     building: Building,
     city: &City,
-    cost_info: &CostInfo,
-) -> Vec<(Building, CostInfo, Option<Position>)> {
+) -> Vec<Option<Position>> {
     if building != Building::Port {
-        return vec![(building, cost_info.clone(), None)];
+        return vec![None];
     }
 
     game.map
@@ -153,7 +149,7 @@ fn new_building_positions(
         .iter()
         .filter_map(|(p, t)| {
             if *t == Terrain::Water && city.position.is_neighbor(*p) {
-                Some((building, cost_info.clone(), Some(*p)))
+                Some(Some(*p))
             } else {
                 None
             }

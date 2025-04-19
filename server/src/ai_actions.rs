@@ -2,7 +2,7 @@ use crate::action::{Action, ActionType};
 use crate::card::validate_card_selection;
 use crate::city::{City, MoodState};
 use crate::collect::{available_collect_actions, collect_action};
-use crate::construct::{Construct, available_buildings};
+use crate::construct::{Construct, available_buildings, new_building_positions};
 use crate::content::advances;
 use crate::content::advances::economy::tax_options;
 use crate::content::custom_actions::{CustomAction, CustomActionType};
@@ -579,11 +579,16 @@ fn construct(p: &Player, game: &Game) -> Vec<Action> {
 pub(crate) fn get_construct_actions(game: &Game, p: &Player, city: &City) -> Vec<Action> {
     available_buildings(game, p.index, city.position)
         .iter()
-        .map(|(building, cost, port)| {
-            Action::Playing(PlayingAction::Construct(
-                Construct::new(city.position, *building, payment(&cost.cost, p))
-                    .with_port_position(*port),
-            ))
+        .flat_map(|(building, cost)| {
+            new_building_positions(game, *building, city)
+                .iter()
+                .map(|port| {
+                    Action::Playing(PlayingAction::Construct(
+                        Construct::new(city.position, *building, payment(&cost.cost, p))
+                            .with_port_position(*port),
+                    ))
+                })
+                .collect_vec()
         })
         .collect()
 }

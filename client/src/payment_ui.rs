@@ -2,7 +2,7 @@ use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::OkTooltip;
 use crate::event_ui::event_help;
 use crate::layout_ui::{
-    ICON_SIZE, bottom_centered_text_with_offset, draw_icon, draw_scaled_icon_with_tooltip,
+    ICON_SIZE, bottom_centered_text_with_offset, draw_scaled_icon_with_tooltip,
 };
 use crate::render_context::RenderContext;
 use crate::resource_ui::{new_resource_map, resource_name};
@@ -175,7 +175,7 @@ pub fn multi_payment_dialog(
                     &[resource_name(s.resource).to_string()],
                     p + vec2(0., -10.),
                     ICON_SIZE,
-                )
+                );
             },
             || tooltip.clone(),
             || {
