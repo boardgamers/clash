@@ -646,7 +646,19 @@ impl Game {
             .custom_actions
             .clone()
             .into_iter()
-            .filter(|(t, _)| t.is_available(self, player_index))
+            .filter(|(t, _)| {
+                if matches!(
+                    t,
+                    CustomActionType::ArtsInfluenceCultureAttempt
+                        | CustomActionType::FreeEconomyCollect
+                        | CustomActionType::VotingIncreaseHappiness
+                ) {
+                    // returned as part of "base_or_custom_available"
+                    return false;
+                }
+
+                t.is_available(self, player_index)
+            })
             .collect()
     }
 

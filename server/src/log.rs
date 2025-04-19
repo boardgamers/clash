@@ -149,6 +149,17 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
             &PlayingActionType::InfluenceCultureAttempt,
         ),
         PlayingAction::Custom(action) => action.format_log_item(game, player, &player_name),
+        PlayingAction::CustomEvent(action) => {
+            format!(
+                "{player_name} started {:?}{}",
+                action.action,
+                if let Some(p) = action.city {
+                    format!(" at {p}")
+                } else {
+                    String::new()
+                }
+            )
+        }
         PlayingAction::ActionCard(a) => {
             let card = get_civil_card(*a);
             let pile = &card.action_type.cost;

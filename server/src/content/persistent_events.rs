@@ -6,6 +6,7 @@ use crate::collect::CollectInfo;
 use crate::combat::Combat;
 use crate::combat_listeners::{CombatEnd, CombatRoundEnd, CombatRoundStart};
 use crate::combat_stats::CombatStats;
+use crate::content::custom_actions::CustomEventAction;
 use crate::events::EventOrigin;
 use crate::explore::ExploreResolutionState;
 use crate::game::Game;
@@ -112,6 +113,7 @@ pub enum PersistentEventType {
     WonderCard(WonderCardInfo),
     DrawWonderCard,
     SelectObjectives(SelectObjectivesInfo),
+    CustomAction(CustomEventAction),
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]

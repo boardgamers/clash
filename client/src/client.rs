@@ -25,8 +25,8 @@ use crate::player_ui::{player_select, show_global_controls, show_top_center, sho
 use crate::render_context::RenderContext;
 use crate::unit_ui::unit_selection_click;
 use crate::{
-    cards_ui, custom_actions_ui, custom_phase_ui, dialog_ui, map_ui, move_ui, recruit_unit_ui,
-    status_phase_ui, tooltip,
+    cards_ui, custom_phase_ui, dialog_ui, map_ui, move_ui, recruit_unit_ui, status_phase_ui,
+    tooltip,
 };
 
 fn render_with_mutable_state(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
@@ -167,10 +167,6 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
         ActiveDialog::ChooseAdditionalAdvances(a) => {
             status_phase_ui::choose_additional_advances_dialog(rc, a)
         }
-        ActiveDialog::Sports((p, pos)) => custom_actions_ui::sports(rc, p, *pos),
-        ActiveDialog::Taxes(p) => custom_actions_ui::taxes(rc, p),
-        ActiveDialog::Theaters(p) => custom_actions_ui::theaters(rc, p),
-
         ActiveDialog::PaymentRequest(c) => custom_phase_ui::custom_phase_payment_dialog(rc, c),
         ActiveDialog::PlayerRequest(r) => custom_phase_ui::player_request_dialog(rc, r),
         ActiveDialog::ResourceRewardRequest(p) => custom_phase_ui::payment_reward_dialog(rc, p),

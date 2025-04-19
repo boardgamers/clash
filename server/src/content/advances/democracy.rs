@@ -3,11 +3,13 @@ use crate::action::Action;
 use crate::advance::{Advance, AdvanceBuilder};
 use crate::city::MoodState;
 use crate::content::advances::{AdvanceGroup, advance_group_builder};
+use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType::{
     CivilLiberties, FreeEconomyCollect, VotingIncreaseHappiness,
 };
 use crate::log::current_player_turn_log;
 use crate::playing_actions::{PlayingAction, PlayingActionType};
+use crate::resource_pile::ResourcePile;
 
 pub(crate) fn democracy() -> AdvanceGroup {
     advance_group_builder(
@@ -54,6 +56,22 @@ fn civil_liberties() -> AdvanceBuilder {
         The cost of Draft is increased to 2 mood token",
     )
     .add_custom_action(CivilLiberties)
+}
+
+pub(crate) fn use_civil_liberties() -> Builtin {
+    Builtin::builder("Civil Liberties", "")
+        .add_simple_persistent_event_listener(
+            |event| &mut event.custom_action,
+            0,
+            |game, player_index, player_name, _| {
+                game.player_mut(player_index)
+                    .gain_resources(ResourcePile::mood_tokens(3));
+                game.add_info_log_item(&format!(
+                    "{player_name} gained 3 mood tokens using Civil Liberties"
+                ));
+            },
+        )
+        .build()
 }
 
 fn free_economy() -> AdvanceBuilder {

@@ -3,9 +3,11 @@ use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::BaseOrCustomDialog;
 use crate::payment_ui::{Payment, payment_dialog};
 use crate::render_context::RenderContext;
-use server::city::City;
-use server::happiness::{happiness_action, happiness_cost_for_all_cities, increase_happiness_cost};
+use server::city::{City, MoodState};
+use server::game::Game;
+use server::happiness::{available_happiness_actions, happiness_action, happiness_cost};
 use server::player::Player;
+use server::player_events::CostInfo;
 use server::playing_actions::{IncreaseHappiness, PlayingActionType};
 use server::position::Position;
 
@@ -21,7 +23,7 @@ impl IncreaseHappinessConfig {
         let steps = p.cities.iter().map(|c| (c.position, 0)).collect();
         IncreaseHappinessConfig {
             steps,
-            payment: Self::happiness_payment(p, &[(p.cities[0].position, 0)], &custom)
+            payment: Self::happiness_payment(p, 0, &custom)
                 .expect("Happiness payment should be available"),
             custom,
         }
@@ -29,17 +31,17 @@ impl IncreaseHappinessConfig {
 
     fn happiness_payment(
         p: &Player,
-        new_steps: &[(Position, u32)],
+        new_steps: u32,
         custom: &BaseOrCustomDialog,
     ) -> Option<Payment> {
-        happiness_cost_for_all_cities(p, new_steps, &custom.action_type).map(|cost| {
-            Payment::new(
-                &cost,
+        let c = happiness_cost(p, new_steps, None).cost;
+        c.can_afford(&custom.action_type.remaining_resources(p))
+            .then_some(Payment::new(
+                &c,
                 &custom.action_type.remaining_resources(p),
                 "Increase happiness",
                 false,
-            )
-        })
+            ))
     }
 }
 
@@ -94,9 +96,14 @@ pub fn add_increase_happiness(
         })
         .collect();
 
+    let step_sum = new_steps
+        .iter()
+        .map(|(p, steps)| rc.shown_player.get_city(*p).size() as u32 * steps)
+        .sum::<u32>();
+
     IncreaseHappinessConfig::happiness_payment(
         rc.shown_player,
-        &new_steps,
+        step_sum,
         &increase_happiness.custom,
     )
     .map(|payment| {
@@ -128,6 +135,36 @@ fn increase_happiness_new_steps(
     action_type: &PlayingActionType,
 ) -> Option<u32> {
     increase_happiness_cost(rc.shown_player, city, new_steps, action_type).map(|_| new_steps)
+}
+
+#[must_use]
+pub fn increase_happiness_cost(
+    player: &Player,
+    city: &City,
+    steps: u32,
+    action_type: &PlayingActionType,
+) -> Option<CostInfo> {
+    let total_cost = happiness_cost(player, steps * city.size() as u32, None);
+    let max_steps = 2 - city.mood_state.clone() as u32;
+    (total_cost
+        .cost
+        .can_afford(&action_type.remaining_resources(player))
+        && steps <= max_steps)
+        .then_some(total_cost)
+}
+
+#[must_use]
+pub fn available_happiness_actions_for_city(
+    game: &Game,
+    player: usize,
+    position: Position,
+) -> Vec<PlayingActionType> {
+    let city = game.player(player).get_city(position);
+    if city.can_activate() && city.mood_state != MoodState::Happy {
+        available_happiness_actions(game, player)
+    } else {
+        vec![]
+    }
 }
 
 pub fn increase_happiness_menu(rc: &RenderContext, h: &IncreaseHappinessConfig) -> StateUpdate {

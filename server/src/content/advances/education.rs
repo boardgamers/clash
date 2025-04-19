@@ -1,9 +1,11 @@
 use crate::ability_initializer::{AbilityInitializerSetup, do_once_per_turn};
+use crate::action_card::gain_action_card_from_pile;
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder};
 use crate::city_pieces::Building;
 use crate::content::advances::{AdvanceGroup, advance_group_builder, get_group};
 use crate::content::persistent_events::PaymentRequest;
+use crate::objective_card::gain_objective_card_from_pile;
 use crate::payment::PaymentOptions;
 use crate::resource_pile::ResourcePile;
 
@@ -20,9 +22,13 @@ pub(crate) fn education() -> AdvanceGroup {
 }
 
 fn writing() -> AdvanceBuilder {
-    Advance::builder("Writing", "todo")
+    Advance::builder("Writing", "Gain 1 action and 1 objective card")
         .with_advance_bonus(CultureToken)
         .with_unlocked_building(Building::Academy)
+        .add_one_time_ability_initializer(|game, player_index| {
+            gain_action_card_from_pile(game, player_index);
+            gain_objective_card_from_pile(game, player_index);
+        })
         .add_simple_persistent_event_listener(
             |event| &mut event.construct,
             3,

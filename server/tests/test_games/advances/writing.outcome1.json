@@ -4,16 +4,16 @@
     {
       "id": 0,
       "resources": {
-        "food": 2,
+        "food": 5,
         "wood": 5,
         "ore": 5,
-        "ideas": 5,
+        "ideas": 3,
         "gold": 5,
-        "mood_tokens": 9,
-        "culture_tokens": 7
+        "mood_tokens": 10,
+        "culture_tokens": 11
       },
       "resource_limit": {
-        "food": 2,
+        "food": 7,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -22,9 +22,10 @@
       "cities": [
         {
           "city_pieces": {
-            "market": 1
+            "academy": 0
           },
           "mood_state": "Happy",
+          "activations": 1,
           "position": "A1"
         },
         {
@@ -32,8 +33,9 @@
             "academy": 1,
             "port": 1
           },
-          "mood_state": "Happy",
+          "mood_state": "Angry",
           "activations": 6,
+          "angry_activation": true,
           "position": "C2",
           "port_position": "C3"
         },
@@ -62,16 +64,6 @@
           "id": 0
         },
         {
-          "position": "C3",
-          "unit_type": "Cavalry",
-          "id": 1
-        },
-        {
-          "position": "C3",
-          "unit_type": "Elephant",
-          "id": 2
-        },
-        {
           "position": "B3",
           "unit_type": "Settler",
           "id": 3
@@ -94,7 +86,17 @@
         {
           "position": "C3",
           "unit_type": "Ship",
-          "id": 7
+          "id": 7,
+          "carried_units": [
+            {
+              "unit_type": "Cavalry",
+              "id": 1
+            },
+            {
+              "unit_type": "Elephant",
+              "id": 2
+            }
+          ]
         },
         {
           "position": "C3",
@@ -107,21 +109,22 @@
           "id": 9
         }
       ],
-      "civilization": "test0",
+      "civilization": "Maya",
       "available_leaders": [
-        "Alexander",
-        "Kleopatra"
+        "Kʼinich Janaab Pakal I"
       ],
       "advances": [
-        "Farming",
-        "Free Economy",
-        "Mining",
-        "Sports",
-        "Voting"
+        "Writing"
       ],
       "incident_tokens": 1,
       "wonder_cards": [
-        "Pyramids"
+        "Great Gardens"
+      ],
+      "action_cards": [
+        1
+      ],
+      "objective_cards": [
+        1
       ],
       "next_unit_id": 10
     },
@@ -171,7 +174,11 @@
           "id": 1
         }
       ],
-      "civilization": "test1",
+      "civilization": "test0",
+      "available_leaders": [
+        "Alexander",
+        "Kleopatra"
+      ],
       "advances": [
         "Farming",
         "Mining"
@@ -217,6 +224,14 @@
         "Fertile"
       ],
       [
+        "B5",
+        "Fertile"
+      ],
+      [
+        "B6",
+        "Fertile"
+      ],
+      [
         "C1",
         "Barren"
       ],
@@ -243,6 +258,10 @@
       [
         "D2",
         "Water"
+      ],
+      [
+        "E2",
+        "Fertile"
       ]
     ]
   },
@@ -259,13 +278,28 @@
                 {
                   "action": {
                     "Playing": {
-                      "Custom": {
-                        "Sports": {
-                          "city_position": "C2",
-                          "payment": {
-                            "culture_tokens": 2
-                          }
+                      "Advance": {
+                        "advance": "Writing",
+                        "payment": {
+                          "food": 1,
+                          "gold": 1
                         }
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Construct": {
+                        "city_position": "A1",
+                        "city_piece": "Academy",
+                        "payment": {
+                          "food": 1,
+                          "wood": 1,
+                          "ore": 1
+                        },
+                        "port_position": null
                       }
                     }
                   },
@@ -273,22 +307,35 @@
                     {
                       "op": "replace",
                       "path": "/actions_left",
-                      "value": 3
+                      "value": 1
                     },
                     {
-                      "op": "add",
-                      "path": "/players/0/cities/1/angry_activation",
-                      "value": true
+                      "op": "remove",
+                      "path": "/players/0/cities/0/city_pieces/academy"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/cities/0/activations"
                     },
                     {
                       "op": "replace",
-                      "path": "/players/0/cities/1/mood_state",
-                      "value": "Angry"
+                      "path": "/players/0/resources/food",
+                      "value": 6
                     },
                     {
                       "op": "replace",
-                      "path": "/players/0/resources/culture_tokens",
-                      "value": 9
+                      "path": "/players/0/resources/ideas",
+                      "value": 1
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/ore",
+                      "value": 6
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/wood",
+                      "value": 6
                     }
                   ]
                 }
@@ -299,14 +346,21 @@
       ]
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 2,
   "log": [
     [
-      "Player1 paid 2 culture tokens to increase the happiness in the city at C2 by 2 steps, making it Happy using Sports"
+      "Player1 paid 1 food and 1 gold to get the Writing advance",
+      "Player1 gained an action card from the pile",
+      "Player1 gained an objective card from the pile",
+      "Player gained 1 culture token as advance bonus"
+    ],
+    [
+      "Player1 paid 1 food, 1 wood and 1 ore to construct a Academy in the city at A1",
+      "Academy gained 2 ideas"
     ]
   ],
-  "undo_limit": 0,
-  "actions_left": 2,
+  "undo_limit": 1,
+  "actions_left": 0,
   "round": 6,
   "age": 1,
   "messages": [
@@ -324,5 +378,8 @@
     10,
     10
   ],
-  "rng": "234162992961072890508432380903651342097"
+  "rng": "46312381643103681595563341886777350953",
+  "wonders_left": [
+    "Pyramids"
+  ]
 }

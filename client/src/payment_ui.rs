@@ -1,11 +1,14 @@
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::OkTooltip;
 use crate::event_ui::event_help;
-use crate::layout_ui::{bottom_centered_text_with_offset, draw_icon};
+use crate::layout_ui::{
+    ICON_SIZE, bottom_centered_text_with_offset, draw_scaled_icon_with_tooltip,
+};
 use crate::render_context::RenderContext;
 use crate::resource_ui::{new_resource_map, resource_name};
 use crate::select_ui;
 use crate::select_ui::{CountSelector, HasCountSelectableObject};
+use crate::tooltip::show_tooltip_for_circle;
 use macroquad::math::{bool, vec2};
 use server::payment::PaymentOptions;
 use server::resource::ResourceType;
@@ -158,11 +161,20 @@ pub fn multi_payment_dialog(
             payment,
             |p| p.current.clone(),
             |s, p| {
-                let _ = draw_icon(
+                let _ = draw_scaled_icon_with_tooltip(
                     rc,
                     &rc.assets().resources[&s.resource],
-                    resource_name(s.resource),
+                    &[],
                     p + vec2(0., -10.),
+                    ICON_SIZE,
+                );
+            },
+            |s, p| {
+                show_tooltip_for_circle(
+                    rc,
+                    &[resource_name(s.resource).to_string()],
+                    p + vec2(0., -10.),
+                    ICON_SIZE,
                 );
             },
             || tooltip.clone(),

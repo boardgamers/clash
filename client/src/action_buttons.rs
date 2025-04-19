@@ -6,13 +6,10 @@ use crate::happiness_ui::open_increase_happiness_dialog;
 use crate::influence_ui::new_cultural_influence_dialog;
 use crate::layout_ui::{bottom_left_texture, icon_pos};
 use crate::move_ui::MoveIntent;
-use crate::payment_ui::Payment;
 use crate::render_context::RenderContext;
 use server::action::Action;
 use server::city::City;
-use server::content::advances::culture::{sports_options, theaters_options};
-use server::content::advances::economy::tax_options;
-use server::content::custom_actions::{CustomAction, CustomActionType};
+use server::content::custom_actions::{CustomActionType, CustomEventAction};
 use server::cultural_influence::available_influence_actions;
 use server::happiness::available_happiness_actions;
 use server::playing_actions::{PlayingAction, PlayingActionType, base_and_custom_action};
@@ -61,22 +58,22 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
         });
     }
     let mut i = 0;
-    for (a, origin) in &game.available_custom_actions(rc.shown_player.index) {
-        if let Some(action) = generic_custom_action(rc, a, None) {
+    for (a, origin) in game.available_custom_actions(rc.shown_player.index) {
+        if let Some(action) = generic_custom_action(rc, a.clone(), None) {
             if bottom_left_texture(
                 rc,
-                &assets.custom_actions[a],
+                &assets.custom_actions[&a],
                 icon_pos(i as i8, -1),
-                &event_help(rc, origin)[0],
+                &event_help(rc, &origin)[0],
             ) {
                 return action;
             }
             i += 1;
         }
     }
-    for (i, (icon, tooltip, action)) in custom_action_buttons(rc, None).iter().enumerate() {
-        if bottom_left_texture(rc, icon, icon_pos(i as i8, -1), tooltip) {
-            return action();
+    for (i, icon) in custom_action_buttons(rc, None).iter().enumerate() {
+        if bottom_left_texture(rc, icon.texture, icon_pos(i as i8, -1), &icon.tooltip) {
+            return (icon.action)();
         }
     }
     StateUpdate::None
@@ -90,13 +87,12 @@ pub fn custom_action_buttons<'a>(
         .available_custom_actions(rc.shown_player.index)
         .into_iter()
         .filter_map(|(a, origin)| {
-            generic_custom_action(rc, &a, city).map(|action| {
-                let a: IconAction<'a> = (
+            generic_custom_action(rc, a.clone(), city).map(|action| {
+                IconAction::new(
                     &rc.assets().custom_actions[&a],
                     event_help(rc, &origin)[0].clone(),
                     Box::new(move || action.clone()),
-                );
-                a
+                )
             })
         })
         .collect()
@@ -117,45 +113,23 @@ fn global_move(rc: &RenderContext) -> StateUpdate {
 
 fn generic_custom_action(
     rc: &RenderContext,
-    custom_action_type: &CustomActionType,
+    custom_action_type: CustomActionType,
     city: Option<&City>,
 ) -> Option<StateUpdate> {
     if let Some(city) = city {
-        if matches!(custom_action_type, CustomActionType::Sports) {
-            if let Some(options) = sports_options(city) {
-                return Some(StateUpdate::OpenDialog(ActiveDialog::Sports((
-                    Payment::new_gain(&options, "Increase happiness using sports"),
-                    city.position,
-                ))));
-            }
-        }
-        return None;
+        return custom_action_type
+            .is_available_city(rc.shown_player, city)
+            .then_some(StateUpdate::execute(Action::Playing(
+                PlayingAction::CustomEvent(CustomEventAction::new(
+                    custom_action_type,
+                    Some(city.position),
+                )),
+            )));
     }
 
-    match custom_action_type {
-        CustomActionType::ArtsInfluenceCultureAttempt
-        | CustomActionType::VotingIncreaseHappiness
-        | CustomActionType::FreeEconomyCollect
-        | CustomActionType::Sports => {
-            // handled explicitly
-            None
-        }
-        CustomActionType::AbsolutePower => Some(StateUpdate::execute(Action::Playing(
-            PlayingAction::Custom(CustomAction::AbsolutePower),
-        ))),
-        CustomActionType::ForcedLabor => Some(StateUpdate::execute(Action::Playing(
-            PlayingAction::Custom(CustomAction::ForcedLabor),
-        ))),
-        CustomActionType::CivilLiberties => Some(StateUpdate::execute(Action::Playing(
-            PlayingAction::Custom(CustomAction::CivilLiberties),
-        ))),
-        CustomActionType::Taxes => Some(StateUpdate::OpenDialog(ActiveDialog::Taxes(
-            Payment::new_gain(&tax_options(rc.shown_player), "Collect taxes"),
-        ))),
-        CustomActionType::Theaters => Some(StateUpdate::OpenDialog(ActiveDialog::Theaters(
-            Payment::new_gain(&theaters_options(), "Convert Resources"),
-        ))),
-    }
+    (!custom_action_type.is_city_bound()).then_some(StateUpdate::execute(Action::Playing(
+        PlayingAction::CustomEvent(CustomEventAction::new(custom_action_type, None)),
+    )))
 }
 
 pub fn base_or_custom_action(

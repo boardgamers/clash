@@ -23,7 +23,6 @@ use server::content::persistent_events::{
     AdvanceRequest, ChangeGovernmentRequest, EventResponse, MultiRequest, PersistentEventRequest,
     PersistentEventType, PlayerRequest, UnitTypeRequest,
 };
-use server::events::EventOrigin;
 use server::game::{Game, GameState};
 use server::movement::CurrentMove;
 use server::playing_actions::PlayingActionType;
@@ -49,9 +48,6 @@ pub enum ActiveDialog {
     ExploreResolution(ExploreResolutionConfig),
 
     // custom
-    Sports((Payment, Position)),
-    Theaters(Payment),
-    Taxes(Payment),
     ResourceRewardRequest(Payment),
     AdvanceRequest(AdvanceRequest),
     PaymentRequest(Vec<Payment>),
@@ -89,9 +85,6 @@ impl ActiveDialog {
             ActiveDialog::ExploreResolution(_) => "explore resolution",
             ActiveDialog::ChangeGovernmentType(_) => "change government type",
             ActiveDialog::ChooseAdditionalAdvances(_) => "choose additional advances",
-            ActiveDialog::Sports(_) => "sports",
-            ActiveDialog::Theaters(_) => "theaters",
-            ActiveDialog::Taxes(_) => "collect taxes",
             ActiveDialog::ResourceRewardRequest(_) => "trade route selection",
             ActiveDialog::AdvanceRequest(_) => "advance selection",
             ActiveDialog::PaymentRequest(_) => "custom phase payment request",
@@ -139,11 +132,6 @@ impl ActiveDialog {
                 vec!["Click on an advance to choose it".to_string()]
             }
             ActiveDialog::WaitingForUpdate => vec!["Waiting for server update".to_string()],
-            ActiveDialog::Sports(_) => event_help(rc, &EventOrigin::Advance("Sports".to_string())),
-            ActiveDialog::Taxes(_) => event_help(rc, &EventOrigin::Advance("Taxes".to_string())),
-            ActiveDialog::Theaters(_) => {
-                event_help(rc, &EventOrigin::Advance("Theaters".to_string()))
-            }
             ActiveDialog::ResourceRewardRequest(_)
             | ActiveDialog::AdvanceRequest(_)
             | ActiveDialog::PaymentRequest(_) => event_help(rc, &custom_phase_event_origin(rc)),

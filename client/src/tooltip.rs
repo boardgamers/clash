@@ -1,4 +1,5 @@
 use crate::client_state::{CameraMode, MousePosition, State, StateUpdate};
+use crate::log_ui::break_text;
 use crate::render_context::RenderContext;
 use macroquad::color::{Color, GRAY};
 use macroquad::input::mouse_position;
@@ -55,17 +56,12 @@ fn is_circle_tooltip_active(rc: &RenderContext, center: Vec2, radius: f32) -> bo
         .all(|mp| (center - rc.screen_to_world(mp.position)).length() < radius)
 }
 
-pub fn show_tooltip_for_circle(rc: &RenderContext, tooltip: &str, center: Vec2, radius: f32) {
+pub fn show_tooltip_for_circle(rc: &RenderContext, tooltip: &[String], center: Vec2, radius: f32) {
     let screen_center = rc.world_to_screen(center);
     if is_circle_tooltip_active(rc, center, radius) {
         draw_circle(center.x, center.y, radius, Color::new(0.0, 0.0, 0.0, 0.5));
         let _ = rc.with_camera(CameraMode::Screen, |rc| {
-            show_tooltip_text(
-                rc,
-                &[tooltip.to_string()],
-                screen_center + vec2(radius, radius),
-                50.,
-            );
+            show_tooltip_text(rc, tooltip, screen_center + vec2(radius, radius), 50.);
             StateUpdate::None
         });
     }
@@ -82,9 +78,15 @@ fn show_tooltip_text(rc: &RenderContext, tooltip: &[String], origin: Vec2, right
     let w = tooltip_rect.size().x + 10.;
     let sx = state.screen_size.x - right_offset;
     let x = tooltip_rect.left().min(sx - w);
-    let y = (tooltip_rect.top() - 10.).max(40.);
+    let y = (tooltip_rect.top() - 10.)
+        .max(40.)
+        .min(state.screen_size.y - tooltip_rect.h - 40.);
     draw_rectangle(x, y, w, tooltip_rect.size().y + 10., GRAY);
     for (i, line) in tooltip.iter().enumerate() {
         state.draw_text(line, x + 5., y + 20. + i as f32 * 20.);
     }
+}
+
+pub fn add_tooltip_description(parts: &mut Vec<String>, label: &str) {
+    break_text(label, 70, parts);
 }

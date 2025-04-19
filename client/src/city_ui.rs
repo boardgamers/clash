@@ -3,30 +3,59 @@ use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::collect_ui::CollectResources;
 use crate::construct_ui::{ConstructionPayment, ConstructionProject};
 use crate::custom_phase_ui::{SelectedStructureInfo, SelectedStructureStatus};
-use crate::happiness_ui::{add_increase_happiness, open_increase_happiness_dialog};
+use crate::happiness_ui::{
+    add_increase_happiness, available_happiness_actions_for_city, increase_happiness_cost,
+    open_increase_happiness_dialog,
+};
 use crate::hex_ui;
-use crate::layout_ui::{draw_scaled_icon, is_in_circle};
+use crate::layout_ui::{draw_scaled_icon, draw_scaled_icon_with_tooltip, is_in_circle};
 use crate::map_ui::{move_units_buttons, show_map_action_buttons};
 use crate::recruit_unit_ui::RecruitAmount;
 use crate::render_context::RenderContext;
 use crate::select_ui::HighlightType;
-use crate::tooltip::show_tooltip_for_circle;
+use crate::tooltip::{add_tooltip_description, show_tooltip_for_circle};
 use itertools::Itertools;
 use macroquad::math::f32;
 use macroquad::prelude::*;
 use server::city::{City, MoodState};
 use server::city_pieces::Building;
 use server::collect::{available_collect_actions_for_city, possible_resource_collections};
-use server::construct::available_buildings;
+use server::construct::{can_construct, new_building_positions};
+use server::consts::BUILDING_COST;
 use server::content::persistent_events::Structure;
 use server::game::Game;
-use server::happiness::{available_happiness_actions_for_city, increase_happiness_cost};
 use server::playing_actions::PlayingActionType;
 use server::resource::ResourceType;
 use server::unit::{UnitType, Units};
 use std::ops::Add;
 
-pub type IconAction<'a> = (&'a Texture2D, String, Box<dyn Fn() -> StateUpdate + 'a>);
+pub struct IconAction<'a> {
+    pub texture: &'a Texture2D,
+    pub tooltip: String,
+    pub warning: bool,
+    pub action: Box<dyn Fn() -> StateUpdate + 'a>,
+}
+
+impl<'a> IconAction<'a> {
+    #[must_use]
+    pub fn new(
+        texture: &'a Texture2D,
+        tooltip: String,
+        action: Box<dyn Fn() -> StateUpdate + 'a>,
+    ) -> IconAction<'a> {
+        IconAction {
+            texture,
+            tooltip,
+            warning: false,
+            action,
+        }
+    }
+
+    #[must_use]
+    pub fn with_warning(self, warning: bool) -> IconAction<'a> {
+        IconAction { warning, ..self }
+    }
+}
 
 pub type IconActionVec<'a> = Vec<IconAction<'a>>;
 
@@ -63,7 +92,7 @@ fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Optio
         return None;
     }
 
-    Some((
+    Some(IconAction::new(
         &rc.assets().resources[&ResourceType::MoodTokens],
         "Increase happiness".to_string(),
         Box::new(move || {
@@ -84,37 +113,56 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
     if !city.can_activate() || !rc.can_play_action(&PlayingActionType::Construct) {
         return vec![];
     }
-    available_buildings(rc.game, rc.shown_player.index, city.position)
+    let game = rc.game;
+    Building::all()
         .into_iter()
-        .map(|(b, cost_info, pos)| {
+        .flat_map(|b| {
+            let can = can_construct(city, b, rc.shown_player, game);
+
+            new_building_positions(game, b, city)
+                .into_iter()
+                .map(|pos| (b, can.clone(), pos))
+                .collect_vec()
+        })
+        .map(|(b, can, pos)| {
             let name = b.name();
+            let warn = can.is_err();
+            let suffix = match &can {
+                Ok(c) => format!(
+                    " for {}{}",
+                    c.cost,
+                    if c.activate_city {
+                        ""
+                    } else {
+                        " (without city activation)"
+                    }
+                ),
+                Err(e) => format!(" ({e})"),
+            };
             let tooltip = format!(
-                "Built {}{} for {}{}",
+                "Built {}{}{}",
                 name,
                 pos.map_or(String::new(), |p| format!(" at {p}")),
-                cost_info.cost,
-                if cost_info.activate_city {
-                    ""
-                } else {
-                    " (without city activation)"
-                }
+                suffix
             );
-            let a: IconAction<'a> = (
+            IconAction::new(
                 &rc.assets().buildings[&b],
                 tooltip,
                 Box::new(move || {
-                    StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(
-                        ConstructionPayment::new(
-                            rc,
-                            city,
-                            name,
-                            ConstructionProject::Building(b, pos),
-                            &cost_info,
-                        ),
-                    ))
+                    can.clone().map_or(StateUpdate::None, |cost_info| {
+                        StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(
+                            ConstructionPayment::new(
+                                rc,
+                                city,
+                                name,
+                                ConstructionProject::Building(b, pos),
+                                &cost_info,
+                            ),
+                        ))
+                    })
                 }),
-            );
-            a
+            )
+            .with_warning(warn)
         })
         .collect()
 }
@@ -123,7 +171,7 @@ fn recruit_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconActio
     if !city.can_activate() || !rc.can_play_action(&PlayingActionType::Recruit) {
         return None;
     }
-    Some((
+    Some(IconAction::new(
         rc.assets().unit(UnitType::Infantry, rc.shown_player),
         "Recruit Units".to_string(),
         Box::new(|| {
@@ -133,7 +181,6 @@ fn recruit_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconActio
                 city.position,
                 Units::empty(),
                 None,
-                &[],
             )
         }),
     ))
@@ -145,7 +192,7 @@ fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option
         return None;
     }
 
-    Some((
+    Some(IconAction::new(
         &rc.assets().resources[&ResourceType::Food],
         "Collect Resources".to_string(),
         Box::new(move || {
@@ -220,7 +267,7 @@ fn draw_selected_state(
     draw_circle_lines(center.x, center.y, size, 3., t.color());
 
     if let Some(tooltip) = &info.tooltip {
-        show_tooltip_for_circle(rc, tooltip, center, size);
+        show_tooltip_for_circle(rc, &[tooltip.clone()], center, size);
     }
 
     if info.status != SelectedStructureStatus::Invalid
@@ -311,10 +358,13 @@ fn draw_buildings(
             let p = building_position(city, center, i, *b);
             draw_circle(p.x, p.y, BUILDING_SIZE, rc.player_color(player_index));
 
-            draw_scaled_icon(
+            let mut tooltip = vec![b.name().to_string()];
+            add_building_description(rc, &mut tooltip, *b);
+
+            draw_scaled_icon_with_tooltip(
                 rc,
                 &rc.assets().buildings[b],
-                b.name(),
+                &tooltip,
                 p + vec2(-8., -8.),
                 16.,
             );
@@ -331,6 +381,22 @@ fn draw_buildings(
         }
     }
     None
+}
+
+pub fn add_building_description(rc: &RenderContext, parts: &mut Vec<String>, b: Building) {
+    let pile = rc
+        .shown_player
+        .building_cost(rc.game, b, None)
+        .cost
+        .first_valid_payment(&BUILDING_COST)
+        .expect("Building cost should be valid");
+    if pile == BUILDING_COST {
+        parts.push(format!("Cost: {BUILDING_COST}"));
+    } else {
+        parts.push(format!("Base cost: {BUILDING_COST}"));
+        parts.push(format!("Current cost: {pile}"));
+    }
+    add_tooltip_description(parts, b.description());
 }
 
 #[allow(clippy::result_large_err)]

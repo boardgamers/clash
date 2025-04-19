@@ -6,8 +6,8 @@ use crate::payment_ui::{Payment, multi_payment_dialog, payment_dialog};
 use crate::player_ui::choose_player_dialog;
 use crate::render_context::RenderContext;
 use crate::select_ui::HighlightType;
-use crate::unit_ui;
-use crate::unit_ui::{UnitSelection, draw_unit_type};
+use crate::tooltip::show_tooltip_for_circle;
+use crate::unit_ui::{UnitSelection, add_unit_description, draw_unit_type};
 use itertools::Itertools;
 use macroquad::math::vec2;
 use server::action::Action;
@@ -68,23 +68,24 @@ pub fn unit_request_dialog(rc: &RenderContext, r: &UnitTypeRequest) -> StateUpda
 
     let c = &r.choices;
     let anchor = bottom_center_anchor(rc) + vec2(0., 60.);
-    for (i, u) in c.iter().enumerate() {
-        let x = (c.len() - i) as i8 - 1;
-        let p = icon_pos(x, -2) + anchor;
+    for pass in 0..2 {
+        for (i, u) in c.iter().enumerate() {
+            let x = (c.len() - i) as i8 - 1;
+            let center = icon_pos(x, -2) + anchor;
 
-        if draw_unit_type(
-            rc,
-            HighlightType::None,
-            p,
-            *u,
-            r.player_index,
-            unit_ui::name(u),
-            20.,
-        ) {
-            return StateUpdate::Execute(Action::Response(EventResponse::SelectUnitType(*u)));
+            if pass == 0 {
+                if draw_unit_type(rc, HighlightType::None, center, *u, r.player_index, 20.) {
+                    return StateUpdate::Execute(Action::Response(EventResponse::SelectUnitType(
+                        *u,
+                    )));
+                }
+            } else {
+                let mut tooltip = vec![u.name().to_string()];
+                add_unit_description(&mut tooltip, *u);
+                show_tooltip_for_circle(rc, &tooltip, center, 20.);
+            }
         }
     }
-
     StateUpdate::None
 }
 

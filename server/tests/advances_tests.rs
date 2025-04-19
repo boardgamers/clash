@@ -2,26 +2,26 @@ use crate::common::{JsonTest, TestAction, illegal_action_test, influence_action}
 use server::action::{Action, execute_action};
 use server::city_pieces::Building::{Academy, Fortress, Temple};
 use server::collect::PositionCollection;
-use server::consts::CONSTRUCT_COST;
+use server::consts::BUILDING_COST;
 use server::content::advances::trade_routes::find_trade_routes;
-use server::content::custom_actions::CustomAction;
 use server::content::custom_actions::CustomAction::{
-    AbsolutePower, ArtsInfluenceCultureAttempt, CivilLiberties, ForcedLabor, Sports, Taxes,
-    Theaters, VotingIncreaseHappiness,
+    ArtsInfluenceCultureAttempt, VotingIncreaseHappiness,
 };
+use server::content::custom_actions::{CustomAction, CustomActionType, CustomEventAction};
 use server::content::persistent_events::{EventResponse, SelectedStructure, Structure};
 use server::events::EventOrigin;
 use server::game::Game;
 use server::movement::MovementAction::Move;
 use server::movement::{MoveUnits, move_units_destinations};
 use server::playing_actions::PlayingAction::{
-    Advance, Collect, Construct, Custom, EndTurn, Recruit, WonderCard,
+    Advance, Collect, Construct, Custom, CustomEvent, EndTurn, Recruit, WonderCard,
 };
 use server::position::Position;
 use server::recruit::recruit_cost_without_replaced;
 use server::resource_pile::ResourcePile;
 use server::unit::Units;
 use server::{construct, playing_actions};
+use std::vec;
 
 mod common;
 
@@ -176,13 +176,22 @@ fn test_monuments() {
 fn test_increase_happiness_sports() {
     JSON.test(
         "increase_happiness_sports",
-        vec![TestAction::undoable(
-            0,
-            Action::Playing(Custom(Sports {
-                payment: ResourcePile::culture_tokens(1),
-                city_position: Position::from_offset("C2"),
-            })),
-        )],
+        vec![
+            TestAction::undoable(
+                0,
+                Action::Playing(CustomEvent(CustomEventAction::new(
+                    CustomActionType::Sports,
+                    Some(Position::from_offset("C2")),
+                ))),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
+                    1,
+                )])),
+            ),
+        ],
     );
 }
 
@@ -190,13 +199,22 @@ fn test_increase_happiness_sports() {
 fn test_increase_happiness_sports2() {
     JSON.test(
         "increase_happiness_sports2",
-        vec![TestAction::undoable(
-            0,
-            Action::Playing(Custom(Sports {
-                payment: ResourcePile::culture_tokens(2),
-                city_position: Position::from_offset("C2"),
-            })),
-        )],
+        vec![
+            TestAction::undoable(
+                0,
+                Action::Playing(CustomEvent(CustomEventAction::new(
+                    CustomActionType::Sports,
+                    Some(Position::from_offset("C2")),
+                ))),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
+                    2,
+                )])),
+            ),
+        ],
     );
 }
 
@@ -244,7 +262,10 @@ fn test_absolute_power() {
         "absolute_power",
         vec![TestAction::undoable(
             0,
-            Action::Playing(Custom(AbsolutePower)),
+            Action::Playing(CustomEvent(CustomEventAction::new(
+                CustomActionType::AbsolutePower,
+                None,
+            ))),
         )],
     );
 }
@@ -254,7 +275,13 @@ fn test_forced_labor() {
     JSON.test(
         "forced_labor",
         vec![
-            TestAction::undoable(0, Action::Playing(Custom(ForcedLabor))),
+            TestAction::undoable(
+                0,
+                Action::Playing(CustomEvent(CustomEventAction::new(
+                    CustomActionType::ForcedLabor,
+                    None,
+                ))),
+            ),
             TestAction::undoable(
                 0,
                 Action::Playing(Collect(playing_actions::Collect::new(
@@ -275,7 +302,13 @@ fn test_civil_liberties() {
     JSON.test(
         "civil_liberties",
         vec![
-            TestAction::undoable(0, Action::Playing(Custom(CivilLiberties))),
+            TestAction::undoable(
+                0,
+                Action::Playing(CustomEvent(CustomEventAction::new(
+                    CustomActionType::CivilLiberties,
+                    None,
+                ))),
+            ),
             TestAction::undoable(
                 0,
                 Action::Playing(Recruit(playing_actions::Recruit::new(
@@ -283,6 +316,27 @@ fn test_civil_liberties() {
                     Position::from_offset("A1"),
                     ResourcePile::mood_tokens(2),
                 ))),
+            ),
+        ],
+    );
+}
+
+#[test]
+fn test_bartering() {
+    JSON.test(
+        "bartering",
+        vec![
+            TestAction::undoable(
+                0,
+                Action::Playing(CustomEvent(CustomEventAction::new(
+                    CustomActionType::Bartering,
+                    None,
+                ))),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::ResourceReward(ResourcePile::gold(1))),
             ),
         ],
     );
@@ -364,10 +418,22 @@ fn get_destinations(game: &Game, units: &[u32], position: &str) -> Vec<String> {
 fn test_theaters() {
     JSON.test(
         "theaters",
-        vec![TestAction::undoable(
-            0,
-            Action::Playing(Custom(Theaters(ResourcePile::culture_tokens(1)))),
-        )],
+        vec![
+            TestAction::undoable(
+                0,
+                Action::Playing(CustomEvent(CustomEventAction::new(
+                    CustomActionType::Theaters,
+                    None,
+                ))),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
+                    1,
+                )])),
+            ),
+        ],
     );
 }
 
@@ -375,10 +441,22 @@ fn test_theaters() {
 fn test_taxes() {
     JSON.test(
         "taxes",
-        vec![TestAction::undoable(
-            0,
-            Action::Playing(Custom(Taxes(ResourcePile::new(1, 1, 1, 0, 1, 0, 0)))),
-        )],
+        vec![
+            TestAction::undoable(
+                0,
+                Action::Playing(CustomEvent(CustomEventAction::new(
+                    CustomActionType::Taxes,
+                    None,
+                ))),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::ResourceReward(ResourcePile::new(
+                    1, 1, 1, 0, 1, 0, 0,
+                ))),
+            ),
+        ],
     );
 }
 
@@ -489,14 +567,24 @@ fn test_priesthood() {
 fn test_writing() {
     JSON.test(
         "writing",
-        vec![TestAction::undoable(
-            0,
-            Action::Playing(Construct(construct::Construct::new(
-                Position::from_offset("A1"),
-                Academy,
-                CONSTRUCT_COST.clone(),
-            ))),
-        )],
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::Playing(Advance {
+                    advance: String::from("Writing"),
+                    payment: ResourcePile::food(1) + ResourcePile::gold(1),
+                }),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Playing(Construct(construct::Construct::new(
+                    Position::from_offset("A1"),
+                    Academy,
+                    BUILDING_COST.clone(),
+                ))),
+            ),
+        ],
     );
 }
 #[test]

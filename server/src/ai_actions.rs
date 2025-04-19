@@ -2,10 +2,9 @@ use crate::action::{Action, ActionType};
 use crate::card::validate_card_selection;
 use crate::city::{City, MoodState};
 use crate::collect::{available_collect_actions, collect_action};
-use crate::construct::{Construct, available_buildings};
+use crate::construct::{Construct, available_buildings, new_building_positions};
 use crate::content::advances;
-use crate::content::advances::economy::tax_options;
-use crate::content::custom_actions::{CustomAction, CustomActionType};
+use crate::content::custom_actions::CustomEventAction;
 use crate::content::persistent_events::{
     ChangeGovernmentRequest, EventResponse, HandCardsRequest, MultiRequest, PersistentEventRequest,
     PersistentEventState, PositionRequest, SelectedStructure, is_selected_structures_valid,
@@ -15,9 +14,7 @@ use crate::cultural_influence::{
 };
 use crate::events::EventOrigin;
 use crate::game::Game;
-use crate::happiness::{
-    available_happiness_actions, happiness_action, happiness_cost_for_all_cities,
-};
+use crate::happiness::{available_happiness_actions, happiness_action, happiness_cost};
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::playing_actions::{
@@ -149,21 +146,21 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
     }
 
     for (a, _) in game.available_custom_actions(p.index) {
-        let option = match a {
-            CustomActionType::Sports | CustomActionType::Theaters | // todo
-            CustomActionType::ArtsInfluenceCultureAttempt
-            | CustomActionType::VotingIncreaseHappiness
-            | CustomActionType::FreeEconomyCollect => None, // handled above
-            CustomActionType::AbsolutePower => Some(CustomAction::AbsolutePower),
-            CustomActionType::ForcedLabor => Some(CustomAction::ForcedLabor),
-            CustomActionType::CivilLiberties => Some(CustomAction::CivilLiberties),
-            CustomActionType::Taxes => try_payment(&tax_options(p), p).map(CustomAction::Taxes),
+        let cities = if a.is_city_bound() {
+            p.cities
+                .iter()
+                .filter_map(|city| a.is_available_city(p, city).then_some(Some(city.position)))
+                .collect_vec()
+        } else {
+            vec![None]
         };
 
-        if let Some(action) = option {
+        for c in cities {
             actions.push((
                 ActionType::Playing(PlayingActionType::Custom(a.clone().info())),
-                vec![Action::Playing(PlayingAction::Custom(action))],
+                vec![Action::Playing(PlayingAction::CustomEvent(
+                    CustomEventAction::new(a.clone(), c),
+                ))],
             ));
         }
     }
@@ -357,7 +354,9 @@ fn calculate_increase_happiness(
 ) -> Option<IncreaseHappiness> {
     // try to make the biggest cities happy - that's usually the best choice
     let mut all_steps: Vec<(Position, u32)> = vec![];
+    let mut step_sum = 0;
     let mut cost = PaymentOptions::free();
+    let available = action_type.remaining_resources(player);
 
     for c in player
         .cities
@@ -370,14 +369,15 @@ fn calculate_increase_happiness(
             MoodState::Neutral => 1,
             MoodState::Happy => 0,
         };
-        let mut new_steps = all_steps.clone();
-        new_steps.push((c.position, steps));
+        let new_steps_sum = step_sum + steps * c.size() as u32;
 
-        let Some(new_cost) = happiness_cost_for_all_cities(player, &new_steps, action_type) else {
+        let info = happiness_cost(player, new_steps_sum, None);
+        if !info.cost.can_afford(&available) {
             break;
-        };
-        all_steps = new_steps;
-        cost = new_cost;
+        }
+        all_steps.push((c.position, steps));
+        step_sum = new_steps_sum;
+        cost = info.cost;
     }
 
     (!all_steps.is_empty()).then_some(IncreaseHappiness::new(
@@ -579,11 +579,16 @@ fn construct(p: &Player, game: &Game) -> Vec<Action> {
 pub(crate) fn get_construct_actions(game: &Game, p: &Player, city: &City) -> Vec<Action> {
     available_buildings(game, p.index, city.position)
         .iter()
-        .map(|(building, cost, port)| {
-            Action::Playing(PlayingAction::Construct(
-                Construct::new(city.position, *building, payment(&cost.cost, p))
-                    .with_port_position(*port),
-            ))
+        .flat_map(|(building, cost)| {
+            new_building_positions(game, *building, city)
+                .iter()
+                .map(|port| {
+                    Action::Playing(PlayingAction::Construct(
+                        Construct::new(city.position, *building, payment(&cost.cost, p))
+                            .with_port_position(*port),
+                    ))
+                })
+                .collect_vec()
         })
         .collect()
 }

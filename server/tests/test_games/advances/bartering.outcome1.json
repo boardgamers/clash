@@ -9,7 +9,7 @@
         "ore": 7,
         "ideas": 5,
         "gold": 7,
-        "mood_tokens": 7,
+        "mood_tokens": 6,
         "culture_tokens": 7
       },
       "resource_limit": {
@@ -25,7 +25,6 @@
         {
           "city_pieces": {},
           "mood_state": "Happy",
-          "activations": 1,
           "position": "A1"
         },
         {
@@ -76,16 +75,11 @@
           "position": "C2",
           "unit_type": "Settler",
           "id": 7
-        },
-        {
-          "position": "A1",
-          "unit_type": "Infantry",
-          "id": 8
         }
       ],
       "civilization": "test0",
       "advances": [
-        "Civil Liberties",
+        "Bartering",
         "Draft",
         "Farming",
         "Math",
@@ -93,7 +87,10 @@
         "Public Education"
       ],
       "incident_tokens": 2,
-      "next_unit_id": 9
+      "next_unit_id": 8,
+      "played_once_per_turn_actions": [
+        "Bartering"
+      ]
     },
     {
       "id": 1,
@@ -203,61 +200,82 @@
                   "action": {
                     "Playing": {
                       "CustomEvent": {
-                        "action": "CivilLiberties",
+                        "action": "Bartering",
                         "city": null
                       }
                     }
                   },
                   "undo": [
                     {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 3
+                      "op": "add",
+                      "path": "/players/0/action_cards",
+                      "value": [
+                        1
+                      ]
                     },
                     {
-                      "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 6
+                      "op": "remove",
+                      "path": "/players/0/played_once_per_turn_actions"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events"
                     }
                   ]
                 },
                 {
                   "action": {
-                    "Playing": {
-                      "Recruit": {
-                        "units": {
-                          "infantry": 1
-                        },
-                        "city_position": "A1",
-                        "payment": {
-                          "mood_tokens": 2
-                        }
+                    "Response": {
+                      "ResourceReward": {
+                        "gold": 1
                       }
                     }
                   },
                   "undo": [
                     {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 2
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/cities/0/activations"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/next_unit_id",
-                      "value": 8
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 9
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/units/8"
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "CustomAction": {
+                              "action": "Bartering",
+                              "city": null
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "Builtin": "Bartering"
+                            },
+                            "priority": 0,
+                            "request": {
+                              "ResourceReward": {
+                                "name": "Select a resource to gain",
+                                "reward": {
+                                  "conversions": [
+                                    {
+                                      "from": [
+                                        {
+                                          "gold": 1
+                                        }
+                                      ],
+                                      "to": {
+                                        "culture_tokens": 1
+                                      },
+                                      "type": "Unlimited"
+                                    }
+                                  ],
+                                  "default": {
+                                    "gold": 1
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "last_priority_used": 0,
+                          "player": 0
+                        }
+                      ]
                     }
                   ]
                 }
@@ -271,16 +289,16 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 started CivilLiberties",
-      "Player1 gained 3 mood tokens using Civil Liberties"
+      "Player1 started Bartering",
+      "Player1 discarded an action card for 1 gold or 1 culture token"
     ],
     [
-      "Player1 paid 2 mood tokens to recruit 1 infantry in the city at A1",
-      "Draft reduced the cost of 1 Infantry to 2 mood tokens"
+      "Player1 gained 1 gold for discarding an action card",
+      "Player1 could not store 1 gold"
     ]
   ],
   "undo_limit": 0,
-  "actions_left": 1,
+  "actions_left": 3,
   "round": 2,
   "age": 1,
   "messages": [
