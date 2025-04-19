@@ -158,11 +158,14 @@ where
                 return None;
             }
 
-            let choices = get_barbarian_reinforcement_choices(game, get_barbarian_city(v));
+             let Some(city) = get_barbarian_city(v) else {
+                return None;
+            };
+            let choices = get_barbarian_reinforcement_choices(game, city);
             Some(UnitTypeRequest::new(
                 choices,
                 get_barbarians_player(game).index,
-                "Select a unit to reinforce the barbarians",
+                &format!("Select a unit to reinforce the barbarians at {}", city),
             ))
         },
         move |game, s, v| {
@@ -416,11 +419,8 @@ fn possible_barbarians_reinforcements(game: &Game) -> Vec<Position> {
     cities_that_can_add_units(barbarian)
 }
 
-fn get_barbarian_reinforcement_choices(game: &Game, pos: Option<Position>) -> Vec<UnitType> {
+fn get_barbarian_reinforcement_choices(game: &Game, pos: Position) -> Vec<UnitType> {
     let barbarian = get_barbarians_player(game);
-    let Some(pos) = pos else {
-        return vec![];
-    };
 
     let possible = if barbarian
         .get_units(pos)

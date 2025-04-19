@@ -155,7 +155,7 @@ fn teach_us(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
          without changing the Game Event counter.",
         ActionCost::free(),
         // is played by "use_teach_us"
-        |_game, _player, _a| true,
+        |_game, _player, _a| false,
     )
     .tactics_card(tactics_card)
     .build()
