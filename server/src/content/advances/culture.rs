@@ -124,7 +124,7 @@ pub(crate) fn use_sports() -> Builtin {
                         position,
                         game.get_any_city(position).mood_state
                     ),
-                )
+                );
             },
         )
         .build()
