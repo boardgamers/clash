@@ -6,7 +6,6 @@ use crate::payment_ui::{Payment, multi_payment_dialog, payment_dialog};
 use crate::player_ui::choose_player_dialog;
 use crate::render_context::RenderContext;
 use crate::select_ui::HighlightType;
-use crate::unit_ui;
 use crate::unit_ui::{UnitSelection, draw_unit_type};
 use itertools::Itertools;
 use macroquad::math::vec2;
@@ -72,15 +71,7 @@ pub fn unit_request_dialog(rc: &RenderContext, r: &UnitTypeRequest) -> StateUpda
         let x = (c.len() - i) as i8 - 1;
         let p = icon_pos(x, -2) + anchor;
 
-        if draw_unit_type(
-            rc,
-            HighlightType::None,
-            p,
-            *u,
-            r.player_index,
-            unit_ui::name(u),
-            20.,
-        ) {
+        if draw_unit_type(rc, HighlightType::None, p, *u, r.player_index, "", 20.) {
             return StateUpdate::Execute(Action::Response(EventResponse::SelectUnitType(*u)));
         }
     }

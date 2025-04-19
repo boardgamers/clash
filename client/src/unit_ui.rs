@@ -9,10 +9,10 @@ use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::hex_ui;
 use crate::select_ui::HighlightType;
 
-use crate::layout_ui::{draw_scaled_icon, is_in_circle};
+use crate::layout_ui::{draw_scaled_icon_with_tooltip, is_in_circle};
 use crate::move_ui::MoveDestination;
 use crate::render_context::RenderContext;
-use crate::tooltip::show_tooltip_for_circle;
+use crate::tooltip::{add_tooltip_description, show_tooltip_for_circle};
 use itertools::Itertools;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::movement::MovementRestriction;
@@ -41,16 +41,21 @@ pub fn draw_unit_type(
     center: Vec2,
     unit_type: UnitType,
     player_index: usize,
-    tooltip: &str,
+    tooltip_suffix: &str,
     size: f32,
 ) -> bool {
     draw_circle(center.x, center.y, size, unit_highlight_type.color());
     draw_circle(center.x, center.y, size - 2., rc.player_color(player_index));
     let icon_size = size * 1.1;
-    draw_scaled_icon(
+
+    let mut tooltip = vec![];
+    tooltip.push(format!("{}{}", unit_type.name(), tooltip_suffix));
+    add_unit_description(&mut tooltip, unit_type);
+
+    draw_scaled_icon_with_tooltip(
         rc,
         rc.assets().unit(unit_type, rc.game.player(player_index)),
-        tooltip,
+        &tooltip,
         vec2(center.x - icon_size / 2., center.y - icon_size / 2.),
         icon_size,
     )
@@ -315,4 +320,9 @@ pub fn unit_selection_clicked(unit_id: u32, units: &mut Vec<u32>) {
     } else {
         units.push(unit_id);
     }
+}
+
+pub fn add_unit_description(parts: &mut Vec<String>, u: UnitType) {
+    parts.push(format!("Cost: {}", u.cost()));
+    add_tooltip_description(parts, &u.description());
 }

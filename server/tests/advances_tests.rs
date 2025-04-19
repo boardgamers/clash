@@ -2,7 +2,7 @@ use crate::common::{JsonTest, TestAction, illegal_action_test, influence_action}
 use server::action::{Action, execute_action};
 use server::city_pieces::Building::{Academy, Fortress, Temple};
 use server::collect::PositionCollection;
-use server::consts::CONSTRUCT_COST;
+use server::consts::BUILDING_COST;
 use server::content::advances::trade_routes::find_trade_routes;
 use server::content::custom_actions::CustomAction;
 use server::content::custom_actions::CustomAction::{
@@ -494,7 +494,7 @@ fn test_writing() {
             Action::Playing(Construct(construct::Construct::new(
                 Position::from_offset("A1"),
                 Academy,
-                CONSTRUCT_COST.clone(),
+                BUILDING_COST.clone(),
             ))),
         )],
     );

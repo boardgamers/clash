@@ -16,9 +16,9 @@ use crate::{
     city_pieces::Building::{self},
     civilization::Civilization,
     consts::{
-        ADVANCE_COST, ADVANCE_VICTORY_POINTS, BUILDING_VICTORY_POINTS,
-        CAPTURED_LEADER_VICTORY_POINTS, CITY_LIMIT, CITY_PIECE_LIMIT, CONSTRUCT_COST,
-        OBJECTIVE_VICTORY_POINTS, UNIT_LIMIT, WONDER_VICTORY_POINTS,
+        ADVANCE_COST, ADVANCE_VICTORY_POINTS, BUILDING_COST, BUILDING_VICTORY_POINTS,
+        CAPTURED_LEADER_VICTORY_POINTS, CITY_LIMIT, CITY_PIECE_LIMIT, OBJECTIVE_VICTORY_POINTS,
+        UNIT_LIMIT, WONDER_VICTORY_POINTS,
     },
     content::{civilizations, custom_actions::CustomActionType},
     game::Game,
@@ -592,7 +592,7 @@ impl Player {
     }
 
     #[must_use]
-    pub fn construct_cost(
+    pub fn building_cost(
         &self,
         game: &Game,
         building: Building,
@@ -600,7 +600,7 @@ impl Player {
     ) -> CostInfo {
         self.trigger_cost_event(
             |e| &e.construct_cost,
-            &PaymentOptions::resources(CONSTRUCT_COST),
+            &PaymentOptions::resources(BUILDING_COST),
             &building,
             game,
             execute,

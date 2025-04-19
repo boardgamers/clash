@@ -1,4 +1,5 @@
 use crate::client_state::{CameraMode, MousePosition, State, StateUpdate};
+use crate::log_ui::break_text;
 use crate::render_context::RenderContext;
 use macroquad::color::{Color, GRAY};
 use macroquad::input::mouse_position;
@@ -87,4 +88,8 @@ fn show_tooltip_text(rc: &RenderContext, tooltip: &[String], origin: Vec2, right
     for (i, line) in tooltip.iter().enumerate() {
         state.draw_text(line, x + 5., y + 20. + i as f32 * 20.);
     }
+}
+
+pub fn add_tooltip_description(parts: &mut Vec<String>, label: &str) {
+    break_text(label, 70, parts);
 }

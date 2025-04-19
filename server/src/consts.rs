@@ -1,7 +1,7 @@
 use crate::content::advances::TACTICS;
 use crate::{resource_pile::ResourcePile, unit::Units};
 
-pub const MAX_CITY_SIZE: usize = 4;
+pub const MAX_CITY_PIECES: usize = 4; // i.e. city size 5
 pub const AGES: u32 = 6;
 pub const ADVANCE_COST: u32 = 2;
 pub const BUILDING_VICTORY_POINTS: f32 = 1.0;
@@ -42,7 +42,7 @@ pub const UNIT_LIMIT_PIRATES: Units = Units {
     elephants: 0,
     leaders: 0,
 };
-pub const CONSTRUCT_COST: ResourcePile = ResourcePile {
+pub const BUILDING_COST: ResourcePile = ResourcePile {
     food: 1,
     wood: 1,
     ore: 1,

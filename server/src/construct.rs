@@ -1,6 +1,6 @@
 use crate::city::{City, MoodState};
 use crate::city_pieces::Building;
-use crate::consts::MAX_CITY_SIZE;
+use crate::consts::MAX_CITY_PIECES;
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
 use crate::map::Terrain;
@@ -65,7 +65,7 @@ pub fn can_construct(
     if !player.is_building_available(building, game) {
         return Err("All non-destroyed buildings are built".to_string());
     }
-    let cost_info = player.construct_cost(game, building, None);
+    let cost_info = player.building_cost(game, building, None);
     if !player.can_afford(&cost_info.cost) {
         // construct cost event listener?
         return Err("Not enough resources".to_string());
@@ -77,7 +77,7 @@ pub(crate) fn can_construct_anything(city: &City, player: &Player) -> Result<(),
     if city.player_index != player.index {
         return Err("Not your city".to_string());
     }
-    if city.pieces.amount() >= MAX_CITY_SIZE {
+    if city.pieces.amount() >= MAX_CITY_PIECES {
         return Err("City is full".to_string());
     }
     if city.size() >= player.cities.len() {

@@ -5,9 +5,7 @@ use crate::payment_ui::{Payment, payment_dialog};
 use crate::render_context::RenderContext;
 use server::city::{City, MoodState};
 use server::game::Game;
-use server::happiness::{
-    available_happiness_actions, happiness_action, happiness_cost, increase_happiness_cost,
-};
+use server::happiness::{available_happiness_actions, happiness_action, happiness_cost};
 use server::player::Player;
 use server::player_events::CostInfo;
 use server::playing_actions::{IncreaseHappiness, PlayingActionType};

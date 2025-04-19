@@ -298,7 +298,7 @@ fn great_prophet() -> ActionCard {
 }
 
 fn temple_cost(game: &Game, player: &Player) -> PaymentOptions {
-    player.construct_cost(game, Building::Temple, None).cost
+    player.building_cost(game, Building::Temple, None).cost
 }
 
 pub(crate) fn great_person_description<S: AsRef<str>>(free_advance_groups: &[S]) -> String {

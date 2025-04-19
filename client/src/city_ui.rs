@@ -3,14 +3,17 @@ use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::collect_ui::CollectResources;
 use crate::construct_ui::{ConstructionPayment, ConstructionProject};
 use crate::custom_phase_ui::{SelectedStructureInfo, SelectedStructureStatus};
-use crate::happiness_ui::{add_increase_happiness, open_increase_happiness_dialog};
+use crate::happiness_ui::{
+    add_increase_happiness, available_happiness_actions_for_city, increase_happiness_cost,
+    open_increase_happiness_dialog,
+};
 use crate::hex_ui;
-use crate::layout_ui::{draw_scaled_icon, is_in_circle};
+use crate::layout_ui::{draw_scaled_icon, draw_scaled_icon_with_tooltip, is_in_circle};
 use crate::map_ui::{move_units_buttons, show_map_action_buttons};
 use crate::recruit_unit_ui::RecruitAmount;
 use crate::render_context::RenderContext;
 use crate::select_ui::HighlightType;
-use crate::tooltip::show_tooltip_for_circle;
+use crate::tooltip::{add_tooltip_description, show_tooltip_for_circle};
 use itertools::Itertools;
 use macroquad::math::f32;
 use macroquad::prelude::*;
@@ -18,6 +21,7 @@ use server::city::{City, MoodState};
 use server::city_pieces::Building;
 use server::collect::{available_collect_actions_for_city, possible_resource_collections};
 use server::construct::available_buildings;
+use server::consts::BUILDING_COST;
 use server::content::persistent_events::Structure;
 use server::game::Game;
 use server::playing_actions::PlayingActionType;
@@ -310,10 +314,13 @@ fn draw_buildings(
             let p = building_position(city, center, i, *b);
             draw_circle(p.x, p.y, BUILDING_SIZE, rc.player_color(player_index));
 
-            draw_scaled_icon(
+            let mut tooltip = vec![b.name().to_string()];
+            add_building_description(rc, &mut tooltip, *b);
+
+            draw_scaled_icon_with_tooltip(
                 rc,
                 &rc.assets().buildings[b],
-                b.name(),
+                &tooltip,
                 p + vec2(-8., -8.),
                 16.,
             );
@@ -330,6 +337,22 @@ fn draw_buildings(
         }
     }
     None
+}
+
+pub fn add_building_description(rc: &RenderContext, parts: &mut Vec<String>, b: Building) {
+    let pile = rc
+        .shown_player
+        .building_cost(rc.game, b, None)
+        .cost
+        .first_valid_payment(&BUILDING_COST)
+        .expect("Building cost should be valid");
+    if pile == BUILDING_COST {
+        parts.push(format!("Cost: {BUILDING_COST}"));
+    } else {
+        parts.push(format!("Base cost: {BUILDING_COST}"));
+        parts.push(format!("Current cost: {pile}"));
+    }
+    add_tooltip_description(parts, b.description());
 }
 
 #[allow(clippy::result_large_err)]

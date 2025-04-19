@@ -230,10 +230,7 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
                 p,
                 s.unit_type,
                 rc.shown_player.index,
-                &format!(
-                    "{} ({} available with current resources)",
-                    s.name, s.selectable.max
-                ),
+                &format!(" ({} available with current resources)", s.selectable.max),
                 20.,
             );
         },
