@@ -4,6 +4,7 @@ use crate::map::Terrain::Fertile;
 use crate::payment::{PaymentConversionType, PaymentOptions};
 use crate::{cache, resource_pile::ResourcePile, wonder::Wonder};
 use std::collections::HashSet;
+use crate::advance::Advance;
 
 #[must_use]
 pub fn get_all() -> &'static Vec<Wonder> {
@@ -26,7 +27,7 @@ pub fn get_all_uncached() -> Vec<Wonder> {
             "Great Gardens",
             "The city with this wonder may Collect any type of resource from Grassland spaces including ideas and gold.",
             PaymentOptions::resources(ResourcePile::new(5, 5, 2, 0, 0, 0, 5)),
-            vec![IRRIGATION],
+            vec![Advance::Irrigation],
         )
             .with_reset_collect_stats()
             .add_transient_event_listener(

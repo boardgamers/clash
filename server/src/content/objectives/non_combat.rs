@@ -7,6 +7,7 @@ use crate::objective_card::{Objective, objective_is_ready};
 use crate::player::Player;
 use crate::position::Position;
 use itertools::Itertools;
+use crate::advance::Advance;
 
 pub(crate) fn draft() -> Objective {
     let name = "Draft";
@@ -19,7 +20,7 @@ pub(crate) fn draft() -> Objective {
                 // Draft is just a cost conversion
                 let used_draft = r.units.infantry > 0
                     && r.payment.mood_tokens >= draft_cost(p)
-                    && p.has_advance("Draft");
+                    && p.has_advance(Advance::Draft);
                 if used_draft {
                     if p.event_info.contains_key("Used Draft") {
                         objective_is_ready(p, name);

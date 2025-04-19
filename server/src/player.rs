@@ -1,4 +1,5 @@
-use crate::advance::AdvanceInfo;
+use enumset::EnumSet;
+use crate::advance::{Advance, AdvanceInfo};
 use crate::city_pieces::{DestroyedStructures, DestroyedStructuresData};
 use crate::collect::reset_collect_within_range_for_all;
 use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
@@ -59,7 +60,7 @@ pub struct Player {
     pub civilization: Civilization,
     pub active_leader: Option<String>,
     pub available_leaders: Vec<String>,
-    pub advances: Vec<&'static AdvanceInfo>,
+    pub advances: EnumSet<Advance>,
     pub unlocked_special_advances: Vec<String>,
     pub wonders_build: Vec<String>,
     pub incident_tokens: u8,
@@ -440,10 +441,10 @@ impl Player {
 
     #[must_use]
     pub fn can_advance_in_change_government(&self, advance: &AdvanceInfo) -> bool {
-        if self.has_advance(&advance.name) {
+        if self.has_advance(advance.advance) {
             return false;
         }
-        if let Some(required_advance) = &advance.required {
+        if let Some(required_advance) = advance.required {
             if !self.has_advance(required_advance) {
                 return false;
             }
@@ -453,11 +454,11 @@ impl Player {
 
     #[must_use]
     pub fn can_advance_free(&self, advance: &AdvanceInfo) -> bool {
-        if self.has_advance(&advance.name) {
+        if self.has_advance(a.advance) {
             return false;
         }
 
-        for contradicting_advance in &advance.contradicting {
+        for contradicting_advance in advance.contradicting {
             if self.has_advance(contradicting_advance) {
                 return false;
             }
@@ -471,8 +472,8 @@ impl Player {
     }
 
     #[must_use]
-    pub fn has_advance(&self, advance: &str) -> bool {
-        self.advances.iter().any(|a| a.name == advance)
+    pub fn has_advance(&self, advance: Advance) -> bool {
+        self.advances.contains(advance)
     }
 
     #[must_use]

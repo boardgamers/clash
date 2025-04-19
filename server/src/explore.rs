@@ -11,6 +11,7 @@ use crate::movement::{move_units, stop_current_move};
 use crate::position::Position;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use crate::advance::Advance;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct ExploreResolutionState {
@@ -167,7 +168,7 @@ fn move_to_explored_tile(
 ) {
     if is_any_ship(game, player_index, units) && game.map.is_land(destination) {
         let player = game.player(player_index);
-        let used_navigation = player.has_advance(NAVIGATION)
+        let used_navigation = player.has_advance(Advance::Navigation)
             && !player.get_unit(units[0]).position.is_neighbor(destination);
 
         if ship_can_teleport || used_navigation {

@@ -338,7 +338,7 @@ pub(crate) fn government_advances(p: &Player) -> Vec<String> {
     advances::get_government(&current)
         .advances
         .iter()
-        .filter(|a| p.has_advance(&a.name))
+        .filter(|a| p.has_advance(a.advance))
         .map(|a| a.name.clone())
         .collect_vec()
 }

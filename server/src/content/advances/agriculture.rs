@@ -39,7 +39,7 @@ fn storage() -> AdvanceBuilder {
 fn irrigation() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::Irrigation,
-        IRRIGATION,
+        "Irrigation",
         "Your cities may Collect food from Barren spaces, Ignore Famine events",
     )
     .with_reset_collect_stats()
@@ -74,7 +74,7 @@ fn husbandry() -> AdvanceBuilder {
 
 fn husbandry_collect(i: &mut CollectInfo, c: &CollectContext, game: &Game) {
     let player = &game.players[c.player_index];
-    let allowed = if player.has_advance(ROADS) { 2 } else { 1 };
+    let allowed = if player.has_advance(Advance::Roads) { 2 } else { 1 };
 
     if c.used
         .iter()

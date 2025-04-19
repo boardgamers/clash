@@ -38,7 +38,7 @@ pub fn show_paid_advance_menu(rc: &RenderContext) -> StateUpdate {
         rc,
         "Advances",
         |a, p| {
-            if p.has_advance(&a.name) {
+            if p.has_advance(a.advance) {
                 AdvanceState::Owned
             } else if game.state == GameState::Playing && game.actions_left > 0 && p.can_advance(a)
             {

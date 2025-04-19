@@ -12,8 +12,8 @@ pub(crate) mod theocracy;
 pub mod trade_routes;
 pub(crate) mod warfare;
 
-use crate::advance::AdvanceInfo;
 use crate::advance::AdvanceBuilder;
+use crate::advance::AdvanceInfo;
 use crate::cache;
 use crate::content::advances::agriculture::agriculture;
 use crate::content::advances::autocracy::autocracy;
@@ -28,15 +28,6 @@ use crate::content::advances::spirituality::spirituality;
 use crate::content::advances::theocracy::theocracy;
 use crate::content::advances::warfare::warfare;
 use std::vec;
-
-//names of advances that need special handling
-pub const NAVIGATION: &str = "Navigation";
-pub const ROADS: &str = "Roads";
-pub const STEEL_WEAPONS: &str = "Steel Weapons";
-pub const METALLURGY: &str = "Metallurgy";
-pub const TACTICS: &str = "Tactics";
-pub const CURRENCY: &str = "Currency";
-pub const IRRIGATION: &str = "Irrigation";
 
 struct GovernmentInfo {
     name: &'static str,

@@ -17,6 +17,7 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::iter;
+use crate::advance::Advance;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Hash, Debug)]
 pub struct PositionCollection {
@@ -417,7 +418,7 @@ pub(crate) fn invalidate_collect_cache() -> Builtin {
 }
 
 pub(crate) fn reset_collect_within_range(p: &mut Player, position: Position) {
-    let has_husbandry = p.has_advance("Husbandry");
+    let has_husbandry = p.has_advance(Advance::Husbandry);
     let range = if has_husbandry { 2 } else { 1 };
     for c in &mut p.cities {
         if c.position.distance(position) <= range {

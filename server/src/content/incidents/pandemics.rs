@@ -18,6 +18,7 @@ use crate::position::Position;
 use crate::resource::ResourceType;
 use itertools::Itertools;
 use std::ops::RangeInclusive;
+use crate::advance::Advance;
 
 pub(crate) fn pandemics_incidents() -> Vec<Incident> {
     vec![pandemics(), black_death(), vermin(), draught(), fire()]
@@ -201,7 +202,7 @@ fn vermin() -> Incident {
         IncidentTarget::AllPlayers,
         IncidentBaseEffect::None,
         |_, _| 1,
-        |p| p.has_advance("Storage"),
+        |p| p.has_advance(Advance::Storage),
         |_, _| true,
     )
 }

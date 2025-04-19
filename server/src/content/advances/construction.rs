@@ -63,7 +63,7 @@ fn sanitation() -> AdvanceBuilder {
 fn roads() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::Roads,
-        ROADS,
+        "Roads",
         "When moving from or to a city, you may pay 1 food and 1 ore \
     to extend the range of a group of land units by 1 and ignore terrain effects. \
     May not be used to embark, disembark, or explore",

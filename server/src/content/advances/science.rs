@@ -108,7 +108,7 @@ fn medicine() -> AdvanceBuilder {
 fn metallurgy() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::Metallurgy,
-        METALLURGY,
+        "Metallurgy",
         "If you have the Steel Weapons Advance, \
         you no longer have to pay 1 ore to activate it against enemies without Steel Weapons. \
         If you collect at least 2 ore, replace 1 ore with 1 gold",

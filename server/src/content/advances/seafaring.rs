@@ -3,7 +3,7 @@ use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{AdvanceInfo, AdvanceBuilder, Advance};
 use crate::city_pieces::Building::Port;
 use crate::collect::{CollectContext, CollectInfo};
-use crate::content::advances::{AdvanceGroup, NAVIGATION, advance_group_builder};
+use crate::content::advances::{AdvanceGroup,  advance_group_builder};
 use crate::game::Game;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
@@ -29,7 +29,7 @@ fn fishing() -> AdvanceBuilder {
 fn navigation() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::Navigation,
-        NAVIGATION,
+        "Navigation",
         "Ships may leave the map and return at the next sea space",
     )
     .with_advance_bonus(CultureToken)

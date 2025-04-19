@@ -52,7 +52,7 @@ pub fn change_government_type_dialog(
                 .is_some_and(|_| p.can_advance_in_change_government(a))
             {
                 AdvanceState::Available
-            } else if rc.shown_player.has_advance(&a.name) && a.government.is_some() {
+            } else if rc.shown_player.has_advance(a.advance) && a.government.is_some() {
                 AdvanceState::Owned
             } else {
                 AdvanceState::Unavailable
@@ -69,7 +69,7 @@ pub fn change_government_type_dialog(
             let needed = get_government(&rc.shown_player.government().unwrap())
                 .advances
                 .iter()
-                .filter(|a| rc.shown_player.has_advance(&a.name))
+                .filter(|a| rc.shown_player.has_advance(a.advance))
                 .count()
                 - 1;
             StateUpdate::OpenDialog(ActiveDialog::ChooseAdditionalAdvances(

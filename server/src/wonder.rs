@@ -14,6 +14,7 @@ use crate::utils::remove_element;
 use crate::{ability_initializer::AbilityInitializerSetup, game::Game, position::Position};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use crate::advance::Advance;
 
 type PlacementChecker = Box<dyn Fn(Position, &Game) -> bool + Sync + Send>;
 
@@ -21,7 +22,7 @@ pub struct Wonder {
     pub name: String,
     pub description: String,
     pub cost: PaymentOptions,
-    pub required_advances: Vec<String>,
+    pub required_advances: Vec<Advance>,
     pub placement_requirement: Option<PlacementChecker>,
     pub listeners: AbilityListeners,
 }
@@ -214,7 +215,7 @@ pub(crate) fn can_construct_wonder(
     if city.mood_state != MoodState::Happy {
         return Err("City is not happy".to_string());
     }
-    if !player.has_advance("Engineering") {
+    if !player.has_advance(Advance::Engineering) {
         return Err("Engineering advance missing".to_string());
     }
     if !discount.ignore_required_advances {

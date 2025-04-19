@@ -28,7 +28,7 @@ pub(crate) fn economy() -> AdvanceGroup {
 fn currency() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::Currency,
-        CURRENCY,
+        "Currency",
         "You may collect gold instead of food for Trade Routes and Taxes",
     )
     .with_advance_bonus(CultureToken)
@@ -131,7 +131,7 @@ pub(crate) fn use_taxes() -> Builtin {
 #[must_use]
 pub fn tax_options(player: &Player) -> PaymentOptions {
     let mut c = vec![ResourceType::Food, ResourceType::Wood, ResourceType::Ore];
-    if player.has_advance(CURRENCY) {
+    if player.has_advance(Advance::Currency) {
         c.insert(0, ResourceType::Gold);
     }
     PaymentOptions::sum(player.cities.len() as u32, &c)
@@ -164,7 +164,7 @@ where
         event,
         0,
         |game, player_index, _| {
-            if !game.player(player_index).has_advance("Trade Routes") {
+            if !game.player(player_index).has_advance(Advance::TradeRoutes) {
                 return None;
             }
 

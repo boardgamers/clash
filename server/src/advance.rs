@@ -1,6 +1,6 @@
 use crate::{ability_initializer::AbilityInitializerSetup, resource_pile::ResourcePile, utils};
 use std::mem;
-
+use enumset::EnumSetType;
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::city_pieces::Building;
 use crate::content::advances::get_advance;
@@ -13,6 +13,7 @@ use crate::special_advance::SpecialAdvance;
 use Bonus::*;
 
 // id / 4 = advance group
+#[derive(EnumSetType, Debug)]
 pub enum Advance {
     // Farming Group
     Farming = 0,
@@ -79,7 +80,7 @@ pub enum Advance {
     Totalitarianism = 41,
     AbsolutePower = 42,
     ForcedLabor = 43,
-    
+
     // Theocracy Group
     Dogma = 44,
     Devotion = 45,
@@ -92,8 +93,8 @@ pub struct AdvanceInfo {
     pub name: String,
     pub description: String,
     pub bonus: Option<Bonus>,
-    pub required: Option<String>,
-    pub contradicting: Vec<String>,
+    pub required: Option<Advance>,
+    pub contradicting: Vec<Advance>,
     pub unlocked_building: Option<Building>,
     pub government: Option<String>,
     pub listeners: AbilityListeners,
@@ -127,7 +128,7 @@ pub(crate) struct AdvanceBuilder {
 impl AdvanceBuilder {
     fn new(advance: Advance, name: String, description: String) -> Self {
         Self {
-            advance, 
+            advance,
             name,
             description,
             advance_bonus: None,

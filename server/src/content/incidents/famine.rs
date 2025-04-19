@@ -1,4 +1,5 @@
 use crate::ability_initializer::{AbilityInitializerSetup, SelectedChoice};
+use crate::advance::Advance;
 use crate::city::{City, MoodState};
 use crate::content::builtin::Builtin;
 use crate::content::effects::PermanentEffect;
@@ -61,7 +62,9 @@ fn pestilence_applies(player: &Player) -> bool {
 }
 
 pub(crate) fn additional_sanitation_damage(p: &Player) -> bool {
-    p.has_advance("Roads") || p.has_advance("Navigation") || p.has_advance("Trade Routes")
+    p.has_advance(Advance::Roads)
+        || p.has_advance(Advance::Navigation)
+        || p.has_advance(Advance::TradeRoutes)
 }
 
 pub(crate) fn pestilence_permanent_effect() -> Builtin {

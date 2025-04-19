@@ -8,7 +8,7 @@ use crate::combat::CombatModifier::{
 use crate::combat::{Combat, CombatModifier};
 use crate::combat_listeners::CombatStrength;
 use crate::content::advances::{
-    AdvanceGroup, METALLURGY, STEEL_WEAPONS, TACTICS, advance_group_builder,
+    AdvanceGroup,  advance_group_builder,
 };
 use crate::content::persistent_events::PaymentRequest;
 use crate::game::Game;
@@ -30,7 +30,7 @@ fn tactics() -> AdvanceBuilder {
     play_tactics_card(
         AdvanceInfo::builder(
             Advance::Tactics,
-            TACTICS,
+            "Tactics",
             "May Move Army units, May use Tactics on Action Cards",
         )
         .with_advance_bonus(CultureToken)
@@ -105,7 +105,7 @@ fn siegecraft() -> AdvanceBuilder {
 fn steel_weapons() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::SteelWeapons,
-        STEEL_WEAPONS,
+        "Steel Weapons",
         "Immediately before a Land battle starts, \
         you may pay 1 ore to get +2 combat value in every Combat Round against an enemy \
         that does not have the Steel Weapons advance. \
@@ -177,7 +177,7 @@ fn draft() -> AdvanceBuilder {
 }
 
 pub(crate) fn draft_cost(player: &Player) -> u32 {
-    if player.has_advance("Civil Liberties") {
+    if player.has_advance(Advance::CivilLiberties) {
         2
     } else {
         1
@@ -198,8 +198,8 @@ fn steel_weapons_cost(game: &Game, combat: &Combat, player_index: usize) -> Paym
     let attacker = &game.players[combat.attacker];
     let defender = &game.players[combat.defender];
     let both_steel_weapons =
-        attacker.has_advance(STEEL_WEAPONS) && defender.has_advance(STEEL_WEAPONS);
-    let cost = u32::from(!player.has_advance(METALLURGY) || both_steel_weapons);
+        attacker.has_advance(Advance::SteelWeapons) && defender.has_advance(Advance::SteelWeapons);
+    let cost = u32::from(!player.has_advance(Advance::Metallurgy) || both_steel_weapons);
     PaymentOptions::sum(cost, &[ResourceType::Ore, ResourceType::Gold])
 }
 
@@ -220,8 +220,8 @@ fn fortress(game: &Game, c: &Combat, s: &mut CombatStrength, role: CombatRole) {
 }
 
 fn use_steel_weapons(game: &Game, c: &Combat, s: &mut CombatStrength, role: CombatRole) {
-    let steel_weapon_value = if game.player(c.attacker).has_advance(STEEL_WEAPONS)
-        && game.player(c.defender).has_advance(STEEL_WEAPONS)
+    let steel_weapon_value = if game.player(c.attacker).has_advance(Advance::SteelWeapons)
+        && game.player(c.defender).has_advance(Advance::SteelWeapons)
     {
         1
     } else {

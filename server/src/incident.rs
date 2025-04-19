@@ -23,6 +23,7 @@ use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use crate::advance::Advance;
 
 pub(crate) const BASE_EFFECT_PRIORITY: i32 = 100;
 
@@ -485,7 +486,7 @@ impl IncidentBuilder {
             10,
             move |game, player_index, i| {
                 let p = game.player(player_index);
-                if p.has_advance("Myths") {
+                if p.has_advance(Advance::Myths) {
                     let needed = amount(game, p, i);
                     if needed == 0 {
                         return None;
@@ -642,7 +643,7 @@ fn passed_to_player(game: &mut Game, i: &mut IncidentInfo) -> bool {
 
 #[must_use]
 pub fn is_active(
-    protection_advance: &Option<String>,
+    protection_advance: &Option<Advance>,
     priority: i32,
     game: &Game,
     i: &IncidentInfo,
@@ -656,7 +657,7 @@ pub fn is_active(
         return play_base_effect(i);
     }
     // protection advance does not protect against base effects
-    if let Some(advance) = &protection_advance {
+    if let Some(advance) = protection_advance {
         if game.players[player].has_advance(advance) {
             return false;
         }

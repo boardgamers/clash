@@ -127,7 +127,7 @@ fn categories_with_2_affordable_advances(p: &Player) -> Vec<String> {
             let vec = g
                 .advances
                 .iter()
-                .filter(|a| !p.has_advance(&a.name))
+                .filter(|a| !p.has_advance(a.advance))
                 .collect_vec();
             if vec.len() < 2 {
                 return vec![];
@@ -392,7 +392,7 @@ fn new_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
 fn advances_that_can_be_gained(player: &Player) -> Vec<String> {
     advances::get_all()
         .iter()
-        .filter(|a| !player.has_advance(&a.name) && player.can_advance(a))
+        .filter(|a| !player.has_advance(a.advance) && player.can_advance(a))
         .map(|a| a.name.clone())
         .collect()
 }

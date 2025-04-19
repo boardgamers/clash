@@ -49,7 +49,7 @@ pub fn advance_reward_dialog(rc: &RenderContext, r: &AdvanceRequest, name: &str)
         |a, _| {
             if possible.contains(&a.name) {
                 AdvanceState::Available
-            } else if rc.shown_player.has_advance(&a.name) {
+            } else if rc.shown_player.has_advance(a.advance) {
                 AdvanceState::Owned
             } else {
                 AdvanceState::Unavailable
