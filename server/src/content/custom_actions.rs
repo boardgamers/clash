@@ -13,8 +13,8 @@ use crate::happiness::increase_happiness;
 use crate::log::{format_collect_log_item, format_happiness_increase};
 use crate::player::Player;
 use crate::playing_actions::{Collect, IncreaseHappiness, PlayingActionType};
-use crate::{game::Game, playing_actions::ActionCost, resource_pile::ResourcePile};
 use crate::position::Position;
+use crate::{game::Game, playing_actions::ActionCost, resource_pile::ResourcePile};
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub struct CustomEventAction {
@@ -28,7 +28,7 @@ impl CustomEventAction {
         Self { action, city }
     }
 }
-    
+
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub enum CustomAction {
     AbsolutePower,

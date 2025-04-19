@@ -5,7 +5,7 @@ use crate::collect::{CollectContext, CollectInfo};
 use crate::combat::Combat;
 use crate::combat_listeners::{CombatEnd, CombatRoundEnd, CombatRoundStart};
 use crate::combat_stats::CombatStats;
-use crate::content::custom_actions::{CustomActionType, CustomEventAction};
+use crate::content::custom_actions::CustomEventAction;
 use crate::content::persistent_events::KilledUnits;
 use crate::cultural_influence::{InfluenceCultureInfo, InfluenceCultureOutcome};
 use crate::events::Event;

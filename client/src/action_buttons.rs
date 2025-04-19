@@ -9,7 +9,7 @@ use crate::move_ui::MoveIntent;
 use crate::render_context::RenderContext;
 use server::action::Action;
 use server::city::City;
-use server::content::custom_actions::CustomActionType;
+use server::content::custom_actions::{CustomActionType, CustomEventAction};
 use server::cultural_influence::available_influence_actions;
 use server::happiness::available_happiness_actions;
 use server::playing_actions::{PlayingAction, PlayingActionType, base_and_custom_action};
@@ -58,13 +58,13 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
         });
     }
     let mut i = 0;
-    for (a, origin) in &game.available_custom_actions(rc.shown_player.index) {
-        if let Some(action) = generic_custom_action(rc, a, None) {
+    for (a, origin) in game.available_custom_actions(rc.shown_player.index) {
+        if let Some(action) = generic_custom_action(rc, a.clone(), None) {
             if bottom_left_texture(
                 rc,
-                &assets.custom_actions[a],
+                &assets.custom_actions[&a],
                 icon_pos(i as i8, -1),
-                &event_help(rc, origin)[0],
+                &event_help(rc, &origin)[0],
             ) {
                 return action;
             }
@@ -87,7 +87,7 @@ pub fn custom_action_buttons<'a>(
         .available_custom_actions(rc.shown_player.index)
         .into_iter()
         .filter_map(|(a, origin)| {
-            generic_custom_action(rc, &a, city).map(|action| {
+            generic_custom_action(rc, a.clone(), city).map(|action| {
                 IconAction::new(
                     &rc.assets().custom_actions[&a],
                     event_help(rc, &origin)[0].clone(),
@@ -113,19 +113,22 @@ fn global_move(rc: &RenderContext) -> StateUpdate {
 
 fn generic_custom_action(
     rc: &RenderContext,
-    custom_action_type: &CustomActionType,
+    custom_action_type: CustomActionType,
     city: Option<&City>,
 ) -> Option<StateUpdate> {
     if let Some(city) = city {
         return custom_action_type
             .is_available_city(rc.shown_player, city)
             .then_some(StateUpdate::execute(Action::Playing(
-                PlayingAction::CustomEvent(custom_action_type.clone()),
+                PlayingAction::CustomEvent(CustomEventAction::new(
+                    custom_action_type,
+                    Some(city.position),
+                )),
             )));
     }
 
     (!custom_action_type.is_city_bound()).then_some(StateUpdate::execute(Action::Playing(
-        PlayingAction::CustomEvent(custom_action_type.clone()),
+        PlayingAction::CustomEvent(CustomEventAction::new(custom_action_type, None)),
     )))
 
     // match custom_action_type {

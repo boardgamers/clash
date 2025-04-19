@@ -10,7 +10,7 @@
         "ideas": 5,
         "gold": 5,
         "mood_tokens": 9,
-        "culture_tokens": 7
+        "culture_tokens": 8
       },
       "resource_limit": {
         "food": 2,
@@ -32,7 +32,7 @@
             "academy": 1,
             "port": 1
           },
-          "mood_state": "Happy",
+          "mood_state": "Neutral",
           "activations": 6,
           "position": "C2",
           "port_position": "C3"
@@ -259,13 +259,9 @@
                 {
                   "action": {
                     "Playing": {
-                      "Custom": {
-                        "Sports": {
-                          "city_position": "C2",
-                          "payment": {
-                            "culture_tokens": 2
-                          }
-                        }
+                      "CustomEvent": {
+                        "action": "Sports",
+                        "city": "C2"
                       }
                     }
                   },
@@ -274,6 +270,71 @@
                       "op": "replace",
                       "path": "/actions_left",
                       "value": 3
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events"
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 1
+                        }
+                      ]
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "CustomAction": {
+                              "action": "Sports",
+                              "city": "C2"
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "Builtin": "Sports"
+                            },
+                            "priority": 0,
+                            "request": {
+                              "Payment": [
+                                {
+                                  "cost": {
+                                    "conversions": [
+                                      {
+                                        "from": [
+                                          {
+                                            "culture_tokens": 1
+                                          }
+                                        ],
+                                        "to": {},
+                                        "type": {
+                                          "MayOverpay": 1
+                                        }
+                                      }
+                                    ],
+                                    "default": {
+                                      "culture_tokens": 2
+                                    }
+                                  },
+                                  "name": "Each culture token increases the happiness by 1 step",
+                                  "optional": false
+                                }
+                              ]
+                            }
+                          },
+                          "last_priority_used": 0,
+                          "player": 0
+                        }
+                      ]
                     },
                     {
                       "op": "add",
@@ -299,10 +360,13 @@
       ]
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 2,
   "log": [
     [
-      "Player1 paid 2 culture tokens to increase the happiness in the city at C2 by 2 steps, making it Happy using Sports"
+      "Player1 started Sports at C2"
+    ],
+    [
+      "Player1 used Sports to increase the happiness of C2 by 1 steps, making it Neutral"
     ]
   ],
   "undo_limit": 0,

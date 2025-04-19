@@ -199,7 +199,10 @@
                 {
                   "action": {
                     "Playing": {
-                      "Custom": "Bartering"
+                      "CustomEvent": {
+                        "action": "Bartering",
+                        "city": null
+                      }
                     }
                   },
                   "undo": [
@@ -234,7 +237,12 @@
                       "path": "/events",
                       "value": [
                         {
-                          "event_type": "Bartering",
+                          "event_type": {
+                            "CustomAction": {
+                              "action": "Bartering",
+                              "city": null
+                            }
+                          },
                           "handler": {
                             "origin": {
                               "Builtin": "Bartering"

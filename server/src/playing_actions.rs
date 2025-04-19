@@ -7,8 +7,11 @@ use crate::city::found_city;
 use crate::collect::{PositionCollection, collect};
 use crate::construct::Construct;
 use crate::content::action_cards::get_civil_card;
+use crate::content::advances::culture::can_play_sports;
 use crate::content::advances::get_advance;
-use crate::content::custom_actions::{CustomActionInfo, CustomActionType, execute_custom_action, CustomEventAction};
+use crate::content::custom_actions::{
+    CustomActionInfo, CustomActionType, CustomEventAction, execute_custom_action,
+};
 use crate::content::persistent_events::SelectedStructure;
 use crate::cultural_influence::influence_culture_attempt;
 use crate::game::GameState;
@@ -140,7 +143,9 @@ impl PlayingActionType {
                 }
 
                 let can_play = match t {
+                    // todo use event?
                     CustomActionType::Bartering => !p.action_cards.is_empty(),
+                    CustomActionType::Sports => can_play_sports(p),
                     _ => true,
                 };
                 if !can_play {
@@ -307,7 +312,7 @@ impl PlayingAction {
             PlayingAction::ActionCard(a) => PlayingActionType::ActionCard(*a),
             PlayingAction::WonderCard(name) => PlayingActionType::WonderCard(name.clone()),
             PlayingAction::Custom(c) => PlayingActionType::Custom(c.custom_action_type().info()),
-            PlayingAction::CustomEvent(c) => PlayingActionType::Custom(c.info()),
+            PlayingAction::CustomEvent(c) => PlayingActionType::Custom(c.action.info()),
             PlayingAction::EndTurn => PlayingActionType::EndTurn,
         }
     }
