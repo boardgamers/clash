@@ -24,12 +24,39 @@ use server::construct::{can_construct, new_building_positions};
 use server::consts::BUILDING_COST;
 use server::content::persistent_events::Structure;
 use server::game::Game;
+use server::player_events::CostInfo;
 use server::playing_actions::PlayingActionType;
 use server::resource::ResourceType;
 use server::unit::{UnitType, Units};
 use std::ops::Add;
 
-pub type IconAction<'a> = (&'a Texture2D, String, Box<dyn Fn() -> StateUpdate + 'a>);
+pub struct IconAction<'a> {
+    pub texture: &'a Texture2D,
+    pub tooltip: String,
+    pub warning: bool,
+    pub action: Box<dyn Fn() -> StateUpdate + 'a>,
+}
+
+impl<'a> IconAction<'a> {
+    #[must_use]
+    pub fn new(
+        texture: &'a Texture2D,
+        tooltip: String,
+        action: Box<dyn Fn() -> StateUpdate + 'a>,
+    ) -> IconAction<'a> {
+        IconAction {
+            texture,
+            tooltip,
+            warning: false,
+            action,
+        }
+    }
+
+    #[must_use]
+    pub fn with_warning(self, warning: bool) -> IconAction<'a> {
+        IconAction { warning, ..self }
+    }
+}
 
 pub type IconActionVec<'a> = Vec<IconAction<'a>>;
 
@@ -66,7 +93,7 @@ fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Optio
         return None;
     }
 
-    Some((
+    Some(IconAction::new(
         &rc.assets().resources[&ResourceType::MoodTokens],
         "Increase happiness".to_string(),
         Box::new(move || {
@@ -93,17 +120,16 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
         .flat_map(|b| {
             let can = can_construct(city, b, rc.shown_player, game);
 
-            can.as_ref()
-                .ok()
-                .iter()
-                .flat_map(|_| new_building_positions(game, b, city))
+            new_building_positions(game, b, city)
+                .into_iter()
                 .map(|pos| (b, can.clone(), pos))
-                .collect::<Vec<_>>()
+                .collect_vec()
         })
         .map(|(b, can, pos)| {
             let name = b.name();
-            let cost = can.clone().map_or(String::new(), |c| {
-                format!(
+            let warn = can.is_err();
+            let suffix = match &can {
+                Ok(c) => format!(
                     " for {}{}",
                     c.cost,
                     if c.activate_city {
@@ -111,15 +137,16 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
                     } else {
                         " (without city activation)"
                     }
-                )
-            });
+                ),
+                Err(e) => format!(" ({e})"),
+            };
             let tooltip = format!(
                 "Built {}{}{}",
                 name,
                 pos.map_or(String::new(), |p| format!(" at {p}")),
-                cost
+                suffix
             );
-            let a: IconAction<'a> = (
+            IconAction::new(
                 &rc.assets().buildings[&b],
                 tooltip,
                 Box::new(move || {
@@ -135,8 +162,8 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
                         ))
                     })
                 }),
-            );
-            a
+            )
+            .with_warning(warn)
         })
         .collect()
 }
@@ -145,7 +172,7 @@ fn recruit_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconActio
     if !city.can_activate() || !rc.can_play_action(&PlayingActionType::Recruit) {
         return None;
     }
-    Some((
+    Some(IconAction::new(
         rc.assets().unit(UnitType::Infantry, rc.shown_player),
         "Recruit Units".to_string(),
         Box::new(|| {
@@ -166,7 +193,7 @@ fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option
         return None;
     }
 
-    Some((
+    Some(IconAction::new(
         &rc.assets().resources[&ResourceType::Food],
         "Collect Resources".to_string(),
         Box::new(move || {

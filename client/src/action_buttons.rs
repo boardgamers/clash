@@ -74,9 +74,9 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
             i += 1;
         }
     }
-    for (i, (icon, tooltip, action)) in custom_action_buttons(rc, None).iter().enumerate() {
-        if bottom_left_texture(rc, icon, icon_pos(i as i8, -1), tooltip) {
-            return action();
+    for (i, icon) in custom_action_buttons(rc, None).iter().enumerate() {
+        if bottom_left_texture(rc, icon.texture, icon_pos(i as i8, -1), &icon.tooltip) {
+            return (icon.action)();
         }
     }
     StateUpdate::None
@@ -91,12 +91,11 @@ pub fn custom_action_buttons<'a>(
         .into_iter()
         .filter_map(|(a, origin)| {
             generic_custom_action(rc, &a, city).map(|action| {
-                let a: IconAction<'a> = (
+                IconAction::new (
                     &rc.assets().custom_actions[&a],
                     event_help(rc, &origin)[0].clone(),
                     Box::new(move || action.clone()),
-                );
-                a
+                )
             })
         })
         .collect()

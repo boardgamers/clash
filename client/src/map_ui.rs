@@ -1,7 +1,7 @@
-use crate::city_ui::{IconAction, IconActionVec, draw_city, show_city_menu};
+use crate::city_ui::{IconAction, IconActionVec, draw_city, show_city_menu, BUILDING_SIZE};
 use crate::client_state::{ActiveDialog, MAX_OFFSET, MIN_OFFSET, State, StateUpdate, ZOOM};
 use crate::dialog_ui::{OkTooltip, cancel_button_pos, ok_button};
-use crate::layout_ui::{bottom_center_texture, bottom_right_texture, icon_pos};
+use crate::layout_ui::{bottom_center_anchor, bottom_center_texture, bottom_right_texture, icon_pos};
 use crate::move_ui::{MoveDestination, MoveIntent, movable_units};
 use crate::player_ui::get_combat;
 use crate::render_context::RenderContext;
@@ -234,7 +234,7 @@ fn found_city_button<'a>(rc: &'a RenderContext<'a>, pos: Position) -> Option<Ico
     unit_ui::units_on_tile(game, pos)
         .find(|(_, unit)| unit.can_found_city(game))
         .map(|(_index, unit)| {
-            let action: IconAction<'a> = (
+            IconAction::new(
                 rc.assets().unit(UnitType::Settler, rc.shown_player),
                 "Found a new city".to_string(),
                 Box::new(move || {
@@ -242,8 +242,7 @@ fn found_city_button<'a>(rc: &'a RenderContext<'a>, pos: Position) -> Option<Ico
                         settler: unit.id,
                     }))
                 }),
-            );
-            action
+            )
         })
 }
 
@@ -257,7 +256,7 @@ pub fn move_units_button<'a>(
     {
         return None;
     }
-    Some((
+    Some(IconAction::new(
         move_intent.icon(rc),
         move_intent.toolip().to_string(),
         Box::new(move || StateUpdate::move_units(rc, Some(pos), move_intent)),
@@ -279,14 +278,19 @@ pub fn move_units_buttons<'a>(rc: &'a RenderContext, pos: Position) -> Vec<IconA
 }
 
 pub fn show_map_action_buttons(rc: &RenderContext, icons: &IconActionVec) -> StateUpdate {
-    for (i, (icon, tooltip, action)) in icons.iter().enumerate() {
+    for (i, icon) in icons.iter().enumerate() {
+        let p = icon_pos(-(icons.len() as i8) / 2 + i as i8, -1);
+        if icon.warning {
+            let a = bottom_center_anchor(rc) + p + vec2(15., 15.);
+            draw_circle(a.x, a.y, 20., RED);
+        }
         if bottom_center_texture(
             rc,
-            icon,
-            icon_pos(-(icons.len() as i8) / 2 + i as i8, -1),
-            tooltip,
+            icon.texture,
+            p,
+            icon.tooltip.as_str(),
         ) {
-            return action();
+            return (icon.action)();
         }
     }
     StateUpdate::None
