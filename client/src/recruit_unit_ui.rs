@@ -3,6 +3,7 @@ use macroquad::prelude::*;
 
 use server::game::Game;
 use server::player::Player;
+use server::player_events::CostInfo;
 use server::position::Position;
 use server::recruit::{recruit_cost, recruit_cost_without_replaced};
 use server::unit::{Unit, UnitType, Units};
@@ -13,14 +14,15 @@ use crate::dialog_ui::{OkTooltip, cancel_button, ok_button};
 use crate::render_context::RenderContext;
 use crate::select_ui;
 use crate::select_ui::{CountSelector, HasCountSelectableObject, HighlightType};
-use crate::unit_ui::{UnitSelection, draw_unit_type};
+use crate::tooltip::show_tooltip_for_circle;
+use crate::unit_ui::{UnitSelection, draw_unit_type, add_unit_description};
 
 #[derive(Clone)]
 pub struct SelectableUnit {
     pub unit_type: UnitType,
     pub selectable: CountSelector,
-    name: String,
     leader_name: Option<String>,
+    cost: Result<CostInfo, String>,
 }
 
 #[derive(Clone)]
@@ -45,17 +47,15 @@ impl RecruitAmount {
         city_position: Position,
         units: Units,
         leader_name: Option<&String>,
-        must_show_units: &[SelectableUnit],
     ) -> StateUpdate {
         let player = game.player(player_index);
         let selectable: Vec<SelectableUnit> = new_units(player)
             .into_iter()
-            .filter_map(|u| {
+            .map(|u| {
                 selectable_unit(
                     city_position,
                     &units,
                     leader_name,
-                    must_show_units,
                     player,
                     &u,
                 )
@@ -76,10 +76,9 @@ fn selectable_unit(
     city_position: Position,
     units: &Units,
     leader_name: Option<&String>,
-    must_show_units: &[SelectableUnit],
     player: &Player,
     unit: &NewUnit,
-) -> Option<SelectableUnit> {
+) -> SelectableUnit {
     let mut all = units.clone();
     all += &unit.unit_type;
 
@@ -89,36 +88,29 @@ fn selectable_unit(
         units.get(&unit.unit_type)
     };
 
-    let max = if recruit_cost_without_replaced(
+    let cost = recruit_cost_without_replaced(
         player,
         &all,
         city_position,
         unit.leader_name.as_ref().or(leader_name),
         None,
-    )
+    );
+    let max = if cost
     .is_ok()
     {
         u32::from(current + 1)
     } else {
         u32::from(current)
     };
-    if max == 0
-        && !must_show_units
-            .iter()
-            .any(|u| u.unit_type == unit.unit_type)
-    {
-        None
-    } else {
-        Some(SelectableUnit {
-            name: unit.name.to_string(),
-            unit_type: unit.unit_type,
-            selectable: CountSelector {
-                current: u32::from(current),
-                min: 0,
-                max,
-            },
-            leader_name: unit.leader_name.clone(),
-        })
+    SelectableUnit {
+        unit_type: unit.unit_type,
+        cost,
+        selectable: CountSelector {
+            current: u32::from(current),
+            min: 0,
+            max,
+        },
+        leader_name: unit.leader_name.clone(),
     }
 }
 
@@ -219,6 +211,7 @@ impl UnitSelection for RecruitSelection {
 
 pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
     let game = rc.game;
+    let radius = 20.;
     select_ui::count_dialog(
         rc,
         a,
@@ -230,9 +223,21 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
                 p,
                 s.unit_type,
                 rc.shown_player.index,
-                &format!(" ({} available with current resources)", s.selectable.max),
-                20.,
+                radius,
             );
+        },
+        |s, p| {
+            let suffix = match &s.cost {
+                Ok(_) => format!(" ({} available with current resources)", s.selectable.max),
+                Err(e) => format!(" ({e})"),
+            };
+            let mut tooltip = vec![format!(
+                "Recruit {}{}",
+                s.unit_type.name(),
+                suffix
+            )];
+            add_unit_description(&mut tooltip, s.unit_type);
+            show_tooltip_for_circle(rc, &tooltip, p, radius);
         },
         || OkTooltip::Valid("Recruit units".to_string()),
         || {
@@ -314,7 +319,6 @@ fn update_selection(
         s.city_position,
         units,
         leader_name,
-        s.selectable.as_slice(),
     )
 }
 

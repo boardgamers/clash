@@ -136,7 +136,6 @@ fn recruit_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconActio
                 city.position,
                 Units::empty(),
                 None,
-                &[],
             )
         }),
     ))
@@ -223,7 +222,7 @@ fn draw_selected_state(
     draw_circle_lines(center.x, center.y, size, 3., t.color());
 
     if let Some(tooltip) = &info.tooltip {
-        show_tooltip_for_circle(rc, tooltip, center, size);
+        show_tooltip_for_circle(rc, &[tooltip.clone()], center, size);
     }
 
     if info.status != SelectedStructureStatus::Invalid
