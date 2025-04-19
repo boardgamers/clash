@@ -107,6 +107,8 @@ pub(crate) struct PersistentEvents {
     pub capture_undefended_position: PersistentEvent<CombatStats>,
     pub units_killed: PersistentEvent<KilledUnits>,
     pub select_objective_cards: PersistentEvent<SelectObjectivesInfo>,
+
+    pub custom_action_bartering: PersistentEvent,
 }
 
 impl PersistentEvents {
@@ -137,6 +139,8 @@ impl PersistentEvents {
             capture_undefended_position: Event::new("capture_undefended_position"),
             units_killed: Event::new("units_killed"),
             select_objective_cards: Event::new("select_objective_cards"),
+
+            custom_action_bartering: Event::new("custom_action_bartering"),
         }
     }
 }

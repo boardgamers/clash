@@ -10,6 +10,7 @@ use crate::content::action_cards::cultural_takeover::use_cultural_takeover;
 use crate::content::action_cards::development::collect_only;
 use crate::content::action_cards::negotiation::{use_assassination, use_negotiations};
 use crate::content::action_cards::synergies::use_teach_us;
+use crate::content::advances::economy::use_bartering;
 use crate::content::incidents::famine::pestilence_permanent_effect;
 use crate::content::incidents::great_builders::construct_only;
 use crate::content::incidents::great_diplomat::use_diplomatic_relations;
@@ -121,6 +122,8 @@ pub fn get_all_uncached() -> Vec<Builtin> {
         use_negotiations(),
         use_assassination(),
         use_teach_us(),
+        // custom actions
+        use_bartering(),
     ]
 }
 

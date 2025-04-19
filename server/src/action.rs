@@ -7,6 +7,7 @@ use crate::combat::{
 };
 use crate::combat_listeners::{combat_round_end, combat_round_start, end_combat};
 use crate::construct::on_construct;
+use crate::content::advances::economy::execute_bartering;
 use crate::content::persistent_events::{EventResponse, PersistentEventType};
 use crate::cultural_influence::ask_for_cultural_influence_payment;
 use crate::explore::{ask_explore_resolution, move_to_unexplored_tile};
@@ -223,6 +224,7 @@ pub(crate) fn execute_custom_phase_action(
         SelectObjectives(c) => {
             on_objective_cards(game, player_index, c);
         }
+        Bartering => execute_bartering(game, player_index),
     }
 
     if let Some(s) = game.events.pop() {

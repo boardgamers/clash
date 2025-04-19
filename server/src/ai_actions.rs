@@ -148,6 +148,7 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
 
     for (a, _) in game.available_custom_actions(p.index) {
         let option = match a {
+            CustomActionType::Bartering | // usually a bad idea
             CustomActionType::Sports | CustomActionType::Theaters | // todo
             CustomActionType::ArtsInfluenceCultureAttempt
             | CustomActionType::VotingIncreaseHappiness

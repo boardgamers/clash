@@ -25,12 +25,10 @@ fn writing() -> AdvanceBuilder {
     Advance::builder("Writing", "Gain 1 action and 1 objective card")
         .with_advance_bonus(CultureToken)
         .with_unlocked_building(Building::Academy)
-        .add_one_time_ability_initializer(
-            |game, player_index| {
-                gain_action_card_from_pile(game, player_index);
-                gain_objective_card_from_pile(game, player_index);
-            },
-        )
+        .add_one_time_ability_initializer(|game, player_index| {
+            gain_action_card_from_pile(game, player_index);
+            gain_objective_card_from_pile(game, player_index);
+        })
         .add_simple_persistent_event_listener(
             |event| &mut event.construct,
             3,

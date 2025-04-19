@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::collect::collect;
 use crate::content::advances::culture::{execute_sports, execute_theaters};
-use crate::content::advances::economy::collect_taxes;
+use crate::content::advances::economy::{collect_taxes, execute_bartering};
 use crate::content::persistent_events::SelectedStructure;
 use crate::cultural_influence::{
     format_cultural_influence_attempt_log_item, influence_culture_attempt,
@@ -22,6 +22,7 @@ pub enum CustomAction {
     AbsolutePower,
     ForcedLabor,
     CivilLiberties,
+    Bartering,
     ArtsInfluenceCultureAttempt(SelectedStructure),
     VotingIncreaseHappiness(IncreaseHappiness),
     FreeEconomyCollect(Collect),
@@ -61,6 +62,7 @@ pub enum CustomActionType {
     AbsolutePower,
     ForcedLabor,
     CivilLiberties,
+    Bartering,
     ArtsInfluenceCultureAttempt,
     VotingIncreaseHappiness,
     FreeEconomyCollect,
@@ -79,6 +81,7 @@ impl CustomAction {
             CustomAction::CivilLiberties => {
                 game.players[player_index].gain_resources(ResourcePile::mood_tokens(3));
             }
+            CustomAction::Bartering => execute_bartering(game, player_index),
             CustomAction::ArtsInfluenceCultureAttempt(c) => {
                 influence_culture_attempt(
                     game,
@@ -109,6 +112,7 @@ impl CustomAction {
             CustomAction::AbsolutePower => CustomActionType::AbsolutePower,
             CustomAction::ForcedLabor => CustomActionType::ForcedLabor,
             CustomAction::CivilLiberties => CustomActionType::CivilLiberties,
+            CustomAction::Bartering => CustomActionType::Bartering,
             CustomAction::ArtsInfluenceCultureAttempt(_) => {
                 CustomActionType::ArtsInfluenceCultureAttempt
             }
@@ -131,6 +135,9 @@ impl CustomAction {
             }
             CustomAction::CivilLiberties => {
                 format!("{player_name} gained 3 mood tokens using Civil Liberties")
+            }
+            CustomAction::Bartering => {
+                format!("{player_name} started Bartering")
             }
             CustomAction::ArtsInfluenceCultureAttempt(c) => format!(
                 "{} using Arts",
@@ -175,6 +182,9 @@ impl CustomActionType {
                 self.free_and_once_per_turn(ResourcePile::mood_tokens(2))
             }
             CustomActionType::CivilLiberties | CustomActionType::Sports => self.regular(),
+            CustomActionType::Bartering | CustomActionType::Theaters => {
+                self.free_and_once_per_turn(ResourcePile::empty())
+            }
             CustomActionType::ArtsInfluenceCultureAttempt => {
                 self.free_and_once_per_turn(ResourcePile::culture_tokens(1))
             }
@@ -183,7 +193,6 @@ impl CustomActionType {
                 self.free_and_once_per_turn(ResourcePile::mood_tokens(1))
             }
             CustomActionType::Taxes => self.once_per_turn(ResourcePile::mood_tokens(1)),
-            CustomActionType::Theaters => self.free_and_once_per_turn(ResourcePile::empty()),
         }
     }
 

@@ -130,15 +130,21 @@ impl PlayingActionType {
 
         match self {
             PlayingActionType::Custom(c) => {
-                if !p.custom_actions.contains_key(&c.custom_action_type) {
+                let t = &c.custom_action_type;
+                if !p.custom_actions.contains_key(t) {
                     return Err("Custom action not available".to_string());
                 }
 
-                if c.once_per_turn
-                    && p.played_once_per_turn_actions
-                        .contains(&c.custom_action_type)
-                {
+                if c.once_per_turn && p.played_once_per_turn_actions.contains(t) {
                     return Err("Custom action already played this turn".to_string());
+                }
+
+                let can_play = match t {
+                    CustomActionType::Bartering => !p.action_cards.is_empty(),
+                    _ => true,
+                };
+                if !can_play {
+                    return Err("Cannot play custom action".to_string());
                 }
             }
             PlayingActionType::ActionCard(id) => {

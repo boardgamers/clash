@@ -148,6 +148,9 @@ fn generic_custom_action(
         CustomActionType::CivilLiberties => Some(StateUpdate::execute(Action::Playing(
             PlayingAction::Custom(CustomAction::CivilLiberties),
         ))),
+        CustomActionType::Bartering => Some(StateUpdate::execute(Action::Playing(
+            PlayingAction::Custom(CustomAction::Bartering),
+        ))),
         CustomActionType::Taxes => Some(StateUpdate::OpenDialog(ActiveDialog::Taxes(
             Payment::new_gain(&tax_options(rc.shown_player), "Collect taxes"),
         ))),

@@ -1,11 +1,17 @@
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::action_card::discard_action_card;
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder};
+use crate::card::HandCard;
 use crate::city_pieces::Building::Market;
 use crate::content::advances::trade_routes::{TradeRoute, trade_route_log, trade_route_reward};
 use crate::content::advances::{AdvanceGroup, CURRENCY, advance_group_builder};
+use crate::content::builtin::Builtin;
+use crate::content::custom_actions::CustomActionType;
 use crate::content::custom_actions::CustomActionType::Taxes;
-use crate::content::persistent_events::ResourceRewardRequest;
+use crate::content::persistent_events::{
+    HandCardsRequest, PersistentEventType, ResourceRewardRequest,
+};
 use crate::game::Game;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
@@ -29,10 +35,72 @@ fn currency() -> AdvanceBuilder {
     .with_advance_bonus(CultureToken)
 }
 
+const BARTER_DESC: &str = "Once per turn, as a free action, \
+        you may spend discard an action card for 1 gold or 1 culture token.";
+
 fn bartering() -> AdvanceBuilder {
-    Advance::builder("Bartering", "todo")
+    Advance::builder("Bartering", BARTER_DESC)
         .with_advance_bonus(MoodToken)
+        .add_custom_action(CustomActionType::Bartering)
         .with_unlocked_building(Market)
+}
+
+pub(crate) fn execute_bartering(game: &mut Game, player_index: usize) {
+    let _ = game.trigger_persistent_event(
+        &[player_index],
+        |e| &mut e.custom_action_bartering,
+        (),
+        |()| PersistentEventType::Bartering,
+    );
+}
+
+pub(crate) fn use_bartering() -> Builtin {
+    Builtin::builder("Bartering", BARTER_DESC)
+        .add_hand_card_request(
+            |event| &mut event.custom_action_bartering,
+            1,
+            |game, player_index, ()| {
+                let cards = game
+                    .player(player_index)
+                    .action_cards
+                    .iter()
+                    .map(|a| HandCard::ActionCard(*a))
+                    .collect_vec();
+
+                Some(HandCardsRequest::new(
+                    cards,
+                    1..=1,
+                    "Select an action card to discard",
+                ))
+            },
+            |game, s, _e| {
+                let HandCard::ActionCard(card) = s.choice[0] else {
+                    panic!("Invalid type");
+                };
+                game.add_info_log_item(&format!(
+                    "{} discarded an action card for 1 gold or 1 culture token",
+                    s.player_name
+                ));
+                discard_action_card(game, s.player_index, card);
+            },
+        )
+        .add_resource_request(
+            |event| &mut event.custom_action_bartering,
+            0,
+            |_game, _player_index, ()| {
+                Some(ResourceRewardRequest::new(
+                    PaymentOptions::sum(1, &[ResourceType::Gold, ResourceType::CultureTokens]),
+                    "Select a resource to gain".to_string(),
+                ))
+            },
+            |_game, s, ()| {
+                vec![format!(
+                    "{} gained {} for discarding an action card",
+                    s.player_name, s.choice
+                )]
+            },
+        )
+        .build()
 }
 
 fn taxes() -> AdvanceBuilder {

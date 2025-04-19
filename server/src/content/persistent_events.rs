@@ -112,6 +112,7 @@ pub enum PersistentEventType {
     WonderCard(WonderCardInfo),
     DrawWonderCard,
     SelectObjectives(SelectObjectivesInfo),
+    Bartering,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
