@@ -96,8 +96,9 @@ pub(crate) fn barbarians_bonus() -> Builtin {
 }
 
 pub(crate) fn barbarians_spawn(mut builder: IncidentBuilder) -> IncidentBuilder {
-    builder = set_info(builder, "Barbarians spawn", |_, _, _| {});
-    builder = add_barbarians_city(builder);
+    let event_name = "Barbarians spawn";
+    builder = set_info(builder, event_name, |_, _, _| {});
+    builder = add_barbarians_city(builder, event_name);
     builder = builder.add_incident_position_request(
         IncidentTarget::ActivePlayer,
         BASE_EFFECT_PRIORITY + 1,
@@ -110,7 +111,7 @@ pub(crate) fn barbarians_spawn(mut builder: IncidentBuilder) -> IncidentBuilder 
             Some(PositionRequest::new(
                 r,
                 needed,
-                "Select a position for the additional Barbarian unit",
+                "Barbarians spawn: select a position for the additional Barbarian unit",
             ))
         },
         |_game, s, i| {
@@ -174,14 +175,15 @@ where
 }
 
 pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
-    builder = set_info(builder, "Barbarians move", |state, game, human| {
+    let event_name = "Barbarians move";
+    builder = set_info(builder, event_name, |state, game, human| {
         if get_movable_units(game, human, state).is_empty() {
             game.add_info_log_item("Barbarians cannot move - will try to spawn a new city instead");
         } else {
             state.move_units = true;
         }
     });
-    builder = add_barbarians_city(builder);
+    builder = add_barbarians_city(builder, event_name);
     for army in 0..18 {
         builder = builder
             .add_incident_position_request(
@@ -342,7 +344,7 @@ pub(crate) fn set_info(
     )
 }
 
-fn add_barbarians_city(builder: IncidentBuilder) -> IncidentBuilder {
+fn add_barbarians_city(builder: IncidentBuilder, event_name: &'static str) -> IncidentBuilder {
     builder.add_incident_position_request(
         IncidentTarget::ActivePlayer,
         BASE_EFFECT_PRIORITY + 100,
@@ -359,7 +361,7 @@ fn add_barbarians_city(builder: IncidentBuilder) -> IncidentBuilder {
             Some(PositionRequest::new(
                 choices,
                 needed,
-                "Select a position for the new city and infantry unit",
+                &format!("{event_name}: Select a position for the new city and infantry unit"),
             ))
         },
         move |game, s, _| {
