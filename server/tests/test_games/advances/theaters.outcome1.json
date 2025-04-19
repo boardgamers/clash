@@ -284,14 +284,82 @@
                 {
                   "action": {
                     "Playing": {
-                      "Custom": {
-                        "Theaters": {
-                          "culture_tokens": 1
-                        }
+                      "CustomEvent": {
+                        "action": "Theaters",
+                        "city": null
                       }
                     }
                   },
                   "undo": [
+                    {
+                      "op": "remove",
+                      "path": "/players/0/played_once_per_turn_actions"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events"
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 1
+                        }
+                      ]
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "CustomAction": {
+                              "action": "Theaters",
+                              "city": null
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "Builtin": "Theaters"
+                            },
+                            "priority": 0,
+                            "request": {
+                              "Payment": [
+                                {
+                                  "cost": {
+                                    "conversions": [
+                                      {
+                                        "from": [
+                                          {
+                                            "culture_tokens": 1
+                                          }
+                                        ],
+                                        "to": {
+                                          "mood_tokens": 1
+                                        },
+                                        "type": "Unlimited"
+                                      }
+                                    ],
+                                    "default": {
+                                      "culture_tokens": 1
+                                    }
+                                  },
+                                  "name": "Convert 1 culture token into 1 mood token, or 1 mood token into 1 culture token",
+                                  "optional": false
+                                }
+                              ]
+                            }
+                          },
+                          "last_priority_used": 0,
+                          "player": 0
+                        }
+                      ]
+                    },
                     {
                       "op": "replace",
                       "path": "/players/0/resources/culture_tokens",
@@ -301,10 +369,6 @@
                       "op": "replace",
                       "path": "/players/0/resources/mood_tokens",
                       "value": 10
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/played_once_per_turn_actions"
                     }
                   ]
                 }
@@ -315,10 +379,13 @@
       ]
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 2,
   "log": [
     [
-      "Player1 paid 1 culture token to convert resources using Theaters"
+      "Player1 started Theaters"
+    ],
+    [
+      "Player1 used Theaters to convert 1 culture token into 1 mood token"
     ]
   ],
   "undo_limit": 0,

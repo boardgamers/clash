@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::city::City;
 use crate::collect::collect;
-use crate::content::advances::culture::{execute_theaters, sports_options, use_sports};
+use crate::content::advances::culture::{sports_options, use_sports, use_theaters};
 use crate::content::advances::economy::{collect_taxes, use_bartering};
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{PersistentEventType, SelectedStructure};
@@ -38,7 +38,6 @@ pub enum CustomAction {
     VotingIncreaseHappiness(IncreaseHappiness),
     FreeEconomyCollect(Collect),
     Taxes(ResourcePile),
-    Theaters(ResourcePile),
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -101,7 +100,6 @@ impl CustomAction {
             }
             CustomAction::FreeEconomyCollect(c) => collect(game, player_index, &c)?,
             CustomAction::Taxes(r) => collect_taxes(game, player_index, r),
-            CustomAction::Theaters(r) => execute_theaters(game, player_index, &r),
         }
         Ok(())
     }
@@ -118,7 +116,6 @@ impl CustomAction {
             CustomAction::VotingIncreaseHappiness(_) => CustomActionType::VotingIncreaseHappiness,
             CustomAction::FreeEconomyCollect(_) => CustomActionType::FreeEconomyCollect,
             CustomAction::Taxes(_) => CustomActionType::Taxes,
-            CustomAction::Theaters(_) => CustomActionType::Theaters,
         }
     }
 
@@ -154,9 +151,6 @@ impl CustomAction {
             ),
             CustomAction::Taxes(r) => {
                 format!("{player_name} paid 1 mood token to collect {r} using Taxes")
-            }
-            CustomAction::Theaters(r) => {
-                format!("{player_name} paid {r} to convert resources using Theaters")
             }
         }
     }
@@ -235,6 +229,7 @@ impl CustomActionType {
     pub(crate) fn execute_builtin(&self) -> Builtin {
         match self {
             CustomActionType::Sports => use_sports(),
+            CustomActionType::Theaters => use_theaters(),
             CustomActionType::Bartering => use_bartering(),
             _ => {
                 panic!("CustomActionType::execute_builtin called on non-builtin action")

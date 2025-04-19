@@ -5,7 +5,7 @@ use server::collect::PositionCollection;
 use server::consts::BUILDING_COST;
 use server::content::advances::trade_routes::find_trade_routes;
 use server::content::custom_actions::CustomAction::{
-    AbsolutePower, ArtsInfluenceCultureAttempt, CivilLiberties, ForcedLabor, Taxes, Theaters,
+    AbsolutePower, ArtsInfluenceCultureAttempt, CivilLiberties, ForcedLabor, Taxes,
     VotingIncreaseHappiness,
 };
 use server::content::custom_actions::{CustomAction, CustomActionType, CustomEventAction};
@@ -404,10 +404,22 @@ fn get_destinations(game: &Game, units: &[u32], position: &str) -> Vec<String> {
 fn test_theaters() {
     JSON.test(
         "theaters",
-        vec![TestAction::undoable(
-            0,
-            Action::Playing(Custom(Theaters(ResourcePile::culture_tokens(1)))),
-        )],
+        vec![
+            TestAction::undoable(
+                0,
+                Action::Playing(CustomEvent(CustomEventAction::new(
+                    CustomActionType::Theaters,
+                    None,
+                ))),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
+                    1,
+                )])),
+            ),
+        ]
     );
 }
 

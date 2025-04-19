@@ -18,17 +18,3 @@ pub fn taxes(rc: &RenderContext, payment: &Payment) -> StateUpdate {
         },
     )
 }
-
-pub fn theaters(rc: &RenderContext, payment: &Payment) -> StateUpdate {
-    payment_dialog(
-        rc,
-        payment,
-        false,
-        |p| ActiveDialog::Theaters(p.clone()),
-        |p| {
-            StateUpdate::Execute(Action::Playing(PlayingAction::Custom(
-                CustomAction::Theaters(p),
-            )))
-        },
-    )
-}
