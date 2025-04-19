@@ -1,6 +1,7 @@
 use crate::city::{City, MoodState};
 use crate::city_pieces::Building;
 use crate::consts::MAX_CITY_PIECES;
+use crate::content::advances;
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
 use crate::map::Terrain;
@@ -9,7 +10,6 @@ use crate::player_events::CostInfo;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use serde::{Deserialize, Serialize};
-use crate::content::advances;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub struct Construct {
@@ -49,13 +49,11 @@ pub fn can_construct(
     player: &Player,
     game: &Game,
 ) -> Result<CostInfo, String> {
-    let advance = advances::get_all().iter().find(
-        |a| a.unlocked_building == Some(building),
-    ).expect("Advance not found");
-    if !player
-        .advances
-        .contains(&advance)
-    {
+    let advance = advances::get_all()
+        .iter()
+        .find(|a| a.unlocked_building == Some(building))
+        .expect("Advance not found");
+    if !player.advances.contains(&advance) {
         return Err(format!("Missing advance: {}", advance.name));
     }
 

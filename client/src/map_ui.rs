@@ -1,13 +1,12 @@
-use crate::city_ui::{BUILDING_SIZE, IconAction, IconActionVec, draw_city, show_city_menu};
+use crate::city_ui::{IconAction, IconActionVec, draw_city, show_city_menu};
 use crate::client_state::{ActiveDialog, MAX_OFFSET, MIN_OFFSET, State, StateUpdate, ZOOM};
 use crate::dialog_ui::{OkTooltip, cancel_button_pos, ok_button};
 use crate::layout_ui::{
-    ICON_SIZE, bottom_center_anchor, bottom_center_texture, bottom_right_texture, icon_pos,
+    bottom_center_anchor, bottom_center_texture, bottom_right_texture, icon_pos,
 };
 use crate::move_ui::{MoveDestination, MoveIntent, movable_units};
 use crate::player_ui::get_combat;
 use crate::render_context::RenderContext;
-use crate::resource_ui::resource_name;
 use crate::select_ui::HighlightType;
 use crate::tooltip::show_tooltip_for_circle;
 use crate::{collect_ui, hex_ui, unit_ui};

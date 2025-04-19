@@ -24,7 +24,6 @@ use server::construct::{can_construct, new_building_positions};
 use server::consts::BUILDING_COST;
 use server::content::persistent_events::Structure;
 use server::game::Game;
-use server::player_events::CostInfo;
 use server::playing_actions::PlayingActionType;
 use server::resource::ResourceType;
 use server::unit::{UnitType, Units};

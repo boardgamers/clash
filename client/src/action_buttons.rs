@@ -91,7 +91,7 @@ pub fn custom_action_buttons<'a>(
         .into_iter()
         .filter_map(|(a, origin)| {
             generic_custom_action(rc, &a, city).map(|action| {
-                IconAction::new (
+                IconAction::new(
                     &rc.assets().custom_actions[&a],
                     event_help(rc, &origin)[0].clone(),
                     Box::new(move || action.clone()),
