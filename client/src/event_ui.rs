@@ -13,7 +13,7 @@ use server::events::EventOrigin;
 pub fn event_help(rc: &RenderContext, origin: &EventOrigin) -> Vec<String> {
     let mut h = vec![origin.name()];
     h.extend(match origin {
-        EventOrigin::Advance(a) => vec![get_advance(a).description.clone()],
+        EventOrigin::Advance(a) => vec![a.info().description.clone()],
         EventOrigin::Wonder(w) => vec![get_wonder(w).description.clone()],
         EventOrigin::Builtin(b) => vec![get_builtin(rc.game, b).description.clone()],
         EventOrigin::CivilCard(id) => vec![get_civil_card(*id).description.clone()],

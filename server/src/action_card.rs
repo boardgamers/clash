@@ -17,6 +17,7 @@ use crate::tactics_card::TacticsCard;
 use crate::utils::remove_element_by;
 use action_cards::get_action_card;
 use serde::{Deserialize, Serialize};
+use crate::advance::Advance;
 
 pub type CanPlayCard = Box<dyn Fn(&Game, &Player, &ActionCardInfo) -> bool + Sync + Send>;
 
@@ -218,7 +219,7 @@ pub struct ActionCardInfo {
     pub selected_position: Option<Position>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub selected_advance: Option<String>,
+    pub selected_advance: Option<Advance>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub selected_positions: Vec<Position>,

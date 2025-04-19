@@ -12,7 +12,7 @@ pub(crate) mod theocracy;
 pub mod trade_routes;
 pub(crate) mod warfare;
 
-use crate::advance::AdvanceBuilder;
+use crate::advance::{Advance, AdvanceBuilder};
 use crate::advance::AdvanceInfo;
 use crate::cache;
 use crate::content::advances::agriculture::agriculture;
@@ -140,9 +140,9 @@ pub(crate) fn advance_group_builder(name: &str, advances: Vec<AdvanceBuilder>) -
 ///
 /// Panics if advance with name doesn't exist
 #[must_use]
-pub fn get_advance(name: &str) -> &'static AdvanceInfo {
-    cache::get().get_advance(name).unwrap_or_else(|| {
-        panic!("Advance with name {name} not found");
+pub fn get_advance(advance: Advance) -> &'static AdvanceInfo {
+    cache::get().get_advance(advance).unwrap_or_else(|| {
+        panic!("Advance with name {advance:?} not found");
     })
 }
 

@@ -6,7 +6,7 @@ use macroquad::miniquad::window::set_window_size;
 use macroquad::prelude::{next_frame, screen_width, vec2};
 use macroquad::window::screen_height;
 use server::action::execute_action;
-use server::advance::do_advance;
+use server::advance::{do_advance, Advance};
 use server::ai::AI;
 use server::city::City;
 use server::content::advances::get_advance;
@@ -301,9 +301,9 @@ fn setup_local_game() -> Game {
         .pieces
         .market = Some(1);
 
-    do_advance(&mut game, get_advance("Voting"), player_index1);
-    do_advance(&mut game, get_advance("Free Economy"), player_index1);
-    do_advance(&mut game, get_advance("Storage"), player_index1);
+    do_advance(&mut game, Advance::Voting, player_index1);
+    do_advance(&mut game, Advance::FreeEconomy, player_index1);
+    do_advance(&mut game, Advance::Storage, player_index1);
     game.players[player_index1].gain_resources(ResourcePile::food(5));
 
     game

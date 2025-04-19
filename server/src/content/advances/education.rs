@@ -84,7 +84,7 @@ fn free_education() -> AdvanceBuilder {
         |e| &mut e.advance,
         1,
         |_game, _player_index, i| {
-            if i.name == "Free Education" {
+            if i.advance == "Free Education" {
                 None
             } else if i.payment.has_at_least(&ResourcePile::gold(1))
                 || i.payment.has_at_least(&ResourcePile::ideas(1))
@@ -133,7 +133,7 @@ fn philosophy() -> AdvanceBuilder {
             if get_group("Science")
                 .advances
                 .iter()
-                .any(|a| a.name == advance.name)
+                .any(|a| a.name == advance.advance)
             {
                 let player = game.player_mut(player_index);
                 player.gain_resources(ResourcePile::ideas(1));

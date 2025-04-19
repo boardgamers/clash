@@ -436,6 +436,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d07a4b049558765cef5f0c1a273c3fc57084d768b44d2f98127aef4cceb17293"
 dependencies = [
  "enumset_derive",
+ "serde",
 ]
 
 [[package]]
@@ -1947,7 +1948,6 @@ dependencies = [
  "num",
  "num_cpus",
  "pathfinding",
- "quad-rand",
  "readonly",
  "serde",
  "serde-wasm-bindgen",

@@ -83,8 +83,8 @@ fn priesthood() -> AdvanceBuilder {
         .add_once_per_turn_listener(
             |event| &mut event.advance_cost,
             2,
-            |i, advance, ()| {
-                if get_group("Science").advances.iter().any(|a| a == advance) {
+            |i, &advance, ()| {
+                if get_group("Science").advances.iter().any(|a| a.advance == advance) {
                     i.set_zero();
                     i.info
                         .log

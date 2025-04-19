@@ -1,9 +1,7 @@
-use enumset::EnumSet;
 use crate::advance::{Advance, AdvanceInfo};
 use crate::city_pieces::{DestroyedStructures, DestroyedStructuresData};
 use crate::collect::reset_collect_within_range_for_all;
 use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
-use crate::content::advances::get_advance;
 use crate::content::builtin;
 use crate::events::{Event, EventOrigin};
 use crate::objective_card::init_objective_card;
@@ -31,6 +29,7 @@ use crate::{
     utils,
     wonder::Wonder,
 };
+use enumset::EnumSet;
 use itertools::Itertools;
 use num::Zero;
 use serde::{Deserialize, Serialize};
@@ -161,7 +160,7 @@ impl Player {
                 .expect("player data should have a valid civilization"),
             active_leader: data.active_leader,
             available_leaders: data.available_leaders,
-            advances: data.advances.iter().map(|a| get_advance(a)).collect(),
+            advances: data.advances,
             unlocked_special_advances: data.unlocked_special_advance,
             wonders_build: data.wonders_build,
             incident_tokens: data.incident_tokens,
@@ -207,12 +206,7 @@ impl Player {
             civilization: self.civilization.name,
             active_leader: self.active_leader,
             available_leaders: self.available_leaders.into_iter().collect(),
-            advances: self
-                .advances
-                .into_iter()
-                .map(|a| a.name.clone())
-                .sorted()
-                .collect(),
+            advances: self.advances,
             unlocked_special_advance: self.unlocked_special_advances,
             wonders_build: self.wonders_build,
             incident_tokens: self.incident_tokens,
@@ -249,12 +243,7 @@ impl Player {
             civilization: self.civilization.name.clone(),
             active_leader: self.active_leader.clone(),
             available_leaders: self.available_leaders.clone(),
-            advances: self
-                .advances
-                .iter()
-                .map(|a| a.name.clone())
-                .sorted()
-                .collect(),
+            advances: self.advances,
             unlocked_special_advance: self.unlocked_special_advances.clone(),
             wonders_build: self.wonders_build.clone(),
             incident_tokens: self.incident_tokens,
@@ -293,7 +282,7 @@ impl Player {
                 .map(|l| l.name.clone())
                 .collect(),
             civilization,
-            advances: vec![],
+            advances: EnumSet::new(),
             unlocked_special_advances: Vec::new(),
             incident_tokens: 0,
             completed_objectives: Vec::new(),
@@ -440,7 +429,7 @@ impl Player {
     }
 
     #[must_use]
-    pub fn can_advance_in_change_government(&self, advance: &AdvanceInfo) -> bool {
+    pub fn can_advance_in_change_government(&self, advance: Advance) -> bool {
         if self.has_advance(advance.advance) {
             return false;
         }
@@ -453,12 +442,12 @@ impl Player {
     }
 
     #[must_use]
-    pub fn can_advance_free(&self, advance: &AdvanceInfo) -> bool {
-        if self.has_advance(advance.advance) {
+    pub fn can_advance_free(&self, advance: Advance) -> bool {
+        if self.has_advance(advance) {
             return false;
         }
 
-        for contradicting_advance in advance.contradicting {
+        for contradicting_advance in advance.info().contradicting {
             if self.has_advance(contradicting_advance) {
                 return false;
             }
@@ -467,7 +456,7 @@ impl Player {
     }
 
     #[must_use]
-    pub fn can_advance(&self, advance: &AdvanceInfo) -> bool {
+    pub fn can_advance(&self, advance: Advance) -> bool {
         self.can_afford(&self.advance_cost(advance, None).cost) && self.can_advance_free(advance)
     }
 
@@ -625,14 +614,15 @@ impl Player {
     }
 
     #[must_use]
-    pub fn advance_cost(&self, advance: &AdvanceInfo, execute: Option<&ResourcePile>) -> CostInfo {
+    pub fn advance_cost(&self, advance: Advance, execute: Option<&ResourcePile>) -> CostInfo {
         self.trigger_cost_event(
             |e| &e.advance_cost,
-            &PaymentOptions::sum(
-                ADVANCE_COST,
-                &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
-            ),
-            advance,
+            &PaymentOptions::sum(ADVANCE_COST, &[
+                ResourceType::Ideas,
+                ResourceType::Food,
+                ResourceType::Gold,
+            ]),
+            &advance,
             &(),
             execute,
         )
@@ -844,8 +834,8 @@ pub struct PlayerData {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     available_leaders: Vec<String>,
     #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    advances: Vec<String>,
+    #[serde(skip_serializing_if = "EnumSet::is_empty")]
+    advances: EnumSet<Advance>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     unlocked_special_advance: Vec<String>,

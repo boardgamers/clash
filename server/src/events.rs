@@ -2,8 +2,8 @@
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub enum EventOrigin {
-    Advance(String),
-    SpecialAdvance(String),
+    Advance(Advance),
+    SpecialAdvance(Advance),
     Leader(String),
     Wonder(String),
     Builtin(String),
@@ -51,6 +51,7 @@ use crate::content::tactics_cards::get_tactics_card;
 use incidents::get_incident;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use crate::advance::Advance;
 
 type Listener<T, U, V, W> = (
     Box<dyn Fn(&mut T, &U, &V, &mut W) + Sync + Send>,

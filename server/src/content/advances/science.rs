@@ -1,18 +1,20 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::gain_action_card_from_pile;
 use crate::advance::Bonus::CultureToken;
-use crate::advance::{AdvanceInfo, AdvanceBuilder, Advance};
+use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city_pieces::Building;
-use crate::content::advances::{AdvanceGroup,  advance_group_builder};
+use crate::content::advances::{AdvanceGroup, advance_group_builder};
 use crate::content::persistent_events::ResourceRewardRequest;
 use crate::payment::PaymentOptions;
 use crate::resource::ResourceType;
 
 pub(crate) fn science() -> AdvanceGroup {
-    advance_group_builder(
-        "Science",
-        vec![math(), astronomy(), medicine(), metallurgy()],
-    )
+    advance_group_builder("Science", vec![
+        math(),
+        astronomy(),
+        medicine(),
+        metallurgy(),
+    ])
 }
 
 fn math() -> AdvanceBuilder {
@@ -24,8 +26,8 @@ fn math() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.advance_cost,
         1,
-        |i, a, ()| {
-            if a.name == "Engineering" || a.name == "Roads" {
+        |i, &a, ()| {
+            if a == Advance::Engineering || a == Advance::Roads {
                 i.info.log.push("Math reduced the cost to 0".to_string());
                 i.set_zero();
             }

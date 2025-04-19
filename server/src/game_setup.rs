@@ -14,6 +14,7 @@ use crate::unit::UnitType;
 use crate::utils::{Rng, Shuffle};
 use itertools::Itertools;
 use std::collections::HashMap;
+use crate::advance::Advance;
 
 /// Creates a new [`Game`].
 ///
@@ -161,8 +162,8 @@ fn init_human_players(player_amount: usize, rng: &mut Rng) -> Vec<Player> {
         let mut player = Player::new(civilizations.remove(civilization), player_index);
         player.resource_limit = ResourcePile::new(2, 7, 7, 7, 7, 0, 0);
         player.gain_resources(ResourcePile::food(2));
-        player.advances.push(advances::get_advance("Farming"));
-        player.advances.push(advances::get_advance("Mining"));
+        player.advances.insert(Advance::Farming);
+        player.advances.insert(Advance::Mining);
         player.incident_tokens = 3;
         players.push(player);
     }

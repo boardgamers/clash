@@ -299,7 +299,7 @@ fn change_government_type(game: &mut Game, player_index: usize, new_government: 
     let a = advances::get_government(government);
     assert!(
         game.player(player_index)
-            .can_advance_in_change_government(&a.advances[0]),
+            .can_advance_in_change_government(a.advances[0].advance),
         "Cannot advance in change government"
     );
 
@@ -348,7 +348,7 @@ pub(crate) fn can_change_government_for_free(player: &Player) -> bool {
     player.government().is_some_and(|government| {
         advances::get_governments().iter().any(|g| {
             g.government != Some(government.clone())
-                && player.can_advance_in_change_government(&g.advances[0])
+                && player.can_advance_in_change_government(g.advances[0].advance)
         })
     })
 }

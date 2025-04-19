@@ -14,6 +14,7 @@ use Bonus::*;
 
 // id / 4 = advance group
 #[derive(EnumSetType, Debug)]
+#[derive(Hash)]
 pub enum Advance {
     // Farming Group
     Farming = 0,
@@ -88,6 +89,13 @@ pub enum Advance {
     Fanaticism = 47,
 }
 
+impl Advance {
+    #[must_use]
+    pub fn info(&self) -> AdvanceInfo {
+        get_advance(**self)
+    }
+}
+
 pub struct AdvanceInfo {
     pub advance: Advance,
     pub name: String,
@@ -153,11 +161,8 @@ impl AdvanceBuilder {
     }
 
     #[must_use]
-    pub fn with_contradicting_advance(mut self, contradicting_advance: &[&str]) -> Self {
-        self.contradicting_advance = contradicting_advance
-            .iter()
-            .map(|s| (*s).to_string())
-            .collect();
+    pub fn with_contradicting_advance(mut self, contradicting_advance: &[Advance]) -> Self {
+        self.contradicting_advance = contradicting_advance.to_vec();
         self
     }
 
@@ -219,7 +224,7 @@ impl Bonus {
 /// # Panics
 ///
 /// Panics if advance does not exist
-pub fn do_advance(game: &mut Game, advance: &AdvanceInfo, player_index: usize) {
+pub fn do_advance(game: &mut Game, advance: Advance, player_index: usize) {
     advance.listeners.one_time_init(game, player_index);
     let name = advance.name.clone();
     for i in 0..game.players[player_index]
@@ -246,22 +251,22 @@ pub fn do_advance(game: &mut Game, advance: &AdvanceInfo, player_index: usize) {
         game.players[player_index].gain_resources(pile);
     }
     let player = &mut game.players[player_index];
-    player.advances.push(get_advance(&advance.name));
+    player.advances.insert(advance);
 }
 
 pub(crate) fn gain_advance_without_payment(
     game: &mut Game,
-    name: &str,
+    advance: Advance,
     player_index: usize,
     payment: ResourcePile,
     take_incident_token: bool,
 ) {
-    do_advance(game, get_advance(name), player_index);
+    do_advance(game, advance, player_index);
     on_advance(
         game,
         player_index,
         OnAdvanceInfo {
-            name: name.to_string(),
+            advance,
             payment,
             take_incident_token,
         },
@@ -289,7 +294,7 @@ pub(crate) fn on_advance(game: &mut Game, player_index: usize, info: OnAdvanceIn
     }
 }
 
-pub(crate) fn remove_advance(game: &mut Game, advance: &AdvanceInfo, player_index: usize) {
+pub(crate) fn remove_advance(game: &mut Game, advance: Advance, player_index: usize) {
     advance.listeners.undo(game, player_index);
 
     for i in 0..game.players[player_index]

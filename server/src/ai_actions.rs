@@ -487,7 +487,7 @@ fn change_government(p: &Player, c: &ChangeGovernmentRequest) -> Vec<EventRespon
         // change to the first available government and take the first advances
         let new = advances::get_governments()
             .iter()
-            .find(|g| p.can_advance_in_change_government(&g.advances[0]))
+            .find(|g| p.can_advance_in_change_government(g.advances[0].advance))
             .expect("government not found");
 
         let advances = new
