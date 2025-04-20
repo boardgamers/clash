@@ -233,7 +233,10 @@ fn get_card_object(
                     format!("Cost: {}", w.cost.to_string()),
                     format!(
                         "Required advances: {}",
-                        w.required_advances.iter().map(std::string::ToString::to_string).join(", ")
+                        w.required_advances
+                            .iter()
+                            .map(std::string::ToString::to_string)
+                            .join(", ")
                     ),
                 ],
             )

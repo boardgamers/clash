@@ -176,7 +176,7 @@ pub fn get_government(government: &str) -> &'static AdvanceGroup {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     use crate::content::advances::get_governments;
     use crate::content::advances::get_groups;
 

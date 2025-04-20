@@ -168,7 +168,10 @@ fn description(rc: &RenderContext, a: &AdvanceInfo) -> Vec<String> {
     if !a.contradicting.is_empty() {
         parts.push(format!(
             "Contradicts: {}",
-            a.contradicting.iter().map(std::string::ToString::to_string).join(", ")
+            a.contradicting
+                .iter()
+                .map(std::string::ToString::to_string)
+                .join(", ")
         ));
     }
     if let Some(b) = &a.bonus {

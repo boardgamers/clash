@@ -28,7 +28,8 @@ pub struct Wonder {
 }
 
 impl Wonder {
-    #[must_use] pub fn builder(
+    #[must_use]
+    pub fn builder(
         name: &str,
         description: &str,
         cost: PaymentOptions,
