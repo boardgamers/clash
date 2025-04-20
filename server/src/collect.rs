@@ -433,7 +433,11 @@ pub(crate) fn reset_collect_within_range_for_all(game: &mut Game, pos: Position)
     }
 }
 
-pub(crate) fn reset_collect_within_range_for_all_except(game: &mut Game, pos: Position, player: usize) {
+pub(crate) fn reset_collect_within_range_for_all_except(
+    game: &mut Game,
+    pos: Position,
+    player: usize,
+) {
     for p in &mut game.players {
         if p.index == player {
             continue;

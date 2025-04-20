@@ -2,6 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
 use crate::card::{HandCard, HandCardType, hand_cards};
 use crate::content::action_cards::get_action_card;
+use crate::content::objective_cards::get_objective_card;
 use crate::content::persistent_events::{HandCardsRequest, PersistentEventType, PlayerRequest};
 use crate::content::tactics_cards::TacticsCardFactory;
 use crate::game::Game;
@@ -11,7 +12,6 @@ use crate::resource_pile::ResourcePile;
 use crate::utils::remove_element;
 use itertools::Itertools;
 use std::fmt::Display;
-use crate::content::objective_cards::get_objective_card;
 
 pub(crate) fn spy(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     ActionCard::builder(
@@ -204,7 +204,7 @@ fn get_swap_secrets(other: &Player) -> Vec<String> {
                     )
                 })
                 .join(", ")
-        )        ,
+        ),
         format!(
             "{} has the following objective cards: {}",
             other.get_name(),
@@ -213,11 +213,7 @@ fn get_swap_secrets(other: &Player) -> Vec<String> {
                 .iter()
                 .map(|id| {
                     let a = get_objective_card(*id);
-                    format!(
-                        "{}/{}",
-                        a.objectives[0].name,
-                        a.objectives[1].name
-                    )
+                    format!("{}/{}", a.objectives[0].name, a.objectives[1].name)
                 })
                 .join(", ")
         ),

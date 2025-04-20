@@ -9,7 +9,7 @@ use std::{
 
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::city::is_valid_city_terrain;
-use crate::collect::{reset_collect_within_range_for_all, reset_collect_within_range_for_all_except};
+use crate::collect::reset_collect_within_range_for_all_except;
 use crate::combat_roll::COMBAT_DIE_SIDES;
 use crate::consts::SHIP_CAPACITY;
 use crate::content::builtin::Builtin;

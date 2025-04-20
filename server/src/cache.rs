@@ -92,7 +92,7 @@ impl Cache {
 
             advances_by_building: advances::get_all_uncached()
                 .into_iter()
-                .flat_map(|advance| {
+                .filter_map(|advance| {
                     advance
                         .unlocked_building
                         .map(|building| (building, advance.advance))

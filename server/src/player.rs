@@ -1,6 +1,6 @@
 use crate::advance::Advance;
 use crate::city_pieces::{DestroyedStructures, DestroyedStructuresData};
-use crate::collect::{reset_collect_within_range_for_all, reset_collect_within_range_for_all_except};
+use crate::collect::reset_collect_within_range_for_all_except;
 use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::content::builtin;
 use crate::events::{Event, EventOrigin};
