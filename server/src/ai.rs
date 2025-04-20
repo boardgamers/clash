@@ -220,9 +220,9 @@ async fn evaluate_action(
 }
 
 fn monte_carlo_score(mut rng: Rng, player_index: usize, game_data: GameData) -> f64 {
+    let mut ai = AiActions::new();
     let mut game = Game::from_data(game_data);
     game.supports_undo = false;
-    let mut ai = AiActions::new();
     let new_game = monte_carlo_run(&mut ai, game, &mut rng);
     let ai_score = new_game.players[player_index].victory_points(&new_game) as f64;
     let mut max_opponent_score = 0.0;

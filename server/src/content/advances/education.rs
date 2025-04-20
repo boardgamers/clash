@@ -1,4 +1,4 @@
-use crate::ability_initializer::{AbilityInitializerSetup, do_once_per_turn};
+use crate::ability_initializer::{AbilityInitializerSetup, once_per_turn_advance};
 use crate::action_card::gain_action_card_from_pile;
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
@@ -10,15 +10,12 @@ use crate::payment::PaymentOptions;
 use crate::resource_pile::ResourcePile;
 
 pub(crate) fn education() -> AdvanceGroup {
-    advance_group_builder(
-        "Education",
-        vec![
-            writing(),
-            public_education(),
-            free_education(),
-            philosophy(),
-        ],
-    )
+    advance_group_builder("Education", vec![
+        writing(),
+        public_education(),
+        free_education(),
+        philosophy(),
+    ])
 }
 
 fn writing() -> AdvanceBuilder {
@@ -58,8 +55,8 @@ fn public_education() -> AdvanceBuilder {
         |i, game, ()| {
             let city = game.get_any_city(i.city);
             if city.pieces.academy.is_some() {
-                do_once_per_turn(
-                    "Public Education",
+                once_per_turn_advance(
+                    Advance::PublicEducation,
                     i,
                     &(),
                     &(),

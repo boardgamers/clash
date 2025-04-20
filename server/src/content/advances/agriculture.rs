@@ -64,6 +64,7 @@ fn husbandry() -> AdvanceBuilder {
     )
     .with_advance_bonus(MoodToken)
     .with_reset_collect_stats()
+        // todo remove this
     .add_once_per_turn_listener(
         |event| &mut event.collect_options,
         0,
