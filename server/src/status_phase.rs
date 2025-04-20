@@ -418,9 +418,9 @@ mod tests {
 
     fn assert_next_player(
         name: &str,
-        player0_mood: u32,
-        player1_mood: u32,
-        player2_mood: u32,
+        player0_mood: u8,
+        player1_mood: u8,
+        player2_mood: u8,
         expected_player_index: usize,
     ) {
         let mut player0 = Player::new(civ::get_test_civilization(), 0);

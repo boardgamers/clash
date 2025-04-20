@@ -19,7 +19,7 @@ impl EventOrigin {
         match self {
             EventOrigin::Advance(name)
             // can't call to_string, because cache is not constructed
-            | EventOrigin::SpecialAdvance(name) => format!("{name:?}"), 
+            | EventOrigin::SpecialAdvance(name) => format!("{name:?}"),
             | EventOrigin::Wonder(name)
             | EventOrigin::Leader(name)
             | EventOrigin::Objective(name)
