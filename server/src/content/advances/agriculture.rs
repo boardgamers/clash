@@ -1,4 +1,4 @@
-use crate::ability_initializer::AbilityInitializerSetup;
+use crate::ability_initializer::{AbilityInitializerSetup, once_per_turn_advance};
 use crate::advance::Bonus::MoodToken;
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::collect::{CollectContext, CollectInfo};
@@ -63,13 +63,19 @@ fn husbandry() -> AdvanceBuilder {
         spaces away. This Advance can only be used once per turn.",
     )
     .with_advance_bonus(MoodToken)
-    .with_reset_collect_stats()
-        // todo remove this
-    .add_once_per_turn_listener(
+    .add_transient_event_listener(
         |event| &mut event.collect_options,
         0,
-        husbandry_collect,
-        |i| &mut i.info.info,
+        |i, c, game| {
+            once_per_turn_advance(
+                Advance::Husbandry,
+                i,
+                c,
+                game,
+                |i| &mut i.info.info,
+                husbandry_collect,
+            )
+        },
     )
 }
 

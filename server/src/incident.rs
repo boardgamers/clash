@@ -469,10 +469,8 @@ impl IncidentBuilder {
         + Send,
     ) -> Self {
         let cities2 = cities.clone();
-        self.add_myths_payment(target, mood_modifier, move |g, p, i| {
-            cities(p, g, i).1
-        })
-        .decrease_mood(target, mood_modifier, cities2)
+        self.add_myths_payment(target, mood_modifier, move |g, p, i| cities(p, g, i).1)
+            .decrease_mood(target, mood_modifier, cities2)
     }
 
     fn add_myths_payment(
@@ -514,7 +512,7 @@ impl IncidentBuilder {
             },
             move |game, s, i| {
                 let pile = &s.choice[0];
-                i.player.myths_payment = pile.amount() as u8;
+                i.player.myths_payment = pile.amount();
                 game.add_info_log_item(&format!(
                     "{} paid {pile} to avoid the mood change using Myths",
                     s.player_name

@@ -3,15 +3,15 @@ use crate::advance::Advance;
 use crate::card::validate_card_selection;
 use crate::city::{City, MoodState};
 use crate::collect::available_collect_actions;
-use crate::construct::{available_buildings, new_building_positions, Construct};
+use crate::construct::{Construct, available_buildings, new_building_positions};
 use crate::content::advances;
 use crate::content::custom_actions::CustomEventAction;
 use crate::content::persistent_events::{
-    is_selected_structures_valid, ChangeGovernmentRequest, EventResponse, HandCardsRequest, MultiRequest,
-    PersistentEventRequest, PersistentEventState, PositionRequest, SelectedStructure,
+    ChangeGovernmentRequest, EventResponse, HandCardsRequest, MultiRequest, PersistentEventRequest,
+    PersistentEventState, PositionRequest, SelectedStructure, is_selected_structures_valid,
 };
 use crate::cultural_influence::{
-    available_influence_actions, available_influence_culture, InfluenceCultureAttempt,
+    InfluenceCultureAttempt, available_influence_actions, available_influence_culture,
 };
 use crate::events::EventOrigin;
 use crate::game::Game;
@@ -19,13 +19,13 @@ use crate::happiness::{available_happiness_actions, happiness_cost};
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::playing_actions::{
-    base_and_custom_action, IncreaseHappiness, PlayingAction, PlayingActionType, Recruit,
+    IncreaseHappiness, PlayingAction, PlayingActionType, Recruit, base_and_custom_action,
 };
 use crate::position::Position;
 use crate::recruit::recruit_cost;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
-use crate::status_phase::{government_advances, ChangeGovernment, ChangeGovernmentType};
+use crate::status_phase::{ChangeGovernment, ChangeGovernmentType, government_advances};
 use crate::unit::{UnitType, Units};
 use itertools::Itertools;
 use rustc_hash::FxHashMap;
@@ -53,12 +53,12 @@ pub struct AiActions {
 }
 
 impl AiActions {
+    #[must_use]
     pub fn new() -> Self {
         AiActions {
             payment_cache: PaymentCache::new(),
         }
     }
-
 
     ///
     /// Returns a list of available actions for the current player.
@@ -86,7 +86,10 @@ impl AiActions {
     }
 }
 
-type ActionFactory = (PlayingActionType, fn(&mut AiActions, &Player, &Game) -> Vec<Action>);
+type ActionFactory = (
+    PlayingActionType,
+    fn(&mut AiActions, &Player, &Game) -> Vec<Action>,
+);
 
 #[must_use]
 fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>)> {
@@ -238,8 +241,7 @@ fn available_action_cards(game: &Game, p: &Player) -> Vec<Action> {
 }
 
 fn payment(ai_actions: &mut AiActions, o: &PaymentOptions, p: &Player) -> ResourcePile {
-    try_payment(ai_actions, o, p)
-        .expect("expected payment")
+    try_payment(ai_actions, o, p).expect("expected payment")
 }
 
 fn payment_with_action(
@@ -262,7 +264,8 @@ fn try_payment(ai_actions: &mut AiActions, o: &PaymentOptions, p: &Player) -> Op
         }
     }
 
-    ai_actions.payment_cache
+    ai_actions
+        .payment_cache
         .options
         .entry(o.clone())
         .or_insert(FxHashMap::default())
@@ -498,17 +501,17 @@ fn responses(event: &PersistentEventState, player: &Player, game: &Game) -> Vec<
             select_multi(&r, SelectMultiStrategy::All, |s| {
                 is_selected_structures_valid(game, s)
             })
-                .into_iter()
-                .map(EventResponse::SelectStructures)
-                .collect()
+            .into_iter()
+            .map(EventResponse::SelectStructures)
+            .collect()
         }
         PersistentEventRequest::SelectHandCards(r) => {
             select_multi(&r, hand_card_strategy(&h.origin, &r), |v| {
                 validate_card_selection(v, game).is_ok()
             })
-                .into_iter()
-                .map(EventResponse::SelectHandCards)
-                .collect()
+            .into_iter()
+            .map(EventResponse::SelectHandCards)
+            .collect()
         }
         PersistentEventRequest::BoolRequest(_) => {
             vec![EventResponse::Bool(false), EventResponse::Bool(true)]
@@ -558,10 +561,10 @@ fn hand_card_strategy(o: &EventOrigin, r: &HandCardsRequest) -> SelectMultiStrat
             SelectMultiStrategy::Max
         }
         EventOrigin::CivilCard(_)
-        if r.description == "Select a Wonder, Action, or Objective card to swap" =>
-            {
-                SelectMultiStrategy::Min // powerset takes too long
-            }
+            if r.description == "Select a Wonder, Action, or Objective card to swap" =>
+        {
+            SelectMultiStrategy::Min // powerset takes too long
+        }
         _ => SelectMultiStrategy::All,
     }
 }
@@ -626,7 +629,12 @@ fn construct(ai_actions: &mut AiActions, p: &Player, game: &Game) -> Vec<Action>
         .collect()
 }
 
-pub(crate) fn get_construct_actions(ai_actions: &mut AiActions, game: &Game, p: &Player, city: &City) -> Vec<Action> {
+pub(crate) fn get_construct_actions(
+    ai_actions: &mut AiActions,
+    game: &Game,
+    p: &Player,
+    city: &City,
+) -> Vec<Action> {
     available_buildings(game, p.index, city.position)
         .iter()
         .flat_map(|(building, cost)| {
@@ -634,8 +642,12 @@ pub(crate) fn get_construct_actions(ai_actions: &mut AiActions, game: &Game, p: 
                 .iter()
                 .map(|port| {
                     Action::Playing(PlayingAction::Construct(
-                        Construct::new(city.position, *building, payment(ai_actions, &cost.cost, p))
-                            .with_port_position(*port),
+                        Construct::new(
+                            city.position,
+                            *building,
+                            payment(ai_actions, &cost.cost, p),
+                        )
+                        .with_port_position(*port),
                     ))
                 })
                 .collect_vec()

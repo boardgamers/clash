@@ -1,19 +1,16 @@
-use crate::ability_initializer::{
-    AbilityInitializerBuilder, AbilityListeners, once_per_turn_advance,
-};
+use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::city_pieces::Building;
 use crate::content::advances::get_advance;
 use crate::content::persistent_events::PersistentEventType;
-use crate::events::{Event, EventOrigin};
+use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::incident::on_trigger_incident;
-use crate::player_events::{IncidentInfo, OnAdvanceInfo, TransientEvents};
+use crate::player_events::{IncidentInfo, OnAdvanceInfo};
 use crate::special_advance::SpecialAdvance;
 use crate::{ability_initializer::AbilityInitializerSetup, resource_pile::ResourcePile};
 use Bonus::*;
 use enumset::EnumSetType;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use std::fmt::Display;
 use std::mem;
 
@@ -191,24 +188,6 @@ impl AdvanceBuilder {
         self
     }
 
-    pub(crate) fn add_once_per_turn_listener<T, U, V, E, F>(
-        self,
-        event: E,
-        priority: i32,
-        listener: F,
-        get_info: impl Fn(&mut T) -> &mut HashMap<String, String> + 'static + Clone + Sync + Send,
-    ) -> Self
-    where
-        T: Clone + PartialEq,
-        E: Fn(&mut TransientEvents) -> &mut Event<T, U, V, ()> + 'static + Clone + Sync + Send,
-        F: Fn(&mut T, &U, &V) + 'static + Clone + Sync + Send,
-    {
-        let advance = self.advance.clone();
-        self.add_transient_event_listener(event, priority, move |value, u, v| {
-            once_per_turn_advance(advance, value, u, v, get_info.clone(), listener.clone());
-        })
-    }
-
     #[must_use]
     pub fn build(self) -> AdvanceInfo {
         AdvanceInfo {
@@ -293,11 +272,15 @@ pub(crate) fn gain_advance_without_payment(
     take_incident_token: bool,
 ) {
     do_advance(game, advance, player_index);
-    on_advance(game, player_index, OnAdvanceInfo {
-        advance,
-        payment,
-        take_incident_token,
-    });
+    on_advance(
+        game,
+        player_index,
+        OnAdvanceInfo {
+            advance,
+            payment,
+            take_incident_token,
+        },
+    );
 }
 
 pub(crate) fn on_advance(game: &mut Game, player_index: usize, info: OnAdvanceInfo) {

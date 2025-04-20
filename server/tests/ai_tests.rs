@@ -1,6 +1,7 @@
 use crate::common::JsonTest;
 use itertools::Itertools;
 use server::action::{Action, ActionType};
+use server::ai_actions::AiActions;
 use server::collect::{PositionCollection, city_collections_uncached};
 use server::playing_actions::{
     Collect, IncreaseHappiness, PlayingAction, PlayingActionType, Recruit,
@@ -10,7 +11,6 @@ use server::resource_pile::ResourcePile;
 use server::unit::Units;
 use server::utils::remove_element_by;
 use std::vec;
-use server::ai_actions::AiActions;
 
 mod common;
 

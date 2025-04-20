@@ -46,7 +46,7 @@ fn pestilence() -> Incident {
                 2
             } else {
                 1
-            } - i.player.payment.amount() as u8;
+            } - i.player.payment.amount();
 
             (non_angry_cites(p), needed)
         },

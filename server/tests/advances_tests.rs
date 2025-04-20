@@ -1,7 +1,7 @@
 use crate::common::{JsonTest, TestAction, illegal_action_test, influence_action};
 use server::action::{Action, execute_action};
 use server::city_pieces::Building::{Academy, Fortress, Temple};
-use server::collect::PositionCollection;
+use server::collect::{PositionCollection, possible_resource_collections};
 use server::consts::BUILDING_COST;
 use server::content::advances::trade_routes::find_trade_routes;
 use server::content::custom_actions::{CustomActionType, CustomEventAction};
@@ -696,4 +696,53 @@ fn test_overpay() {
             ))),
         )],
     );
+}
+
+#[test]
+fn test_husbandry() {
+    JSON.test(
+        "husbandry",
+        vec![
+            TestAction::undoable(
+                0,
+                Action::Playing(Collect(playing_actions::Collect::new(
+                    Position::from_offset("C2"),
+                    vec![PositionCollection::new(
+                        Position::from_offset("D1"),
+                        ResourcePile::food(1),
+                    )],
+                    ResourcePile::food(1),
+                    PlayingActionType::Collect,
+                ))),
+            )
+            .without_json_comparison()
+            .with_post_assert(|game| {
+                // but not again
+                assert!(has_husbandry_field(game))
+            }),
+            // can use husbandry - because it was not used in the previous action
+            TestAction::undoable(
+                0,
+                Action::Playing(Collect(playing_actions::Collect::new(
+                    Position::from_offset("C2"),
+                    vec![PositionCollection::new(
+                        Position::from_offset("E2"),
+                        ResourcePile::food(1),
+                    )],
+                    ResourcePile::food(1),
+                    PlayingActionType::Collect,
+                ))),
+            )
+            .without_json_comparison()
+            .with_post_assert(|game| {
+                // but not again
+                assert!(!has_husbandry_field(game))
+            }),
+        ],
+    );
+}
+
+fn has_husbandry_field(game: &Game) -> bool {
+    let info = possible_resource_collections(game, Position::from_offset("C2"), 0, &[]);
+    info.choices.contains_key(&Position::from_offset("E2"))
 }

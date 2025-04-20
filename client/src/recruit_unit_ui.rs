@@ -87,16 +87,12 @@ fn selectable_unit(
         unit.leader_name.as_ref().or(leader_name),
         None,
     );
-    let max = if cost.is_ok() {
-        u8::from(current + 1)
-    } else {
-        u8::from(current)
-    };
+    let max = if cost.is_ok() { current + 1 } else { current };
     SelectableUnit {
         unit_type: unit.unit_type,
         cost,
         selectable: CountSelector {
-            current: u8::from(current),
+            current,
             min: 0,
             max,
         },

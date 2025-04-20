@@ -1,7 +1,13 @@
 use async_std::task;
 use server::ai_actions::AiActions;
 use server::game::Game;
-use server::{action::{self, Action}, game::GameState, game_setup, playing_actions::PlayingAction, utils::{Rng, Shuffle}};
+use server::{
+    action::{self, Action},
+    game::GameState,
+    game_setup,
+    playing_actions::PlayingAction,
+    utils::{Rng, Shuffle},
+};
 
 mod common;
 

@@ -127,13 +127,25 @@ pub fn tiles_used(collections: &[PositionCollection]) -> u8 {
 }
 
 pub(crate) fn collect(game: &mut Game, player_index: usize, c: &Collect) -> Result<(), String> {
-    let i = get_total_collection(game, player_index, c.city_position, &c.collections)?;
+    let mut i = get_total_collection(game, player_index, c.city_position, &c.collections)?;
     let city = game.players[player_index].get_city_mut(c.city_position);
     if !city.can_activate() {
         return Err("City can't be activated".to_string());
     }
     city.activate();
     game.players[player_index].gain_resources(i.total.clone());
+
+    let key = Advance::Husbandry.to_string();
+    if i.info.info.contains_key(&key) {
+        // check if husbandry is used
+        let used = c
+            .collections
+            .iter()
+            .any(|p| p.position.distance(c.city_position) > 1);
+        if !used {
+            i.info.info.remove(&key);
+        }
+    }
 
     on_collect(game, player_index, i);
     Ok(())

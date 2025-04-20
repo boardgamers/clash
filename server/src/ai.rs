@@ -5,8 +5,7 @@ use tokio::runtime::Runtime;
 
 use crate::ai_actions::AiActions;
 use crate::{
-    action::{self, Action, ActionType}
-    ,
+    action::{self, Action, ActionType},
     game::{Game, GameData, GameState},
     playing_actions::PlayingAction,
     position::Position,

@@ -161,7 +161,7 @@ fn draft() -> AdvanceBuilder {
             if units.infantry > 0 {
                 // insert at beginning so that it's preferred over gold
 
-                let pile = ResourcePile::mood_tokens(draft_cost(player) as u8);
+                let pile = ResourcePile::mood_tokens(draft_cost(player));
                 cost.info
                     .log
                     .push(format!("Draft reduced the cost of 1 Infantry to {pile}"));

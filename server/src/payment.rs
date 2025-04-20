@@ -58,8 +58,6 @@ pub struct PaymentOptions {
 }
 
 impl PaymentOptions {
-
-
     #[must_use]
     pub fn first_valid_payment(&self, available: &ResourcePile) -> Option<ResourcePile> {
         let discount_left = self
@@ -146,10 +144,10 @@ impl PaymentOptions {
 
     #[must_use]
     pub(crate) fn tokens(cost: u8) -> Self {
-        Self::sum(cost, &[
-            ResourceType::MoodTokens,
-            ResourceType::CultureTokens,
-        ])
+        Self::sum(
+            cost,
+            &[ResourceType::MoodTokens, ResourceType::CultureTokens],
+        )
     }
 
     #[must_use]

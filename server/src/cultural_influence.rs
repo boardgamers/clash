@@ -266,7 +266,7 @@ pub fn influence_culture_boost_cost(
     let (start, range_boost) = affordable_start_city(game, player_index, target_city, action_type)?;
 
     let mut info = Ok(InfluenceCultureInfo::new(
-        PaymentOptions::resources(ResourcePile::culture_tokens(range_boost as u8)),
+        PaymentOptions::resources(ResourcePile::culture_tokens(range_boost)),
         ActionInfo::new(attacker),
         target_city_position,
         structure.clone(),
