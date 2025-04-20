@@ -190,7 +190,7 @@ fn description(rc: &RenderContext, a: &AdvanceInfo) -> Vec<String> {
         parts.push(format!("Unlocks building: {}", b.name()));
         add_building_description(rc, &mut parts, *b);
     }
-    if a.name == "Bartering" {
+    if a.advance == Advance::Bartering {
         parts.push("Can build in a city with a Market: cavalry".to_string());
         add_unit_description(&mut parts, UnitType::Cavalry);
         parts.push("Can build in a city with a Market: elephant".to_string());

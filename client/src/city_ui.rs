@@ -31,7 +31,7 @@ use std::ops::Add;
 
 pub struct IconAction<'a> {
     pub texture: &'a Texture2D,
-    pub tooltip: String,
+    pub tooltip: Vec<String>,
     pub warning: bool,
     pub action: Box<dyn Fn() -> StateUpdate + 'a>,
 }
@@ -40,7 +40,7 @@ impl<'a> IconAction<'a> {
     #[must_use]
     pub fn new(
         texture: &'a Texture2D,
-        tooltip: String,
+        tooltip: Vec<String>,
         action: Box<dyn Fn() -> StateUpdate + 'a>,
     ) -> IconAction<'a> {
         IconAction {
@@ -94,7 +94,7 @@ fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Optio
 
     Some(IconAction::new(
         &rc.assets().resources[&ResourceType::MoodTokens],
-        "Increase happiness".to_string(),
+        vec!["Increase happiness".to_string()],
         Box::new(move || {
             open_increase_happiness_dialog(rc, actions.clone(), |mut happiness| {
                 let mut target = city.mood_state.clone();
@@ -139,13 +139,15 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
                 ),
                 Err(e) => format!(" ({e})"),
             };
-            let tooltip = format!(
-                "Built {}{}{} - {}",
-                name,
-                pos.map_or(String::new(), |p| format!(" at {p}")),
-                suffix,
-                b.description(),
-            );
+            let tooltip = vec![
+                format!(
+                    "{}{}{}",
+                    name,
+                    pos.map_or(String::new(), |p| format!(" at {p}")),
+                    suffix,
+                ),
+                b.description().to_string(),
+            ];
             IconAction::new(
                 &rc.assets().buildings[&b],
                 tooltip,
@@ -174,7 +176,7 @@ fn recruit_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconActio
     }
     Some(IconAction::new(
         rc.assets().unit(UnitType::Infantry, rc.shown_player),
-        "Recruit Units".to_string(),
+        vec!["Recruit Units".to_string()],
         Box::new(|| {
             RecruitAmount::new_selection(
                 rc.game,
@@ -195,7 +197,7 @@ fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option
 
     Some(IconAction::new(
         &rc.assets().resources[&ResourceType::Food],
-        "Collect Resources".to_string(),
+        vec!["Collect Resources".to_string()],
         Box::new(move || {
             base_or_custom_action(rc, actions.clone(), "Collect resources", |custom| {
                 let i = possible_resource_collections(

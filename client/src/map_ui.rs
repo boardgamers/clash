@@ -236,7 +236,7 @@ fn found_city_button<'a>(rc: &'a RenderContext<'a>, pos: Position) -> Option<Ico
             && rc.can_play_action_for_player(&PlayingActionType::FoundCity, unit.player_index))
         .then_some(IconAction::new(
             rc.assets().unit(UnitType::Settler, rc.shown_player),
-            "Found a new city".to_string(),
+            vec!["Found a new city".to_string()],
             Box::new(move || {
                 StateUpdate::execute(Action::Playing(PlayingAction::FoundCity {
                     settler: unit.id,
@@ -258,7 +258,7 @@ pub fn move_units_button<'a>(
     }
     Some(IconAction::new(
         move_intent.icon(rc),
-        move_intent.toolip().to_string(),
+        vec![move_intent.toolip().to_string()],
         Box::new(move || StateUpdate::move_units(rc, Some(pos), move_intent)),
     ))
 }
@@ -291,7 +291,7 @@ pub fn show_map_action_buttons(rc: &RenderContext, icons: &IconActionVec) -> Sta
                     return (icon.action)();
                 }
             } else {
-                show_tooltip_for_circle(rc, &[icon.tooltip.clone()], center, radius);
+                show_tooltip_for_circle(rc, &icon.tooltip, center, radius);
             }
         }
     }

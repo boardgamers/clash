@@ -53,8 +53,7 @@ impl CollectResources {
             format!("{extra} left"),
         ];
         for o in self.info.modifiers.clone() {
-            let vec1 = event_help(rc, &o);
-            r.extend(vec1);
+            r.extend(event_help(rc, &o));
         }
         r
     }

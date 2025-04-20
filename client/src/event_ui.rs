@@ -1,5 +1,6 @@
 use crate::payment_ui::Payment;
 use crate::render_context::RenderContext;
+use crate::tooltip::add_tooltip_description;
 use server::content::action_cards::get_civil_card;
 use server::content::builtin::get_builtin;
 use server::content::incidents::get_incident;
@@ -11,7 +12,7 @@ use server::events::EventOrigin;
 #[must_use]
 pub fn event_help(rc: &RenderContext, origin: &EventOrigin) -> Vec<String> {
     let mut h = vec![origin.name()];
-    h.extend(match origin {
+    let d = match origin {
         EventOrigin::Advance(a) => vec![a.info().description.clone()],
         EventOrigin::Wonder(w) => vec![get_wonder(w).description.clone()],
         EventOrigin::Builtin(b) => vec![get_builtin(rc.game, b).description.clone()],
@@ -37,14 +38,15 @@ pub fn event_help(rc: &RenderContext, origin: &EventOrigin) -> Vec<String> {
                 .unwrap();
             s.description.clone()
         }],
-    });
+    };
+    h.extend(d);
     h
 }
 
 #[must_use]
 pub fn custom_phase_event_help(rc: &RenderContext, description: &str) -> Vec<String> {
     let mut h = event_help(rc, &custom_phase_event_origin(rc));
-    h.push(description.to_string());
+    add_tooltip_description(&mut h, description);
     h
 }
 

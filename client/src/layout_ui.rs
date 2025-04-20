@@ -43,10 +43,10 @@ pub fn bottom_left_texture(
     rc: &RenderContext,
     texture: &Texture2D,
     p: Vec2,
-    tooltip: &str,
+    tooltip: &[String],
 ) -> bool {
     let anchor = vec2(MARGIN, rc.state.screen_size.y - MARGIN);
-    draw_icon(rc, texture, tooltip, anchor + p)
+    draw_scaled_icon_with_tooltip(rc, texture, tooltip,anchor + p, ICON_SIZE)
 }
 
 pub fn bottom_center_texture(
