@@ -2,7 +2,7 @@ use itertools::{Either, Itertools};
 use serde::{Deserialize, Serialize};
 
 use crate::action_card::{ActionCardInfo, land_battle_won_action, play_action_card};
-use crate::advance::gain_advance_without_payment;
+use crate::advance::{gain_advance_without_payment, Advance};
 use crate::city::{MoodState, found_city};
 use crate::collect::{PositionCollection, collect};
 use crate::construct::Construct;
@@ -226,7 +226,7 @@ impl PlayingActionType {
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub enum PlayingAction {
     Advance {
-        advance: String,
+        advance: Advance,
         payment: ResourcePile,
     },
     FoundCity {
@@ -268,14 +268,13 @@ impl PlayingAction {
 
         match self {
             Advance { advance, payment } => {
-                let a = get_advance(&advance);
-                if !game.player(player_index).can_advance(a) {
+                if !game.player(player_index).can_advance(advance) {
                     return Err("Cannot advance".to_string());
                 }
                 game.player(player_index)
-                    .advance_cost(a, Some(&payment))
+                    .advance_cost(advance, Some(&payment))
                     .pay(game, &payment);
-                gain_advance_without_payment(game, &advance, player_index, payment, true);
+                gain_advance_without_payment(game, advance, player_index, payment, true);
             }
             FoundCity { settler } => {
                 let settler = game.players[player_index].remove_unit(settler);

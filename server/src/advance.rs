@@ -92,7 +92,7 @@ pub enum Advance {
 impl Advance {
     #[must_use]
     pub fn info(&self) -> &'static AdvanceInfo {
-        get_advance(self)
+        get_advance(*self)
     }
 }
 

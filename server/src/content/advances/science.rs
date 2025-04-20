@@ -57,7 +57,7 @@ fn astronomy() -> AdvanceBuilder {
         |event| &mut event.advance_cost,
         0,
         |i, a, ()| {
-            if a.name == "Navigation" || a.name == "Cartography" {
+            if a.name == Advance::Navigation || a.name == Advance::Cartography {
                 i.set_zero();
                 i.info
                     .log

@@ -27,6 +27,7 @@ use crate::status_phase::{ChangeGovernment, ChangeGovernmentType, government_adv
 use crate::unit::{UnitType, Units};
 use itertools::Itertools;
 use std::vec;
+use crate::advance::Advance;
 //todo
 //nicht nur maximale anzahl rekrutieren
 //bewegung:
@@ -230,8 +231,9 @@ fn try_payment(o: &PaymentOptions, p: &Player) -> Option<ResourcePile> {
 fn advances(p: &Player, _game: &Game) -> Vec<Action> {
     advances::get_all()
         .iter()
-        .filter_map(|a| {
-            if deny_advance(&a.name) {
+        .filter_map(|info| {
+            let a = info.advance;
+            if deny_advance(a) {
                 return None;
             }
 
@@ -240,7 +242,7 @@ fn advances(p: &Player, _game: &Game) -> Vec<Action> {
             }
             try_payment(&p.advance_cost(a, None).cost, p).map(|r| {
                 Action::Playing(PlayingAction::Advance {
-                    advance: a.name.clone(),
+                    advance: a,
                     payment: r,
                 })
             })
@@ -248,11 +250,11 @@ fn advances(p: &Player, _game: &Game) -> Vec<Action> {
         .collect()
 }
 
-fn deny_advance(name: &str) -> bool {
+fn deny_advance(name: Advance) -> bool {
     //todo collect cache doesn't work, because husbandry can only be used once per turn
     //correct cache: 1) only store total in cache 2) sort by distance 3) add husbandry flag
 
-    name == "Husbandry"
+    name == Advance::Husbandry
 }
 
 fn collect_actions(p: &Player, game: &Game) -> Vec<Action> {
@@ -424,7 +426,7 @@ fn responses(event: &PersistentEventState, player: &Player, game: &Game) -> Vec<
         PersistentEventRequest::SelectAdvance(a) => a
             .choices
             .iter()
-            .filter(|c| !deny_advance(c.as_str()))
+            .filter(|c| !deny_advance(**c))
             .map(|c| EventResponse::SelectAdvance(c.clone()))
             .collect(),
         PersistentEventRequest::SelectPlayer(p) => p

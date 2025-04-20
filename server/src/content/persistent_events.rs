@@ -46,7 +46,7 @@ pub enum PersistentEventRequest {
 pub enum EventResponse {
     Payment(Vec<ResourcePile>),
     ResourceReward(ResourcePile),
-    SelectAdvance(String),
+    SelectAdvance(Advance),
     SelectPlayer(usize),
     SelectPositions(Vec<Position>),
     SelectUnitType(UnitType),

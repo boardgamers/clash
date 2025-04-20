@@ -160,7 +160,7 @@ impl Player {
                 .expect("player data should have a valid civilization"),
             active_leader: data.active_leader,
             available_leaders: data.available_leaders,
-            advances: data.advances.into(),
+            advances: EnumSet::from_iter(data.advances),
             unlocked_special_advances: data.unlocked_special_advance,
             wonders_build: data.wonders_build,
             incident_tokens: data.incident_tokens,
@@ -451,7 +451,7 @@ impl Player {
             return false;
         }
 
-        for contradicting_advance in advance.info().contradicting {
+        for contradicting_advance in &advance.info().contradicting {
             if self.has_advance(contradicting_advance) {
                 return false;
             }

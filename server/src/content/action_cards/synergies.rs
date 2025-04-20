@@ -389,10 +389,10 @@ fn new_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         .build()
 }
 
-fn advances_that_can_be_gained(player: &Player) -> Vec<String> {
+fn advances_that_can_be_gained(player: &Player) -> Vec<Advance> {
     advances::get_all()
         .iter()
-        .filter(|a| !player.has_advance(a.advance) && player.can_advance(a))
-        .map(|a| a.name.clone())
+        .filter(|a| player.can_advance(a.advance))
+        .map(|a| a.advance)
         .collect()
 }

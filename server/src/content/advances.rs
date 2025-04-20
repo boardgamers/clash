@@ -28,28 +28,29 @@ use crate::content::advances::spirituality::spirituality;
 use crate::content::advances::theocracy::theocracy;
 use crate::content::advances::warfare::warfare;
 use std::vec;
+use itertools::Itertools;
 
 struct GovernmentInfo {
     name: &'static str,
-    leading: &'static str,
-    requirement: &'static str,
+    leading: Advance,
+    requirement: Advance,
 }
 
 const GOVERNMENTS: [GovernmentInfo; 3] = [
     GovernmentInfo {
         name: "Democracy",
-        leading: "Voting",
-        requirement: "Philosophy",
+        leading: Advance::Voting,
+        requirement: Advance::Philosophy,
     },
     GovernmentInfo {
         name: "Autocracy",
-        leading: "Nationalism",
-        requirement: "Draft",
+        leading: Advance::Nationalism,
+        requirement: Advance::Draft,
     },
     GovernmentInfo {
         name: "Theocracy",
-        leading: "Dogma",
-        requirement: "State Religion",
+        leading: Advance::Dogma,
+        requirement: Advance::StateReligion,
     },
 ];
 
@@ -97,7 +98,7 @@ pub fn get_groups_uncached() -> Vec<AdvanceGroup> {
 }
 
 pub(crate) fn advance_group_builder(name: &str, advances: Vec<AdvanceBuilder>) -> AdvanceGroup {
-    let first = &advances[0].advance;
+    let first = advances[0].advance;
     let government = GOVERNMENTS.into_iter().find(|i| first == i.leading);
     let a: Vec<AdvanceInfo> = advances
         .into_iter()
@@ -120,7 +121,7 @@ pub(crate) fn advance_group_builder(name: &str, advances: Vec<AdvanceBuilder>) -
                             &GOVERNMENTS
                                 .into_iter()
                                 .map(|i| i.leading)
-                                .collect::<Vec<&str>>(),
+                                .collect_vec(),
                         );
                 }
                 builder

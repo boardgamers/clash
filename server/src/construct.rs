@@ -49,12 +49,13 @@ pub fn can_construct(
     player: &Player,
     game: &Game,
 ) -> Result<CostInfo, String> {
+    // todo cache this
     let advance = advances::get_all()
         .iter()
         .find(|a| a.unlocked_building == Some(building))
-        .expect("Advance not found");
-    if !player.advances.contains(&advance) {
-        return Err(format!("Missing advance: {}", advance.name));
+        .expect("Advance not found").advance;
+    if !player.has_advance(advance) {
+        return Err(format!("Missing advance: {}", advance));
     }
 
     can_construct_anything(city, player)?;
