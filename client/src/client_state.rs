@@ -9,14 +9,16 @@ use crate::dialog_ui::BaseOrCustomDialog;
 use crate::event_ui::{custom_phase_event_help, custom_phase_event_origin, event_help, pay_help};
 use crate::happiness_ui::IncreaseHappinessConfig;
 use crate::layout_ui::FONT_SIZE;
+use crate::log_ui::get_log_end;
 use crate::map_ui::ExploreResolutionConfig;
 use crate::move_ui::{MoveDestination, MoveIntent, MovePayment, MoveSelection};
-use crate::payment_ui::Payment;
+use crate::payment_ui::{Payment, new_gain};
 use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
 use crate::render_context::RenderContext;
 use crate::status_phase_ui::ChooseAdditionalAdvances;
 use macroquad::prelude::*;
 use server::action::Action;
+use server::advance::Advance;
 use server::card::HandCard;
 use server::city::{City, MoodState};
 use server::content::persistent_events::{
@@ -38,7 +40,7 @@ pub enum ActiveDialog {
     // playing actions
     IncreaseHappiness(IncreaseHappinessConfig),
     AdvanceMenu,
-    AdvancePayment(Payment),
+    AdvancePayment(Payment<Advance>),
     ConstructionPayment(ConstructionPayment),
     CollectResources(CollectResources),
     RecruitUnitSelection(RecruitAmount),
@@ -48,9 +50,9 @@ pub enum ActiveDialog {
     ExploreResolution(ExploreResolutionConfig),
 
     // custom
-    ResourceRewardRequest(Payment),
+    ResourceRewardRequest(Payment<String>),
     AdvanceRequest(AdvanceRequest),
-    PaymentRequest(Vec<Payment>),
+    PaymentRequest(Vec<Payment<String>>),
     PlayerRequest(PlayerRequest),
     PositionRequest(MultiSelection<Position>),
     UnitTypeRequest(UnitTypeRequest),
@@ -145,10 +147,7 @@ impl ActiveDialog {
                     let v = vec!["Click on a building to influence its culture".to_string()];
                     if let PlayingActionType::Custom(c) = &b.action_type {
                         let mut r = v.clone();
-                        r.extend(event_help(
-                            rc,
-                            &rc.shown_player.custom_actions[&c.custom_action_type],
-                        ));
+                        r.extend(event_help(rc, &rc.shown_player.custom_actions[c]));
                     }
                     v
                 } else {
@@ -465,6 +464,9 @@ impl State {
                 }
             }
             StateUpdate::OpenDialog(dialog) => {
+                if matches!(dialog, ActiveDialog::Log) {
+                    self.log_scroll = get_log_end(game, self.screen_size.y);
+                }
                 let d = self.game_state_dialog(game);
                 if matches!(dialog, ActiveDialog::AdvanceMenu) && d.is_advance() {
                     self.set_dialog(d);
@@ -472,7 +474,6 @@ impl State {
                     self.set_dialog(dialog);
                 }
                 self.focused_tile = None;
-                self.log_scroll = 0.0;
                 GameSyncRequest::None
             }
             StateUpdate::CloseDialog => {
@@ -531,6 +532,7 @@ impl State {
                             Payment::new(
                                 &p.cost,
                                 &game.player(game.active_player()).resources,
+                                p.name.clone(),
                                 &p.name,
                                 p.optional,
                             )
@@ -538,7 +540,7 @@ impl State {
                         .collect(),
                 ),
                 PersistentEventRequest::ResourceReward(r) => {
-                    ActiveDialog::ResourceRewardRequest(Payment::new_gain(&r.reward, &r.name))
+                    ActiveDialog::ResourceRewardRequest(new_gain(&r.reward, &r.name))
                 }
                 PersistentEventRequest::SelectAdvance(r) => ActiveDialog::AdvanceRequest(r.clone()),
                 PersistentEventRequest::SelectPositions(r) => {

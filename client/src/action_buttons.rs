@@ -25,20 +25,30 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
             rc,
             &assets.resources[&ResourceType::MoodTokens],
             icon_pos(0, -2),
-            "Increase happiness",
+            &["Increase happiness".to_string()],
         )
     {
         return open_increase_happiness_dialog(rc, happiness, |h| h);
     }
 
     if rc.can_play_action(&PlayingActionType::MoveUnits)
-        && bottom_left_texture(rc, &assets.move_units, icon_pos(0, -3), "Move units")
+        && bottom_left_texture(
+            rc,
+            &assets.move_units,
+            icon_pos(0, -3),
+            &["Move units".to_string()],
+        )
     {
         return global_move(rc);
     }
 
     if rc.can_play_action(&PlayingActionType::Advance)
-        && bottom_left_texture(rc, &assets.advances, icon_pos(1, -3), "Research advances")
+        && bottom_left_texture(
+            rc,
+            &assets.advances,
+            icon_pos(1, -3),
+            &["Research advances".to_string()],
+        )
     {
         return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
     }
@@ -50,7 +60,7 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
             rc,
             &assets.resources[&ResourceType::CultureTokens],
             icon_pos(1, -2),
-            "Cultural Influence",
+            &["Cultural Influence".to_string()],
         )
     {
         return base_or_custom_action(rc, influence, "Influence culture", |d| {
@@ -64,7 +74,7 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
                 rc,
                 &assets.custom_actions[&a],
                 icon_pos(i as i8, -1),
-                &event_help(rc, &origin)[0],
+                &event_help(rc, &origin),
             ) {
                 return action;
             }
@@ -90,7 +100,7 @@ pub fn custom_action_buttons<'a>(
             generic_custom_action(rc, a.clone(), city).map(|action| {
                 IconAction::new(
                     &rc.assets().custom_actions[&a],
-                    event_help(rc, &origin)[0].clone(),
+                    event_help(rc, &origin),
                     Box::new(move || action.clone()),
                 )
             })
@@ -120,7 +130,7 @@ fn generic_custom_action(
         return custom_action_type
             .is_available_city(rc.shown_player, city)
             .then_some(StateUpdate::execute(Action::Playing(
-                PlayingAction::CustomEvent(CustomEventAction::new(
+                PlayingAction::Custom(CustomEventAction::new(
                     custom_action_type,
                     Some(city.position),
                 )),
@@ -128,7 +138,7 @@ fn generic_custom_action(
     }
 
     (!custom_action_type.is_city_bound()).then_some(StateUpdate::execute(Action::Playing(
-        PlayingAction::CustomEvent(CustomEventAction::new(custom_action_type, None)),
+        PlayingAction::Custom(CustomEventAction::new(custom_action_type, None)),
     )))
 }
 
@@ -150,7 +160,7 @@ pub fn base_or_custom_action(
     let special = custom.map(|a| {
         let origin = &rc.shown_player.custom_actions[&a];
         let dialog = execute(BaseOrCustomDialog {
-            action_type: PlayingActionType::Custom(a.info()),
+            action_type: PlayingActionType::Custom(a),
             title: format!("{title} with {}", origin.name()),
         });
 

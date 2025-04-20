@@ -1,5 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::advance::{Advance, AdvanceBuilder, gain_advance_without_payment};
+use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo, gain_advance_without_payment};
 use crate::city_pieces::Building::Temple;
 use crate::consts::STACK_LIMIT;
 use crate::content::advances::{AdvanceGroup, advance_group_builder, get_group};
@@ -17,7 +17,8 @@ pub(crate) fn theocracy() -> AdvanceGroup {
 }
 
 fn dogma() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Dogma,
         "Dogma",
         "Whenever you Construct a new Temple, \
         you may immediately get a Theocracy Advance for free, \
@@ -42,11 +43,11 @@ fn dogma() -> AdvanceBuilder {
         |game, player_index, building| {
             if matches!(building, Temple) {
                 let player = game.player(player_index);
-                let choices: Vec<String> = get_group("Theocracy")
+                let choices: Vec<Advance> = get_group("Theocracy")
                     .advances
                     .iter()
-                    .filter(|a| player.can_advance_free(a))
-                    .map(|a| a.name.clone())
+                    .filter(|a| player.can_advance_free(a.advance))
+                    .map(|a| a.advance)
                     .collect();
                 if choices.is_empty() {
                     return None;
@@ -67,7 +68,7 @@ fn dogma() -> AdvanceBuilder {
             ));
             gain_advance_without_payment(
                 game,
-                &c.choice,
+                c.choice,
                 c.player_index,
                 ResourcePile::empty(),
                 true,
@@ -77,7 +78,8 @@ fn dogma() -> AdvanceBuilder {
 }
 
 fn devotion() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Devotion,
         "Devotion",
         "Attempts to influence your cities with a Temple may not be boosted by culture tokens",
     )
@@ -95,7 +97,8 @@ fn devotion() -> AdvanceBuilder {
 }
 
 fn conversion() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Conversion,
         "Conversion",
         "You add +1 to your Influence Culture roll \
         and gain 1 culture token when you make a successful Influence Culture attempt.",
@@ -132,7 +135,8 @@ fn conversion() -> AdvanceBuilder {
 }
 
 fn fanaticism() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+    Advance::Fanaticism,
         "Fanaticism",
         "During a battle in a city with a Temple, \
         whether you are the attacker or defender, you add +2 combat value to your first combat roll. \

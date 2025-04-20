@@ -114,7 +114,7 @@
       ],
       "advances": [
         "Farming",
-        "Free Economy",
+        "FreeEconomy",
         "Husbandry",
         "Mining",
         "Voting"
@@ -291,7 +291,8 @@
                         ],
                         "total": {
                           "food": 1
-                        }
+                        },
+                        "action_type": "Collect"
                       }
                     }
                   },

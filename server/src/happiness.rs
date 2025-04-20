@@ -1,13 +1,10 @@
-use crate::action::Action;
 use crate::city::MoodState;
-use crate::content::custom_actions::{CustomAction, CustomActionType};
+use crate::content::custom_actions::CustomActionType;
 use crate::game::Game;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::player_events::CostInfo;
-use crate::playing_actions::{
-    IncreaseHappiness, PlayingAction, PlayingActionType, base_or_custom_available,
-};
+use crate::playing_actions::{PlayingActionType, base_or_custom_available};
 use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
@@ -20,30 +17,6 @@ pub fn available_happiness_actions(game: &Game, player: usize) -> Vec<PlayingAct
         PlayingActionType::IncreaseHappiness,
         &CustomActionType::VotingIncreaseHappiness,
     )
-}
-
-///
-/// # Panics
-///
-/// If the action is illegal
-#[must_use]
-pub fn happiness_action(
-    action: &PlayingActionType,
-    include_happiness: IncreaseHappiness,
-) -> Action {
-    match action {
-        PlayingActionType::IncreaseHappiness => {
-            Action::Playing(PlayingAction::IncreaseHappiness(include_happiness))
-        }
-        PlayingActionType::Custom(c)
-            if c.custom_action_type == CustomActionType::VotingIncreaseHappiness =>
-        {
-            Action::Playing(PlayingAction::Custom(
-                CustomAction::VotingIncreaseHappiness(include_happiness),
-            ))
-        }
-        _ => panic!("illegal type {action:?}"),
-    }
 }
 
 pub(crate) fn increase_happiness(

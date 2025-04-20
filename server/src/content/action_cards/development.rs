@@ -141,11 +141,7 @@ pub(crate) fn collect_only() -> Builtin {
 fn is_collect(i: &PlayingActionInfo) -> bool {
     match &i.action_type {
         PlayingActionType::Collect => true,
-        PlayingActionType::Custom(c)
-            if c.custom_action_type == CustomActionType::FreeEconomyCollect =>
-        {
-            true
-        }
+        PlayingActionType::Custom(c) if *c == CustomActionType::FreeEconomyCollect => true,
         _ => false,
     }
 }

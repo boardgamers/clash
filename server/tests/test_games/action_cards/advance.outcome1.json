@@ -236,21 +236,21 @@
                             "request": {
                               "SelectAdvance": {
                                 "choices": [
-                                  "Arts",
-                                  "Bartering",
-                                  "Draft",
-                                  "Engineering",
-                                  "Fishing",
-                                  "Husbandry",
-                                  "Irrigation",
-                                  "Math",
-                                  "Myths",
-                                  "Roads",
-                                  "Sanitation",
-                                  "Siegecraft",
-                                  "Steel Weapons",
                                   "Storage",
-                                  "Writing"
+                                  "Irrigation",
+                                  "Husbandry",
+                                  "Engineering",
+                                  "Sanitation",
+                                  "Roads",
+                                  "Fishing",
+                                  "Writing",
+                                  "Siegecraft",
+                                  "SteelWeapons",
+                                  "Draft",
+                                  "Myths",
+                                  "Bartering",
+                                  "Arts",
+                                  "Math"
                                 ]
                               }
                             }

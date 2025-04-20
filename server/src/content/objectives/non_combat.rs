@@ -1,4 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::advance::Advance;
 use crate::content::advances::warfare::draft_cost;
 use crate::game::Game;
 use crate::log::{ActionLogItem, ActionLogPlayer};
@@ -19,7 +20,7 @@ pub(crate) fn draft() -> Objective {
                 // Draft is just a cost conversion
                 let used_draft = r.units.infantry > 0
                     && r.payment.mood_tokens >= draft_cost(p)
-                    && p.has_advance("Draft");
+                    && p.has_advance(Advance::Draft);
                 if used_draft {
                     if p.event_info.contains_key("Used Draft") {
                         objective_is_ready(p, name);

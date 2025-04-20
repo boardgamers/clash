@@ -13,7 +13,7 @@ fn all_advances_in_group(player: &Player, group: &str) -> bool {
     advances::get_group(group)
         .advances
         .iter()
-        .all(|a| player.has_advance(&a.name))
+        .all(|a| player.has_advance(a.advance))
 }
 
 pub(crate) fn city_planner() -> Objective {
@@ -66,7 +66,7 @@ pub(crate) fn goal_focused() -> Objective {
         leading_player(game, player, 1, |p, _| {
             advances::get_groups()
                 .iter()
-                .filter(|g| g.advances.iter().all(|a| p.has_advance(&a.name)))
+                .filter(|g| g.advances.iter().all(|a| p.has_advance(a.advance)))
                 .count()
         })
     })
@@ -81,7 +81,7 @@ pub(crate) fn diversified_research() -> Objective {
     .status_phase_check(|_game, player| {
         advances::get_groups()
             .iter()
-            .filter(|g| g.advances.iter().any(|a| player.has_advance(&a.name)))
+            .filter(|g| g.advances.iter().any(|a| player.has_advance(a.advance)))
             .count()
             >= 9
     })

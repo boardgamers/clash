@@ -2,8 +2,8 @@
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub enum EventOrigin {
-    Advance(String),
-    SpecialAdvance(String),
+    Advance(Advance),
+    SpecialAdvance(Advance),
     Leader(String),
     Wonder(String),
     Builtin(String),
@@ -18,7 +18,8 @@ impl EventOrigin {
     pub fn id(&self) -> String {
         match self {
             EventOrigin::Advance(name)
-            | EventOrigin::SpecialAdvance(name)
+            // can't call to_string, because cache is not constructed
+            | EventOrigin::SpecialAdvance(name) => format!("{name:?}"), 
             | EventOrigin::Wonder(name)
             | EventOrigin::Leader(name)
             | EventOrigin::Objective(name)
@@ -32,9 +33,8 @@ impl EventOrigin {
     #[must_use]
     pub fn name(&self) -> String {
         match self {
-            EventOrigin::Advance(name)
-            | EventOrigin::SpecialAdvance(name)
-            | EventOrigin::Wonder(name)
+            EventOrigin::Advance(name) | EventOrigin::SpecialAdvance(name) => name.to_string(),
+            EventOrigin::Wonder(name)
             | EventOrigin::Leader(name)
             | EventOrigin::Objective(name)
             | EventOrigin::Builtin(name) => name.to_string(),
@@ -45,6 +45,7 @@ impl EventOrigin {
     }
 }
 
+use crate::advance::Advance;
 use crate::content::action_cards::get_civil_card;
 use crate::content::incidents;
 use crate::content::tactics_cards::get_tactics_card;
@@ -225,27 +226,31 @@ impl<T, U, V, W> Event<T, U, V, W> {
 #[cfg(test)]
 mod tests {
     use super::{EventMut, EventOrigin};
+    use crate::advance::Advance;
 
     #[test]
     fn mutable_event() {
         let mut event = EventMut::new("test");
+        let add_constant = Advance::Arts;
         event.add_listener_mut(
             |item, constant, _, ()| *item += constant,
             0,
-            EventOrigin::Advance("add constant".to_string()),
+            EventOrigin::Advance(add_constant),
         );
+        let multiply_value = Advance::Sanitation;
         event.add_listener_mut(
             |item, _, multiplier, ()| *item *= multiplier,
             -1,
-            EventOrigin::Advance("multiply value".to_string()),
+            EventOrigin::Advance(multiply_value),
         );
+        let no_change = Advance::Bartering;
         event.add_listener_mut(
             |item, _, _, ()| {
                 *item += 1;
                 *item -= 1;
             },
             1,
-            EventOrigin::Advance("no change".to_string()),
+            EventOrigin::Advance(no_change),
         );
 
         let mut item = 0;
@@ -255,21 +260,18 @@ mod tests {
         assert_eq!(6, item);
         assert_eq!(
             vec![
-                EventOrigin::Advance("add constant".to_string()),
-                EventOrigin::Advance("multiply value".to_string())
+                EventOrigin::Advance(add_constant),
+                EventOrigin::Advance(multiply_value)
             ],
             modifiers
         );
 
-        event.remove_listener_mut_by_key(&EventOrigin::Advance("multiply value".to_string()));
+        event.remove_listener_mut_by_key(&EventOrigin::Advance(multiply_value));
         let mut item = 0;
         let addend = 3;
         let modifiers = event.trigger_with_modifiers(&mut item, &addend, &0, &mut ());
         assert_eq!(3, item);
-        assert_eq!(
-            vec![EventOrigin::Advance("add constant".to_string())],
-            modifiers
-        );
+        assert_eq!(vec![EventOrigin::Advance(add_constant)], modifiers);
     }
 
     #[test]
@@ -280,28 +282,29 @@ mod tests {
             pub modifiers: Vec<EventOrigin>,
         }
 
+        let a = Advance::Arts;
+        let b = Advance::Bartering;
+        let c = Advance::Cartography;
+
         let mut event = EventMut::new("test");
         event.add_listener_mut(
             |value: &mut Info, (), (), ()| value.value += 1,
             0,
-            EventOrigin::Advance("A".to_string()),
+            EventOrigin::Advance(a),
         );
         event.add_listener_mut(
             |value: &mut Info, (), (), ()| value.value += 2,
             1,
-            EventOrigin::Advance("B".to_string()),
+            EventOrigin::Advance(b),
         );
         event.add_listener_mut(
             |value: &mut Info, (), (), ()| value.value += 4,
             2,
-            EventOrigin::Advance("C".to_string()),
+            EventOrigin::Advance(c),
         );
 
         assert_eq!(
-            vec![
-                EventOrigin::Advance("C".to_string()),
-                EventOrigin::Advance("A".to_string())
-            ],
+            vec![EventOrigin::Advance(c), EventOrigin::Advance(a)],
             event
                 .trigger_with_minimal_modifiers(
                     &Info {

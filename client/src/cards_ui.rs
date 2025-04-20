@@ -231,7 +231,13 @@ fn get_card_object(
                 vec![
                     w.description.clone(),
                     format!("Cost: {}", w.cost.to_string()),
-                    format!("Required advances: {}", w.required_advances.join(", ")),
+                    format!(
+                        "Required advances: {}",
+                        w.required_advances
+                            .iter()
+                            .map(std::string::ToString::to_string)
+                            .join(", ")
+                    ),
                 ],
             )
         }

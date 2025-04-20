@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action::Action;
-use crate::advance::{Advance, AdvanceBuilder};
+use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city::MoodState;
 use crate::content::advances::{AdvanceGroup, advance_group_builder};
 use crate::content::builtin::Builtin;
@@ -24,7 +24,8 @@ pub(crate) fn democracy() -> AdvanceGroup {
 }
 
 fn voting() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Voting,
         "Voting",
         "As a free action, you may spend 1 mood token to gain an action 'Increase happiness'",
     )
@@ -32,7 +33,8 @@ fn voting() -> AdvanceBuilder {
 }
 
 fn separation_of_power() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::SeparationOfPower,
         "Separation of Power",
         "Attempts to influence your happy cities may not be boosted by culture tokens",
     )
@@ -50,7 +52,8 @@ fn separation_of_power() -> AdvanceBuilder {
 }
 
 fn civil_liberties() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::CivilLiberties,
         "Civil Liberties",
         "As a free action, you may gain 3 mood tokens. \
         The cost of Draft is increased to 2 mood token",
@@ -75,7 +78,8 @@ pub(crate) fn use_civil_liberties() -> Builtin {
 }
 
 fn free_economy() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::FreeEconomy,
         "Free Economy",
         "As a free action, you may spend 1 mood token to collect \
                   resources in one city. This must be your only collect action this turn",
@@ -94,9 +98,10 @@ fn free_economy() -> AdvanceBuilder {
                         Err("Cannot collect when Free Economy Collect was used".to_string());
                 }
                 PlayingActionType::Custom(i)
-                    if matches!(i.custom_action_type, FreeEconomyCollect)
+                    if *i == FreeEconomyCollect
                         && current_player_turn_log(game).items.iter().any(|item| {
-                            matches!(item.action, Action::Playing(PlayingAction::Collect(_)))
+                            matches!(&item.action, Action::Playing(PlayingAction::Collect(c)) if
+                                c.action_type == PlayingActionType::Collect)
                         }) =>
                 {
                     *available =

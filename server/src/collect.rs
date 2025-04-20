@@ -1,8 +1,8 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::action::Action;
+use crate::advance::Advance;
 use crate::city::City;
 use crate::content::builtin::Builtin;
-use crate::content::custom_actions::{CustomAction, CustomActionType};
+use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::PersistentEventType;
 use crate::events::EventOrigin;
 use crate::game::Game;
@@ -10,7 +10,7 @@ use crate::map::Terrain;
 use crate::map::Terrain::{Fertile, Forest, Mountain};
 use crate::player::Player;
 use crate::player_events::ActionInfo;
-use crate::playing_actions::{Collect, PlayingAction, PlayingActionType, base_or_custom_available};
+use crate::playing_actions::{Collect, PlayingActionType, base_or_custom_available};
 use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
@@ -309,25 +309,6 @@ pub fn available_collect_actions(game: &Game, player: usize) -> Vec<PlayingActio
     )
 }
 
-///
-/// # Panics
-///
-/// If the action is illegal
-#[must_use]
-pub fn collect_action(action: &PlayingActionType, collect: Collect) -> Action {
-    match action {
-        PlayingActionType::Collect => Action::Playing(PlayingAction::Collect(collect)),
-        PlayingActionType::Custom(c)
-            if c.custom_action_type == CustomActionType::FreeEconomyCollect =>
-        {
-            Action::Playing(PlayingAction::Custom(CustomAction::FreeEconomyCollect(
-                collect,
-            )))
-        }
-        _ => panic!("illegal type {action:?}"),
-    }
-}
-
 pub fn set_city_collections(game: &mut Game, city_position: Position) {
     let city = game.get_any_city(city_position);
     let player = city.player_index;
@@ -372,7 +353,7 @@ fn city_collection_uncached(
         let Some((pos, pile)) = pick_resource(&info, &c, priority) else {
             return apply_total_collect(&c, player, info, game)
                 .ok()
-                .map(|i| Collect::new(city.position, c, i.total));
+                .map(|i| Collect::new(city.position, c, i.total, PlayingActionType::Collect));
         };
         c = add_collect(&info, pos, &pile, &c);
     }
@@ -437,7 +418,7 @@ pub(crate) fn invalidate_collect_cache() -> Builtin {
 }
 
 pub(crate) fn reset_collect_within_range(p: &mut Player, position: Position) {
-    let has_husbandry = p.has_advance("Husbandry");
+    let has_husbandry = p.has_advance(Advance::Husbandry);
     let range = if has_husbandry { 2 } else { 1 };
     for c in &mut p.cities {
         if c.position.distance(position) <= range {
@@ -448,6 +429,19 @@ pub(crate) fn reset_collect_within_range(p: &mut Player, position: Position) {
 
 pub(crate) fn reset_collect_within_range_for_all(game: &mut Game, pos: Position) {
     for p in &mut game.players {
+        reset_collect_within_range(p, pos);
+    }
+}
+
+pub(crate) fn reset_collect_within_range_for_all_except(
+    game: &mut Game,
+    pos: Position,
+    player: usize,
+) {
+    for p in &mut game.players {
+        if p.index == player {
+            continue;
+        }
         reset_collect_within_range(p, pos);
     }
 }

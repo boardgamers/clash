@@ -12,23 +12,23 @@
         "request": {
           "SelectAdvance": {
             "choices": [
-              "Arts",
-              "Bartering",
-              "Cartography",
-              "Dogma",
-              "Engineering",
-              "Husbandry",
-              "Irrigation",
-              "Math",
-              "Navigation",
-              "Priesthood",
-              "Rituals",
-              "Roads",
-              "Sanitation",
               "Storage",
+              "Irrigation",
+              "Husbandry",
+              "Engineering",
+              "Sanitation",
+              "Roads",
+              "Navigation",
+              "WarShips",
+              "Cartography",
+              "Writing",
               "Tactics",
-              "War Ships",
-              "Writing"
+              "Rituals",
+              "Priesthood",
+              "Bartering",
+              "Arts",
+              "Math",
+              "Dogma"
             ]
           }
         },
@@ -149,8 +149,8 @@
       "advances": [
         "Farming",
         "Fishing",
-        "Free Economy",
-        "Free Education",
+        "FreeEconomy",
+        "FreeEducation",
         "Mining",
         "Storage",
         "Voting",
@@ -217,7 +217,7 @@
         "Fishing",
         "Mining",
         "Myths",
-        "State Religion"
+        "StateReligion"
       ],
       "incident_tokens": 3,
       "next_unit_id": 2

@@ -2,7 +2,6 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::remove_advance;
 use crate::combat::{Combat, CombatModifier, CombatRetreatState};
 use crate::combat_listeners::CombatResult;
-use crate::content::advances::get_advance;
 use crate::content::builtin::Builtin;
 use crate::content::effects::{Anarchy, PermanentEffect};
 use crate::content::persistent_events::PaymentRequest;
@@ -165,10 +164,10 @@ fn anarchy() -> Incident {
                 .player(player_index)
                 .advances
                 .iter()
-                .filter_map(|a| a.government.is_some().then_some(a.name.clone()))
+                .filter(|a| a.info().government.is_some())
                 .collect_vec();
             for a in remove {
-                remove_advance(game, get_advance(&a), player_index);
+                remove_advance(game, a, player_index);
             }
 
             let p = game.player_mut(player_index);
@@ -197,7 +196,7 @@ pub(crate) fn anarchy_advance() -> Builtin {
             |event| &mut event.advance,
             10,
             |game, player_index, player_name, i| {
-                if get_advance(&i.name).government.is_none() {
+                if i.advance.info().government.is_none() {
                     return;
                 }
 

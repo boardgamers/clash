@@ -4,23 +4,22 @@ use server::city_pieces::Building::{Academy, Fortress, Temple};
 use server::collect::PositionCollection;
 use server::consts::BUILDING_COST;
 use server::content::advances::trade_routes::find_trade_routes;
-use server::content::custom_actions::CustomAction::{
-    ArtsInfluenceCultureAttempt, VotingIncreaseHappiness,
-};
-use server::content::custom_actions::{CustomAction, CustomActionType, CustomEventAction};
+use server::content::custom_actions::{CustomActionType, CustomEventAction};
 use server::content::persistent_events::{EventResponse, SelectedStructure, Structure};
+use server::cultural_influence::InfluenceCultureAttempt;
 use server::events::EventOrigin;
 use server::game::Game;
 use server::movement::MovementAction::Move;
 use server::movement::{MoveUnits, move_units_destinations};
 use server::playing_actions::PlayingAction::{
-    Advance, Collect, Construct, Custom, CustomEvent, EndTurn, Recruit, WonderCard,
+    Advance, Collect, Construct, Custom, EndTurn, Recruit, WonderCard,
 };
+use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
 use server::recruit::recruit_cost_without_replaced;
 use server::resource_pile::ResourcePile;
 use server::unit::Units;
-use server::{construct, playing_actions};
+use server::{advance, construct, playing_actions};
 use std::vec;
 
 mod common;
@@ -37,7 +36,7 @@ fn test_sanitation_and_draft() {
         vec![
             TestAction::undoable(
                 0,
-                Action::Playing(Recruit(server::playing_actions::Recruit::new(
+                Action::Playing(Recruit(playing_actions::Recruit::new(
                     &units,
                     city_position,
                     ResourcePile::mood_tokens(1) + ResourcePile::gold(2),
@@ -58,8 +57,8 @@ fn test_sanitation_and_draft() {
                 assert_eq!(ResourcePile::mood_tokens(1), options.conversions[1].to);
                 assert_eq!(
                     vec![
-                        EventOrigin::Advance("Sanitation".to_string()),
-                        EventOrigin::Advance("Draft".to_string())
+                        EventOrigin::Advance(advance::Advance::Sanitation),
+                        EventOrigin::Advance(advance::Advance::Draft)
                     ],
                     options.modifiers
                 );
@@ -77,7 +76,7 @@ fn test_separation_of_power() {
             game = execute_action(
                 game,
                 Action::Playing(Advance {
-                    advance: String::from("Separation of Power"),
+                    advance: advance::Advance::SeparationOfPower,
                     payment: ResourcePile::food(1) + ResourcePile::gold(1),
                 }),
                 0,
@@ -98,7 +97,7 @@ fn test_devotion() {
             game = execute_action(
                 game,
                 Action::Playing(Advance {
-                    advance: String::from("Devotion"),
+                    advance: advance::Advance::Devotion,
                     payment: ResourcePile::food(1) + ResourcePile::gold(1),
                 }),
                 0,
@@ -123,7 +122,7 @@ fn test_totalitarianism() {
             game = execute_action(
                 game,
                 Action::Playing(Advance {
-                    advance: String::from("Totalitarianism"),
+                    advance: advance::Advance::Totalitarianism,
                     payment: ResourcePile::food(1) + ResourcePile::gold(1),
                 }),
                 0,
@@ -144,7 +143,7 @@ fn test_monuments() {
             game = execute_action(
                 game,
                 Action::Playing(Advance {
-                    advance: String::from("Monuments"),
+                    advance: advance::Advance::Monuments,
                     payment: ResourcePile::food(1) + ResourcePile::gold(1),
                 }),
                 0,
@@ -179,7 +178,7 @@ fn test_increase_happiness_sports() {
         vec![
             TestAction::undoable(
                 0,
-                Action::Playing(CustomEvent(CustomEventAction::new(
+                Action::Playing(Custom(CustomEventAction::new(
                     CustomActionType::Sports,
                     Some(Position::from_offset("C2")),
                 ))),
@@ -202,7 +201,7 @@ fn test_increase_happiness_sports2() {
         vec![
             TestAction::undoable(
                 0,
-                Action::Playing(CustomEvent(CustomEventAction::new(
+                Action::Playing(Custom(CustomEventAction::new(
                     CustomActionType::Sports,
                     Some(Position::from_offset("C2")),
                 ))),
@@ -224,15 +223,16 @@ fn test_increase_happiness_voting() {
         "increase_happiness_voting",
         vec![TestAction::undoable(
             0,
-            Action::Playing(Custom(VotingIncreaseHappiness(
-                playing_actions::IncreaseHappiness {
-                    happiness_increases: vec![
+            Action::Playing(PlayingAction::IncreaseHappiness(
+                playing_actions::IncreaseHappiness::new(
+                    vec![
                         (Position::from_offset("C2"), 1),
                         (Position::from_offset("B3"), 2),
                     ],
-                    payment: ResourcePile::mood_tokens(5),
-                },
-            ))),
+                    ResourcePile::mood_tokens(5),
+                    PlayingActionType::Custom(CustomActionType::VotingIncreaseHappiness),
+                ),
+            )),
         )],
     );
 }
@@ -243,15 +243,16 @@ fn test_increase_happiness_voting_rituals() {
         "increase_happiness_voting_rituals",
         vec![TestAction::undoable(
             0,
-            Action::Playing(Custom(VotingIncreaseHappiness(
-                playing_actions::IncreaseHappiness {
-                    happiness_increases: vec![
+            Action::Playing(PlayingAction::IncreaseHappiness(
+                playing_actions::IncreaseHappiness::new(
+                    vec![
                         (Position::from_offset("C2"), 1),
                         (Position::from_offset("B3"), 2),
                     ],
-                    payment: ResourcePile::new(1, 0, 1, 1, 1, 1, 0),
-                },
-            ))),
+                    ResourcePile::new(1, 0, 1, 1, 1, 1, 0),
+                    PlayingActionType::Custom(CustomActionType::VotingIncreaseHappiness),
+                ),
+            )),
         )],
     );
 }
@@ -262,7 +263,7 @@ fn test_absolute_power() {
         "absolute_power",
         vec![TestAction::undoable(
             0,
-            Action::Playing(CustomEvent(CustomEventAction::new(
+            Action::Playing(Custom(CustomEventAction::new(
                 CustomActionType::AbsolutePower,
                 None,
             ))),
@@ -277,7 +278,7 @@ fn test_forced_labor() {
         vec![
             TestAction::undoable(
                 0,
-                Action::Playing(CustomEvent(CustomEventAction::new(
+                Action::Playing(Custom(CustomEventAction::new(
                     CustomActionType::ForcedLabor,
                     None,
                 ))),
@@ -291,6 +292,7 @@ fn test_forced_labor() {
                         PositionCollection::new(Position::from_offset("A2"), ResourcePile::wood(1)),
                     ],
                     ResourcePile::food(1) + ResourcePile::wood(1),
+                    PlayingActionType::Collect,
                 ))),
             ),
         ],
@@ -304,7 +306,7 @@ fn test_civil_liberties() {
         vec![
             TestAction::undoable(
                 0,
-                Action::Playing(CustomEvent(CustomEventAction::new(
+                Action::Playing(Custom(CustomEventAction::new(
                     CustomActionType::CivilLiberties,
                     None,
                 ))),
@@ -328,7 +330,7 @@ fn test_bartering() {
         vec![
             TestAction::undoable(
                 0,
-                Action::Playing(CustomEvent(CustomEventAction::new(
+                Action::Playing(Custom(CustomEventAction::new(
                     CustomActionType::Bartering,
                     None,
                 ))),
@@ -421,7 +423,7 @@ fn test_theaters() {
         vec![
             TestAction::undoable(
                 0,
-                Action::Playing(CustomEvent(CustomEventAction::new(
+                Action::Playing(Custom(CustomEventAction::new(
                     CustomActionType::Theaters,
                     None,
                 ))),
@@ -444,7 +446,7 @@ fn test_taxes() {
         vec![
             TestAction::undoable(
                 0,
-                Action::Playing(CustomEvent(CustomEventAction::new(
+                Action::Playing(Custom(CustomEventAction::new(
                     CustomActionType::Taxes,
                     None,
                 ))),
@@ -507,7 +509,7 @@ fn test_dogma() {
             TestAction::undoable(
                 1,
                 Action::Playing(Advance {
-                    advance: String::from("Dogma"),
+                    advance: advance::Advance::Dogma,
                     payment: ResourcePile::ideas(2),
                 }),
             ),
@@ -527,7 +529,7 @@ fn test_dogma() {
             ),
             TestAction::undoable(
                 1,
-                Action::Response(EventResponse::SelectAdvance("Fanaticism".to_string())),
+                Action::Response(EventResponse::SelectAdvance(advance::Advance::Fanaticism)),
             ),
         ],
     );
@@ -541,21 +543,21 @@ fn test_priesthood() {
             TestAction::undoable(
                 1,
                 Action::Playing(Advance {
-                    advance: String::from("Math"),
+                    advance: advance::Advance::Math,
                     payment: ResourcePile::empty(),
                 }),
             ),
             TestAction::undoable(
                 1,
                 Action::Playing(Advance {
-                    advance: String::from("Astronomy"),
+                    advance: advance::Advance::Astronomy,
                     payment: ResourcePile::gold(2),
                 }),
             ),
             TestAction::illegal(
                 1,
                 Action::Playing(Advance {
-                    advance: String::from("Astronomy"),
+                    advance: advance::Advance::Astronomy,
                     payment: ResourcePile::empty(),
                 }),
             ),
@@ -571,7 +573,7 @@ fn test_writing() {
             TestAction::not_undoable(
                 0,
                 Action::Playing(Advance {
-                    advance: String::from("Writing"),
+                    advance: advance::Advance::Writing,
                     payment: ResourcePile::food(1) + ResourcePile::gold(1),
                 }),
             )
@@ -595,7 +597,7 @@ fn test_free_education() {
             TestAction::undoable(
                 0,
                 Action::Playing(Advance {
-                    advance: String::from("Draft"),
+                    advance: advance::Advance::Draft,
                     payment: ResourcePile::food(1) + ResourcePile::gold(1),
                 }),
             ),
@@ -616,6 +618,7 @@ fn test_collect_husbandry() {
             ResourcePile::food(1),
         )],
         ResourcePile::food(1),
+        PlayingActionType::Collect,
     )));
     JSON.test(
         "collect_husbandry",
@@ -632,15 +635,14 @@ fn test_collect_free_economy() {
         "collect_free_economy",
         vec![TestAction::undoable(
             0,
-            Action::Playing(Custom(CustomAction::FreeEconomyCollect(
-                playing_actions::Collect::new(
-                    Position::from_offset("C2"),
-                    vec![
-                        PositionCollection::new(Position::from_offset("B1"), ResourcePile::ore(1)),
-                        PositionCollection::new(Position::from_offset("B2"), ResourcePile::ore(1)),
-                    ],
-                    ResourcePile::ore(2),
-                ),
+            Action::Playing(Collect(playing_actions::Collect::new(
+                Position::from_offset("C2"),
+                vec![
+                    PositionCollection::new(Position::from_offset("B1"), ResourcePile::ore(1)),
+                    PositionCollection::new(Position::from_offset("B2"), ResourcePile::ore(1)),
+                ],
+                ResourcePile::ore(2),
+                PlayingActionType::Custom(CustomActionType::FreeEconomyCollect),
             ))),
         )],
     );
@@ -652,10 +654,15 @@ fn test_cultural_influence_instant_with_arts() {
         "cultural_influence_instant_with_arts",
         vec![TestAction::not_undoable(
             1,
-            Action::Playing(Custom(ArtsInfluenceCultureAttempt(SelectedStructure::new(
-                Position::from_offset("C2"),
-                Structure::Building(Fortress),
-            )))),
+            Action::Playing(PlayingAction::InfluenceCultureAttempt(
+                InfluenceCultureAttempt::new(
+                    SelectedStructure::new(
+                        Position::from_offset("C2"),
+                        Structure::Building(Fortress),
+                    ),
+                    PlayingActionType::Custom(CustomActionType::ArtsInfluenceCultureAttempt),
+                ),
+            )),
         )],
     )
 }
@@ -682,7 +689,7 @@ fn test_overpay() {
         "sanitation_and_draft",
         vec![TestAction::illegal(
             0,
-            Action::Playing(Recruit(server::playing_actions::Recruit::new(
+            Action::Playing(Recruit(playing_actions::Recruit::new(
                 &Units::new(0, 1, 0, 0, 0, 0),
                 Position::from_offset("A1"),
                 ResourcePile::mood_tokens(1) + ResourcePile::gold(2), //paid too much

@@ -1,4 +1,5 @@
 use crate::action_card::discard_action_card;
+use crate::advance::Advance;
 use crate::card::{HandCard, HandCardType, hand_cards};
 use crate::city::City;
 use crate::content::incidents::famine::{
@@ -31,7 +32,7 @@ fn pandemics() -> Incident {
         or units equal to the half of the number of their cities (rounded down).",
         IncidentBaseEffect::BarbariansMove,
     )
-    .with_protection_advance("Sanitation")
+    .with_protection_advance(Advance::Sanitation)
     .add_incident_units_request(
         IncidentTarget::AllPlayers,
         2,
@@ -201,7 +202,7 @@ fn vermin() -> Incident {
         IncidentTarget::AllPlayers,
         IncidentBaseEffect::None,
         |_, _| 1,
-        |p| p.has_advance("Storage"),
+        |p| p.has_advance(Advance::Storage),
         |_, _| true,
     )
 }

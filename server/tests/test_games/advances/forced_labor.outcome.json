@@ -92,7 +92,7 @@
       "civilization": "test1",
       "advances": [
         "Farming",
-        "Forced Labor",
+        "ForcedLabor",
         "Math",
         "Mining",
         "Nationalism"
@@ -233,7 +233,7 @@
                 {
                   "action": {
                     "Playing": {
-                      "CustomEvent": {
+                      "Custom": {
                         "action": "ForcedLabor",
                         "city": null
                       }

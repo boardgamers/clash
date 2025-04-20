@@ -1,5 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::advance::{Advance, AdvanceBuilder};
+use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::content::advances::{AdvanceGroup, advance_group_builder};
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType::{AbsolutePower, ForcedLabor};
@@ -19,7 +19,8 @@ pub(crate) fn autocracy() -> AdvanceGroup {
 }
 
 fn nationalism() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Nationalism,
         "Nationalism",
         "Gain 1 mood or culture token when you recruit an army or ship unit.",
     )
@@ -52,7 +53,8 @@ fn nationalism() -> AdvanceBuilder {
 }
 
 fn totalitarianism() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Totalitarianism,
         "Totalitarianism",
         "Attempts to influence your cities with Army Units may not be boosted by culture tokens",
     )
@@ -76,7 +78,8 @@ fn totalitarianism() -> AdvanceBuilder {
 }
 
 fn absolute_power() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::AbsolutePower,
         "Absolute Power",
         "Once per turn, as a free action, you may spend 2 mood tokens to get an additional action",
     )
@@ -99,7 +102,8 @@ pub(crate) fn use_absolute_power() -> Builtin {
 }
 
 fn forced_labor() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::ForcedLabor,
         "Forced Labor",
         "Once per turn, as a free action, you may spend 1 mood token to treat your Angry cities as neutral for the rest of the turn",
     )

@@ -141,15 +141,10 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
         PlayingAction::Collect(c) => format_collect_log_item(player, &player_name, c),
         PlayingAction::Recruit(r) => format_recruit_log_item(player, &player_name, r),
         PlayingAction::IncreaseHappiness(i) => format_happiness_increase(player, &player_name, i),
-        PlayingAction::InfluenceCultureAttempt(c) => format_cultural_influence_attempt_log_item(
-            game,
-            player.index,
-            &player_name,
-            c,
-            &PlayingActionType::InfluenceCultureAttempt,
-        ),
-        PlayingAction::Custom(action) => action.format_log_item(game, player, &player_name),
-        PlayingAction::CustomEvent(action) => {
+        PlayingAction::InfluenceCultureAttempt(c) => {
+            format_cultural_influence_attempt_log_item(game, player.index, &player_name, c)
+        }
+        PlayingAction::Custom(action) => {
             format!(
                 "{player_name} started {:?}{}",
                 action.action,
@@ -211,8 +206,14 @@ pub fn format_happiness_increase(
             }
         })
         .collect_vec();
+    let suffix = if let PlayingActionType::Custom(_) = i.action_type {
+        " using Voting"
+    } else {
+        ""
+    };
+
     format!(
-        "{player_name} paid {} to increase happiness in {}",
+        "{player_name} paid {} to increase happiness in {}{suffix}",
         i.payment,
         utils::format_and(&happiness_increases, "no city")
     )
@@ -294,9 +295,15 @@ pub(crate) fn format_collect_log_item(player: &Player, player_name: &str, c: &Co
     } else {
         String::new()
     };
+    let suffix = if let PlayingActionType::Custom(_) = c.action_type {
+        " using Free Economy"
+    } else {
+        ""
+    };
+
     let city_position = c.city_position;
     let mood = format_mood_change(player, city_position);
-    format!("{player_name} collects {res}{total} in the city at {city_position}{mood}")
+    format!("{player_name} collects {res}{total} in the city at {city_position}{mood}{suffix}")
 }
 
 fn format_construct_log_item(

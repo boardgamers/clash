@@ -87,7 +87,7 @@ pub(crate) struct PersistentEvents {
     pub collect: PersistentEvent<CollectInfo>,
     pub construct: PersistentEvent<Building>,
     pub draw_wonder_card: PersistentEvent,
-    pub advance: PersistentEvent<AdvanceInfo>,
+    pub advance: PersistentEvent<OnAdvanceInfo>,
     pub recruit: PersistentEvent<Recruit>,
     pub found_city: PersistentEvent<Position>,
     pub influence_culture_resolution: PersistentEvent<ResourcePile>,
@@ -297,8 +297,8 @@ impl CostInfo {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub struct AdvanceInfo {
-    pub name: String,
+pub struct OnAdvanceInfo {
+    pub advance: Advance,
     pub payment: ResourcePile,
     pub take_incident_token: bool,
 }

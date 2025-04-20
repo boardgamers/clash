@@ -1,7 +1,8 @@
 use crate::action::{Action, ActionType};
+use crate::advance::Advance;
 use crate::card::validate_card_selection;
 use crate::city::{City, MoodState};
-use crate::collect::{available_collect_actions, collect_action};
+use crate::collect::available_collect_actions;
 use crate::construct::{Construct, available_buildings, new_building_positions};
 use crate::content::advances;
 use crate::content::custom_actions::CustomEventAction;
@@ -10,11 +11,11 @@ use crate::content::persistent_events::{
     PersistentEventState, PositionRequest, SelectedStructure, is_selected_structures_valid,
 };
 use crate::cultural_influence::{
-    available_influence_actions, available_influence_culture, influence_action,
+    InfluenceCultureAttempt, available_influence_actions, available_influence_culture,
 };
 use crate::events::EventOrigin;
 use crate::game::Game;
-use crate::happiness::{available_happiness_actions, happiness_action, happiness_cost};
+use crate::happiness::{available_happiness_actions, happiness_cost};
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::playing_actions::{
@@ -99,7 +100,7 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
         if let Some(h) = calculate_increase_happiness(p, &action_type) {
             actions.push((
                 ActionType::Playing(PlayingActionType::IncreaseHappiness),
-                vec![happiness_action(&action_type, h)],
+                vec![Action::Playing(PlayingAction::IncreaseHappiness(h))],
             ));
         }
     }
@@ -111,7 +112,9 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
         if let Some(i) = calculate_influence(game, p, &action_type) {
             actions.push((
                 ActionType::Playing(PlayingActionType::Collect),
-                vec![influence_action(&action_type, i)],
+                vec![Action::Playing(PlayingAction::InfluenceCultureAttempt(
+                    InfluenceCultureAttempt::new(i, action_type),
+                ))],
             ));
         }
     }
@@ -157,8 +160,8 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
 
         for c in cities {
             actions.push((
-                ActionType::Playing(PlayingActionType::Custom(a.clone().info())),
-                vec![Action::Playing(PlayingAction::CustomEvent(
+                ActionType::Playing(PlayingActionType::Custom(a.clone())),
+                vec![Action::Playing(PlayingAction::Custom(
                     CustomEventAction::new(a.clone(), c),
                 ))],
             ));
@@ -228,8 +231,9 @@ fn try_payment(o: &PaymentOptions, p: &Player) -> Option<ResourcePile> {
 fn advances(p: &Player, _game: &Game) -> Vec<Action> {
     advances::get_all()
         .iter()
-        .filter_map(|a| {
-            if deny_advance(&a.name) {
+        .filter_map(|info| {
+            let a = info.advance;
+            if deny_advance(a) {
                 return None;
             }
 
@@ -238,7 +242,7 @@ fn advances(p: &Player, _game: &Game) -> Vec<Action> {
             }
             try_payment(&p.advance_cost(a, None).cost, p).map(|r| {
                 Action::Playing(PlayingAction::Advance {
-                    advance: a.name.clone(),
+                    advance: a,
                     payment: r,
                 })
             })
@@ -246,11 +250,11 @@ fn advances(p: &Player, _game: &Game) -> Vec<Action> {
         .collect()
 }
 
-fn deny_advance(name: &str) -> bool {
+fn deny_advance(name: Advance) -> bool {
     //todo collect cache doesn't work, because husbandry can only be used once per turn
     //correct cache: 1) only store total in cache 2) sort by distance 3) add husbandry flag
 
-    name == "Husbandry"
+    name == Advance::Husbandry
 }
 
 fn collect_actions(p: &Player, game: &Game) -> Vec<Action> {
@@ -265,10 +269,12 @@ fn collect_actions(p: &Player, game: &Game) -> Vec<Action> {
         .filter(|city| city.can_activate())
         .flat_map(|city| {
             city.possible_collections.iter().filter_map({
-                let value = action_type.clone();
+                let action_type = action_type.clone();
                 move |c| {
+                    let mut a = c.clone();
+                    a.action_type = action_type.clone();
                     p.can_gain(c.total.clone())
-                        .then_some(collect_action(&value, c.clone()))
+                        .then_some(Action::Playing(PlayingAction::Collect(a)))
                 }
             })
         })
@@ -383,13 +389,14 @@ fn calculate_increase_happiness(
     (!all_steps.is_empty()).then_some(IncreaseHappiness::new(
         all_steps,
         payment_with_action(&cost, player, action_type),
+        action_type.clone(),
     ))
 }
 
 fn prefer_custom_action(actions: Vec<PlayingActionType>) -> PlayingActionType {
     let (action, custom) = base_and_custom_action(actions);
     action.unwrap_or_else(|| {
-        PlayingActionType::Custom(custom.expect("custom action should be present").info())
+        PlayingActionType::Custom(custom.expect("custom action should be present"))
     })
 }
 
@@ -419,8 +426,8 @@ fn responses(event: &PersistentEventState, player: &Player, game: &Game) -> Vec<
         PersistentEventRequest::SelectAdvance(a) => a
             .choices
             .iter()
-            .filter(|c| !deny_advance(c.as_str()))
-            .map(|c| EventResponse::SelectAdvance(c.clone()))
+            .filter(|c| !deny_advance(**c))
+            .map(|c| EventResponse::SelectAdvance(*c))
             .collect(),
         PersistentEventRequest::SelectPlayer(p) => p
             .choices
@@ -482,7 +489,7 @@ fn change_government(p: &Player, c: &ChangeGovernmentRequest) -> Vec<EventRespon
         // change to the first available government and take the first advances
         let new = advances::get_governments()
             .iter()
-            .find(|g| p.can_advance_in_change_government(&g.advances[0]))
+            .find(|g| p.can_advance_in_change_government(g.advances[0].advance))
             .expect("government not found");
 
         let advances = new
@@ -490,7 +497,7 @@ fn change_government(p: &Player, c: &ChangeGovernmentRequest) -> Vec<EventRespon
             .iter()
             .dropping(1) // is taken implicitly
             .take(government_advances(p).len() - 1)
-            .map(|a| a.name.clone())
+            .map(|a| a.advance)
             .collect_vec();
 
         vec![EventResponse::ChangeGovernmentType(

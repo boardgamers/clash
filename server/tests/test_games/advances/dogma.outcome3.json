@@ -111,8 +111,8 @@
       "advances": [
         "Farming",
         "Fishing",
-        "Free Economy",
-        "Free Education",
+        "FreeEconomy",
+        "FreeEducation",
         "Mining",
         "Storage",
         "Voting",
@@ -184,12 +184,12 @@
         "Fishing",
         "Mining",
         "Myths",
-        "State Religion"
+        "StateReligion"
       ],
       "incident_tokens": 1,
       "next_unit_id": 2,
       "event_info": {
-        "State Religion": "used"
+        "StateReligion": "used"
       }
     },
     {
@@ -331,7 +331,7 @@
                     {
                       "op": "replace",
                       "path": "/players/1/advances/4",
-                      "value": "State Religion"
+                      "value": "StateReligion"
                     },
                     {
                       "op": "remove",
@@ -485,8 +485,8 @@
                             "request": {
                               "SelectAdvance": {
                                 "choices": [
-                                  "Conversion",
                                   "Devotion",
+                                  "Conversion",
                                   "Fanaticism"
                                 ]
                               }
@@ -520,7 +520,7 @@
                     {
                       "op": "replace",
                       "path": "/players/1/advances/5",
-                      "value": "State Religion"
+                      "value": "StateReligion"
                     },
                     {
                       "op": "remove",

@@ -91,7 +91,7 @@
       ],
       "civilization": "test1",
       "advances": [
-        "Absolute Power",
+        "AbsolutePower",
         "Farming",
         "Math",
         "Mining",
@@ -233,7 +233,7 @@
                 {
                   "action": {
                     "Playing": {
-                      "CustomEvent": {
+                      "Custom": {
                         "action": "AbsolutePower",
                         "city": null
                       }

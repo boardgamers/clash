@@ -1,8 +1,8 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Bonus::MoodToken;
-use crate::advance::{Advance, AdvanceBuilder};
+use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::collect::{CollectContext, CollectInfo};
-use crate::content::advances::{AdvanceGroup, IRRIGATION, ROADS, advance_group_builder};
+use crate::content::advances::{AdvanceGroup, advance_group_builder};
 use crate::game::Game;
 use crate::map::Terrain::Barren;
 use crate::resource_pile::ResourcePile;
@@ -16,14 +16,16 @@ pub(crate) fn agriculture() -> AdvanceGroup {
 }
 
 fn farming() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Farming,
         "Farming",
         "Your cities may Collect food from Grassland and wood from Forest spaces",
     )
 }
 
 fn storage() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Storage,
         "Storage",
         "Your maximum food limit is increased from 2 to 7",
     )
@@ -35,8 +37,9 @@ fn storage() -> AdvanceBuilder {
 }
 
 fn irrigation() -> AdvanceBuilder {
-    Advance::builder(
-        IRRIGATION,
+    AdvanceInfo::builder(
+        Advance::Irrigation,
+        "Irrigation",
         "Your cities may Collect food from Barren spaces, Ignore Famine events",
     )
     .with_reset_collect_stats()
@@ -51,7 +54,8 @@ fn irrigation() -> AdvanceBuilder {
 }
 
 fn husbandry() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Husbandry,
         "Husbandry",
         "During a Collect Resources Action, \
         you may collect from a Land space that is 2 Land spaces away, rather than 1. \
@@ -70,7 +74,11 @@ fn husbandry() -> AdvanceBuilder {
 
 fn husbandry_collect(i: &mut CollectInfo, c: &CollectContext, game: &Game) {
     let player = &game.players[c.player_index];
-    let allowed = if player.has_advance(ROADS) { 2 } else { 1 };
+    let allowed = if player.has_advance(Advance::Roads) {
+        2
+    } else {
+        1
+    };
 
     if c.used
         .iter()

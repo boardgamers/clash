@@ -30,7 +30,7 @@ pub fn top_centered_text(rc: &RenderContext, text: &str, p: Vec2) {
         .draw_text(text, p.x - rc.state.measure_text(text).width / 2., p.y);
 }
 
-fn top_center_anchor(rc: &RenderContext) -> Vec2 {
+pub fn top_center_anchor(rc: &RenderContext) -> Vec2 {
     vec2(rc.state.screen_size.x / 2., MARGIN)
 }
 
@@ -43,10 +43,10 @@ pub fn bottom_left_texture(
     rc: &RenderContext,
     texture: &Texture2D,
     p: Vec2,
-    tooltip: &str,
+    tooltip: &[String],
 ) -> bool {
     let anchor = vec2(MARGIN, rc.state.screen_size.y - MARGIN);
-    draw_icon(rc, texture, tooltip, anchor + p)
+    draw_scaled_icon_with_tooltip(rc, texture, tooltip, anchor + p, ICON_SIZE)
 }
 
 pub fn bottom_center_texture(

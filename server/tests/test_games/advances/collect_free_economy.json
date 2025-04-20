@@ -80,7 +80,7 @@
       "civilization": "test0",
       "advances": [
         "Farming",
-        "Free Economy",
+        "FreeEconomy",
         "Math",
         "Metallurgy",
         "Mining"

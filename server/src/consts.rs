@@ -1,4 +1,4 @@
-use crate::content::advances::TACTICS;
+use crate::advance::Advance;
 use crate::{resource_pile::ResourcePile, unit::Units};
 
 pub const MAX_CITY_PIECES: usize = 4; // i.e. city size 5
@@ -13,7 +13,7 @@ pub const STACK_LIMIT: usize = 4;
 pub const SHIP_CAPACITY: u8 = 2;
 pub const CITY_LIMIT: u8 = 7;
 pub const MOVEMENT_ACTIONS: u32 = 3;
-pub const ARMY_MOVEMENT_REQUIRED_ADVANCE: &str = TACTICS;
+pub const ARMY_MOVEMENT_REQUIRED_ADVANCE: Advance = Advance::Tactics;
 pub const CITY_PIECE_LIMIT: usize = 5;
 pub const ACTIONS: u32 = 3;
 pub const NON_HUMAN_PLAYERS: usize = 2; // pirates, barbarians

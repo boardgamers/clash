@@ -12,8 +12,8 @@ pub(crate) mod theocracy;
 pub mod trade_routes;
 pub(crate) mod warfare;
 
-use crate::advance::Advance;
-use crate::advance::AdvanceBuilder;
+use crate::advance::AdvanceInfo;
+use crate::advance::{Advance, AdvanceBuilder};
 use crate::cache;
 use crate::content::advances::agriculture::agriculture;
 use crate::content::advances::autocracy::autocracy;
@@ -27,49 +27,41 @@ use crate::content::advances::seafaring::seafaring;
 use crate::content::advances::spirituality::spirituality;
 use crate::content::advances::theocracy::theocracy;
 use crate::content::advances::warfare::warfare;
+use itertools::Itertools;
 use std::vec;
-
-//names of advances that need special handling
-pub const NAVIGATION: &str = "Navigation";
-pub const ROADS: &str = "Roads";
-pub const STEEL_WEAPONS: &str = "Steel Weapons";
-pub const METALLURGY: &str = "Metallurgy";
-pub const TACTICS: &str = "Tactics";
-pub const CURRENCY: &str = "Currency";
-pub const IRRIGATION: &str = "Irrigation";
 
 struct GovernmentInfo {
     name: &'static str,
-    leading: &'static str,
-    requirement: &'static str,
+    leading: Advance,
+    requirement: Advance,
 }
 
 const GOVERNMENTS: [GovernmentInfo; 3] = [
     GovernmentInfo {
         name: "Democracy",
-        leading: "Voting",
-        requirement: "Philosophy",
+        leading: Advance::Voting,
+        requirement: Advance::Philosophy,
     },
     GovernmentInfo {
         name: "Autocracy",
-        leading: "Nationalism",
-        requirement: "Draft",
+        leading: Advance::Nationalism,
+        requirement: Advance::Draft,
     },
     GovernmentInfo {
         name: "Theocracy",
-        leading: "Dogma",
-        requirement: "State Religion",
+        leading: Advance::Dogma,
+        requirement: Advance::StateReligion,
     },
 ];
 
 pub struct AdvanceGroup {
     pub name: String,
-    pub advances: Vec<Advance>,
+    pub advances: Vec<AdvanceInfo>,
     pub government: Option<String>,
 }
 
 #[must_use]
-pub(crate) fn get_all_uncached() -> Vec<Advance> {
+pub(crate) fn get_all_uncached() -> Vec<AdvanceInfo> {
     get_groups_uncached()
         .into_iter()
         .flat_map(|g| g.advances)
@@ -77,7 +69,7 @@ pub(crate) fn get_all_uncached() -> Vec<Advance> {
 }
 
 #[must_use]
-pub fn get_all() -> &'static Vec<Advance> {
+pub fn get_all() -> &'static Vec<AdvanceInfo> {
     cache::get().get_advances()
 }
 
@@ -106,9 +98,9 @@ pub fn get_groups_uncached() -> Vec<AdvanceGroup> {
 }
 
 pub(crate) fn advance_group_builder(name: &str, advances: Vec<AdvanceBuilder>) -> AdvanceGroup {
-    let first = &advances[0].name.clone();
+    let first = advances[0].advance;
     let government = GOVERNMENTS.into_iter().find(|i| first == i.leading);
-    let a: Vec<Advance> = advances
+    let a: Vec<AdvanceInfo> = advances
         .into_iter()
         .enumerate()
         .map(|(index, builder)| {
@@ -126,10 +118,7 @@ pub(crate) fn advance_group_builder(name: &str, advances: Vec<AdvanceBuilder>) -
                     return builder
                         .with_required_advance(i.requirement)
                         .with_contradicting_advance(
-                            &GOVERNMENTS
-                                .into_iter()
-                                .map(|i| i.leading)
-                                .collect::<Vec<&str>>(),
+                            &GOVERNMENTS.into_iter().map(|i| i.leading).collect_vec(),
                         );
                 }
                 builder
@@ -149,10 +138,8 @@ pub(crate) fn advance_group_builder(name: &str, advances: Vec<AdvanceBuilder>) -
 ///
 /// Panics if advance with name doesn't exist
 #[must_use]
-pub fn get_advance(name: &str) -> &'static Advance {
-    cache::get().get_advance(name).unwrap_or_else(|| {
-        panic!("Advance with name {name} not found");
-    })
+pub fn get_advance(advance: Advance) -> &'static AdvanceInfo {
+    cache::get().get_advance(advance)
 }
 
 pub(crate) fn get_group(group: &str) -> &'static AdvanceGroup {
@@ -184,4 +171,47 @@ pub fn get_government(government: &str) -> &'static AdvanceGroup {
     cache::get().get_government(government).unwrap_or_else(|| {
         panic!("Government {government} not found");
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use crate::content::advances::get_governments;
+    use crate::content::advances::get_groups;
+
+    #[test]
+    fn test_get_all() {
+        let all = get_all();
+        assert!(!all.is_empty());
+        let unsorted = all.iter().map(|a| a.advance).collect_vec();
+
+        let sorted = unsorted
+            .clone()
+            .into_iter()
+            .sorted_by_key(|a| *a as usize)
+            .collect_vec();
+        assert_eq!(sorted, unsorted);
+        for advance in all {
+            assert_eq!(get_advance(advance.advance).advance, advance.advance);
+        }
+    }
+
+    #[test]
+    fn test_get_groups() {
+        let groups = get_groups();
+        assert!(!groups.is_empty());
+        assert_eq!(groups.len(), 12);
+        assert_eq!(groups[0].name, "Agriculture");
+        assert_eq!(groups[5].name, "Spirituality");
+    }
+
+    #[test]
+    fn test_get_governments() {
+        let governments = get_governments();
+        assert!(!governments.is_empty());
+        assert_eq!(governments.len(), 3);
+        assert_eq!(governments[0].name, "Democracy");
+        assert_eq!(governments[2].name, "Theocracy");
+    }
 }

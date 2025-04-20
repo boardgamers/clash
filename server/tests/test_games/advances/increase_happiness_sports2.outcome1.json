@@ -114,7 +114,7 @@
       ],
       "advances": [
         "Farming",
-        "Free Economy",
+        "FreeEconomy",
         "Mining",
         "Sports",
         "Voting"
@@ -259,7 +259,7 @@
                 {
                   "action": {
                     "Playing": {
-                      "CustomEvent": {
+                      "Custom": {
                         "action": "Sports",
                         "city": "C2"
                       }

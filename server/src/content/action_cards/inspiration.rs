@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{ActionCard, ActionCardBuilder};
-use crate::advance::gain_advance_without_payment;
+use crate::advance::{Advance, gain_advance_without_payment};
 use crate::city::MoodState;
 use crate::content::action_cards::spy::spy;
 use crate::content::action_cards::synergies::teachable_advances;
@@ -52,10 +52,10 @@ fn advance(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         0,
         |game, player, _| Some(AdvanceRequest::new(possible_advances(game.player(player)))),
         |game, sel, _| {
-            let advance = sel.choice.clone();
+            let advance = sel.choice;
             gain_advance_without_payment(
                 game,
-                &advance,
+                advance,
                 sel.player_index,
                 ResourcePile::culture_tokens(1),
                 false,
@@ -69,11 +69,11 @@ fn advance(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .build()
 }
 
-fn possible_advances(player: &Player) -> Vec<String> {
+fn possible_advances(player: &Player) -> Vec<Advance> {
     advances::get_all()
         .iter()
-        .filter(|a| player.can_advance_free(a))
-        .map(|a| a.name.clone())
+        .filter(|a| player.can_advance_free(a.advance))
+        .map(|a| a.advance)
         .collect()
 }
 
@@ -97,10 +97,10 @@ fn inspiration(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             )))
         },
         |game, sel, _| {
-            let advance = sel.choice.clone();
+            let advance = sel.choice;
             gain_advance_without_payment(
                 game,
-                &advance,
+                advance,
                 sel.player_index,
                 ResourcePile::empty(),
                 false,
@@ -114,7 +114,7 @@ fn inspiration(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .build()
 }
 
-pub(crate) fn possible_inspiration_advances(game: &Game, player: &Player) -> Vec<String> {
+pub(crate) fn possible_inspiration_advances(game: &Game, player: &Player) -> Vec<Advance> {
     let players = players_in_range2(game, player)
         .iter()
         .map(|&i| game.player(i))

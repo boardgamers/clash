@@ -1,7 +1,7 @@
 use crate::ability_initializer::{AbilityInitializerSetup, do_once_per_turn};
 use crate::action_card::gain_action_card_from_pile;
 use crate::advance::Bonus::{CultureToken, MoodToken};
-use crate::advance::{Advance, AdvanceBuilder};
+use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city_pieces::Building;
 use crate::content::advances::{AdvanceGroup, advance_group_builder, get_group};
 use crate::content::persistent_events::PaymentRequest;
@@ -22,27 +22,32 @@ pub(crate) fn education() -> AdvanceGroup {
 }
 
 fn writing() -> AdvanceBuilder {
-    Advance::builder("Writing", "Gain 1 action and 1 objective card")
-        .with_advance_bonus(CultureToken)
-        .with_unlocked_building(Building::Academy)
-        .add_one_time_ability_initializer(|game, player_index| {
-            gain_action_card_from_pile(game, player_index);
-            gain_objective_card_from_pile(game, player_index);
-        })
-        .add_simple_persistent_event_listener(
-            |event| &mut event.construct,
-            3,
-            |game, player_index, _player_name, b| {
-                if matches!(b, Building::Academy) {
-                    game.players[player_index].gain_resources(ResourcePile::ideas(2));
-                    game.add_info_log_item("Academy gained 2 ideas");
-                }
-            },
-        )
+    AdvanceInfo::builder(
+        Advance::Writing,
+        "Writing",
+        "Gain 1 action and 1 objective card",
+    )
+    .with_advance_bonus(CultureToken)
+    .with_unlocked_building(Building::Academy)
+    .add_one_time_ability_initializer(|game, player_index| {
+        gain_action_card_from_pile(game, player_index);
+        gain_objective_card_from_pile(game, player_index);
+    })
+    .add_simple_persistent_event_listener(
+        |event| &mut event.construct,
+        3,
+        |game, player_index, _player_name, b| {
+            if matches!(b, Building::Academy) {
+                game.players[player_index].gain_resources(ResourcePile::ideas(2));
+                game.add_info_log_item("Academy gained 2 ideas");
+            }
+        },
+    )
 }
 
 fn public_education() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::PublicEducation,
         "Public Education",
         "Once per turn, when you collect resources in a city with an Academy, gain 1 idea",
     )
@@ -72,7 +77,8 @@ fn public_education() -> AdvanceBuilder {
 }
 
 fn free_education() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::FreeEducation,
         "Free Education",
         "After you buy an Advance by paying for it with at least 1 gold or 1 idea, \
         you may pay an extra 1 idea to gain 1 mood token",
@@ -82,7 +88,7 @@ fn free_education() -> AdvanceBuilder {
         |e| &mut e.advance,
         1,
         |_game, _player_index, i| {
-            if i.name == "Free Education" {
+            if i.advance == Advance::FreeEducation {
                 None
             } else if i.payment.has_at_least(&ResourcePile::gold(1))
                 || i.payment.has_at_least(&ResourcePile::ideas(1))
@@ -116,7 +122,8 @@ fn free_education() -> AdvanceBuilder {
 }
 
 fn philosophy() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Philosophy,
         "Philosophy",
         "Immediately gain 1 idea after getting a Science advance",
     )
@@ -130,7 +137,7 @@ fn philosophy() -> AdvanceBuilder {
             if get_group("Science")
                 .advances
                 .iter()
-                .any(|a| a.name == advance.name)
+                .any(|a| a.advance == advance.advance)
             {
                 let player = game.player_mut(player_index);
                 player.gain_resources(ResourcePile::ideas(1));

@@ -66,7 +66,8 @@ fn all_actions() {
                             Position::from_offset("E8"),
                             ResourcePile::wood(1)
                         )],
-                        ResourcePile::wood(1)
+                        ResourcePile::wood(1),
+                        PlayingActionType::Collect,
                     ))),
                     Action::Playing(PlayingAction::Collect(Collect::new(
                         Position::from_offset("D8"),
@@ -74,7 +75,8 @@ fn all_actions() {
                             Position::from_offset("C8"),
                             ResourcePile::ore(1)
                         )],
-                        ResourcePile::ore(1)
+                        ResourcePile::ore(1),
+                        PlayingActionType::Collect,
                     )))
                 ]
             ),
@@ -83,7 +85,8 @@ fn all_actions() {
                 vec![Action::Playing(PlayingAction::IncreaseHappiness(
                     IncreaseHappiness::new(
                         vec![(Position::from_offset("D8"), 1)],
-                        ResourcePile::mood_tokens(1)
+                        ResourcePile::mood_tokens(1),
+                        PlayingActionType::IncreaseHappiness
                     )
                 ))]
             ),

@@ -10,11 +10,12 @@ use macroquad::color::BLACK;
 use macroquad::math::{Vec2, vec2};
 use macroquad::prelude::WHITE;
 use macroquad::shapes::draw_circle;
+use server::action::Action;
 use server::collect::{
-    CollectInfo, PositionCollection, add_collect, collect_action, get_total_collection,
+    CollectInfo, PositionCollection, add_collect, get_total_collection,
     possible_resource_collections, tiles_used,
 };
-use server::playing_actions::Collect;
+use server::playing_actions::{Collect, PlayingAction};
 use server::position::Position;
 use server::resource::ResourceType;
 use server::resource_pile::ResourcePile;
@@ -52,8 +53,7 @@ impl CollectResources {
             format!("{extra} left"),
         ];
         for o in self.info.modifiers.clone() {
-            let vec1 = event_help(rc, &o);
-            r.extend(vec1);
+            r.extend(event_help(rc, &o));
         }
         r
     }
@@ -92,10 +92,15 @@ pub fn collect_dialog(rc: &RenderContext, collect: &CollectResources) -> StateUp
     if ok_button(rc, tooltip) {
         let extra = collect.extra_resources();
 
-        let c = Collect::new(collect.city_position, collect.collections.clone(), total);
+        let c = Collect::new(
+            collect.city_position,
+            collect.collections.clone(),
+            total,
+            collect.custom.action_type.clone(),
+        );
 
         return StateUpdate::execute_activation(
-            collect_action(&collect.custom.action_type, c),
+            Action::Playing(PlayingAction::Collect(c)),
             if extra > 0 {
                 vec![format!("{extra} more tiles can be collected")]
             } else {

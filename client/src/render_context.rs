@@ -63,6 +63,10 @@ impl RenderContext<'_> {
         }
     }
 
+    pub fn can_play_action_for_player(&self, action: &PlayingActionType, player: usize) -> bool {
+        self.can_play_action(action) && self.game.active_player() == player
+    }
+
     pub fn can_play_action(&self, action: &PlayingActionType) -> bool {
         self.can_control_shown_player()
             && action
@@ -82,9 +86,15 @@ impl RenderContext<'_> {
         self.game.active_player() == self.state.show_player
     }
 
-    pub fn new_payment(&self, cost: &PaymentOptions, name: &str, optional: bool) -> Payment {
+    pub fn new_payment<T: Clone>(
+        &self,
+        cost: &PaymentOptions,
+        value: T,
+        name: &str,
+        optional: bool,
+    ) -> Payment<T> {
         let available = &self.shown_player.resources;
-        Payment::new(cost, available, name, optional)
+        Payment::new(cost, available, value, name, optional)
     }
 
     pub fn player_color(&self, player_index: usize) -> Color {

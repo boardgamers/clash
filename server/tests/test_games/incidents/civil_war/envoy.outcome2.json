@@ -92,7 +92,7 @@
         "Farming",
         "Mining",
         "Monuments",
-        "State Religion",
+        "StateReligion",
         "Storage",
         "Tactics",
         "Voting"
@@ -256,7 +256,7 @@
                     {
                       "op": "replace",
                       "path": "/players/0/advances/3",
-                      "value": "State Religion"
+                      "value": "StateReligion"
                     },
                     {
                       "op": "replace",

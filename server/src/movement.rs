@@ -1,4 +1,3 @@
-use crate::content::advances::{NAVIGATION, ROADS};
 use crate::events::EventOrigin;
 use crate::map::Map;
 use crate::map::Terrain::{Forest, Mountain};
@@ -7,6 +6,7 @@ use crate::resource_pile::ResourcePile;
 use crate::unit::{Unit, set_unit_position};
 use crate::utils;
 
+use crate::advance::Advance;
 use crate::consts::{ARMY_MOVEMENT_REQUIRED_ADVANCE, MOVEMENT_ACTIONS, SHIP_CAPACITY, STACK_LIMIT};
 use crate::content::action_cards::negotiation::negotiations_partner;
 use crate::content::incidents::great_diplomat::{DIPLOMAT_ID, diplomatic_relations_partner};
@@ -361,10 +361,10 @@ pub(crate) fn move_routes(
         .filter(|&n| game.map.is_inside(*n))
         .map(|&n| MoveRoute::free(n, vec![]))
         .collect();
-    if player.has_advance(NAVIGATION) {
+    if player.has_advance(Advance::Navigation) {
         base.extend(reachable_with_navigation(player, units, &game.map));
     }
-    if player.has_advance(ROADS) && embark_carrier_id.is_none() {
+    if player.has_advance(Advance::Roads) && embark_carrier_id.is_none() {
         base.extend(reachable_with_roads(player, units, game));
     }
     add_diplomatic_relations(player, game, &mut base);
@@ -448,7 +448,7 @@ fn reachable_with_roads(player: &Player, units: &[u32], game: &Game) -> Vec<Move
                         stack_sizes_used.iter().map(|&(_, s)| s).min().expect("min");
                     let mut cost =
                         PaymentOptions::resources(ResourcePile::ore(1) + ResourcePile::food(1));
-                    let origin = EventOrigin::Advance(ROADS.to_string());
+                    let origin = EventOrigin::Advance(Advance::Roads);
                     cost.modifiers = vec![origin.clone()];
                     let route = MoveRoute {
                         destination,
@@ -468,7 +468,7 @@ fn reachable_with_roads(player: &Player, units: &[u32], game: &Game) -> Vec<Move
 
 #[must_use]
 fn reachable_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<MoveRoute> {
-    if !player.has_advance(NAVIGATION) {
+    if !player.has_advance(Advance::Navigation) {
         return vec![];
     }
     let ship = units.iter().find_map(|&id| {
@@ -494,10 +494,7 @@ fn reachable_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<M
                 .into_iter()
                 .flatten()
                 .map(|destination| {
-                    MoveRoute::free(
-                        destination,
-                        vec![EventOrigin::Advance(NAVIGATION.to_string())],
-                    )
+                    MoveRoute::free(destination, vec![EventOrigin::Advance(Advance::Navigation)])
                 })
                 .collect();
         }
