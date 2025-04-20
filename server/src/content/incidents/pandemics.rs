@@ -126,7 +126,7 @@ impl PandemicsContributions {
             max: vec![
                 player.units.len() as u8,
                 player.action_cards.len() as u8,
-                player.resources.amount() as u8,
+                player.resources.amount(),
             ],
         }
     }

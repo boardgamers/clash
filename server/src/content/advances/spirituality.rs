@@ -105,7 +105,7 @@ fn priesthood() -> AdvanceBuilder {
                             .log
                             .push("Priesthood reduced the cost to 0".to_string());
                     },
-                )
+                );
             }
         },
     )
@@ -129,7 +129,7 @@ fn state_religion() -> AdvanceBuilder {
                     &b,
                     &(),
                     |i| &mut i.info.info,
-                    |i, _, _| {
+                    |i, _, ()| {
                         i.cost.conversions.push(PaymentConversion::limited(
                             ResourcePile::of(ResourceType::Food, 1),
                             ResourcePile::empty(),
@@ -139,7 +139,7 @@ fn state_religion() -> AdvanceBuilder {
                             .log
                             .push("State Religion reduced the food cost to 0".to_string());
                     },
-                )
+                );
             }
         },
     )

@@ -226,7 +226,7 @@ pub(crate) fn format_city_happiness_increase(
 ) -> String {
     format!(
         "the city at {position} by {steps} steps, making it {:?}",
-        player.get_city(position).mood_state.clone() + steps.into()
+        player.get_city(position).mood_state.clone() + steps
     )
 }
 

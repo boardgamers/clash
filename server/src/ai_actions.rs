@@ -86,6 +86,12 @@ impl AiActions {
     }
 }
 
+impl Default for AiActions {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 type ActionFactory = (
     PlayingActionType,
     fn(&mut AiActions, &Player, &Game) -> Vec<Action>,
@@ -268,7 +274,7 @@ fn try_payment(ai_actions: &mut AiActions, o: &PaymentOptions, p: &Player) -> Op
         .payment_cache
         .options
         .entry(o.clone())
-        .or_insert(FxHashMap::default())
+        .or_default()
         .entry(max)
         .or_insert_with_key(|available| o.first_valid_payment(available))
         .clone()

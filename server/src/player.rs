@@ -90,7 +90,7 @@ impl PartialEq for Player {
     }
 }
 
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Copy, Clone)]
 pub enum CostTrigger {
     WithModifiers,
     NoModifiers,

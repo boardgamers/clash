@@ -413,7 +413,7 @@ impl ActionCost {
 }
 
 pub(crate) fn roll_boost_cost(roll: u8) -> ResourcePile {
-    ResourcePile::culture_tokens(5 - roll as u8)
+    ResourcePile::culture_tokens(5 - roll)
 }
 
 #[must_use]

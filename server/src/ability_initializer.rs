@@ -935,6 +935,7 @@ where
         .add_ability_deinitializer(deinitializer)
 }
 
+#[allow(clippy::map_entry)]
 pub(crate) fn once_per_turn_advance<F, T, U, V>(
     id: Advance,
     value: &mut T,

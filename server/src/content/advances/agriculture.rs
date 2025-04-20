@@ -74,7 +74,7 @@ fn husbandry() -> AdvanceBuilder {
                 game,
                 |i| &mut i.info.info,
                 husbandry_collect,
-            )
+            );
         },
     )
 }
