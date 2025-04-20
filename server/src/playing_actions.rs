@@ -11,7 +11,7 @@ use crate::content::custom_actions::{CustomActionType, CustomEventAction, execut
 use crate::cultural_influence::{InfluenceCultureAttempt, influence_culture_attempt};
 use crate::game::GameState;
 use crate::happiness::increase_happiness;
-use crate::player::{CostTrigger, Player};
+use crate::player::Player;
 use crate::player_events::PlayingActionInfo;
 use crate::recruit::recruit;
 use crate::unit::Units;
