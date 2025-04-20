@@ -111,7 +111,7 @@
       "civilization": "test1",
       "advances": [
         "Farming",
-        "Free Economy",
+        "FreeEconomy",
         "Mining",
         "Tactics"
       ],

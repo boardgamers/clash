@@ -4,7 +4,7 @@
     {
       "event_type": {
         "Advance": {
-          "name": "Draft",
+          "advance": "Draft",
           "payment": {
             "food": 1,
             "gold": 1
@@ -52,7 +52,7 @@
           ]
         },
         "origin": {
-          "Advance": "Free Education"
+          "Advance": "FreeEducation"
         }
       }
     }
@@ -170,15 +170,15 @@
         "Kʼinich Janaab Pakal I"
       ],
       "advances": [
-        "Draft",
         "Farming",
-        "Free Economy",
-        "Free Education",
-        "Mining",
         "Storage",
+        "Mining",
+        "Writing",
+        "FreeEducation",
         "Tactics",
+        "Draft",
         "Voting",
-        "Writing"
+        "FreeEconomy"
       ],
       "incident_tokens": 2,
       "wonder_cards": [
@@ -353,43 +353,13 @@
                     },
                     {
                       "op": "replace",
-                      "path": "/players/0/advances/0",
-                      "value": "Farming"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/advances/1",
-                      "value": "Free Economy"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/advances/2",
-                      "value": "Free Education"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/advances/3",
-                      "value": "Mining"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/advances/4",
-                      "value": "Storage"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/advances/5",
-                      "value": "Tactics"
-                    },
-                    {
-                      "op": "replace",
                       "path": "/players/0/advances/6",
                       "value": "Voting"
                     },
                     {
                       "op": "replace",
                       "path": "/players/0/advances/7",
-                      "value": "Writing"
+                      "value": "FreeEconomy"
                     },
                     {
                       "op": "remove",

@@ -78,8 +78,8 @@
       "civilization": "test0",
       "advances": [
         "Farming",
-        "Fishing",
         "Mining",
+        "Fishing",
         "Tactics"
       ],
       "incident_tokens": 2,
@@ -129,11 +129,11 @@
       ],
       "civilization": "test1",
       "advances": [
-        "Fanaticism",
         "Farming",
-        "Mining",
         "Storage",
-        "Tactics"
+        "Mining",
+        "Tactics",
+        "Fanaticism"
       ],
       "incident_tokens": 3,
       "next_unit_id": 2

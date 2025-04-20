@@ -110,13 +110,13 @@
       ],
       "advances": [
         "Farming",
-        "Fishing",
-        "Free Economy",
-        "Free Education",
-        "Mining",
         "Storage",
+        "Mining",
+        "Fishing",
+        "Writing",
+        "FreeEducation",
         "Voting",
-        "Writing"
+        "FreeEconomy"
       ],
       "incident_tokens": 3,
       "wonder_cards": [
@@ -178,18 +178,18 @@
         "Kleopatra"
       ],
       "advances": [
-        "Dogma",
-        "Fanaticism",
         "Farming",
-        "Fishing",
         "Mining",
+        "Fishing",
         "Myths",
-        "State Religion"
+        "StateReligion",
+        "Dogma",
+        "Fanaticism"
       ],
       "incident_tokens": 1,
       "next_unit_id": 2,
       "event_info": {
-        "State Religion": "used"
+        "StateReligion": "used"
       }
     },
     {
@@ -307,31 +307,6 @@
                       "op": "replace",
                       "path": "/actions_left",
                       "value": 3
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/0",
-                      "value": "Farming"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/1",
-                      "value": "Fishing"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/2",
-                      "value": "Mining"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/3",
-                      "value": "Myths"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/4",
-                      "value": "State Religion"
                     },
                     {
                       "op": "remove",
@@ -485,8 +460,8 @@
                             "request": {
                               "SelectAdvance": {
                                 "choices": [
-                                  "Conversion",
                                   "Devotion",
+                                  "Conversion",
                                   "Fanaticism"
                                 ]
                               }
@@ -496,31 +471,6 @@
                           "player": 1
                         }
                       ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/1",
-                      "value": "Farming"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/2",
-                      "value": "Fishing"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/3",
-                      "value": "Mining"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/4",
-                      "value": "Myths"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/5",
-                      "value": "State Religion"
                     },
                     {
                       "op": "remove",

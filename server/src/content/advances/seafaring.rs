@@ -38,7 +38,7 @@ fn navigation() -> AdvanceBuilder {
 fn war_ships() -> AdvanceBuilder {
     AdvanceInfo::builder(
                 Advance::WarShips,
-        "War Ships",
+        "WarShips",
         "Ignore the first hit it the first round of combat \
         when attacking with Ships or disembarking from Ships",
     )
@@ -48,7 +48,7 @@ fn war_ships() -> AdvanceBuilder {
         if c.round == 1 && (disembark || sea_battle) {
             s.hit_cancels += 1;
             s.roll_log
-                .push("War Ships ignore the first hit in the first round of combat".to_string());
+                .push("WarShips ignore the first hit in the first round of combat".to_string());
         }
     })
 }

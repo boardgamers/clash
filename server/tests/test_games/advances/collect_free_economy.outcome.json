@@ -81,10 +81,10 @@
       "civilization": "test0",
       "advances": [
         "Farming",
-        "Free Economy",
+        "Mining",
         "Math",
         "Metallurgy",
-        "Mining"
+        "FreeEconomy"
       ],
       "incident_tokens": 2,
       "next_unit_id": 8,

@@ -78,8 +78,8 @@
       "civilization": "test0",
       "advances": [
         "Farming",
-        "Mining",
         "Storage",
+        "Mining",
         "Tactics"
       ],
       "incident_tokens": 2,
@@ -126,10 +126,10 @@
       ],
       "civilization": "test1",
       "advances": [
-        "Fanaticism",
         "Farming",
         "Mining",
-        "Tactics"
+        "Tactics",
+        "Fanaticism"
       ],
       "incident_tokens": 3,
       "next_unit_id": 2
@@ -236,21 +236,21 @@
                             "request": {
                               "SelectAdvance": {
                                 "choices": [
-                                  "Arts",
-                                  "Bartering",
-                                  "Draft",
-                                  "Engineering",
-                                  "Fishing",
-                                  "Husbandry",
-                                  "Irrigation",
-                                  "Math",
-                                  "Myths",
-                                  "Roads",
-                                  "Sanitation",
-                                  "Siegecraft",
-                                  "Steel Weapons",
                                   "Storage",
-                                  "Writing"
+                                  "Irrigation",
+                                  "Husbandry",
+                                  "Engineering",
+                                  "Sanitation",
+                                  "Roads",
+                                  "Fishing",
+                                  "Writing",
+                                  "Siegecraft",
+                                  "SteelWeapons",
+                                  "Draft",
+                                  "Myths",
+                                  "Bartering",
+                                  "Arts",
+                                  "Math"
                                 ]
                               }
                             }
@@ -259,6 +259,11 @@
                           "player": 0
                         }
                       ]
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/advances/1",
+                      "value": "Mining"
                     },
                     {
                       "op": "replace",

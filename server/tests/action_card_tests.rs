@@ -10,7 +10,7 @@ use server::playing_actions::PlayingAction::Construct;
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
-use server::{construct, cultural_influence, playing_actions};
+use server::{advance, construct, cultural_influence, playing_actions};
 
 mod common;
 
@@ -24,7 +24,7 @@ fn test_advance() {
             TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(2))),
             TestAction::undoable(
                 0,
-                Action::Response(EventResponse::SelectAdvance("Storage".to_string())),
+                Action::Response(EventResponse::SelectAdvance(advance::Advance::Storage)),
             ),
         ],
     );
@@ -353,7 +353,7 @@ fn test_synergies() {
                 .without_json_comparison(),
             TestAction::undoable(
                 0,
-                Action::Response(EventResponse::SelectAdvance("Cartography".to_string())),
+                Action::Response(EventResponse::SelectAdvance(advance::Advance::Cartography)),
             )
             .without_json_comparison(),
             TestAction::undoable(
@@ -363,7 +363,7 @@ fn test_synergies() {
             .without_json_comparison(),
             TestAction::undoable(
                 0,
-                Action::Response(EventResponse::SelectAdvance("War Ships".to_string())),
+                Action::Response(EventResponse::SelectAdvance(advance::Advance::WarShips)),
             )
             .without_json_comparison(),
             TestAction::undoable(
@@ -425,7 +425,7 @@ fn test_new_ideas() {
                 .without_json_comparison(),
             TestAction::undoable(
                 0,
-                Action::Response(EventResponse::SelectAdvance("Storage".to_string())),
+                Action::Response(EventResponse::SelectAdvance(advance::Advance::Storage)),
             )
             .without_json_comparison(),
             TestAction::undoable(

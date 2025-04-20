@@ -30,7 +30,7 @@ fn basic_actions() {
     let founded_city_position = Position::new(0, 1);
     game.map.tiles = HashMap::from([(founded_city_position, Forest)]);
     let advance_action = Action::Playing(Advance {
-        advance: String::from("Math"),
+        advance: advance::Advance::Math,
         payment: ResourcePile::food(2),
     });
     let game = game_api::execute(game, advance_action, 0);
@@ -40,7 +40,7 @@ fn basic_actions() {
     assert_eq!(2, game.actions_left);
 
     let advance_action = Action::Playing(Advance {
-        advance: String::from("Engineering"),
+        advance: advance::Advance::Engineering,
         payment: ResourcePile::empty(),
     });
     let mut game = game_api::execute(game, advance_action, 0);
@@ -55,6 +55,7 @@ fn basic_actions() {
         ],
         player
             .advances
+            .iter()
             .collect_vec()
     );
     assert_eq!(ResourcePile::culture_tokens(1), player.resources);
@@ -244,7 +245,7 @@ fn undo() {
     assert_eq!(Angry, game.players[0].cities[0].mood_state);
 
     let advance_action = Action::Playing(Advance {
-        advance: String::from("Math"),
+        advance: advance::Advance::Math,
         payment: ResourcePile::food(2),
     });
     let game = game_api::execute(game, advance_action, 0);
@@ -253,7 +254,7 @@ fn undo() {
     assert_undo(&game, false, true, 1, 0, 0);
     assert_eq!(2, game.players[0].advances.len());
     let advance_action = Action::Playing(Advance {
-        advance: String::from("Engineering"),
+        advance: advance::Advance::Engineering,
         payment: ResourcePile::food(2),
     });
     let game = game_api::execute(game, advance_action, 0);

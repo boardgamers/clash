@@ -114,10 +114,10 @@
       ],
       "advances": [
         "Farming",
-        "Free Economy",
         "Mining",
         "Sports",
-        "Voting"
+        "Voting",
+        "FreeEconomy"
       ],
       "incident_tokens": 1,
       "wonder_cards": [

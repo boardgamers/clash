@@ -19,7 +19,7 @@ use server::position::Position;
 use server::recruit::recruit_cost_without_replaced;
 use server::resource_pile::ResourcePile;
 use server::unit::Units;
-use server::{construct, playing_actions};
+use server::{advance, construct, playing_actions};
 use std::vec;
 
 mod common;
@@ -36,7 +36,7 @@ fn test_sanitation_and_draft() {
         vec![
             TestAction::undoable(
                 0,
-                Action::Playing(Recruit(server::playing_actions::Recruit::new(
+                Action::Playing(Recruit(playing_actions::Recruit::new(
                     &units,
                     city_position,
                     ResourcePile::mood_tokens(1) + ResourcePile::gold(2),
@@ -57,8 +57,8 @@ fn test_sanitation_and_draft() {
                 assert_eq!(ResourcePile::mood_tokens(1), options.conversions[1].to);
                 assert_eq!(
                     vec![
-                        EventOrigin::Advance("Sanitation".to_string()),
-                        EventOrigin::Advance("Draft".to_string())
+                        EventOrigin::Advance(advance::Advance::Sanitation),
+                        EventOrigin::Advance(advance::Advance::Draft)
                     ],
                     options.modifiers
                 );
@@ -76,7 +76,7 @@ fn test_separation_of_power() {
             game = execute_action(
                 game,
                 Action::Playing(Advance {
-                    advance: String::from("Separation of Power"),
+                    advance: advance::Advance::SeparationOfPower,
                     payment: ResourcePile::food(1) + ResourcePile::gold(1),
                 }),
                 0,
@@ -97,7 +97,7 @@ fn test_devotion() {
             game = execute_action(
                 game,
                 Action::Playing(Advance {
-                    advance: String::from("Devotion"),
+                    advance: advance::Advance::Devotion,
                     payment: ResourcePile::food(1) + ResourcePile::gold(1),
                 }),
                 0,
@@ -122,7 +122,7 @@ fn test_totalitarianism() {
             game = execute_action(
                 game,
                 Action::Playing(Advance {
-                    advance: String::from("Totalitarianism"),
+                    advance: advance::Advance::Totalitarianism,
                     payment: ResourcePile::food(1) + ResourcePile::gold(1),
                 }),
                 0,
@@ -143,7 +143,7 @@ fn test_monuments() {
             game = execute_action(
                 game,
                 Action::Playing(Advance {
-                    advance: String::from("Monuments"),
+                    advance: advance::Advance::Monuments,
                     payment: ResourcePile::food(1) + ResourcePile::gold(1),
                 }),
                 0,
@@ -509,7 +509,7 @@ fn test_dogma() {
             TestAction::undoable(
                 1,
                 Action::Playing(Advance {
-                    advance: String::from("Dogma"),
+                    advance: advance::Advance::Dogma,
                     payment: ResourcePile::ideas(2),
                 }),
             ),
@@ -529,7 +529,7 @@ fn test_dogma() {
             ),
             TestAction::undoable(
                 1,
-                Action::Response(EventResponse::SelectAdvance("Fanaticism".to_string())),
+                Action::Response(EventResponse::SelectAdvance(advance::Advance::Fanaticism)),
             ),
         ],
     );
@@ -543,21 +543,21 @@ fn test_priesthood() {
             TestAction::undoable(
                 1,
                 Action::Playing(Advance {
-                    advance: String::from("Math"),
+                    advance: advance::Advance::Math,
                     payment: ResourcePile::empty(),
                 }),
             ),
             TestAction::undoable(
                 1,
                 Action::Playing(Advance {
-                    advance: String::from("Astronomy"),
+                    advance: advance::Advance::Astronomy,
                     payment: ResourcePile::gold(2),
                 }),
             ),
             TestAction::illegal(
                 1,
                 Action::Playing(Advance {
-                    advance: String::from("Astronomy"),
+                    advance: advance::Advance::Astronomy,
                     payment: ResourcePile::empty(),
                 }),
             ),
@@ -573,7 +573,7 @@ fn test_writing() {
             TestAction::not_undoable(
                 0,
                 Action::Playing(Advance {
-                    advance: String::from("Writing"),
+                    advance: advance::Advance::Writing,
                     payment: ResourcePile::food(1) + ResourcePile::gold(1),
                 }),
             )
@@ -597,7 +597,7 @@ fn test_free_education() {
             TestAction::undoable(
                 0,
                 Action::Playing(Advance {
-                    advance: String::from("Draft"),
+                    advance: advance::Advance::Draft,
                     payment: ResourcePile::food(1) + ResourcePile::gold(1),
                 }),
             ),
@@ -689,7 +689,7 @@ fn test_overpay() {
         "sanitation_and_draft",
         vec![TestAction::illegal(
             0,
-            Action::Playing(Recruit(server::playing_actions::Recruit::new(
+            Action::Playing(Recruit(playing_actions::Recruit::new(
                 &Units::new(0, 1, 0, 0, 0, 0),
                 Position::from_offset("A1"),
                 ResourcePile::mood_tokens(1) + ResourcePile::gold(2), //paid too much

@@ -1,7 +1,7 @@
 use crate::common::{JsonTest, TestAction, move_action};
 use server::action::Action;
 use server::city_pieces::Building::Fortress;
-use server::construct;
+use server::{advance, construct};
 use server::content::persistent_events::EventResponse;
 use server::movement::{MoveUnits, MovementAction};
 use server::playing_actions::PlayingAction::{Advance, Construct};
@@ -21,7 +21,7 @@ fn test_great_explorer() {
             TestAction::not_undoable(
                 1,
                 Action::Playing(Advance {
-                    advance: String::from("Storage"),
+                    advance: advance::Advance::Storage,
                     payment: ResourcePile::food(2),
                 }),
             )
@@ -67,7 +67,7 @@ fn test_great_artist() {
             TestAction::not_undoable(
                 0,
                 Action::Playing(Advance {
-                    advance: String::from("Storage"),
+                    advance: advance::Advance::Storage,
                     payment: ResourcePile::food(2),
                 }),
             ),
@@ -91,7 +91,7 @@ fn test_great_prophet() {
             TestAction::not_undoable(
                 0,
                 Action::Playing(Advance {
-                    advance: String::from("Storage"),
+                    advance: advance::Advance::Storage,
                     payment: ResourcePile::food(2),
                 }),
             )
@@ -128,7 +128,7 @@ fn test_great_warlord() {
             TestAction::not_undoable(
                 1,
                 Action::Playing(Advance {
-                    advance: String::from("Storage"),
+                    advance: advance::Advance::Storage,
                     payment: ResourcePile::food(2),
                 }),
             )
@@ -155,7 +155,7 @@ fn test_great_merchant() {
             TestAction::not_undoable(
                 0,
                 Action::Playing(Advance {
-                    advance: String::from("Storage"),
+                    advance: advance::Advance::Storage,
                     payment: ResourcePile::food(2),
                 }),
             )
@@ -185,7 +185,7 @@ fn test_great_engineer() {
             TestAction::not_undoable(
                 0,
                 Action::Playing(Advance {
-                    advance: String::from("Storage"),
+                    advance: advance::Advance::Storage,
                     payment: ResourcePile::food(2),
                 }),
             )
@@ -201,7 +201,7 @@ fn test_great_engineer() {
                 .without_json_comparison(),
             TestAction::not_undoable(
                 0,
-                Action::Response(EventResponse::SelectAdvance("Engineering".to_string())),
+                Action::Response(EventResponse::SelectAdvance(advance::Advance::Engineering)),
             )
             .without_json_comparison(),
             TestAction::undoable(0, Action::Response(EventResponse::Bool(true)))
@@ -230,7 +230,7 @@ fn test_great_architect() {
             TestAction::not_undoable(
                 0,
                 Action::Playing(Advance {
-                    advance: String::from("Storage"),
+                    advance: advance::Advance::Storage,
                     payment: ResourcePile::food(2),
                 }),
             )
@@ -269,7 +269,7 @@ fn test_great_athlete() {
             TestAction::not_undoable(
                 0,
                 Action::Playing(Advance {
-                    advance: String::from("Storage"),
+                    advance: advance::Advance::Storage,
                     payment: ResourcePile::food(2),
                 }),
             )
@@ -305,7 +305,7 @@ fn test_great_diplomat() {
             TestAction::not_undoable(
                 0,
                 Action::Playing(Advance {
-                    advance: String::from("Storage"),
+                    advance: advance::Advance::Storage,
                     payment: ResourcePile::food(2),
                 }),
             )

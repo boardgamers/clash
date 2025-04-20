@@ -84,12 +84,12 @@
       ],
       "civilization": "test0",
       "advances": [
-        "Arts",
-        "Bartering",
-        "Currency",
         "Farming",
         "Mining",
-        "Tactics"
+        "Tactics",
+        "Bartering",
+        "Currency",
+        "Arts"
       ],
       "incident_tokens": 1,
       "next_unit_id": 8

@@ -27,7 +27,7 @@
               "Sanitation",
               "Storage",
               "Tactics",
-              "War Ships",
+              "WarShips",
               "Writing"
             ]
           }
@@ -149,8 +149,8 @@
       "advances": [
         "Farming",
         "Fishing",
-        "Free Economy",
-        "Free Education",
+        "FreeEconomy",
+        "FreeEducation",
         "Mining",
         "Storage",
         "Voting",
@@ -217,7 +217,7 @@
         "Fishing",
         "Mining",
         "Myths",
-        "State Religion"
+        "StateReligion"
       ],
       "incident_tokens": 3,
       "next_unit_id": 2

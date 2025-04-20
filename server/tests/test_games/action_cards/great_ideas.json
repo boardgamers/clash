@@ -134,11 +134,11 @@
       ],
       "civilization": "test1",
       "advances": [
-        "Fanaticism",
         "Farming",
-        "Mining",
         "Storage",
-        "Tactics"
+        "Mining",
+        "Tactics",
+        "Fanaticism"
       ],
       "incident_tokens": 3,
       "next_unit_id": 2

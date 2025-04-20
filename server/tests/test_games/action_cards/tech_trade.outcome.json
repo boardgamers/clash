@@ -78,9 +78,9 @@
       "civilization": "test0",
       "advances": [
         "Farming",
-        "Fishing",
-        "Mining",
         "Storage",
+        "Mining",
+        "Fishing",
         "Tactics"
       ],
       "incident_tokens": 2,
@@ -127,12 +127,12 @@
       ],
       "civilization": "test1",
       "advances": [
-        "Fanaticism",
         "Farming",
-        "Fishing",
-        "Mining",
         "Storage",
-        "Tactics"
+        "Mining",
+        "Fishing",
+        "Tactics",
+        "Fanaticism"
       ],
       "incident_tokens": 3,
       "next_unit_id": 2
@@ -220,6 +220,16 @@
                     },
                     {
                       "op": "replace",
+                      "path": "/players/0/advances/1",
+                      "value": "Mining"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/advances/2",
+                      "value": "Fishing"
+                    },
+                    {
+                      "op": "replace",
                       "path": "/players/0/advances/3",
                       "value": "Tactics"
                     },
@@ -244,18 +254,13 @@
                     },
                     {
                       "op": "replace",
-                      "path": "/players/1/advances/2",
-                      "value": "Mining"
-                    },
-                    {
-                      "op": "replace",
                       "path": "/players/1/advances/3",
-                      "value": "Storage"
+                      "value": "Tactics"
                     },
                     {
                       "op": "replace",
                       "path": "/players/1/advances/4",
-                      "value": "Tactics"
+                      "value": "Fanaticism"
                     },
                     {
                       "op": "remove",

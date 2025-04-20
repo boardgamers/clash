@@ -31,7 +31,7 @@
               "Sanitation",
               "Separation of Power",
               "Tactics",
-              "War Ships"
+              "WarShips"
             ]
           }
         },
@@ -152,8 +152,8 @@
       "advances": [
         "Farming",
         "Fishing",
-        "Free Economy",
-        "Free Education",
+        "FreeEconomy",
+        "FreeEducation",
         "Mining",
         "Storage",
         "Voting",
@@ -220,7 +220,7 @@
         "Fishing",
         "Mining",
         "Myths",
-        "State Religion",
+        "StateReligion",
         "Storage"
       ],
       "incident_tokens": 2,

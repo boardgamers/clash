@@ -1,6 +1,7 @@
 use crate::common::TestAction;
 use common::JsonTest;
 use server::action::Action;
+use server::advance;
 use server::content::persistent_events::EventResponse;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
@@ -29,11 +30,11 @@ fn test_free_advance() {
             TestAction::not_undoable(0, Action::Playing(PlayingAction::EndTurn)),
             TestAction::not_undoable(
                 1,
-                Action::Response(EventResponse::SelectAdvance("Storage".to_string())),
+                Action::Response(EventResponse::SelectAdvance(advance::Advance::Storage)),
             ),
             TestAction::not_undoable(
                 0,
-                Action::Response(EventResponse::SelectAdvance("Philosophy".to_string())),
+                Action::Response(EventResponse::SelectAdvance(advance::Advance::Philosophy)),
             ),
         ],
     );
@@ -94,7 +95,7 @@ fn test_change_government() {
             Action::Response(EventResponse::ChangeGovernmentType(
                 ChangeGovernmentType::ChangeGovernment(ChangeGovernment::new(
                     String::from("Theocracy"),
-                    vec![String::from("Devotion")],
+                    vec![advance::Advance::Devotion],
                 )),
             )),
         )],

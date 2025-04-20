@@ -141,7 +141,7 @@
         "Farming",
         "Mining",
         "Myths",
-        "State Religion",
+        "StateReligion",
         "Storage",
         "Tactics",
         "Voting"
@@ -149,7 +149,7 @@
       "incident_tokens": 3,
       "next_unit_id": 8,
       "event_info": {
-        "State Religion": "used"
+        "StateReligion": "used"
       }
     },
     {
@@ -318,7 +318,7 @@
                     {
                       "op": "replace",
                       "path": "/players/0/advances/3",
-                      "value": "State Religion"
+                      "value": "StateReligion"
                     },
                     {
                       "op": "replace",
@@ -458,7 +458,7 @@
                                 },
                                 "modifiers": [
                                   {
-                                    "Advance": "State Religion"
+                                    "Advance": "StateReligion"
                                   }
                                 ]
                               },
@@ -524,7 +524,7 @@
     ],
     [
       "Player1 built a Temple at C1 for 2 gold",
-      "State Religion reduced the food cost to 0"
+      "StateReligion reduced the food cost to 0"
     ]
   ],
   "undo_limit": 2,
