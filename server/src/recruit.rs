@@ -17,7 +17,7 @@ pub(crate) fn recruit(game: &mut Game, player_index: usize, r: Recruit) -> Resul
         r.city_position,
         r.leader_name.as_ref(),
         &r.replaced_units,
-        CostTrigger::Execute,
+        game.execute_cost_trigger(),
     )?;
     cost.pay(game, &r.payment);
     for unit in &r.replaced_units {

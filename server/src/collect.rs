@@ -129,7 +129,7 @@ pub(crate) fn collect(game: &mut Game, player_index: usize, c: &Collect) -> Resu
         player_index,
         c.city_position,
         &c.collections,
-        CostTrigger::Execute,
+        game.execute_cost_trigger(),
     )?;
     let city = game.players[player_index].get_city_mut(c.city_position);
     if !city.can_activate() {

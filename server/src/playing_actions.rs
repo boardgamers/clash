@@ -271,7 +271,7 @@ impl PlayingAction {
                     return Err("Cannot advance".to_string());
                 }
                 game.player(player_index)
-                    .advance_cost(advance, CostTrigger::Execute)
+                    .advance_cost(advance, game.execute_cost_trigger())
                     .pay(game, &payment);
                 gain_advance_without_payment(game, advance, player_index, payment, true);
             }

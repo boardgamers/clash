@@ -45,7 +45,7 @@ pub(crate) fn increase_happiness(
     }
 
     if let Some(r) = payment {
-        happiness_cost(player, step_sum, CostTrigger::Execute).pay(game, &r);
+        happiness_cost(player, step_sum, game.execute_cost_trigger()).pay(game, &r);
     }
 }
 

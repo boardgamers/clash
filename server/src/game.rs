@@ -31,6 +31,7 @@ use crate::{
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::vec;
+use crate::player::CostTrigger;
 
 pub struct Game {
     pub state: GameState,
@@ -45,7 +46,7 @@ pub struct Game {
     pub action_log_index: usize,
     pub log: Vec<Vec<String>>,
     pub undo_limit: usize,
-    pub supports_undo: bool,
+    pub supports_undo: bool, // if false: optimizend AI mode
     pub actions_left: u32,
     pub successful_cultural_influence: bool,
     pub round: u32, // starts at 1
@@ -396,6 +397,15 @@ impl Game {
         let e = event(&mut self.players[player_index].events).take();
         e.trigger(self, info, details, extra_value);
         event(&mut self.players[player_index].events).set(e);
+    }
+
+    #[must_use]
+    pub(crate) fn execute_cost_trigger(&self) -> CostTrigger {
+        if self.supports_undo {
+            CostTrigger::WithModifiers
+        } else {
+            CostTrigger::NoModifiers
+        }
     }
 
     #[must_use]

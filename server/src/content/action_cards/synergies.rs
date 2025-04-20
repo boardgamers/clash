@@ -103,7 +103,7 @@ fn pay_for_advance(b: ActionCardBuilder, priority: i32) -> ActionCardBuilder {
             let p = game.player(player_index);
             let advance = i.selected_advance.expect("advance not found");
             Some(vec![PaymentRequest::new(
-                p.advance_cost(advance, CostTrigger::Execute).cost,
+                p.advance_cost(advance, game.execute_cost_trigger()).cost,
                 &format!("Pay for {}", advance.info().name),
                 false,
             )])

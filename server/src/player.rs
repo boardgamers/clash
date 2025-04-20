@@ -92,7 +92,6 @@ impl PartialEq for Player {
 
 #[derive(PartialEq, Eq)]
 pub enum CostTrigger {
-    Execute, // todo same as no modifiers?
     WithModifiers,
     NoModifiers,
 }
@@ -628,10 +627,11 @@ impl Player {
     pub fn advance_cost(&self, advance: Advance, execute: CostTrigger) -> CostInfo {
         self.trigger_cost_event(
             |e| &e.advance_cost,
-            &PaymentOptions::sum(
-                ADVANCE_COST,
-                &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
-            ),
+            &PaymentOptions::sum(ADVANCE_COST, &[
+                ResourceType::Ideas,
+                ResourceType::Food,
+                ResourceType::Gold,
+            ]),
             &advance,
             &(),
             execute,
@@ -781,12 +781,12 @@ impl Player {
         let event = get_event(&self.events.transient).get();
         let mut cost_info = CostInfo::new(self, value.clone());
         match trigger {
-            CostTrigger::WithModifiers => {
+            CostTrigger::WithModifiers | CostTrigger::Execute => {
                 let m =
                     event.trigger_with_modifiers(&mut cost_info, info, details, &mut (), trigger);
                 cost_info.cost.modifiers = m;
             }
-            CostTrigger::NoModifiers | CostTrigger::Execute => {
+            CostTrigger::NoModifiers => {
                 event.trigger(&mut cost_info, info, details, &mut ());
             }
         }
