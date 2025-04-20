@@ -127,7 +127,7 @@ fn fantastic_years() -> Vec<Incident> {
     ]
 }
 
-fn good_year(mut builder: IncidentBuilder, amount: u32, good_year_type: &GoodYearType) -> Incident {
+fn good_year(mut builder: IncidentBuilder, amount: u8, good_year_type: &GoodYearType) -> Incident {
     let n = builder.name.clone();
     let role = match good_year_type {
         GoodYearType::AllPlayers => IncidentTarget::AllPlayers,
@@ -264,7 +264,7 @@ pub(crate) fn successful_year() -> Incident {
             let cities = game.players[player_index].cities.len();
             if cities == *min_cities {
                 Some(ResourceRewardRequest::new(
-                    PaymentOptions::sum((max_cities - min_cities) as u32, &[ResourceType::Food]),
+                    PaymentOptions::sum((max_cities - min_cities) as u8, &[ResourceType::Food]),
                     "-".to_string(),
                 ))
             } else {

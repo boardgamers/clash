@@ -23,7 +23,7 @@ use std::iter;
 pub struct PositionCollection {
     pub position: Position,
     pub pile: ResourcePile,
-    pub times: u32,
+    pub times: u8,
 }
 
 impl PositionCollection {
@@ -37,7 +37,7 @@ impl PositionCollection {
     }
 
     #[must_use]
-    pub fn times(&self, times: u32) -> PositionCollection {
+    pub fn times(&self, times: u8) -> PositionCollection {
         PositionCollection {
             position: self.position,
             pile: self.pile.clone(),
@@ -78,7 +78,7 @@ pub fn get_total_collection(
     }
 
     for (_, group) in &collections.iter().chunk_by(|c| c.position) {
-        let used = group.map(|c| c.times).sum::<u32>();
+        let used = group.map(|c| c.times).sum::<u8>();
 
         if used > i.max_per_tile {
             return Err(format!(
@@ -122,7 +122,7 @@ fn apply_total_collect(
 }
 
 #[must_use]
-pub fn tiles_used(collections: &[PositionCollection]) -> u32 {
+pub fn tiles_used(collections: &[PositionCollection]) -> u8 {
     collections.iter().map(|c| c.times).sum()
 }
 
@@ -165,8 +165,8 @@ pub struct CollectInfo {
     pub modifiers: Vec<EventOrigin>,
     pub city: Position,
     pub total: ResourcePile,
-    pub max_per_tile: u32,
-    pub max_selection: u32,
+    pub max_per_tile: u8,
+    pub max_selection: u8,
     pub(crate) info: ActionInfo,
 }
 
@@ -183,7 +183,7 @@ impl CollectInfo {
             info: ActionInfo::new(player),
             city,
             max_per_tile: 1,
-            max_selection: player.get_city(city).mood_modified_size(player) as u32,
+            max_selection: player.get_city(city).mood_modified_size(player) as u8,
         }
     }
 }
@@ -372,7 +372,7 @@ fn pick_resource(
         .iter()
         .chunk_by(|c| c.position)
         .into_iter()
-        .map(|(p, group)| (p, group.map(|c| c.times).sum::<u32>()))
+        .map(|(p, group)| (p, group.map(|c| c.times).sum::<u8>()))
         .collect_vec();
 
     let available = info

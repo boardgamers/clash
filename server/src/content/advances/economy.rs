@@ -129,7 +129,7 @@ pub fn tax_options(player: &Player) -> PaymentOptions {
     if player.has_advance(Advance::Currency) {
         c.insert(0, ResourceType::Gold);
     }
-    PaymentOptions::sum(player.cities.len() as u32, &c)
+    PaymentOptions::sum(player.cities.len() as u8, &c)
 }
 
 fn trade_routes() -> AdvanceBuilder {

@@ -32,3 +32,4 @@ num_cpus = "1.16.0"
 readonly = "0.2.13"
 chrono = "0.4.40"
 enumset = { version = "1.1.5" }
+prehash = "1.0.0"

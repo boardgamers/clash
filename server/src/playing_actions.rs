@@ -83,7 +83,7 @@ impl Recruit {
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub struct IncreaseHappiness {
-    pub happiness_increases: Vec<(Position, u32)>,
+    pub happiness_increases: Vec<(Position, u8)>,
     pub payment: ResourcePile,
     pub action_type: PlayingActionType,
 }
@@ -91,7 +91,7 @@ pub struct IncreaseHappiness {
 impl IncreaseHappiness {
     #[must_use]
     pub fn new(
-        happiness_increases: Vec<(Position, u32)>,
+        happiness_increases: Vec<(Position, u8)>,
         payment: ResourcePile,
         action_type: PlayingActionType,
     ) -> Self {
@@ -413,7 +413,7 @@ impl ActionCost {
 }
 
 pub(crate) fn roll_boost_cost(roll: u8) -> ResourcePile {
-    ResourcePile::culture_tokens(5 - roll as u32)
+    ResourcePile::culture_tokens(5 - roll as u8)
 }
 
 #[must_use]

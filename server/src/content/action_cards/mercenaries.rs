@@ -63,7 +63,7 @@ pub(crate) fn mercenaries(id: u8, tactics_card: TacticsCardFactory) -> ActionCar
         |_game, _player, a| {
             Some(vec![PaymentRequest::new(
                 PaymentOptions::sum(
-                    a.selected_positions.len() as u32,
+                    a.selected_positions.len() as u8,
                     &[
                         ResourceType::Food,
                         ResourceType::Wood,

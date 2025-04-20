@@ -1,20 +1,20 @@
+extern crate num_cpus;
 use std::time::Duration;
 
 use tokio::runtime::Runtime;
 
+use crate::ai_actions::AiActions;
 use crate::{
-    action::{self, Action, ActionType},
-    ai_actions,
+    action::{self, Action, ActionType}
+    ,
     game::{Game, GameData, GameState},
     playing_actions::PlayingAction,
     position::Position,
     utils::{self, Rng},
 };
-use crate::ai_actions::AiActions;
 
 const ACTION_SCORE_WEIGHTING: f64 = 1.0;
 const ADAPTIVE_DIFFICULTY_SCORE_THRESHOLD: f64 = 10.0;
-extern crate num_cpus;
 
 pub struct AI {
     rng: Rng,

@@ -248,12 +248,12 @@ pub(crate) fn on_play_wonder_card(game: &mut Game, player_index: usize, i: Wonde
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct WonderDiscount {
     ignore_required_advances: bool,
-    culture_tokens: u32,
+    culture_tokens: u8,
 }
 
 impl WonderDiscount {
     #[must_use]
-    pub const fn new(ignore_required_advances: bool, discount_culture_tokens: u32) -> Self {
+    pub const fn new(ignore_required_advances: bool, discount_culture_tokens: u8) -> Self {
         Self {
             ignore_required_advances,
             culture_tokens: discount_culture_tokens,

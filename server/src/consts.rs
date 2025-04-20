@@ -3,7 +3,7 @@ use crate::{resource_pile::ResourcePile, unit::Units};
 
 pub const MAX_CITY_PIECES: usize = 4; // i.e. city size 5
 pub const AGES: u32 = 6;
-pub const ADVANCE_COST: u32 = 2;
+pub const ADVANCE_COST: u8 = 2;
 pub const BUILDING_VICTORY_POINTS: f32 = 1.0;
 pub const ADVANCE_VICTORY_POINTS: f32 = 0.5;
 pub const OBJECTIVE_VICTORY_POINTS: f32 = 2.0;

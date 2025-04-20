@@ -173,7 +173,7 @@ pub fn draw_resource_collect_tile(rc: &RenderContext, pos: Position) -> StateUpd
         }
 
         let map = new_resource_map(pile);
-        let m: Vec<(ResourceType, &u32)> = ResourceType::all()
+        let m: Vec<(ResourceType, &u8)> = ResourceType::all()
             .iter()
             .filter_map(|r| {
                 let a = map.get(r);
@@ -196,7 +196,7 @@ pub fn draw_resource_collect_tile(rc: &RenderContext, pos: Position) -> StateUpd
 fn draw_collect_item(
     rc: &RenderContext,
     center: Vec2,
-    resources: &[(ResourceType, &u32)],
+    resources: &[(ResourceType, &u8)],
     size: f32,
 ) {
     if resources.iter().len() == 1 {

@@ -207,9 +207,9 @@ pub(crate) fn famine(
             }
 
             let needed = amount(p, game);
-            let lost = needed.min(p.resources.food as u8) as u32;
+            let lost = needed.min(p.resources.food);
 
-            if lost == needed as u32 {
+            if lost == needed {
                 // only avoid anger if full amount is paid
                 i.player.payment = ResourcePile::food(lost);
             }

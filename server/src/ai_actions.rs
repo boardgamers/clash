@@ -28,7 +28,7 @@ use crate::resource_pile::ResourcePile;
 use crate::status_phase::{government_advances, ChangeGovernment, ChangeGovernmentType};
 use crate::unit::{UnitType, Units};
 use itertools::Itertools;
-use std::collections::HashMap;
+use prehash::{new_prehashed_map, DefaultPrehasher, PrehashedMap, Prehasher};
 use std::vec;
 //todo
 //nicht nur maximale anzahl rekrutieren
@@ -37,13 +37,15 @@ use std::vec;
 //militär
 
 struct PaymentCache {
-    options: HashMap<PaymentOptions, HashMap<ResourcePile, Option<ResourcePile>>>,
+    options: PrehashedMap<PaymentOptions, PrehashedMap<ResourcePile, Option<ResourcePile>>>,
+    prehasher: DefaultPrehasher,
 }
 
 impl PaymentCache {
     fn new() -> Self {
         PaymentCache {
-            options: HashMap::new(),
+            options: new_prehashed_map(),
+            prehasher: DefaultPrehasher::new()
         }
     }
 }
@@ -264,9 +266,9 @@ fn try_payment(ai_actions: &mut AiActions, o: &PaymentOptions, p: &Player) -> Op
 
     ai_actions.payment_cache
         .options
-        .entry(o.clone())
-        .or_insert(HashMap::new())
-        .entry(max)
+        .entry(ai_actions.payment_cache.prehasher.prehash(o.clone()))
+        .or_insert(new_prehashed_map())
+        .entry(ai_actions.payment_cache.prehasher.prehash(max))
         .or_insert_with_key(|available| o.first_valid_payment(available))
         .clone()
 }
@@ -402,7 +404,7 @@ fn calculate_increase_happiness(
     action_type: &PlayingActionType,
 ) -> Option<IncreaseHappiness> {
     // try to make the biggest cities happy - that's usually the best choice
-    let mut all_steps: Vec<(Position, u32)> = vec![];
+    let mut all_steps: Vec<(Position, u8)> = vec![];
     let mut step_sum = 0;
     let mut cost = PaymentOptions::free();
     let available = action_type.remaining_resources(player);
@@ -418,7 +420,7 @@ fn calculate_increase_happiness(
             MoodState::Neutral => 1,
             MoodState::Happy => 0,
         };
-        let new_steps_sum = step_sum + steps * c.size() as u32;
+        let new_steps_sum = step_sum + steps * c.size() as u8;
 
         let info = happiness_cost(player, new_steps_sum, None);
         if !info.cost.can_afford(&available) {

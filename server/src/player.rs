@@ -425,7 +425,7 @@ impl Player {
         self.resources -= resources;
     }
 
-    pub(crate) fn can_gain_resource(&self, r: ResourceType, amount: u32) -> bool {
+    pub(crate) fn can_gain_resource(&self, r: ResourceType, amount: u8) -> bool {
         match r {
             ResourceType::MoodTokens | ResourceType::CultureTokens => true,
             _ => self.resources.get(&r) + amount <= self.resource_limit.get(&r),

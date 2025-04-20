@@ -337,7 +337,7 @@ pub(crate) fn conquer_city(
     let attacker_is_human = game.player(new_player_index).is_human();
     let size = city.mood_modified_size(&game.players[new_player_index]);
     if attacker_is_human {
-        game.players[new_player_index].gain_resources(ResourcePile::gold(size as u32));
+        game.players[new_player_index].gain_resources(ResourcePile::gold(size as u8));
     }
     let take_over = game.player(new_player_index).is_city_available();
 
@@ -370,7 +370,7 @@ pub(crate) fn conquer_city(
         }
         game.players[new_player_index].cities.push(city);
     } else {
-        game.players[new_player_index].gain_resources(ResourcePile::gold(city.size() as u32));
+        game.players[new_player_index].gain_resources(ResourcePile::gold(city.size() as u8));
         city.raze(game, old_player_index);
     }
 }

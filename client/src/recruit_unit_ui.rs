@@ -88,15 +88,15 @@ fn selectable_unit(
         None,
     );
     let max = if cost.is_ok() {
-        u32::from(current + 1)
+        u8::from(current + 1)
     } else {
-        u32::from(current)
+        u8::from(current)
     };
     SelectableUnit {
         unit_type: unit.unit_type,
         cost,
         selectable: CountSelector {
-            current: u32::from(current),
+            current: u8::from(current),
             min: 0,
             max,
         },

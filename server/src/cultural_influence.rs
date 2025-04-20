@@ -205,7 +205,7 @@ pub(crate) fn cultural_influence_resolution() -> Builtin {
     .build()
 }
 
-fn influence_distance(game: &Game, src: Position, dst: Position) -> u32 {
+fn influence_distance(game: &Game, src: Position, dst: Position) -> u8 {
     astar(
         &src,
         |p| {
@@ -217,7 +217,7 @@ fn influence_distance(game: &Game, src: Position, dst: Position) -> u32 {
         |p| p.distance(dst),
         |&p| p == dst,
     )
-    .map_or(u32::MAX, |(_path, len)| len)
+    .map_or(u8::MAX, |(_path, len)| len as u8)
 }
 
 ///
@@ -266,7 +266,7 @@ pub fn influence_culture_boost_cost(
     let (start, range_boost) = affordable_start_city(game, player_index, target_city, action_type)?;
 
     let mut info = Ok(InfluenceCultureInfo::new(
-        PaymentOptions::resources(ResourcePile::culture_tokens(range_boost)),
+        PaymentOptions::resources(ResourcePile::culture_tokens(range_boost as u8)),
         ActionInfo::new(attacker),
         target_city_position,
         structure.clone(),
@@ -379,7 +379,7 @@ fn affordable_start_city(
     player_index: usize,
     target_city: &City,
     action_type: &PlayingActionType,
-) -> Result<(Position, u32), String> {
+) -> Result<(Position, u8), String> {
     if target_city.player_index == player_index {
         Ok((target_city.position, 0))
     } else {
@@ -397,14 +397,14 @@ fn affordable_start_city(
                 let min_cost = c
                     .position
                     .distance(target_city.position)
-                    .saturating_sub(c.size() as u32);
+                    .saturating_sub(c.size() as u32) as u8;
                 if min_cost > available.culture_tokens {
                     // avoid unnecessary calculations
                     return None;
                 }
 
                 let boost_cost = influence_distance(game, c.position, target_city.position)
-                    .saturating_sub(c.size() as u32);
+                    .saturating_sub(c.size() as u8);
                 if boost_cost > available.culture_tokens {
                     return None;
                 }

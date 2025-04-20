@@ -470,7 +470,7 @@ impl IncidentBuilder {
     ) -> Self {
         let cities2 = cities.clone();
         self.add_myths_payment(target, mood_modifier, move |g, p, i| {
-            cities(p, g, i).1 as u32
+            cities(p, g, i).1
         })
         .decrease_mood(target, mood_modifier, cities2)
     }
@@ -479,7 +479,7 @@ impl IncidentBuilder {
         self,
         target: IncidentTarget,
         mood_modifier: MoodModifier,
-        amount: impl Fn(&Game, &Player, &IncidentInfo) -> u32 + 'static + Clone + Sync + Send,
+        amount: impl Fn(&Game, &Player, &IncidentInfo) -> u8 + 'static + Clone + Sync + Send,
     ) -> Self {
         self.add_incident_payment_request(
             target,

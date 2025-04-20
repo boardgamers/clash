@@ -104,7 +104,7 @@ fn pandemics() -> Incident {
             }
 
             Some(vec![PaymentRequest::new(
-                PaymentOptions::sum(needed as u32, &ResourceType::all()),
+                PaymentOptions::sum(needed, &ResourceType::all()),
                 "Select resources to lose",
                 false,
             )])

@@ -22,7 +22,7 @@ pub fn available_happiness_actions(game: &Game, player: usize) -> Vec<PlayingAct
 pub(crate) fn increase_happiness(
     game: &mut Game,
     player_index: usize,
-    happiness_increases: &[(Position, u32)],
+    happiness_increases: &[(Position, u8)],
     payment: Option<ResourcePile>,
 ) {
     let player = &mut game.players[player_index];
@@ -33,7 +33,7 @@ pub(crate) fn increase_happiness(
         if steps == 0 {
             continue;
         }
-        step_sum += steps * city.size() as u32;
+        step_sum += steps * city.size() as u8;
 
         if city.mood_state == MoodState::Angry {
             angry_activations.push(city_position);
@@ -52,7 +52,7 @@ pub(crate) fn increase_happiness(
 #[must_use]
 pub fn happiness_cost(
     p: &Player,
-    city_size_steps: u32, // for each city: size * steps in that city
+    city_size_steps: u8, // for each city: size * steps in that city
     execute: Option<&ResourcePile>,
 ) -> CostInfo {
     let payment_options = PaymentOptions::sum(city_size_steps, &[ResourceType::MoodTokens]);
