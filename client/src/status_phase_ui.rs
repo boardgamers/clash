@@ -19,7 +19,7 @@ pub struct ChooseAdditionalAdvances {
 impl ChooseAdditionalAdvances {
     fn new(
         government: String,
-        possible: Vec<String>,
+        possible: Vec<Advance>,
         needed: usize,
         r: &ChangeGovernmentRequest,
     ) -> Self {
@@ -105,9 +105,9 @@ pub fn choose_additional_advances_dialog(
         rc,
         &format!("Choose additional advances for {}", choose.government),
         |a, _| {
-            if choose.selected.contains(&a.name) {
+            if choose.selected.contains(&a.advance) {
                 AdvanceState::Removable
-            } else if choose.possible.contains(&a.name) && choose.selected.len() < choose.needed {
+            } else if choose.possible.contains(&a.advance) && choose.selected.len() < choose.needed {
                 AdvanceState::Available
             } else {
                 AdvanceState::Unavailable

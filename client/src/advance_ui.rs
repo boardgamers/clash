@@ -18,6 +18,7 @@ use server::player::Player;
 use server::playing_actions::PlayingAction;
 use server::unit::UnitType;
 use std::ops::Rem;
+use itertools::Itertools;
 
 const COLUMNS: usize = 6;
 
@@ -29,7 +30,7 @@ pub enum AdvanceState {
 }
 
 fn new_advance_payment(rc: &RenderContext, a: &AdvanceInfo) -> Payment {
-    rc.new_payment(&rc.shown_player.advance_cost(a, None).cost, &a.name, false)
+    rc.new_payment(&rc.shown_player.advance_cost(a.advance, None).cost, &a.name, false)
 }
 
 pub fn show_paid_advance_menu(rc: &RenderContext) -> StateUpdate {
@@ -40,7 +41,7 @@ pub fn show_paid_advance_menu(rc: &RenderContext) -> StateUpdate {
         |a, p| {
             if p.has_advance(a.advance) {
                 AdvanceState::Owned
-            } else if game.state == GameState::Playing && game.actions_left > 0 && p.can_advance(a)
+            } else if game.state == GameState::Playing && game.actions_left > 0 && p.can_advance(a.advance)
             {
                 AdvanceState::Available
             } else {
@@ -152,13 +153,17 @@ fn description(rc: &RenderContext, a: &AdvanceInfo) -> Vec<String> {
     add_tooltip_description(&mut parts, &a.description);
     parts.push(format!(
         "Cost: {}",
-        rc.shown_player.advance_cost(a, None).cost
+        rc.shown_player.advance_cost(a.advance, None).cost
     ));
     if let Some(r) = &a.required {
         parts.push(format!("Required: {r}"));
     }
     if !a.contradicting.is_empty() {
-        parts.push(format!("Contradicts: {}", a.contradicting.join(", ")));
+        parts.push(format!("Contradicts: {}", a.contradicting
+            .iter().map(
+                |a| a.to_string()
+        )
+            .join(", ")));
     }
     if let Some(b) = &a.bonus {
         parts.push(format!(

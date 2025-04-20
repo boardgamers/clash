@@ -47,7 +47,7 @@ pub fn advance_reward_dialog(rc: &RenderContext, r: &AdvanceRequest, name: &str)
         rc,
         &format!("Select advance for {name}"),
         |a, _| {
-            if possible.contains(&a.name) {
+            if possible.contains(&a.advance) {
                 AdvanceState::Available
             } else if rc.shown_player.has_advance(a.advance) {
                 AdvanceState::Owned
