@@ -1,15 +1,7 @@
-use crate::common::{GamePath, to_json, write_result};
 use async_std::task;
+use server::ai_actions::AiActions;
 use server::game::Game;
-use server::{
-    action::{self, Action},
-    ai_actions,
-    game::GameState,
-    game_setup,
-    playing_actions::PlayingAction,
-    utils::{Rng, Shuffle},
-};
-use std::panic::{AssertUnwindSafe, catch_unwind};
+use server::{action::{self, Action}, game::GameState, game_setup, playing_actions::PlayingAction, utils::{Rng, Shuffle}};
 
 mod common;
 
@@ -44,13 +36,14 @@ fn random_actions_iterations(mut rng: Rng) {
     let mut game = game_setup::setup_game(2, seed, true);
     game.supports_undo = false;
     build_adjacent_cities(&mut game);
+    let mut ai_actions = AiActions::new();
     loop {
         if matches!(game.state, GameState::Finished) {
             break;
         }
         let player_index = game.active_player();
         //todo: include movement action
-        let actions = ai_actions::get_available_actions(&game);
+        let actions = ai_actions.get_available_actions(&game);
         let actions = actions
             .into_iter()
             .flat_map(|(_, actions)| actions)
@@ -59,18 +52,7 @@ fn random_actions_iterations(mut rng: Rng) {
             .take_random_element(&mut rng)
             .unwrap_or(Action::Playing(PlayingAction::EndTurn));
 
-        game = catch_unwind(AssertUnwindSafe(|| {
-            action::execute_action(game.clone(), action.clone(), player_index)
-        }))
-        .unwrap_or_else(move |e| {
-            use chrono::Utc;
-            let rfc_format = Utc::now().to_rfc3339();
-            let file = format!("failure{rfc_format}");
-
-            write_result(&to_json(&game), &GamePath::new(".", &file));
-
-            panic!("action {action:?}\nresult stored in {file}.json: {e:?}")
-        });
+        game = action::execute_action(game.clone(), action.clone(), player_index)
     }
 }
 

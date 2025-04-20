@@ -3,12 +3,8 @@ use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use std::fmt::Display;
 use std::ops::RangeInclusive;
-use std::sync::LazyLock;
-
-use std::sync::Mutex;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub enum PaymentConversionType {
@@ -50,21 +46,6 @@ impl PaymentConversion {
     }
 }
 
-struct PaymentCache {
-    options: HashMap<PaymentOptions, HashMap<ResourcePile, Option<ResourcePile>>>,
-}
-
-impl PaymentCache {
-    fn new() -> Self {
-        PaymentCache {
-            options: HashMap::new(),
-        }
-    }
-}
-
-static PAYMENT_CACHE: LazyLock<Mutex<PaymentCache>> =
-    LazyLock::new(|| Mutex::new(PaymentCache::new()));
-
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub struct PaymentOptions {
     pub default: ResourcePile,
@@ -77,31 +58,10 @@ pub struct PaymentOptions {
 }
 
 impl PaymentOptions {
+
+
     #[must_use]
     pub fn first_valid_payment(&self, available: &ResourcePile) -> Option<ResourcePile> {
-        let sum = self.default.amount();
-
-        let mut max = available.clone();
-        for r in ResourceType::all() {
-            let t = max.get_mut(&r);
-            if *t > sum {
-                *t = sum;
-            }
-        }
-
-        PAYMENT_CACHE
-            .lock()
-            .expect("get cache")
-            .options
-            .entry(self.clone())
-            .or_insert(HashMap::new())
-            .entry(max)
-            .or_insert_with_key(|available| self.first_valid_payment_uncached(available))
-            .clone()
-    }
-
-    #[must_use]
-    pub fn first_valid_payment_uncached(&self, available: &ResourcePile) -> Option<ResourcePile> {
         let discount_left = self
             .conversions
             .iter()

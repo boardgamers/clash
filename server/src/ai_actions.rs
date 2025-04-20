@@ -3,15 +3,15 @@ use crate::advance::Advance;
 use crate::card::validate_card_selection;
 use crate::city::{City, MoodState};
 use crate::collect::available_collect_actions;
-use crate::construct::{Construct, available_buildings, new_building_positions};
+use crate::construct::{available_buildings, new_building_positions, Construct};
 use crate::content::advances;
 use crate::content::custom_actions::CustomEventAction;
 use crate::content::persistent_events::{
-    ChangeGovernmentRequest, EventResponse, HandCardsRequest, MultiRequest, PersistentEventRequest,
-    PersistentEventState, PositionRequest, SelectedStructure, is_selected_structures_valid,
+    is_selected_structures_valid, ChangeGovernmentRequest, EventResponse, HandCardsRequest, MultiRequest,
+    PersistentEventRequest, PersistentEventState, PositionRequest, SelectedStructure,
 };
 use crate::cultural_influence::{
-    InfluenceCultureAttempt, available_influence_actions, available_influence_culture,
+    available_influence_actions, available_influence_culture, InfluenceCultureAttempt,
 };
 use crate::events::EventOrigin;
 use crate::game::Game;
@@ -19,14 +19,16 @@ use crate::happiness::{available_happiness_actions, happiness_cost};
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::playing_actions::{
-    IncreaseHappiness, PlayingAction, PlayingActionType, Recruit, base_and_custom_action,
+    base_and_custom_action, IncreaseHappiness, PlayingAction, PlayingActionType, Recruit,
 };
 use crate::position::Position;
 use crate::recruit::recruit_cost;
+use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
-use crate::status_phase::{ChangeGovernment, ChangeGovernmentType, government_advances};
+use crate::status_phase::{government_advances, ChangeGovernment, ChangeGovernmentType};
 use crate::unit::{UnitType, Units};
 use itertools::Itertools;
+use std::collections::HashMap;
 use std::vec;
 //todo
 //nicht nur maximale anzahl rekrutieren
@@ -34,35 +36,60 @@ use std::vec;
 //Siedler: nur von stadt wegbewegen wo er gebaut wurde
 //militär
 
-///
-/// Returns a list of available actions for the current player.
-///
-/// Some simplifications are made to help AI implementations:
-/// - custom actions are preferred over basic actions if available.
-/// - always pay default payment
-/// - collect and select as much as possible (which is not always the best choice,
-///   e.g. selecting to sacrifice a unit for an incident)
-/// - move actions are not returned at all - this required special handling
-///
-#[must_use]
-pub fn get_available_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
-    if let Some(event) = game.events.last() {
-        vec![(
-            ActionType::Response,
-            responses(event, game.player(game.active_player()), game)
-                .into_iter()
-                .map(Action::Response)
-                .collect(),
-        )]
-    } else {
-        base_actions(game)
+struct PaymentCache {
+    options: HashMap<PaymentOptions, HashMap<ResourcePile, Option<ResourcePile>>>,
+}
+
+impl PaymentCache {
+    fn new() -> Self {
+        PaymentCache {
+            options: HashMap::new(),
+        }
     }
 }
 
-type ActionFactory = (PlayingActionType, fn(&Player, &Game) -> Vec<Action>);
+pub struct AiActions {
+    payment_cache: PaymentCache,
+}
+
+impl AiActions {
+    pub fn new() -> Self {
+        AiActions {
+            payment_cache: PaymentCache::new(),
+        }
+    }
+
+
+    ///
+    /// Returns a list of available actions for the current player.
+    ///
+    /// Some simplifications are made to help AI implementations:
+    /// - custom actions are preferred over basic actions if available.
+    /// - always pay default payment
+    /// - collect and select as much as possible (which is not always the best choice,
+    ///   e.g. selecting to sacrifice a unit for an incident)
+    /// - move actions are not returned at all - this required special handling
+    ///
+    #[must_use]
+    pub fn get_available_actions(&mut self, game: &Game) -> Vec<(ActionType, Vec<Action>)> {
+        if let Some(event) = game.events.last() {
+            vec![(
+                ActionType::Response,
+                responses(event, game.player(game.active_player()), game)
+                    .into_iter()
+                    .map(Action::Response)
+                    .collect(),
+            )]
+        } else {
+            base_actions(self, game)
+        }
+    }
+}
+
+type ActionFactory = (PlayingActionType, fn(&mut AiActions, &Player, &Game) -> Vec<Action>);
 
 #[must_use]
-fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
+fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>)> {
     let p = game.player(game.current_player_index);
 
     let factories: Vec<ActionFactory> = vec![
@@ -79,7 +106,7 @@ fn base_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
                 return None;
             }
 
-            let a = f(p, game);
+            let a = f(ai, p, game);
             (!a.is_empty()).then_some((ActionType::Playing(t.clone()), a))
         })
         .collect_vec();
@@ -210,8 +237,8 @@ fn available_action_cards(game: &Game, p: &Player) -> Vec<Action> {
     action_cards
 }
 
-fn payment(o: &PaymentOptions, p: &Player) -> ResourcePile {
-    o.first_valid_payment(&p.resources)
+fn payment(ai_actions: &mut AiActions, o: &PaymentOptions, p: &Player) -> ResourcePile {
+    try_payment(ai_actions, o, p)
         .expect("expected payment")
 }
 
@@ -224,11 +251,27 @@ fn payment_with_action(
         .expect("expected payment")
 }
 
-fn try_payment(o: &PaymentOptions, p: &Player) -> Option<ResourcePile> {
-    o.first_valid_payment(&p.resources)
+fn try_payment(ai_actions: &mut AiActions, o: &PaymentOptions, p: &Player) -> Option<ResourcePile> {
+    let sum = o.default.amount();
+
+    let mut max = p.resources.clone();
+    for r in ResourceType::all() {
+        let t = max.get_mut(&r);
+        if *t > sum {
+            *t = sum;
+        }
+    }
+
+    ai_actions.payment_cache
+        .options
+        .entry(o.clone())
+        .or_insert(HashMap::new())
+        .entry(max)
+        .or_insert_with_key(|available| o.first_valid_payment(available))
+        .clone()
 }
 
-fn advances(p: &Player, _game: &Game) -> Vec<Action> {
+fn advances(ai_actions: &mut AiActions, p: &Player, _game: &Game) -> Vec<Action> {
     advances::get_all()
         .iter()
         .filter_map(|info| {
@@ -240,7 +283,7 @@ fn advances(p: &Player, _game: &Game) -> Vec<Action> {
             if !p.can_advance_free(a) {
                 return None;
             }
-            try_payment(&p.advance_cost(a, None).cost, p).map(|r| {
+            try_payment(ai_actions, &p.advance_cost(a, None).cost, p).map(|r| {
                 Action::Playing(PlayingAction::Advance {
                     advance: a,
                     payment: r,
@@ -281,7 +324,7 @@ fn collect_actions(p: &Player, game: &Game) -> Vec<Action> {
         .collect_vec()
 }
 
-fn found_city(p: &Player, game: &Game) -> Vec<Action> {
+fn found_city(_ai_actions: &mut AiActions, p: &Player, game: &Game) -> Vec<Action> {
     p.units
         .iter()
         .filter_map(|u| {
@@ -301,12 +344,12 @@ fn recruit_strategies() -> Vec<Vec<UnitType>> {
     ]
 }
 
-fn recruit(p: &Player, _game: &Game) -> Vec<Action> {
+fn recruit(ai_actions: &mut AiActions, p: &Player, _game: &Game) -> Vec<Action> {
     p.cities
         .iter()
         .flat_map(|city| {
             if city.can_activate() {
-                recruit_actions(p, city)
+                recruit_actions(ai_actions, p, city)
             } else {
                 vec![]
             }
@@ -314,7 +357,7 @@ fn recruit(p: &Player, _game: &Game) -> Vec<Action> {
         .collect()
 }
 
-fn recruit_actions(player: &Player, city: &City) -> Vec<Action> {
+fn recruit_actions(ai_actions: &mut AiActions, player: &Player, city: &City) -> Vec<Action> {
     recruit_strategies()
         .iter()
         .map(|strategy| {
@@ -331,7 +374,7 @@ fn recruit_actions(player: &Player, city: &City) -> Vec<Action> {
                 next += &unit_type;
                 match recruit_cost(player, &next, city.position, None, &[], None) {
                     Ok(c) => {
-                        cost = payment(&c.cost, player);
+                        cost = payment(ai_actions, &c.cost, player);
                         units = next;
                     }
                     Err(_) => {
@@ -455,17 +498,17 @@ fn responses(event: &PersistentEventState, player: &Player, game: &Game) -> Vec<
             select_multi(&r, SelectMultiStrategy::All, |s| {
                 is_selected_structures_valid(game, s)
             })
-            .into_iter()
-            .map(EventResponse::SelectStructures)
-            .collect()
+                .into_iter()
+                .map(EventResponse::SelectStructures)
+                .collect()
         }
         PersistentEventRequest::SelectHandCards(r) => {
             select_multi(&r, hand_card_strategy(&h.origin, &r), |v| {
                 validate_card_selection(v, game).is_ok()
             })
-            .into_iter()
-            .map(EventResponse::SelectHandCards)
-            .collect()
+                .into_iter()
+                .map(EventResponse::SelectHandCards)
+                .collect()
         }
         PersistentEventRequest::BoolRequest(_) => {
             vec![EventResponse::Bool(false), EventResponse::Bool(true)]
@@ -515,10 +558,10 @@ fn hand_card_strategy(o: &EventOrigin, r: &HandCardsRequest) -> SelectMultiStrat
             SelectMultiStrategy::Max
         }
         EventOrigin::CivilCard(_)
-            if r.description == "Select a Wonder, Action, or Objective card to swap" =>
-        {
-            SelectMultiStrategy::Min // powerset takes too long
-        }
+        if r.description == "Select a Wonder, Action, or Objective card to swap" =>
+            {
+                SelectMultiStrategy::Min // powerset takes too long
+            }
         _ => SelectMultiStrategy::All,
     }
 }
@@ -571,19 +614,19 @@ fn calculate_influence(
         .map(|(s, _, _)| s)
 }
 
-fn construct(p: &Player, game: &Game) -> Vec<Action> {
+fn construct(ai_actions: &mut AiActions, p: &Player, game: &Game) -> Vec<Action> {
     p.cities
         .iter()
         .flat_map(|city| {
             if !city.can_activate() {
                 return vec![];
             }
-            get_construct_actions(game, p, city)
+            get_construct_actions(ai_actions, game, p, city)
         })
         .collect()
 }
 
-pub(crate) fn get_construct_actions(game: &Game, p: &Player, city: &City) -> Vec<Action> {
+pub(crate) fn get_construct_actions(ai_actions: &mut AiActions, game: &Game, p: &Player, city: &City) -> Vec<Action> {
     available_buildings(game, p.index, city.position)
         .iter()
         .flat_map(|(building, cost)| {
@@ -591,7 +634,7 @@ pub(crate) fn get_construct_actions(game: &Game, p: &Player, city: &City) -> Vec
                 .iter()
                 .map(|port| {
                     Action::Playing(PlayingAction::Construct(
-                        Construct::new(city.position, *building, payment(&cost.cost, p))
+                        Construct::new(city.position, *building, payment(ai_actions, &cost.cost, p))
                             .with_port_position(*port),
                     ))
                 })
