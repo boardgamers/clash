@@ -91,7 +91,7 @@
       ],
       "civilization": "test1",
       "advances": [
-        "Absolute Power",
+        "AbsolutePower",
         "Farming",
         "Math",
         "Mining",

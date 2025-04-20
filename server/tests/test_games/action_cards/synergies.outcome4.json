@@ -60,13 +60,13 @@
       ],
       "civilization": "test0",
       "advances": [
-        "Farming",
-        "Storage",
-        "Mining",
-        "Fishing",
-        "WarShips",
         "Cartography",
-        "Tactics"
+        "Farming",
+        "Fishing",
+        "Mining",
+        "Storage",
+        "Tactics",
+        "WarShips"
       ],
       "incident_tokens": 3,
       "next_unit_id": 8
@@ -108,8 +108,8 @@
       "civilization": "test1",
       "advances": [
         "Farming",
-        "Mining",
-        "Fishing"
+        "Fishing",
+        "Mining"
       ],
       "incident_tokens": 2,
       "action_cards": [
@@ -350,6 +350,26 @@
                     },
                     {
                       "op": "replace",
+                      "path": "/players/0/advances/0",
+                      "value": "Farming"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/advances/1",
+                      "value": "Fishing"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/advances/2",
+                      "value": "Mining"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/advances/3",
+                      "value": "Storage"
+                    },
+                    {
+                      "op": "replace",
                       "path": "/players/0/advances/4",
                       "value": "Tactics"
                     },
@@ -476,16 +496,6 @@
                           "player": 0
                         }
                       ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/advances/4",
-                      "value": "Cartography"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/advances/5",
-                      "value": "Tactics"
                     },
                     {
                       "op": "remove",

@@ -110,13 +110,13 @@
       ],
       "advances": [
         "Farming",
-        "Storage",
-        "Mining",
         "Fishing",
-        "Writing",
+        "FreeEconomy",
         "FreeEducation",
+        "Mining",
+        "Storage",
         "Voting",
-        "FreeEconomy"
+        "Writing"
       ],
       "incident_tokens": 3,
       "wonder_cards": [
@@ -175,12 +175,12 @@
         "Kleopatra"
       ],
       "advances": [
+        "Dogma",
         "Farming",
-        "Mining",
         "Fishing",
+        "Mining",
         "Myths",
-        "StateReligion",
-        "Dogma"
+        "StateReligion"
       ],
       "incident_tokens": 2,
       "next_unit_id": 2
@@ -300,6 +300,31 @@
                       "op": "replace",
                       "path": "/actions_left",
                       "value": 3
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/advances/0",
+                      "value": "Farming"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/advances/1",
+                      "value": "Fishing"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/advances/2",
+                      "value": "Mining"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/advances/3",
+                      "value": "Myths"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/advances/4",
+                      "value": "StateReligion"
                     },
                     {
                       "op": "remove",

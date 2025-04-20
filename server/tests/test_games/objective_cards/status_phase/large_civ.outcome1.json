@@ -12,20 +12,20 @@
         "request": {
           "SelectAdvance": {
             "choices": [
+              "Storage",
+              "Irrigation",
+              "Husbandry",
+              "Fishing",
+              "PublicEducation",
+              "FreeEducation",
+              "Philosophy",
+              "Tactics",
+              "Myths",
+              "Bartering",
               "Arts",
               "Astronomy",
-              "Bartering",
-              "Fishing",
-              "FreeEducation",
-              "Husbandry",
-              "Irrigation",
               "Medicine",
-              "Metallurgy",
-              "Myths",
-              "Philosophy",
-              "Public Education",
-              "Storage",
-              "Tactics"
+              "Metallurgy"
             ]
           }
         },
@@ -152,7 +152,7 @@
       ],
       "civilization": "test0",
       "advances": [
-        "Civil Liberties",
+        "CivilLiberties",
         "Draft",
         "Engineering",
         "Farming",
@@ -161,7 +161,7 @@
         "Mining",
         "Roads",
         "Sanitation",
-        "Separation of Power",
+        "SeparationOfPower",
         "Voting",
         "Writing"
       ],

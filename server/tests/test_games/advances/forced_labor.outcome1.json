@@ -94,7 +94,7 @@
       "civilization": "test1",
       "advances": [
         "Farming",
-        "Forced Labor",
+        "ForcedLabor",
         "Math",
         "Mining",
         "Nationalism"

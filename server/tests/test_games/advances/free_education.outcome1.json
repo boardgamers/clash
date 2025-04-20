@@ -112,15 +112,15 @@
         "Kʼinich Janaab Pakal I"
       ],
       "advances": [
-        "Farming",
-        "Storage",
-        "Mining",
-        "Writing",
-        "FreeEducation",
-        "Tactics",
         "Draft",
+        "Farming",
+        "FreeEconomy",
+        "FreeEducation",
+        "Mining",
+        "Storage",
+        "Tactics",
         "Voting",
-        "FreeEconomy"
+        "Writing"
       ],
       "incident_tokens": 1,
       "wonder_cards": [
@@ -295,13 +295,43 @@
                     },
                     {
                       "op": "replace",
+                      "path": "/players/0/advances/0",
+                      "value": "Farming"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/advances/1",
+                      "value": "FreeEconomy"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/advances/2",
+                      "value": "FreeEducation"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/advances/3",
+                      "value": "Mining"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/advances/4",
+                      "value": "Storage"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/advances/5",
+                      "value": "Tactics"
+                    },
+                    {
+                      "op": "replace",
                       "path": "/players/0/advances/6",
                       "value": "Voting"
                     },
                     {
                       "op": "replace",
                       "path": "/players/0/advances/7",
-                      "value": "FreeEconomy"
+                      "value": "Writing"
                     },
                     {
                       "op": "remove",

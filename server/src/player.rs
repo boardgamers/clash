@@ -206,7 +206,9 @@ impl Player {
             civilization: self.civilization.name,
             active_leader: self.active_leader,
             available_leaders: self.available_leaders.into_iter().collect(),
-            advances: self.advances.into_iter().collect(),
+            advances: self.advances.into_iter().sorted_by_key(
+                ToString::to_string
+            ).collect(),
             unlocked_special_advance: self.unlocked_special_advances,
             wonders_build: self.wonders_build,
             incident_tokens: self.incident_tokens,
@@ -246,7 +248,9 @@ impl Player {
             advances: self
                 .advances
                 .iter()
-                .sorted()
+                .sorted_by_key(
+                                ToString::to_string
+                            )
                 .collect(),
             unlocked_special_advance: self.unlocked_special_advances.clone(),
             wonders_build: self.wonders_build.clone(),

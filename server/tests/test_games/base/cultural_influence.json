@@ -84,15 +84,15 @@
       ],
       "civilization": "test0",
       "advances": [
+        "Arts",
+        "Dogma",
+        "Engineering",
         "Farming",
         "Mining",
-        "Engineering",
-        "Tactics",
         "Myths",
-        "Arts",
-        "Voting",
         "Nationalism",
-        "Dogma"
+        "Tactics",
+        "Voting"
       ],
       "incident_tokens": 2,
       "wonder_cards": [

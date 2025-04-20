@@ -85,12 +85,12 @@
       ],
       "civilization": "test0",
       "advances": [
-        "Farming",
-        "Mining",
-        "Tactics",
+        "Arts",
         "Bartering",
         "Currency",
-        "Arts"
+        "Farming",
+        "Mining",
+        "Tactics"
       ],
       "incident_tokens": 1,
       "action_cards": [

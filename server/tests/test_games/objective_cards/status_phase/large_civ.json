@@ -117,7 +117,7 @@
       ],
       "civilization": "test0",
       "advances": [
-        "Civil Liberties",
+        "CivilLiberties",
         "Draft",
         "Engineering",
         "Farming",
@@ -126,7 +126,7 @@
         "Mining",
         "Roads",
         "Sanitation",
-        "Separation of Power",
+        "SeparationOfPower",
         "Voting",
         "Writing"
       ],

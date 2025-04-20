@@ -128,9 +128,9 @@
       ],
       "civilization": "test1",
       "advances": [
+        "Arts",
         "Farming",
-        "Mining",
-        "Arts"
+        "Mining"
       ],
       "incident_tokens": 3,
       "next_unit_id": 2,

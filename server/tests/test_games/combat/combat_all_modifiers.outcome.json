@@ -83,7 +83,7 @@
           ]
         },
         "origin": {
-          "Advance": "Steel Weapons"
+          "Advance": "SteelWeapons"
         }
       }
     }
@@ -180,7 +180,7 @@
         "Farming",
         "Mining",
         "Siegecraft",
-        "Steel Weapons",
+        "SteelWeapons",
         "Tactics"
       ],
       "incident_tokens": 1,
@@ -235,7 +235,7 @@
         "Fanaticism",
         "Farming",
         "Mining",
-        "Steel Weapons",
+        "SteelWeapons",
         "Tactics"
       ],
       "incident_tokens": 3,

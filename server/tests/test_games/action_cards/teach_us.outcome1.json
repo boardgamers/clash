@@ -95,8 +95,8 @@
       "civilization": "test0",
       "advances": [
         "Farming",
-        "Storage",
         "Mining",
+        "Storage",
         "Tactics"
       ],
       "incident_tokens": 2,
@@ -124,11 +124,11 @@
       },
       "civilization": "test1",
       "advances": [
+        "Fanaticism",
         "Farming",
-        "Storage",
         "Mining",
-        "Tactics",
-        "Fanaticism"
+        "Storage",
+        "Tactics"
       ],
       "incident_tokens": 3,
       "next_unit_id": 2
@@ -323,11 +323,6 @@
                       "value": [
                         35
                       ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/advances/1",
-                      "value": "Mining"
                     },
                     {
                       "op": "replace",

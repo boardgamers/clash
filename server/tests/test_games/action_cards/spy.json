@@ -129,11 +129,11 @@
       ],
       "civilization": "test1",
       "advances": [
+        "Fanaticism",
         "Farming",
-        "Storage",
         "Mining",
-        "Tactics",
-        "Fanaticism"
+        "Storage",
+        "Tactics"
       ],
       "incident_tokens": 3,
       "wonder_cards": [

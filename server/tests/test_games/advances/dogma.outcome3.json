@@ -110,13 +110,13 @@
       ],
       "advances": [
         "Farming",
-        "Storage",
-        "Mining",
         "Fishing",
-        "Writing",
+        "FreeEconomy",
         "FreeEducation",
+        "Mining",
+        "Storage",
         "Voting",
-        "FreeEconomy"
+        "Writing"
       ],
       "incident_tokens": 3,
       "wonder_cards": [
@@ -178,13 +178,13 @@
         "Kleopatra"
       ],
       "advances": [
-        "Farming",
-        "Mining",
-        "Fishing",
-        "Myths",
-        "StateReligion",
         "Dogma",
-        "Fanaticism"
+        "Fanaticism",
+        "Farming",
+        "Fishing",
+        "Mining",
+        "Myths",
+        "StateReligion"
       ],
       "incident_tokens": 1,
       "next_unit_id": 2,
@@ -307,6 +307,31 @@
                       "op": "replace",
                       "path": "/actions_left",
                       "value": 3
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/advances/0",
+                      "value": "Farming"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/advances/1",
+                      "value": "Fishing"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/advances/2",
+                      "value": "Mining"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/advances/3",
+                      "value": "Myths"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/advances/4",
+                      "value": "StateReligion"
                     },
                     {
                       "op": "remove",
@@ -471,6 +496,31 @@
                           "player": 1
                         }
                       ]
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/advances/1",
+                      "value": "Farming"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/advances/2",
+                      "value": "Fishing"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/advances/3",
+                      "value": "Mining"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/advances/4",
+                      "value": "Myths"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/advances/5",
+                      "value": "StateReligion"
                     },
                     {
                       "op": "remove",

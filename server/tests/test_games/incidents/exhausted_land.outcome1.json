@@ -15,19 +15,19 @@
         "request": {
           "SelectAdvance": {
             "choices": [
-              "Arts",
-              "Bartering",
-              "Engineering",
-              "Fishing",
-              "Husbandry",
-              "Irrigation",
-              "Math",
-              "Myths",
-              "Roads",
-              "Sanitation",
               "Storage",
+              "Irrigation",
+              "Husbandry",
+              "Engineering",
+              "Sanitation",
+              "Roads",
+              "Fishing",
+              "Writing",
               "Tactics",
-              "Writing"
+              "Myths",
+              "Bartering",
+              "Arts",
+              "Math"
             ]
           }
         },

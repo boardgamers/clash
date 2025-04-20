@@ -63,9 +63,9 @@
       "civilization": "test0",
       "advances": [
         "Farming",
-        "Storage",
-        "Mining",
         "Fishing",
+        "Mining",
+        "Storage",
         "Tactics"
       ],
       "incident_tokens": 3,
@@ -111,8 +111,8 @@
       "civilization": "test1",
       "advances": [
         "Farming",
-        "Mining",
-        "Fishing"
+        "Fishing",
+        "Mining"
       ],
       "incident_tokens": 2,
       "action_cards": [

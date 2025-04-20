@@ -50,8 +50,8 @@ fn basic_actions() {
         vec![
             advance::Advance::Farming,
             advance::Advance::Mining,
-            advance::Advance::Math,
             advance::Advance::Engineering,
+            advance::Advance::Math,
         ],
         player
             .advances

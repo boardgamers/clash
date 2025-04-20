@@ -524,7 +524,7 @@
     ],
     [
       "Player1 built a Temple at C1 for 2 gold",
-      "StateReligion reduced the food cost to 0"
+      "State Religion reduced the food cost to 0"
     ]
   ],
   "undo_limit": 2,

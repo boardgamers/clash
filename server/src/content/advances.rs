@@ -207,7 +207,7 @@ mod tests {
         assert!(!groups.is_empty());
         assert_eq!(groups.len(), 12);
         assert_eq!(groups[0].name, "Agriculture");
-        assert_eq!(groups[5].name, "Warfare");
+        assert_eq!(groups[5].name, "Spirituality");
     }
 
     #[test]

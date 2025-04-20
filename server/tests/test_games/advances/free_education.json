@@ -114,13 +114,13 @@
       ],
       "advances": [
         "Farming",
-        "Storage",
-        "Mining",
-        "Writing",
+        "FreeEconomy",
         "FreeEducation",
+        "Mining",
+        "Storage",
         "Tactics",
         "Voting",
-        "FreeEconomy"
+        "Writing"
       ],
       "incident_tokens": 2,
       "wonder_cards": [
