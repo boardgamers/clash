@@ -781,24 +781,7 @@ impl Player {
         let mut cost_info = CostInfo::new(self, value.clone());
         let mut can_avoid_activate = false;
         match execute {
-            CostTrigger::Execute(execute) => event.trigger_with_minimal_modifiers(
-                &cost_info,
-                info,
-                details,
-                &mut (),
-                |i| {
-                    if can_avoid_activate && i.activate_city {
-                        return false;
-                    }
-                    if !i.activate_city {
-                        can_avoid_activate = true;
-                    }
-
-                    i.cost.is_valid_payment(execute)
-                },
-                |i, m| i.cost.modifiers = m,
-            ),
-            CostTrigger::WithModifiers => {
+            CostTrigger::WithModifiers | CostTrigger::Execute(_) => {
                 let m = event.trigger_with_modifiers(&mut cost_info, info, details, &mut (), true);
                 cost_info.cost.modifiers = m;
                 cost_info

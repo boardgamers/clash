@@ -159,45 +159,6 @@ where
         }
         modifiers
     }
-
-    pub(crate) fn trigger_with_minimal_modifiers(
-        &self,
-        value: &T,
-        info: &U,
-        details: &V,
-        extra_value: &mut W,
-        mut is_ok: impl FnMut(&T) -> bool,
-        set_modifiers: impl Fn(&mut T, Vec<EventOrigin>),
-    ) -> T
-    where
-        T: Clone + PartialEq,
-    {
-        let mut initial_value = value.clone();
-        let initial_modifiers =
-            self.trigger_with_modifiers(&mut initial_value, info, details, extra_value, );
-        // to see what's possible
-        is_ok(&initial_value);
-
-        initial_modifiers
-            .iter()
-            .powerset()
-            .find_map(|try_modifiers| {
-                let mut v = value.clone();
-                let mut exclude = initial_modifiers.clone();
-                exclude.retain(|origin| !try_modifiers.contains(&origin));
-                let m = self.trigger_with_exclude(&mut v, info, details, extra_value, &exclude);
-                if is_ok(&v) {
-                    set_modifiers(&mut v, m);
-                    Some(v)
-                } else {
-                    None
-                }
-            })
-            .unwrap_or_else(|| {
-                set_modifiers(&mut initial_value, initial_modifiers);
-                initial_value
-            })
-    }
 }
 
 pub struct Event<T, U = (), V = (), W = ()> {
@@ -278,52 +239,5 @@ mod tests {
         let modifiers = event.trigger_with_modifiers(&mut item, &addend, &0, &mut (), );
         assert_eq!(3, item);
         assert_eq!(vec![EventOrigin::Advance(add_constant)], modifiers);
-    }
-
-    #[test]
-    fn find_minimal_modifiers() {
-        #[derive(Clone, PartialEq)]
-        struct Info {
-            pub value: i32,
-            pub modifiers: Vec<EventOrigin>,
-        }
-
-        let a = Advance::Arts;
-        let b = Advance::Bartering;
-        let c = Advance::Cartography;
-
-        let mut event = EventMut::new("test");
-        event.add_listener_mut(
-            |value: &mut Info, (), (), ()| value.value += 1,
-            0,
-            EventOrigin::Advance(a),
-        );
-        event.add_listener_mut(
-            |value: &mut Info, (), (), ()| value.value += 2,
-            1,
-            EventOrigin::Advance(b),
-        );
-        event.add_listener_mut(
-            |value: &mut Info, (), (), ()| value.value += 4,
-            2,
-            EventOrigin::Advance(c),
-        );
-
-        assert_eq!(
-            vec![EventOrigin::Advance(c), EventOrigin::Advance(a)],
-            event
-                .trigger_with_minimal_modifiers(
-                    &Info {
-                        value: 0,
-                        modifiers: Vec::new(),
-                    },
-                    &(),
-                    &(),
-                    &mut (),
-                    |i| i.value == 5,
-                    |v, m| v.modifiers = m
-                )
-                .modifiers
-        );
     }
 }
