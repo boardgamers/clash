@@ -37,7 +37,7 @@ impl HasCountSelectableObject for ResourcePayment {
 }
 
 #[derive(PartialEq, Eq, Debug, Clone)]
-pub struct Payment<T> {
+pub struct Payment<T: Clone> {
     pub value: T,
     pub name: String,
     pub cost: PaymentOptions,
@@ -46,7 +46,7 @@ pub struct Payment<T> {
     pub current: Vec<ResourcePayment>,
 }
 
-impl<T> Payment<T> {
+impl<T> Payment<T> where T : Clone {
     #[must_use]
     pub fn new(
         cost: &PaymentOptions,
@@ -108,7 +108,7 @@ pub fn new_gain(options: &PaymentOptions, name: &str) -> Payment<String> {
     Payment::new(options, &available, name.to_string(), name, false)
 }
 
-pub fn payment_dialog<T>(
+pub fn payment_dialog<T: Clone>(
     rc: &RenderContext,
     payment: &Payment<T>,
     may_cancel: bool,
@@ -124,7 +124,7 @@ pub fn payment_dialog<T>(
     )
 }
 
-pub fn multi_payment_dialog<T>(
+pub fn multi_payment_dialog<T: Clone>(
     rc: &RenderContext,
     payments: &[Payment<T>],
     to_dialog: impl FnOnce(Vec<Payment<T>>) -> ActiveDialog,
@@ -217,7 +217,7 @@ pub fn multi_payment_dialog<T>(
     StateUpdate::None
 }
 
-fn ok_tooltip<T>(payments: &[Payment<T>], mut available: ResourcePile) -> OkTooltip {
+fn ok_tooltip<T: Clone>(payments: &[Payment<T>], mut available: ResourcePile) -> OkTooltip {
     let mut valid: Vec<String> = vec![];
     let mut invalid: Vec<String> = vec![];
 
@@ -250,7 +250,7 @@ fn ok_tooltip<T>(payments: &[Payment<T>], mut available: ResourcePile) -> OkTool
     }
 }
 
-fn replace_updated_payment<T>(payment: &Payment<T>, all: &[Payment<T>]) -> Vec<Payment<T>> {
+fn replace_updated_payment<T: Clone>(payment: &Payment<T>, all: &[Payment<T>]) -> Vec<Payment<T>> {
     all.iter()
         .map(|e| {
             if e.name == payment.name {
@@ -284,12 +284,12 @@ fn resource_payment(options: &PaymentOptions, available: &ResourcePile) -> Vec<R
     resources
 }
 
-pub fn plus<T>(mut payment: Payment<T>, t: ResourceType) -> Payment<T> {
+pub fn plus<T: Clone>(mut payment: Payment<T>, t: ResourceType) -> Payment<T> {
     payment.get_mut(t).selectable.current += 1;
     payment
 }
 
-pub fn minus<T>(mut payment: Payment<T>, t: ResourceType) -> Payment<T> {
+pub fn minus<T: Clone>(mut payment: Payment<T>, t: ResourceType) -> Payment<T> {
     payment.get_mut(t).selectable.current -= 1;
     payment
 }

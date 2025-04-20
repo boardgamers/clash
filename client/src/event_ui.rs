@@ -59,7 +59,7 @@ pub fn custom_phase_event_origin(rc: &RenderContext) -> EventOrigin {
         .clone()
 }
 
-pub fn pay_help<T>(rc: &RenderContext, p: &Payment<T>) -> Vec<String> {
+pub fn pay_help<T: Clone>(rc: &RenderContext, p: &Payment<T>) -> Vec<String> {
     let mut result = vec!["Pay resources".to_string()];
     for o in p.cost.modifiers.clone() {
         result.extend(event_help(rc, &o));
