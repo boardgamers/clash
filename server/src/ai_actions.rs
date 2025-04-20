@@ -28,7 +28,7 @@ use crate::resource_pile::ResourcePile;
 use crate::status_phase::{government_advances, ChangeGovernment, ChangeGovernmentType};
 use crate::unit::{UnitType, Units};
 use itertools::Itertools;
-use prehash::{new_prehashed_map, DefaultPrehasher, PrehashedMap, Prehasher};
+use rustc_hash::FxHashMap;
 use std::vec;
 //todo
 //nicht nur maximale anzahl rekrutieren
@@ -37,15 +37,13 @@ use std::vec;
 //militär
 
 struct PaymentCache {
-    options: PrehashedMap<PaymentOptions, PrehashedMap<ResourcePile, Option<ResourcePile>>>,
-    prehasher: DefaultPrehasher,
+    options: FxHashMap<PaymentOptions, FxHashMap<ResourcePile, Option<ResourcePile>>>,
 }
 
 impl PaymentCache {
     fn new() -> Self {
         PaymentCache {
-            options: new_prehashed_map(),
-            prehasher: DefaultPrehasher::new()
+            options: FxHashMap::default(),
         }
     }
 }
@@ -266,9 +264,9 @@ fn try_payment(ai_actions: &mut AiActions, o: &PaymentOptions, p: &Player) -> Op
 
     ai_actions.payment_cache
         .options
-        .entry(ai_actions.payment_cache.prehasher.prehash(o.clone()))
-        .or_insert(new_prehashed_map())
-        .entry(ai_actions.payment_cache.prehasher.prehash(max))
+        .entry(o.clone())
+        .or_insert(FxHashMap::default())
+        .entry(max)
         .or_insert_with_key(|available| o.first_valid_payment(available))
         .clone()
 }

@@ -965,6 +965,7 @@ dependencies = [
  "pathfinding",
  "prehash",
  "readonly",
+ "rustc-hash",
  "serde",
  "serde-wasm-bindgen",
  "serde_json",
