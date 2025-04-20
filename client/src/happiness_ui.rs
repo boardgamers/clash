@@ -146,7 +146,11 @@ pub fn increase_happiness_cost(
     steps: u8,
     action_type: &PlayingActionType,
 ) -> Option<CostInfo> {
-    let total_cost = happiness_cost(player, steps * city.size() as u8, CostTrigger::WithModifiers);
+    let total_cost = happiness_cost(
+        player,
+        steps * city.size() as u8,
+        CostTrigger::WithModifiers,
+    );
     let max_steps = 2 - city.mood_state.clone() as u8;
     (total_cost
         .cost

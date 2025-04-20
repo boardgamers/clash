@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::action_card::{discard_action_card, ActionCard, ActionCardBuilder, CivilCardTarget};
-use crate::advance::{gain_advance_without_payment, Advance};
+use crate::action_card::{ActionCard, ActionCardBuilder, CivilCardTarget, discard_action_card};
+use crate::advance::{Advance, gain_advance_without_payment};
 use crate::card::HandCard;
 use crate::content::action_cards::{get_action_card, inspiration};
 use crate::content::advances;
@@ -10,11 +10,11 @@ use crate::content::persistent_events::{
     AdvanceRequest, HandCardsRequest, PaymentRequest, PlayerRequest, PositionRequest,
 };
 use crate::content::tactics_cards::{
-    archers, defensive_formation, flanking, high_ground, high_morale, surprise, wedge_formation,
-    TacticsCardFactory,
+    TacticsCardFactory, archers, defensive_formation, flanking, high_ground, high_morale, surprise,
+    wedge_formation,
 };
 use crate::game::Game;
-use crate::player::{add_unit, Player};
+use crate::player::{Player, add_unit};
 use crate::playing_actions::ActionCost;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
@@ -53,7 +53,7 @@ fn synergies(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |game, p, _| {
             Some(AdvanceRequest::new(categories_with_2_affordable_advances(
                 game.player(p),
-                game
+                game,
             )))
         },
         |game, sel, i| {

@@ -14,6 +14,7 @@ use crate::log::{
 use crate::movement::MoveState;
 use crate::objective_card::present_instant_objective_cards;
 use crate::pirates::get_pirates_player;
+use crate::player::CostTrigger;
 use crate::player_events::{
     PersistentEvent, PersistentEventInfo, PersistentEvents, PlayerEvents, TransientEvents,
 };
@@ -31,7 +32,6 @@ use crate::{
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::vec;
-use crate::player::CostTrigger;
 
 pub struct Game {
     pub state: GameState,

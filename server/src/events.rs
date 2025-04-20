@@ -224,7 +224,13 @@ mod tests {
         let mut item = 0;
         let addend = 2;
         let multiplier = 3;
-        let modifiers = event.trigger_with_modifiers(&mut item, &addend, &multiplier, &mut (), CostTrigger::WithModifiers);
+        let modifiers = event.trigger_with_modifiers(
+            &mut item,
+            &addend,
+            &multiplier,
+            &mut (),
+            CostTrigger::WithModifiers,
+        );
         assert_eq!(6, item);
         assert_eq!(
             vec![
@@ -237,7 +243,13 @@ mod tests {
         event.remove_listener_mut_by_key(&EventOrigin::Advance(multiply_value));
         let mut item = 0;
         let addend = 3;
-        let modifiers = event.trigger_with_modifiers(&mut item, &addend, &0, &mut (), CostTrigger::WithModifiers);
+        let modifiers = event.trigger_with_modifiers(
+            &mut item,
+            &addend,
+            &0,
+            &mut (),
+            CostTrigger::WithModifiers,
+        );
         assert_eq!(3, item);
         assert_eq!(vec![EventOrigin::Advance(add_constant)], modifiers);
     }

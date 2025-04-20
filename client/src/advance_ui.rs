@@ -31,7 +31,9 @@ pub enum AdvanceState {
 
 fn new_advance_payment(rc: &RenderContext, a: &AdvanceInfo) -> Payment<Advance> {
     rc.new_payment(
-        &rc.shown_player.advance_cost(a.advance, CostTrigger::WithModifiers).cost,
+        &rc.shown_player
+            .advance_cost(a.advance, CostTrigger::WithModifiers)
+            .cost,
         a.advance,
         &a.name,
         false,
@@ -160,7 +162,9 @@ fn description(rc: &RenderContext, a: &AdvanceInfo) -> Vec<String> {
     add_tooltip_description(&mut parts, &a.description);
     parts.push(format!(
         "Cost: {}",
-        rc.shown_player.advance_cost(a.advance, CostTrigger::WithModifiers).cost
+        rc.shown_player
+            .advance_cost(a.advance, CostTrigger::WithModifiers)
+            .cost
     ));
     if let Some(r) = &a.required {
         parts.push(format!("Required: {r}"));

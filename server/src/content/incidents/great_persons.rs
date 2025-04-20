@@ -1,9 +1,9 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::action_card::{ActionCard, ActionCardBuilder, gain_action_card_from_pile};
+use crate::action_card::{gain_action_card_from_pile, ActionCard, ActionCardBuilder};
 use crate::advance::gain_advance_without_payment;
 use crate::city::MoodState;
 use crate::city_pieces::Building;
-use crate::construct::{Construct, construct};
+use crate::construct::{construct, Construct};
 use crate::content::advances;
 use crate::content::advances::{economy, get_governments_uncached};
 use crate::content::incidents::great_builders::{great_architect, great_engineer};
@@ -14,7 +14,7 @@ use crate::content::persistent_events::{AdvanceRequest, PaymentRequest, Position
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, IncidentBuilder};
 use crate::payment::PaymentOptions;
-use crate::player::{CostTrigger, Player};
+use crate::player::Player;
 use crate::player_events::IncidentTarget;
 use crate::playing_actions::ActionCost;
 use crate::resource::ResourceType;

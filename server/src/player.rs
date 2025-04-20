@@ -627,11 +627,10 @@ impl Player {
     pub fn advance_cost(&self, advance: Advance, execute: CostTrigger) -> CostInfo {
         self.trigger_cost_event(
             |e| &e.advance_cost,
-            &PaymentOptions::sum(ADVANCE_COST, &[
-                ResourceType::Ideas,
-                ResourceType::Food,
-                ResourceType::Gold,
-            ]),
+            &PaymentOptions::sum(
+                ADVANCE_COST,
+                &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
+            ),
             &advance,
             &(),
             execute,
