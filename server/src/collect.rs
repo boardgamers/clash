@@ -433,6 +433,15 @@ pub(crate) fn reset_collect_within_range_for_all(game: &mut Game, pos: Position)
     }
 }
 
+pub(crate) fn reset_collect_within_range_for_all_except(game: &mut Game, pos: Position, player: usize) {
+    for p in &mut game.players {
+        if p.index == player {
+            continue;
+        }
+        reset_collect_within_range(p, pos);
+    }
+}
+
 pub(crate) fn reset_collection_stats(p: &mut Player) {
     for c in &mut p.cities {
         c.possible_collections.clear();

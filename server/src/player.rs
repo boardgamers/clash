@@ -1,6 +1,6 @@
 use crate::advance::Advance;
 use crate::city_pieces::{DestroyedStructures, DestroyedStructuresData};
-use crate::collect::reset_collect_within_range_for_all;
+use crate::collect::{reset_collect_within_range_for_all, reset_collect_within_range_for_all_except};
 use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::content::builtin;
 use crate::events::{Event, EventOrigin};
@@ -809,7 +809,7 @@ pub fn add_unit(player: usize, position: Position, unit_type: UnitType, game: &m
     let unit = Unit::new(player, position, unit_type, p.next_unit_id);
     p.units.push(unit);
     p.next_unit_id += 1;
-    reset_collect_within_range_for_all(game, position);
+    reset_collect_within_range_for_all_except(game, position, player);
 }
 
 #[derive(Serialize, Deserialize, PartialEq)]
