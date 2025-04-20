@@ -90,6 +90,12 @@ impl PartialEq for Player {
     }
 }
 
+pub enum CostTrigger {
+    Execute(ResourcePile),
+    WithModifiers,
+    NoModifiers,
+}
+
 impl Player {
     ///
     ///
@@ -606,12 +612,7 @@ impl Player {
     }
 
     #[must_use]
-    pub fn building_cost(
-        &self,
-        game: &Game,
-        building: Building,
-        execute: Option<&ResourcePile>,
-    ) -> CostInfo {
+    pub fn building_cost(&self, game: &Game, building: Building, execute: CostTrigger) -> CostInfo {
         self.trigger_cost_event(
             |e| &e.construct_cost,
             &PaymentOptions::resources(BUILDING_COST),
@@ -622,13 +623,14 @@ impl Player {
     }
 
     #[must_use]
-    pub fn advance_cost(&self, advance: Advance, execute: Option<&ResourcePile>) -> CostInfo {
+    pub fn advance_cost(&self, advance: Advance, execute: CostTrigger) -> CostInfo {
         self.trigger_cost_event(
             |e| &e.advance_cost,
-            &PaymentOptions::sum(
-                ADVANCE_COST,
-                &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
-            ),
+            &PaymentOptions::sum(ADVANCE_COST, &[
+                ResourceType::Ideas,
+                ResourceType::Food,
+                ResourceType::Gold,
+            ]),
             &advance,
             &(),
             execute,
@@ -773,13 +775,13 @@ impl Player {
         value: &PaymentOptions,
         info: &U,
         details: &V,
-        execute: Option<&ResourcePile>,
+        execute: CostTrigger,
     ) -> CostInfo {
         let event = get_event(&self.events.transient).get();
         let mut cost_info = CostInfo::new(self, value.clone());
         let mut can_avoid_activate = false;
-        if let Some(execute) = execute {
-            event.trigger_with_minimal_modifiers(
+        match execute {
+            CostTrigger::Execute(execute) => event.trigger_with_minimal_modifiers(
                 &cost_info,
                 info,
                 details,
@@ -795,11 +797,15 @@ impl Player {
                     i.cost.is_valid_payment(execute)
                 },
                 |i, m| i.cost.modifiers = m,
-            )
-        } else {
-            let m = event.trigger_with_modifiers(&mut cost_info, info, details, &mut ());
-            cost_info.cost.modifiers = m;
-            cost_info
+            ),
+            CostTrigger::WithModifiers => {
+                let m = event.trigger_with_modifiers(&mut cost_info, info, details, &mut (), true);
+                cost_info.cost.modifiers = m;
+                cost_info
+            }
+            CostTrigger::NoModifiers => {
+                event.trigger(&mut cost_info, info, details, &mut ());
+            }
         }
     }
 }

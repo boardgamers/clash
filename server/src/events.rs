@@ -120,8 +120,14 @@ where
         info: &U,
         details: &V,
         extra_value: &mut W,
+        show_modifiers: bool,
     ) -> Vec<EventOrigin> {
-        self.trigger_with_exclude(value, info, details, extra_value, &[])
+        if show_modifiers {
+            self.trigger_with_exclude(value, info, details, extra_value, &[])
+        } else {
+            self.trigger(value, info, details, extra_value);
+            vec![]
+        }
     }
 
     pub(crate) fn trigger(&self, value: &mut T, info: &U, details: &V, extra_value: &mut W) {
@@ -168,7 +174,7 @@ where
     {
         let mut initial_value = value.clone();
         let initial_modifiers =
-            self.trigger_with_modifiers(&mut initial_value, info, details, extra_value);
+            self.trigger_with_modifiers(&mut initial_value, info, details, extra_value, );
         // to see what's possible
         is_ok(&initial_value);
 
@@ -256,7 +262,7 @@ mod tests {
         let mut item = 0;
         let addend = 2;
         let multiplier = 3;
-        let modifiers = event.trigger_with_modifiers(&mut item, &addend, &multiplier, &mut ());
+        let modifiers = event.trigger_with_modifiers(&mut item, &addend, &multiplier, &mut (), );
         assert_eq!(6, item);
         assert_eq!(
             vec![
@@ -269,7 +275,7 @@ mod tests {
         event.remove_listener_mut_by_key(&EventOrigin::Advance(multiply_value));
         let mut item = 0;
         let addend = 3;
-        let modifiers = event.trigger_with_modifiers(&mut item, &addend, &0, &mut ());
+        let modifiers = event.trigger_with_modifiers(&mut item, &addend, &0, &mut (), );
         assert_eq!(3, item);
         assert_eq!(vec![EventOrigin::Advance(add_constant)], modifiers);
     }

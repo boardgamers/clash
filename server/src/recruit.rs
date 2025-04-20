@@ -3,7 +3,7 @@ use crate::consts::STACK_LIMIT;
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
 use crate::payment::PaymentOptions;
-use crate::player::{Player, add_unit};
+use crate::player::{Player, add_unit, CostTrigger};
 use crate::player_events::CostInfo;
 use crate::playing_actions::Recruit;
 use crate::position::Position;
@@ -126,7 +126,7 @@ pub fn recruit_cost(
     city_position: Position,
     leader_name: Option<&String>,
     replaced_units: &[u32],
-    execute: Option<&ResourcePile>,
+    execute: CostTrigger,
 ) -> Result<CostInfo, String> {
     let mut require_replace = units.clone();
     for t in player.available_units().to_vec() {
@@ -154,7 +154,7 @@ pub fn recruit_cost_without_replaced(
     units: &Units,
     city_position: Position,
     leader_name: Option<&String>,
-    execute: Option<&ResourcePile>,
+    execute: CostTrigger,
 ) -> Result<CostInfo, String> {
     let city = player.get_city(city_position);
     if (units.cavalry > 0 || units.elephants > 0) && city.pieces.market.is_none() {

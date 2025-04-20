@@ -2,7 +2,7 @@ use crate::city::MoodState;
 use crate::content::custom_actions::CustomActionType;
 use crate::game::Game;
 use crate::payment::PaymentOptions;
-use crate::player::Player;
+use crate::player::{CostTrigger, Player};
 use crate::player_events::CostInfo;
 use crate::playing_actions::{PlayingActionType, base_or_custom_available};
 use crate::position::Position;
@@ -53,7 +53,7 @@ pub(crate) fn increase_happiness(
 pub fn happiness_cost(
     p: &Player,
     city_size_steps: u8, // for each city: size * steps in that city
-    execute: Option<&ResourcePile>,
+    execute: CostTrigger,
 ) -> CostInfo {
     let payment_options = PaymentOptions::sum(city_size_steps, &[ResourceType::MoodTokens]);
     p.trigger_cost_event(|e| &e.happiness_cost, &payment_options, &(), &(), execute)

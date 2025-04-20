@@ -209,6 +209,7 @@ pub fn possible_resource_collections(
     city_pos: Position,
     player_index: usize,
     used: &[PositionCollection],
+    show_modifiers: bool,
 ) -> CollectInfo {
     let set = [
         (Mountain, HashSet::from([ResourcePile::ore(1)])),
@@ -223,7 +224,7 @@ pub fn possible_resource_collections(
         .terrain_collect_options;
     let modifiers = event
         .get()
-        .trigger_with_modifiers(&mut terrain_options, &(), &(), &mut ());
+        .trigger_with_modifiers(&mut terrain_options, &(), &(), &mut (), show_modifiers);
 
     let collect_options = city_pos
         .neighbors()
