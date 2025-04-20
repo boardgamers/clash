@@ -3,17 +3,21 @@ use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::fmt::Display;
 use std::ops::RangeInclusive;
+use std::sync::LazyLock;
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+use std::sync::Mutex;
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub enum PaymentConversionType {
     Unlimited,
     MayOverpay(u32),
     MayNotOverpay(u32),
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub struct PaymentConversion {
     pub from: Vec<ResourcePile>, // alternatives
     pub to: ResourcePile,
@@ -46,7 +50,22 @@ impl PaymentConversion {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+struct PaymentCache {
+    options: HashMap<PaymentOptions, HashMap<ResourcePile, Option<ResourcePile>>>,
+}
+
+impl PaymentCache {
+    fn new() -> Self {
+        PaymentCache {
+            options: HashMap::new(),
+        }
+    }
+}
+
+static PAYMENT_CACHE: LazyLock<Mutex<PaymentCache>> =
+    LazyLock::new(|| Mutex::new(PaymentCache::new()));
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub struct PaymentOptions {
     pub default: ResourcePile,
     #[serde(default)]
@@ -60,6 +79,29 @@ pub struct PaymentOptions {
 impl PaymentOptions {
     #[must_use]
     pub fn first_valid_payment(&self, available: &ResourcePile) -> Option<ResourcePile> {
+        let sum = self.default.amount();
+
+        let mut max = available.clone();
+        for r in ResourceType::all() {
+            let t = max.get_mut(&r);
+            if *t > sum {
+                *t = sum;
+            }
+        }
+
+        PAYMENT_CACHE
+            .lock()
+            .expect("get cache")
+            .options
+            .entry(self.clone())
+            .or_insert(HashMap::new())
+            .entry(max)
+            .or_insert_with_key(|available| self.first_valid_payment_uncached(available))
+            .clone()
+    }
+
+    #[must_use]
+    pub fn first_valid_payment_uncached(&self, available: &ResourcePile) -> Option<ResourcePile> {
         let discount_left = self
             .conversions
             .iter()
@@ -144,10 +186,10 @@ impl PaymentOptions {
 
     #[must_use]
     pub(crate) fn tokens(cost: u32) -> Self {
-        Self::sum(
-            cost,
-            &[ResourceType::MoodTokens, ResourceType::CultureTokens],
-        )
+        Self::sum(cost, &[
+            ResourceType::MoodTokens,
+            ResourceType::CultureTokens,
+        ])
     }
 
     #[must_use]
@@ -334,8 +376,8 @@ mod tests {
         };
         let available = ResourcePile::wood(1) + ResourcePile::ore(1);
         assert_eq!(
+            cost.first_valid_payment(&available),
             Some(ResourcePile::wood(1)),
-            cost.first_valid_payment(&available)
         );
     }
 

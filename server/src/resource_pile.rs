@@ -76,6 +76,19 @@ impl ResourcePile {
     }
 
     #[must_use]
+    pub fn get_mut(&mut self, resource_type: &ResourceType) -> &mut u32 {
+        match resource_type {
+            ResourceType::Food => &mut self.food,
+            ResourceType::Wood => &mut self.wood,
+            ResourceType::Ore => &mut self.ore,
+            ResourceType::Ideas => &mut self.ideas,
+            ResourceType::Gold => &mut self.gold,
+            ResourceType::MoodTokens => &mut self.mood_tokens,
+            ResourceType::CultureTokens => &mut self.culture_tokens,
+        }
+    }
+
+    #[must_use]
     pub fn has_at_least(&self, other: &ResourcePile) -> bool {
         self.has_at_least_times(other, 1)
     }
