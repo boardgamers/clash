@@ -1,7 +1,7 @@
+use crate::cache;
 use crate::city::{City, MoodState};
 use crate::city_pieces::Building;
 use crate::consts::MAX_CITY_PIECES;
-use crate::content::advances;
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
 use crate::map::Terrain;
@@ -49,12 +49,7 @@ pub fn can_construct(
     player: &Player,
     game: &Game,
 ) -> Result<CostInfo, String> {
-    // todo cache this
-    let advance = advances::get_all()
-        .iter()
-        .find(|a| a.unlocked_building == Some(building))
-        .expect("Advance not found")
-        .advance;
+    let advance = cache::get().get_building_advance(building);
     if !player.has_advance(advance) {
         return Err(format!("Missing advance: {advance}"));
     }
