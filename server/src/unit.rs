@@ -674,8 +674,9 @@ pub(crate) fn choose_carried_units_to_remove() -> Builtin {
 
 pub fn set_unit_position(player: usize, unit_id: u32, position: Position, game: &mut Game) {
     let unit = game.player_mut(player).get_unit_mut(unit_id);
-    reset_collect_within_range_for_all_except(game, unit.position, player);
+    let old = unit.position;
     unit.position = position;
+    reset_collect_within_range_for_all_except(game, old, player);
     reset_collect_within_range_for_all_except(game, position, player);
 }
 

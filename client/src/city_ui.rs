@@ -140,10 +140,11 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
                 Err(e) => format!(" ({e})"),
             };
             let tooltip = format!(
-                "Built {}{}{}",
+                "Built {}{}{} - {}",
                 name,
                 pos.map_or(String::new(), |p| format!(" at {p}")),
-                suffix
+                suffix,
+                b.description(),
             );
             IconAction::new(
                 &rc.assets().buildings[&b],
