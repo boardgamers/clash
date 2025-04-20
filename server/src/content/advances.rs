@@ -12,8 +12,8 @@ pub(crate) mod theocracy;
 pub mod trade_routes;
 pub(crate) mod warfare;
 
-use crate::advance::{Advance, AdvanceBuilder};
 use crate::advance::AdvanceInfo;
+use crate::advance::{Advance, AdvanceBuilder};
 use crate::cache;
 use crate::content::advances::agriculture::agriculture;
 use crate::content::advances::autocracy::autocracy;
@@ -27,8 +27,8 @@ use crate::content::advances::seafaring::seafaring;
 use crate::content::advances::spirituality::spirituality;
 use crate::content::advances::theocracy::theocracy;
 use crate::content::advances::warfare::warfare;
-use std::vec;
 use itertools::Itertools;
+use std::vec;
 
 struct GovernmentInfo {
     name: &'static str,
@@ -174,4 +174,48 @@ pub fn get_government(government: &str) -> &'static AdvanceGroup {
     cache::get().get_government(government).unwrap_or_else(|| {
         panic!("Government {government} not found");
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::content::advances;
+    use super::*;
+    use crate::content::advances::get_governments;
+    use crate::content::advances::get_groups;
+
+    #[test]
+    fn test_get_all() {
+        let all = get_all();
+        assert!(!all.is_empty());
+        let unsorted = all
+            .iter()
+            .map(|a| a.advance)
+            .collect_vec();
+
+        let sorted = unsorted.clone().into_iter().sorted_by_key(
+            |a| *a as usize
+        ).collect_vec();
+        assert_eq!(sorted, unsorted);
+        for advance in all {
+            assert_eq!(get_advance(advance.advance).advance, advance.advance);
+        }
+    }
+
+    #[test]
+    fn test_get_groups() {
+        let groups = get_groups();
+        assert!(!groups.is_empty());
+        assert_eq!(groups.len(), 12);
+        assert_eq!(groups[0].name, "Agriculture");
+        assert_eq!(groups[5].name, "Warfare");
+    }
+
+    #[test]
+    fn test_get_governments() {
+        let governments = get_governments();
+        assert!(!governments.is_empty());
+        assert_eq!(governments.len(), 3);
+        assert_eq!(governments[0].name, "Democracy");
+        assert_eq!(governments[2].name, "Theocracy");
+    }
 }
