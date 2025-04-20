@@ -1,8 +1,8 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
+use crate::ai_collect::invalidate_collect_cache;
 use crate::barbarians::barbarians_bonus;
 use crate::cache;
-use crate::collect::invalidate_collect_cache;
 use crate::combat_listeners::{
     choose_fighter_casualties, combat_stats, offer_retreat, place_settler,
 };

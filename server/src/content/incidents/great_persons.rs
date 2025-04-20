@@ -14,7 +14,7 @@ use crate::content::persistent_events::{AdvanceRequest, PaymentRequest, Position
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, IncidentBuilder};
 use crate::payment::PaymentOptions;
-use crate::player::Player;
+use crate::player::{CostTrigger, Player};
 use crate::player_events::IncidentTarget;
 use crate::playing_actions::ActionCost;
 use crate::resource::ResourceType;
@@ -298,7 +298,9 @@ fn great_prophet() -> ActionCard {
 }
 
 fn temple_cost(game: &Game, player: &Player) -> PaymentOptions {
-    player.building_cost(game, Building::Temple, None).cost
+    player
+        .building_cost(game, Building::Temple, CostTrigger::NoModifiers)
+        .cost
 }
 
 pub(crate) fn great_person_description<S: AsRef<str>>(free_advance_groups: &[S]) -> String {

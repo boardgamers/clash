@@ -1,8 +1,8 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action::Action;
 use crate::action_card::ActionCard;
+use crate::ai_collect::reset_collection_stats;
 use crate::city::City;
-use crate::collect::reset_collection_stats;
 use crate::content::builtin::Builtin;
 use crate::content::effects::{CollectEffect, PermanentEffect};
 use crate::content::incidents::great_diplomat::{DiplomaticRelations, Negotiations};

@@ -13,7 +13,7 @@ use crate::content::tactics_cards::{
     TacticsCardFactory, archers, defensive_formation, flanking, high_ground, high_morale, surprise,
     wedge_formation,
 };
-use crate::player::{Player, add_unit};
+use crate::player::{CostTrigger, Player, add_unit};
 use crate::playing_actions::ActionCost;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
@@ -103,7 +103,7 @@ fn pay_for_advance(b: ActionCardBuilder, priority: i32) -> ActionCardBuilder {
             let p = game.player(player_index);
             let advance = i.selected_advance.expect("advance not found");
             Some(vec![PaymentRequest::new(
-                p.advance_cost(advance, None).cost,
+                p.advance_cost(advance, CostTrigger::Execute).cost,
                 &format!("Pay for {}", advance.info().name),
                 false,
             )])
@@ -136,8 +136,11 @@ fn categories_with_2_affordable_advances(p: &Player) -> Vec<Advance> {
                 .filter(|pair| {
                     let a = pair[0];
                     let b = pair[1];
-                    let mut cost = p.advance_cost(a.advance, None).cost;
-                    cost.default += p.advance_cost(b.advance, None).cost.default;
+                    let mut cost = p.advance_cost(a.advance, CostTrigger::NoModifiers).cost;
+                    cost.default += p
+                        .advance_cost(b.advance, CostTrigger::NoModifiers)
+                        .cost
+                        .default;
                     p.can_afford(&cost)
                         && p.can_advance_free(a.advance)
                         && p.can_advance_free(b.advance)

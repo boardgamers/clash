@@ -7,7 +7,7 @@ use server::action::Action;
 use server::city::{City, MoodState};
 use server::game::Game;
 use server::happiness::{available_happiness_actions, happiness_cost};
-use server::player::Player;
+use server::player::{CostTrigger, Player};
 use server::player_events::CostInfo;
 use server::playing_actions::{IncreaseHappiness, PlayingAction, PlayingActionType};
 use server::position::Position;
@@ -35,7 +35,7 @@ impl IncreaseHappinessConfig {
         new_steps: u8,
         custom: &BaseOrCustomDialog,
     ) -> Option<Payment<String>> {
-        let c = happiness_cost(p, new_steps, None).cost;
+        let c = happiness_cost(p, new_steps, CostTrigger::WithModifiers).cost;
         c.can_afford(&custom.action_type.remaining_resources(p))
             .then_some(Payment::new(
                 &c,
@@ -146,7 +146,7 @@ pub fn increase_happiness_cost(
     steps: u8,
     action_type: &PlayingActionType,
 ) -> Option<CostInfo> {
-    let total_cost = happiness_cost(player, steps * city.size() as u8, None);
+    let total_cost = happiness_cost(player, steps * city.size() as u8, CostTrigger::WithModifiers);
     let max_steps = 2 - city.mood_state.clone() as u8;
     (total_cost
         .cost

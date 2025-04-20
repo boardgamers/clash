@@ -11,7 +11,7 @@ use crate::content::custom_actions::{CustomActionType, CustomEventAction, execut
 use crate::cultural_influence::{InfluenceCultureAttempt, influence_culture_attempt};
 use crate::game::GameState;
 use crate::happiness::increase_happiness;
-use crate::player::Player;
+use crate::player::{CostTrigger, Player};
 use crate::player_events::PlayingActionInfo;
 use crate::recruit::recruit;
 use crate::unit::Units;
@@ -271,7 +271,7 @@ impl PlayingAction {
                     return Err("Cannot advance".to_string());
                 }
                 game.player(player_index)
-                    .advance_cost(advance, Some(&payment))
+                    .advance_cost(advance, CostTrigger::Execute)
                     .pay(game, &payment);
                 gain_advance_without_payment(game, advance, player_index, payment, true);
             }

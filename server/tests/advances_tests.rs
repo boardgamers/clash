@@ -11,6 +11,7 @@ use server::events::EventOrigin;
 use server::game::Game;
 use server::movement::MovementAction::Move;
 use server::movement::{MoveUnits, move_units_destinations};
+use server::player::CostTrigger;
 use server::playing_actions::PlayingAction::{
     Advance, Collect, Construct, Custom, EndTurn, Recruit, WonderCard,
 };
@@ -48,7 +49,7 @@ fn test_sanitation_and_draft() {
                     &units,
                     city_position,
                     None,
-                    None,
+                    CostTrigger::WithModifiers,
                 )
                 .unwrap()
                 .cost;
@@ -743,6 +744,12 @@ fn test_husbandry() {
 }
 
 fn has_husbandry_field(game: &Game) -> bool {
-    let info = possible_resource_collections(game, Position::from_offset("C2"), 0, &[]);
+    let info = possible_resource_collections(
+        game,
+        Position::from_offset("C2"),
+        0,
+        &[],
+        CostTrigger::NoModifiers,
+    );
     info.choices.contains_key(&Position::from_offset("E2"))
 }

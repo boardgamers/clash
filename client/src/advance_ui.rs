@@ -15,7 +15,7 @@ use server::action::Action;
 use server::advance::{Advance, AdvanceInfo, Bonus};
 use server::content::advances;
 use server::game::GameState;
-use server::player::Player;
+use server::player::{CostTrigger, Player};
 use server::playing_actions::PlayingAction;
 use server::unit::UnitType;
 use std::ops::Rem;
@@ -31,7 +31,7 @@ pub enum AdvanceState {
 
 fn new_advance_payment(rc: &RenderContext, a: &AdvanceInfo) -> Payment<Advance> {
     rc.new_payment(
-        &rc.shown_player.advance_cost(a.advance, None).cost,
+        &rc.shown_player.advance_cost(a.advance, CostTrigger::WithModifiers).cost,
         a.advance,
         &a.name,
         false,
@@ -160,7 +160,7 @@ fn description(rc: &RenderContext, a: &AdvanceInfo) -> Vec<String> {
     add_tooltip_description(&mut parts, &a.description);
     parts.push(format!(
         "Cost: {}",
-        rc.shown_player.advance_cost(a.advance, None).cost
+        rc.shown_player.advance_cost(a.advance, CostTrigger::WithModifiers).cost
     ));
     if let Some(r) = &a.required {
         parts.push(format!("Required: {r}"));

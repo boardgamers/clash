@@ -1,7 +1,8 @@
 use crate::action_card::on_play_action_card;
 use crate::advance::on_advance;
+use crate::ai_collect::set_city_collections;
 use crate::city::{MoodState, on_found_city};
-use crate::collect::{on_collect, set_city_collections};
+use crate::collect::on_collect;
 use crate::combat::{
     combat_loop, move_with_possible_combat, on_capture_undefended_position, start_combat,
 };

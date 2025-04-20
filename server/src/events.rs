@@ -49,8 +49,8 @@ use crate::advance::Advance;
 use crate::content::action_cards::get_civil_card;
 use crate::content::incidents;
 use crate::content::tactics_cards::get_tactics_card;
+use crate::player::CostTrigger;
 use incidents::get_incident;
-use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 type Listener<T, U, V, W> = (
@@ -120,9 +120,9 @@ where
         info: &U,
         details: &V,
         extra_value: &mut W,
-        show_modifiers: bool,
+        trigger: CostTrigger,
     ) -> Vec<EventOrigin> {
-        if show_modifiers {
+        if trigger == CostTrigger::WithModifiers {
             self.trigger_with_exclude(value, info, details, extra_value, &[])
         } else {
             self.trigger(value, info, details, extra_value);
@@ -194,6 +194,7 @@ impl<T, U, V, W> Event<T, U, V, W> {
 mod tests {
     use super::{EventMut, EventOrigin};
     use crate::advance::Advance;
+    use crate::player::CostTrigger;
 
     #[test]
     fn mutable_event() {
@@ -223,7 +224,7 @@ mod tests {
         let mut item = 0;
         let addend = 2;
         let multiplier = 3;
-        let modifiers = event.trigger_with_modifiers(&mut item, &addend, &multiplier, &mut (), );
+        let modifiers = event.trigger_with_modifiers(&mut item, &addend, &multiplier, &mut (), CostTrigger::WithModifiers);
         assert_eq!(6, item);
         assert_eq!(
             vec![
@@ -236,7 +237,7 @@ mod tests {
         event.remove_listener_mut_by_key(&EventOrigin::Advance(multiply_value));
         let mut item = 0;
         let addend = 3;
-        let modifiers = event.trigger_with_modifiers(&mut item, &addend, &0, &mut (), );
+        let modifiers = event.trigger_with_modifiers(&mut item, &addend, &0, &mut (), CostTrigger::WithModifiers);
         assert_eq!(3, item);
         assert_eq!(vec![EventOrigin::Advance(add_constant)], modifiers);
     }

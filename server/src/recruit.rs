@@ -3,11 +3,10 @@ use crate::consts::STACK_LIMIT;
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
 use crate::payment::PaymentOptions;
-use crate::player::{Player, add_unit, CostTrigger};
+use crate::player::{CostTrigger, Player, add_unit};
 use crate::player_events::CostInfo;
 use crate::playing_actions::Recruit;
 use crate::position::Position;
-use crate::resource_pile::ResourcePile;
 use crate::unit::{UnitType, Units, kill_units, set_unit_position};
 use itertools::Itertools;
 
@@ -18,7 +17,7 @@ pub(crate) fn recruit(game: &mut Game, player_index: usize, r: Recruit) -> Resul
         r.city_position,
         r.leader_name.as_ref(),
         &r.replaced_units,
-        Some(&r.payment),
+        CostTrigger::Execute,
     )?;
     cost.pay(game, &r.payment);
     for unit in &r.replaced_units {

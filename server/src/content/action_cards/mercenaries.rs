@@ -189,5 +189,5 @@ fn barbarian_army_positions_in_range2(game: &Game, player: &Player) -> Vec<Posit
 
 fn max_mercenary_payment(player: &Player) -> u8 {
     let pile = &player.resources;
-    (pile.food + pile.wood + pile.ore + pile.culture_tokens + pile.gold)
+    pile.food + pile.wood + pile.ore + pile.culture_tokens + pile.gold
 }

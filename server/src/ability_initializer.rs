@@ -1,6 +1,6 @@
 use crate::advance::Advance;
+use crate::ai_collect::reset_collection_stats;
 use crate::card::HandCard;
-use crate::collect::reset_collection_stats;
 use crate::combat::{Combat, update_combat_strength};
 use crate::combat_listeners::CombatStrength;
 use crate::content::persistent_events::{

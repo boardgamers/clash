@@ -17,7 +17,7 @@ use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::happiness::{available_happiness_actions, happiness_cost};
 use crate::payment::PaymentOptions;
-use crate::player::Player;
+use crate::player::{CostTrigger, Player};
 use crate::playing_actions::{
     IncreaseHappiness, PlayingAction, PlayingActionType, Recruit, base_and_custom_action,
 };
@@ -286,7 +286,12 @@ fn advances(ai_actions: &mut AiActions, p: &Player, _game: &Game) -> Vec<Action>
             if !p.can_advance_free(a) {
                 return None;
             }
-            try_payment(ai_actions, &p.advance_cost(a, None).cost, p).map(|r| {
+            try_payment(
+                ai_actions,
+                &p.advance_cost(a, CostTrigger::NoModifiers).cost,
+                p,
+            )
+            .map(|r| {
                 Action::Playing(PlayingAction::Advance {
                     advance: a,
                     payment: r,
@@ -375,7 +380,14 @@ fn recruit_actions(ai_actions: &mut AiActions, player: &Player, city: &City) -> 
 
                 let mut next = units.clone();
                 next += &unit_type;
-                match recruit_cost(player, &next, city.position, None, &[], None) {
+                match recruit_cost(
+                    player,
+                    &next,
+                    city.position,
+                    None,
+                    &[],
+                    CostTrigger::NoModifiers,
+                ) {
                     Ok(c) => {
                         cost = payment(ai_actions, &c.cost, player);
                         units = next;
@@ -423,7 +435,7 @@ fn calculate_increase_happiness(
         };
         let new_steps_sum = step_sum + steps * c.size() as u8;
 
-        let info = happiness_cost(player, new_steps_sum, None);
+        let info = happiness_cost(player, new_steps_sum, CostTrigger::NoModifiers);
         if !info.cost.can_afford(&available) {
             break;
         }
