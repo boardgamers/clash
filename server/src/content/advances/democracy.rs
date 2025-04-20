@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action::Action;
-use crate::advance::{AdvanceInfo, AdvanceBuilder, Advance};
+use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city::MoodState;
 use crate::content::advances::{AdvanceGroup, advance_group_builder};
 use crate::content::builtin::Builtin;

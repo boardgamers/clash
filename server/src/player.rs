@@ -1,4 +1,4 @@
-use crate::advance::{Advance};
+use crate::advance::Advance;
 use crate::city_pieces::{DestroyedStructures, DestroyedStructuresData};
 use crate::collect::reset_collect_within_range_for_all;
 use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
@@ -206,9 +206,11 @@ impl Player {
             civilization: self.civilization.name,
             active_leader: self.active_leader,
             available_leaders: self.available_leaders.into_iter().collect(),
-            advances: self.advances.into_iter().sorted_by_key(
-                ToString::to_string
-            ).collect(),
+            advances: self
+                .advances
+                .into_iter()
+                .sorted_by_key(ToString::to_string)
+                .collect(),
             unlocked_special_advance: self.unlocked_special_advances,
             wonders_build: self.wonders_build,
             incident_tokens: self.incident_tokens,
@@ -248,9 +250,7 @@ impl Player {
             advances: self
                 .advances
                 .iter()
-                .sorted_by_key(
-                                ToString::to_string
-                            )
+                .sorted_by_key(ToString::to_string)
                 .collect(),
             unlocked_special_advance: self.unlocked_special_advances.clone(),
             wonders_build: self.wonders_build.clone(),
@@ -625,11 +625,10 @@ impl Player {
     pub fn advance_cost(&self, advance: Advance, execute: Option<&ResourcePile>) -> CostInfo {
         self.trigger_cost_event(
             |e| &e.advance_cost,
-            &PaymentOptions::sum(ADVANCE_COST, &[
-                ResourceType::Ideas,
-                ResourceType::Food,
-                ResourceType::Gold,
-            ]),
+            &PaymentOptions::sum(
+                ADVANCE_COST,
+                &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
+            ),
             &advance,
             &(),
             execute,

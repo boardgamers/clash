@@ -21,7 +21,10 @@ use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::unit::Unit;
 
-pub fn custom_phase_payment_dialog(rc: &RenderContext, payments: &[Payment<String>]) -> StateUpdate {
+pub fn custom_phase_payment_dialog(
+    rc: &RenderContext,
+    payments: &[Payment<String>],
+) -> StateUpdate {
     multi_payment_dialog(
         rc,
         payments,

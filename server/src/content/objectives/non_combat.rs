@@ -1,4 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::advance::Advance;
 use crate::content::advances::warfare::draft_cost;
 use crate::game::Game;
 use crate::log::{ActionLogItem, ActionLogPlayer};
@@ -7,7 +8,6 @@ use crate::objective_card::{Objective, objective_is_ready};
 use crate::player::Player;
 use crate::position::Position;
 use itertools::Itertools;
-use crate::advance::Advance;
 
 pub(crate) fn draft() -> Objective {
     let name = "Draft";

@@ -53,9 +53,10 @@ pub fn can_construct(
     let advance = advances::get_all()
         .iter()
         .find(|a| a.unlocked_building == Some(building))
-        .expect("Advance not found").advance;
+        .expect("Advance not found")
+        .advance;
     if !player.has_advance(advance) {
-        return Err(format!("Missing advance: {}", advance));
+        return Err(format!("Missing advance: {advance}"));
     }
 
     can_construct_anything(city, player)?;

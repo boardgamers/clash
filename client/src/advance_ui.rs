@@ -5,6 +5,7 @@ use crate::payment_ui::{Payment, payment_dialog};
 use crate::render_context::RenderContext;
 use crate::tooltip::{add_tooltip_description, show_tooltip_for_rect};
 use crate::unit_ui::add_unit_description;
+use itertools::Itertools;
 use macroquad::color::Color;
 use macroquad::math::vec2;
 use macroquad::prelude::{
@@ -18,7 +19,6 @@ use server::player::Player;
 use server::playing_actions::PlayingAction;
 use server::unit::UnitType;
 use std::ops::Rem;
-use itertools::Itertools;
 
 const COLUMNS: usize = 6;
 
@@ -30,7 +30,12 @@ pub enum AdvanceState {
 }
 
 fn new_advance_payment(rc: &RenderContext, a: &AdvanceInfo) -> Payment<Advance> {
-    rc.new_payment(&rc.shown_player.advance_cost(a.advance, None).cost, a.advance, &a.name, false)
+    rc.new_payment(
+        &rc.shown_player.advance_cost(a.advance, None).cost,
+        a.advance,
+        &a.name,
+        false,
+    )
 }
 
 pub fn show_paid_advance_menu(rc: &RenderContext) -> StateUpdate {
@@ -41,7 +46,9 @@ pub fn show_paid_advance_menu(rc: &RenderContext) -> StateUpdate {
         |a, p| {
             if p.has_advance(a.advance) {
                 AdvanceState::Owned
-            } else if game.state == GameState::Playing && game.actions_left > 0 && p.can_advance(a.advance)
+            } else if game.state == GameState::Playing
+                && game.actions_left > 0
+                && p.can_advance(a.advance)
             {
                 AdvanceState::Available
             } else {
@@ -159,11 +166,10 @@ fn description(rc: &RenderContext, a: &AdvanceInfo) -> Vec<String> {
         parts.push(format!("Required: {r}"));
     }
     if !a.contradicting.is_empty() {
-        parts.push(format!("Contradicts: {}", a.contradicting
-            .iter().map(
-                |a| a.to_string()
-        )
-            .join(", ")));
+        parts.push(format!(
+            "Contradicts: {}",
+            a.contradicting.iter().map(std::string::ToString::to_string).join(", ")
+        ));
     }
     if let Some(b) = &a.bonus {
         parts.push(format!(

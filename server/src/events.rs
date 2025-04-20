@@ -33,9 +33,8 @@ impl EventOrigin {
     #[must_use]
     pub fn name(&self) -> String {
         match self {
-            EventOrigin::Advance(name)
-            | EventOrigin::SpecialAdvance(name) => name.to_string(),
-            | EventOrigin::Wonder(name)
+            EventOrigin::Advance(name) | EventOrigin::SpecialAdvance(name) => name.to_string(),
+            EventOrigin::Wonder(name)
             | EventOrigin::Leader(name)
             | EventOrigin::Objective(name)
             | EventOrigin::Builtin(name) => name.to_string(),
@@ -272,10 +271,7 @@ mod tests {
         let addend = 3;
         let modifiers = event.trigger_with_modifiers(&mut item, &addend, &0, &mut ());
         assert_eq!(3, item);
-        assert_eq!(
-            vec![EventOrigin::Advance(add_constant)],
-            modifiers
-        );
+        assert_eq!(vec![EventOrigin::Advance(add_constant)], modifiers);
     }
 
     #[test]
@@ -308,10 +304,7 @@ mod tests {
         );
 
         assert_eq!(
-            vec![
-                EventOrigin::Advance(c),
-                EventOrigin::Advance(a)
-            ],
+            vec![EventOrigin::Advance(c), EventOrigin::Advance(a)],
             event
                 .trigger_with_minimal_modifiers(
                     &Info {

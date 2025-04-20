@@ -1,4 +1,5 @@
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
+use crate::advance::Advance;
 use crate::card::draw_card_from_pile;
 use crate::city::{City, MoodState};
 use crate::construct::can_construct_anything;
@@ -14,7 +15,6 @@ use crate::utils::remove_element;
 use crate::{ability_initializer::AbilityInitializerSetup, game::Game, position::Position};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use crate::advance::Advance;
 
 type PlacementChecker = Box<dyn Fn(Position, &Game) -> bool + Sync + Send>;
 
@@ -28,18 +28,13 @@ pub struct Wonder {
 }
 
 impl Wonder {
-    pub fn builder(
+    #[must_use] pub fn builder(
         name: &str,
         description: &str,
         cost: PaymentOptions,
         required_advances: Vec<Advance>,
     ) -> WonderBuilder {
-        WonderBuilder::new(
-            name,
-            description,
-            cost,
-            required_advances,
-        )
+        WonderBuilder::new(name, description, cost, required_advances)
     }
 }
 

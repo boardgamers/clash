@@ -1,7 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Bonus::{CultureToken, MoodToken};
-use crate::advance::{AdvanceInfo, AdvanceBuilder, Advance};
-use crate::content::advances::{AdvanceGroup,  advance_group_builder};
+use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
+use crate::content::advances::{AdvanceGroup, advance_group_builder};
 use crate::payment::PaymentConversion;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
@@ -16,8 +16,10 @@ pub(crate) fn construction() -> AdvanceGroup {
 
 fn mining() -> AdvanceBuilder {
     AdvanceInfo::builder(
-                Advance::Mining,
-        "Mining", "Your cities may Collect ore from Mountain spaces")
+        Advance::Mining,
+        "Mining",
+        "Your cities may Collect ore from Mountain spaces",
+    )
 }
 
 fn engineering() -> AdvanceBuilder {

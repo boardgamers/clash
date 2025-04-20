@@ -1,9 +1,9 @@
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::advance::Advance;
 use crate::map::Terrain::Fertile;
 use crate::payment::{PaymentConversionType, PaymentOptions};
 use crate::{cache, resource_pile::ResourcePile, wonder::Wonder};
 use std::collections::HashSet;
-use crate::advance::Advance;
 
 #[must_use]
 pub fn get_all() -> &'static Vec<Wonder> {

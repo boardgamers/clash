@@ -1,5 +1,5 @@
 use crate::action_card::ActionCardInfo;
-use crate::advance::{Advance, AdvanceInfo};
+use crate::advance::Advance;
 use crate::barbarians::BarbariansEventState;
 use crate::collect::{CollectContext, CollectInfo};
 use crate::combat::Combat;

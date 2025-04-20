@@ -164,9 +164,7 @@ fn anarchy() -> Incident {
                 .player(player_index)
                 .advances
                 .iter()
-                .filter(|a| {
-                    a.info().government.is_some()
-                })
+                .filter(|a| a.info().government.is_some())
                 .collect_vec();
             for a in remove {
                 remove_advance(game, a, player_index);

@@ -1,3 +1,4 @@
+use crate::advance::Advance;
 use crate::card::HandCard;
 use crate::collect::reset_collection_stats;
 use crate::combat::{Combat, update_combat_strength};
@@ -17,7 +18,6 @@ use crate::{content::custom_actions::CustomActionType, game::Game, player_events
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::ops::RangeInclusive;
-use crate::advance::Advance;
 
 pub(crate) type AbilityInitializer = Box<dyn Fn(&mut Game, usize) + Sync + Send>;
 
@@ -498,7 +498,11 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         + Clone
         + Sync
         + Send,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<Advance>, &mut V) + 'static + Clone + Sync + Send,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<Advance>, &mut V)
+        + 'static
+        + Clone
+        + Sync
+        + Send,
     ) -> Self
     where
         E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone + Sync + Send,

@@ -1,6 +1,7 @@
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::ability_initializer::{AbilityInitializerSetup, SelectedChoice};
 use crate::action_card::ActionCard;
+use crate::advance::Advance;
 use crate::barbarians::{barbarians_move, barbarians_spawn};
 use crate::card::{HandCard, draw_card_from_pile};
 use crate::city::{MoodState, is_valid_city_terrain};
@@ -23,7 +24,6 @@ use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use crate::advance::Advance;
 
 pub(crate) const BASE_EFFECT_PRIORITY: i32 = 100;
 

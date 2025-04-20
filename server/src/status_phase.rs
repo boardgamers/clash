@@ -2,7 +2,6 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::gain_action_card_from_pile;
 use crate::advance::{Advance, do_advance, gain_advance_without_payment, remove_advance};
 use crate::consts::AGES;
-use crate::content::advances::get_advance;
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{
     AdvanceRequest, ChangeGovernmentRequest, EventResponse, PersistentEventRequest,
@@ -275,7 +274,7 @@ where
                                 } else {
                                     c.additional_advances
                                         .iter()
-                                        .map(|a| a.to_string())
+                                        .map(std::string::ToString::to_string)
                                         .join(", ")
                                 }
                             ));

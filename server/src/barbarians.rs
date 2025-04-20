@@ -158,14 +158,14 @@ where
                 return None;
             }
 
-             let Some(city) = get_barbarian_city(v) else {
+            let Some(city) = get_barbarian_city(v) else {
                 return None;
             };
             let choices = get_barbarian_reinforcement_choices(game, city);
             Some(UnitTypeRequest::new(
                 choices,
                 get_barbarians_player(game).index,
-                &format!("Select a unit to reinforce the barbarians at {}", city),
+                &format!("Select a unit to reinforce the barbarians at {city}"),
             ))
         },
         move |game, s, v| {

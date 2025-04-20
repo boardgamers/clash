@@ -1,5 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::advance::{AdvanceInfo, AdvanceBuilder, Advance};
+use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::content::advances::{AdvanceGroup, advance_group_builder};
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType::{AbsolutePower, ForcedLabor};

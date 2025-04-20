@@ -1,9 +1,9 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Bonus::{CultureToken, MoodToken};
-use crate::advance::{AdvanceInfo, AdvanceBuilder, Advance};
+use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city_pieces::Building::Port;
 use crate::collect::{CollectContext, CollectInfo};
-use crate::content::advances::{AdvanceGroup,  advance_group_builder};
+use crate::content::advances::{AdvanceGroup, advance_group_builder};
 use crate::game::Game;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
@@ -18,12 +18,14 @@ pub(crate) fn seafaring() -> AdvanceGroup {
 
 fn fishing() -> AdvanceBuilder {
     AdvanceInfo::builder(
-                Advance::Fishing,
-        "Fishing", "Your cities may Collect food from one Sea space")
-        .with_reset_collect_stats()
-        .add_transient_event_listener(|event| &mut event.collect_options, 1, fishing_collect)
-        .with_advance_bonus(MoodToken)
-        .with_unlocked_building(Port)
+        Advance::Fishing,
+        "Fishing",
+        "Your cities may Collect food from one Sea space",
+    )
+    .with_reset_collect_stats()
+    .add_transient_event_listener(|event| &mut event.collect_options, 1, fishing_collect)
+    .with_advance_bonus(MoodToken)
+    .with_unlocked_building(Port)
 }
 
 fn navigation() -> AdvanceBuilder {
@@ -37,7 +39,7 @@ fn navigation() -> AdvanceBuilder {
 
 fn war_ships() -> AdvanceBuilder {
     AdvanceInfo::builder(
-                Advance::WarShips,
+        Advance::WarShips,
         "WarShips",
         "Ignore the first hit it the first round of combat \
         when attacking with Ships or disembarking from Ships",

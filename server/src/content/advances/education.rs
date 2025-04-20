@@ -1,7 +1,7 @@
 use crate::ability_initializer::{AbilityInitializerSetup, do_once_per_turn};
 use crate::action_card::gain_action_card_from_pile;
 use crate::advance::Bonus::{CultureToken, MoodToken};
-use crate::advance::{AdvanceInfo, AdvanceBuilder, Advance};
+use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city_pieces::Building;
 use crate::content::advances::{AdvanceGroup, advance_group_builder, get_group};
 use crate::content::persistent_events::PaymentRequest;
@@ -22,23 +22,27 @@ pub(crate) fn education() -> AdvanceGroup {
 }
 
 fn writing() -> AdvanceBuilder {
-    AdvanceInfo::builder(Advance::Writing,"Writing", "Gain 1 action and 1 objective card")
-        .with_advance_bonus(CultureToken)
-        .with_unlocked_building(Building::Academy)
-        .add_one_time_ability_initializer(|game, player_index| {
-            gain_action_card_from_pile(game, player_index);
-            gain_objective_card_from_pile(game, player_index);
-        })
-        .add_simple_persistent_event_listener(
-            |event| &mut event.construct,
-            3,
-            |game, player_index, _player_name, b| {
-                if matches!(b, Building::Academy) {
-                    game.players[player_index].gain_resources(ResourcePile::ideas(2));
-                    game.add_info_log_item("Academy gained 2 ideas");
-                }
-            },
-        )
+    AdvanceInfo::builder(
+        Advance::Writing,
+        "Writing",
+        "Gain 1 action and 1 objective card",
+    )
+    .with_advance_bonus(CultureToken)
+    .with_unlocked_building(Building::Academy)
+    .add_one_time_ability_initializer(|game, player_index| {
+        gain_action_card_from_pile(game, player_index);
+        gain_objective_card_from_pile(game, player_index);
+    })
+    .add_simple_persistent_event_listener(
+        |event| &mut event.construct,
+        3,
+        |game, player_index, _player_name, b| {
+            if matches!(b, Building::Academy) {
+                game.players[player_index].gain_resources(ResourcePile::ideas(2));
+                game.add_info_log_item("Academy gained 2 ideas");
+            }
+        },
+    )
 }
 
 fn public_education() -> AdvanceBuilder {

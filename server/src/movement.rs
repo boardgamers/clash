@@ -6,6 +6,7 @@ use crate::resource_pile::ResourcePile;
 use crate::unit::{Unit, set_unit_position};
 use crate::utils;
 
+use crate::advance::Advance;
 use crate::consts::{ARMY_MOVEMENT_REQUIRED_ADVANCE, MOVEMENT_ACTIONS, SHIP_CAPACITY, STACK_LIMIT};
 use crate::content::action_cards::negotiation::negotiations_partner;
 use crate::content::incidents::great_diplomat::{DIPLOMAT_ID, diplomatic_relations_partner};
@@ -17,7 +18,6 @@ use crate::position::Position;
 use crate::unit::{carried_units, get_current_move};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use crate::advance::Advance;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct MoveUnits {
@@ -494,10 +494,7 @@ fn reachable_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<M
                 .into_iter()
                 .flatten()
                 .map(|destination| {
-                    MoveRoute::free(
-                        destination,
-                        vec![EventOrigin::Advance(Advance::Navigation)],
-                    )
+                    MoveRoute::free(destination, vec![EventOrigin::Advance(Advance::Navigation)])
                 })
                 .collect();
         }

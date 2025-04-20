@@ -1,4 +1,3 @@
-use std::fmt::Display;
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::city_pieces::Building;
 use crate::content::advances::get_advance;
@@ -8,12 +7,12 @@ use crate::game::Game;
 use crate::incident::on_trigger_incident;
 use crate::player_events::{IncidentInfo, OnAdvanceInfo};
 use crate::special_advance::SpecialAdvance;
-use crate::{ability_initializer::AbilityInitializerSetup, resource_pile::ResourcePile, utils};
+use crate::{ability_initializer::AbilityInitializerSetup, resource_pile::ResourcePile};
 use Bonus::*;
 use enumset::EnumSetType;
-use std::mem;
 use serde::{Deserialize, Serialize};
-use crate::content::advances;
+use std::fmt::Display;
+use std::mem;
 
 // id / 4 = advance group
 #[derive(EnumSetType, Serialize, Deserialize, Debug, Ord, PartialOrd, Hash)]
@@ -89,10 +88,9 @@ pub enum Advance {
     Devotion = 45,
     Conversion = 46,
     Fanaticism = 47,
-    
+
     // Civ specific
     Terrace = 48,
-    
 }
 
 impl Advance {
@@ -274,11 +272,15 @@ pub(crate) fn gain_advance_without_payment(
     take_incident_token: bool,
 ) {
     do_advance(game, advance, player_index);
-    on_advance(game, player_index, OnAdvanceInfo {
-        advance,
-        payment,
-        take_incident_token,
-    });
+    on_advance(
+        game,
+        player_index,
+        OnAdvanceInfo {
+            advance,
+            payment,
+            take_incident_token,
+        },
+    );
 }
 
 pub(crate) fn on_advance(game: &mut Game, player_index: usize, info: OnAdvanceInfo) {

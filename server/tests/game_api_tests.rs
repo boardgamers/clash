@@ -1,4 +1,5 @@
 use crate::common::*;
+use itertools::Itertools;
 use playing_actions::PlayingActionType;
 use server::card::HandCard;
 use server::collect::PositionCollection;
@@ -6,9 +7,21 @@ use server::content::persistent_events::{EventResponse, SelectedStructure, Struc
 use server::game_setup::setup_game;
 use server::log::current_player_turn_log;
 use server::unit::Units;
-use server::{action::Action, advance, city::{City, MoodState::*}, city_pieces::Building::*, construct, cultural_influence, game::Game, game_api, map::Terrain::*, playing_actions, playing_actions::PlayingAction::*, position::Position, resource_pile::ResourcePile};
+use server::{
+    action::Action,
+    advance,
+    city::{City, MoodState::*},
+    city_pieces::Building::*,
+    construct, cultural_influence,
+    game::Game,
+    game_api,
+    map::Terrain::*,
+    playing_actions,
+    playing_actions::PlayingAction::*,
+    position::Position,
+    resource_pile::ResourcePile,
+};
 use std::{collections::HashMap, vec};
-use itertools::Itertools;
 
 mod common;
 
@@ -53,10 +66,7 @@ fn basic_actions() {
             advance::Advance::Engineering,
             advance::Advance::Math,
         ],
-        player
-            .advances
-            .iter()
-            .collect_vec()
+        player.advances.iter().collect_vec()
     );
     assert_eq!(ResourcePile::culture_tokens(1), player.resources);
     assert_eq!(1, game.actions_left);

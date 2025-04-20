@@ -1,6 +1,7 @@
 use crate::ability_initializer::{
     AbilityInitializerBuilder, AbilityInitializerSetup, AbilityListeners,
 };
+use crate::advance::Advance;
 use crate::card::draw_card_from_pile;
 use crate::combat_listeners::CombatResult;
 use crate::content::action_cards;
@@ -17,7 +18,6 @@ use crate::tactics_card::TacticsCard;
 use crate::utils::remove_element_by;
 use action_cards::get_action_card;
 use serde::{Deserialize, Serialize};
-use crate::advance::Advance;
 
 pub type CanPlayCard = Box<dyn Fn(&Game, &Player, &ActionCardInfo) -> bool + Sync + Send>;
 

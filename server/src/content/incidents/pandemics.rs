@@ -1,4 +1,5 @@
 use crate::action_card::discard_action_card;
+use crate::advance::Advance;
 use crate::card::{HandCard, HandCardType, hand_cards};
 use crate::city::City;
 use crate::content::incidents::famine::{
@@ -18,7 +19,6 @@ use crate::position::Position;
 use crate::resource::ResourceType;
 use itertools::Itertools;
 use std::ops::RangeInclusive;
-use crate::advance::Advance;
 
 pub(crate) fn pandemics_incidents() -> Vec<Incident> {
     vec![pandemics(), black_death(), vermin(), draught(), fire()]

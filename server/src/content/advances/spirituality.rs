@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Bonus::{CultureToken, MoodToken};
-use crate::advance::{AdvanceInfo, AdvanceBuilder, Advance};
+use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city_pieces::Building::Temple;
 use crate::content::advances::{AdvanceGroup, advance_group_builder, get_group};
 use crate::content::persistent_events::ResourceRewardRequest;
@@ -48,7 +48,7 @@ fn myths() -> AdvanceBuilder {
 
 fn rituals() -> AdvanceBuilder {
     AdvanceInfo::builder(
-                Advance::Rituals,
+        Advance::Rituals,
         "Rituals",
         "When you perform the Increase Happiness Action \
         you may spend any Resources as a substitute for mood tokens. This is done at a 1:1 ratio",
@@ -79,25 +79,33 @@ fn rituals() -> AdvanceBuilder {
 }
 
 fn priesthood() -> AdvanceBuilder {
-    AdvanceInfo::builder(Advance::Priesthood,"Priesthood", "Once per turn, a science advance is free")
-        .add_once_per_turn_listener(
-            |event| &mut event.advance_cost,
-            2,
-            |i, &advance, ()| {
-                if get_group("Science").advances.iter().any(|a| a.advance == advance) {
-                    i.set_zero();
-                    i.info
-                        .log
-                        .push("Priesthood reduced the cost to 0".to_string());
-                }
-            },
-            |i| &mut i.info.info,
-        )
+    AdvanceInfo::builder(
+        Advance::Priesthood,
+        "Priesthood",
+        "Once per turn, a science advance is free",
+    )
+    .add_once_per_turn_listener(
+        |event| &mut event.advance_cost,
+        2,
+        |i, &advance, ()| {
+            if get_group("Science")
+                .advances
+                .iter()
+                .any(|a| a.advance == advance)
+            {
+                i.set_zero();
+                i.info
+                    .log
+                    .push("Priesthood reduced the cost to 0".to_string());
+            }
+        },
+        |i| &mut i.info.info,
+    )
 }
 
 fn state_religion() -> AdvanceBuilder {
     AdvanceInfo::builder(
-                Advance::StateReligion,
+        Advance::StateReligion,
         "State Religion",
         "Once per turn, when constructing a Temple, do not pay any Food.",
     )

@@ -13,7 +13,11 @@ pub struct SpecialAdvance {
 
 impl SpecialAdvance {
     #[must_use]
-    pub fn builder(advance: Advance, name: &str, required_advance: Advance) -> SpecialAdvanceBuilder {
+    pub fn builder(
+        advance: Advance,
+        name: &str,
+        required_advance: Advance,
+    ) -> SpecialAdvanceBuilder {
         SpecialAdvanceBuilder::new(advance, name.to_string(), required_advance)
     }
 

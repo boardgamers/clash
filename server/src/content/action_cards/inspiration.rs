@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{ActionCard, ActionCardBuilder};
-use crate::advance::{gain_advance_without_payment, Advance};
+use crate::advance::{Advance, gain_advance_without_payment};
 use crate::city::MoodState;
 use crate::content::action_cards::spy::spy;
 use crate::content::action_cards::synergies::teachable_advances;
@@ -52,7 +52,7 @@ fn advance(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         0,
         |game, player, _| Some(AdvanceRequest::new(possible_advances(game.player(player)))),
         |game, sel, _| {
-            let advance = sel.choice.clone();
+            let advance = sel.choice;
             gain_advance_without_payment(
                 game,
                 advance,
@@ -97,7 +97,7 @@ fn inspiration(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             )))
         },
         |game, sel, _| {
-            let advance = sel.choice.clone();
+            let advance = sel.choice;
             gain_advance_without_payment(
                 game,
                 advance,

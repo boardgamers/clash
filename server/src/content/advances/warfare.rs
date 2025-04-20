@@ -1,15 +1,13 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Bonus::CultureToken;
-use crate::advance::{AdvanceInfo, AdvanceBuilder, Advance};
+use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city_pieces::Building::Fortress;
 use crate::combat::CombatModifier::{
     CancelFortressExtraDie, CancelFortressIgnoreHit, SteelWeaponsAttacker, SteelWeaponsDefender,
 };
 use crate::combat::{Combat, CombatModifier};
 use crate::combat_listeners::CombatStrength;
-use crate::content::advances::{
-    AdvanceGroup,  advance_group_builder,
-};
+use crate::content::advances::{AdvanceGroup, advance_group_builder};
 use crate::content::persistent_events::PaymentRequest;
 use crate::game::Game;
 use crate::payment::{PaymentConversion, PaymentOptions};

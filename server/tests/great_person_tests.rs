@@ -1,13 +1,13 @@
 use crate::common::{JsonTest, TestAction, move_action};
 use server::action::Action;
 use server::city_pieces::Building::Fortress;
-use server::{advance, construct};
 use server::content::persistent_events::EventResponse;
 use server::movement::{MoveUnits, MovementAction};
 use server::playing_actions::PlayingAction::{Advance, Construct};
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
+use server::{advance, construct};
 
 mod common;
 

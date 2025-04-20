@@ -1,7 +1,6 @@
 use crate::payment_ui::Payment;
 use crate::render_context::RenderContext;
 use server::content::action_cards::get_civil_card;
-use server::content::advances::get_advance;
 use server::content::builtin::get_builtin;
 use server::content::incidents::get_incident;
 use server::content::objectives::get_objective;

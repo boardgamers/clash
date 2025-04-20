@@ -2,12 +2,11 @@ use itertools::{Either, Itertools};
 use serde::{Deserialize, Serialize};
 
 use crate::action_card::{ActionCardInfo, land_battle_won_action, play_action_card};
-use crate::advance::{gain_advance_without_payment, Advance};
+use crate::advance::{Advance, gain_advance_without_payment};
 use crate::city::{MoodState, found_city};
 use crate::collect::{PositionCollection, collect};
 use crate::construct::Construct;
 use crate::content::action_cards::get_civil_card;
-use crate::content::advances::get_advance;
 use crate::content::custom_actions::{CustomActionType, CustomEventAction, execute_custom_action};
 use crate::cultural_influence::{InfluenceCultureAttempt, influence_culture_attempt};
 use crate::game::GameState;

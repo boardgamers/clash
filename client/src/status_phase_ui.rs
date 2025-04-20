@@ -1,8 +1,8 @@
-use server::advance::Advance;
 use crate::advance_ui::{AdvanceState, show_advance_menu};
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::{OkTooltip, cancel_button_with_tooltip, ok_button};
 use crate::render_context::RenderContext;
+use server::advance::Advance;
 use server::content::advances::{get_government, get_governments};
 use server::content::persistent_events::{ChangeGovernmentRequest, EventResponse};
 use server::status_phase::{ChangeGovernment, ChangeGovernmentType};
@@ -107,7 +107,8 @@ pub fn choose_additional_advances_dialog(
         |a, _| {
             if choose.selected.contains(&a.advance) {
                 AdvanceState::Removable
-            } else if choose.possible.contains(&a.advance) && choose.selected.len() < choose.needed {
+            } else if choose.possible.contains(&a.advance) && choose.selected.len() < choose.needed
+            {
                 AdvanceState::Available
             } else {
                 AdvanceState::Unavailable

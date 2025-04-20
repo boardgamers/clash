@@ -1,5 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::advance::{AdvanceInfo, AdvanceBuilder, gain_advance_without_payment, Advance};
+use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo, gain_advance_without_payment};
 use crate::city_pieces::Building::Temple;
 use crate::consts::STACK_LIMIT;
 use crate::content::advances::{AdvanceGroup, advance_group_builder, get_group};
@@ -79,7 +79,7 @@ fn dogma() -> AdvanceBuilder {
 
 fn devotion() -> AdvanceBuilder {
     AdvanceInfo::builder(
-    Advance::Devotion,
+        Advance::Devotion,
         "Devotion",
         "Attempts to influence your cities with a Temple may not be boosted by culture tokens",
     )
@@ -98,7 +98,7 @@ fn devotion() -> AdvanceBuilder {
 
 fn conversion() -> AdvanceBuilder {
     AdvanceInfo::builder(
-    Advance::Conversion,
+        Advance::Conversion,
         "Conversion",
         "You add +1 to your Influence Culture roll \
         and gain 1 culture token when you make a successful Influence Culture attempt.",

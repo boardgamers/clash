@@ -118,10 +118,7 @@ pub(crate) fn advance_group_builder(name: &str, advances: Vec<AdvanceBuilder>) -
                     return builder
                         .with_required_advance(i.requirement)
                         .with_contradicting_advance(
-                            &GOVERNMENTS
-                                .into_iter()
-                                .map(|i| i.leading)
-                                .collect_vec(),
+                            &GOVERNMENTS.into_iter().map(|i| i.leading).collect_vec(),
                         );
                 }
                 builder
@@ -178,8 +175,8 @@ pub fn get_government(government: &str) -> &'static AdvanceGroup {
 
 #[cfg(test)]
 mod tests {
-    use crate::content::advances;
     use super::*;
+    
     use crate::content::advances::get_governments;
     use crate::content::advances::get_groups;
 
@@ -187,14 +184,13 @@ mod tests {
     fn test_get_all() {
         let all = get_all();
         assert!(!all.is_empty());
-        let unsorted = all
-            .iter()
-            .map(|a| a.advance)
-            .collect_vec();
+        let unsorted = all.iter().map(|a| a.advance).collect_vec();
 
-        let sorted = unsorted.clone().into_iter().sorted_by_key(
-            |a| *a as usize
-        ).collect_vec();
+        let sorted = unsorted
+            .clone()
+            .into_iter()
+            .sorted_by_key(|a| *a as usize)
+            .collect_vec();
         assert_eq!(sorted, unsorted);
         for advance in all {
             assert_eq!(get_advance(advance.advance).advance, advance.advance);

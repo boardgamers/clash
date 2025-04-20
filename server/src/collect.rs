@@ -1,4 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::advance::Advance;
 use crate::city::City;
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
@@ -17,7 +18,6 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::iter;
-use crate::advance::Advance;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Hash, Debug)]
 pub struct PositionCollection {

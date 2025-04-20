@@ -12,7 +12,7 @@ use crate::layout_ui::FONT_SIZE;
 use crate::log_ui::get_log_end;
 use crate::map_ui::ExploreResolutionConfig;
 use crate::move_ui::{MoveDestination, MoveIntent, MovePayment, MoveSelection};
-use crate::payment_ui::{new_gain, Payment};
+use crate::payment_ui::{Payment, new_gain};
 use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
 use crate::render_context::RenderContext;
 use crate::status_phase_ui::ChooseAdditionalAdvances;

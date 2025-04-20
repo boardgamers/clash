@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{ActionCard, ActionCardBuilder, CivilCardTarget, discard_action_card};
-use crate::advance::{gain_advance_without_payment, Advance};
+use crate::advance::{Advance, gain_advance_without_payment};
 use crate::card::HandCard;
 use crate::content::action_cards::{get_action_card, inspiration};
 use crate::content::advances;
@@ -19,7 +19,6 @@ use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
 use inspiration::possible_inspiration_advances;
 use itertools::Itertools;
-use crate::content::advances::get_advance;
 
 pub(crate) fn synergies_action_cards() -> Vec<ActionCard> {
     vec![
@@ -61,7 +60,7 @@ fn synergies(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                 "{} selected {} as first advance for Synergies.",
                 sel.player_name, advance
             ));
-            i.selected_advance = Some(advance.clone());
+            i.selected_advance = Some(*advance);
         },
     );
     b = pay_for_advance(b, 2);
@@ -88,7 +87,7 @@ fn synergies(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                 "{} selected {} as second advance for Synergies.",
                 sel.player_name, advance
             ));
-            i.selected_advance = Some(advance.clone());
+            i.selected_advance = Some(*advance);
         },
     );
     b = pay_for_advance(b, 0);
@@ -139,7 +138,9 @@ fn categories_with_2_affordable_advances(p: &Player) -> Vec<Advance> {
                     let b = pair[1];
                     let mut cost = p.advance_cost(a.advance, None).cost;
                     cost.default += p.advance_cost(b.advance, None).cost.default;
-                    p.can_afford(&cost) && p.can_advance_free(a.advance) && p.can_advance_free(b.advance)
+                    p.can_afford(&cost)
+                        && p.can_advance_free(a.advance)
+                        && p.can_advance_free(b.advance)
                 })
                 .map(|pair| pair[0].advance)
                 .collect_vec()
@@ -372,7 +373,7 @@ fn new_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                 "{} selected {advance} as advance for New Ideas.",
                 sel.player_name,
             ));
-            i.selected_advance = Some(advance.clone());
+            i.selected_advance = Some(*advance);
         },
     );
     pay_for_advance(b, 1)

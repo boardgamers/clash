@@ -1,8 +1,8 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Bonus::MoodToken;
-use crate::advance::{AdvanceInfo, AdvanceBuilder, Advance};
+use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::collect::{CollectContext, CollectInfo};
-use crate::content::advances::{AdvanceGroup,  advance_group_builder};
+use crate::content::advances::{AdvanceGroup, advance_group_builder};
 use crate::game::Game;
 use crate::map::Terrain::Barren;
 use crate::resource_pile::ResourcePile;
@@ -74,7 +74,11 @@ fn husbandry() -> AdvanceBuilder {
 
 fn husbandry_collect(i: &mut CollectInfo, c: &CollectContext, game: &Game) {
     let player = &game.players[c.player_index];
-    let allowed = if player.has_advance(Advance::Roads) { 2 } else { 1 };
+    let allowed = if player.has_advance(Advance::Roads) {
+        2
+    } else {
+        1
+    };
 
     if c.used
         .iter()

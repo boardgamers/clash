@@ -1,4 +1,5 @@
 use crate::action::{Action, ActionType};
+use crate::advance::Advance;
 use crate::card::validate_card_selection;
 use crate::city::{City, MoodState};
 use crate::collect::available_collect_actions;
@@ -27,7 +28,6 @@ use crate::status_phase::{ChangeGovernment, ChangeGovernmentType, government_adv
 use crate::unit::{UnitType, Units};
 use itertools::Itertools;
 use std::vec;
-use crate::advance::Advance;
 //todo
 //nicht nur maximale anzahl rekrutieren
 //bewegung:
@@ -427,7 +427,7 @@ fn responses(event: &PersistentEventState, player: &Player, game: &Game) -> Vec<
             .choices
             .iter()
             .filter(|c| !deny_advance(**c))
-            .map(|c| EventResponse::SelectAdvance(c.clone()))
+            .map(|c| EventResponse::SelectAdvance(*c))
             .collect(),
         PersistentEventRequest::SelectPlayer(p) => p
             .choices

@@ -1,4 +1,3 @@
-use itertools::Itertools;
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::OkTooltip;
 use crate::event_ui::event_help;
@@ -10,6 +9,7 @@ use crate::resource_ui::{new_resource_map, resource_name};
 use crate::select_ui;
 use crate::select_ui::{CountSelector, HasCountSelectableObject};
 use crate::tooltip::show_tooltip_for_circle;
+use itertools::Itertools;
 use macroquad::math::{bool, vec2};
 use server::payment::PaymentOptions;
 use server::resource::ResourceType;
@@ -46,7 +46,10 @@ pub struct Payment<T: Clone> {
     pub current: Vec<ResourcePayment>,
 }
 
-impl<T> Payment<T> where T : Clone {
+impl<T> Payment<T>
+where
+    T: Clone,
+{
     #[must_use]
     pub fn new(
         cost: &PaymentOptions,

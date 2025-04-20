@@ -75,7 +75,7 @@ impl Cache {
             status_phase_handlers: status_phase_handlers(),
 
             all_advances: advances::get_all_uncached(),
-            
+
             all_advance_groups: advances::get_groups_uncached(),
             advance_groups_by_name: advances::get_groups_uncached()
                 .into_iter()
@@ -132,7 +132,7 @@ impl Cache {
     }
 
     #[must_use]
-    pub fn get_advance(&'static self, a: Advance) -> &AdvanceInfo {
+    pub fn get_advance(&'static self, a: Advance) -> &'static AdvanceInfo {
         &self.all_advances[a as usize]
     }
 

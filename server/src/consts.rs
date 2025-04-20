@@ -1,5 +1,5 @@
-use crate::{resource_pile::ResourcePile, unit::Units};
 use crate::advance::Advance;
+use crate::{resource_pile::ResourcePile, unit::Units};
 
 pub const MAX_CITY_PIECES: usize = 4; // i.e. city size 5
 pub const AGES: u32 = 6;

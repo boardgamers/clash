@@ -1,4 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::advance::Advance;
 use crate::collect::reset_collect_within_range_for_all;
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{
@@ -10,7 +11,6 @@ use crate::movement::{move_units, stop_current_move};
 use crate::position::Position;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use crate::advance::Advance;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct ExploreResolutionState {

@@ -1,5 +1,6 @@
 use crate::action::execute_custom_phase_action;
 use crate::action_card::ActionCardInfo;
+use crate::advance::Advance;
 use crate::card::HandCard;
 use crate::city_pieces::Building;
 use crate::collect::CollectInfo;
@@ -14,7 +15,7 @@ use crate::map::Rotation;
 use crate::objective_card::SelectObjectivesInfo;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
-use crate::player_events::{OnAdvanceInfo, IncidentInfo};
+use crate::player_events::{IncidentInfo, OnAdvanceInfo};
 use crate::playing_actions::Recruit;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
@@ -24,7 +25,6 @@ use crate::wonder::WonderCardInfo;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::ops::RangeInclusive;
-use crate::advance::Advance;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum PersistentEventRequest {

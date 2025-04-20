@@ -2,13 +2,13 @@ use crate::common::{JsonTest, TestAction, move_action};
 use server::action::Action;
 use server::card::HandCard;
 use server::city_pieces::Building::Fortress;
-use server::{advance, construct};
 use server::content::persistent_events::{EventResponse, SelectedStructure, Structure};
 use server::playing_actions::PlayingAction::{Advance, Construct};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::status_phase::{ChangeGovernment, ChangeGovernmentType};
 use server::unit::UnitType;
+use server::{advance, construct};
 use std::vec;
 
 mod common;
