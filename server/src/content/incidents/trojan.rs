@@ -2,7 +2,6 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::remove_advance;
 use crate::combat::{Combat, CombatModifier, CombatRetreatState};
 use crate::combat_listeners::CombatResult;
-use crate::content::advances::get_advance;
 use crate::content::builtin::Builtin;
 use crate::content::effects::{Anarchy, PermanentEffect};
 use crate::content::persistent_events::PaymentRequest;

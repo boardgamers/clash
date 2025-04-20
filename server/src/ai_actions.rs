@@ -497,7 +497,7 @@ fn change_government(p: &Player, c: &ChangeGovernmentRequest) -> Vec<EventRespon
             .iter()
             .dropping(1) // is taken implicitly
             .take(government_advances(p).len() - 1)
-            .map(|a| a.name.clone())
+            .map(|a| a.advance)
             .collect_vec();
 
         vec![EventResponse::ChangeGovernmentType(

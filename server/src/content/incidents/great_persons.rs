@@ -157,13 +157,13 @@ where
             let choices = groups
                 .iter()
                 .flat_map(|g| &advances::get_group(g.as_ref()).advances)
-                .filter(|a| p.can_advance_free(a))
-                .map(|a| a.name.clone())
+                .filter(|a| p.can_advance_free(a.advance))
+                .map(|a| a.advance)
                 .collect();
             Some(AdvanceRequest::new(choices))
         },
         |game, s, _| {
-            let name = &s.choice;
+            let name = s.choice;
             game.add_info_log_item(&format!("{} gained {}", s.player_name, name));
             gain_advance_without_payment(game, name, s.player_index, ResourcePile::empty(), false);
         },

@@ -448,7 +448,7 @@ fn reachable_with_roads(player: &Player, units: &[u32], game: &Game) -> Vec<Move
                         stack_sizes_used.iter().map(|&(_, s)| s).min().expect("min");
                     let mut cost =
                         PaymentOptions::resources(ResourcePile::ore(1) + ResourcePile::food(1));
-                    let origin = EventOrigin::Advance(Advance::Roads.to_string());
+                    let origin = EventOrigin::Advance(Advance::Roads);
                     cost.modifiers = vec![origin.clone()];
                     let route = MoveRoute {
                         destination,
@@ -496,7 +496,7 @@ fn reachable_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<M
                 .map(|destination| {
                     MoveRoute::free(
                         destination,
-                        vec![EventOrigin::Advance(Advance::Navigation.to_string())],
+                        vec![EventOrigin::Advance(Advance::Navigation)],
                     )
                 })
                 .collect();

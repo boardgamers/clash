@@ -69,16 +69,16 @@ fn synergies(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |e| &mut e.play_action_card,
         1,
         |game, p, i| {
-            let first = i.selected_advance.as_ref().expect("advance not found");
+            let first = i.selected_advance.expect("advance not found");
             Some(AdvanceRequest::new(
                 advances::get_groups()
                     .iter()
-                    .find(|g| g.advances.iter().any(|a| a.name == *first))
+                    .find(|g| g.advances.iter().any(|a| a.advance == first))
                     .expect("Advance group not found")
                     .advances
                     .iter()
-                    .filter(|a| game.player(p).can_advance(a))
-                    .map(|a| a.name.clone())
+                    .filter(|a| game.player(p).can_advance(a.advance))
+                    .map(|a| a.advance)
                     .collect_vec(),
             ))
         },
@@ -102,7 +102,7 @@ fn pay_for_advance(b: ActionCardBuilder, priority: i32) -> ActionCardBuilder {
         priority,
         |game, player_index, i| {
             let p = game.player(player_index);
-            let advance = i.selected_advance.as_ref().expect("advance not found");
+            let advance = i.selected_advance.expect("advance not found");
             Some(vec![PaymentRequest::new(
                 p.advance_cost(advance, None).cost,
                 &format!("Pay for {}", advance.info().name),
@@ -110,7 +110,7 @@ fn pay_for_advance(b: ActionCardBuilder, priority: i32) -> ActionCardBuilder {
             )])
         },
         |game, s, i| {
-            let advance = i.selected_advance.as_ref().expect("advance not found");
+            let advance = i.selected_advance.expect("advance not found");
             game.add_info_log_item(&format!(
                 "{} paid {} for advance {advance}",
                 s.player_name, s.choice[0]
@@ -120,7 +120,7 @@ fn pay_for_advance(b: ActionCardBuilder, priority: i32) -> ActionCardBuilder {
     )
 }
 
-fn categories_with_2_affordable_advances(p: &Player) -> Vec<String> {
+fn categories_with_2_affordable_advances(p: &Player) -> Vec<Advance> {
     advances::get_groups()
         .iter()
         .flat_map(|g| {
@@ -137,11 +137,11 @@ fn categories_with_2_affordable_advances(p: &Player) -> Vec<String> {
                 .filter(|pair| {
                     let a = pair[0];
                     let b = pair[1];
-                    let mut cost = p.advance_cost(a, None).cost;
-                    cost.default += p.advance_cost(b, None).cost.default;
-                    p.can_afford(&cost) && p.can_advance_free(a) && p.can_advance_free(b)
+                    let mut cost = p.advance_cost(a.advance, None).cost;
+                    cost.default += p.advance_cost(b.advance, None).cost.default;
+                    p.can_afford(&cost) && p.can_advance_free(a.advance) && p.can_advance_free(b.advance)
                 })
-                .map(|pair| pair[0].name.clone())
+                .map(|pair| pair[0].advance)
                 .collect_vec()
         })
         .collect()
@@ -209,7 +209,7 @@ pub(crate) fn use_teach_us() -> Builtin {
             })
         },
         |game, sel, _| {
-            let advance = &sel.choice;
+            let advance = sel.choice;
             game.add_info_log_item(&format!(
                 "{} selected {advance} as advance for Teach Us.",
                 sel.player_name,
@@ -226,12 +226,11 @@ pub(crate) fn use_teach_us() -> Builtin {
     .build()
 }
 
-pub(crate) fn teachable_advances(teacher: &Player, student: &Player) -> Vec<String> {
+pub(crate) fn teachable_advances(teacher: &Player, student: &Player) -> Vec<Advance> {
     teacher
         .advances
         .iter()
-        .filter(|a| student.can_advance_free(a))
-        .map(|a| a.name.clone())
+        .filter(|a| student.can_advance_free(*a))
         .collect()
 }
 
@@ -333,7 +332,7 @@ fn tech_trade(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             None
         },
         |game, sel, _| {
-            let advance = &sel.choice;
+            let advance = sel.choice;
             game.add_info_log_item(&format!(
                 "{} selected {advance} as advance for Technology Trade.",
                 sel.player_name,

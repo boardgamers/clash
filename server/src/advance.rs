@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::city_pieces::Building;
 use crate::content::advances::get_advance;
@@ -12,6 +13,7 @@ use Bonus::*;
 use enumset::EnumSetType;
 use std::mem;
 use serde::{Deserialize, Serialize};
+use crate::content::advances;
 
 // id / 4 = advance group
 #[derive(EnumSetType, Serialize, Deserialize, Debug, Ord, PartialOrd, Hash)]
@@ -87,12 +89,22 @@ pub enum Advance {
     Devotion = 45,
     Conversion = 46,
     Fanaticism = 47,
+    
+    // Civ specific
+    Terrace = 48,
+    
 }
 
 impl Advance {
     #[must_use]
     pub fn info(&self) -> &'static AdvanceInfo {
         get_advance(*self)
+    }
+}
+
+impl Display for Advance {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", get_advance(*self).name)
     }
 }
 

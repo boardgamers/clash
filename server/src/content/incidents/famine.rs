@@ -33,7 +33,7 @@ fn pestilence() -> Incident {
             You cannot construct buildings or wonders until you research Sanitation.",
         IncidentBaseEffect::None,
     )
-    .with_protection_advance("Sanitation")
+    .with_protection_advance(Advance::Sanitation)
     .add_decrease_mood(
         IncidentTarget::AllPlayers,
         MoodModifier::Decrease,
@@ -81,7 +81,7 @@ pub(crate) fn pestilence_permanent_effect() -> Builtin {
                 .permanent_effects
                 .contains(&PermanentEffect::Pestilence)
                 && matches!(i.action_type, PlayingActionType::Construct)
-                && !player.has_advance("Sanitation")
+                && !player.has_advance(Advance::Sanitation)
             {
                 *available = Err(
                     "Cannot construct buildings or wonders until you research Sanitation."
@@ -101,7 +101,7 @@ fn epidemics() -> Incident {
             Choose 1 (or 2 if you have Roads, Navigation, or Trade Routes) units and kill them.",
         IncidentBaseEffect::None,
     )
-    .with_protection_advance("Sanitation")
+    .with_protection_advance(Advance::Sanitation)
     .add_incident_units_request(
         IncidentTarget::AllPlayers,
         0,
@@ -198,7 +198,7 @@ pub(crate) fn famine(
     let player_pred2 = player_pred.clone();
     let city_pred2 = city_pred.clone();
     Incident::builder(id, name, description, incident_base_effect)
-        .with_protection_advance("Irrigation")
+        .with_protection_advance(Advance::Irrigation)
         .add_simple_incident_listener(target, 11, move |game, player_index, player_name, i| {
             // we lose the food regardless of the outcome
             let p = game.player(player_index);

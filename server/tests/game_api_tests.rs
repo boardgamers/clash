@@ -6,20 +6,9 @@ use server::content::persistent_events::{EventResponse, SelectedStructure, Struc
 use server::game_setup::setup_game;
 use server::log::current_player_turn_log;
 use server::unit::Units;
-use server::{
-    action::Action,
-    city::{City, MoodState::*},
-    city_pieces::Building::*,
-    construct, cultural_influence,
-    game::Game,
-    game_api,
-    map::Terrain::*,
-    playing_actions,
-    playing_actions::PlayingAction::*,
-    position::Position,
-    resource_pile::ResourcePile,
-};
+use server::{action::Action, advance, city::{City, MoodState::*}, city_pieces::Building::*, construct, cultural_influence, game::Game, game_api, map::Terrain::*, playing_actions, playing_actions::PlayingAction::*, position::Position, resource_pile::ResourcePile};
 use std::{collections::HashMap, vec};
+use itertools::Itertools;
 
 mod common;
 
@@ -59,16 +48,14 @@ fn basic_actions() {
 
     assert_eq!(
         vec![
-            String::from("Farming"),
-            String::from("Mining"),
-            String::from("Math"),
-            String::from("Engineering")
+            advance::Advance::Farming,
+            advance::Advance::Mining,
+            advance::Advance::Math,
+            advance::Advance::Engineering,
         ],
         player
             .advances
-            .iter()
-            .map(|a| a.name.clone())
-            .collect::<Vec<String>>()
+            .collect_vec()
     );
     assert_eq!(ResourcePile::culture_tokens(1), player.resources);
     assert_eq!(1, game.actions_left);

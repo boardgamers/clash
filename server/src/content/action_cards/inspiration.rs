@@ -55,7 +55,7 @@ fn advance(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             let advance = sel.choice.clone();
             gain_advance_without_payment(
                 game,
-                &advance,
+                advance,
                 sel.player_index,
                 ResourcePile::culture_tokens(1),
                 false,

@@ -56,8 +56,8 @@ fn astronomy() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.advance_cost,
         0,
-        |i, a, ()| {
-            if a.name == Advance::Navigation || a.name == Advance::Cartography {
+        |i, &a, ()| {
+            if a == Advance::Navigation || a == Advance::Cartography {
                 i.set_zero();
                 i.info
                     .log

@@ -32,7 +32,7 @@ fn pandemics() -> Incident {
         or units equal to the half of the number of their cities (rounded down).",
         IncidentBaseEffect::BarbariansMove,
     )
-    .with_protection_advance("Sanitation")
+    .with_protection_advance(Advance::Sanitation)
     .add_incident_units_request(
         IncidentTarget::AllPlayers,
         2,

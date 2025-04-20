@@ -26,7 +26,7 @@ pub fn get_all() -> Vec<Civilization> {
             "Maya",
             vec![
                 // todo add other effects
-                SpecialAdvance::builder("Terrace", Advance::Irrigation)
+                SpecialAdvance::builder(Advance::Terrace, "Terrace", Advance::Irrigation)
                     .with_reset_collect_stats()
                     .add_transient_event_listener(
                         |events| &mut events.terrain_collect_options,

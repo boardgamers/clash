@@ -1,3 +1,4 @@
+use server::advance::Advance;
 use crate::advance_ui::{AdvanceState, show_advance_menu};
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::{OkTooltip, cancel_button_with_tooltip, ok_button};
@@ -9,8 +10,8 @@ use server::status_phase::{ChangeGovernment, ChangeGovernmentType};
 #[derive(Clone)]
 pub struct ChooseAdditionalAdvances {
     government: String,
-    possible: Vec<String>,
-    selected: Vec<String>,
+    possible: Vec<Advance>,
+    selected: Vec<Advance>,
     needed: usize,
     request: ChangeGovernmentRequest,
 }
@@ -64,7 +65,7 @@ pub fn change_government_type_dialog(
                 .advances
                 .iter()
                 .skip(1) // the government advance itself is always chosen
-                .map(|a| a.name.clone())
+                .map(|a| a.advance)
                 .collect::<Vec<_>>();
             let needed = get_government(&rc.shown_player.government().unwrap())
                 .advances
@@ -114,10 +115,10 @@ pub fn choose_additional_advances_dialog(
         },
         |a| {
             let mut selected = choose.selected.clone();
-            if selected.contains(&a.name) {
-                selected.retain(|n| n != &a.name);
+            if selected.contains(&a.advance) {
+                selected.retain(|n| n != &a.advance);
             } else {
-                selected.push(a.name.clone());
+                selected.push(a.advance);
             }
             StateUpdate::OpenDialog(ActiveDialog::ChooseAdditionalAdvances(
                 ChooseAdditionalAdvances {

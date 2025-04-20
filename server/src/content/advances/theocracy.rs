@@ -43,11 +43,11 @@ fn dogma() -> AdvanceBuilder {
         |game, player_index, building| {
             if matches!(building, Temple) {
                 let player = game.player(player_index);
-                let choices: Vec<String> = get_group("Theocracy")
+                let choices: Vec<Advance> = get_group("Theocracy")
                     .advances
                     .iter()
-                    .filter(|a| player.can_advance_free(a))
-                    .map(|a| a.name.clone())
+                    .filter(|a| player.can_advance_free(a.advance))
+                    .map(|a| a.advance)
                     .collect();
                 if choices.is_empty() {
                     return None;
@@ -68,7 +68,7 @@ fn dogma() -> AdvanceBuilder {
             ));
             gain_advance_without_payment(
                 game,
-                &c.choice,
+                c.choice,
                 c.player_index,
                 ResourcePile::empty(),
                 true,

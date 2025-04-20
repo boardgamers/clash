@@ -32,16 +32,13 @@ impl Wonder {
         name: &str,
         description: &str,
         cost: PaymentOptions,
-        required_advances: Vec<&str>,
+        required_advances: Vec<Advance>,
     ) -> WonderBuilder {
         WonderBuilder::new(
             name,
             description,
             cost,
-            required_advances
-                .into_iter()
-                .map(ToString::to_string)
-                .collect(),
+            required_advances,
         )
     }
 }
@@ -50,7 +47,7 @@ pub struct WonderBuilder {
     name: String,
     descriptions: Vec<String>,
     cost: PaymentOptions,
-    required_advances: Vec<String>,
+    required_advances: Vec<Advance>,
     placement_requirement: Option<PlacementChecker>,
     builder: AbilityInitializerBuilder,
 }
@@ -60,7 +57,7 @@ impl WonderBuilder {
         name: &str,
         description: &str,
         cost: PaymentOptions,
-        required_advances: Vec<String>,
+        required_advances: Vec<Advance>,
     ) -> Self {
         Self {
             name: name.to_string(),
@@ -220,7 +217,7 @@ pub(crate) fn can_construct_wonder(
     }
     if !discount.ignore_required_advances {
         for advance in &wonder.required_advances {
-            if !player.has_advance(advance) {
+            if !player.has_advance(*advance) {
                 return Err(format!("Advance missing: {advance}"));
             }
         }

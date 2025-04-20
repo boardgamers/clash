@@ -1,4 +1,4 @@
-use crate::advance::{Advance, AdvanceInfo};
+use crate::advance::{Advance};
 use crate::city_pieces::{DestroyedStructures, DestroyedStructuresData};
 use crate::collect::reset_collect_within_range_for_all;
 use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
@@ -206,7 +206,7 @@ impl Player {
             civilization: self.civilization.name,
             active_leader: self.active_leader,
             available_leaders: self.available_leaders.into_iter().collect(),
-            advances: self.advances.into(),
+            advances: self.advances.into_iter().collect(),
             unlocked_special_advance: self.unlocked_special_advances,
             wonders_build: self.wonders_build,
             incident_tokens: self.incident_tokens,
@@ -452,7 +452,7 @@ impl Player {
         }
 
         for contradicting_advance in &advance.info().contradicting {
-            if self.has_advance(contradicting_advance) {
+            if self.has_advance(*contradicting_advance) {
                 return false;
             }
         }

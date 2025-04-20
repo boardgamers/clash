@@ -1,20 +1,20 @@
 use crate::action::update_stats;
 use crate::action_card::gain_action_card_from_pile;
+use crate::advance::Advance;
 use crate::consts::{ACTIONS, NON_HUMAN_PLAYERS};
 use crate::content::civilizations::{BARBARIANS, PIRATES};
 use crate::content::{
-    action_cards, advances, builtin, civilizations, incidents, objective_cards, wonders,
+    action_cards, builtin, civilizations, incidents, objective_cards, wonders,
 };
 use crate::game::{Game, GameState};
 use crate::map::Map;
 use crate::objective_card::gain_objective_card_from_pile;
-use crate::player::{Player, add_unit};
+use crate::player::{add_unit, Player};
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
 use crate::utils::{Rng, Shuffle};
 use itertools::Itertools;
 use std::collections::HashMap;
-use crate::advance::Advance;
 
 /// Creates a new [`Game`].
 ///

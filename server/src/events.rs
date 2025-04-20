@@ -18,7 +18,7 @@ impl EventOrigin {
     pub fn id(&self) -> String {
         match self {
             EventOrigin::Advance(name)
-            | EventOrigin::SpecialAdvance(name)
+            | EventOrigin::SpecialAdvance(name) => name.to_string(),
             | EventOrigin::Wonder(name)
             | EventOrigin::Leader(name)
             | EventOrigin::Objective(name)
@@ -33,7 +33,7 @@ impl EventOrigin {
     pub fn name(&self) -> String {
         match self {
             EventOrigin::Advance(name)
-            | EventOrigin::SpecialAdvance(name)
+            | EventOrigin::SpecialAdvance(name) => name.to_string(),
             | EventOrigin::Wonder(name)
             | EventOrigin::Leader(name)
             | EventOrigin::Objective(name)

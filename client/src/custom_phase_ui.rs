@@ -58,7 +58,7 @@ pub fn advance_reward_dialog(rc: &RenderContext, r: &AdvanceRequest, name: &str)
         |a| {
             StateUpdate::execute_with_confirm(
                 vec![format!("Select {}?", a.name)],
-                Action::Response(EventResponse::SelectAdvance(a.name.clone())),
+                Action::Response(EventResponse::SelectAdvance(a.advance)),
             )
         },
     )

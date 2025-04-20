@@ -34,7 +34,7 @@ pub struct Incident {
     pub id: u8,
     pub name: String,
     description: String,
-    protection_advance: Option<String>,
+    protection_advance: Option<Advance>,
     pub base_effect: IncidentBaseEffect,
     pub listeners: AbilityListeners,
     pub(crate) action_card: Option<ActionCard>,
@@ -98,11 +98,11 @@ pub enum PassedIncident {
 pub(crate) struct IncidentFilter {
     role: IncidentTarget,
     priority: i32,
-    protection_advance: Option<String>,
+    protection_advance: Option<Advance>,
 }
 
 impl IncidentFilter {
-    pub fn new(role: IncidentTarget, priority: i32, protection_advance: Option<String>) -> Self {
+    pub fn new(role: IncidentTarget, priority: i32, protection_advance: Option<Advance>) -> Self {
         Self {
             role,
             priority,
@@ -345,7 +345,7 @@ impl IncidentBuilder {
     }
 
     fn new_filter(&self, role: IncidentTarget, priority: i32) -> IncidentFilter {
-        IncidentFilter::new(role, priority, self.protection_advance.clone())
+        IncidentFilter::new(role, priority, self.protection_advance)
     }
 
     #[must_use]
@@ -658,7 +658,7 @@ pub fn is_active(
     }
     // protection advance does not protect against base effects
     if let Some(advance) = protection_advance {
-        if game.players[player].has_advance(advance) {
+        if game.player(player).has_advance(*advance) {
             return false;
         }
     }
