@@ -97,7 +97,7 @@ pub fn get_groups_uncached() -> Vec<AdvanceGroup> {
 }
 
 pub(crate) fn advance_group_builder(name: &str, advances: Vec<AdvanceBuilder>) -> AdvanceGroup {
-    let first = &advances[0].name.clone();
+    let first = &advances[0].advance;
     let government = GOVERNMENTS.into_iter().find(|i| first == i.leading);
     let a: Vec<AdvanceInfo> = advances
         .into_iter()
@@ -141,9 +141,7 @@ pub(crate) fn advance_group_builder(name: &str, advances: Vec<AdvanceBuilder>) -
 /// Panics if advance with name doesn't exist
 #[must_use]
 pub fn get_advance(advance: Advance) -> &'static AdvanceInfo {
-    cache::get().get_advance(advance).unwrap_or_else(|| {
-        panic!("Advance with name {advance:?} not found");
-    })
+    cache::get().get_advance(advance)
 }
 
 pub(crate) fn get_group(group: &str) -> &'static AdvanceGroup {
