@@ -9,7 +9,7 @@ use server::action::execute_action;
 use server::advance::{Advance, do_advance};
 use server::ai::AI;
 use server::city::City;
-use server::game::{Game, GameData};
+use server::game::{Game, GameData, GameState};
 use server::game_setup::setup_game;
 use server::map::Terrain;
 use server::player::add_unit;
@@ -133,14 +133,14 @@ async fn run(mut game: Game, features: &mut Features) {
     }
 }
 
-fn ai_autoplay(game: Game, f: &mut Features, state: &mut State) -> Game {
+fn ai_autoplay(mut game: Game, f: &mut Features, state: &mut State) -> Game {
     if let Some(ai) = &mut f.ai {
-        if state.ai_autoplay {
+        while state.ai_autoplay && game.state != GameState::Finished {
             // todo does this block the ui?
             // state.ai_autoplay = false;
             let action = ai.next_action(&game);
             let player_index = game.active_player();
-            return execute_action(game, action, player_index);
+            game = execute_action(game, action, player_index);
         }
     }
     game
