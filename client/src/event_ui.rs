@@ -34,7 +34,7 @@ pub fn event_help(rc: &RenderContext, origin: &EventOrigin) -> Vec<String> {
                 .civilization
                 .special_advances
                 .iter()
-                .find(|sa| &sa.name == s)
+                .find(|sa| &sa.advance == s)
                 .unwrap();
             s.description.clone()
         }],
@@ -59,7 +59,7 @@ pub fn custom_phase_event_origin(rc: &RenderContext) -> EventOrigin {
         .clone()
 }
 
-pub fn pay_help(rc: &RenderContext, p: &Payment) -> Vec<String> {
+pub fn pay_help<T>(rc: &RenderContext, p: &Payment<T>) -> Vec<String> {
     let mut result = vec!["Pay resources".to_string()];
     for o in p.cost.modifiers.clone() {
         result.extend(event_help(rc, &o));

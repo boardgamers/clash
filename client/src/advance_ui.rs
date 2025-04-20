@@ -11,7 +11,7 @@ use macroquad::prelude::{
     BLACK, BLUE, GRAY, Rect, WHITE, YELLOW, draw_rectangle, draw_rectangle_lines,
 };
 use server::action::Action;
-use server::advance::{AdvanceInfo, Bonus};
+use server::advance::{Advance, AdvanceInfo, Bonus};
 use server::content::advances;
 use server::game::GameState;
 use server::player::Player;
@@ -29,8 +29,8 @@ pub enum AdvanceState {
     Unavailable,
 }
 
-fn new_advance_payment(rc: &RenderContext, a: &AdvanceInfo) -> Payment {
-    rc.new_payment(&rc.shown_player.advance_cost(a.advance, None).cost, &a.name, false)
+fn new_advance_payment(rc: &RenderContext, a: &AdvanceInfo) -> Payment<Advance> {
+    rc.new_payment(&rc.shown_player.advance_cost(a.advance, None).cost, a.advance, &a.name, false)
 }
 
 pub fn show_paid_advance_menu(rc: &RenderContext) -> StateUpdate {
@@ -191,7 +191,7 @@ fn description(rc: &RenderContext, a: &AdvanceInfo) -> Vec<String> {
     parts
 }
 
-pub fn pay_advance_dialog(ap: &Payment, rc: &RenderContext) -> StateUpdate {
+pub fn pay_advance_dialog(ap: &Payment<Advance>, rc: &RenderContext) -> StateUpdate {
     let update = show_paid_advance_menu(rc);
     if !matches!(update, StateUpdate::None) {
         // select a different advance
@@ -200,7 +200,7 @@ pub fn pay_advance_dialog(ap: &Payment, rc: &RenderContext) -> StateUpdate {
     payment_dialog(rc, ap, true, ActiveDialog::AdvancePayment, |payment| {
         StateUpdate::execute_with_warning(
             Action::Playing(PlayingAction::Advance {
-                advance: ap.name.to_string(),
+                advance: ap.value,
                 payment,
             }),
             if rc.shown_player.incident_tokens == 1 {

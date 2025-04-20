@@ -26,7 +26,7 @@ pub enum MoveIntent {
 #[derive(Clone)]
 pub struct MovePayment {
     pub action: MovementAction,
-    pub payment: Payment,
+    pub payment: Payment<String>,
 }
 
 impl MoveIntent {
@@ -115,7 +115,7 @@ pub fn click(rc: &RenderContext, pos: Position, s: &MoveSelection, mouse_pos: Ve
             if !cost.is_free() {
                 return StateUpdate::OpenDialog(ActiveDialog::MovePayment(MovePayment {
                     action,
-                    payment: rc.new_payment(&cost, "Move units", true),
+                    payment: rc.new_payment(&cost, "Move units".to_string(), "Move units", true),
                 }));
             }
             StateUpdate::execute(Action::Movement(action))

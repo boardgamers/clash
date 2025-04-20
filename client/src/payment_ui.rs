@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::OkTooltip;
 use crate::event_ui::event_help;
@@ -36,7 +37,8 @@ impl HasCountSelectableObject for ResourcePayment {
 }
 
 #[derive(PartialEq, Eq, Debug, Clone)]
-pub struct Payment {
+pub struct Payment<T> {
+    pub value: T,
     pub name: String,
     pub cost: PaymentOptions,
     pub available: ResourcePile,
@@ -44,31 +46,23 @@ pub struct Payment {
     pub current: Vec<ResourcePayment>,
 }
 
-impl Payment {
+impl<T> Payment<T> {
     #[must_use]
     pub fn new(
         cost: &PaymentOptions,
         available: &ResourcePile,
+        value: T,
         name: &str,
         optional: bool,
-    ) -> Payment {
+    ) -> Payment<T> {
         Self {
+            value,
             name: name.to_string(),
             cost: cost.clone(),
             available: available.clone(),
             optional,
             current: resource_payment(cost, available),
         }
-    }
-
-    #[must_use]
-    pub fn new_gain(options: &PaymentOptions, name: &str) -> Payment {
-        let a = options.default.amount();
-        let mut available = ResourcePile::empty();
-        for r in options.possible_resource_types() {
-            available += ResourcePile::of(r, a);
-        }
-        Self::new(options, &available, name, false)
     }
 
     pub fn to_resource_pile(&self) -> ResourcePile {
@@ -104,11 +98,21 @@ impl Payment {
     }
 }
 
-pub fn payment_dialog(
+#[must_use]
+pub fn new_gain(options: &PaymentOptions, name: &str) -> Payment<String> {
+    let a = options.default.amount();
+    let mut available = ResourcePile::empty();
+    for r in options.possible_resource_types() {
+        available += ResourcePile::of(r, a);
+    }
+    Payment::new(options, &available, name.to_string(), name, false)
+}
+
+pub fn payment_dialog<T>(
     rc: &RenderContext,
-    payment: &Payment,
+    payment: &Payment<T>,
     may_cancel: bool,
-    to_dialog: impl FnOnce(Payment) -> ActiveDialog,
+    to_dialog: impl FnOnce(Payment<T>) -> ActiveDialog,
     execute_action: impl FnOnce(ResourcePile) -> StateUpdate,
 ) -> StateUpdate {
     multi_payment_dialog(
@@ -120,17 +124,17 @@ pub fn payment_dialog(
     )
 }
 
-pub fn multi_payment_dialog(
+pub fn multi_payment_dialog<T>(
     rc: &RenderContext,
-    payments: &[Payment],
-    to_dialog: impl FnOnce(Vec<Payment>) -> ActiveDialog,
+    payments: &[Payment<T>],
+    to_dialog: impl FnOnce(Vec<Payment<T>>) -> ActiveDialog,
     may_cancel: bool,
     execute_action: impl FnOnce(Vec<ResourcePile>) -> StateUpdate,
 ) -> StateUpdate {
     let tooltip = ok_tooltip(payments, payments[0].available.clone());
     let mut exec = false;
-    let mut added: Option<Payment> = None;
-    let mut removed: Option<Payment> = None;
+    let mut added: Option<Payment<T>> = None;
+    let mut removed: Option<Payment<T>> = None;
 
     for (i, payment) in payments.iter().enumerate() {
         let name = &payment.name;
@@ -213,7 +217,7 @@ pub fn multi_payment_dialog(
     StateUpdate::None
 }
 
-fn ok_tooltip(payments: &[Payment], mut available: ResourcePile) -> OkTooltip {
+fn ok_tooltip<T>(payments: &[Payment<T>], mut available: ResourcePile) -> OkTooltip {
     let mut valid: Vec<String> = vec![];
     let mut invalid: Vec<String> = vec![];
 
@@ -246,7 +250,7 @@ fn ok_tooltip(payments: &[Payment], mut available: ResourcePile) -> OkTooltip {
     }
 }
 
-fn replace_updated_payment(payment: &Payment, all: &[Payment]) -> Vec<Payment> {
+fn replace_updated_payment<T>(payment: &Payment<T>, all: &[Payment<T>]) -> Vec<Payment<T>> {
     all.iter()
         .map(|e| {
             if e.name == payment.name {
@@ -255,7 +259,7 @@ fn replace_updated_payment(payment: &Payment, all: &[Payment]) -> Vec<Payment> {
                 e.clone()
             }
         })
-        .collect::<Vec<_>>()
+        .collect_vec()
 }
 
 #[must_use]
@@ -280,12 +284,12 @@ fn resource_payment(options: &PaymentOptions, available: &ResourcePile) -> Vec<R
     resources
 }
 
-pub fn plus(mut payment: Payment, t: ResourceType) -> Payment {
+pub fn plus<T>(mut payment: Payment<T>, t: ResourceType) -> Payment<T> {
     payment.get_mut(t).selectable.current += 1;
     payment
 }
 
-pub fn minus(mut payment: Payment, t: ResourceType) -> Payment {
+pub fn minus<T>(mut payment: Payment<T>, t: ResourceType) -> Payment<T> {
     payment.get_mut(t).selectable.current -= 1;
     payment
 }

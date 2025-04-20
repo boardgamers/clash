@@ -15,7 +15,7 @@ use server::position::Position;
 #[derive(Clone)]
 pub struct IncreaseHappinessConfig {
     pub steps: Vec<(Position, u32)>,
-    pub payment: Payment,
+    pub payment: Payment<String>,
     pub custom: BaseOrCustomDialog,
 }
 
@@ -34,12 +34,13 @@ impl IncreaseHappinessConfig {
         p: &Player,
         new_steps: u32,
         custom: &BaseOrCustomDialog,
-    ) -> Option<Payment> {
+    ) -> Option<Payment<String>> {
         let c = happiness_cost(p, new_steps, None).cost;
         c.can_afford(&custom.action_type.remaining_resources(p))
             .then_some(Payment::new(
                 &c,
                 &custom.action_type.remaining_resources(p),
+                "Increase happiness".to_string(),
                 "Increase happiness",
                 false,
             ))

@@ -12,12 +12,13 @@ use crate::layout_ui::FONT_SIZE;
 use crate::log_ui::get_log_end;
 use crate::map_ui::ExploreResolutionConfig;
 use crate::move_ui::{MoveDestination, MoveIntent, MovePayment, MoveSelection};
-use crate::payment_ui::Payment;
+use crate::payment_ui::{new_gain, Payment};
 use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
 use crate::render_context::RenderContext;
 use crate::status_phase_ui::ChooseAdditionalAdvances;
 use macroquad::prelude::*;
 use server::action::Action;
+use server::advance::Advance;
 use server::card::HandCard;
 use server::city::{City, MoodState};
 use server::content::persistent_events::{
@@ -39,7 +40,7 @@ pub enum ActiveDialog {
     // playing actions
     IncreaseHappiness(IncreaseHappinessConfig),
     AdvanceMenu,
-    AdvancePayment(Payment),
+    AdvancePayment(Payment<Advance>),
     ConstructionPayment(ConstructionPayment),
     CollectResources(CollectResources),
     RecruitUnitSelection(RecruitAmount),
@@ -49,9 +50,9 @@ pub enum ActiveDialog {
     ExploreResolution(ExploreResolutionConfig),
 
     // custom
-    ResourceRewardRequest(Payment),
+    ResourceRewardRequest(Payment<String>),
     AdvanceRequest(AdvanceRequest),
-    PaymentRequest(Vec<Payment>),
+    PaymentRequest(Vec<Payment<String>>),
     PlayerRequest(PlayerRequest),
     PositionRequest(MultiSelection<Position>),
     UnitTypeRequest(UnitTypeRequest),
@@ -531,6 +532,7 @@ impl State {
                             Payment::new(
                                 &p.cost,
                                 &game.player(game.active_player()).resources,
+                                p.name.clone(),
                                 &p.name,
                                 p.optional,
                             )
@@ -538,7 +540,7 @@ impl State {
                         .collect(),
                 ),
                 PersistentEventRequest::ResourceReward(r) => {
-                    ActiveDialog::ResourceRewardRequest(Payment::new_gain(&r.reward, &r.name))
+                    ActiveDialog::ResourceRewardRequest(new_gain(&r.reward, &r.name))
                 }
                 PersistentEventRequest::SelectAdvance(r) => ActiveDialog::AdvanceRequest(r.clone()),
                 PersistentEventRequest::SelectPositions(r) => {

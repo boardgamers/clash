@@ -86,9 +86,9 @@ impl RenderContext<'_> {
         self.game.active_player() == self.state.show_player
     }
 
-    pub fn new_payment(&self, cost: &PaymentOptions, name: &str, optional: bool) -> Payment {
+    pub fn new_payment<T>(&self, cost: &PaymentOptions, value: T, name: &str, optional: bool) -> Payment<T> {
         let available = &self.shown_player.resources;
-        Payment::new(cost, available, name, optional)
+        Payment::new(cost, available, value, name, optional)
     }
 
     pub fn player_color(&self, player_index: usize) -> Color {

@@ -57,7 +57,7 @@ pub struct ConstructionPayment {
     pub player_index: usize,
     pub city_position: Position,
     pub project: ConstructionProject,
-    pub payment: Payment,
+    pub payment: Payment<String>,
 }
 
 impl ConstructionPayment {
@@ -72,7 +72,7 @@ impl ConstructionPayment {
             player_index: city.player_index,
             city_position: city.position,
             project,
-            payment: rc.new_payment(&cost.cost, name, false),
+            payment: rc.new_payment(&cost.cost, name.to_string(), name, false),
         }
     }
 }
