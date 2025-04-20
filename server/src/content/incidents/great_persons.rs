@@ -299,7 +299,7 @@ fn great_prophet() -> ActionCard {
 
 fn temple_cost(game: &Game, player: &Player) -> PaymentOptions {
     player
-        .building_cost(game, Building::Temple, CostTrigger::NoModifiers)
+        .building_cost(game, Building::Temple, game.execute_cost_trigger())
         .cost
 }
 

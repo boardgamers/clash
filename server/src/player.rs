@@ -781,7 +781,7 @@ impl Player {
         let event = get_event(&self.events.transient).get();
         let mut cost_info = CostInfo::new(self, value.clone());
         match trigger {
-            CostTrigger::WithModifiers | CostTrigger::Execute => {
+            CostTrigger::WithModifiers => {
                 let m =
                     event.trigger_with_modifiers(&mut cost_info, info, details, &mut (), trigger);
                 cost_info.cost.modifiers = m;

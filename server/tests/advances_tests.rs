@@ -30,6 +30,8 @@ const JSON: JsonTest = JsonTest::new("advances");
 #[test]
 fn test_sanitation_and_draft() {
     // we should figure out that sanitation or draft are used, but not both
+    // actually that code turns out to be too complicated and slow, so the log now says you
+    // used both
     let units = Units::new(1, 1, 0, 0, 0, 0);
     let city_position = Position::from_offset("A1");
     JSON.test(

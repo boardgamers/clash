@@ -10,7 +10,7 @@ use crate::content::incidents::great_persons::{
 };
 use crate::content::persistent_events::HandCardsRequest;
 use crate::game::Game;
-use crate::player::Player;
+use crate::player::{CostTrigger, Player};
 use crate::playing_actions::{ActionCost, PlayingActionType};
 use crate::resource_pile::ResourcePile;
 use crate::utils::remove_element_by;

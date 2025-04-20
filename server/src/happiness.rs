@@ -25,6 +25,7 @@ pub(crate) fn increase_happiness(
     happiness_increases: &[(Position, u8)],
     payment: Option<ResourcePile>,
 ) {
+    let trigger = game.execute_cost_trigger();
     let player = &mut game.players[player_index];
     let mut angry_activations = vec![];
     let mut step_sum = 0;
@@ -45,7 +46,7 @@ pub(crate) fn increase_happiness(
     }
 
     if let Some(r) = payment {
-        happiness_cost(player, step_sum, game.execute_cost_trigger()).pay(game, &r);
+        happiness_cost(player, step_sum, trigger).pay(game, &r);
     }
 }
 

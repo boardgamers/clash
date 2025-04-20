@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::action_card::{ActionCard, ActionCardBuilder, CivilCardTarget, discard_action_card};
-use crate::advance::{Advance, gain_advance_without_payment};
+use crate::action_card::{discard_action_card, ActionCard, ActionCardBuilder, CivilCardTarget};
+use crate::advance::{gain_advance_without_payment, Advance};
 use crate::card::HandCard;
 use crate::content::action_cards::{get_action_card, inspiration};
 use crate::content::advances;
@@ -10,10 +10,11 @@ use crate::content::persistent_events::{
     AdvanceRequest, HandCardsRequest, PaymentRequest, PlayerRequest, PositionRequest,
 };
 use crate::content::tactics_cards::{
-    TacticsCardFactory, archers, defensive_formation, flanking, high_ground, high_morale, surprise,
-    wedge_formation,
+    archers, defensive_formation, flanking, high_ground, high_morale, surprise, wedge_formation,
+    TacticsCardFactory,
 };
-use crate::player::{CostTrigger, Player, add_unit};
+use crate::game::Game;
+use crate::player::{add_unit, Player};
 use crate::playing_actions::ActionCost;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
@@ -43,7 +44,7 @@ fn synergies(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Gain 2 advances from the same category without changing the Game Event counter. \
         Pay the price as usual.",
         ActionCost::regular(),
-        move |_game, p, _| !categories_with_2_affordable_advances(p).is_empty(),
+        move |game, p, _| !categories_with_2_affordable_advances(p, game).is_empty(),
     )
     .tactics_card(tactics_card)
     .add_advance_request(
@@ -52,6 +53,7 @@ fn synergies(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |game, p, _| {
             Some(AdvanceRequest::new(categories_with_2_affordable_advances(
                 game.player(p),
+                game
             )))
         },
         |game, sel, i| {
@@ -119,7 +121,7 @@ fn pay_for_advance(b: ActionCardBuilder, priority: i32) -> ActionCardBuilder {
     )
 }
 
-fn categories_with_2_affordable_advances(p: &Player) -> Vec<Advance> {
+fn categories_with_2_affordable_advances(p: &Player, game: &Game) -> Vec<Advance> {
     advances::get_groups()
         .iter()
         .flat_map(|g| {
@@ -136,9 +138,9 @@ fn categories_with_2_affordable_advances(p: &Player) -> Vec<Advance> {
                 .filter(|pair| {
                     let a = pair[0];
                     let b = pair[1];
-                    let mut cost = p.advance_cost(a.advance, CostTrigger::NoModifiers).cost;
+                    let mut cost = p.advance_cost(a.advance, game.execute_cost_trigger()).cost;
                     cost.default += p
-                        .advance_cost(b.advance, CostTrigger::NoModifiers)
+                        .advance_cost(b.advance, game.execute_cost_trigger())
                         .cost
                         .default;
                     p.can_afford(&cost)
