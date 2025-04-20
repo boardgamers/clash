@@ -158,9 +158,7 @@ where
                 return None;
             }
 
-            let Some(city) = get_barbarian_city(v) else {
-                return None;
-            };
+            let city = get_barbarian_city(v)?;
             let choices = get_barbarian_reinforcement_choices(game, city);
             Some(UnitTypeRequest::new(
                 choices,
