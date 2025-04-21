@@ -117,9 +117,9 @@ fn pay_for_advance(b: ActionCardBuilder, priority: i32) -> ActionCardBuilder {
             let advance = i.selected_advance.expect("advance not found");
             game.add_info_log_item(&format!(
                 "{} paid {} for advance {}",
+                 s.player_name,
+                s.choice[0],
                 advance.name(game),
-                s.player_name,
-                s.choice[0]
             ));
             gain_advance_without_payment(game, advance, s.player_index, s.choice[0].clone(), false);
         },
