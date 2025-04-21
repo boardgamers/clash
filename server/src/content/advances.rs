@@ -54,6 +54,7 @@ const GOVERNMENTS: [GovernmentInfo; 3] = [
     },
 ];
 
+#[derive(Clone)]
 pub struct AdvanceGroup {
     pub name: String,
     pub advances: Vec<AdvanceInfo>,

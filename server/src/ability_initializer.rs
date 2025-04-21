@@ -41,6 +41,7 @@ impl<C> SelectedChoice<C> {
     }
 }
 
+#[derive(Clone)]
 pub struct AbilityListeners {
     initializer: AbilityInitializerWithPrioDelta,
     deinitializer: AbilityInitializer,

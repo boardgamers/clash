@@ -108,6 +108,7 @@ impl Advance {
     }
 }
 
+#[derive(Clone)]
 pub struct AdvanceInfo {
     pub advance: Advance,
     pub name: String,
@@ -216,6 +217,7 @@ impl AbilityInitializerSetup for AdvanceBuilder {
     }
 }
 
+#[derive(Clone)]
 pub enum Bonus {
     MoodToken,
     CultureToken,

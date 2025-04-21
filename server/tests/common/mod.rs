@@ -22,6 +22,7 @@ use std::{
     path::MAIN_SEPARATOR as SEPARATOR,
     vec,
 };
+use server::cache::Cache;
 
 #[derive(Clone)]
 pub struct GamePath {
@@ -417,6 +418,7 @@ pub fn load_game(path: &GamePath) -> Game {
     let game = Game::from_data(
         serde_json::from_str(&read_game_str(path))
             .unwrap_or_else(|e| panic!("the game file should be deserializable {path}: {e}",)),
+        Cache::new(),
     );
     if update_expected() {
         write_result(&to_json(&game), path);

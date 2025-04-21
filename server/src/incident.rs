@@ -30,6 +30,7 @@ pub(crate) const BASE_EFFECT_PRIORITY: i32 = 100;
 ///
 /// An incident represents a Game Event that is triggerd for every third advance.
 /// We use the term incident to differentiate it from the events system to avoid confusion.
+#[derive(Clone)]
 pub struct Incident {
     pub id: u8,
     pub name: String,
@@ -66,6 +67,7 @@ impl Incident {
     }
 }
 
+#[derive(Clone)]
 pub enum IncidentBaseEffect {
     None,
     BarbariansSpawn,

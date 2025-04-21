@@ -74,6 +74,7 @@ impl CombatRole {
 
 type TacticsChecker = Box<dyn Fn(usize, &Game, &Combat) -> bool + Sync + Send>;
 
+#[derive(Clone)]
 pub struct TacticsCard {
     pub id: u8,
     pub name: String,

@@ -18,6 +18,7 @@ use serde::{Deserialize, Serialize};
 
 type PlacementChecker = Box<dyn Fn(Position, &Game) -> bool + Sync + Send>;
 
+#[derive(Clone)]
 pub struct Wonder {
     pub name: String,
     pub description: String,

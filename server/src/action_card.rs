@@ -24,6 +24,7 @@ pub enum CivilCardTarget {
     AllPlayers,
 }
 
+#[derive(Clone)]
 pub struct CivilCard {
     pub name: String,
     pub description: String,
@@ -34,6 +35,7 @@ pub struct CivilCard {
     pub(crate) target: CivilCardTarget,
 }
 
+#[derive(Clone)]
 pub struct ActionCard {
     pub id: u8,
     pub civil_card: CivilCard,

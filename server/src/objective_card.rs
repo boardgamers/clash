@@ -18,6 +18,7 @@ type StatusPhaseCheck = Box<dyn Fn(&Game, &Player) -> bool + Sync + Send>;
 
 type StatusPhaseUpdate = Box<dyn Fn(&mut Game, usize) + Sync + Send>;
 
+#[derive(Clone)]
 pub struct Objective {
     pub name: String,
     pub description: String,
@@ -33,6 +34,7 @@ impl Objective {
         ObjectiveBuilder::new(name, description)
     }
 }
+#[derive(Clone)]
 pub struct ObjectiveCard {
     pub id: u8,
     pub objectives: [Objective; 2],

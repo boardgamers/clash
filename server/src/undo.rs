@@ -40,6 +40,7 @@ pub(crate) fn undo(mut game: Game) -> Result<Game, String> {
 
     Ok(Game::from_data(
         serde_json::from_value(v).map_err(|e| format!("Failed to deserialize game: {e}"))?,
+        game.cache
     ))
 }
 

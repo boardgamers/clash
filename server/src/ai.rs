@@ -11,6 +11,7 @@ use crate::{
     position::Position,
     utils::{self, Rng},
 };
+use crate::cache::Cache;
 
 const ACTION_SCORE_WEIGHTING: f64 = 1.0;
 const ADAPTIVE_DIFFICULTY_SCORE_THRESHOLD: f64 = 10.0;
@@ -218,9 +219,9 @@ async fn evaluate_action(
     (score / iterations as f64) * action_score * action_group_score
 }
 
-fn monte_carlo_score(mut rng: Rng, player_index: usize, game_data: GameData) -> f64 {
+fn monte_carlo_score(mut rng: Rng, player_index: usize, game_data: GameData, cache: Cache) -> f64 {
     let mut ai = AiActions::new();
-    let mut game = Game::from_data(game_data);
+    let mut game = Game::from_data(game_data, cache);
     game.supports_undo = false;
     let new_game = monte_carlo_run(&mut ai, game, &mut rng);
     let ai_score = new_game.players[player_index].victory_points(&new_game) as f64;

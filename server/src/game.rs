@@ -67,7 +67,7 @@ pub struct Game {
 
 impl Clone for Game {
     fn clone(&self) -> Self {
-        let mut game = Self::from_data(self.cloned_data());
+        let mut game = Self::from_data(self.cloned_data(), self.cache.clone());
         game.supports_undo = self.supports_undo;
         game
     }
