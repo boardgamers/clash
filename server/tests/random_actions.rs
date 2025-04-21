@@ -13,7 +13,7 @@ use std::panic::{AssertUnwindSafe, catch_unwind};
 
 mod common;
 
-const ITERATIONS: usize = 96;
+const ITERATIONS: usize = 100;
 
 #[tokio::test]
 async fn test_random_actions() {
@@ -33,7 +33,10 @@ async fn test_random_actions() {
             handle.await;
         }
         iterations += num_cores;
+        if iterations >= ITERATIONS {
+            break;
         }
+    }
 }
 
 fn random_actions_iterations(mut rng: Rng) {
