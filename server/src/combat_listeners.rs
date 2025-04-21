@@ -458,12 +458,14 @@ pub(crate) fn trigger_tactics_event<T>(
 where
     T: Clone + PartialEq,
 {
-    let attacker_card =
-        get_attacker_tactics_card(&event_type).map(|c| game.cache.get_tactics_card(*c));
-    let defender_card =
-        get_defender_tactics_card(&event_type).map(|c| game.cache.get_tactics_card(*c));
+    let attacker_card = |event_type: &T, game: &Game| -> Option<&TacticsCard> {
+        get_attacker_tactics_card(&event_type).map(|c| game.cache.get_tactics_card(*c))
+    };
+    let defender_card = |event_type: &T, game: &Game| -> Option<&TacticsCard> {
+        get_defender_tactics_card(&event_type).map(|c| game.cache.get_tactics_card(*c))
+    };
 
-    if attacker_card.is_none() && defender_card.is_none() {
+    if attacker_card(&event_type,game).is_none() && defender_card(&event_type,game).is_none() {
         return Some(event_type);
     }
 
@@ -472,14 +474,14 @@ where
     add_tactics_listener(
         game,
         reveal_card,
-        attacker_card,
+        attacker_card(&event_type,game),
         combat,
         CombatRole::Attacker,
     );
     add_tactics_listener(
         game,
         reveal_card,
-        defender_card,
+        defender_card(&event_type,game),
         combat,
         CombatRole::Defender,
     );
@@ -487,12 +489,12 @@ where
     let players = &combat.players();
     let result = game.trigger_persistent_event(players, event, event_type, store_type);
 
-    if let Some(card) = attacker_card {
+    if let Some(card) = attacker_card(&event_type,game) {
         for p in players {
             card.listeners.deinit(game, *p);
         }
     }
-    if let Some(card) = defender_card {
+    if let Some(card) = defender_card(&event_type,game) {
         for p in players {
             card.listeners.deinit(game, *p);
         }

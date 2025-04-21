@@ -5,7 +5,6 @@ pub(crate) mod non_combat;
 pub(crate) mod resource_objectives;
 pub(crate) mod unit_objectives;
 
-use crate::cache;
 use crate::content::objective_cards;
 use crate::objective_card::Objective;
 use itertools::Itertools;

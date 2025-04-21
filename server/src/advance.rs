@@ -1,6 +1,5 @@
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::city_pieces::Building;
-use crate::content::advances::get_advance;
 use crate::content::persistent_events::PersistentEventType;
 use crate::events::EventOrigin;
 use crate::game::Game;
@@ -11,7 +10,6 @@ use crate::{ability_initializer::AbilityInitializerSetup, resource_pile::Resourc
 use Bonus::*;
 use enumset::EnumSetType;
 use serde::{Deserialize, Serialize};
-use std::fmt::Display;
 use std::mem;
 
 // id / 4 = advance group
@@ -95,7 +93,7 @@ pub enum Advance {
 
 impl Advance {
     #[must_use]
-    pub fn info(&self, game: &Game) -> &AdvanceInfo {
+    pub fn info<'a>(&self, game: &'a Game) -> &'a AdvanceInfo {
         game.cache.get_advance(*self)
     }
 

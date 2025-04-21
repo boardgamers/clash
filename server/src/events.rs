@@ -34,7 +34,7 @@ impl EventOrigin {
     pub fn name(&self, game: &Game) -> String {
         let cache = &game.cache;
         match self {
-            EventOrigin::Advance(name) | EventOrigin::SpecialAdvance(name) => name.to_string(),
+            EventOrigin::Advance(name) | EventOrigin::SpecialAdvance(name) => name.name(game).to_string(),
             EventOrigin::Wonder(name)
             | EventOrigin::Leader(name)
             | EventOrigin::Objective(name)
@@ -47,7 +47,6 @@ impl EventOrigin {
 }
 
 use crate::advance::Advance;
-use crate::content::incidents;
 use crate::player::CostTrigger;
 use serde::{Deserialize, Serialize};
 use crate::game::Game;

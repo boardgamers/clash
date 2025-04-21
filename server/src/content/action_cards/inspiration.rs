@@ -1,14 +1,13 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{ActionCard, ActionCardBuilder};
-use crate::advance::{Advance, gain_advance_without_payment};
+use crate::advance::{gain_advance_without_payment, Advance};
 use crate::city::MoodState;
 use crate::content::action_cards::spy::spy;
 use crate::content::action_cards::synergies::teachable_advances;
-use crate::content::advances;
 use crate::content::persistent_events::{AdvanceRequest, PaymentRequest, PositionRequest};
 use crate::content::tactics_cards::{
-    TacticsCardFactory, encircled, heavy_resistance, high_ground, high_morale, peltasts, siege,
-    surprise, wedge_formation,
+    encircled, heavy_resistance, high_ground, high_morale, peltasts, siege, surprise,
+    wedge_formation, TacticsCardFactory,
 };
 use crate::game::Game;
 use crate::payment::PaymentOptions;

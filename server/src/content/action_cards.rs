@@ -6,8 +6,7 @@ pub(crate) mod negotiation;
 pub(crate) mod spy;
 pub(crate) mod synergies;
 
-use crate::action_card::{ActionCard, CivilCard};
-use crate::cache;
+use crate::action_card::ActionCard;
 use crate::content::action_cards::inspiration::inspiration_action_cards;
 use crate::content::action_cards::negotiation::negotiation_action_cards;
 use crate::content::action_cards::synergies::synergies_action_cards;
