@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Advance;
-use crate::collect::reset_collect_within_range_for_all;
+use crate::ai_collect::reset_collect_within_range_for_all;
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{
     EventResponse, PersistentEventRequest, PersistentEventType,

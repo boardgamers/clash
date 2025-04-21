@@ -28,7 +28,7 @@ pub(crate) fn pirates_round_bonus() -> Builtin {
                 {
                     let hits = r.casualties(CombatRole::Defender).fighters as u32;
                     Some(ResourceRewardRequest::new(
-                        PaymentOptions::sum(hits, &[ResourceType::Gold]),
+                        PaymentOptions::sum(hits as u8, &[ResourceType::Gold]),
                         "-".to_string(),
                     ))
                 } else {

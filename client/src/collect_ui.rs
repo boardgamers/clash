@@ -15,6 +15,7 @@ use server::collect::{
     CollectInfo, PositionCollection, add_collect, get_total_collection,
     possible_resource_collections, tiles_used,
 };
+use server::player::CostTrigger;
 use server::playing_actions::{Collect, PlayingAction};
 use server::position::Position;
 use server::resource::ResourceType;
@@ -82,6 +83,7 @@ pub fn collect_dialog(rc: &RenderContext, collect: &CollectResources) -> StateUp
         collect.player_index,
         collect.city_position,
         &collect.collections,
+        CostTrigger::WithModifiers,
     );
     let tooltip = result.as_ref().map_or(
         OkTooltip::Invalid("Too many resources selected".to_string()),
@@ -124,7 +126,13 @@ fn click_collect_option(
     let c = add_collect(&col.info, p, pile, &col.collections);
 
     let used = c.clone().into_iter().collect_vec();
-    let i = possible_resource_collections(rc.game, col.info.city, col.player_index, &used);
+    let i = possible_resource_collections(
+        rc.game,
+        col.info.city,
+        col.player_index,
+        &used,
+        CostTrigger::WithModifiers,
+    );
     let mut new = col.clone();
     new.info = i;
     new.collections = c;
@@ -173,7 +181,7 @@ pub fn draw_resource_collect_tile(rc: &RenderContext, pos: Position) -> StateUpd
         }
 
         let map = new_resource_map(pile);
-        let m: Vec<(ResourceType, &u32)> = ResourceType::all()
+        let m: Vec<(ResourceType, &u8)> = ResourceType::all()
             .iter()
             .filter_map(|r| {
                 let a = map.get(r);
@@ -196,7 +204,7 @@ pub fn draw_resource_collect_tile(rc: &RenderContext, pos: Position) -> StateUpd
 fn draw_collect_item(
     rc: &RenderContext,
     center: Vec2,
-    resources: &[(ResourceType, &u32)],
+    resources: &[(ResourceType, &u8)],
     size: f32,
 ) {
     if resources.iter().len() == 1 {

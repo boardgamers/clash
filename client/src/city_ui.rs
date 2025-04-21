@@ -24,6 +24,7 @@ use server::construct::{can_construct, new_building_positions};
 use server::consts::BUILDING_COST;
 use server::content::persistent_events::Structure;
 use server::game::Game;
+use server::player::CostTrigger;
 use server::playing_actions::PlayingActionType;
 use server::resource::ResourceType;
 use server::unit::{UnitType, Units};
@@ -117,7 +118,7 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
     Building::all()
         .into_iter()
         .flat_map(|b| {
-            let can = can_construct(city, b, rc.shown_player, game);
+            let can = can_construct(city, b, rc.shown_player, game, CostTrigger::WithModifiers);
 
             new_building_positions(game, b, city)
                 .into_iter()
@@ -205,6 +206,7 @@ fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option
                     city.position,
                     city.player_index,
                     &Vec::new(),
+                    CostTrigger::WithModifiers,
                 );
                 ActiveDialog::CollectResources(CollectResources::new(
                     city.player_index,
@@ -389,7 +391,7 @@ fn draw_buildings(
 pub fn add_building_description(rc: &RenderContext, parts: &mut Vec<String>, b: Building) {
     let pile = rc
         .shown_player
-        .building_cost(rc.game, b, None)
+        .building_cost(rc.game, b, CostTrigger::WithModifiers)
         .cost
         .first_valid_payment(&BUILDING_COST)
         .expect("Building cost should be valid");

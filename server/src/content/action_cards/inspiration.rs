@@ -255,12 +255,12 @@ fn ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .build()
 }
 
-fn academies(player: &Player) -> u32 {
+fn academies(player: &Player) -> u8 {
     player
         .cities
         .iter()
         .filter(|c| c.pieces.academy.is_some())
-        .count() as u32
+        .count() as u8
 }
 
 fn great_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {

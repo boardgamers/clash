@@ -2,7 +2,7 @@ use itertools::Itertools;
 use macroquad::prelude::*;
 
 use server::game::Game;
-use server::player::Player;
+use server::player::{CostTrigger, Player};
 use server::player_events::CostInfo;
 use server::position::Position;
 use server::recruit::{recruit_cost, recruit_cost_without_replaced};
@@ -85,18 +85,14 @@ fn selectable_unit(
         &all,
         city_position,
         unit.leader_name.as_ref().or(leader_name),
-        None,
+        CostTrigger::WithModifiers,
     );
-    let max = if cost.is_ok() {
-        u32::from(current + 1)
-    } else {
-        u32::from(current)
-    };
+    let max = if cost.is_ok() { current + 1 } else { current };
     SelectableUnit {
         unit_type: unit.unit_type,
         cost,
         selectable: CountSelector {
-            current: u32::from(current),
+            current,
             min: 0,
             max,
         },
@@ -174,7 +170,7 @@ impl RecruitSelection {
             self.amount.city_position,
             self.amount.leader_name.as_ref(),
             self.replaced_units.as_slice(),
-            None,
+            CostTrigger::WithModifiers,
         )
         .map_or_else(
             |_| OkTooltip::Invalid("Replace exact amount of units".to_string()),
@@ -279,7 +275,7 @@ fn open_dialog(rc: &RenderContext, city: Position, sel: RecruitSelection) -> Sta
         city,
         sel.amount.leader_name.as_ref(),
         &sel.replaced_units,
-        None,
+        CostTrigger::WithModifiers,
     )
     .unwrap();
     StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(

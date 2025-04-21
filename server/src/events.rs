@@ -19,7 +19,7 @@ impl EventOrigin {
         match self {
             EventOrigin::Advance(name)
             // can't call to_string, because cache is not constructed
-            | EventOrigin::SpecialAdvance(name) => format!("{name:?}"), 
+            | EventOrigin::SpecialAdvance(name) => format!("{name:?}"),
             | EventOrigin::Wonder(name)
             | EventOrigin::Leader(name)
             | EventOrigin::Objective(name)
@@ -49,8 +49,8 @@ use crate::advance::Advance;
 use crate::content::action_cards::get_civil_card;
 use crate::content::incidents;
 use crate::content::tactics_cards::get_tactics_card;
+use crate::player::CostTrigger;
 use incidents::get_incident;
-use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 type Listener<T, U, V, W> = (
@@ -120,8 +120,14 @@ where
         info: &U,
         details: &V,
         extra_value: &mut W,
+        trigger: CostTrigger,
     ) -> Vec<EventOrigin> {
-        self.trigger_with_exclude(value, info, details, extra_value, &[])
+        if trigger == CostTrigger::WithModifiers {
+            self.trigger_with_exclude(value, info, details, extra_value, &[])
+        } else {
+            self.trigger(value, info, details, extra_value);
+            vec![]
+        }
     }
 
     pub(crate) fn trigger(&self, value: &mut T, info: &U, details: &V, extra_value: &mut W) {
@@ -152,45 +158,6 @@ where
             }
         }
         modifiers
-    }
-
-    pub(crate) fn trigger_with_minimal_modifiers(
-        &self,
-        value: &T,
-        info: &U,
-        details: &V,
-        extra_value: &mut W,
-        mut is_ok: impl FnMut(&T) -> bool,
-        set_modifiers: impl Fn(&mut T, Vec<EventOrigin>),
-    ) -> T
-    where
-        T: Clone + PartialEq,
-    {
-        let mut initial_value = value.clone();
-        let initial_modifiers =
-            self.trigger_with_modifiers(&mut initial_value, info, details, extra_value);
-        // to see what's possible
-        is_ok(&initial_value);
-
-        initial_modifiers
-            .iter()
-            .powerset()
-            .find_map(|try_modifiers| {
-                let mut v = value.clone();
-                let mut exclude = initial_modifiers.clone();
-                exclude.retain(|origin| !try_modifiers.contains(&origin));
-                let m = self.trigger_with_exclude(&mut v, info, details, extra_value, &exclude);
-                if is_ok(&v) {
-                    set_modifiers(&mut v, m);
-                    Some(v)
-                } else {
-                    None
-                }
-            })
-            .unwrap_or_else(|| {
-                set_modifiers(&mut initial_value, initial_modifiers);
-                initial_value
-            })
     }
 }
 
@@ -227,6 +194,7 @@ impl<T, U, V, W> Event<T, U, V, W> {
 mod tests {
     use super::{EventMut, EventOrigin};
     use crate::advance::Advance;
+    use crate::player::CostTrigger;
 
     #[test]
     fn mutable_event() {
@@ -256,7 +224,13 @@ mod tests {
         let mut item = 0;
         let addend = 2;
         let multiplier = 3;
-        let modifiers = event.trigger_with_modifiers(&mut item, &addend, &multiplier, &mut ());
+        let modifiers = event.trigger_with_modifiers(
+            &mut item,
+            &addend,
+            &multiplier,
+            &mut (),
+            CostTrigger::WithModifiers,
+        );
         assert_eq!(6, item);
         assert_eq!(
             vec![
@@ -269,55 +243,14 @@ mod tests {
         event.remove_listener_mut_by_key(&EventOrigin::Advance(multiply_value));
         let mut item = 0;
         let addend = 3;
-        let modifiers = event.trigger_with_modifiers(&mut item, &addend, &0, &mut ());
+        let modifiers = event.trigger_with_modifiers(
+            &mut item,
+            &addend,
+            &0,
+            &mut (),
+            CostTrigger::WithModifiers,
+        );
         assert_eq!(3, item);
         assert_eq!(vec![EventOrigin::Advance(add_constant)], modifiers);
-    }
-
-    #[test]
-    fn find_minimal_modifiers() {
-        #[derive(Clone, PartialEq)]
-        struct Info {
-            pub value: i32,
-            pub modifiers: Vec<EventOrigin>,
-        }
-
-        let a = Advance::Arts;
-        let b = Advance::Bartering;
-        let c = Advance::Cartography;
-
-        let mut event = EventMut::new("test");
-        event.add_listener_mut(
-            |value: &mut Info, (), (), ()| value.value += 1,
-            0,
-            EventOrigin::Advance(a),
-        );
-        event.add_listener_mut(
-            |value: &mut Info, (), (), ()| value.value += 2,
-            1,
-            EventOrigin::Advance(b),
-        );
-        event.add_listener_mut(
-            |value: &mut Info, (), (), ()| value.value += 4,
-            2,
-            EventOrigin::Advance(c),
-        );
-
-        assert_eq!(
-            vec![EventOrigin::Advance(c), EventOrigin::Advance(a)],
-            event
-                .trigger_with_minimal_modifiers(
-                    &Info {
-                        value: 0,
-                        modifiers: Vec::new(),
-                    },
-                    &(),
-                    &(),
-                    &mut (),
-                    |i| i.value == 5,
-                    |v, m| v.modifiers = m
-                )
-                .modifiers
-        );
     }
 }

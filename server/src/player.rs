@@ -1,6 +1,6 @@
 use crate::advance::Advance;
+use crate::ai_collect::reset_collect_within_range_for_all_except;
 use crate::city_pieces::{DestroyedStructures, DestroyedStructuresData};
-use crate::collect::reset_collect_within_range_for_all_except;
 use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::content::builtin;
 use crate::events::{Event, EventOrigin};
@@ -88,6 +88,12 @@ impl PartialEq for Player {
     fn eq(&self, other: &Self) -> bool {
         self.cloned_data() == other.cloned_data()
     }
+}
+
+#[derive(PartialEq, Eq, Copy, Clone)]
+pub enum CostTrigger {
+    WithModifiers,
+    NoModifiers,
 }
 
 impl Player {
@@ -425,7 +431,7 @@ impl Player {
         self.resources -= resources;
     }
 
-    pub(crate) fn can_gain_resource(&self, r: ResourceType, amount: u32) -> bool {
+    pub(crate) fn can_gain_resource(&self, r: ResourceType, amount: u8) -> bool {
         match r {
             ResourceType::MoodTokens | ResourceType::CultureTokens => true,
             _ => self.resources.get(&r) + amount <= self.resource_limit.get(&r),
@@ -465,7 +471,8 @@ impl Player {
 
     #[must_use]
     pub fn can_advance(&self, advance: Advance) -> bool {
-        self.can_afford(&self.advance_cost(advance, None).cost) && self.can_advance_free(advance)
+        self.can_afford(&self.advance_cost(advance, CostTrigger::NoModifiers).cost)
+            && self.can_advance_free(advance)
     }
 
     #[must_use]
@@ -606,12 +613,7 @@ impl Player {
     }
 
     #[must_use]
-    pub fn building_cost(
-        &self,
-        game: &Game,
-        building: Building,
-        execute: Option<&ResourcePile>,
-    ) -> CostInfo {
+    pub fn building_cost(&self, game: &Game, building: Building, execute: CostTrigger) -> CostInfo {
         self.trigger_cost_event(
             |e| &e.construct_cost,
             &PaymentOptions::resources(BUILDING_COST),
@@ -622,7 +624,7 @@ impl Player {
     }
 
     #[must_use]
-    pub fn advance_cost(&self, advance: Advance, execute: Option<&ResourcePile>) -> CostInfo {
+    pub fn advance_cost(&self, advance: Advance, execute: CostTrigger) -> CostInfo {
         self.trigger_cost_event(
             |e| &e.advance_cost,
             &PaymentOptions::sum(
@@ -773,34 +775,21 @@ impl Player {
         value: &PaymentOptions,
         info: &U,
         details: &V,
-        execute: Option<&ResourcePile>,
+        trigger: CostTrigger,
     ) -> CostInfo {
         let event = get_event(&self.events.transient).get();
         let mut cost_info = CostInfo::new(self, value.clone());
-        let mut can_avoid_activate = false;
-        if let Some(execute) = execute {
-            event.trigger_with_minimal_modifiers(
-                &cost_info,
-                info,
-                details,
-                &mut (),
-                |i| {
-                    if can_avoid_activate && i.activate_city {
-                        return false;
-                    }
-                    if !i.activate_city {
-                        can_avoid_activate = true;
-                    }
-
-                    i.cost.is_valid_payment(execute)
-                },
-                |i, m| i.cost.modifiers = m,
-            )
-        } else {
-            let m = event.trigger_with_modifiers(&mut cost_info, info, details, &mut ());
-            cost_info.cost.modifiers = m;
-            cost_info
+        match trigger {
+            CostTrigger::WithModifiers => {
+                let m =
+                    event.trigger_with_modifiers(&mut cost_info, info, details, &mut (), trigger);
+                cost_info.cost.modifiers = m;
+            }
+            CostTrigger::NoModifiers => {
+                event.trigger(&mut cost_info, info, details, &mut ());
+            }
         }
+        cost_info
     }
 }
 

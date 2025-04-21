@@ -39,7 +39,7 @@ fn scientific_trade() -> Incident {
             ideas = ideas.max(2);
         }
 
-        let pile = ResourcePile::ideas(ideas as u32);
+        let pile = ResourcePile::ideas(ideas as u8);
         player.gain_resources(pile.clone());
         game.add_info_log_item(&format!("{name} gained {pile}"));
     })
@@ -71,7 +71,7 @@ fn flourishing_trade() -> Incident {
             gold = gold.max(1);
         }
 
-        let pile = ResourcePile::gold(gold as u32);
+        let pile = ResourcePile::gold(gold as u8);
         player.gain_resources(pile.clone());
         game.add_info_log_item(&format!("{name} gained {pile}"));
     })
@@ -107,7 +107,7 @@ fn era_of_stability() -> Incident {
                 tokens = tokens.max(1);
             }
             Some(ResourceRewardRequest::new(
-                PaymentOptions::tokens(tokens as u32),
+                PaymentOptions::tokens(tokens as u8),
                 "Select token to gain".to_string(),
             ))
         },

@@ -8,9 +8,9 @@ use macroquad::prelude::{GRAY, RED};
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct CountSelector {
-    pub current: u32,
-    pub min: u32,
-    pub max: u32,
+    pub current: u8,
+    pub min: u8,
+    pub max: u8,
 }
 
 pub trait HasCountSelectableObject {

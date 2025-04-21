@@ -11,38 +11,38 @@ use std::{
 #[derive(Default, Clone, Serialize, Deserialize, PartialEq, Eq, Debug, Hash)]
 pub struct ResourcePile {
     #[serde(default)]
-    #[serde(skip_serializing_if = "u32::is_zero")]
-    pub food: u32,
+    #[serde(skip_serializing_if = "u8::is_zero")]
+    pub food: u8,
     #[serde(default)]
-    #[serde(skip_serializing_if = "u32::is_zero")]
-    pub wood: u32,
+    #[serde(skip_serializing_if = "u8::is_zero")]
+    pub wood: u8,
     #[serde(default)]
-    #[serde(skip_serializing_if = "u32::is_zero")]
-    pub ore: u32,
+    #[serde(skip_serializing_if = "u8::is_zero")]
+    pub ore: u8,
     #[serde(default)]
-    #[serde(skip_serializing_if = "u32::is_zero")]
-    pub ideas: u32,
+    #[serde(skip_serializing_if = "u8::is_zero")]
+    pub ideas: u8,
     #[serde(default)]
-    #[serde(skip_serializing_if = "u32::is_zero")]
-    pub gold: u32,
+    #[serde(skip_serializing_if = "u8::is_zero")]
+    pub gold: u8,
     #[serde(default)]
-    #[serde(skip_serializing_if = "u32::is_zero")]
-    pub mood_tokens: u32,
+    #[serde(skip_serializing_if = "u8::is_zero")]
+    pub mood_tokens: u8,
     #[serde(default)]
-    #[serde(skip_serializing_if = "u32::is_zero")]
-    pub culture_tokens: u32,
+    #[serde(skip_serializing_if = "u8::is_zero")]
+    pub culture_tokens: u8,
 }
 
 impl ResourcePile {
     #[must_use]
     pub const fn new(
-        food: u32,
-        wood: u32,
-        ore: u32,
-        ideas: u32,
-        gold: u32,
-        mood_tokens: u32,
-        culture_tokens: u32,
+        food: u8,
+        wood: u8,
+        ore: u8,
+        ideas: u8,
+        gold: u8,
+        mood_tokens: u8,
+        culture_tokens: u8,
     ) -> Self {
         Self {
             food,
@@ -56,14 +56,14 @@ impl ResourcePile {
     }
 
     #[must_use]
-    pub const fn of(resource_type: ResourceType, amount: u32) -> Self {
+    pub const fn of(resource_type: ResourceType, amount: u8) -> Self {
         let mut p = Self::empty();
         p.add_type(resource_type, amount as i32);
         p
     }
 
     #[must_use]
-    pub fn get(&self, resource_type: &ResourceType) -> u32 {
+    pub fn get(&self, resource_type: &ResourceType) -> u8 {
         match resource_type {
             ResourceType::Food => self.food,
             ResourceType::Wood => self.wood,
@@ -76,12 +76,25 @@ impl ResourcePile {
     }
 
     #[must_use]
+    pub fn get_mut(&mut self, resource_type: &ResourceType) -> &mut u8 {
+        match resource_type {
+            ResourceType::Food => &mut self.food,
+            ResourceType::Wood => &mut self.wood,
+            ResourceType::Ore => &mut self.ore,
+            ResourceType::Ideas => &mut self.ideas,
+            ResourceType::Gold => &mut self.gold,
+            ResourceType::MoodTokens => &mut self.mood_tokens,
+            ResourceType::CultureTokens => &mut self.culture_tokens,
+        }
+    }
+
+    #[must_use]
     pub fn has_at_least(&self, other: &ResourcePile) -> bool {
         self.has_at_least_times(other, 1)
     }
 
     #[must_use]
-    pub fn has_at_least_times(&self, other: &ResourcePile, times: u32) -> bool {
+    pub fn has_at_least_times(&self, other: &ResourcePile, times: u8) -> bool {
         self.food >= other.food * times
             && self.wood >= other.wood * times
             && self.ore >= other.ore * times
@@ -96,52 +109,52 @@ impl ResourcePile {
     /// Panics if `resource_type` is `Discount`
     pub const fn add_type(&mut self, resource_type: ResourceType, amount: i32) {
         match resource_type {
-            ResourceType::Food => self.food = (self.food as i32 + amount) as u32,
-            ResourceType::Wood => self.wood = (self.wood as i32 + amount) as u32,
-            ResourceType::Ore => self.ore = (self.ore as i32 + amount) as u32,
-            ResourceType::Ideas => self.ideas = (self.ideas as i32 + amount) as u32,
-            ResourceType::Gold => self.gold = (self.gold as i32 + amount) as u32,
+            ResourceType::Food => self.food = (self.food as i32 + amount) as u8,
+            ResourceType::Wood => self.wood = (self.wood as i32 + amount) as u8,
+            ResourceType::Ore => self.ore = (self.ore as i32 + amount) as u8,
+            ResourceType::Ideas => self.ideas = (self.ideas as i32 + amount) as u8,
+            ResourceType::Gold => self.gold = (self.gold as i32 + amount) as u8,
             ResourceType::MoodTokens => {
-                self.mood_tokens = (self.mood_tokens as i32 + amount) as u32;
+                self.mood_tokens = (self.mood_tokens as i32 + amount) as u8;
             }
             ResourceType::CultureTokens => {
-                self.culture_tokens = (self.culture_tokens as i32 + amount) as u32;
+                self.culture_tokens = (self.culture_tokens as i32 + amount) as u8;
             }
         }
     }
 
     #[must_use]
-    pub const fn food(amount: u32) -> Self {
+    pub const fn food(amount: u8) -> Self {
         Self::new(amount, 0, 0, 0, 0, 0, 0)
     }
 
     #[must_use]
-    pub const fn wood(amount: u32) -> Self {
+    pub const fn wood(amount: u8) -> Self {
         Self::new(0, amount, 0, 0, 0, 0, 0)
     }
 
     #[must_use]
-    pub const fn ore(amount: u32) -> Self {
+    pub const fn ore(amount: u8) -> Self {
         Self::new(0, 0, amount, 0, 0, 0, 0)
     }
 
     #[must_use]
-    pub const fn ideas(amount: u32) -> Self {
+    pub const fn ideas(amount: u8) -> Self {
         Self::new(0, 0, 0, amount, 0, 0, 0)
     }
 
     #[must_use]
-    pub const fn gold(amount: u32) -> Self {
+    pub const fn gold(amount: u8) -> Self {
         Self::new(0, 0, 0, 0, amount, 0, 0)
     }
 
     #[must_use]
-    pub const fn mood_tokens(amount: u32) -> Self {
+    pub const fn mood_tokens(amount: u8) -> Self {
         Self::new(0, 0, 0, 0, 0, amount, 0)
     }
 
     #[must_use]
-    pub const fn culture_tokens(amount: u32) -> Self {
+    pub const fn culture_tokens(amount: u8) -> Self {
         Self::new(0, 0, 0, 0, 0, 0, amount)
     }
 
@@ -188,7 +201,7 @@ impl ResourcePile {
     }
 
     #[must_use]
-    pub fn amount(&self) -> u32 {
+    pub fn amount(&self) -> u8 {
         self.food
             + self.wood
             + self.ore
@@ -231,7 +244,7 @@ impl ResourcePile {
     }
 
     #[must_use]
-    pub fn times(&self, t: u32) -> Self {
+    pub fn times(&self, t: u8) -> Self {
         ResourcePile::new(
             self.food * t,
             self.wood * t,
@@ -284,10 +297,10 @@ impl SubAssign for ResourcePile {
     }
 }
 
-impl Mul<u32> for ResourcePile {
+impl Mul<u8> for ResourcePile {
     type Output = Self;
 
-    fn mul(self, rhs: u32) -> Self::Output {
+    fn mul(self, rhs: u8) -> Self::Output {
         Self::new(
             self.food * rhs,
             self.wood * rhs,
@@ -311,7 +324,7 @@ impl Sum for ResourcePile {
 }
 
 impl IntoIterator for ResourcePile {
-    type Item = (ResourceType, u32);
+    type Item = (ResourceType, u8);
     type IntoIter = ResourceIntoIterator;
 
     fn into_iter(self) -> Self::IntoIter {
@@ -328,7 +341,7 @@ pub struct ResourceIntoIterator {
 }
 
 impl Iterator for ResourceIntoIterator {
-    type Item = (ResourceType, u32);
+    type Item = (ResourceType, u8);
 
     fn next(&mut self) -> Option<Self::Item> {
         let index = self.index;
@@ -399,7 +412,7 @@ impl Display for ResourcePile {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CostWithDiscount {
     pub cost: ResourcePile,
-    pub discount: u32,
+    pub discount: u8,
 }
 
 impl CostWithDiscount {
@@ -430,7 +443,7 @@ mod tests {
     use super::ResourcePile;
     use crate::payment::{PaymentConversionType, PaymentOptions};
 
-    fn assert_can_afford(name: &str, cost: &ResourcePile, discount: u32) {
+    fn assert_can_afford(name: &str, cost: &ResourcePile, discount: u8) {
         let player_has = ResourcePile::new(1, 2, 3, 4, 5, 6, 7);
         let can_afford = PaymentOptions::resources_with_discount(
             cost.clone(),
@@ -440,7 +453,7 @@ mod tests {
         assert!(can_afford, "{name}");
     }
 
-    fn assert_cannot_afford(name: &str, cost: &ResourcePile, discount: u32) {
+    fn assert_cannot_afford(name: &str, cost: &ResourcePile, discount: u8) {
         let player_has = ResourcePile::new(1, 2, 3, 4, 5, 6, 7);
         let can_afford = PaymentOptions::resources_with_discount(
             cost.clone(),

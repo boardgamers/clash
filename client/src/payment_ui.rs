@@ -22,7 +22,7 @@ pub struct ResourcePayment {
 }
 
 impl ResourcePayment {
-    pub fn new(resource: ResourceType, current: u32, min: u32, max: u32) -> ResourcePayment {
+    pub fn new(resource: ResourceType, current: u8, min: u8, max: u8) -> ResourcePayment {
         ResourcePayment {
             resource,
             selectable: CountSelector { current, min, max },
@@ -94,7 +94,7 @@ where
             .unwrap_or_else(|| panic!("Resource {r:?} not found in payment"))
     }
 
-    fn current(r: &[ResourcePayment], resource_type: ResourceType) -> u32 {
+    fn current(r: &[ResourcePayment], resource_type: ResourceType) -> u8 {
         r.iter()
             .find(|p| p.resource == resource_type)
             .map_or(0, |p| p.selectable.current)

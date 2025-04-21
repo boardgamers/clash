@@ -1,18 +1,14 @@
-use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Advance;
-use crate::city::City;
-use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::PersistentEventType;
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::map::Terrain;
 use crate::map::Terrain::{Fertile, Forest, Mountain};
-use crate::player::Player;
+use crate::player::{CostTrigger, Player};
 use crate::player_events::ActionInfo;
 use crate::playing_actions::{Collect, PlayingActionType, base_or_custom_available};
 use crate::position::Position;
-use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -23,7 +19,7 @@ use std::iter;
 pub struct PositionCollection {
     pub position: Position,
     pub pile: ResourcePile,
-    pub times: u32,
+    pub times: u8,
 }
 
 impl PositionCollection {
@@ -37,7 +33,7 @@ impl PositionCollection {
     }
 
     #[must_use]
-    pub fn times(&self, times: u32) -> PositionCollection {
+    pub fn times(&self, times: u8) -> PositionCollection {
         PositionCollection {
             position: self.position,
             pile: self.pile.clone(),
@@ -60,6 +56,7 @@ pub fn get_total_collection(
     player_index: usize,
     city_position: Position,
     collections: &[PositionCollection],
+    trigger: CostTrigger,
 ) -> Result<CollectInfo, String> {
     let player = &game.players[player_index];
     let city = player.get_city(city_position);
@@ -68,7 +65,7 @@ pub fn get_total_collection(
         return Err("Not your city".to_string());
     }
 
-    let i = possible_resource_collections(game, city_position, player_index, &Vec::new());
+    let i = possible_resource_collections(game, city_position, player_index, &Vec::new(), trigger);
     if i.max_selection < tiles_used(collections) {
         return Err(format!(
             "You can only collect {} resources at {city_position} - got {}",
@@ -78,7 +75,7 @@ pub fn get_total_collection(
     }
 
     for (_, group) in &collections.iter().chunk_by(|c| c.position) {
-        let used = group.map(|c| c.times).sum::<u32>();
+        let used = group.map(|c| c.times).sum::<u8>();
 
         if used > i.max_per_tile {
             return Err(format!(
@@ -101,7 +98,7 @@ pub fn get_total_collection(
     apply_total_collect(collections, player, i, game)
 }
 
-fn apply_total_collect(
+pub(crate) fn apply_total_collect(
     collections: &[PositionCollection],
     player: &Player,
     mut i: CollectInfo,
@@ -122,18 +119,36 @@ fn apply_total_collect(
 }
 
 #[must_use]
-pub fn tiles_used(collections: &[PositionCollection]) -> u32 {
+pub fn tiles_used(collections: &[PositionCollection]) -> u8 {
     collections.iter().map(|c| c.times).sum()
 }
 
 pub(crate) fn collect(game: &mut Game, player_index: usize, c: &Collect) -> Result<(), String> {
-    let i = get_total_collection(game, player_index, c.city_position, &c.collections)?;
+    let mut i = get_total_collection(
+        game,
+        player_index,
+        c.city_position,
+        &c.collections,
+        game.execute_cost_trigger(),
+    )?;
     let city = game.players[player_index].get_city_mut(c.city_position);
     if !city.can_activate() {
         return Err("City can't be activated".to_string());
     }
     city.activate();
     game.players[player_index].gain_resources(i.total.clone());
+
+    let key = Advance::Husbandry.to_string();
+    if i.info.info.contains_key(&key) {
+        // check if husbandry is used
+        let used = c
+            .collections
+            .iter()
+            .any(|p| p.position.distance(c.city_position) > 1);
+        if !used {
+            i.info.info.remove(&key);
+        }
+    }
 
     on_collect(game, player_index, i);
     Ok(())
@@ -165,8 +180,8 @@ pub struct CollectInfo {
     pub modifiers: Vec<EventOrigin>,
     pub city: Position,
     pub total: ResourcePile,
-    pub max_per_tile: u32,
-    pub max_selection: u32,
+    pub max_per_tile: u8,
+    pub max_selection: u8,
     pub(crate) info: ActionInfo,
 }
 
@@ -183,7 +198,7 @@ impl CollectInfo {
             info: ActionInfo::new(player),
             city,
             max_per_tile: 1,
-            max_selection: player.get_city(city).mood_modified_size(player) as u32,
+            max_selection: player.get_city(city).mood_modified_size(player) as u8,
         }
     }
 }
@@ -197,6 +212,7 @@ pub fn possible_resource_collections(
     city_pos: Position,
     player_index: usize,
     used: &[PositionCollection],
+    trigger: CostTrigger,
 ) -> CollectInfo {
     let set = [
         (Mountain, HashSet::from([ResourcePile::ore(1)])),
@@ -209,9 +225,10 @@ pub fn possible_resource_collections(
         .events
         .transient
         .terrain_collect_options;
-    let modifiers = event
-        .get()
-        .trigger_with_modifiers(&mut terrain_options, &(), &(), &mut ());
+    let modifiers =
+        event
+            .get()
+            .trigger_with_modifiers(&mut terrain_options, &(), &(), &mut (), trigger);
 
     let collect_options = city_pos
         .neighbors()
@@ -307,147 +324,4 @@ pub fn available_collect_actions(game: &Game, player: usize) -> Vec<PlayingActio
         PlayingActionType::Collect,
         &CustomActionType::FreeEconomyCollect,
     )
-}
-
-pub fn set_city_collections(game: &mut Game, city_position: Position) {
-    let city = game.get_any_city(city_position);
-    let player = city.player_index;
-    let p = city_collections_uncached(game, game.player(player), city);
-    game.player_mut(player)
-        .get_city_mut(city_position)
-        .possible_collections
-        .clone_from(&p);
-}
-
-#[must_use]
-pub fn city_collections_uncached(game: &Game, player: &Player, city: &City) -> Vec<Collect> {
-    let info = possible_resource_collections(game, city.position, player.index, &[]);
-
-    let all = ResourceType::all()
-        .into_iter()
-        .filter(|r| {
-            info.choices
-                .iter()
-                .any(|(_, choices)| choices.iter().any(|pile| pile.get(r) > 0))
-        })
-        .collect_vec();
-    let l = all.len();
-    all.into_iter()
-        .permutations(l)
-        .filter_map(|priority| city_collection_uncached(game, player, city, &priority))
-        .unique_by(|c| c.total.clone())
-        .collect_vec()
-}
-
-fn city_collection_uncached(
-    game: &Game,
-    player: &Player,
-    city: &City,
-    priority: &[ResourceType],
-) -> Option<Collect> {
-    let mut c: Vec<PositionCollection> = vec![];
-
-    loop {
-        let info = possible_resource_collections(game, city.position, player.index, &c);
-
-        let Some((pos, pile)) = pick_resource(&info, &c, priority) else {
-            return apply_total_collect(&c, player, info, game)
-                .ok()
-                .map(|i| Collect::new(city.position, c, i.total, PlayingActionType::Collect));
-        };
-        c = add_collect(&info, pos, &pile, &c);
-    }
-}
-
-fn pick_resource(
-    info: &CollectInfo,
-    collected: &[PositionCollection],
-    priority: &[ResourceType],
-) -> Option<(Position, ResourcePile)> {
-    if info.max_selection == tiles_used(collected) {
-        return None;
-    }
-
-    let used = collected
-        .iter()
-        .chunk_by(|c| c.position)
-        .into_iter()
-        .map(|(p, group)| (p, group.map(|c| c.times).sum::<u32>()))
-        .collect_vec();
-
-    let available = info
-        .choices
-        .iter()
-        // .sorted_by_key(|(pos, _)| **pos)
-        .filter(|(pos, _)| {
-            let u = used
-                .iter()
-                .find_map(|(p, u)| (*p == **pos).then_some(*u))
-                .unwrap_or(0);
-
-            u < info.max_per_tile
-        })
-        .collect_vec();
-
-    priority.iter().find_map(|r| {
-        available.iter().find_map(|(pos, choices)| {
-            choices
-                .iter()
-                .find_map(|pile| (pile.get(r) > 0).then_some((**pos, pile.clone())))
-        })
-    })
-}
-
-pub(crate) fn invalidate_collect_cache() -> Builtin {
-    Builtin::builder("InvalidateCollectCache", "-")
-        .add_simple_persistent_event_listener(
-            |event| &mut event.found_city,
-            1,
-            |game, player, _, p| {
-                reset_collect_within_range(game.player_mut(player), *p);
-            },
-        )
-        .add_simple_persistent_event_listener(
-            |event| &mut event.combat_end,
-            0,
-            |game, _player, _, p| {
-                reset_collect_within_range_for_all(game, p.combat.defender_position);
-            },
-        )
-        .build()
-}
-
-pub(crate) fn reset_collect_within_range(p: &mut Player, position: Position) {
-    let has_husbandry = p.has_advance(Advance::Husbandry);
-    let range = if has_husbandry { 2 } else { 1 };
-    for c in &mut p.cities {
-        if c.position.distance(position) <= range {
-            c.possible_collections.clear();
-        }
-    }
-}
-
-pub(crate) fn reset_collect_within_range_for_all(game: &mut Game, pos: Position) {
-    for p in &mut game.players {
-        reset_collect_within_range(p, pos);
-    }
-}
-
-pub(crate) fn reset_collect_within_range_for_all_except(
-    game: &mut Game,
-    pos: Position,
-    player: usize,
-) {
-    for p in &mut game.players {
-        if p.index == player {
-            continue;
-        }
-        reset_collect_within_range(p, pos);
-    }
-}
-
-pub(crate) fn reset_collection_stats(p: &mut Player) {
-    for c in &mut p.cities {
-        c.possible_collections.clear();
-    }
 }

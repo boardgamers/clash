@@ -26,11 +26,11 @@ pub fn trade_route_reward(game: &Game) -> Option<(PaymentOptions, Vec<TradeRoute
     Some((
         if game.players[p].has_advance(Advance::Currency) {
             PaymentOptions::sum(
-                trade_routes.len() as u32,
+                trade_routes.len() as u8,
                 &[ResourceType::Gold, ResourceType::Food],
             )
         } else {
-            PaymentOptions::sum(trade_routes.len() as u32, &[ResourceType::Food])
+            PaymentOptions::sum(trade_routes.len() as u8, &[ResourceType::Food])
         },
         trade_routes,
     ))

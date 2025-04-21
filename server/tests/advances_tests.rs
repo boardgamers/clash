@@ -1,7 +1,7 @@
 use crate::common::{JsonTest, TestAction, illegal_action_test, influence_action};
 use server::action::{Action, execute_action};
 use server::city_pieces::Building::{Academy, Fortress, Temple};
-use server::collect::PositionCollection;
+use server::collect::{PositionCollection, possible_resource_collections};
 use server::consts::BUILDING_COST;
 use server::content::advances::trade_routes::find_trade_routes;
 use server::content::custom_actions::{CustomActionType, CustomEventAction};
@@ -11,6 +11,7 @@ use server::events::EventOrigin;
 use server::game::Game;
 use server::movement::MovementAction::Move;
 use server::movement::{MoveUnits, move_units_destinations};
+use server::player::CostTrigger;
 use server::playing_actions::PlayingAction::{
     Advance, Collect, Construct, Custom, EndTurn, Recruit, WonderCard,
 };
@@ -29,6 +30,8 @@ const JSON: JsonTest = JsonTest::new("advances");
 #[test]
 fn test_sanitation_and_draft() {
     // we should figure out that sanitation or draft are used, but not both
+    // actually that code turns out to be too complicated and slow, so the log now says you
+    // used both
     let units = Units::new(1, 1, 0, 0, 0, 0);
     let city_position = Position::from_offset("A1");
     JSON.test(
@@ -48,7 +51,7 @@ fn test_sanitation_and_draft() {
                     &units,
                     city_position,
                     None,
-                    None,
+                    CostTrigger::WithModifiers,
                 )
                 .unwrap()
                 .cost;
@@ -696,4 +699,59 @@ fn test_overpay() {
             ))),
         )],
     );
+}
+
+#[test]
+fn test_husbandry() {
+    JSON.test(
+        "husbandry",
+        vec![
+            TestAction::undoable(
+                0,
+                Action::Playing(Collect(playing_actions::Collect::new(
+                    Position::from_offset("C2"),
+                    vec![PositionCollection::new(
+                        Position::from_offset("D1"),
+                        ResourcePile::food(1),
+                    )],
+                    ResourcePile::food(1),
+                    PlayingActionType::Collect,
+                ))),
+            )
+            .without_json_comparison()
+            .with_post_assert(|game| {
+                // but not again
+                assert!(has_husbandry_field(game))
+            }),
+            // can use husbandry - because it was not used in the previous action
+            TestAction::undoable(
+                0,
+                Action::Playing(Collect(playing_actions::Collect::new(
+                    Position::from_offset("C2"),
+                    vec![PositionCollection::new(
+                        Position::from_offset("E2"),
+                        ResourcePile::food(1),
+                    )],
+                    ResourcePile::food(1),
+                    PlayingActionType::Collect,
+                ))),
+            )
+            .without_json_comparison()
+            .with_post_assert(|game| {
+                // but not again
+                assert!(!has_husbandry_field(game))
+            }),
+        ],
+    );
+}
+
+fn has_husbandry_field(game: &Game) -> bool {
+    let info = possible_resource_collections(
+        game,
+        Position::from_offset("C2"),
+        0,
+        &[],
+        CostTrigger::NoModifiers,
+    );
+    info.choices.contains_key(&Position::from_offset("E2"))
 }

@@ -222,7 +222,7 @@ pub fn format_happiness_increase(
 pub(crate) fn format_city_happiness_increase(
     player: &Player,
     position: Position,
-    steps: u32,
+    steps: u8,
 ) -> String {
     format!(
         "the city at {position} by {steps} steps, making it {:?}",

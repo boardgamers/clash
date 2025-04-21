@@ -8,8 +8,8 @@
         "wood": 5,
         "ore": 5,
         "ideas": 1,
-        "gold": 3,
-        "mood_tokens": 10,
+        "gold": 5,
+        "mood_tokens": 11,
         "culture_tokens": 10
       },
       "resource_limit": {
@@ -25,7 +25,6 @@
             "market": 1
           },
           "mood_state": "Happy",
-          "activations": 1,
           "position": "A1"
         },
         {
@@ -33,9 +32,8 @@
             "academy": 1,
             "port": 1
           },
-          "mood_state": "Angry",
+          "mood_state": "Happy",
           "activations": 6,
-          "angry_activation": true,
           "position": "C2",
           "port_position": "C3"
         },
@@ -97,16 +95,6 @@
           "position": "C3",
           "unit_type": "Ship",
           "id": 9
-        },
-        {
-          "position": "A1",
-          "unit_type": "Settler",
-          "id": 10
-        },
-        {
-          "position": "A1",
-          "unit_type": "Infantry",
-          "id": 11
         }
       ],
       "civilization": "Maya",
@@ -116,19 +104,13 @@
       "advances": [
         "Draft",
         "Farming",
-        "FreeEconomy",
-        "FreeEducation",
-        "Mining",
-        "Sanitation",
-        "Storage",
-        "Voting",
-        "Writing"
+        "Husbandry"
       ],
       "incident_tokens": 2,
       "wonder_cards": [
         "Great Gardens"
       ],
-      "next_unit_id": 12
+      "next_unit_id": 10
     },
     {
       "id": 1,
@@ -276,75 +258,17 @@
           "players": [
             {
               "index": 0,
-              "items": [
-                {
-                  "action": {
-                    "Playing": {
-                      "Recruit": {
-                        "units": {
-                          "settlers": 1,
-                          "infantry": 1
-                        },
-                        "city_position": "A1",
-                        "payment": {
-                          "gold": 2,
-                          "mood_tokens": 1
-                        }
-                      }
-                    }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 1
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/cities/0/activations"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/next_unit_id",
-                      "value": 10
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/gold",
-                      "value": 5
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 11
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/units/6"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/units/6"
-                    }
-                  ]
-                }
-              ]
+              "items": []
             }
           ]
         }
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player1 paid 2 gold and 1 mood token to recruit 1 settler and 1 infantry in the city at A1",
-      "Sanitation reduced the cost of 1 Settler to 1 mood token",
-      "Draft reduced the cost of 1 Infantry to 1 mood token"
-    ]
-  ],
+  "action_log_index": 0,
+  "log": [],
   "undo_limit": 0,
-  "actions_left": 0,
+  "actions_left": 3,
   "round": 6,
   "age": 1,
   "messages": [

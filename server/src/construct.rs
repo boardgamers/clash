@@ -5,7 +5,7 @@ use crate::consts::MAX_CITY_PIECES;
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
 use crate::map::Terrain;
-use crate::player::Player;
+use crate::player::{CostTrigger, Player};
 use crate::player_events::CostInfo;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
@@ -48,6 +48,7 @@ pub fn can_construct(
     building: Building,
     player: &Player,
     game: &Game,
+    trigger: CostTrigger,
 ) -> Result<CostInfo, String> {
     let advance = cache::get().get_building_advance(building);
     if !player.has_advance(advance) {
@@ -67,7 +68,7 @@ pub fn can_construct(
     if !player.is_building_available(building, game) {
         return Err("All non-destroyed buildings are built".to_string());
     }
-    let cost_info = player.building_cost(game, building, None);
+    let cost_info = player.building_cost(game, building, trigger);
     if !player.can_afford(&cost_info.cost) {
         // construct cost event listener?
         return Err("Not enough resources".to_string());
@@ -92,7 +93,13 @@ pub(crate) fn can_construct_anything(city: &City, player: &Player) -> Result<(),
 pub(crate) fn construct(game: &mut Game, player_index: usize, c: &Construct) -> Result<(), String> {
     let player = &game.players[player_index];
     let city = player.get_city(c.city_position);
-    let cost = can_construct(city, c.city_piece, player, game)?;
+    let cost = can_construct(
+        city,
+        c.city_piece,
+        player,
+        game,
+        game.execute_cost_trigger(),
+    )?;
     if matches!(c.city_piece, Building::Port) {
         let port_position = c.port_position.as_ref().expect("Illegal action");
         assert!(
@@ -132,7 +139,11 @@ pub fn available_buildings(
     let city = player.get_city(city);
     Building::all()
         .into_iter()
-        .filter_map(|b| can_construct(city, b, player, game).ok().map(|i| (b, i)))
+        .filter_map(|b| {
+            can_construct(city, b, player, game, CostTrigger::NoModifiers)
+                .ok()
+                .map(|i| (b, i))
+        })
         .collect()
 }
 

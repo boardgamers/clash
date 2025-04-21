@@ -174,7 +174,7 @@ fn draft() -> AdvanceBuilder {
     )
 }
 
-pub(crate) fn draft_cost(player: &Player) -> u32 {
+pub(crate) fn draft_cost(player: &Player) -> u8 {
     if player.has_advance(Advance::CivilLiberties) {
         2
     } else {
@@ -197,7 +197,7 @@ fn steel_weapons_cost(game: &Game, combat: &Combat, player_index: usize) -> Paym
     let defender = &game.players[combat.defender];
     let both_steel_weapons =
         attacker.has_advance(Advance::SteelWeapons) && defender.has_advance(Advance::SteelWeapons);
-    let cost = u32::from(!player.has_advance(Advance::Metallurgy) || both_steel_weapons);
+    let cost = u8::from(!player.has_advance(Advance::Metallurgy) || both_steel_weapons);
     PaymentOptions::sum(cost, &[ResourceType::Ore, ResourceType::Gold])
 }
 

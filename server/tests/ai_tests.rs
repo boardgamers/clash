@@ -1,8 +1,9 @@
 use crate::common::JsonTest;
 use itertools::Itertools;
 use server::action::{Action, ActionType};
-use server::ai_actions::get_available_actions;
-use server::collect::{PositionCollection, city_collections_uncached};
+use server::ai_actions::AiActions;
+use server::ai_collect::city_collections_uncached;
+use server::collect::PositionCollection;
 use server::playing_actions::{
     Collect, IncreaseHappiness, PlayingAction, PlayingActionType, Recruit,
 };
@@ -39,7 +40,8 @@ fn collect_city() {
 #[test]
 fn all_actions() {
     let game = &JSON.load_game("start");
-    let mut all = get_available_actions(game);
+    let mut actions = AiActions::new();
+    let mut all = actions.get_available_actions(game);
     let (_, advances) = remove_element_by(&mut all, |(t, _)| {
         matches!(t, ActionType::Playing(PlayingActionType::Advance))
     })

@@ -7,14 +7,14 @@ use server::action::Action;
 use server::city::{City, MoodState};
 use server::game::Game;
 use server::happiness::{available_happiness_actions, happiness_cost};
-use server::player::Player;
+use server::player::{CostTrigger, Player};
 use server::player_events::CostInfo;
 use server::playing_actions::{IncreaseHappiness, PlayingAction, PlayingActionType};
 use server::position::Position;
 
 #[derive(Clone)]
 pub struct IncreaseHappinessConfig {
-    pub steps: Vec<(Position, u32)>,
+    pub steps: Vec<(Position, u8)>,
     pub payment: Payment<String>,
     pub custom: BaseOrCustomDialog,
 }
@@ -32,10 +32,10 @@ impl IncreaseHappinessConfig {
 
     fn happiness_payment(
         p: &Player,
-        new_steps: u32,
+        new_steps: u8,
         custom: &BaseOrCustomDialog,
     ) -> Option<Payment<String>> {
-        let c = happiness_cost(p, new_steps, None).cost;
+        let c = happiness_cost(p, new_steps, CostTrigger::WithModifiers).cost;
         c.can_afford(&custom.action_type.remaining_resources(p))
             .then_some(Payment::new(
                 &c,
@@ -79,7 +79,7 @@ pub fn add_increase_happiness(
     city: &City,
     mut increase_happiness: IncreaseHappinessConfig,
 ) -> Option<IncreaseHappinessConfig> {
-    let new_steps: Vec<(Position, u32)> = increase_happiness
+    let new_steps: Vec<(Position, u8)> = increase_happiness
         .steps
         .iter()
         .map(|(p, steps)| {
@@ -100,8 +100,8 @@ pub fn add_increase_happiness(
 
     let step_sum = new_steps
         .iter()
-        .map(|(p, steps)| rc.shown_player.get_city(*p).size() as u32 * steps)
-        .sum::<u32>();
+        .map(|(p, steps)| rc.shown_player.get_city(*p).size() as u8 * steps)
+        .sum::<u8>();
 
     IncreaseHappinessConfig::happiness_payment(
         rc.shown_player,
@@ -118,9 +118,9 @@ pub fn add_increase_happiness(
 fn increase_happiness_steps(
     rc: &RenderContext,
     city: &City,
-    old_steps: u32,
+    old_steps: u8,
     action_type: &PlayingActionType,
-) -> Option<u32> {
+) -> Option<u8> {
     if let Some(value) = increase_happiness_new_steps(rc, city, old_steps + 1, action_type) {
         return Some(value);
     }
@@ -133,9 +133,9 @@ fn increase_happiness_steps(
 fn increase_happiness_new_steps(
     rc: &RenderContext,
     city: &City,
-    new_steps: u32,
+    new_steps: u8,
     action_type: &PlayingActionType,
-) -> Option<u32> {
+) -> Option<u8> {
     increase_happiness_cost(rc.shown_player, city, new_steps, action_type).map(|_| new_steps)
 }
 
@@ -143,11 +143,15 @@ fn increase_happiness_new_steps(
 pub fn increase_happiness_cost(
     player: &Player,
     city: &City,
-    steps: u32,
+    steps: u8,
     action_type: &PlayingActionType,
 ) -> Option<CostInfo> {
-    let total_cost = happiness_cost(player, steps * city.size() as u32, None);
-    let max_steps = 2 - city.mood_state.clone() as u32;
+    let total_cost = happiness_cost(
+        player,
+        steps * city.size() as u8,
+        CostTrigger::WithModifiers,
+    );
+    let max_steps = 2 - city.mood_state.clone() as u8;
     (total_cost
         .cost
         .can_afford(&action_type.remaining_resources(player))

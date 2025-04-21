@@ -6,14 +6,14 @@ use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use std::ops::RangeInclusive;
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub enum PaymentConversionType {
     Unlimited,
-    MayOverpay(u32),
-    MayNotOverpay(u32),
+    MayOverpay(u8),
+    MayNotOverpay(u8),
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub struct PaymentConversion {
     pub from: Vec<ResourcePile>, // alternatives
     pub to: ResourcePile,
@@ -28,7 +28,7 @@ impl PaymentConversion {
     }
 
     #[must_use]
-    pub fn limited(from: ResourcePile, to: ResourcePile, limit: u32) -> Self {
+    pub fn limited(from: ResourcePile, to: ResourcePile, limit: u8) -> Self {
         PaymentConversion::new(vec![from], to, PaymentConversionType::MayNotOverpay(limit))
     }
 
@@ -46,7 +46,7 @@ impl PaymentConversion {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub struct PaymentOptions {
     pub default: ResourcePile,
     #[serde(default)]
@@ -74,7 +74,7 @@ impl PaymentOptions {
                     None
                 }
             })
-            .sum::<u32>();
+            .sum::<u8>();
         if discount_left == 0 && available.has_at_least(&self.default) {
             return Some(self.default.clone());
         }
@@ -112,7 +112,7 @@ impl PaymentOptions {
     }
 
     #[must_use]
-    pub(crate) fn sum(cost: u32, types_by_preference: &[ResourceType]) -> Self {
+    pub(crate) fn sum(cost: u8, types_by_preference: &[ResourceType]) -> Self {
         let mut conversions = vec![];
         types_by_preference.windows(2).for_each(|pair| {
             conversions.push(PaymentConversion::unlimited(
@@ -128,7 +128,7 @@ impl PaymentOptions {
     }
 
     #[must_use]
-    pub(crate) fn single_type(t: ResourceType, r: RangeInclusive<u32>) -> PaymentOptions {
+    pub(crate) fn single_type(t: ResourceType, r: RangeInclusive<u8>) -> PaymentOptions {
         let max = r.clone().max().expect("range empty");
         let d = max - r.min().expect("range empty");
         PaymentOptions {
@@ -143,7 +143,7 @@ impl PaymentOptions {
     }
 
     #[must_use]
-    pub(crate) fn tokens(cost: u32) -> Self {
+    pub(crate) fn tokens(cost: u8) -> Self {
         Self::sum(
             cost,
             &[ResourceType::MoodTokens, ResourceType::CultureTokens],
@@ -242,7 +242,7 @@ pub fn can_convert(
     current: &ResourcePile,
     conversions: &[&PaymentConversion],
     skip_from: usize,
-    discount_left: u32,
+    discount_left: u8,
     may_overpay: bool,
 ) -> Option<ResourcePile> {
     if available.has_at_least(current) && (discount_left == 0 || may_overpay) {
@@ -266,7 +266,7 @@ pub fn can_convert(
     let from = &conversion.from[skip_from];
 
     let upper_limit = match conversion.payment_conversion_type {
-        PaymentConversionType::Unlimited => u32::MAX,
+        PaymentConversionType::Unlimited => u8::MAX,
         PaymentConversionType::MayOverpay(i) | PaymentConversionType::MayNotOverpay(i) => i,
     };
 
@@ -334,8 +334,8 @@ mod tests {
         };
         let available = ResourcePile::wood(1) + ResourcePile::ore(1);
         assert_eq!(
+            cost.first_valid_payment(&available),
             Some(ResourcePile::wood(1)),
-            cost.first_valid_payment(&available)
         );
     }
 

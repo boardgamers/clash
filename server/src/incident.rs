@@ -2,10 +2,10 @@ use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::ability_initializer::{AbilityInitializerSetup, SelectedChoice};
 use crate::action_card::ActionCard;
 use crate::advance::Advance;
+use crate::ai_collect::reset_collect_within_range_for_all;
 use crate::barbarians::{barbarians_move, barbarians_spawn};
 use crate::card::{HandCard, draw_card_from_pile};
 use crate::city::{MoodState, is_valid_city_terrain};
-use crate::collect::reset_collect_within_range_for_all;
 use crate::content::incidents;
 use crate::content::incidents::great_persons::GREAT_PERSON_OFFSET;
 use crate::content::persistent_events::{
@@ -469,17 +469,15 @@ impl IncidentBuilder {
         + Send,
     ) -> Self {
         let cities2 = cities.clone();
-        self.add_myths_payment(target, mood_modifier, move |g, p, i| {
-            cities(p, g, i).1 as u32
-        })
-        .decrease_mood(target, mood_modifier, cities2)
+        self.add_myths_payment(target, mood_modifier, move |g, p, i| cities(p, g, i).1)
+            .decrease_mood(target, mood_modifier, cities2)
     }
 
     fn add_myths_payment(
         self,
         target: IncidentTarget,
         mood_modifier: MoodModifier,
-        amount: impl Fn(&Game, &Player, &IncidentInfo) -> u32 + 'static + Clone + Sync + Send,
+        amount: impl Fn(&Game, &Player, &IncidentInfo) -> u8 + 'static + Clone + Sync + Send,
     ) -> Self {
         self.add_incident_payment_request(
             target,
@@ -514,7 +512,7 @@ impl IncidentBuilder {
             },
             move |game, s, i| {
                 let pile = &s.choice[0];
-                i.player.myths_payment = pile.amount() as u8;
+                i.player.myths_payment = pile.amount();
                 game.add_info_log_item(&format!(
                     "{} paid {pile} to avoid the mood change using Myths",
                     s.player_name

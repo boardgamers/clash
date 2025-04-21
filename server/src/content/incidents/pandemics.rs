@@ -104,7 +104,7 @@ fn pandemics() -> Incident {
             }
 
             Some(vec![PaymentRequest::new(
-                PaymentOptions::sum(needed as u32, &ResourceType::all()),
+                PaymentOptions::sum(needed, &ResourceType::all()),
                 "Select resources to lose",
                 false,
             )])
@@ -126,7 +126,7 @@ impl PandemicsContributions {
             max: vec![
                 player.units.len() as u8,
                 player.action_cards.len() as u8,
-                player.resources.amount() as u8,
+                player.resources.amount(),
             ],
         }
     }

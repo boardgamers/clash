@@ -1,10 +1,11 @@
+extern crate num_cpus;
 use std::time::Duration;
 
 use tokio::runtime::Runtime;
 
+use crate::ai_actions::AiActions;
 use crate::{
     action::{self, Action, ActionType},
-    ai_actions,
     game::{Game, GameData, GameState},
     playing_actions::PlayingAction,
     position::Position,
@@ -13,7 +14,6 @@ use crate::{
 
 const ACTION_SCORE_WEIGHTING: f64 = 1.0;
 const ADAPTIVE_DIFFICULTY_SCORE_THRESHOLD: f64 = 10.0;
-extern crate num_cpus;
 
 pub struct AI {
     rng: Rng,
@@ -21,6 +21,7 @@ pub struct AI {
     pub thinking_time: Duration,
     pub adaptive_difficulty: bool,
     active_missions: Vec<Mission>,
+    pub ai_actions: AiActions,
 }
 
 impl AI {
@@ -44,6 +45,7 @@ impl AI {
             thinking_time,
             adaptive_difficulty,
             active_missions: Vec::new(),
+            ai_actions: AiActions::new(),
         }
     }
 
@@ -59,7 +61,7 @@ impl AI {
     /// May panic if the game is in an invalid state or if `ai_actions` provides an invalid action.
     pub fn next_action(&mut self, game: &Game) -> Action {
         //todo: handle movement phase actions
-        let actions = ai_actions::get_available_actions(game);
+        let actions = self.ai_actions.get_available_actions(game);
         let actions = actions
             .into_iter()
             .flat_map(|(action_group, actions)| {
@@ -217,9 +219,10 @@ async fn evaluate_action(
 }
 
 fn monte_carlo_score(mut rng: Rng, player_index: usize, game_data: GameData) -> f64 {
+    let mut ai = AiActions::new();
     let mut game = Game::from_data(game_data);
     game.supports_undo = false;
-    let new_game = monte_carlo_run(game, &mut rng);
+    let new_game = monte_carlo_run(&mut ai, game, &mut rng);
     let ai_score = new_game.players[player_index].victory_points(&new_game) as f64;
     let mut max_opponent_score = 0.0;
     for (i, player) in new_game.players.iter().enumerate() {
@@ -233,19 +236,19 @@ fn monte_carlo_score(mut rng: Rng, player_index: usize, game_data: GameData) -> 
     ai_score - max_opponent_score
 }
 
-fn monte_carlo_run(mut game: Game, rng: &mut Rng) -> Game {
+fn monte_carlo_run(ai: &mut AiActions, mut game: Game, rng: &mut Rng) -> Game {
     loop {
         if matches!(game.state, GameState::Finished) {
             return game;
         }
         let current_player = game.active_player();
-        let action = choose_monte_carlo_action(&game, rng);
+        let action = choose_monte_carlo_action(ai, &game, rng);
         game = action::execute_action(game, action, current_player);
     }
 }
 
-fn choose_monte_carlo_action(game: &Game, rng: &mut Rng) -> Action {
-    let action_groups = ai_actions::get_available_actions(game);
+fn choose_monte_carlo_action(ai: &mut AiActions, game: &Game, rng: &mut Rng) -> Action {
+    let action_groups = ai.get_available_actions(game);
     if action_groups.is_empty() {
         return Action::Playing(PlayingAction::EndTurn);
     }
@@ -357,13 +360,13 @@ enum MissionType {
 ///
 /// Panics if the game is in an invalid state.
 #[must_use]
-pub fn evaluate_position(game: &Game, evaluation_time: Duration) -> Vec<f64> {
+pub fn evaluate_position(ai: &mut AiActions, game: &Game, evaluation_time: Duration) -> Vec<f64> {
     let mut rng = Rng::new();
     let start_time = std::time::Instant::now();
     let mut wins = vec![0; game.players.len()];
     let mut iterations = 0;
     loop {
-        let new_game = monte_carlo_run(game.clone(), &mut rng);
+        let new_game = monte_carlo_run(ai, game.clone(), &mut rng);
         let max_score = new_game
             .players
             .iter()
@@ -392,8 +395,8 @@ pub fn evaluate_position(game: &Game, evaluation_time: Duration) -> Vec<f64> {
 ///
 /// Panics if the game is in an invalid state.
 #[must_use]
-pub fn rate_action(game: &Game, action: &Action, evaluation_time: Duration) -> f64 {
-    let all_actions = ai_actions::get_available_actions(game);
+pub fn rate_action(ai: &mut AI, game: &Game, action: &Action, evaluation_time: Duration) -> f64 {
+    let all_actions = ai.ai_actions.get_available_actions(game);
     let all_actions = all_actions
         .into_iter()
         .flat_map(|(action_group, actions)| {

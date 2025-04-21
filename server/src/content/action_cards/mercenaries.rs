@@ -63,7 +63,7 @@ pub(crate) fn mercenaries(id: u8, tactics_card: TacticsCardFactory) -> ActionCar
         |_game, _player, a| {
             Some(vec![PaymentRequest::new(
                 PaymentOptions::sum(
-                    a.selected_positions.len() as u32,
+                    a.selected_positions.len() as u8,
                     &[
                         ResourceType::Food,
                         ResourceType::Wood,
@@ -189,5 +189,5 @@ fn barbarian_army_positions_in_range2(game: &Game, player: &Player) -> Vec<Posit
 
 fn max_mercenary_payment(player: &Player) -> u8 {
     let pile = &player.resources;
-    (pile.food + pile.wood + pile.ore + pile.culture_tokens + pile.gold) as u8
+    pile.food + pile.wood + pile.ore + pile.culture_tokens + pile.gold
 }
