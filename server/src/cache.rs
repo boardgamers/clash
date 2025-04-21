@@ -154,6 +154,10 @@ impl Cache {
         &self.all_advance_groups
     }
 
+    ///
+    /// # Panics
+    ///
+    /// Panics if advance group doesn't exist
     #[must_use]
     pub fn get_advance_group(&self, name: &str) -> &AdvanceGroup {
         self.advance_groups_by_name
@@ -190,6 +194,10 @@ impl Cache {
         &self.all_builtins
     }
 
+    ///
+    /// # Panics
+    ///
+    /// Panics if builtin does not exist
     #[must_use]
     pub fn get_builtin(&self, name: &str, game: &Game) -> &Builtin {
         self.builtins_by_name
@@ -250,6 +258,10 @@ impl Cache {
         &self.all_objective_cards
     }
 
+    ///
+    /// # Panics
+    ///
+    /// Panics if objective card does not exist
     #[must_use]
     pub fn get_objective_card(&self, id: u8) -> &ObjectiveCard {
         self.objective_cards_by_id

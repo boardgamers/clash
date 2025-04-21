@@ -12,9 +12,7 @@ use crate::objective_card::{
 };
 use crate::payment::PaymentOptions;
 use crate::player_events::{PersistentEvent, PersistentEvents};
-use crate::{
-    cache, game::Game, player::Player, resource_pile::ResourcePile, utils,
-};
+use crate::{cache, game::Game, player::Player, resource_pile::ResourcePile, utils};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
