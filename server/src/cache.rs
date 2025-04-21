@@ -28,6 +28,7 @@ pub fn get() -> &'static Cache {
     &CACHE
 }
 
+#[derive(Clone)]
 pub struct Cache {
     all_builtins: Vec<Builtin>,
     builtins_by_name: HashMap<String, Builtin>,

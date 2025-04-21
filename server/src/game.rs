@@ -86,8 +86,9 @@ impl Game {
     ///
     /// Panics if any wonder does not exist
     #[must_use]
-    pub fn from_data(data: GameData) -> Self {
+    pub fn from_data(data: GameData, cache: Cache) -> Self {
         let mut game = Self {
+            cache,
             state: data.state,
             players: Vec::new(),
             map: Map::from_data(data.map),

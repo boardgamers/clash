@@ -9,6 +9,7 @@ use macroquad::math::vec2;
 use server::action::Action;
 use std::panic;
 use wasm_bindgen::prelude::*;
+use server::cache::Cache;
 
 #[wasm_bindgen]
 extern "C" {
@@ -130,8 +131,13 @@ impl RemoteClient {
         let s = self.control.receive_state();
         if s.is_object() {
             log("received state");
+            let cache = self.game.take().map_or_else(
+                || Cache::new(),
+                |g| g.cache,
+            );
             let g = Game::from_data(
                 serde_wasm_bindgen::from_value(s).expect("game should be of type game data"),
+                cache,
             );
             self.state.show_player = g.active_player();
             self.game = Some(g);
