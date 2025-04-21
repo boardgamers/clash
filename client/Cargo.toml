@@ -22,18 +22,9 @@ serde_json = "1.0.140"
 server = { path = "../server", version = "0.1.0" }
 wasm-bindgen = "0.2.95"
 wasm-bindgen-futures = "0.4.50"
-lazy_static = "1.4.0"
-log = "0.4.27"
-async-std = "1.13.1"
 serde-wasm-bindgen = "0.6.5"
 console_error_panic_hook = "0.1.7"
 web-sys = { version = "0.3.72", features = ["Window"] }
-js-sys = "0.3.72"
-pyroscope = { version = "0.5.8", optional = true }
-pyroscope_pprofrs = { version = "0.2.8", optional = true }
-
-[features]
-profiling = ["dep:pyroscope", "dep:pyroscope_pprofrs"]
 
 [[bin]]
 name = "local_client"

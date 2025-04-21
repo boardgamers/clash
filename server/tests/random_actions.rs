@@ -8,6 +8,9 @@ use server::{
     playing_actions::PlayingAction,
     utils::{Rng, Shuffle},
 };
+use server::city::City;
+use server::map::Terrain;
+use server::profiling::start_profiling;
 
 mod common;
 
@@ -15,6 +18,8 @@ const ITERATIONS: usize = 100;
 
 #[tokio::test]
 async fn test_random_actions() {
+    start_profiling();
+    
     let num_cores = num_cpus::get();
     let mut rng = Rng::new();
     let mut iterations = 0;
@@ -62,19 +67,18 @@ fn random_actions_iterations(mut rng: Rng) {
     }
 }
 
-fn build_adjacent_cities(_game: &mut Game) {
+fn build_adjacent_cities(game: &mut Game) {
     // only until move works
     // this way we can test constructing buildings
 
-    // todo makes it too slow
-    // for i in game.human_players(0) {
-    //     let city = &game.player(i).cities[0];
-    //     let pos = city
-    //         .position
-    //         .neighbors()
-    //         .into_iter()
-    //         .find(|p| game.map.get(*p) == Some(&Terrain::Barren))
-    //         .expect("no barren space");
-    //     game.player_mut(i).cities.push(City::new(i, pos));
-    // }
+    for i in game.human_players(0) {
+        let city = &game.player(i).cities[0];
+        let pos = city
+            .position
+            .neighbors()
+            .into_iter()
+            .find(|p| game.map.get(*p) == Some(&Terrain::Barren))
+            .expect("no barren space");
+        game.player_mut(i).cities.push(City::new(i, pos));
+    }
 }
