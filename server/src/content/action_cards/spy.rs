@@ -2,6 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
 use crate::card::{HandCard, HandCardType, hand_cards};
 use crate::content::action_cards::get_action_card;
+use crate::content::objective_cards::get_objective_card;
 use crate::content::persistent_events::{HandCardsRequest, PersistentEventType, PlayerRequest};
 use crate::content::tactics_cards::TacticsCardFactory;
 use crate::game::Game;
@@ -201,6 +202,18 @@ fn get_swap_secrets(other: &Player) -> Vec<String> {
                             .as_ref()
                             .map_or("-".to_string(), |c| c.name.clone())
                     )
+                })
+                .join(", ")
+        ),
+        format!(
+            "{} has the following objective cards: {}",
+            other.get_name(),
+            other
+                .objective_cards
+                .iter()
+                .map(|id| {
+                    let a = get_objective_card(*id);
+                    format!("{}/{}", a.objectives[0].name, a.objectives[1].name)
                 })
                 .join(", ")
         ),

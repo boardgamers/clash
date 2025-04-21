@@ -1,30 +1,13 @@
-use crate::action::Action;
-use crate::city::{City, MoodState};
-use crate::content::custom_actions::{CustomAction, CustomActionType};
+use crate::city::MoodState;
+use crate::content::custom_actions::CustomActionType;
 use crate::game::Game;
 use crate::payment::PaymentOptions;
-use crate::player::Player;
+use crate::player::{CostTrigger, Player};
 use crate::player_events::CostInfo;
-use crate::playing_actions::{
-    IncreaseHappiness, PlayingAction, PlayingActionType, base_or_custom_available,
-};
+use crate::playing_actions::{PlayingActionType, base_or_custom_available};
 use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
-
-#[must_use]
-pub fn available_happiness_actions_for_city(
-    game: &Game,
-    player: usize,
-    position: Position,
-) -> Vec<PlayingActionType> {
-    let city = game.player(player).get_city(position);
-    if city.can_activate() && city.mood_state != MoodState::Happy {
-        available_happiness_actions(game, player)
-    } else {
-        vec![]
-    }
-}
 
 #[must_use]
 pub fn available_happiness_actions(game: &Game, player: usize) -> Vec<PlayingActionType> {
@@ -36,46 +19,22 @@ pub fn available_happiness_actions(game: &Game, player: usize) -> Vec<PlayingAct
     )
 }
 
-///
-/// # Panics
-///
-/// If the action is illegal
-#[must_use]
-pub fn happiness_action(
-    action: &PlayingActionType,
-    include_happiness: IncreaseHappiness,
-) -> Action {
-    match action {
-        PlayingActionType::IncreaseHappiness => {
-            Action::Playing(PlayingAction::IncreaseHappiness(include_happiness))
-        }
-        PlayingActionType::Custom(c)
-            if c.custom_action_type == CustomActionType::VotingIncreaseHappiness =>
-        {
-            Action::Playing(PlayingAction::Custom(
-                CustomAction::VotingIncreaseHappiness(include_happiness),
-            ))
-        }
-        _ => panic!("illegal type {action:?}"),
-    }
-}
-
 pub(crate) fn increase_happiness(
     game: &mut Game,
     player_index: usize,
-    happiness_increases: &[(Position, u32)],
+    happiness_increases: &[(Position, u8)],
     payment: Option<ResourcePile>,
 ) {
+    let trigger = game.execute_cost_trigger();
     let player = &mut game.players[player_index];
     let mut angry_activations = vec![];
-    let mut count = 0;
+    let mut step_sum = 0;
     for &(city_position, steps) in happiness_increases {
         let city = player.get_city(city_position);
         if steps == 0 {
             continue;
         }
-
-        count += steps * city.size() as u32;
+        step_sum += steps * city.size() as u8;
 
         if city.mood_state == MoodState::Angry {
             angry_activations.push(city_position);
@@ -87,56 +46,16 @@ pub(crate) fn increase_happiness(
     }
 
     if let Some(r) = payment {
-        increase_happiness_total_cost(player, count, Some(&r)).pay(game, &r);
+        happiness_cost(player, step_sum, trigger).pay(game, &r);
     }
 }
 
 #[must_use]
-pub fn happiness_cost_for_all_cities(
+pub fn happiness_cost(
     p: &Player,
-    new_steps: &[(Position, u32)],
-    action_type: &PlayingActionType,
-) -> Option<PaymentOptions> {
-    new_steps
-        .iter()
-        .filter_map(|(pos, steps)| {
-            let city = p.get_city(*pos);
-            increase_happiness_cost(p, city, *steps, action_type).map(|c| c.cost.clone())
-        })
-        .reduce(|mut a, b| {
-            a.default += b.default;
-            a
-        })
-}
-
-#[must_use]
-pub fn increase_happiness_cost(
-    player: &Player,
-    city: &City,
-    steps: u32,
-    action_type: &PlayingActionType,
-) -> Option<CostInfo> {
-    let max_steps = 2 - city.mood_state.clone() as u32;
-    let mood_tokens = city.size() as u32 * steps;
-    let total_cost = increase_happiness_total_cost(player, mood_tokens, None);
-    (total_cost
-        .cost
-        .can_afford(&action_type.remaining_resources(player))
-        && steps <= max_steps)
-        .then_some(total_cost)
-}
-
-#[must_use]
-fn increase_happiness_total_cost(
-    player: &Player,
-    cost: u32,
-    execute: Option<&ResourcePile>,
+    city_size_steps: u8, // for each city: size * steps in that city
+    execute: CostTrigger,
 ) -> CostInfo {
-    player.trigger_cost_event(
-        |e| &e.happiness_cost,
-        &PaymentOptions::sum(cost, &[ResourceType::MoodTokens]),
-        &(),
-        &(),
-        execute,
-    )
+    let payment_options = PaymentOptions::sum(city_size_steps, &[ResourceType::MoodTokens]);
+    p.trigger_cost_event(|e| &e.happiness_cost, &payment_options, &(), &(), execute)
 }

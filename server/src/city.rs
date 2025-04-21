@@ -226,10 +226,10 @@ pub enum MoodState {
     Angry = 0,
 }
 
-impl Add<u32> for MoodState {
+impl Add<u8> for MoodState {
     type Output = Self;
 
-    fn add(self, rhs: u32) -> Self::Output {
+    fn add(self, rhs: u8) -> Self::Output {
         match rhs {
             0 => self,
             1 => match self {
@@ -241,10 +241,10 @@ impl Add<u32> for MoodState {
     }
 }
 
-impl Sub<u32> for MoodState {
+impl Sub<u8> for MoodState {
     type Output = Self;
 
-    fn sub(self, rhs: u32) -> Self::Output {
+    fn sub(self, rhs: u8) -> Self::Output {
         match rhs {
             0 => self,
             1 => match self {

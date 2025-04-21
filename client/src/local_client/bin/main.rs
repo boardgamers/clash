@@ -6,11 +6,10 @@ use macroquad::miniquad::window::set_window_size;
 use macroquad::prelude::{next_frame, screen_width, vec2};
 use macroquad::window::screen_height;
 use server::action::execute_action;
-use server::advance::do_advance;
+use server::advance::{Advance, do_advance};
 use server::ai::AI;
 use server::city::City;
-use server::content::advances::get_advance;
-use server::game::{Game, GameData};
+use server::game::{Game, GameData, GameState};
 use server::game_setup::setup_game;
 use server::map::Terrain;
 use server::player::add_unit;
@@ -134,14 +133,14 @@ async fn run(mut game: Game, features: &mut Features) {
     }
 }
 
-fn ai_autoplay(game: Game, f: &mut Features, state: &mut State) -> Game {
+fn ai_autoplay(mut game: Game, f: &mut Features, state: &mut State) -> Game {
     if let Some(ai) = &mut f.ai {
-        if state.ai_autoplay {
+        while state.ai_autoplay && game.state != GameState::Finished {
             // todo does this block the ui?
             // state.ai_autoplay = false;
             let action = ai.next_action(&game);
             let player_index = game.active_player();
-            return execute_action(game, action, player_index);
+            game = execute_action(game, action, player_index);
         }
     }
     game
@@ -301,9 +300,9 @@ fn setup_local_game() -> Game {
         .pieces
         .market = Some(1);
 
-    do_advance(&mut game, get_advance("Voting"), player_index1);
-    do_advance(&mut game, get_advance("Free Economy"), player_index1);
-    do_advance(&mut game, get_advance("Storage"), player_index1);
+    do_advance(&mut game, Advance::Voting, player_index1);
+    do_advance(&mut game, Advance::FreeEconomy, player_index1);
+    do_advance(&mut game, Advance::Storage, player_index1);
     game.players[player_index1].gain_resources(ResourcePile::food(5));
 
     game

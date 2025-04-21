@@ -8,8 +8,9 @@ use std::{
 };
 
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::ai_collect::reset_collect_within_range_for_all_except;
 use crate::city::is_valid_city_terrain;
-use crate::collect::reset_collect_within_range_for_all;
+use crate::combat_roll::COMBAT_DIE_SIDES;
 use crate::consts::SHIP_CAPACITY;
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{KilledUnits, PersistentEventType, UnitsRequest};
@@ -161,7 +162,7 @@ impl UnitType {
     }
 
     #[must_use]
-    pub fn name(&self) -> &str {
+    pub fn name(&self) -> &'static str {
         match self {
             Settler => "settler",
             Infantry => "infantry",
@@ -181,6 +182,39 @@ impl UnitType {
             Cavalry => ResourcePile::food(1) + ResourcePile::wood(1),
             Leader => ResourcePile::culture_tokens(1) + ResourcePile::mood_tokens(1),
         }
+    }
+
+    #[must_use]
+    pub fn description(&self) -> String {
+        match self {
+            Settler => "A unit that can found cities.".to_string(),
+            Ship => "Can fight ships. Can carry 2 land units.".to_string(),
+            Infantry => format!(
+                "Army unit. Combat abilities: +1 combat values on {}",
+                Self::sides(Infantry)
+            ),
+            Cavalry => format!(
+                "Army unit. Combat abilities: +2 combat values on {}",
+                Self::sides(Cavalry)
+            ),
+            Elephant => format!(
+                "Army unit. Combat abilities: -1 hit but no combat value on {}",
+                Self::sides(Elephant)
+            ),
+            Leader => format!(
+                "Army unit. Combat abilities: Reroll the die until you get a \
+             non-leader roll on {}",
+                Self::sides(Leader)
+            ),
+        }
+    }
+
+    fn sides(unit_type: UnitType) -> String {
+        COMBAT_DIE_SIDES
+            .iter()
+            .filter(|d| d.bonus == unit_type)
+            .map(|d| d.value.to_string())
+            .join(", ")
     }
 
     #[must_use]
@@ -640,8 +674,10 @@ pub(crate) fn choose_carried_units_to_remove() -> Builtin {
 
 pub fn set_unit_position(player: usize, unit_id: u32, position: Position, game: &mut Game) {
     let unit = game.player_mut(player).get_unit_mut(unit_id);
+    let old = unit.position;
     unit.position = position;
-    reset_collect_within_range_for_all(game, position);
+    reset_collect_within_range_for_all_except(game, old, player);
+    reset_collect_within_range_for_all_except(game, position, player);
 }
 
 #[cfg(test)]

@@ -14,6 +14,7 @@ use crate::log::{
 use crate::movement::MoveState;
 use crate::objective_card::present_instant_objective_cards;
 use crate::pirates::get_pirates_player;
+use crate::player::CostTrigger;
 use crate::player_events::{
     PersistentEvent, PersistentEventInfo, PersistentEvents, PlayerEvents, TransientEvents,
 };
@@ -45,7 +46,7 @@ pub struct Game {
     pub action_log_index: usize,
     pub log: Vec<Vec<String>>,
     pub undo_limit: usize,
-    pub supports_undo: bool,
+    pub supports_undo: bool, // if false: optimizend AI mode
     pub actions_left: u32,
     pub successful_cultural_influence: bool,
     pub round: u32, // starts at 1
@@ -399,6 +400,15 @@ impl Game {
     }
 
     #[must_use]
+    pub(crate) fn execute_cost_trigger(&self) -> CostTrigger {
+        if self.supports_undo {
+            CostTrigger::WithModifiers
+        } else {
+            CostTrigger::NoModifiers
+        }
+    }
+
+    #[must_use]
     pub fn can_undo(&self) -> bool {
         self.supports_undo && self.undo_limit < self.action_log_index
     }
@@ -646,7 +656,19 @@ impl Game {
             .custom_actions
             .clone()
             .into_iter()
-            .filter(|(t, _)| t.is_available(self, player_index))
+            .filter(|(t, _)| {
+                if matches!(
+                    t,
+                    CustomActionType::ArtsInfluenceCultureAttempt
+                        | CustomActionType::FreeEconomyCollect
+                        | CustomActionType::VotingIncreaseHappiness
+                ) {
+                    // returned as part of "base_or_custom_available"
+                    return false;
+                }
+
+                t.is_available(self, player_index)
+            })
             .collect()
     }
 

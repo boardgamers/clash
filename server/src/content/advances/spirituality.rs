@@ -1,6 +1,6 @@
-use crate::ability_initializer::AbilityInitializerSetup;
+use crate::ability_initializer::{AbilityInitializerSetup, once_per_turn_advance};
 use crate::advance::Bonus::{CultureToken, MoodToken};
-use crate::advance::{Advance, AdvanceBuilder};
+use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city_pieces::Building::Temple;
 use crate::content::advances::{AdvanceGroup, advance_group_builder, get_group};
 use crate::content::persistent_events::ResourceRewardRequest;
@@ -17,7 +17,8 @@ pub(crate) fn spirituality() -> AdvanceGroup {
 }
 
 fn myths() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Myths,
         "Myths",
         "Whenever an Event card asks you have to reduce the mood in a city, \
         you may pay 1 mood token instead of reducing the mood (does not apply for Pirates).",
@@ -46,7 +47,8 @@ fn myths() -> AdvanceBuilder {
 }
 
 fn rituals() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Rituals,
         "Rituals",
         "When you perform the Increase Happiness Action \
         you may spend any Resources as a substitute for mood tokens. This is done at a 1:1 ratio",
@@ -77,43 +79,68 @@ fn rituals() -> AdvanceBuilder {
 }
 
 fn priesthood() -> AdvanceBuilder {
-    Advance::builder("Priesthood", "Once per turn, a science advance is free")
-        .add_once_per_turn_listener(
-            |event| &mut event.advance_cost,
-            2,
-            |i, advance, ()| {
-                if get_group("Science").advances.iter().any(|a| a == advance) {
-                    i.set_zero();
-                    i.info
-                        .log
-                        .push("Priesthood reduced the cost to 0".to_string());
-                }
-            },
-            |i| &mut i.info.info,
-        )
+    AdvanceInfo::builder(
+        Advance::Priesthood,
+        "Priesthood",
+        "Once per turn, a science advance is free",
+    )
+    .add_transient_event_listener(
+        |event| &mut event.advance_cost,
+        2,
+        |i, &advance, ()| {
+            if get_group("Science")
+                .advances
+                .iter()
+                .any(|a| a.advance == advance)
+            {
+                once_per_turn_advance(
+                    Advance::Priesthood,
+                    i,
+                    &(),
+                    &(),
+                    |i| &mut i.info.info,
+                    |i, (), ()| {
+                        i.set_zero();
+                        i.info
+                            .log
+                            .push("Priesthood reduced the cost to 0".to_string());
+                    },
+                );
+            }
+        },
+    )
 }
 
 fn state_religion() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::StateReligion,
         "State Religion",
         "Once per turn, when constructing a Temple, do not pay any Food.",
     )
     .with_advance_bonus(MoodToken)
-    .add_once_per_turn_listener(
+    .add_transient_event_listener(
         |event| &mut event.construct_cost,
         0,
-        |i, b, _| {
+        |i, &b, _| {
             if matches!(b, Temple) {
-                i.cost.conversions.push(PaymentConversion::limited(
-                    ResourcePile::of(ResourceType::Food, 1),
-                    ResourcePile::empty(),
-                    1,
-                ));
-                i.info
-                    .log
-                    .push("State Religion reduced the food cost to 0".to_string());
+                once_per_turn_advance(
+                    Advance::StateReligion,
+                    i,
+                    &b,
+                    &(),
+                    |i| &mut i.info.info,
+                    |i, _, ()| {
+                        i.cost.conversions.push(PaymentConversion::limited(
+                            ResourcePile::of(ResourceType::Food, 1),
+                            ResourcePile::empty(),
+                            1,
+                        ));
+                        i.info
+                            .log
+                            .push("State Religion reduced the food cost to 0".to_string());
+                    },
+                );
             }
         },
-        |i| &mut i.info.info,
     )
 }

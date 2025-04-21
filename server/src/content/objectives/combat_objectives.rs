@@ -187,7 +187,7 @@ fn warfare_advances(player: &Player) -> usize {
     advances::get_group("Warfare")
         .advances
         .iter()
-        .filter(|a| player.has_advance(&a.name))
+        .filter(|a| player.has_advance(a.advance))
         .count()
 }
 

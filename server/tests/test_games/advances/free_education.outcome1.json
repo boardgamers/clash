@@ -114,8 +114,8 @@
       "advances": [
         "Draft",
         "Farming",
-        "Free Economy",
-        "Free Education",
+        "FreeEconomy",
+        "FreeEducation",
         "Mining",
         "Storage",
         "Tactics",
@@ -301,12 +301,12 @@
                     {
                       "op": "replace",
                       "path": "/players/0/advances/1",
-                      "value": "Free Economy"
+                      "value": "FreeEconomy"
                     },
                     {
                       "op": "replace",
                       "path": "/players/0/advances/2",
-                      "value": "Free Education"
+                      "value": "FreeEducation"
                     },
                     {
                       "op": "replace",
@@ -376,7 +376,7 @@
                         {
                           "event_type": {
                             "Advance": {
-                              "name": "Draft",
+                              "advance": "Draft",
                               "payment": {
                                 "food": 1,
                                 "gold": 1
@@ -386,7 +386,7 @@
                           },
                           "handler": {
                             "origin": {
-                              "Advance": "Free Education"
+                              "Advance": "FreeEducation"
                             },
                             "priority": 1,
                             "request": {

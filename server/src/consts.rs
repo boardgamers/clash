@@ -1,9 +1,9 @@
-use crate::content::advances::TACTICS;
+use crate::advance::Advance;
 use crate::{resource_pile::ResourcePile, unit::Units};
 
-pub const MAX_CITY_SIZE: usize = 4;
+pub const MAX_CITY_PIECES: usize = 4; // i.e. city size 5
 pub const AGES: u32 = 6;
-pub const ADVANCE_COST: u32 = 2;
+pub const ADVANCE_COST: u8 = 2;
 pub const BUILDING_VICTORY_POINTS: f32 = 1.0;
 pub const ADVANCE_VICTORY_POINTS: f32 = 0.5;
 pub const OBJECTIVE_VICTORY_POINTS: f32 = 2.0;
@@ -13,7 +13,7 @@ pub const STACK_LIMIT: usize = 4;
 pub const SHIP_CAPACITY: u8 = 2;
 pub const CITY_LIMIT: u8 = 7;
 pub const MOVEMENT_ACTIONS: u32 = 3;
-pub const ARMY_MOVEMENT_REQUIRED_ADVANCE: &str = TACTICS;
+pub const ARMY_MOVEMENT_REQUIRED_ADVANCE: Advance = Advance::Tactics;
 pub const CITY_PIECE_LIMIT: usize = 5;
 pub const ACTIONS: u32 = 3;
 pub const NON_HUMAN_PLAYERS: usize = 2; // pirates, barbarians
@@ -42,7 +42,7 @@ pub const UNIT_LIMIT_PIRATES: Units = Units {
     elephants: 0,
     leaders: 0,
 };
-pub const CONSTRUCT_COST: ResourcePile = ResourcePile {
+pub const BUILDING_COST: ResourcePile = ResourcePile {
     food: 1,
     wood: 1,
     ore: 1,

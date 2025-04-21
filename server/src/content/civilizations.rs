@@ -1,5 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::content::advances::IRRIGATION;
+use crate::advance::Advance;
 use crate::map::Terrain;
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::SpecialAdvance;
@@ -26,7 +26,7 @@ pub fn get_all() -> Vec<Civilization> {
             "Maya",
             vec![
                 // todo add other effects
-                SpecialAdvance::builder("Terrace", IRRIGATION)
+                SpecialAdvance::builder(Advance::Terrace, "Terrace", Advance::Irrigation)
                     .with_reset_collect_stats()
                     .add_transient_event_listener(
                         |events| &mut events.terrain_collect_options,

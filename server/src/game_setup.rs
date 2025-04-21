@@ -1,10 +1,9 @@
 use crate::action::update_stats;
 use crate::action_card::gain_action_card_from_pile;
+use crate::advance::Advance;
 use crate::consts::{ACTIONS, NON_HUMAN_PLAYERS};
 use crate::content::civilizations::{BARBARIANS, PIRATES};
-use crate::content::{
-    action_cards, advances, builtin, civilizations, incidents, objective_cards, wonders,
-};
+use crate::content::{action_cards, builtin, civilizations, incidents, objective_cards, wonders};
 use crate::game::{Game, GameState};
 use crate::map::Map;
 use crate::objective_card::gain_objective_card_from_pile;
@@ -161,8 +160,8 @@ fn init_human_players(player_amount: usize, rng: &mut Rng) -> Vec<Player> {
         let mut player = Player::new(civilizations.remove(civilization), player_index);
         player.resource_limit = ResourcePile::new(2, 7, 7, 7, 7, 0, 0);
         player.gain_resources(ResourcePile::food(2));
-        player.advances.push(advances::get_advance("Farming"));
-        player.advances.push(advances::get_advance("Mining"));
+        player.advances.insert(Advance::Farming);
+        player.advances.insert(Advance::Mining);
         player.incident_tokens = 3;
         players.push(player);
     }

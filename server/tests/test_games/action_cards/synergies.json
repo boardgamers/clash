@@ -242,7 +242,7 @@
                 {
                   "action": {
                     "Response": {
-                      "SelectAdvance": "War Ships"
+                      "SelectAdvance": "WarShips"
                     }
                   }
                 },

@@ -1,7 +1,9 @@
 use crate::action_card::ActionCard;
-use crate::advance::Advance;
+use crate::advance::{Advance, AdvanceInfo};
+use crate::city_pieces::Building;
 use crate::content::advances::AdvanceGroup;
 use crate::content::builtin::Builtin;
+use crate::content::custom_actions::custom_action_builtins;
 use crate::content::{
     action_cards, advances, builtin, incidents, objective_cards, objectives, wonders,
 };
@@ -32,10 +34,10 @@ pub struct Cache {
 
     all_advance_groups: Vec<AdvanceGroup>,
     advance_groups_by_name: HashMap<String, AdvanceGroup>,
-    all_advances: Vec<Advance>,
-    advances_by_name: HashMap<String, Advance>,
+    all_advances: Vec<AdvanceInfo>,
     all_governments: Vec<AdvanceGroup>,
     governments_by_name: HashMap<String, AdvanceGroup>,
+    advances_by_building: HashMap<Building, Advance>,
 
     all_action_cards: Vec<ActionCard>,
     action_cards_by_id: HashMap<u8, ActionCard>,
@@ -66,14 +68,15 @@ impl Cache {
             builtins_by_name: builtin::get_all_uncached()
                 .into_iter()
                 .map(|builtin| (builtin.name.clone(), builtin))
+                .chain(
+                    custom_action_builtins()
+                        .into_values()
+                        .map(|builtin| (builtin.name.clone(), builtin)),
+                )
                 .collect(),
             status_phase_handlers: status_phase_handlers(),
 
             all_advances: advances::get_all_uncached(),
-            advances_by_name: advances::get_all_uncached()
-                .into_iter()
-                .map(|advance| (advance.name.clone(), advance))
-                .collect(),
 
             all_advance_groups: advances::get_groups_uncached(),
             advance_groups_by_name: advances::get_groups_uncached()
@@ -85,6 +88,15 @@ impl Cache {
             governments_by_name: advances::get_governments_uncached()
                 .into_iter()
                 .map(|government| (government.name.clone(), government))
+                .collect(),
+
+            advances_by_building: advances::get_all_uncached()
+                .into_iter()
+                .filter_map(|advance| {
+                    advance
+                        .unlocked_building
+                        .map(|building| (building, advance.advance))
+                })
                 .collect(),
 
             all_action_cards: action_cards::get_all_uncached(),
@@ -126,13 +138,13 @@ impl Cache {
     }
 
     #[must_use]
-    pub fn get_advances(&'static self) -> &'static Vec<Advance> {
+    pub fn get_advances(&'static self) -> &'static Vec<AdvanceInfo> {
         &self.all_advances
     }
 
     #[must_use]
-    pub fn get_advance(&'static self, name: &str) -> Option<&'static Advance> {
-        self.advances_by_name.get(name)
+    pub fn get_advance(&'static self, a: Advance) -> &'static AdvanceInfo {
+        &self.all_advances[a as usize]
     }
 
     #[must_use]
@@ -153,6 +165,11 @@ impl Cache {
     #[must_use]
     pub fn get_government(&'static self, name: &str) -> Option<&'static AdvanceGroup> {
         self.governments_by_name.get(name)
+    }
+
+    #[must_use]
+    pub fn get_building_advance(&'static self, building: Building) -> Advance {
+        self.advances_by_building[&building]
     }
 
     #[must_use]

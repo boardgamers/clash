@@ -19,8 +19,8 @@ pub fn resource_name(t: ResourceType) -> &'static str {
 }
 
 #[must_use]
-pub fn new_resource_map(p: &ResourcePile) -> HashMap<ResourceType, u32> {
-    let mut m: HashMap<ResourceType, u32> = HashMap::new();
+pub fn new_resource_map(p: &ResourcePile) -> HashMap<ResourceType, u8> {
+    let mut m: HashMap<ResourceType, u8> = HashMap::new();
     add_resource(&mut m, p.food, ResourceType::Food);
     add_resource(&mut m, p.wood, ResourceType::Wood);
     add_resource(&mut m, p.ore, ResourceType::Ore);
@@ -31,7 +31,7 @@ pub fn new_resource_map(p: &ResourcePile) -> HashMap<ResourceType, u32> {
     m
 }
 
-fn add_resource(m: &mut HashMap<ResourceType, u32>, amount: u32, resource_type: ResourceType) {
+fn add_resource(m: &mut HashMap<ResourceType, u8>, amount: u8, resource_type: ResourceType) {
     m.insert(resource_type, amount);
 }
 

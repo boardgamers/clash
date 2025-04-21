@@ -4,16 +4,16 @@
     {
       "id": 0,
       "resources": {
-        "food": 2,
-        "wood": 5,
-        "ore": 5,
-        "ideas": 5,
-        "gold": 5,
-        "mood_tokens": 9,
-        "culture_tokens": 8
+        "food": 7,
+        "wood": 6,
+        "ore": 6,
+        "ideas": 1,
+        "gold": 6,
+        "mood_tokens": 11,
+        "culture_tokens": 9
       },
       "resource_limit": {
-        "food": 2,
+        "food": 7,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -32,8 +32,9 @@
             "academy": 1,
             "port": 1
           },
-          "mood_state": "Neutral",
+          "mood_state": "Angry",
           "activations": 6,
+          "angry_activation": true,
           "position": "C2",
           "port_position": "C3"
         },
@@ -62,16 +63,6 @@
           "id": 0
         },
         {
-          "position": "C3",
-          "unit_type": "Cavalry",
-          "id": 1
-        },
-        {
-          "position": "C3",
-          "unit_type": "Elephant",
-          "id": 2
-        },
-        {
           "position": "B3",
           "unit_type": "Settler",
           "id": 3
@@ -94,7 +85,17 @@
         {
           "position": "C3",
           "unit_type": "Ship",
-          "id": 7
+          "id": 7,
+          "carried_units": [
+            {
+              "unit_type": "Cavalry",
+              "id": 1
+            },
+            {
+              "unit_type": "Elephant",
+              "id": 2
+            }
+          ]
         },
         {
           "position": "C3",
@@ -107,23 +108,31 @@
           "id": 9
         }
       ],
-      "civilization": "test0",
+      "civilization": "Maya",
       "available_leaders": [
-        "Alexander",
-        "Kleopatra"
+        "Kʼinich Janaab Pakal I"
       ],
       "advances": [
+        "Currency",
+        "Draft",
         "Farming",
-        "Free Economy",
+        "FreeEconomy",
+        "FreeEducation",
         "Mining",
-        "Sports",
-        "Voting"
+        "Sanitation",
+        "Storage",
+        "Theaters",
+        "Voting",
+        "Writing"
       ],
-      "incident_tokens": 1,
+      "incident_tokens": 2,
       "wonder_cards": [
-        "Pyramids"
+        "Great Gardens"
       ],
-      "next_unit_id": 10
+      "next_unit_id": 10,
+      "played_once_per_turn_actions": [
+        "Theaters"
+      ]
     },
     {
       "id": 1,
@@ -171,7 +180,11 @@
           "id": 1
         }
       ],
-      "civilization": "test1",
+      "civilization": "test0",
+      "available_leaders": [
+        "Alexander",
+        "Kleopatra"
+      ],
       "advances": [
         "Farming",
         "Mining"
@@ -217,6 +230,14 @@
         "Fertile"
       ],
       [
+        "B5",
+        "Fertile"
+      ],
+      [
+        "B6",
+        "Fertile"
+      ],
+      [
         "C1",
         "Barren"
       ],
@@ -243,6 +264,10 @@
       [
         "D2",
         "Water"
+      ],
+      [
+        "E2",
+        "Fertile"
       ]
     ]
   },
@@ -260,35 +285,90 @@
                   "action": {
                     "Playing": {
                       "Custom": {
-                        "Sports": {
-                          "city_position": "C2",
-                          "payment": {
-                            "culture_tokens": 1
-                          }
-                        }
+                        "action": "Theaters",
+                        "city": null
                       }
                     }
                   },
                   "undo": [
                     {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 3
+                      "op": "remove",
+                      "path": "/players/0/played_once_per_turn_actions"
                     },
+                    {
+                      "op": "remove",
+                      "path": "/events"
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 1
+                        }
+                      ]
+                    }
+                  },
+                  "undo": [
                     {
                       "op": "add",
-                      "path": "/players/0/cities/1/angry_activation",
-                      "value": true
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/cities/1/mood_state",
-                      "value": "Angry"
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "CustomAction": {
+                              "action": "Theaters",
+                              "city": null
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "Builtin": "Theaters"
+                            },
+                            "priority": 0,
+                            "request": {
+                              "Payment": [
+                                {
+                                  "cost": {
+                                    "conversions": [
+                                      {
+                                        "from": [
+                                          {
+                                            "culture_tokens": 1
+                                          }
+                                        ],
+                                        "to": {
+                                          "mood_tokens": 1
+                                        },
+                                        "type": "Unlimited"
+                                      }
+                                    ],
+                                    "default": {
+                                      "culture_tokens": 1
+                                    }
+                                  },
+                                  "name": "Convert 1 culture token into 1 mood token, or 1 mood token into 1 culture token",
+                                  "optional": false
+                                }
+                              ]
+                            }
+                          },
+                          "last_priority_used": 0,
+                          "player": 0
+                        }
+                      ]
                     },
                     {
                       "op": "replace",
                       "path": "/players/0/resources/culture_tokens",
-                      "value": 9
+                      "value": 10
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/mood_tokens",
+                      "value": 10
                     }
                   ]
                 }
@@ -299,14 +379,17 @@
       ]
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 2,
   "log": [
     [
-      "Player1 paid 1 culture token to increase the happiness in the city at C2 by 1 steps, making it Neutral using Sports"
+      "Player1 started Theaters"
+    ],
+    [
+      "Player1 used Theaters to convert 1 culture token into 1 mood token"
     ]
   ],
   "undo_limit": 0,
-  "actions_left": 2,
+  "actions_left": 0,
   "round": 6,
   "age": 1,
   "messages": [
@@ -324,5 +407,8 @@
     10,
     10
   ],
-  "rng": "234162992961072890508432380903651342097"
+  "rng": "46312381643103681595563341886777350953",
+  "wonders_left": [
+    "Pyramids"
+  ]
 }

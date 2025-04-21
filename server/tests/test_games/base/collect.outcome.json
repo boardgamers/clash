@@ -83,7 +83,7 @@
         "Farming",
         "Math",
         "Mining",
-        "Public Education"
+        "PublicEducation"
       ],
       "incident_tokens": 2,
       "next_unit_id": 8,
@@ -219,7 +219,8 @@
                         "total": {
                           "wood": 1,
                           "ore": 1
-                        }
+                        },
+                        "action_type": "Collect"
                       }
                     }
                   },

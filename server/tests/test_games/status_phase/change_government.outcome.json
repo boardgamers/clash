@@ -111,7 +111,7 @@
         "Farming",
         "Fishing",
         "Mining",
-        "State Religion"
+        "StateReligion"
       ],
       "incident_tokens": 3,
       "next_unit_id": 8

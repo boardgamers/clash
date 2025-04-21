@@ -9,10 +9,10 @@ use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::hex_ui;
 use crate::select_ui::HighlightType;
 
-use crate::layout_ui::{draw_scaled_icon, is_in_circle};
+use crate::layout_ui::{draw_scaled_icon_with_tooltip, is_in_circle};
 use crate::move_ui::MoveDestination;
 use crate::render_context::RenderContext;
-use crate::tooltip::show_tooltip_for_circle;
+use crate::tooltip::{add_tooltip_description, show_tooltip_for_circle};
 use itertools::Itertools;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::movement::MovementRestriction;
@@ -41,16 +41,26 @@ pub fn draw_unit_type(
     center: Vec2,
     unit_type: UnitType,
     player_index: usize,
-    tooltip: &str,
-    size: f32,
+    radius: f32,
 ) -> bool {
-    draw_circle(center.x, center.y, size, unit_highlight_type.color());
-    draw_circle(center.x, center.y, size - 2., rc.player_color(player_index));
-    let icon_size = size * 1.1;
-    draw_scaled_icon(
+    let r = if unit_highlight_type == HighlightType::None {
+        radius
+    } else {
+        radius + 2.
+    };
+    draw_circle(center.x, center.y, r, unit_highlight_type.color());
+    draw_circle(
+        center.x,
+        center.y,
+        radius - 2.,
+        rc.player_color(player_index),
+    );
+    let icon_size = radius * 1.1;
+
+    draw_scaled_icon_with_tooltip(
         rc,
         rc.assets().unit(unit_type, rc.game.player(player_index)),
-        tooltip,
+        &[],
         vec2(center.x - icon_size / 2., center.y - icon_size / 2.),
         icon_size,
     )
@@ -203,7 +213,7 @@ fn highlight_units(
 
 fn draw_unit(
     rc: &RenderContext,
-    tooltip: bool,
+    draw_tooltip: bool,
     selected_units: &[UnitHighlight],
     player_index: usize,
     unit: &Unit,
@@ -212,11 +222,13 @@ fn draw_unit(
     let center = place.center;
     let radius = place.radius;
     let game = &rc.game;
-    if tooltip {
+    if draw_tooltip {
         let army_move = game
             .player(player_index)
             .has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
-        show_tooltip_for_circle(rc, &unit_label(unit, army_move), center, radius);
+        let mut tooltip = vec![unit_label(unit, army_move)];
+        add_unit_description(&mut tooltip, unit.unit_type);
+        show_tooltip_for_circle(rc, &tooltip, center, radius);
     } else {
         let highlight = selected_units
             .iter()
@@ -229,7 +241,6 @@ fn draw_unit(
             center,
             unit.unit_type,
             unit.player_index,
-            "",
             radius,
         );
     }
@@ -315,4 +326,9 @@ pub fn unit_selection_clicked(unit_id: u32, units: &mut Vec<u32>) {
     } else {
         units.push(unit_id);
     }
+}
+
+pub fn add_unit_description(parts: &mut Vec<String>, u: UnitType) {
+    parts.push(format!("Cost: {}", u.cost()));
+    add_tooltip_description(parts, &u.description());
 }

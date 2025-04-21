@@ -9,21 +9,22 @@ use crate::dialog_ui::BaseOrCustomDialog;
 use crate::event_ui::{custom_phase_event_help, custom_phase_event_origin, event_help, pay_help};
 use crate::happiness_ui::IncreaseHappinessConfig;
 use crate::layout_ui::FONT_SIZE;
+use crate::log_ui::get_log_end;
 use crate::map_ui::ExploreResolutionConfig;
 use crate::move_ui::{MoveDestination, MoveIntent, MovePayment, MoveSelection};
-use crate::payment_ui::Payment;
+use crate::payment_ui::{Payment, new_gain};
 use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
 use crate::render_context::RenderContext;
 use crate::status_phase_ui::ChooseAdditionalAdvances;
 use macroquad::prelude::*;
 use server::action::Action;
+use server::advance::Advance;
 use server::card::HandCard;
 use server::city::{City, MoodState};
 use server::content::persistent_events::{
     AdvanceRequest, ChangeGovernmentRequest, EventResponse, MultiRequest, PersistentEventRequest,
     PersistentEventType, PlayerRequest, UnitTypeRequest,
 };
-use server::events::EventOrigin;
 use server::game::{Game, GameState};
 use server::movement::CurrentMove;
 use server::playing_actions::PlayingActionType;
@@ -39,7 +40,7 @@ pub enum ActiveDialog {
     // playing actions
     IncreaseHappiness(IncreaseHappinessConfig),
     AdvanceMenu,
-    AdvancePayment(Payment),
+    AdvancePayment(Payment<Advance>),
     ConstructionPayment(ConstructionPayment),
     CollectResources(CollectResources),
     RecruitUnitSelection(RecruitAmount),
@@ -49,12 +50,9 @@ pub enum ActiveDialog {
     ExploreResolution(ExploreResolutionConfig),
 
     // custom
-    Sports((Payment, Position)),
-    Theaters(Payment),
-    Taxes(Payment),
-    ResourceRewardRequest(Payment),
+    ResourceRewardRequest(Payment<String>),
     AdvanceRequest(AdvanceRequest),
-    PaymentRequest(Vec<Payment>),
+    PaymentRequest(Vec<Payment<String>>),
     PlayerRequest(PlayerRequest),
     PositionRequest(MultiSelection<Position>),
     UnitTypeRequest(UnitTypeRequest),
@@ -89,9 +87,6 @@ impl ActiveDialog {
             ActiveDialog::ExploreResolution(_) => "explore resolution",
             ActiveDialog::ChangeGovernmentType(_) => "change government type",
             ActiveDialog::ChooseAdditionalAdvances(_) => "choose additional advances",
-            ActiveDialog::Sports(_) => "sports",
-            ActiveDialog::Theaters(_) => "theaters",
-            ActiveDialog::Taxes(_) => "collect taxes",
             ActiveDialog::ResourceRewardRequest(_) => "trade route selection",
             ActiveDialog::AdvanceRequest(_) => "advance selection",
             ActiveDialog::PaymentRequest(_) => "custom phase payment request",
@@ -139,11 +134,6 @@ impl ActiveDialog {
                 vec!["Click on an advance to choose it".to_string()]
             }
             ActiveDialog::WaitingForUpdate => vec!["Waiting for server update".to_string()],
-            ActiveDialog::Sports(_) => event_help(rc, &EventOrigin::Advance("Sports".to_string())),
-            ActiveDialog::Taxes(_) => event_help(rc, &EventOrigin::Advance("Taxes".to_string())),
-            ActiveDialog::Theaters(_) => {
-                event_help(rc, &EventOrigin::Advance("Theaters".to_string()))
-            }
             ActiveDialog::ResourceRewardRequest(_)
             | ActiveDialog::AdvanceRequest(_)
             | ActiveDialog::PaymentRequest(_) => event_help(rc, &custom_phase_event_origin(rc)),
@@ -157,10 +147,7 @@ impl ActiveDialog {
                     let v = vec!["Click on a building to influence its culture".to_string()];
                     if let PlayingActionType::Custom(c) = &b.action_type {
                         let mut r = v.clone();
-                        r.extend(event_help(
-                            rc,
-                            &rc.shown_player.custom_actions[&c.custom_action_type],
-                        ));
+                        r.extend(event_help(rc, &rc.shown_player.custom_actions[c]));
                     }
                     v
                 } else {
@@ -477,6 +464,9 @@ impl State {
                 }
             }
             StateUpdate::OpenDialog(dialog) => {
+                if matches!(dialog, ActiveDialog::Log) {
+                    self.log_scroll = get_log_end(game, self.screen_size.y);
+                }
                 let d = self.game_state_dialog(game);
                 if matches!(dialog, ActiveDialog::AdvanceMenu) && d.is_advance() {
                     self.set_dialog(d);
@@ -484,7 +474,6 @@ impl State {
                     self.set_dialog(dialog);
                 }
                 self.focused_tile = None;
-                self.log_scroll = 0.0;
                 GameSyncRequest::None
             }
             StateUpdate::CloseDialog => {
@@ -543,6 +532,7 @@ impl State {
                             Payment::new(
                                 &p.cost,
                                 &game.player(game.active_player()).resources,
+                                p.name.clone(),
                                 &p.name,
                                 p.optional,
                             )
@@ -550,7 +540,7 @@ impl State {
                         .collect(),
                 ),
                 PersistentEventRequest::ResourceReward(r) => {
-                    ActiveDialog::ResourceRewardRequest(Payment::new_gain(&r.reward, &r.name))
+                    ActiveDialog::ResourceRewardRequest(new_gain(&r.reward, &r.name))
                 }
                 PersistentEventRequest::SelectAdvance(r) => ActiveDialog::AdvanceRequest(r.clone()),
                 PersistentEventRequest::SelectPositions(r) => {

@@ -1,10 +1,12 @@
 use core::panic;
+extern crate num_cpus;
 use std::time::Duration;
 
 use itertools::Itertools;
 use num_cpus;
 use tokio::runtime::Runtime;
 
+use crate::ai_actions::AiActions;
 use crate::{
     action::{self, Action, ActionType},
     ai_actions,
@@ -24,6 +26,7 @@ pub struct AI {
     pub thinking_time: Duration,
     pub adaptive_difficulty: bool,
     active_missions: ActiveMissions,
+    pub ai_actions: AiActions,
 }
 
 impl AI {
@@ -66,6 +69,7 @@ impl AI {
                     difficulty,
                 )),
             ),
+            ai_actions: AiActions::new(),
         }
     }
 
@@ -286,7 +290,7 @@ fn monte_carlo_score(
 }
 
 fn monte_carlo_run(
-    mut game: Game,
+    ai: &mut AiActions,mut game: Game,
     rng: &mut Rng,
     mut players_active_missions: Vec<ActiveMissions>,
 ) -> Game {
@@ -299,17 +303,17 @@ fn monte_carlo_run(
             players_active_missions[current_player].update(&game, rng, None);
         }
         let action =
-            choose_monte_carlo_action(&game, rng, &players_active_missions[current_player]);
+            choose_monte_carlo_action(ai, &game, rng, &players_active_missions[current_player]);
         game = action::execute_action(game, action, current_player);
     }
 }
 
 fn choose_monte_carlo_action(
-    game: &Game,
+    ai: &mut AiActions,game: &Game,
     rng: &mut Rng,
     active_missions: &ActiveMissions,
 ) -> Action {
-    let action_groups = ai_actions::get_available_actions(game);
+    let action_groups = ai.get_available_actions(game);
     if action_groups.is_empty() {
         return Action::Playing(PlayingAction::EndTurn);
     }
@@ -444,7 +448,7 @@ fn get_action_group_score(
 ///
 /// Panics if the game is in an invalid state.
 #[must_use]
-pub async fn evaluate_position(game: &Game, evaluation_time: Duration) -> Vec<f64> {
+pub async fn evaluate_position(ai: &mut AiActions, game: &Game, evaluation_time: Duration) -> Vec<f64> {
     let mut rng = Rng::new();
     let start_time = std::time::Instant::now();
     let players_active_missions = game
@@ -510,8 +514,8 @@ fn simulate_game(
 ///
 /// Panics if the game is in an invalid state.
 #[must_use]
-pub fn rate_action(game: &Game, action: &Action, evaluation_time: Duration) -> f64 {
-    let all_actions = ai_actions::get_available_actions(game);
+pub fn rate_action(ai: &mut AI, game: &Game, action: &Action, evaluation_time: Duration) -> f64 {
+    let all_actions = ai.ai_actions.get_available_actions(game);
     let all_actions = all_actions
         .into_iter()
         .flat_map(|(action_group, actions)| {

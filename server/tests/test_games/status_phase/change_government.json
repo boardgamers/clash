@@ -103,9 +103,9 @@
       "advances": [
         "Farming",
         "Fishing",
-        "Free Economy",
+        "FreeEconomy",
         "Mining",
-        "State Religion",
+        "StateReligion",
         "Voting"
       ],
       "incident_tokens": 3,

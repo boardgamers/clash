@@ -1,4 +1,5 @@
 use crate::ability_initializer::{AbilityInitializerSetup, SelectedChoice};
+use crate::advance::Advance;
 use crate::city::{City, MoodState};
 use crate::content::builtin::Builtin;
 use crate::content::effects::PermanentEffect;
@@ -32,7 +33,7 @@ fn pestilence() -> Incident {
             You cannot construct buildings or wonders until you research Sanitation.",
         IncidentBaseEffect::None,
     )
-    .with_protection_advance("Sanitation")
+    .with_protection_advance(Advance::Sanitation)
     .add_decrease_mood(
         IncidentTarget::AllPlayers,
         MoodModifier::Decrease,
@@ -45,7 +46,7 @@ fn pestilence() -> Incident {
                 2
             } else {
                 1
-            } - i.player.payment.amount() as u8;
+            } - i.player.payment.amount();
 
             (non_angry_cites(p), needed)
         },
@@ -61,7 +62,9 @@ fn pestilence_applies(player: &Player) -> bool {
 }
 
 pub(crate) fn additional_sanitation_damage(p: &Player) -> bool {
-    p.has_advance("Roads") || p.has_advance("Navigation") || p.has_advance("Trade Routes")
+    p.has_advance(Advance::Roads)
+        || p.has_advance(Advance::Navigation)
+        || p.has_advance(Advance::TradeRoutes)
 }
 
 pub(crate) fn pestilence_permanent_effect() -> Builtin {
@@ -78,7 +81,7 @@ pub(crate) fn pestilence_permanent_effect() -> Builtin {
                 .permanent_effects
                 .contains(&PermanentEffect::Pestilence)
                 && matches!(i.action_type, PlayingActionType::Construct)
-                && !player.has_advance("Sanitation")
+                && !player.has_advance(Advance::Sanitation)
             {
                 *available = Err(
                     "Cannot construct buildings or wonders until you research Sanitation."
@@ -98,7 +101,7 @@ fn epidemics() -> Incident {
             Choose 1 (or 2 if you have Roads, Navigation, or Trade Routes) units and kill them.",
         IncidentBaseEffect::None,
     )
-    .with_protection_advance("Sanitation")
+    .with_protection_advance(Advance::Sanitation)
     .add_incident_units_request(
         IncidentTarget::AllPlayers,
         0,
@@ -195,7 +198,7 @@ pub(crate) fn famine(
     let player_pred2 = player_pred.clone();
     let city_pred2 = city_pred.clone();
     Incident::builder(id, name, description, incident_base_effect)
-        .with_protection_advance("Irrigation")
+        .with_protection_advance(Advance::Irrigation)
         .add_simple_incident_listener(target, 11, move |game, player_index, player_name, i| {
             // we lose the food regardless of the outcome
             let p = game.player(player_index);
@@ -204,9 +207,9 @@ pub(crate) fn famine(
             }
 
             let needed = amount(p, game);
-            let lost = needed.min(p.resources.food as u8) as u32;
+            let lost = needed.min(p.resources.food);
 
-            if lost == needed as u32 {
+            if lost == needed {
                 // only avoid anger if full amount is paid
                 i.player.payment = ResourcePile::food(lost);
             }

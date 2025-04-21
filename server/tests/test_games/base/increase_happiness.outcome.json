@@ -113,7 +113,7 @@
       ],
       "advances": [
         "Farming",
-        "Free Economy",
+        "FreeEconomy",
         "Mining",
         "Voting"
       ],
@@ -270,7 +270,8 @@
                         ],
                         "payment": {
                           "mood_tokens": 5
-                        }
+                        },
+                        "action_type": "IncreaseHappiness"
                       }
                     }
                   },

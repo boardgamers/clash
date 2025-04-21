@@ -138,8 +138,8 @@
       "advances": [
         "Farming",
         "Fishing",
-        "Free Economy",
-        "Free Education",
+        "FreeEconomy",
+        "FreeEducation",
         "Mining",
         "Philosophy",
         "Storage",
@@ -213,7 +213,7 @@
         "Fishing",
         "Mining",
         "Myths",
-        "State Religion",
+        "StateReligion",
         "Storage"
       ],
       "incident_tokens": 2,

@@ -1,5 +1,6 @@
+use crate::advance::Advance;
+use crate::ai_collect::reset_collection_stats;
 use crate::card::HandCard;
-use crate::collect::reset_collection_stats;
 use crate::combat::{Combat, update_combat_strength};
 use crate::combat_listeners::CombatStrength;
 use crate::content::persistent_events::{
@@ -208,24 +209,6 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                 });
             },
         )
-    }
-
-    fn add_once_per_turn_listener<T, U, V, E, F>(
-        self,
-        event: E,
-        priority: i32,
-        listener: F,
-        get_info: impl Fn(&mut T) -> &mut HashMap<String, String> + 'static + Clone + Sync + Send,
-    ) -> Self
-    where
-        T: Clone + PartialEq,
-        E: Fn(&mut TransientEvents) -> &mut Event<T, U, V, ()> + 'static + Clone + Sync + Send,
-        F: Fn(&mut T, &U, &V) + 'static + Clone + Sync + Send,
-    {
-        let id = self.get_key().id();
-        self.add_transient_event_listener(event, priority, move |value, u, v| {
-            do_once_per_turn(&id, value, u, v, get_info.clone(), listener.clone());
-        })
     }
 
     fn add_persistent_event_listener<E, V>(
@@ -497,13 +480,17 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         + Clone
         + Sync
         + Send,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<String>, &mut V) + 'static + Clone + Sync + Send,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<Advance>, &mut V)
+        + 'static
+        + Clone
+        + Sync
+        + Send,
     ) -> Self
     where
         E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone + Sync + Send,
         V: Clone + PartialEq,
     {
-        self.add_choice_reward_request_listener::<E, String, AdvanceRequest, V>(
+        self.add_choice_reward_request_listener::<E, Advance, AdvanceRequest, V>(
             event,
             priority,
             |r| &r.choices,
@@ -948,8 +935,9 @@ where
         .add_ability_deinitializer(deinitializer)
 }
 
-pub(crate) fn do_once_per_turn<F, T, U, V>(
-    id: &str,
+#[allow(clippy::map_entry)]
+pub(crate) fn once_per_turn_advance<F, T, U, V>(
+    id: Advance,
     value: &mut T,
     u: &U,
     v: &V,
@@ -958,8 +946,9 @@ pub(crate) fn do_once_per_turn<F, T, U, V>(
 ) where
     F: Fn(&mut T, &U, &V) + 'static + Clone + Sync + Send,
 {
-    if !get_info(value).contains_key(id) {
+    let key = id.to_string();
+    if !get_info(value).contains_key(&key) {
         listener(value, u, v);
-        get_info(value).insert(id.to_string(), "used".to_string());
+        get_info(value).insert(key, "used".to_string());
     }
 }

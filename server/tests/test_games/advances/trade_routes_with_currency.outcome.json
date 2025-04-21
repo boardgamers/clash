@@ -31,7 +31,7 @@
           }
         },
         "origin": {
-          "Advance": "Trade Routes"
+          "Advance": "TradeRoutes"
         }
       }
     }
@@ -158,7 +158,7 @@
         "Philosophy",
         "Roads",
         "Tactics",
-        "Trade Routes"
+        "TradeRoutes"
       ],
       "incident_tokens": 1,
       "next_unit_id": 1

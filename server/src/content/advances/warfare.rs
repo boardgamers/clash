@@ -1,15 +1,13 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Bonus::CultureToken;
-use crate::advance::{Advance, AdvanceBuilder};
+use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city_pieces::Building::Fortress;
 use crate::combat::CombatModifier::{
     CancelFortressExtraDie, CancelFortressIgnoreHit, SteelWeaponsAttacker, SteelWeaponsDefender,
 };
 use crate::combat::{Combat, CombatModifier};
 use crate::combat_listeners::CombatStrength;
-use crate::content::advances::{
-    AdvanceGroup, METALLURGY, STEEL_WEAPONS, TACTICS, advance_group_builder,
-};
+use crate::content::advances::{AdvanceGroup, advance_group_builder};
 use crate::content::persistent_events::PaymentRequest;
 use crate::game::Game;
 use crate::payment::{PaymentConversion, PaymentOptions};
@@ -28,8 +26,9 @@ pub(crate) fn warfare() -> AdvanceGroup {
 
 fn tactics() -> AdvanceBuilder {
     play_tactics_card(
-        Advance::builder(
-            TACTICS,
+        AdvanceInfo::builder(
+            Advance::Tactics,
+            "Tactics",
             "May Move Army units, May use Tactics on Action Cards",
         )
         .with_advance_bonus(CultureToken)
@@ -39,7 +38,8 @@ fn tactics() -> AdvanceBuilder {
 }
 
 fn siegecraft() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Siegecraft,
         "Siegecraft",
         "When attacking a city with a Fortress, pay 2 wood to cancel the Fortress’ \
         ability to add +1 die and/or pay 2 ore to ignore its ability to cancel a hit.",
@@ -101,8 +101,9 @@ fn siegecraft() -> AdvanceBuilder {
 }
 
 fn steel_weapons() -> AdvanceBuilder {
-    Advance::builder(
-        STEEL_WEAPONS,
+    AdvanceInfo::builder(
+        Advance::SteelWeapons,
+        "Steel Weapons",
         "Immediately before a Land battle starts, \
         you may pay 1 ore to get +2 combat value in every Combat Round against an enemy \
         that does not have the Steel Weapons advance. \
@@ -147,7 +148,8 @@ fn steel_weapons() -> AdvanceBuilder {
 }
 
 fn draft() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Draft,
         "Draft",
         "When Recruiting, you may spend 1 mood token to pay for 1 Infantry Army Unit.",
     )
@@ -172,8 +174,8 @@ fn draft() -> AdvanceBuilder {
     )
 }
 
-pub(crate) fn draft_cost(player: &Player) -> u32 {
-    if player.has_advance("Civil Liberties") {
+pub(crate) fn draft_cost(player: &Player) -> u8 {
+    if player.has_advance(Advance::CivilLiberties) {
         2
     } else {
         1
@@ -194,8 +196,8 @@ fn steel_weapons_cost(game: &Game, combat: &Combat, player_index: usize) -> Paym
     let attacker = &game.players[combat.attacker];
     let defender = &game.players[combat.defender];
     let both_steel_weapons =
-        attacker.has_advance(STEEL_WEAPONS) && defender.has_advance(STEEL_WEAPONS);
-    let cost = u32::from(!player.has_advance(METALLURGY) || both_steel_weapons);
+        attacker.has_advance(Advance::SteelWeapons) && defender.has_advance(Advance::SteelWeapons);
+    let cost = u8::from(!player.has_advance(Advance::Metallurgy) || both_steel_weapons);
     PaymentOptions::sum(cost, &[ResourceType::Ore, ResourceType::Gold])
 }
 
@@ -216,8 +218,8 @@ fn fortress(game: &Game, c: &Combat, s: &mut CombatStrength, role: CombatRole) {
 }
 
 fn use_steel_weapons(game: &Game, c: &Combat, s: &mut CombatStrength, role: CombatRole) {
-    let steel_weapon_value = if game.player(c.attacker).has_advance(STEEL_WEAPONS)
-        && game.player(c.defender).has_advance(STEEL_WEAPONS)
+    let steel_weapon_value = if game.player(c.attacker).has_advance(Advance::SteelWeapons)
+        && game.player(c.defender).has_advance(Advance::SteelWeapons)
     {
         1
     } else {

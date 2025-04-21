@@ -196,12 +196,15 @@
                 {
                   "action": {
                     "Playing": {
-                      "Custom": {
-                        "ArtsInfluenceCultureAttempt": {
+                      "InfluenceCultureAttempt": {
+                        "selected_structure": {
                           "position": "C2",
                           "structure": {
                             "Building": "Fortress"
                           }
+                        },
+                        "action_type": {
+                          "Custom": "ArtsInfluenceCultureAttempt"
                         }
                       }
                     }

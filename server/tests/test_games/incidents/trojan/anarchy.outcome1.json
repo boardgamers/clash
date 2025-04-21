@@ -75,7 +75,7 @@
         "Dogma",
         "Farming",
         "Mining",
-        "State Religion",
+        "StateReligion",
         "Storage",
         "Tactics"
       ],
@@ -250,7 +250,7 @@
                     {
                       "op": "replace",
                       "path": "/players/0/advances/2",
-                      "value": "State Religion"
+                      "value": "StateReligion"
                     },
                     {
                       "op": "replace",

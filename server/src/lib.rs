@@ -16,6 +16,7 @@ pub mod action_card;
 pub mod advance;
 pub mod ai;
 pub mod ai_actions;
+pub mod ai_collect;
 pub mod ai_missions;
 mod barbarians;
 pub mod cache;

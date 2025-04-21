@@ -1,20 +1,23 @@
+use crate::city_ui::add_building_description;
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::layout_ui::{left_mouse_button_pressed_in_rect, top_centered_text};
-use crate::log_ui::break_text;
 use crate::payment_ui::{Payment, payment_dialog};
 use crate::render_context::RenderContext;
-use crate::tooltip::show_tooltip_for_rect;
+use crate::tooltip::{add_tooltip_description, show_tooltip_for_rect};
+use crate::unit_ui::add_unit_description;
+use itertools::Itertools;
 use macroquad::color::Color;
 use macroquad::math::vec2;
 use macroquad::prelude::{
     BLACK, BLUE, GRAY, Rect, WHITE, YELLOW, draw_rectangle, draw_rectangle_lines,
 };
 use server::action::Action;
-use server::advance::{Advance, Bonus};
+use server::advance::{Advance, AdvanceInfo, Bonus};
 use server::content::advances;
 use server::game::GameState;
-use server::player::Player;
+use server::player::{CostTrigger, Player};
 use server::playing_actions::PlayingAction;
+use server::unit::UnitType;
 use std::ops::Rem;
 
 const COLUMNS: usize = 6;
@@ -26,8 +29,15 @@ pub enum AdvanceState {
     Unavailable,
 }
 
-fn new_advance_payment(rc: &RenderContext, a: &Advance) -> Payment {
-    rc.new_payment(&rc.shown_player.advance_cost(a, None).cost, &a.name, false)
+fn new_advance_payment(rc: &RenderContext, a: &AdvanceInfo) -> Payment<Advance> {
+    rc.new_payment(
+        &rc.shown_player
+            .advance_cost(a.advance, CostTrigger::WithModifiers)
+            .cost,
+        a.advance,
+        &a.name,
+        false,
+    )
 }
 
 pub fn show_paid_advance_menu(rc: &RenderContext) -> StateUpdate {
@@ -36,9 +46,11 @@ pub fn show_paid_advance_menu(rc: &RenderContext) -> StateUpdate {
         rc,
         "Advances",
         |a, p| {
-            if p.has_advance(&a.name) {
+            if p.has_advance(a.advance) {
                 AdvanceState::Owned
-            } else if game.state == GameState::Playing && game.actions_left > 0 && p.can_advance(a)
+            } else if game.state == GameState::Playing
+                && game.actions_left > 0
+                && p.can_advance(a.advance)
             {
                 AdvanceState::Available
             } else {
@@ -52,8 +64,8 @@ pub fn show_paid_advance_menu(rc: &RenderContext) -> StateUpdate {
 pub fn show_advance_menu(
     rc: &RenderContext,
     title: &str,
-    advance_state: impl Fn(&Advance, &Player) -> AdvanceState,
-    new_update: impl Fn(&Advance) -> StateUpdate,
+    advance_state: impl Fn(&AdvanceInfo, &Player) -> AdvanceState,
+    new_update: impl Fn(&AdvanceInfo) -> StateUpdate,
 ) -> StateUpdate {
     top_centered_text(rc, title, vec2(0., 10.));
     let p = rc.shown_player;
@@ -107,7 +119,7 @@ pub fn show_advance_menu(
                     );
                 } else {
                     // tooltip should be shown on top of everything
-                    show_tooltip_for_rect(rc, &description(p, a), rect, 50.);
+                    show_tooltip_for_rect(rc, &description(rc, a), rect, 50.);
 
                     if rc.can_control_shown_player()
                         && matches!(
@@ -133,7 +145,7 @@ fn fill_color(rc: &RenderContext, p: &Player, advance_state: &AdvanceState) -> C
     }
 }
 
-fn border_color(a: &Advance) -> Color {
+fn border_color(a: &AdvanceInfo) -> Color {
     if let Some(b) = &a.bonus {
         match b {
             Bonus::MoodToken => YELLOW,
@@ -144,18 +156,27 @@ fn border_color(a: &Advance) -> Color {
     }
 }
 
-fn description(p: &Player, a: &Advance) -> Vec<String> {
-    let desc = &a.description;
-
+fn description(rc: &RenderContext, a: &AdvanceInfo) -> Vec<String> {
     let mut parts: Vec<String> = vec![];
     parts.push(a.name.clone());
-    break_text(desc, 70, &mut parts);
-    parts.push(format!("Cost: {}", p.advance_cost(a, None).cost));
+    add_tooltip_description(&mut parts, &a.description);
+    parts.push(format!(
+        "Cost: {}",
+        rc.shown_player
+            .advance_cost(a.advance, CostTrigger::WithModifiers)
+            .cost
+    ));
     if let Some(r) = &a.required {
         parts.push(format!("Required: {r}"));
     }
     if !a.contradicting.is_empty() {
-        parts.push(format!("Contradicts: {}", a.contradicting.join(", ")));
+        parts.push(format!(
+            "Contradicts: {}",
+            a.contradicting
+                .iter()
+                .map(std::string::ToString::to_string)
+                .join(", ")
+        ));
     }
     if let Some(b) = &a.bonus {
         parts.push(format!(
@@ -169,14 +190,21 @@ fn description(p: &Player, a: &Advance) -> Vec<String> {
     if let Some(g) = &a.government {
         parts.push(format!("Government: {g}"));
     }
-    if let Some(u) = &a.unlocked_building {
-        parts.push(format!("Unlocks: {}", u.name()));
+    if let Some(b) = &a.unlocked_building {
+        parts.push(format!("Unlocks building: {}", b.name()));
+        add_building_description(rc, &mut parts, *b);
+    }
+    if a.advance == Advance::Bartering {
+        parts.push("Can build in a city with a Market: cavalry".to_string());
+        add_unit_description(&mut parts, UnitType::Cavalry);
+        parts.push("Can build in a city with a Market: elephant".to_string());
+        add_unit_description(&mut parts, UnitType::Elephant);
     }
 
     parts
 }
 
-pub fn pay_advance_dialog(ap: &Payment, rc: &RenderContext) -> StateUpdate {
+pub fn pay_advance_dialog(ap: &Payment<Advance>, rc: &RenderContext) -> StateUpdate {
     let update = show_paid_advance_menu(rc);
     if !matches!(update, StateUpdate::None) {
         // select a different advance
@@ -185,7 +213,7 @@ pub fn pay_advance_dialog(ap: &Payment, rc: &RenderContext) -> StateUpdate {
     payment_dialog(rc, ap, true, ActiveDialog::AdvancePayment, |payment| {
         StateUpdate::execute_with_warning(
             Action::Playing(PlayingAction::Advance {
-                advance: ap.name.to_string(),
+                advance: ap.value,
                 payment,
             }),
             if rc.shown_player.incident_tokens == 1 {

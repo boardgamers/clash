@@ -30,7 +30,7 @@ pub fn top_centered_text(rc: &RenderContext, text: &str, p: Vec2) {
         .draw_text(text, p.x - rc.state.measure_text(text).width / 2., p.y);
 }
 
-fn top_center_anchor(rc: &RenderContext) -> Vec2 {
+pub fn top_center_anchor(rc: &RenderContext) -> Vec2 {
     vec2(rc.state.screen_size.x / 2., MARGIN)
 }
 
@@ -43,10 +43,10 @@ pub fn bottom_left_texture(
     rc: &RenderContext,
     texture: &Texture2D,
     p: Vec2,
-    tooltip: &str,
+    tooltip: &[String],
 ) -> bool {
     let anchor = vec2(MARGIN, rc.state.screen_size.y - MARGIN);
-    draw_icon(rc, texture, tooltip, anchor + p)
+    draw_scaled_icon_with_tooltip(rc, texture, tooltip, anchor + p, ICON_SIZE)
 }
 
 pub fn bottom_center_texture(
@@ -101,6 +101,24 @@ pub fn draw_scaled_icon(
     origin: Vec2,
     size: f32,
 ) -> bool {
+    let t = if tooltip.is_empty() {
+        vec![]
+    } else {
+        let mut parts: Vec<String> = vec![];
+        break_text(tooltip, 70, &mut parts);
+        parts
+    };
+
+    draw_scaled_icon_with_tooltip(rc, texture, &t, origin, size)
+}
+
+pub fn draw_scaled_icon_with_tooltip(
+    rc: &RenderContext,
+    texture: &Texture2D,
+    tooltip: &[String],
+    origin: Vec2,
+    size: f32,
+) -> bool {
     draw_texture_ex(
         texture,
         origin.x,
@@ -114,9 +132,7 @@ pub fn draw_scaled_icon(
 
     let rect = Rect::new(origin.x, origin.y, size, size);
     if !tooltip.is_empty() {
-        let mut parts: Vec<String> = vec![];
-        break_text(tooltip, 70, &mut parts);
-        tooltip::show_tooltip_for_rect(rc, &parts, rect, 50.);
+        tooltip::show_tooltip_for_rect(rc, tooltip, rect, 50.);
     }
     left_mouse_button_pressed_in_rect(rect, rc)
 }

@@ -1,10 +1,11 @@
+use crate::cache;
 use crate::city::{City, MoodState};
 use crate::city_pieces::Building;
-use crate::consts::MAX_CITY_SIZE;
+use crate::consts::MAX_CITY_PIECES;
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
 use crate::map::Terrain;
-use crate::player::Player;
+use crate::player::{CostTrigger, Player};
 use crate::player_events::CostInfo;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
@@ -39,12 +40,21 @@ impl Construct {
 ///
 /// # Errors
 /// Returns an error if the building cannot be built
+///
+/// # Panics
+/// Panics if the required advance is not found
 pub fn can_construct(
     city: &City,
     building: Building,
     player: &Player,
     game: &Game,
+    trigger: CostTrigger,
 ) -> Result<CostInfo, String> {
+    let advance = cache::get().get_building_advance(building);
+    if !player.has_advance(advance) {
+        return Err(format!("Missing advance: {advance}"));
+    }
+
     can_construct_anything(city, player)?;
     if !city.can_activate() {
         return Err("Can't activate".to_string());
@@ -55,17 +65,10 @@ pub fn can_construct(
     if !city.pieces.can_add_building(building) {
         return Err("Building already exists".to_string());
     }
-    if !player
-        .advances
-        .iter()
-        .any(|a| a.unlocked_building == Some(building))
-    {
-        return Err("Building not researched".to_string());
-    }
     if !player.is_building_available(building, game) {
         return Err("All non-destroyed buildings are built".to_string());
     }
-    let cost_info = player.construct_cost(game, building, None);
+    let cost_info = player.building_cost(game, building, trigger);
     if !player.can_afford(&cost_info.cost) {
         // construct cost event listener?
         return Err("Not enough resources".to_string());
@@ -77,7 +80,7 @@ pub(crate) fn can_construct_anything(city: &City, player: &Player) -> Result<(),
     if city.player_index != player.index {
         return Err("Not your city".to_string());
     }
-    if city.pieces.amount() >= MAX_CITY_SIZE {
+    if city.pieces.amount() >= MAX_CITY_PIECES {
         return Err("City is full".to_string());
     }
     if city.size() >= player.cities.len() {
@@ -90,7 +93,13 @@ pub(crate) fn can_construct_anything(city: &City, player: &Player) -> Result<(),
 pub(crate) fn construct(game: &mut Game, player_index: usize, c: &Construct) -> Result<(), String> {
     let player = &game.players[player_index];
     let city = player.get_city(c.city_position);
-    let cost = can_construct(city, c.city_piece, player, game)?;
+    let cost = can_construct(
+        city,
+        c.city_piece,
+        player,
+        game,
+        game.execute_cost_trigger(),
+    )?;
     if matches!(c.city_piece, Building::Port) {
         let port_position = c.port_position.as_ref().expect("Illegal action");
         assert!(
@@ -125,27 +134,27 @@ pub fn available_buildings(
     game: &Game,
     player: usize,
     city: Position,
-) -> Vec<(Building, CostInfo, Option<Position>)> {
+) -> Vec<(Building, CostInfo)> {
     let player = game.player(player);
     let city = player.get_city(city);
     Building::all()
         .into_iter()
-        .flat_map(|b| {
-            can_construct(city, b, player, game)
-                .map_or(Vec::new(), |i| new_building_positions(game, b, city, &i))
+        .filter_map(|b| {
+            can_construct(city, b, player, game, CostTrigger::NoModifiers)
+                .ok()
+                .map(|i| (b, i))
         })
         .collect()
 }
 
 #[must_use]
-fn new_building_positions(
+pub fn new_building_positions(
     game: &Game,
     building: Building,
     city: &City,
-    cost_info: &CostInfo,
-) -> Vec<(Building, CostInfo, Option<Position>)> {
+) -> Vec<Option<Position>> {
     if building != Building::Port {
-        return vec![(building, cost_info.clone(), None)];
+        return vec![None];
     }
 
     game.map
@@ -153,7 +162,7 @@ fn new_building_positions(
         .iter()
         .filter_map(|(p, t)| {
             if *t == Terrain::Water && city.position.is_neighbor(*p) {
-                Some((building, cost_info.clone(), Some(*p)))
+                Some(Some(*p))
             } else {
                 None
             }

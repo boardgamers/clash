@@ -1,27 +1,35 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
+use crate::advance::Advance;
 use crate::events::EventOrigin;
 
 pub struct SpecialAdvance {
+    pub advance: Advance,
     pub name: String,
     pub description: String,
-    pub required_advance: String,
+    pub required_advance: Advance,
     pub listeners: AbilityListeners,
 }
 
 impl SpecialAdvance {
     #[must_use]
-    pub fn builder(name: &str, required_advance: &str) -> SpecialAdvanceBuilder {
-        SpecialAdvanceBuilder::new(name.to_string(), required_advance.to_string())
+    pub fn builder(
+        advance: Advance,
+        name: &str,
+        required_advance: Advance,
+    ) -> SpecialAdvanceBuilder {
+        SpecialAdvanceBuilder::new(advance, name.to_string(), required_advance)
     }
 
     fn new(
+        advance: Advance,
         name: String,
         description: String,
-        required_advance: String,
+        required_advance: Advance,
         listeners: AbilityListeners,
     ) -> Self {
         Self {
+            advance,
             name,
             description,
             required_advance,
@@ -31,15 +39,17 @@ impl SpecialAdvance {
 }
 
 pub struct SpecialAdvanceBuilder {
+    advance: Advance,
     name: String,
     descriptions: Vec<String>,
-    required_advance: String,
+    required_advance: Advance,
     builder: AbilityInitializerBuilder,
 }
 
 impl SpecialAdvanceBuilder {
-    fn new(name: String, required_advance: String) -> Self {
+    fn new(advance: Advance, name: String, required_advance: Advance) -> Self {
         Self {
+            advance,
             name,
             descriptions: Vec::new(),
             required_advance,
@@ -49,6 +59,7 @@ impl SpecialAdvanceBuilder {
 
     pub fn build(self) -> SpecialAdvance {
         SpecialAdvance::new(
+            self.advance,
             self.name,
             String::from("✦ ") + &self.descriptions.join("\n✦ "),
             self.required_advance,
@@ -63,6 +74,6 @@ impl AbilityInitializerSetup for SpecialAdvanceBuilder {
     }
 
     fn get_key(&self) -> EventOrigin {
-        EventOrigin::SpecialAdvance(self.name.clone())
+        EventOrigin::SpecialAdvance(self.advance)
     }
 }

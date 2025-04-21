@@ -1,11 +1,13 @@
 use crate::action::execute_custom_phase_action;
 use crate::action_card::ActionCardInfo;
+use crate::advance::Advance;
 use crate::card::HandCard;
 use crate::city_pieces::Building;
 use crate::collect::CollectInfo;
 use crate::combat::Combat;
 use crate::combat_listeners::{CombatEnd, CombatRoundEnd, CombatRoundStart};
 use crate::combat_stats::CombatStats;
+use crate::content::custom_actions::CustomEventAction;
 use crate::events::EventOrigin;
 use crate::explore::ExploreResolutionState;
 use crate::game::Game;
@@ -13,7 +15,7 @@ use crate::map::Rotation;
 use crate::objective_card::SelectObjectivesInfo;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
-use crate::player_events::{AdvanceInfo, IncidentInfo};
+use crate::player_events::{IncidentInfo, OnAdvanceInfo};
 use crate::playing_actions::Recruit;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
@@ -44,7 +46,7 @@ pub enum PersistentEventRequest {
 pub enum EventResponse {
     Payment(Vec<ResourcePile>),
     ResourceReward(ResourcePile),
-    SelectAdvance(String),
+    SelectAdvance(Advance),
     SelectPlayer(usize),
     SelectPositions(Vec<Position>),
     SelectUnitType(UnitType),
@@ -103,7 +105,7 @@ pub enum PersistentEventType {
     CaptureUndefendedPosition(CombatStats),
     StatusPhase(StatusPhaseState),
     TurnStart,
-    Advance(AdvanceInfo),
+    Advance(OnAdvanceInfo),
     Construct(Building),
     Recruit(Recruit),
     FoundCity(Position),
@@ -112,6 +114,7 @@ pub enum PersistentEventType {
     WonderCard(WonderCardInfo),
     DrawWonderCard,
     SelectObjectives(SelectObjectivesInfo),
+    CustomAction(CustomEventAction),
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -189,12 +192,12 @@ impl ResourceRewardRequest {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct AdvanceRequest {
-    pub choices: Vec<String>,
+    pub choices: Vec<Advance>,
 }
 
 impl AdvanceRequest {
     #[must_use]
-    pub fn new(mut choices: Vec<String>) -> Self {
+    pub fn new(mut choices: Vec<Advance>) -> Self {
         choices.sort();
         choices.dedup();
         Self { choices }

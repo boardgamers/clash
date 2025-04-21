@@ -1,4 +1,6 @@
 use crate::common::*;
+use itertools::Itertools;
+use playing_actions::PlayingActionType;
 use server::card::HandCard;
 use server::collect::PositionCollection;
 use server::content::persistent_events::{EventResponse, SelectedStructure, Structure};
@@ -7,9 +9,10 @@ use server::log::current_player_turn_log;
 use server::unit::Units;
 use server::{
     action::Action,
+    advance,
     city::{City, MoodState::*},
     city_pieces::Building::*,
-    construct,
+    construct, cultural_influence,
     game::Game,
     game_api,
     map::Terrain::*,
@@ -40,7 +43,7 @@ fn basic_actions() {
     let founded_city_position = Position::new(0, 1);
     game.map.tiles = HashMap::from([(founded_city_position, Forest)]);
     let advance_action = Action::Playing(Advance {
-        advance: String::from("Math"),
+        advance: advance::Advance::Math,
         payment: ResourcePile::food(2),
     });
     let game = game_api::execute(game, advance_action, 0);
@@ -50,7 +53,7 @@ fn basic_actions() {
     assert_eq!(2, game.actions_left);
 
     let advance_action = Action::Playing(Advance {
-        advance: String::from("Engineering"),
+        advance: advance::Advance::Engineering,
         payment: ResourcePile::empty(),
     });
     let mut game = game_api::execute(game, advance_action, 0);
@@ -58,16 +61,12 @@ fn basic_actions() {
 
     assert_eq!(
         vec![
-            String::from("Farming"),
-            String::from("Mining"),
-            String::from("Math"),
-            String::from("Engineering")
+            advance::Advance::Farming,
+            advance::Advance::Mining,
+            advance::Advance::Engineering,
+            advance::Advance::Math,
         ],
-        player
-            .advances
-            .iter()
-            .map(|a| a.name.clone())
-            .collect::<Vec<String>>()
+        player.advances.iter().collect_vec()
     );
     assert_eq!(ResourcePile::culture_tokens(1), player.resources);
     assert_eq!(1, game.actions_left);
@@ -101,10 +100,11 @@ fn basic_actions() {
     assert_eq!(0, game.active_player());
 
     let increase_happiness_action =
-        Action::Playing(IncreaseHappiness(playing_actions::IncreaseHappiness {
-            happiness_increases: vec![(city_position, 1)],
-            payment: ResourcePile::mood_tokens(2),
-        }));
+        Action::Playing(IncreaseHappiness(playing_actions::IncreaseHappiness::new(
+            vec![(city_position, 1)],
+            ResourcePile::mood_tokens(2),
+            PlayingActionType::IncreaseHappiness,
+        )));
     let mut game = game_api::execute(game, increase_happiness_action, 0);
     let player = &game.players[0];
 
@@ -136,6 +136,7 @@ fn basic_actions() {
         city_position,
         vec![PositionCollection::new(tile_position, ResourcePile::ore(1))],
         ResourcePile::ore(1),
+        PlayingActionType::Collect,
     )));
     let game = game_api::execute(game, collect_action, 0);
     let player = &game.players[0];
@@ -201,10 +202,11 @@ fn assert_undo(
 
 fn increase_happiness(game: Game) -> Game {
     let increase_happiness_action =
-        Action::Playing(IncreaseHappiness(playing_actions::IncreaseHappiness {
-            happiness_increases: vec![(Position::new(0, 0), 1)],
-            payment: ResourcePile::mood_tokens(1),
-        }));
+        Action::Playing(IncreaseHappiness(playing_actions::IncreaseHappiness::new(
+            vec![(Position::new(0, 0), 1)],
+            ResourcePile::mood_tokens(1),
+            PlayingActionType::IncreaseHappiness,
+        )));
     game_api::execute(game, increase_happiness_action, 0)
 }
 
@@ -253,7 +255,7 @@ fn undo() {
     assert_eq!(Angry, game.players[0].cities[0].mood_state);
 
     let advance_action = Action::Playing(Advance {
-        advance: String::from("Math"),
+        advance: advance::Advance::Math,
         payment: ResourcePile::food(2),
     });
     let game = game_api::execute(game, advance_action, 0);
@@ -262,7 +264,7 @@ fn undo() {
     assert_undo(&game, false, true, 1, 0, 0);
     assert_eq!(2, game.players[0].advances.len());
     let advance_action = Action::Playing(Advance {
-        advance: String::from("Engineering"),
+        advance: advance::Advance::Engineering,
         payment: ResourcePile::food(2),
     });
     let game = game_api::execute(game, advance_action, 0);
@@ -275,10 +277,15 @@ fn test_cultural_influence_instant() {
         "cultural_influence_instant",
         vec![TestAction::not_undoable(
             1,
-            Action::Playing(InfluenceCultureAttempt(SelectedStructure::new(
-                Position::from_offset("C2"),
-                Structure::Building(Fortress),
-            ))),
+            Action::Playing(InfluenceCultureAttempt(
+                cultural_influence::InfluenceCultureAttempt::new(
+                    SelectedStructure::new(
+                        Position::from_offset("C2"),
+                        Structure::Building(Fortress),
+                    ),
+                    PlayingActionType::InfluenceCultureAttempt,
+                ),
+            )),
         )],
     );
 }
@@ -346,13 +353,14 @@ fn test_increase_happiness() {
         "increase_happiness",
         vec![TestAction::undoable(
             0,
-            Action::Playing(IncreaseHappiness(playing_actions::IncreaseHappiness {
-                happiness_increases: vec![
+            Action::Playing(IncreaseHappiness(playing_actions::IncreaseHappiness::new(
+                vec![
                     (Position::from_offset("C2"), 1),
                     (Position::from_offset("B3"), 2),
                 ],
-                payment: ResourcePile::mood_tokens(5),
-            })),
+                ResourcePile::mood_tokens(5),
+                PlayingActionType::IncreaseHappiness,
+            ))),
         )],
     );
 }
@@ -434,6 +442,7 @@ fn test_collect() {
                     PositionCollection::new(Position::from_offset("B2"), ResourcePile::wood(1)),
                 ],
                 ResourcePile::ore(1) + ResourcePile::wood(1),
+                PlayingActionType::Collect,
             ))),
         )],
     );

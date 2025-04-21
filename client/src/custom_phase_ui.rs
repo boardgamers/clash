@@ -6,8 +6,8 @@ use crate::payment_ui::{Payment, multi_payment_dialog, payment_dialog};
 use crate::player_ui::choose_player_dialog;
 use crate::render_context::RenderContext;
 use crate::select_ui::HighlightType;
-use crate::unit_ui;
-use crate::unit_ui::{UnitSelection, draw_unit_type};
+use crate::tooltip::show_tooltip_for_circle;
+use crate::unit_ui::{UnitSelection, add_unit_description, draw_unit_type};
 use itertools::Itertools;
 use macroquad::math::vec2;
 use server::action::Action;
@@ -15,12 +15,16 @@ use server::content::persistent_events::{
     AdvanceRequest, EventResponse, MultiRequest, PlayerRequest, SelectedStructure, Structure,
     UnitTypeRequest, UnitsRequest, is_selected_structures_valid,
 };
-use server::cultural_influence::influence_action;
+use server::cultural_influence::InfluenceCultureAttempt;
 use server::game::Game;
+use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::unit::Unit;
 
-pub fn custom_phase_payment_dialog(rc: &RenderContext, payments: &[Payment]) -> StateUpdate {
+pub fn custom_phase_payment_dialog(
+    rc: &RenderContext,
+    payments: &[Payment<String>],
+) -> StateUpdate {
     multi_payment_dialog(
         rc,
         payments,
@@ -30,7 +34,7 @@ pub fn custom_phase_payment_dialog(rc: &RenderContext, payments: &[Payment]) -> 
     )
 }
 
-pub fn payment_reward_dialog(rc: &RenderContext, payment: &Payment) -> StateUpdate {
+pub fn payment_reward_dialog(rc: &RenderContext, payment: &Payment<String>) -> StateUpdate {
     payment_dialog(
         rc,
         payment,
@@ -46,9 +50,9 @@ pub fn advance_reward_dialog(rc: &RenderContext, r: &AdvanceRequest, name: &str)
         rc,
         &format!("Select advance for {name}"),
         |a, _| {
-            if possible.contains(&a.name) {
+            if possible.contains(&a.advance) {
                 AdvanceState::Available
-            } else if rc.shown_player.has_advance(&a.name) {
+            } else if rc.shown_player.has_advance(a.advance) {
                 AdvanceState::Owned
             } else {
                 AdvanceState::Unavailable
@@ -57,7 +61,7 @@ pub fn advance_reward_dialog(rc: &RenderContext, r: &AdvanceRequest, name: &str)
         |a| {
             StateUpdate::execute_with_confirm(
                 vec![format!("Select {}?", a.name)],
-                Action::Response(EventResponse::SelectAdvance(a.name.clone())),
+                Action::Response(EventResponse::SelectAdvance(a.advance)),
             )
         },
     )
@@ -68,23 +72,24 @@ pub fn unit_request_dialog(rc: &RenderContext, r: &UnitTypeRequest) -> StateUpda
 
     let c = &r.choices;
     let anchor = bottom_center_anchor(rc) + vec2(0., 60.);
-    for (i, u) in c.iter().enumerate() {
-        let x = (c.len() - i) as i8 - 1;
-        let p = icon_pos(x, -2) + anchor;
+    for pass in 0..2 {
+        for (i, u) in c.iter().enumerate() {
+            let x = (c.len() - i) as i8 - 1;
+            let center = icon_pos(x, -2) + anchor;
 
-        if draw_unit_type(
-            rc,
-            HighlightType::None,
-            p,
-            *u,
-            r.player_index,
-            unit_ui::name(u),
-            20.,
-        ) {
-            return StateUpdate::Execute(Action::Response(EventResponse::SelectUnitType(*u)));
+            if pass == 0 {
+                if draw_unit_type(rc, HighlightType::None, center, *u, r.player_index, 20.) {
+                    return StateUpdate::Execute(Action::Response(EventResponse::SelectUnitType(
+                        *u,
+                    )));
+                }
+            } else {
+                let mut tooltip = vec![u.name().to_string()];
+                add_unit_description(&mut tooltip, *u);
+                show_tooltip_for_circle(rc, &tooltip, center, 20.);
+            }
         }
     }
-
     StateUpdate::None
 }
 
@@ -249,7 +254,9 @@ pub fn select_structures_dialog(
             if s.selected.is_empty() {
                 return StateUpdate::CloseDialog;
             }
-            StateUpdate::execute(influence_action(&d.action_type, s.selected[0].selected()))
+            StateUpdate::execute(Action::Playing(PlayingAction::InfluenceCultureAttempt(
+                InfluenceCultureAttempt::new(s.selected[0].selected(), d.action_type.clone()),
+            )))
         } else {
             StateUpdate::response(EventResponse::SelectStructures(sel))
         }

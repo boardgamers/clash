@@ -262,6 +262,10 @@ impl Assets {
                 load_png(include_bytes!("../assets/justice-hammer-svgrepo-com.png")),
             ),
             (
+                CustomActionType::Bartering,
+                load_png(include_bytes!("../assets/card-discard-svgrepo-com.png")),
+            ),
+            (
                 CustomActionType::Taxes,
                 load_png(include_bytes!("../assets/tax-svgrepo-com.png")),
             ),

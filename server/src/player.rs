@@ -1,8 +1,7 @@
 use crate::advance::Advance;
+use crate::ai_collect::reset_collect_within_range_for_all_except;
 use crate::city_pieces::{DestroyedStructures, DestroyedStructuresData};
-use crate::collect::reset_collect_within_range_for_all;
 use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
-use crate::content::advances::get_advance;
 use crate::content::builtin;
 use crate::events::{Event, EventOrigin};
 use crate::objective_card::init_objective_card;
@@ -16,9 +15,9 @@ use crate::{
     city_pieces::Building::{self},
     civilization::Civilization,
     consts::{
-        ADVANCE_COST, ADVANCE_VICTORY_POINTS, BUILDING_VICTORY_POINTS,
-        CAPTURED_LEADER_VICTORY_POINTS, CITY_LIMIT, CITY_PIECE_LIMIT, CONSTRUCT_COST,
-        OBJECTIVE_VICTORY_POINTS, UNIT_LIMIT, WONDER_VICTORY_POINTS,
+        ADVANCE_COST, ADVANCE_VICTORY_POINTS, BUILDING_COST, BUILDING_VICTORY_POINTS,
+        CAPTURED_LEADER_VICTORY_POINTS, CITY_LIMIT, CITY_PIECE_LIMIT, OBJECTIVE_VICTORY_POINTS,
+        UNIT_LIMIT, WONDER_VICTORY_POINTS,
     },
     content::{civilizations, custom_actions::CustomActionType},
     game::Game,
@@ -30,6 +29,7 @@ use crate::{
     utils,
     wonder::Wonder,
 };
+use enumset::EnumSet;
 use itertools::Itertools;
 use num::Zero;
 use serde::{Deserialize, Serialize};
@@ -59,7 +59,7 @@ pub struct Player {
     pub civilization: Civilization,
     pub active_leader: Option<String>,
     pub available_leaders: Vec<String>,
-    pub advances: Vec<&'static Advance>,
+    pub advances: EnumSet<Advance>,
     pub unlocked_special_advances: Vec<String>,
     pub wonders_build: Vec<String>,
     pub incident_tokens: u8,
@@ -88,6 +88,12 @@ impl PartialEq for Player {
     fn eq(&self, other: &Self) -> bool {
         self.cloned_data() == other.cloned_data()
     }
+}
+
+#[derive(PartialEq, Eq, Copy, Clone)]
+pub enum CostTrigger {
+    WithModifiers,
+    NoModifiers,
 }
 
 impl Player {
@@ -160,7 +166,7 @@ impl Player {
                 .expect("player data should have a valid civilization"),
             active_leader: data.active_leader,
             available_leaders: data.available_leaders,
-            advances: data.advances.iter().map(|a| get_advance(a)).collect(),
+            advances: EnumSet::from_iter(data.advances),
             unlocked_special_advances: data.unlocked_special_advance,
             wonders_build: data.wonders_build,
             incident_tokens: data.incident_tokens,
@@ -209,8 +215,7 @@ impl Player {
             advances: self
                 .advances
                 .into_iter()
-                .map(|a| a.name.clone())
-                .sorted()
+                .sorted_by_key(ToString::to_string)
                 .collect(),
             unlocked_special_advance: self.unlocked_special_advances,
             wonders_build: self.wonders_build,
@@ -251,8 +256,7 @@ impl Player {
             advances: self
                 .advances
                 .iter()
-                .map(|a| a.name.clone())
-                .sorted()
+                .sorted_by_key(ToString::to_string)
                 .collect(),
             unlocked_special_advance: self.unlocked_special_advances.clone(),
             wonders_build: self.wonders_build.clone(),
@@ -292,7 +296,7 @@ impl Player {
                 .map(|l| l.name.clone())
                 .collect(),
             civilization,
-            advances: vec![],
+            advances: EnumSet::empty(),
             unlocked_special_advances: Vec::new(),
             incident_tokens: 0,
             completed_objectives: Vec::new(),
@@ -389,7 +393,7 @@ impl Player {
     pub fn government(&self) -> Option<String> {
         self.advances
             .iter()
-            .find_map(|advance| advance.government.clone())
+            .find_map(|advance| advance.info().government.clone())
     }
 
     pub fn gain_resources(&mut self, resources: ResourcePile) {
@@ -427,7 +431,7 @@ impl Player {
         self.resources -= resources;
     }
 
-    pub(crate) fn can_gain_resource(&self, r: ResourceType, amount: u32) -> bool {
+    pub(crate) fn can_gain_resource(&self, r: ResourceType, amount: u8) -> bool {
         match r {
             ResourceType::MoodTokens | ResourceType::CultureTokens => true,
             _ => self.resources.get(&r) + amount <= self.resource_limit.get(&r),
@@ -439,11 +443,11 @@ impl Player {
     }
 
     #[must_use]
-    pub fn can_advance_in_change_government(&self, advance: &Advance) -> bool {
-        if self.has_advance(&advance.name) {
+    pub fn can_advance_in_change_government(&self, advance: Advance) -> bool {
+        if self.has_advance(advance) {
             return false;
         }
-        if let Some(required_advance) = &advance.required {
+        if let Some(required_advance) = advance.info().required {
             if !self.has_advance(required_advance) {
                 return false;
             }
@@ -452,13 +456,13 @@ impl Player {
     }
 
     #[must_use]
-    pub fn can_advance_free(&self, advance: &Advance) -> bool {
-        if self.has_advance(&advance.name) {
+    pub fn can_advance_free(&self, advance: Advance) -> bool {
+        if self.has_advance(advance) {
             return false;
         }
 
-        for contradicting_advance in &advance.contradicting {
-            if self.has_advance(contradicting_advance) {
+        for contradicting_advance in &advance.info().contradicting {
+            if self.has_advance(*contradicting_advance) {
                 return false;
             }
         }
@@ -466,30 +470,47 @@ impl Player {
     }
 
     #[must_use]
-    pub fn can_advance(&self, advance: &Advance) -> bool {
-        self.can_afford(&self.advance_cost(advance, None).cost) && self.can_advance_free(advance)
+    pub fn can_advance(&self, advance: Advance) -> bool {
+        self.can_afford(&self.advance_cost(advance, CostTrigger::NoModifiers).cost)
+            && self.can_advance_free(advance)
     }
 
     #[must_use]
-    pub fn has_advance(&self, advance: &str) -> bool {
-        self.advances.iter().any(|a| a.name == advance)
+    pub fn has_advance(&self, advance: Advance) -> bool {
+        self.advances.contains(advance)
     }
 
     #[must_use]
     pub fn victory_points(&self, game: &Game) -> f32 {
-        self.victory_points_parts(game).iter().sum()
+        self.victory_points_parts(game).iter().map(|(_, v)| v).sum()
     }
 
     #[must_use]
-    pub fn victory_points_parts(&self, game: &Game) -> [f32; 6] {
+    pub fn victory_points_parts(&self, game: &Game) -> [(&'static str, f32); 6] {
         [
-            (self.cities.len() + self.owned_buildings(game)) as f32 * BUILDING_VICTORY_POINTS,
-            (self.advances.len() + self.unlocked_special_advances.len()) as f32
-                * ADVANCE_VICTORY_POINTS,
-            self.completed_objectives.len() as f32 * OBJECTIVE_VICTORY_POINTS,
-            (self.wonders_owned() + self.wonders_build.len()) as f32 * WONDER_VICTORY_POINTS / 2.0,
-            self.event_victory_points,
-            self.captured_leaders.len() as f32 * CAPTURED_LEADER_VICTORY_POINTS,
+            (
+                "City pieces",
+                (self.cities.len() + self.owned_buildings(game)) as f32 * BUILDING_VICTORY_POINTS,
+            ),
+            (
+                "Advances",
+                (self.advances.len() + self.unlocked_special_advances.len()) as f32
+                    * ADVANCE_VICTORY_POINTS,
+            ),
+            (
+                "Objectives",
+                self.completed_objectives.len() as f32 * OBJECTIVE_VICTORY_POINTS,
+            ),
+            (
+                "Wonders",
+                (self.wonders_owned() + self.wonders_build.len()) as f32 * WONDER_VICTORY_POINTS
+                    / 2.0,
+            ),
+            ("Events", self.event_victory_points),
+            (
+                "Captured Leaders",
+                self.captured_leaders.len() as f32 * CAPTURED_LEADER_VICTORY_POINTS,
+            ),
         ]
     }
 
@@ -566,8 +587,8 @@ impl Player {
     pub(crate) fn compare_score(&self, other: &Self, game: &Game) -> Ordering {
         let parts = self.victory_points_parts(game);
         let other_parts = other.victory_points_parts(game);
-        let sum = parts.iter().sum::<f32>();
-        let other_sum = other_parts.iter().sum::<f32>();
+        let sum = parts.iter().map(|(_, v)| v).sum::<f32>();
+        let other_sum = other_parts.iter().map(|(_, v)| v).sum::<f32>();
 
         match sum
             .partial_cmp(&other_sum)
@@ -592,15 +613,10 @@ impl Player {
     }
 
     #[must_use]
-    pub fn construct_cost(
-        &self,
-        game: &Game,
-        building: Building,
-        execute: Option<&ResourcePile>,
-    ) -> CostInfo {
+    pub fn building_cost(&self, game: &Game, building: Building, execute: CostTrigger) -> CostInfo {
         self.trigger_cost_event(
             |e| &e.construct_cost,
-            &PaymentOptions::resources(CONSTRUCT_COST),
+            &PaymentOptions::resources(BUILDING_COST),
             &building,
             game,
             execute,
@@ -608,14 +624,14 @@ impl Player {
     }
 
     #[must_use]
-    pub fn advance_cost(&self, advance: &Advance, execute: Option<&ResourcePile>) -> CostInfo {
+    pub fn advance_cost(&self, advance: Advance, execute: CostTrigger) -> CostInfo {
         self.trigger_cost_event(
             |e| &e.advance_cost,
             &PaymentOptions::sum(
                 ADVANCE_COST,
                 &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
             ),
-            advance,
+            &advance,
             &(),
             execute,
         )
@@ -759,34 +775,21 @@ impl Player {
         value: &PaymentOptions,
         info: &U,
         details: &V,
-        execute: Option<&ResourcePile>,
+        trigger: CostTrigger,
     ) -> CostInfo {
         let event = get_event(&self.events.transient).get();
         let mut cost_info = CostInfo::new(self, value.clone());
-        let mut can_avoid_activate = false;
-        if let Some(execute) = execute {
-            event.trigger_with_minimal_modifiers(
-                &cost_info,
-                info,
-                details,
-                &mut (),
-                |i| {
-                    if can_avoid_activate && i.activate_city {
-                        return false;
-                    }
-                    if !i.activate_city {
-                        can_avoid_activate = true;
-                    }
-
-                    i.cost.is_valid_payment(execute)
-                },
-                |i, m| i.cost.modifiers = m,
-            )
-        } else {
-            let m = event.trigger_with_modifiers(&mut cost_info, info, details, &mut ());
-            cost_info.cost.modifiers = m;
-            cost_info
+        match trigger {
+            CostTrigger::WithModifiers => {
+                let m =
+                    event.trigger_with_modifiers(&mut cost_info, info, details, &mut (), trigger);
+                cost_info.cost.modifiers = m;
+            }
+            CostTrigger::NoModifiers => {
+                event.trigger(&mut cost_info, info, details, &mut ());
+            }
         }
+        cost_info
     }
 }
 
@@ -795,7 +798,7 @@ pub fn add_unit(player: usize, position: Position, unit_type: UnitType, game: &m
     let unit = Unit::new(player, position, unit_type, p.next_unit_id);
     p.units.push(unit);
     p.next_unit_id += 1;
-    reset_collect_within_range_for_all(game, position);
+    reset_collect_within_range_for_all_except(game, position, player);
 }
 
 #[derive(Serialize, Deserialize, PartialEq)]
@@ -828,7 +831,7 @@ pub struct PlayerData {
     available_leaders: Vec<String>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    advances: Vec<String>,
+    advances: Vec<Advance>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     unlocked_special_advance: Vec<String>,

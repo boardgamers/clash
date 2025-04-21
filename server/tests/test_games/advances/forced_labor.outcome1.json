@@ -94,7 +94,7 @@
       "civilization": "test1",
       "advances": [
         "Farming",
-        "Forced Labor",
+        "ForcedLabor",
         "Math",
         "Mining",
         "Nationalism"
@@ -235,7 +235,10 @@
                 {
                   "action": {
                     "Playing": {
-                      "Custom": "ForcedLabor"
+                      "Custom": {
+                        "action": "ForcedLabor",
+                        "city": null
+                      }
                     }
                   },
                   "undo": [
@@ -274,7 +277,8 @@
                         "total": {
                           "food": 1,
                           "wood": 1
-                        }
+                        },
+                        "action_type": "Collect"
                       }
                     }
                   },
@@ -304,6 +308,7 @@
   "action_log_index": 2,
   "log": [
     [
+      "Player1 started ForcedLabor",
       "Player1 paid 1 mood token to treat Angry cities as neutral"
     ],
     [

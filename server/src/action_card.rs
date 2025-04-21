@@ -1,6 +1,7 @@
 use crate::ability_initializer::{
     AbilityInitializerBuilder, AbilityInitializerSetup, AbilityListeners,
 };
+use crate::advance::Advance;
 use crate::card::draw_card_from_pile;
 use crate::combat_listeners::CombatResult;
 use crate::content::action_cards;
@@ -218,7 +219,7 @@ pub struct ActionCardInfo {
     pub selected_position: Option<Position>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub selected_advance: Option<String>,
+    pub selected_advance: Option<Advance>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub selected_positions: Vec<Position>,

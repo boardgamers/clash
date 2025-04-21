@@ -85,12 +85,12 @@
       ],
       "civilization": "test0",
       "advances": [
-        "Civil Liberties",
+        "CivilLiberties",
         "Draft",
         "Farming",
         "Math",
         "Mining",
-        "Public Education"
+        "PublicEducation"
       ],
       "incident_tokens": 2,
       "next_unit_id": 9
@@ -202,7 +202,10 @@
                 {
                   "action": {
                     "Playing": {
-                      "Custom": "CivilLiberties"
+                      "Custom": {
+                        "action": "CivilLiberties",
+                        "city": null
+                      }
                     }
                   },
                   "undo": [
@@ -268,6 +271,7 @@
   "action_log_index": 2,
   "log": [
     [
+      "Player1 started CivilLiberties",
       "Player1 gained 3 mood tokens using Civil Liberties"
     ],
     [

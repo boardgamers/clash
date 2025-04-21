@@ -1,9 +1,9 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::gain_action_card_from_pile;
 use crate::advance::Bonus::CultureToken;
-use crate::advance::{Advance, AdvanceBuilder};
+use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city_pieces::Building;
-use crate::content::advances::{AdvanceGroup, METALLURGY, advance_group_builder};
+use crate::content::advances::{AdvanceGroup, advance_group_builder};
 use crate::content::persistent_events::ResourceRewardRequest;
 use crate::payment::PaymentOptions;
 use crate::resource::ResourceType;
@@ -16,15 +16,16 @@ pub(crate) fn science() -> AdvanceGroup {
 }
 
 fn math() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Math,
         "Math",
         "Engineering and Roads can be bought at no food cost",
     )
     .add_transient_event_listener(
         |event| &mut event.advance_cost,
         1,
-        |i, a, ()| {
-            if a.name == "Engineering" || a.name == "Roads" {
+        |i, &a, ()| {
+            if a == Advance::Engineering || a == Advance::Roads {
                 i.info.log.push("Math reduced the cost to 0".to_string());
                 i.set_zero();
             }
@@ -45,15 +46,16 @@ fn math() -> AdvanceBuilder {
 }
 
 fn astronomy() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Astronomy,
         "Astronomy",
         "Navigation and Cartography can be bought at no food cost",
     )
     .add_transient_event_listener(
         |event| &mut event.advance_cost,
         0,
-        |i, a, ()| {
-            if a.name == "Navigation" || a.name == "Cartography" {
+        |i, &a, ()| {
+            if a == Advance::Navigation || a == Advance::Cartography {
                 i.set_zero();
                 i.info
                     .log
@@ -65,7 +67,8 @@ fn astronomy() -> AdvanceBuilder {
 }
 
 fn medicine() -> AdvanceBuilder {
-    Advance::builder(
+    AdvanceInfo::builder(
+        Advance::Medicine,
         "Medicine",
         "After recruiting, gain one of the paid resources back",
     )
@@ -103,8 +106,9 @@ fn medicine() -> AdvanceBuilder {
 }
 
 fn metallurgy() -> AdvanceBuilder {
-    Advance::builder(
-        METALLURGY,
+    AdvanceInfo::builder(
+        Advance::Metallurgy,
+        "Metallurgy",
         "If you have the Steel Weapons Advance, \
         you no longer have to pay 1 ore to activate it against enemies without Steel Weapons. \
         If you collect at least 2 ore, replace 1 ore with 1 gold",

@@ -1,10 +1,11 @@
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::ability_initializer::{AbilityInitializerSetup, SelectedChoice};
 use crate::action_card::ActionCard;
+use crate::advance::Advance;
+use crate::ai_collect::reset_collect_within_range_for_all;
 use crate::barbarians::{barbarians_move, barbarians_spawn};
 use crate::card::{HandCard, draw_card_from_pile};
 use crate::city::{MoodState, is_valid_city_terrain};
-use crate::collect::reset_collect_within_range_for_all;
 use crate::content::incidents;
 use crate::content::incidents::great_persons::GREAT_PERSON_OFFSET;
 use crate::content::persistent_events::{
@@ -33,7 +34,7 @@ pub struct Incident {
     pub id: u8,
     pub name: String,
     description: String,
-    protection_advance: Option<String>,
+    protection_advance: Option<Advance>,
     pub base_effect: IncidentBaseEffect,
     pub listeners: AbilityListeners,
     pub(crate) action_card: Option<ActionCard>,
@@ -97,11 +98,11 @@ pub enum PassedIncident {
 pub(crate) struct IncidentFilter {
     role: IncidentTarget,
     priority: i32,
-    protection_advance: Option<String>,
+    protection_advance: Option<Advance>,
 }
 
 impl IncidentFilter {
-    pub fn new(role: IncidentTarget, priority: i32, protection_advance: Option<String>) -> Self {
+    pub fn new(role: IncidentTarget, priority: i32, protection_advance: Option<Advance>) -> Self {
         Self {
             role,
             priority,
@@ -133,7 +134,7 @@ pub struct IncidentBuilder {
     pub name: String,
     description: String,
     base_effect: IncidentBaseEffect,
-    protection_advance: Option<String>,
+    protection_advance: Option<Advance>,
     action_card: Option<ActionCard>,
     builder: AbilityInitializerBuilder,
 }
@@ -177,8 +178,8 @@ impl IncidentBuilder {
     }
 
     #[must_use]
-    pub fn with_protection_advance(mut self, advance: &str) -> Self {
-        self.protection_advance = Some(advance.to_string());
+    pub fn with_protection_advance(mut self, advance: Advance) -> Self {
+        self.protection_advance = Some(advance);
         self
     }
 
@@ -344,7 +345,7 @@ impl IncidentBuilder {
     }
 
     fn new_filter(&self, role: IncidentTarget, priority: i32) -> IncidentFilter {
-        IncidentFilter::new(role, priority, self.protection_advance.clone())
+        IncidentFilter::new(role, priority, self.protection_advance)
     }
 
     #[must_use]
@@ -468,24 +469,22 @@ impl IncidentBuilder {
         + Send,
     ) -> Self {
         let cities2 = cities.clone();
-        self.add_myths_payment(target, mood_modifier, move |g, p, i| {
-            cities(p, g, i).1 as u32
-        })
-        .decrease_mood(target, mood_modifier, cities2)
+        self.add_myths_payment(target, mood_modifier, move |g, p, i| cities(p, g, i).1)
+            .decrease_mood(target, mood_modifier, cities2)
     }
 
     fn add_myths_payment(
         self,
         target: IncidentTarget,
         mood_modifier: MoodModifier,
-        amount: impl Fn(&Game, &Player, &IncidentInfo) -> u32 + 'static + Clone + Sync + Send,
+        amount: impl Fn(&Game, &Player, &IncidentInfo) -> u8 + 'static + Clone + Sync + Send,
     ) -> Self {
         self.add_incident_payment_request(
             target,
             10,
             move |game, player_index, i| {
                 let p = game.player(player_index);
-                if p.has_advance("Myths") {
+                if p.has_advance(Advance::Myths) {
                     let needed = amount(game, p, i);
                     if needed == 0 {
                         return None;
@@ -513,7 +512,7 @@ impl IncidentBuilder {
             },
             move |game, s, i| {
                 let pile = &s.choice[0];
-                i.player.myths_payment = pile.amount() as u8;
+                i.player.myths_payment = pile.amount();
                 game.add_info_log_item(&format!(
                     "{} paid {pile} to avoid the mood change using Myths",
                     s.player_name
@@ -642,7 +641,7 @@ fn passed_to_player(game: &mut Game, i: &mut IncidentInfo) -> bool {
 
 #[must_use]
 pub fn is_active(
-    protection_advance: &Option<String>,
+    protection_advance: &Option<Advance>,
     priority: i32,
     game: &Game,
     i: &IncidentInfo,
@@ -656,8 +655,8 @@ pub fn is_active(
         return play_base_effect(i);
     }
     // protection advance does not protect against base effects
-    if let Some(advance) = &protection_advance {
-        if game.players[player].has_advance(advance) {
+    if let Some(advance) = protection_advance {
+        if game.player(player).has_advance(*advance) {
             return false;
         }
     }

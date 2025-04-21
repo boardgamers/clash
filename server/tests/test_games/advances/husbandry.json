@@ -4,12 +4,12 @@
     {
       "id": 0,
       "resources": {
-        "food": 6,
+        "food": 7,
         "wood": 5,
         "ore": 5,
-        "ideas": 3,
-        "gold": 6,
-        "mood_tokens": 10,
+        "ideas": 1,
+        "gold": 5,
+        "mood_tokens": 11,
         "culture_tokens": 10
       },
       "resource_limit": {
@@ -22,10 +22,9 @@
       "cities": [
         {
           "city_pieces": {
-            "academy": 0
+            "market": 1
           },
           "mood_state": "Happy",
-          "activations": 1,
           "position": "A1"
         },
         {
@@ -33,9 +32,8 @@
             "academy": 1,
             "port": 1
           },
-          "mood_state": "Angry",
+          "mood_state": "Happy",
           "activations": 6,
-          "angry_activation": true,
           "position": "C2",
           "port_position": "C3"
         },
@@ -62,16 +60,6 @@
           "position": "C2",
           "unit_type": "Infantry",
           "id": 0
-        },
-        {
-          "position": "B3",
-          "unit_type": "Settler",
-          "id": 3
-        },
-        {
-          "position": "B3",
-          "unit_type": "Settler",
-          "id": 4
         },
         {
           "position": "B3",
@@ -114,7 +102,9 @@
         "Kʼinich Janaab Pakal I"
       ],
       "advances": [
-        "Writing"
+        "Draft",
+        "Farming",
+        "Husbandry"
       ],
       "incident_tokens": 2,
       "wonder_cards": [
@@ -268,74 +258,17 @@
           "players": [
             {
               "index": 0,
-              "items": [
-                {
-                  "action": {
-                    "Playing": {
-                      "Construct": {
-                        "city_position": "A1",
-                        "city_piece": "Academy",
-                        "payment": {
-                          "food": 1,
-                          "wood": 1,
-                          "ore": 1
-                        },
-                        "port_position": null
-                      }
-                    }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 1
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/cities/0/city_pieces/academy"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/cities/0/activations"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/food",
-                      "value": 7
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/ideas",
-                      "value": 1
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/ore",
-                      "value": 6
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/wood",
-                      "value": 6
-                    }
-                  ]
-                }
-              ]
+              "items": []
             }
           ]
         }
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player1 paid 1 food, 1 wood and 1 ore to construct a Academy in the city at A1",
-      "Academy gained 2 ideas"
-    ]
-  ],
+  "action_log_index": 0,
+  "log": [],
   "undo_limit": 0,
-  "actions_left": 0,
+  "actions_left": 3,
   "round": 6,
   "age": 1,
   "messages": [

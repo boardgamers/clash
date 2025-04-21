@@ -207,10 +207,13 @@
                   "action": {
                     "Playing": {
                       "InfluenceCultureAttempt": {
-                        "position": "C2",
-                        "structure": {
-                          "Building": "Temple"
-                        }
+                        "selected_structure": {
+                          "position": "C2",
+                          "structure": {
+                            "Building": "Temple"
+                          }
+                        },
+                        "action_type": "InfluenceCultureAttempt"
                       }
                     }
                   }

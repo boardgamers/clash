@@ -66,7 +66,7 @@
         "Mining",
         "Storage",
         "Tactics",
-        "War Ships"
+        "WarShips"
       ],
       "incident_tokens": 3,
       "next_unit_id": 8
@@ -259,17 +259,17 @@
                       "path": "/events/0/handler/request/SelectAdvance",
                       "value": {
                         "choices": [
-                          "Cartography",
-                          "Draft",
-                          "Engineering",
-                          "Husbandry",
                           "Irrigation",
-                          "Navigation",
-                          "Roads",
+                          "Husbandry",
+                          "Engineering",
                           "Sanitation",
+                          "Roads",
+                          "Navigation",
+                          "WarShips",
+                          "Cartography",
                           "Siegecraft",
-                          "Steel Weapons",
-                          "War Ships"
+                          "SteelWeapons",
+                          "Draft"
                         ]
                       }
                     },
@@ -392,7 +392,7 @@
                 {
                   "action": {
                     "Response": {
-                      "SelectAdvance": "War Ships"
+                      "SelectAdvance": "WarShips"
                     }
                   },
                   "undo": [
@@ -412,7 +412,7 @@
                       "value": {
                         "choices": [
                           "Navigation",
-                          "War Ships"
+                          "WarShips"
                         ]
                       }
                     },
@@ -446,7 +446,7 @@
                           "event_type": {
                             "ActionCard": {
                               "id": 34,
-                              "selected_advance": "War Ships"
+                              "selected_advance": "WarShips"
                             }
                           },
                           "handler": {
@@ -486,7 +486,7 @@
                                       "ideas": 2
                                     }
                                   },
-                                  "name": "Pay for War Ships",
+                                  "name": "Pay for WarShips",
                                   "optional": false
                                 }
                               ]
@@ -528,10 +528,10 @@
       "Player gained 1 culture token as advance bonus"
     ],
     [
-      "Player1 selected War Ships as second advance for Synergies."
+      "Player1 selected WarShips as second advance for Synergies."
     ],
     [
-      "Player1 paid 2 ideas for advance War Ships"
+      "Player1 paid 2 ideas for advance WarShips"
     ]
   ],
   "undo_limit": 0,

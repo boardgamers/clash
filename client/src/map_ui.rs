@@ -1,11 +1,14 @@
 use crate::city_ui::{IconAction, IconActionVec, draw_city, show_city_menu};
 use crate::client_state::{ActiveDialog, MAX_OFFSET, MIN_OFFSET, State, StateUpdate, ZOOM};
 use crate::dialog_ui::{OkTooltip, cancel_button_pos, ok_button};
-use crate::layout_ui::{bottom_center_texture, bottom_right_texture, icon_pos};
+use crate::layout_ui::{
+    bottom_center_anchor, bottom_center_texture, bottom_right_texture, icon_pos,
+};
 use crate::move_ui::{MoveDestination, MoveIntent, movable_units};
 use crate::player_ui::get_combat;
 use crate::render_context::RenderContext;
 use crate::select_ui::HighlightType;
+use crate::tooltip::show_tooltip_for_circle;
 use crate::{collect_ui, hex_ui, unit_ui};
 use macroquad::math::{f32, vec2};
 use macroquad::prelude::*;
@@ -226,25 +229,21 @@ pub fn show_tile_menu(rc: &RenderContext, pos: Position) -> StateUpdate {
 }
 
 fn found_city_button<'a>(rc: &'a RenderContext<'a>, pos: Position) -> Option<IconAction<'a>> {
-    if !rc.can_play_action(&PlayingActionType::FoundCity) {
-        return None;
-    }
     let game = rc.game;
 
-    unit_ui::units_on_tile(game, pos)
-        .find(|(_, unit)| unit.can_found_city(game))
-        .map(|(_index, unit)| {
-            let action: IconAction<'a> = (
-                rc.assets().unit(UnitType::Settler, rc.shown_player),
-                "Found a new city".to_string(),
-                Box::new(move || {
-                    StateUpdate::execute(Action::Playing(PlayingAction::FoundCity {
-                        settler: unit.id,
-                    }))
-                }),
-            );
-            action
-        })
+    unit_ui::units_on_tile(game, pos).find_map(|(_index, unit)| {
+        (unit.can_found_city(game)
+            && rc.can_play_action_for_player(&PlayingActionType::FoundCity, unit.player_index))
+        .then_some(IconAction::new(
+            rc.assets().unit(UnitType::Settler, rc.shown_player),
+            vec!["Found a new city".to_string()],
+            Box::new(move || {
+                StateUpdate::execute(Action::Playing(PlayingAction::FoundCity {
+                    settler: unit.id,
+                }))
+            }),
+        ))
+    })
 }
 
 pub fn move_units_button<'a>(
@@ -257,9 +256,9 @@ pub fn move_units_button<'a>(
     {
         return None;
     }
-    Some((
+    Some(IconAction::new(
         move_intent.icon(rc),
-        move_intent.toolip().to_string(),
+        vec![move_intent.toolip().to_string()],
         Box::new(move || StateUpdate::move_units(rc, Some(pos), move_intent)),
     ))
 }
@@ -279,14 +278,21 @@ pub fn move_units_buttons<'a>(rc: &'a RenderContext, pos: Position) -> Vec<IconA
 }
 
 pub fn show_map_action_buttons(rc: &RenderContext, icons: &IconActionVec) -> StateUpdate {
-    for (i, (icon, tooltip, action)) in icons.iter().enumerate() {
-        if bottom_center_texture(
-            rc,
-            icon,
-            icon_pos(-(icons.len() as i8) / 2 + i as i8, -1),
-            tooltip,
-        ) {
-            return action();
+    for pass in 0..2 {
+        for (i, icon) in icons.iter().enumerate() {
+            let p = icon_pos(-(icons.len() as i8) / 2 + i as i8, -1);
+            let center = bottom_center_anchor(rc) + p + vec2(15., 15.);
+            let radius = 20.;
+            if pass == 0 {
+                if icon.warning {
+                    draw_circle(center.x, center.y, radius, RED);
+                }
+                if bottom_center_texture(rc, icon.texture, p, "") {
+                    return (icon.action)();
+                }
+            } else {
+                show_tooltip_for_circle(rc, &icon.tooltip, center, radius);
+            }
         }
     }
     StateUpdate::None

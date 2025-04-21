@@ -1,9 +1,9 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Bonus::{CultureToken, MoodToken};
-use crate::advance::{Advance, AdvanceBuilder};
+use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city_pieces::Building::Port;
 use crate::collect::{CollectContext, CollectInfo};
-use crate::content::advances::{AdvanceGroup, NAVIGATION, advance_group_builder};
+use crate::content::advances::{AdvanceGroup, advance_group_builder};
 use crate::game::Game;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
@@ -17,24 +17,30 @@ pub(crate) fn seafaring() -> AdvanceGroup {
 }
 
 fn fishing() -> AdvanceBuilder {
-    Advance::builder("Fishing", "Your cities may Collect food from one Sea space")
-        .with_reset_collect_stats()
-        .add_transient_event_listener(|event| &mut event.collect_options, 1, fishing_collect)
-        .with_advance_bonus(MoodToken)
-        .with_unlocked_building(Port)
+    AdvanceInfo::builder(
+        Advance::Fishing,
+        "Fishing",
+        "Your cities may Collect food from one Sea space",
+    )
+    .with_reset_collect_stats()
+    .add_transient_event_listener(|event| &mut event.collect_options, 1, fishing_collect)
+    .with_advance_bonus(MoodToken)
+    .with_unlocked_building(Port)
 }
 
 fn navigation() -> AdvanceBuilder {
-    Advance::builder(
-        NAVIGATION,
+    AdvanceInfo::builder(
+        Advance::Navigation,
+        "Navigation",
         "Ships may leave the map and return at the next sea space",
     )
     .with_advance_bonus(CultureToken)
 }
 
 fn war_ships() -> AdvanceBuilder {
-    Advance::builder(
-        "War Ships",
+    AdvanceInfo::builder(
+        Advance::WarShips,
+        "WarShips",
         "Ignore the first hit it the first round of combat \
         when attacking with Ships or disembarking from Ships",
     )
@@ -44,14 +50,14 @@ fn war_ships() -> AdvanceBuilder {
         if c.round == 1 && (disembark || sea_battle) {
             s.hit_cancels += 1;
             s.roll_log
-                .push("War Ships ignore the first hit in the first round of combat".to_string());
+                .push("WarShips ignore the first hit in the first round of combat".to_string());
         }
     })
 }
 
 fn cartography() -> AdvanceBuilder {
-    Advance::builder(
-        "Cartography",
+    AdvanceInfo::builder(
+        Advance::Cartography,"Cartography",
         "Gain 1 idea after a move action where you moved a Ship. If you used navigation, gain an additional 1 culture token.", )
         .with_advance_bonus(CultureToken)
         .add_transient_event_listener(
