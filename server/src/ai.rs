@@ -1,5 +1,4 @@
 use core::panic;
-extern crate num_cpus;
 use std::time::Duration;
 
 use itertools::Itertools;
@@ -9,7 +8,6 @@ use tokio::runtime::Runtime;
 use crate::ai_actions::AiActions;
 use crate::{
     action::{self, Action, ActionType},
-    ai_actions,
     ai_missions::ActiveMissions,
     game::{Game, GameData, GameState},
     playing_actions::{PlayingAction, PlayingActionType},
@@ -99,7 +97,7 @@ impl AI {
             );
         }
 
-        let actions = get_actions(game, &self.active_missions);
+        let actions = get_actions(&mut self.ai_actions, game, &self.active_missions);
         if actions.is_empty() {
             return Action::Playing(PlayingAction::EndTurn);
         }
@@ -271,7 +269,9 @@ fn monte_carlo_score(
     game_data: GameData,
     players_active_missions: Vec<ActiveMissions>,
 ) -> f64 {
+    let mut ai = AiActions::new();
     let new_game = monte_carlo_run(
+        &mut ai,
         Game::from_data(game_data),
         &mut rng,
         players_active_missions,
@@ -290,7 +290,8 @@ fn monte_carlo_score(
 }
 
 fn monte_carlo_run(
-    ai: &mut AiActions,mut game: Game,
+    ai: &mut AiActions,
+    mut game: Game,
     rng: &mut Rng,
     mut players_active_missions: Vec<ActiveMissions>,
 ) -> Game {
@@ -309,7 +310,8 @@ fn monte_carlo_run(
 }
 
 fn choose_monte_carlo_action(
-    ai: &mut AiActions,game: &Game,
+    ai: &mut AiActions,
+    game: &Game,
     rng: &mut Rng,
     active_missions: &ActiveMissions,
 ) -> Action {
@@ -348,8 +350,12 @@ fn choose_monte_carlo_action(
         .expect("index out of bounds")
 }
 
-fn get_actions(game: &Game, active_missions: &ActiveMissions) -> Vec<(ActionType, Action)> {
-    let mut actions = ai_actions::get_available_actions(game);
+fn get_actions(
+    ai_actions: &mut AiActions,
+    game: &Game,
+    active_missions: &ActiveMissions,
+) -> Vec<(ActionType, Action)> {
+    let mut actions = ai_actions.get_available_actions(game);
     if can_move(game, active_missions.player_index) {
         actions.push((
             ActionType::Movement,
@@ -448,7 +454,7 @@ fn get_action_group_score(
 ///
 /// Panics if the game is in an invalid state.
 #[must_use]
-pub async fn evaluate_position(ai: &mut AiActions, game: &Game, evaluation_time: Duration) -> Vec<f64> {
+pub async fn evaluate_position(game: &Game, evaluation_time: Duration) -> Vec<f64> {
     let mut rng = Rng::new();
     let start_time = std::time::Instant::now();
     let players_active_missions = game
@@ -492,7 +498,12 @@ fn simulate_game(
     mut rng: Rng,
     players_active_missions: Vec<ActiveMissions>,
 ) -> usize {
-    let new_game = monte_carlo_run(Game::from_data(game), &mut rng, players_active_missions);
+    let new_game = monte_carlo_run(
+        &mut AiActions::new(),
+        Game::from_data(game),
+        &mut rng,
+        players_active_missions,
+    );
     let max_score = new_game
         .players
         .iter()

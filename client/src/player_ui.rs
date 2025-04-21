@@ -351,7 +351,7 @@ pub fn show_global_controls(rc: &RenderContext, features: &Features) -> StateUpd
         }
     }
 
-    if features.ai.is_some() {
+    if features.ai {
         let tooltip = if rc.state.ai_autoplay {
             "Pause AI autoplay"
         } else {

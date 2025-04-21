@@ -2,6 +2,7 @@ use std::{mem, time::Duration, vec};
 
 use tokio::runtime::Runtime;
 
+use crate::advance::Advance;
 use crate::{
     ai::{self, ACTION_SCORE_WEIGHTING},
     barbarians,
@@ -140,6 +141,7 @@ impl ActiveMissions {
         self.get_combat_unit_missions(game, explore_target, unit.id)
     }
 
+    #[allow(clippy::too_many_lines)]
     fn get_combat_unit_missions(
         &self,
         game: &Game,
@@ -688,8 +690,9 @@ fn settling_score(
     }
     if neighbors.contains(&&Terrain::Fertile)
         || (neighbors.contains(&&Terrain::Barren)
-            && game.players[player_index].has_advance("irrigation"))
-        || neighbors.contains(&&Terrain::Water) && game.players[player_index].has_advance("fishing")
+            && game.players[player_index].has_advance(Advance::Irrigation))
+        || neighbors.contains(&&Terrain::Water)
+            && game.players[player_index].has_advance(Advance::Fishing)
     {
         score += 1.0;
     }
@@ -701,7 +704,7 @@ fn settling_score(
         {
             score += 0.75;
         }
-        if game.players[player_index].has_advance("fishing") {
+        if game.players[player_index].has_advance(Advance::Fishing) {
             score += 0.25;
         }
     }

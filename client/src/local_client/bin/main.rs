@@ -2,6 +2,7 @@
 
 use client::client::{Features, GameSyncRequest, GameSyncResult, init, render_and_update};
 use client::client_state::State;
+use itertools::Itertools;
 use macroquad::miniquad::window::set_window_size;
 use macroquad::prelude::{next_frame, screen_width, vec2};
 use macroquad::window::screen_height;
@@ -41,9 +42,7 @@ async fn main() {
     let mut features = Features {
         import_export: true,
         assets_url: "assets/".to_string(),
-        ai: modes
-            .contains(&Mode::AI)
-            .then(|| AI::new(1., Duration::from_secs(5), false)),
+        ai: modes.contains(&Mode::AI),
     };
 
     let game = if modes.contains(&Mode::Test) {
@@ -98,6 +97,14 @@ fn get_modes(args: &[String]) -> Vec<Mode> {
 async fn run(mut game: Game, features: &mut Features) {
     let mut state = init(features).await;
 
+    if features.ai {
+        state.ai_players = game
+            .human_players(0)
+            .into_iter()
+            .map(|p| AI::new(1., Duration::from_secs(5), false, &game, p))
+            .collect_vec()
+    }
+
     let mut sync_result = GameSyncResult::None;
     state.show_player = game.active_player();
     loop {
@@ -134,10 +141,12 @@ async fn run(mut game: Game, features: &mut Features) {
 }
 
 fn ai_autoplay(mut game: Game, f: &mut Features, state: &mut State) -> Game {
-    if let Some(ai) = &mut f.ai {
+    if f.ai {
         while state.ai_autoplay && game.state != GameState::Finished {
             // todo does this block the ui?
             // state.ai_autoplay = false;
+            let active_player = game.active_player();
+            let ai = &mut state.ai_players[active_player];
             let action = ai.next_action(&game);
             let player_index = game.active_player();
             game = execute_action(game, action, player_index);
