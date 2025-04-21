@@ -146,12 +146,11 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
     if !influence.is_empty() {
         let action_type = prefer_custom_action(influence);
         if let Some(i) = calculate_influence(game, p, &action_type) {
-            actions.push((
-                ActionType::Playing(PlayingActionType::Collect),
-                vec![Action::Playing(PlayingAction::InfluenceCultureAttempt(
+            actions.push((ActionType::Playing(PlayingActionType::Collect), vec![
+                Action::Playing(PlayingAction::InfluenceCultureAttempt(
                     InfluenceCultureAttempt::new(i, action_type),
-                ))],
-            ));
+                )),
+            ]));
         }
     }
 
@@ -268,6 +267,14 @@ fn try_payment(ai_actions: &mut AiActions, o: &PaymentOptions, p: &Player) -> Op
         if *t > sum {
             *t = sum;
         }
+    }
+
+    if let Some(e) = ai_actions.payment_cache.options.get_mut(o) {
+        // here we don't need to clone the payment options
+        return e
+            .entry(max)
+            .or_insert_with_key(|available| o.first_valid_payment(available))
+            .clone();
     }
 
     ai_actions
