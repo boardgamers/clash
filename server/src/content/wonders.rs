@@ -6,11 +6,6 @@ use crate::{cache, resource_pile::ResourcePile, wonder::Wonder};
 use std::collections::HashSet;
 
 #[must_use]
-pub fn get_all() -> &'static Vec<Wonder> {
-    cache::get().get_wonders()
-}
-
-#[must_use]
 pub fn get_all_uncached() -> Vec<Wonder> {
     vec![
         // todo add effects

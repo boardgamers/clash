@@ -224,7 +224,7 @@ fn get_card_object(
             vec!["Hidden Wonder Card".to_string()],
         ),
         HandCard::Wonder(name) => {
-            let w = get_wonder(name);
+            let w = rc.game.cache.get_wonder(name);
             HandCardObject::new(
                 card.clone(),
                 WONDER_CARD_COLOR,

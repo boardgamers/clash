@@ -297,7 +297,7 @@ pub(crate) fn build_wonder() -> Builtin {
             move |game, player_index, i| {
                 let p = game.player(player_index);
                 let city = p.get_city(i.selected_position.expect("city not selected"));
-                let wonder = get_wonder(&i.name);
+                let wonder = game.cache.get_wonder(&i.name);
                 let cost = can_construct_wonder(city, wonder, p, game, &i.discount)
                     .expect("can't construct wonder");
                 Some(vec![PaymentRequest::new(
@@ -316,7 +316,7 @@ pub(crate) fn build_wonder() -> Builtin {
                 ));
                 current_action_log_item(game).wonder_built = Some(name.clone());
                 remove_element(&mut game.player_mut(s.player_index).wonder_cards, name);
-                construct_wonder(game, get_wonder(name), pos, s.player_index);
+                construct_wonder(game, game.cache.get_wonder(name), pos, s.player_index);
             },
         )
         .build()
@@ -331,7 +331,7 @@ pub(crate) fn cities_for_wonder(
     p.cities
         .iter()
         .filter_map(|c| {
-            can_construct_wonder(c, get_wonder(name), p, game, discount)
+            can_construct_wonder(c, game.cache.get_wonder(name), p, game, discount)
                 .ok()
                 .map(|_| c.position)
         })

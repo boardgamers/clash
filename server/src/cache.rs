@@ -289,9 +289,15 @@ impl Cache {
         &self.all_wonders
     }
 
+    ///
+    /// # Panics
+    /// 
+    /// Panics if wonder does not exist
     #[must_use]
-    pub fn get_wonder(&self, name: &str) -> Option<&Wonder> {
-        self.wonders_by_name.get(name)
+    pub fn get_wonder(&self, name: &str) -> &Wonder {
+        self.wonders_by_name
+            .get(name)
+            .unwrap_or_else(|| panic!("wonder not found: {name}"))
     }
 
     #[must_use]
