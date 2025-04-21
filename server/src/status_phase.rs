@@ -298,7 +298,7 @@ where
 
 fn change_government_type(game: &mut Game, player_index: usize, new_government: &ChangeGovernment) {
     let government = &new_government.new_government;
-    let a = advances::get_government(government);
+    let a = game.cache.get_government(government);
     assert!(
         game.player(player_index)
             .can_advance_in_change_government(a.advances[0].advance, game),
@@ -317,10 +317,9 @@ fn change_government_type(game: &mut Game, player_index: usize, new_government: 
         remove_advance(game, a, player_index);
     }
 
-    let new_government_advances = &advances::get_government(government).advances;
-    do_advance(game, new_government_advances[0].advance, player_index);
+    do_advance(game, game.cache.get_government(government).advances[0].advance, player_index);
     for name in &new_government.additional_advances {
-        let (pos, advance) = new_government_advances
+        let (pos, advance) = game.cache.get_government(government).advances
             .iter()
             .find_position(|a| a.advance == *name)
             .unwrap_or_else(|| {
@@ -337,7 +336,7 @@ fn change_government_type(game: &mut Game, player_index: usize, new_government: 
 pub(crate) fn government_advances(p: &Player, game: &Game) -> Vec<Advance> {
     let current = p.government(game).expect("player should have a government");
 
-    advances::get_government(&current)
+    game.cache.get_government(&current)
         .advances
         .iter()
         .filter(|a| p.has_advance(a.advance))
@@ -348,7 +347,7 @@ pub(crate) fn government_advances(p: &Player, game: &Game) -> Vec<Advance> {
 #[must_use]
 pub(crate) fn can_change_government_for_free(player: &Player, game: &Game) -> bool {
     player.government(game).is_some_and(|government| {
-        advances::get_governments().iter().any(|g| {
+        game.cache.get_governments().iter().any(|g| {
             g.government != Some(government.clone())
                 && player.can_advance_in_change_government(g.advances[0].advance, game)
         })

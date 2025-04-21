@@ -471,7 +471,7 @@ impl Player {
 
     #[must_use]
     pub fn can_advance(&self, advance: Advance, game: &Game) -> bool {
-        self.can_afford(&self.advance_cost(advance, CostTrigger::NoModifiers).cost)
+        self.can_afford(&self.advance_cost(advance, game,CostTrigger::NoModifiers).cost)
             && self.can_advance_free(advance, game)
     }
 
@@ -624,7 +624,7 @@ impl Player {
     }
 
     #[must_use]
-    pub fn advance_cost(&self, advance: Advance, execute: CostTrigger) -> CostInfo {
+    pub fn advance_cost(&self, advance: Advance, game: &Game, execute: CostTrigger) -> CostInfo {
         self.trigger_cost_event(
             |e| &e.advance_cost,
             &PaymentOptions::sum(
@@ -632,7 +632,7 @@ impl Player {
                 &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
             ),
             &advance,
-            &(),
+            game,
             execute,
         )
     }

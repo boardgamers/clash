@@ -156,7 +156,7 @@ where
             let p = game.player(player_index);
             let choices = groups
                 .iter()
-                .flat_map(|g| &advances::get_group(g.as_ref()).advances)
+                .flat_map(|g| &game.cache.get_advance_group(g.as_ref()).advances)
                 .filter(|a| p.can_advance_free(a.advance, game))
                 .map(|a| a.advance)
                 .collect();

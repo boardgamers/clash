@@ -51,7 +51,7 @@ pub(crate) struct TransientEvents {
     pub before_move: Event<Game, MoveInfo>,
 
     pub construct_cost: Event<CostInfo, Building, Game>,
-    pub advance_cost: Event<CostInfo, Advance>,
+    pub advance_cost: Event<CostInfo, Advance, Game>,
     pub happiness_cost: Event<CostInfo>,
     pub recruit_cost: Event<CostInfo, Units, Player>,
 

@@ -2,7 +2,6 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::ai_collect::invalidate_collect_cache;
 use crate::barbarians::barbarians_bonus;
-use crate::cache;
 use crate::combat_listeners::{
     choose_fighter_casualties, combat_stats, offer_retreat, place_settler,
 };
@@ -75,21 +74,6 @@ impl AbilityInitializerSetup for BuiltinBuilder {
     }
 }
 
-///
-/// # Panics
-/// Panics if builtin does not exist
-#[must_use]
-pub fn get_builtin(game: &Game, name: &str) -> &'static Builtin {
-    cache::get()
-        .get_builtin(name, game)
-        .unwrap_or_else(|| panic!("builtin not found: {name}"))
-}
-
-#[must_use]
-pub fn get_all() -> &'static Vec<Builtin> {
-    cache::get().get_builtins()
-}
-
 #[must_use]
 pub fn get_all_uncached() -> Vec<Builtin> {
     vec![
@@ -126,7 +110,7 @@ pub fn get_all_uncached() -> Vec<Builtin> {
 }
 
 pub(crate) fn init_player(game: &mut Game, player_index: usize) {
-    for b in get_all() {
+    for b in get_all_uncached() {
         b.listeners.init(game, player_index);
     }
 }

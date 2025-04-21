@@ -27,10 +27,6 @@ use crate::objective_card::ObjectiveCard;
 use itertools::Itertools;
 use std::vec;
 
-#[must_use]
-pub(crate) fn get_all() -> &'static Vec<ObjectiveCard> {
-    cache::get().get_objective_cards()
-}
 
 #[must_use]
 pub(crate) fn get_all_uncached() -> Vec<ObjectiveCard> {
@@ -78,14 +74,4 @@ pub(crate) fn get_all_uncached() -> Vec<ObjectiveCard> {
         "Objective card ids are not unique"
     );
     all
-}
-
-///
-/// # Panics
-/// Panics if incident does not exist
-#[must_use]
-pub fn get_objective_card(id: u8) -> &'static ObjectiveCard {
-    cache::get()
-        .get_objective_card(id)
-        .unwrap_or_else(|| panic!("objective card not found {id}"))
 }

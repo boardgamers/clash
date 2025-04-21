@@ -10,7 +10,7 @@ fn advance_group_complete(objective: &str, group: &'static str) -> Objective {
 }
 
 fn all_advances_in_group(player: &Player, group: &str) -> bool {
-    advances::get_group(group)
+    advances::get_group_uncached(group)
         .advances
         .iter()
         .all(|a| player.has_advance(a.advance))
@@ -49,8 +49,8 @@ pub(crate) fn government() -> Objective {
         "Government",
         "You have all advances in one government type.",
     )
-    .status_phase_check(|_game, player| {
-        advances::get_governments()
+    .status_phase_check(|game, player| {
+        game.cache.get_governments()
             .iter()
             .any(|g| all_advances_in_group(player, &g.name))
     })
@@ -63,8 +63,8 @@ pub(crate) fn goal_focused() -> Objective {
         "You have more complete advance groups than any other player.",
     )
     .status_phase_check(|game, player| {
-        leading_player(game, player, 1, |p, _| {
-            advances::get_groups()
+        leading_player(game, player, 1, |p, g| {
+            g.cache.get_advance_groups()
                 .iter()
                 .filter(|g| g.advances.iter().all(|a| p.has_advance(a.advance)))
                 .count()
@@ -78,8 +78,8 @@ pub(crate) fn diversified_research() -> Objective {
         "Diversified Research",
         "You have at least 1 advance in 9 different advance groups.",
     )
-    .status_phase_check(|_game, player| {
-        advances::get_groups()
+    .status_phase_check(|game, player| {
+        game.cache.get_advance_groups()
             .iter()
             .filter(|g| g.advances.iter().any(|a| player.has_advance(a.advance)))
             .count()

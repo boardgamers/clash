@@ -59,7 +59,7 @@ pub fn setup_game(player_amount: usize, seed: String, setup: bool) -> Game {
         Map::new(HashMap::new())
     };
 
-    let wonders_left = wonders::get_all()
+    let wonders_left = cache.get_wonders()
         .iter()
         .map(|w| w.name.clone())
         .collect_vec()
@@ -69,7 +69,7 @@ pub fn setup_game(player_amount: usize, seed: String, setup: bool) -> Game {
         .map(|a| a.id)
         .collect_vec()
         .shuffled(&mut rng);
-    let objective_cards_left = objective_cards::get_all()
+    let objective_cards_left = cache.get_objective_cards()
         .iter()
         .map(|a| a.id)
         .collect_vec()

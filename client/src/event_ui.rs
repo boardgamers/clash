@@ -1,11 +1,6 @@
 use crate::payment_ui::Payment;
 use crate::render_context::RenderContext;
 use crate::tooltip::add_tooltip_description;
-use server::content::action_cards::get_civil_card;
-use server::content::builtin::get_builtin;
-use server::content::incidents::get_incident;
-use server::content::objectives::get_objective;
-use server::content::tactics_cards::get_tactics_card;
 use server::content::wonders::get_wonder;
 use server::events::EventOrigin;
 
@@ -16,7 +11,7 @@ pub fn event_help(rc: &RenderContext, origin: &EventOrigin) -> Vec<String> {
     let d = match origin {
         EventOrigin::Advance(a) => vec![a.info(rc.game).description.clone()],
         EventOrigin::Wonder(w) => vec![get_wonder(w).description.clone()],
-        EventOrigin::Builtin(b) => vec![get_builtin(rc.game, b).description.clone()],
+        EventOrigin::Builtin(b) => vec![cache.get_builtin(b, rc.game).description.clone()],
         EventOrigin::CivilCard(id) => vec![cache.get_civil_card(*id).description.clone()],
         EventOrigin::TacticsCard(id) => vec![cache.get_tactics_card(*id).description.clone()],
         EventOrigin::Incident(id) => cache.get_incident(*id).description(rc.game),

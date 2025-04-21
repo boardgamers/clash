@@ -123,7 +123,7 @@ pub fn validate_card_selection(
                 return Err("no selection handler".to_string());
             };
 
-            match_objective_cards(cards, &c.objective_opportunities)
+            match_objective_cards(cards, &c.objective_opportunities, game)
         }
         _ => Ok(Vec::new()),
     }

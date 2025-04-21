@@ -13,7 +13,6 @@ use macroquad::prelude::{
 };
 use server::action::Action;
 use server::advance::{Advance, AdvanceInfo, Bonus};
-use server::content::advances;
 use server::game::GameState;
 use server::player::{CostTrigger, Player};
 use server::playing_actions::PlayingAction;
@@ -32,7 +31,7 @@ pub enum AdvanceState {
 fn new_advance_payment(rc: &RenderContext, a: &AdvanceInfo) -> Payment<Advance> {
     rc.new_payment(
         &rc.shown_player
-            .advance_cost(a.advance, CostTrigger::WithModifiers)
+            .advance_cost(a.advance,rc.game, CostTrigger::WithModifiers)
             .cost,
         a.advance,
         &a.name,
@@ -72,7 +71,7 @@ pub fn show_advance_menu(
     let state = rc.state;
 
     for pass in 0..2 {
-        for (i, group) in advances::get_groups().iter().enumerate() {
+        for (i, group) in rc.game.cache.get_advance_groups().iter().enumerate() {
             let pos =
                 vec2(i.rem(COLUMNS) as f32 * 140., (i / COLUMNS) as f32 * 180.) + vec2(20., 70.);
             if pass == 0 {
@@ -163,18 +162,18 @@ fn description(rc: &RenderContext, a: &AdvanceInfo) -> Vec<String> {
     parts.push(format!(
         "Cost: {}",
         rc.shown_player
-            .advance_cost(a.advance, CostTrigger::WithModifiers)
+            .advance_cost(a.advance,rc.game, CostTrigger::WithModifiers)
             .cost
     ));
     if let Some(r) = &a.required {
-        parts.push(format!("Required: {r}"));
+        parts.push(format!("Required: {}", r.name(rc.game)));
     }
     if !a.contradicting.is_empty() {
         parts.push(format!(
             "Contradicts: {}",
             a.contradicting
                 .iter()
-                .map(std::string::ToString::to_string)
+                .map(|a| a.name(rc.game))
                 .join(", ")
         ));
     }

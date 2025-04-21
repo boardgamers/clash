@@ -184,7 +184,7 @@ pub(crate) fn bold() -> Objective {
 }
 
 fn warfare_advances(player: &Player) -> usize {
-    advances::get_group("Warfare")
+    advances::get_group_uncached("Warfare")
         .advances
         .iter()
         .filter(|a| player.has_advance(a.advance))

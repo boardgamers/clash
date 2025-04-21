@@ -72,7 +72,7 @@ fn synergies(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |game, p, i| {
             let first = i.selected_advance.expect("advance not found");
             Some(AdvanceRequest::new(
-                advances::get_groups()
+                game.cache.get_advance_groups()
                     .iter()
                     .find(|g| g.advances.iter().any(|a| a.advance == first))
                     .expect("Advance group not found")
@@ -105,7 +105,7 @@ fn pay_for_advance(b: ActionCardBuilder, priority: i32) -> ActionCardBuilder {
             let p = game.player(player_index);
             let advance = i.selected_advance.expect("advance not found");
             Some(vec![PaymentRequest::new(
-                p.advance_cost(advance, game.execute_cost_trigger()).cost,
+                p.advance_cost(advance,game, game.execute_cost_trigger()).cost,
                 &format!("Pay for {}", advance.name(game)),
                 false,
             )])
@@ -122,7 +122,7 @@ fn pay_for_advance(b: ActionCardBuilder, priority: i32) -> ActionCardBuilder {
 }
 
 fn categories_with_2_affordable_advances(p: &Player, game: &Game) -> Vec<Advance> {
-    advances::get_groups()
+    game.cache.get_advance_groups()
         .iter()
         .flat_map(|g| {
             let vec = g
@@ -138,9 +138,9 @@ fn categories_with_2_affordable_advances(p: &Player, game: &Game) -> Vec<Advance
                 .filter(|pair| {
                     let a = pair[0];
                     let b = pair[1];
-                    let mut cost = p.advance_cost(a.advance, game.execute_cost_trigger()).cost;
+                    let mut cost = p.advance_cost(a.advance, game,game.execute_cost_trigger()).cost;
                     cost.default += p
-                        .advance_cost(b.advance, game.execute_cost_trigger())
+                        .advance_cost(b.advance,game, game.execute_cost_trigger())
                         .cost
                         .default;
                     p.can_afford(&cost)
