@@ -946,7 +946,7 @@ pub(crate) fn once_per_turn_advance<F, T, U, V>(
 ) where
     F: Fn(&mut T, &U, &V) + 'static + Clone + Sync + Send,
 {
-    let key = id.to_string();
+    let key = id.id();
     if !get_info(value).contains_key(&key) {
         listener(value, u, v);
         get_info(value).insert(key, "used".to_string());

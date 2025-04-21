@@ -390,10 +390,10 @@ impl Player {
     ///
     /// Panics if the player has advances which don't exist
     #[must_use]
-    pub fn government(&self) -> Option<String> {
+    pub fn government(&self, game: &Game) -> Option<String> {
         self.advances
             .iter()
-            .find_map(|advance| advance.info().government.clone())
+            .find_map(|advance| advance.info(game).government.clone())
     }
 
     pub fn gain_resources(&mut self, resources: ResourcePile) {
@@ -443,11 +443,11 @@ impl Player {
     }
 
     #[must_use]
-    pub fn can_advance_in_change_government(&self, advance: Advance) -> bool {
+    pub fn can_advance_in_change_government(&self, advance: Advance, game: &Game) -> bool {
         if self.has_advance(advance) {
             return false;
         }
-        if let Some(required_advance) = advance.info().required {
+        if let Some(required_advance) = advance.info(game).required {
             if !self.has_advance(required_advance) {
                 return false;
             }
@@ -456,23 +456,23 @@ impl Player {
     }
 
     #[must_use]
-    pub fn can_advance_free(&self, advance: Advance) -> bool {
+    pub fn can_advance_free(&self, advance: Advance, game: &Game) -> bool {
         if self.has_advance(advance) {
             return false;
         }
 
-        for contradicting_advance in &advance.info().contradicting {
+        for contradicting_advance in &advance.info(game).contradicting {
             if self.has_advance(*contradicting_advance) {
                 return false;
             }
         }
-        self.can_advance_in_change_government(advance)
+        self.can_advance_in_change_government(advance, game)
     }
 
     #[must_use]
-    pub fn can_advance(&self, advance: Advance) -> bool {
+    pub fn can_advance(&self, advance: Advance, game: &Game) -> bool {
         self.can_afford(&self.advance_cost(advance, CostTrigger::NoModifiers).cost)
-            && self.can_advance_free(advance)
+            && self.can_advance_free(advance, game)
     }
 
     #[must_use]

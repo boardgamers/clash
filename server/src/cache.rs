@@ -1,8 +1,6 @@
 use crate::action_card::{ActionCard, CivilCard};
 use crate::advance::{Advance, AdvanceInfo};
-use crate::cache;
 use crate::city_pieces::Building;
-use crate::content::action_cards::get_action_card;
 use crate::content::advances::AdvanceGroup;
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::custom_action_builtins;
@@ -141,47 +139,47 @@ impl Cache {
     }
 
     #[must_use]
-    pub fn get_advances(&'static self) -> &'static Vec<AdvanceInfo> {
+    pub fn get_advances(&self) -> &Vec<AdvanceInfo> {
         &self.all_advances
     }
 
     #[must_use]
-    pub fn get_advance(&'static self, a: Advance) -> &'static AdvanceInfo {
+    pub fn get_advance(&self, a: Advance) -> &AdvanceInfo {
         &self.all_advances[a as usize]
     }
 
     #[must_use]
-    pub fn get_advance_groups(&'static self) -> &'static Vec<AdvanceGroup> {
+    pub fn get_advance_groups(&self) -> &Vec<AdvanceGroup> {
         &self.all_advance_groups
     }
 
     #[must_use]
-    pub fn get_advance_group(&'static self, name: &str) -> Option<&'static AdvanceGroup> {
+    pub fn get_advance_group(&self, name: &str) -> Option<&AdvanceGroup> {
         self.advance_groups_by_name.get(name)
     }
 
     #[must_use]
-    pub fn get_governments(&'static self) -> &'static Vec<AdvanceGroup> {
+    pub fn get_governments(&self) -> &Vec<AdvanceGroup> {
         &self.all_governments
     }
 
     #[must_use]
-    pub fn get_government(&'static self, name: &str) -> Option<&'static AdvanceGroup> {
+    pub fn get_government(&self, name: &str) -> Option<&AdvanceGroup> {
         self.governments_by_name.get(name)
     }
 
     #[must_use]
-    pub fn get_building_advance(&'static self, building: Building) -> Advance {
+    pub fn get_building_advance(&self, building: Building) -> Advance {
         self.advances_by_building[&building]
     }
 
     #[must_use]
-    pub fn get_builtins(&'static self) -> &'static Vec<Builtin> {
+    pub fn get_builtins(&self) -> &Vec<Builtin> {
         &self.all_builtins
     }
 
     #[must_use]
-    pub fn get_builtin(&'static self, name: &str, game: &Game) -> Option<&'static Builtin> {
+    pub fn get_builtin(&self, name: &str, game: &Game) -> Option<&Builtin> {
         self.builtins_by_name.get(name).or_else(|| {
             if let Some(p) = get_status_phase(game) {
                 return Some(self.status_phase_handler(p));
@@ -191,7 +189,7 @@ impl Cache {
     }
 
     #[must_use]
-    pub fn status_phase_handler(&'static self, p: &StatusPhaseState) -> &'static Builtin {
+    pub fn status_phase_handler(&self, p: &StatusPhaseState) -> &Builtin {
         if let DetermineFirstPlayer(_) = p {
             return &self.status_phase_handlers[&DetermineFirstPlayer(0)];
         }
@@ -199,7 +197,7 @@ impl Cache {
     }
 
     #[must_use]
-    pub fn get_action_cards(&'static self) -> &'static Vec<ActionCard> {
+    pub fn get_action_cards(&self) -> &Vec<ActionCard> {
         &self.all_action_cards
     }
 
@@ -207,7 +205,7 @@ impl Cache {
     /// # Panics
     /// Panics if action card does not exist
     #[must_use]
-    pub fn get_action_card(&'static self, id: u8) -> &'static ActionCard {
+    pub fn get_action_card(&self, id: u8) -> &ActionCard {
         self.action_cards_by_id
             .get(&id)
             .expect("incident action card not found")
@@ -217,7 +215,7 @@ impl Cache {
     /// # Panics
     /// Panics if action card does not exist
     #[must_use]
-    pub fn get_civil_card(&'static self, id: u8) -> &'static CivilCard {
+    pub fn get_civil_card(&self, id: u8) -> &CivilCard {
         &self.get_action_card(id).civil_card
     }
 
@@ -225,7 +223,7 @@ impl Cache {
     /// # Panics
     /// Panics if action card does not exist
     #[must_use]
-    pub fn get_tactics_card(&'static self, id: u8) -> &'static TacticsCard {
+    pub fn get_tactics_card(&self, id: u8) -> &TacticsCard {
         self.get_action_card(id)
             .tactics_card
             .as_ref()
@@ -233,17 +231,17 @@ impl Cache {
     }
 
     #[must_use]
-    pub fn get_objective_cards(&'static self) -> &'static Vec<ObjectiveCard> {
+    pub fn get_objective_cards(&self) -> &Vec<ObjectiveCard> {
         &self.all_objective_cards
     }
 
     #[must_use]
-    pub fn get_objective_card(&'static self, id: u8) -> Option<&'static ObjectiveCard> {
+    pub fn get_objective_card(&self, id: u8) -> Option<&ObjectiveCard> {
         self.objective_cards_by_id.get(&id)
     }
 
     #[must_use]
-    pub fn get_objectives(&'static self) -> &'static Vec<Objective> {
+    pub fn get_objectives(&self) -> &Vec<Objective> {
         &self.all_objectives
     }
 
@@ -251,24 +249,24 @@ impl Cache {
     /// # Panics
     /// Panics if incident does not exist
     #[must_use]
-    pub fn get_objective(&'static self, name: &str) -> &'static Objective {
+    pub fn get_objective(&self, name: &str) -> &Objective {
         self.objectives_by_name
             .get(name)
             .expect("objective not found")
     }
 
     #[must_use]
-    pub fn get_wonders(&'static self) -> &'static Vec<Wonder> {
+    pub fn get_wonders(&self) -> &Vec<Wonder> {
         &self.all_wonders
     }
 
     #[must_use]
-    pub fn get_wonder(&'static self, name: &str) -> Option<&'static Wonder> {
+    pub fn get_wonder(&self, name: &str) -> Option<&Wonder> {
         self.wonders_by_name.get(name)
     }
 
     #[must_use]
-    pub fn get_incidents(&'static self) -> &'static Vec<Incident> {
+    pub fn get_incidents(&self) -> &Vec<Incident> {
         &self.all_incidents
     }
 
@@ -276,7 +274,7 @@ impl Cache {
     /// # Panics
     /// Panics if incident does not exist
     #[must_use]
-    pub fn get_incident(&'static self, id: u8) -> &'static Incident {
+    pub fn get_incident(&self, id: u8) -> &Incident {
         self.incidents_by_id.get(&id).expect("incident not found")
     }
 }

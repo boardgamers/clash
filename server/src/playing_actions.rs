@@ -6,7 +6,6 @@ use crate::advance::{Advance, gain_advance_without_payment};
 use crate::city::{MoodState, found_city};
 use crate::collect::{PositionCollection, collect};
 use crate::construct::Construct;
-use crate::content::action_cards::get_civil_card;
 use crate::content::custom_actions::{CustomActionType, CustomEventAction, execute_custom_action};
 use crate::cultural_influence::{InfluenceCultureAttempt, influence_culture_attempt};
 use crate::game::GameState;
@@ -128,7 +127,7 @@ impl PlayingActionType {
             return Err("Game is not in playing state".to_string());
         }
 
-        self.cost().is_available(game, player_index)?;
+        self.cost(game).is_available(game, player_index)?;
 
         let p = game.player(player_index);
 
@@ -205,7 +204,7 @@ impl PlayingActionType {
     }
 
     #[must_use]
-    pub fn cost(&self) -> ActionCost {
+    pub fn cost(&self, game: &Game) -> ActionCost {
         match self {
             PlayingActionType::Custom(custom_action) => custom_action.info().action_type.clone(),
             PlayingActionType::ActionCard(id) => game.cache.get_civil_card(*id).action_type.clone(),
@@ -215,9 +214,9 @@ impl PlayingActionType {
     }
 
     #[must_use]
-    pub fn remaining_resources(&self, p: &Player) -> ResourcePile {
+    pub fn remaining_resources(&self, p: &Player, game: &Game) -> ResourcePile {
         let mut r = p.resources.clone();
-        r -= self.cost().cost.clone();
+        r -= self.cost(game).cost.clone();
         r
     }
 }
@@ -255,7 +254,7 @@ impl PlayingAction {
         if !redo {
             playing_action_type.is_available(game, player_index)?;
         }
-        playing_action_type.cost().pay(game, player_index);
+        playing_action_type.cost(game).pay(game, player_index);
 
         if let PlayingActionType::Custom(c) = playing_action_type {
             if c.info().once_per_turn {
@@ -267,7 +266,7 @@ impl PlayingAction {
 
         match self {
             Advance { advance, payment } => {
-                if !game.player(player_index).can_advance(advance) {
+                if !game.player(player_index).can_advance(advance, game) {
                     return Err("Cannot advance".to_string());
                 }
                 game.player(player_index)

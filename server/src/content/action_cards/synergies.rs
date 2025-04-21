@@ -2,7 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{ActionCard, ActionCardBuilder, CivilCardTarget, discard_action_card};
 use crate::advance::{Advance, gain_advance_without_payment};
 use crate::card::HandCard;
-use crate::content::action_cards::{get_action_card, inspiration};
+use crate::content::action_cards::{ inspiration};
 use crate::content::advances;
 use crate::content::advances::theocracy::cities_that_can_add_units;
 use crate::content::builtin::Builtin;
@@ -60,7 +60,7 @@ fn synergies(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             let advance = &sel.choice;
             game.add_info_log_item(&format!(
                 "{} selected {} as first advance for Synergies.",
-                sel.player_name, advance
+                sel.player_name, advance.name(game)
             ));
             i.selected_advance = Some(*advance);
         },
@@ -78,7 +78,7 @@ fn synergies(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                     .expect("Advance group not found")
                     .advances
                     .iter()
-                    .filter(|a| game.player(p).can_advance(a.advance))
+                    .filter(|a| game.player(p).can_advance(a.advance, game))
                     .map(|a| a.advance)
                     .collect_vec(),
             ))
@@ -87,7 +87,7 @@ fn synergies(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             let advance = &sel.choice;
             game.add_info_log_item(&format!(
                 "{} selected {} as second advance for Synergies.",
-                sel.player_name, advance
+                sel.player_name, advance.name(game)
             ));
             i.selected_advance = Some(*advance);
         },
@@ -106,14 +106,14 @@ fn pay_for_advance(b: ActionCardBuilder, priority: i32) -> ActionCardBuilder {
             let advance = i.selected_advance.expect("advance not found");
             Some(vec![PaymentRequest::new(
                 p.advance_cost(advance, game.execute_cost_trigger()).cost,
-                &format!("Pay for {}", advance.info().name),
+                &format!("Pay for {}", advance.name(game)),
                 false,
             )])
         },
         |game, s, i| {
             let advance = i.selected_advance.expect("advance not found");
             game.add_info_log_item(&format!(
-                "{} paid {} for advance {advance}",
+                "{} paid {} for advance {}", advance.name(game),
                 s.player_name, s.choice[0]
             ));
             gain_advance_without_payment(game, advance, s.player_index, s.choice[0].clone(), false);
@@ -144,8 +144,8 @@ fn categories_with_2_affordable_advances(p: &Player, game: &Game) -> Vec<Advance
                         .cost
                         .default;
                     p.can_afford(&cost)
-                        && p.can_advance_free(a.advance)
-                        && p.can_advance_free(b.advance)
+                        && p.can_advance_free(a.advance, game)
+                        && p.can_advance_free(b.advance, game)
                 })
                 .map(|pair| pair[0].advance)
                 .collect_vec()
@@ -210,15 +210,16 @@ pub(crate) fn use_teach_us() -> Builtin {
         |game, player, e| {
             e.selected_card.map(|_| {
                 let vec =
-                    teachable_advances(game.player(e.combat.opponent(player)), game.player(player));
+                    teachable_advances(game.player(e.combat.opponent(player)), game.player(player), game);
                 AdvanceRequest::new(vec)
             })
         },
         |game, sel, _| {
             let advance = sel.choice;
             game.add_info_log_item(&format!(
-                "{} selected {advance} as advance for Teach Us.",
+                "{} selected {} as advance for Teach Us.",
                 sel.player_name,
+                advance.name(game)
             ));
             gain_advance_without_payment(
                 game,
@@ -232,11 +233,11 @@ pub(crate) fn use_teach_us() -> Builtin {
     .build()
 }
 
-pub(crate) fn teachable_advances(teacher: &Player, student: &Player) -> Vec<Advance> {
+pub(crate) fn teachable_advances(teacher: &Player, student: &Player, game: &Game) -> Vec<Advance> {
     teacher
         .advances
         .iter()
-        .filter(|a| student.can_advance_free(*a))
+        .filter(|a| student.can_advance_free(*a, game))
         .collect()
 }
 
@@ -301,7 +302,7 @@ fn tech_trade(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             let choices = game
                 .players
                 .iter()
-                .filter(|teacher| !teachable_advances(teacher, player).is_empty())
+                .filter(|teacher| !teachable_advances(teacher, player, game).is_empty())
                 .map(|p| p.index)
                 .collect();
             Some(PlayerRequest::new(
@@ -333,6 +334,7 @@ fn tech_trade(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                 return Some(AdvanceRequest::new(teachable_advances(
                     game.player(trade_partner),
                     game.player(player_index),
+                    game,
                 )));
             }
             None
@@ -340,8 +342,9 @@ fn tech_trade(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |game, sel, _| {
             let advance = sel.choice;
             game.add_info_log_item(&format!(
-                "{} selected {advance} as advance for Technology Trade.",
+                "{} selected {} as advance for Technology Trade.",
                 sel.player_name,
+                advance.name(game)
             ));
             gain_advance_without_payment(
                 game,
@@ -362,7 +365,7 @@ fn new_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Gain 1 advance for the regular price (without changing the Game Event counter), \
         then gain 2 ideas.",
         ActionCost::regular(),
-        |_game, player, _a| !advances_that_can_be_gained(player).is_empty(),
+        |game, player, _a| !advances_that_can_be_gained(player, game).is_empty(),
     )
     .tactics_card(tactics_card)
     .add_advance_request(
@@ -370,13 +373,14 @@ fn new_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         2,
         |game, player_index, _| {
             let player = game.player(player_index);
-            Some(AdvanceRequest::new(advances_that_can_be_gained(player)))
+            Some(AdvanceRequest::new(advances_that_can_be_gained(player, game)))
         },
         |game, sel, i| {
             let advance = &sel.choice;
             game.add_info_log_item(&format!(
-                "{} selected {advance} as advance for New Ideas.",
+                "{} selected {} as advance for New Ideas.",
                 sel.player_name,
+                advance.name(game)
             ));
             i.selected_advance = Some(*advance);
         },
@@ -394,10 +398,10 @@ fn new_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         .build()
 }
 
-fn advances_that_can_be_gained(player: &Player) -> Vec<Advance> {
-    advances::get_all()
+fn advances_that_can_be_gained(player: &Player, game: &Game) -> Vec<Advance> {
+    game.cache.get_advances()
         .iter()
-        .filter(|a| player.can_advance(a.advance))
+        .filter(|a| player.can_advance(a.advance, game))
         .map(|a| a.advance)
         .collect()
 }

@@ -46,7 +46,7 @@ fn dogma() -> AdvanceBuilder {
                 let choices: Vec<Advance> = get_group("Theocracy")
                     .advances
                     .iter()
-                    .filter(|a| player.can_advance_free(a.advance))
+                    .filter(|a| player.can_advance_free(a.advance, game))
                     .map(|a| a.advance)
                     .collect();
                 if choices.is_empty() {
@@ -64,7 +64,7 @@ fn dogma() -> AdvanceBuilder {
             };
             game.add_info_log_item(&format!(
                 "{} {verb} {} as a reward for constructing a Temple",
-                c.player_name, c.choice
+                c.player_name, c.choice.name(game)
             ));
             gain_advance_without_payment(
                 game,

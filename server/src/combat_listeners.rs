@@ -2,7 +2,6 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::combat::{Combat, CombatRetreatState, capture_position};
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{PersistentEventType, PositionRequest, UnitsRequest};
-use crate::content::tactics_cards;
 use crate::game::Game;
 use crate::log::current_player_turn_log_mut;
 use crate::movement::move_units;

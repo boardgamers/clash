@@ -4,8 +4,6 @@ use crate::ability_initializer::{
 use crate::advance::Advance;
 use crate::card::draw_card_from_pile;
 use crate::combat_listeners::CombatResult;
-use crate::content::action_cards;
-use crate::content::action_cards::get_civil_card;
 use crate::content::persistent_events::PersistentEventType;
 use crate::content::tactics_cards::TacticsCardFactory;
 use crate::events::EventOrigin;
@@ -16,12 +14,11 @@ use crate::playing_actions::ActionCost;
 use crate::position::Position;
 use crate::tactics_card::TacticsCard;
 use crate::utils::remove_element_by;
-use action_cards::get_action_card;
 use serde::{Deserialize, Serialize};
 
 pub type CanPlayCard = Box<dyn Fn(&Game, &Player, &ActionCardInfo) -> bool + Sync + Send>;
 
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Copy, Clone)]
 pub enum CivilCardTarget {
     ActivePlayer,
     AllPlayers,
@@ -141,6 +138,7 @@ pub(crate) fn play_action_card(game: &mut Game, player_index: usize, id: u8) {
     discard_action_card(game, player_index, id);
     let mut satisfying_action: Option<usize> = None;
     let card = game.cache.get_civil_card(id);
+    let civil_card_target = card.target;
     if card.requirement_land_battle_won {
         if let Some(action_log_index) = land_battle_won_action(game, player_index, id) {
             satisfying_action = Some(action_log_index);
@@ -158,13 +156,13 @@ pub(crate) fn play_action_card(game: &mut Game, player_index: usize, id: u8) {
         ActionCardInfo::new(
             id,
             satisfying_action,
-            (card.target == CivilCardTarget::AllPlayers).then_some(player_index),
+            (civil_card_target == CivilCardTarget::AllPlayers).then_some(player_index),
         ),
     );
 }
 
 pub(crate) fn on_play_action_card(game: &mut Game, player_index: usize, i: ActionCardInfo) {
-    let cache = game.cache;
+    let cache = &game.cache;
     let players = match cache.get_civil_card(i.id).target {
         CivilCardTarget::ActivePlayer => vec![player_index],
         CivilCardTarget::AllPlayers => game.human_players(player_index),

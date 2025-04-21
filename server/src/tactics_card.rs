@@ -13,7 +13,6 @@ use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use action_card::discard_action_card;
-use action_cards::get_action_card;
 
 #[derive(Clone, PartialEq, Eq, Copy)]
 pub enum TacticsCardTarget {

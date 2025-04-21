@@ -214,7 +214,7 @@ pub(crate) fn can_construct_wonder(
     if !discount.ignore_required_advances {
         for advance in &wonder.required_advances {
             if !player.has_advance(*advance) {
-                return Err(format!("Advance missing: {advance}"));
+                return Err(format!("Advance missing: {}", advance.name(game)));
             }
         }
     }

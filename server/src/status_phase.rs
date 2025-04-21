@@ -145,9 +145,9 @@ pub(crate) fn free_advance() -> Builtin {
             |event| &mut event.status_phase,
             0,
             |game, player_index, _player_name| {
-                let choices = advances::get_all()
+                let choices = game.cache.get_advances()
                     .iter()
-                    .filter(|advance| game.player(player_index).can_advance_free(advance.advance))
+                    .filter(|advance| game.player(player_index).can_advance_free(advance.advance, game))
                     .map(|a| a.advance)
                     .collect_vec();
                 Some(AdvanceRequest::new(choices))
@@ -155,7 +155,7 @@ pub(crate) fn free_advance() -> Builtin {
             |game, c, _| {
                 game.add_info_log_item(&format!(
                     "{} advanced {} for free",
-                    c.player_name, c.choice
+                    c.player_name, c.choice.name(game)
                 ));
                 gain_advance_without_payment(
                     game,
@@ -249,7 +249,7 @@ where
         0,
         move |game, player_index, _, _| {
             let p = game.player(player_index);
-            (can_change_government_for_free(p)
+            (can_change_government_for_free(p, game)
                 && p.can_afford(&PaymentOptions::resources(cost.clone())))
             .then_some(PersistentEventRequest::ChangeGovernment(
                 ChangeGovernmentRequest::new(optional, cost.clone()),
@@ -263,7 +263,7 @@ where
                             game.add_info_log_item(&format!(
                                 "{player_name} changed their government from {} to {}",
                                 game.players[game.active_player()]
-                                    .government()
+                                    .government(game)
                                     .expect("player should have a government before changing it"),
                                 c.new_government
                             ));
@@ -274,7 +274,7 @@ where
                                 } else {
                                     c.additional_advances
                                         .iter()
-                                        .map(std::string::ToString::to_string)
+                                        .map(|a|a.name(game))
                                         .join(", ")
                                 }
                             ));
@@ -301,11 +301,11 @@ fn change_government_type(game: &mut Game, player_index: usize, new_government: 
     let a = advances::get_government(government);
     assert!(
         game.player(player_index)
-            .can_advance_in_change_government(a.advances[0].advance),
+            .can_advance_in_change_government(a.advances[0].advance, game),
         "Cannot advance in change government"
     );
 
-    let player_government_advances = government_advances(game.player(player_index));
+    let player_government_advances = government_advances(game.player(player_index), game);
 
     assert_eq!(
         player_government_advances.len() - 1,
@@ -324,7 +324,7 @@ fn change_government_type(game: &mut Game, player_index: usize, new_government: 
             .iter()
             .find_position(|a| a.advance == *name)
             .unwrap_or_else(|| {
-                panic!("Advance with name {name} not found in government advances");
+                panic!("Advance with name {} not found in government advances", name.name(game));
             });
         assert!(
             pos > 0,
@@ -334,8 +334,8 @@ fn change_government_type(game: &mut Game, player_index: usize, new_government: 
     }
 }
 
-pub(crate) fn government_advances(p: &Player) -> Vec<Advance> {
-    let current = p.government().expect("player should have a government");
+pub(crate) fn government_advances(p: &Player, game: &Game) -> Vec<Advance> {
+    let current = p.government(game).expect("player should have a government");
 
     advances::get_government(&current)
         .advances
@@ -346,11 +346,11 @@ pub(crate) fn government_advances(p: &Player) -> Vec<Advance> {
 }
 
 #[must_use]
-pub(crate) fn can_change_government_for_free(player: &Player) -> bool {
-    player.government().is_some_and(|government| {
+pub(crate) fn can_change_government_for_free(player: &Player, game: &Game) -> bool {
+    player.government(game).is_some_and(|government| {
         advances::get_governments().iter().any(|g| {
             g.government != Some(government.clone())
-                && player.can_advance_in_change_government(g.advances[0].advance)
+                && player.can_advance_in_change_government(g.advances[0].advance, game)
         })
     })
 }

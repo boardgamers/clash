@@ -86,7 +86,7 @@ fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Optio
     let p = rc.shown_player;
     let actions = available_happiness_actions_for_city(rc.game, p.index, city.position)
         .into_iter()
-        .filter(|a| increase_happiness_cost(p, city, 1, a).is_some())
+        .filter(|a| increase_happiness_cost(rc, city, 1, a).is_some())
         .collect_vec();
 
     if actions.is_empty() {

@@ -69,11 +69,6 @@ pub(crate) fn get_all_uncached() -> Vec<AdvanceInfo> {
 }
 
 #[must_use]
-pub fn get_all() -> &'static Vec<AdvanceInfo> {
-    cache::get().get_advances()
-}
-
-#[must_use]
 pub fn get_groups() -> &'static Vec<AdvanceGroup> {
     cache::get().get_advance_groups()
 }
@@ -175,6 +170,7 @@ pub fn get_government(government: &str) -> &'static AdvanceGroup {
 
 #[cfg(test)]
 mod tests {
+    use crate::cache::Cache;
     use super::*;
 
     use crate::content::advances::get_governments;
@@ -182,7 +178,8 @@ mod tests {
 
     #[test]
     fn test_get_all() {
-        let all = get_all();
+        let cache = Cache::new();
+        let all = cache.get_advances();
         assert!(!all.is_empty());
         let unsorted = all.iter().map(|a| a.advance).collect_vec();
 
@@ -193,7 +190,7 @@ mod tests {
             .collect_vec();
         assert_eq!(sorted, unsorted);
         for advance in all {
-            assert_eq!(get_advance(advance.advance).advance, advance.advance);
+            assert_eq!(cache.get_advance(advance.advance).advance, advance.advance);
         }
     }
 

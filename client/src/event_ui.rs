@@ -14,7 +14,7 @@ pub fn event_help(rc: &RenderContext, origin: &EventOrigin) -> Vec<String> {
     let mut h = vec![origin.name(rc.game)];
     let cache = &rc.game.cache;
     let d = match origin {
-        EventOrigin::Advance(a) => vec![a.info().description.clone()],
+        EventOrigin::Advance(a) => vec![a.info(rc.game).description.clone()],
         EventOrigin::Wonder(w) => vec![get_wonder(w).description.clone()],
         EventOrigin::Builtin(b) => vec![get_builtin(rc.game, b).description.clone()],
         EventOrigin::CivilCard(id) => vec![cache.get_civil_card(*id).description.clone()],

@@ -95,14 +95,18 @@ pub enum Advance {
 
 impl Advance {
     #[must_use]
-    pub fn info(&self) -> &'static AdvanceInfo {
-        get_advance(*self)
+    pub fn info(&self, game: &Game) -> &AdvanceInfo {
+        game.cache.get_advance(*self)
     }
-}
 
-impl Display for Advance {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", get_advance(*self).name)
+    #[must_use]
+    pub fn id(&self) -> String {
+        format!("{self:?}")
+    }
+
+    #[must_use]
+    pub fn name(&self, game: &Game) -> &str {
+        self.info(game).name.as_str()
     }
 }
 
@@ -235,7 +239,7 @@ impl Bonus {
 ///
 /// Panics if advance does not exist
 pub fn do_advance(game: &mut Game, advance: Advance, player_index: usize) {
-    let info = advance.info();
+    let info = advance.info(game);
     info.listeners.one_time_init(game, player_index);
     for i in 0..game.players[player_index]
         .civilization
@@ -305,7 +309,7 @@ pub(crate) fn on_advance(game: &mut Game, player_index: usize, info: OnAdvanceIn
 }
 
 pub(crate) fn remove_advance(game: &mut Game, advance: Advance, player_index: usize) {
-    let info = advance.info();
+    let info = advance.info(game);
     info.listeners.undo(game, player_index);
 
     for i in 0..game.players[player_index]
@@ -352,7 +356,7 @@ fn undo_unlock_special_advance(
 pub(crate) fn init_player(game: &mut Game, player_index: usize) {
     let advances = mem::take(&mut game.player_mut(player_index).advances);
     for advance in advances.iter() {
-        let info = advance.info();
+        let info = advance.info(game);
         info.listeners.init(game, player_index);
         for i in 0..game
             .player(player_index)

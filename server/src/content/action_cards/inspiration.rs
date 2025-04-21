@@ -42,15 +42,15 @@ fn advance(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Advance",
         "Pay 1 culture token: Gain 1 advance without changing the Game Event counter.",
         ActionCost::free(),
-        |_game, player, _| {
-            player.resources.culture_tokens >= 1 && !possible_advances(player).is_empty()
+        |game, player, _| {
+            player.resources.culture_tokens >= 1 && !possible_advances(player, game).is_empty()
         },
     )
     .tactics_card(tactics_card)
     .add_advance_request(
         |e| &mut e.play_action_card,
         0,
-        |game, player, _| Some(AdvanceRequest::new(possible_advances(game.player(player)))),
+        |game, player, _| Some(AdvanceRequest::new(possible_advances(game.player(player), game))),
         |game, sel, _| {
             let advance = sel.choice;
             gain_advance_without_payment(
@@ -62,7 +62,7 @@ fn advance(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             );
             let name = &sel.player_name;
             game.add_info_log_item(&format!(
-                "{name} gained {advance} for 1 culture token using the Advance action card.",
+                "{name} gained {} for 1 culture token using the Advance action card.", advance.name(game)
             ));
         },
     )
@@ -70,9 +70,9 @@ fn advance(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
 }
 
 fn possible_advances(player: &Player, game: &Game) -> Vec<Advance> {
-    advances::get_all()
+    game.cache.get_advances()
         .iter()
-        .filter(|a| player.can_advance_free(a.advance))
+        .filter(|a| player.can_advance_free(a.advance, game))
         .map(|a| a.advance)
         .collect()
 }
@@ -107,7 +107,7 @@ fn inspiration(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             );
             let name = &sel.player_name;
             game.add_info_log_item(&format!(
-                "{name} gained {advance} for free using Inspiration.",
+                "{name} gained {} for free using Inspiration.", advance.name(game)
             ));
         },
     )
@@ -122,7 +122,7 @@ pub(crate) fn possible_inspiration_advances(game: &Game, player: &Player) -> Vec
 
     players
         .iter()
-        .flat_map(|p| teachable_advances(p, player))
+        .flat_map(|p| teachable_advances(p, player, game))
         .collect()
 }
 

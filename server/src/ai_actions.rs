@@ -133,7 +133,7 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
     // if !happiness.is_empty() {
     // let action_type = prefer_custom_action(happiness); // todo custom action is buggy
     if let Some(action_type) = base_and_custom_action(happiness).0 {
-        if let Some(h) = calculate_increase_happiness(p, &action_type) {
+        if let Some(h) = calculate_increase_happiness(p, &action_type, game) {
             actions.push((
                 ActionType::Playing(PlayingActionType::IncreaseHappiness),
                 vec![Action::Playing(PlayingAction::IncreaseHappiness(h))],
@@ -254,8 +254,9 @@ fn payment_with_action(
     o: &PaymentOptions,
     p: &Player,
     playing_action_type: &PlayingActionType,
+    game: &Game
 ) -> ResourcePile {
-    o.first_valid_payment(&playing_action_type.remaining_resources(p))
+    o.first_valid_payment(&playing_action_type.remaining_resources(p, game))
         .expect("expected payment")
 }
 
@@ -288,8 +289,8 @@ fn try_payment(ai_actions: &mut AiActions, o: &PaymentOptions, p: &Player) -> Op
         .clone()
 }
 
-fn advances(ai_actions: &mut AiActions, p: &Player, _game: &Game) -> Vec<Action> {
-    advances::get_all()
+fn advances(ai_actions: &mut AiActions, p: &Player, game: &Game) -> Vec<Action> {
+    game.cache.get_advances()
         .iter()
         .filter_map(|info| {
             let a = info.advance;
@@ -297,7 +298,7 @@ fn advances(ai_actions: &mut AiActions, p: &Player, _game: &Game) -> Vec<Action>
                 return None;
             }
 
-            if !p.can_advance_free(a) {
+            if !p.can_advance_free(a, game) {
                 return None;
             }
             try_payment(
@@ -429,12 +430,13 @@ fn recruit_actions(ai_actions: &mut AiActions, player: &Player, city: &City) -> 
 fn calculate_increase_happiness(
     player: &Player,
     action_type: &PlayingActionType,
+    game: &Game
 ) -> Option<IncreaseHappiness> {
     // try to make the biggest cities happy - that's usually the best choice
     let mut all_steps: Vec<(Position, u8)> = vec![];
     let mut step_sum = 0;
     let mut cost = PaymentOptions::free();
-    let available = action_type.remaining_resources(player);
+    let available = action_type.remaining_resources(player, game);
 
     for c in player
         .cities
@@ -460,7 +462,7 @@ fn calculate_increase_happiness(
 
     (!all_steps.is_empty()).then_some(IncreaseHappiness::new(
         all_steps,
-        payment_with_action(&cost, player, action_type),
+        payment_with_action(&cost, player, action_type, game),
         action_type.clone(),
     ))
 }
@@ -542,7 +544,7 @@ fn responses(event: &PersistentEventState, player: &Player, game: &Game) -> Vec<
         PersistentEventRequest::BoolRequest(_) => {
             vec![EventResponse::Bool(false), EventResponse::Bool(true)]
         }
-        PersistentEventRequest::ChangeGovernment(c) => change_government(player, &c),
+        PersistentEventRequest::ChangeGovernment(c) => change_government(player, &c, game),
         PersistentEventRequest::ExploreResolution => {
             vec![
                 EventResponse::ExploreResolution(0),
@@ -552,7 +554,7 @@ fn responses(event: &PersistentEventState, player: &Player, game: &Game) -> Vec<
     }
 }
 
-fn change_government(p: &Player, c: &ChangeGovernmentRequest) -> Vec<EventResponse> {
+fn change_government(p: &Player, c: &ChangeGovernmentRequest, game: &Game) -> Vec<EventResponse> {
     if c.optional {
         vec![EventResponse::ChangeGovernmentType(
             ChangeGovernmentType::KeepGovernment,
@@ -561,14 +563,14 @@ fn change_government(p: &Player, c: &ChangeGovernmentRequest) -> Vec<EventRespon
         // change to the first available government and take the first advances
         let new = advances::get_governments()
             .iter()
-            .find(|g| p.can_advance_in_change_government(g.advances[0].advance))
+            .find(|g| p.can_advance_in_change_government(g.advances[0].advance, game))
             .expect("government not found");
 
         let advances = new
             .advances
             .iter()
             .dropping(1) // is taken implicitly
-            .take(government_advances(p).len() - 1)
+            .take(government_advances(p, game).len() - 1)
             .map(|a| a.advance)
             .collect_vec();
 

@@ -138,7 +138,7 @@ pub(crate) fn collect(game: &mut Game, player_index: usize, c: &Collect) -> Resu
     city.activate();
     game.players[player_index].gain_resources(i.total.clone());
 
-    let key = Advance::Husbandry.to_string();
+    let key = Advance::Husbandry.id();
     if i.info.info.contains_key(&key) {
         // check if husbandry is used
         let used = c

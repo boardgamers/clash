@@ -52,7 +52,7 @@ pub fn can_construct(
 ) -> Result<CostInfo, String> {
     let advance = cache::get().get_building_advance(building);
     if !player.has_advance(advance) {
-        return Err(format!("Missing advance: {advance}"));
+        return Err(format!("Missing advance: {}", advance.name(game)));
     }
 
     can_construct_anything(city, player)?;

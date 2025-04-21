@@ -154,7 +154,7 @@ fn revolution() -> Incident {
         b,
         1,
         "Kill a unit to avoid changing government",
-        |_game, player| can_change_government_for_free(player),
+        |game, player| can_change_government_for_free(player, game),
     );
     b = add_change_government(b, |event| &mut event.incident, false, ResourcePile::empty());
     b.build()
