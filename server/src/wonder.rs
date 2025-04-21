@@ -6,7 +6,6 @@ use crate::construct::can_construct_anything;
 use crate::content::builtin::Builtin;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{PaymentRequest, PersistentEventType, PositionRequest};
-use crate::content::wonders::get_wonder;
 use crate::events::EventOrigin;
 use crate::log::current_action_log_item;
 use crate::payment::PaymentOptions;
@@ -316,7 +315,7 @@ pub(crate) fn build_wonder() -> Builtin {
                 ));
                 current_action_log_item(game).wonder_built = Some(name.clone());
                 remove_element(&mut game.player_mut(s.player_index).wonder_cards, name);
-                construct_wonder(game, game.cache.get_wonder(name), pos, s.player_index);
+                construct_wonder(game, name, pos, s.player_index);
             },
         )
         .build()
@@ -340,16 +339,17 @@ pub(crate) fn cities_for_wonder(
 
 pub(crate) fn construct_wonder(
     game: &mut Game,
-    wonder: &'static Wonder,
+    name: &str,
     city_position: Position,
     player_index: usize,
 ) {
-    wonder.listeners.one_time_init(game, player_index);
+    let listeners = game.cache.get_wonder(name).listeners.clone();
+    listeners.one_time_init(game, player_index);
     let player = &mut game.players[player_index];
-    player.wonders_build.push(wonder.name.clone());
+    player.wonders_build.push(name.to_string());
     player
         .get_city_mut(city_position)
         .pieces
         .wonders
-        .push(wonder);
+        .push(name.to_string());
 }

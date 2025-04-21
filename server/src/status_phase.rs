@@ -12,7 +12,7 @@ use crate::objective_card::{
 };
 use crate::payment::PaymentOptions;
 use crate::player_events::{PersistentEvent, PersistentEvents};
-use crate::{cache, game::Game, player::Player, resource_pile::ResourcePile, utils};
+use crate::{game::Game, player::Player, resource_pile::ResourcePile, utils};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
@@ -74,7 +74,7 @@ pub(crate) fn play_status_phase(game: &mut Game, mut phase: StatusPhaseState) {
         phase = match game.trigger_persistent_event_with_listener(
             &game.human_players(game.starting_player_index),
             |events| &mut events.status_phase,
-            &cache::get().status_phase_handler(&phase).listeners,
+            &game.cache.status_phase_handler(&phase).listeners.clone(),
             phase,
             PersistentEventType::StatusPhase,
             None,

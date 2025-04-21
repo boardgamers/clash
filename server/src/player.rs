@@ -27,7 +27,6 @@ use crate::{
     resource_pile::ResourcePile,
     unit::{Unit, Units},
     utils,
-    wonder::Wonder,
 };
 use enumset::EnumSet;
 use itertools::Itertools;
@@ -125,7 +124,8 @@ impl Player {
         let mut cities = mem::take(&mut game.players[player_index].cities);
         for city in &mut cities {
             for wonder in &city.pieces.wonders {
-                wonder.listeners.init(game, player_index);
+                let listeners = game.cache.get_wonder(wonder).listeners.clone();
+                listeners.init(game, player_index);
             }
         }
         game.players[player_index].cities = cities;
@@ -160,7 +160,7 @@ impl Player {
                 .into_iter()
                 .map(|d| City::from_data(d, data.id))
                 .collect(),
-            destroyed_structures: DestroyedStructures::from_data(&data.destroyed_structures),
+            destroyed_structures: DestroyedStructures::from_data(data.destroyed_structures),
             units,
             civilization: civilizations::get_civilization(&data.civilization)
                 .expect("player data should have a valid civilization"),
@@ -571,8 +571,8 @@ impl Player {
         }
     }
 
-    pub fn remove_wonder(&mut self, wonder: &Wonder) {
-        utils::remove_element(&mut self.wonders_build, &wonder.name);
+    pub fn remove_wonder(&mut self, wonder: &String) {
+        utils::remove_element(&mut self.wonders_build, wonder);
     }
 
     pub fn strip_secret(&mut self) {

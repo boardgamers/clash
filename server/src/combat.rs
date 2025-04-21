@@ -346,8 +346,9 @@ pub(crate) fn conquer_city(
         city.set_mood_state(Angry);
         if attacker_is_human {
             for wonder in &city.pieces.wonders {
-                wonder.listeners.deinit(game, old_player_index);
-                wonder.listeners.init(game, new_player_index);
+                let listeners = game.cache.get_wonder(wonder).listeners.clone();
+                listeners.deinit(game, old_player_index);
+                listeners.init(game, new_player_index);
             }
 
             for (building, owner) in city.pieces.building_owners() {

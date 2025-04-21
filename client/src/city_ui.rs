@@ -418,8 +418,7 @@ fn draw_wonders(
         draw_circle(p.x, p.y, 18.0, rc.player_color(owner));
         let size = 20.;
         if let Some(h) = highlighted.iter().find(|s| {
-            s.position == city.position
-                && matches!(&s.structure, Structure::Wonder(n) if n == &w.name)
+            s.position == city.position && matches!(&s.structure, Structure::Wonder(n) if n == w)
         }) {
             if let Some(u) = draw_selected_state(rc, p, 18., h) {
                 return Err(u);
@@ -427,8 +426,8 @@ fn draw_wonders(
         } else {
             draw_scaled_icon(
                 rc,
-                &rc.assets().wonders[&w.name],
-                &w.name,
+                &rc.assets().wonders[w],
+                w,
                 p + vec2(-size / 2., -size / 2.),
                 size,
             );

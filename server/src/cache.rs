@@ -19,14 +19,6 @@ use crate::tactics_card::TacticsCard;
 use crate::wonder::Wonder;
 use itertools::Itertools;
 use std::collections::HashMap;
-use std::sync::LazyLock;
-
-static CACHE: LazyLock<Cache> = LazyLock::new(Cache::new);
-
-#[must_use]
-pub fn get() -> &'static Cache {
-    &CACHE
-}
 
 #[derive(Clone)]
 pub struct Cache {
@@ -291,7 +283,7 @@ impl Cache {
 
     ///
     /// # Panics
-    /// 
+    ///
     /// Panics if wonder does not exist
     #[must_use]
     pub fn get_wonder(&self, name: &str) -> &Wonder {

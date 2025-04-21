@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{content::wonders, wonder::Wonder};
 use Building::*;
 use num::Zero;
 
@@ -13,7 +12,7 @@ pub struct CityPieces {
     pub fortress: Option<usize>,
     pub port: Option<usize>,
     pub temple: Option<usize>,
-    pub wonders: Vec<&'static Wonder>,
+    pub wonders: Vec<String>,
 }
 
 impl CityPieces {
@@ -23,7 +22,7 @@ impl CityPieces {
     ///
     /// Panics if any wonder does not exist
     #[must_use]
-    pub fn from_data(data: &CityPiecesData) -> Self {
+    pub fn from_data(data: CityPiecesData) -> Self {
         Self {
             academy: data.academy,
             market: data.market,
@@ -32,11 +31,7 @@ impl CityPieces {
             fortress: data.fortress,
             port: data.port,
             temple: data.temple,
-            wonders: data
-                .wonders
-                .iter()
-                .map(|wonder| wonders::get_wonder(wonder))
-                .collect(),
+            wonders: data.wonders,
         }
     }
 
@@ -50,11 +45,7 @@ impl CityPieces {
             fortress: self.fortress,
             port: self.port,
             temple: self.temple,
-            wonders: self
-                .wonders
-                .into_iter()
-                .map(|wonder| wonder.name.clone())
-                .collect(),
+            wonders: self.wonders,
         }
     }
 
@@ -68,11 +59,7 @@ impl CityPieces {
             fortress: self.fortress,
             port: self.port,
             temple: self.temple,
-            wonders: self
-                .wonders
-                .iter()
-                .map(|wonder| wonder.name.clone())
-                .collect(),
+            wonders: self.wonders.clone(),
         }
     }
 
@@ -209,9 +196,9 @@ impl DestroyedStructures {
     }
 
     #[must_use]
-    pub fn from_data(data: &DestroyedStructuresData) -> Self {
+    pub fn from_data(data: DestroyedStructuresData) -> Self {
         Self {
-            pieces: CityPieces::from_data(&data.pieces),
+            pieces: CityPieces::from_data(data.pieces),
             cities: data.cities,
         }
     }
