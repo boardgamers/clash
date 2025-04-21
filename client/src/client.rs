@@ -3,7 +3,6 @@ use macroquad::prelude::clear_background;
 use macroquad::prelude::*;
 
 use server::action::Action;
-use server::ai::AI;
 use server::game::Game;
 use server::position::Position;
 
@@ -238,7 +237,7 @@ fn controlling_player_click(rc: &RenderContext, mouse_pos: Vec2, pos: Position) 
 pub struct Features {
     pub import_export: bool,
     pub assets_url: String,
-    pub ai: Option<AI>,
+    pub ai: bool,
 }
 
 impl Features {

@@ -8,6 +8,7 @@
 #![allow(clippy::cast_precision_loss)]
 #![allow(clippy::cast_possible_wrap)]
 #![allow(clippy::implicit_hasher)]
+#![allow(clippy::struct_field_names)]
 
 pub mod ability_initializer;
 pub mod action;
@@ -16,6 +17,7 @@ pub mod advance;
 pub mod ai;
 pub mod ai_actions;
 pub mod ai_collect;
+pub mod ai_missions;
 mod barbarians;
 pub mod cache;
 pub mod card;

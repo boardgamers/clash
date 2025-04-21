@@ -87,9 +87,7 @@ pub fn ordinal_number(value: u32) -> String {
 
 fn get_current_time() -> Duration {
     let start = SystemTime::now();
-    start
-        .duration_since(UNIX_EPOCH)
-        .expect("Time went backwards")
+    start.duration_since(UNIX_EPOCH).expect("unix time error")
 }
 
 #[derive(Clone, Default)]

@@ -83,7 +83,7 @@ impl RemoteClient {
         let features = Features {
             import_export: false,
             assets_url: control.assets_url(),
-            ai: None,
+            ai: false,
         };
         let state = init(&features).await;
 

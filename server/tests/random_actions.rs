@@ -11,7 +11,7 @@ use server::{
 
 mod common;
 
-const ITERATIONS: usize = 96;
+const ITERATIONS: usize = 100;
 
 #[tokio::test]
 async fn test_random_actions() {
