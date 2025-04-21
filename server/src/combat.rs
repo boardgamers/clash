@@ -514,6 +514,7 @@ pub mod tests {
         position::Position,
         utils::Rng,
     };
+    use crate::cache::Cache;
 
     #[must_use]
     pub fn test_game() -> Game {
@@ -525,6 +526,7 @@ pub mod tests {
         round.players.push(log);
         age.rounds.push(round);
         Game {
+            cache: Cache::new(),
             state: GameState::Playing,
             events: Vec::new(),
             players: Vec::new(),

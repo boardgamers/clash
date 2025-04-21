@@ -1,9 +1,8 @@
 use crate::ability_initializer::{
     AbilityInitializerBuilder, AbilityInitializerSetup, AbilityListeners,
 };
-use crate::card::{HandCard, draw_card_from_pile};
+use crate::card::{draw_card_from_pile, HandCard};
 use crate::content::builtin::Builtin;
-use crate::content::objective_cards;
 use crate::content::objective_cards::get_objective_card;
 use crate::content::persistent_events::{HandCardsRequest, PersistentEventType};
 use crate::events::EventOrigin;
@@ -13,10 +12,11 @@ use crate::player::Player;
 use crate::utils::remove_element_by;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 
-type StatusPhaseCheck = Box<dyn Fn(&Game, &Player) -> bool + Sync + Send>;
+type StatusPhaseCheck = Arc<dyn Fn(&Game, &Player) -> bool + Sync + Send>;
 
-type StatusPhaseUpdate = Box<dyn Fn(&mut Game, usize) + Sync + Send>;
+type StatusPhaseUpdate = Arc<dyn Fn(&mut Game, usize) + Sync + Send>;
 
 #[derive(Clone)]
 pub struct Objective {
@@ -82,7 +82,7 @@ impl ObjectiveBuilder {
     where
         F: Fn(&Game, &Player) -> bool + 'static + Sync + Send,
     {
-        self.status_phase_check = Some(Box::new(f));
+        self.status_phase_check = Some(Arc::new(f));
         self
     }
 
@@ -91,7 +91,7 @@ impl ObjectiveBuilder {
     where
         F: Fn(&mut Game, usize) + 'static + Sync + Send,
     {
-        self.status_phase_update = Some(Box::new(f));
+        self.status_phase_update = Some(Arc::new(f));
         self
     }
 
@@ -390,22 +390,21 @@ pub(crate) fn gain_objective_card_from_pile(game: &mut Game, player: usize) {
     }
 }
 
-fn draw_objective_card_from_pile(game: &mut Game) -> Option<&'static ObjectiveCard> {
+fn draw_objective_card_from_pile(game: &mut Game) -> Option<u8> {
     draw_card_from_pile(
         game,
         "Objective Card",
         false,
         |g| &mut g.objective_cards_left,
-        || objective_cards::get_all().iter().map(|c| c.id).collect(),
+        |g| g.cache.get_objective_cards().iter().map(|c| c.id).collect(),
         |p| p.objective_cards.clone(),
     )
-    .map(get_objective_card)
 }
 
 pub(crate) fn gain_objective_card(
     game: &mut Game,
     player_index: usize,
-    objective_card: &ObjectiveCard,
+    objective_card: u8,
 ) {
     let mut o = game
         .player(player_index)
@@ -418,10 +417,10 @@ pub(crate) fn gain_objective_card(
                 .map(|o| o.name.clone())
         })
         .collect_vec();
-    init_objective_card(game, player_index, &mut o, objective_card.id);
+    init_objective_card(game, player_index, &mut o, objective_card);
     game.players[player_index]
         .objective_cards
-        .push(objective_card.id);
+        .push(objective_card);
 }
 
 pub(crate) fn init_objective_card(

@@ -103,7 +103,7 @@ impl Advance {
     }
 
     #[must_use]
-    pub fn name(&self, game: &Game) -> &str {
+    pub fn name<'a>(&self, game: &'a Game) -> &'a str {
         self.info(game).name.as_str()
     }
 }
@@ -239,7 +239,8 @@ impl Bonus {
 ///
 /// Panics if advance does not exist
 pub fn do_advance(game: &mut Game, advance: Advance, player_index: usize) {
-    let info = advance.info(game);
+    let info = advance.info(game).clone();
+    let bonus = info.bonus.clone();
     info.listeners.one_time_init(game, player_index);
     for i in 0..game.players[player_index]
         .civilization
@@ -259,7 +260,7 @@ pub fn do_advance(game: &mut Game, advance: Advance, player_index: usize) {
             break;
         }
     }
-    if let Some(advance_bonus) = &info.bonus {
+    if let Some(advance_bonus) = &bonus {
         let pile = advance_bonus.resources();
         game.add_info_log_item(&format!("Player gained {pile} as advance bonus"));
         game.players[player_index].gain_resources(pile);
@@ -310,7 +311,8 @@ pub(crate) fn on_advance(game: &mut Game, player_index: usize, info: OnAdvanceIn
 
 pub(crate) fn remove_advance(game: &mut Game, advance: Advance, player_index: usize) {
     let info = advance.info(game);
-    info.listeners.undo(game, player_index);
+    let bonus = info.bonus.clone();
+    info.listeners.clone().undo(game, player_index);
 
     for i in 0..game.players[player_index]
         .civilization
@@ -331,7 +333,7 @@ pub(crate) fn remove_advance(game: &mut Game, advance: Advance, player_index: us
         }
     }
     let player = &mut game.players[player_index];
-    if let Some(advance_bonus) = &info.bonus {
+    if let Some(advance_bonus) = &bonus {
         player.lose_resources(advance_bonus.resources());
     }
     game.player_mut(player_index).advances.remove(advance);
@@ -357,7 +359,7 @@ pub(crate) fn init_player(game: &mut Game, player_index: usize) {
     let advances = mem::take(&mut game.player_mut(player_index).advances);
     for advance in advances.iter() {
         let info = advance.info(game);
-        info.listeners.init(game, player_index);
+        info.listeners.clone().init(game, player_index);
         for i in 0..game
             .player(player_index)
             .civilization

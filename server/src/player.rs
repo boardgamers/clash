@@ -215,7 +215,7 @@ impl Player {
             advances: self
                 .advances
                 .into_iter()
-                .sorted_by_key(ToString::to_string)
+                .sorted_by_key(Advance::id)
                 .collect(),
             unlocked_special_advance: self.unlocked_special_advances,
             wonders_build: self.wonders_build,
@@ -256,7 +256,7 @@ impl Player {
             advances: self
                 .advances
                 .iter()
-                .sorted_by_key(ToString::to_string)
+                .sorted_by_key(Advance::id)
                 .collect(),
             unlocked_special_advance: self.unlocked_special_advances.clone(),
             wonders_build: self.wonders_build.clone(),

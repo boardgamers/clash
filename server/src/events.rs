@@ -46,13 +46,14 @@ impl EventOrigin {
     }
 }
 
+use std::sync::Arc;
 use crate::advance::Advance;
 use crate::player::CostTrigger;
 use serde::{Deserialize, Serialize};
 use crate::game::Game;
 
 type Listener<T, U, V, W> = (
-    Box<dyn Fn(&mut T, &U, &V, &mut W) + Sync + Send>,
+    Arc<dyn Fn(&mut T, &U, &V, &mut W) + Sync + Send>,
     i32,
     usize,
     EventOrigin,
@@ -95,7 +96,7 @@ where
             )
         }
         self.listeners
-            .push((Box::new(new_listener), priority, id, key));
+            .push((Arc::new(new_listener), priority, id, key));
         self.listeners.sort_by_key(|(_, priority, _, _)| *priority);
         self.listeners.reverse();
         self.next_id += 1;

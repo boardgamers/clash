@@ -326,7 +326,7 @@ pub(crate) fn scout(id: u8) -> TacticsCard {
                 if s.is_active(p, id, TacticsCardTarget::ActivePlayer) {
                     update_combat_strength(game, s.combat.opponent(p), s, |game, _combat, st, _role| {
                         if let Some(tactics_card) = st.tactics_card.take() {
-                            gain_action_card(game, p, game.cache.get_action_card(tactics_card));
+                            gain_action_card(game, p, tactics_card);
                             game.add_info_log_item(&format!(
                                 "{name} ignores the enemy tactics {} and takes it to their hand using Scout",
                                 game.cache.get_action_card(tactics_card).tactics_card.as_ref().expect("tactics card not found").name

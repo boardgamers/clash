@@ -1,3 +1,4 @@
+use std::sync::Arc;
 use crate::ability_initializer::{
     AbilityInitializerBuilder, AbilityInitializerSetup, AbilityListeners,
 };
@@ -16,7 +17,7 @@ use crate::tactics_card::TacticsCard;
 use crate::utils::remove_element_by;
 use serde::{Deserialize, Serialize};
 
-pub type CanPlayCard = Box<dyn Fn(&Game, &Player, &ActionCardInfo) -> bool + Sync + Send>;
+pub type CanPlayCard = Arc<dyn Fn(&Game, &Player, &ActionCardInfo) -> bool + Sync + Send>;
 
 #[derive(PartialEq, Eq, Copy, Clone)]
 pub enum CivilCardTarget {
@@ -67,7 +68,7 @@ impl ActionCard {
             id,
             name: name.to_string(),
             description: description.to_string(),
-            can_play: Box::new(can_play),
+            can_play: Arc::new(can_play),
             requirement_land_battle_won: false,
             builder: AbilityInitializerBuilder::new(),
             tactics_card: None,
@@ -164,8 +165,7 @@ pub(crate) fn play_action_card(game: &mut Game, player_index: usize, id: u8) {
 }
 
 pub(crate) fn on_play_action_card(game: &mut Game, player_index: usize, i: ActionCardInfo) {
-    let cache = &game.cache;
-    let players = match cache.get_civil_card(i.id).target {
+    let players = match &game.cache.get_civil_card(i.id).target {
         CivilCardTarget::ActivePlayer => vec![player_index],
         CivilCardTarget::AllPlayers => game.human_players(player_index),
     };
@@ -173,7 +173,7 @@ pub(crate) fn on_play_action_card(game: &mut Game, player_index: usize, i: Actio
     let _ = game.trigger_persistent_event_with_listener(
         &players,
         |e| &mut e.play_action_card,
-        &cache.get_civil_card(i.id).listeners,
+        &game.cache.get_civil_card(i.id).listeners.clone(),
         i,
         PersistentEventType::ActionCard,
         None,
@@ -183,28 +183,27 @@ pub(crate) fn on_play_action_card(game: &mut Game, player_index: usize, i: Actio
 
 pub(crate) fn gain_action_card_from_pile(game: &mut Game, player: usize) {
     if let Some(c) = draw_action_card_from_pile(game) {
+        gain_action_card(game, player, c);
         game.add_info_log_item(&format!(
             "{} gained an action card from the pile",
             game.player_name(player)
         ));
-        gain_action_card(game, player, c);
     }
 }
 
-fn draw_action_card_from_pile(game: &mut Game) -> Option<&'static ActionCard> {
+fn draw_action_card_from_pile(game: &mut Game) -> Option<u8> {
     draw_card_from_pile(
         game,
         "Action Card",
         false,
         |g| &mut g.action_cards_left,
-        || game.cache.get_action_cards().iter().map(|c| c.id).collect(),
+        |g| g.cache.get_action_cards().iter().map(|c| c.id).collect(),
         |p| p.action_cards.clone(),
     )
-    .map(|id|game.cache.get_action_card(id))
 }
 
-pub(crate) fn gain_action_card(game: &mut Game, player_index: usize, action_card: &ActionCard) {
-    game.players[player_index].action_cards.push(action_card.id);
+pub(crate) fn gain_action_card(game: &mut Game, player_index: usize, action_card: u8) {
+    game.players[player_index].action_cards.push(action_card);
 }
 
 pub(crate) fn discard_action_card(game: &mut Game, player: usize, card: u8) {

@@ -19,7 +19,7 @@ pub fn event_help(rc: &RenderContext, origin: &EventOrigin) -> Vec<String> {
         EventOrigin::Builtin(b) => vec![get_builtin(rc.game, b).description.clone()],
         EventOrigin::CivilCard(id) => vec![cache.get_civil_card(*id).description.clone()],
         EventOrigin::TacticsCard(id) => vec![cache.get_tactics_card(*id).description.clone()],
-        EventOrigin::Incident(id) => cache.get_incident(*id).description(),
+        EventOrigin::Incident(id) => cache.get_incident(*id).description(rc.game),
         EventOrigin::Objective(name) => vec![cache.get_objective(name).description.clone()],
         EventOrigin::Leader(l) => vec![{
             let l = rc.shown_player.get_leader(l).unwrap();

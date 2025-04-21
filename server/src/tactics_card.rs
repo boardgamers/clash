@@ -5,14 +5,14 @@ use crate::action_card;
 use crate::action_card::ActionCard;
 use crate::advance::AdvanceBuilder;
 use crate::card::HandCard;
-use crate::combat::{Combat, CombatModifier, update_combat_strength};
+use crate::combat::{update_combat_strength, Combat, CombatModifier};
 use crate::combat_listeners::{CombatRoundEnd, CombatRoundStart, CombatStrength};
-use crate::content::action_cards;
 use crate::content::persistent_events::HandCardsRequest;
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use action_card::discard_action_card;
+use std::sync::Arc;
 
 #[derive(Clone, PartialEq, Eq, Copy)]
 pub enum TacticsCardTarget {
@@ -72,7 +72,7 @@ impl CombatRole {
     }
 }
 
-type TacticsChecker = Box<dyn Fn(usize, &Game, &Combat) -> bool + Sync + Send>;
+type TacticsChecker = Arc<dyn Fn(usize, &Game, &Combat) -> bool + Sync + Send>;
 
 #[derive(Clone)]
 pub struct TacticsCard {
@@ -153,7 +153,7 @@ impl TacticsCardBuilder {
         mut self,
         checker: impl Fn(usize, &Game, &Combat) -> bool + Clone + 'static + Sync + Send,
     ) -> Self {
-        self.checker = Some(Box::new(checker));
+        self.checker = Some(Arc::new(checker));
         self
     }
 

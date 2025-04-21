@@ -200,8 +200,10 @@ async fn evaluate_action(
             rng.next_seed();
             let thread_rng = rng.clone();
             let new_game = game.cloned_data();
+            let cache = game.cache.clone();
             let handle =
-                tokio::spawn(async move { monte_carlo_score(thread_rng, player_index, new_game, game.cache.clone()) });
+                tokio::spawn(async move {
+                    monte_carlo_score(thread_rng, player_index, new_game, cache) });
             handles.push(handle);
         }
         for handle in handles {

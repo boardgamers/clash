@@ -38,14 +38,14 @@ pub(crate) fn draw_card_from_pile<T>(
     name: &str,
     leave_card: bool,
     get_pile: impl Fn(&mut Game) -> &mut Vec<T>,
-    reshuffle_pile: impl Fn() -> Vec<T>,
+    reshuffle_pile: impl Fn(&Game) -> Vec<T>,
     get_owned: impl Fn(&Player) -> Vec<T>,
 ) -> Option<T>
 where
     T: Clone + PartialEq,
 {
     if get_pile(game).is_empty() {
-        let mut new_pile = reshuffle_pile();
+        let mut new_pile = reshuffle_pile(game);
         for p in &game.players {
             let owned = get_owned(p);
             new_pile.retain(|c| !owned.contains(c));

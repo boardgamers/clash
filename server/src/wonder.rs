@@ -1,3 +1,4 @@
+use std::sync::Arc;
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::advance::Advance;
 use crate::card::draw_card_from_pile;
@@ -16,7 +17,7 @@ use crate::{ability_initializer::AbilityInitializerSetup, game::Game, position::
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
-type PlacementChecker = Box<dyn Fn(Position, &Game) -> bool + Sync + Send>;
+type PlacementChecker = Arc<dyn Fn(Position, &Game) -> bool + Sync + Send>;
 
 #[derive(Clone)]
 pub struct Wonder {
@@ -103,22 +104,21 @@ pub(crate) fn draw_wonder_card(game: &mut Game, player_index: usize) {
     );
 }
 
-pub(crate) fn draw_wonder_from_pile(game: &mut Game) -> Option<&'static Wonder> {
+pub(crate) fn draw_wonder_from_pile(game: &mut Game) -> Option<String> {
     draw_card_from_pile(
         game,
         "Wonders",
         false,
         |game| &mut game.wonders_left,
-        Vec::new,
+        |_|Vec::new(),
         |_| vec![], // can't reshuffle wonders
     )
-    .map(|n| get_wonder(&n))
 }
 
-fn gain_wonder(game: &mut Game, player_index: usize, wonder: &Wonder) {
+fn gain_wonder(game: &mut Game, player_index: usize, wonder: String) {
     game.players[player_index]
         .wonder_cards
-        .push(wonder.name.clone());
+        .push(wonder);
 }
 
 pub(crate) fn on_draw_wonder_card() -> Builtin {
@@ -146,7 +146,7 @@ pub(crate) fn on_draw_wonder_card() -> Builtin {
                         "{} drew the public wonder card {}",
                         s.player_name, name
                     ));
-                    gain_wonder(game, s.player_index, get_wonder(&name));
+                    gain_wonder(game, s.player_index, name);
                     game.permanent_effects
                         .retain(|e| !matches!(e, PermanentEffect::PublicWonderCard(_)));
                 } else {

@@ -18,10 +18,11 @@ use crate::{content::custom_actions::CustomActionType, game::Game, player_events
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::ops::RangeInclusive;
+use std::sync::Arc;
 
-pub(crate) type AbilityInitializer = Box<dyn Fn(&mut Game, usize) + Sync + Send>;
+pub(crate) type AbilityInitializer = Arc<dyn Fn(&mut Game, usize) + Sync + Send>;
 
-pub(crate) type AbilityInitializerWithPrioDelta = Box<dyn Fn(&mut Game, usize, i32) + Sync + Send>;
+pub(crate) type AbilityInitializerWithPrioDelta = Arc<dyn Fn(&mut Game, usize, i32) + Sync + Send>;
 
 pub struct SelectedChoice<C> {
     pub player_index: usize,
@@ -94,28 +95,28 @@ impl AbilityInitializerBuilder {
     where
         F: Fn(&mut Game, usize, i32) + 'static + Sync + Send,
     {
-        self.initializers.push(Box::new(initializer));
+        self.initializers.push(Arc::new(initializer));
     }
 
     pub(crate) fn add_ability_deinitializer<F>(&mut self, deinitializer: F)
     where
         F: Fn(&mut Game, usize) + 'static + Sync + Send,
     {
-        self.deinitializers.push(Box::new(deinitializer));
+        self.deinitializers.push(Arc::new(deinitializer));
     }
 
     pub(crate) fn add_one_time_ability_initializer<F>(&mut self, initializer: F)
     where
         F: Fn(&mut Game, usize) + 'static + Sync + Send,
     {
-        self.one_time_initializers.push(Box::new(initializer));
+        self.one_time_initializers.push(Arc::new(initializer));
     }
 
     pub(crate) fn add_ability_undo_deinitializer<F>(&mut self, deinitializer: F)
     where
         F: Fn(&mut Game, usize) + 'static + Sync + Send,
     {
-        self.undo_deinitializers.push(Box::new(deinitializer));
+        self.undo_deinitializers.push(Arc::new(deinitializer));
     }
 
     pub(crate) fn build(self) -> AbilityListeners {
@@ -882,7 +883,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
 }
 
 fn join_ability_initializers(setup: Vec<AbilityInitializer>) -> AbilityInitializer {
-    Box::new(move |game: &mut Game, player_index: usize| {
+    Arc::new(move |game: &mut Game, player_index: usize| {
         for initializer in &setup {
             initializer(game, player_index);
         }
@@ -892,7 +893,7 @@ fn join_ability_initializers(setup: Vec<AbilityInitializer>) -> AbilityInitializ
 fn join_ability_initializers_with_prio_delta(
     setup: Vec<AbilityInitializerWithPrioDelta>,
 ) -> AbilityInitializerWithPrioDelta {
-    Box::new(
+    Arc::new(
         move |game: &mut Game, player_index: usize, prio_delta: i32| {
             for initializer in &setup {
                 initializer(game, player_index, prio_delta);
