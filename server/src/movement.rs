@@ -546,7 +546,7 @@ pub(crate) fn has_movable_units(game: &Game, player: &Player) -> bool {
     })
 }
 
-fn can_embark(game: &Game, player: &Player, unit: &Unit) -> bool {
+pub fn can_embark(game: &Game, player: &Player, unit: &Unit) -> bool {
     unit.unit_type.is_land_based()
         && player.units.iter().any(|u| {
             u.unit_type.is_ship()

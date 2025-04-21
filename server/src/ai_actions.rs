@@ -29,6 +29,7 @@ use crate::unit::{UnitType, Units};
 use itertools::Itertools;
 use rustc_hash::FxHashMap;
 use std::vec;
+use crate::movement::{move_units_destinations, MoveUnits, MovementAction};
 //todo
 //nicht nur maximale anzahl rekrutieren
 //bewegung:
@@ -83,6 +84,56 @@ impl AiActions {
             base_actions(self, game)
         }
     }
+
+    fn get_movement_actions(&mut self, game: &Game) -> Vec<(ActionType, Vec<Action>)> {
+        
+    }
+}
+
+fn get_movement_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
+    if PlayingActionType::MoveUnits.is_available(game, game.current_player_index).is_err() {
+        return vec![];
+    }
+
+    //todo
+    let p = game.player(game.current_player_index);
+    
+    // always move entire stacks as a simplification
+    let map = p.units.chunk_by(|u| u.position).map(
+        |chunk| {
+            let unit_ids = chunk.iter().map(|u| u.id).collect_vec();
+            let destinations = move_units_destinations(p, game, &unit_ids, chunk[0].position, None);
+            destinations.ok().map(
+                |d|d.iter().map(
+                    |route| {
+                        let cost = route.cost.clone();
+                        let destination = route.destination;
+                        Action::Movement(MovementAction::Move(MoveUnits::new(
+                                            unit_ids,
+                                            destination,
+                                            None,
+                                            ,
+                                        ))]
+                    }
+                )
+            )
+                
+                .iter().map(
+                |dest| {
+                return vec![Action::Movement(MovementAction::Move(MoveUnits::new(
+                    unit_ids,
+                    dest,
+                    None,
+                    ResourcePile::empty(),
+                ))];
+            }
+        }
+    );
+    
+    // todo embark
+                // || can_embark(game, p, unit)
+    
+    vec![]
 }
 
 impl Default for AiActions {
