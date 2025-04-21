@@ -293,7 +293,7 @@ fn available_tactics_cards(game: &Game, player: usize, combat: &Combat) -> Vec<H
     game.players[player]
         .action_cards
         .iter()
-        .map(|id| get_action_card(*id))
+        .map(|id| game.cache.get_action_card(*id))
         .filter(|a| can_play_tactics_card(game, player, a, combat))
         .map(|a| HandCard::ActionCard(a.id))
         .collect()

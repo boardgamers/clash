@@ -31,27 +31,26 @@ impl EventOrigin {
     }
 
     #[must_use]
-    pub fn name(&self) -> String {
+    pub fn name(&self, game: &Game) -> String {
+        let cache = &game.cache;
         match self {
             EventOrigin::Advance(name) | EventOrigin::SpecialAdvance(name) => name.to_string(),
             EventOrigin::Wonder(name)
             | EventOrigin::Leader(name)
             | EventOrigin::Objective(name)
             | EventOrigin::Builtin(name) => name.to_string(),
-            EventOrigin::CivilCard(id) => get_civil_card(*id).name.clone(),
-            EventOrigin::TacticsCard(id) => get_tactics_card(*id).name.clone(),
-            EventOrigin::Incident(id) => get_incident(*id).name.clone(),
+            EventOrigin::CivilCard(id) => cache.get_civil_card(*id).name.clone(),
+            EventOrigin::TacticsCard(id) => cache.get_tactics_card(*id).name.clone(),
+            EventOrigin::Incident(id) => cache.get_incident(*id).name.clone(),
         }
     }
 }
 
 use crate::advance::Advance;
-use crate::content::action_cards::get_civil_card;
 use crate::content::incidents;
-use crate::content::tactics_cards::get_tactics_card;
 use crate::player::CostTrigger;
-use incidents::get_incident;
 use serde::{Deserialize, Serialize};
+use crate::game::Game;
 
 type Listener<T, U, V, W> = (
     Box<dyn Fn(&mut T, &U, &V, &mut W) + Sync + Send>,

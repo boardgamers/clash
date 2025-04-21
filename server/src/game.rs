@@ -32,8 +32,10 @@ use crate::{
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::vec;
+use crate::cache::Cache;
 
 pub struct Game {
+    pub cache: Cache,
     pub state: GameState,
     pub events: Vec<PersistentEventState>,
     // in turn order starting from starting_player_index and wrapping around

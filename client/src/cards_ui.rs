@@ -149,7 +149,7 @@ fn draw_card(
                 )));
             }
             if can_play_card(rc, card) {
-                return Some(play_card(card));
+                return Some(play_card(rc, card));
             }
         }
     }
@@ -164,10 +164,10 @@ fn can_play_card(rc: &RenderContext, card: &HandCard) -> bool {
     }
 }
 
-fn play_card(card: &HandCard) -> StateUpdate {
+fn play_card(rc: &RenderContext, card: &HandCard) -> StateUpdate {
     match card {
         HandCard::ActionCard(a) => StateUpdate::execute_with_confirm(
-            vec![format!("Play Action Card: {}", get_civil_card(*a).name)],
+            vec![format!("Play Action Card: {}", rc.game.cache.get_civil_card(*a).name)],
             Action::Playing(PlayingAction::ActionCard(*a)),
         ),
         HandCard::Wonder(name) => StateUpdate::execute_with_confirm(
@@ -245,7 +245,7 @@ fn get_card_object(
 }
 
 fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
-    let a = get_action_card(id);
+    let a = rc.game.cache.get_action_card(id);
 
     let name = match &a.tactics_card {
         Some(t) => {

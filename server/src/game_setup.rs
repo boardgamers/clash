@@ -13,6 +13,7 @@ use crate::unit::UnitType;
 use crate::utils::{Rng, Shuffle};
 use itertools::Itertools;
 use std::collections::HashMap;
+use crate::cache::Cache;
 
 /// Creates a new [`Game`].
 ///
@@ -36,6 +37,8 @@ pub fn setup_game(player_amount: usize, seed: String, setup: bool) -> Game {
     let seed2 = u128::from_be_bytes(buffer);
     let seed = seed1 ^ seed2;
     let mut rng = Rng::from_seed(seed);
+
+    let cache = Cache::new();
 
     let mut players = init_human_players(player_amount, &mut rng);
 
@@ -61,7 +64,7 @@ pub fn setup_game(player_amount: usize, seed: String, setup: bool) -> Game {
         .map(|w| w.name.clone())
         .collect_vec()
         .shuffled(&mut rng);
-    let action_cards_left = action_cards::get_all()
+    let action_cards_left = cache.get_action_cards()
         .iter()
         .map(|a| a.id)
         .collect_vec()
@@ -71,12 +74,13 @@ pub fn setup_game(player_amount: usize, seed: String, setup: bool) -> Game {
         .map(|a| a.id)
         .collect_vec()
         .shuffled(&mut rng);
-    let incidents_left = incidents::get_all()
+    let incidents_left = cache.get_incidents()
         .iter()
         .map(|i| i.id)
         .collect_vec()
         .shuffled(&mut rng);
     let mut game = new_game(
+        cache,
         rng,
         players,
         starting_player,
@@ -111,6 +115,7 @@ pub fn setup_game(player_amount: usize, seed: String, setup: bool) -> Game {
 }
 
 fn new_game(
+    cache: Cache,
     rng: Rng,
     players: Vec<Player>,
     starting_player: usize,
@@ -121,6 +126,7 @@ fn new_game(
     incidents_left: Vec<u8>,
 ) -> Game {
     Game {
+        cache,
         state: GameState::Playing,
         events: Vec::new(),
         players,

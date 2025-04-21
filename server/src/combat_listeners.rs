@@ -460,9 +460,9 @@ where
     T: Clone + PartialEq,
 {
     let attacker_card =
-        get_attacker_tactics_card(&event_type).map(|c| tactics_cards::get_tactics_card(*c));
+        get_attacker_tactics_card(&event_type).map(|c| game.cache.get_tactics_card(*c));
     let defender_card =
-        get_defender_tactics_card(&event_type).map(|c| tactics_cards::get_tactics_card(*c));
+        get_defender_tactics_card(&event_type).map(|c| game.cache.get_tactics_card(*c));
 
     if attacker_card.is_none() && defender_card.is_none() {
         return Some(event_type);

@@ -27,12 +27,3 @@ pub(crate) fn get_all_uncached() -> Vec<Objective> {
     all
 }
 
-///
-/// # Panics
-/// Panics if incident does not exist
-#[must_use]
-pub fn get_objective(name: &str) -> &'static Objective {
-    cache::get()
-        .get_objective(name)
-        .expect("objective not found")
-}

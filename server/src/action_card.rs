@@ -140,7 +140,7 @@ impl AbilityInitializerSetup for ActionCardBuilder {
 pub(crate) fn play_action_card(game: &mut Game, player_index: usize, id: u8) {
     discard_action_card(game, player_index, id);
     let mut satisfying_action: Option<usize> = None;
-    let card = get_civil_card(id);
+    let card = game.cache.get_civil_card(id);
     if card.requirement_land_battle_won {
         if let Some(action_log_index) = land_battle_won_action(game, player_index, id) {
             satisfying_action = Some(action_log_index);
@@ -164,7 +164,8 @@ pub(crate) fn play_action_card(game: &mut Game, player_index: usize, id: u8) {
 }
 
 pub(crate) fn on_play_action_card(game: &mut Game, player_index: usize, i: ActionCardInfo) {
-    let players = match get_civil_card(i.id).target {
+    let cache = game.cache;
+    let players = match cache.get_civil_card(i.id).target {
         CivilCardTarget::ActivePlayer => vec![player_index],
         CivilCardTarget::AllPlayers => game.human_players(player_index),
     };
@@ -172,7 +173,7 @@ pub(crate) fn on_play_action_card(game: &mut Game, player_index: usize, i: Actio
     let _ = game.trigger_persistent_event_with_listener(
         &players,
         |e| &mut e.play_action_card,
-        &get_civil_card(i.id).listeners,
+        &cache.get_civil_card(i.id).listeners,
         i,
         PersistentEventType::ActionCard,
         None,
@@ -196,10 +197,10 @@ fn draw_action_card_from_pile(game: &mut Game) -> Option<&'static ActionCard> {
         "Action Card",
         false,
         |g| &mut g.action_cards_left,
-        || action_cards::get_all().iter().map(|c| c.id).collect(),
+        || game.cache.get_action_cards().iter().map(|c| c.id).collect(),
         |p| p.action_cards.clone(),
     )
-    .map(get_action_card)
+    .map(|id|game.cache.get_action_card(id))
 }
 
 pub(crate) fn gain_action_card(game: &mut Game, player_index: usize, action_card: &ActionCard) {

@@ -58,7 +58,7 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                 }
             }
 
-            let secrets = get_swap_secrets(other);
+            let secrets = get_swap_secrets(other, game);
             game.player_mut(player).secrets.extend(secrets);
 
             Some(HandCardsRequest::new(
@@ -185,7 +185,7 @@ fn has_any_card(p: &Player) -> bool {
     !hand_cards(p, &HandCardType::get_all()).is_empty()
 }
 
-fn get_swap_secrets(other: &Player) -> Vec<String> {
+fn get_swap_secrets(other: &Player, game: &Game) -> Vec<String> {
     vec![
         format!(
             "{} has the following action cards: {}",
@@ -194,7 +194,7 @@ fn get_swap_secrets(other: &Player) -> Vec<String> {
                 .action_cards
                 .iter()
                 .map(|id| {
-                    let a = get_action_card(*id);
+                    let a = game.cache.get_action_card(*id);
                     format!(
                         "{}/{}",
                         a.civil_card.name,

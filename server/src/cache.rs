@@ -1,6 +1,8 @@
-use crate::action_card::ActionCard;
+use crate::action_card::{ActionCard, CivilCard};
 use crate::advance::{Advance, AdvanceInfo};
+use crate::cache;
 use crate::city_pieces::Building;
+use crate::content::action_cards::get_action_card;
 use crate::content::advances::AdvanceGroup;
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::custom_action_builtins;
@@ -15,6 +17,7 @@ use crate::status_phase::{
     StatusPhaseState, complete_objectives, determine_first_player, draw_cards, free_advance,
     get_status_phase, may_change_government, raze_city,
 };
+use crate::tactics_card::TacticsCard;
 use crate::wonder::Wonder;
 use itertools::Itertools;
 use std::collections::HashMap;
@@ -200,9 +203,33 @@ impl Cache {
         &self.all_action_cards
     }
 
+    ///
+    /// # Panics
+    /// Panics if action card does not exist
     #[must_use]
-    pub fn get_action_card(&'static self, id: u8) -> Option<&'static ActionCard> {
-        self.action_cards_by_id.get(&id)
+    pub fn get_action_card(&'static self, id: u8) -> &'static ActionCard {
+        self.action_cards_by_id
+            .get(&id)
+            .expect("incident action card not found")
+    }
+
+    ///
+    /// # Panics
+    /// Panics if action card does not exist
+    #[must_use]
+    pub fn get_civil_card(&'static self, id: u8) -> &'static CivilCard {
+        &self.get_action_card(id).civil_card
+    }
+
+    ///
+    /// # Panics
+    /// Panics if action card does not exist
+    #[must_use]
+    pub fn get_tactics_card(&'static self, id: u8) -> &'static TacticsCard {
+        self.get_action_card(id)
+            .tactics_card
+            .as_ref()
+            .unwrap_or_else(|| panic!("tactics card not found for action card {id}"))
     }
 
     #[must_use]
@@ -220,9 +247,14 @@ impl Cache {
         &self.all_objectives
     }
 
+    ///
+    /// # Panics
+    /// Panics if incident does not exist
     #[must_use]
-    pub fn get_objective(&'static self, name: &str) -> Option<&'static Objective> {
-        self.objectives_by_name.get(name)
+    pub fn get_objective(&'static self, name: &str) -> &'static Objective {
+        self.objectives_by_name
+            .get(name)
+            .expect("objective not found")
     }
 
     #[must_use]
@@ -240,9 +272,12 @@ impl Cache {
         &self.all_incidents
     }
 
+    ///
+    /// # Panics
+    /// Panics if incident does not exist
     #[must_use]
-    pub fn get_incident(&'static self, id: u8) -> Option<&'static Incident> {
-        self.incidents_by_id.get(&id)
+    pub fn get_incident(&'static self, id: u8) -> &'static Incident {
+        self.incidents_by_id.get(&id).expect("incident not found")
     }
 }
 

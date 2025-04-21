@@ -184,7 +184,7 @@ pub(crate) fn use_teach_us() -> Builtin {
                 let cards = p
                     .action_cards
                     .iter()
-                    .filter(|a| get_action_card(**a).civil_card.name == "Teach Us")
+                    .filter(|a| game.cache.get_action_card(**a).civil_card.name == "Teach Us")
                     .map(|a| HandCard::ActionCard(*a))
                     .collect_vec();
                 return Some(HandCardsRequest::new(cards, 0..=1, "Select Teach Us card"));

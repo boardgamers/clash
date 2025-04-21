@@ -69,7 +69,7 @@ fn advance(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .build()
 }
 
-fn possible_advances(player: &Player) -> Vec<Advance> {
+fn possible_advances(player: &Player, game: &Game) -> Vec<Advance> {
     advances::get_all()
         .iter()
         .filter(|a| player.can_advance_free(a.advance))

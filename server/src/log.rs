@@ -156,7 +156,7 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
             )
         }
         PlayingAction::ActionCard(a) => {
-            let card = get_civil_card(*a);
+            let card = game.cache.get_civil_card(*a);
             let pile = &card.action_type.cost;
             let cost = if pile.is_empty() {
                 ""

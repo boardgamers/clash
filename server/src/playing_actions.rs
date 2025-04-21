@@ -161,7 +161,7 @@ impl PlayingActionType {
                     return Err("Action card not available".to_string());
                 }
 
-                let civil_card = get_civil_card(*id);
+                let civil_card = game.cache.get_civil_card(*id);
                 let mut satisfying_action: Option<usize> = None;
                 if civil_card.requirement_land_battle_won {
                     if let Some(action_log_index) = land_battle_won_action(game, player_index, *id)
@@ -208,7 +208,7 @@ impl PlayingActionType {
     pub fn cost(&self) -> ActionCost {
         match self {
             PlayingActionType::Custom(custom_action) => custom_action.info().action_type.clone(),
-            PlayingActionType::ActionCard(id) => get_civil_card(*id).action_type.clone(),
+            PlayingActionType::ActionCard(id) => game.cache.get_civil_card(*id).action_type.clone(),
             PlayingActionType::EndTurn => ActionCost::cost(ResourcePile::empty()),
             _ => ActionCost::regular(),
         }

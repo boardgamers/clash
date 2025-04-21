@@ -565,13 +565,13 @@ impl AbilityInitializerSetup for IncidentBuilder {
 }
 
 pub(crate) fn on_trigger_incident(game: &mut Game, mut info: IncidentInfo) {
-    let incident = incidents::get_incident(
+    let incident = game.cache.get_incident(
         draw_card_from_pile(
             game,
             "Events",
             true,
             |g| &mut g.incidents_left,
-            || incidents::get_all().iter().map(|i| i.id).collect_vec(),
+            || game.cache.get_incidents().iter().map(|i| i.id).collect_vec(),
             |p| {
                 p.action_cards
                     .iter()

@@ -11,15 +11,16 @@ use server::events::EventOrigin;
 
 #[must_use]
 pub fn event_help(rc: &RenderContext, origin: &EventOrigin) -> Vec<String> {
-    let mut h = vec![origin.name()];
+    let mut h = vec![origin.name(rc.game)];
+    let cache = &rc.game.cache;
     let d = match origin {
         EventOrigin::Advance(a) => vec![a.info().description.clone()],
         EventOrigin::Wonder(w) => vec![get_wonder(w).description.clone()],
         EventOrigin::Builtin(b) => vec![get_builtin(rc.game, b).description.clone()],
-        EventOrigin::CivilCard(id) => vec![get_civil_card(*id).description.clone()],
-        EventOrigin::TacticsCard(id) => vec![get_tactics_card(*id).description.clone()],
-        EventOrigin::Incident(id) => get_incident(*id).description(),
-        EventOrigin::Objective(name) => vec![get_objective(name).description.clone()],
+        EventOrigin::CivilCard(id) => vec![cache.get_civil_card(*id).description.clone()],
+        EventOrigin::TacticsCard(id) => vec![cache.get_tactics_card(*id).description.clone()],
+        EventOrigin::Incident(id) => cache.get_incident(*id).description(),
+        EventOrigin::Objective(name) => vec![cache.get_objective(name).description.clone()],
         EventOrigin::Leader(l) => vec![{
             let l = rc.shown_player.get_leader(l).unwrap();
             // todo: leader should have a 2 event sources - no each event source should have a description

@@ -15,11 +15,6 @@ use development::development_action_cards;
 use itertools::Itertools;
 
 #[must_use]
-pub(crate) fn get_all() -> &'static Vec<ActionCard> {
-    cache::get().get_action_cards()
-}
-
-#[must_use]
 pub(crate) fn get_all_uncached() -> Vec<ActionCard> {
     let all = vec![
         inspiration_action_cards(),
@@ -38,20 +33,3 @@ pub(crate) fn get_all_uncached() -> Vec<ActionCard> {
     all
 }
 
-///
-/// # Panics
-/// Panics if action card does not exist
-#[must_use]
-pub fn get_action_card(id: u8) -> &'static ActionCard {
-    cache::get()
-        .get_action_card(id)
-        .expect("incident action card not found")
-}
-
-///
-/// # Panics
-/// Panics if action card does not exist
-#[must_use]
-pub fn get_civil_card(id: u8) -> &'static CivilCard {
-    &get_action_card(id).civil_card
-}
