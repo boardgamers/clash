@@ -577,11 +577,11 @@ impl Mission {
             .current_location
             .next_position_in_path(&self.target)
             .expect("missions is at it's target location");
-        let carrier = self.carrier(game);
-        let cost = self.movement_cost(game);
+        let cost = self.movement_cost(game, next_position);
         if !game.players[self.player_index].can_afford(&cost) {
             return None;
         }
+        let carrier = self.carrier(game);
         //todo: handle roads
         Some(MovementAction::Move(MoveUnits::new(
             self.units.clone(),
@@ -598,7 +598,7 @@ impl Mission {
         carrier
     }
 
-    fn movement_cost(&self, game: &Game) -> PaymentOptions {
+    fn movement_cost(&self, game: &Game, next_position: Position) -> PaymentOptions {
         movement::move_units_destinations(
             game.player(self.player_index),
             game,
@@ -608,8 +608,8 @@ impl Mission {
         )
         .expect("units in mission can't move")
         .into_iter()
-        .find(|destination| destination.destination == self.target)
-        .expect("mission can't move to target")
+        .find(|route| route.destination == next_position)
+        .expect("can't move to target")
         .cost
     }
 }
