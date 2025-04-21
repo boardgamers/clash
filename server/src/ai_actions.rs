@@ -231,6 +231,10 @@ fn available_action_cards(game: &Game, p: &Player) -> Vec<Action> {
                 // todo influence only is buggy
                 return None;
             }
+            if *card == 7 || *card == 8 {
+                // todo spy is slow
+                return None;
+            }
             if *card == 33 || *card == 34 {
                 // todo synergies is slow
                 return None;

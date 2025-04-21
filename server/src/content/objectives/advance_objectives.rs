@@ -1,16 +1,16 @@
-use crate::content::advances;
 use crate::content::objectives::city_objectives::leading_player;
+use crate::game::Game;
 use crate::objective_card::Objective;
 use crate::player::Player;
 
 fn advance_group_complete(objective: &str, group: &'static str) -> Objective {
     Objective::builder(objective, &format!("You have all {group} advances."))
-        .status_phase_check(move |_game, player| all_advances_in_group(player, group))
+        .status_phase_check(move |game, player| all_advances_in_group(player, group, game))
         .build()
 }
 
-fn all_advances_in_group(player: &Player, group: &str) -> bool {
-    advances::get_group_uncached(group)
+fn all_advances_in_group(player: &Player, group: &str, game: &Game) -> bool {
+    game.cache.get_advance_group(group)
         .advances
         .iter()
         .all(|a| player.has_advance(a.advance))
@@ -53,7 +53,7 @@ pub(crate) fn government() -> Objective {
         game.cache
             .get_governments()
             .iter()
-            .any(|g| all_advances_in_group(player, &g.name))
+            .any(|g| all_advances_in_group(player, &g.name, game))
     })
     .build()
 }

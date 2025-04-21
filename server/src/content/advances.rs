@@ -123,13 +123,6 @@ pub(crate) fn advance_group_builder(name: &str, advances: Vec<AdvanceBuilder>) -
     }
 }
 
-pub(crate) fn get_group_uncached(group: &str) -> AdvanceGroup {
-    get_groups_uncached()
-        .into_iter()
-        .find(|g| g.name == group)
-        .unwrap_or_else(|| panic!("Advance group {group} not found"))
-}
-
 #[must_use]
 pub fn get_governments_uncached() -> Vec<AdvanceGroup> {
     get_groups_uncached()
