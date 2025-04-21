@@ -156,7 +156,8 @@ impl Cache {
 
     #[must_use]
     pub fn get_advance_group(&self, name: &str) -> &AdvanceGroup {
-        self.advance_groups_by_name.get(name)
+        self.advance_groups_by_name
+            .get(name)
             .unwrap_or_else(|| panic!("Advance group {name} not found"))
     }
 
@@ -171,12 +172,13 @@ impl Cache {
     ///
     /// Panics if government doesn't exist
     #[must_use]
-    pub fn get_government(&self,government: &str) -> &AdvanceGroup {
-        self.governments_by_name.get(government).unwrap_or_else(move|| {
-            panic!("Government {government} not found");
-        })
+    pub fn get_government(&self, government: &str) -> &AdvanceGroup {
+        self.governments_by_name
+            .get(government)
+            .unwrap_or_else(move || {
+                panic!("Government {government} not found");
+            })
     }
-
 
     #[must_use]
     pub fn get_building_advance(&self, building: Building) -> Advance {
@@ -190,12 +192,14 @@ impl Cache {
 
     #[must_use]
     pub fn get_builtin(&self, name: &str, game: &Game) -> &Builtin {
-        self.builtins_by_name.get(name).or_else(|| {
-            if let Some(p) = get_status_phase(game) {
-                return Some(self.status_phase_handler(p));
-            }
-            None
-        })
+        self.builtins_by_name
+            .get(name)
+            .or_else(|| {
+                if let Some(p) = get_status_phase(game) {
+                    return Some(self.status_phase_handler(p));
+                }
+                None
+            })
             .unwrap_or_else(|| panic!("builtin not found: {name}"))
     }
 
@@ -248,7 +252,8 @@ impl Cache {
 
     #[must_use]
     pub fn get_objective_card(&self, id: u8) -> &ObjectiveCard {
-        self.objective_cards_by_id.get(&id)
+        self.objective_cards_by_id
+            .get(&id)
             .unwrap_or_else(|| panic!("objective card not found {id}"))
     }
 

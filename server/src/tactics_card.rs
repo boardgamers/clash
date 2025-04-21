@@ -5,7 +5,7 @@ use crate::action_card;
 use crate::action_card::ActionCard;
 use crate::advance::AdvanceBuilder;
 use crate::card::HandCard;
-use crate::combat::{update_combat_strength, Combat, CombatModifier};
+use crate::combat::{Combat, CombatModifier, update_combat_strength};
 use crate::combat_listeners::{CombatRoundEnd, CombatRoundStart, CombatStrength};
 use crate::content::persistent_events::HandCardsRequest;
 use crate::events::EventOrigin;

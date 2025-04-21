@@ -143,7 +143,6 @@ mod tests {
     use super::*;
     use crate::cache::Cache;
 
-
     #[test]
     fn test_get_all() {
         let cache = Cache::new();

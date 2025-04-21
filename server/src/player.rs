@@ -253,11 +253,7 @@ impl Player {
             civilization: self.civilization.name.clone(),
             active_leader: self.active_leader.clone(),
             available_leaders: self.available_leaders.clone(),
-            advances: self
-                .advances
-                .iter()
-                .sorted_by_key(Advance::id)
-                .collect(),
+            advances: self.advances.iter().sorted_by_key(Advance::id).collect(),
             unlocked_special_advance: self.unlocked_special_advances.clone(),
             wonders_build: self.wonders_build.clone(),
             incident_tokens: self.incident_tokens,
@@ -471,8 +467,11 @@ impl Player {
 
     #[must_use]
     pub fn can_advance(&self, advance: Advance, game: &Game) -> bool {
-        self.can_afford(&self.advance_cost(advance, game,CostTrigger::NoModifiers).cost)
-            && self.can_advance_free(advance, game)
+        self.can_afford(
+            &self
+                .advance_cost(advance, game, CostTrigger::NoModifiers)
+                .cost,
+        ) && self.can_advance_free(advance, game)
     }
 
     #[must_use]

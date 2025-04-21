@@ -13,7 +13,7 @@ use crate::objective_card::{
 use crate::payment::PaymentOptions;
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::{
-    cache, content::advances, game::Game, player::Player, resource_pile::ResourcePile, utils,
+    cache, game::Game, player::Player, resource_pile::ResourcePile, utils,
 };
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -145,9 +145,14 @@ pub(crate) fn free_advance() -> Builtin {
             |event| &mut event.status_phase,
             0,
             |game, player_index, _player_name| {
-                let choices = game.cache.get_advances()
+                let choices = game
+                    .cache
+                    .get_advances()
                     .iter()
-                    .filter(|advance| game.player(player_index).can_advance_free(advance.advance, game))
+                    .filter(|advance| {
+                        game.player(player_index)
+                            .can_advance_free(advance.advance, game)
+                    })
                     .map(|a| a.advance)
                     .collect_vec();
                 Some(AdvanceRequest::new(choices))
@@ -155,7 +160,8 @@ pub(crate) fn free_advance() -> Builtin {
             |game, c, _| {
                 game.add_info_log_item(&format!(
                     "{} advanced {} for free",
-                    c.player_name, c.choice.name(game)
+                    c.player_name,
+                    c.choice.name(game)
                 ));
                 gain_advance_without_payment(
                     game,
@@ -274,7 +280,7 @@ where
                                 } else {
                                     c.additional_advances
                                         .iter()
-                                        .map(|a|a.name(game))
+                                        .map(|a| a.name(game))
                                         .join(", ")
                                 }
                             ));
@@ -317,13 +323,23 @@ fn change_government_type(game: &mut Game, player_index: usize, new_government: 
         remove_advance(game, a, player_index);
     }
 
-    do_advance(game, game.cache.get_government(government).advances[0].advance, player_index);
+    do_advance(
+        game,
+        game.cache.get_government(government).advances[0].advance,
+        player_index,
+    );
     for name in &new_government.additional_advances {
-        let (pos, advance) = game.cache.get_government(government).advances
+        let (pos, advance) = game
+            .cache
+            .get_government(government)
+            .advances
             .iter()
             .find_position(|a| a.advance == *name)
             .unwrap_or_else(|| {
-                panic!("Advance with name {} not found in government advances", name.name(game));
+                panic!(
+                    "Advance with name {} not found in government advances",
+                    name.name(game)
+                );
             });
         assert!(
             pos > 0,
@@ -336,7 +352,8 @@ fn change_government_type(game: &mut Game, player_index: usize, new_government: 
 pub(crate) fn government_advances(p: &Player, game: &Game) -> Vec<Advance> {
     let current = p.government(game).expect("player should have a government");
 
-    game.cache.get_government(&current)
+    game.cache
+        .get_government(&current)
         .advances
         .iter()
         .filter(|a| p.has_advance(a.advance))

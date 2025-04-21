@@ -2,7 +2,7 @@ use crate::ability_initializer::{
     AbilityInitializerBuilder, AbilityInitializerSetup, AbilityListeners,
 };
 use crate::cache::Cache;
-use crate::card::{draw_card_from_pile, HandCard};
+use crate::card::{HandCard, draw_card_from_pile};
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{HandCardsRequest, PersistentEventType};
 use crate::events::EventOrigin;
@@ -231,7 +231,8 @@ pub(crate) fn select_objectives() -> Builtin {
 }
 
 pub(crate) fn status_phase_completable(game: &Game, player: &Player, id: u8) -> Vec<String> {
-    game.cache.get_objective_card(id)
+    game.cache
+        .get_objective_card(id)
         .objectives
         .iter()
         .filter_map(|objective| {
@@ -316,7 +317,11 @@ pub(crate) fn match_objective_cards(
         .ok_or("Invalid selection of objective cards".to_string())
 }
 
-fn combinations(cards: &[&ObjectiveCard], opportunities: &[String], cache: &Cache) -> Vec<Vec<(u8, String)>> {
+fn combinations(
+    cards: &[&ObjectiveCard],
+    opportunities: &[String],
+    cache: &Cache,
+) -> Vec<Vec<(u8, String)>> {
     let Some((first, rest)) = cards.split_first() else {
         return vec![];
     };
@@ -354,7 +359,10 @@ fn combinations(cards: &[&ObjectiveCard], opportunities: &[String], cache: &Cach
     filter_duplicated_objectives(result, cache)
 }
 
-fn filter_duplicated_objectives(o: Vec<Vec<(u8, String)>>, cache: &Cache) -> Vec<Vec<(u8, String)>> {
+fn filter_duplicated_objectives(
+    o: Vec<Vec<(u8, String)>>,
+    cache: &Cache,
+) -> Vec<Vec<(u8, String)>> {
     o.into_iter()
         .map(|mut v| {
             for (id, group) in &v.clone().iter().chunk_by(|(id, _name)| *id) {
@@ -402,17 +410,14 @@ fn draw_objective_card_from_pile(game: &mut Game) -> Option<u8> {
     )
 }
 
-pub(crate) fn gain_objective_card(
-    game: &mut Game,
-    player_index: usize,
-    objective_card: u8,
-) {
+pub(crate) fn gain_objective_card(game: &mut Game, player_index: usize, objective_card: u8) {
     let mut o = game
         .player(player_index)
         .objective_cards
         .iter()
         .flat_map(|&id| {
-            game.cache.get_objective_card(id)
+            game.cache
+                .get_objective_card(id)
                 .objectives
                 .iter()
                 .map(|o| o.name.clone())
@@ -447,7 +452,8 @@ pub(crate) fn discard_objective_card(game: &mut Game, player: usize, card: u8) {
     .unwrap_or_else(|| panic!("should be able to discard objective card {card}"));
     for o in &game.cache.get_objective_card(card).objectives.clone() {
         if game.player(player).objective_cards.iter().any(|c| {
-            game.cache.get_objective_card(*c)
+            game.cache
+                .get_objective_card(*c)
                 .objectives
                 .iter()
                 .any(|o2| o2.name == o.name)

@@ -4,11 +4,11 @@ use crate::advance::Advance;
 use crate::cache::Cache;
 use crate::consts::{ACTIONS, NON_HUMAN_PLAYERS};
 use crate::content::civilizations::{BARBARIANS, PIRATES};
-use crate::content::{builtin, civilizations, objective_cards, wonders};
+use crate::content::{builtin, civilizations};
 use crate::game::{Game, GameState};
 use crate::map::Map;
 use crate::objective_card::gain_objective_card_from_pile;
-use crate::player::{add_unit, Player};
+use crate::player::{Player, add_unit};
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
 use crate::utils::{Rng, Shuffle};
@@ -59,22 +59,26 @@ pub fn setup_game(player_amount: usize, seed: String, setup: bool) -> Game {
         Map::new(HashMap::new())
     };
 
-    let wonders_left = cache.get_wonders()
+    let wonders_left = cache
+        .get_wonders()
         .iter()
         .map(|w| w.name.clone())
         .collect_vec()
         .shuffled(&mut rng);
-    let action_cards_left = cache.get_action_cards()
+    let action_cards_left = cache
+        .get_action_cards()
         .iter()
         .map(|a| a.id)
         .collect_vec()
         .shuffled(&mut rng);
-    let objective_cards_left = cache.get_objective_cards()
+    let objective_cards_left = cache
+        .get_objective_cards()
         .iter()
         .map(|a| a.id)
         .collect_vec()
         .shuffled(&mut rng);
-    let incidents_left = cache.get_incidents()
+    let incidents_left = cache
+        .get_incidents()
         .iter()
         .map(|i| i.id)
         .collect_vec()

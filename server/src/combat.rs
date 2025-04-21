@@ -499,6 +499,7 @@ pub mod tests {
 
     use crate::action::Action;
 
+    use crate::cache::Cache;
     use crate::content::wonders;
     use crate::game::GameState;
     use crate::log::{ActionLogAge, ActionLogItem, ActionLogPlayer, ActionLogRound};
@@ -514,7 +515,6 @@ pub mod tests {
         position::Position,
         utils::Rng,
     };
-    use crate::cache::Cache;
 
     #[must_use]
     pub fn test_game() -> Game {

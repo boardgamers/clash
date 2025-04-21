@@ -459,13 +459,15 @@ where
     T: Clone + PartialEq,
 {
     let attacker_card = |event_type: &T, game: &Game| -> Option<TacticsCard> {
-        get_attacker_tactics_card(&event_type).map(move|c| game.cache.get_tactics_card(*c).clone())
+        get_attacker_tactics_card(event_type).map(move |c| game.cache.get_tactics_card(*c).clone())
     };
     let defender_card = |event_type: &T, game: &Game| -> Option<TacticsCard> {
-        get_defender_tactics_card(&event_type).map(move|c| game.cache.get_tactics_card(*c).clone())
+        get_defender_tactics_card(event_type).map(move |c| game.cache.get_tactics_card(*c).clone())
     };
 
-    if get_attacker_tactics_card(&event_type).is_none() && get_defender_tactics_card(&event_type).is_none() {
+    if get_attacker_tactics_card(&event_type).is_none()
+        && get_defender_tactics_card(&event_type).is_none()
+    {
         return Some(event_type);
     }
 
@@ -474,14 +476,14 @@ where
     add_tactics_listener(
         game,
         reveal_card,
-        attacker_card(&event_type,game),
+        attacker_card(&event_type, game),
         combat,
         CombatRole::Attacker,
     );
     add_tactics_listener(
         game,
         reveal_card,
-        defender_card(&event_type,game),
+        defender_card(&event_type, game),
         combat,
         CombatRole::Defender,
     );
@@ -489,13 +491,13 @@ where
     let players = &combat.players();
     let result = game.trigger_persistent_event(players, event, event_type.clone(), store_type);
 
-    if let Some(card) = attacker_card(&event_type,game) {
+    if let Some(card) = attacker_card(&event_type, game) {
         let card = card.clone();
         for p in players {
             card.listeners.deinit(game, *p);
         }
     }
-    if let Some(card) = defender_card(&event_type,game) {
+    if let Some(card) = defender_card(&event_type, game) {
         let card = card.clone();
         for p in players {
             card.listeners.deinit(game, *p);

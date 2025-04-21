@@ -130,7 +130,10 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
     let player_name = player.get_name();
     match action {
         PlayingAction::Advance { advance, payment } => {
-            format!("{player_name} paid {payment} to get the {} advance", advance.name(game))
+            format!(
+                "{player_name} paid {payment} to get the {} advance",
+                advance.name(game)
+            )
         }
         PlayingAction::FoundCity { settler } => format!(
             "{player_name} founded a city at {}",

@@ -46,7 +46,10 @@ pub fn change_government_type_dialog(
         rc,
         &format!("Change government for {}", r.cost),
         |a, p| {
-            if rc.game.cache.get_governments()
+            if rc
+                .game
+                .cache
+                .get_governments()
                 .iter()
                 .find(|g| g.advances[0].name == a.name)
                 .is_some_and(|_| p.can_advance_in_change_government(a.advance, rc.game))
@@ -60,13 +63,19 @@ pub fn change_government_type_dialog(
         },
         |a| {
             let g = a.government.as_ref().expect("should have government");
-            let additional = rc.game.cache.get_government(g)
+            let additional = rc
+                .game
+                .cache
+                .get_government(g)
                 .advances
                 .iter()
                 .skip(1) // the government advance itself is always chosen
                 .map(|a| a.advance)
                 .collect::<Vec<_>>();
-            let needed = rc.game.cache.get_government(&rc.shown_player.government(rc.game).unwrap())
+            let needed = rc
+                .game
+                .cache
+                .get_government(&rc.shown_player.government(rc.game).unwrap())
                 .advances
                 .iter()
                 .filter(|a| rc.shown_player.has_advance(a.advance))

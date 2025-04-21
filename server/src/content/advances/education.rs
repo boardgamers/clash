@@ -3,7 +3,7 @@ use crate::action_card::gain_action_card_from_pile;
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city_pieces::Building;
-use crate::content::advances::{AdvanceGroup, advance_group_builder, get_group_uncached};
+use crate::content::advances::{AdvanceGroup, advance_group_builder};
 use crate::content::persistent_events::PaymentRequest;
 use crate::objective_card::gain_objective_card_from_pile;
 use crate::payment::PaymentOptions;
@@ -134,7 +134,9 @@ fn philosophy() -> AdvanceBuilder {
         |event| &mut event.advance,
         0,
         |game, player_index, player_name, advance| {
-            if game.cache.get_advance_group("Science")
+            if game
+                .cache
+                .get_advance_group("Science")
                 .advances
                 .iter()
                 .any(|a| a.advance == advance.advance)

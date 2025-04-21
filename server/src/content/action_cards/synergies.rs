@@ -2,8 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{ActionCard, ActionCardBuilder, CivilCardTarget, discard_action_card};
 use crate::advance::{Advance, gain_advance_without_payment};
 use crate::card::HandCard;
-use crate::content::action_cards::{ inspiration};
-use crate::content::advances;
+use crate::content::action_cards::inspiration;
 use crate::content::advances::theocracy::cities_that_can_add_units;
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{
@@ -60,7 +59,8 @@ fn synergies(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             let advance = &sel.choice;
             game.add_info_log_item(&format!(
                 "{} selected {} as first advance for Synergies.",
-                sel.player_name, advance.name(game)
+                sel.player_name,
+                advance.name(game)
             ));
             i.selected_advance = Some(*advance);
         },
@@ -72,7 +72,8 @@ fn synergies(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |game, p, i| {
             let first = i.selected_advance.expect("advance not found");
             Some(AdvanceRequest::new(
-                game.cache.get_advance_groups()
+                game.cache
+                    .get_advance_groups()
                     .iter()
                     .find(|g| g.advances.iter().any(|a| a.advance == first))
                     .expect("Advance group not found")
@@ -87,7 +88,8 @@ fn synergies(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             let advance = &sel.choice;
             game.add_info_log_item(&format!(
                 "{} selected {} as second advance for Synergies.",
-                sel.player_name, advance.name(game)
+                sel.player_name,
+                advance.name(game)
             ));
             i.selected_advance = Some(*advance);
         },
@@ -105,7 +107,8 @@ fn pay_for_advance(b: ActionCardBuilder, priority: i32) -> ActionCardBuilder {
             let p = game.player(player_index);
             let advance = i.selected_advance.expect("advance not found");
             Some(vec![PaymentRequest::new(
-                p.advance_cost(advance,game, game.execute_cost_trigger()).cost,
+                p.advance_cost(advance, game, game.execute_cost_trigger())
+                    .cost,
                 &format!("Pay for {}", advance.name(game)),
                 false,
             )])
@@ -113,8 +116,10 @@ fn pay_for_advance(b: ActionCardBuilder, priority: i32) -> ActionCardBuilder {
         |game, s, i| {
             let advance = i.selected_advance.expect("advance not found");
             game.add_info_log_item(&format!(
-                "{} paid {} for advance {}", advance.name(game),
-                s.player_name, s.choice[0]
+                "{} paid {} for advance {}",
+                advance.name(game),
+                s.player_name,
+                s.choice[0]
             ));
             gain_advance_without_payment(game, advance, s.player_index, s.choice[0].clone(), false);
         },
@@ -122,7 +127,8 @@ fn pay_for_advance(b: ActionCardBuilder, priority: i32) -> ActionCardBuilder {
 }
 
 fn categories_with_2_affordable_advances(p: &Player, game: &Game) -> Vec<Advance> {
-    game.cache.get_advance_groups()
+    game.cache
+        .get_advance_groups()
         .iter()
         .flat_map(|g| {
             let vec = g
@@ -138,9 +144,11 @@ fn categories_with_2_affordable_advances(p: &Player, game: &Game) -> Vec<Advance
                 .filter(|pair| {
                     let a = pair[0];
                     let b = pair[1];
-                    let mut cost = p.advance_cost(a.advance, game,game.execute_cost_trigger()).cost;
+                    let mut cost = p
+                        .advance_cost(a.advance, game, game.execute_cost_trigger())
+                        .cost;
                     cost.default += p
-                        .advance_cost(b.advance,game, game.execute_cost_trigger())
+                        .advance_cost(b.advance, game, game.execute_cost_trigger())
                         .cost
                         .default;
                     p.can_afford(&cost)
@@ -209,8 +217,11 @@ pub(crate) fn use_teach_us() -> Builtin {
         90,
         |game, player, e| {
             e.selected_card.map(|_| {
-                let vec =
-                    teachable_advances(game.player(e.combat.opponent(player)), game.player(player), game);
+                let vec = teachable_advances(
+                    game.player(e.combat.opponent(player)),
+                    game.player(player),
+                    game,
+                );
                 AdvanceRequest::new(vec)
             })
         },
@@ -373,7 +384,9 @@ fn new_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         2,
         |game, player_index, _| {
             let player = game.player(player_index);
-            Some(AdvanceRequest::new(advances_that_can_be_gained(player, game)))
+            Some(AdvanceRequest::new(advances_that_can_be_gained(
+                player, game,
+            )))
         },
         |game, sel, i| {
             let advance = &sel.choice;
@@ -399,7 +412,8 @@ fn new_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
 }
 
 fn advances_that_can_be_gained(player: &Player, game: &Game) -> Vec<Advance> {
-    game.cache.get_advances()
+    game.cache
+        .get_advances()
         .iter()
         .filter(|a| player.can_advance(a.advance, game))
         .map(|a| a.advance)

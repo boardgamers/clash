@@ -4,8 +4,8 @@ use crate::action_card::ActionCard;
 use crate::advance::Advance;
 use crate::ai_collect::reset_collect_within_range_for_all;
 use crate::barbarians::{barbarians_move, barbarians_spawn};
-use crate::card::{draw_card_from_pile, HandCard};
-use crate::city::{is_valid_city_terrain, MoodState};
+use crate::card::{HandCard, draw_card_from_pile};
+use crate::city::{MoodState, is_valid_city_terrain};
 use crate::content::incidents::great_persons::GREAT_PERSON_OFFSET;
 use crate::content::persistent_events::{
     HandCardsRequest, PaymentRequest, PersistentEventType, PlayerRequest, PositionRequest,
@@ -566,27 +566,26 @@ impl AbilityInitializerSetup for IncidentBuilder {
 }
 
 pub(crate) fn on_trigger_incident(game: &mut Game, mut info: IncidentInfo) {
-    let incident_id =
-        draw_card_from_pile(
-            game,
-            "Events",
-            true,
-            |g| &mut g.incidents_left,
-            |g| g.cache.get_incidents().iter().map(|i| i.id).collect_vec(),
-            |p| {
-                p.action_cards
-                    .iter()
-                    .filter_map(|a| {
-                        if *a >= GREAT_PERSON_OFFSET {
-                            Some(a - GREAT_PERSON_OFFSET)
-                        } else {
-                            None
-                        }
-                    })
-                    .collect()
-            },
-        )
-            .expect("incident should exist");
+    let incident_id = draw_card_from_pile(
+        game,
+        "Events",
+        true,
+        |g| &mut g.incidents_left,
+        |g| g.cache.get_incidents().iter().map(|i| i.id).collect_vec(),
+        |p| {
+            p.action_cards
+                .iter()
+                .filter_map(|a| {
+                    if *a >= GREAT_PERSON_OFFSET {
+                        Some(a - GREAT_PERSON_OFFSET)
+                    } else {
+                        None
+                    }
+                })
+                .collect()
+        },
+    )
+    .expect("incident should exist");
 
     loop {
         let log: Option<String> = play_base_effect(&info).then_some(format!(

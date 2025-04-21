@@ -4,6 +4,7 @@ use std::time::Duration;
 use tokio::runtime::Runtime;
 
 use crate::ai_actions::AiActions;
+use crate::cache::Cache;
 use crate::{
     action::{self, Action, ActionType},
     game::{Game, GameData, GameState},
@@ -11,7 +12,6 @@ use crate::{
     position::Position,
     utils::{self, Rng},
 };
-use crate::cache::Cache;
 
 const ACTION_SCORE_WEIGHTING: f64 = 1.0;
 const ADAPTIVE_DIFFICULTY_SCORE_THRESHOLD: f64 = 10.0;
@@ -201,9 +201,9 @@ async fn evaluate_action(
             let thread_rng = rng.clone();
             let new_game = game.cloned_data();
             let cache = game.cache.clone();
-            let handle =
-                tokio::spawn(async move {
-                    monte_carlo_score(thread_rng, player_index, new_game, cache) });
+            let handle = tokio::spawn(async move {
+                monte_carlo_score(thread_rng, player_index, new_game, cache)
+            });
             handles.push(handle);
         }
         for handle in handles {

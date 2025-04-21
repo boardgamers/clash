@@ -165,7 +165,10 @@ fn can_play_card(rc: &RenderContext, card: &HandCard) -> bool {
 fn play_card(rc: &RenderContext, card: &HandCard) -> StateUpdate {
     match card {
         HandCard::ActionCard(a) => StateUpdate::execute_with_confirm(
-            vec![format!("Play Action Card: {}", rc.game.cache.get_civil_card(*a).name)],
+            vec![format!(
+                "Play Action Card: {}",
+                rc.game.cache.get_civil_card(*a).name
+            )],
             Action::Playing(PlayingAction::ActionCard(*a)),
         ),
         HandCard::Wonder(name) => StateUpdate::execute_with_confirm(
@@ -309,7 +312,11 @@ fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
     )
 }
 
-fn objective_card_object(rc: &RenderContext,id: u8, selection: Option<&SelectionInfo>) -> HandCardObject {
+fn objective_card_object(
+    rc: &RenderContext,
+    id: u8,
+    selection: Option<&SelectionInfo>,
+) -> HandCardObject {
     let card = rc.game.cache.get_objective_card(id);
 
     let mut description = vec![];

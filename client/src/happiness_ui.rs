@@ -7,7 +7,7 @@ use server::action::Action;
 use server::city::{City, MoodState};
 use server::game::Game;
 use server::happiness::{available_happiness_actions, happiness_cost};
-use server::player::{CostTrigger, Player};
+use server::player::CostTrigger;
 use server::player_events::CostInfo;
 use server::playing_actions::{IncreaseHappiness, PlayingAction, PlayingActionType};
 use server::position::Position;
@@ -105,16 +105,13 @@ pub fn add_increase_happiness(
         .map(|(p, steps)| rc.shown_player.get_city(*p).size() as u8 * steps)
         .sum::<u8>();
 
-    IncreaseHappinessConfig::happiness_payment(
-        rc,
-        step_sum,
-        &increase_happiness.custom,
+    IncreaseHappinessConfig::happiness_payment(rc, step_sum, &increase_happiness.custom).map(
+        |payment| {
+            increase_happiness.payment = payment;
+            increase_happiness.steps = new_steps;
+            increase_happiness
+        },
     )
-    .map(|payment| {
-        increase_happiness.payment = payment;
-        increase_happiness.steps = new_steps;
-        increase_happiness
-    })
 }
 
 fn increase_happiness_steps(

@@ -31,4 +31,3 @@ pub(crate) fn get_all_uncached() -> Vec<ActionCard> {
     );
     all
 }
-

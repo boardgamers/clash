@@ -1,4 +1,3 @@
-use std::sync::Arc;
 use crate::ability_initializer::{
     AbilityInitializerBuilder, AbilityInitializerSetup, AbilityListeners,
 };
@@ -16,6 +15,7 @@ use crate::position::Position;
 use crate::tactics_card::TacticsCard;
 use crate::utils::remove_element_by;
 use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 
 pub type CanPlayCard = Arc<dyn Fn(&Game, &Player, &ActionCardInfo) -> bool + Sync + Send>;
 

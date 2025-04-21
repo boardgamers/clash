@@ -50,7 +50,8 @@ pub(crate) fn government() -> Objective {
         "You have all advances in one government type.",
     )
     .status_phase_check(|game, player| {
-        game.cache.get_governments()
+        game.cache
+            .get_governments()
             .iter()
             .any(|g| all_advances_in_group(player, &g.name))
     })
@@ -64,7 +65,8 @@ pub(crate) fn goal_focused() -> Objective {
     )
     .status_phase_check(|game, player| {
         leading_player(game, player, 1, |p, g| {
-            g.cache.get_advance_groups()
+            g.cache
+                .get_advance_groups()
                 .iter()
                 .filter(|g| g.advances.iter().all(|a| p.has_advance(a.advance)))
                 .count()
@@ -79,7 +81,8 @@ pub(crate) fn diversified_research() -> Objective {
         "You have at least 1 advance in 9 different advance groups.",
     )
     .status_phase_check(|game, player| {
-        game.cache.get_advance_groups()
+        game.cache
+            .get_advance_groups()
             .iter()
             .filter(|g| g.advances.iter().any(|a| player.has_advance(a.advance)))
             .count()

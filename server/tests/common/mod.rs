@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 
 use server::action::Action;
+use server::cache::Cache;
 use server::city_pieces::Building::Temple;
 use server::content::persistent_events::{SelectedStructure, Structure};
 use server::game::Game;
@@ -22,7 +23,6 @@ use std::{
     path::MAIN_SEPARATOR as SEPARATOR,
     vec,
 };
-use server::cache::Cache;
 
 #[derive(Clone)]
 pub struct GamePath {

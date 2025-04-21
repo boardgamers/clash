@@ -3,14 +3,14 @@ use crate::advance::Advance;
 use crate::card::validate_card_selection;
 use crate::city::{City, MoodState};
 use crate::collect::available_collect_actions;
-use crate::construct::{available_buildings, new_building_positions, Construct};
+use crate::construct::{Construct, available_buildings, new_building_positions};
 use crate::content::custom_actions::CustomEventAction;
 use crate::content::persistent_events::{
-    is_selected_structures_valid, ChangeGovernmentRequest, EventResponse, HandCardsRequest, MultiRequest,
-    PersistentEventRequest, PersistentEventState, PositionRequest, SelectedStructure,
+    ChangeGovernmentRequest, EventResponse, HandCardsRequest, MultiRequest, PersistentEventRequest,
+    PersistentEventState, PositionRequest, SelectedStructure, is_selected_structures_valid,
 };
 use crate::cultural_influence::{
-    available_influence_actions, available_influence_culture, InfluenceCultureAttempt,
+    InfluenceCultureAttempt, available_influence_actions, available_influence_culture,
 };
 use crate::events::EventOrigin;
 use crate::game::Game;
@@ -18,13 +18,13 @@ use crate::happiness::{available_happiness_actions, happiness_cost};
 use crate::payment::PaymentOptions;
 use crate::player::{CostTrigger, Player};
 use crate::playing_actions::{
-    base_and_custom_action, IncreaseHappiness, PlayingAction, PlayingActionType, Recruit,
+    IncreaseHappiness, PlayingAction, PlayingActionType, Recruit, base_and_custom_action,
 };
 use crate::position::Position;
 use crate::recruit::recruit_cost;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
-use crate::status_phase::{government_advances, ChangeGovernment, ChangeGovernmentType};
+use crate::status_phase::{ChangeGovernment, ChangeGovernmentType, government_advances};
 use crate::unit::{UnitType, Units};
 use itertools::Itertools;
 use rustc_hash::FxHashMap;
@@ -253,7 +253,7 @@ fn payment_with_action(
     o: &PaymentOptions,
     p: &Player,
     playing_action_type: &PlayingActionType,
-    game: &Game
+    game: &Game,
 ) -> ResourcePile {
     o.first_valid_payment(&playing_action_type.remaining_resources(p, game))
         .expect("expected payment")
@@ -289,7 +289,8 @@ fn try_payment(ai_actions: &mut AiActions, o: &PaymentOptions, p: &Player) -> Op
 }
 
 fn advances(ai_actions: &mut AiActions, p: &Player, game: &Game) -> Vec<Action> {
-    game.cache.get_advances()
+    game.cache
+        .get_advances()
         .iter()
         .filter_map(|info| {
             let a = info.advance;
@@ -302,7 +303,7 @@ fn advances(ai_actions: &mut AiActions, p: &Player, game: &Game) -> Vec<Action> 
             }
             try_payment(
                 ai_actions,
-                &p.advance_cost(a,game, CostTrigger::NoModifiers).cost,
+                &p.advance_cost(a, game, CostTrigger::NoModifiers).cost,
                 p,
             )
             .map(|r| {
@@ -429,7 +430,7 @@ fn recruit_actions(ai_actions: &mut AiActions, player: &Player, city: &City) -> 
 fn calculate_increase_happiness(
     player: &Player,
     action_type: &PlayingActionType,
-    game: &Game
+    game: &Game,
 ) -> Option<IncreaseHappiness> {
     // try to make the biggest cities happy - that's usually the best choice
     let mut all_steps: Vec<(Position, u8)> = vec![];
@@ -560,7 +561,9 @@ fn change_government(p: &Player, c: &ChangeGovernmentRequest, game: &Game) -> Ve
         )]
     } else {
         // change to the first available government and take the first advances
-        let new = game.cache.get_governments()
+        let new = game
+            .cache
+            .get_governments()
             .iter()
             .find(|g| p.can_advance_in_change_government(g.advances[0].advance, game))
             .expect("government not found");

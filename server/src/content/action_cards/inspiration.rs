@@ -1,13 +1,13 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{ActionCard, ActionCardBuilder};
-use crate::advance::{gain_advance_without_payment, Advance};
+use crate::advance::{Advance, gain_advance_without_payment};
 use crate::city::MoodState;
 use crate::content::action_cards::spy::spy;
 use crate::content::action_cards::synergies::teachable_advances;
 use crate::content::persistent_events::{AdvanceRequest, PaymentRequest, PositionRequest};
 use crate::content::tactics_cards::{
-    encircled, heavy_resistance, high_ground, high_morale, peltasts, siege, surprise,
-    wedge_formation, TacticsCardFactory,
+    TacticsCardFactory, encircled, heavy_resistance, high_ground, high_morale, peltasts, siege,
+    surprise, wedge_formation,
 };
 use crate::game::Game;
 use crate::payment::PaymentOptions;
@@ -49,7 +49,12 @@ fn advance(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_advance_request(
         |e| &mut e.play_action_card,
         0,
-        |game, player, _| Some(AdvanceRequest::new(possible_advances(game.player(player), game))),
+        |game, player, _| {
+            Some(AdvanceRequest::new(possible_advances(
+                game.player(player),
+                game,
+            )))
+        },
         |game, sel, _| {
             let advance = sel.choice;
             gain_advance_without_payment(
@@ -61,7 +66,8 @@ fn advance(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             );
             let name = &sel.player_name;
             game.add_info_log_item(&format!(
-                "{name} gained {} for 1 culture token using the Advance action card.", advance.name(game)
+                "{name} gained {} for 1 culture token using the Advance action card.",
+                advance.name(game)
             ));
         },
     )
@@ -69,7 +75,8 @@ fn advance(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
 }
 
 fn possible_advances(player: &Player, game: &Game) -> Vec<Advance> {
-    game.cache.get_advances()
+    game.cache
+        .get_advances()
         .iter()
         .filter(|a| player.can_advance_free(a.advance, game))
         .map(|a| a.advance)
@@ -106,7 +113,8 @@ fn inspiration(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             );
             let name = &sel.player_name;
             game.add_info_log_item(&format!(
-                "{name} gained {} for free using Inspiration.", advance.name(game)
+                "{name} gained {} for free using Inspiration.",
+                advance.name(game)
             ));
         },
     )

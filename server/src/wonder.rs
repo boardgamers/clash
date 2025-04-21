@@ -1,4 +1,3 @@
-use std::sync::Arc;
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::advance::Advance;
 use crate::card::draw_card_from_pile;
@@ -16,6 +15,7 @@ use crate::utils::remove_element;
 use crate::{ability_initializer::AbilityInitializerSetup, game::Game, position::Position};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 
 type PlacementChecker = Arc<dyn Fn(Position, &Game) -> bool + Sync + Send>;
 
@@ -110,15 +110,13 @@ pub(crate) fn draw_wonder_from_pile(game: &mut Game) -> Option<String> {
         "Wonders",
         false,
         |game| &mut game.wonders_left,
-        |_|Vec::new(),
+        |_| Vec::new(),
         |_| vec![], // can't reshuffle wonders
     )
 }
 
 fn gain_wonder(game: &mut Game, player_index: usize, wonder: String) {
-    game.players[player_index]
-        .wonder_cards
-        .push(wonder);
+    game.players[player_index].wonder_cards.push(wonder);
 }
 
 pub(crate) fn on_draw_wonder_card() -> Builtin {

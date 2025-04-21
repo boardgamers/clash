@@ -1,5 +1,6 @@
 use crate::ability_initializer::AbilityListeners;
 use crate::action::update_stats;
+use crate::cache::Cache;
 use crate::combat_roll::{COMBAT_DIE_SIDES, CombatDieRoll};
 use crate::consts::ACTIONS;
 use crate::content::effects::PermanentEffect;
@@ -32,7 +33,6 @@ use crate::{
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::vec;
-use crate::cache::Cache;
 
 pub struct Game {
     pub cache: Cache,

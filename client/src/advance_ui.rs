@@ -31,7 +31,7 @@ pub enum AdvanceState {
 fn new_advance_payment(rc: &RenderContext, a: &AdvanceInfo) -> Payment<Advance> {
     rc.new_payment(
         &rc.shown_player
-            .advance_cost(a.advance,rc.game, CostTrigger::WithModifiers)
+            .advance_cost(a.advance, rc.game, CostTrigger::WithModifiers)
             .cost,
         a.advance,
         &a.name,
@@ -162,7 +162,7 @@ fn description(rc: &RenderContext, a: &AdvanceInfo) -> Vec<String> {
     parts.push(format!(
         "Cost: {}",
         rc.shown_player
-            .advance_cost(a.advance,rc.game, CostTrigger::WithModifiers)
+            .advance_cost(a.advance, rc.game, CostTrigger::WithModifiers)
             .cost
     ));
     if let Some(r) = &a.required {
@@ -171,10 +171,7 @@ fn description(rc: &RenderContext, a: &AdvanceInfo) -> Vec<String> {
     if !a.contradicting.is_empty() {
         parts.push(format!(
             "Contradicts: {}",
-            a.contradicting
-                .iter()
-                .map(|a| a.name(rc.game))
-                .join(", ")
+            a.contradicting.iter().map(|a| a.name(rc.game)).join(", ")
         ));
     }
     if let Some(b) = &a.bonus {

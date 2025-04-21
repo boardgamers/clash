@@ -281,8 +281,7 @@ fn envoy() -> Incident {
 
             if let Some(wonder) = draw_wonder_from_pile(game) {
                 game.add_info_log_item(&format!(
-                    "{} is now available to be taken by anyone",
-                    wonder
+                    "{wonder} is now available to be taken by anyone"
                 ));
                 game.permanent_effects
                     .push(PermanentEffect::PublicWonderCard(wonder));
