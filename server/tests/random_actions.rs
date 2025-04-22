@@ -1,7 +1,8 @@
+use crate::common::{GamePath, to_json, write_result};
 use async_std::task;
 use itertools::Itertools;
 use server::action::ActionType;
-use server::ai_actions::{AiActions};
+use server::ai_actions::AiActions;
 use server::game::Game;
 use server::movement::{MoveUnits, MovementAction, move_units_destinations};
 use server::playing_actions::PlayingActionType;
@@ -68,13 +69,28 @@ fn random_actions_iterations(mut rng: Rng) {
             .collect::<Vec<Action>>();
         let action = actions
             .take_random_element(&mut rng)
-            .unwrap_or_else(
-                || {
-                    no_action_available(&game)
-                },
-            );
+            .unwrap_or_else(|| no_action_available(&game));
 
-        game = action::execute_action(game.clone(), action.clone(), player_index)
+        match action::execute_without_undo(game.clone(), action.clone(), player_index) {
+            Ok(g) => {
+                game = g;
+            }
+            Err(e) => {
+                use chrono::Utc;
+                let rfc_format = Utc::now().to_rfc3339();
+                let file = format!("failure{rfc_format}");
+
+                write_result(&to_json(&game), &GamePath::new(".", &file));
+
+                for g in game.log {
+                    for l in g {
+                        println!("{l}");
+                    }
+                }
+                
+                panic!("player {player_index} action {action:?}\nresult stored in {file}.json: {e:?}")
+            }
+        }
     }
 }
 
@@ -112,15 +128,15 @@ pub fn get_movement_actions(
                     d.iter()
                         .filter_map(|route| {
                             ai_actions::try_payment(ai_actions, &route.cost, p).map({
-                            let value = unit_ids.clone();
-                            move|pay| {
-                                Action::Movement(MovementAction::Move(MoveUnits::new(
-                                    value,
-                                    route.destination,
-                                    None,
-                                    pay,
-                                )))
-                            }
+                                let value = unit_ids.clone();
+                                move |pay| {
+                                    Action::Movement(MovementAction::Move(MoveUnits::new(
+                                        value,
+                                        route.destination,
+                                        None,
+                                        pay,
+                                    )))
+                                }
                             })
                         })
                         .collect_vec()

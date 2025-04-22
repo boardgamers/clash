@@ -31,6 +31,7 @@ enumset = { version = "1.1.5" }
 rustc-hash = "2.1.1"
 pyroscope = { version = "0.5.8", optional = true }
 pyroscope_pprofrs = { version = "0.2.8", optional = true }
+chrono = "0.4.40"
 
 [features]
 profiling = ["dep:pyroscope", "dep:pyroscope_pprofrs"]

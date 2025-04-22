@@ -119,7 +119,11 @@ pub fn execute_action(mut game: Game, action: Action, player_index: usize) -> Ga
     game
 }
 
-fn execute_without_undo(
+///
+/// # Errors
+/// 
+/// Returns an error if the action is not valid
+pub fn execute_without_undo(
     mut game: Game,
     action: Action,
     player_index: usize,
