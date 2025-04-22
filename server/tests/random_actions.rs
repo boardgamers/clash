@@ -1,7 +1,7 @@
 use async_std::task;
 use itertools::Itertools;
 use server::action::ActionType;
-use server::ai_actions::{AiActions, get_movement_actions};
+use server::ai_actions::{AiActions};
 use server::game::Game;
 use server::movement::{MoveUnits, MovementAction, move_units_destinations};
 use server::playing_actions::PlayingActionType;
@@ -68,10 +68,21 @@ fn random_actions_iterations(mut rng: Rng) {
             .collect::<Vec<Action>>();
         let action = actions
             .take_random_element(&mut rng)
-            .unwrap_or(Action::Playing(PlayingAction::EndTurn));
+            .unwrap_or_else(
+                || {
+                    no_action_available(&game)
+                },
+            );
 
         game = action::execute_action(game.clone(), action.clone(), player_index)
     }
+}
+
+fn no_action_available(game: &Game) -> Action {
+    if matches!(game.state, GameState::Movement(_)) {
+        return Action::Movement(MovementAction::Stop);
+    }
+    Action::Playing(PlayingAction::EndTurn)
 }
 
 pub fn get_movement_actions(
@@ -100,13 +111,16 @@ pub fn get_movement_actions(
                 .map(|d| {
                     d.iter()
                         .filter_map(|route| {
-                            ai_actions::try_payment(ai_actions, &route.cost, p).map(|pay| {
+                            ai_actions::try_payment(ai_actions, &route.cost, p).map({
+                            let value = unit_ids.clone();
+                            move|pay| {
                                 Action::Movement(MovementAction::Move(MoveUnits::new(
-                                    unit_ids,
+                                    value,
                                     route.destination,
                                     None,
                                     pay,
                                 )))
+                            }
                             })
                         })
                         .collect_vec()
