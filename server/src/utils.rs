@@ -85,6 +85,23 @@ pub fn ordinal_number(value: u32) -> String {
     )
 }
 
+#[must_use]
+pub fn new_average(old_average: f64, new_value: f64, averaged_values: usize) -> f64 {
+    (old_average * averaged_values as f64 + new_value) / (averaged_values + 1) as f64
+}
+
+#[must_use]
+pub fn median(list: &[f64]) -> f64 {
+    let mut sorted_list = list.to_vec();
+    sorted_list.sort_by(f64::total_cmp);
+    let len = sorted_list.len();
+    if len % 2 == 0 {
+        (sorted_list[len / 2 - 1] + sorted_list[len / 2]) / 2.0
+    } else {
+        sorted_list[len / 2]
+    }
+}
+
 fn get_current_time() -> Duration {
     let start = SystemTime::now();
     start.duration_since(UNIX_EPOCH).expect("unix time error")
