@@ -1,14 +1,12 @@
 use async_std::task;
 use itertools::Itertools;
-use server::ai_actions::AiActions;
+use server::ai_actions::{get_movement_actions, AiActions};
 use server::profiling::start_profiling;
-use server::{
-    action::{self, Action},
-    game::GameState,
-    game_setup,
-    playing_actions::PlayingAction,
-    utils::{Rng, Shuffle},
-};
+use server::{action::{self, Action}, ai_actions, game::GameState, game_setup, playing_actions::PlayingAction, utils::{Rng, Shuffle}};
+use server::action::ActionType;
+use server::game::Game;
+use server::movement::{move_units_destinations, MoveUnits, MovementAction};
+use server::playing_actions::PlayingActionType;
 
 mod common;
 
@@ -55,7 +53,7 @@ fn random_actions_iterations(mut rng: Rng) {
         }
         let player_index = game.active_player();
         let mut actions = ai_actions.get_available_actions(&game);
-        actions.extend(get_movement_actions(game));
+        actions.extend(get_movement_actions(&mut ai_actions, &game));
 
         let actions = actions
             .into_iter()
@@ -67,4 +65,55 @@ fn random_actions_iterations(mut rng: Rng) {
 
         game = action::execute_action(game.clone(), action.clone(), player_index)
     }
+}
+
+
+pub fn get_movement_actions(
+    ai_actions: &mut AiActions,
+    game: &Game,
+) -> Vec<(ActionType, Vec<Action>)> {
+    if PlayingActionType::MoveUnits
+        .is_available(game, game.current_player_index)
+        .is_err()
+    {
+        return vec![];
+    }
+
+    let p = game.player(game.current_player_index);
+
+    // always move entire stacks as a simplification
+    let actions = p
+        .units
+        .iter()
+        .chunk_by(|u| u.position)
+        .into_iter()
+        .flat_map(|(pos, units)| {
+            let unit_ids = units.into_iter().map(|u| u.id).collect_vec();
+            let destinations = move_units_destinations(p, game, &unit_ids, pos, None);
+            destinations
+                .map(|d| {
+                    d.iter()
+                        .filter_map(|route| {
+                            ai_actions::try_payment(ai_actions, &route.cost, p).map(|pay| {
+                                Action::Movement(MovementAction::Move(MoveUnits::new(
+                                    unit_ids,
+                                    route.destination,
+                                    None,
+                                    pay,
+                                )))
+                            })
+                        })
+                        .collect_vec()
+                })
+                .unwrap_or_default()
+        })
+        .collect_vec();
+
+    if actions.is_empty() {
+        return vec![];
+    }
+    vec![(ActionType::Playing(PlayingActionType::MoveUnits), actions)]
+
+    // todo embark
+    // || can_embark(game, p, unit)
 }

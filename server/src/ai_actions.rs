@@ -3,14 +3,14 @@ use crate::advance::Advance;
 use crate::card::validate_card_selection;
 use crate::city::{City, MoodState};
 use crate::collect::available_collect_actions;
-use crate::construct::{Construct, available_buildings, new_building_positions};
+use crate::construct::{available_buildings, new_building_positions, Construct};
 use crate::content::custom_actions::CustomEventAction;
 use crate::content::persistent_events::{
-    ChangeGovernmentRequest, EventResponse, HandCardsRequest, MultiRequest, PersistentEventRequest,
-    PersistentEventState, PositionRequest, SelectedStructure, is_selected_structures_valid,
+    is_selected_structures_valid, ChangeGovernmentRequest, EventResponse, HandCardsRequest, MultiRequest,
+    PersistentEventRequest, PersistentEventState, PositionRequest, SelectedStructure,
 };
 use crate::cultural_influence::{
-    InfluenceCultureAttempt, available_influence_actions, available_influence_culture,
+    available_influence_actions, available_influence_culture, InfluenceCultureAttempt,
 };
 use crate::events::EventOrigin;
 use crate::game::Game;
@@ -18,18 +18,17 @@ use crate::happiness::{available_happiness_actions, happiness_cost};
 use crate::payment::PaymentOptions;
 use crate::player::{CostTrigger, Player};
 use crate::playing_actions::{
-    IncreaseHappiness, PlayingAction, PlayingActionType, Recruit, base_and_custom_action,
+    base_and_custom_action, IncreaseHappiness, PlayingAction, PlayingActionType, Recruit,
 };
 use crate::position::Position;
 use crate::recruit::recruit_cost;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
-use crate::status_phase::{ChangeGovernment, ChangeGovernmentType, government_advances};
+use crate::status_phase::{government_advances, ChangeGovernment, ChangeGovernmentType};
 use crate::unit::{UnitType, Units};
 use itertools::Itertools;
 use rustc_hash::FxHashMap;
 use std::vec;
-use crate::movement::{move_units_destinations, MoveUnits, MovementAction};
 //todo
 //nicht nur maximale anzahl rekrutieren
 //bewegung:
@@ -84,56 +83,6 @@ impl AiActions {
             base_actions(self, game)
         }
     }
-
-    fn get_movement_actions(&mut self, game: &Game) -> Vec<(ActionType, Vec<Action>)> {
-        
-    }
-}
-
-fn get_movement_actions(game: &Game) -> Vec<(ActionType, Vec<Action>)> {
-    if PlayingActionType::MoveUnits.is_available(game, game.current_player_index).is_err() {
-        return vec![];
-    }
-
-    //todo
-    let p = game.player(game.current_player_index);
-    
-    // always move entire stacks as a simplification
-    let map = p.units.chunk_by(|u| u.position).map(
-        |chunk| {
-            let unit_ids = chunk.iter().map(|u| u.id).collect_vec();
-            let destinations = move_units_destinations(p, game, &unit_ids, chunk[0].position, None);
-            destinations.ok().map(
-                |d|d.iter().map(
-                    |route| {
-                        let cost = route.cost.clone();
-                        let destination = route.destination;
-                        Action::Movement(MovementAction::Move(MoveUnits::new(
-                                            unit_ids,
-                                            destination,
-                                            None,
-                                            ,
-                                        ))]
-                    }
-                )
-            )
-                
-                .iter().map(
-                |dest| {
-                return vec![Action::Movement(MovementAction::Move(MoveUnits::new(
-                    unit_ids,
-                    dest,
-                    None,
-                    ResourcePile::empty(),
-                ))];
-            }
-        }
-    );
-    
-    // todo embark
-                // || can_embark(game, p, unit)
-    
-    vec![]
 }
 
 impl Default for AiActions {
@@ -196,12 +145,11 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
     if !influence.is_empty() {
         let action_type = prefer_custom_action(influence);
         if let Some(i) = calculate_influence(game, p, &action_type) {
-            actions.push((
-                ActionType::Playing(PlayingActionType::Collect),
-                vec![Action::Playing(PlayingAction::InfluenceCultureAttempt(
+            actions.push((ActionType::Playing(PlayingActionType::Collect), vec![
+                Action::Playing(PlayingAction::InfluenceCultureAttempt(
                     InfluenceCultureAttempt::new(i, action_type),
-                ))],
-            ));
+                )),
+            ]));
         }
     }
 
@@ -314,7 +262,7 @@ fn payment_with_action(
         .expect("expected payment")
 }
 
-fn try_payment(ai_actions: &mut AiActions, o: &PaymentOptions, p: &Player) -> Option<ResourcePile> {
+pub fn try_payment(ai_actions: &mut AiActions, o: &PaymentOptions, p: &Player) -> Option<ResourcePile> {
     let sum = o.default.amount();
 
     let mut max = p.resources.clone();
