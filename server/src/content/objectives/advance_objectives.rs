@@ -10,7 +10,8 @@ fn advance_group_complete(objective: &str, group: &'static str) -> Objective {
 }
 
 fn all_advances_in_group(player: &Player, group: &str, game: &Game) -> bool {
-    game.cache.get_advance_group(group)
+    game.cache
+        .get_advance_group(group)
         .advances
         .iter()
         .all(|a| player.has_advance(a.advance))
