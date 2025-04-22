@@ -17,7 +17,6 @@ use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
 use pathfinding::prelude::astar;
 use serde::{Deserialize, Serialize};
-use crate::player::Player;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub struct InfluenceCultureAttempt {

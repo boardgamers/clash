@@ -800,6 +800,13 @@ pub fn add_unit(player: usize, position: Position, unit_type: UnitType, game: &m
     p.units.push(unit);
     p.next_unit_id += 1;
     reset_collect_within_range_for_all_except(game, position, player);
+    if game.player(player).civilization.is_pirates() {
+        for n in position.neighbors() {
+            if game.map.is_sea(n) {
+                reset_collect_within_range_for_all_except(game, n, player);
+            }
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, PartialEq)]

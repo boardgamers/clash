@@ -41,7 +41,7 @@ description = "Run AI client with profiling"
 run = ["cargo run --release --package client --features profiling --bin local_client -- ai"]
 dir = "client"
 
-[tasks.profile-rendom-actions]
+[tasks.profile-random-actions]
 description = "Run AI random actions test with profiling"
 run = ["cargo test --release --features profiling random_actions"]
 dir = "server"
