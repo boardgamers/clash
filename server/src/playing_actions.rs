@@ -292,8 +292,7 @@ impl PlayingAction {
                     game,
                     player_index,
                     &c.selected_structure,
-                    &c.action_type,
-                );
+                )?;
             }
             ActionCard(a) => play_action_card(game, player_index, a),
             WonderCard(name) => {
@@ -455,3 +454,14 @@ fn any_angry(player: &Player) -> bool {
         .iter()
         .any(|city| city.mood_state == MoodState::Angry)
 }
+
+// None if the action cost has been paid
+pub fn remaining_resources_for_action(game: &Game, action_type: Option<&PlayingActionType>, player: &Player) -> ResourcePile {
+    action_type.map_or_else(
+        || player.resources.clone(),
+        |action_type| {
+            action_type.remaining_resources(player, game)
+        },
+    )
+}
+
