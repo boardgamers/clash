@@ -164,7 +164,7 @@ fn anarchy() -> Incident {
                 .player(player_index)
                 .advances
                 .iter()
-                .filter(|a| a.info().government.is_some())
+                .filter(|a| a.info(game).government.is_some())
                 .collect_vec();
             for a in remove {
                 remove_advance(game, a, player_index);
@@ -196,7 +196,7 @@ pub(crate) fn anarchy_advance() -> Builtin {
             |event| &mut event.advance,
             10,
             |game, player_index, player_name, i| {
-                if i.advance.info().government.is_none() {
+                if i.advance.info(game).government.is_none() {
                     return;
                 }
 

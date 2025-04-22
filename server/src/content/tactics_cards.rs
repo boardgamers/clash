@@ -2,7 +2,6 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{gain_action_card, gain_action_card_from_pile};
 use crate::combat::{Combat, update_combat_strength};
 use crate::combat_listeners::{CombatResult, CombatRoundStart, CombatStrength, kill_combat_units};
-use crate::content::action_cards::get_action_card;
 use crate::content::persistent_events::{PaymentRequest, PositionRequest, UnitsRequest};
 use crate::game::Game;
 use crate::payment::PaymentOptions;
@@ -15,17 +14,6 @@ use crate::unit::set_unit_position;
 use crate::utils::a_or_an;
 use itertools::Itertools;
 use std::vec;
-
-///
-/// # Panics
-/// Panics if action card does not exist
-#[must_use]
-pub fn get_tactics_card(id: u8) -> &'static TacticsCard {
-    get_action_card(id)
-        .tactics_card
-        .as_ref()
-        .unwrap_or_else(|| panic!("tactics card not found for action card {id}"))
-}
 
 pub(crate) type TacticsCardFactory = fn(u8) -> TacticsCard;
 
@@ -338,11 +326,10 @@ pub(crate) fn scout(id: u8) -> TacticsCard {
                 if s.is_active(p, id, TacticsCardTarget::ActivePlayer) {
                     update_combat_strength(game, s.combat.opponent(p), s, |game, _combat, st, _role| {
                         if let Some(tactics_card) = st.tactics_card.take() {
-                            let card = get_action_card(tactics_card);
-                            gain_action_card(game, p, card);
+                            gain_action_card(game, p, tactics_card);
                             game.add_info_log_item(&format!(
                                 "{name} ignores the enemy tactics {} and takes it to their hand using Scout",
-                                card.tactics_card.as_ref().expect("tactics card not found").name
+                                game.cache.get_action_card(tactics_card).tactics_card.as_ref().expect("tactics card not found").name
                             ));
                         } else {
                             game.add_info_log_item(&format!(

@@ -1,5 +1,4 @@
 use crate::construct::Construct;
-use crate::content::action_cards::get_civil_card;
 use crate::cultural_influence::format_cultural_influence_attempt_log_item;
 use crate::player::Player;
 
@@ -131,7 +130,10 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
     let player_name = player.get_name();
     match action {
         PlayingAction::Advance { advance, payment } => {
-            format!("{player_name} paid {payment} to get the {advance} advance")
+            format!(
+                "{player_name} paid {payment} to get the {} advance",
+                advance.name(game)
+            )
         }
         PlayingAction::FoundCity { settler } => format!(
             "{player_name} founded a city at {}",
@@ -156,7 +158,7 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
             )
         }
         PlayingAction::ActionCard(a) => {
-            let card = get_civil_card(*a);
+            let card = game.cache.get_civil_card(*a);
             let pile = &card.action_type.cost;
             let cost = if pile.is_empty() {
                 ""

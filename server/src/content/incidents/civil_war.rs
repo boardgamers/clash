@@ -154,7 +154,7 @@ fn revolution() -> Incident {
         b,
         1,
         "Kill a unit to avoid changing government",
-        |_game, player| can_change_government_for_free(player),
+        |game, player| can_change_government_for_free(player, game),
     );
     b = add_change_government(b, |event| &mut event.incident, false, ResourcePile::empty());
     b.build()
@@ -280,12 +280,9 @@ fn envoy() -> Incident {
                 .gain_resources(ResourcePile::culture_tokens(1) + ResourcePile::ideas(1));
 
             if let Some(wonder) = draw_wonder_from_pile(game) {
-                game.add_info_log_item(&format!(
-                    "{} is now available to be taken by anyone",
-                    wonder.name
-                ));
+                game.add_info_log_item(&format!("{wonder} is now available to be taken by anyone"));
                 game.permanent_effects
-                    .push(PermanentEffect::PublicWonderCard(wonder.name.clone()));
+                    .push(PermanentEffect::PublicWonderCard(wonder));
             }
         },
     )

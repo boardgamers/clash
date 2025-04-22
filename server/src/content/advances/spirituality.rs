@@ -2,7 +2,7 @@ use crate::ability_initializer::{AbilityInitializerSetup, once_per_turn_advance}
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city_pieces::Building::Temple;
-use crate::content::advances::{AdvanceGroup, advance_group_builder, get_group};
+use crate::content::advances::{AdvanceGroup, advance_group_builder};
 use crate::content::persistent_events::ResourceRewardRequest;
 use crate::payment::{PaymentConversion, PaymentOptions};
 use crate::resource::ResourceType;
@@ -87,8 +87,10 @@ fn priesthood() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.advance_cost,
         2,
-        |i, &advance, ()| {
-            if get_group("Science")
+        |i, &advance, game| {
+            if game
+                .cache
+                .get_advance_group("Science")
                 .advances
                 .iter()
                 .any(|a| a.advance == advance)

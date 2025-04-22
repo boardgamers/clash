@@ -15,10 +15,7 @@ use macroquad::math::{Rect, Vec2, vec2};
 use macroquad::prelude::{BEIGE, Color, GREEN, RED, YELLOW, draw_rectangle, draw_rectangle_lines};
 use server::action::Action;
 use server::card::{HandCard, HandCardType, hand_cards, validate_card_selection};
-use server::content::action_cards::{get_action_card, get_civil_card};
-use server::content::objective_cards::get_objective_card;
 use server::content::persistent_events::EventResponse;
-use server::content::wonders::get_wonder;
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::tactics_card::CombatRole;
 
@@ -149,7 +146,7 @@ fn draw_card(
                 )));
             }
             if can_play_card(rc, card) {
-                return Some(play_card(card));
+                return Some(play_card(rc, card));
             }
         }
     }
@@ -164,10 +161,13 @@ fn can_play_card(rc: &RenderContext, card: &HandCard) -> bool {
     }
 }
 
-fn play_card(card: &HandCard) -> StateUpdate {
+fn play_card(rc: &RenderContext, card: &HandCard) -> StateUpdate {
     match card {
         HandCard::ActionCard(a) => StateUpdate::execute_with_confirm(
-            vec![format!("Play Action Card: {}", get_civil_card(*a).name)],
+            vec![format!(
+                "Play Action Card: {}",
+                rc.game.cache.get_civil_card(*a).name
+            )],
             Action::Playing(PlayingAction::ActionCard(*a)),
         ),
         HandCard::Wonder(name) => StateUpdate::execute_with_confirm(
@@ -215,7 +215,7 @@ fn get_card_object(
             "Objective Card",
             vec!["Hidden Objective Card".to_string()],
         ),
-        HandCard::ObjectiveCard(id) => objective_card_object(*id, selection),
+        HandCard::ObjectiveCard(id) => objective_card_object(rc, *id, selection),
         HandCard::Wonder(n) if n.is_empty() => HandCardObject::new(
             card.clone(),
             WONDER_CARD_COLOR,
@@ -223,7 +223,7 @@ fn get_card_object(
             vec!["Hidden Wonder Card".to_string()],
         ),
         HandCard::Wonder(name) => {
-            let w = get_wonder(name);
+            let w = rc.game.cache.get_wonder(name);
             HandCardObject::new(
                 card.clone(),
                 WONDER_CARD_COLOR,
@@ -235,7 +235,7 @@ fn get_card_object(
                         "Required advances: {}",
                         w.required_advances
                             .iter()
-                            .map(std::string::ToString::to_string)
+                            .map(|a| a.name(rc.game))
                             .join(", ")
                     ),
                 ],
@@ -245,7 +245,7 @@ fn get_card_object(
 }
 
 fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
-    let a = get_action_card(id);
+    let a = rc.game.cache.get_action_card(id);
 
     let name = match &a.tactics_card {
         Some(t) => {
@@ -311,8 +311,12 @@ fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
     )
 }
 
-fn objective_card_object(id: u8, selection: Option<&SelectionInfo>) -> HandCardObject {
-    let card = get_objective_card(id);
+fn objective_card_object(
+    rc: &RenderContext,
+    id: u8,
+    selection: Option<&SelectionInfo>,
+) -> HandCardObject {
+    let card = rc.game.cache.get_objective_card(id);
 
     let mut description = vec![];
     for o in &card.objectives {

@@ -5,7 +5,6 @@ pub(crate) mod non_combat;
 pub(crate) mod resource_objectives;
 pub(crate) mod unit_objectives;
 
-use crate::cache;
 use crate::content::objective_cards;
 use crate::objective_card::Objective;
 use itertools::Itertools;
@@ -25,14 +24,4 @@ pub(crate) fn get_all_uncached() -> Vec<Objective> {
         "objective names are not unique"
     );
     all
-}
-
-///
-/// # Panics
-/// Panics if incident does not exist
-#[must_use]
-pub fn get_objective(name: &str) -> &'static Objective {
-    cache::get()
-        .get_objective(name)
-        .expect("objective not found")
 }

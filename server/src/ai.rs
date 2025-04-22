@@ -6,6 +6,7 @@ use num_cpus;
 use tokio::runtime::Runtime;
 
 use crate::ai_actions::AiActions;
+use crate::cache::Cache;
 use crate::{
     action::{self, Action, ActionType},
     ai_missions::ActiveMissions,
@@ -272,7 +273,7 @@ fn monte_carlo_score(
     let mut ai = AiActions::new();
     let new_game = monte_carlo_run(
         &mut ai,
-        Game::from_data(game_data),
+        Game::from_data(game_data, Cache::new()),
         &mut rng,
         players_active_missions,
     );
@@ -500,7 +501,7 @@ fn simulate_game(
 ) -> usize {
     let new_game = monte_carlo_run(
         &mut AiActions::new(),
-        Game::from_data(game),
+        Game::from_data(game, Cache::new()),
         &mut rng,
         players_active_missions,
     );

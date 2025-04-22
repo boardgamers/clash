@@ -1,8 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
 use crate::card::{HandCard, HandCardType, hand_cards};
-use crate::content::action_cards::get_action_card;
-use crate::content::objective_cards::get_objective_card;
 use crate::content::persistent_events::{HandCardsRequest, PersistentEventType, PlayerRequest};
 use crate::content::tactics_cards::TacticsCardFactory;
 use crate::game::Game;
@@ -58,7 +56,7 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                 }
             }
 
-            let secrets = get_swap_secrets(other);
+            let secrets = get_swap_secrets(other, game);
             game.player_mut(player).secrets.extend(secrets);
 
             Some(HandCardsRequest::new(
@@ -185,7 +183,7 @@ fn has_any_card(p: &Player) -> bool {
     !hand_cards(p, &HandCardType::get_all()).is_empty()
 }
 
-fn get_swap_secrets(other: &Player) -> Vec<String> {
+fn get_swap_secrets(other: &Player, game: &Game) -> Vec<String> {
     vec![
         format!(
             "{} has the following action cards: {}",
@@ -194,7 +192,7 @@ fn get_swap_secrets(other: &Player) -> Vec<String> {
                 .action_cards
                 .iter()
                 .map(|id| {
-                    let a = get_action_card(*id);
+                    let a = game.cache.get_action_card(*id);
                     format!(
                         "{}/{}",
                         a.civil_card.name,
@@ -212,7 +210,7 @@ fn get_swap_secrets(other: &Player) -> Vec<String> {
                 .objective_cards
                 .iter()
                 .map(|id| {
-                    let a = get_objective_card(*id);
+                    let a = game.cache.get_objective_card(*id);
                     format!("{}/{}", a.objectives[0].name, a.objectives[1].name)
                 })
                 .join(", ")

@@ -346,8 +346,9 @@ pub(crate) fn conquer_city(
         city.set_mood_state(Angry);
         if attacker_is_human {
             for wonder in &city.pieces.wonders {
-                wonder.listeners.deinit(game, old_player_index);
-                wonder.listeners.init(game, new_player_index);
+                let listeners = game.cache.get_wonder(wonder).listeners.clone();
+                listeners.deinit(game, old_player_index);
+                listeners.init(game, new_player_index);
             }
 
             for (building, owner) in city.pieces.building_owners() {
@@ -499,7 +500,7 @@ pub mod tests {
 
     use crate::action::Action;
 
-    use crate::content::wonders;
+    use crate::cache::Cache;
     use crate::game::GameState;
     use crate::log::{ActionLogAge, ActionLogItem, ActionLogPlayer, ActionLogRound};
     use crate::movement::MovementAction;
@@ -525,6 +526,7 @@ pub mod tests {
         round.players.push(log);
         age.rounds.push(round);
         Game {
+            cache: Cache::new(),
             state: GameState::Playing,
             events: Vec::new(),
             players: Vec::new(),
@@ -567,7 +569,7 @@ pub mod tests {
 
         let position = Position::new(0, 0);
         game.players[old].cities.push(City::new(old, position));
-        construct_wonder(&mut game, wonders::get_wonder("Pyramids"), position, old);
+        construct_wonder(&mut game, "Pyramids", position, old);
         game.players[old].construct(Academy, position, None, true);
         game.players[old].construct(Obelisk, position, None, true);
 

@@ -4,7 +4,6 @@ use crate::advance::gain_advance_without_payment;
 use crate::city::MoodState;
 use crate::city_pieces::Building;
 use crate::construct::{Construct, construct};
-use crate::content::advances;
 use crate::content::advances::{economy, get_governments_uncached};
 use crate::content::incidents::great_builders::{great_architect, great_engineer};
 use crate::content::incidents::great_diplomat::{choose_diplomat_partner, great_diplomat};
@@ -156,15 +155,15 @@ where
             let p = game.player(player_index);
             let choices = groups
                 .iter()
-                .flat_map(|g| &advances::get_group(g.as_ref()).advances)
-                .filter(|a| p.can_advance_free(a.advance))
+                .flat_map(|g| &game.cache.get_advance_group(g.as_ref()).advances)
+                .filter(|a| p.can_advance_free(a.advance, game))
                 .map(|a| a.advance)
                 .collect();
             Some(AdvanceRequest::new(choices))
         },
         |game, s, _| {
             let name = s.choice;
-            game.add_info_log_item(&format!("{} gained {}", s.player_name, name));
+            game.add_info_log_item(&format!("{} gained {}", s.player_name, name.name(game)));
             gain_advance_without_payment(game, name, s.player_index, ResourcePile::empty(), false);
         },
     )

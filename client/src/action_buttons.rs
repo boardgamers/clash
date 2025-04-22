@@ -161,11 +161,11 @@ pub fn base_or_custom_action(
         let origin = &rc.shown_player.custom_actions[&a];
         let dialog = execute(BaseOrCustomDialog {
             action_type: PlayingActionType::Custom(a),
-            title: format!("{title} with {}", origin.name()),
+            title: format!("{title} with {}", origin.name(rc.game)),
         });
 
         StateUpdate::dialog_chooser(
-            &format!("Use special action from {}?", origin.name()),
+            &format!("Use special action from {}?", origin.name(rc.game)),
             Some(dialog),
             base.clone(),
         )

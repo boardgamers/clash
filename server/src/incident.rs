@@ -6,7 +6,6 @@ use crate::ai_collect::reset_collect_within_range_for_all;
 use crate::barbarians::{barbarians_move, barbarians_spawn};
 use crate::card::{HandCard, draw_card_from_pile};
 use crate::city::{MoodState, is_valid_city_terrain};
-use crate::content::incidents;
 use crate::content::incidents::great_persons::GREAT_PERSON_OFFSET;
 use crate::content::persistent_events::{
     HandCardsRequest, PaymentRequest, PersistentEventType, PlayerRequest, PositionRequest,
@@ -28,8 +27,9 @@ use serde::{Deserialize, Serialize};
 pub(crate) const BASE_EFFECT_PRIORITY: i32 = 100;
 
 ///
-/// An incident represents a Game Event that is triggerd for every third advance.
+/// An incident represents a Game Event that is triggered for every third advance.
 /// We use the term incident to differentiate it from the events system to avoid confusion.
+#[derive(Clone)]
 pub struct Incident {
     pub id: u8,
     pub name: String,
@@ -52,20 +52,21 @@ impl Incident {
     }
 
     #[must_use]
-    pub fn description(&self) -> Vec<String> {
+    pub fn description(&self, game: &Game) -> Vec<String> {
         let mut h = vec![];
 
         if matches!(self.base_effect, IncidentBaseEffect::None) {
             h.push(self.base_effect.to_string());
         }
         if let Some(p) = &self.protection_advance {
-            h.push(format!("Protection advance: {p}"));
+            h.push(format!("Protection advance: {}", p.name(game)));
         }
         h.push(self.description.clone());
         h
     }
 }
 
+#[derive(Clone)]
 pub enum IncidentBaseEffect {
     None,
     BarbariansSpawn,
@@ -565,38 +566,36 @@ impl AbilityInitializerSetup for IncidentBuilder {
 }
 
 pub(crate) fn on_trigger_incident(game: &mut Game, mut info: IncidentInfo) {
-    let incident = incidents::get_incident(
-        draw_card_from_pile(
-            game,
-            "Events",
-            true,
-            |g| &mut g.incidents_left,
-            || incidents::get_all().iter().map(|i| i.id).collect_vec(),
-            |p| {
-                p.action_cards
-                    .iter()
-                    .filter_map(|a| {
-                        if *a >= GREAT_PERSON_OFFSET {
-                            Some(a - GREAT_PERSON_OFFSET)
-                        } else {
-                            None
-                        }
-                    })
-                    .collect()
-            },
-        )
-        .expect("incident should exist"),
-    );
+    let incident_id = draw_card_from_pile(
+        game,
+        "Events",
+        true,
+        |g| &mut g.incidents_left,
+        |g| g.cache.get_incidents().iter().map(|i| i.id).collect_vec(),
+        |p| {
+            p.action_cards
+                .iter()
+                .filter_map(|a| {
+                    if *a >= GREAT_PERSON_OFFSET {
+                        Some(a - GREAT_PERSON_OFFSET)
+                    } else {
+                        None
+                    }
+                })
+                .collect()
+        },
+    )
+    .expect("incident should exist");
 
     loop {
         let log: Option<String> = play_base_effect(&info).then_some(format!(
             "A new game event has been triggered: {}",
-            incident.name
+            game.cache.get_incident(incident_id).name
         ));
         info = match game.trigger_persistent_event_with_listener(
             &game.human_players(info.active_player),
             |events| &mut events.incident,
-            &incident.listeners,
+            &game.cache.get_incident(incident_id).listeners.clone(),
             info,
             PersistentEventType::Incident,
             log.as_deref(),

@@ -1,8 +1,10 @@
 #![allow(clippy::pedantic)]
 
+use crate::cache::Cache;
 use crate::{game::Game, game_api};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
+
 extern crate console_error_panic_hook;
 
 #[derive(Serialize, Deserialize)]
@@ -12,7 +14,10 @@ pub struct PlayerMetaData {
 
 fn get_game(data: JsValue) -> Game {
     console_error_panic_hook::set_once();
-    Game::from_data(serde_wasm_bindgen::from_value(data).expect("game should be of type game data"))
+    Game::from_data(
+        serde_wasm_bindgen::from_value(data).expect("game should be of type game data"),
+        Cache::new(),
+    )
 }
 
 fn from_game(game: Game) -> JsValue {

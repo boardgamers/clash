@@ -1,6 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::combat_stats::CombatStats;
-use crate::content::advances;
 use crate::content::advances::trade_routes::find_trade_route_for_unit;
 use crate::game::Game;
 use crate::log::current_player_turn_log;
@@ -174,7 +173,7 @@ pub(crate) fn bold() -> Objective {
             let o = s.opponent(player);
             let fewer_fighters =
                 s.player(player).fighters(b).amount() < o.fighters(b).amount();
-            let fewer_warfare = warfare_advances(game.player(player)) < warfare_advances(game.player(o.player));
+            let fewer_warfare = warfare_advances(game.player(player), game) < warfare_advances(game.player(o.player), game);
             if (fewer_fighters && s.is_winner(player)) || fewer_warfare {
                 objective_is_ready(game.player_mut(player), name);
             }
@@ -183,8 +182,9 @@ pub(crate) fn bold() -> Objective {
     .build()
 }
 
-fn warfare_advances(player: &Player) -> usize {
-    advances::get_group("Warfare")
+fn warfare_advances(player: &Player, game: &Game) -> usize {
+    game.cache
+        .get_advance_group("Warfare")
         .advances
         .iter()
         .filter(|a| player.has_advance(a.advance))

@@ -2,7 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo, gain_advance_without_payment};
 use crate::city_pieces::Building::Temple;
 use crate::consts::STACK_LIMIT;
-use crate::content::advances::{AdvanceGroup, advance_group_builder, get_group};
+use crate::content::advances::{AdvanceGroup, advance_group_builder};
 use crate::content::persistent_events::{AdvanceRequest, PositionRequest};
 use crate::player::{Player, add_unit};
 use crate::position::Position;
@@ -43,10 +43,12 @@ fn dogma() -> AdvanceBuilder {
         |game, player_index, building| {
             if matches!(building, Temple) {
                 let player = game.player(player_index);
-                let choices: Vec<Advance> = get_group("Theocracy")
+                let choices: Vec<Advance> = game
+                    .cache
+                    .get_advance_group("Theocracy")
                     .advances
                     .iter()
-                    .filter(|a| player.can_advance_free(a.advance))
+                    .filter(|a| player.can_advance_free(a.advance, game))
                     .map(|a| a.advance)
                     .collect();
                 if choices.is_empty() {
@@ -64,7 +66,8 @@ fn dogma() -> AdvanceBuilder {
             };
             game.add_info_log_item(&format!(
                 "{} {verb} {} as a reward for constructing a Temple",
-                c.player_name, c.choice
+                c.player_name,
+                c.choice.name(game)
             ));
             gain_advance_without_payment(
                 game,

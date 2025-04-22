@@ -169,9 +169,11 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
         ActiveDialog::PaymentRequest(c) => custom_phase_ui::custom_phase_payment_dialog(rc, c),
         ActiveDialog::PlayerRequest(r) => custom_phase_ui::player_request_dialog(rc, r),
         ActiveDialog::ResourceRewardRequest(p) => custom_phase_ui::payment_reward_dialog(rc, p),
-        ActiveDialog::AdvanceRequest(r) => {
-            custom_phase_ui::advance_reward_dialog(rc, r, &custom_phase_event_origin(rc).name())
-        }
+        ActiveDialog::AdvanceRequest(r) => custom_phase_ui::advance_reward_dialog(
+            rc,
+            r,
+            &custom_phase_event_origin(rc).name(rc.game),
+        ),
         ActiveDialog::UnitTypeRequest(r) => custom_phase_ui::unit_request_dialog(rc, r),
         ActiveDialog::UnitsRequest(r) => custom_phase_ui::select_units_dialog(rc, r),
         ActiveDialog::StructuresRequest(d, r) => {

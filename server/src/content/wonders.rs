@@ -2,13 +2,8 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Advance;
 use crate::map::Terrain::Fertile;
 use crate::payment::{PaymentConversionType, PaymentOptions};
-use crate::{cache, resource_pile::ResourcePile, wonder::Wonder};
+use crate::{resource_pile::ResourcePile, wonder::Wonder};
 use std::collections::HashSet;
-
-#[must_use]
-pub fn get_all() -> &'static Vec<Wonder> {
-    cache::get().get_wonders()
-}
 
 #[must_use]
 pub fn get_all_uncached() -> Vec<Wonder> {
@@ -44,14 +39,4 @@ pub fn get_all_uncached() -> Vec<Wonder> {
             )
         .build(),
     ]
-}
-
-///
-/// # Panics
-/// Panics if wonder does not exist
-#[must_use]
-pub fn get_wonder(name: &str) -> &'static Wonder {
-    cache::get()
-        .get_wonder(name)
-        .unwrap_or_else(|| panic!("wonder not found: {name}"))
 }
