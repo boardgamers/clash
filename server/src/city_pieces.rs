@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use Building::*;
 use num::Zero;
+use crate::city::City;
 
 #[derive(Default)]
 pub struct CityPieces {
@@ -88,18 +89,6 @@ impl CityPieces {
         }
     }
 
-    pub fn remove_building(&mut self, building: Building) {
-        match building {
-            Academy => self.academy = None,
-            Market => self.market = None,
-            Obelisk => self.obelisk = None,
-            Observatory => self.observatory = None,
-            Fortress => self.fortress = None,
-            Port => self.port = None,
-            Temple => self.temple = None,
-        }
-    }
-
     #[must_use]
     pub fn amount(&self) -> usize {
         self.buildings(None).len() + self.wonders.len()
@@ -145,6 +134,20 @@ impl CityPieces {
             })
             .collect()
     }
+}
+
+pub fn remove_building(city: &mut City, building: Building) {
+    let pieces = &mut city.pieces;
+    match building {
+        Academy => pieces.academy = None,
+        Market => pieces.market = None,
+        Obelisk => pieces.obelisk = None,
+        Observatory => pieces.observatory = None,
+        Fortress => pieces.fortress = None,
+        Port => pieces.port = None,
+        Temple => pieces.temple = None,
+    }
+    city.possible_collections.clear();
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Default)]

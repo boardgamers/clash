@@ -71,10 +71,8 @@ fn random_actions_iterations(mut rng: Rng) {
             .take_random_element(&mut rng)
             .unwrap_or_else(|| no_action_available(&game));
 
-        match action::execute_without_undo(game.clone(), action.clone(), player_index) {
-            Ok(g) => {
-                game = g;
-            }
+        match action::execute_without_undo(&mut game, action.clone(), player_index) {
+            Ok(_) => {}
             Err(e) => {
                 use chrono::Utc;
                 let rfc_format = Utc::now().to_rfc3339();
@@ -87,8 +85,10 @@ fn random_actions_iterations(mut rng: Rng) {
                         println!("{l}");
                     }
                 }
-                
-                panic!("player {player_index} action {action:?}\nresult stored in {file}.json: {e:?}")
+
+                panic!(
+                    "player {player_index} action {action:?}\nresult stored in {file}.json: {e:?}"
+                )
             }
         }
     }

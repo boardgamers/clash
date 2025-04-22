@@ -1,6 +1,6 @@
 use crate::ability_initializer::SelectedChoice;
 use crate::city::{City, MoodState};
-use crate::city_pieces::Building;
+use crate::city_pieces::{Building, remove_building};
 use crate::consts::WONDER_VICTORY_POINTS;
 use crate::content::persistent_events::{
     PositionRequest, SelectedStructure, Structure, StructuresRequest, is_selected_structures_valid,
@@ -197,10 +197,7 @@ fn destroy_building(game: &mut Game, b: Building, position: Position) {
     let o = game.player_mut(owner);
     o.event_victory_points += 2.0;
     o.destroyed_structures.add_building(b);
-    game.player_mut(city_owner)
-        .get_city_mut(position)
-        .pieces
-        .remove_building(b);
+    remove_building(game.player_mut(city_owner).get_city_mut(position), b);
     game.add_info_log_item(&format!(
         "{} gained 2 points for the {:?} at {}",
         game.player_name(owner),
@@ -216,10 +213,9 @@ fn destroy_wonder(game: &mut Game, position: Position, name: &str) {
 
     let a = WONDER_VICTORY_POINTS / 2.0;
     let p = game.player_mut(owner);
-    p.get_city_mut(position)
-        .pieces
-        .wonders
-        .retain(|w| w != name);
+    let city = p.get_city_mut(position);
+    city.pieces.wonders.retain(|w| w != name);
+    city.possible_collections.clear();
     p.event_victory_points += a;
     game.add_info_log_item(&format!(
         "{} gained {} points for the {} at {}",
