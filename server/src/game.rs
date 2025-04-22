@@ -1,5 +1,6 @@
 use crate::ability_initializer::AbilityListeners;
 use crate::action::update_stats;
+use crate::cache::Cache;
 use crate::combat_roll::{COMBAT_DIE_SIDES, CombatDieRoll};
 use crate::consts::ACTIONS;
 use crate::content::effects::PermanentEffect;
@@ -34,6 +35,7 @@ use serde::{Deserialize, Serialize};
 use std::vec;
 
 pub struct Game {
+    pub cache: Cache,
     pub state: GameState,
     pub events: Vec<PersistentEventState>,
     // in turn order starting from starting_player_index and wrapping around
@@ -65,7 +67,7 @@ pub struct Game {
 
 impl Clone for Game {
     fn clone(&self) -> Self {
-        let mut game = Self::from_data(self.cloned_data());
+        let mut game = Self::from_data(self.cloned_data(), self.cache.clone());
         game.supports_undo = self.supports_undo;
         game
     }
@@ -84,8 +86,9 @@ impl Game {
     ///
     /// Panics if any wonder does not exist
     #[must_use]
-    pub fn from_data(data: GameData) -> Self {
+    pub fn from_data(data: GameData, cache: Cache) -> Self {
         let mut game = Self {
+            cache,
             state: data.state,
             players: Vec::new(),
             map: Map::from_data(data.map),

@@ -86,7 +86,7 @@ fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Optio
     let p = rc.shown_player;
     let actions = available_happiness_actions_for_city(rc.game, p.index, city.position)
         .into_iter()
-        .filter(|a| increase_happiness_cost(p, city, 1, a).is_some())
+        .filter(|a| increase_happiness_cost(rc, city, 1, a).is_some())
         .collect_vec();
 
     if actions.is_empty() {
@@ -418,8 +418,7 @@ fn draw_wonders(
         draw_circle(p.x, p.y, 18.0, rc.player_color(owner));
         let size = 20.;
         if let Some(h) = highlighted.iter().find(|s| {
-            s.position == city.position
-                && matches!(&s.structure, Structure::Wonder(n) if n == &w.name)
+            s.position == city.position && matches!(&s.structure, Structure::Wonder(n) if n == w)
         }) {
             if let Some(u) = draw_selected_state(rc, p, 18., h) {
                 return Err(u);
@@ -427,8 +426,8 @@ fn draw_wonders(
         } else {
             draw_scaled_icon(
                 rc,
-                &rc.assets().wonders[&w.name],
-                &w.name,
+                &rc.assets().wonders[w],
+                w,
                 p + vec2(-size / 2., -size / 2.),
                 size,
             );

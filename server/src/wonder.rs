@@ -6,7 +6,6 @@ use crate::construct::can_construct_anything;
 use crate::content::builtin::Builtin;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{PaymentRequest, PersistentEventType, PositionRequest};
-use crate::content::wonders::get_wonder;
 use crate::events::EventOrigin;
 use crate::log::current_action_log_item;
 use crate::payment::PaymentOptions;
@@ -15,9 +14,11 @@ use crate::utils::remove_element;
 use crate::{ability_initializer::AbilityInitializerSetup, game::Game, position::Position};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 
-type PlacementChecker = Box<dyn Fn(Position, &Game) -> bool + Sync + Send>;
+type PlacementChecker = Arc<dyn Fn(Position, &Game) -> bool + Sync + Send>;
 
+#[derive(Clone)]
 pub struct Wonder {
     pub name: String,
     pub description: String,
@@ -102,22 +103,19 @@ pub(crate) fn draw_wonder_card(game: &mut Game, player_index: usize) {
     );
 }
 
-pub(crate) fn draw_wonder_from_pile(game: &mut Game) -> Option<&'static Wonder> {
+pub(crate) fn draw_wonder_from_pile(game: &mut Game) -> Option<String> {
     draw_card_from_pile(
         game,
         "Wonders",
         false,
         |game| &mut game.wonders_left,
-        Vec::new,
+        |_| Vec::new(),
         |_| vec![], // can't reshuffle wonders
     )
-    .map(|n| get_wonder(&n))
 }
 
-fn gain_wonder(game: &mut Game, player_index: usize, wonder: &Wonder) {
-    game.players[player_index]
-        .wonder_cards
-        .push(wonder.name.clone());
+fn gain_wonder(game: &mut Game, player_index: usize, wonder: String) {
+    game.players[player_index].wonder_cards.push(wonder);
 }
 
 pub(crate) fn on_draw_wonder_card() -> Builtin {
@@ -145,7 +143,7 @@ pub(crate) fn on_draw_wonder_card() -> Builtin {
                         "{} drew the public wonder card {}",
                         s.player_name, name
                     ));
-                    gain_wonder(game, s.player_index, get_wonder(&name));
+                    gain_wonder(game, s.player_index, name);
                     game.permanent_effects
                         .retain(|e| !matches!(e, PermanentEffect::PublicWonderCard(_)));
                 } else {
@@ -214,7 +212,7 @@ pub(crate) fn can_construct_wonder(
     if !discount.ignore_required_advances {
         for advance in &wonder.required_advances {
             if !player.has_advance(*advance) {
-                return Err(format!("Advance missing: {advance}"));
+                return Err(format!("Advance missing: {}", advance.name(game)));
             }
         }
     }
@@ -298,7 +296,7 @@ pub(crate) fn build_wonder() -> Builtin {
             move |game, player_index, i| {
                 let p = game.player(player_index);
                 let city = p.get_city(i.selected_position.expect("city not selected"));
-                let wonder = get_wonder(&i.name);
+                let wonder = game.cache.get_wonder(&i.name);
                 let cost = can_construct_wonder(city, wonder, p, game, &i.discount)
                     .expect("can't construct wonder");
                 Some(vec![PaymentRequest::new(
@@ -317,7 +315,7 @@ pub(crate) fn build_wonder() -> Builtin {
                 ));
                 current_action_log_item(game).wonder_built = Some(name.clone());
                 remove_element(&mut game.player_mut(s.player_index).wonder_cards, name);
-                construct_wonder(game, get_wonder(name), pos, s.player_index);
+                construct_wonder(game, name, pos, s.player_index);
             },
         )
         .build()
@@ -332,7 +330,7 @@ pub(crate) fn cities_for_wonder(
     p.cities
         .iter()
         .filter_map(|c| {
-            can_construct_wonder(c, get_wonder(name), p, game, discount)
+            can_construct_wonder(c, game.cache.get_wonder(name), p, game, discount)
                 .ok()
                 .map(|_| c.position)
         })
@@ -341,16 +339,17 @@ pub(crate) fn cities_for_wonder(
 
 pub(crate) fn construct_wonder(
     game: &mut Game,
-    wonder: &'static Wonder,
+    name: &str,
     city_position: Position,
     player_index: usize,
 ) {
-    wonder.listeners.one_time_init(game, player_index);
+    let listeners = game.cache.get_wonder(name).listeners.clone();
+    listeners.one_time_init(game, player_index);
     let player = &mut game.players[player_index];
-    player.wonders_build.push(wonder.name.clone());
+    player.wonders_build.push(name.to_string());
     player
         .get_city_mut(city_position)
         .pieces
         .wonders
-        .push(wonder);
+        .push(name.to_string());
 }

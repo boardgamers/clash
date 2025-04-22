@@ -27,7 +27,6 @@ use crate::{
     resource_pile::ResourcePile,
     unit::{Unit, Units},
     utils,
-    wonder::Wonder,
 };
 use enumset::EnumSet;
 use itertools::Itertools;
@@ -125,7 +124,8 @@ impl Player {
         let mut cities = mem::take(&mut game.players[player_index].cities);
         for city in &mut cities {
             for wonder in &city.pieces.wonders {
-                wonder.listeners.init(game, player_index);
+                let listeners = game.cache.get_wonder(wonder).listeners.clone();
+                listeners.init(game, player_index);
             }
         }
         game.players[player_index].cities = cities;
@@ -160,7 +160,7 @@ impl Player {
                 .into_iter()
                 .map(|d| City::from_data(d, data.id))
                 .collect(),
-            destroyed_structures: DestroyedStructures::from_data(&data.destroyed_structures),
+            destroyed_structures: DestroyedStructures::from_data(data.destroyed_structures),
             units,
             civilization: civilizations::get_civilization(&data.civilization)
                 .expect("player data should have a valid civilization"),
@@ -215,7 +215,7 @@ impl Player {
             advances: self
                 .advances
                 .into_iter()
-                .sorted_by_key(ToString::to_string)
+                .sorted_by_key(Advance::id)
                 .collect(),
             unlocked_special_advance: self.unlocked_special_advances,
             wonders_build: self.wonders_build,
@@ -253,11 +253,7 @@ impl Player {
             civilization: self.civilization.name.clone(),
             active_leader: self.active_leader.clone(),
             available_leaders: self.available_leaders.clone(),
-            advances: self
-                .advances
-                .iter()
-                .sorted_by_key(ToString::to_string)
-                .collect(),
+            advances: self.advances.iter().sorted_by_key(Advance::id).collect(),
             unlocked_special_advance: self.unlocked_special_advances.clone(),
             wonders_build: self.wonders_build.clone(),
             incident_tokens: self.incident_tokens,
@@ -390,10 +386,10 @@ impl Player {
     ///
     /// Panics if the player has advances which don't exist
     #[must_use]
-    pub fn government(&self) -> Option<String> {
+    pub fn government(&self, game: &Game) -> Option<String> {
         self.advances
             .iter()
-            .find_map(|advance| advance.info().government.clone())
+            .find_map(|advance| advance.info(game).government.clone())
     }
 
     pub fn gain_resources(&mut self, resources: ResourcePile) {
@@ -443,11 +439,11 @@ impl Player {
     }
 
     #[must_use]
-    pub fn can_advance_in_change_government(&self, advance: Advance) -> bool {
+    pub fn can_advance_in_change_government(&self, advance: Advance, game: &Game) -> bool {
         if self.has_advance(advance) {
             return false;
         }
-        if let Some(required_advance) = advance.info().required {
+        if let Some(required_advance) = advance.info(game).required {
             if !self.has_advance(required_advance) {
                 return false;
             }
@@ -456,23 +452,26 @@ impl Player {
     }
 
     #[must_use]
-    pub fn can_advance_free(&self, advance: Advance) -> bool {
+    pub fn can_advance_free(&self, advance: Advance, game: &Game) -> bool {
         if self.has_advance(advance) {
             return false;
         }
 
-        for contradicting_advance in &advance.info().contradicting {
+        for contradicting_advance in &advance.info(game).contradicting {
             if self.has_advance(*contradicting_advance) {
                 return false;
             }
         }
-        self.can_advance_in_change_government(advance)
+        self.can_advance_in_change_government(advance, game)
     }
 
     #[must_use]
-    pub fn can_advance(&self, advance: Advance) -> bool {
-        self.can_afford(&self.advance_cost(advance, CostTrigger::NoModifiers).cost)
-            && self.can_advance_free(advance)
+    pub fn can_advance(&self, advance: Advance, game: &Game) -> bool {
+        self.can_afford(
+            &self
+                .advance_cost(advance, game, CostTrigger::NoModifiers)
+                .cost,
+        ) && self.can_advance_free(advance, game)
     }
 
     #[must_use]
@@ -572,8 +571,8 @@ impl Player {
         }
     }
 
-    pub fn remove_wonder(&mut self, wonder: &Wonder) {
-        utils::remove_element(&mut self.wonders_build, &wonder.name);
+    pub fn remove_wonder(&mut self, wonder: &String) {
+        utils::remove_element(&mut self.wonders_build, wonder);
     }
 
     pub fn strip_secret(&mut self) {
@@ -624,7 +623,7 @@ impl Player {
     }
 
     #[must_use]
-    pub fn advance_cost(&self, advance: Advance, execute: CostTrigger) -> CostInfo {
+    pub fn advance_cost(&self, advance: Advance, game: &Game, execute: CostTrigger) -> CostInfo {
         self.trigger_cost_event(
             |e| &e.advance_cost,
             &PaymentOptions::sum(
@@ -632,7 +631,7 @@ impl Player {
                 &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
             ),
             &advance,
-            &(),
+            game,
             execute,
         )
     }

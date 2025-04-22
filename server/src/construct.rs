@@ -1,4 +1,3 @@
-use crate::cache;
 use crate::city::{City, MoodState};
 use crate::city_pieces::Building;
 use crate::consts::MAX_CITY_PIECES;
@@ -50,9 +49,9 @@ pub fn can_construct(
     game: &Game,
     trigger: CostTrigger,
 ) -> Result<CostInfo, String> {
-    let advance = cache::get().get_building_advance(building);
+    let advance = game.cache.get_building_advance(building);
     if !player.has_advance(advance) {
-        return Err(format!("Missing advance: {advance}"));
+        return Err(format!("Missing advance: {}", advance.name(game)));
     }
 
     can_construct_anything(city, player)?;

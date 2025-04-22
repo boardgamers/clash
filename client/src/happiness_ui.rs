@@ -7,7 +7,7 @@ use server::action::Action;
 use server::city::{City, MoodState};
 use server::game::Game;
 use server::happiness::{available_happiness_actions, happiness_cost};
-use server::player::{CostTrigger, Player};
+use server::player::CostTrigger;
 use server::player_events::CostInfo;
 use server::playing_actions::{IncreaseHappiness, PlayingAction, PlayingActionType};
 use server::position::Position;
@@ -20,26 +20,28 @@ pub struct IncreaseHappinessConfig {
 }
 
 impl IncreaseHappinessConfig {
-    pub fn new(p: &Player, custom: BaseOrCustomDialog) -> IncreaseHappinessConfig {
+    pub fn new(rc: &RenderContext, custom: BaseOrCustomDialog) -> IncreaseHappinessConfig {
+        let p = rc.shown_player;
         let steps = p.cities.iter().map(|c| (c.position, 0)).collect();
         IncreaseHappinessConfig {
             steps,
-            payment: Self::happiness_payment(p, 0, &custom)
+            payment: Self::happiness_payment(rc, 0, &custom)
                 .expect("Happiness payment should be available"),
             custom,
         }
     }
 
     fn happiness_payment(
-        p: &Player,
+        rc: &RenderContext,
         new_steps: u8,
         custom: &BaseOrCustomDialog,
     ) -> Option<Payment<String>> {
+        let p = rc.shown_player;
         let c = happiness_cost(p, new_steps, CostTrigger::WithModifiers).cost;
-        c.can_afford(&custom.action_type.remaining_resources(p))
+        c.can_afford(&custom.action_type.remaining_resources(p, rc.game))
             .then_some(Payment::new(
                 &c,
-                &custom.action_type.remaining_resources(p),
+                &custom.action_type.remaining_resources(p, rc.game),
                 "Increase happiness".to_string(),
                 "Increase happiness",
                 false,
@@ -53,7 +55,7 @@ pub fn open_increase_happiness_dialog(
     init: impl Fn(IncreaseHappinessConfig) -> IncreaseHappinessConfig,
 ) -> StateUpdate {
     base_or_custom_action(rc, actions, "Increase happiness", |custom| {
-        ActiveDialog::IncreaseHappiness(init(IncreaseHappinessConfig::new(rc.shown_player, custom)))
+        ActiveDialog::IncreaseHappiness(init(IncreaseHappinessConfig::new(rc, custom)))
     })
 }
 
@@ -103,16 +105,13 @@ pub fn add_increase_happiness(
         .map(|(p, steps)| rc.shown_player.get_city(*p).size() as u8 * steps)
         .sum::<u8>();
 
-    IncreaseHappinessConfig::happiness_payment(
-        rc.shown_player,
-        step_sum,
-        &increase_happiness.custom,
+    IncreaseHappinessConfig::happiness_payment(rc, step_sum, &increase_happiness.custom).map(
+        |payment| {
+            increase_happiness.payment = payment;
+            increase_happiness.steps = new_steps;
+            increase_happiness
+        },
     )
-    .map(|payment| {
-        increase_happiness.payment = payment;
-        increase_happiness.steps = new_steps;
-        increase_happiness
-    })
 }
 
 fn increase_happiness_steps(
@@ -136,25 +135,25 @@ fn increase_happiness_new_steps(
     new_steps: u8,
     action_type: &PlayingActionType,
 ) -> Option<u8> {
-    increase_happiness_cost(rc.shown_player, city, new_steps, action_type).map(|_| new_steps)
+    increase_happiness_cost(rc, city, new_steps, action_type).map(|_| new_steps)
 }
 
 #[must_use]
 pub fn increase_happiness_cost(
-    player: &Player,
+    rc: &RenderContext,
     city: &City,
     steps: u8,
     action_type: &PlayingActionType,
 ) -> Option<CostInfo> {
     let total_cost = happiness_cost(
-        player,
+        rc.shown_player,
         steps * city.size() as u8,
         CostTrigger::WithModifiers,
     );
     let max_steps = 2 - city.mood_state.clone() as u8;
     (total_cost
         .cost
-        .can_afford(&action_type.remaining_resources(player))
+        .can_afford(&action_type.remaining_resources(rc.shown_player, rc.game))
         && steps <= max_steps)
         .then_some(total_cost)
 }

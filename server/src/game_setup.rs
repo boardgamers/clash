@@ -1,9 +1,10 @@
 use crate::action::update_stats;
 use crate::action_card::gain_action_card_from_pile;
 use crate::advance::Advance;
+use crate::cache::Cache;
 use crate::consts::{ACTIONS, NON_HUMAN_PLAYERS};
 use crate::content::civilizations::{BARBARIANS, PIRATES};
-use crate::content::{action_cards, builtin, civilizations, incidents, objective_cards, wonders};
+use crate::content::{builtin, civilizations};
 use crate::game::{Game, GameState};
 use crate::map::Map;
 use crate::objective_card::gain_objective_card_from_pile;
@@ -21,22 +22,8 @@ use std::collections::HashMap;
 /// Panics only if there is an internal bug
 #[must_use]
 pub fn setup_game(player_amount: usize, seed: String, setup: bool) -> Game {
-    let seed_length = seed.len();
-    let seed = if seed_length < 32 {
-        seed + &" ".repeat(32 - seed_length)
-    } else {
-        String::from(&seed[..32])
-    };
-    let seed: &[u8] = seed.as_bytes();
-    let mut buffer = [0u8; 16];
-    buffer[..].copy_from_slice(&seed[..16]);
-    let seed1 = u128::from_be_bytes(buffer);
-    let mut buffer = [0u8; 16];
-    buffer[..].copy_from_slice(&seed[16..]);
-    let seed2 = u128::from_be_bytes(buffer);
-    let seed = seed1 ^ seed2;
-    let mut rng = Rng::from_seed(seed);
-
+    let mut rng = init_rng(seed);
+    let cache = Cache::new();
     let mut players = init_human_players(player_amount, &mut rng);
 
     let starting_player = rng.range(0, players.len());
@@ -56,71 +43,32 @@ pub fn setup_game(player_amount: usize, seed: String, setup: bool) -> Game {
         Map::new(HashMap::new())
     };
 
-    let wonders_left = wonders::get_all()
+    let wonders_left = cache
+        .get_wonders()
         .iter()
         .map(|w| w.name.clone())
         .collect_vec()
         .shuffled(&mut rng);
-    let action_cards_left = action_cards::get_all()
+    let action_cards_left = cache
+        .get_action_cards()
         .iter()
         .map(|a| a.id)
         .collect_vec()
         .shuffled(&mut rng);
-    let objective_cards_left = objective_cards::get_all()
+    let objective_cards_left = cache
+        .get_objective_cards()
         .iter()
         .map(|a| a.id)
         .collect_vec()
         .shuffled(&mut rng);
-    let incidents_left = incidents::get_all()
+    let incidents_left = cache
+        .get_incidents()
         .iter()
         .map(|i| i.id)
         .collect_vec()
         .shuffled(&mut rng);
-    let mut game = new_game(
-        rng,
-        players,
-        starting_player,
-        map,
-        wonders_left,
-        action_cards_left,
-        objective_cards_left,
-        incidents_left,
-    );
-    for i in 0..game.players.len() {
-        builtin::init_player(&mut game, i);
-    }
-
-    for player_index in 0..player_amount {
-        let p = game.player(player_index);
-        game.add_info_log_group(format!(
-            "{} is playing as {}",
-            p.get_name(),
-            p.civilization.name
-        ));
-        gain_action_card_from_pile(&mut game, player_index);
-        gain_objective_card_from_pile(&mut game, player_index);
-        let p = game.player(player_index);
-        if setup {
-            add_unit(p.index, p.cities[0].position, UnitType::Settler, &mut game);
-        }
-    }
-
-    update_stats(&mut game);
-    game.next_age();
-    game
-}
-
-fn new_game(
-    rng: Rng,
-    players: Vec<Player>,
-    starting_player: usize,
-    map: Map,
-    wonders_left: Vec<String>,
-    action_cards_left: Vec<u8>,
-    objective_cards_left: Vec<u8>,
-    incidents_left: Vec<u8>,
-) -> Game {
-    Game {
+    let mut game = Game {
+        cache,
         state: GameState::Playing,
         events: Vec::new(),
         players,
@@ -149,7 +97,47 @@ fn new_game(
         objective_cards_left,
         incidents_left,
         permanent_effects: Vec::new(),
+    };
+    for i in 0..game.players.len() {
+        builtin::init_player(&mut game, i);
     }
+
+    for player_index in 0..player_amount {
+        let p = game.player(player_index);
+        game.add_info_log_group(format!(
+            "{} is playing as {}",
+            p.get_name(),
+            p.civilization.name
+        ));
+        gain_action_card_from_pile(&mut game, player_index);
+        gain_objective_card_from_pile(&mut game, player_index);
+        let p = game.player(player_index);
+        if setup {
+            add_unit(p.index, p.cities[0].position, UnitType::Settler, &mut game);
+        }
+    }
+
+    update_stats(&mut game);
+    game.next_age();
+    game
+}
+
+fn init_rng(seed: String) -> Rng {
+    let seed_length = seed.len();
+    let seed = if seed_length < 32 {
+        seed + &" ".repeat(32 - seed_length)
+    } else {
+        String::from(&seed[..32])
+    };
+    let seed: &[u8] = seed.as_bytes();
+    let mut buffer = [0u8; 16];
+    buffer[..].copy_from_slice(&seed[..16]);
+    let seed1 = u128::from_be_bytes(buffer);
+    let mut buffer = [0u8; 16];
+    buffer[..].copy_from_slice(&seed[16..]);
+    let seed2 = u128::from_be_bytes(buffer);
+    let seed = seed1 ^ seed2;
+    Rng::from_seed(seed)
 }
 
 fn init_human_players(player_amount: usize, rng: &mut Rng) -> Vec<Player> {

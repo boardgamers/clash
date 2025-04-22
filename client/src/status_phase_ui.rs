@@ -3,7 +3,6 @@ use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::{OkTooltip, cancel_button_with_tooltip, ok_button};
 use crate::render_context::RenderContext;
 use server::advance::Advance;
-use server::content::advances::{get_government, get_governments};
 use server::content::persistent_events::{ChangeGovernmentRequest, EventResponse};
 use server::status_phase::{ChangeGovernment, ChangeGovernmentType};
 
@@ -37,7 +36,7 @@ pub fn change_government_type_dialog(
     rc: &RenderContext,
     r: &ChangeGovernmentRequest,
 ) -> StateUpdate {
-    let current = rc.shown_player.government().unwrap();
+    let current = rc.shown_player.government(rc.game).unwrap();
     if r.optional && cancel_button_with_tooltip(rc, &format!("Keep {current}")) {
         return StateUpdate::response(EventResponse::ChangeGovernmentType(
             ChangeGovernmentType::KeepGovernment,
@@ -47,10 +46,13 @@ pub fn change_government_type_dialog(
         rc,
         &format!("Change government for {}", r.cost),
         |a, p| {
-            if get_governments()
+            if rc
+                .game
+                .cache
+                .get_governments()
                 .iter()
                 .find(|g| g.advances[0].name == a.name)
-                .is_some_and(|_| p.can_advance_in_change_government(a.advance))
+                .is_some_and(|_| p.can_advance_in_change_government(a.advance, rc.game))
             {
                 AdvanceState::Available
             } else if rc.shown_player.has_advance(a.advance) && a.government.is_some() {
@@ -61,13 +63,19 @@ pub fn change_government_type_dialog(
         },
         |a| {
             let g = a.government.as_ref().expect("should have government");
-            let additional = get_government(g)
+            let additional = rc
+                .game
+                .cache
+                .get_government(g)
                 .advances
                 .iter()
                 .skip(1) // the government advance itself is always chosen
                 .map(|a| a.advance)
                 .collect::<Vec<_>>();
-            let needed = get_government(&rc.shown_player.government().unwrap())
+            let needed = rc
+                .game
+                .cache
+                .get_government(&rc.shown_player.government(rc.game).unwrap())
                 .advances
                 .iter()
                 .filter(|a| rc.shown_player.has_advance(a.advance))

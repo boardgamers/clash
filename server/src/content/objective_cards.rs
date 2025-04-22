@@ -6,7 +6,6 @@ use crate::content::objectives::non_combat::{
     city_founder, draft, magnificent_culture, terror_regime,
 };
 
-use crate::cache;
 use crate::content::objectives::advance_objectives::{
     city_planner, culture_focus, diversified_research, education_lead, goal_focused, government,
     militarized, science_focus, seafarers, trade_focus,
@@ -26,11 +25,6 @@ use crate::content::objectives::unit_objectives::{
 use crate::objective_card::ObjectiveCard;
 use itertools::Itertools;
 use std::vec;
-
-#[must_use]
-pub(crate) fn get_all() -> &'static Vec<ObjectiveCard> {
-    cache::get().get_objective_cards()
-}
 
 #[must_use]
 pub(crate) fn get_all_uncached() -> Vec<ObjectiveCard> {
@@ -78,14 +72,4 @@ pub(crate) fn get_all_uncached() -> Vec<ObjectiveCard> {
         "Objective card ids are not unique"
     );
     all
-}
-
-///
-/// # Panics
-/// Panics if incident does not exist
-#[must_use]
-pub fn get_objective_card(id: u8) -> &'static ObjectiveCard {
-    cache::get()
-        .get_objective_card(id)
-        .unwrap_or_else(|| panic!("objective card not found {id}"))
 }

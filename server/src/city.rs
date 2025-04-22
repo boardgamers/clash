@@ -32,7 +32,7 @@ impl City {
     #[must_use]
     pub fn from_data(data: CityData, player_index: usize) -> Self {
         Self {
-            pieces: CityPieces::from_data(&data.city_pieces),
+            pieces: CityPieces::from_data(data.city_pieces),
             mood_state: data.mood_state,
             activations: data.activations,
             angry_activation: data.angry_activation,
@@ -115,7 +115,11 @@ impl City {
     /// Panics if the city does not have a builder
     pub fn raze(self, game: &mut Game, player_index: usize) {
         for wonder in &self.pieces.wonders {
-            wonder.listeners.deinit(game, player_index);
+            game.cache
+                .get_wonder(wonder)
+                .listeners
+                .clone()
+                .deinit(game, player_index);
         }
         for wonder in &self.pieces.wonders {
             for p in &mut game.players {

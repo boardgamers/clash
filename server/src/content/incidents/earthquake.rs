@@ -5,7 +5,6 @@ use crate::consts::WONDER_VICTORY_POINTS;
 use crate::content::persistent_events::{
     PositionRequest, SelectedStructure, Structure, StructuresRequest, is_selected_structures_valid,
 };
-use crate::content::wonders::get_wonder;
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, MoodModifier};
 use crate::player_events::{IncidentInfo, IncidentTarget};
@@ -57,12 +56,7 @@ fn volcano() -> Incident {
             ));
             let city = game.player(player_index).get_city(pos);
             let buildings = city.pieces.buildings(None);
-            let wonders = city
-                .pieces
-                .wonders
-                .iter()
-                .map(|w| w.name.clone())
-                .collect_vec();
+            let wonders = city.pieces.wonders.iter().cloned().collect_vec();
             for b in buildings {
                 destroy_building(game, b, pos);
             }
@@ -164,7 +158,7 @@ fn destroyable_structures(city: &City) -> Vec<SelectedStructure> {
     let w = pieces
         .wonders
         .iter()
-        .map(|w| SelectedStructure::new(city.position, Structure::Wonder(w.name.clone())))
+        .map(|w| SelectedStructure::new(city.position, Structure::Wonder(w.clone())))
         .collect_vec();
     let b = pieces
         .buildings(None)
@@ -217,15 +211,15 @@ fn destroy_building(game: &mut Game, b: Building, position: Position) {
 
 fn destroy_wonder(game: &mut Game, position: Position, name: &str) {
     let owner = game.get_any_city(position).player_index;
-    let wonder = get_wonder(name);
-    wonder.listeners.deinit(game, owner);
+    let wonder = game.cache.get_wonder(name);
+    wonder.listeners.clone().deinit(game, owner);
 
     let a = WONDER_VICTORY_POINTS / 2.0;
     let p = game.player_mut(owner);
     p.get_city_mut(position)
         .pieces
         .wonders
-        .retain(|w| w.name != name);
+        .retain(|w| w != name);
     p.event_victory_points += a;
     game.add_info_log_item(&format!(
         "{} gained {} points for the {} at {}",

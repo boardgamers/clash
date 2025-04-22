@@ -2,7 +2,6 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::combat::{Combat, CombatRetreatState, capture_position};
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{PersistentEventType, PositionRequest, UnitsRequest};
-use crate::content::tactics_cards;
 use crate::game::Game;
 use crate::log::current_player_turn_log_mut;
 use crate::movement::move_units;
@@ -459,12 +458,16 @@ pub(crate) fn trigger_tactics_event<T>(
 where
     T: Clone + PartialEq,
 {
-    let attacker_card =
-        get_attacker_tactics_card(&event_type).map(|c| tactics_cards::get_tactics_card(*c));
-    let defender_card =
-        get_defender_tactics_card(&event_type).map(|c| tactics_cards::get_tactics_card(*c));
+    let attacker_card = |event_type: &T, game: &Game| -> Option<TacticsCard> {
+        get_attacker_tactics_card(event_type).map(move |c| game.cache.get_tactics_card(*c).clone())
+    };
+    let defender_card = |event_type: &T, game: &Game| -> Option<TacticsCard> {
+        get_defender_tactics_card(event_type).map(move |c| game.cache.get_tactics_card(*c).clone())
+    };
 
-    if attacker_card.is_none() && defender_card.is_none() {
+    if get_attacker_tactics_card(&event_type).is_none()
+        && get_defender_tactics_card(&event_type).is_none()
+    {
         return Some(event_type);
     }
 
@@ -473,27 +476,29 @@ where
     add_tactics_listener(
         game,
         reveal_card,
-        attacker_card,
+        attacker_card(&event_type, game),
         combat,
         CombatRole::Attacker,
     );
     add_tactics_listener(
         game,
         reveal_card,
-        defender_card,
+        defender_card(&event_type, game),
         combat,
         CombatRole::Defender,
     );
 
     let players = &combat.players();
-    let result = game.trigger_persistent_event(players, event, event_type, store_type);
+    let result = game.trigger_persistent_event(players, event, event_type.clone(), store_type);
 
-    if let Some(card) = attacker_card {
+    if let Some(card) = attacker_card(&event_type, game) {
+        let card = card.clone();
         for p in players {
             card.listeners.deinit(game, *p);
         }
     }
-    if let Some(card) = defender_card {
+    if let Some(card) = defender_card(&event_type, game) {
+        let card = card.clone();
         for p in players {
             card.listeners.deinit(game, *p);
         }
@@ -505,7 +510,7 @@ where
 fn add_tactics_listener(
     game: &mut Game,
     reveal_card: bool,
-    card: Option<&TacticsCard>,
+    card: Option<TacticsCard>,
     combat: &Combat,
     role: CombatRole,
 ) {

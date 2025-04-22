@@ -24,7 +24,7 @@ fn math() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.advance_cost,
         1,
-        |i, &a, ()| {
+        |i, &a, _| {
             if a == Advance::Engineering || a == Advance::Roads {
                 i.info.log.push("Math reduced the cost to 0".to_string());
                 i.set_zero();
@@ -54,7 +54,7 @@ fn astronomy() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.advance_cost,
         0,
-        |i, &a, ()| {
+        |i, &a, _| {
             if a == Advance::Navigation || a == Advance::Cartography {
                 i.set_zero();
                 i.info

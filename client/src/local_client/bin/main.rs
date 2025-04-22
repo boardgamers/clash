@@ -128,7 +128,7 @@ async fn run(mut game: Game, features: &mut Features) {
                 sync_result = GameSyncResult::Update;
             }
             GameSyncRequest::Import => {
-                game = import();
+                game = import(game);
                 state.show_player = game.active_player();
                 sync_result = GameSyncResult::Update;
             }
@@ -329,11 +329,11 @@ fn add_terrain(game: &mut Game, pos: &str, terrain: Terrain) {
 
 const EXPORT_FILE: &str = "game.json";
 
-fn import() -> Game {
+fn import(game: Game) -> Game {
     let file = File::open(EXPORT_FILE).expect("Failed to open export file");
     let reader = BufReader::new(file);
     let data: GameData = serde_json::from_reader(reader).expect("Failed to read export file");
-    Game::from_data(data)
+    Game::from_data(data, game.cache)
 }
 
 fn export(game: &Game) {

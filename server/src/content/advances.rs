@@ -14,7 +14,6 @@ pub(crate) mod warfare;
 
 use crate::advance::AdvanceInfo;
 use crate::advance::{Advance, AdvanceBuilder};
-use crate::cache;
 use crate::content::advances::agriculture::agriculture;
 use crate::content::advances::autocracy::autocracy;
 use crate::content::advances::construction::construction;
@@ -54,6 +53,7 @@ const GOVERNMENTS: [GovernmentInfo; 3] = [
     },
 ];
 
+#[derive(Clone)]
 pub struct AdvanceGroup {
     pub name: String,
     pub advances: Vec<AdvanceInfo>,
@@ -66,16 +66,6 @@ pub(crate) fn get_all_uncached() -> Vec<AdvanceInfo> {
         .into_iter()
         .flat_map(|g| g.advances)
         .collect()
-}
-
-#[must_use]
-pub fn get_all() -> &'static Vec<AdvanceInfo> {
-    cache::get().get_advances()
-}
-
-#[must_use]
-pub fn get_groups() -> &'static Vec<AdvanceGroup> {
-    cache::get().get_advance_groups()
 }
 
 #[must_use]
@@ -133,26 +123,6 @@ pub(crate) fn advance_group_builder(name: &str, advances: Vec<AdvanceBuilder>) -
     }
 }
 
-///
-/// # Panics
-///
-/// Panics if advance with name doesn't exist
-#[must_use]
-pub fn get_advance(advance: Advance) -> &'static AdvanceInfo {
-    cache::get().get_advance(advance)
-}
-
-pub(crate) fn get_group(group: &str) -> &'static AdvanceGroup {
-    cache::get()
-        .get_advance_group(group)
-        .unwrap_or_else(|| panic!("Advance group {group} not found"))
-}
-
-#[must_use]
-pub fn get_governments() -> &'static Vec<AdvanceGroup> {
-    cache::get().get_governments()
-}
-
 #[must_use]
 pub fn get_governments_uncached() -> Vec<AdvanceGroup> {
     get_groups_uncached()
@@ -161,28 +131,15 @@ pub fn get_governments_uncached() -> Vec<AdvanceGroup> {
         .collect()
 }
 
-///
-///
-/// # Panics
-///
-/// Panics if government doesn't exist
-#[must_use]
-pub fn get_government(government: &str) -> &'static AdvanceGroup {
-    cache::get().get_government(government).unwrap_or_else(|| {
-        panic!("Government {government} not found");
-    })
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    use crate::content::advances::get_governments;
-    use crate::content::advances::get_groups;
+    use crate::cache::Cache;
 
     #[test]
     fn test_get_all() {
-        let all = get_all();
+        let cache = Cache::new();
+        let all = cache.get_advances();
         assert!(!all.is_empty());
         let unsorted = all.iter().map(|a| a.advance).collect_vec();
 
@@ -193,13 +150,13 @@ mod tests {
             .collect_vec();
         assert_eq!(sorted, unsorted);
         for advance in all {
-            assert_eq!(get_advance(advance.advance).advance, advance.advance);
+            assert_eq!(cache.get_advance(advance.advance).advance, advance.advance);
         }
     }
 
     #[test]
     fn test_get_groups() {
-        let groups = get_groups();
+        let groups = get_groups_uncached();
         assert!(!groups.is_empty());
         assert_eq!(groups.len(), 12);
         assert_eq!(groups[0].name, "Agriculture");
@@ -208,7 +165,7 @@ mod tests {
 
     #[test]
     fn test_get_governments() {
-        let governments = get_governments();
+        let governments = get_governments_uncached();
         assert!(!governments.is_empty());
         assert_eq!(governments.len(), 3);
         assert_eq!(governments[0].name, "Democracy");
