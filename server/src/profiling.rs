@@ -19,4 +19,3 @@ pub fn start_profiling() {
         .expect("Failed to initialize pyroscope");
     let _ = agent.start().unwrap();
 }
-

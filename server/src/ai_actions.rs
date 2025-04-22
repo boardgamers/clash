@@ -3,14 +3,14 @@ use crate::advance::Advance;
 use crate::card::validate_card_selection;
 use crate::city::{City, MoodState};
 use crate::collect::available_collect_actions;
-use crate::construct::{available_buildings, new_building_positions, Construct};
+use crate::construct::{Construct, available_buildings, new_building_positions};
 use crate::content::custom_actions::CustomEventAction;
 use crate::content::persistent_events::{
-    is_selected_structures_valid, ChangeGovernmentRequest, EventResponse, HandCardsRequest, MultiRequest,
-    PersistentEventRequest, PersistentEventState, PositionRequest, SelectedStructure,
+    ChangeGovernmentRequest, EventResponse, HandCardsRequest, MultiRequest, PersistentEventRequest,
+    PersistentEventState, PositionRequest, SelectedStructure, is_selected_structures_valid,
 };
 use crate::cultural_influence::{
-    available_influence_actions, available_influence_culture, InfluenceCultureAttempt,
+    InfluenceCultureAttempt, available_influence_actions, available_influence_culture,
 };
 use crate::events::EventOrigin;
 use crate::game::Game;
@@ -18,13 +18,13 @@ use crate::happiness::{available_happiness_actions, happiness_cost};
 use crate::payment::PaymentOptions;
 use crate::player::{CostTrigger, Player};
 use crate::playing_actions::{
-    base_and_custom_action, IncreaseHappiness, PlayingAction, PlayingActionType, Recruit,
+    IncreaseHappiness, PlayingAction, PlayingActionType, Recruit, base_and_custom_action,
 };
 use crate::position::Position;
 use crate::recruit::recruit_cost;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
-use crate::status_phase::{government_advances, ChangeGovernment, ChangeGovernmentType};
+use crate::status_phase::{ChangeGovernment, ChangeGovernmentType, government_advances};
 use crate::unit::{UnitType, Units};
 use itertools::Itertools;
 use rustc_hash::FxHashMap;
@@ -145,11 +145,12 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
     if !influence.is_empty() {
         let action_type = prefer_custom_action(influence);
         if let Some(i) = calculate_influence(game, p, &action_type) {
-            actions.push((ActionType::Playing(PlayingActionType::Collect), vec![
-                Action::Playing(PlayingAction::InfluenceCultureAttempt(
+            actions.push((
+                ActionType::Playing(PlayingActionType::Collect),
+                vec![Action::Playing(PlayingAction::InfluenceCultureAttempt(
                     InfluenceCultureAttempt::new(i, action_type),
-                )),
-            ]));
+                ))],
+            ));
         }
     }
 
@@ -262,7 +263,11 @@ fn payment_with_action(
         .expect("expected payment")
 }
 
-pub fn try_payment(ai_actions: &mut AiActions, o: &PaymentOptions, p: &Player) -> Option<ResourcePile> {
+pub fn try_payment(
+    ai_actions: &mut AiActions,
+    o: &PaymentOptions,
+    p: &Player,
+) -> Option<ResourcePile> {
     let sum = o.default.amount();
 
     let mut max = p.resources.clone();

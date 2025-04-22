@@ -15,6 +15,7 @@ use server::game_setup::setup_game;
 use server::map::Terrain;
 use server::player::add_unit;
 use server::position::Position;
+use server::profiling::start_profiling;
 use server::resource_pile::ResourcePile;
 use server::unit::{UnitType, set_unit_position};
 use server::utils::remove_element;
@@ -22,7 +23,6 @@ use std::fs::File;
 use std::io::BufReader;
 use std::time::Duration;
 use std::{env, vec};
-use server::profiling::start_profiling;
 
 #[derive(PartialEq)]
 enum Mode {

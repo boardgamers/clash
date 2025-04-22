@@ -1,12 +1,19 @@
 use async_std::task;
 use itertools::Itertools;
-use server::ai_actions::{get_movement_actions, AiActions};
-use server::profiling::start_profiling;
-use server::{action::{self, Action}, ai_actions, game::GameState, game_setup, playing_actions::PlayingAction, utils::{Rng, Shuffle}};
 use server::action::ActionType;
+use server::ai_actions::{AiActions, get_movement_actions};
 use server::game::Game;
-use server::movement::{move_units_destinations, MoveUnits, MovementAction};
+use server::movement::{MoveUnits, MovementAction, move_units_destinations};
 use server::playing_actions::PlayingActionType;
+use server::profiling::start_profiling;
+use server::{
+    action::{self, Action},
+    ai_actions,
+    game::GameState,
+    game_setup,
+    playing_actions::PlayingAction,
+    utils::{Rng, Shuffle},
+};
 
 mod common;
 
@@ -66,7 +73,6 @@ fn random_actions_iterations(mut rng: Rng) {
         game = action::execute_action(game.clone(), action.clone(), player_index)
     }
 }
-
 
 pub fn get_movement_actions(
     ai_actions: &mut AiActions,
