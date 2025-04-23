@@ -918,18 +918,24 @@ where
     let key = setup.get_key().clone();
     let deinitialize_event = event.clone();
     let initializer = move |game: &mut Game, player_index: usize, prio_delta: i32| {
-        event(&mut game.players[player_index].events)
+        let e = event(&mut game.players[player_index].events);
+        e
             .inner
             .as_mut()
-            .expect("events should be set")
+            .unwrap_or_else(
+                || panic!("event {} should be set: {key:?}", e.name),
+            )
             .add_listener_mut(listener.clone(), priority + prio_delta, key.clone());
     };
     let key = setup.get_key().clone();
     let deinitializer = move |game: &mut Game, player_index: usize| {
-        deinitialize_event(&mut game.players[player_index].events)
+        let e = deinitialize_event(&mut game.players[player_index].events);
+        e
             .inner
             .as_mut()
-            .expect("events should be set")
+            .unwrap_or_else(
+                || panic!("event {} should be set: {key:?}", e.name),
+            )
             .remove_listener_mut_by_key(&key);
     };
     setup

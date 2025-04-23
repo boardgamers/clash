@@ -25,6 +25,7 @@ use crate::wonder::WonderCardInfo;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::ops::RangeInclusive;
+use crate::construct::ConstructInfo;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum PersistentEventRequest {
@@ -106,7 +107,7 @@ pub enum PersistentEventType {
     StatusPhase(StatusPhaseState),
     TurnStart,
     Advance(OnAdvanceInfo),
-    Construct(Building),
+    Construct(ConstructInfo),
     Recruit(Recruit),
     FoundCity(Position),
     Incident(IncidentInfo),

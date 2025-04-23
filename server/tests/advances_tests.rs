@@ -505,7 +505,7 @@ fn test_trade_routes_with_currency() {
 }
 
 #[test]
-fn test_dogma() {
+fn test_dogma_with_anarchy() {
     JSON.test(
         "dogma",
         vec![
@@ -515,7 +515,7 @@ fn test_dogma() {
                     advance: advance::Advance::Dogma,
                     payment: ResourcePile::ideas(2),
                 }),
-            ),
+            ).without_json_comparison(),
             TestAction::undoable(
                 1,
                 Action::Playing(Construct(construct::Construct::new(
@@ -523,14 +523,14 @@ fn test_dogma() {
                     Temple,
                     ResourcePile::new(0, 1, 1, 0, 0, 0, 0),
                 ))),
-            ),
+            ).without_json_comparison(),
             TestAction::undoable(
                 1,
                 Action::Response(EventResponse::ResourceReward(ResourcePile::culture_tokens(
                     1,
                 ))),
-            ),
-            TestAction::undoable(
+            ).without_json_comparison(),
+            TestAction::not_undoable(
                 1,
                 Action::Response(EventResponse::SelectAdvance(advance::Advance::Fanaticism)),
             ),

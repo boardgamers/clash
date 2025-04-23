@@ -1,10 +1,10 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo, gain_advance_without_payment};
+use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city_pieces::Building::Temple;
 use crate::consts::STACK_LIMIT;
-use crate::content::advances::{AdvanceGroup, advance_group_builder};
+use crate::content::advances::{advance_group_builder, AdvanceGroup};
 use crate::content::persistent_events::{AdvanceRequest, PositionRequest};
-use crate::player::{Player, add_unit};
+use crate::player::{add_unit, Player};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
@@ -21,8 +21,8 @@ fn dogma() -> AdvanceBuilder {
         Advance::Dogma,
         "Dogma",
         "Whenever you Construct a new Temple, \
-        you may immediately get a Theocracy Advance for free, \
-        You are now limited to a maximum of 2 ideas (discard if necessary) \
+        you may immediately get a Theocracy Advance for free. \
+        You are now limited to a maximum of 2 ideas (discard if necessary). \
         Note: Dogma Advance does not apply when you conquer a city with a Temple.",
     )
     .add_one_time_ability_initializer(|game, player_index| {
@@ -41,7 +41,7 @@ fn dogma() -> AdvanceBuilder {
         |event| &mut event.construct,
         0,
         |game, player_index, building| {
-            if matches!(building, Temple) {
+            if matches!(building.building, Temple) {
                 let player = game.player(player_index);
                 let choices: Vec<Advance> = game
                     .cache
@@ -58,7 +58,7 @@ fn dogma() -> AdvanceBuilder {
             }
             None
         },
-        |game, c, _| {
+        |game, c, i| {
             let verb = if c.actively_selected {
                 "selected"
             } else {
@@ -69,13 +69,9 @@ fn dogma() -> AdvanceBuilder {
                 c.player_name,
                 c.choice.name(game)
             ));
-            gain_advance_without_payment(
-                game,
-                c.choice,
-                c.player_index,
-                ResourcePile::empty(),
-                true,
-            );
+            // the advance may trigger the Anarchy incident, which will remove Dogma
+            // this needs to happen after the Dogma listener is processed
+            i.gained_advance = Some(c.choice);
         },
     )
 }

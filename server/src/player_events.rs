@@ -28,6 +28,7 @@ use itertools::Itertools;
 use num::Zero;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
+use crate::construct::ConstructInfo;
 
 pub(crate) type PersistentEvent<V = ()> = Event<Game, PersistentEventInfo, (), V>;
 
@@ -85,7 +86,7 @@ impl TransientEvents {
 
 pub(crate) struct PersistentEvents {
     pub collect: PersistentEvent<CollectInfo>,
-    pub construct: PersistentEvent<Building>,
+    pub construct: PersistentEvent<ConstructInfo>,
     pub draw_wonder_card: PersistentEvent,
     pub advance: PersistentEvent<OnAdvanceInfo>,
     pub recruit: PersistentEvent<Recruit>,

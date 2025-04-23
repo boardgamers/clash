@@ -9,6 +9,7 @@ use crate::player_events::CostInfo;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use serde::{Deserialize, Serialize};
+use crate::advance::{gain_advance_without_payment, Advance};
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub struct Construct {
@@ -115,17 +116,45 @@ pub(crate) fn construct(game: &mut Game, player_index: usize, c: &Construct) -> 
         cost.activate_city,
     );
     cost.pay(game, &c.payment);
-    on_construct(game, player_index, c.city_piece);
+    on_construct(game, player_index, ConstructInfo::new(c.city_piece));
     Ok(())
 }
 
-pub(crate) fn on_construct(game: &mut Game, player_index: usize, building: Building) {
-    let _ = game.trigger_persistent_event(
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
+pub struct ConstructInfo {
+    pub building: Building,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub gained_advance: Option<Advance>,
+}
+
+impl ConstructInfo {
+    #[must_use]
+    pub fn new(building: Building) -> Self {
+        Self {
+            building,
+            gained_advance: None,
+        }
+    }
+}
+
+pub(crate) fn on_construct(game: &mut Game, player_index: usize, info: ConstructInfo) {
+    if let Some(i) = game.trigger_persistent_event(
         &[player_index],
         |e| &mut e.construct,
-        building,
+        info,
         PersistentEventType::Construct,
-    );
+    ) {
+        if let Some(advance) = i.gained_advance {
+            gain_advance_without_payment(
+                game,
+                advance,
+                player_index,
+                ResourcePile::empty(),
+                true,
+            );
+        }
+    }
 }
 
 #[must_use]

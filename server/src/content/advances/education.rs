@@ -37,7 +37,7 @@ fn writing() -> AdvanceBuilder {
         |event| &mut event.construct,
         3,
         |game, player_index, _player_name, b| {
-            if matches!(b, Building::Academy) {
+            if matches!(b.building, Building::Academy) {
                 game.players[player_index].gain_resources(ResourcePile::ideas(2));
                 game.add_info_log_item("Academy gained 2 ideas");
             }

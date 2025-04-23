@@ -13,7 +13,9 @@
     },
     {
       "event_type": {
-        "Construct": "Temple"
+        "Construct": {
+          "building": "Temple",
+        }
       },
       "player": 0,
       "last_priority_used": 1,
@@ -149,7 +151,7 @@
       "incident_tokens": 3,
       "next_unit_id": 8,
       "event_info": {
-        "State Religion": "used"
+        "StateReligion": "used"
       }
     },
     {

@@ -163,6 +163,7 @@ where
 }
 
 pub struct Event<T, U = (), V = (), W = ()> {
+    pub name: String,
     pub inner: Option<EventMut<T, U, V, W>>,
 }
 
@@ -174,6 +175,7 @@ impl<T, U, V, W> Event<T, U, V, W> {
         W: Clone + PartialEq,
     {
         Self {
+            name: name.to_string(),
             inner: Some(EventMut::new(name)),
         }
     }
