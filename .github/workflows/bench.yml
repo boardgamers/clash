@@ -1,0 +1,22 @@
+name: Performance Benchmark
+
+on:
+  workflow_dispatch:
+    # still hangs
+#
+#  push:
+#    branches: [ "main" ]
+#  pull_request:
+#    branches: [ "main" ]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: jdx/mise-action@v2
+      with:
+        experimental: 'true' # to get lock file support
+    - name: Random actions test
+      run: mise run random-actions

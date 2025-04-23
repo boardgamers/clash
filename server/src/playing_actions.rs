@@ -288,12 +288,7 @@ impl PlayingAction {
                 increase_happiness(game, player_index, &i.happiness_increases, Some(i.payment));
             }
             InfluenceCultureAttempt(c) => {
-                influence_culture_attempt(
-                    game,
-                    player_index,
-                    &c.selected_structure,
-                    &c.action_type,
-                );
+                influence_culture_attempt(game, player_index, &c.selected_structure)?;
             }
             ActionCard(a) => play_action_card(game, player_index, a),
             WonderCard(name) => {
@@ -454,4 +449,17 @@ fn any_angry(player: &Player) -> bool {
         .cities
         .iter()
         .any(|city| city.mood_state == MoodState::Angry)
+}
+
+// None if the action cost has been paid
+#[must_use]
+pub fn remaining_resources_for_action(
+    game: &Game,
+    action_type: Option<&PlayingActionType>,
+    player: &Player,
+) -> ResourcePile {
+    action_type.map_or_else(
+        || player.resources.clone(),
+        |action_type| action_type.remaining_resources(player, game),
+    )
 }

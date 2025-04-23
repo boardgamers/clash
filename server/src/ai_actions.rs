@@ -263,7 +263,11 @@ fn payment_with_action(
         .expect("expected payment")
 }
 
-fn try_payment(ai_actions: &mut AiActions, o: &PaymentOptions, p: &Player) -> Option<ResourcePile> {
+pub fn try_payment(
+    ai_actions: &mut AiActions,
+    o: &PaymentOptions,
+    p: &Player,
+) -> Option<ResourcePile> {
     let sum = o.default.amount();
 
     let mut max = p.resources.clone();

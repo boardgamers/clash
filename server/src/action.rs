@@ -99,14 +99,25 @@ pub enum ActionType {
 /// Panics if the action is illegal
 #[must_use]
 pub fn execute_action(mut game: Game, action: Action, player_index: usize) -> Game {
+    assert_eq!(player_index, game.active_player(), "Not your turn");
+
     if !game.supports_undo {
-        return execute_without_undo(game, action, player_index)
-            .expect("action should be executed");
+        execute_without_undo(&mut game, action, player_index).expect("action should be executed");
+        return game;
     }
+
+    if let Action::Undo = action {
+        assert!(
+            game.can_undo(),
+            "actions revealing new information can't be undone"
+        );
+        return undo(game).expect("cannot undo");
+    }
+
     let add_undo = !matches!(&action, Action::Undo);
     let old = to_serde_value(&game);
     let old_player = game.active_player();
-    game = execute_without_undo(game, action, player_index).expect("action should be executed");
+    execute_without_undo(&mut game, action, player_index).expect("action should be executed");
     let new = to_serde_value(&game);
     let new_player = game.active_player();
     let patch = json_patch::diff(&new, &old);
@@ -119,42 +130,36 @@ pub fn execute_action(mut game: Game, action: Action, player_index: usize) -> Ga
     game
 }
 
-fn execute_without_undo(
-    mut game: Game,
+///
+/// # Errors
+///
+/// Returns an error if the action is not valid
+pub fn execute_without_undo(
+    game: &mut Game,
     action: Action,
     player_index: usize,
-) -> Result<Game, String> {
-    if player_index != game.active_player() {
-        return Err("Not your turn".to_string());
-    }
-    if let Action::Undo = action {
-        if !game.can_undo() {
-            return Err("actions revealing new information can't be undone".to_string());
-        }
-        return undo(game);
-    }
-
+) -> Result<(), String> {
     if matches!(action, Action::Redo) {
         if !game.can_redo() {
             return Err("action can't be redone".to_string());
         }
-        redo(&mut game, player_index)?;
-        return Ok(game);
+        redo(game, player_index)?;
+        return Ok(());
     }
 
-    add_log_item_from_action(&mut game, &action);
-    add_action_log_item(&mut game, action.clone());
+    add_log_item_from_action(game, &action);
+    add_action_log_item(game, action.clone());
 
     match game.current_event_handler_mut() {
         Some(s) => {
             s.response = action.response();
             let details = game.current_event().event_type.clone();
-            execute_custom_phase_action(&mut game, player_index, details)
+            execute_custom_phase_action(game, player_index, details)
         }
-        _ => execute_regular_action(&mut game, action, player_index),
+        _ => execute_regular_action(game, action, player_index),
     }?;
-    check_for_waste(&mut game);
-    update_stats(&mut game);
+    check_for_waste(game);
+    update_stats(game);
 
     if game
         .player(player_index)
@@ -164,10 +169,10 @@ fn execute_without_undo(
         .count()
         >= 4
     {
-        present_objective_cards(&mut game, player_index, vec!["Terror Regime".to_string()]);
+        present_objective_cards(game, player_index, vec!["Terror Regime".to_string()]);
     }
 
-    Ok(game)
+    Ok(())
 }
 
 pub(crate) fn execute_custom_phase_action(

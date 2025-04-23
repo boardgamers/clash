@@ -7,9 +7,6 @@ repository = "git@github.com:boardgamers/clash.git"
 homepage = "https://www.boardgamers.space/"
 description = "A server for Clash of Cultures"
 
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [lib]
 name = "server"
 crate-type = ["cdylib", "rlib"]
@@ -32,3 +29,9 @@ num_cpus = "1.16.0"
 readonly = "0.2.13"
 enumset = { version = "1.1.5" }
 rustc-hash = "2.1.1"
+pyroscope = { version = "0.5.8", optional = true }
+pyroscope_pprofrs = { version = "0.2.8", optional = true }
+chrono = "0.4.40"
+
+[features]
+profiling = ["dep:pyroscope", "dep:pyroscope_pprofrs"]

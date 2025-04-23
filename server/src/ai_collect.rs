@@ -121,7 +121,7 @@ pub(crate) fn invalidate_collect_cache() -> Builtin {
             |event| &mut event.found_city,
             1,
             |game, player, _, p| {
-                reset_collect_within_range(game.player_mut(player), *p);
+                reset_collect_within_range(player, *p, game);
             },
         )
         .add_simple_persistent_event_listener(
@@ -134,9 +134,14 @@ pub(crate) fn invalidate_collect_cache() -> Builtin {
         .build()
 }
 
-pub(crate) fn reset_collect_within_range(p: &mut Player, position: Position) {
-    let has_husbandry = p.has_advance(Advance::Husbandry);
-    let range = if has_husbandry { 2 } else { 1 };
+pub(crate) fn reset_collect_within_range(player: usize, position: Position, game: &mut Game) {
+    let is_land = game.map.is_land(position);
+    let p = game.player_mut(player);
+    let range = if is_land && p.has_advance(Advance::Husbandry) {
+        2
+    } else {
+        1
+    };
     for c in &mut p.cities {
         if c.position.distance(position) <= range {
             c.possible_collections.clear();
@@ -145,8 +150,8 @@ pub(crate) fn reset_collect_within_range(p: &mut Player, position: Position) {
 }
 
 pub(crate) fn reset_collect_within_range_for_all(game: &mut Game, pos: Position) {
-    for p in &mut game.players {
-        reset_collect_within_range(p, pos);
+    for p in 0..game.human_players_count() {
+        reset_collect_within_range(p, pos, game);
     }
 }
 
@@ -155,11 +160,11 @@ pub(crate) fn reset_collect_within_range_for_all_except(
     pos: Position,
     player: usize,
 ) {
-    for p in &mut game.players {
-        if p.index == player {
+    for p in 0..game.human_players_count() {
+        if p == player {
             continue;
         }
-        reset_collect_within_range(p, pos);
+        reset_collect_within_range(p, pos, game);
     }
 }
 

@@ -52,6 +52,7 @@ pub mod player;
 pub mod player_events;
 pub mod playing_actions;
 pub mod position;
+pub mod profiling;
 pub mod recruit;
 pub mod resource;
 pub mod resource_pile;

@@ -1,6 +1,6 @@
 use crate::city::City;
 use crate::city::MoodState::Angry;
-use crate::city_pieces::Building;
+use crate::city_pieces::{Building, remove_building};
 use crate::combat_listeners::{
     Casualties, CombatEventPhase, CombatResult, CombatRoundEnd, CombatRoundStart, CombatStrength,
     combat_round_end, combat_round_start,
@@ -364,7 +364,7 @@ pub(crate) fn conquer_city(
                 if game.players[new_player_index].is_building_available(building, game) {
                     city.pieces.set_building(building, new_player_index);
                 } else {
-                    city.pieces.remove_building(building);
+                    remove_building(&mut city, building);
                     game.players[new_player_index].gain_resources(ResourcePile::gold(1));
                 }
             }

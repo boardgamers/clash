@@ -1,9 +1,11 @@
 [env]
 RUST_BACKTRACE = '1'
+RUSTFLAGS = '-Dwarnings' # Make sure CI fails on all warnings, including Clippy lints
+CARGO_TERM_COLOR = 'always'
 
 [tasks.random-actions]
 description = "Run server tests"
-run = 'cargo nextest run --nocapture random_actions'
+run = 'cargo nextest run --release --nocapture test_random_actions -Pbench'
 dir = "server"
 
 [tasks.test]
@@ -36,10 +38,34 @@ dir = "client"
 [tasks.format-and-lint]
 depends = ["server-format-and-lint", "client-format-and-lint"]
 
+[tasks.ci-server]
+description = "Run CI tasks server"
+dir = "server"
+run = [
+    "cargo build",
+    "cargo fmt --check",
+    "cargo clippy",
+    "cargo nextest run"
+]
+
+[tasks.ci-client]
+description = "Run CI tasks server"
+dir = "client"
+run = [
+    "cargo build",
+    "cargo fmt --check",
+    "cargo clippy",
+]
+
 [tasks.profile]
 description = "Run AI client with profiling"
 run = ["cargo run --release --package client --features profiling --bin local_client -- ai"]
 dir = "client"
+
+[tasks.profile-random-actions]
+description = "Run AI random actions test with profiling"
+run = ["cargo test --release --features profiling random_actions"]
+dir = "server"
 
 [tools]
 "cargo:cargo-nextest" = "latest"

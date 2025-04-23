@@ -89,8 +89,8 @@ pub fn get_total_collection(
         let option = i.choices.get(&c.position);
         if option.is_none_or(|options| !options.contains(&c.pile)) {
             return Err(format!(
-                "You can only collect {:?} from {:?}",
-                option, c.position
+                "You can only collect {:?} from {:?} - all options are {:?}",
+                option, c.position, i.choices
             ));
         }
     }

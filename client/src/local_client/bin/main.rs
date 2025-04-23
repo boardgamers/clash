@@ -15,6 +15,7 @@ use server::game_setup::setup_game;
 use server::map::Terrain;
 use server::player::add_unit;
 use server::position::Position;
+use server::profiling::start_profiling;
 use server::resource_pile::ResourcePile;
 use server::unit::{UnitType, set_unit_position};
 use server::utils::remove_element;
@@ -57,28 +58,6 @@ async fn main() {
     };
 
     run(game, &mut features).await;
-}
-
-#[cfg(not(feature = "profiling"))]
-fn start_profiling() {
-    // do nothing
-}
-
-#[cfg(feature = "profiling")]
-fn start_profiling() {
-    println!("start profiling");
-
-    use pyroscope::PyroscopeAgent;
-    use pyroscope_pprofrs::{PprofConfig, pprof_backend};
-
-    let pprof_config = PprofConfig::new().sample_rate(100);
-    let backend_impl = pprof_backend(pprof_config);
-
-    let agent = PyroscopeAgent::builder("http://localhost:4040", "clash")
-        .backend(backend_impl)
-        .build()
-        .expect("Failed to initialize pyroscope");
-    let _ = agent.start().unwrap();
 }
 
 fn get_modes(args: &[String]) -> Vec<Mode> {

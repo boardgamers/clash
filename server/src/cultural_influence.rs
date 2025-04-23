@@ -12,7 +12,8 @@ use crate::log::current_player_turn_log;
 use crate::payment::PaymentOptions;
 use crate::player_events::ActionInfo;
 use crate::playing_actions::{
-    PlayingAction, PlayingActionType, base_or_custom_available, roll_boost_cost,
+    PlayingAction, PlayingActionType, base_or_custom_available, remaining_resources_for_action,
+    roll_boost_cost,
 };
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
@@ -96,11 +97,9 @@ pub(crate) fn influence_culture_attempt(
     game: &mut Game,
     player_index: usize,
     c: &SelectedStructure,
-    action_type: &PlayingActionType,
-) {
+) -> Result<(), String> {
     let target_city_position = c.position;
-    let info = influence_culture_boost_cost(game, player_index, c, action_type)
-        .expect("this should be a valid action");
+    let info = influence_culture_boost_cost(game, player_index, c, None)?;
     let self_influence = info.starting_city_position == target_city_position;
 
     // currently, there is no way to have different costs for this
@@ -111,14 +110,14 @@ pub(crate) fn influence_culture_attempt(
         game.add_to_last_log_item(&format!(" and succeeded (rolled {roll})"));
         info.info.execute(game);
         influence_culture(game, player_index, c);
-        return;
+        return Ok(());
     }
 
     if self_influence || info.prevent_boost {
         game.add_to_last_log_item(&format!(" and failed (rolled {roll})"));
         info.info.execute(game);
         attempt_failed(game, player_index, target_city_position);
-        return;
+        return Ok(());
     }
     if let Some(roll_boost_cost) = PaymentOptions::resources(roll_boost_cost(roll))
         .first_valid_payment(&game.players[player_index].resources)
@@ -134,6 +133,7 @@ pub(crate) fn influence_culture_attempt(
         info.info.execute(game);
         attempt_failed(game, player_index, target_city_position);
     }
+    Ok(())
 }
 
 pub(crate) fn ask_for_cultural_influence_payment(
@@ -232,7 +232,7 @@ pub fn influence_culture_boost_cost(
     game: &Game,
     player_index: usize,
     selected: &SelectedStructure,
-    action_type: &PlayingActionType,
+    action_type: Option<&PlayingActionType>,
 ) -> Result<InfluenceCultureInfo, String> {
     let target_city_position = selected.position;
     let structure = &selected.structure;
@@ -314,7 +314,7 @@ pub fn available_influence_culture(
                         .into_iter()
                         .map(|s| {
                             let result =
-                                influence_culture_boost_cost(game, player, &s, action_type);
+                                influence_culture_boost_cost(game, player, &s, Some(action_type));
                             (s, result)
                         })
                         .collect_vec()
@@ -378,13 +378,13 @@ fn affordable_start_city(
     game: &Game,
     player_index: usize,
     target_city: &City,
-    action_type: &PlayingActionType,
+    action_type: Option<&PlayingActionType>,
 ) -> Result<(Position, u8), String> {
     if target_city.player_index == player_index {
         Ok((target_city.position, 0))
     } else {
         let player = game.player(player_index);
-        let available = action_type.remaining_resources(player, game);
+        let available = remaining_resources_for_action(game, action_type, player);
 
         player
             .cities
@@ -403,8 +403,8 @@ fn affordable_start_city(
                     return None;
                 }
 
-                let boost_cost = influence_distance(game, c.position, target_city.position)
-                    .saturating_sub(c.size() as u8);
+                let distance = influence_distance(game, c.position, target_city.position);
+                let boost_cost = distance.saturating_sub(c.size() as u8);
                 if boost_cost > available.culture_tokens {
                     return None;
                 }
@@ -425,7 +425,7 @@ pub(crate) fn format_cultural_influence_attempt_log_item(
     let target_city_position = s.position;
     let target_city = game.get_any_city(target_city_position);
     let target_player_index = target_city.player_index;
-    let info = influence_culture_boost_cost(game, player_index, s, &i.action_type)
+    let info = influence_culture_boost_cost(game, player_index, s, Some(&i.action_type))
         .expect("this should be a valid action");
 
     let player = if target_player_index == game.active_player() {
