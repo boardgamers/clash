@@ -1,9 +1,9 @@
-use crate::common::{to_json, write_result, GamePath};
+use crate::common::{GamePath, to_json, write_result};
 use itertools::Itertools;
 use server::action::ActionType;
 use server::ai_actions::AiActions;
 use server::game::Game;
-use server::movement::{move_units_destinations, MoveUnits, MovementAction};
+use server::movement::{MoveUnits, MovementAction, move_units_destinations};
 use server::playing_actions::PlayingActionType;
 use server::profiling::start_profiling;
 use server::{

@@ -452,7 +452,7 @@ fn any_angry(player: &Player) -> bool {
 }
 
 // None if the action cost has been paid
-#[must_use] 
+#[must_use]
 pub fn remaining_resources_for_action(
     game: &Game,
     action_type: Option<&PlayingActionType>,
