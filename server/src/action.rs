@@ -103,11 +103,14 @@ pub fn execute_action(mut game: Game, action: Action, player_index: usize) -> Ga
 
     if !game.supports_undo {
         execute_without_undo(&mut game, action, player_index).expect("action should be executed");
-        return game
+        return game;
     }
 
     if let Action::Undo = action {
-        assert!(game.can_undo(), "actions revealing new information can't be undone");
+        assert!(
+            game.can_undo(),
+            "actions revealing new information can't be undone"
+        );
         return undo(game).expect("cannot undo");
     }
 

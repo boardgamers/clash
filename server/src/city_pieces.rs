@@ -1,8 +1,8 @@
 use serde::{Deserialize, Serialize};
 
+use crate::city::City;
 use Building::*;
 use num::Zero;
-use crate::city::City;
 
 #[derive(Default)]
 pub struct CityPieces {

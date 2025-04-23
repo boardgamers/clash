@@ -11,7 +11,10 @@ use crate::game::Game;
 use crate::log::current_player_turn_log;
 use crate::payment::PaymentOptions;
 use crate::player_events::ActionInfo;
-use crate::playing_actions::{PlayingAction, PlayingActionType, base_or_custom_available, roll_boost_cost, remaining_resources_for_action};
+use crate::playing_actions::{
+    PlayingAction, PlayingActionType, base_or_custom_available, remaining_resources_for_action,
+    roll_boost_cost,
+};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
@@ -401,8 +404,7 @@ fn affordable_start_city(
                 }
 
                 let distance = influence_distance(game, c.position, target_city.position);
-                let boost_cost = distance
-                    .saturating_sub(c.size() as u8);
+                let boost_cost = distance.saturating_sub(c.size() as u8);
                 if boost_cost > available.culture_tokens {
                     return None;
                 }

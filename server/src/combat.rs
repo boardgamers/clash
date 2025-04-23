@@ -1,6 +1,6 @@
 use crate::city::City;
 use crate::city::MoodState::Angry;
-use crate::city_pieces::{remove_building, Building};
+use crate::city_pieces::{Building, remove_building};
 use crate::combat_listeners::{
     Casualties, CombatEventPhase, CombatResult, CombatRoundEnd, CombatRoundStart, CombatStrength,
     combat_round_end, combat_round_start,

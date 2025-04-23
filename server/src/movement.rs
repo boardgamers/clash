@@ -440,7 +440,7 @@ fn reachable_with_roads(player: &Player, units: &[u32], game: &Game) -> Vec<Move
                     // can go directly without using roads
                     return None;
                 }
-                
+
                 // but can stop on enemy units
                 if map.is_land(destination)
                     && (
@@ -551,7 +551,7 @@ pub(crate) fn has_movable_units(game: &Game, player: &Player) -> bool {
     })
 }
 
-#[must_use] 
+#[must_use]
 pub fn can_embark(game: &Game, player: &Player, unit: &Unit) -> bool {
     unit.unit_type.is_land_based()
         && player.units.iter().any(|u| {

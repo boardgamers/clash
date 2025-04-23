@@ -137,7 +137,11 @@ pub(crate) fn invalidate_collect_cache() -> Builtin {
 pub(crate) fn reset_collect_within_range(player: usize, position: Position, game: &mut Game) {
     let is_land = game.map.is_land(position);
     let p = game.player_mut(player);
-    let range = if is_land && p.has_advance(Advance::Husbandry) { 2 } else { 1 };
+    let range = if is_land && p.has_advance(Advance::Husbandry) {
+        2
+    } else {
+        1
+    };
     for c in &mut p.cities {
         if c.position.distance(position) <= range {
             c.possible_collections.clear();
