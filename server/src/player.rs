@@ -700,6 +700,7 @@ impl Player {
         if let Some(port_position) = port_position {
             city.port_position = Some(port_position);
         }
+        city.possible_collections.clear();
     }
 
     #[must_use]
