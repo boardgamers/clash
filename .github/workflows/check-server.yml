@@ -1,4 +1,4 @@
-name: Check All
+name: Check Server
 
 on:
   push:
@@ -15,5 +15,5 @@ jobs:
     - uses: jdx/mise-action@v2
       with:
         experimental: 'true' # to get lock file support
-    - name: Random actions test
-      run: mise run random-actions
+    - name: Check all
+      run: mise run ci-server
