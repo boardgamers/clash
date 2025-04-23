@@ -80,12 +80,6 @@ fn random_actions_iterations(mut rng: Rng) {
 
                 write_result(&to_json(&game), &GamePath::new(".", &file));
 
-                for g in game.log {
-                    for l in g {
-                        println!("{l}");
-                    }
-                }
-
                 panic!(
                     "player {player_index} action {action:?}\nresult stored in {file}.json: {e:?}"
                 )
