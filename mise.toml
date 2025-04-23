@@ -55,7 +55,6 @@ run = [
     "cargo build",
     "cargo fmt --check",
     "cargo clippy",
-    "cargo nextest run"
 ]
 
 [tasks.profile]

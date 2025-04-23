@@ -1,4 +1,4 @@
-name: Check All
+name: Performance Benchmark
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  check:
     runs-on: ubuntu-latest
 
     steps:
