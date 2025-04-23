@@ -707,6 +707,7 @@ impl Player {
         self.units.iter().find(|unit| unit.id == id)
     }
 
+    /// Returns an immutable reference to a player's unit.
     ///
     /// # Panics
     /// Panics if unit does not exist
@@ -715,9 +716,10 @@ impl Player {
         self.units
             .iter()
             .find(|unit| unit.id == id)
-            .unwrap_or_else(|| panic!("unit should exist {id}"))
+            .unwrap_or_else(|| panic!("unit should exist {id} for player {}", self.index))
     }
 
+    /// Returns a mutable reference to a player's unit.
     ///
     /// # Panics
     /// Panics if unit does not exist
@@ -726,7 +728,7 @@ impl Player {
         self.units
             .iter_mut()
             .find(|unit| unit.id == id)
-            .unwrap_or_else(|| panic!("unit should exist {id}"))
+            .unwrap_or_else(|| panic!("unit should exist {id}for player {}", self.index))
     }
 
     pub(crate) fn remove_unit(&mut self, id: u32) -> Unit {

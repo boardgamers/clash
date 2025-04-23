@@ -9,7 +9,6 @@ use crate::{
     game::Game,
     map::Terrain,
     movement::{self, MoveUnits, MovementAction},
-    payment::PaymentOptions,
     pirates,
     position::Position,
     unit::UnitType,
@@ -105,6 +104,7 @@ impl ActiveMissions {
             };
             new_missions.push(mission);
         }
+        self.idle_units.clear();
         new_missions
             .chunk_by_mut(|a, b| {
                 a.mission_type == b.mission_type
@@ -572,45 +572,28 @@ impl Mission {
     }
 
     fn next_movement(&self, game: &Game) -> Option<MovementAction> {
-        //todo: settlers and scouts should avoid stronger enemies in their path
-        let next_position = self
-            .current_location
-            .next_position_in_path(&self.target)
-            .expect("missions is at it's target location");
-        let cost = self.movement_cost(game, next_position);
-        if !game.players[self.player_index].can_afford(&cost) {
-            return None;
-        }
-        let carrier = self.carrier(game);
-        //todo: handle roads
-        Some(MovementAction::Move(MoveUnits::new(
-            self.units.clone(),
-            next_position,
-            carrier,
-            cost.default_payment(),
-        )))
-    }
-
-    fn carrier(&self, game: &Game) -> Option<u32> {
-        let carrier = game.players[self.player_index]
-            .get_unit(self.units[0])
-            .carrier_id;
-        carrier
-    }
-
-    fn movement_cost(&self, game: &Game, next_position: Position) -> PaymentOptions {
-        movement::move_units_destinations(
-            game.player(self.player_index),
+        //todo: settlers and scouts should avoid enemy combat troupes in their path
+        let route = movement::move_units_destinations(
+            &game.players[self.player_index],
             game,
             &self.units,
             self.current_location,
-            self.carrier(game),
+            None,
         )
-        .expect("units in mission can't move")
+        .ok()?
         .into_iter()
-        .find(|route| route.destination == next_position)
-        .expect("can't move to target")
-        .cost
+        .min_by_key(|route| route.destination.distance(self.target))?;
+        let cost = route.cost;
+        let payment = cost.first_valid_payment(&game.players[self.player_index].resources)?;
+        if !game.players[self.player_index].can_afford(&cost) {
+            return None;
+        }
+        Some(MovementAction::Move(MoveUnits::new(
+            self.units.clone(),
+            route.destination,
+            None,
+            payment,
+        )))
     }
 }
 
@@ -742,12 +725,12 @@ fn decide_scouting_position(
         .clone()
         .into_keys()
         .filter(|position| game.map.is_unexplored(*position) && !scout_targets.contains(position))
-        .map(|position| {
-            (
+        .filter_map(|position| {
+            Some((
                 position,
-                scout_score(game, player_index, position, &scout_targets)
+                scout_score(game, player_index, position, &scout_targets)?
                     / scout_position.distance(position) as f64,
-            )
+            ))
         })
         .max_by(|(_, a), (_, b)| a.total_cmp(b))
         .map(|(position, _)| position)
@@ -758,8 +741,8 @@ fn scout_score(
     player_index: usize,
     position: Position,
     scout_targets: &[Position],
-) -> f64 {
-    let capital_city_position = game.players[player_index].cities[0].position;
+) -> Option<f64> {
+    let capital_city_position = game.players[player_index].cities.first()?.position;
     let mut score = 1.0;
     for target in scout_targets {
         let distance = position.distance(*target);
@@ -768,5 +751,5 @@ fn scout_score(
         }
     }
     score /= position.distance(capital_city_position) as f64;
-    score
+    Some(score)
 }

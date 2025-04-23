@@ -1,5 +1,6 @@
 use core::panic;
 use std::time::Duration;
+use std::vec;
 
 use itertools::Itertools;
 use num_cpus;
@@ -7,6 +8,7 @@ use tokio::runtime::Runtime;
 
 use crate::ai_actions::AiActions;
 use crate::cache::Cache;
+use crate::utils::new_average;
 use crate::{
     action::{self, Action, ActionType},
     ai_missions::ActiveMissions,
@@ -18,6 +20,7 @@ use crate::{
 pub const ACTION_SCORE_WEIGHTING: f64 = 0.0;
 const ADAPTIVE_DIFFICULTY_SCORE_THRESHOLD: f64 = 10.0;
 const ALLOCATE_UNITS_EVALUATION_TIME: f64 = 0.1;
+const PRUNING_ITERATIONS: usize = 3;
 
 pub struct AI {
     rng: Rng,
@@ -25,16 +28,11 @@ pub struct AI {
     pub thinking_time: Duration,
     pub adaptive_difficulty: bool,
     active_missions: ActiveMissions,
-    pub ai_actions: AiActions,
+    ai_actions: AiActions,
 }
 
 impl AI {
-    ///
-    ///
-    /// # Panics
-    ///
-    /// Panics if the difficulty is not between 0 and 1
-    ///
+    /// Returns an instance of an AI which takes control of one of the players in the game.
     ///
     /// # Panics
     ///
@@ -98,7 +96,7 @@ impl AI {
             );
         }
 
-        let actions = get_actions(&mut self.ai_actions, game, &self.active_missions);
+        let mut actions = get_actions(&mut self.ai_actions, game, &self.active_missions);
         if actions.is_empty() {
             return Action::Playing(PlayingAction::EndTurn);
         }
@@ -111,29 +109,44 @@ impl AI {
         }
 
         let runtime = Runtime::new().expect("failed to create runtime");
-        let time_remaining = self.thinking_time - start_time.elapsed();
-        let thinking_time_per_action = time_remaining / actions.len() as u32;
-        //todo: multiple iterations with pruning
 
         let players_active_missions = self
             .active_missions
             .get_players_active_missions(game, &mut self.rng);
         let difficulty_factor = difficulty_factor(self.difficulty);
-        let evaluations = actions
-            .iter()
-            .map(|(action_group, action)| {
-                runtime
-                    .block_on(evaluate_action(
-                        game,
-                        action,
-                        action_group,
-                        &mut self.rng,
-                        &thinking_time_per_action,
-                        &players_active_missions,
-                    ))
-                    .powf(difficulty_factor)
-            })
-            .collect::<Vec<f64>>();
+
+        let mut evaluations = vec![1.0; actions.len()];
+        for i in 0..PRUNING_ITERATIONS {
+            let time_remaining = self.thinking_time - start_time.elapsed();
+            let thinking_time_per_action =
+                time_remaining / actions.len() as u32 / (PRUNING_ITERATIONS - i) as u32;
+            for (j, new_evaluation) in actions
+                .iter()
+                .map(|(action_group, action)| {
+                    runtime
+                        .block_on(evaluate_action(
+                            game,
+                            action,
+                            action_group,
+                            &mut self.rng,
+                            &thinking_time_per_action,
+                            &players_active_missions,
+                        ))
+                        .powf(difficulty_factor)
+                })
+                .enumerate()
+            {
+                evaluations[j] = new_average(evaluations[j], new_evaluation, i);
+            }
+            let median = utils::median(&evaluations);
+            let (new_actions, new_evaluations) = actions
+                .into_iter()
+                .zip(evaluations.into_iter())
+                .filter(|&(_, evaluation)| evaluation >= median)
+                .unzip::<(ActionType, Action), f64, Vec<(ActionType, Action)>, Vec<f64>>();
+            actions = new_actions;
+            evaluations = new_evaluations;
+        }
 
         let chosen_action = if self.difficulty >= 1.0 - f64::EPSILON {
             evaluations
