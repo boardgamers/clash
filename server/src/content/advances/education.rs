@@ -1,24 +1,21 @@
-use crate::ability_initializer::{AbilityInitializerSetup, once_per_turn_advance};
+use crate::ability_initializer::{once_per_turn_advance, AbilityInitializerSetup};
 use crate::action_card::gain_action_card_from_pile;
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city_pieces::Building;
-use crate::content::advances::{AdvanceGroup, advance_group_builder};
+use crate::content::advances::{advance_group_builder, AdvanceGroup};
 use crate::content::persistent_events::PaymentRequest;
-use crate::objective_card::gain_objective_card_from_pile;
+use crate::objective_card::draw_and_log_objective_card_from_pile;
 use crate::payment::PaymentOptions;
 use crate::resource_pile::ResourcePile;
 
 pub(crate) fn education() -> AdvanceGroup {
-    advance_group_builder(
-        "Education",
-        vec![
-            writing(),
-            public_education(),
-            free_education(),
-            philosophy(),
-        ],
-    )
+    advance_group_builder("Education", vec![
+        writing(),
+        public_education(),
+        free_education(),
+        philosophy(),
+    ])
 }
 
 fn writing() -> AdvanceBuilder {
@@ -31,7 +28,10 @@ fn writing() -> AdvanceBuilder {
     .with_unlocked_building(Building::Academy)
     .add_one_time_ability_initializer(|game, player_index| {
         gain_action_card_from_pile(game, player_index);
-        gain_objective_card_from_pile(game, player_index);
+        // can't gain objective card directly, because the "combat_end" listener might
+        // currently being processed ("teach us now")
+        game.player_mut(player_index).gained_objective =
+            draw_and_log_objective_card_from_pile(game, player_index);
     })
     .add_simple_persistent_event_listener(
         |event| &mut event.construct,

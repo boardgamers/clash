@@ -74,6 +74,7 @@ pub struct Player {
     pub event_info: HashMap<String, String>,
     pub secrets: Vec<String>,
     pub(crate) objective_opportunities: Vec<String>, // transient
+    pub(crate) gained_objective: Option<u8>, // transient
 }
 
 impl Clone for Player {
@@ -182,6 +183,7 @@ impl Player {
             event_info: data.event_info,
             secrets: data.secrets,
             objective_opportunities: Vec::new(),
+            gained_objective: None,
         }
     }
 
@@ -308,6 +310,7 @@ impl Player {
             event_info: HashMap::new(),
             secrets: Vec::new(),
             objective_opportunities: Vec::new(),
+            gained_objective: None,
         }
     }
 

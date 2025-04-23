@@ -390,13 +390,20 @@ fn filter_duplicated_objectives(
 }
 
 pub(crate) fn gain_objective_card_from_pile(game: &mut Game, player: usize) {
-    if let Some(c) = draw_objective_card_from_pile(game) {
+    if let Some(c) = draw_and_log_objective_card_from_pile(game, player) {
+        gain_objective_card(game, player, c);
+    }
+}
+
+pub(crate) fn draw_and_log_objective_card_from_pile(game: &mut Game, player: usize) -> Option<u8> {
+    let card = draw_objective_card_from_pile(game);
+    if card.is_some() {
         game.add_info_log_item(&format!(
             "{} gained an objective card from the pile",
             game.player_name(player)
         ));
-        gain_objective_card(game, player, c);
     }
+    card
 }
 
 fn draw_objective_card_from_pile(game: &mut Game) -> Option<u8> {
