@@ -225,8 +225,10 @@ impl Game {
     }
 
     pub(crate) fn lock_undo(&mut self) {
-        self.undo_limit = self.action_log_index;
-        current_player_turn_log_mut(self).clear_undo();
+        if self.supports_undo {
+            self.undo_limit = self.action_log_index;
+            current_player_turn_log_mut(self).clear_undo();
+        }
     }
 
     ///
