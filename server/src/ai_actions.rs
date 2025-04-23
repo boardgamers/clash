@@ -71,7 +71,7 @@ impl AiActions {
     ///
     #[must_use]
     pub fn get_available_actions(&mut self, game: &Game) -> Vec<(ActionType, Vec<Action>)> {
-        if let Some(event) = game.events.last() {
+        let actions = if let Some(event) = game.events.last() {
             vec![(
                 ActionType::Response,
                 responses(event, game.player(game.active_player()), game)
@@ -81,7 +81,11 @@ impl AiActions {
             )]
         } else {
             base_actions(self, game)
+        };
+        for (t, a) in actions.iter() {
+            assert!(!a.is_empty(), "Empty actions for action type: {t:?}");
         }
+        actions
     }
 }
 
@@ -145,12 +149,11 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
     if !influence.is_empty() {
         let action_type = prefer_custom_action(influence);
         if let Some(i) = calculate_influence(game, p, &action_type) {
-            actions.push((
-                ActionType::Playing(PlayingActionType::Collect),
-                vec![Action::Playing(PlayingAction::InfluenceCultureAttempt(
+            actions.push((ActionType::Playing(PlayingActionType::Collect), vec![
+                Action::Playing(PlayingAction::InfluenceCultureAttempt(
                     InfluenceCultureAttempt::new(i, action_type),
-                ))],
-            ));
+                )),
+            ]));
         }
     }
 
