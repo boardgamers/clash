@@ -29,17 +29,21 @@ fn test_random_actions() {
     loop {
         rng.seed = rng.seed.wrapping_add(1);
         rng.next_seed();
-        random_actions_iterations(rng.clone());
-        iterations += 1;
-        println!("Iterations: {}", iterations);
-
+            let thread_rng = rng.clone();
+            let handle = task::spawn(async move { random_actions_iteration(thread_rng) });
+            handles.push(handle);
+        }
+        for handle in handles {
+            handle.await;
+        }
+        iterations += num_cores;
         if iterations >= ITERATIONS {
             break;
         }
     }
 }
 
-fn random_actions_iterations(mut rng: Rng) {
+fn random_actions_iteration(mut rng: Rng) {
     let seed = rng.range(0, 10_usize.pow(15)).to_string();
     let mut game = game_setup::setup_game(2, seed, true);
     game.ai_mode = true;

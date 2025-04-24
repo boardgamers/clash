@@ -8,7 +8,7 @@ use tokio::runtime::Runtime;
 
 use crate::ai_actions::AiActions;
 use crate::cache::Cache;
-use crate::utils::new_average;
+use crate::movement::MovementAction;
 use crate::{
     action::{self, Action, ActionType},
     ai_missions::ActiveMissions,
@@ -98,7 +98,7 @@ impl AI {
 
         let mut actions = get_actions(&mut self.ai_actions, game, &self.active_missions);
         if actions.is_empty() {
-            return Action::Playing(PlayingAction::EndTurn);
+            return forced_action(game);
         }
         if actions.len() == 1 {
             return actions
@@ -117,6 +117,9 @@ impl AI {
 
         let mut evaluations = vec![1.0; actions.len()];
         for i in 0..PRUNING_ITERATIONS {
+            if start_time.elapsed() >= self.thinking_time {
+                break;
+            }
             let time_remaining = self.thinking_time - start_time.elapsed();
             let thinking_time_per_action =
                 time_remaining / actions.len() as u32 / (PRUNING_ITERATIONS - i) as u32;
@@ -129,14 +132,14 @@ impl AI {
                             action,
                             action_group,
                             &mut self.rng,
-                            &thinking_time_per_action,
+                            thinking_time_per_action,
                             &players_active_missions,
                         ))
                         .powf(difficulty_factor)
                 })
                 .enumerate()
             {
-                evaluations[j] = new_average(evaluations[j], new_evaluation, i);
+                evaluations[j] = utils::new_average(evaluations[j], new_evaluation, i);
             }
             let median = utils::median(&evaluations);
             let (new_actions, new_evaluations) = actions
@@ -212,7 +215,7 @@ async fn evaluate_action(
     action: &Action,
     action_group: &ActionType,
     rng: &mut Rng,
-    thinking_time: &Duration,
+    thinking_time: Duration,
     players_active_missions: &[ActiveMissions],
 ) -> f64 {
     let player_index = game.active_player();
@@ -245,7 +248,7 @@ pub async fn get_average_score(
     game: Game,
     player_index: usize,
     rng: &mut Rng,
-    evaluation_time: &Duration,
+    evaluation_time: Duration,
     players_active_missions: &[ActiveMissions],
 ) -> f64 {
     let mut iterations = 0;
@@ -269,7 +272,7 @@ pub async fn get_average_score(
             score += handle.await.expect("multi-threading error");
         }
         iterations += num_cores;
-        if start_time.elapsed() >= *evaluation_time {
+        if start_time.elapsed() >= evaluation_time {
             break;
         }
     }
@@ -324,14 +327,14 @@ fn monte_carlo_run(
 }
 
 fn choose_monte_carlo_action(
-    ai: &mut AiActions,
+    ai_actions: &mut AiActions,
     game: &Game,
     rng: &mut Rng,
     active_missions: &ActiveMissions,
 ) -> Action {
-    let action_groups = ai.get_available_actions(game);
+    let action_groups = get_action_groups(ai_actions, game, active_missions);
     if action_groups.is_empty() {
-        return Action::Playing(PlayingAction::EndTurn);
+        return forced_action(game);
     }
     if action_groups.len() == 1 && action_groups[0].1.len() == 1 {
         return action_groups
@@ -364,26 +367,18 @@ fn choose_monte_carlo_action(
         .expect("index out of bounds")
 }
 
+fn forced_action(game: &Game) -> Action {
+    if matches!(game.state, GameState::Movement(_)) { Action::Movement(MovementAction::Stop) } else { Action::Playing(PlayingAction::EndTurn) }
+}
+
 fn get_actions(
     ai_actions: &mut AiActions,
     game: &Game,
     active_missions: &ActiveMissions,
 ) -> Vec<(ActionType, Action)> {
-    let mut actions = ai_actions.get_available_actions(game);
-    if can_move(game, active_missions.player_index) {
-        actions.push((
-            ActionType::Movement,
-            active_missions
-                .missions
-                .clone()
-                .into_iter()
-                .filter_map(|mission| mission.next_action)
-                .map(Action::Movement)
-                .collect(),
-        ));
-    }
+    let action_groups = get_action_groups(ai_actions, game, active_missions);
 
-    actions
+    action_groups
         .into_iter()
         .flat_map(|(action_group, actions)| {
             actions
@@ -392,6 +387,27 @@ fn get_actions(
                 .collect::<Vec<(ActionType, Action)>>()
         })
         .collect::<Vec<(ActionType, Action)>>()
+}
+
+fn get_action_groups(
+    ai_actions: &mut AiActions,
+    game: &Game,
+    active_missions: &ActiveMissions,
+) -> Vec<(ActionType, Vec<Action>)> {
+    let mut actions = ai_actions.get_available_actions(game);
+    if can_move(game, active_missions.player_index) {
+        let mission_actions = active_missions
+            .missions
+            .iter()
+            .filter_map(|mission| mission.next_action.as_ref())
+            .cloned()
+            .map(Action::Movement)
+            .collect::<Vec<Action>>();
+        if !mission_actions.is_empty() {
+            actions.push((ActionType::Movement, mission_actions));
+        }
+    }
+    actions
 }
 
 fn can_move(game: &Game, player_index: usize) -> bool {
@@ -539,24 +555,12 @@ fn simulate_game(
 ///
 /// Panics if the game is in an invalid state.
 #[must_use]
-pub fn rate_action(ai: &mut AI, game: &Game, action: &Action, evaluation_time: Duration) -> f64 {
-    let all_actions = ai.ai_actions.get_available_actions(game);
-    let all_actions = all_actions
-        .into_iter()
-        .flat_map(|(action_group, actions)| {
-            actions
-                .into_iter()
-                .map(|action| (action_group.clone(), action))
-                .collect::<Vec<(ActionType, Action)>>()
-        })
-        .collect::<Vec<(ActionType, Action)>>();
-    if all_actions.is_empty() {
-        return 1.0;
-    }
-    let action_index = all_actions
-        .iter()
-        .position(|(_, a)| a == action)
-        .expect("action not found in available actions");
+pub fn rate_action(
+    game: &Game,
+    player_index: usize,
+    action: &Action,
+    evaluation_time: Duration,
+) -> f64 {
     let mut rng = Rng::new();
     let players_active_missions = game
         .players
@@ -564,27 +568,20 @@ pub fn rate_action(ai: &mut AI, game: &Game, action: &Action, evaluation_time: D
         .map(|player| ActiveMissions::new(game, player.index, &mut rng, None))
         .collect::<Vec<ActiveMissions>>();
     let runtime = Runtime::new().expect("failed to create runtime");
-    let thinking_time_per_action = evaluation_time / all_actions.len() as u32;
-    let evaluations = all_actions
-        .iter()
-        .map(|(action_group, action)| {
-            runtime.block_on(evaluate_action(
-                game,
-                action,
-                action_group,
-                &mut rng,
-                &thinking_time_per_action,
-                &players_active_missions,
-            ))
-        })
-        .collect::<Vec<f64>>();
-    let max_evaluation = evaluations
-        .iter()
-        .max_by(|a, b| a.partial_cmp(b).expect("floating point error"))
-        .expect("there are no possible actions");
-    let min_evaluation = evaluations
-        .iter()
-        .min_by(|a, b| a.partial_cmp(b).expect("floating point error"))
-        .expect("there are no possible actions");
-    evaluations[action_index] - *min_evaluation / (*max_evaluation - *min_evaluation)
+    let initial_score = runtime.block_on(get_average_score(
+        game.clone(),
+        player_index,
+        &mut rng,
+        evaluation_time / 2,
+        &players_active_missions,
+    ));
+    let new_game = action::execute_action(game.clone(), action.clone(), player_index);
+    let new_score = runtime.block_on(get_average_score(
+        new_game,
+        player_index,
+        &mut rng,
+        evaluation_time / 2,
+        &players_active_missions,
+    ));
+    new_score - initial_score
 }
