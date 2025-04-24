@@ -3,7 +3,7 @@ use crate::card::validate_card_selection;
 use crate::city::{City, MoodState};
 use crate::collect::available_collect_actions;
 use crate::construct::{Construct, available_buildings, new_building_positions};
-use crate::content::custom_actions::CustomEventAction;
+use crate::content::custom_actions::{CustomActionType, CustomEventAction};
 use crate::content::persistent_events::{
     ChangeGovernmentRequest, EventResponse, HandCardsRequest, MultiRequest, PersistentEventRequest,
     PersistentEventState, PositionRequest, SelectedStructure, is_selected_structures_valid,
@@ -194,6 +194,11 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
     }
 
     for (a, _) in game.available_custom_actions(p.index) {
+        if a == CustomActionType::ForcedLabor {
+            // todo forced labor doesn't work with collect cache
+            continue;
+        }
+
         let cities = if a.is_city_bound() {
             p.cities
                 .iter()

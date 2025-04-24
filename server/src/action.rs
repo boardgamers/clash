@@ -22,7 +22,7 @@ use crate::movement::MovementAction::{Move, Stop};
 use crate::movement::{
     CurrentMove, MoveState, MoveUnits, MovementAction, has_movable_units, move_units_destinations,
 };
-use crate::objective_card::{gain_objective_card, on_objective_cards, present_objective_cards};
+use crate::objective_card::{complete_objective_card, gain_objective_card, on_objective_cards};
 use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::recruit::on_recruit;
 use crate::resource::check_for_waste;
@@ -138,7 +138,7 @@ pub fn execute_without_undo(
     check_for_waste(game);
     update_stats(game);
 
-    if let Some(o) = game.player(player_index).gained_objective {
+    if let Some(o) = game.player_mut(player_index).gained_objective.take() {
         gain_objective_card(game, player_index, o);
     }
 
@@ -149,8 +149,18 @@ pub fn execute_without_undo(
         .filter(|c| c.mood_state == MoodState::Angry)
         .count()
         >= 4
+        && !current_player_turn_log_mut(game).items.is_empty()
     {
-        present_objective_cards(game, player_index, vec!["Terror Regime".to_string()]);
+        //endless loop if this is not selected automatically
+        let card = game
+            .player(player_index)
+            .objective_cards
+            .iter()
+            .find(|o| **o == 29);
+        if let Some(o) = card {
+            // actually did an action
+            complete_objective_card(game, player_index, *o, "Terror Regime".to_string());
+        }
     }
 
     Ok(())

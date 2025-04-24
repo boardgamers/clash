@@ -685,13 +685,6 @@ fn test_fire() {
                 Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
                     "B2",
                 )])),
-            )
-            .without_json_comparison(),
-            TestAction::undoable(
-                0,
-                Action::Response(EventResponse::SelectHandCards(vec![
-                    HandCard::ObjectiveCard(29),
-                ])),
             ),
         ],
     );

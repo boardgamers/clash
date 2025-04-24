@@ -127,22 +127,31 @@ pub(crate) fn invalidate_collect_cache() -> Builtin {
             |event| &mut event.found_city,
             1,
             |game, player, _, p| {
-                reset_collect_within_range(player, *p, game);
+                reset_collect_within_range(player, *p, game, 1);
             },
         )
         .add_simple_persistent_event_listener(
             |event| &mut event.combat_end,
             0,
-            |game, _player, _, p| {
-                reset_collect_within_range_for_all(game, p.combat.defender_position);
+            |game, player, _, p| {
+                let range = if game.player(player).civilization.is_pirates() {
+                    2 // pirates zone of control can influence a city 2 tiles away
+                } else {
+                    1
+                };
+                reset_collect_within_range_for_all(game, p.combat.defender_position, range);
             },
         )
         .build()
 }
 
-pub(crate) fn reset_collect_within_range(player: usize, position: Position, game: &mut Game) {
+pub(crate) fn reset_collect_within_range(
+    player: usize,
+    position: Position,
+    game: &mut Game,
+    range: u8,
+) {
     let p = game.player_mut(player);
-    let range = 1;
 
     // husbandry is not used yet by the AI
     //     if is_land && p.has_advance(Advance::Husbandry) {
@@ -151,15 +160,15 @@ pub(crate) fn reset_collect_within_range(player: usize, position: Position, game
     //     1
     // };
     for c in &mut p.cities {
-        if c.position.distance(position) <= range {
+        if c.position.distance(position) <= range as u32 {
             c.possible_collections.clear();
         }
     }
 }
 
-pub(crate) fn reset_collect_within_range_for_all(game: &mut Game, pos: Position) {
+pub(crate) fn reset_collect_within_range_for_all(game: &mut Game, pos: Position, range: u8) {
     for p in 0..game.human_players_count() {
-        reset_collect_within_range(p, pos, game);
+        reset_collect_within_range(p, pos, game, range);
     }
 }
 
@@ -172,7 +181,7 @@ pub(crate) fn reset_collect_within_range_for_all_except(
         if p == player {
             continue;
         }
-        reset_collect_within_range(p, pos, game);
+        reset_collect_within_range(p, pos, game, 1);
     }
 }
 

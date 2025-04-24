@@ -17,7 +17,7 @@ use crate::content::persistent_events::{KilledUnits, PersistentEventType, UnitsR
 use crate::explore::is_any_ship;
 use crate::game::GameState;
 use crate::movement::{CurrentMove, MovementRestriction};
-use crate::player::Player;
+use crate::player::{Player, remove_unit};
 use crate::{game::Game, position::Position, resource_pile::ResourcePile, utils};
 
 #[readonly::make]
@@ -546,7 +546,7 @@ pub(crate) fn units_killed(game: &mut Game, player_index: usize, killed_units: K
 }
 
 fn kill_unit(game: &mut Game, unit_id: u32, player_index: usize, killer: Option<usize>) {
-    let unit = game.players[player_index].remove_unit(unit_id);
+    let unit = remove_unit(player_index, unit_id, game);
     if matches!(unit.unit_type, UnitType::Leader) {
         let leader = game.players[player_index]
             .active_leader

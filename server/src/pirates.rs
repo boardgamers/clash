@@ -8,7 +8,7 @@ use crate::content::persistent_events::{
 use crate::game::Game;
 use crate::incident::{BASE_EFFECT_PRIORITY, IncidentBuilder};
 use crate::payment::PaymentOptions;
-use crate::player::{Player, add_unit};
+use crate::player::{Player, add_unit, remove_unit};
 use crate::player_events::IncidentTarget;
 use crate::position::Position;
 use crate::resource::ResourceType;
@@ -195,7 +195,7 @@ fn remove_pirate_ships(builder: IncidentBuilder) -> IncidentBuilder {
                     .join(", ")
             ));
             for unit in &s.choice {
-                game.player_mut(pirates).remove_unit(*unit);
+                remove_unit(pirates, *unit, game);
             }
         },
     )

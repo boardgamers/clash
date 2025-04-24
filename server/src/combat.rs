@@ -11,6 +11,7 @@ use crate::combat_stats::{CombatStats, active_defenders, new_combat_stats};
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
 use crate::movement::{MoveUnits, MovementRestriction, move_units, stop_current_move};
+use crate::player::remove_unit;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::tactics_card::CombatRole;
@@ -390,7 +391,7 @@ pub fn capture_position(game: &mut Game, old_player: usize, position: Position, 
         ));
     }
     for id in captured_settlers {
-        game.players[old_player].remove_unit(id);
+        remove_unit(old_player, id, game);
     }
     if game.player(old_player).try_get_city(position).is_some() {
         conquer_city(game, position, new_player, old_player);

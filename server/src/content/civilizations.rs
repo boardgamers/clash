@@ -22,57 +22,64 @@ pub fn get_all() -> Vec<Civilization> {
             ],
         ),
         Civilization::new("test1", vec![], vec![]),
-        Civilization::new(
-            "Maya",
-            vec![
-                // todo add other effects
-                SpecialAdvance::builder(Advance::Terrace, "Terrace", Advance::Irrigation)
-                    .with_reset_collect_stats()
-                    .add_transient_event_listener(
-                        |events| &mut events.terrain_collect_options,
-                        2,
-                        |m, (), ()| {
-                            m.insert(
-                                Terrain::Mountain,
-                                std::collections::HashSet::from([
-                                    ResourcePile::food(1),
-                                    ResourcePile::wood(1),
-                                    ResourcePile::ore(1),
-                                ]),
-                            );
-                        },
-                    )
-                    .build(),
-            ],
-            vec![
-                Leader::builder(
-                    "Kʼinich Janaab Pakal I",
-                    "Shield of the sun",
-                    "ignore the first hit in a battle with an Obelisk",
-                    "",
-                    "",
+        Civilization::new("test2", vec![], vec![]),
+    ]
+}
+
+fn get_maya() -> Civilization {
+    Civilization::new(
+        "Maya",
+        vec![
+            // todo add other effects
+            SpecialAdvance::builder(Advance::Terrace, "Terrace", Advance::Irrigation)
+                .with_reset_collect_stats()
+                .add_transient_event_listener(
+                    |events| &mut events.terrain_collect_options,
+                    2,
+                    |m, (), ()| {
+                        m.insert(
+                            Terrain::Mountain,
+                            std::collections::HashSet::from([
+                                ResourcePile::food(1),
+                                ResourcePile::wood(1),
+                                ResourcePile::ore(1),
+                            ]),
+                        );
+                    },
                 )
-                .add_combat_round_start_listener(4, |game, c, s, _role| {
-                    if c.round == 1
-                        && game
-                            .try_get_any_city(c.defender_position)
-                            .is_some_and(|city| city.pieces.obelisk.is_some())
-                    {
-                        s.roll_log.push(
+                .build(),
+        ],
+        vec![
+            Leader::builder(
+                "Kʼinich Janaab Pakal I",
+                "Shield of the sun",
+                "ignore the first hit in a battle with an Obelisk",
+                "",
+                "",
+            )
+            .add_combat_round_start_listener(4, |game, c, s, _role| {
+                if c.round == 1
+                    && game
+                        .try_get_any_city(c.defender_position)
+                        .is_some_and(|city| city.pieces.obelisk.is_some())
+                {
+                    s.roll_log.push(
                         "Kʼinich Janaab Pakal I ignores the first hit in a battle with an Obelisk"
                             .to_string(),
                     );
-                        s.hit_cancels += 1;
-                    }
-                })
-                .build(),
-            ],
-        ),
-    ]
+                    s.hit_cancels += 1;
+                }
+            })
+            .build(),
+        ],
+    )
 }
 
 #[must_use]
 pub fn get_civilization(name: &str) -> Option<Civilization> {
+    if name == "Maya" {
+        return Some(get_maya());
+    }
     get_all()
         .into_iter()
         .find(|civilization| civilization.name == name)
