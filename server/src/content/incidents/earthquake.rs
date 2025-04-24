@@ -6,7 +6,7 @@ use crate::content::persistent_events::{
     PositionRequest, SelectedStructure, Structure, StructuresRequest, is_selected_structures_valid,
 };
 use crate::game::Game;
-use crate::incident::{Incident, IncidentBaseEffect, MoodModifier};
+use crate::incident::{DecreaseMood, Incident, IncidentBaseEffect, MoodModifier};
 use crate::player_events::{IncidentInfo, IncidentTarget};
 use crate::position::Position;
 use itertools::Itertools;
@@ -99,7 +99,7 @@ fn earthquake(id: u8, name: &str, target: IncidentTarget) -> Incident {
         MoodModifier::Decrease,
         move |_p, _game, i| {
             let c = &i.player.must_reduce_mood;
-            (c.clone(), c.len() as u8)
+            DecreaseMood::new(c.clone(), c.len() as u8)
         },
     )
     .build()
@@ -235,7 +235,7 @@ fn flood(id: u8, name: &str, target: IncidentTarget) -> Incident {
         IncidentBaseEffect::None,
     )
     .add_decrease_mood(target, MoodModifier::Decrease, |p, game, _| {
-        (non_angry_shore_cites(game, p.index), 1)
+        DecreaseMood::new(non_angry_shore_cites(game, p.index), 1)
     })
     .build()
 }

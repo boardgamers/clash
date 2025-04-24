@@ -130,6 +130,29 @@ pub(crate) enum MoodModifier {
     MakeAngry,
 }
 
+pub(crate) struct DecreaseMood {
+    pub choices: Vec<Position>,
+    pub needed: u8,
+}
+
+impl DecreaseMood {
+    #[must_use]
+    pub fn new(possible: Vec<Position>, needed: u8) -> Self {
+        Self {
+            needed: needed.min(possible.len() as u8),
+            choices: possible,
+        }
+    }
+
+    #[must_use]
+    pub fn none() -> Self {
+        Self {
+            choices: vec![],
+            needed: 0,
+        }
+    }
+}
+
 pub struct IncidentBuilder {
     id: u8,
     pub name: String,
@@ -463,15 +486,11 @@ impl IncidentBuilder {
         self,
         target: IncidentTarget,
         mood_modifier: MoodModifier,
-        cities: impl Fn(&Player, &Game, &IncidentInfo) -> (Vec<Position>, u8)
-        + 'static
-        + Clone
-        + Sync
-        + Send,
+        cities: impl Fn(&Player, &Game, &IncidentInfo) -> DecreaseMood + 'static + Clone + Sync + Send,
     ) -> Self {
         let cities2 = cities.clone();
-        self.add_myths_payment(target, mood_modifier, move |g, p, i| cities(p, g, i).1)
-        .decrease_mood(target, mood_modifier, cities2)
+        self.add_myths_payment(target, mood_modifier, move |g, p, i| cities(p, g, i).needed)
+            .decrease_mood(target, mood_modifier, cities2)
     }
 
     fn add_myths_payment(
@@ -526,7 +545,7 @@ impl IncidentBuilder {
         self,
         target: IncidentTarget,
         mood_modifier: MoodModifier,
-        cities: impl Fn(&Player, &Game, &IncidentInfo) -> (Vec<Position>, u8)
+        cities: impl Fn(&Player, &Game, &IncidentInfo) -> DecreaseMood
         + 'static
         + Clone
         + Sync
@@ -536,7 +555,8 @@ impl IncidentBuilder {
             target,
             9,
             move |game, p, i| {
-                let (cities, mut needed) = cities(game.player(p), game, i);
+                let d = cities(game.player(p), game, i);
+                let mut needed = d.needed;
                 needed -= i.player.myths_payment;
 
                 let action = match mood_modifier {
@@ -546,7 +566,7 @@ impl IncidentBuilder {
 
                 let needed1 = needed..=needed;
                 let description = &format!("Select a city to {action}");
-                Some(PositionRequest::new(cities, needed1, description))
+                Some(PositionRequest::new(d.choices, needed1, description))
             },
             move |game, s, _| {
                 decrease_mod_and_log(game, s, mood_modifier);

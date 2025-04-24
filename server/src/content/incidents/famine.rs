@@ -6,7 +6,7 @@ use crate::content::builtin::Builtin;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::UnitsRequest;
 use crate::game::Game;
-use crate::incident::{Incident, IncidentBaseEffect, MoodModifier};
+use crate::incident::{DecreaseMood, Incident, IncidentBaseEffect, MoodModifier};
 use crate::player::Player;
 use crate::player_events::IncidentTarget;
 use crate::playing_actions::PlayingActionType;
@@ -33,31 +33,26 @@ fn pestilence() -> Incident {
             You cannot construct buildings or wonders until you research Sanitation.",
         IncidentBaseEffect::None,
     )
-    .with_protection_advance(Advance::Sanitation)
-    .add_decrease_mood(
-        IncidentTarget::AllPlayers,
-        MoodModifier::Decrease,
-        move |p, _game, i| {
-            if !pestilence_applies(p) {
-                return (vec![], 0);
-            }
+        .with_protection_advance(Advance::Sanitation)
+        .add_decrease_mood(
+            IncidentTarget::AllPlayers,
+            MoodModifier::Decrease,
+            move |p, _game, _| {
+                if !pestilence_applies(p) {
+                    return DecreaseMood::none();
+                }
 
-            let cites = non_angry_cites(p);
-            let needed = (if additional_sanitation_damage(p) {
-                2
-            } else {
-                1
-            }
-            .min(cites.len() as u8))
-                - i.player.payment.amount();
-
-            (cites, needed)
-        },
-    )
-    .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, _, _, _| {
-        game.permanent_effects.push(PermanentEffect::Pestilence);
-    })
-    .build()
+                DecreaseMood::new(non_angry_cites(p), if additional_sanitation_damage(p) {
+                    2
+                } else {
+                    1
+                })
+            },
+        )
+        .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, _, _, _| {
+            game.permanent_effects.push(PermanentEffect::Pestilence);
+        })
+        .build()
 }
 
 fn pestilence_applies(player: &Player) -> bool {
@@ -75,25 +70,25 @@ pub(crate) fn pestilence_permanent_effect() -> Builtin {
         "Pestilence",
         "You cannot construct buildings or wonders until you research Sanitation.",
     )
-    .add_transient_event_listener(
-        |event| &mut event.is_playing_action_available,
-        1,
-        |available, game, i| {
-            let player = game.player(i.player);
-            if game
-                .permanent_effects
-                .contains(&PermanentEffect::Pestilence)
-                && matches!(i.action_type, PlayingActionType::Construct)
-                && !player.has_advance(Advance::Sanitation)
-            {
-                *available = Err(
-                    "Cannot construct buildings or wonders until you research Sanitation."
-                        .to_string(),
-                );
-            }
-        },
-    )
-    .build()
+        .add_transient_event_listener(
+            |event| &mut event.is_playing_action_available,
+            1,
+            |available, game, i| {
+                let player = game.player(i.player);
+                if game
+                    .permanent_effects
+                    .contains(&PermanentEffect::Pestilence)
+                    && matches!(i.action_type, PlayingActionType::Construct)
+                    && !player.has_advance(Advance::Sanitation)
+                {
+                    *available = Err(
+                        "Cannot construct buildings or wonders until you research Sanitation."
+                            .to_string(),
+                    );
+                }
+            },
+        )
+        .build()
 }
 
 fn epidemics() -> Incident {
@@ -104,34 +99,34 @@ fn epidemics() -> Incident {
             Choose 1 (or 2 if you have Roads, Navigation, or Trade Routes) units and kill them.",
         IncidentBaseEffect::None,
     )
-    .with_protection_advance(Advance::Sanitation)
-    .add_incident_units_request(
-        IncidentTarget::AllPlayers,
-        0,
-        |game, player_index, _incident| {
-            let p = game.player(player_index);
-            let units = p.units.iter().map(|u| u.id).collect_vec();
-            let needed = if additional_sanitation_damage(p) {
-                2
-            } else {
-                1
-            };
-            if units.len() <= 2 {
-                None
-            } else {
-                Some(UnitsRequest::new(
-                    player_index,
-                    units,
-                    needed..=needed,
-                    "Select units to kill",
-                ))
-            }
-        },
-        |game, s, _| {
-            kill_incident_units(game, s);
-        },
-    )
-    .build()
+        .with_protection_advance(Advance::Sanitation)
+        .add_incident_units_request(
+            IncidentTarget::AllPlayers,
+            0,
+            |game, player_index, _incident| {
+                let p = game.player(player_index);
+                let units = p.units.iter().map(|u| u.id).collect_vec();
+                let needed = if additional_sanitation_damage(p) {
+                    2
+                } else {
+                    1
+                };
+                if units.len() <= 2 {
+                    None
+                } else {
+                    Some(UnitsRequest::new(
+                        player_index,
+                        units,
+                        needed..=needed,
+                        "Select units to kill",
+                    ))
+                }
+            },
+            |game, s, _| {
+                kill_incident_units(game, s);
+            },
+        )
+        .build()
 }
 
 pub(crate) fn kill_incident_units(game: &mut Game, s: &SelectedChoice<Vec<u32>>) {
@@ -220,13 +215,13 @@ pub(crate) fn famine(
             game.player_mut(player_index)
                 .lose_resources(ResourcePile::food(lost));
 
-            game.add_info_log_item(&format!("{player_name} lost {lost} food to Famine",));
+            game.add_info_log_item(&format!("{player_name} lost {lost} food to Famine", ));
         })
         .add_decrease_mood(target, MoodModifier::MakeAngry, move |p, game, i| {
             if player_pred2(p) && i.player.payment.is_empty() {
-                (famine_targets(p, game, city_pred2.clone()), 1)
+                DecreaseMood::new(famine_targets(p, game, city_pred2.clone()), 1)
             } else {
-                (vec![], 0)
+                DecreaseMood::none()
             }
         })
         .build()

@@ -9,7 +9,7 @@ use crate::content::persistent_events::{
     HandCardsRequest, PaymentRequest, PositionRequest, UnitsRequest,
 };
 use crate::game::Game;
-use crate::incident::{Incident, IncidentBaseEffect, MoodModifier};
+use crate::incident::{DecreaseMood, Incident, IncidentBaseEffect, MoodModifier};
 use crate::map::{Map, Terrain};
 use crate::objective_card::discard_objective_card;
 use crate::payment::PaymentOptions;
@@ -282,7 +282,7 @@ fn fire() -> Incident {
         |p, game, i| {
             let b = burning_cities(p, game, i);
             let a = b.len() as u8;
-            (b, a)
+            DecreaseMood::new(b, a)
         },
     )
     .build()

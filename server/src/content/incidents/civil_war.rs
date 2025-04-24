@@ -4,9 +4,7 @@ use crate::content::incidents::famine::kill_incident_units;
 use crate::content::incidents::good_year::select_player_to_gain_settler;
 use crate::content::persistent_events::{PaymentRequest, PositionRequest, UnitsRequest};
 use crate::game::Game;
-use crate::incident::{
-    decrease_mod_and_log, Incident, IncidentBaseEffect, IncidentBuilder, MoodModifier,
-};
+use crate::incident::{decrease_mod_and_log, DecreaseMood, Incident, IncidentBaseEffect, IncidentBuilder, MoodModifier};
 use crate::payment::{PaymentConversion, PaymentConversionType, PaymentOptions};
 use crate::player::Player;
 use crate::player_events::IncidentTarget;
@@ -44,7 +42,7 @@ fn migration(id: u8) -> Incident {
         .add_decrease_mood(
             IncidentTarget::ActivePlayer,
             MoodModifier::Decrease,
-            |p, _game, _| (city::non_angry_cites(p), 1),
+            |p, _game, _| DecreaseMood::new(city::non_angry_cites(p), 1),
         )
         .build()
 }
@@ -63,9 +61,9 @@ fn civil_war(id: u8) -> Incident {
         MoodModifier::Decrease,
         |p, _game, _| {
             if non_happy_cites_with_infantry(p).is_empty() {
-                (city::non_angry_cites(p), 1)
+                DecreaseMood::new(city::non_angry_cites(p), 1)
             } else {
-                (vec![], 0)
+                DecreaseMood::none()
             }
         },
     )
