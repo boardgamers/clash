@@ -369,26 +369,17 @@ fn test_increase_happiness() {
 fn test_recruit() {
     JSON.test(
         "recruit",
-        vec![
-            TestAction::undoable(
-                0,
-                Action::Playing(Recruit(
-                    playing_actions::Recruit::new(
-                        &Units::new(1, 1, 0, 0, 0, 0),
-                        Position::from_offset("A1"),
-                        ResourcePile::food(1) + ResourcePile::ore(1) + ResourcePile::gold(2),
-                    )
-                    .with_replaced_units(&[4]),
-                )),
-            )
-            .without_json_comparison(),
-            TestAction::undoable(
-                0,
-                Action::Response(EventResponse::SelectHandCards(vec![
-                    HandCard::ObjectiveCard(29),
-                ])),
-            ),
-        ],
+        vec![TestAction::undoable(
+            0,
+            Action::Playing(Recruit(
+                playing_actions::Recruit::new(
+                    &Units::new(1, 1, 0, 0, 0, 0),
+                    Position::from_offset("A1"),
+                    ResourcePile::food(1) + ResourcePile::ore(1) + ResourcePile::gold(2),
+                )
+                .with_replaced_units(&[4]),
+            )),
+        )],
     );
 }
 

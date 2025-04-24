@@ -8,7 +8,7 @@ use crate::content::persistent_events::{Structure, UnitTypeRequest};
 use crate::content::tactics_cards::TacticsCardFactory;
 use crate::cultural_influence::InfluenceCultureInfo;
 use crate::game::Game;
-use crate::player::add_unit;
+use crate::player::{add_unit, remove_unit};
 use crate::player_events::PlayingActionInfo;
 use crate::playing_actions::{ActionCost, PlayingActionType};
 use crate::unit::UnitType;
@@ -32,11 +32,17 @@ pub(crate) fn cultural_takeover(id: u8, tactics_card: TacticsCardFactory) -> Act
         |game, player, a| {
             if let Some(position) = a.selected_position {
                 //set in use_cultural_takeover
-                let b = game.player_mut(get_barbarians_player(game).index);
-                let units = b.get_units(position).iter().map(|u| u.id).collect_vec();
+
+                let barbarians = get_barbarians_player(game);
+                let b = barbarians.index;
+                let units = barbarians
+                    .get_units(position)
+                    .iter()
+                    .map(|u| u.id)
+                    .collect_vec();
                 let len = units.len();
                 for id in units {
-                    b.remove_unit(id);
+                    remove_unit(b, id, game);
                 }
                 if len > 0 {
                     let p = game.player_mut(player);

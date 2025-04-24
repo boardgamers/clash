@@ -10,7 +10,7 @@ use crate::content::custom_actions::{CustomActionType, CustomEventAction, execut
 use crate::cultural_influence::{InfluenceCultureAttempt, influence_culture_attempt};
 use crate::game::GameState;
 use crate::happiness::increase_happiness;
-use crate::player::Player;
+use crate::player::{Player, remove_unit};
 use crate::player_events::PlayingActionInfo;
 use crate::recruit::recruit;
 use crate::unit::Units;
@@ -275,7 +275,7 @@ impl PlayingAction {
                 gain_advance_without_payment(game, advance, player_index, payment, true);
             }
             FoundCity { settler } => {
-                let settler = game.players[player_index].remove_unit(settler);
+                let settler = remove_unit(player_index, settler, game);
                 if !settler.can_found_city(game) {
                     return Err("Cannot found city".to_string());
                 }

@@ -710,7 +710,7 @@ fn exhausted_land(builder: IncidentBuilder) -> IncidentBuilder {
             ));
             let t = game.map.tiles.get_mut(&pos).expect("tile should exist");
             *t = Terrain::Exhausted(Box::new(t.clone()));
-            reset_collect_within_range_for_all(game, pos);
+            reset_collect_within_range_for_all(game, pos, 1);
         },
     )
 }

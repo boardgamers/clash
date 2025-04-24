@@ -263,7 +263,7 @@ fn add_block_tiles_with_log(
     let tiles = block.tiles(pos, rotation);
 
     for (p, _) in &tiles {
-        reset_collect_within_range_for_all(game, *p);
+        reset_collect_within_range_for_all(game, *p, 1);
     }
 
     let s = tiles

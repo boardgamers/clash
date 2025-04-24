@@ -1,5 +1,5 @@
 use crate::advance::Advance;
-use crate::ai_collect::reset_collect_within_range_for_all_except;
+use crate::ai_collect::{reset_collect_within_range, reset_collect_within_range_for_all_except};
 use crate::city_pieces::{DestroyedStructures, DestroyedStructuresData};
 use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::content::builtin;
@@ -731,16 +731,6 @@ impl Player {
             .unwrap_or_else(|| panic!("unit should exist {id}for player {}", self.index))
     }
 
-    pub(crate) fn remove_unit(&mut self, id: u32) -> Unit {
-        // carried units can be transferred to another ship - which has to be selected later
-        self.units.remove(
-            self.units
-                .iter()
-                .position(|unit| unit.id == id)
-                .expect("unit should exist"),
-        )
-    }
-
     #[must_use]
     pub fn get_units(&self, position: Position) -> Vec<&Unit> {
         self.units
@@ -807,6 +797,19 @@ pub fn add_unit(player: usize, position: Position, unit_type: UnitType, game: &m
             }
         }
     }
+}
+
+pub(crate) fn remove_unit(player: usize, id: u32, game: &mut Game) -> Unit {
+    // carried units can be transferred to another ship - which has to be selected later
+    let p = game.player_mut(player);
+    let u = p.units.remove(
+        p.units
+            .iter()
+            .position(|unit| unit.id == id)
+            .expect("unit should exist"),
+    );
+    reset_collect_within_range(player, u.position, game, 1);
+    u
 }
 
 #[derive(Serialize, Deserialize, PartialEq)]
