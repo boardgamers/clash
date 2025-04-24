@@ -5,6 +5,7 @@ use crate::collect::{CollectContext, CollectInfo};
 use crate::combat::Combat;
 use crate::combat_listeners::{CombatEnd, CombatRoundEnd, CombatRoundStart};
 use crate::combat_stats::CombatStats;
+use crate::construct::ConstructInfo;
 use crate::content::custom_actions::CustomEventAction;
 use crate::content::persistent_events::KilledUnits;
 use crate::cultural_influence::{InfluenceCultureInfo, InfluenceCultureOutcome};
@@ -28,7 +29,6 @@ use itertools::Itertools;
 use num::Zero;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
-use crate::construct::ConstructInfo;
 
 pub(crate) type PersistentEvent<V = ()> = Event<Game, PersistentEventInfo, (), V>;
 

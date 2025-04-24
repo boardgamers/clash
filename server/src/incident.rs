@@ -545,11 +545,7 @@ impl IncidentBuilder {
         self,
         target: IncidentTarget,
         mood_modifier: MoodModifier,
-        cities: impl Fn(&Player, &Game, &IncidentInfo) -> DecreaseMood
-        + 'static
-        + Clone
-        + Sync
-        + Send,
+        cities: impl Fn(&Player, &Game, &IncidentInfo) -> DecreaseMood + 'static + Clone + Sync + Send,
     ) -> Self {
         self.add_incident_position_request(
             target,

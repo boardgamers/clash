@@ -74,7 +74,7 @@ pub struct Player {
     pub event_info: HashMap<String, String>,
     pub secrets: Vec<String>,
     pub(crate) objective_opportunities: Vec<String>, // transient
-    pub(crate) gained_objective: Option<u8>, // transient
+    pub(crate) gained_objective: Option<u8>,         // transient
 }
 
 impl Clone for Player {

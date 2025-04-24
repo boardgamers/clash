@@ -1,3 +1,4 @@
+use crate::advance::{Advance, gain_advance_without_payment};
 use crate::city::{City, MoodState};
 use crate::city_pieces::Building;
 use crate::consts::MAX_CITY_PIECES;
@@ -9,7 +10,6 @@ use crate::player_events::CostInfo;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use serde::{Deserialize, Serialize};
-use crate::advance::{gain_advance_without_payment, Advance};
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub struct Construct {
@@ -146,13 +146,7 @@ pub(crate) fn on_construct(game: &mut Game, player_index: usize, info: Construct
         PersistentEventType::Construct,
     ) {
         if let Some(advance) = i.gained_advance {
-            gain_advance_without_payment(
-                game,
-                advance,
-                player_index,
-                ResourcePile::empty(),
-                true,
-            );
+            gain_advance_without_payment(game, advance, player_index, ResourcePile::empty(), true);
         }
     }
 }

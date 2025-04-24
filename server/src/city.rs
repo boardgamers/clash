@@ -13,8 +13,8 @@ use crate::{
     position::Position,
 };
 use MoodState::*;
-use num::Zero;
 use itertools::Itertools;
+use num::Zero;
 
 #[readonly::make]
 pub struct City {

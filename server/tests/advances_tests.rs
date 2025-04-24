@@ -515,7 +515,8 @@ fn test_dogma_with_anarchy() {
                     advance: advance::Advance::Dogma,
                     payment: ResourcePile::ideas(2),
                 }),
-            ).without_json_comparison(),
+            )
+            .without_json_comparison(),
             TestAction::undoable(
                 1,
                 Action::Playing(Construct(construct::Construct::new(
@@ -523,13 +524,15 @@ fn test_dogma_with_anarchy() {
                     Temple,
                     ResourcePile::new(0, 1, 1, 0, 0, 0, 0),
                 ))),
-            ).without_json_comparison(),
+            )
+            .without_json_comparison(),
             TestAction::undoable(
                 1,
                 Action::Response(EventResponse::ResourceReward(ResourcePile::culture_tokens(
                     1,
                 ))),
-            ).without_json_comparison(),
+            )
+            .without_json_comparison(),
             TestAction::not_undoable(
                 1,
                 Action::Response(EventResponse::SelectAdvance(advance::Advance::Fanaticism)),

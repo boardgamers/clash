@@ -1,21 +1,24 @@
-use crate::ability_initializer::{once_per_turn_advance, AbilityInitializerSetup};
+use crate::ability_initializer::{AbilityInitializerSetup, once_per_turn_advance};
 use crate::action_card::gain_action_card_from_pile;
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city_pieces::Building;
-use crate::content::advances::{advance_group_builder, AdvanceGroup};
+use crate::content::advances::{AdvanceGroup, advance_group_builder};
 use crate::content::persistent_events::PaymentRequest;
 use crate::objective_card::draw_and_log_objective_card_from_pile;
 use crate::payment::PaymentOptions;
 use crate::resource_pile::ResourcePile;
 
 pub(crate) fn education() -> AdvanceGroup {
-    advance_group_builder("Education", vec![
-        writing(),
-        public_education(),
-        free_education(),
-        philosophy(),
-    ])
+    advance_group_builder(
+        "Education",
+        vec![
+            writing(),
+            public_education(),
+            free_education(),
+            philosophy(),
+        ],
+    )
 }
 
 fn writing() -> AdvanceBuilder {

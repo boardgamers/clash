@@ -89,8 +89,7 @@ fn pick_resource(
         .iter()
         .chunk_by(|c| c.position)
         .into_iter()
-        .map(|(p, group)|
-            (p, group.map(|c| c.times).sum::<u8>()))
+        .map(|(p, group)| (p, group.map(|c| c.times).sum::<u8>()))
         .collect_vec();
 
     let available = info

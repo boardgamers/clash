@@ -48,7 +48,7 @@ pub struct Game {
     pub action_log_index: usize,
     pub log: Vec<Vec<String>>,
     pub undo_limit: usize,
-    pub ai_mode: bool, 
+    pub ai_mode: bool,
     pub actions_left: u32,
     pub successful_cultural_influence: bool,
     pub round: u32, // starts at 1
