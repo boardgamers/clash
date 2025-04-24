@@ -1,9 +1,9 @@
 use crate::ability_initializer::{AbilityInitializerSetup, SelectedChoice};
 use crate::advance::Advance;
+use crate::city::non_angry_cites;
 use crate::city::{City, MoodState};
 use crate::content::builtin::Builtin;
 use crate::content::effects::PermanentEffect;
-use crate::content::incidents::civil_war::non_angry_cites;
 use crate::content::persistent_events::UnitsRequest;
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, MoodModifier};
@@ -42,13 +42,16 @@ fn pestilence() -> Incident {
                 return (vec![], 0);
             }
 
-            let needed = if additional_sanitation_damage(p) {
+            let cites = non_angry_cites(p);
+            let needed = (if additional_sanitation_damage(p) {
                 2
             } else {
                 1
-            } - i.player.payment.amount();
+            }
+            .min(cites.len() as u8))
+                - i.player.payment.amount();
 
-            (non_angry_cites(p), needed)
+            (cites, needed)
         },
     )
     .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, _, _, _| {

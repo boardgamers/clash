@@ -69,7 +69,7 @@ impl AiActions {
     /// - move actions are not returned at all - this required special handling
     ///
     /// # Panics
-    /// 
+    ///
     /// Panics if the actions for any type is empty
     #[must_use]
     pub fn get_available_actions(&mut self, game: &Game) -> Vec<(ActionType, Vec<Action>)> {
@@ -85,7 +85,14 @@ impl AiActions {
             base_actions(self, game)
         };
         for (t, a) in &actions {
-            assert!(!a.is_empty(), "Empty actions for action type: {t:?}");
+            assert!(
+                !a.is_empty(),
+                "Empty actions for action type: {t:?} - {:?}",
+                game.events
+                    .last()
+                    .as_ref()
+                    .expect("event not found")
+            );
         }
         actions
     }

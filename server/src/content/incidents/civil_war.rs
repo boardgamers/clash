@@ -5,7 +5,7 @@ use crate::content::incidents::good_year::select_player_to_gain_settler;
 use crate::content::persistent_events::{PaymentRequest, PositionRequest, UnitsRequest};
 use crate::game::Game;
 use crate::incident::{
-    Incident, IncidentBaseEffect, IncidentBuilder, MoodModifier, decrease_mod_and_log,
+    decrease_mod_and_log, Incident, IncidentBaseEffect, IncidentBuilder, MoodModifier,
 };
 use crate::payment::{PaymentConversion, PaymentConversionType, PaymentOptions};
 use crate::player::Player;
@@ -15,9 +15,10 @@ use crate::resource_pile::ResourcePile;
 use crate::status_phase::{
     add_change_government, can_change_government_for_free, get_status_phase,
 };
-use crate::unit::{UnitType, kill_units};
+use crate::unit::{kill_units, UnitType};
 use crate::wonder::draw_wonder_from_pile;
 use itertools::Itertools;
+use crate::city;
 
 pub(crate) fn civil_war_incidents() -> Vec<Incident> {
     vec![
@@ -43,17 +44,9 @@ fn migration(id: u8) -> Incident {
         .add_decrease_mood(
             IncidentTarget::ActivePlayer,
             MoodModifier::Decrease,
-            |p, _game, _| (non_angry_cites(p), 1),
+            |p, _game, _| (city::non_angry_cites(p), 1),
         )
         .build()
-}
-
-pub(crate) fn non_angry_cites(p: &Player) -> Vec<Position> {
-    p.cities
-        .iter()
-        .filter(|c| !matches!(c.mood_state, MoodState::Angry))
-        .map(|c| c.position)
-        .collect_vec()
 }
 
 fn civil_war(id: u8) -> Incident {
@@ -70,7 +63,7 @@ fn civil_war(id: u8) -> Incident {
         MoodModifier::Decrease,
         |p, _game, _| {
             if non_happy_cites_with_infantry(p).is_empty() {
-                (non_angry_cites(p), 1)
+                (city::non_angry_cites(p), 1)
             } else {
                 (vec![], 0)
             }
@@ -81,7 +74,7 @@ fn civil_war(id: u8) -> Incident {
         0,
         |game, player_index, i| {
             let p = game.player(player_index);
-            let suffix = if !non_angry_cites(p).is_empty() && i.player.payment.is_empty() {
+            let suffix = if !city::non_angry_cites(p).is_empty() && i.player.payment.is_empty() {
                 " and decrease the mood"
             } else {
                 ""
