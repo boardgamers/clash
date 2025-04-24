@@ -2,4 +2,4 @@
 default-filter = 'not test(test_random_actions)'
 
 [profile.bench]
-default-filter = 'all()'
+default-filter = 'test(random_actions)'

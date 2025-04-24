@@ -92,7 +92,7 @@ fn pick_resource(
         .filter_map(|(p, group)|
             // AI does not husbandry, because husbandry can only be used once per turn
             // correct cache: 1) only store total in cache 2) sort by distance 3) add husbandry flag
-            (p.distance(city) == 1).then_some(
+            (p.distance(city) <= 1).then_some(
             (p, group.map(|c| c.times).sum::<u8>())))
         .collect_vec();
 
