@@ -124,6 +124,7 @@
         1
       ],
       "objective_cards": [
+        1,
         1
       ],
       "next_unit_id": 10
@@ -316,6 +317,10 @@
                     {
                       "op": "remove",
                       "path": "/players/0/cities/0/activations"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/objective_cards/1"
                     },
                     {
                       "op": "replace",
