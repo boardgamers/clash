@@ -305,7 +305,7 @@ fn change_government_type(game: &mut Game, player_index: usize, new_government: 
     let a = game.cache.get_government(government);
     assert!(
         game.player(player_index)
-            .can_advance_in_change_government(a.advances[0].advance, game),
+            .can_advance_ignore_contradicting(a.advances[0].advance, game),
         "Cannot advance in change government"
     );
 
@@ -364,7 +364,7 @@ pub(crate) fn can_change_government_for_free(player: &Player, game: &Game) -> bo
     player.government(game).is_some_and(|government| {
         game.cache.get_governments().iter().any(|g| {
             g.government != Some(government.clone())
-                && player.can_advance_in_change_government(g.advances[0].advance, game)
+                && player.can_advance_ignore_contradicting(g.advances[0].advance, game)
         })
     })
 }

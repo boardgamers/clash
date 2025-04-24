@@ -442,7 +442,7 @@ impl Player {
     }
 
     #[must_use]
-    pub fn can_advance_in_change_government(&self, advance: Advance, game: &Game) -> bool {
+    pub fn can_advance_ignore_contradicting(&self, advance: Advance, game: &Game) -> bool {
         if self.has_advance(advance) {
             return false;
         }
@@ -456,16 +456,12 @@ impl Player {
 
     #[must_use]
     pub fn can_advance_free(&self, advance: Advance, game: &Game) -> bool {
-        if self.has_advance(advance) {
-            return false;
-        }
-
         for contradicting_advance in &advance.info(game).contradicting {
             if self.has_advance(*contradicting_advance) {
                 return false;
             }
         }
-        self.can_advance_in_change_government(advance, game)
+        self.can_advance_ignore_contradicting(advance, game)
     }
 
     #[must_use]

@@ -220,7 +220,7 @@ async fn evaluate_action(
     let action_group_score =
         get_action_group_score(game, action_group, &players_active_missions[player_index]);
     let mut game = game.clone();
-    game.supports_undo = false;
+    game.ai_mode = true;
     let game = action::execute_action(game, action.clone(), player_index);
     let score = get_average_score(
         game,

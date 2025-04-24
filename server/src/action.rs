@@ -74,7 +74,7 @@ pub enum ActionType {
 pub fn execute_action(mut game: Game, action: Action, player_index: usize) -> Game {
     assert_eq!(player_index, game.active_player(), "Not your turn");
 
-    if !game.supports_undo {
+    if game.ai_mode {
         execute_without_undo(&mut game, action, player_index).expect("action should be executed");
         return game;
     }

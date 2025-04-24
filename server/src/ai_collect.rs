@@ -84,12 +84,17 @@ fn pick_resource(
     if info.max_selection == tiles_used(collected) {
         return None;
     }
+    let city = info.city;
 
     let used = collected
         .iter()
         .chunk_by(|c| c.position)
         .into_iter()
-        .map(|(p, group)| (p, group.map(|c| c.times).sum::<u8>()))
+        .filter_map(|(p, group)|
+            // AI does not husbandry, because husbandry can only be used once per turn
+            // correct cache: 1) only store total in cache 2) sort by distance 3) add husbandry flag
+            (p.distance(city) == 1).then_some(
+            (p, group.map(|c| c.times).sum::<u8>())))
         .collect_vec();
 
     let available = info
@@ -137,11 +142,14 @@ pub(crate) fn invalidate_collect_cache() -> Builtin {
 pub(crate) fn reset_collect_within_range(player: usize, position: Position, game: &mut Game) {
     let is_land = game.map.is_land(position);
     let p = game.player_mut(player);
-    let range = if is_land && p.has_advance(Advance::Husbandry) {
-        2
-    } else {
-        1
-    };
+    let range = 1;
+
+    // husbandry is not used yet by the AI
+    //     if is_land && p.has_advance(Advance::Husbandry) {
+    //     2
+    // } else {
+    //     1
+    // };
     for c in &mut p.cities {
         if c.position.distance(position) <= range {
             c.possible_collections.clear();

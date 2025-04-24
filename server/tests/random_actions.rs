@@ -42,7 +42,7 @@ fn test_random_actions() {
 fn random_actions_iterations(mut rng: Rng) {
     let seed = rng.range(0, 10_usize.pow(15)).to_string();
     let mut game = game_setup::setup_game(2, seed, true);
-    game.supports_undo = false;
+    game.ai_mode = true;
     let mut ai_actions = AiActions::new();
     loop {
         if matches!(game.state, GameState::Finished) {

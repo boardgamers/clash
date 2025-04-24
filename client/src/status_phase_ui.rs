@@ -52,7 +52,7 @@ pub fn change_government_type_dialog(
                 .get_governments()
                 .iter()
                 .find(|g| g.advances[0].name == a.name)
-                .is_some_and(|_| p.can_advance_in_change_government(a.advance, rc.game))
+                .is_some_and(|_| p.can_advance_ignore_contradicting(a.advance, rc.game))
             {
                 AdvanceState::Available
             } else if rc.shown_player.has_advance(a.advance) && a.government.is_some() {

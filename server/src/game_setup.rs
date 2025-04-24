@@ -82,7 +82,7 @@ pub fn setup_game(player_amount: usize, seed: String, setup: bool) -> Game {
             .map(|s| vec![s.clone()])
             .collect(),
         undo_limit: 0,
-        supports_undo: true,
+        ai_mode: false,
         actions_left: ACTIONS,
         successful_cultural_influence: false,
         round: 1,

@@ -368,7 +368,7 @@ impl ActiveMissions {
         let difficulty_factor = ai::difficulty_factor(difficulty);
         for mission in &missions {
             let mut game = game.clone();
-            game.supports_undo = false;
+            game.ai_mode = true;
             let mut players_active_missions = players_active_missions.clone();
             players_active_missions[self.player_index]
                 .missions
