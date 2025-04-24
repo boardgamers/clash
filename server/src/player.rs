@@ -74,6 +74,7 @@ pub struct Player {
     pub event_info: HashMap<String, String>,
     pub secrets: Vec<String>,
     pub(crate) objective_opportunities: Vec<String>, // transient
+    pub(crate) gained_objective: Option<u8>,         // transient
 }
 
 impl Clone for Player {
@@ -182,6 +183,7 @@ impl Player {
             event_info: data.event_info,
             secrets: data.secrets,
             objective_opportunities: Vec::new(),
+            gained_objective: None,
         }
     }
 
@@ -308,6 +310,7 @@ impl Player {
             event_info: HashMap::new(),
             secrets: Vec::new(),
             objective_opportunities: Vec::new(),
+            gained_objective: None,
         }
     }
 
@@ -439,7 +442,7 @@ impl Player {
     }
 
     #[must_use]
-    pub fn can_advance_in_change_government(&self, advance: Advance, game: &Game) -> bool {
+    pub fn can_advance_ignore_contradicting(&self, advance: Advance, game: &Game) -> bool {
         if self.has_advance(advance) {
             return false;
         }
@@ -453,16 +456,12 @@ impl Player {
 
     #[must_use]
     pub fn can_advance_free(&self, advance: Advance, game: &Game) -> bool {
-        if self.has_advance(advance) {
-            return false;
-        }
-
         for contradicting_advance in &advance.info(game).contradicting {
             if self.has_advance(*contradicting_advance) {
                 return false;
             }
         }
-        self.can_advance_in_change_government(advance, game)
+        self.can_advance_ignore_contradicting(advance, game)
     }
 
     #[must_use]

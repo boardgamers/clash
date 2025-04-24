@@ -29,7 +29,7 @@ fn myths() -> AdvanceBuilder {
         |event| &mut event.construct,
         1,
         |_game, _player_index, building| {
-            if matches!(building, Temple) {
+            if matches!(building.building, Temple) {
                 return Some(ResourceRewardRequest::new(
                     PaymentOptions::sum(1, &[MoodTokens, CultureTokens]),
                     "Select Temple bonus".to_string(),

@@ -181,7 +181,7 @@
         "Myths",
         "StateReligion"
       ],
-      "incident_tokens": 3,
+      "incident_tokens": 2,
       "next_unit_id": 2
     },
     {
@@ -313,5 +313,8 @@
   "rng": "46312381643103681595563341886777350953",
   "wonders_left": [
     "Pyramids"
+  ],
+  "incidents_left": [
+    44
   ]
 }

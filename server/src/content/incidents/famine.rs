@@ -1,12 +1,12 @@
 use crate::ability_initializer::{AbilityInitializerSetup, SelectedChoice};
 use crate::advance::Advance;
+use crate::city::non_angry_cites;
 use crate::city::{City, MoodState};
 use crate::content::builtin::Builtin;
 use crate::content::effects::PermanentEffect;
-use crate::content::incidents::civil_war::non_angry_cites;
 use crate::content::persistent_events::UnitsRequest;
 use crate::game::Game;
-use crate::incident::{Incident, IncidentBaseEffect, MoodModifier};
+use crate::incident::{DecreaseMood, Incident, IncidentBaseEffect, MoodModifier};
 use crate::player::Player;
 use crate::player_events::IncidentTarget;
 use crate::playing_actions::PlayingActionType;
@@ -37,18 +37,19 @@ fn pestilence() -> Incident {
     .add_decrease_mood(
         IncidentTarget::AllPlayers,
         MoodModifier::Decrease,
-        move |p, _game, i| {
+        move |p, _game, _| {
             if !pestilence_applies(p) {
-                return (vec![], 0);
+                return DecreaseMood::none();
             }
 
-            let needed = if additional_sanitation_damage(p) {
-                2
-            } else {
-                1
-            } - i.player.payment.amount();
-
-            (non_angry_cites(p), needed)
+            DecreaseMood::new(
+                non_angry_cites(p),
+                if additional_sanitation_damage(p) {
+                    2
+                } else {
+                    1
+                },
+            )
         },
     )
     .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, _, _, _| {
@@ -221,9 +222,9 @@ pub(crate) fn famine(
         })
         .add_decrease_mood(target, MoodModifier::MakeAngry, move |p, game, i| {
             if player_pred2(p) && i.player.payment.is_empty() {
-                (famine_targets(p, game, city_pred2.clone()), 1)
+                DecreaseMood::new(famine_targets(p, game, city_pred2.clone()), 1)
             } else {
-                (vec![], 0)
+                DecreaseMood::none()
             }
         })
         .build()

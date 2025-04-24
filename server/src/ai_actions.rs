@@ -1,5 +1,4 @@
 use crate::action::{Action, ActionType};
-use crate::advance::Advance;
 use crate::card::validate_card_selection;
 use crate::city::{City, MoodState};
 use crate::collect::available_collect_actions;
@@ -69,9 +68,12 @@ impl AiActions {
     ///   e.g. selecting to sacrifice a unit for an incident)
     /// - move actions are not returned at all - this required special handling
     ///
+    /// # Panics
+    ///
+    /// Panics if the actions for any type is empty
     #[must_use]
     pub fn get_available_actions(&mut self, game: &Game) -> Vec<(ActionType, Vec<Action>)> {
-        if let Some(event) = game.events.last() {
+        let actions = if let Some(event) = game.events.last() {
             vec![(
                 ActionType::Response,
                 responses(event, game.player(game.active_player()), game)
@@ -81,7 +83,15 @@ impl AiActions {
             )]
         } else {
             base_actions(self, game)
+        };
+        for (t, a) in &actions {
+            assert!(
+                !a.is_empty(),
+                "Empty actions for action type: {t:?} - {:?}",
+                game.events.last().as_ref().expect("event not found")
+            );
         }
+        actions
     }
 }
 
@@ -302,10 +312,6 @@ fn advances(ai_actions: &mut AiActions, p: &Player, game: &Game) -> Vec<Action> 
         .iter()
         .filter_map(|info| {
             let a = info.advance;
-            if deny_advance(a) {
-                return None;
-            }
-
             if !p.can_advance_free(a, game) {
                 return None;
             }
@@ -322,13 +328,6 @@ fn advances(ai_actions: &mut AiActions, p: &Player, game: &Game) -> Vec<Action> 
             })
         })
         .collect()
-}
-
-fn deny_advance(name: Advance) -> bool {
-    //todo collect cache doesn't work, because husbandry can only be used once per turn
-    //correct cache: 1) only store total in cache 2) sort by distance 3) add husbandry flag
-
-    name == Advance::Husbandry
 }
 
 fn collect_actions(p: &Player, game: &Game) -> Vec<Action> {
@@ -508,7 +507,6 @@ fn responses(event: &PersistentEventState, player: &Player, game: &Game) -> Vec<
         PersistentEventRequest::SelectAdvance(a) => a
             .choices
             .iter()
-            .filter(|c| !deny_advance(**c))
             .map(|c| EventResponse::SelectAdvance(*c))
             .collect(),
         PersistentEventRequest::SelectPlayer(p) => p
@@ -573,7 +571,7 @@ fn change_government(p: &Player, c: &ChangeGovernmentRequest, game: &Game) -> Ve
             .cache
             .get_governments()
             .iter()
-            .find(|g| p.can_advance_in_change_government(g.advances[0].advance, game))
+            .find(|g| p.can_advance_ignore_contradicting(g.advances[0].advance, game))
             .expect("government not found");
 
         let advances = new

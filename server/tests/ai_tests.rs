@@ -46,7 +46,7 @@ fn all_actions() {
         matches!(t, ActionType::Playing(PlayingActionType::Advance))
     })
     .unwrap();
-    assert_eq!(advances.len(), 12);
+    assert_eq!(advances.len(), 13);
 
     assert_eq!(
         all,

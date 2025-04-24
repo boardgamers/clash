@@ -1,5 +1,4 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::advance::Advance;
 use crate::city::City;
 use crate::collect::{
     CollectInfo, PositionCollection, add_collect, apply_total_collect,
@@ -84,6 +83,7 @@ fn pick_resource(
     if info.max_selection == tiles_used(collected) {
         return None;
     }
+    let city = info.city;
 
     let used = collected
         .iter()
@@ -97,6 +97,12 @@ fn pick_resource(
         .iter()
         // .sorted_by_key(|(pos, _)| **pos)
         .filter(|(pos, _)| {
+            // AI does not husbandry, because husbandry can only be used once per turn
+            // correct cache: 1) only store total in cache 2) sort by distance 3) add husbandry flag
+            if pos.distance(city) > 1 {
+                return false;
+            }
+
             let u = used
                 .iter()
                 .find_map(|(p, u)| (*p == **pos).then_some(*u))
@@ -135,13 +141,15 @@ pub(crate) fn invalidate_collect_cache() -> Builtin {
 }
 
 pub(crate) fn reset_collect_within_range(player: usize, position: Position, game: &mut Game) {
-    let is_land = game.map.is_land(position);
     let p = game.player_mut(player);
-    let range = if is_land && p.has_advance(Advance::Husbandry) {
-        2
-    } else {
-        1
-    };
+    let range = 1;
+
+    // husbandry is not used yet by the AI
+    //     if is_land && p.has_advance(Advance::Husbandry) {
+    //     2
+    // } else {
+    //     1
+    // };
     for c in &mut p.cities {
         if c.position.distance(position) <= range {
             c.possible_collections.clear();

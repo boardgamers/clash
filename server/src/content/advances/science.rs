@@ -35,7 +35,7 @@ fn math() -> AdvanceBuilder {
         |event| &mut event.construct,
         4,
         |game, player_index, _player_name, b| {
-            if matches!(b, Building::Observatory) {
+            if matches!(b.building, Building::Observatory) {
                 gain_action_card_from_pile(game, player_index);
                 game.add_info_log_item("Observatory gained 1 action card");
             }

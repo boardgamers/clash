@@ -4,8 +4,13 @@ RUSTFLAGS = '-Dwarnings' # Make sure CI fails on all warnings, including Clippy 
 CARGO_TERM_COLOR = 'always'
 
 [tasks.random-actions]
-description = "Run server tests"
-run = 'cargo nextest run --release --nocapture test_random_actions -Pbench'
+description = "Run random actions tests"
+run = 'cargo test --package server --test random_actions test_random_actions -- --exact --nocapture'
+dir = "server"
+
+[tasks.profile-random-actions]
+description = "Run AI random actions test with profiling"
+run = ["cargo test --release --features profiling --package server --test random_actions test_random_actions -- --exact --nocapture"]
 dir = "server"
 
 [tasks.test]
@@ -61,11 +66,6 @@ run = [
 description = "Run AI client with profiling"
 run = ["cargo run --release --package client --features profiling --bin local_client -- ai"]
 dir = "client"
-
-[tasks.profile-random-actions]
-description = "Run AI random actions test with profiling"
-run = ["cargo test --release --features profiling random_actions"]
-dir = "server"
 
 [tools]
 "cargo:cargo-nextest" = "latest"

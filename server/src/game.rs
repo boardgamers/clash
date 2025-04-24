@@ -48,7 +48,7 @@ pub struct Game {
     pub action_log_index: usize,
     pub log: Vec<Vec<String>>,
     pub undo_limit: usize,
-    pub supports_undo: bool, // if false: optimizend AI mode
+    pub ai_mode: bool,
     pub actions_left: u32,
     pub successful_cultural_influence: bool,
     pub round: u32, // starts at 1
@@ -68,7 +68,7 @@ pub struct Game {
 impl Clone for Game {
     fn clone(&self) -> Self {
         let mut game = Self::from_data(self.cloned_data(), self.cache.clone());
-        game.supports_undo = self.supports_undo;
+        game.ai_mode = self.ai_mode;
         game
     }
 }
@@ -100,7 +100,7 @@ impl Game {
             action_log_index: data.action_log_index,
             log: data.log,
             undo_limit: data.undo_limit,
-            supports_undo: true,
+            ai_mode: false,
             round: data.round,
             age: data.age,
             messages: data.messages,
@@ -225,7 +225,7 @@ impl Game {
     }
 
     pub(crate) fn lock_undo(&mut self) {
-        if self.supports_undo {
+        if !self.ai_mode {
             self.undo_limit = self.action_log_index;
             current_player_turn_log_mut(self).clear_undo();
         }
@@ -406,21 +406,21 @@ impl Game {
 
     #[must_use]
     pub(crate) fn execute_cost_trigger(&self) -> CostTrigger {
-        if self.supports_undo {
-            CostTrigger::WithModifiers
-        } else {
+        if self.ai_mode {
             CostTrigger::NoModifiers
+        } else {
+            CostTrigger::WithModifiers
         }
     }
 
     #[must_use]
     pub fn can_undo(&self) -> bool {
-        self.supports_undo && self.undo_limit < self.action_log_index
+        !self.ai_mode && self.undo_limit < self.action_log_index
     }
 
     #[must_use]
     pub fn can_redo(&self) -> bool {
-        self.supports_undo && self.action_log_index < current_player_turn_log(self).items.len()
+        !self.ai_mode && self.action_log_index < current_player_turn_log(self).items.len()
     }
 
     pub(crate) fn is_pirate_zone(&self, position: Position) -> bool {

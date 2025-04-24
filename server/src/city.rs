@@ -13,6 +13,7 @@ use crate::{
     position::Position,
 };
 use MoodState::*;
+use itertools::Itertools;
 use num::Zero;
 
 #[readonly::make]
@@ -278,4 +279,13 @@ pub(crate) fn on_found_city(game: &mut Game, player_index: usize, position: Posi
         position,
         PersistentEventType::FoundCity,
     );
+}
+
+#[must_use]
+pub(crate) fn non_angry_cites(p: &Player) -> Vec<Position> {
+    p.cities
+        .iter()
+        .filter(|c| !matches!(c.mood_state, MoodState::Angry))
+        .map(|c| c.position)
+        .collect_vec()
 }

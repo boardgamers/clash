@@ -5,7 +5,7 @@ use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city_pieces::Building;
 use crate::content::advances::{AdvanceGroup, advance_group_builder};
 use crate::content::persistent_events::PaymentRequest;
-use crate::objective_card::gain_objective_card_from_pile;
+use crate::objective_card::draw_and_log_objective_card_from_pile;
 use crate::payment::PaymentOptions;
 use crate::resource_pile::ResourcePile;
 
@@ -31,13 +31,16 @@ fn writing() -> AdvanceBuilder {
     .with_unlocked_building(Building::Academy)
     .add_one_time_ability_initializer(|game, player_index| {
         gain_action_card_from_pile(game, player_index);
-        gain_objective_card_from_pile(game, player_index);
+        // can't gain objective card directly, because the "combat_end" listener might
+        // currently being processed ("teach us now")
+        game.player_mut(player_index).gained_objective =
+            draw_and_log_objective_card_from_pile(game, player_index);
     })
     .add_simple_persistent_event_listener(
         |event| &mut event.construct,
         3,
         |game, player_index, _player_name, b| {
-            if matches!(b, Building::Academy) {
+            if matches!(b.building, Building::Academy) {
                 game.players[player_index].gain_resources(ResourcePile::ideas(2));
                 game.add_info_log_item("Academy gained 2 ideas");
             }

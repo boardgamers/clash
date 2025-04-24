@@ -7,6 +7,7 @@ use crate::collect::CollectInfo;
 use crate::combat::Combat;
 use crate::combat_listeners::{CombatEnd, CombatRoundEnd, CombatRoundStart};
 use crate::combat_stats::CombatStats;
+use crate::construct::ConstructInfo;
 use crate::content::custom_actions::CustomEventAction;
 use crate::events::EventOrigin;
 use crate::explore::ExploreResolutionState;
@@ -106,7 +107,7 @@ pub enum PersistentEventType {
     StatusPhase(StatusPhaseState),
     TurnStart,
     Advance(OnAdvanceInfo),
-    Construct(Building),
+    Construct(ConstructInfo),
     Recruit(Recruit),
     FoundCity(Position),
     Incident(IncidentInfo),

@@ -9,11 +9,11 @@
         "ore": 7,
         "ideas": 3,
         "gold": 7,
-        "mood_tokens": 8,
-        "culture_tokens": 7
+        "mood_tokens": 7,
+        "culture_tokens": 8
       },
       "resource_limit": {
-        "food": 7,
+        "food": 2,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -96,10 +96,16 @@
       "advances": [
         "Farming",
         "Mining",
-        "Storage",
-        "Tactics"
+        "Tactics",
+        "Writing"
       ],
       "incident_tokens": 2,
+      "action_cards": [
+        1
+      ],
+      "objective_cards": [
+        1
+      ],
       "next_unit_id": 8
     },
     {
@@ -127,8 +133,8 @@
         "Fanaticism",
         "Farming",
         "Mining",
-        "Storage",
-        "Tactics"
+        "Tactics",
+        "Writing"
       ],
       "incident_tokens": 3,
       "next_unit_id": 2
@@ -241,109 +247,6 @@
                       ]
                     }
                   },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "CombatEnd": {
-                              "combat": {
-                                "attacker": 0,
-                                "attacker_position": "C2",
-                                "attackers": [
-                                  0,
-                                  1,
-                                  2,
-                                  3,
-                                  4,
-                                  5
-                                ],
-                                "defender": 1,
-                                "defender_position": "C1",
-                                "retreat": "CanRetreat",
-                                "round": 1,
-                                "stats": {
-                                  "attacker": {
-                                    "player": 0,
-                                    "present": {
-                                      "cavalry": 1,
-                                      "elephants": 1,
-                                      "infantry": 1,
-                                      "leaders": 1,
-                                      "settlers": 2
-                                    }
-                                  },
-                                  "battleground": "City",
-                                  "defender": {
-                                    "losses": {
-                                      "infantry": 2
-                                    },
-                                    "player": 1,
-                                    "present": {
-                                      "infantry": 2
-                                    }
-                                  },
-                                  "position": "C1",
-                                  "result": "AttackerWins"
-                                }
-                              },
-                              "result": "AttackerWins"
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Builtin": "Teach us"
-                            },
-                            "priority": 91,
-                            "request": {
-                              "SelectHandCards": {
-                                "choices": [
-                                  {
-                                    "ActionCard": 35
-                                  }
-                                ],
-                                "description": "Select Teach Us card",
-                                "needed": {
-                                  "end": 1,
-                                  "start": 0
-                                }
-                              }
-                            }
-                          },
-                          "last_priority_used": 91,
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/action_cards",
-                      "value": [
-                        35
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/advances/2",
-                      "value": "Tactics"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/advances/3"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resource_limit/food",
-                      "value": 2
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 7
-                    }
-                  ],
                   "combat_stats": {
                     "position": "C1",
                     "battleground": "City",
@@ -394,11 +297,13 @@
     ],
     [
       "Player1 selected to use Teach Us.",
-      "Player1 selected Storage as advance for Teach Us.",
-      "Player gained 1 mood token as advance bonus"
+      "Player1 selected Writing as advance for Teach Us.",
+      "Player1 gained an action card from the pile",
+      "Player1 gained an objective card from the pile",
+      "Player gained 1 culture token as advance bonus"
     ]
   ],
-  "undo_limit": 1,
+  "undo_limit": 2,
   "actions_left": 3,
   "round": 2,
   "age": 1,

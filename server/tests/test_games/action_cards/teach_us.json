@@ -135,8 +135,8 @@
         "Fanaticism",
         "Farming",
         "Mining",
-        "Storage",
-        "Tactics"
+        "Tactics",
+        "Writing"
       ],
       "incident_tokens": 3,
       "next_unit_id": 2
@@ -226,5 +226,11 @@
   ],
   "wonders_left": [
     "Pyramids"
+  ],
+  "action_cards_left": [
+    1
+  ],
+  "objective_cards_left": [
+    1
   ]
 }

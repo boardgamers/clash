@@ -22,7 +22,7 @@ use crate::movement::MovementAction::{Move, Stop};
 use crate::movement::{
     CurrentMove, MoveState, MoveUnits, MovementAction, has_movable_units, move_units_destinations,
 };
-use crate::objective_card::{on_objective_cards, present_objective_cards};
+use crate::objective_card::{gain_objective_card, on_objective_cards, present_objective_cards};
 use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::recruit::on_recruit;
 use crate::resource::check_for_waste;
@@ -44,33 +44,6 @@ pub enum Action {
 }
 
 impl Action {
-    #[must_use]
-    pub fn playing(self) -> Option<PlayingAction> {
-        if let Self::Playing(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-
-    #[must_use]
-    pub fn movement(self) -> Option<MovementAction> {
-        if let Self::Movement(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-
-    #[must_use]
-    pub fn response(self) -> Option<EventResponse> {
-        if let Self::Response(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-
     #[must_use]
     pub fn get_type(&self) -> ActionType {
         match self {
@@ -101,7 +74,7 @@ pub enum ActionType {
 pub fn execute_action(mut game: Game, action: Action, player_index: usize) -> Game {
     assert_eq!(player_index, game.active_player(), "Not your turn");
 
-    if !game.supports_undo {
+    if game.ai_mode {
         execute_without_undo(&mut game, action, player_index).expect("action should be executed");
         return game;
     }
@@ -152,7 +125,11 @@ pub fn execute_without_undo(
 
     match game.current_event_handler_mut() {
         Some(s) => {
-            s.response = action.response();
+            s.response = if let Action::Response(v) = action {
+                Some(v)
+            } else {
+                return Err(format!("action should be a response: {action:?}"));
+            };
             let details = game.current_event().event_type.clone();
             execute_custom_phase_action(game, player_index, details)
         }
@@ -160,6 +137,10 @@ pub fn execute_without_undo(
     }?;
     check_for_waste(game);
     update_stats(game);
+
+    if let Some(o) = game.player(player_index).gained_objective {
+        gain_objective_card(game, player_index, o);
+    }
 
     if game
         .player(player_index)
@@ -257,19 +238,24 @@ fn execute_regular_action(
 ) -> Result<(), String> {
     match game.state {
         Playing => {
-            if let Some(m) = action.clone().movement() {
-                execute_movement_action(game, m, player_index)
+            if let Action::Movement(m) = action {
+                execute_movement_action(game, m.clone(), player_index)
             } else {
-                let action = action.playing().expect("action should be a playing action");
+                let Action::Playing(action) = action else {
+                    return Err(format!("Action {action:?} is not a playing action"));
+                };
                 action.execute(game, player_index, false)
             }
         }
-        Movement(_) => {
-            let action = action
-                .movement()
-                .expect("action should be a movement action");
-            execute_movement_action(game, action, player_index)
-        }
+        Movement(_) => execute_movement_action(
+            game,
+            if let Action::Movement(v) = action {
+                v
+            } else {
+                return Err(format!("action {action:?} is not a movement action"));
+            },
+            player_index,
+        ),
         Finished => Err("actions can't be executed when the game is finished".to_string()),
     }
 }
