@@ -89,11 +89,8 @@ fn pick_resource(
         .iter()
         .chunk_by(|c| c.position)
         .into_iter()
-        .filter_map(|(p, group)|
-            // AI does not husbandry, because husbandry can only be used once per turn
-            // correct cache: 1) only store total in cache 2) sort by distance 3) add husbandry flag
-            (p.distance(city) <= 1).then_some(
-            (p, group.map(|c| c.times).sum::<u8>())))
+        .map(|(p, group)|
+            (p, group.map(|c| c.times).sum::<u8>()))
         .collect_vec();
 
     let available = info
@@ -101,6 +98,12 @@ fn pick_resource(
         .iter()
         // .sorted_by_key(|(pos, _)| **pos)
         .filter(|(pos, _)| {
+            // AI does not husbandry, because husbandry can only be used once per turn
+            // correct cache: 1) only store total in cache 2) sort by distance 3) add husbandry flag
+            if pos.distance(city) > 1 {
+                return false;
+            }
+
             let u = used
                 .iter()
                 .find_map(|(p, u)| (*p == **pos).then_some(*u))
