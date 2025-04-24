@@ -377,7 +377,7 @@ impl ActiveMissions {
                 game,
                 self.player_index,
                 rng,
-                &time_per_mission,
+                time_per_mission,
                 &players_active_missions,
             )
             .await

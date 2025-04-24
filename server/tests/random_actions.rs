@@ -24,7 +24,7 @@ async fn test_random_actions() {
             rng.seed = rng.seed.wrapping_add(1);
             rng.next_seed();
             let thread_rng = rng.clone();
-            let handle = task::spawn(async move { random_actions_iterations(thread_rng) });
+            let handle = task::spawn(async move { random_actions_iteration(thread_rng) });
             handles.push(handle);
         }
         for handle in handles {
@@ -37,7 +37,7 @@ async fn test_random_actions() {
     }
 }
 
-fn random_actions_iterations(mut rng: Rng) {
+fn random_actions_iteration(mut rng: Rng) {
     let seed = rng.range(0, 10_usize.pow(15)).to_string();
     let mut game = game_setup::setup_game(2, seed, true);
     game.supports_undo = false;
