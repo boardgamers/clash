@@ -1,5 +1,4 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::advance::Advance;
 use crate::city::City;
 use crate::collect::{
     CollectInfo, PositionCollection, add_collect, apply_total_collect,
@@ -140,7 +139,6 @@ pub(crate) fn invalidate_collect_cache() -> Builtin {
 }
 
 pub(crate) fn reset_collect_within_range(player: usize, position: Position, game: &mut Game) {
-    let is_land = game.map.is_land(position);
     let p = game.player_mut(player);
     let range = 1;
 
