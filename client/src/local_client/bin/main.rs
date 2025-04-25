@@ -150,6 +150,7 @@ fn ai_autoplay(mut game: Game, f: &mut Features, state: &mut State) -> Game {
             let action = ai.next_action(&game);
             let player_index = game.active_player();
             game = execute_action(game, action, player_index);
+            export(&game)
         }
     }
     game
