@@ -81,7 +81,7 @@ impl AI {
     ///
     /// Panics if it's not the AI's turn
     pub fn next_action(&mut self, game: &Game) -> Action {
-        assert_eq!(game.current_player_index, self.active_missions.player_index);
+        assert_eq!(game.active_player(), self.active_missions.player_index);
         let start_time = std::time::Instant::now();
 
         if can_move(game, self.active_missions.player_index) {
