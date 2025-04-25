@@ -3,6 +3,7 @@ use async_std::task;
 use itertools::Itertools;
 use server::action::ActionType;
 use server::ai_actions::AiActions;
+use server::cache::Cache;
 use server::game::Game;
 use server::movement::{MoveUnits, MovementAction, move_units_destinations};
 use server::playing_actions::PlayingActionType;
@@ -15,40 +16,50 @@ use server::{
     playing_actions::PlayingAction,
     utils::{Rng, Shuffle},
 };
+use std::env;
 
 mod common;
 
-const ITERATIONS: usize = 100;
-
 #[tokio::test]
 async fn test_random_actions() {
+    let iterations = env::var("ITERATIONS")
+        .map(|v| v.parse::<usize>().ok())
+        .ok()
+        .flatten()
+        .unwrap_or(100);
+
     start_profiling();
     let num_cores = num_cpus::get();
+    let cache = Cache::new();
 
     let mut rng = Rng::new();
-    let mut iterations = 0;
+    let mut iteration = 0;
     loop {
         let mut handles = Vec::new();
         for _ in 0..num_cores {
             rng.seed = rng.seed.wrapping_add(1);
             rng.next_seed();
             let thread_rng = rng.clone();
-            let handle = task::spawn(async move { random_actions_iteration(thread_rng) });
+            let cache = cache.clone();
+            let handle = task::spawn(async move { random_actions_iteration(thread_rng, cache) });
             handles.push(handle);
         }
         for handle in handles {
             handle.await;
+            iteration += 1;
+            if iteration % 100 == 0 {
+                println!("Iterations: {}", iteration);
+            }
         }
-        iterations += num_cores;
-        if iterations >= ITERATIONS {
+        if iteration >= iterations {
             break;
         }
     }
 }
 
-fn random_actions_iteration(mut rng: Rng) {
+fn random_actions_iteration(mut rng: Rng, cache: Cache) {
     let seed = rng.range(0, 10_usize.pow(15)).to_string();
-    let mut game = game_setup::setup_game(2, seed, true);
+    let mut game = game_setup::setup_game_with_cache(2, seed, true, cache);
     game.ai_mode = true;
     let mut ai_actions = AiActions::new();
     loop {
