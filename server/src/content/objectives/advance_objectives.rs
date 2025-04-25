@@ -91,3 +91,14 @@ pub(crate) fn diversified_research() -> Objective {
     })
     .build()
 }
+
+// todo needs civilizations implemented
+// pub(crate) fn high_culture() -> Objective {
+//     Objective::builder(
+//         "High Culture",
+//         "You have gained all 4 of your civilization advances and recruited at least 2 of your leaders.",
+//     )
+//     .status_phase_check(|game, player| {
+//     })
+//     .build()
+// }

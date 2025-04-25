@@ -22,8 +22,22 @@ use std::collections::HashMap;
 /// Panics only if there is an internal bug
 #[must_use]
 pub fn setup_game(player_amount: usize, seed: String, setup: bool) -> Game {
+    setup_game_with_cache(player_amount, seed, setup, Cache::new())
+}
+
+/// Creates a new [`Game`].
+///
+/// # Panics
+///
+/// Panics only if there is an internal bug
+#[must_use]
+pub fn setup_game_with_cache(
+    player_amount: usize,
+    seed: String,
+    setup: bool,
+    cache: Cache,
+) -> Game {
     let mut rng = init_rng(seed);
-    let cache = Cache::new();
     let mut players = init_human_players(player_amount, &mut rng);
 
     let starting_player = rng.range(0, players.len());
@@ -67,6 +81,7 @@ pub fn setup_game(player_amount: usize, seed: String, setup: bool) -> Game {
         .map(|i| i.id)
         .collect_vec()
         .shuffled(&mut rng);
+    let all = &cache.get_builtins().clone();
     let mut game = Game {
         cache,
         state: GameState::Playing,
@@ -99,7 +114,7 @@ pub fn setup_game(player_amount: usize, seed: String, setup: bool) -> Game {
         permanent_effects: Vec::new(),
     };
     for i in 0..game.players.len() {
-        builtin::init_player(&mut game, i);
+        builtin::init_player(&mut game, i, all);
     }
 
     for player_index in 0..player_amount {

@@ -357,3 +357,48 @@ pub(crate) fn brutus() -> Objective {
         )
         .build()
 }
+
+pub(crate) fn trample() -> Objective {
+    let name = "Trample";
+    Objective::builder(
+        name,
+        "You won a land battle as attacker where 1 elephant or 1 cavalry unit survived.",
+    )
+    .add_simple_persistent_event_listener(
+        |event| &mut event.combat_end,
+        15,
+        |game, player, _, e| {
+            let s = &e.combat.stats;
+            let p = s.player(player);
+            let mut survived = p.present.clone();
+            for l in p.losses.clone().to_vec() {
+                survived -= &l;
+            }
+
+            if s.is_winner(player)
+                && s.battleground.is_land()
+                && s.attacker.player == player
+                && (survived.elephants > 0 || survived.cavalry > 0)
+            {
+                objective_is_ready(game.player_mut(player), name);
+            }
+        },
+    )
+    .build()
+}
+
+// pub(crate) fn sea_cleansing() -> Objective {
+//     let name = "Sea Cleansing";
+//     Objective::builder(
+//         name,
+//         "You won the second battle against Pirates this turn.",
+//     )
+//     .add_simple_persistent_event_listener(
+//         |event| &mut event.combat_end,
+//         16,
+//         |game, player, _, e| {
+//
+//         },
+//     )
+//     .build()
+// }

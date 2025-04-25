@@ -126,8 +126,8 @@ pub(crate) fn invalidate_collect_cache() -> Builtin {
         .add_simple_persistent_event_listener(
             |event| &mut event.found_city,
             1,
-            |game, player, _, p| {
-                reset_collect_within_range(player, *p, game, 1);
+            |game, _player, _, p| {
+                reset_collect_within_range_for_all(game, *p, 1);
             },
         )
         .add_simple_persistent_event_listener(

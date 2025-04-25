@@ -1,6 +1,6 @@
 use crate::content::objectives::combat_objectives::{
     aggressor, barbarian_conquest, bold, brutus, conqueror, defiance, general, great_battle,
-    great_commander, legendary_battle, naval_assault, resistance, scavenger, warmonger,
+    great_commander, legendary_battle, naval_assault, resistance, scavenger, trample, warmonger,
 };
 use crate::content::objectives::non_combat::{
     city_founder, draft, magnificent_culture, terror_regime,
@@ -19,7 +19,7 @@ use crate::content::objectives::resource_objectives::{
     eureka, food_supplies, optimized_storage, ore_supplies, wealth, wood_supplies,
 };
 use crate::content::objectives::unit_objectives::{
-    colony, horse_power, ivory_tower, large_army, large_fleet, military_might, outpost,
+    colony, horse_power, ivory_tower, large_army, large_fleet, migration, military_might, outpost,
     sea_blockade, shipping_routes, standing_army, threat, trade_power, versatility,
 };
 use crate::objective_card::ObjectiveCard;
@@ -65,6 +65,9 @@ pub(crate) fn get_all_uncached() -> Vec<ObjectiveCard> {
         ObjectiveCard::new(34, traders(), great_commander()),
         ObjectiveCard::new(35, versatility(), brutus()),
         ObjectiveCard::new(36, legacy(), ivory_tower()),
+        ObjectiveCard::new(37, migration(), trample()),
+        // todo needs civilizations implemented
+        // ObjectiveCard::new(38, high_culture(), sea_cleansing()),
     ];
     assert_eq!(
         all.iter().unique_by(|i| i.id).count(),

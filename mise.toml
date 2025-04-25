@@ -11,6 +11,7 @@ dir = "server"
 [tasks.profile-random-actions]
 description = "Run AI random actions test with profiling"
 run = ["cargo test --release --features profiling --package server --test random_actions test_random_actions -- --exact --nocapture"]
+env = { ITERATIONS = "100000" }
 dir = "server"
 
 [tasks.test]

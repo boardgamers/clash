@@ -9,8 +9,8 @@ use itertools::Itertools;
 pub(crate) fn sea_blockade() -> Objective {
     Objective::builder(
         "Sea Blockade",
-        "At least 2 of your cities are on the \
-    port location of another player",
+        "At least 2 of your ships are on the \
+        port location of another player",
     )
     .status_phase_check(|game, player| {
         let enemy_ports = game
@@ -151,7 +151,31 @@ pub(crate) fn outpost() -> Objective {
                     && player
                         .cities
                         .iter()
-                        .all(|c| c.position.distance(u.position) > 0))
+                        .all(|c| c.position.distance(u.position) > 1))
+                .then_some(u.position)
+            })
+            .unique()
+            .count()
+            >= 3
+    })
+    .build()
+}
+
+pub(crate) fn migration() -> Objective {
+    Objective::builder(
+        "Migration",
+        "You have settlers on at least 3 spaces outside, and not adjacent to cities",
+    )
+    .status_phase_check(|_game, player| {
+        player
+            .units
+            .iter()
+            .filter_map(|u| {
+                (u.unit_type.is_settler()
+                    && player
+                        .cities
+                        .iter()
+                        .all(|c| c.position.distance(u.position) > 1))
                 .then_some(u.position)
             })
             .unique()
