@@ -60,6 +60,8 @@ pub(crate) fn get_all_uncached() -> Vec<ObjectiveCard> {
         ObjectiveCard::new(35, versatility(), brutus()),
         ObjectiveCard::new(36, legacy(), ivory_tower()),
         ObjectiveCard::new(37, migration(), trample()),
+        // todo needs civilizations implemented
+        // ObjectiveCard::new(38, high_culture(), sea_cleansing()),
     ];
     assert_eq!(
         all.iter().unique_by(|i| i.id).count(),
