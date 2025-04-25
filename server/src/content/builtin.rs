@@ -109,8 +109,8 @@ pub fn get_all_uncached() -> Vec<Builtin> {
     ]
 }
 
-pub(crate) fn init_player(game: &mut Game, player_index: usize) {
-    for b in get_all_uncached() {
+pub(crate) fn init_player(game: &mut Game, player_index: usize, all: &[Builtin]) {
+    for b in all {
         b.listeners.init(game, player_index);
     }
 }

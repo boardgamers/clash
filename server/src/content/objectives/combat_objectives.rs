@@ -397,7 +397,7 @@ pub(crate) fn trample() -> Objective {
 //         |event| &mut event.combat_end,
 //         16,
 //         |game, player, _, e| {
-//         
+//
 //         },
 //     )
 //     .build()

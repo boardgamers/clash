@@ -3,6 +3,7 @@ use crate::ai_collect::{reset_collect_within_range, reset_collect_within_range_f
 use crate::city_pieces::{DestroyedStructures, DestroyedStructuresData};
 use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::content::builtin;
+use crate::content::builtin::Builtin;
 use crate::events::{Event, EventOrigin};
 use crate::objective_card::init_objective_card;
 use crate::payment::PaymentOptions;
@@ -102,13 +103,13 @@ impl Player {
     /// # Panics
     ///
     /// Panics if elements like wonders or advances don't exist
-    pub fn initialize_player(data: PlayerData, game: &mut Game) {
+    pub fn initialize_player(data: PlayerData, game: &mut Game, all: &[Builtin]) {
         let leader = data.active_leader.clone();
         let objective_cards = data.objective_cards.clone();
         let player = Self::from_data(data);
         let player_index = player.index;
         game.players.push(player);
-        builtin::init_player(game, player_index);
+        builtin::init_player(game, player_index, all);
         advance::init_player(game, player_index);
 
         if let Some(leader) = leader {
