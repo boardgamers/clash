@@ -1,4 +1,5 @@
 use crate::common::{GamePath, to_json, write_result};
+use async_std::task;
 use itertools::Itertools;
 use server::action::ActionType;
 use server::ai_actions::AiActions;
@@ -19,16 +20,18 @@ mod common;
 
 const ITERATIONS: usize = 100;
 
-//is too slow if not in release mode
-#[test]
-fn test_random_actions() {
+#[tokio::test]
+async fn test_random_actions() {
     start_profiling();
+    let num_cores = num_cpus::get();
 
     let mut rng = Rng::new();
     let mut iterations = 0;
     loop {
-        rng.seed = rng.seed.wrapping_add(1);
-        rng.next_seed();
+        let mut handles = Vec::new();
+        for _ in 0..num_cores {
+            rng.seed = rng.seed.wrapping_add(1);
+            rng.next_seed();
             let thread_rng = rng.clone();
             let handle = task::spawn(async move { random_actions_iteration(thread_rng) });
             handles.push(handle);

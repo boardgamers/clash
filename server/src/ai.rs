@@ -368,7 +368,11 @@ fn choose_monte_carlo_action(
 }
 
 fn forced_action(game: &Game) -> Action {
-    if matches!(game.state, GameState::Movement(_)) { Action::Movement(MovementAction::Stop) } else { Action::Playing(PlayingAction::EndTurn) }
+    if matches!(game.state, GameState::Movement(_)) {
+        Action::Movement(MovementAction::Stop)
+    } else {
+        Action::Playing(PlayingAction::EndTurn)
+    }
 }
 
 fn get_actions(
