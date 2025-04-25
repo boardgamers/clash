@@ -367,14 +367,12 @@ impl ActiveMissions {
         let players_active_missions = self.get_players_active_missions(game, rng);
         let difficulty_factor = ai::difficulty_factor(difficulty);
         for mission in &missions {
-            let mut game = game.clone();
-            game.ai_mode = true;
             let mut players_active_missions = players_active_missions.clone();
             players_active_missions[self.player_index]
                 .missions
                 .push(mission.clone());
             let score = ai::get_average_score(
-                game,
+                game.clone(),
                 self.player_index,
                 rng,
                 time_per_mission,
