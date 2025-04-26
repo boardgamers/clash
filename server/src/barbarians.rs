@@ -191,6 +191,10 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
                 IncidentTarget::ActivePlayer,
                 BASE_EFFECT_PRIORITY + (army * 2) + 2,
                 |game, player_index, i| {
+                    if !i.get_barbarian_state().move_units {
+                        return None;
+                    }
+
                     let armies = get_movable_units(game, player_index, i.get_barbarian_state());
                     let needed = 1..=1;
                     Some(PositionRequest::new(
