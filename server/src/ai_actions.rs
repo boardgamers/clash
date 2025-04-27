@@ -195,11 +195,6 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
     }
 
     for (a, _) in game.available_custom_actions(p.index) {
-        if a == CustomActionType::ForcedLabor {
-            // todo forced labor doesn't work with collect cache
-            continue;
-        }
-
         let cities = if a.is_city_bound() {
             p.cities
                 .iter()
