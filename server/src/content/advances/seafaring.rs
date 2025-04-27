@@ -22,7 +22,6 @@ fn fishing() -> AdvanceBuilder {
         "Fishing",
         "Your cities may Collect food from one Sea space",
     )
-    .with_reset_collect_stats()
     .add_transient_event_listener(|event| &mut event.collect_options, 1, fishing_collect)
     .with_advance_bonus(MoodToken)
     .with_unlocked_building(Port)

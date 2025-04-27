@@ -1,5 +1,4 @@
 use crate::ability_initializer::AbilityListeners;
-use crate::action::update_stats;
 use crate::cache::Cache;
 use crate::combat_roll::{COMBAT_DIE_SIDES, CombatDieRoll};
 use crate::consts::ACTIONS;
@@ -119,7 +118,6 @@ impl Game {
         for player in data.players {
             Player::initialize_player(player, &mut game, &all);
         }
-        update_stats(&mut game);
         game
     }
 

@@ -8,7 +8,6 @@ use std::{
 };
 
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::ai_collect::reset_collect_within_range_for_all_except;
 use crate::city::is_valid_city_terrain;
 use crate::combat_roll::COMBAT_DIE_SIDES;
 use crate::consts::SHIP_CAPACITY;
@@ -673,11 +672,7 @@ pub(crate) fn choose_carried_units_to_remove() -> Builtin {
 }
 
 pub fn set_unit_position(player: usize, unit_id: u32, position: Position, game: &mut Game) {
-    let unit = game.player_mut(player).get_unit_mut(unit_id);
-    let old = unit.position;
-    unit.position = position;
-    reset_collect_within_range_for_all_except(game, old, player);
-    reset_collect_within_range_for_all_except(game, position, player);
+    game.player_mut(player).get_unit_mut(unit_id).position = position;
 }
 
 #[cfg(test)]

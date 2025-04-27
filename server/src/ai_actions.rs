@@ -156,11 +156,12 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
     if !influence.is_empty() {
         let action_type = prefer_custom_action(influence);
         if let Some(i) = calculate_influence(game, p, &action_type) {
-            actions.push((ActionType::Playing(PlayingActionType::Collect), vec![
-                Action::Playing(PlayingAction::InfluenceCultureAttempt(
+            actions.push((
+                ActionType::Playing(PlayingActionType::Collect),
+                vec![Action::Playing(PlayingAction::InfluenceCultureAttempt(
                     InfluenceCultureAttempt::new(i, action_type),
-                )),
-            ]));
+                ))],
+            ));
         }
     }
 
@@ -353,7 +354,8 @@ fn collect_actions(p: &Player, game: &Game) -> Vec<Action> {
                 CostTrigger::NoModifiers,
             );
 
-            possible_collections(&info).into_iter()
+            possible_collections(&info)
+                .into_iter()
                 .filter_map(|c| {
                     let total = total_collect(&c);
                     if !p.can_gain(total.clone()) {

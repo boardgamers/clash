@@ -74,9 +74,9 @@ pub fn get_total_collection(
         ));
     }
     let range2_tiles = collections
-             .iter()
-             .filter(|c| c.position.distance(i.city) > 1)
-             .count();
+        .iter()
+        .filter(|c| c.position.distance(i.city) > 1)
+        .count();
     if range2_tiles > i.max_range2_tiles as usize {
         return Err(format!(
             "You can only collect {} resources from range 2 tiles - got {range2_tiles}",
@@ -209,7 +209,7 @@ impl CollectInfo {
             city,
             max_per_tile: 1,
             max_selection: player.get_city(city).mood_modified_size(player) as u8,
-            max_range2_tiles: 0
+            max_range2_tiles: 0,
         }
     }
 }

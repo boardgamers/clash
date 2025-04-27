@@ -215,7 +215,6 @@ fn destroy_wonder(game: &mut Game, position: Position, name: &str) {
     let p = game.player_mut(owner);
     let city = p.get_city_mut(position);
     city.pieces.wonders.retain(|w| w != name);
-    city.possible_collections.clear();
     p.event_victory_points += a;
     game.add_info_log_item(&format!(
         "{} gained {} points for the {} at {}",

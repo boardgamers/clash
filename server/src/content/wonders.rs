@@ -23,8 +23,7 @@ pub fn get_all_uncached() -> Vec<Wonder> {
             PaymentOptions::resources(ResourcePile::new(5, 5, 2, 0, 0, 0, 5)),
             vec![Advance::Irrigation],
         )
-            .with_reset_collect_stats()
-            .add_transient_event_listener(
+                    .add_transient_event_listener(
                 |events| &mut events.terrain_collect_options,
                 1,
                 |m,(),()| {

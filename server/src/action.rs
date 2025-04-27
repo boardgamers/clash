@@ -135,7 +135,6 @@ pub fn execute_without_undo(
         _ => execute_regular_action(game, action, player_index),
     }?;
     check_for_waste(game);
-    update_stats(game);
 
     if let Some(o) = game.player_mut(player_index).gained_objective.take() {
         gain_objective_card(game, player_index, o);
@@ -370,8 +369,4 @@ fn execute_move_action(game: &mut Game, player_index: usize, m: &MoveUnits) -> R
     }
 
     Ok(())
-}
-
-pub(crate) fn update_stats(_game: &mut Game) {
-    // todo remove this
 }
