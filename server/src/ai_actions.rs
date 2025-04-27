@@ -4,7 +4,7 @@ use crate::card::validate_card_selection;
 use crate::city::{City, MoodState};
 use crate::collect::{available_collect_actions, possible_resource_collections};
 use crate::construct::{Construct, available_buildings, new_building_positions};
-use crate::content::custom_actions::{CustomActionType, CustomEventAction};
+use crate::content::custom_actions::CustomEventAction;
 use crate::content::persistent_events::{
     ChangeGovernmentRequest, EventResponse, HandCardsRequest, MultiRequest, PersistentEventRequest,
     PersistentEventState, PositionRequest, SelectedStructure, is_selected_structures_valid,
