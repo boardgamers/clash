@@ -17,6 +17,7 @@ use crate::player_events::PlayingActionInfo;
 use crate::playing_actions::{ActionCost, PlayingActionType};
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
+use crate::utils::remove_element_by;
 
 pub(crate) fn development_action_cards() -> Vec<ActionCard> {
     vec![
@@ -117,6 +118,15 @@ pub(crate) fn collect_only() -> Builtin {
                 {
                     c.max_selection += 2;
                 }
+            },
+        )
+        .add_simple_persistent_event_listener(
+            |event| &mut event.collect,
+            2,
+            |game, _, _, _| {
+                remove_element_by(&mut game.permanent_effects, |e| {
+                    matches!(e, &PermanentEffect::Collect(_))
+                });
             },
         )
         .build()
