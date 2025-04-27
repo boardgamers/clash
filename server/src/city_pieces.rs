@@ -147,7 +147,6 @@ pub fn remove_building(city: &mut City, building: Building) {
         Port => pieces.port = None,
         Temple => pieces.temple = None,
     }
-    city.possible_collections.clear();
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Default)]

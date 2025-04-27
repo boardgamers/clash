@@ -261,11 +261,6 @@
                             "times": 1
                           }
                         ],
-                        "total": {
-                          "wood": 1,
-                          "ore": 1,
-                          "mood_tokens": 1
-                        },
                         "action_type": "Collect"
                       }
                     }

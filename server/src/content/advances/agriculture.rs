@@ -32,7 +32,6 @@ fn storage() -> AdvanceBuilder {
     .add_one_time_ability_initializer(|game, player_index| {
         game.players[player_index].resource_limit.food = 7;
     })
-    .with_reset_collect_stats()
     .with_advance_bonus(MoodToken)
 }
 
@@ -42,7 +41,6 @@ fn irrigation() -> AdvanceBuilder {
         "Irrigation",
         "Your cities may Collect food from Barren spaces, Ignore Famine events",
     )
-    .with_reset_collect_stats()
     .add_transient_event_listener(
         |event| &mut event.terrain_collect_options,
         0,
@@ -86,15 +84,7 @@ fn husbandry_collect(i: &mut CollectInfo, c: &CollectContext, game: &Game) {
     } else {
         1
     };
-
-    if c.used
-        .iter()
-        .filter(|u| u.position.distance(c.city_position) == 2)
-        .count()
-        == allowed
-    {
-        return;
-    }
+    i.max_range2_tiles = allowed;
 
     i.info.log.push(format!(
         "Husbandry allows collecting {allowed} resources from 2 land spaces away"
@@ -105,7 +95,10 @@ fn husbandry_collect(i: &mut CollectInfo, c: &CollectContext, game: &Game) {
         .iter()
         .filter(|(pos, t)| pos.distance(c.city_position) == 2 && t.is_land())
         .for_each(|(pos, t)| {
-            i.choices
-                .insert(*pos, c.terrain_options.get(t).cloned().unwrap_or_default());
+            let option = c.terrain_options.get(t);
+            if option.is_none() {
+                return;
+            }
+            i.choices.insert(*pos, option.cloned().unwrap_or_default());
         });
 }

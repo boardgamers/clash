@@ -89,15 +89,12 @@ pub fn collect_dialog(rc: &RenderContext, collect: &CollectResources) -> StateUp
         OkTooltip::Invalid("Too many resources selected".to_string()),
         |i| OkTooltip::Valid(format!("Collect {}", i.total)),
     );
-    let total = result.map_or(ResourcePile::empty(), |i| i.total);
-
     if ok_button(rc, tooltip) {
         let extra = collect.extra_resources();
 
         let c = Collect::new(
             collect.city_position,
             collect.collections.clone(),
-            total,
             collect.custom.action_type.clone(),
         );
 
@@ -125,12 +122,10 @@ fn click_collect_option(
 ) -> StateUpdate {
     let c = add_collect(&col.info, p, pile, &col.collections);
 
-    let used = c.clone().into_iter().collect_vec();
     let i = possible_resource_collections(
         rc.game,
         col.info.city,
         col.player_index,
-        &used,
         CostTrigger::WithModifiers,
     );
     let mut new = col.clone();

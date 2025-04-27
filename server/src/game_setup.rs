@@ -1,4 +1,3 @@
-use crate::action::update_stats;
 use crate::action_card::gain_action_card_from_pile;
 use crate::advance::Advance;
 use crate::cache::Cache;
@@ -132,7 +131,6 @@ pub fn setup_game_with_cache(
         }
     }
 
-    update_stats(&mut game);
     game.next_age();
     game
 }

@@ -21,7 +21,6 @@ use crate::{game::Game, position::Position, resource_pile::ResourcePile};
 pub struct Collect {
     pub city_position: Position,
     pub collections: Vec<PositionCollection>,
-    pub total: ResourcePile,
     pub action_type: PlayingActionType,
 }
 
@@ -30,13 +29,11 @@ impl Collect {
     pub fn new(
         city_position: Position,
         collections: Vec<PositionCollection>,
-        total: ResourcePile,
         action_type: PlayingActionType,
     ) -> Self {
         Self {
             city_position,
             collections,
-            total,
             action_type,
         }
     }

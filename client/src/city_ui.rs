@@ -205,7 +205,6 @@ fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option
                     rc.game,
                     city.position,
                     city.player_index,
-                    &Vec::new(),
                     CostTrigger::WithModifiers,
                 );
                 ActiveDialog::CollectResources(CollectResources::new(

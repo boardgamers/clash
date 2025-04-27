@@ -217,9 +217,6 @@
                             "times": 1
                           }
                         ],
-                        "total": {
-                          "ore": 2
-                        },
                         "action_type": {
                           "Custom": "FreeEconomyCollect"
                         }

@@ -1,6 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
-use crate::ai_collect::reset_collection_stats;
 use crate::content::action_cards::cultural_takeover::cultural_takeover;
 use crate::content::action_cards::mercenaries::mercenaries;
 use crate::content::builtin::Builtin;
@@ -73,14 +72,13 @@ fn production_focus(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_simple_persistent_event_listener(
         |e| &mut e.play_action_card,
         0,
-        |game, player, _name, _| {
+        |game, _player, _name, _| {
             game.permanent_effects
                 .push(PermanentEffect::Collect(CollectEffect::ProductionFocus));
             game.actions_left += 1; // to offset the action spent for collecting
             game.add_info_log_item(
                 "Production Focus: You may collect multiple times from the same tile.",
             );
-            reset_collection_stats(game.player_mut(player));
         },
     )
     .build()
@@ -125,14 +123,10 @@ pub(crate) fn collect_only() -> Builtin {
         .add_simple_persistent_event_listener(
             |event| &mut event.collect,
             2,
-            |game, player, _, _| {
-                if remove_element_by(&mut game.permanent_effects, |e| {
+            |game, _, _, _| {
+                remove_element_by(&mut game.permanent_effects, |e| {
                     matches!(e, &PermanentEffect::Collect(_))
-                })
-                .is_some()
-                {
-                    reset_collection_stats(game.player_mut(player));
-                }
+                });
             },
         )
         .build()

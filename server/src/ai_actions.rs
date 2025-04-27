@@ -1,9 +1,10 @@
 use crate::action::{Action, ActionType};
+use crate::ai_collect::{possible_collections, total_collect};
 use crate::card::validate_card_selection;
 use crate::city::{City, MoodState};
-use crate::collect::available_collect_actions;
+use crate::collect::{available_collect_actions, possible_resource_collections};
 use crate::construct::{Construct, available_buildings, new_building_positions};
-use crate::content::custom_actions::{CustomActionType, CustomEventAction};
+use crate::content::custom_actions::CustomEventAction;
 use crate::content::persistent_events::{
     ChangeGovernmentRequest, EventResponse, HandCardsRequest, MultiRequest, PersistentEventRequest,
     PersistentEventState, PositionRequest, SelectedStructure, is_selected_structures_valid,
@@ -17,7 +18,7 @@ use crate::happiness::{available_happiness_actions, happiness_cost};
 use crate::payment::PaymentOptions;
 use crate::player::{CostTrigger, Player};
 use crate::playing_actions::{
-    IncreaseHappiness, PlayingAction, PlayingActionType, Recruit, base_and_custom_action,
+    Collect, IncreaseHappiness, PlayingAction, PlayingActionType, Recruit, base_and_custom_action,
 };
 use crate::position::Position;
 use crate::recruit::recruit_cost;
@@ -194,11 +195,6 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
     }
 
     for (a, _) in game.available_custom_actions(p.index) {
-        if a == CustomActionType::ForcedLabor {
-            // todo forced labor doesn't work with collect cache
-            continue;
-        }
-
         let cities = if a.is_city_bound() {
             p.cities
                 .iter()
@@ -346,15 +342,28 @@ fn collect_actions(p: &Player, game: &Game) -> Vec<Action> {
         .iter()
         .filter(|city| city.can_activate())
         .flat_map(|city| {
-            city.possible_collections.iter().filter_map({
-                let action_type = action_type.clone();
-                move |c| {
-                    let mut a = c.clone();
-                    a.action_type = action_type.clone();
-                    p.can_gain(c.total.clone())
-                        .then_some(Action::Playing(PlayingAction::Collect(a)))
-                }
-            })
+            let info = possible_resource_collections(
+                game,
+                city.position,
+                p.index,
+                CostTrigger::NoModifiers,
+            );
+
+            possible_collections(&info)
+                .into_iter()
+                .filter_map(|c| {
+                    let total = total_collect(&c);
+                    if !p.can_gain(total.clone()) {
+                        return None;
+                    }
+
+                    Some(Action::Playing(PlayingAction::Collect(Collect::new(
+                        city.position,
+                        c,
+                        action_type.clone(),
+                    ))))
+                })
+                .collect_vec()
         })
         .collect_vec()
 }

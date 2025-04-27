@@ -1,5 +1,4 @@
 use crate::advance::Advance;
-use crate::ai_collect::{reset_collect_within_range, reset_collect_within_range_for_all_except};
 use crate::city_pieces::{DestroyedStructures, DestroyedStructuresData};
 use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::content::builtin;
@@ -700,7 +699,6 @@ impl Player {
         if let Some(port_position) = port_position {
             city.port_position = Some(port_position);
         }
-        city.possible_collections.clear();
     }
 
     #[must_use]
@@ -790,12 +788,9 @@ pub fn add_unit(player: usize, position: Position, unit_type: UnitType, game: &m
     let unit = Unit::new(player, position, unit_type, p.next_unit_id);
     p.units.push(unit);
     p.next_unit_id += 1;
-    reset_collect_within_range_for_all_except(game, position, player);
     if game.player(player).civilization.is_pirates() {
         for n in position.neighbors() {
-            if game.map.is_sea(n) {
-                reset_collect_within_range_for_all_except(game, n, player);
-            }
+            if game.map.is_sea(n) {}
         }
     }
 }
@@ -809,7 +804,6 @@ pub(crate) fn remove_unit(player: usize, id: u32, game: &mut Game) -> Unit {
             .position(|unit| unit.id == id)
             .expect("unit should exist"),
     );
-    reset_collect_within_range(player, u.position, game, 1);
     u
 }
 
