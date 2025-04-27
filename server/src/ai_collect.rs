@@ -8,6 +8,8 @@ use crate::playing_actions::Collect;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
+use std::collections::HashSet;
+use std::mem;
 
 pub fn set_city_collections(game: &mut Game, city_position: Position) {
     let city = game.get_any_city(city_position);
@@ -72,14 +74,9 @@ fn possible_collections(info: &CollectInfo) -> Vec<Vec<PositionCollection>> {
 
     combinations
         .into_iter()
-        .map(|c| {
-            let mut result = vec![];
-            for i in c {
-                let (pos, pile) = list[i];
-                for r in pile {
-                    result.push(PositionCollection::new(*pos, r.clone()));
-                }
-            }
+        .flat_map(|c| {
+            let mut result = vec![vec![]];
+            add_combination(&c, &list, &mut result);
             result
         })
         .filter(|c| {
@@ -91,6 +88,35 @@ fn possible_collections(info: &CollectInfo) -> Vec<Vec<PositionCollection>> {
         })
         .unique_by(|c| total(c))
         .collect_vec()
+}
+
+fn add_combination(
+    combo: &[usize],
+    choices: &[(&Position, &HashSet<ResourcePile>)],
+    result: &mut Vec<Vec<PositionCollection>>,
+) {
+    if combo.is_empty() {
+        return;
+    }
+
+    let (pos, pile) = choices[combo[0]];
+
+    if pile.len() > 1 {
+        let old = mem::take(result);
+        for j in pile {
+            for r in &old.clone() {
+                let mut r = r.clone();
+                r.push(PositionCollection::new(*pos, j.clone()));
+                result.push(r);
+            }
+        }
+    } else {
+        let n = pile.iter().next().expect("pile empty");
+        for r in &mut *result {
+            r.push(PositionCollection::new(*pos, n.clone()));
+        }
+    }
+    add_combination(&combo[1..], choices, result);
 }
 
 /// Generates all possible combinations of `k` numbers out of `0...n-1`.
@@ -255,7 +281,6 @@ mod tests {
     }
 
     fn assert_total(result: &Vec<Vec<PositionCollection>>, expected: Vec<ResourcePile>) {
-        // HashSet::
         let got = result.iter().map(|r| total(r)).collect::<Vec<_>>();
         let want: HashSet<&ResourcePile, FxBuildHasher> = HashSet::from_iter(expected.iter());
         let got: HashSet<&ResourcePile, FxBuildHasher> = HashSet::from_iter(got.iter());
