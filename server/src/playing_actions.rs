@@ -21,7 +21,7 @@ use crate::{game::Game, position::Position, resource_pile::ResourcePile};
 pub struct Collect {
     pub city_position: Position,
     pub collections: Vec<PositionCollection>,
-    pub total: ResourcePile,
+    pub total: ResourcePile, //todo remove
     pub action_type: PlayingActionType,
 }
 

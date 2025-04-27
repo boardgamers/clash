@@ -65,7 +65,7 @@ pub fn get_total_collection(
         return Err("Not your city".to_string());
     }
 
-    let i = possible_resource_collections(game, city_position, player_index, &Vec::new(), trigger);
+    let i = possible_resource_collections(game, city_position, player_index, trigger);
     if i.max_selection < tiles_used(collections) {
         return Err(format!(
             "You can only collect {} resources at {city_position} - got {}",
@@ -170,7 +170,6 @@ pub(crate) fn on_collect(game: &mut Game, player_index: usize, i: CollectInfo) {
 pub(crate) struct CollectContext {
     pub player_index: usize,
     pub city_position: Position,
-    pub used: Vec<PositionCollection>,
     pub terrain_options: HashMap<Terrain, HashSet<ResourcePile>>,
 }
 
@@ -182,6 +181,7 @@ pub struct CollectInfo {
     pub total: ResourcePile,
     pub max_per_tile: u8,
     pub max_selection: u8,
+    pub max_range2_tiles: u8,
     pub(crate) info: ActionInfo,
 }
 
@@ -199,6 +199,7 @@ impl CollectInfo {
             city,
             max_per_tile: 1,
             max_selection: player.get_city(city).mood_modified_size(player) as u8,
+            max_range2_tiles: 0
         }
     }
 }
@@ -211,7 +212,6 @@ pub fn possible_resource_collections(
     game: &Game,
     city_pos: Position,
     player_index: usize,
-    used: &[PositionCollection],
     trigger: CostTrigger,
 ) -> CollectInfo {
     let set = [
@@ -248,7 +248,6 @@ pub fn possible_resource_collections(
     let collect_context = CollectContext {
         player_index,
         city_position: city_pos,
-        used: used.to_vec(),
         terrain_options,
     };
 
@@ -260,15 +259,6 @@ pub fn possible_resource_collections(
     );
 
     collect_info.modifiers.extend(modifiers);
-
-    for u in used {
-        collect_info
-            .choices
-            .entry(u.position)
-            .or_default()
-            .insert(u.pile.clone());
-    }
-
     collect_info.choices.retain(|p, _| {
         game.try_get_any_city(*p)
             .is_none_or(|c| c.position == city_pos)

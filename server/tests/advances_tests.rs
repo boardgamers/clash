@@ -753,7 +753,6 @@ fn has_husbandry_field(game: &Game) -> bool {
         game,
         Position::from_offset("C2"),
         0,
-        &[],
         CostTrigger::NoModifiers,
     );
     info.choices.contains_key(&Position::from_offset("E2"))

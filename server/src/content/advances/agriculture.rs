@@ -86,16 +86,8 @@ fn husbandry_collect(i: &mut CollectInfo, c: &CollectContext, game: &Game) {
     } else {
         1
     };
-
-    if c.used
-        .iter()
-        .filter(|u| u.position.distance(c.city_position) == 2)
-        .count()
-        == allowed
-    {
-        return;
-    }
-
+    i.max_per_tile = allowed;
+    
     i.info.log.push(format!(
         "Husbandry allows collecting {allowed} resources from 2 land spaces away"
     ));

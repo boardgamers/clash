@@ -125,12 +125,10 @@ fn click_collect_option(
 ) -> StateUpdate {
     let c = add_collect(&col.info, p, pile, &col.collections);
 
-    let used = c.clone().into_iter().collect_vec();
     let i = possible_resource_collections(
         rc.game,
         col.info.city,
         col.player_index,
-        &used,
         CostTrigger::WithModifiers,
     );
     let mut new = col.clone();
