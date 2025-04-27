@@ -1,8 +1,6 @@
 use crate::common::JsonTest;
-use itertools::Itertools;
 use server::action::{Action, ActionType};
 use server::ai_actions::AiActions;
-use server::ai_collect::city_collections_uncached;
 use server::collect::PositionCollection;
 use server::playing_actions::{
     Collect, IncreaseHappiness, PlayingAction, PlayingActionType, Recruit,
@@ -16,26 +14,6 @@ use std::vec;
 mod common;
 
 const JSON: JsonTest = JsonTest::new("ai");
-
-#[test]
-fn collect_city() {
-    let game = &JSON.load_game("collect");
-    let p = game.player(0);
-    let mut collect = city_collections_uncached(game, p, p.get_city(Position::from_offset("C2")));
-    for c in &mut collect {
-        c.collections.sort_by_key(|x| x.position);
-    }
-    assert_eq!(collect.len(), 3);
-    let got = collect.into_iter().map(|c| c.total).collect_vec();
-    assert_eq!(
-        got,
-        vec![
-            ResourcePile::wood(1) + ResourcePile::food(2),
-            ResourcePile::food(1) + ResourcePile::wood(1) + ResourcePile::gold(1),
-            ResourcePile::food(1) + ResourcePile::wood(1) + ResourcePile::mood_tokens(1),
-        ]
-    )
-}
 
 #[test]
 fn all_actions() {
@@ -68,7 +46,6 @@ fn all_actions() {
                             Position::from_offset("E8"),
                             ResourcePile::wood(1)
                         )],
-                        ResourcePile::wood(1),
                         PlayingActionType::Collect,
                     ))),
                     Action::Playing(PlayingAction::Collect(Collect::new(
@@ -77,7 +54,6 @@ fn all_actions() {
                             Position::from_offset("C8"),
                             ResourcePile::ore(1)
                         )],
-                        ResourcePile::ore(1),
                         PlayingActionType::Collect,
                     )))
                 ]

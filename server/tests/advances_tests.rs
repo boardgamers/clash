@@ -294,7 +294,6 @@ fn test_forced_labor() {
                         PositionCollection::new(Position::from_offset("A1"), ResourcePile::food(1)),
                         PositionCollection::new(Position::from_offset("A2"), ResourcePile::wood(1)),
                     ],
-                    ResourcePile::food(1) + ResourcePile::wood(1),
                     PlayingActionType::Collect,
                 ))),
             ),
@@ -623,7 +622,6 @@ fn test_collect_husbandry() {
             Position::from_offset("B5"),
             ResourcePile::food(1),
         )],
-        ResourcePile::food(1),
         PlayingActionType::Collect,
     )));
     JSON.test(
@@ -647,7 +645,6 @@ fn test_collect_free_economy() {
                     PositionCollection::new(Position::from_offset("B1"), ResourcePile::ore(1)),
                     PositionCollection::new(Position::from_offset("B2"), ResourcePile::ore(1)),
                 ],
-                ResourcePile::ore(2),
                 PlayingActionType::Custom(CustomActionType::FreeEconomyCollect),
             ))),
         )],
@@ -717,7 +714,6 @@ fn test_husbandry() {
                         Position::from_offset("D1"),
                         ResourcePile::food(1),
                     )],
-                    ResourcePile::food(1),
                     PlayingActionType::Collect,
                 ))),
             )
@@ -735,7 +731,6 @@ fn test_husbandry() {
                         Position::from_offset("E2"),
                         ResourcePile::food(1),
                     )],
-                    ResourcePile::food(1),
                     PlayingActionType::Collect,
                 ))),
             )

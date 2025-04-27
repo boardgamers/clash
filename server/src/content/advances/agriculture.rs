@@ -86,7 +86,7 @@ fn husbandry_collect(i: &mut CollectInfo, c: &CollectContext, game: &Game) {
     } else {
         1
     };
-    i.max_per_tile = allowed;
+    i.max_range2_tiles = allowed;
     
     i.info.log.push(format!(
         "Husbandry allows collecting {allowed} resources from 2 land spaces away"

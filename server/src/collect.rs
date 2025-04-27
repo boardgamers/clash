@@ -73,6 +73,16 @@ pub fn get_total_collection(
             tiles_used(collections)
         ));
     }
+    let range2_tiles = collections
+             .iter()
+             .filter(|c| c.position.distance(i.city) > 1)
+             .count();
+    if range2_tiles > i.max_range2_tiles as usize {
+        return Err(format!(
+            "You can only collect {} resources from range 2 tiles - got {range2_tiles}",
+            i.max_range2_tiles,
+        ));
+    }
 
     for (_, group) in &collections.iter().chunk_by(|c| c.position) {
         let used = group.map(|c| c.times).sum::<u8>();

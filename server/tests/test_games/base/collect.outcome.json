@@ -88,7 +88,7 @@
       "incident_tokens": 2,
       "next_unit_id": 8,
       "event_info": {
-        "Public Education": "used"
+        "PublicEducation": "used"
       }
     },
     {
@@ -216,10 +216,6 @@
                             "times": 1
                           }
                         ],
-                        "total": {
-                          "wood": 1,
-                          "ore": 1
-                        },
                         "action_type": "Collect"
                       }
                     }

@@ -135,7 +135,6 @@ fn basic_actions() {
     let collect_action = Action::Playing(Collect(playing_actions::Collect::new(
         city_position,
         vec![PositionCollection::new(tile_position, ResourcePile::ore(1))],
-        ResourcePile::ore(1),
         PlayingActionType::Collect,
     )));
     let game = game_api::execute(game, collect_action, 0);
@@ -432,7 +431,6 @@ fn test_collect() {
                     PositionCollection::new(Position::from_offset("B1"), ResourcePile::ore(1)),
                     PositionCollection::new(Position::from_offset("B2"), ResourcePile::wood(1)),
                 ],
-                ResourcePile::ore(1) + ResourcePile::wood(1),
                 PlayingActionType::Collect,
             ))),
         )],

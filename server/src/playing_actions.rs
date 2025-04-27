@@ -21,7 +21,6 @@ use crate::{game::Game, position::Position, resource_pile::ResourcePile};
 pub struct Collect {
     pub city_position: Position,
     pub collections: Vec<PositionCollection>,
-    pub total: ResourcePile, //todo remove
     pub action_type: PlayingActionType,
 }
 
@@ -30,13 +29,11 @@ impl Collect {
     pub fn new(
         city_position: Position,
         collections: Vec<PositionCollection>,
-        total: ResourcePile,
         action_type: PlayingActionType,
     ) -> Self {
         Self {
             city_position,
             collections,
-            total,
             action_type,
         }
     }
@@ -312,28 +309,19 @@ impl PlayingAction {
             PlayingAction::Advance { .. } => PlayingActionType::Advance,
             PlayingAction::FoundCity { .. } => PlayingActionType::FoundCity,
             PlayingAction::Construct(_) => PlayingActionType::Construct,
-            PlayingAction::Collect(c) => allowed_types(
-                &c.action_type,
-                &[
-                    PlayingActionType::Collect,
-                    PlayingActionType::Custom(CustomActionType::FreeEconomyCollect),
-                ],
-            ),
+            PlayingAction::Collect(c) => allowed_types(&c.action_type, &[
+                PlayingActionType::Collect,
+                PlayingActionType::Custom(CustomActionType::FreeEconomyCollect),
+            ]),
             PlayingAction::Recruit(_) => PlayingActionType::Recruit,
-            PlayingAction::IncreaseHappiness(h) => allowed_types(
-                &h.action_type,
-                &[
-                    PlayingActionType::IncreaseHappiness,
-                    PlayingActionType::Custom(CustomActionType::VotingIncreaseHappiness),
-                ],
-            ),
-            PlayingAction::InfluenceCultureAttempt(i) => allowed_types(
-                &i.action_type,
-                &[
-                    PlayingActionType::InfluenceCultureAttempt,
-                    PlayingActionType::Custom(CustomActionType::ArtsInfluenceCultureAttempt),
-                ],
-            ),
+            PlayingAction::IncreaseHappiness(h) => allowed_types(&h.action_type, &[
+                PlayingActionType::IncreaseHappiness,
+                PlayingActionType::Custom(CustomActionType::VotingIncreaseHappiness),
+            ]),
+            PlayingAction::InfluenceCultureAttempt(i) => allowed_types(&i.action_type, &[
+                PlayingActionType::InfluenceCultureAttempt,
+                PlayingActionType::Custom(CustomActionType::ArtsInfluenceCultureAttempt),
+            ]),
             PlayingAction::ActionCard(a) => PlayingActionType::ActionCard(*a),
             PlayingAction::WonderCard(name) => PlayingActionType::WonderCard(name.clone()),
             PlayingAction::Custom(c) => PlayingActionType::Custom(c.action.clone()),

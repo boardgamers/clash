@@ -1,57 +1,16 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::city::City;
-use crate::collect::{CollectInfo, PositionCollection, possible_resource_collections};
+use crate::collect::{CollectInfo, PositionCollection};
 use crate::content::builtin::Builtin;
 use crate::game::Game;
-use crate::player::{CostTrigger, Player};
-use crate::playing_actions::Collect;
+use crate::player::Player;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
 use std::collections::HashSet;
 use std::mem;
 
-pub fn set_city_collections(game: &mut Game, city_position: Position) {
-    let city = game.get_any_city(city_position);
-    let player = city.player_index;
-    let p = city_collections_uncached(game, game.player(player), city);
-    game.player_mut(player)
-        .get_city_mut(city_position)
-        .possible_collections
-        .clone_from(&p);
-}
 
-#[must_use]
-pub fn city_collections_uncached(game: &Game, player: &Player, city: &City) -> Vec<Collect> {
-    let info =
-        possible_resource_collections(game, city.position, player.index, CostTrigger::NoModifiers);
-
-    city_collection_uncached(game, player, city)
-}
-
-fn city_collection_uncached(game: &Game, player: &Player, city: &City) -> Vec<Collect> {
-    let info =
-        possible_resource_collections(game, city.position, player.index, CostTrigger::NoModifiers);
-
-    possible_collections(&info);
-    //
-    // let resource = add_resource(
-    //     game,
-    //     player,
-    //     city,
-    //     vec![],
-    //     &info,
-    //     choices,
-    //     info.max_selection,
-    //     info.max_range2_tiles,
-    // );
-    // // todo map to Cell
-    // todo!()
-    // // resource
-    vec![]
-}
-
-fn possible_collections(info: &CollectInfo) -> Vec<Vec<PositionCollection>> {
+pub(crate) fn possible_collections(info: &CollectInfo) -> Vec<Vec<PositionCollection>> {
     let choices = info.choices.clone();
 
     let mut list = choices.iter().collect_vec();
@@ -60,7 +19,7 @@ fn possible_collections(info: &CollectInfo) -> Vec<Vec<PositionCollection>> {
 
     if info.max_range2_tiles > 0 {
         // avoid husbandry
-        list.sort_by_key(|(pos, _)| (pos.distance(info.city), pos.clone()));
+        list.sort_by_key(|(pos, _)| (pos.distance(info.city), (*pos).clone()));
 
         let range2_tiles = list
             .iter()
@@ -86,7 +45,7 @@ fn possible_collections(info: &CollectInfo) -> Vec<Vec<PositionCollection>> {
                     .count()
                     <= info.max_range2_tiles as usize
         })
-        .unique_by(|c| total(c))
+        .unique_by(total_collect)
         .collect_vec()
 }
 
@@ -174,7 +133,7 @@ fn backtrack(
     }
 }
 
-fn total(r: &Vec<PositionCollection>) -> ResourcePile {
+pub(crate) fn total_collect(r: &Vec<PositionCollection>) -> ResourcePile {
     let mut total = ResourcePile::empty();
     for c in r {
         total += c.total();
@@ -254,7 +213,7 @@ pub(crate) fn reset_collection_stats(p: &mut Player) {
 
 #[cfg(test)]
 mod tests {
-    use crate::ai_collect::{possible_collections, total};
+    use crate::ai_collect::{possible_collections, total_collect};
     use crate::collect::{CollectInfo, PositionCollection};
     use crate::player_events::ActionInfo;
     use crate::position::Position;
@@ -281,7 +240,7 @@ mod tests {
     }
 
     fn assert_total(result: &Vec<Vec<PositionCollection>>, expected: Vec<ResourcePile>) {
-        let got = result.iter().map(|r| total(r)).collect::<Vec<_>>();
+        let got = result.iter().map(|r| total_collect(r)).collect::<Vec<_>>();
         let want: HashSet<&ResourcePile, FxBuildHasher> = HashSet::from_iter(expected.iter());
         let got: HashSet<&ResourcePile, FxBuildHasher> = HashSet::from_iter(got.iter());
         assert_eq!(got, want, "Total mismatch");

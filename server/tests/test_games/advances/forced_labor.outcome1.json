@@ -274,10 +274,6 @@
                             "times": 1
                           }
                         ],
-                        "total": {
-                          "food": 1,
-                          "wood": 1
-                        },
                         "action_type": "Collect"
                       }
                     }

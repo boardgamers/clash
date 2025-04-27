@@ -1,6 +1,5 @@
 use crate::action_card::on_play_action_card;
 use crate::advance::on_advance;
-use crate::ai_collect::set_city_collections;
 use crate::city::{MoodState, on_found_city};
 use crate::collect::on_collect;
 use crate::combat::{
@@ -373,17 +372,6 @@ fn execute_move_action(game: &mut Game, player_index: usize, m: &MoveUnits) -> R
     Ok(())
 }
 
-pub(crate) fn update_stats(game: &mut Game) {
-    let update = game
-        .players
-        .iter()
-        .flat_map(|p| {
-            p.cities
-                .iter()
-                .filter_map(|c| c.possible_collections.is_empty().then_some(c.position))
-        })
-        .collect_vec();
-    for p in update {
-        set_city_collections(game, p);
-    }
+pub(crate) fn update_stats(_game: &mut Game) {
+    // todo remove this
 }
