@@ -97,7 +97,11 @@ fn husbandry_collect(i: &mut CollectInfo, c: &CollectContext, game: &Game) {
         .iter()
         .filter(|(pos, t)| pos.distance(c.city_position) == 2 && t.is_land())
         .for_each(|(pos, t)| {
+            let option = c.terrain_options.get(t);
+            if option.is_none() {
+                return;
+            }
             i.choices
-                .insert(*pos, c.terrain_options.get(t).cloned().unwrap_or_default());
+                .insert(*pos, option.cloned().unwrap_or_default());
         });
 }
