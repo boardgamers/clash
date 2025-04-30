@@ -166,7 +166,7 @@ fn test_cultural_takeover() {
         vec![
             TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(15)))
                 .without_json_comparison(),
-            TestAction::not_undoable(
+            TestAction::undoable(
                 0,
                 Action::Playing(PlayingAction::InfluenceCultureAttempt(
                     cultural_influence::InfluenceCultureAttempt::new(
@@ -174,7 +174,13 @@ fn test_cultural_takeover() {
                         PlayingActionType::InfluenceCultureAttempt,
                     ),
                 )),
-            ),
+            ).without_json_comparison(),
+            TestAction::not_undoable(
+                0,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
+                    2,
+                )])),
+            )
         ],
     );
 }

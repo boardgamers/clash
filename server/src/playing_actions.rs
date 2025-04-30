@@ -405,10 +405,6 @@ impl ActionCost {
     }
 }
 
-pub(crate) fn roll_boost_cost(roll: u8) -> ResourcePile {
-    ResourcePile::culture_tokens(5 - roll)
-}
-
 #[must_use]
 pub fn base_and_custom_action(
     actions: Vec<PlayingActionType>,

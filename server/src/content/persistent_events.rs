@@ -9,6 +9,7 @@ use crate::combat_listeners::{CombatEnd, CombatRoundEnd, CombatRoundStart};
 use crate::combat_stats::CombatStats;
 use crate::construct::ConstructInfo;
 use crate::content::custom_actions::CustomEventAction;
+use crate::cultural_influence::InfluenceCultureInfo;
 use crate::events::EventOrigin;
 use crate::explore::ExploreResolutionState;
 use crate::game::Game;
@@ -97,7 +98,7 @@ impl PersistentEventPlayer {
 pub enum PersistentEventType {
     Collect(CollectInfo),
     ExploreResolution(ExploreResolutionState),
-    InfluenceCultureResolution(ResourcePile),
+    InfluenceCulture(InfluenceCultureInfo),
     UnitsKilled(KilledUnits),
     CombatStart(Combat),
     CombatRoundStart(CombatRoundStart),
