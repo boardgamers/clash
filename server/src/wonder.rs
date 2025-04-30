@@ -359,10 +359,7 @@ pub(crate) fn build_wonder() -> Builtin {
                 let city = p.get_city(i.selected_position.expect("city not selected"));
                 let cost = can_construct_wonder(city, i.name, p, game, &i.discount)
                     .expect("can't construct wonder");
-                Some(vec![PaymentRequest::mandatory(
-                    cost,
-                    "Pay to build wonder",
-                )])
+                Some(vec![PaymentRequest::mandatory(cost, "Pay to build wonder")])
             },
             |game, s, i| {
                 let pos = i.selected_position.expect("city not selected");

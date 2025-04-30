@@ -624,9 +624,9 @@ pub(crate) fn terrain_movement_restriction(
 
 pub(crate) fn has_movable_units(game: &Game, player: &Player) -> bool {
     player.units.iter().any(|unit| {
-        let result = possible_move_units_destinations(player, game, &[unit.id], unit.position, None);
-        result.is_ok_and(|r|!r.is_empty())
-            || can_embark(game, player, unit)
+        let result =
+            possible_move_units_destinations(player, game, &[unit.id], unit.position, None);
+        result.is_ok_and(|r| !r.is_empty()) || can_embark(game, player, unit)
     })
 }
 

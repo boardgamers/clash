@@ -53,7 +53,7 @@ pub(crate) fn encircled(id: u8) -> TacticsCard {
         let opponent = combat.opponent(player);
         let role = combat.role(player);
         let opponent_role = combat.role(opponent);
-        
+
         let player_losses = e.losses(role);
         let opponent_losses = e.losses(opponent_role);
         if opponent_losses >= player_losses {

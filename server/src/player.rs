@@ -174,7 +174,7 @@ impl Player {
             wonders_built: data.wonders_built,
             wonders_owned: cities
                 .iter()
-                .flat_map(|city| city.pieces.wonders.iter().map(|w| *w))
+                .flat_map(|city| city.pieces.wonders.iter().copied())
                 .collect(),
             cities,
             incident_tokens: data.incident_tokens,
@@ -625,11 +625,12 @@ impl Player {
     pub fn advance_cost(&self, advance: Advance, game: &Game, execute: CostTrigger) -> CostInfo {
         self.trigger_cost_event(
             |e| &e.advance_cost,
-            &PaymentOptions::sum(self, PaymentReason::GainAdvance, ADVANCE_COST, &[
-                ResourceType::Ideas,
-                ResourceType::Food,
-                ResourceType::Gold,
-            ]),
+            &PaymentOptions::sum(
+                self,
+                PaymentReason::GainAdvance,
+                ADVANCE_COST,
+                &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
+            ),
             &advance,
             game,
             execute,

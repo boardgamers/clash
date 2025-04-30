@@ -77,7 +77,7 @@ fn colosseum() -> WonderInfo {
             if !player.can_afford(&cost) {
                 return None;
             }
-            
+
             let h = e.hits_mut(e.role(player_index));
             let mut with_increase = h.clone();
             with_increase.combat_value += 1;

@@ -471,10 +471,7 @@ fn great_athlete() -> ActionCard {
                 )
             };
 
-            Some(vec![PaymentRequest::optional(
-                options,
-                "Convert resources",
-            )])
+            Some(vec![PaymentRequest::optional(options, "Convert resources")])
         },
         |game, s, _| {
             let from = &s.choice[0];

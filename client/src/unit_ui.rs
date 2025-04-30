@@ -309,7 +309,7 @@ pub fn unit_label(unit: &Unit, army_move: bool, game: &Game) -> String {
                     notes.push("can't attack from a Forest this turn");
                 }
                 MovementRestriction::Fertile => {
-                        if game.players.iter().any(|p| {
+                    if game.players.iter().any(|p| {
                         p.index != unit.player_index
                             && p.wonders_owned.contains(Wonder::GreatGardens)
                     }) {

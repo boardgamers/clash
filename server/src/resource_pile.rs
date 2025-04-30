@@ -441,9 +441,6 @@ impl CostWithDiscount {
 #[cfg(test)]
 mod tests {
     use super::ResourcePile;
-    
-    
-    
 
     fn assert_to_string(resource_pile: &ResourcePile, expected: &str) {
         assert_eq!(

@@ -18,12 +18,10 @@ use crate::tactics_card::{CombatRole, play_tactics_card};
 use crate::unit::UnitType;
 
 pub(crate) fn warfare() -> AdvanceGroup {
-    advance_group_builder("Warfare", vec![
-        tactics(),
-        siegecraft(),
-        steel_weapons(),
-        draft(),
-    ])
+    advance_group_builder(
+        "Warfare",
+        vec![tactics(), siegecraft(), steel_weapons(), draft()],
+    )
 }
 
 fn tactics() -> AdvanceBuilder {
@@ -51,14 +49,18 @@ fn siegecraft() -> AdvanceBuilder {
         0,
         |game, player, c| {
             let p = game.player(player);
-            let extra_die = PaymentOptions::sum(p, PaymentReason::AdvanceAbility, 2, &[
-                ResourceType::Wood,
-                ResourceType::Gold,
-            ]);
-            let ignore_hit = PaymentOptions::sum(p, PaymentReason::AdvanceAbility, 2, &[
-                ResourceType::Ore,
-                ResourceType::Gold,
-            ]);
+            let extra_die = PaymentOptions::sum(
+                p,
+                PaymentReason::AdvanceAbility,
+                2,
+                &[ResourceType::Wood, ResourceType::Gold],
+            );
+            let ignore_hit = PaymentOptions::sum(
+                p,
+                PaymentReason::AdvanceAbility,
+                2,
+                &[ResourceType::Ore, ResourceType::Gold],
+            );
 
             let player = &game.players[player];
             if game
@@ -208,10 +210,12 @@ fn steel_weapons_cost(game: &Game, combat: &Combat, player_index: usize) -> Paym
     let both_steel_weapons =
         attacker.has_advance(Advance::SteelWeapons) && defender.has_advance(Advance::SteelWeapons);
     let cost = u8::from(!player.has_advance(Advance::Metallurgy) || both_steel_weapons);
-    PaymentOptions::sum(player, PaymentReason::AdvanceAbility, cost, &[
-        ResourceType::Ore,
-        ResourceType::Gold,
-    ])
+    PaymentOptions::sum(
+        player,
+        PaymentReason::AdvanceAbility,
+        cost,
+        &[ResourceType::Ore, ResourceType::Gold],
+    )
 }
 
 fn fortress(game: &Game, c: &Combat, s: &mut CombatStrength, role: CombatRole) {

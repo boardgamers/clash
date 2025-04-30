@@ -176,12 +176,12 @@ impl PaymentRequest {
             optional,
         }
     }
-    
+
     #[must_use]
     pub fn mandatory(cost: PaymentOptions, name: &str) -> Self {
         Self::new(cost, name, false)
     }
-    
+
     #[must_use]
     pub fn optional(cost: PaymentOptions, name: &str) -> Self {
         Self::new(cost, name, true)

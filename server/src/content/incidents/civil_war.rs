@@ -231,10 +231,12 @@ fn uprising() -> Incident {
                 ResourcePile::empty(),
                 PaymentConversionType::MayOverpay(3),
             ));
-            player.can_afford(&cost).then_some(vec![PaymentRequest::mandatory(
-                cost,
-                "Pay 1-4 mood or culture tokens",
-            )])
+            player
+                .can_afford(&cost)
+                .then_some(vec![PaymentRequest::mandatory(
+                    cost,
+                    "Pay 1-4 mood or culture tokens",
+                )])
         },
         |game, s, _| {
             let player = game.player_mut(s.player_index);

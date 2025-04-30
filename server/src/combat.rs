@@ -2,7 +2,7 @@ use crate::city::City;
 use crate::city::MoodState::Angry;
 use crate::city_pieces::{Building, remove_building};
 use crate::combat_listeners::{
-     CombatEventPhase, CombatResult, CombatRoundEnd, CombatRoundStart, CombatStrength,
+    CombatEventPhase, CombatResult, CombatRoundEnd, CombatRoundStart, CombatStrength,
     combat_round_end, combat_round_start,
 };
 use crate::combat_roll::{CombatHits, CombatRoundStats};
@@ -339,8 +339,12 @@ pub(crate) fn conquer_city(
                 let listeners = game.cache.get_wonder(wonder).listeners.clone();
                 listeners.deinit(game, old_player_index);
                 listeners.init(game, new_player_index);
-                game.player_mut(old_player_index).wonders_owned.remove(wonder);
-                game.player_mut(new_player_index).wonders_owned.insert(wonder);
+                game.player_mut(old_player_index)
+                    .wonders_owned
+                    .remove(wonder);
+                game.player_mut(new_player_index)
+                    .wonders_owned
+                    .insert(wonder);
             }
 
             for (building, owner) in city.pieces.building_owners() {
