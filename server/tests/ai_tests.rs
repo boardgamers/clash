@@ -70,7 +70,7 @@ fn all_actions() {
             ),
             (
                 ActionType::Playing(PlayingActionType::ActionCard(0)),
-                vec![Action::Playing(PlayingAction::ActionCard((42, ResourcePile::empty())))]
+                vec![Action::Playing(PlayingAction::ActionCard(42))]
             ),
         ]
     )
