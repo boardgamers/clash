@@ -214,7 +214,8 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player2 tried to influence culture the Fortress in the city at C2 by Player1 with the city at C1 and succeeded (rolled 6)"
+      "Player2 tried to influence culture the Fortress in the city at C2 by Player1 with the city at C1",
+      "Cultural influence succeeded (rolled 6)"
     ]
   ],
   "undo_limit": 1,

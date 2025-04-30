@@ -298,7 +298,13 @@ fn test_cultural_influence() {
     JSON.test(
         "cultural_influence",
         vec![
-            TestAction::not_undoable(1, influence_action()),
+            TestAction::undoable(1, influence_action()).without_json_comparison(),
+            TestAction::not_undoable(
+                1,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
+                    1,
+                )])),
+            ).without_json_comparison(),
             TestAction::undoable(
                 1,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(

@@ -605,7 +605,7 @@ fn test_collect_free_economy() {
 #[test]
 fn test_cultural_influence_instant_with_arts() {
     JSON.test("cultural_influence_instant_with_arts", vec![
-        TestAction::undoable(
+        TestAction::not_undoable(
             1,
             Action::Playing(PlayingAction::InfluenceCultureAttempt(
                 InfluenceCultureAttempt::new(
@@ -617,7 +617,6 @@ fn test_cultural_influence_instant_with_arts() {
                 ),
             )),
         )
-
     ])
 }
 
