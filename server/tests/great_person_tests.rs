@@ -216,7 +216,7 @@ fn test_great_engineer() {
             )
             .with_pre_assert(|game| {
                 // must do construct
-                assert!(PlayingActionType::Advance.is_available(game, 0).is_err())
+                assert!(PlayingActionType::Advance.is_available(&game, 0).is_err())
             }),
         ],
     );
@@ -254,7 +254,7 @@ fn test_great_architect() {
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::new(
-                    2, 3, 3, 0, 0, 0, 1,
+                    2, 3, 6, 0, 1, 0, 2,
                 )])),
             ),
         ],

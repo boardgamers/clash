@@ -7,7 +7,7 @@ use crate::content::persistent_events::{
 };
 use crate::game::Game;
 use crate::incident::{BASE_EFFECT_PRIORITY, IncidentBuilder};
-use crate::payment::PaymentOptions;
+use crate::payment::{PaymentOptions, PaymentReason, ResourceReward};
 use crate::player::{Player, add_unit, remove_unit};
 use crate::player_events::IncidentTarget;
 use crate::position::Position;
@@ -26,9 +26,8 @@ pub(crate) fn pirates_round_bonus() -> Builtin {
                 if c.is_sea_battle(game)
                     && c.opponent(player_index) == get_pirates_player(game).index
                 {
-                    let hits = r.casualties(CombatRole::Defender).fighters as u32;
                     Some(ResourceRewardRequest::new(
-                        PaymentOptions::sum(hits as u8, &[ResourceType::Gold]),
+                        ResourceReward::sum(r.hits(CombatRole::Attacker), &[ResourceType::Gold]),
                         "-".to_string(),
                     ))
                 } else {
@@ -60,7 +59,7 @@ pub(crate) fn pirates_bonus() -> Builtin {
                 .is_pirates()
             {
                 Some(ResourceRewardRequest::new(
-                    PaymentOptions::tokens(1),
+                    ResourceReward::tokens(1),
                     "Select a reward for fighting the Pirates".to_string(),
                 ))
             } else {
@@ -98,10 +97,14 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
                         "{} must pay 1 resource or token to bribe the pirates",
                         player.get_name()
                     ));
-                    Some(vec![PaymentRequest::new(
-                        PaymentOptions::sum(1, &ResourceType::all()),
+                    Some(vec![PaymentRequest::mandatory(
+                        PaymentOptions::sum(
+                            game.player(player_index),
+                            PaymentReason::Incident,
+                            1,
+                            &ResourceType::all(),
+                        ),
                         "Pay 1 Resource or token to bribe the pirates",
-                        false,
                     )])
                 } else {
                     let state = i.get_barbarian_state();

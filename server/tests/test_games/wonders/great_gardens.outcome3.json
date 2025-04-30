@@ -1,0 +1,322 @@
+{
+  "state": "Playing",
+  "players": [
+    {
+      "id": 0,
+      "resources": {
+        "food": 2,
+        "wood": 2,
+        "ore": 5,
+        "ideas": 5,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 2
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {
+            "wonders": [
+              "GreatGardens"
+            ]
+          },
+          "mood_state": "Happy",
+          "position": "A1"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Neutral",
+          "position": "C2"
+        }
+      ],
+      "units": [
+        {
+          "position": "C2",
+          "unit_type": "Infantry",
+          "id": 0
+        },
+        {
+          "position": "C2",
+          "unit_type": "Cavalry",
+          "id": 1
+        },
+        {
+          "position": "C2",
+          "unit_type": "Leader",
+          "id": 2
+        },
+        {
+          "position": "C2",
+          "unit_type": "Elephant",
+          "id": 3
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 4
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 5
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 6
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 7
+        }
+      ],
+      "civilization": "test0",
+      "advances": [
+        "Engineering",
+        "Farming",
+        "Irrigation",
+        "Mining"
+      ],
+      "wonders_built": [
+        "GreatGardens"
+      ],
+      "incident_tokens": 2,
+      "next_unit_id": 8
+    },
+    {
+      "id": 1,
+      "resources": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {},
+          "mood_state": "Angry",
+          "activations": 2,
+          "position": "C1"
+        }
+      ],
+      "units": [
+        {
+          "position": "B1",
+          "unit_type": "Infantry",
+          "movement_restrictions": [
+            "Fertile"
+          ],
+          "id": 0
+        },
+        {
+          "position": "B1",
+          "unit_type": "Infantry",
+          "movement_restrictions": [
+            "Fertile"
+          ],
+          "id": 1
+        }
+      ],
+      "civilization": "test1",
+      "advances": [
+        "Farming",
+        "Mining",
+        "Tactics"
+      ],
+      "incident_tokens": 3,
+      "next_unit_id": 2
+    }
+  ],
+  "map": {
+    "tiles": [
+      [
+        "A1",
+        "Fertile"
+      ],
+      [
+        "A2",
+        "Water"
+      ],
+      [
+        "A3",
+        {
+          "Exhausted": "Forest"
+        }
+      ],
+      [
+        "B1",
+        "Fertile"
+      ],
+      [
+        "B2",
+        "Forest"
+      ],
+      [
+        "B3",
+        "Fertile"
+      ],
+      [
+        "C1",
+        "Barren"
+      ],
+      [
+        "C2",
+        "Forest"
+      ],
+      [
+        "C3",
+        "Water"
+      ],
+      [
+        "D2",
+        "Water"
+      ]
+    ]
+  },
+  "starting_player_index": 0,
+  "current_player_index": 1,
+  "action_log": [
+    {
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "WonderCard": "GreatGardens"
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "food": 5,
+                          "wood": 5,
+                          "ore": 2,
+                          "culture_tokens": 5
+                        }
+                      ]
+                    }
+                  },
+                  "wonder_built": "GreatGardens"
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  }
+                }
+              ]
+            },
+            {
+              "index": 1,
+              "items": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          0,
+                          1
+                        ],
+                        "destination": "B1"
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 3
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/units/0/position",
+                      "value": "C1"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/1/units/0/movement_restrictions"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/units/1/position",
+                      "value": "C1"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/1/units/1/movement_restrictions"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "action_log_index": 1,
+  "log": [
+    [
+      "Player1 played the wonder card Great Gardens",
+      "Player1 decided to build Great Gardens in city A1"
+    ],
+    [
+      "Player1 built Great Gardens in city A1 for 5 food, 5 wood, 2 ore and 5 culture tokens"
+    ],
+    [
+      "Player1 ended their turn with 1 actions left"
+    ],
+    [
+      "It's Player2's turn"
+    ],
+    [
+      "Player2 marched 2 infantry from C1 to B1"
+    ]
+  ],
+  "undo_limit": 0,
+  "actions_left": 2,
+  "round": 1,
+  "age": 1,
+  "messages": [
+    "The game has started"
+  ],
+  "dice_roll_outcomes": [
+    1,
+    1,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10
+  ]
+}

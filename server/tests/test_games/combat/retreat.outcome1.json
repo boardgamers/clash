@@ -226,8 +226,10 @@
                         {
                           "event_type": {
                             "CombatRoundEnd": {
-                              "attacker_casualties": {},
-                              "can_retreat": true,
+                              "attacker": {
+                                "combat_value": 1,
+                                "opponent_fighters": 2
+                              },
                               "combat": {
                                 "attacker": 0,
                                 "attacker_position": "C2",
@@ -255,7 +257,10 @@
                                   "position": "C1"
                                 }
                               },
-                              "defender_casualties": {}
+                              "defender": {
+                                "combat_value": 2,
+                                "opponent_fighters": 1
+                              }
                             }
                           },
                           "handler": {

@@ -58,19 +58,12 @@
             }
           },
           "attacker_strength": {
-            "extra_dies": 0,
             "extra_combat_value": 1,
-            "hit_cancels": 0,
             "roll_log": [
               "steel weapons added 1 combat value"
             ]
           },
-          "defender_strength": {
-            "extra_dies": 0,
-            "extra_combat_value": 0,
-            "hit_cancels": 0,
-            "roll_log": []
-          }
+          "defender_strength": {}
         }
       },
       "player": 0,

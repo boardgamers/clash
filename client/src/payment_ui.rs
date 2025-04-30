@@ -11,7 +11,7 @@ use crate::select_ui::{CountSelector, HasCountSelectableObject};
 use crate::tooltip::show_tooltip_for_circle;
 use itertools::Itertools;
 use macroquad::math::{bool, vec2};
-use server::payment::PaymentOptions;
+use server::payment::{PaymentOptions, ResourceReward};
 use server::resource::ResourceType;
 use server::resource_pile::ResourcePile;
 
@@ -102,7 +102,8 @@ where
 }
 
 #[must_use]
-pub fn new_gain(options: &PaymentOptions, name: &str) -> Payment<String> {
+pub fn new_gain(reward: &ResourceReward, name: &str) -> Payment<String> {
+    let options = &reward.payment_options;
     let a = options.default.amount();
     let mut available = ResourcePile::empty();
     for r in options.possible_resource_types() {

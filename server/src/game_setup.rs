@@ -59,7 +59,7 @@ pub fn setup_game_with_cache(
     let wonders_left = cache
         .get_wonders()
         .iter()
-        .map(|w| w.name.clone())
+        .map(|w| w.wonder)
         .collect_vec()
         .shuffled(&mut rng);
     let action_cards_left = cache

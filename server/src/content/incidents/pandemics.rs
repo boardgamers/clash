@@ -12,7 +12,7 @@ use crate::game::Game;
 use crate::incident::{DecreaseMood, Incident, IncidentBaseEffect, MoodModifier};
 use crate::map::{Map, Terrain};
 use crate::objective_card::discard_objective_card;
-use crate::payment::PaymentOptions;
+use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::Player;
 use crate::player_events::{IncidentInfo, IncidentTarget};
 use crate::position::Position;
@@ -103,10 +103,14 @@ fn pandemics() -> Incident {
                 return None;
             }
 
-            Some(vec![PaymentRequest::new(
-                PaymentOptions::sum(needed, &ResourceType::all()),
+            Some(vec![PaymentRequest::mandatory(
+                PaymentOptions::sum(
+                    player,
+                    PaymentReason::Incident,
+                    needed,
+                    &ResourceType::all(),
+                ),
                 "Select resources to lose",
-                false,
             )])
         },
         |game, s, _| {

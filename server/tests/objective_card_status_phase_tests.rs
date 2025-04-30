@@ -42,7 +42,7 @@ fn test_large_civ() {
                 };
                 //can't fulfill all objectives with same name
                 assert_eq!(c.choices.len(), 8);
-                assert!(validate_card_selection(&c.choices, game).is_err());
+                assert!(validate_card_selection(&c.choices, &game).is_err());
             }),
         ],
     )
@@ -95,7 +95,7 @@ fn test_standing_army() {
                 };
                 //can't fulfill all objectives with same name
                 assert_eq!(c.choices.len(), 2);
-                assert!(validate_card_selection(&c.choices, game).is_err());
+                assert!(validate_card_selection(&c.choices, &game).is_err());
             }),
         ],
     )

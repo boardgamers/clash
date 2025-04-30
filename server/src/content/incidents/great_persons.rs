@@ -12,7 +12,7 @@ use crate::content::incidents::great_warlord::great_warlord;
 use crate::content::persistent_events::{AdvanceRequest, PaymentRequest, PositionRequest};
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, IncidentBuilder};
-use crate::payment::PaymentOptions;
+use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::Player;
 use crate::player_events::IncidentTarget;
 use crate::playing_actions::ActionCost;
@@ -82,13 +82,16 @@ fn incident(
                 } else {
                     2
                 };
-                let options = PaymentOptions::resources(ResourcePile::culture_tokens(cost));
                 let p = game.player(player_index);
+                let options = PaymentOptions::resources(
+                    p,
+                    PaymentReason::ActionCard,
+                    ResourcePile::culture_tokens(cost),
+                );
                 if p.can_afford(&options) {
-                    Some(vec![PaymentRequest::new(
+                    Some(vec![PaymentRequest::optional(
                         options,
                         "Pay to gain the Action Card",
-                        true,
                     )])
                 } else {
                     game.add_info_log_item(&format!(
@@ -268,10 +271,9 @@ fn great_prophet() -> ActionCard {
         0,
         |game, player, a| {
             a.selected_position?;
-            Some(vec![PaymentRequest::new(
+            Some(vec![PaymentRequest::optional(
                 temple_cost(game, game.player(player)),
                 "Pay to build the Temple",
-                true,
             )])
         },
         |game, s, a| {
@@ -455,18 +457,21 @@ fn great_athlete() -> ActionCard {
             };
             let options = if culture_to_mood {
                 PaymentOptions::single_type(
+                    p,
+                    PaymentReason::ActionCard,
                     ResourceType::CultureTokens,
                     0..=p.resources.culture_tokens,
                 )
             } else {
-                PaymentOptions::single_type(ResourceType::MoodTokens, 0..=p.resources.mood_tokens)
+                PaymentOptions::single_type(
+                    p,
+                    PaymentReason::ActionCard,
+                    ResourceType::MoodTokens,
+                    0..=p.resources.mood_tokens,
+                )
             };
 
-            Some(vec![PaymentRequest::new(
-                options,
-                "Convert resources",
-                true,
-            )])
+            Some(vec![PaymentRequest::optional(options, "Convert resources")])
         },
         |game, s, _| {
             let from = &s.choice[0];

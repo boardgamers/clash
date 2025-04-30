@@ -5,7 +5,7 @@ use server::action::ActionType;
 use server::ai_actions::AiActions;
 use server::cache::Cache;
 use server::game::Game;
-use server::movement::{MoveUnits, MovementAction, move_units_destinations};
+use server::movement::{MoveUnits, MovementAction, possible_move_units_destinations};
 use server::playing_actions::PlayingActionType;
 use server::profiling::start_profiling;
 use server::{
@@ -123,7 +123,7 @@ pub fn get_movement_actions(
         .into_iter()
         .flat_map(|(pos, units)| {
             let unit_ids = units.into_iter().map(|u| u.id).collect_vec();
-            let destinations = move_units_destinations(p, game, &unit_ids, pos, None);
+            let destinations = possible_move_units_destinations(p, game, &unit_ids, pos, None);
             destinations
                 .map(|d| {
                     d.iter()

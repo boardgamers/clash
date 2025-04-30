@@ -2,7 +2,7 @@ use crate::combat;
 use crate::consts::STACK_LIMIT;
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
-use crate::payment::PaymentOptions;
+use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::{CostTrigger, Player, add_unit};
 use crate::player_events::CostInfo;
 use crate::playing_actions::Recruit;
@@ -174,7 +174,11 @@ pub fn recruit_cost_without_replaced(
     }
     let cost = player.trigger_cost_event(
         |e| &e.recruit_cost,
-        &PaymentOptions::resources(units.clone().to_vec().iter().map(UnitType::cost).sum()),
+        &PaymentOptions::resources(
+            player,
+            PaymentReason::Recruit,
+            units.clone().to_vec().iter().map(UnitType::cost).sum(),
+        ),
         units,
         player,
         execute,

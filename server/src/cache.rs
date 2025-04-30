@@ -16,7 +16,7 @@ use crate::status_phase::{
     get_status_phase, may_change_government, raze_city,
 };
 use crate::tactics_card::TacticsCard;
-use crate::wonder::Wonder;
+use crate::wonder::{Wonder, WonderInfo};
 use itertools::Itertools;
 use std::collections::HashMap;
 
@@ -41,8 +41,7 @@ pub struct Cache {
     all_objectives: Vec<Objective>,
     objectives_by_name: HashMap<String, Objective>,
 
-    all_wonders: Vec<Wonder>,
-    wonders_by_name: HashMap<String, Wonder>,
+    all_wonders: Vec<WonderInfo>,
 
     all_incidents: Vec<Incident>,
     incidents_by_id: HashMap<u8, Incident>,
@@ -118,11 +117,10 @@ impl Cache {
                 .map(|objective| (objective.name.clone(), objective))
                 .collect(),
 
-            all_wonders: wonders::get_all_uncached(),
-            wonders_by_name: wonders::get_all_uncached()
+            all_wonders: wonders::get_all_uncached()
                 .into_iter()
-                .map(|wonder| (wonder.name.clone(), wonder))
-                .collect(),
+                .sorted_by_key(|w| w.wonder)
+                .collect_vec(),
 
             all_incidents: incidents::get_all_uncached(),
             incidents_by_id: incidents::get_all_uncached()
@@ -278,19 +276,13 @@ impl Cache {
     }
 
     #[must_use]
-    pub fn get_wonders(&self) -> &Vec<Wonder> {
+    pub fn get_wonders(&self) -> &Vec<WonderInfo> {
         &self.all_wonders
     }
 
-    ///
-    /// # Panics
-    ///
-    /// Panics if wonder does not exist
     #[must_use]
-    pub fn get_wonder(&self, name: &str) -> &Wonder {
-        self.wonders_by_name
-            .get(name)
-            .unwrap_or_else(|| panic!("wonder not found: {name}"))
+    pub fn get_wonder(&self, w: Wonder) -> &WonderInfo {
+        &self.all_wonders[w as usize]
     }
 
     #[must_use]

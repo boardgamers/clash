@@ -282,7 +282,7 @@ fn show_focused_tile(label: &mut impl FnMut(&str), game: &Game, position: Positi
 
     for (p, unit) in units {
         let army_move = game.player(p).has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
-        label(&unit_ui::unit_label(&unit, army_move));
+        label(&unit_ui::unit_label(&unit, army_move, game));
     }
 }
 

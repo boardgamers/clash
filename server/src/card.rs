@@ -5,6 +5,7 @@ use crate::game::Game;
 use crate::objective_card::match_objective_cards;
 use crate::player::Player;
 use crate::utils::Shuffle;
+use crate::wonder::Wonder;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
@@ -30,7 +31,7 @@ impl HandCardType {
 pub enum HandCard {
     ActionCard(u8),
     ObjectiveCard(u8),
-    Wonder(String),
+    Wonder(Wonder),
 }
 
 pub(crate) fn draw_card_from_pile<T>(
@@ -91,7 +92,7 @@ pub fn hand_cards(player: &Player, types: &[HandCardType]) -> Vec<HandCard> {
             HandCardType::Wonder => player
                 .wonder_cards
                 .iter()
-                .map(|n| HandCard::Wonder(n.clone()))
+                .map(|n| HandCard::Wonder(*n))
                 .collect(),
         })
         .collect()

@@ -214,10 +214,10 @@
                         {
                           "event_type": {
                             "CombatRoundEnd": {
-                              "attacker_casualties": {
-                                "fighters": 2
+                              "attacker": {
+                                "combat_value": 25,
+                                "opponent_fighters": 2
                               },
-                              "can_retreat": false,
                               "combat": {
                                 "attacker": 0,
                                 "attacker_position": "C2",
@@ -251,8 +251,9 @@
                                   "position": "C1"
                                 }
                               },
-                              "defender_casualties": {
-                                "fighters": 2
+                              "defender": {
+                                "combat_value": 14,
+                                "opponent_fighters": 4
                               },
                               "final_result": "AttackerWins"
                             }

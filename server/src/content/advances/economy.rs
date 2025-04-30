@@ -11,7 +11,7 @@ use crate::content::custom_actions::CustomActionType;
 use crate::content::custom_actions::CustomActionType::Taxes;
 use crate::content::persistent_events::{HandCardsRequest, ResourceRewardRequest};
 use crate::game::Game;
-use crate::payment::PaymentOptions;
+use crate::payment::ResourceReward;
 use crate::player::Player;
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::resource::ResourceType;
@@ -79,7 +79,7 @@ pub(crate) fn use_bartering() -> Builtin {
             0,
             |_game, _player_index, _| {
                 Some(ResourceRewardRequest::new(
-                    PaymentOptions::sum(1, &[ResourceType::Gold, ResourceType::CultureTokens]),
+                    ResourceReward::sum(1, &[ResourceType::Gold, ResourceType::CultureTokens]),
                     "Select a resource to gain".to_string(),
                 ))
             },
@@ -124,12 +124,12 @@ pub(crate) fn use_taxes() -> Builtin {
 }
 
 #[must_use]
-pub fn tax_options(player: &Player) -> PaymentOptions {
+pub fn tax_options(player: &Player) -> ResourceReward {
     let mut c = vec![ResourceType::Food, ResourceType::Wood, ResourceType::Ore];
     if player.has_advance(Advance::Currency) {
         c.insert(0, ResourceType::Gold);
     }
-    PaymentOptions::sum(player.cities.len() as u8, &c)
+    ResourceReward::sum(player.cities.len() as u8, &c)
 }
 
 fn trade_routes() -> AdvanceBuilder {

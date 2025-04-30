@@ -5,11 +5,11 @@
       "id": 0,
       "resources": {
         "wood": 4,
-        "ore": 4,
+        "ore": 1,
         "ideas": 3,
-        "gold": 7,
+        "gold": 6,
         "mood_tokens": 8,
-        "culture_tokens": 5
+        "culture_tokens": 4
       },
       "resource_limit": {
         "food": 7,
@@ -86,7 +86,7 @@
         "Storage",
         "Tactics"
       ],
-      "wonders_build": [
+      "wonders_built": [
         "Pyramids"
       ],
       "incident_tokens": 3,
@@ -300,8 +300,9 @@
                         {
                           "food": 2,
                           "wood": 3,
-                          "ore": 3,
-                          "culture_tokens": 1
+                          "ore": 6,
+                          "gold": 1,
+                          "culture_tokens": 2
                         }
                       ]
                     }
@@ -360,32 +361,12 @@
                                           "gold": 1
                                         },
                                         "type": "Unlimited"
-                                      },
-                                      {
-                                        "from": [
-                                          {
-                                            "food": 1
-                                          },
-                                          {
-                                            "wood": 1
-                                          },
-                                          {
-                                            "ore": 1
-                                          },
-                                          {
-                                            "ideas": 1
-                                          }
-                                        ],
-                                        "to": {},
-                                        "type": {
-                                          "MayNotOverpay": 1
-                                        }
                                       }
                                     ],
                                     "default": {
-                                      "culture_tokens": 1,
-                                      "food": 3,
-                                      "ore": 3,
+                                      "culture_tokens": 2,
+                                      "food": 2,
+                                      "ore": 7,
                                       "wood": 3
                                     }
                                   },
@@ -416,6 +397,11 @@
                     },
                     {
                       "op": "replace",
+                      "path": "/players/0/resources/gold",
+                      "value": 7
+                    },
+                    {
+                      "op": "replace",
                       "path": "/players/0/resources/ore",
                       "value": 7
                     },
@@ -433,7 +419,7 @@
                     },
                     {
                       "op": "remove",
-                      "path": "/players/0/wonders_build"
+                      "path": "/players/0/wonders_built"
                     }
                   ],
                   "wonder_built": "Pyramids"
@@ -466,7 +452,7 @@
       "Player1 decided to build Pyramids in city A1"
     ],
     [
-      "Player1 built Pyramids in city A1 for 2 food, 3 wood, 3 ore and 1 culture token"
+      "Player1 built Pyramids in city A1 for 2 food, 3 wood, 6 ore, 1 gold and 2 culture tokens"
     ]
   ],
   "undo_limit": 2,

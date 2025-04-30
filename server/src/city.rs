@@ -111,12 +111,12 @@ impl City {
     pub fn raze(self, game: &mut Game, player_index: usize) {
         for wonder in &self.pieces.wonders {
             game.cache
-                .get_wonder(wonder)
+                .get_wonder(*wonder)
                 .listeners
                 .clone()
                 .deinit(game, player_index);
         }
-        for wonder in &self.pieces.wonders {
+        for wonder in self.pieces.wonders {
             for p in &mut game.players {
                 p.remove_wonder(wonder);
             }

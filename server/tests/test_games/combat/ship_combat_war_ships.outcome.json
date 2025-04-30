@@ -12,13 +12,16 @@
     {
       "event_type": {
         "CombatRoundEnd": {
-          "attacker_casualties": {
-            "fighters": 1
+          "attacker": {
+            "opponent_hit_cancels": 1,
+            "opponent_fighters": 2,
+            "combat_value": 12
           },
-          "defender_casualties": {
-            "fighters": 1
+          "defender": {
+            "opponent_hit_cancels": 1,
+            "opponent_fighters": 2,
+            "combat_value": 12
           },
-          "can_retreat": true,
           "combat": {
             "round": 1,
             "defender": 1,

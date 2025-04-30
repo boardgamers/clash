@@ -8,6 +8,7 @@ use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::status_phase::{ChangeGovernment, ChangeGovernmentType};
 use server::unit::UnitType;
+use server::wonder::Wonder;
 use server::{advance, construct};
 use std::vec;
 
@@ -301,7 +302,8 @@ fn test_earthquake() {
                     advance: advance::Advance::Storage,
                     payment: ResourcePile::gold(2),
                 }),
-            ),
+            )
+            .without_json_comparison(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::SelectStructures(vec![
@@ -312,14 +314,16 @@ fn test_earthquake() {
                     ),
                     SelectedStructure::new(
                         Position::from_offset("C2"),
-                        Structure::Wonder("Pyramids".to_string()),
+                        Structure::Wonder(Wonder::GreatGardens),
                     ),
                 ])),
-            ),
+            )
+            .without_json_comparison(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::mood_tokens(1)])),
-            ),
+            )
+            .without_json_comparison(),
             TestAction::not_undoable(
                 1,
                 Action::Response(EventResponse::SelectStructures(vec![

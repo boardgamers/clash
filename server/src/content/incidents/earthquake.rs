@@ -1,7 +1,6 @@
 use crate::ability_initializer::SelectedChoice;
 use crate::city::{City, MoodState};
 use crate::city_pieces::{Building, remove_building};
-use crate::consts::WONDER_VICTORY_POINTS;
 use crate::content::persistent_events::{
     PositionRequest, SelectedStructure, Structure, StructuresRequest, is_selected_structures_valid,
 };
@@ -9,6 +8,7 @@ use crate::game::Game;
 use crate::incident::{DecreaseMood, Incident, IncidentBaseEffect, MoodModifier};
 use crate::player_events::{IncidentInfo, IncidentTarget};
 use crate::position::Position;
+use crate::wonder::Wonder;
 use itertools::Itertools;
 
 pub(crate) fn earthquake_incidents() -> Vec<Incident> {
@@ -56,12 +56,12 @@ fn volcano() -> Incident {
             ));
             let city = game.player(player_index).get_city(pos);
             let buildings = city.pieces.buildings(None);
-            let wonders = city.pieces.wonders.iter().cloned().collect_vec();
+            let wonders = city.pieces.wonders.iter().copied().collect_vec();
             for b in buildings {
                 destroy_building(game, b, pos);
             }
             for wonder in wonders {
-                destroy_wonder(game, pos, &wonder);
+                destroy_wonder(game, pos, wonder);
             }
             destroy_city_center(game, pos);
         },
@@ -126,7 +126,7 @@ fn apply_earthquake(
         let position = st.position;
         match st.structure {
             Structure::Building(b) => destroy_building(game, b, position),
-            Structure::Wonder(name) => destroy_wonder(game, position, &name),
+            Structure::Wonder(name) => destroy_wonder(game, position, name),
             Structure::CityCenter => destroy_city_center(game, position),
         }
     }
@@ -158,7 +158,7 @@ fn destroyable_structures(city: &City) -> Vec<SelectedStructure> {
     let w = pieces
         .wonders
         .iter()
-        .map(|w| SelectedStructure::new(city.position, Structure::Wonder(w.clone())))
+        .map(|w| SelectedStructure::new(city.position, Structure::Wonder(*w)))
         .collect_vec();
     let b = pieces
         .buildings(None)
@@ -206,21 +206,22 @@ fn destroy_building(game: &mut Game, b: Building, position: Position) {
     ));
 }
 
-fn destroy_wonder(game: &mut Game, position: Position, name: &str) {
+fn destroy_wonder(game: &mut Game, position: Position, name: Wonder) {
     let owner = game.get_any_city(position).player_index;
     let wonder = game.cache.get_wonder(name);
     wonder.listeners.clone().deinit(game, owner);
 
-    let a = WONDER_VICTORY_POINTS / 2.0;
+    let a = name.info(game).owned_victory_points;
     let p = game.player_mut(owner);
+    p.wonders_owned.remove(name);
     let city = p.get_city_mut(position);
-    city.pieces.wonders.retain(|w| w != name);
-    p.event_victory_points += a;
+    city.pieces.wonders.retain(|w| *w != name);
+    p.event_victory_points += a as f32;
     game.add_info_log_item(&format!(
         "{} gained {} points for the {} at {}",
         game.player_name(owner),
         a,
-        name,
+        name.name(game),
         position
     ));
 }

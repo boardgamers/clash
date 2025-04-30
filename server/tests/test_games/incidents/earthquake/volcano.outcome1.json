@@ -91,11 +91,11 @@
         "Storage",
         "Tactics"
       ],
-      "wonders_build": [
+      "wonders_built": [
         "Pyramids"
       ],
       "incident_tokens": 3,
-      "event_victory_points": 6.0,
+      "event_victory_points": 4.0,
       "next_unit_id": 8
     },
     {
@@ -240,7 +240,7 @@
       "Player1 selected city C2 to be destroyed",
       "Player1 gained 2 points for the Fortress at C2",
       "Player2 gained 2 points for the Temple at C2",
-      "Player1 gained 2 points for the Pyramids at C2",
+      "Player1 gained 0 points for the Pyramids at C2",
       "Player1 gained 2 points for the city center at C2"
     ]
   ],

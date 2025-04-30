@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::city::City;
+use crate::wonder::Wonder;
 use Building::*;
 use num::Zero;
 
@@ -13,7 +14,7 @@ pub struct CityPieces {
     pub fortress: Option<usize>,
     pub port: Option<usize>,
     pub temple: Option<usize>,
-    pub wonders: Vec<String>,
+    pub wonders: Vec<Wonder>,
 }
 
 impl CityPieces {
@@ -174,7 +175,7 @@ pub struct CityPiecesData {
     temple: Option<usize>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     #[serde(default)]
-    wonders: Vec<String>,
+    wonders: Vec<Wonder>,
 }
 
 pub struct DestroyedStructures {

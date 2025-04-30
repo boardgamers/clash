@@ -1,6 +1,6 @@
 use crate::content::persistent_events::{PositionRequest, ResourceRewardRequest};
 use crate::incident::{Incident, IncidentBaseEffect, IncidentBuilder};
-use crate::payment::PaymentOptions;
+use crate::payment::ResourceReward;
 use crate::player::add_unit;
 use crate::player_events::IncidentTarget;
 use crate::resource::ResourceType;
@@ -139,7 +139,7 @@ fn good_year(mut builder: IncidentBuilder, amount: u8, good_year_type: &GoodYear
         10,
         move |_game, _player_index, _incident| {
             Some(ResourceRewardRequest::new(
-                PaymentOptions::sum(amount, &[ResourceType::Food]),
+                ResourceReward::sum(amount, &[ResourceType::Food]),
                 "-".to_string(),
             ))
         },
@@ -256,7 +256,7 @@ pub(crate) fn successful_year() -> Incident {
             let max_cities = player_to_city_num.iter().max().unwrap_or(&0);
             if min_cities == max_cities {
                 return Some(ResourceRewardRequest::new(
-                    PaymentOptions::sum(1, &[ResourceType::Food]),
+                    ResourceReward::sum(1, &[ResourceType::Food]),
                     "-".to_string(),
                 ));
             }
@@ -264,7 +264,7 @@ pub(crate) fn successful_year() -> Incident {
             let cities = game.players[player_index].cities.len();
             if cities == *min_cities {
                 Some(ResourceRewardRequest::new(
-                    PaymentOptions::sum((max_cities - min_cities) as u8, &[ResourceType::Food]),
+                    ResourceReward::sum((max_cities - min_cities) as u8, &[ResourceType::Food]),
                     "-".to_string(),
                 ))
             } else {

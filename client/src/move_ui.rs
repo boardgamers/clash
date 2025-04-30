@@ -8,7 +8,7 @@ use macroquad::prelude::Texture2D;
 use server::action::Action;
 use server::events::EventOrigin;
 use server::game::{Game, GameState};
-use server::movement::{CurrentMove, MoveUnits, MovementAction, move_units_destinations};
+use server::movement::{CurrentMove, MoveUnits, MovementAction, possible_move_units_destinations};
 use server::payment::PaymentOptions;
 use server::player::Player;
 use server::position::Position;
@@ -64,7 +64,7 @@ pub fn possible_destinations(
     let player = game.player(player_index);
     let mut modifiers = HashSet::new();
 
-    let mut res = move_units_destinations(player, game, units, start, None)
+    let mut res = possible_move_units_destinations(player, game, units, start, None)
         .unwrap_or_default()
         .into_iter()
         .map(|route| {
@@ -75,7 +75,7 @@ pub fn possible_destinations(
 
     player.units.iter().for_each(|u| {
         if u.unit_type.is_ship()
-            && move_units_destinations(player, game, units, start, Some(u.id))
+            && possible_move_units_destinations(player, game, units, start, Some(u.id))
                 .is_ok_and(|v| v.iter().any(|route| route.destination == u.position))
         {
             res.push(MoveDestination::Carrier(u.id));

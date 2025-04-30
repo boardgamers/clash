@@ -1,7 +1,7 @@
 use crate::advance::Advance;
 use crate::city::{City, MoodState};
 use crate::game::Game;
-use crate::payment::PaymentOptions;
+use crate::payment::ResourceReward;
 use crate::player::Player;
 use crate::position::Position;
 use crate::resource::ResourceType;
@@ -16,7 +16,7 @@ pub struct TradeRoute {
 }
 
 #[must_use]
-pub fn trade_route_reward(game: &Game) -> Option<(PaymentOptions, Vec<TradeRoute>)> {
+pub fn trade_route_reward(game: &Game) -> Option<(ResourceReward, Vec<TradeRoute>)> {
     let p = game.current_player_index;
     let trade_routes = find_trade_routes(game, &game.players[p], false);
     if trade_routes.is_empty() {
@@ -25,12 +25,12 @@ pub fn trade_route_reward(game: &Game) -> Option<(PaymentOptions, Vec<TradeRoute
 
     Some((
         if game.players[p].has_advance(Advance::Currency) {
-            PaymentOptions::sum(
+            ResourceReward::sum(
                 trade_routes.len() as u8,
                 &[ResourceType::Gold, ResourceType::Food],
             )
         } else {
-            PaymentOptions::sum(trade_routes.len() as u8, &[ResourceType::Food])
+            ResourceReward::sum(trade_routes.len() as u8, &[ResourceType::Food])
         },
         trade_routes,
     ))

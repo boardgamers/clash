@@ -6,6 +6,7 @@ use super::collect::PositionCollection;
 use crate::combat_stats::CombatStats;
 use crate::movement::{MoveUnits, MovementAction};
 use crate::playing_actions::{Collect, IncreaseHappiness, PlayingActionType, Recruit};
+use crate::wonder::Wonder;
 use crate::{
     action::Action, game::Game, playing_actions::PlayingAction, position::Position,
     resource_pile::ResourcePile, unit::Units, utils,
@@ -77,7 +78,7 @@ pub struct ActionLogItem {
     pub combat_stats: Option<CombatStats>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub wonder_built: Option<String>,
+    pub wonder_built: Option<Wonder>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub completed_objectives: Vec<String>,
@@ -176,7 +177,9 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
                 card.name,
             )
         }
-        PlayingAction::WonderCard(name) => format!("{player_name} played the wonder card {name}",),
+        PlayingAction::WonderCard(name) => {
+            format!("{player_name} played the wonder card {}", name.name(game))
+        }
         PlayingAction::EndTurn => format!(
             "{player_name} ended their turn{}",
             match game.actions_left {

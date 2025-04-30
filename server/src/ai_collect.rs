@@ -12,10 +12,9 @@ pub(crate) fn possible_collections(info: &CollectInfo) -> Vec<Vec<PositionCollec
     let tiles = list.len(); // production focus is not considered
     let mut max_tiles = tiles;
 
+    // avoid husbandry
+    list.sort_by_key(|(pos, _)| (pos.distance(info.city), *(*pos)));
     if info.max_range2_tiles > 0 {
-        // avoid husbandry
-        list.sort_by_key(|(pos, _)| (pos.distance(info.city), *(*pos)));
-
         let range2_tiles = list
             .iter()
             .filter(|(pos, _)| pos.distance(info.city) > 1)
@@ -40,7 +39,12 @@ pub(crate) fn possible_collections(info: &CollectInfo) -> Vec<Vec<PositionCollec
                     .count()
                     <= info.max_range2_tiles as usize
         })
-        .unique_by(total_collect)
+        .filter_map(|c| {
+            let t = total_collect(&c);
+            (t.amount() > 0).then_some((c, t))
+        })
+        .unique_by(|(_, t)| t.clone())
+        .map(|(c, _)| c)
         .collect_vec()
 }
 

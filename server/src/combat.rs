@@ -2,10 +2,10 @@ use crate::city::City;
 use crate::city::MoodState::Angry;
 use crate::city_pieces::{Building, remove_building};
 use crate::combat_listeners::{
-    Casualties, CombatEventPhase, CombatResult, CombatRoundEnd, CombatRoundStart, CombatStrength,
+    CombatEventPhase, CombatResult, CombatRoundEnd, CombatRoundStart, CombatStrength,
     combat_round_end, combat_round_start,
 };
-use crate::combat_roll::CombatRoundStats;
+use crate::combat_roll::{CombatHits, CombatRoundStats};
 use crate::combat_stats;
 use crate::combat_stats::{CombatStats, active_defenders, new_combat_stats};
 use crate::content::persistent_events::PersistentEventType;
@@ -275,11 +275,9 @@ pub(crate) fn combat_loop(game: &mut Game, mut s: CombatRoundStart) {
 
         let result = if let Some(result) = s.final_result {
             let mut round_end = CombatRoundEnd::new(
-                Casualties::new(0, None),
-                Casualties::new(0, None),
-                false,
+                CombatHits::new(None, 0, 0, 0),
+                CombatHits::new(None, 0, 0, 0),
                 c,
-                game,
             );
             round_end.final_result = Some(result);
             round_end.phase = CombatEventPhase::Default;
@@ -288,19 +286,10 @@ pub(crate) fn combat_loop(game: &mut Game, mut s: CombatRoundStart) {
             let mut a = CombatRoundStats::roll(c.attacker, &c, game, s.attacker_strength);
             let mut d = CombatRoundStats::roll(c.defender, &c, game, s.defender_strength);
 
-            a.determine_hits(&d, game);
-            d.determine_hits(&a, game);
-
-            let can_retreat = matches!(c.retreat, CombatRetreatState::CanRetreat)
-                && a.hits < d.fighters
-                && d.hits < a.fighters;
-
             CombatRoundEnd::new(
-                Casualties::new(d.hits, a_t),
-                Casualties::new(a.hits, d_t),
-                can_retreat,
+                a.determine_hits(&d, game, a_t),
+                d.determine_hits(&a, game, d_t),
                 c,
-                game,
             )
         };
 
@@ -346,10 +335,16 @@ pub(crate) fn conquer_city(
         city.player_index = new_player_index;
         city.set_mood_state(Angry);
         if attacker_is_human {
-            for wonder in &city.pieces.wonders {
+            for wonder in city.pieces.wonders.clone() {
                 let listeners = game.cache.get_wonder(wonder).listeners.clone();
                 listeners.deinit(game, old_player_index);
                 listeners.init(game, new_player_index);
+                game.player_mut(old_player_index)
+                    .wonders_owned
+                    .remove(wonder);
+                game.player_mut(new_player_index)
+                    .wonders_owned
+                    .insert(wonder);
             }
 
             for (building, owner) in city.pieces.building_owners() {
@@ -506,7 +501,7 @@ pub mod tests {
     use crate::log::{ActionLogAge, ActionLogItem, ActionLogPlayer, ActionLogRound};
     use crate::movement::MovementAction;
     use crate::utils::tests::FloatEq;
-    use crate::wonder::construct_wonder;
+    use crate::wonder::{Wonder, construct_wonder, wonders_owned_points};
     use crate::{
         city::{City, MoodState::*},
         city_pieces::Building::*,
@@ -570,7 +565,7 @@ pub mod tests {
 
         let position = Position::new(0, 0);
         game.players[old].cities.push(City::new(old, position));
-        construct_wonder(&mut game, "Pyramids", position, old);
+        construct_wonder(&mut game, Wonder::GreatGardens, position, old);
         game.players[old].construct(Academy, position, None, true);
         game.players[old].construct(Obelisk, position, None, true);
 
@@ -586,8 +581,8 @@ pub mod tests {
         let new = &game.players[new];
         old.victory_points(&game).assert_eq(3.0);
         new.victory_points(&game).assert_eq(4.0);
-        assert_eq!(0, old.wonders_owned());
-        assert_eq!(1, new.wonders_owned());
+        assert_eq!(0, wonders_owned_points(old, &game));
+        assert_eq!(2, wonders_owned_points(new, &game));
         assert_eq!(1, old.owned_buildings(&game));
         assert_eq!(1, new.owned_buildings(&game));
     }

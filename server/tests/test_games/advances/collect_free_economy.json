@@ -86,6 +86,9 @@
         "Mining"
       ],
       "incident_tokens": 2,
+      "action_cards": [
+        19
+      ],
       "next_unit_id": 8
     },
     {

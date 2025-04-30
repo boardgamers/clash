@@ -5,10 +5,11 @@ use crate::content::builtin;
 use crate::content::builtin::Builtin;
 use crate::events::{Event, EventOrigin};
 use crate::objective_card::init_objective_card;
-use crate::payment::PaymentOptions;
+use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player_events::{CostInfo, TransientEvents};
 use crate::resource::ResourceType;
 use crate::unit::{UnitData, UnitType};
+use crate::wonder::{Wonder, wonders_built_points, wonders_owned_points};
 use crate::{
     advance,
     city::{City, CityData},
@@ -17,7 +18,7 @@ use crate::{
     consts::{
         ADVANCE_COST, ADVANCE_VICTORY_POINTS, BUILDING_COST, BUILDING_VICTORY_POINTS,
         CAPTURED_LEADER_VICTORY_POINTS, CITY_LIMIT, CITY_PIECE_LIMIT, OBJECTIVE_VICTORY_POINTS,
-        UNIT_LIMIT, WONDER_VICTORY_POINTS,
+        UNIT_LIMIT,
     },
     content::{civilizations, custom_actions::CustomActionType},
     game::Game,
@@ -60,13 +61,14 @@ pub struct Player {
     pub available_leaders: Vec<String>,
     pub advances: EnumSet<Advance>,
     pub unlocked_special_advances: Vec<String>,
-    pub wonders_build: Vec<String>,
+    pub wonders_built: Vec<Wonder>,
+    pub wonders_owned: EnumSet<Wonder>, // transient
     pub incident_tokens: u8,
     pub completed_objectives: Vec<String>,
     pub captured_leaders: Vec<String>,
     pub event_victory_points: f32,
     pub custom_actions: HashMap<CustomActionType, EventOrigin>,
-    pub wonder_cards: Vec<String>,
+    pub wonder_cards: Vec<Wonder>,
     pub action_cards: Vec<u8>,
     pub objective_cards: Vec<u8>,
     pub next_unit_id: u32,
@@ -125,7 +127,7 @@ impl Player {
         let mut cities = mem::take(&mut game.players[player_index].cities);
         for city in &mut cities {
             for wonder in &city.pieces.wonders {
-                let listeners = game.cache.get_wonder(wonder).listeners.clone();
+                let listeners = game.cache.get_wonder(*wonder).listeners.clone();
                 listeners.init(game, player_index);
             }
         }
@@ -149,6 +151,11 @@ impl Player {
                     data.id
                 );
             });
+        let cities = data
+            .cities
+            .into_iter()
+            .map(|d| City::from_data(d, data.id))
+            .collect_vec();
         Self {
             name: data.name,
             index: data.id,
@@ -156,11 +163,6 @@ impl Player {
             resource_limit: data.resource_limit,
             wasted_resources: ResourcePile::empty(),
             events: PlayerEvents::new(),
-            cities: data
-                .cities
-                .into_iter()
-                .map(|d| City::from_data(d, data.id))
-                .collect(),
             destroyed_structures: DestroyedStructures::from_data(data.destroyed_structures),
             units,
             civilization: civilizations::get_civilization(&data.civilization)
@@ -169,7 +171,12 @@ impl Player {
             available_leaders: data.available_leaders,
             advances: EnumSet::from_iter(data.advances),
             unlocked_special_advances: data.unlocked_special_advance,
-            wonders_build: data.wonders_build,
+            wonders_built: data.wonders_built,
+            wonders_owned: cities
+                .iter()
+                .flat_map(|city| city.pieces.wonders.iter().copied())
+                .collect(),
+            cities,
             incident_tokens: data.incident_tokens,
             completed_objectives: data.completed_objectives,
             captured_leaders: data.captured_leaders,
@@ -220,7 +227,7 @@ impl Player {
                 .sorted_by_key(Advance::id)
                 .collect(),
             unlocked_special_advance: self.unlocked_special_advances,
-            wonders_build: self.wonders_build,
+            wonders_built: self.wonders_built,
             incident_tokens: self.incident_tokens,
             completed_objectives: self.completed_objectives,
             captured_leaders: self.captured_leaders,
@@ -257,7 +264,7 @@ impl Player {
             available_leaders: self.available_leaders.clone(),
             advances: self.advances.iter().sorted_by_key(Advance::id).collect(),
             unlocked_special_advance: self.unlocked_special_advances.clone(),
-            wonders_build: self.wonders_build.clone(),
+            wonders_built: self.wonders_built.clone(),
             incident_tokens: self.incident_tokens,
             completed_objectives: self.completed_objectives.clone(),
             captured_leaders: self.captured_leaders.clone(),
@@ -304,7 +311,8 @@ impl Player {
             wonder_cards: Vec::new(),
             action_cards: Vec::new(),
             objective_cards: Vec::new(),
-            wonders_build: Vec::new(),
+            wonders_built: Vec::new(),
+            wonders_owned: EnumSet::new(),
             next_unit_id: 0,
             played_once_per_turn_actions: Vec::new(),
             event_info: HashMap::new(),
@@ -501,8 +509,7 @@ impl Player {
             ),
             (
                 "Wonders",
-                (self.wonders_owned() + self.wonders_build.len()) as f32 * WONDER_VICTORY_POINTS
-                    / 2.0,
+                wonders_owned_points(self, game) as f32 + wonders_built_points(self, game),
             ),
             ("Events", self.event_victory_points),
             (
@@ -519,14 +526,6 @@ impl Player {
             .flat_map(|player| &player.cities)
             .map(|city| city.pieces.buildings(Some(self.index)).len())
             .sum()
-    }
-
-    #[must_use]
-    pub fn wonders_owned(&self) -> usize {
-        self.cities
-            .iter()
-            .map(|city| city.pieces.wonders.len())
-            .sum::<usize>()
     }
 
     #[must_use]
@@ -570,12 +569,13 @@ impl Player {
         }
     }
 
-    pub fn remove_wonder(&mut self, wonder: &String) {
-        utils::remove_element(&mut self.wonders_build, wonder);
+    pub fn remove_wonder(&mut self, wonder: Wonder) {
+        utils::remove_element(&mut self.wonders_built, &wonder);
+        self.wonders_owned.remove(wonder);
     }
 
     pub fn strip_secret(&mut self) {
-        self.wonder_cards = self.wonder_cards.iter().map(|_| String::new()).collect();
+        self.wonder_cards = self.wonder_cards.iter().map(|_| Wonder::Pyramids).collect();
         self.action_cards = self.action_cards.iter().map(|_| 0).collect();
         self.objective_cards = self.objective_cards.iter().map(|_| 0).collect();
         self.secrets = Vec::new();
@@ -614,7 +614,7 @@ impl Player {
     pub fn building_cost(&self, game: &Game, building: Building, execute: CostTrigger) -> CostInfo {
         self.trigger_cost_event(
             |e| &e.construct_cost,
-            &PaymentOptions::resources(BUILDING_COST),
+            &PaymentOptions::resources(self, PaymentReason::Building, BUILDING_COST),
             &building,
             game,
             execute,
@@ -626,6 +626,8 @@ impl Player {
         self.trigger_cost_event(
             |e| &e.advance_cost,
             &PaymentOptions::sum(
+                self,
+                PaymentReason::GainAdvance,
                 ADVANCE_COST,
                 &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
             ),
@@ -843,7 +845,7 @@ pub struct PlayerData {
     unlocked_special_advance: Vec<String>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    wonders_build: Vec<String>,
+    wonders_built: Vec<Wonder>,
     #[serde(default)]
     #[serde(skip_serializing_if = "u8::is_zero")]
     incident_tokens: u8,
@@ -858,7 +860,7 @@ pub struct PlayerData {
     event_victory_points: f32,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    wonder_cards: Vec<String>,
+    wonder_cards: Vec<Wonder>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     action_cards: Vec<u8>,

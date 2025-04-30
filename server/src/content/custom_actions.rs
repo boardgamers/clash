@@ -95,7 +95,7 @@ impl CustomActionType {
     pub fn is_available_city(&self, player: &Player, city: &City) -> bool {
         match self {
             CustomActionType::Sports => {
-                sports_options(city).is_some_and(|c| c.can_afford(&player.resources))
+                sports_options(player, city).is_some_and(|c| c.can_afford(&player.resources))
             }
             _ => false,
         }

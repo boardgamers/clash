@@ -48,7 +48,7 @@
         "ideas": 3,
         "gold": 7,
         "mood_tokens": 7,
-        "culture_tokens": 7
+        "culture_tokens": 6
       },
       "resource_limit": {
         "food": 2,
@@ -243,6 +243,11 @@
                       ]
                     },
                     {
+                      "op": "replace",
+                      "path": "/players/0/resources/culture_tokens",
+                      "value": 7
+                    },
+                    {
                       "op": "remove",
                       "path": "/events"
                     }
@@ -258,7 +263,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 played the action card Advance"
+      "Player1 played the action card Advance for 1 culture token"
     ]
   ],
   "undo_limit": 0,

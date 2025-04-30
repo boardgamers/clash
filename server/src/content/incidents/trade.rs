@@ -3,7 +3,7 @@ use crate::city_pieces::Building;
 use crate::content::persistent_events::{PositionRequest, ResourceRewardRequest};
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, PassedIncident};
-use crate::payment::PaymentOptions;
+use crate::payment::ResourceReward;
 use crate::player::Player;
 use crate::player_events::IncidentTarget;
 use crate::resource_pile::ResourcePile;
@@ -107,7 +107,7 @@ fn era_of_stability() -> Incident {
                 tokens = tokens.max(1);
             }
             Some(ResourceRewardRequest::new(
-                PaymentOptions::tokens(tokens as u8),
+                ResourceReward::tokens(tokens as u8),
                 "Select token to gain".to_string(),
             ))
         },

@@ -65,6 +65,9 @@
         {
           "position": "B3",
           "unit_type": "Settler",
+          "movement_restrictions": [
+            "Fertile"
+          ],
           "id": 4
         },
         {
@@ -210,6 +213,10 @@
                       "op": "replace",
                       "path": "/players/0/units/4/position",
                       "value": "B2"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/units/4/movement_restrictions"
                     },
                     {
                       "op": "replace",

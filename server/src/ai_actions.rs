@@ -26,6 +26,7 @@ use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::{ChangeGovernment, ChangeGovernmentType, government_advances};
 use crate::unit::{UnitType, Units};
+use crate::wonder::Wonder;
 use itertools::Itertools;
 use rustc_hash::FxHashMap;
 use std::vec;
@@ -180,16 +181,16 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
         .wonder_cards
         .iter()
         .filter_map(|card| {
-            PlayingActionType::WonderCard(card.clone())
+            PlayingActionType::WonderCard(*card)
                 .is_available(game, p.index)
                 .is_ok()
-                .then_some(Action::Playing(PlayingAction::WonderCard(card.clone())))
+                .then_some(Action::Playing(PlayingAction::WonderCard(*card)))
         })
         .collect_vec();
 
     if !wonder_cards.is_empty() {
         actions.push((
-            ActionType::Playing(PlayingActionType::WonderCard(String::new())),
+            ActionType::Playing(PlayingActionType::WonderCard(Wonder::Pyramids)),
             wonder_cards,
         ));
     }
@@ -235,11 +236,7 @@ fn available_action_cards(game: &Game, p: &Player) -> Vec<Action> {
                 return None;
             }
             if *card == 19 || *card == 20 || *card == 29 || *card == 30 {
-                // todo collect only is buggy
-                return None;
-            }
-            if *card == 15 || *card == 16 {
-                // todo influence only is buggy
+                // todo collect only is possible even if resources are wasted
                 return None;
             }
             if *card == 7 || *card == 8 {
@@ -516,7 +513,9 @@ fn responses(event: &PersistentEventState, player: &Player, game: &Game) -> Vec<
             )]
         }
         PersistentEventRequest::ResourceReward(r) => {
-            vec![EventResponse::ResourceReward(r.reward.default)]
+            vec![EventResponse::ResourceReward(
+                r.reward.payment_options.default,
+            )]
         }
         PersistentEventRequest::SelectAdvance(a) => a
             .choices

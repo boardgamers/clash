@@ -10,7 +10,7 @@ use crate::content::persistent_events::{
 use crate::objective_card::{
     gain_objective_card_from_pile, present_objective_cards, status_phase_completable,
 };
-use crate::payment::PaymentOptions;
+use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::{game::Game, player::Player, resource_pile::ResourcePile, utils};
 use itertools::Itertools;
@@ -254,7 +254,11 @@ where
         move |game, player_index, _, _| {
             let p = game.player(player_index);
             (can_change_government_for_free(p, game)
-                && p.can_afford(&PaymentOptions::resources(cost.clone())))
+                && p.can_afford(&PaymentOptions::resources(
+                    p,
+                    PaymentReason::ChangeGovernment,
+                    cost.clone(),
+                )))
             .then_some(PersistentEventRequest::ChangeGovernment(
                 ChangeGovernmentRequest::new(optional, cost.clone()),
             ))
@@ -282,7 +286,7 @@ where
                                         .join(", ")
                                 }
                             ));
-                            game.players[player_index].lose_resources(cost2.clone());
+                            game.players[player_index].lose_resources(cost2.clone()); // todo colosseum
                             change_government_type(game, player_index, &c);
                         }
                         ChangeGovernmentType::KeepGovernment => {
