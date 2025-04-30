@@ -426,7 +426,7 @@ fn draw_wonders(
             draw_scaled_icon(
                 rc,
                 &rc.assets().wonders[w],
-                w,
+                w.name(rc.game),
                 p + vec2(-size / 2., -size / 2.),
                 size,
             );

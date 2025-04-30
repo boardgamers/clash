@@ -1,7 +1,7 @@
 use crate::events::EventOrigin;
 use crate::map::Map;
-use crate::map::Terrain::{Forest, Mountain};
-use crate::payment::PaymentOptions;
+use crate::map::Terrain::{Fertile, Forest, Mountain};
+use crate::payment::{PaymentOptions, PaymentReason};
 use crate::resource_pile::ResourcePile;
 use crate::unit::{Unit, set_unit_position};
 use crate::utils;
@@ -16,6 +16,7 @@ use crate::player::Player;
 use crate::player_events::MoveInfo;
 use crate::position::Position;
 use crate::unit::{carried_units, get_current_move};
+use crate::wonder::Wonder;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
@@ -59,6 +60,7 @@ pub enum MovementRestriction {
     Battle,
     Mountain,
     Forest,
+    Fertile,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Default)]
@@ -167,13 +169,33 @@ fn move_unit(
 /// # Panics
 ///
 /// Panics if destination tile does not exist
-pub fn move_units_destinations(
+pub fn possible_move_units_destinations(
     player: &Player,
     game: &Game,
     unit_ids: &[u32],
     start: Position,
     embark_carrier_id: Option<u32>,
 ) -> Result<Vec<MoveRoute>, String> {
+    let destinations = move_units_destinations(player, game, unit_ids, start, embark_carrier_id)?;
+
+    if destinations.is_empty() {
+        return Err("no valid destinations".to_string());
+    }
+    Ok(destinations
+        .into_iter()
+        .filter_map(|(route, r)| r.is_ok().then_some(route))
+        .collect_vec())
+}
+
+pub(crate) type MoveDestinations = Vec<(MoveRoute, Result<(), String>)>;
+
+pub(crate) fn move_units_destinations(
+    player: &Player,
+    game: &Game,
+    unit_ids: &[u32],
+    start: Position,
+    embark_carrier_id: Option<u32>,
+) -> Result<MoveDestinations, String> {
     let (moved_units, movement_actions_left, current_move) = if let Movement(m) = &game.state {
         (&m.moved_units, m.movement_actions_left, &m.current_move)
     } else {
@@ -208,78 +230,126 @@ pub fn move_units_destinations(
         }
     }
 
-    let destinations: Vec<MoveRoute> =
+    Ok(
         move_routes(start, player, unit_ids, game, embark_carrier_id)
-            .iter()
-            .filter(|route| {
-                if !player.can_afford(&route.cost) {
-                    return false;
-                }
-                if movement_restrictions.contains(&&MovementRestriction::Battle) {
-                    return false;
-                }
-                let dest = route.destination;
-                let attack = game.enemy_player(player.index, dest).is_some();
-                if attack && game.map.is_land(dest) && stack_size == 0 {
-                    return false;
-                }
-
-                if !route.ignore_terrain_movement_restrictions {
-                    if movement_restrictions
-                        .iter()
-                        .contains(&&MovementRestriction::Mountain)
-                    {
-                        return false;
-                    }
-                    if attack
-                        && movement_restrictions
-                            .iter()
-                            .contains(&&MovementRestriction::Forest)
-                    {
-                        return false;
-                    }
-                }
-
-                if game.map.is_land(start)
-                    && player
-                        .get_units(dest)
-                        .iter()
-                        .filter(|unit| unit.unit_type.is_army_unit() && !unit.is_transported())
-                        .count()
-                        + stack_size
-                        + route.stack_size_used
-                        > STACK_LIMIT
-                {
-                    return false;
-                }
-
-                if !is_valid_movement_type(game, &units, carrier_position, dest) {
-                    return false;
-                }
-
-                if !matches!(current_move, CurrentMove::None)
-                    && *current_move
-                        == get_current_move(game, unit_ids, start, dest, embark_carrier_id)
-                {
-                    return true;
-                }
-
-                if movement_actions_left == 0 {
-                    return false;
-                }
-
-                if unit_ids.iter().any(|id| moved_units.contains(id)) {
-                    return false;
-                }
-                true
+            .into_iter()
+            .map(|route| {
+                let result = move_route_result(
+                    player,
+                    game,
+                    unit_ids,
+                    start,
+                    embark_carrier_id,
+                    moved_units,
+                    movement_actions_left,
+                    current_move,
+                    &units,
+                    carrier_position,
+                    stack_size,
+                    &mut movement_restrictions,
+                    &route,
+                );
+                (route, result)
             })
-            .cloned()
-            .collect();
+            .collect_vec(),
+    )
+}
 
-    if destinations.is_empty() {
-        return Err("no valid destinations".to_string());
+#[allow(clippy::too_many_arguments)]
+fn move_route_result(
+    player: &Player,
+    game: &Game,
+    unit_ids: &[u32],
+    start: Position,
+    embark_carrier_id: Option<u32>,
+    moved_units: &[u32],
+    movement_actions_left: u32,
+    current_move: &CurrentMove,
+    units: &Vec<&Unit>,
+    carrier_position: Option<Position>,
+    stack_size: usize,
+    movement_restrictions: &mut Vec<&MovementRestriction>,
+    route: &MoveRoute,
+) -> Result<(), String> {
+    if !player.can_afford(&route.cost) {
+        return Err("not enough resources".to_string());
     }
-    Ok(destinations)
+
+    is_move_restricted(player, game, stack_size, movement_restrictions, route)?;
+
+    let dest = route.destination;
+    if game.map.is_land(start)
+        && player
+            .get_units(dest)
+            .iter()
+            .filter(|unit| unit.unit_type.is_army_unit() && !unit.is_transported())
+            .count()
+            + stack_size
+            + route.stack_size_used
+            > STACK_LIMIT
+    {
+        return Err("stack limit exceeded".to_string());
+    }
+
+    is_valid_movement_type(game, units, carrier_position, dest)?;
+
+    if matches!(current_move, CurrentMove::None)
+        || *current_move != get_current_move(game, unit_ids, start, dest, embark_carrier_id)
+    {
+        if movement_actions_left == 0 {
+            return Err("no movement actions left".to_string());
+        }
+
+        if unit_ids.iter().any(|id| moved_units.contains(id)) {
+            return Err("some units already moved".to_string());
+        }
+    }
+    Ok(())
+}
+
+fn is_move_restricted(
+    player: &Player,
+    game: &Game,
+    stack_size: usize,
+    movement_restrictions: &Vec<&MovementRestriction>,
+    route: &MoveRoute,
+) -> Result<(), String> {
+    if movement_restrictions.contains(&&MovementRestriction::Battle) {
+        return Err("battle movement restriction".to_string());
+    }
+    let dest = route.destination;
+    let attack = game.enemy_player(player.index, dest).is_some();
+    if attack && game.map.is_land(dest) && stack_size == 0 {
+        return Err("no army units to attack".to_string());
+    }
+
+    if !route.ignore_terrain_movement_restrictions {
+        if movement_restrictions
+            .iter()
+            .contains(&&MovementRestriction::Mountain)
+        {
+            return Err("mountain movement restriction".to_string());
+        }
+        if attack
+            && movement_restrictions
+                .iter()
+                .contains(&&MovementRestriction::Forest)
+        {
+            return Err("forest movement attack restriction".to_string());
+        }
+    }
+    // this restriction can't be ignored
+    if attack
+        && game
+            .try_get_any_city(dest)
+            .is_some_and(|city| city.pieces.wonders.contains(&Wonder::GreatGardens))
+        && movement_restrictions
+            .iter()
+            .any(|&r| r == &MovementRestriction::Fertile)
+    {
+        return Err("fertile movement attack great gardens restriction".to_string());
+    }
+    Ok(())
 }
 
 fn check_can_move(
@@ -293,7 +363,7 @@ fn check_can_move(
     }
     if let Some(embark_carrier_id) = embark_carrier_id {
         if !unit.unit_type.is_land_based() {
-            return Err("the unit should be land based to embark".to_string());
+            return Err("the unit should be land-based to embark".to_string());
         }
         let carrier = player.get_unit(embark_carrier_id);
         if !carrier.unit_type.is_ship() {
@@ -332,19 +402,23 @@ pub(crate) fn is_valid_movement_type(
     units: &Vec<&Unit>,
     embark_position: Option<Position>,
     dest: Position,
-) -> bool {
+) -> Result<(), String> {
     if let Some(embark_position) = embark_position {
-        return dest == embark_position;
+        return if dest == embark_position {
+            Ok(())
+        } else {
+            Err("the destination should be the carrier position".to_string())
+        };
     }
-    units.iter().all(|unit| {
+    for unit in units {
         if unit.unit_type.is_land_based() && game.map.is_sea(dest) {
-            return false;
+            return Err("the destination should be land".to_string());
         }
         if unit.unit_type.is_ship() && game.map.is_land(dest) {
-            return false;
+            return Err("the destination should be sea".to_string());
         }
-        true
-    })
+    }
+    Ok(())
 }
 
 #[must_use]
@@ -451,8 +525,11 @@ fn reachable_with_roads(player: &Player, units: &[u32], game: &Game) -> Vec<Move
                 {
                     let stack_size_used =
                         stack_sizes_used.iter().map(|&(_, s)| s).min().expect("min");
-                    let mut cost =
-                        PaymentOptions::resources(ResourcePile::ore(1) + ResourcePile::food(1));
+                    let mut cost = PaymentOptions::resources(
+                        player,
+                        PaymentReason::Move,
+                        ResourcePile::ore(1) + ResourcePile::food(1),
+                    );
                     let origin = EventOrigin::Advance(Advance::Roads);
                     cost.modifiers = vec![origin.clone()];
                     let route = MoveRoute {
@@ -538,6 +615,7 @@ pub(crate) fn terrain_movement_restriction(
         .get(destination)
         .expect("the destination position should exist on the map");
     match terrain {
+        Fertile => Some(MovementRestriction::Fertile),
         Mountain => Some(MovementRestriction::Mountain),
         Forest if unit.unit_type.is_army_unit() => Some(MovementRestriction::Forest),
         _ => None,
@@ -546,7 +624,8 @@ pub(crate) fn terrain_movement_restriction(
 
 pub(crate) fn has_movable_units(game: &Game, player: &Player) -> bool {
     player.units.iter().any(|unit| {
-        move_units_destinations(player, game, &[unit.id], unit.position, None).is_ok()
+        let result = possible_move_units_destinations(player, game, &[unit.id], unit.position, None);
+        result.is_ok_and(|r|!r.is_empty())
             || can_embark(game, player, unit)
     })
 }
@@ -556,6 +635,13 @@ pub fn can_embark(game: &Game, player: &Player, unit: &Unit) -> bool {
     unit.unit_type.is_land_based()
         && player.units.iter().any(|u| {
             u.unit_type.is_ship()
-                && move_units_destinations(player, game, &[unit.id], u.position, Some(u.id)).is_ok()
+                && possible_move_units_destinations(
+                    player,
+                    game,
+                    &[unit.id],
+                    u.position,
+                    Some(u.id),
+                )
+                .is_ok()
         })
 }

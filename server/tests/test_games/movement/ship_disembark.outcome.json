@@ -72,11 +72,17 @@
         {
           "position": "B3",
           "unit_type": "Cavalry",
+          "movement_restrictions": [
+            "Fertile"
+          ],
           "id": 1
         },
         {
           "position": "B3",
           "unit_type": "Elephant",
+          "movement_restrictions": [
+            "Fertile"
+          ],
           "id": 2
         },
         {
@@ -269,9 +275,17 @@
                       "value": "C3"
                     },
                     {
+                      "op": "remove",
+                      "path": "/players/0/units/1/movement_restrictions"
+                    },
+                    {
                       "op": "replace",
                       "path": "/players/0/units/2/position",
                       "value": "C3"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/units/2/movement_restrictions"
                     },
                     {
                       "op": "replace",

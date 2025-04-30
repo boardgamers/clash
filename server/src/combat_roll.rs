@@ -3,6 +3,56 @@ use crate::combat_listeners::CombatStrength;
 use crate::game::Game;
 use crate::unit::UnitType::{Cavalry, Elephant, Infantry, Leader};
 use crate::unit::{UnitType, Units};
+use num::Zero;
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub(crate) struct CombatHits {
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tactics_card: Option<u8>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "u8::is_zero")]
+    pub opponent_hit_cancels: u8,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "u8::is_zero")]
+    pub opponent_fighters: u8,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "u8::is_zero")]
+    pub combat_value: u8,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "u8::is_zero")]
+    pub extra_hits: u8, // that cannot be cancelled
+}
+
+impl CombatHits {
+    #[must_use]
+    pub(crate) fn new(
+        tactics_card: Option<u8>,
+        opponent_hit_cancels: u8,
+        opponent_fighters: u8,
+        combat_value: u8,
+    ) -> CombatHits {
+        CombatHits {
+            tactics_card,
+            opponent_hit_cancels,
+            opponent_fighters,
+            combat_value,
+            extra_hits: 0,
+        }
+    }
+
+    #[must_use]
+    pub(crate) fn hits(&self) -> u8 {
+        let hits =
+            (self.combat_value / 5).saturating_sub(self.opponent_hit_cancels) + self.extra_hits;
+        hits.min(self.opponent_fighters)
+    }
+
+    pub(crate) fn all_opponents_killed(&self) -> bool {
+        self.hits() == self.opponent_fighters
+    }
+}
 
 pub(crate) struct CombatRoundStats {
     player: usize,
@@ -11,7 +61,6 @@ pub(crate) struct CombatRoundStats {
     log_str: String,
     combat_value: u8,
     hit_cancels: u8,
-    pub(crate) hits: u8,
     strength: CombatStrength,
 }
 
@@ -51,21 +100,29 @@ impl CombatRoundStats {
             log_str,
             combat_value,
             hit_cancels,
-            hits: 0,
             fighters: fighting.len() as u8,
         }
     }
 
-    pub(crate) fn determine_hits(&mut self, opponent: &CombatRoundStats, game: &mut Game) {
-        self.hits = (self.combat_value / 5)
-            .saturating_sub(opponent.hit_cancels)
-            .min(opponent.fighters);
+    pub(crate) fn determine_hits(
+        &mut self,
+        opponent: &CombatRoundStats,
+        game: &mut Game,
+        a_t: Option<u8>,
+    ) -> CombatHits {
+        let combat_hits = CombatHits::new(
+            a_t,
+            opponent.hit_cancels,
+            opponent.fighters,
+            self.combat_value,
+        );
+        let hits = combat_hits.hits();
 
         let name = game.player_name(self.player);
         game.add_info_log_item(&format!(
             "{name} rolled {} for combined combat value of {} and gets {} hits \
             against {} units.",
-            self.log_str, self.combat_value, self.hits, self.opponent_str,
+            self.log_str, self.combat_value, hits, self.opponent_str,
         ));
 
         if !self.strength.roll_log.is_empty() {
@@ -74,6 +131,7 @@ impl CombatRoundStats {
                 self.strength.roll_log.join(", ")
             ));
         }
+        combat_hits
     }
 }
 

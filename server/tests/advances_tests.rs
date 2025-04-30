@@ -10,7 +10,7 @@ use server::cultural_influence::InfluenceCultureAttempt;
 use server::events::EventOrigin;
 use server::game::Game;
 use server::movement::MovementAction::Move;
-use server::movement::{MoveUnits, move_units_destinations};
+use server::movement::{MoveUnits, possible_move_units_destinations};
 use server::player::CostTrigger;
 use server::playing_actions::PlayingAction::{
     Advance, Collect, Construct, Custom, EndTurn, Recruit, WonderCard,
@@ -20,6 +20,7 @@ use server::position::Position;
 use server::recruit::recruit_cost_without_replaced;
 use server::resource_pile::ResourcePile;
 use server::unit::Units;
+use server::wonder::Wonder;
 use server::{advance, construct, playing_actions};
 use std::vec;
 
@@ -153,7 +154,7 @@ fn test_monuments() {
             );
         }
 
-        game = execute_action(game, Action::Playing(WonderCard("Pyramids".to_string())), 0);
+        game = execute_action(game, Action::Playing(WonderCard(Wonder::Pyramids)), 0);
         game = execute_action(
             game,
             Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
@@ -164,7 +165,7 @@ fn test_monuments() {
         game = execute_action(
             game,
             Action::Response(EventResponse::Payment(vec![ResourcePile::new(
-                2, 3, 3, 0, 0, 0, 4,
+                2, 3, 6, 0, 1, 0, 5,
             )])),
             0,
         );
@@ -411,7 +412,7 @@ fn test_road_coordinates() {
 
 fn get_destinations(game: &Game, units: &[u32], position: &str) -> Vec<String> {
     let player = game.player(1);
-    move_units_destinations(player, game, units, Position::from_offset(position), None)
+    possible_move_units_destinations(player, game, units, Position::from_offset(position), None)
         .unwrap()
         .into_iter()
         .map(|r| r.destination.to_string())
@@ -637,17 +638,25 @@ fn test_collect_husbandry() {
 fn test_collect_free_economy() {
     JSON.test(
         "collect_free_economy",
-        vec![TestAction::undoable(
-            0,
-            Action::Playing(Collect(playing_actions::Collect::new(
-                Position::from_offset("C2"),
-                vec![
-                    PositionCollection::new(Position::from_offset("B1"), ResourcePile::ore(1)),
-                    PositionCollection::new(Position::from_offset("B2"), ResourcePile::ore(1)),
-                ],
-                PlayingActionType::Custom(CustomActionType::FreeEconomyCollect),
-            ))),
-        )],
+        vec![
+            TestAction::undoable(
+                0,
+                Action::Playing(Collect(playing_actions::Collect::new(
+                    Position::from_offset("C2"),
+                    vec![
+                        PositionCollection::new(Position::from_offset("B1"), ResourcePile::ore(1)),
+                        PositionCollection::new(Position::from_offset("B2"), ResourcePile::ore(1)),
+                    ],
+                    PlayingActionType::Custom(CustomActionType::FreeEconomyCollect),
+                ))),
+            )
+            .with_post_assert(|game| {
+                // no production focus
+                let result =
+                    PlayingActionType::ActionCard(19).is_available(&game, game.active_player());
+                assert!(result.is_err());
+            }),
+        ],
     );
 }
 
@@ -720,7 +729,7 @@ fn test_husbandry() {
             .without_json_comparison()
             .with_post_assert(|game| {
                 // but not again
-                assert!(has_husbandry_field(game))
+                assert!(has_husbandry_field(&game))
             }),
             // can use husbandry - because it was not used in the previous action
             TestAction::undoable(
@@ -737,7 +746,7 @@ fn test_husbandry() {
             .without_json_comparison()
             .with_post_assert(|game| {
                 // but not again
-                assert!(!has_husbandry_field(game))
+                assert!(!has_husbandry_field(&game))
             }),
         ],
     );

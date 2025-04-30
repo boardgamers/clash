@@ -16,15 +16,17 @@
     {
       "event_type": {
         "CombatRoundEnd": {
-          "attacker_casualties": {
-            "fighters": 1,
-            "tactics_card": 1
+          "attacker": {
+            "tactics_card": 1,
+            "opponent_fighters": 2,
+            "combat_value": 24
           },
-          "defender_casualties": {
-            "fighters": 2,
-            "tactics_card": 2
+          "defender": {
+            "tactics_card": 2,
+            "opponent_hit_cancels": 1,
+            "opponent_fighters": 4,
+            "combat_value": 12
           },
-          "can_retreat": false,
           "final_result": "AttackerWins",
           "combat": {
             "round": 1,

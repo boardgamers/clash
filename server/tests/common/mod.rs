@@ -146,7 +146,7 @@ pub(crate) fn write_result(actual: &str, result_path: &GamePath) {
         .expect("Failed to write output file");
 }
 
-pub(crate) type TestAssert = Vec<Box<dyn FnOnce(&Game)>>;
+pub(crate) type TestAssert = Vec<Box<dyn FnOnce(Game)>>;
 
 pub struct TestAction {
     action: Action,
@@ -187,12 +187,12 @@ impl TestAction {
         Self::new(action, false, false, player_index)
     }
 
-    pub fn with_pre_assert(mut self, pre_assert: impl FnOnce(&Game) + 'static) -> Self {
+    pub fn with_pre_assert(mut self, pre_assert: impl FnOnce(Game) + 'static) -> Self {
         self.pre_asserts.push(Box::new(pre_assert));
         self
     }
 
-    pub fn with_post_assert(mut self, post_assert: impl FnOnce(&Game) + 'static) -> Self {
+    pub fn with_post_assert(mut self, post_assert: impl FnOnce(Game) + 'static) -> Self {
         self.post_asserts.push(Box::new(post_assert));
         self
     }
@@ -277,7 +277,7 @@ fn test_action_internal(
     let a = serde_json::to_string(&action).expect("action should be serializable");
     let a2 = serde_json::from_str(&a).expect("action should be deserializable");
     for pre_assert in test.pre_asserts {
-        pre_assert(&game);
+        pre_assert(game.clone());
     }
 
     if test.illegal_action_test {
@@ -301,7 +301,7 @@ fn test_action_internal(
         return game;
     }
     for post_assert in test.post_asserts {
-        post_assert(&game);
+        post_assert(game.clone());
     }
     let compare_json = test.compare_json && last_json_compare;
     undo_redo(

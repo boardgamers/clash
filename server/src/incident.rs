@@ -13,7 +13,9 @@ use crate::content::persistent_events::{
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::map::Terrain;
-use crate::payment::{PaymentConversion, PaymentConversionType, PaymentOptions};
+use crate::payment::{
+    PaymentConversion, PaymentConversionType, PaymentOptions, PaymentReason, ResourceReward,
+};
 use crate::pirates::pirates_spawn_and_raid;
 use crate::player::Player;
 use crate::player_events::{IncidentInfo, IncidentPlayerInfo, IncidentTarget};
@@ -508,7 +510,12 @@ impl IncidentBuilder {
                     if needed == 0 {
                         return None;
                     }
-                    let mut options = PaymentOptions::sum(needed, &[ResourceType::MoodTokens]);
+                    let mut options = PaymentOptions::sum(
+                        p,
+                        PaymentReason::Incident,
+                        needed,
+                        &[ResourceType::MoodTokens],
+                    );
                     options.conversions.push(PaymentConversion::new(
                         vec![ResourcePile::mood_tokens(1)],
                         ResourcePile::empty(),
@@ -520,10 +527,10 @@ impl IncidentBuilder {
                         MoodModifier::MakeAngry => "making it Angry",
                     };
 
-                    Some(vec![PaymentRequest::new(
+                    // mandatory - but may be 0
+                    Some(vec![PaymentRequest::mandatory(
                         options,
                         &format!("You may pay 1 mood token for each city to avoid {action}"),
-                        false,
                     )])
                 } else {
                     None
@@ -719,7 +726,7 @@ fn gold_deposits(b: IncidentBuilder) -> IncidentBuilder {
         BASE_EFFECT_PRIORITY,
         |_game, _player_index, _incident| {
             Some(ResourceRewardRequest::new(
-                PaymentOptions::sum(2, &[ResourceType::Gold]),
+                ResourceReward::sum(2, &[ResourceType::Gold]),
                 "-".to_string(),
             ))
         },

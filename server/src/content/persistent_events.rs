@@ -14,7 +14,7 @@ use crate::explore::ExploreResolutionState;
 use crate::game::Game;
 use crate::map::Rotation;
 use crate::objective_card::SelectObjectivesInfo;
-use crate::payment::PaymentOptions;
+use crate::payment::{PaymentOptions, ResourceReward};
 use crate::player::Player;
 use crate::player_events::{IncidentInfo, OnAdvanceInfo};
 use crate::playing_actions::Recruit;
@@ -22,7 +22,7 @@ use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::{ChangeGovernmentType, StatusPhaseState};
 use crate::unit::UnitType;
-use crate::wonder::WonderCardInfo;
+use crate::wonder::{Wonder, WonderCardInfo};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::ops::RangeInclusive;
@@ -169,24 +169,34 @@ pub struct PaymentRequest {
 
 impl PaymentRequest {
     #[must_use]
-    pub fn new(cost: PaymentOptions, name: &str, optional: bool) -> Self {
+    fn new(cost: PaymentOptions, name: &str, optional: bool) -> Self {
         Self {
             cost,
             name: name.to_string(),
             optional,
         }
     }
+    
+    #[must_use]
+    pub fn mandatory(cost: PaymentOptions, name: &str) -> Self {
+        Self::new(cost, name, false)
+    }
+    
+    #[must_use]
+    pub fn optional(cost: PaymentOptions, name: &str) -> Self {
+        Self::new(cost, name, true)
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct ResourceRewardRequest {
-    pub reward: PaymentOptions,
+    pub reward: ResourceReward,
     pub name: String,
 }
 
 impl ResourceRewardRequest {
     #[must_use]
-    pub fn new(reward: PaymentOptions, name: String) -> Self {
+    pub fn new(reward: ResourceReward, name: String) -> Self {
         Self { reward, name }
     }
 }
@@ -288,7 +298,7 @@ impl UnitsRequest {
 pub enum Structure {
     CityCenter,
     Building(Building),
-    Wonder(String),
+    Wonder(Wonder),
 }
 
 impl Structure {

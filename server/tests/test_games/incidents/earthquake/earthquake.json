@@ -27,7 +27,7 @@
             "fortress": 0,
             "temple": 1,
             "wonders": [
-              "Pyramids"
+              "GreatGardens"
             ]
           },
           "mood_state": "Happy",
@@ -98,7 +98,7 @@
         "Myths",
         "Tactics"
       ],
-      "wonders_build": [
+      "wonders_built": [
         "Pyramids"
       ],
       "incident_tokens": 1,

@@ -1,5 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::combat::{Combat, CombatRetreatState, capture_position};
+use crate::combat_roll::CombatHits;
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{PersistentEventType, PositionRequest, UnitsRequest};
 use crate::game::Game;
@@ -17,9 +18,17 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CombatStrength {
+    #[serde(default)]
+    #[serde(skip_serializing_if = "u8::is_zero")]
     pub extra_dies: u8,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "i8::is_zero")]
     pub extra_combat_value: i8,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "u8::is_zero")]
     pub hit_cancels: u8,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub roll_log: Vec<String>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -186,34 +195,12 @@ impl CombatEnd {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub struct Casualties {
-    #[serde(default)]
-    #[serde(skip_serializing_if = "u8::is_zero")]
-    pub fighters: u8,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub tactics_card: Option<u8>,
-}
-
-impl Casualties {
-    #[must_use]
-    pub fn new(fighters: u8, tactics_card: Option<u8>) -> Self {
-        Self {
-            fighters,
-            tactics_card,
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CombatRoundEnd {
     #[serde(default)]
     #[serde(skip_serializing_if = "CombatEventPhase::is_default")]
     pub phase: CombatEventPhase,
-    pub attacker_casualties: Casualties,
-    pub defender_casualties: Casualties,
-    #[serde(default)]
-    pub can_retreat: bool,
+    pub(crate) attacker: CombatHits,
+    pub(crate) defender: CombatHits,
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub final_result: Option<CombatResult>,
@@ -222,32 +209,27 @@ pub struct CombatRoundEnd {
 
 impl CombatRoundEnd {
     #[must_use]
-    pub fn new(
-        attacker_casualties: Casualties,
-        defender_casualties: Casualties,
-        can_retreat: bool,
-        combat: Combat,
-        game: &Game,
-    ) -> Self {
+    pub(crate) fn new(attacker: CombatHits, defender: CombatHits, combat: Combat) -> Self {
         let mut combat_round_end = Self {
-            attacker_casualties,
-            defender_casualties,
-            can_retreat,
+            attacker,
+            defender,
             final_result: None,
             combat,
             phase: CombatEventPhase::TacticsCard,
         };
-        combat_round_end.set_final_result(game);
+        combat_round_end.set_final_result();
         combat_round_end
     }
 
-    pub(crate) fn set_final_result(&mut self, game: &Game) {
-        let attackers_dead = self.combat.active_attackers(game).len()
-            - self.attacker_casualties.fighters as usize
-            == 0;
-        let defenders_dead = self.combat.active_defenders(game).len()
-            - self.defender_casualties.fighters as usize
-            == 0;
+    pub(crate) fn can_retreat(&self) -> bool {
+        self.combat.retreat == CombatRetreatState::CanRetreat
+            && !self.attacker.all_opponents_killed()
+            && !self.defender.all_opponents_killed()
+    }
+
+    pub(crate) fn set_final_result(&mut self) {
+        let attackers_dead = self.defender.all_opponents_killed();
+        let defenders_dead = self.attacker.all_opponents_killed();
 
         self.final_result = if attackers_dead && defenders_dead {
             Some(CombatResult::Draw)
@@ -266,28 +248,40 @@ impl CombatRoundEnd {
             player,
             &self.combat,
             card,
-            self.attacker_casualties.tactics_card.as_ref(),
+            self.attacker.tactics_card.as_ref(),
         )
     }
-}
 
-impl CombatRoundEnd {
     #[must_use]
-    pub fn casualties(&self, role: CombatRole) -> &Casualties {
+    pub fn hits(&self, role: CombatRole) -> u8 {
         if role.is_attacker() {
-            &self.attacker_casualties
+            self.attacker.hits()
         } else {
-            &self.defender_casualties
+            self.defender.hits()
         }
     }
 
     #[must_use]
-    pub fn casualties_mut(&mut self, role: CombatRole) -> &mut Casualties {
+    pub fn losses(&self, role: CombatRole) -> u8 {
         if role.is_attacker() {
-            &mut self.attacker_casualties
+            self.defender.hits()
         } else {
-            &mut self.defender_casualties
+            self.attacker.hits()
         }
+    }
+
+    #[must_use]
+    pub(crate) fn hits_mut(&mut self, role: CombatRole) -> &mut CombatHits {
+        if role.is_attacker() {
+            &mut self.attacker
+        } else {
+            &mut self.defender
+        }
+    }
+
+    #[must_use]
+    pub fn role(&self, player: usize) -> CombatRole {
+        self.combat.role(player)
     }
 }
 
@@ -335,8 +329,8 @@ pub(crate) fn combat_round_end(game: &mut Game, r: CombatRoundEnd) -> Option<Com
         },
         |s| &mut s.phase,
         |s| &s.combat,
-        |s| s.attacker_casualties.tactics_card.as_ref(),
-        |s| s.defender_casualties.tactics_card.as_ref(),
+        |s| s.attacker.tactics_card.as_ref(),
+        |s| s.defender.tactics_card.as_ref(),
     );
     let e = e?;
 
@@ -542,13 +536,13 @@ pub(crate) fn choose_fighter_casualties() -> Builtin {
             move |game, player, r| {
                 let choices = r.combat.fighting_units(game, player).clone();
 
-                let role = r.combat.role(player);
+                let role = r.role(player);
                 let role_str = if role.is_attacker() {
                     "attacking"
                 } else {
                     "defending"
                 };
-                let casualties = r.casualties(role).fighters;
+                let casualties = r.losses(role);
                 if casualties == 0 {
                     return None;
                 }
@@ -599,7 +593,7 @@ pub(crate) fn offer_retreat() -> Builtin {
             0,
             |game, player, r| {
                 let c = &r.combat;
-                if c.attacker == player && r.can_retreat {
+                if c.attacker == player && r.can_retreat() {
                     let name = game.player_name(player);
                     game.add_info_log_item(&format!("{name} can retreat",));
                     Some("Do you want to retreat?".to_string())

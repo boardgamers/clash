@@ -17,6 +17,7 @@ use itertools::Itertools;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::movement::MovementRestriction;
 use server::player::Player;
+use server::wonder::Wonder;
 
 pub struct UnitPlace {
     pub center: Vec2,
@@ -226,7 +227,7 @@ fn draw_unit(
         let army_move = game
             .player(player_index)
             .has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
-        let mut tooltip = vec![unit_label(unit, army_move)];
+        let mut tooltip = vec![unit_label(unit, army_move, game)];
         add_unit_description(&mut tooltip, unit.unit_type);
         show_tooltip_for_circle(rc, &tooltip, center, radius);
     } else {
@@ -289,7 +290,7 @@ pub fn name(u: &UnitType) -> &str {
     u.name()
 }
 
-pub fn unit_label(unit: &Unit, army_move: bool) -> String {
+pub fn unit_label(unit: &Unit, army_move: bool, game: &Game) -> String {
     let name = name(&unit.unit_type);
     let mut notes = vec![];
 
@@ -306,6 +307,14 @@ pub fn unit_label(unit: &Unit, army_move: bool) -> String {
                 }
                 MovementRestriction::Forest => {
                     notes.push("can't attack from a Forest this turn");
+                }
+                MovementRestriction::Fertile => {
+                        if game.players.iter().any(|p| {
+                        p.index != unit.player_index
+                            && p.wonders_owned.contains(Wonder::GreatGardens)
+                    }) {
+                        notes.push("can't move into the city with Great Gardens this turn");
+                    }
                 }
             }
         }

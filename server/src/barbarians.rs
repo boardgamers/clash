@@ -9,7 +9,7 @@ use crate::game::Game;
 use crate::incident::{BASE_EFFECT_PRIORITY, IncidentBuilder, IncidentFilter, play_base_effect};
 use crate::map::Terrain;
 use crate::movement::MoveUnits;
-use crate::payment::PaymentOptions;
+use crate::payment::ResourceReward;
 use crate::player::{Player, add_unit};
 use crate::player_events::{IncidentTarget, PersistentEvent, PersistentEvents};
 use crate::position::Position;
@@ -78,7 +78,7 @@ pub(crate) fn barbarians_bonus() -> Builtin {
                         1
                     };
                     Some(ResourceRewardRequest::new(
-                        PaymentOptions::sum(sum, &[ResourceType::Gold]),
+                        ResourceReward::sum(sum, &[ResourceType::Gold]),
                         "-".to_string(),
                     ))
                 } else {

@@ -14,7 +14,9 @@ use crate::player::{Player, remove_unit};
 use crate::player_events::PlayingActionInfo;
 use crate::recruit::recruit;
 use crate::unit::Units;
-use crate::wonder::{WonderCardInfo, WonderDiscount, cities_for_wonder, on_play_wonder_card};
+use crate::wonder::{
+    Wonder, WonderCardInfo, WonderDiscount, cities_for_wonder, on_play_wonder_card,
+};
 use crate::{game::Game, position::Position, resource_pile::ResourcePile};
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
@@ -110,7 +112,7 @@ pub enum PlayingActionType {
     IncreaseHappiness,
     InfluenceCultureAttempt,
     ActionCard(u8),
-    WonderCard(String),
+    WonderCard(Wonder),
     Custom(CustomActionType),
     EndTurn,
 }
@@ -180,7 +182,7 @@ impl PlayingActionType {
                     return Err("Wonder card not available".to_string());
                 }
 
-                if cities_for_wonder(name, game, p, &WonderDiscount::default()).is_empty() {
+                if cities_for_wonder(*name, game, p, &WonderDiscount::default()).is_empty() {
                     return Err("no cities for wonder".to_string());
                 }
             }
@@ -234,7 +236,7 @@ pub enum PlayingAction {
     InfluenceCultureAttempt(InfluenceCultureAttempt),
     Custom(CustomEventAction),
     ActionCard(u8),
-    WonderCard(String),
+    WonderCard(Wonder),
     EndTurn,
 }
 
@@ -332,7 +334,7 @@ impl PlayingAction {
                 ],
             ),
             PlayingAction::ActionCard(a) => PlayingActionType::ActionCard(*a),
-            PlayingAction::WonderCard(name) => PlayingActionType::WonderCard(name.clone()),
+            PlayingAction::WonderCard(name) => PlayingActionType::WonderCard(*name),
             PlayingAction::Custom(c) => PlayingActionType::Custom(c.action.clone()),
             PlayingAction::EndTurn => PlayingActionType::EndTurn,
         }
@@ -369,7 +371,7 @@ impl ActionCost {
     pub(crate) fn pay(&self, game: &mut Game, player_index: usize) {
         let p = game.player_mut(player_index);
         let cost = self.cost.clone();
-        p.lose_resources(cost.clone());
+        p.lose_resources(cost.clone()); // todo colosseum
         if !self.free {
             game.actions_left -= 1;
         }

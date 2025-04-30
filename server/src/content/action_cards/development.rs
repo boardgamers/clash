@@ -1,5 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
+use crate::collect::available_collect_actions_for_city;
 use crate::content::action_cards::cultural_takeover::cultural_takeover;
 use crate::content::action_cards::mercenaries::mercenaries;
 use crate::content::builtin::Builtin;
@@ -12,7 +13,8 @@ use crate::content::tactics_cards::{
     TacticsCardFactory, defensive_formation, encircled, for_the_people, heavy_resistance,
     improved_defenses, peltasts, tactical_retreat,
 };
-use crate::player::add_unit;
+use crate::game::Game;
+use crate::player::{Player, add_unit};
 use crate::player_events::PlayingActionInfo;
 use crate::playing_actions::{ActionCost, PlayingActionType};
 use crate::resource_pile::ResourcePile;
@@ -66,7 +68,7 @@ fn production_focus(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "For the next collect action, you may collect multiple times from the same tile. \
         The total amount of resources does not change.",
         ActionCost::regular(),
-        |_game, _player, _| true,
+        |game, player, _| collect_special_action(game, player),
     )
     .tactics_card(tactics_card)
     .add_simple_persistent_event_listener(
@@ -82,6 +84,17 @@ fn production_focus(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         },
     )
     .build()
+}
+
+pub(crate) fn collect_special_action(game: &Game, player: &Player) -> bool {
+    !game
+        .permanent_effects
+        .iter()
+        .any(|e| matches!(e, PermanentEffect::Collect(_)))
+        && player
+            .cities
+            .iter()
+            .any(|c| !available_collect_actions_for_city(game, player.index, c.position).is_empty())
 }
 
 pub(crate) fn collect_only() -> Builtin {

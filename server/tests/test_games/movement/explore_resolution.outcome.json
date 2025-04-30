@@ -1,4 +1,4 @@
-{
+  {
   "state": "Playing",
   "events": [
     {
@@ -493,7 +493,7 @@
   ],
   "rng": "175288996178563520907356813494494136334",
   "wonders_left": [
-    "Great Gardens",
+    "GreatGardens",
     "Pyramids"
   ]
 }

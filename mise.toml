@@ -16,12 +16,12 @@ dir = "server"
 
 [tasks.test]
 description = "Run server tests"
-run = 'cargo nextest run {{arg(name="test", default="")}}'
+run = 'cargo test {{arg(name="test", default="")}}'
 dir = "server"
 
 [tasks.update-tests]
 description = "Run server tests and update JSON files"
-run = 'cargo nextest run {{arg(name="test", default="")}}'
+run = 'cargo test --jobs 2 {{arg(name="test", default="")}}'
 env = { UPDATE_EXPECTED = "true" }
 dir = "server"
 

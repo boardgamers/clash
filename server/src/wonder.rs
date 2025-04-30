@@ -3,6 +3,7 @@ use crate::advance::Advance;
 use crate::card::draw_card_from_pile;
 use crate::city::{City, MoodState};
 use crate::construct::can_construct_anything;
+use crate::consts::WONDER_VICTORY_POINTS;
 use crate::content::builtin::Builtin;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{PaymentRequest, PersistentEventType, PositionRequest};
@@ -12,74 +13,131 @@ use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::utils::remove_element;
 use crate::{ability_initializer::AbilityInitializerSetup, game::Game, position::Position};
+use enumset::EnumSetType;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
 type PlacementChecker = Arc<dyn Fn(Position, &Game) -> bool + Sync + Send>;
 
-#[derive(Clone)]
-pub struct Wonder {
-    pub name: String,
-    pub description: String,
-    pub cost: PaymentOptions,
-    pub required_advances: Vec<Advance>,
-    pub placement_requirement: Option<PlacementChecker>,
-    pub listeners: AbilityListeners,
+#[derive(EnumSetType, Serialize, Deserialize, Debug, Ord, PartialOrd, Hash)]
+pub enum Wonder {
+    Colosseum = 0,
+    Pyramids,
+    GreatGardens,
+    GreatLibrary,
+    GreatWall,
+    GreatLighthouse,
+    Colossus,
+    GreatMausoleum,
 }
 
 impl Wonder {
     #[must_use]
+    pub fn info<'a>(&self, game: &'a Game) -> &'a WonderInfo {
+        game.cache.get_wonder(*self)
+    }
+
+    #[must_use]
+    pub fn id(&self) -> String {
+        format!("{self:?}")
+    }
+
+    #[must_use]
+    pub fn name<'a>(&self, game: &'a Game) -> &'a str {
+        self.info(game).name.as_str()
+    }
+}
+
+#[derive(Clone)]
+pub struct WonderInfo {
+    pub wonder: Wonder,
+    pub name: String,
+    pub description: String,
+    pub cost: PaymentOptions,
+    pub required_advance: Advance,
+    pub placement_requirement: Option<PlacementChecker>,
+    pub listeners: AbilityListeners,
+    pub owned_victory_points: u8,
+    pub built_victory_points: f32,
+}
+
+impl WonderInfo {
+    #[must_use]
     pub fn builder(
+        wonder: Wonder,
         name: &str,
         description: &str,
         cost: PaymentOptions,
-        required_advances: Vec<Advance>,
+        required_advance: Advance,
     ) -> WonderBuilder {
-        WonderBuilder::new(name, description, cost, required_advances)
+        WonderBuilder::new(wonder, name, description, cost, required_advance)
     }
 }
 
 pub struct WonderBuilder {
+    wonder: Wonder,
     name: String,
     descriptions: Vec<String>,
     cost: PaymentOptions,
-    required_advances: Vec<Advance>,
+    required_advance: Advance,
     placement_requirement: Option<PlacementChecker>,
     builder: AbilityInitializerBuilder,
+    pub owned_victory_points: u8,
+    pub built_victory_points: f32,
 }
 
 impl WonderBuilder {
     fn new(
+        wonder: Wonder,
         name: &str,
         description: &str,
         cost: PaymentOptions,
-        required_advances: Vec<Advance>,
+        required_advance: Advance,
     ) -> Self {
         Self {
+            wonder,
             name: name.to_string(),
             descriptions: vec![description.to_string()],
             cost,
-            required_advances,
+            required_advance,
             placement_requirement: None,
             builder: AbilityInitializerBuilder::new(),
+            built_victory_points: WONDER_VICTORY_POINTS as f32 / 2.0,
+            owned_victory_points: WONDER_VICTORY_POINTS / 2,
         }
     }
 
-    pub fn placement_requirement(&mut self, placement_requirement: PlacementChecker) -> &mut Self {
+    #[must_use]
+    pub fn placement_requirement(mut self, placement_requirement: PlacementChecker) -> Self {
         self.placement_requirement = Some(placement_requirement);
         self
     }
 
     #[must_use]
-    pub fn build(self) -> Wonder {
-        Wonder {
+    pub fn built_victory_points(mut self, points: f32) -> Self {
+        self.built_victory_points = points;
+        self
+    }
+
+    #[must_use]
+    pub fn owned_victory_points(mut self, points: u8) -> Self {
+        self.owned_victory_points = points;
+        self
+    }
+
+    #[must_use]
+    pub fn build(self) -> WonderInfo {
+        WonderInfo {
+            wonder: self.wonder,
             name: self.name,
             description: String::from("✦ ") + &self.descriptions.join("\n✦ "),
             cost: self.cost,
-            required_advances: self.required_advances,
+            required_advance: self.required_advance,
             placement_requirement: self.placement_requirement,
             listeners: self.builder.build(),
+            owned_victory_points: self.owned_victory_points,
+            built_victory_points: self.built_victory_points,
         }
     }
 }
@@ -90,7 +148,7 @@ impl AbilityInitializerSetup for WonderBuilder {
     }
 
     fn get_key(&self) -> EventOrigin {
-        EventOrigin::Wonder(self.name.clone())
+        EventOrigin::Wonder(self.wonder)
     }
 }
 
@@ -103,7 +161,7 @@ pub(crate) fn draw_wonder_card(game: &mut Game, player_index: usize) {
     );
 }
 
-pub(crate) fn draw_wonder_from_pile(game: &mut Game) -> Option<String> {
+pub(crate) fn draw_wonder_from_pile(game: &mut Game) -> Option<Wonder> {
     draw_card_from_pile(
         game,
         "Wonders",
@@ -114,7 +172,7 @@ pub(crate) fn draw_wonder_from_pile(game: &mut Game) -> Option<String> {
     )
 }
 
-fn gain_wonder(game: &mut Game, player_index: usize, wonder: String) {
+fn gain_wonder(game: &mut Game, player_index: usize, wonder: Wonder) {
     game.players[player_index].wonder_cards.push(wonder);
 }
 
@@ -127,7 +185,8 @@ pub(crate) fn on_draw_wonder_card() -> Builtin {
                 let public_wonder = find_public_wonder(game);
                 if let Some(public_wonder) = public_wonder {
                     Some(format!(
-                        "Do you want to draw the public wonder card {public_wonder}?"
+                        "Do you want to draw the public wonder card {}?",
+                        public_wonder.name(game)
                     ))
                 } else {
                     gain_wonder_from_pile(game, player_index);
@@ -136,12 +195,11 @@ pub(crate) fn on_draw_wonder_card() -> Builtin {
             },
             |game, s, ()| {
                 if s.choice {
-                    let name = find_public_wonder(game)
-                        .expect("public wonder card not found")
-                        .clone();
+                    let name = *find_public_wonder(game).expect("public wonder card not found");
                     game.add_info_log_item(&format!(
                         "{} drew the public wonder card {}",
-                        s.player_name, name
+                        s.player_name,
+                        name.name(game)
                     ));
                     gain_wonder(game, s.player_index, name);
                     game.permanent_effects
@@ -164,7 +222,7 @@ fn gain_wonder_from_pile(game: &mut Game, player: usize) {
     }
 }
 
-fn find_public_wonder(game: &Game) -> Option<&String> {
+fn find_public_wonder(game: &Game) -> Option<&Wonder> {
     game.permanent_effects.iter().find_map(|e| match e {
         PermanentEffect::PublicWonderCard(name) => Some(name),
         _ => None,
@@ -173,7 +231,7 @@ fn find_public_wonder(game: &Game) -> Option<&String> {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct WonderCardInfo {
-    pub name: String,
+    pub name: Wonder,
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub selected_position: Option<Position>,
@@ -182,7 +240,7 @@ pub struct WonderCardInfo {
 
 impl WonderCardInfo {
     #[must_use]
-    pub fn new(name: String, discount: WonderDiscount) -> Self {
+    pub fn new(name: Wonder, discount: WonderDiscount) -> Self {
         Self {
             name,
             selected_position: None,
@@ -193,16 +251,18 @@ impl WonderCardInfo {
 
 pub(crate) fn can_construct_wonder(
     city: &City,
-    wonder: &Wonder,
+    wonder: Wonder,
     player: &Player,
     game: &Game,
     discount: &WonderDiscount,
 ) -> Result<PaymentOptions, String> {
     can_construct_anything(city, player)?;
 
-    if !player.wonder_cards.contains(&wonder.name) {
+    if !player.wonder_cards.contains(&wonder) {
         return Err("Wonder card not owned".to_string());
     }
+    let info = wonder.info(game);
+
     if city.mood_state != MoodState::Happy {
         return Err("City is not happy".to_string());
     }
@@ -210,18 +270,17 @@ pub(crate) fn can_construct_wonder(
         return Err("Engineering advance missing".to_string());
     }
     if !discount.ignore_required_advances {
-        for advance in &wonder.required_advances {
-            if !player.has_advance(*advance) {
-                return Err(format!("Advance missing: {}", advance.name(game)));
-            }
+        let a = info.required_advance;
+        if !player.has_advance(a) {
+            return Err(format!("Advance missing: {a:?}"));
         }
     }
-    if let Some(placement_requirement) = &wonder.placement_requirement {
+    if let Some(placement_requirement) = &info.placement_requirement {
         if !placement_requirement(city.position, game) {
             return Err("Placement requirement not met".to_string());
         }
     }
-    let mut cost = wonder.cost.clone();
+    let mut cost = info.cost.clone();
     cost.default.culture_tokens = cost
         .default
         .culture_tokens
@@ -272,7 +331,7 @@ pub(crate) fn build_wonder() -> Builtin {
             11,
             move |game, player_index, i| {
                 let p = game.player(player_index);
-                let choices = cities_for_wonder(&i.name, game, p, &i.discount);
+                let choices = cities_for_wonder(i.name, game, p, &i.discount);
 
                 let needed = 1..=1;
                 Some(PositionRequest::new(
@@ -286,7 +345,9 @@ pub(crate) fn build_wonder() -> Builtin {
                 i.selected_position = Some(position);
                 game.add_info_log_item(&format!(
                     "{} decided to build {} in city {}",
-                    s.player_name, i.name, position
+                    s.player_name,
+                    i.name.name(game),
+                    position
                 ));
             },
         )
@@ -296,25 +357,25 @@ pub(crate) fn build_wonder() -> Builtin {
             move |game, player_index, i| {
                 let p = game.player(player_index);
                 let city = p.get_city(i.selected_position.expect("city not selected"));
-                let wonder = game.cache.get_wonder(&i.name);
-                let cost = can_construct_wonder(city, wonder, p, game, &i.discount)
+                let cost = can_construct_wonder(city, i.name, p, game, &i.discount)
                     .expect("can't construct wonder");
-                Some(vec![PaymentRequest::new(
+                Some(vec![PaymentRequest::mandatory(
                     cost,
                     "Pay to build wonder",
-                    false,
                 )])
             },
             |game, s, i| {
                 let pos = i.selected_position.expect("city not selected");
-                let name = &i.name;
+                let name = i.name;
 
                 game.add_info_log_item(&format!(
                     "{} built {} in city {pos} for {}",
-                    s.player_name, name, s.choice[0]
+                    s.player_name,
+                    name.name(game),
+                    s.choice[0]
                 ));
-                current_action_log_item(game).wonder_built = Some(name.clone());
-                remove_element(&mut game.player_mut(s.player_index).wonder_cards, name);
+                current_action_log_item(game).wonder_built = Some(name);
+                remove_element(&mut game.player_mut(s.player_index).wonder_cards, &name);
                 construct_wonder(game, name, pos, s.player_index);
             },
         )
@@ -322,7 +383,7 @@ pub(crate) fn build_wonder() -> Builtin {
 }
 
 pub(crate) fn cities_for_wonder(
-    name: &str,
+    name: Wonder,
     game: &Game,
     p: &Player,
     discount: &WonderDiscount,
@@ -330,7 +391,7 @@ pub(crate) fn cities_for_wonder(
     p.cities
         .iter()
         .filter_map(|c| {
-            can_construct_wonder(c, game.cache.get_wonder(name), p, game, discount)
+            can_construct_wonder(c, name, p, game, discount)
                 .ok()
                 .map(|_| c.position)
         })
@@ -339,17 +400,32 @@ pub(crate) fn cities_for_wonder(
 
 pub(crate) fn construct_wonder(
     game: &mut Game,
-    name: &str,
+    name: Wonder,
     city_position: Position,
     player_index: usize,
 ) {
     let listeners = game.cache.get_wonder(name).listeners.clone();
     listeners.one_time_init(game, player_index);
     let player = &mut game.players[player_index];
-    player.wonders_build.push(name.to_string());
+    player.wonders_built.push(name);
+    player.wonders_owned.insert(name);
+    player.get_city_mut(city_position).pieces.wonders.push(name);
+}
+
+#[must_use]
+pub(crate) fn wonders_owned_points(player: &Player, game: &Game) -> u8 {
     player
-        .get_city_mut(city_position)
-        .pieces
-        .wonders
-        .push(name.to_string());
+        .wonders_owned
+        .iter()
+        .map(|wonder| wonder.info(game).owned_victory_points)
+        .sum::<u8>()
+}
+
+#[must_use]
+pub(crate) fn wonders_built_points(player: &Player, game: &Game) -> f32 {
+    player
+        .wonders_built
+        .iter()
+        .map(|wonder| wonder.info(game).built_victory_points)
+        .sum::<f32>()
 }

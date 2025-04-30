@@ -10,7 +10,7 @@ use crate::combat_listeners::CombatStrength;
 use crate::content::advances::{AdvanceGroup, advance_group_builder};
 use crate::content::persistent_events::PaymentRequest;
 use crate::game::Game;
-use crate::payment::{PaymentConversion, PaymentOptions};
+use crate::payment::{PaymentConversion, PaymentOptions, PaymentReason};
 use crate::player::Player;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
@@ -18,10 +18,12 @@ use crate::tactics_card::{CombatRole, play_tactics_card};
 use crate::unit::UnitType;
 
 pub(crate) fn warfare() -> AdvanceGroup {
-    advance_group_builder(
-        "Warfare",
-        vec![tactics(), siegecraft(), steel_weapons(), draft()],
-    )
+    advance_group_builder("Warfare", vec![
+        tactics(),
+        siegecraft(),
+        steel_weapons(),
+        draft(),
+    ])
 }
 
 fn tactics() -> AdvanceBuilder {
@@ -44,60 +46,72 @@ fn siegecraft() -> AdvanceBuilder {
         "When attacking a city with a Fortress, pay 2 wood to cancel the Fortress’ \
         ability to add +1 die and/or pay 2 ore to ignore its ability to cancel a hit.",
     )
-        .add_payment_request_listener(
-            |e| &mut e.combat_start,
-            0,
-            |game, player, c| {
-                let extra_die = PaymentOptions::sum(2, &[ResourceType::Wood, ResourceType::Gold]);
-                let ignore_hit = PaymentOptions::sum(2, &[ResourceType::Ore, ResourceType::Gold]);
+    .add_payment_request_listener(
+        |e| &mut e.combat_start,
+        0,
+        |game, player, c| {
+            let p = game.player(player);
+            let extra_die = PaymentOptions::sum(p, PaymentReason::AdvanceAbility, 2, &[
+                ResourceType::Wood,
+                ResourceType::Gold,
+            ]);
+            let ignore_hit = PaymentOptions::sum(p, PaymentReason::AdvanceAbility, 2, &[
+                ResourceType::Ore,
+                ResourceType::Gold,
+            ]);
 
-                let player = &game.players[player];
-                if game
-                    .try_get_any_city(c.defender_position)
-                    .is_some_and(|c| c.pieces.fortress.is_some())
-                    && (player.can_afford(&extra_die) || player.can_afford(&ignore_hit))
-                {
-                    Some(vec![
-                        PaymentRequest {
-                            cost: extra_die,
-                            name: "Cancel fortress ability to add an extra die in the first round of combat".to_string(),
-                            optional: true,
-                        },
-                        PaymentRequest {
-                            cost: ignore_hit,
-                            name: "Cancel fortress ability to ignore the first hit in the first round of combat".to_string(),
-                            optional: true,
-                        },
-                    ])
-                } else {
-                    None
+            let player = &game.players[player];
+            if game
+                .try_get_any_city(c.defender_position)
+                .is_some_and(|c| c.pieces.fortress.is_some())
+                && (player.can_afford(&extra_die) || player.can_afford(&ignore_hit))
+            {
+                Some(vec![
+                    PaymentRequest::optional(
+                        extra_die,
+                        "Cancel fortress ability to add an extra die \
+                             in the first round of combat",
+                    ),
+                    PaymentRequest::optional(
+                        ignore_hit,
+                        "Cancel fortress ability to ignore the first hit \
+                             in the first round of combat",
+                    ),
+                ])
+            } else {
+                None
+            }
+        },
+        |game, s, c| {
+            game.add_info_log_item(&format!("{} paid for siegecraft: ", s.player_name));
+            let mut paid = false;
+            let mut modifiers: Vec<CombatModifier> = Vec::new();
+            let payment = &s.choice;
+            if !payment[0].is_empty() {
+                modifiers.push(CancelFortressExtraDie);
+                game.add_to_last_log_item(&format!(
+                    "{} to cancel the fortress ability to add an extra die",
+                    payment[0]
+                ));
+                paid = true;
+            }
+            if !payment[1].is_empty() {
+                modifiers.push(CancelFortressIgnoreHit);
+                if paid {
+                    game.add_to_last_log_item(" and ");
                 }
-            },
-            |game, s, c| {
-                game.add_info_log_item(
-                    &format!("{} paid for siegecraft: ", s.player_name));
-                let mut paid = false;
-                let mut modifiers: Vec<CombatModifier> = Vec::new();
-                let payment = &s.choice;
-                if !payment[0].is_empty() {
-                    modifiers.push(CancelFortressExtraDie);
-                    game.add_to_last_log_item(&format!("{} to cancel the fortress ability to add an extra die", payment[0]));
-                    paid = true;
-                }
-                if !payment[1].is_empty() {
-                    modifiers.push(CancelFortressIgnoreHit);
-                    if paid {
-                        game.add_to_last_log_item(" and ");
-                    }
-                    game.add_to_last_log_item(&format!("{} to cancel the fortress ability to ignore a hit", payment[1]));
-                    paid = true;
-                }
-                if !paid {
-                    game.add_to_last_log_item("nothing");
-                }
-                c.modifiers.extend(modifiers);
-            },
-        )
+                game.add_to_last_log_item(&format!(
+                    "{} to cancel the fortress ability to ignore a hit",
+                    payment[1]
+                ));
+                paid = true;
+            }
+            if !paid {
+                game.add_to_last_log_item("nothing");
+            }
+            c.modifiers.extend(modifiers);
+        },
+    )
 }
 
 fn steel_weapons() -> AdvanceBuilder {
@@ -123,11 +137,7 @@ fn steel_weapons() -> AdvanceBuilder {
             }
 
             if player.can_afford(&cost) {
-                Some(vec![PaymentRequest {
-                    cost,
-                    name: "Use steel weapons".to_string(),
-                    optional: true,
-                }])
+                Some(vec![PaymentRequest::optional(cost, "Use steel weapons")])
             } else {
                 None
             }
@@ -198,7 +208,10 @@ fn steel_weapons_cost(game: &Game, combat: &Combat, player_index: usize) -> Paym
     let both_steel_weapons =
         attacker.has_advance(Advance::SteelWeapons) && defender.has_advance(Advance::SteelWeapons);
     let cost = u8::from(!player.has_advance(Advance::Metallurgy) || both_steel_weapons);
-    PaymentOptions::sum(cost, &[ResourceType::Ore, ResourceType::Gold])
+    PaymentOptions::sum(player, PaymentReason::AdvanceAbility, cost, &[
+        ResourceType::Ore,
+        ResourceType::Gold,
+    ])
 }
 
 fn fortress(game: &Game, c: &Combat, s: &mut CombatStrength, role: CombatRole) {

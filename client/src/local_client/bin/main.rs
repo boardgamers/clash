@@ -15,9 +15,11 @@ use server::game_setup::setup_game;
 use server::map::Terrain;
 use server::player::add_unit;
 use server::position::Position;
+use server::profiling::start_profiling;
 use server::resource_pile::ResourcePile;
 use server::unit::{UnitType, set_unit_position};
 use server::utils::remove_element;
+use server::wonder::Wonder;
 use std::fs::File;
 use std::io::BufReader;
 use std::time::Duration;
@@ -28,28 +30,6 @@ enum Mode {
     Local,
     AI,
     Test,
-}
-
-#[cfg(not(feature = "profiling"))]
-pub fn start_profiling() {
-    // do nothing
-}
-
-#[cfg(feature = "profiling")]
-pub fn start_profiling() {
-    println!("start profiling");
-
-    use pyroscope::PyroscopeAgent;
-    use pyroscope_pprofrs::{PprofConfig, pprof_backend};
-
-    let pprof_config = PprofConfig::new().sample_rate(100);
-    let backend_impl = pprof_backend(pprof_config);
-
-    let agent = PyroscopeAgent::builder("http://localhost:4040", "clash")
-        .backend(backend_impl)
-        .build()
-        .expect("Failed to initialize pyroscope");
-    let _ = agent.start().unwrap();
 }
 
 #[macroquad::main("Clash")]
@@ -235,7 +215,7 @@ fn setup_local_game() -> Game {
 
     game.players[player_index1]
         .wonder_cards
-        .push(remove_element(&mut game.wonders_left, &"Great Gardens".to_string()).unwrap());
+        .push(remove_element(&mut game.wonders_left, &Wonder::GreatGardens).unwrap());
     game.players[player_index1]
         .get_city_mut(Position::from_offset("C2"))
         .increase_mood_state();

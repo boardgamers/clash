@@ -1,7 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action::Action;
 use crate::action_card::ActionCard;
-use crate::city::City;
+use crate::content::action_cards::development::collect_special_action;
 use crate::content::builtin::Builtin;
 use crate::content::effects::{CollectEffect, PermanentEffect};
 use crate::content::incidents::great_diplomat::{DiplomaticRelations, Negotiations};
@@ -225,13 +225,7 @@ fn overproduction(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "You may collect from 2 additional tiles this turn. \
         (Cannot combine with Production Focus or another Overproduction.)",
         ActionCost::regular(),
-        move |game, p, _| {
-            !game
-                .permanent_effects
-                .iter()
-                .any(|e| matches!(e, PermanentEffect::Collect(_)))
-                && p.cities.iter().any(City::can_activate)
-        },
+        move |game, p, _| collect_special_action(game, p),
     )
     .tactics_card(tactics_card)
     .add_simple_persistent_event_listener(

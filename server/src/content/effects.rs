@@ -1,5 +1,6 @@
 use crate::content::incidents::great_diplomat::{DIPLOMAT_ID, DiplomaticRelations, Negotiations};
 use crate::events::EventOrigin;
+use crate::wonder::Wonder;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
@@ -24,7 +25,7 @@ pub enum CollectEffect {
 pub enum PermanentEffect {
     Pestilence,
     LoseAction(usize),
-    PublicWonderCard(String),
+    PublicWonderCard(Wonder),
     TrojanHorse,
     SolarEclipse,
     Anarchy(Anarchy),

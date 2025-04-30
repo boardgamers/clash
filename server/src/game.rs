@@ -22,6 +22,7 @@ use crate::resource::check_for_waste;
 use crate::status_phase::enter_status_phase;
 use crate::utils;
 use crate::utils::Rng;
+use crate::wonder::Wonder;
 use crate::{
     city::City,
     content::custom_actions::CustomActionType,
@@ -57,7 +58,7 @@ pub struct Game {
     pub dice_roll_outcomes: Vec<u8>, // for testing
     pub dice_roll_log: Vec<u8>,
     pub dropped_players: Vec<usize>,
-    pub wonders_left: Vec<String>,
+    pub wonders_left: Vec<Wonder>,
     pub action_cards_left: Vec<u8>,
     pub objective_cards_left: Vec<u8>,
     pub incidents_left: Vec<u8>,
@@ -726,7 +727,7 @@ pub struct GameData {
     dropped_players: Vec<usize>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    wonders_left: Vec<String>,
+    wonders_left: Vec<Wonder>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     action_cards_left: Vec<u8>,

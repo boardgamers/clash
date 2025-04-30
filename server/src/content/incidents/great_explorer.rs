@@ -8,7 +8,8 @@ use crate::content::persistent_events::{PaymentRequest, PositionRequest};
 use crate::explore::move_to_unexplored_block;
 use crate::game::Game;
 use crate::map::{BlockPosition, UNEXPLORED_BLOCK, get_map_setup};
-use crate::payment::PaymentOptions;
+use crate::payment::{PaymentOptions, PaymentReason};
+use crate::player::Player;
 use crate::playing_actions::ActionCost;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
@@ -64,12 +65,11 @@ pub(crate) fn great_explorer() -> ActionCard {
         .add_payment_request_listener(
             |e| &mut e.play_action_card,
             7,
-            |_game, _player, a| {
+            |game, player, a| {
                 a.selected_position?;
-                Some(vec![PaymentRequest::new(
-                    city_cost(),
+                Some(vec![PaymentRequest::mandatory(
+                    city_cost(game.player(player)),
                     "Pay to build the city",
-                    false,
                 )])
             },
             |game, s, a| {
@@ -113,7 +113,8 @@ fn place_city_request(
     player_index: usize,
     positions: Vec<Position>,
 ) -> PositionRequest {
-    if !game.player(player_index).can_afford(&city_cost()) {
+    let p = game.player(player_index);
+    if !p.can_afford(&city_cost(p)) {
         game.add_info_log_item("Player cannot afford to build a city");
     }
 
@@ -125,8 +126,8 @@ fn place_city_request(
     PositionRequest::new(choices, 0..=1, "Place a city for 2 food")
 }
 
-fn city_cost() -> PaymentOptions {
-    PaymentOptions::resources(ResourcePile::food(2))
+fn city_cost(player: &Player) -> PaymentOptions {
+    PaymentOptions::resources(player, PaymentReason::ActionCard, ResourcePile::food(2))
 }
 
 pub(crate) fn action_explore_request(game: &Game, player_index: usize) -> PositionRequest {

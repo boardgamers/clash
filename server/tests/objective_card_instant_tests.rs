@@ -105,7 +105,7 @@ fn test_warmonger() {
                 };
                 //can't fulfill both objectives with same name
                 assert_eq!(c.choices.len(), 2);
-                assert!(validate_card_selection(&c.choices, game).is_err());
+                assert!(validate_card_selection(&c.choices, &game).is_err());
             }),
         ],
     );

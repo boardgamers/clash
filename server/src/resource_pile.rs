@@ -441,69 +441,15 @@ impl CostWithDiscount {
 #[cfg(test)]
 mod tests {
     use super::ResourcePile;
-    use crate::payment::{PaymentConversionType, PaymentOptions};
-
-    fn assert_can_afford(name: &str, cost: &ResourcePile, discount: u8) {
-        let player_has = ResourcePile::new(1, 2, 3, 4, 5, 6, 7);
-        let can_afford = PaymentOptions::resources_with_discount(
-            cost.clone(),
-            PaymentConversionType::MayNotOverpay(discount),
-        )
-        .can_afford(&player_has);
-        assert!(can_afford, "{name}");
-    }
-
-    fn assert_cannot_afford(name: &str, cost: &ResourcePile, discount: u8) {
-        let player_has = ResourcePile::new(1, 2, 3, 4, 5, 6, 7);
-        let can_afford = PaymentOptions::resources_with_discount(
-            cost.clone(),
-            PaymentConversionType::MayNotOverpay(discount),
-        )
-        .can_afford(&player_has);
-        assert!(!can_afford, "{name}");
-    }
+    
+    
+    
 
     fn assert_to_string(resource_pile: &ResourcePile, expected: &str) {
         assert_eq!(
             expected.to_string(),
             resource_pile.to_string(),
             "expected {expected} but found {resource_pile}"
-        );
-    }
-
-    #[test]
-    fn can_afford_test() {
-        assert_can_afford("use 6 gold as wood", &ResourcePile::wood(7), 0);
-        assert_cannot_afford("6 gold is not enough", &ResourcePile::wood(8), 0);
-
-        assert_cannot_afford(
-            "gold cannot be converted to mood",
-            &ResourcePile::mood_tokens(7),
-            0,
-        );
-        assert_cannot_afford(
-            "gold cannot be converted to culture",
-            &ResourcePile::culture_tokens(8),
-            0,
-        );
-
-        assert_can_afford("negative gold means rebate", &(ResourcePile::wood(9)), 2);
-        assert_cannot_afford(
-            "discount cannot rebate mood",
-            &(ResourcePile::mood_tokens(9)),
-            2,
-        );
-        assert_cannot_afford(
-            "discount cannot rebate culture",
-            &(ResourcePile::mood_tokens(8)),
-            2,
-        );
-
-        assert_can_afford("payment costs gold", &ResourcePile::wood(5), 0);
-        assert_cannot_afford(
-            "gold cannot be converted, because it's already used for payment",
-            &(ResourcePile::wood(7) + ResourcePile::gold(1)),
-            0,
         );
     }
 

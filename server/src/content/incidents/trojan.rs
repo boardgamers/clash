@@ -7,7 +7,7 @@ use crate::content::effects::{Anarchy, PermanentEffect};
 use crate::content::persistent_events::PaymentRequest;
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect};
-use crate::payment::PaymentOptions;
+use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player_events::IncidentTarget;
 use crate::resource_pile::ResourcePile;
 use crate::utils::remove_and_map_element_by;
@@ -32,10 +32,6 @@ fn trojan_horse() -> Incident {
     .build()
 }
 
-fn trojan_cost() -> PaymentOptions {
-    PaymentOptions::resources(ResourcePile::wood(1) + ResourcePile::culture_tokens(1))
-}
-
 pub(crate) fn decide_trojan_horse() -> Builtin {
     Builtin::builder("Trojan Horse", TROJAN_DESCRIPTION)
         .add_payment_request_listener(
@@ -45,7 +41,14 @@ pub(crate) fn decide_trojan_horse() -> Builtin {
                 if is_land_battle_against_defended_city(game, player_index, c) {
                     game.permanent_effects.iter().find_map(|e| {
                         matches!(e, PermanentEffect::TrojanHorse).then_some(vec![
-                            PaymentRequest::new(trojan_cost(), "Activate the Trojan Horse?", true),
+                            PaymentRequest::optional(
+                                PaymentOptions::resources(
+                                    game.player(player_index),
+                                    PaymentReason::AdvanceAbility,
+                                    ResourcePile::wood(1) + ResourcePile::culture_tokens(1),
+                                ),
+                                "Activate the Trojan Horse?",
+                            ),
                         ])
                     })
                 } else {

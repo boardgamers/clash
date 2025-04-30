@@ -9,7 +9,7 @@ use crate::content::tactics_cards::TacticsCardFactory;
 use crate::game::Game;
 use crate::log::move_action_log;
 use crate::movement::MoveUnits;
-use crate::payment::PaymentOptions;
+use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::Player;
 use crate::playing_actions::ActionCost;
 use crate::position::Position;
@@ -60,9 +60,11 @@ pub(crate) fn mercenaries(id: u8, tactics_card: TacticsCardFactory) -> ActionCar
     .add_payment_request_listener(
         |e| &mut e.play_action_card,
         1,
-        |_game, _player, a| {
-            Some(vec![PaymentRequest::new(
+        |game, player, a| {
+            Some(vec![PaymentRequest::mandatory(
                 PaymentOptions::sum(
+                    game.player(player),
+                    PaymentReason::Incident,
                     a.selected_positions.len() as u8,
                     &[
                         ResourceType::Food,
@@ -73,7 +75,6 @@ pub(crate) fn mercenaries(id: u8, tactics_card: TacticsCardFactory) -> ActionCar
                     ],
                 ),
                 "Pay for mercenaries",
-                false,
             )])
         },
         |game, s, _| {

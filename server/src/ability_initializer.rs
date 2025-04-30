@@ -397,9 +397,9 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             move |game, player_index, _player_name, details| {
                 let req = request(game, player_index, details);
                 if let Some(r) = &req {
-                    if r.reward.possible_resource_types().len() == 1 {
+                    if r.reward.payment_options.possible_resource_types().len() == 1 {
                         let player_name = game.player_name(player_index);
-                        let r = r.reward.default_payment();
+                        let r = r.reward.payment_options.default_payment();
                         for log in g(
                             game,
                             &SelectedChoice::new(player_index, &player_name, false, r.clone()),
@@ -416,7 +416,10 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             move |game, player_index, player_name, action, request, details| {
                 if let PersistentEventRequest::ResourceReward(request) = &request {
                     if let EventResponse::ResourceReward(reward) = action {
-                        assert!(request.reward.is_valid_payment(&reward), "Invalid reward");
+                        assert!(
+                            request.reward.payment_options.is_valid_payment(&reward),
+                            "Invalid reward"
+                        );
                         for log in &gain_reward_log(
                             game,
                             &SelectedChoice::new(player_index, player_name, true, reward.clone()),

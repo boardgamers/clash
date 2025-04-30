@@ -10,7 +10,7 @@ use crate::content::tactics_cards::{
     surprise, wedge_formation,
 };
 use crate::game::Game;
-use crate::payment::PaymentOptions;
+use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::Player;
 use crate::playing_actions::ActionCost;
 use crate::position::Position;
@@ -40,10 +40,8 @@ fn advance(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         id,
         "Advance",
         "Pay 1 culture token: Gain 1 advance without changing the Game Event counter.",
-        ActionCost::free(),
-        |game, player, _| {
-            player.resources.culture_tokens >= 1 && !possible_advances(player, game).is_empty()
-        },
+        ActionCost::cost(ResourcePile::culture_tokens(1)),
+        |game, player, _| !possible_advances(player, game).is_empty(),
     )
     .tactics_card(tactics_card)
     .add_advance_request(
@@ -66,7 +64,7 @@ fn advance(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             );
             let name = &sel.player_name;
             game.add_info_log_item(&format!(
-                "{name} gained {} for 1 culture token using the Advance action card.",
+                "{name} gained {} using the Advance action card.",
                 advance.name(game)
             ));
         },
@@ -177,14 +175,18 @@ fn hero_general(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |e| &mut e.play_action_card,
         1,
         |game, player, _| {
-            if cities_where_mood_can_increase(game.player(player)).is_empty() {
+            let p = game.player(player);
+            if cities_where_mood_can_increase(p).is_empty() {
                 return None;
             }
 
-            Some(vec![PaymentRequest::new(
-                PaymentOptions::resources(ResourcePile::mood_tokens(1)),
+            Some(vec![PaymentRequest::optional(
+                PaymentOptions::resources(
+                    p,
+                    PaymentReason::ActionCard,
+                    ResourcePile::mood_tokens(1),
+                ),
                 "Pay 1 mood token to increase the mood in a city by 1",
-                true,
             )])
         },
         |game, s, a| {

@@ -8,7 +8,7 @@ use crate::game::Game;
 use crate::incident::{
     DecreaseMood, Incident, IncidentBaseEffect, IncidentBuilder, MoodModifier, decrease_mod_and_log,
 };
-use crate::payment::{PaymentConversion, PaymentConversionType, PaymentOptions};
+use crate::payment::{PaymentConversion, PaymentConversionType, PaymentOptions, PaymentReason};
 use crate::player::Player;
 use crate::player_events::IncidentTarget;
 use crate::position::Position;
@@ -222,7 +222,7 @@ fn uprising() -> Incident {
         0,
         |game, player_index, _incident| {
             let player = game.player(player_index);
-            let mut cost = PaymentOptions::tokens(4);
+            let mut cost = PaymentOptions::tokens(player, PaymentReason::Incident, 4);
             cost.conversions.push(PaymentConversion::new(
                 vec![
                     ResourcePile::mood_tokens(1),
@@ -231,10 +231,9 @@ fn uprising() -> Incident {
                 ResourcePile::empty(),
                 PaymentConversionType::MayOverpay(3),
             ));
-            player.can_afford(&cost).then_some(vec![PaymentRequest::new(
+            player.can_afford(&cost).then_some(vec![PaymentRequest::mandatory(
                 cost,
                 "Pay 1-4 mood or culture tokens",
-                false,
             )])
         },
         |game, s, _| {
@@ -273,7 +272,10 @@ fn envoy() -> Incident {
                 .gain_resources(ResourcePile::culture_tokens(1) + ResourcePile::ideas(1));
 
             if let Some(wonder) = draw_wonder_from_pile(game) {
-                game.add_info_log_item(&format!("{wonder} is now available to be taken by anyone"));
+                game.add_info_log_item(&format!(
+                    "{} is now available to be taken by anyone",
+                    wonder.name(game)
+                ));
                 game.permanent_effects
                     .push(PermanentEffect::PublicWonderCard(wonder));
             }

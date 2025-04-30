@@ -7,6 +7,7 @@ use server::map::Terrain;
 use server::player::Player;
 use server::resource::ResourceType;
 use server::unit::UnitType;
+use server::wonder::Wonder;
 use std::collections::HashMap;
 
 pub struct CivAssets {
@@ -51,7 +52,7 @@ pub struct Assets {
 
     pub resources: HashMap<ResourceType, Texture2D>,
     pub buildings: HashMap<Building, Texture2D>,
-    pub wonders: HashMap<String, Texture2D>,
+    pub wonders: HashMap<Wonder, Texture2D>,
     pub custom_actions: HashMap<CustomActionType, Texture2D>,
     pub civ: HashMap<String, CivAssets>,
     pub default_civ: CivAssets,
@@ -65,7 +66,7 @@ impl Assets {
             terrain: Self::terrain(features).await,
             exhausted: load_png(include_bytes!("../assets/cross-svgrepo-com.png")),
 
-            angry: load_png(include_bytes!("../assets/angry-face-svgrepo-com.png")),
+            angry: load_png(include_bytes!("../assets/angry-svgrepo-com.png")),
             resources: Self::resources(),
             buildings: Self::buildings(),
             civ: Self::new_civ_assets(),
@@ -105,16 +106,43 @@ impl Assets {
         }
     }
 
-    fn wonders() -> HashMap<String, Texture2D> {
+    fn wonders() -> HashMap<Wonder, Texture2D> {
         [
             (
-                "Pyramids".to_string(),
+                Wonder::Colosseum,
+                load_png(include_bytes!("../assets/colosseum-rome-svgrepo-com.png")),
+            ),
+            (
+                Wonder::GreatGardens,
+                load_png(include_bytes!("../assets/fountain-svgrepo-com.png")),
+            ),
+            (
+                Wonder::GreatLibrary,
+                load_png(include_bytes!("../assets/library-14-svgrepo-com.png")),
+            ),
+            (
+                Wonder::GreatLighthouse,
+                load_png(include_bytes!("../assets/lighthouse-svgrepo-com.png")),
+            ),
+            (
+                Wonder::GreatMausoleum,
+                load_png(include_bytes!("../assets/mausoleum-svgrepo-com.png")),
+            ),
+            (
+                Wonder::Pyramids,
                 load_png(include_bytes!("../assets/pyramid-svgrepo-com.png")),
             ),
             (
-                "Great Gardens".to_string(),
-                // todo find a better icon
-                load_png(include_bytes!("../assets/pyramid-svgrepo-com.png")),
+                Wonder::Colossus,
+                load_png(include_bytes!(
+                    "../assets/statue-of-david-1-svgrepo-com.png"
+                )),
+            ),
+            (
+                Wonder::GreatWall,
+                load_png(include_bytes!(
+                    "../assets/great-wall-of-china-chinese-svgrepo-com.png"
+                )),
             ),
         ]
         .iter()

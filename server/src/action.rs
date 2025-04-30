@@ -318,11 +318,14 @@ fn execute_move_action(game: &mut Game, player_index: usize, m: &MoveUnits) -> R
         starting_position,
         m.embark_carrier_id,
     )?;
-    let c = &destinations
-        .iter()
-        .find(|route| route.destination == m.destination)
-        .expect("destination should be a valid destination")
-        .cost;
+
+    let (dest, result) = destinations
+        .into_iter()
+        .find(|(route, _)| route.destination == m.destination)
+        .expect("destination should be a valid destination");
+    result?;
+
+    let c = &dest.cost;
     if c.is_free() {
         assert_eq!(m.payment, ResourcePile::empty(), "payment should be empty");
     } else {

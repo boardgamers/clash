@@ -58,9 +58,7 @@
             }
           },
           "attacker_strength": {
-            "extra_dies": 0,
             "extra_combat_value": 1,
-            "hit_cancels": 0,
             "roll_log": [
               "steel weapons added 1 combat value"
             ],
@@ -69,7 +67,6 @@
           "defender_strength": {
             "extra_dies": 1,
             "extra_combat_value": 1,
-            "hit_cancels": 0,
             "roll_log": [
               "fortress added one extra die",
               "steel weapons added 1 combat value"

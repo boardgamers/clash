@@ -4,7 +4,7 @@ use crate::combat::{Combat, update_combat_strength};
 use crate::combat_listeners::{CombatResult, CombatRoundStart, CombatStrength, kill_combat_units};
 use crate::content::persistent_events::{PaymentRequest, PositionRequest, UnitsRequest};
 use crate::game::Game;
-use crate::payment::PaymentOptions;
+use crate::payment::{PaymentOptions, PaymentReason};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::tactics_card::{
@@ -53,9 +53,9 @@ pub(crate) fn encircled(id: u8) -> TacticsCard {
         let opponent = combat.opponent(player);
         let role = combat.role(player);
         let opponent_role = combat.role(opponent);
-
-        let player_losses = e.casualties(role).fighters;
-        let opponent_losses = e.casualties(opponent_role).fighters;
+        
+        let player_losses = e.losses(role);
+        let opponent_losses = e.losses(opponent_role);
         if opponent_losses >= player_losses {
             if opponent_losses == combat.fighting_units(game, opponent).len() as u8 {
                 game.add_info_log_item("Encircled cannot do damage - all units already die");
@@ -67,8 +67,8 @@ pub(crate) fn encircled(id: u8) -> TacticsCard {
                 game.add_info_log_item(
                     "Encircled rolled a 5 or 6 and added a hit that cannot be ignored",
                 );
-                e.casualties_mut(opponent_role).fighters += 1;
-                e.set_final_result(game);
+                e.hits_mut(role).extra_hits += 1;
+                e.set_final_result();
             } else {
                 game.add_info_log_item("Encircled rolled no 5 or 6");
             }
@@ -155,8 +155,7 @@ pub(crate) fn surprise(id: u8) -> TacticsCard {
             .push("Surprise added 1 to combat value".to_string());
     })
     .add_resolve_listener(1, |player, game, e| {
-        let c = &e.combat;
-        if e.casualties(c.role(c.opponent(player))).fighters > 0 {
+        if e.hits(e.role(player)) > 0 {
             game.add_info_log_item(&format!(
                 "{} draws 1 action card for Surprise tactics",
                 game.player_name(player)
@@ -184,17 +183,21 @@ pub(crate) fn siege(id: u8) -> TacticsCard {
     .add_payment_request_listener(
         |event| &mut event.combat_round_start_tactics,
         0,
-        move |game, p, s| {
-            if s.is_active(p, id, TacticsCardTarget::Opponent) {
-                let cost = PaymentOptions::resources(ResourcePile::food(2));
-                if game.player(p).can_afford(&cost) {
-                    return Some(vec![PaymentRequest::new(
+        move |game, player, s| {
+            if s.is_active(player, id, TacticsCardTarget::Opponent) {
+                let p = game.player(player);
+                let cost = PaymentOptions::resources(
+                    p,
+                    PaymentReason::AdvanceAbility,
+                    ResourcePile::food(2),
+                );
+                if p.can_afford(&cost) {
+                    return Some(vec![PaymentRequest::optional(
                         cost,
                         "Pay 2 food to use combat abilities this round",
-                        true,
                     )]);
                 }
-                apply_siege(game, s, p);
+                apply_siege(game, s, player);
             }
             None
         },

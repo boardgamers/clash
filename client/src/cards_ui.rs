@@ -156,7 +156,7 @@ fn draw_card(
 fn can_play_card(rc: &RenderContext, card: &HandCard) -> bool {
     match card {
         HandCard::ActionCard(id) => rc.can_play_action(&PlayingActionType::ActionCard(*id)),
-        HandCard::Wonder(name) => rc.can_play_action(&PlayingActionType::WonderCard(name.clone())),
+        HandCard::Wonder(name) => rc.can_play_action(&PlayingActionType::WonderCard(*name)),
         HandCard::ObjectiveCard(_) => false,
     }
 }
@@ -171,8 +171,8 @@ fn play_card(rc: &RenderContext, card: &HandCard) -> StateUpdate {
             Action::Playing(PlayingAction::ActionCard(*a)),
         ),
         HandCard::Wonder(name) => StateUpdate::execute_with_confirm(
-            vec![format!("Play Wonder Card: {name}")],
-            Action::Playing(PlayingAction::WonderCard(name.clone())),
+            vec![format!("Play Wonder Card: {}", name.name(rc.game))],
+            Action::Playing(PlayingAction::WonderCard(*name)),
         ),
         HandCard::ObjectiveCard(_) => panic!("objective cards are not played as actions"),
     }
@@ -216,14 +216,8 @@ fn get_card_object(
             vec!["Hidden Objective Card".to_string()],
         ),
         HandCard::ObjectiveCard(id) => objective_card_object(rc, *id, selection),
-        HandCard::Wonder(n) if n.is_empty() => HandCardObject::new(
-            card.clone(),
-            WONDER_CARD_COLOR,
-            "Wonder Card",
-            vec!["Hidden Wonder Card".to_string()],
-        ),
         HandCard::Wonder(name) => {
-            let w = rc.game.cache.get_wonder(name);
+            let w = rc.game.cache.get_wonder(*name);
             HandCardObject::new(
                 card.clone(),
                 WONDER_CARD_COLOR,
@@ -231,13 +225,7 @@ fn get_card_object(
                 vec![
                     w.description.clone(),
                     format!("Cost: {}", w.cost.to_string()),
-                    format!(
-                        "Required advances: {}",
-                        w.required_advances
-                            .iter()
-                            .map(|a| a.name(rc.game))
-                            .join(", ")
-                    ),
+                    format!("Required advance: {}", w.required_advance.name(rc.game)),
                 ],
             )
         }

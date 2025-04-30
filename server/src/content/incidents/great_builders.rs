@@ -14,7 +14,9 @@ use crate::player::Player;
 use crate::playing_actions::{ActionCost, PlayingActionType};
 use crate::resource_pile::ResourcePile;
 use crate::utils::remove_element_by;
-use crate::wonder::{WonderCardInfo, WonderDiscount, cities_for_wonder, on_play_wonder_card};
+use crate::wonder::{
+    Wonder, WonderCardInfo, WonderDiscount, cities_for_wonder, on_play_wonder_card,
+};
 
 pub(crate) fn great_engineer() -> ActionCard {
     let groups = &["Construction"];
@@ -122,7 +124,7 @@ pub(crate) fn great_architect() -> ActionCard {
             Some(HandCardsRequest::new(
                 playable_wonders(game, game.player(player))
                     .iter()
-                    .map(|name| HandCard::Wonder(name.clone()))
+                    .map(|name| HandCard::Wonder(*name))
                     .collect(),
                 1..=1,
                 "Great Architect: Select a wonder to build",
@@ -135,18 +137,18 @@ pub(crate) fn great_architect() -> ActionCard {
             on_play_wonder_card(
                 game,
                 s.player_index,
-                WonderCardInfo::new(name.clone(), ARCHITECT_DISCOUNT),
+                WonderCardInfo::new(*name, ARCHITECT_DISCOUNT),
             );
         },
     )
     .build()
 }
 
-fn playable_wonders(game: &Game, player: &Player) -> Vec<String> {
+fn playable_wonders(game: &Game, player: &Player) -> Vec<Wonder> {
     player
         .wonder_cards
         .iter()
-        .filter(|name| !cities_for_wonder(name, game, player, &ARCHITECT_DISCOUNT).is_empty())
-        .cloned()
+        .filter(|name| !cities_for_wonder(**name, game, player, &ARCHITECT_DISCOUNT).is_empty())
+        .copied()
         .collect()
 }

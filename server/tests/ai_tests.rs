@@ -43,19 +43,19 @@ fn all_actions() {
                     Action::Playing(PlayingAction::Collect(Collect::new(
                         Position::from_offset("D8"),
                         vec![PositionCollection::new(
-                            Position::from_offset("E8"),
-                            ResourcePile::wood(1)
+                            Position::from_offset("C8"),
+                            ResourcePile::ore(1)
                         )],
                         PlayingActionType::Collect,
                     ))),
                     Action::Playing(PlayingAction::Collect(Collect::new(
                         Position::from_offset("D8"),
                         vec![PositionCollection::new(
-                            Position::from_offset("C8"),
-                            ResourcePile::ore(1)
+                            Position::from_offset("E8"),
+                            ResourcePile::wood(1)
                         )],
                         PlayingActionType::Collect,
-                    )))
+                    ))),
                 ]
             ),
             (

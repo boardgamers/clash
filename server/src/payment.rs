@@ -1,10 +1,29 @@
 use crate::events::EventOrigin;
+use crate::player::Player;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
+use crate::wonder::Wonder;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use std::ops::RangeInclusive;
+
+// not used right now - but might be useful for statistics
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub enum PaymentReason {
+    Recruit,
+    IncreaseHappiness,
+    GainAdvance,
+    Building,
+    Incident,
+    AdvanceAbility,
+    WonderAbility,
+    ActionCard,
+    CustomAction,
+    InfluenceCulture,
+    Move,
+    ChangeGovernment,
+}
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub enum PaymentConversionType {
@@ -108,27 +127,26 @@ impl PaymentOptions {
 
     #[must_use]
     pub fn free() -> Self {
-        Self::resources(ResourcePile::empty())
+        Self::fixed_resources(ResourcePile::empty())
     }
 
     #[must_use]
-    pub(crate) fn sum(cost: u8, types_by_preference: &[ResourceType]) -> Self {
-        let mut conversions = vec![];
-        types_by_preference.windows(2).for_each(|pair| {
-            conversions.push(PaymentConversion::unlimited(
-                ResourcePile::of(pair[0], 1),
-                ResourcePile::of(pair[1], 1),
-            ));
-        });
-        PaymentOptions {
-            default: ResourcePile::of(types_by_preference[0], cost),
-            conversions,
-            modifiers: vec![],
-        }
+    pub(crate) fn sum(
+        player: &Player,
+        reason: PaymentReason,
+        cost: u8,
+        types_by_preference: &[ResourceType],
+    ) -> Self {
+        payment_options_sum(cost, types_by_preference).add_extra_options(player, reason)
     }
 
     #[must_use]
-    pub(crate) fn single_type(t: ResourceType, r: RangeInclusive<u8>) -> PaymentOptions {
+    pub(crate) fn single_type(
+        player: &Player,
+        reason: PaymentReason,
+        t: ResourceType,
+        r: RangeInclusive<u8>,
+    ) -> PaymentOptions {
         let max = r.clone().max().expect("range empty");
         let d = max - r.min().expect("range empty");
         PaymentOptions {
@@ -140,18 +158,33 @@ impl PaymentOptions {
             )],
             modifiers: vec![],
         }
+        .add_extra_options(player, reason)
+    }
+
+    fn add_extra_options(mut self, player: &Player, _reason: PaymentReason) -> Self {
+        if player.wonders_owned.contains(Wonder::Colosseum) {
+            self.conversions.push(PaymentConversion::unlimited(
+                ResourcePile::of(ResourceType::CultureTokens, 1),
+                ResourcePile::of(ResourceType::MoodTokens, 1),
+            ));
+            self.conversions.push(PaymentConversion::unlimited(
+                ResourcePile::of(ResourceType::MoodTokens, 1),
+                ResourcePile::of(ResourceType::CultureTokens, 1),
+            ));
+        }
+        self
     }
 
     #[must_use]
-    pub(crate) fn tokens(cost: u8) -> Self {
-        Self::sum(
-            cost,
-            &[ResourceType::MoodTokens, ResourceType::CultureTokens],
-        )
+    pub(crate) fn tokens(player: &Player, reason: PaymentReason, cost: u8) -> Self {
+        Self::sum(player, reason, cost, &[
+            ResourceType::MoodTokens,
+            ResourceType::CultureTokens,
+        ])
     }
 
     #[must_use]
-    pub(crate) fn resources_with_discount(
+    pub(self) fn resources_with_discount(
         cost: ResourcePile,
         discount_type: PaymentConversionType,
     ) -> Self {
@@ -183,7 +216,13 @@ impl PaymentOptions {
     }
 
     #[must_use]
-    pub(crate) fn resources(cost: ResourcePile) -> Self {
+    pub(crate) fn resources(player: &Player, reason: PaymentReason, cost: ResourcePile) -> Self {
+        Self::resources_with_discount(cost, PaymentConversionType::Unlimited)
+            .add_extra_options(player, reason)
+    }
+
+    #[must_use]
+    pub(crate) fn fixed_resources(cost: ResourcePile) -> Self {
         Self::resources_with_discount(cost, PaymentConversionType::Unlimited)
     }
 
@@ -233,6 +272,29 @@ impl Display for PaymentOptions {
             }
         }
         Ok(())
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
+pub struct ResourceReward {
+    #[serde(flatten)]
+    pub payment_options: PaymentOptions,
+}
+
+impl ResourceReward {
+    #[must_use]
+    pub(crate) fn sum(cost: u8, types_by_preference: &[ResourceType]) -> Self {
+        Self {
+            payment_options: payment_options_sum(cost, types_by_preference),
+        }
+    }
+
+    #[must_use]
+    pub(crate) fn tokens(cost: u8) -> Self {
+        Self::sum(cost, &[
+            ResourceType::MoodTokens,
+            ResourceType::CultureTokens,
+        ])
     }
 }
 
@@ -310,6 +372,21 @@ pub fn can_convert(
     None
 }
 
+fn payment_options_sum(cost: u8, types_by_preference: &[ResourceType]) -> PaymentOptions {
+    let mut conversions = vec![];
+    types_by_preference.windows(2).for_each(|pair| {
+        conversions.push(PaymentConversion::unlimited(
+            ResourcePile::of(pair[0], 1),
+            ResourcePile::of(pair[1], 1),
+        ));
+    });
+    PaymentOptions {
+        default: ResourcePile::of(types_by_preference[0], cost),
+        conversions,
+        modifiers: vec![],
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -319,6 +396,62 @@ mod tests {
         options: PaymentOptions,
         valid: Vec<ResourcePile>,
         invalid: Vec<ResourcePile>,
+    }
+
+    fn assert_can_afford(name: &str, cost: &ResourcePile, discount: u8) {
+        let player_has = ResourcePile::new(1, 2, 3, 4, 5, 6, 7);
+        let can_afford = PaymentOptions::resources_with_discount(
+            cost.clone(),
+            PaymentConversionType::MayNotOverpay(discount),
+        )
+        .can_afford(&player_has);
+        assert!(can_afford, "{name}");
+    }
+
+    fn assert_cannot_afford(name: &str, cost: &ResourcePile, discount: u8) {
+        let player_has = ResourcePile::new(1, 2, 3, 4, 5, 6, 7);
+        let can_afford = PaymentOptions::resources_with_discount(
+            cost.clone(),
+            PaymentConversionType::MayNotOverpay(discount),
+        )
+        .can_afford(&player_has);
+        assert!(!can_afford, "{name}");
+    }
+
+    #[test]
+    fn can_afford_test() {
+        assert_can_afford("use 6 gold as wood", &ResourcePile::wood(7), 0);
+        assert_cannot_afford("6 gold is not enough", &ResourcePile::wood(8), 0);
+
+        assert_cannot_afford(
+            "gold cannot be converted to mood",
+            &ResourcePile::mood_tokens(7),
+            0,
+        );
+        assert_cannot_afford(
+            "gold cannot be converted to culture",
+            &ResourcePile::culture_tokens(8),
+            0,
+        );
+
+        assert_can_afford("negative gold means rebate", &(ResourcePile::wood(9)), 2);
+        assert_cannot_afford(
+            "discount cannot rebate mood",
+            &(ResourcePile::mood_tokens(9)),
+            2,
+        );
+        assert_cannot_afford(
+            "discount cannot rebate culture",
+            &(ResourcePile::mood_tokens(8)),
+            2,
+        );
+
+        assert_can_afford("payment costs gold", &ResourcePile::wood(5), 0);
+        assert_cannot_afford(
+            "gold cannot be converted, because it's already used for payment",
+            &(ResourcePile::wood(7) + ResourcePile::gold(1)),
+            0,
+        );
     }
 
     #[test]

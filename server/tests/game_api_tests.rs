@@ -7,6 +7,7 @@ use server::content::persistent_events::{EventResponse, SelectedStructure, Struc
 use server::game_setup::setup_game;
 use server::log::current_player_turn_log;
 use server::unit::Units;
+use server::wonder::Wonder;
 use server::{
     action::Action,
     advance,
@@ -39,7 +40,7 @@ fn basic_actions() {
     let seed = String::new();
     let mut game = setup_game(1, seed, false);
 
-    game.wonders_left.retain(|w| w == "Pyramids");
+    game.wonders_left.retain(|w| *w == Wonder::Pyramids);
     let founded_city_position = Position::new(0, 1);
     game.map.tiles = HashMap::from([(founded_city_position, Forest)]);
     let advance_action = Action::Playing(Advance {
@@ -74,6 +75,7 @@ fn basic_actions() {
     game.players[0].gain_resources(ResourcePile::new(2, 4, 4, 0, 2, 2, 3));
     let city_position = Position::new(0, 0);
     game.players[0].cities.push(City::new(0, city_position));
+    game.players[0].advances.insert(advance::Advance::Rituals);
     game.players[0]
         .cities
         .push(City::new(0, Position::new(0, 3)));
@@ -112,19 +114,21 @@ fn basic_actions() {
     assert!(matches!(player.get_city(city_position).mood_state, Happy));
     assert_eq!(2, game.actions_left);
 
-    game = game_api::execute(game, Action::Playing(WonderCard("Pyramids".to_string())), 0);
+    game.players[0].resources = ResourcePile::new(3, 3, 6, 0, 1, 0, 5);
+
+    game = game_api::execute(game, Action::Playing(WonderCard(Wonder::Pyramids)), 0);
     game = game_api::execute(
         game,
         Action::Response(EventResponse::Payment(vec![ResourcePile::new(
-            0, 3, 3, 0, 2, 0, 4,
+            2, 3, 6, 0, 1, 0, 5,
         )])),
         0,
     );
     let player = &game.players[0];
 
-    assert_eq!(10.0, player.victory_points(&game));
+    assert_eq!(11.6, player.victory_points(&game));
     assert_eq!(ResourcePile::food(1), player.resources);
-    assert_eq!(vec![String::from("Pyramids")], player.wonders_build);
+    assert_eq!(vec![Wonder::Pyramids], player.wonders_built);
     assert_eq!(1, player.get_city(city_position).pieces.wonders.len());
     assert_eq!(4, player.get_city(city_position).mood_modified_size(player));
     assert_eq!(1, game.actions_left);
@@ -316,30 +320,6 @@ fn test_found_city() {
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![
                     HandCard::ObjectiveCard(27),
-                ])),
-            ),
-        ],
-    );
-}
-
-#[test]
-fn test_wonder() {
-    JSON.test(
-        "wonder",
-        vec![
-            TestAction::undoable(0, Action::Playing(WonderCard("Pyramids".to_string())))
-                .without_json_comparison(),
-            TestAction::undoable(
-                0,
-                Action::Response(EventResponse::Payment(vec![ResourcePile::new(
-                    2, 3, 3, 0, 0, 0, 4,
-                )])),
-            )
-            .without_json_comparison(),
-            TestAction::undoable(
-                0,
-                Action::Response(EventResponse::SelectHandCards(vec![
-                    HandCard::ObjectiveCard(32),
                 ])),
             ),
         ],

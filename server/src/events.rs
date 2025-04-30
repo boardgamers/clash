@@ -5,7 +5,7 @@ pub enum EventOrigin {
     Advance(Advance),
     SpecialAdvance(Advance),
     Leader(String),
-    Wonder(String),
+    Wonder(Wonder),
     Builtin(String),
     Incident(u8),
     CivilCard(u8),
@@ -17,10 +17,10 @@ impl EventOrigin {
     #[must_use]
     pub fn id(&self) -> String {
         match self {
-            EventOrigin::Advance(name)
+            EventOrigin::Wonder(name) => format!("{name:?}"),
+            | EventOrigin::Advance(name)
             // can't call to_string, because cache is not constructed
             | EventOrigin::SpecialAdvance(name) => format!("{name:?}"),
-            | EventOrigin::Wonder(name)
             | EventOrigin::Leader(name)
             | EventOrigin::Objective(name)
             | EventOrigin::Builtin(name) => name.to_string(),
@@ -37,8 +37,8 @@ impl EventOrigin {
             EventOrigin::Advance(name) | EventOrigin::SpecialAdvance(name) => {
                 name.name(game).to_string()
             }
-            EventOrigin::Wonder(name)
-            | EventOrigin::Leader(name)
+            EventOrigin::Wonder(name) => name.name(game).to_string(),
+            EventOrigin::Leader(name)
             | EventOrigin::Objective(name)
             | EventOrigin::Builtin(name) => name.to_string(),
             EventOrigin::CivilCard(id) => cache.get_civil_card(*id).name.clone(),
@@ -51,6 +51,7 @@ impl EventOrigin {
 use crate::advance::Advance;
 use crate::game::Game;
 use crate::player::CostTrigger;
+use crate::wonder::Wonder;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 

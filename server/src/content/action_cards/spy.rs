@@ -9,7 +9,7 @@ use crate::playing_actions::ActionCost;
 use crate::resource_pile::ResourcePile;
 use crate::utils::remove_element;
 use itertools::Itertools;
-use std::fmt::Display;
+use std::fmt::Debug;
 
 pub(crate) fn spy(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     ActionCard::builder(
@@ -150,7 +150,7 @@ fn swap_cards(
     Ok(())
 }
 
-fn swap_card<T: PartialEq + Ord + Display>(
+fn swap_card<T: PartialEq + Ord + Debug>(
     game: &mut Game,
     player: usize,
     other: usize,
@@ -159,10 +159,10 @@ fn swap_card<T: PartialEq + Ord + Display>(
     get_list: impl Fn(&mut Player) -> &mut Vec<T>,
 ) {
     let card = remove_element(get_list(game.player_mut(player)), id)
-        .unwrap_or_else(|| panic!("card not found {id}"));
+        .unwrap_or_else(|| panic!("card not found {id:?}"));
     let o = game.player_mut(other);
     let other_card = remove_element(get_list(o), other_id)
-        .unwrap_or_else(|| panic!("other card not found {other_id}"));
+        .unwrap_or_else(|| panic!("other card not found {other_id:?}"));
 
     get_list(o).push(card);
     get_list(o).sort();
@@ -218,11 +218,7 @@ fn get_swap_secrets(other: &Player, game: &Game) -> Vec<String> {
         format!(
             "{} has the following wonder cards: {}",
             other.get_name(),
-            other
-                .wonder_cards
-                .iter()
-                .map(std::string::ToString::to_string)
-                .join(", ")
+            other.wonder_cards.iter().map(|w| w.name(game)).join(", ")
         ),
     ]
 }

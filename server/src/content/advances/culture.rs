@@ -8,7 +8,8 @@ use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::PaymentRequest;
 use crate::happiness::increase_happiness;
-use crate::payment::PaymentOptions;
+use crate::payment::{PaymentOptions, PaymentReason};
+use crate::player::Player;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use crate::wonder::draw_wonder_card;
@@ -74,11 +75,18 @@ fn theaters() -> AdvanceBuilder {
 }
 
 #[must_use]
-pub fn sports_options(city: &City) -> Option<PaymentOptions> {
+pub fn sports_options(player: &Player, city: &City) -> Option<PaymentOptions> {
     match city.mood_state {
         MoodState::Happy => None,
-        MoodState::Neutral => Some(PaymentOptions::sum(1, &[ResourceType::CultureTokens])),
+        MoodState::Neutral => Some(PaymentOptions::sum(
+            player,
+            PaymentReason::CustomAction,
+            1,
+            &[ResourceType::CultureTokens],
+        )),
         MoodState::Angry => Some(PaymentOptions::single_type(
+            player,
+            PaymentReason::CustomAction,
             ResourceType::CultureTokens,
             1..=2,
         )),
@@ -90,40 +98,29 @@ pub(crate) fn use_sports() -> Builtin {
         .add_payment_request_listener(
             |event| &mut event.custom_action,
             0,
-            |game, _player_index, a| {
-                let options = sports_options(game.get_any_city(a.city.expect("city not found")))
+            |game, player_index, a| {
+                let p = game.player(player_index);
+                let options = sports_options(p, p.get_city(a.city.expect("city not found")))
                     .expect("Invalid options for sports");
-                Some(vec![PaymentRequest::new(
+                Some(vec![PaymentRequest::mandatory(
                     options,
                     "Each culture token increases the happiness by 1 step",
-                    false,
                 )])
             },
             |game, s, a| {
                 let position = a.city.expect("city not found");
-                let steps = s.choice[0].culture_tokens;
-                increase_happiness(
-                    game,
-                    s.player_index,
-                    &[(position, steps)],
-                    None,
-                );
-                game.add_info_log_item(
-                    &format!(
-                        "{} used Sports to increase the happiness of {} by {steps} steps, making it {:?}",
-                        s.player_name,
-                        position,
-                        game.get_any_city(position).mood_state
-                    ),
-                );
+                let pile = s.choice[0].clone();
+                let steps = pile.amount();
+                increase_happiness(game, s.player_index, &[(position, steps)], None);
+                game.add_info_log_item(&format!(
+                    "{} paid {pile} for Sports to increase the happiness of {position} \
+                        by {steps} steps, making it {:?}",
+                    s.player_name,
+                    game.get_any_city(position).mood_state
+                ));
             },
         )
         .build()
-}
-
-#[must_use]
-pub fn theaters_options() -> PaymentOptions {
-    PaymentOptions::sum(1, &[ResourceType::CultureTokens, ResourceType::MoodTokens])
 }
 
 pub(crate) fn use_theaters() -> Builtin {
@@ -131,11 +128,13 @@ pub(crate) fn use_theaters() -> Builtin {
         .add_payment_request_listener(
             |event| &mut event.custom_action,
             0,
-            |_game, _player_index, _| {
-                Some(vec![PaymentRequest::new(
-                    theaters_options(),
+            |game, player, _| {
+                Some(vec![PaymentRequest::mandatory(
+                    PaymentOptions::sum(
+                        game.player(player),
+                        PaymentReason::CustomAction,
+                        1, &[ResourceType::CultureTokens, ResourceType::MoodTokens]),
                     "Convert 1 culture token into 1 mood token, or 1 mood token into 1 culture token",
-                    false,
                 )])
             },
             |game, s, _| {

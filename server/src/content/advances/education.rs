@@ -6,19 +6,16 @@ use crate::city_pieces::Building;
 use crate::content::advances::{AdvanceGroup, advance_group_builder};
 use crate::content::persistent_events::PaymentRequest;
 use crate::objective_card::draw_and_log_objective_card_from_pile;
-use crate::payment::PaymentOptions;
+use crate::payment::{PaymentOptions, PaymentReason};
 use crate::resource_pile::ResourcePile;
 
 pub(crate) fn education() -> AdvanceGroup {
-    advance_group_builder(
-        "Education",
-        vec![
-            writing(),
-            public_education(),
-            free_education(),
-            philosophy(),
-        ],
-    )
+    advance_group_builder("Education", vec![
+        writing(),
+        public_education(),
+        free_education(),
+        philosophy(),
+    ])
 }
 
 fn writing() -> AdvanceBuilder {
@@ -90,17 +87,20 @@ fn free_education() -> AdvanceBuilder {
     .add_payment_request_listener(
         |e| &mut e.advance,
         1,
-        |_game, _player_index, i| {
+        |game, player_index, i| {
             if i.advance == Advance::FreeEducation {
                 None
             } else if i.payment.has_at_least(&ResourcePile::gold(1))
                 || i.payment.has_at_least(&ResourcePile::ideas(1))
             {
-                Some(vec![PaymentRequest {
-                    cost: PaymentOptions::resources(ResourcePile::ideas(1)),
-                    name: "Pay extra 1 idea for a mood token".to_string(),
-                    optional: true,
-                }])
+                Some(vec![PaymentRequest::optional(
+                    PaymentOptions::resources(
+                        game.player(player_index),
+                        PaymentReason::AdvanceAbility,
+                        ResourcePile::ideas(1),
+                    ),
+                    "Pay extra 1 idea for a mood token",
+                )])
             } else {
                 None
             }

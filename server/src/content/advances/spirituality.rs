@@ -4,9 +4,8 @@ use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city_pieces::Building::Temple;
 use crate::content::advances::{AdvanceGroup, advance_group_builder};
 use crate::content::persistent_events::ResourceRewardRequest;
-use crate::payment::{PaymentConversion, PaymentOptions};
+use crate::payment::{PaymentConversion, ResourceReward};
 use crate::resource::ResourceType;
-use crate::resource::ResourceType::{CultureTokens, MoodTokens};
 use crate::resource_pile::ResourcePile;
 
 pub(crate) fn spirituality() -> AdvanceGroup {
@@ -31,7 +30,7 @@ fn myths() -> AdvanceBuilder {
         |_game, _player_index, building| {
             if matches!(building.building, Temple) {
                 return Some(ResourceRewardRequest::new(
-                    PaymentOptions::sum(1, &[MoodTokens, CultureTokens]),
+                    ResourceReward::tokens(1),
                     "Select Temple bonus".to_string(),
                 ));
             }

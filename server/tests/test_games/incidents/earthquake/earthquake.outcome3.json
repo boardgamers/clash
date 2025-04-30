@@ -94,7 +94,7 @@
         "Storage",
         "Tactics"
       ],
-      "wonders_build": [
+      "wonders_built": [
         "Pyramids"
       ],
       "incident_tokens": 3,
@@ -244,7 +244,7 @@
                         {
                           "position": "C2",
                           "structure": {
-                            "Wonder": "Pyramids"
+                            "Wonder": "GreatGardens"
                           }
                         }
                       ]
@@ -302,7 +302,7 @@
     ],
     [
       "Player1 gained 2 points for the Fortress at C2",
-      "Player1 gained 2 points for the Pyramids at C2",
+      "Player1 gained 2 points for the Great Gardens at C2",
       "Player1 gained 2 points for the city center at B2"
     ],
     [

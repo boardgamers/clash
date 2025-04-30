@@ -14,13 +14,14 @@
     {
       "event_type": {
         "CombatRoundEnd": {
-          "attacker_casualties": {
-            "fighters": 2
+          "attacker": {
+            "opponent_fighters": 2,
+            "combat_value": 25
           },
-          "defender_casualties": {
-            "fighters": 2
+          "defender": {
+            "opponent_fighters": 4,
+            "combat_value": 14
           },
-          "can_retreat": false,
           "final_result": "AttackerWins",
           "combat": {
             "round": 1,
