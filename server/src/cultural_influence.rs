@@ -129,9 +129,10 @@ pub(crate) fn use_cultural_influence() -> Builtin {
         .add_payment_request_listener(
             |e| &mut e.influence_culture,
             2,
-            |_game, _player_index, i| {
-                let cost = &i.range_boost_cost;
+            |game, player_index, info| {
+                let cost = &info.range_boost_cost;
                 if cost.is_free() {
+                    info.roll_boost_cost = range_boost_paid(game, info, player_index);
                     return None;
                 }
                 
@@ -141,7 +142,7 @@ pub(crate) fn use_cultural_influence() -> Builtin {
                 )])
             },
             |game, s, info| {
-                info.roll_boost_cost = range_boost_payment(game, info, s.player_index);
+                info.roll_boost_cost = range_boost_paid(game, info, s.player_index);
             },
         )
         .add_payment_request_listener(
@@ -227,7 +228,7 @@ fn roll_boost_payment(
     )])
 }
 
-fn range_boost_payment(
+fn range_boost_paid(
     game: &mut Game,
     info: &mut InfluenceCultureInfo,
     player_index: usize,
