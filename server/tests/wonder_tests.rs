@@ -84,7 +84,7 @@ fn test_pyramids() {
 
 #[test]
 fn test_great_gardens() {
-     JSON.test(
+    JSON.test(
         "great_gardens",
         vec![
             TestAction::undoable(0, Action::Playing(WonderCard(Wonder::GreatGardens)))
