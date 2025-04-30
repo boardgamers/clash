@@ -174,13 +174,14 @@ fn test_cultural_takeover() {
                         PlayingActionType::InfluenceCultureAttempt,
                     ),
                 )),
-            ).without_json_comparison(),
+            )
+            .without_json_comparison(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
                     2,
                 )])),
-            )
+            ),
         ],
     );
 }

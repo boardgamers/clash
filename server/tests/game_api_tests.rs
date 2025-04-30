@@ -304,7 +304,8 @@ fn test_cultural_influence() {
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
                     1,
                 )])),
-            ).without_json_comparison(),
+            )
+            .without_json_comparison(),
             TestAction::undoable(
                 1,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(

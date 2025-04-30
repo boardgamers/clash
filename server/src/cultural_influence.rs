@@ -13,7 +13,7 @@ use crate::log::current_player_turn_log;
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player_events::ActionInfo;
 use crate::playing_actions::{
-    base_or_custom_available, remaining_resources_for_action, PlayingAction, PlayingActionType,
+    PlayingAction, PlayingActionType, base_or_custom_available, remaining_resources_for_action,
 };
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
@@ -135,7 +135,7 @@ pub(crate) fn use_cultural_influence() -> Builtin {
                     info.roll_boost_cost = range_boost_paid(game, info, player_index);
                     return None;
                 }
-                
+
                 Some(vec![PaymentRequest::mandatory(
                     cost.clone(),
                     &format!("Pay {cost} to increase the range of the influence"),
