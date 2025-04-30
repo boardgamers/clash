@@ -40,7 +40,7 @@ fn negotiations(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                 .items
                 .iter()
                 .any(|i| match &i.action {
-                    Action::Playing(PlayingAction::ActionCard(i)) if *i == id => false,
+                    Action::Playing(PlayingAction::ActionCard((i, _))) if *i == id => false,
                     Action::Playing(_) | Action::Movement(_) => true,
                     _ => false,
                 })

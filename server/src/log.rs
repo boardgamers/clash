@@ -158,14 +158,13 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
                 }
             )
         }
-        PlayingAction::ActionCard(a) => {
-            let card = game.cache.get_civil_card(*a);
-            let pile = &card.action_type.cost;
-            let cost = if pile.is_empty() {
+        PlayingAction::ActionCard((a, payment)) => {
+            let cost = if payment.is_empty() {
                 ""
             } else {
-                &format!(" for {pile}")
+                &format!(" for {payment}")
             };
+            let card = game.cache.get_civil_card(*a);
             let action = if card.action_type.free {
                 ""
             } else {

@@ -33,7 +33,7 @@ fn test_great_explorer() {
                 )])),
             )
             .without_json_comparison(),
-            TestAction::undoable(1, Action::Playing(PlayingAction::ActionCard(118)))
+            TestAction::undoable(1, Action::Playing(PlayingAction::ActionCard((118, ResourcePile::empty()))))
                 .without_json_comparison(),
             TestAction::not_undoable(
                 1,
@@ -78,7 +78,7 @@ fn test_great_artist() {
                 )])),
             ),
             TestAction::not_undoable(0, Action::Playing(PlayingAction::EndTurn)),
-            TestAction::undoable(1, Action::Playing(PlayingAction::ActionCard(119))),
+            TestAction::undoable(1, Action::Playing(PlayingAction::ActionCard((119, ResourcePile::empty())))),
         ],
     );
 }
@@ -103,7 +103,7 @@ fn test_great_prophet() {
                 )])),
             )
             .without_json_comparison(),
-            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(120)))
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard((120, ResourcePile::empty()))))
                 .without_json_comparison(),
             TestAction::undoable(
                 0,
@@ -140,7 +140,7 @@ fn test_great_warlord() {
                 )])),
             )
             .without_json_comparison(),
-            TestAction::undoable(1, Action::Playing(PlayingAction::ActionCard(124)))
+            TestAction::undoable(1, Action::Playing(PlayingAction::ActionCard((124, ResourcePile::empty()))))
                 .without_json_comparison(),
             TestAction::not_undoable(1, move_action(vec![0], Position::from_offset("C8"))),
         ],
@@ -167,7 +167,7 @@ fn test_great_merchant() {
                 )])),
             )
             .without_json_comparison(),
-            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(125)))
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard((125, ResourcePile::empty()))))
                 .without_json_comparison(),
             TestAction::undoable(
                 0,
@@ -197,7 +197,7 @@ fn test_great_engineer() {
                 )])),
             )
             .without_json_comparison(),
-            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(126)))
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard((126, ResourcePile::empty()))))
                 .without_json_comparison(),
             TestAction::not_undoable(
                 0,
@@ -242,7 +242,7 @@ fn test_great_architect() {
                 )])),
             )
             .without_json_comparison(),
-            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(155)))
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard((155, ResourcePile::empty()))))
                 .without_json_comparison(),
             TestAction::undoable(
                 0,
@@ -281,7 +281,7 @@ fn test_great_athlete() {
                 )])),
             )
             .without_json_comparison(),
-            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(156)))
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard((156, ResourcePile::empty()))))
                 .without_json_comparison(),
             TestAction::undoable(0, Action::Response(EventResponse::Bool(true)))
                 .without_json_comparison(),

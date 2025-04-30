@@ -21,7 +21,7 @@ fn test_advance() {
     JSON.test(
         "advance",
         vec![
-            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(2))),
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard((2, ResourcePile::empty())))),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectAdvance(advance::Advance::Storage)),
@@ -36,7 +36,7 @@ fn test_inspiration() {
         "inspiration",
         vec![TestAction::undoable(
             0,
-            Action::Playing(PlayingAction::ActionCard(3)),
+            Action::Playing(PlayingAction::ActionCard((3, ResourcePile::empty()))),
         )],
     );
 }
@@ -52,7 +52,7 @@ fn test_hero_general() {
             )
             .without_json_comparison(),
             TestAction::not_undoable(0, Action::Response(EventResponse::SelectHandCards(vec![]))),
-            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(5)))
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard((5, ResourcePile::empty()))))
                 .without_json_comparison(),
             TestAction::undoable(
                 0,
@@ -81,7 +81,7 @@ fn test_spy() {
     JSON.test(
         "spy",
         vec![
-            TestAction::not_undoable(0, Action::Playing(PlayingAction::ActionCard(7)))
+            TestAction::not_undoable(0, Action::Playing(PlayingAction::ActionCard((7, ResourcePile::empty()))))
                 .without_json_comparison(),
             TestAction::not_undoable(
                 0,
@@ -100,7 +100,7 @@ fn test_ideas() {
         "ideas",
         vec![TestAction::undoable(
             0,
-            Action::Playing(PlayingAction::ActionCard(9)),
+            Action::Playing(PlayingAction::ActionCard((9, ResourcePile::empty()))),
         )],
     );
 }
@@ -117,7 +117,7 @@ fn test_great_ideas() {
             .without_json_comparison(),
             TestAction::not_undoable(0, Action::Response(EventResponse::SelectHandCards(vec![])))
                 .without_json_comparison(),
-            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(11))),
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard((11, ResourcePile::empty())))),
         ],
     );
 }
@@ -127,7 +127,7 @@ fn test_mercenaries() {
     JSON.test(
         "mercenaries",
         vec![
-            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(13)))
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard((13, ResourcePile::empty()))))
                 .without_json_comparison(),
             TestAction::undoable(
                 0,
@@ -164,7 +164,7 @@ fn test_cultural_takeover() {
     JSON.test(
         "cultural_takeover",
         vec![
-            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(15)))
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard((15, ResourcePile::empty()))))
                 .without_json_comparison(),
             TestAction::undoable(
                 0,
@@ -191,7 +191,7 @@ fn test_city_development() {
     JSON.test(
         "city_development",
         vec![
-            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(17)))
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard((17, ResourcePile::empty()))))
                 .without_json_comparison(),
             TestAction::undoable(
                 0,
@@ -210,7 +210,7 @@ fn test_production_focus() {
     JSON.test(
         "production_focus",
         vec![
-            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(19)))
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard((19, ResourcePile::empty()))))
                 .without_json_comparison(),
             TestAction::undoable(
                 0,
@@ -238,7 +238,7 @@ fn test_explorer() {
     JSON.test(
         "explorer",
         vec![
-            TestAction::undoable(1, Action::Playing(PlayingAction::ActionCard(21)))
+            TestAction::undoable(1, Action::Playing(PlayingAction::ActionCard((21, ResourcePile::empty()))))
                 .without_json_comparison(),
             TestAction::not_undoable(
                 1,
@@ -264,7 +264,7 @@ fn test_negotiations() {
     JSON.test(
         "negotiations",
         vec![
-            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(23)))
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard((23, ResourcePile::empty()))))
                 .without_json_comparison(),
             TestAction::not_undoable(0, Action::Playing(PlayingAction::EndTurn))
                 .with_pre_assert(|game| {
@@ -310,7 +310,7 @@ fn test_assassination() {
     JSON.test(
         "assassination",
         vec![
-            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(27)))
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard((27, ResourcePile::empty()))))
                 .without_json_comparison(),
             TestAction::not_undoable(0, Action::Playing(PlayingAction::EndTurn))
                 .without_json_comparison(),
@@ -328,7 +328,7 @@ fn test_overproduction() {
     JSON.test(
         "overproduction",
         vec![
-            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(29)))
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard((29, ResourcePile::empty()))))
                 .without_json_comparison(),
             TestAction::undoable(
                 0,
@@ -354,7 +354,7 @@ fn test_synergies() {
     JSON.test(
         "synergies",
         vec![
-            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(34)))
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard((34, ResourcePile::empty()))))
                 .without_json_comparison(),
             TestAction::undoable(
                 0,
@@ -405,7 +405,7 @@ fn test_militia() {
         "militia",
         vec![TestAction::undoable(
             0,
-            Action::Playing(PlayingAction::ActionCard(37)),
+            Action::Playing(PlayingAction::ActionCard((37, ResourcePile::empty()))),
         )],
     );
 }
@@ -416,7 +416,7 @@ fn test_tech_trade() {
         "tech_trade",
         vec![TestAction::undoable(
             0,
-            Action::Playing(PlayingAction::ActionCard(39)),
+            Action::Playing(PlayingAction::ActionCard((39, ResourcePile::empty()))),
         )],
     );
 }
@@ -426,7 +426,7 @@ fn test_new_ideas() {
     JSON.test(
         "new_ideas",
         vec![
-            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(41)))
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard((41, ResourcePile::empty()))))
                 .without_json_comparison(),
             TestAction::undoable(
                 0,

@@ -18,6 +18,7 @@ use crate::wonder::{
     Wonder, WonderCardInfo, WonderDiscount, cities_for_wonder, on_play_wonder_card,
 };
 use crate::{game::Game, position::Position, resource_pile::ResourcePile};
+use crate::payment::{PaymentOptions, PaymentReason};
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub struct Collect {
@@ -235,7 +236,7 @@ pub enum PlayingAction {
     IncreaseHappiness(IncreaseHappiness),
     InfluenceCultureAttempt(InfluenceCultureAttempt),
     Custom(CustomEventAction),
-    ActionCard(u8),
+    ActionCard((u8, ResourcePile)),
     WonderCard(Wonder),
     EndTurn,
 }
@@ -253,7 +254,12 @@ impl PlayingAction {
         if !redo {
             playing_action_type.is_available(game, player_index)?;
         }
-        playing_action_type.cost(game).pay(game, player_index);
+        let payment = if let PlayingAction::ActionCard((_, payment)) = &self {
+            payment
+        } else {
+            &ResourcePile::empty()
+        };
+        playing_action_type.cost(game).pay(game, player_index, payment);
 
         if let PlayingActionType::Custom(c) = playing_action_type {
             if c.info().once_per_turn {
@@ -289,7 +295,7 @@ impl PlayingAction {
             InfluenceCultureAttempt(c) => {
                 influence_culture_attempt(game, player_index, &c.selected_structure)?;
             }
-            ActionCard(a) => play_action_card(game, player_index, a),
+            ActionCard((a, _)) => play_action_card(game, player_index, a),
             WonderCard(name) => {
                 on_play_wonder_card(
                     game,
@@ -333,7 +339,7 @@ impl PlayingAction {
                     PlayingActionType::Custom(CustomActionType::ArtsInfluenceCultureAttempt),
                 ],
             ),
-            PlayingAction::ActionCard(a) => PlayingActionType::ActionCard(*a),
+            PlayingAction::ActionCard((a, _)) => PlayingActionType::ActionCard(*a),
             PlayingAction::WonderCard(name) => PlayingActionType::WonderCard(*name),
             PlayingAction::Custom(c) => PlayingActionType::Custom(c.action.clone()),
             PlayingAction::EndTurn => PlayingActionType::EndTurn,
@@ -368,10 +374,10 @@ impl ActionCost {
         Ok(())
     }
 
-    pub(crate) fn pay(&self, game: &mut Game, player_index: usize) {
+    pub(crate) fn pay(&self, game: &mut Game, player_index: usize, payment: &ResourcePile) {
         let p = game.player_mut(player_index);
-        let cost = self.cost.clone();
-        p.lose_resources(cost.clone()); // todo colosseum
+        let cost = PaymentOptions::resources(p, PaymentReason::ActionCard, self.cost.clone());
+        p.pay_cost(&cost, &payment);                                     
         if !self.free {
             game.actions_left -= 1;
         }
