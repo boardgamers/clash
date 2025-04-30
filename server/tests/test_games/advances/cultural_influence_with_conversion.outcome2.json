@@ -224,6 +224,17 @@
                     "Response": {
                       "Payment": [
                         {
+                          "culture_tokens": 1
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
                           "culture_tokens": 3
                         }
                       ]
@@ -236,8 +247,78 @@
                       "value": [
                         {
                           "event_type": {
-                            "InfluenceCultureResolution": {
-                              "culture_tokens": 3
+                            "InfluenceCulture": {
+                              "barbarian_takeover_check": false,
+                              "info": {
+                                "info": {},
+                                "log": [
+                                  "Player gets +1 to Influence Culture roll for Conversion Advance"
+                                ],
+                                "player": 1
+                              },
+                              "is_defender": true,
+                              "position": "C2",
+                              "prevent_boost": false,
+                              "range_boost_cost": {
+                                "conversions": [
+                                  {
+                                    "from": [
+                                      {
+                                        "food": 1
+                                      },
+                                      {
+                                        "wood": 1
+                                      },
+                                      {
+                                        "ore": 1
+                                      },
+                                      {
+                                        "ideas": 1
+                                      }
+                                    ],
+                                    "to": {
+                                      "gold": 1
+                                    },
+                                    "type": "Unlimited"
+                                  }
+                                ],
+                                "default": {
+                                  "culture_tokens": 1
+                                }
+                              },
+                              "roll": 2,
+                              "roll_boost": 1,
+                              "roll_boost_cost": {
+                                "conversions": [
+                                  {
+                                    "from": [
+                                      {
+                                        "food": 1
+                                      },
+                                      {
+                                        "wood": 1
+                                      },
+                                      {
+                                        "ore": 1
+                                      },
+                                      {
+                                        "ideas": 1
+                                      }
+                                    ],
+                                    "to": {
+                                      "gold": 1
+                                    },
+                                    "type": "Unlimited"
+                                  }
+                                ],
+                                "default": {
+                                  "culture_tokens": 3
+                                }
+                              },
+                              "starting_city_position": "B3",
+                              "structure": {
+                                "Building": "Temple"
+                              }
                             }
                           },
                           "handler": {
@@ -275,7 +356,7 @@
                                       "culture_tokens": 3
                                     }
                                   },
-                                  "name": "Pay 3 culture tokens to increase the dice roll",
+                                  "name": "Pay 3 culture tokens > Gold to increase the dice roll",
                                   "optional": true
                                 }
                               ]
@@ -309,19 +390,21 @@
       ]
     }
   ],
-  "action_log_index": 2,
+  "action_log_index": 3,
   "log": [
     [
-      "Player2 tried to influence culture the Temple in the city at C2 by Player1 with the city at B3 and paid 1 culture token to boost the range and rolled a 2",
+      "Player2 tried to influence culture the Temple in the city at C2 by Player1 with the city at B3 and paid 1 culture token to boost the range"
+    ],
+    [
       "Player gets +1 to Influence Culture roll for Conversion Advance",
-      "Player2 now has the option to pay 3 culture tokens to increase the dice roll and proceed with the cultural influence"
+      "Player2 rolled a 2 and now has the option to pay 3 culture tokens > Gold to increase the dice roll and proceed with the cultural influence"
     ],
     [
       "Player2 paid 3 culture tokens to increase the dice roll and proceed with the cultural influence",
       "Player gained 1 culture token for a successful Influence Culture attempt for Conversion Advance"
     ]
   ],
-  "undo_limit": 1,
+  "undo_limit": 2,
   "actions_left": 2,
   "successful_cultural_influence": true,
   "round": 1,
