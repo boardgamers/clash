@@ -5,6 +5,7 @@ use server::advance;
 use server::content::persistent_events::EventResponse;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
+use server::resource_pile::ResourcePile;
 use server::status_phase::ChangeGovernment;
 
 mod common;
@@ -71,6 +72,14 @@ fn test_determine_first_player() {
 #[test]
 fn test_change_government() {
     JSON.test("change_government", vec![
+        TestAction::not_undoable(1, Action::Response(EventResponse::SelectPositions(vec![])))
+            .without_json_comparison(),
+        TestAction::undoable(
+            0,
+            Action::Response(EventResponse::Payment(vec![
+                ResourcePile::culture_tokens(1) + ResourcePile::mood_tokens(1),
+            ])),
+        ).without_json_comparison(),
         TestAction::not_undoable(
             0,
             Action::Response(EventResponse::ChangeGovernmentType(ChangeGovernment::new(

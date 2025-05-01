@@ -4,7 +4,7 @@
     {
       "event_type": {
         "StatusPhase": {
-          "DetermineFirstPlayer": 1
+          "ChangeGovernmentType": true
         }
       },
       "players_used": [
@@ -14,17 +14,9 @@
       "last_priority_used": 0,
       "handler": {
         "priority": 0,
-        "request": {
-          "SelectPlayer": {
-            "choices": [
-              0,
-              1
-            ],
-            "description": "Determine the first player"
-          }
-        },
+        "request": "ChangeGovernment",
         "origin": {
-          "Builtin": "Determine First Player"
+          "Builtin": "Change Government"
         }
       }
     }
@@ -237,13 +229,30 @@
                 {
                   "action": {
                     "Response": {
-                      "ChangeGovernmentType": {
-                        "ChangeGovernment": {
-                          "new_government": "Theocracy",
-                          "additional_advances": [
-                            "Devotion"
-                          ]
+                      "SelectPositions": []
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "mood_tokens": 1,
+                          "culture_tokens": 1
                         }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "ChangeGovernmentType": {
+                        "new_government": "Theocracy",
+                        "additional_advances": [
+                          "Devotion"
+                        ]
                       }
                     }
                   }
@@ -255,8 +264,14 @@
       ]
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 3,
   "log": [
+    [
+      "Player2 did not raze a city"
+    ],
+    [
+      "Player1 paid 1 mood token and 1 culture token to change the government"
+    ],
     [
       "Player1 changed their government from Democracy to Theocracy",
       "Additional advances: Devotion",
@@ -264,7 +279,7 @@
       "Player1 could not store 1 idea"
     ]
   ],
-  "undo_limit": 1,
+  "undo_limit": 3,
   "actions_left": 3,
   "round": 1,
   "age": 1,

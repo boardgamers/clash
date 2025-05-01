@@ -4,13 +4,14 @@ use crate::city_pieces::Building;
 use crate::content::advances::AdvanceGroup;
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::custom_action_builtins;
+use crate::content::persistent_events::PersistentEventRequest::ChangeGovernment;
 use crate::content::{
     action_cards, advances, builtin, incidents, objective_cards, objectives, wonders,
 };
 use crate::game::Game;
 use crate::incident::Incident;
 use crate::objective_card::{Objective, ObjectiveCard};
-use crate::status_phase::StatusPhaseState::DetermineFirstPlayer;
+use crate::status_phase::StatusPhaseState::{ChangeGovernmentType, DetermineFirstPlayer};
 use crate::status_phase::{
     StatusPhaseState, complete_objectives, determine_first_player, draw_cards, free_advance,
     get_status_phase, may_change_government, raze_city,
@@ -204,10 +205,11 @@ impl Cache {
 
     #[must_use]
     pub fn status_phase_handler(&self, p: &StatusPhaseState) -> &Builtin {
-        if let DetermineFirstPlayer(_) = p {
-            return &self.status_phase_handlers[&DetermineFirstPlayer(0)];
+        match p {
+            DetermineFirstPlayer(_) => &self.status_phase_handlers[&DetermineFirstPlayer(0)],
+            ChangeGovernmentType(_) => &self.status_phase_handlers[&ChangeGovernmentType(false)],
+            _ => &self.status_phase_handlers[p],
         }
-        &self.status_phase_handlers[p]
     }
 
     #[must_use]
