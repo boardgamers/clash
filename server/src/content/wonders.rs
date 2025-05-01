@@ -30,7 +30,6 @@ pub fn get_all_uncached() -> Vec<WonderInfo> {
 }
 
 fn great_lighthouse() -> WonderInfo {
-    // todo start player
     WonderInfo::builder(
         Wonder::GreatLighthouse,
         "Great Lighthouse",
