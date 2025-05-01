@@ -21,11 +21,15 @@ fn test_advance() {
     JSON.test(
         "advance",
         vec![
-            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(2))),
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(2))).without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(1)])),
+            ).without_json_comparison(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectAdvance(advance::Advance::Storage)),
-            ),
+            )
         ],
     );
 }

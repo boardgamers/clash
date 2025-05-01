@@ -21,6 +21,7 @@ use crate::explore::explore_resolution;
 use crate::game::Game;
 use crate::objective_card::select_objectives;
 use crate::pirates::{pirates_bonus, pirates_round_bonus};
+use crate::playing_actions::pay_for_action;
 use crate::unit::choose_carried_units_to_remove;
 use crate::wonder::{build_wonder, on_draw_wonder_card};
 
@@ -76,6 +77,7 @@ impl AbilityInitializerSetup for BuiltinBuilder {
 #[must_use]
 pub fn get_all_uncached() -> Vec<Builtin> {
     vec![
+        pay_for_action(),
         use_cultural_influence(),
         explore_resolution(),
         on_draw_wonder_card(),

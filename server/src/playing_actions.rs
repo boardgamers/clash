@@ -1,15 +1,19 @@
 use itertools::{Either, Itertools};
 use serde::{Deserialize, Serialize};
 
+use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{ActionCardInfo, land_battle_won_action, play_action_card};
 use crate::advance::{Advance, gain_advance_without_payment};
 use crate::city::{MoodState, found_city};
 use crate::collect::{PositionCollection, collect};
 use crate::construct::Construct;
+use crate::content::builtin::Builtin;
 use crate::content::custom_actions::{CustomActionType, CustomEventAction, execute_custom_action};
+use crate::content::persistent_events::{PaymentRequest, PersistentEventType};
 use crate::cultural_influence::{InfluenceCultureAttempt, influence_culture_attempt};
 use crate::game::GameState;
 use crate::happiness::increase_happiness;
+use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::{Player, remove_unit};
 use crate::player_events::PlayingActionInfo;
 use crate::recruit::recruit;
@@ -214,6 +218,7 @@ impl PlayingActionType {
 
     #[must_use]
     pub fn remaining_resources(&self, p: &Player, game: &Game) -> ResourcePile {
+        // todo use payment options
         let mut r = p.resources.clone();
         r -= self.cost(game).cost.clone();
         r
@@ -247,13 +252,14 @@ impl PlayingAction {
         player_index: usize,
         redo: bool,
     ) -> Result<(), String> {
-        use crate::construct;
-        use PlayingAction::*;
         let playing_action_type = self.playing_action_type();
         if !redo {
             playing_action_type.is_available(game, player_index)?;
         }
-        playing_action_type.cost(game).pay(game, player_index);
+        let action_cost = playing_action_type.cost(game);
+        if !action_cost.free {
+            game.actions_left -= 1;
+        }
 
         if let PlayingActionType::Custom(c) = playing_action_type {
             if c.info().once_per_turn {
@@ -263,6 +269,29 @@ impl PlayingAction {
             }
         }
 
+        self.on_pay_action(game, player_index)
+    }
+
+    pub(crate) fn on_pay_action(self, game: &mut Game, player_index: usize) -> Result<(), String> {
+        let Some(a) = game.trigger_persistent_event(
+            &[player_index],
+            |e| &mut e.pay_action,
+            self,
+            PersistentEventType::PayAction,
+        ) else {
+            return Ok(());
+        };
+
+        a.execute_without_cost(game, player_index)
+    }
+
+    pub(crate) fn execute_without_cost(
+        self,
+        game: &mut Game,
+        player_index: usize,
+    ) -> Result<(), String> {
+        use crate::construct;
+        use PlayingAction::*;
         match self {
             Advance { advance, payment } => {
                 if !game.player(player_index).can_advance(advance, game) {
@@ -311,28 +340,19 @@ impl PlayingAction {
             PlayingAction::Advance { .. } => PlayingActionType::Advance,
             PlayingAction::FoundCity { .. } => PlayingActionType::FoundCity,
             PlayingAction::Construct(_) => PlayingActionType::Construct,
-            PlayingAction::Collect(c) => allowed_types(
-                &c.action_type,
-                &[
-                    PlayingActionType::Collect,
-                    PlayingActionType::Custom(CustomActionType::FreeEconomyCollect),
-                ],
-            ),
+            PlayingAction::Collect(c) => allowed_types(&c.action_type, &[
+                PlayingActionType::Collect,
+                PlayingActionType::Custom(CustomActionType::FreeEconomyCollect),
+            ]),
             PlayingAction::Recruit(_) => PlayingActionType::Recruit,
-            PlayingAction::IncreaseHappiness(h) => allowed_types(
-                &h.action_type,
-                &[
-                    PlayingActionType::IncreaseHappiness,
-                    PlayingActionType::Custom(CustomActionType::VotingIncreaseHappiness),
-                ],
-            ),
-            PlayingAction::InfluenceCultureAttempt(i) => allowed_types(
-                &i.action_type,
-                &[
-                    PlayingActionType::InfluenceCultureAttempt,
-                    PlayingActionType::Custom(CustomActionType::ArtsInfluenceCultureAttempt),
-                ],
-            ),
+            PlayingAction::IncreaseHappiness(h) => allowed_types(&h.action_type, &[
+                PlayingActionType::IncreaseHappiness,
+                PlayingActionType::Custom(CustomActionType::VotingIncreaseHappiness),
+            ]),
+            PlayingAction::InfluenceCultureAttempt(i) => allowed_types(&i.action_type, &[
+                PlayingActionType::InfluenceCultureAttempt,
+                PlayingActionType::Custom(CustomActionType::ArtsInfluenceCultureAttempt),
+            ]),
             PlayingAction::ActionCard(a) => PlayingActionType::ActionCard(*a),
             PlayingAction::WonderCard(name) => PlayingActionType::WonderCard(*name),
             PlayingAction::Custom(c) => PlayingActionType::Custom(c.action.clone()),
@@ -358,7 +378,7 @@ pub struct ActionCost {
 impl ActionCost {
     pub(crate) fn is_available(&self, game: &Game, player_index: usize) -> Result<(), String> {
         let p = game.player(player_index);
-        if !p.resources.has_at_least(&self.cost) {
+        if !p.can_afford(&self.payment_options(p)) {
             return Err("Not enough resources for action type".to_string());
         }
 
@@ -366,15 +386,6 @@ impl ActionCost {
             return Err("No actions left".to_string());
         }
         Ok(())
-    }
-
-    pub(crate) fn pay(&self, game: &mut Game, player_index: usize) {
-        let p = game.player_mut(player_index);
-        let cost = self.cost.clone();
-        p.lose_resources(cost.clone()); // todo colosseum
-        if !self.free {
-            game.actions_left -= 1;
-        }
     }
 }
 
@@ -402,6 +413,11 @@ impl ActionCost {
     #[must_use]
     pub fn new(free: bool, cost: ResourcePile) -> Self {
         Self { free, cost }
+    }
+
+    #[must_use]
+    pub fn payment_options(&self, player: &Player) -> PaymentOptions {
+        PaymentOptions::resources(player, PaymentReason::ActionCard, self.cost.clone())
     }
 }
 
@@ -457,4 +473,30 @@ pub fn remaining_resources_for_action(
         || player.resources.clone(),
         |action_type| action_type.remaining_resources(player, game),
     )
+}
+
+pub(crate) fn pay_for_action() -> Builtin {
+    Builtin::builder("Pay for action card", "")
+        .add_payment_request_listener(
+            |e| &mut e.pay_action,
+            0,
+            |game, player_index, a| {
+                let payment_options = a
+                    .playing_action_type()
+                    .cost(game)
+                    .payment_options(game.player(player_index));
+                if payment_options.is_free() {
+                    return None;
+                }
+
+                Some(vec![PaymentRequest::mandatory(
+                    payment_options,
+                    "Pay for action",
+                )])
+            },
+            |_game, _player_index, a| {
+                
+            },
+        )
+        .build()
 }

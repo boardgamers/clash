@@ -191,6 +191,7 @@ fn hero_general(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         },
         |game, s, a| {
             if s.choice[0].is_empty() {
+                // todo need to know what was actually paid - pass as a parameter
                 game.add_info_log_item(&format!("{} did not pay 1 mood token", s.player_name));
             } else {
                 game.add_info_log_item(&format!("{} paid 1 mood token", s.player_name));
