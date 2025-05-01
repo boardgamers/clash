@@ -545,8 +545,10 @@ pub mod tests {
             dropped_players: Vec::new(),
             wonders_left: Vec::new(),
             action_cards_left: Vec::new(),
+            action_cards_discarded: Vec::new(),
             objective_cards_left: Vec::new(),
             incidents_left: Vec::new(),
+            incidents_discarded: Vec::new(),
             permanent_effects: Vec::new(),
         }
     }

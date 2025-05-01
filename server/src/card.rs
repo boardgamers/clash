@@ -74,6 +74,14 @@ where
     }
 }
 
+pub(crate) fn discard_card(discard: impl Fn(&mut Game) -> &mut Vec<u8>, card: u8, player: usize, game: &mut Game) {
+    if game.player(player).wonders_owned.contains(Wonder::GreatMausoleum) {
+        discard(game).insert(0, card);
+    } else {
+        discard(game).push(card);
+    }
+}
+
 #[must_use]
 pub fn hand_cards(player: &Player, types: &[HandCardType]) -> Vec<HandCard> {
     types

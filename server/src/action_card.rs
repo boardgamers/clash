@@ -2,7 +2,7 @@ use crate::ability_initializer::{
     AbilityInitializerBuilder, AbilityInitializerSetup, AbilityListeners,
 };
 use crate::advance::Advance;
-use crate::card::draw_card_from_pile;
+use crate::card::{discard_card, draw_card_from_pile};
 use crate::combat_listeners::CombatResult;
 use crate::content::persistent_events::PersistentEventType;
 use crate::content::tactics_cards::TacticsCardFactory;
@@ -207,8 +207,9 @@ pub(crate) fn gain_action_card(game: &mut Game, player_index: usize, action_card
 }
 
 pub(crate) fn discard_action_card(game: &mut Game, player: usize, card: u8) {
-    remove_element_by(&mut game.player_mut(player).action_cards, |&id| id == card)
+    let card = remove_element_by(&mut game.player_mut(player).action_cards, |&id| id == card)
         .unwrap_or_else(|| panic!("action card not found {card}"));
+    discard_card(|g| &mut g.action_cards_discarded, card, player, game);
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
