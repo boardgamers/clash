@@ -307,6 +307,10 @@ impl Assets {
                 CustomActionType::Sports,
                 load_png(include_bytes!("../assets/stadium-svgrepo-com.png")),
             ),
+            (
+                CustomActionType::GreatLibrary,
+                load_png(include_bytes!("../assets/library-14-svgrepo-com.png")),
+            ),
         ]
         .iter()
         .cloned()

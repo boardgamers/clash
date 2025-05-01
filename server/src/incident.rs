@@ -505,7 +505,7 @@ impl IncidentBuilder {
             10,
             move |game, player_index, i| {
                 let p = game.player(player_index);
-                if p.has_advance(Advance::Myths) {
+                if p.can_use_advance(Advance::Myths) {
                     let needed = amount(game, p, i);
                     if needed == 0 {
                         return None;
@@ -677,7 +677,7 @@ pub fn is_active(
     }
     // protection advance does not protect against base effects
     if let Some(advance) = protection_advance {
-        if game.player(player).has_advance(*advance) {
+        if game.player(player).can_use_advance(*advance) {
             return false;
         }
     }

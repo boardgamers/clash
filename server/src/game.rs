@@ -14,7 +14,7 @@ use crate::log::{
 use crate::movement::MoveState;
 use crate::objective_card::present_instant_objective_cards;
 use crate::pirates::get_pirates_player;
-use crate::player::CostTrigger;
+use crate::player::{CostTrigger, end_turn};
 use crate::player_events::{
     PersistentEvent, PersistentEventInfo, PersistentEvents, PlayerEvents, TransientEvents,
 };
@@ -566,7 +566,7 @@ impl Game {
     }
 
     pub fn next_turn(&mut self) {
-        self.player_mut(self.current_player_index).end_turn();
+        end_turn(self, self.current_player_index);
         for i in &mut current_player_turn_log_mut(self).items {
             i.undo.clear();
         }

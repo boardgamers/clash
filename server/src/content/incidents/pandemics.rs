@@ -206,7 +206,7 @@ fn vermin() -> Incident {
         IncidentTarget::AllPlayers,
         IncidentBaseEffect::None,
         |_, _| 1,
-        |p| p.has_advance(Advance::Storage),
+        |p| p.can_use_advance(Advance::Storage),
         |_, _| true,
     )
 }

@@ -8,6 +8,7 @@ use crate::content::advances::democracy::use_civil_liberties;
 use crate::content::advances::economy::{use_bartering, use_taxes};
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::PersistentEventType;
+use crate::content::wonders::use_great_library;
 use crate::player::Player;
 use crate::playing_actions::PlayingActionType;
 use crate::position::Position;
@@ -54,6 +55,7 @@ pub enum CustomActionType {
     Sports,
     Taxes,
     Theaters,
+    GreatLibrary,
 }
 
 impl CustomActionType {
@@ -66,7 +68,9 @@ impl CustomActionType {
             CustomActionType::CivilLiberties | CustomActionType::Sports => {
                 CustomActionType::regular()
             }
-            CustomActionType::Bartering | CustomActionType::Theaters => {
+            CustomActionType::Bartering
+            | CustomActionType::Theaters
+            | CustomActionType::GreatLibrary => {
                 CustomActionType::free_and_once_per_turn(ResourcePile::empty())
             }
             CustomActionType::ArtsInfluenceCultureAttempt => {
@@ -141,6 +145,7 @@ pub(crate) fn custom_action_builtins() -> HashMap<CustomActionType, Builtin> {
         (CustomActionType::Sports, use_sports()),
         (CustomActionType::Taxes, use_taxes()),
         (CustomActionType::Theaters, use_theaters()),
+        (CustomActionType::GreatLibrary, use_great_library()),
     ])
 }
 

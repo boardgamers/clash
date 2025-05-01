@@ -126,7 +126,7 @@ pub(crate) fn use_taxes() -> Builtin {
 #[must_use]
 pub fn tax_options(player: &Player) -> ResourceReward {
     let mut c = vec![ResourceType::Food, ResourceType::Wood, ResourceType::Ore];
-    if player.has_advance(Advance::Currency) {
+    if player.can_use_advance(Advance::Currency) {
         c.insert(0, ResourceType::Gold);
     }
     ResourceReward::sum(player.cities.len() as u8, &c)
@@ -159,7 +159,10 @@ where
         event,
         0,
         |game, player_index, _| {
-            if !game.player(player_index).has_advance(Advance::TradeRoutes) {
+            if !game
+                .player(player_index)
+                .can_use_advance(Advance::TradeRoutes)
+            {
                 return None;
             }
 

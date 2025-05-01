@@ -51,7 +51,7 @@ pub fn can_construct(
     trigger: CostTrigger,
 ) -> Result<CostInfo, String> {
     let advance = game.cache.get_building_advance(building);
-    if !player.has_advance(advance) {
+    if !player.can_use_advance(advance) {
         return Err(format!("Missing advance: {}", advance.name(game)));
     }
 

@@ -63,9 +63,9 @@ fn pestilence_applies(player: &Player) -> bool {
 }
 
 pub(crate) fn additional_sanitation_damage(p: &Player) -> bool {
-    p.has_advance(Advance::Roads)
-        || p.has_advance(Advance::Navigation)
-        || p.has_advance(Advance::TradeRoutes)
+    p.can_use_advance(Advance::Roads)
+        || p.can_use_advance(Advance::Navigation)
+        || p.can_use_advance(Advance::TradeRoutes)
 }
 
 pub(crate) fn pestilence_permanent_effect() -> Builtin {
@@ -82,7 +82,7 @@ pub(crate) fn pestilence_permanent_effect() -> Builtin {
                 .permanent_effects
                 .contains(&PermanentEffect::Pestilence)
                 && matches!(i.action_type, PlayingActionType::Construct)
-                && !player.has_advance(Advance::Sanitation)
+                && !player.can_use_advance(Advance::Sanitation)
             {
                 *available = Err(
                     "Cannot construct buildings or wonders until you research Sanitation."

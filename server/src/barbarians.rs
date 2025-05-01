@@ -10,7 +10,7 @@ use crate::incident::{BASE_EFFECT_PRIORITY, IncidentBuilder, IncidentFilter, pla
 use crate::map::Terrain;
 use crate::movement::MoveUnits;
 use crate::payment::ResourceReward;
-use crate::player::{Player, add_unit};
+use crate::player::{Player, add_unit, end_turn};
 use crate::player_events::{IncidentTarget, PersistentEvent, PersistentEvents};
 use crate::position::Position;
 use crate::resource::ResourceType;
@@ -262,8 +262,7 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
                 // after all moves are done
                 reinforce_after_move(game, player);
                 // clear movement restrictions
-                game.player_mut(get_barbarians_player(game).index)
-                    .end_turn();
+                end_turn(game, get_barbarians_player(game).index);
             }
         },
     )

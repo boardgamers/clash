@@ -60,6 +60,7 @@ pub struct Player {
     pub active_leader: Option<String>,
     pub available_leaders: Vec<String>,
     pub advances: EnumSet<Advance>,
+    pub great_library_advance: Option<Advance>,
     pub unlocked_special_advances: Vec<String>,
     pub wonders_built: Vec<Wonder>,
     pub wonders_owned: EnumSet<Wonder>, // transient
@@ -170,6 +171,7 @@ impl Player {
             active_leader: data.active_leader,
             available_leaders: data.available_leaders,
             advances: EnumSet::from_iter(data.advances),
+            great_library_advance: data.great_library_advance,
             unlocked_special_advances: data.unlocked_special_advance,
             wonders_built: data.wonders_built,
             wonders_owned: cities
@@ -226,6 +228,7 @@ impl Player {
                 .into_iter()
                 .sorted_by_key(Advance::id)
                 .collect(),
+            great_library_advance: self.great_library_advance,
             unlocked_special_advance: self.unlocked_special_advances,
             wonders_built: self.wonders_built,
             incident_tokens: self.incident_tokens,
@@ -263,6 +266,7 @@ impl Player {
             active_leader: self.active_leader.clone(),
             available_leaders: self.available_leaders.clone(),
             advances: self.advances.iter().sorted_by_key(Advance::id).collect(),
+            great_library_advance: self.great_library_advance,
             unlocked_special_advance: self.unlocked_special_advances.clone(),
             wonders_built: self.wonders_built.clone(),
             incident_tokens: self.incident_tokens,
@@ -303,6 +307,7 @@ impl Player {
             civilization,
             advances: EnumSet::empty(),
             unlocked_special_advances: Vec::new(),
+            great_library_advance: None,
             incident_tokens: 0,
             completed_objectives: Vec::new(),
             captured_leaders: Vec::new(),
@@ -363,17 +368,6 @@ impl Player {
             .iter()
             .filter_map(|name| self.get_leader(name))
             .collect()
-    }
-
-    pub fn end_turn(&mut self) {
-        for city in &mut self.cities {
-            city.deactivate();
-        }
-        for unit in &mut self.units {
-            unit.movement_restrictions = vec![];
-        }
-        self.played_once_per_turn_actions.clear();
-        self.event_info.clear();
     }
 
     pub fn set_name(&mut self, name: String) {
@@ -484,6 +478,11 @@ impl Player {
     #[must_use]
     pub fn has_advance(&self, advance: Advance) -> bool {
         self.advances.contains(advance)
+    }
+
+    #[must_use]
+    pub fn can_use_advance(&self, advance: Advance) -> bool {
+        self.has_advance(advance) || self.great_library_advance.is_some_and(|a| a == advance)
     }
 
     #[must_use]
@@ -809,6 +808,21 @@ pub(crate) fn remove_unit(player: usize, id: u32, game: &mut Game) -> Unit {
     u
 }
 
+pub fn end_turn(game: &mut Game, player: usize) {
+    let p = game.player_mut(player);
+    for city in &mut p.cities {
+        city.deactivate();
+    }
+    for unit in &mut p.units {
+        unit.movement_restrictions = vec![];
+    }
+    p.played_once_per_turn_actions.clear();
+    p.event_info.clear();
+    if let Some(a) = p.great_library_advance.take() {
+        a.info(game).listeners.clone().deinit(game, player);
+    }
+}
+
 #[derive(Serialize, Deserialize, PartialEq)]
 pub struct PlayerData {
     #[serde(default)]
@@ -840,6 +854,9 @@ pub struct PlayerData {
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     advances: Vec<Advance>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    great_library_advance: Option<Advance>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     unlocked_special_advance: Vec<String>,

@@ -79,7 +79,7 @@ fn husbandry() -> AdvanceBuilder {
 
 fn husbandry_collect(i: &mut CollectInfo, c: &CollectContext, game: &Game) {
     let player = &game.players[c.player_index];
-    let allowed = if player.has_advance(Advance::Roads) {
+    let allowed = if player.can_use_advance(Advance::Roads) {
         2
     } else {
         1

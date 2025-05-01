@@ -266,12 +266,12 @@ pub(crate) fn can_construct_wonder(
     if city.mood_state != MoodState::Happy {
         return Err("City is not happy".to_string());
     }
-    if !player.has_advance(Advance::Engineering) {
+    if !player.can_use_advance(Advance::Engineering) {
         return Err("Engineering advance missing".to_string());
     }
     if !discount.ignore_required_advances {
         let a = info.required_advance;
-        if !player.has_advance(a) {
+        if !player.can_use_advance(a) {
             return Err(format!("Advance missing: {a:?}"));
         }
     }

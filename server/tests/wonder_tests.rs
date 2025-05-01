@@ -1,5 +1,6 @@
 use crate::common::{JsonTest, TestAction, move_action};
 use server::action::{Action, execute_without_undo};
+use server::advance::Advance;
 use server::card::HandCard;
 use server::content::custom_actions::{CustomActionType, CustomEventAction};
 use server::content::persistent_events::EventResponse;
@@ -78,6 +79,30 @@ fn test_pyramids() {
                     HandCard::ObjectiveCard(32),
                 ])),
             ),
+        ],
+    );
+}
+
+    #[test]
+fn test_library() {
+    JSON.test(
+        "library",
+        vec![
+            TestAction::undoable(
+                0,
+                Action::Playing(PlayingAction::Custom(CustomEventAction::new(
+                    CustomActionType::GreatLibrary,
+                    None,
+                ))),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectAdvance(Advance::Engineering)),
+            )
+            .without_json_comparison(),
+            // can use effect to build a wonder - but don't draw a wonder card (one time ability)
+            TestAction::undoable(0, Action::Playing(WonderCard(Wonder::Pyramids))),
         ],
     );
 }
