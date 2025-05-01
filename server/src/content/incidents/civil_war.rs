@@ -209,7 +209,7 @@ fn lose_action(game: &mut Game, player: usize) {
         game.permanent_effects
             .push(PermanentEffect::LoseAction(player));
     } else {
-        game.add_info_log_item(&format!("{name} lost an action"));
+        game.add_info_log_item(&format!("{name} lost an action for Revolution"));
         game.actions_left -= 1;
     }
 }

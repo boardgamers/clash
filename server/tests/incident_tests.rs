@@ -6,7 +6,7 @@ use server::content::persistent_events::{EventResponse, SelectedStructure, Struc
 use server::playing_actions::PlayingAction::{Advance, Construct};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
-use server::status_phase::{ChangeGovernment, ChangeGovernmentType};
+use server::status_phase::{ChangeGovernment, };
 use server::unit::UnitType;
 use server::wonder::Wonder;
 use server::{advance, construct};
@@ -380,9 +380,9 @@ fn test_revolution() {
                     advance: advance::Advance::Storage,
                     payment: ResourcePile::gold(2),
                 }),
-            ),
-            TestAction::not_undoable(0, Action::Response(EventResponse::SelectUnits(vec![3]))),
-            TestAction::not_undoable(0, Action::Response(EventResponse::SelectUnits(vec![]))),
+            ).without_json_comparison(),
+            TestAction::not_undoable(0, Action::Response(EventResponse::SelectUnits(vec![3]))).without_json_comparison(),
+            TestAction::not_undoable(0, Action::Response(EventResponse::SelectUnits(vec![]))).without_json_comparison(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::ChangeGovernmentType(

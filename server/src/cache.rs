@@ -4,7 +4,6 @@ use crate::city_pieces::Building;
 use crate::content::advances::AdvanceGroup;
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::custom_action_builtins;
-use crate::content::persistent_events::PersistentEventRequest::ChangeGovernment;
 use crate::content::{
     action_cards, advances, builtin, incidents, objective_cards, objectives, wonders,
 };
@@ -13,8 +12,8 @@ use crate::incident::Incident;
 use crate::objective_card::{Objective, ObjectiveCard};
 use crate::status_phase::StatusPhaseState::{ChangeGovernmentType, DetermineFirstPlayer};
 use crate::status_phase::{
-    StatusPhaseState, complete_objectives, determine_first_player, draw_cards, free_advance,
-    get_status_phase, may_change_government, raze_city,
+    complete_objectives, determine_first_player, draw_cards, free_advance, get_status_phase,
+    may_change_government, raze_city, StatusPhaseState,
 };
 use crate::tactics_card::TacticsCard;
 use crate::wonder::{Wonder, WonderInfo};
