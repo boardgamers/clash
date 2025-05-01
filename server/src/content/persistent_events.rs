@@ -118,7 +118,7 @@ pub enum PersistentEventType {
     DrawWonderCard,
     SelectObjectives(SelectObjectivesInfo),
     CustomAction(CustomEventAction),
-    GreatMausoleum(bool),
+    GreatMausoleum,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]

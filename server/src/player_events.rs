@@ -111,7 +111,7 @@ pub(crate) struct PersistentEvents {
     pub units_killed: PersistentEvent<KilledUnits>,
     pub select_objective_cards: PersistentEvent<SelectObjectivesInfo>,
     pub custom_action: PersistentEvent<CustomEventAction>,
-    pub great_mausoleum: PersistentEvent<bool>,
+    pub great_mausoleum: PersistentEvent,
 }
 
 impl PersistentEvents {

@@ -22,12 +22,27 @@ use std::sync::Arc;
 #[must_use]
 pub fn get_all_uncached() -> Vec<WonderInfo> {
     vec![
+        great_mausoleum(),
         colosseum(),
         library(),
         great_lighthouse(),
         pyramids(),
         great_gardens(),
     ]
+}
+
+fn great_mausoleum() -> WonderInfo {
+    // todo draw incident 
+    WonderInfo::builder(
+        Wonder::GreatMausoleum,
+        "Great Lighthouse",
+        "Whenever you draw an action or game event card, you may instead draw the \
+        top card of the action or game event discard pile. \
+        You discard to the bottom of the pile.",
+        PaymentOptions::fixed_resources(ResourcePile::new(4, 4, 4, 0, 0, 0, 5)),
+        Advance::Priesthood,
+    )
+    .build()
 }
 
 pub(crate) fn use_great_mausoleum() -> Builtin {

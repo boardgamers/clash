@@ -27,9 +27,9 @@ pub enum Wonder {
     GreatGardens,
     GreatLibrary,
     GreatLighthouse,
+    GreatMausoleum,
     GreatWall,
     Colossus,
-    GreatMausoleum,
 }
 
 impl Wonder {
