@@ -160,9 +160,7 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
         ActiveDialog::MovePayment(p) => move_ui::move_payment_dialog(rc, p),
 
         //status phase
-        ActiveDialog::ChangeGovernmentType(r) => {
-            status_phase_ui::change_government_type_dialog(rc)
-        }
+        ActiveDialog::ChangeGovernmentType => status_phase_ui::change_government_type_dialog(rc),
         ActiveDialog::ChooseAdditionalAdvances(a) => {
             status_phase_ui::choose_additional_advances_dialog(rc, a)
         }

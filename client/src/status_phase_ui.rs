@@ -3,8 +3,8 @@ use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::{OkTooltip, cancel_button_with_tooltip, ok_button};
 use crate::render_context::RenderContext;
 use server::advance::Advance;
-use server::content::persistent_events::{ChangeGovernmentRequest, EventResponse};
-use server::status_phase::{ChangeGovernment, ChangeGovernmentType};
+use server::content::persistent_events::EventResponse;
+use server::status_phase::ChangeGovernment;
 
 #[derive(Clone)]
 pub struct ChooseAdditionalAdvances {
@@ -15,11 +15,7 @@ pub struct ChooseAdditionalAdvances {
 }
 
 impl ChooseAdditionalAdvances {
-    fn new(
-        government: String,
-        possible: Vec<Advance>,
-        needed: usize,
-    ) -> Self {
+    fn new(government: String, possible: Vec<Advance>, needed: usize) -> Self {
         Self {
             government,
             possible,
@@ -70,7 +66,7 @@ pub fn change_government_type_dialog(rc: &RenderContext) -> StateUpdate {
                 .count()
                 - 1;
             StateUpdate::OpenDialog(ActiveDialog::ChooseAdditionalAdvances(
-                ChooseAdditionalAdvances::new(g.clone(), additional, needed, r),
+                ChooseAdditionalAdvances::new(g.clone(), additional, needed),
             ))
         },
     )
@@ -86,16 +82,14 @@ pub fn choose_additional_advances_dialog(
         OkTooltip::Invalid("Select all additional advances".to_string())
     };
     if ok_button(rc, t) {
-        return StateUpdate::response(EventResponse::ChangeGovernmentType(
-            ChangeGovernment::new(
-                choose.government.clone(),
-                choose.selected.clone(),
-            ),
-        ));
+        return StateUpdate::response(EventResponse::ChangeGovernmentType(ChangeGovernment::new(
+            choose.government.clone(),
+            choose.selected.clone(),
+        )));
     }
 
     if cancel_button_with_tooltip(rc, "Back to choose government type") {
-        return StateUpdate::OpenDialog(ActiveDialog::ChangeGovernmentType(choose.request.clone()));
+        return StateUpdate::OpenDialog(ActiveDialog::ChangeGovernmentType);
     }
     show_advance_menu(
         rc,
@@ -123,7 +117,6 @@ pub fn choose_additional_advances_dialog(
                     possible: choose.possible.clone(),
                     selected,
                     needed: choose.needed,
-                    request: choose.request.clone(),
                 },
             ))
         },

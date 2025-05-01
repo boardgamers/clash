@@ -21,7 +21,7 @@ use crate::player_events::{IncidentInfo, OnAdvanceInfo};
 use crate::playing_actions::{PlayingAction, Recruit};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
-use crate::status_phase::{ChangeGovernment,  StatusPhaseState};
+use crate::status_phase::{ChangeGovernment, StatusPhaseState};
 use crate::unit::UnitType;
 use crate::wonder::{Wonder, WonderCardInfo};
 use itertools::Itertools;

@@ -270,7 +270,7 @@ where
         1,
         move |game, player_index, v| {
             set_paid(v, false);
-            
+
             if !is_active_player(v, player_index, game) {
                 return None;
             }
