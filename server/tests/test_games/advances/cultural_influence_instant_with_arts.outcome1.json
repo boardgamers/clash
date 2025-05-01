@@ -4,13 +4,13 @@
     {
       "id": 0,
       "resources": {
-        "food": 2,
-        "wood": 7,
-        "ore": 7,
-        "ideas": 3,
+        "food": 1,
+        "wood": 6,
+        "ore": 6,
+        "ideas": 5,
         "gold": 7,
         "mood_tokens": 7,
-        "culture_tokens": 6
+        "culture_tokens": 7
       },
       "resource_limit": {
         "food": 2,
@@ -26,6 +26,13 @@
           "city_pieces": {},
           "mood_state": "Happy",
           "position": "A1"
+        },
+        {
+          "city_pieces": {
+            "fortress": 1
+          },
+          "mood_state": "Angry",
+          "position": "C2"
         }
       ],
       "units": [
@@ -68,11 +75,6 @@
           "position": "C2",
           "unit_type": "Settler",
           "id": 7
-        },
-        {
-          "position": "A1",
-          "unit_type": "Infantry",
-          "id": 8
         }
       ],
       "civilization": "test0",
@@ -82,7 +84,7 @@
         "Tactics"
       ],
       "incident_tokens": 2,
-      "next_unit_id": 9
+      "next_unit_id": 8
     },
     {
       "id": 1,
@@ -93,7 +95,7 @@
         "ideas": 7,
         "gold": 7,
         "mood_tokens": 7,
-        "culture_tokens": 7
+        "culture_tokens": 6
       },
       "resource_limit": {
         "food": 2,
@@ -108,6 +110,7 @@
         {
           "city_pieces": {},
           "mood_state": "Angry",
+          "activations": 2,
           "position": "C1"
         }
       ],
@@ -125,14 +128,15 @@
       ],
       "civilization": "test1",
       "advances": [
-        "Fanaticism",
+        "Arts",
         "Farming",
-        "Mining",
-        "Storage",
-        "Tactics"
+        "Mining"
       ],
       "incident_tokens": 3,
-      "next_unit_id": 2
+      "next_unit_id": 2,
+      "played_once_per_turn_actions": [
+        "ArtsInfluenceCultureAttempt"
+      ]
     }
   ],
   "map": {
@@ -147,9 +151,7 @@
       ],
       [
         "A3",
-        {
-          "Exhausted": "Forest"
-        }
+        "Mountain"
       ],
       [
         "B1",
@@ -182,7 +184,7 @@
     ]
   },
   "starting_player_index": 0,
-  "current_player_index": 0,
+  "current_player_index": 1,
   "action_log": [
     {
       "rounds": [
@@ -194,32 +196,30 @@
                 {
                   "action": {
                     "Playing": {
-                      "ActionCard": 37
+                      "InfluenceCultureAttempt": {
+                        "selected_structure": {
+                          "position": "C2",
+                          "structure": {
+                            "Building": "Fortress"
+                          }
+                        },
+                        "action_type": {
+                          "Custom": "ArtsInfluenceCultureAttempt"
+                        }
+                      }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/players/0/action_cards",
-                      "value": [
-                        37
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 1
+                        }
                       ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/next_unit_id",
-                      "value": 8
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/culture_tokens",
-                      "value": 7
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/units/8"
                     }
-                  ]
+                  }
                 }
               ]
             }
@@ -228,16 +228,20 @@
       ]
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 2,
   "log": [
     [
-      "Player1 played the action card Militia for 1 culture token",
-      "Player1 selected A1 as city for Militia."
+      "Player2 tried to influence culture the Fortress in the city at C2 by Player1 with the city at C1 using Arts"
+    ],
+    [
+      "Player2 paid 1 culture token for the action",
+      "Cultural influence succeeded (rolled 6)"
     ]
   ],
-  "undo_limit": 0,
+  "undo_limit": 2,
   "actions_left": 3,
-  "round": 2,
+  "successful_cultural_influence": true,
+  "round": 1,
   "age": 1,
   "messages": [
     "The game has started"
@@ -245,13 +249,16 @@
   "dice_roll_outcomes": [
     1,
     1,
-    1,
-    1,
-    1,
-    11,
-    11,
-    11,
-    11
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10
+  ],
+  "dice_roll_log": [
+    10
   ],
   "wonders_left": [
     "Pyramids"

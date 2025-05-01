@@ -26,11 +26,6 @@
           "city_pieces": {},
           "mood_state": "Happy",
           "position": "A1"
-        },
-        {
-          "city_pieces": {},
-          "mood_state": "Neutral",
-          "position": "C2"
         }
       ],
       "units": [
@@ -73,6 +68,11 @@
           "position": "C2",
           "unit_type": "Settler",
           "id": 7
+        },
+        {
+          "position": "A1",
+          "unit_type": "Infantry",
+          "id": 8
         }
       ],
       "civilization": "test0",
@@ -82,15 +82,7 @@
         "Tactics"
       ],
       "incident_tokens": 2,
-      "action_cards": [
-        2
-      ],
-      "next_unit_id": 8,
-      "secrets": [
-        "Player2 has the following action cards: Advance/Encircled, Inspiration/Encircled, Inspiration/Peltasts",
-        "Player2 has the following objective cards: ",
-        "Player2 has the following wonder cards: Pyramids"
-      ]
+      "next_unit_id": 9
     },
     {
       "id": 1,
@@ -140,14 +132,6 @@
         "Tactics"
       ],
       "incident_tokens": 3,
-      "wonder_cards": [
-        "Pyramids"
-      ],
-      "action_cards": [
-        1,
-        3,
-        4
-      ],
       "next_unit_id": 2
     }
   ],
@@ -210,23 +194,105 @@
                 {
                   "action": {
                     "Playing": {
-                      "ActionCard": 7
+                      "ActionCard": 37
                     }
-                  }
+                  },
+                  "undo": [
+                    {
+                      "op": "remove",
+                      "path": "/events"
+                    }
+                  ]
                 },
                 {
                   "action": {
                     "Response": {
-                      "SelectHandCards": [
+                      "Payment": [
                         {
-                          "ActionCard": 1
-                        },
-                        {
-                          "ActionCard": 2
+                          "culture_tokens": 1
                         }
                       ]
                     }
-                  }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "PayAction": {
+                              "ActionCard": 37
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "Builtin": "Pay for action card"
+                            },
+                            "priority": 0,
+                            "request": {
+                              "Payment": [
+                                {
+                                  "cost": {
+                                    "conversions": [
+                                      {
+                                        "from": [
+                                          {
+                                            "food": 1
+                                          },
+                                          {
+                                            "wood": 1
+                                          },
+                                          {
+                                            "ore": 1
+                                          },
+                                          {
+                                            "ideas": 1
+                                          }
+                                        ],
+                                        "to": {
+                                          "gold": 1
+                                        },
+                                        "type": "Unlimited"
+                                      }
+                                    ],
+                                    "default": {
+                                      "culture_tokens": 1
+                                    }
+                                  },
+                                  "name": "Pay for action",
+                                  "optional": false
+                                }
+                              ]
+                            }
+                          },
+                          "last_priority_used": 0,
+                          "player": 0
+                        }
+                      ]
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/action_cards",
+                      "value": [
+                        37
+                      ]
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/next_unit_id",
+                      "value": 8
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/culture_tokens",
+                      "value": 7
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/units/8"
+                    }
+                  ]
                 }
               ]
             }
@@ -238,15 +304,15 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 played the action card Spy for 1 culture token as a regular action",
-      "Player1 decided to looked at all Wonder, Action, and Objective cards of Player2"
+      "Player1 played the action card Militia"
     ],
     [
-      "Player1 decided to swap an action card with Player2"
+      "Player1 paid 1 culture token for the action",
+      "Player1 selected A1 as city for Militia."
     ]
   ],
-  "undo_limit": 2,
-  "actions_left": 2,
+  "undo_limit": 0,
+  "actions_left": 3,
   "round": 2,
   "age": 1,
   "messages": [
@@ -262,5 +328,8 @@
     11,
     11,
     11
+  ],
+  "wonders_left": [
+    "Pyramids"
   ]
 }

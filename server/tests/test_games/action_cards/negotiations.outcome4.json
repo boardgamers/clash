@@ -224,6 +224,17 @@
                 },
                 {
                   "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 1
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
                     "Playing": "EndTurn"
                   }
                 }
@@ -291,7 +302,10 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 played the action card Negotiations for 1 culture token",
+      "Player1 played the action card Negotiations"
+    ],
+    [
+      "Player1 paid 1 culture token for the action",
       "Player1 and Player2 are in negotiations."
     ],
     [
