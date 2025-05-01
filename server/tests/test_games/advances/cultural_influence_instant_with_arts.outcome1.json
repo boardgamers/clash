@@ -209,6 +209,17 @@
                       }
                     }
                   }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 1
+                        }
+                      ]
+                    }
+                  }
                 }
               ]
             }
@@ -217,13 +228,17 @@
       ]
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 2,
   "log": [
     [
-      "Player2 tried to influence culture the Fortress in the city at C2 by Player1 with the city at C1 using Arts and succeeded (rolled 6)"
+      "Player2 tried to influence culture the Fortress in the city at C2 by Player1 with the city at C1 using Arts"
+    ],
+    [
+      "Player2 paid 1 culture token for the action",
+      "Cultural influence succeeded (rolled 6)"
     ]
   ],
-  "undo_limit": 1,
+  "undo_limit": 2,
   "actions_left": 3,
   "successful_cultural_influence": true,
   "round": 1,

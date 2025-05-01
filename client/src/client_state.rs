@@ -23,8 +23,8 @@ use server::ai::AI;
 use server::card::HandCard;
 use server::city::{City, MoodState};
 use server::content::persistent_events::{
-    AdvanceRequest, ChangeGovernmentRequest, EventResponse, MultiRequest, PersistentEventRequest,
-    PersistentEventType, PlayerRequest, UnitTypeRequest,
+    AdvanceRequest, EventResponse, MultiRequest, PersistentEventRequest, PersistentEventType,
+    PlayerRequest, UnitTypeRequest,
 };
 use server::game::{Game, GameState};
 use server::movement::CurrentMove;
@@ -64,7 +64,7 @@ pub enum ActiveDialog {
     ),
     HandCardsRequest(MultiSelection<HandCard>),
     BoolRequest(String),
-    ChangeGovernmentType(ChangeGovernmentRequest),
+    ChangeGovernmentType,
     ChooseAdditionalAdvances(ChooseAdditionalAdvances),
 }
 
@@ -86,7 +86,7 @@ impl ActiveDialog {
             ActiveDialog::MoveUnits(_) => "move units",
             ActiveDialog::MovePayment(_) => "move payment",
             ActiveDialog::ExploreResolution(_) => "explore resolution",
-            ActiveDialog::ChangeGovernmentType(_) => "change government type",
+            ActiveDialog::ChangeGovernmentType => "change government type",
             ActiveDialog::ChooseAdditionalAdvances(_) => "choose additional advances",
             ActiveDialog::ResourceRewardRequest(_) => "trade route selection",
             ActiveDialog::AdvanceRequest(_) => "advance selection",
@@ -124,12 +124,8 @@ impl ActiveDialog {
             ActiveDialog::ExploreResolution(_) => {
                 vec!["Click on the new tile to rotate it".to_string()]
             }
-            ActiveDialog::ChangeGovernmentType(r) => {
-                if r.optional {
-                    vec!["Click on a government type to change - or click cancel".to_string()]
-                } else {
-                    vec!["Click on a government type to change".to_string()]
-                }
+            ActiveDialog::ChangeGovernmentType => {
+                vec!["Click on a government type to change".to_string()]
             }
             ActiveDialog::ChooseAdditionalAdvances(_) => {
                 vec!["Click on an advance to choose it".to_string()]
@@ -207,7 +203,7 @@ impl ActiveDialog {
             self,
             ActiveDialog::AdvanceMenu
                 | ActiveDialog::AdvancePayment(_)
-                | ActiveDialog::ChangeGovernmentType(_)
+                | ActiveDialog::ChangeGovernmentType
                 | ActiveDialog::ChooseAdditionalAdvances(_)
                 | ActiveDialog::AdvanceRequest(_)
         )
@@ -575,9 +571,7 @@ impl State {
                 ),
                 PersistentEventRequest::SelectPlayer(r) => ActiveDialog::PlayerRequest(r.clone()),
                 PersistentEventRequest::BoolRequest(d) => ActiveDialog::BoolRequest(d.clone()),
-                PersistentEventRequest::ChangeGovernment(r) => {
-                    ActiveDialog::ChangeGovernmentType(r.clone())
-                }
+                PersistentEventRequest::ChangeGovernment => ActiveDialog::ChangeGovernmentType,
                 PersistentEventRequest::ExploreResolution => {
                     match &game.current_event().event_type {
                         PersistentEventType::ExploreResolution(r) => {

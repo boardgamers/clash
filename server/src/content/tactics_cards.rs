@@ -322,64 +322,86 @@ pub(crate) fn scout(id: u8) -> TacticsCard {
         "Scout",
         "Ignore the enemy tactics card and take it to your hand.",
     )
-        .add_simple_persistent_event_listener(
-            |event| &mut event.combat_round_start_reveal_tactics,
-            0,
-            move |game, p, name, s| {
-                if s.is_active(p, id, TacticsCardTarget::ActivePlayer) {
-                    update_combat_strength(game, s.combat.opponent(p), s, |game, _combat, st, _role| {
+    .add_simple_persistent_event_listener(
+        |event| &mut event.combat_round_start_reveal_tactics,
+        0,
+        move |game, p, name, s| {
+            if s.is_active(p, id, TacticsCardTarget::ActivePlayer) {
+                update_combat_strength(
+                    game,
+                    s.combat.opponent(p),
+                    s,
+                    |game, _combat, st, _role| {
                         if let Some(tactics_card) = st.tactics_card.take() {
                             gain_action_card(game, p, tactics_card);
                             game.add_info_log_item(&format!(
-                                "{name} ignores the enemy tactics {} and takes it to their hand using Scout",
-                                game.cache.get_action_card(tactics_card).tactics_card.as_ref().expect("tactics card not found").name
+                                "{name} ignores the enemy tactics {} and takes \
+                                    it to their hand using Scout",
+                                game.cache
+                                    .get_action_card(tactics_card)
+                                    .tactics_card
+                                    .as_ref()
+                                    .expect("tactics card not found")
+                                    .name
                             ));
                         } else {
                             game.add_info_log_item(&format!(
                                 "{name} cannot use Scout - opponent didn't play a tactics card",
                             ));
                         }
-                    });
-                }
-            },
-        )
-        .build()
+                    },
+                );
+            }
+        },
+    )
+    .build()
 }
 
 pub(crate) fn martyr(id: u8) -> TacticsCard {
-    TacticsCard::builder(id, "Martyr", "todo")
-        .fighter_any_requirement(&[FighterRequirement::Army, FighterRequirement::Ship])
-        .add_units_request(
-            |event| &mut event.combat_round_start_tactics,
-            0,
-            move |game, p, s| {
-                Some(UnitsRequest::new(p, s.combat.fighting_units(game, p), 1..=1, "Select a unit to sacrifice"))
-            },
-            move |game, s, r| {
-                let unit = s.choice[0];
-                game.add_info_log_item(&format!(
-                    "{} sacrifices {} using Martyr",
-                    game.player_name(s.player_index),
-                    a_or_an(game.player(s.player_index).get_unit(unit).unit_type.name())
-                ));
-                kill_combat_units(game, &mut r.combat, s.player_index, &[unit]);
-            },
-        )
-        .add_simple_persistent_event_listener(
-            |event| &mut event.combat_round_start_reveal_tactics,
-            0,
-            move |game, p, name, s| {
-                if s.is_active(p, id, TacticsCardTarget::Opponent) {
-                    update_combat_strength(game, p, s, |game, _combat, st, _role| {
-                        game.add_info_log_item(&format!(
-                            "{name} cannot use their tactics card using Martyr (but it is still discarded)",
-                        ));
-                        st.tactics_card = None;
-                    });
-                }
-            },
-        )
-        .build()
+    TacticsCard::builder(
+        id,
+        "Martyr",
+        "Remove 1 unit before the die roll: \
+        Your opponent has to remove 1 unit. Ignore the enemy tactics card.",
+    )
+    .fighter_any_requirement(&[FighterRequirement::Army, FighterRequirement::Ship])
+    .add_units_request(
+        |event| &mut event.combat_round_start_tactics,
+        0,
+        move |game, p, s| {
+            Some(UnitsRequest::new(
+                p,
+                s.combat.fighting_units(game, p),
+                1..=1,
+                "Select a unit to sacrifice",
+            ))
+        },
+        move |game, s, r| {
+            let unit = s.choice[0];
+            game.add_info_log_item(&format!(
+                "{} sacrifices {} using Martyr",
+                game.player_name(s.player_index),
+                a_or_an(game.player(s.player_index).get_unit(unit).unit_type.name())
+            ));
+            kill_combat_units(game, &mut r.combat, s.player_index, &[unit]);
+        },
+    )
+    .add_simple_persistent_event_listener(
+        |event| &mut event.combat_round_start_reveal_tactics,
+        0,
+        move |game, p, name, s| {
+            if s.is_active(p, id, TacticsCardTarget::Opponent) {
+                update_combat_strength(game, p, s, |game, _combat, st, _role| {
+                    game.add_info_log_item(&format!(
+                        "{name} cannot use their tactics card using Martyr \
+                            (but it is still discarded)",
+                    ));
+                    st.tactics_card = None;
+                });
+            }
+        },
+    )
+    .build()
 }
 
 pub(crate) fn archers(id: u8) -> TacticsCard {

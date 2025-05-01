@@ -9,6 +9,7 @@ use crate::combat_listeners::{CombatEnd, CombatRoundEnd, CombatRoundStart};
 use crate::combat_stats::CombatStats;
 use crate::construct::ConstructInfo;
 use crate::content::custom_actions::CustomEventAction;
+use crate::cultural_influence::InfluenceCultureInfo;
 use crate::events::EventOrigin;
 use crate::explore::ExploreResolutionState;
 use crate::game::Game;
@@ -17,10 +18,10 @@ use crate::objective_card::SelectObjectivesInfo;
 use crate::payment::{PaymentOptions, ResourceReward};
 use crate::player::Player;
 use crate::player_events::{IncidentInfo, OnAdvanceInfo};
-use crate::playing_actions::Recruit;
+use crate::playing_actions::{PlayingAction, Recruit};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
-use crate::status_phase::{ChangeGovernmentType, StatusPhaseState};
+use crate::status_phase::{ChangeGovernment, StatusPhaseState};
 use crate::unit::UnitType;
 use crate::wonder::{Wonder, WonderCardInfo};
 use itertools::Itertools;
@@ -39,7 +40,7 @@ pub enum PersistentEventRequest {
     SelectStructures(StructuresRequest),
     SelectHandCards(HandCardsRequest),
     BoolRequest(String),
-    ChangeGovernment(ChangeGovernmentRequest),
+    ChangeGovernment,
     ExploreResolution,
 }
 
@@ -55,7 +56,7 @@ pub enum EventResponse {
     SelectHandCards(Vec<HandCard>),
     SelectStructures(Vec<SelectedStructure>),
     Bool(bool),
-    ChangeGovernmentType(ChangeGovernmentType),
+    ChangeGovernmentType(ChangeGovernment),
     ExploreResolution(Rotation),
 }
 
@@ -97,7 +98,7 @@ impl PersistentEventPlayer {
 pub enum PersistentEventType {
     Collect(CollectInfo),
     ExploreResolution(ExploreResolutionState),
-    InfluenceCultureResolution(ResourcePile),
+    InfluenceCulture(InfluenceCultureInfo),
     UnitsKilled(KilledUnits),
     CombatStart(Combat),
     CombatRoundStart(CombatRoundStart),
@@ -106,6 +107,7 @@ pub enum PersistentEventType {
     CaptureUndefendedPosition(CombatStats),
     StatusPhase(StatusPhaseState),
     TurnStart,
+    PayAction(PlayingAction),
     Advance(OnAdvanceInfo),
     Construct(ConstructInfo),
     Recruit(Recruit),
@@ -351,19 +353,6 @@ impl PlayerRequest {
             choices,
             description: description.to_string(),
         }
-    }
-}
-
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub struct ChangeGovernmentRequest {
-    pub optional: bool,
-    pub cost: ResourcePile,
-}
-
-impl ChangeGovernmentRequest {
-    #[must_use]
-    pub fn new(optional: bool, cost: ResourcePile) -> Self {
-        Self { optional, cost }
     }
 }
 

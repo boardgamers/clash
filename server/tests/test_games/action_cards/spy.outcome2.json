@@ -4,13 +4,13 @@
     {
       "id": 0,
       "resources": {
-        "food": 1,
-        "wood": 6,
-        "ore": 6,
-        "ideas": 5,
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 3,
         "gold": 7,
         "mood_tokens": 7,
-        "culture_tokens": 5
+        "culture_tokens": 6
       },
       "resource_limit": {
         "food": 2,
@@ -28,21 +28,14 @@
           "position": "A1"
         },
         {
-          "city_pieces": {
-            "fortress": 1
-          },
-          "mood_state": "Angry",
-          "position": "C2"
-        },
-        {
           "city_pieces": {},
           "mood_state": "Neutral",
-          "position": "B3"
+          "position": "C2"
         }
       ],
       "units": [
         {
-          "position": "B2",
+          "position": "C2",
           "unit_type": "Infantry",
           "id": 0
         },
@@ -80,11 +73,6 @@
           "position": "C2",
           "unit_type": "Settler",
           "id": 7
-        },
-        {
-          "position": "B3",
-          "unit_type": "Infantry",
-          "id": 8
         }
       ],
       "civilization": "test0",
@@ -93,8 +81,16 @@
         "Mining",
         "Tactics"
       ],
-      "incident_tokens": 1,
-      "next_unit_id": 9
+      "incident_tokens": 2,
+      "action_cards": [
+        2
+      ],
+      "next_unit_id": 8,
+      "secrets": [
+        "Player2 has the following action cards: Advance/Encircled, Inspiration/Encircled, Inspiration/Peltasts",
+        "Player2 has the following objective cards: ",
+        "Player2 has the following wonder cards: Pyramids"
+      ]
     },
     {
       "id": 1,
@@ -137,41 +133,22 @@
       ],
       "civilization": "test1",
       "advances": [
+        "Fanaticism",
         "Farming",
-        "Mining"
+        "Mining",
+        "Storage",
+        "Tactics"
       ],
       "incident_tokens": 3,
+      "wonder_cards": [
+        "Pyramids"
+      ],
+      "action_cards": [
+        1,
+        3,
+        4
+      ],
       "next_unit_id": 2
-    },
-    {
-      "id": 2,
-      "resource_limit": {
-        "food": 2,
-        "wood": 7,
-        "ore": 7,
-        "ideas": 7,
-        "gold": 7
-      },
-      "units": [
-        {
-          "position": "A3",
-          "unit_type": "Elephant",
-          "id": 1
-        },
-        {
-          "position": "A3",
-          "unit_type": "Infantry",
-          "id": 3
-        },
-        {
-          "position": "A3",
-          "unit_type": "Infantry",
-          "id": 4
-        }
-      ],
-      "civilization": "Barbarians",
-      "incident_tokens": 3,
-      "next_unit_id": 5
     }
   ],
   "map": {
@@ -186,7 +163,9 @@
       ],
       [
         "A3",
-        "Mountain"
+        {
+          "Exhausted": "Forest"
+        }
       ],
       [
         "B1",
@@ -231,20 +210,32 @@
                 {
                   "action": {
                     "Playing": {
-                      "ActionCard": 15
+                      "ActionCard": 7
                     }
                   }
                 },
                 {
                   "action": {
-                    "Playing": {
-                      "InfluenceCultureAttempt": {
-                        "selected_structure": {
-                          "position": "B3",
-                          "structure": "CityCenter"
+                    "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 1
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ActionCard": 1
                         },
-                        "action_type": "InfluenceCultureAttempt"
-                      }
+                        {
+                          "ActionCard": 2
+                        }
+                      ]
                     }
                   }
                 }
@@ -255,21 +246,22 @@
       ]
     }
   ],
-  "action_log_index": 2,
+  "action_log_index": 3,
   "log": [
     [
-      "Player1 played the action card Cultural Takeover",
-      "Cultural Takeover: You may influence Barbarian cities of size 1."
+      "Player1 played the action card Spy as a regular action"
     ],
     [
-      "Player1 tried to influence culture the City Center in the city at B3 by Barbarians with the city at A1 and paid 2 culture tokens to boost the range and succeeded (rolled 6)",
-      "Player1 selected unit to gain: Infantry"
+      "Player1 paid 1 culture token for the action",
+      "Player1 decided to looked at all Wonder, Action, and Objective cards of Player2"
+    ],
+    [
+      "Player1 decided to swap an action card with Player2"
     ]
   ],
-  "undo_limit": 2,
+  "undo_limit": 3,
   "actions_left": 2,
-  "successful_cultural_influence": true,
-  "round": 1,
+  "round": 2,
   "age": 1,
   "messages": [
     "The game has started"
@@ -277,21 +269,12 @@
   "dice_roll_outcomes": [
     1,
     1,
-    10,
-    10,
-    10,
-    10,
-    10,
-    10
-  ],
-  "dice_roll_log": [
-    10,
-    10
-  ],
-  "wonders_left": [
-    "Pyramids"
-  ],
-  "incidents_left": [
-    28
+    1,
+    1,
+    1,
+    11,
+    11,
+    11,
+    11
   ]
 }

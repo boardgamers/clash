@@ -229,16 +229,110 @@
                   "undo": [
                     {
                       "op": "remove",
+                      "path": "/players/0/played_once_per_turn_actions"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events"
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "mood_tokens": 1
+                        }
+                      ]
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "PayAction": {
+                              "Collect": {
+                                "action_type": {
+                                  "Custom": "FreeEconomyCollect"
+                                },
+                                "city_position": "C2",
+                                "collections": [
+                                  {
+                                    "pile": {
+                                      "ore": 1
+                                    },
+                                    "position": "B1",
+                                    "times": 1
+                                  },
+                                  {
+                                    "pile": {
+                                      "ore": 1
+                                    },
+                                    "position": "B2",
+                                    "times": 1
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "Builtin": "Pay for action card"
+                            },
+                            "priority": 0,
+                            "request": {
+                              "Payment": [
+                                {
+                                  "cost": {
+                                    "conversions": [
+                                      {
+                                        "from": [
+                                          {
+                                            "food": 1
+                                          },
+                                          {
+                                            "wood": 1
+                                          },
+                                          {
+                                            "ore": 1
+                                          },
+                                          {
+                                            "ideas": 1
+                                          }
+                                        ],
+                                        "to": {
+                                          "gold": 1
+                                        },
+                                        "type": "Unlimited"
+                                      }
+                                    ],
+                                    "default": {
+                                      "mood_tokens": 1
+                                    }
+                                  },
+                                  "name": "Pay for action",
+                                  "optional": false
+                                }
+                              ]
+                            }
+                          },
+                          "last_priority_used": 0,
+                          "player": 0
+                        }
+                      ]
+                    },
+                    {
+                      "op": "remove",
                       "path": "/players/0/cities/1/activations"
                     },
                     {
                       "op": "replace",
                       "path": "/players/0/resources/mood_tokens",
                       "value": 6
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/played_once_per_turn_actions"
                     }
                   ]
                 }
@@ -249,10 +343,13 @@
       ]
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 2,
   "log": [
     [
-      "Player1 collects 1 ore and 1 ore for a total of 2 ore in the city at C2 using Free Economy",
+      "Player1 collects 1 ore and 1 ore for a total of 2 ore in the city at C2 using Free Economy"
+    ],
+    [
+      "Player1 paid 1 mood token for the action",
       "Metallurgy converted 1 ore to 1 gold",
       "Player1 could not store 1 ore and 1 gold"
     ]

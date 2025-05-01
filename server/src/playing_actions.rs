@@ -1,15 +1,19 @@
 use itertools::{Either, Itertools};
 use serde::{Deserialize, Serialize};
 
+use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{ActionCardInfo, land_battle_won_action, play_action_card};
 use crate::advance::{Advance, gain_advance_without_payment};
 use crate::city::{MoodState, found_city};
 use crate::collect::{PositionCollection, collect};
 use crate::construct::Construct;
+use crate::content::builtin::Builtin;
 use crate::content::custom_actions::{CustomActionType, CustomEventAction, execute_custom_action};
+use crate::content::persistent_events::{PaymentRequest, PersistentEventType};
 use crate::cultural_influence::{InfluenceCultureAttempt, influence_culture_attempt};
 use crate::game::GameState;
 use crate::happiness::increase_happiness;
+use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::{Player, remove_unit};
 use crate::player_events::PlayingActionInfo;
 use crate::recruit::recruit;
@@ -143,7 +147,7 @@ impl PlayingActionType {
 
                 let can_play = match c {
                     CustomActionType::Bartering => !p.action_cards.is_empty(),
-                    CustomActionType::Sports => p.resources.culture_tokens > 0 && any_non_happy(p),
+                    CustomActionType::Sports => can_use_sports(p),
                     CustomActionType::Theaters => {
                         p.resources.culture_tokens > 0 || p.resources.mood_tokens > 0
                     }
@@ -211,13 +215,6 @@ impl PlayingActionType {
             _ => ActionCost::regular(),
         }
     }
-
-    #[must_use]
-    pub fn remaining_resources(&self, p: &Player, game: &Game) -> ResourcePile {
-        let mut r = p.resources.clone();
-        r -= self.cost(game).cost.clone();
-        r
-    }
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
@@ -247,13 +244,14 @@ impl PlayingAction {
         player_index: usize,
         redo: bool,
     ) -> Result<(), String> {
-        use crate::construct;
-        use PlayingAction::*;
         let playing_action_type = self.playing_action_type();
         if !redo {
             playing_action_type.is_available(game, player_index)?;
         }
-        playing_action_type.cost(game).pay(game, player_index);
+        let action_cost = playing_action_type.cost(game);
+        if !action_cost.free {
+            game.actions_left -= 1;
+        }
 
         if let PlayingActionType::Custom(c) = playing_action_type {
             if c.info().once_per_turn {
@@ -263,6 +261,29 @@ impl PlayingAction {
             }
         }
 
+        self.on_pay_action(game, player_index)
+    }
+
+    pub(crate) fn on_pay_action(self, game: &mut Game, player_index: usize) -> Result<(), String> {
+        let Some(a) = game.trigger_persistent_event(
+            &[player_index],
+            |e| &mut e.pay_action,
+            self,
+            PersistentEventType::PayAction,
+        ) else {
+            return Ok(());
+        };
+
+        a.execute_without_cost(game, player_index)
+    }
+
+    pub(crate) fn execute_without_cost(
+        self,
+        game: &mut Game,
+        player_index: usize,
+    ) -> Result<(), String> {
+        use crate::construct;
+        use PlayingAction::*;
         match self {
             Advance { advance, payment } => {
                 if !game.player(player_index).can_advance(advance, game) {
@@ -284,7 +305,13 @@ impl PlayingAction {
             Collect(c) => collect(game, player_index, &c)?,
             Recruit(r) => recruit(game, player_index, r)?,
             IncreaseHappiness(i) => {
-                increase_happiness(game, player_index, &i.happiness_increases, Some(i.payment));
+                increase_happiness(
+                    game,
+                    player_index,
+                    &i.happiness_increases,
+                    Some(i.payment),
+                    &i.action_type,
+                );
             }
             InfluenceCultureAttempt(c) => {
                 influence_culture_attempt(game, player_index, &c.selected_structure)?;
@@ -358,7 +385,7 @@ pub struct ActionCost {
 impl ActionCost {
     pub(crate) fn is_available(&self, game: &Game, player_index: usize) -> Result<(), String> {
         let p = game.player(player_index);
-        if !p.resources.has_at_least(&self.cost) {
+        if !p.can_afford(&self.payment_options(p)) {
             return Err("Not enough resources for action type".to_string());
         }
 
@@ -366,15 +393,6 @@ impl ActionCost {
             return Err("No actions left".to_string());
         }
         Ok(())
-    }
-
-    pub(crate) fn pay(&self, game: &mut Game, player_index: usize) {
-        let p = game.player_mut(player_index);
-        let cost = self.cost.clone();
-        p.lose_resources(cost.clone()); // todo colosseum
-        if !self.free {
-            game.actions_left -= 1;
-        }
     }
 }
 
@@ -403,10 +421,11 @@ impl ActionCost {
     pub fn new(free: bool, cost: ResourcePile) -> Self {
         Self { free, cost }
     }
-}
 
-pub(crate) fn roll_boost_cost(roll: u8) -> ResourcePile {
-    ResourcePile::culture_tokens(5 - roll)
+    #[must_use]
+    pub fn payment_options(&self, player: &Player) -> PaymentOptions {
+        PaymentOptions::resources(player, PaymentReason::ActionCard, self.cost.clone())
+    }
 }
 
 #[must_use]
@@ -450,15 +469,46 @@ fn any_angry(player: &Player) -> bool {
         .any(|city| city.mood_state == MoodState::Angry)
 }
 
-// None if the action cost has been paid
-#[must_use]
-pub fn remaining_resources_for_action(
-    game: &Game,
-    action_type: Option<&PlayingActionType>,
-    player: &Player,
-) -> ResourcePile {
-    action_type.map_or_else(
-        || player.resources.clone(),
-        |action_type| action_type.remaining_resources(player, game),
-    )
+pub(crate) fn pay_for_action() -> Builtin {
+    Builtin::builder("Pay for action card", "")
+        .add_payment_request_listener(
+            |e| &mut e.pay_action,
+            0,
+            |game, player_index, a| {
+                if matches!(a, PlayingAction::IncreaseHappiness(_)) {
+                    // handled in the happiness action
+                    return None;
+                }
+
+                let payment_options = a
+                    .playing_action_type()
+                    .cost(game)
+                    .payment_options(game.player(player_index));
+                if payment_options.is_free() {
+                    return None;
+                }
+
+                Some(vec![PaymentRequest::mandatory(
+                    payment_options,
+                    "Pay for action",
+                )])
+            },
+            |game, s, _| {
+                game.add_info_log_item(&format!(
+                    "{} paid {} for the action",
+                    s.player_name, s.choice[0]
+                ));
+            },
+        )
+        .build()
+}
+
+fn can_use_sports(p: &Player) -> bool {
+    if !any_non_happy(p) {
+        return false;
+    }
+    if p.resources.culture_tokens > 0 {
+        return true;
+    }
+    p.wonders_owned.contains(Wonder::Colosseum) && p.resources.mood_tokens > 0
 }

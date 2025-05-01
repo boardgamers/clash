@@ -14,7 +14,7 @@ use crate::player_events::IncidentTarget;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::{
-    add_change_government, can_change_government_for_free, get_status_phase,
+    ChangeGovernmentOption, add_change_government, can_change_government_for_free, get_status_phase,
 };
 use crate::unit::{UnitType, kill_units};
 use crate::wonder::draw_wonder_from_pile;
@@ -134,7 +134,7 @@ fn revolution() -> Incident {
     );
     b = kill_unit_for_revolution(
         b,
-        3,
+        11,
         "Kill a unit to avoid losing an action",
         |game, _player| can_lose_action(game),
     );
@@ -145,11 +145,18 @@ fn revolution() -> Incident {
     });
     b = kill_unit_for_revolution(
         b,
-        1,
+        10,
         "Kill a unit to avoid changing government",
         |game, player| can_change_government_for_free(player, game),
     );
-    b = add_change_government(b, |event| &mut event.incident, false, ResourcePile::empty());
+    b = add_change_government(
+        b,
+        |event| &mut event.incident,
+        ChangeGovernmentOption::FreeAndMandatory,
+        |i, p, game| i.active_player == p && can_change_government_for_free(game.player(p), game),
+        |_, _| {}, // don't need to pay
+        |_| true,
+    );
     b.build()
 }
 
@@ -203,7 +210,7 @@ fn lose_action(game: &mut Game, player: usize) {
         game.permanent_effects
             .push(PermanentEffect::LoseAction(player));
     } else {
-        game.add_info_log_item(&format!("{name} lost an action"));
+        game.add_info_log_item(&format!("{name} lost an action for Revolution"));
         game.actions_left -= 1;
     }
 }

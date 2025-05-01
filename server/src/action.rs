@@ -9,7 +9,7 @@ use crate::combat_listeners::{combat_round_end, combat_round_start, end_combat};
 use crate::construct::on_construct;
 use crate::content::custom_actions::execute_custom_action;
 use crate::content::persistent_events::{EventResponse, PersistentEventType};
-use crate::cultural_influence::ask_for_cultural_influence_payment;
+use crate::cultural_influence::on_cultural_influence;
 use crate::explore::{ask_explore_resolution, move_to_unexplored_tile};
 use crate::game::GameState::{Finished, Movement, Playing};
 use crate::game::{Game, GameState};
@@ -178,8 +178,8 @@ pub(crate) fn execute_custom_phase_action(
         ExploreResolution(r) => {
             ask_explore_resolution(game, player_index, r);
         }
-        InfluenceCultureResolution(r) => {
-            ask_for_cultural_influence_payment(game, player_index, r);
+        InfluenceCulture(r) => {
+            on_cultural_influence(game, player_index, r);
         }
         UnitsKilled(k) => units_killed(game, player_index, k),
         CombatStart(c) => {
@@ -203,6 +203,7 @@ pub(crate) fn execute_custom_phase_action(
         }
         StatusPhase(s) => play_status_phase(game, s),
         TurnStart => game.on_start_turn(),
+        PayAction(a) => a.on_pay_action(game, player_index)?,
         Advance(a) => {
             on_advance(game, player_index, a);
         }

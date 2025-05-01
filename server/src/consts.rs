@@ -17,6 +17,7 @@ pub const ARMY_MOVEMENT_REQUIRED_ADVANCE: Advance = Advance::Tactics;
 pub const CITY_PIECE_LIMIT: usize = 5;
 pub const ACTIONS: u32 = 3;
 pub const NON_HUMAN_PLAYERS: usize = 2; // pirates, barbarians
+pub const INFLUENCE_MIN_ROLL: u8 = 5;
 
 pub const UNIT_LIMIT: Units = Units {
     settlers: 4,

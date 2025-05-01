@@ -269,7 +269,7 @@
                           ]
                         ],
                         "payment": {
-                          "mood_tokens": 5
+                          "mood_tokens": 6
                         },
                         "action_type": {
                           "Custom": "VotingIncreaseHappiness"
@@ -315,7 +315,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 paid 5 mood tokens to increase happiness in the city at C2 by 1 steps, making it Neutral and the city at B3 by 2 steps, making it Happy using Voting"
+      "Player1 paid 6 mood tokens to increase happiness in the city at C2 by 1 steps, making it Neutral and the city at B3 by 2 steps, making it Happy using Voting"
     ]
   ],
   "undo_limit": 0,

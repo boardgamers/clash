@@ -243,13 +243,89 @@
                   },
                   "undo": [
                     {
-                      "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 9
+                      "op": "remove",
+                      "path": "/players/0/played_once_per_turn_actions"
                     },
                     {
                       "op": "remove",
-                      "path": "/players/0/played_once_per_turn_actions"
+                      "path": "/events"
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "mood_tokens": 1
+                        }
+                      ]
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "PayAction": {
+                              "Custom": {
+                                "action": "ForcedLabor",
+                                "city": null
+                              }
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "Builtin": "Pay for action card"
+                            },
+                            "priority": 0,
+                            "request": {
+                              "Payment": [
+                                {
+                                  "cost": {
+                                    "conversions": [
+                                      {
+                                        "from": [
+                                          {
+                                            "food": 1
+                                          },
+                                          {
+                                            "wood": 1
+                                          },
+                                          {
+                                            "ore": 1
+                                          },
+                                          {
+                                            "ideas": 1
+                                          }
+                                        ],
+                                        "to": {
+                                          "gold": 1
+                                        },
+                                        "type": "Unlimited"
+                                      }
+                                    ],
+                                    "default": {
+                                      "mood_tokens": 1
+                                    }
+                                  },
+                                  "name": "Pay for action",
+                                  "optional": false
+                                }
+                              ]
+                            }
+                          },
+                          "last_priority_used": 0,
+                          "player": 0
+                        }
+                      ]
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/mood_tokens",
+                      "value": 9
                     }
                   ]
                 },
@@ -301,10 +377,13 @@
       ]
     }
   ],
-  "action_log_index": 2,
+  "action_log_index": 3,
   "log": [
     [
-      "Player1 started ForcedLabor",
+      "Player1 started ForcedLabor"
+    ],
+    [
+      "Player1 paid 1 mood token for the action",
       "Player1 paid 1 mood token to treat Angry cities as neutral"
     ],
     [

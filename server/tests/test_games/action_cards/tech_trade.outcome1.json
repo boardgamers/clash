@@ -212,6 +212,79 @@
                   },
                   "undo": [
                     {
+                      "op": "remove",
+                      "path": "/events"
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 1
+                        }
+                      ]
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "PayAction": {
+                              "ActionCard": 39
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "Builtin": "Pay for action card"
+                            },
+                            "priority": 0,
+                            "request": {
+                              "Payment": [
+                                {
+                                  "cost": {
+                                    "conversions": [
+                                      {
+                                        "from": [
+                                          {
+                                            "food": 1
+                                          },
+                                          {
+                                            "wood": 1
+                                          },
+                                          {
+                                            "ore": 1
+                                          },
+                                          {
+                                            "ideas": 1
+                                          }
+                                        ],
+                                        "to": {
+                                          "gold": 1
+                                        },
+                                        "type": "Unlimited"
+                                      }
+                                    ],
+                                    "default": {
+                                      "culture_tokens": 1
+                                    }
+                                  },
+                                  "name": "Pay for action",
+                                  "optional": false
+                                }
+                              ]
+                            }
+                          },
+                          "last_priority_used": 0,
+                          "player": 0
+                        }
+                      ]
+                    },
+                    {
                       "op": "add",
                       "path": "/players/0/action_cards",
                       "value": [
@@ -275,10 +348,13 @@
       ]
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 2,
   "log": [
     [
-      "Player1 played the action card Technology Trade for 1 culture token",
+      "Player1 played the action card Technology Trade"
+    ],
+    [
+      "Player1 paid 1 culture token for the action",
       "Player1 selected Player2 as player for Technology Trade.",
       "Player1 selected Storage as advance for Technology Trade.",
       "Player gained 1 mood token as advance bonus",

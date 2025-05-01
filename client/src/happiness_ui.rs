@@ -8,7 +8,6 @@ use server::city::{City, MoodState};
 use server::game::Game;
 use server::happiness::{available_happiness_actions, happiness_cost};
 use server::player::CostTrigger;
-use server::player_events::CostInfo;
 use server::playing_actions::{IncreaseHappiness, PlayingAction, PlayingActionType};
 use server::position::Position;
 
@@ -37,15 +36,20 @@ impl IncreaseHappinessConfig {
         custom: &BaseOrCustomDialog,
     ) -> Option<Payment<String>> {
         let p = rc.shown_player;
-        let c = happiness_cost(p, new_steps, CostTrigger::WithModifiers).cost;
-        c.can_afford(&custom.action_type.remaining_resources(p, rc.game))
-            .then_some(Payment::new(
-                &c,
-                &custom.action_type.remaining_resources(p, rc.game),
-                "Increase happiness".to_string(),
-                "Increase happiness",
-                false,
-            ))
+        let c = happiness_cost(
+            p.index,
+            new_steps,
+            CostTrigger::WithModifiers,
+            &custom.action_type,
+            rc.game,
+        )
+        .cost;
+        p.can_afford(&c).then_some(rc.new_payment(
+            &c,
+            "Increase happiness".to_string(),
+            "Increase happiness",
+            false,
+        ))
     }
 }
 
@@ -135,27 +139,31 @@ fn increase_happiness_new_steps(
     new_steps: u8,
     action_type: &PlayingActionType,
 ) -> Option<u8> {
-    increase_happiness_cost(rc, city, new_steps, action_type).map(|_| new_steps)
+    can_afford_increase_happiness(rc, city, new_steps, action_type).then_some(new_steps)
 }
 
 #[must_use]
-pub fn increase_happiness_cost(
+pub fn can_afford_increase_happiness(
     rc: &RenderContext,
     city: &City,
     steps: u8,
     action_type: &PlayingActionType,
-) -> Option<CostInfo> {
-    let total_cost = happiness_cost(
-        rc.shown_player,
-        steps * city.size() as u8,
-        CostTrigger::WithModifiers,
-    );
+) -> bool {
     let max_steps = 2 - city.mood_state.clone() as u8;
-    (total_cost
-        .cost
-        .can_afford(&action_type.remaining_resources(rc.shown_player, rc.game))
-        && steps <= max_steps)
-        .then_some(total_cost)
+    if steps > max_steps {
+        return false;
+    }
+
+    rc.shown_player.can_afford(
+        &happiness_cost(
+            rc.shown_player.index,
+            steps * city.size() as u8,
+            CostTrigger::WithModifiers,
+            action_type,
+            rc.game,
+        )
+        .cost,
+    )
 }
 
 #[must_use]

@@ -16,7 +16,7 @@ use crate::incident::PassedIncident;
 use crate::map::Terrain;
 use crate::objective_card::SelectObjectivesInfo;
 use crate::payment::PaymentOptions;
-use crate::playing_actions::{PlayingActionType, Recruit};
+use crate::playing_actions::{PlayingAction, PlayingActionType, Recruit};
 use crate::status_phase::StatusPhaseState;
 use crate::unit::Units;
 use crate::utils;
@@ -91,8 +91,9 @@ pub(crate) struct PersistentEvents {
     pub advance: PersistentEvent<OnAdvanceInfo>,
     pub recruit: PersistentEvent<Recruit>,
     pub found_city: PersistentEvent<Position>,
-    pub influence_culture_resolution: PersistentEvent<ResourcePile>,
+    pub influence_culture: PersistentEvent<InfluenceCultureInfo>,
     pub explore_resolution: PersistentEvent<ExploreResolutionState>,
+    pub pay_action: PersistentEvent<PlayingAction>,
     pub play_action_card: PersistentEvent<ActionCardInfo>,
     pub play_wonder_card: PersistentEvent<WonderCardInfo>,
 
@@ -122,8 +123,9 @@ impl PersistentEvents {
             advance: Event::new("advance"),
             recruit: Event::new("recruit"),
             found_city: Event::new("found_city"),
-            influence_culture_resolution: Event::new("influence_culture_resolution"),
+            influence_culture: Event::new("influence_culture"),
             explore_resolution: Event::new("explore_resolution"),
+            pay_action: Event::new("pay_action"),
             play_action_card: Event::new("play_action_card"),
             play_wonder_card: Event::new("play_wonder_card"),
 

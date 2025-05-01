@@ -4,13 +4,11 @@
     {
       "id": 0,
       "resources": {
-        "food": 5,
+        "food": 3,
         "wood": 6,
         "ore": 6,
-        "ideas": 5,
         "gold": 7,
-        "mood_tokens": 7,
-        "culture_tokens": 7
+        "culture_tokens": 6
       },
       "resource_limit": {
         "food": 2,
@@ -23,21 +21,28 @@
       },
       "cities": [
         {
-          "city_pieces": {},
-          "mood_state": "Happy",
-          "position": "A1"
-        },
-        {
-          "city_pieces": {},
-          "mood_state": "Happy",
-          "position": "A3"
-        },
-        {
           "city_pieces": {
+            "fortress": 0,
             "temple": 1
           },
-          "mood_state": "Happy",
+          "mood_state": "Neutral",
+          "activations": 1,
           "position": "C2"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "position": "C1"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "position": "B2"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "position": "B3"
         }
       ],
       "units": [
@@ -48,13 +53,11 @@
         },
         {
           "position": "C2",
-          "unit_type": "Cavalry",
+          "unit_type": "Infantry",
+          "movement_restrictions": [
+            "Battle"
+          ],
           "id": 1
-        },
-        {
-          "position": "C2",
-          "unit_type": "Leader",
-          "id": 2
         },
         {
           "position": "C2",
@@ -85,20 +88,13 @@
       "civilization": "test0",
       "advances": [
         "Arts",
-        "Dogma",
-        "Engineering",
+        "Bartering",
+        "Currency",
         "Farming",
         "Mining",
-        "Myths",
-        "Nationalism",
-        "Rituals",
-        "Tactics",
-        "Voting"
+        "Tactics"
       ],
-      "incident_tokens": 2,
-      "wonder_cards": [
-        "Pyramids"
-      ],
+      "incident_tokens": 1,
       "next_unit_id": 8
     },
     {
@@ -110,7 +106,7 @@
         "ideas": 7,
         "gold": 7,
         "mood_tokens": 7,
-        "culture_tokens": 2
+        "culture_tokens": 7
       },
       "resource_limit": {
         "food": 2,
@@ -123,22 +119,23 @@
       },
       "cities": [
         {
-          "city_pieces": {},
+          "city_pieces": {
+            "fortress": 0
+          },
           "mood_state": "Angry",
-          "activations": 2,
-          "position": "B3"
-        }
-      ],
-      "units": [
-        {
-          "position": "C1",
-          "unit_type": "Infantry",
-          "id": 0
+          "position": "A1"
         },
         {
-          "position": "C1",
-          "unit_type": "Infantry",
-          "id": 1
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "position": "A3"
+        },
+        {
+          "city_pieces": {
+            "fortress": 0
+          },
+          "mood_state": "Happy",
+          "position": "A4"
         }
       ],
       "civilization": "test1",
@@ -148,6 +145,19 @@
       ],
       "incident_tokens": 3,
       "next_unit_id": 2
+    },
+    {
+      "id": 2,
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "civilization": "Barbarians",
+      "incident_tokens": 3,
+      "next_unit_id": 0
     }
   ],
   "map": {
@@ -162,6 +172,10 @@
       ],
       [
         "A3",
+        "Mountain"
+      ],
+      [
+        "A4",
         "Mountain"
       ],
       [
@@ -195,7 +209,7 @@
     ]
   },
   "starting_player_index": 0,
-  "current_player_index": 1,
+  "current_player_index": 0,
   "action_log": [
     {
       "rounds": [
@@ -207,42 +221,50 @@
                 {
                   "action": {
                     "Playing": {
-                      "InfluenceCultureAttempt": {
-                        "selected_structure": {
-                          "position": "C2",
-                          "structure": {
-                            "Building": "Temple"
-                          }
-                        },
-                        "action_type": "InfluenceCultureAttempt"
-                      }
+                      "ActionCard": 17
                     }
-                  }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 3
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events"
+                    }
+                  ]
                 },
                 {
                   "action": {
                     "Response": {
                       "Payment": [
                         {
-                          "culture_tokens": 4
+                          "culture_tokens": 1
                         }
                       ]
                     }
                   },
                   "undo": [
                     {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 2
+                    },
+                    {
                       "op": "add",
                       "path": "/events",
                       "value": [
                         {
                           "event_type": {
-                            "InfluenceCultureResolution": {
-                              "culture_tokens": 4
+                            "PayAction": {
+                              "ActionCard": 17
                             }
                           },
                           "handler": {
                             "origin": {
-                              "Builtin": "Influence Culture"
+                              "Builtin": "Pay for action card"
                             },
                             "priority": 0,
                             "request": {
@@ -272,33 +294,71 @@
                                       }
                                     ],
                                     "default": {
-                                      "culture_tokens": 4
+                                      "culture_tokens": 1
                                     }
                                   },
-                                  "name": "Pay 4 culture tokens to increase the dice roll",
-                                  "optional": true
+                                  "name": "Pay for action",
+                                  "optional": false
                                 }
                               ]
                             }
                           },
                           "last_priority_used": 0,
-                          "player": 1
+                          "player": 0
                         }
                       ]
                     },
                     {
-                      "op": "replace",
-                      "path": "/players/0/cities/2/city_pieces/temple",
-                      "value": 0
+                      "op": "add",
+                      "path": "/players/0/action_cards",
+                      "value": [
+                        17
+                      ]
                     },
                     {
                       "op": "replace",
-                      "path": "/players/1/resources/culture_tokens",
-                      "value": 6
+                      "path": "/players/0/resources/culture_tokens",
+                      "value": 7
                     },
                     {
                       "op": "remove",
-                      "path": "/successful_cultural_influence"
+                      "path": "/permanent_effects"
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Construct": {
+                        "city_position": "C2",
+                        "city_piece": "Fortress",
+                        "payment": {},
+                        "port_position": null
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 3
+                    },
+                    {
+                      "op": "add",
+                      "path": "/permanent_effects",
+                      "value": [
+                        {
+                          "Construct": "CityDevelopment"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/cities/0/city_pieces/fortress"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/cities/0/activations"
                     }
                   ]
                 }
@@ -309,19 +369,21 @@
       ]
     }
   ],
-  "action_log_index": 2,
+  "action_log_index": 3,
   "log": [
     [
-      "Player2 tried to influence culture the Temple in the city at C2 by Player1 with the city at B3 and paid 1 culture token to boost the range and rolled a 1",
-      "Player2 now has the option to pay 4 culture tokens to increase the dice roll and proceed with the cultural influence"
+      "Player1 played the action card City Development as a regular action"
     ],
     [
-      "Player2 paid 4 culture tokens to increase the dice roll and proceed with the cultural influence"
+      "Player1 paid 1 culture token for the action",
+      "City Development: You may build a building in a city without spending an action and without paying for it."
+    ],
+    [
+      "Player1 paid nothing to construct a Fortress in the city at C2"
     ]
   ],
-  "undo_limit": 1,
+  "undo_limit": 0,
   "actions_left": 2,
-  "successful_cultural_influence": true,
   "round": 1,
   "age": 1,
   "messages": [
@@ -339,9 +401,12 @@
     10
   ],
   "dice_roll_log": [
-    1
+    10
   ],
   "wonders_left": [
     "Pyramids"
+  ],
+  "incidents_left": [
+    26
   ]
 }

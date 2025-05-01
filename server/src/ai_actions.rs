@@ -6,8 +6,8 @@ use crate::collect::{available_collect_actions, possible_resource_collections};
 use crate::construct::{Construct, available_buildings, new_building_positions};
 use crate::content::custom_actions::CustomEventAction;
 use crate::content::persistent_events::{
-    ChangeGovernmentRequest, EventResponse, HandCardsRequest, MultiRequest, PersistentEventRequest,
-    PersistentEventState, PositionRequest, SelectedStructure, is_selected_structures_valid,
+    EventResponse, HandCardsRequest, MultiRequest, PersistentEventRequest, PersistentEventState,
+    PositionRequest, SelectedStructure, is_selected_structures_valid,
 };
 use crate::cultural_influence::{
     InfluenceCultureAttempt, available_influence_actions, available_influence_culture,
@@ -24,7 +24,7 @@ use crate::position::Position;
 use crate::recruit::recruit_cost;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
-use crate::status_phase::{ChangeGovernment, ChangeGovernmentType, government_advances};
+use crate::status_phase::{ChangeGovernment, government_advances};
 use crate::unit::{UnitType, Units};
 use crate::wonder::Wonder;
 use itertools::Itertools;
@@ -261,16 +261,6 @@ fn payment(ai_actions: &mut AiActions, o: &PaymentOptions, p: &Player) -> Resour
     try_payment(ai_actions, o, p).expect("expected payment")
 }
 
-fn payment_with_action(
-    o: &PaymentOptions,
-    p: &Player,
-    playing_action_type: &PlayingActionType,
-    game: &Game,
-) -> ResourcePile {
-    o.first_valid_payment(&playing_action_type.remaining_resources(p, game))
-        .expect("expected payment")
-}
-
 pub fn try_payment(
     ai_actions: &mut AiActions,
     o: &PaymentOptions,
@@ -454,7 +444,6 @@ fn calculate_increase_happiness(
     let mut all_steps: Vec<(Position, u8)> = vec![];
     let mut step_sum = 0;
     let mut cost = PaymentOptions::free();
-    let available = action_type.remaining_resources(player, game);
 
     for c in player
         .cities
@@ -469,8 +458,14 @@ fn calculate_increase_happiness(
         };
         let new_steps_sum = step_sum + steps * c.size() as u8;
 
-        let info = happiness_cost(player, new_steps_sum, CostTrigger::NoModifiers);
-        if !info.cost.can_afford(&available) {
+        let info = happiness_cost(
+            player.index,
+            new_steps_sum,
+            CostTrigger::NoModifiers,
+            action_type,
+            game,
+        );
+        if !info.cost.can_afford(&player.resources) {
             break;
         }
         all_steps.push((c.position, steps));
@@ -480,7 +475,8 @@ fn calculate_increase_happiness(
 
     (!all_steps.is_empty()).then_some(IncreaseHappiness::new(
         all_steps,
-        payment_with_action(&cost, player, action_type, game),
+        cost.first_valid_payment(&player.resources)
+            .expect("expected payment"),
         action_type.clone(),
     ))
 }
@@ -563,7 +559,7 @@ fn responses(event: &PersistentEventState, player: &Player, game: &Game) -> Vec<
         PersistentEventRequest::BoolRequest(_) => {
             vec![EventResponse::Bool(false), EventResponse::Bool(true)]
         }
-        PersistentEventRequest::ChangeGovernment(c) => change_government(player, &c, game),
+        PersistentEventRequest::ChangeGovernment => change_government(player, game),
         PersistentEventRequest::ExploreResolution => {
             vec![
                 EventResponse::ExploreResolution(0),
@@ -573,35 +569,27 @@ fn responses(event: &PersistentEventState, player: &Player, game: &Game) -> Vec<
     }
 }
 
-fn change_government(p: &Player, c: &ChangeGovernmentRequest, game: &Game) -> Vec<EventResponse> {
-    if c.optional {
-        vec![EventResponse::ChangeGovernmentType(
-            ChangeGovernmentType::KeepGovernment,
-        )]
-    } else {
-        // change to the first available government and take the first advances
-        let new = game
-            .cache
-            .get_governments()
-            .iter()
-            .find(|g| p.can_advance_ignore_contradicting(g.advances[0].advance, game))
-            .expect("government not found");
+fn change_government(p: &Player, game: &Game) -> Vec<EventResponse> {
+    // change to the first available government and take the first advances
+    let new = game
+        .cache
+        .get_governments()
+        .iter()
+        .find(|g| p.can_advance_ignore_contradicting(g.advances[0].advance, game))
+        .expect("government not found");
 
-        let advances = new
-            .advances
-            .iter()
-            .dropping(1) // is taken implicitly
-            .take(government_advances(p, game).len() - 1)
-            .map(|a| a.advance)
-            .collect_vec();
+    let advances = new
+        .advances
+        .iter()
+        .dropping(1) // is taken implicitly
+        .take(government_advances(p, game).len() - 1)
+        .map(|a| a.advance)
+        .collect_vec();
 
-        vec![EventResponse::ChangeGovernmentType(
-            ChangeGovernmentType::ChangeGovernment(ChangeGovernment::new(
-                new.name.clone(),
-                advances,
-            )),
-        )]
-    }
+    vec![EventResponse::ChangeGovernmentType(ChangeGovernment::new(
+        new.name.clone(),
+        advances,
+    ))]
 }
 
 fn hand_card_strategy(o: &EventOrigin, r: &HandCardsRequest) -> SelectMultiStrategy {

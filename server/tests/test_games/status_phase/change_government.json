@@ -3,23 +3,30 @@
   "events": [
     {
       "event_type": {
-        "StatusPhase": "ChangeGovernmentType"
+        "StatusPhase": "RazeSize1City"
       },
-      "player": 0,
+      "players_used": [
+        0
+      ],
+      "player": 1,
       "last_priority_used": 0,
       "handler": {
         "priority": 0,
         "request": {
-          "ChangeGovernment": {
-            "optional": true,
-            "cost": {
-              "mood_tokens": 1,
-              "culture_tokens": 1
-            }
+          "SelectPositions": {
+            "choices": [
+              "A1",
+              "C2"
+            ],
+            "needed": {
+              "start": 0,
+              "end": 1
+            },
+            "description": "Select a city to raze"
           }
         },
         "origin": {
-          "Builtin": "Change Government"
+          "Builtin": "Raze city"
         }
       }
     }

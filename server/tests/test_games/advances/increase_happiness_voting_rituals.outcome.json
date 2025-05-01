@@ -7,9 +7,9 @@
         "food": 1,
         "wood": 5,
         "ore": 4,
-        "ideas": 4,
+        "ideas": 2,
         "gold": 4,
-        "mood_tokens": 7,
+        "mood_tokens": 9,
         "culture_tokens": 9
       },
       "resource_limit": {
@@ -272,9 +272,8 @@
                         "payment": {
                           "food": 1,
                           "ore": 1,
-                          "ideas": 1,
-                          "gold": 1,
-                          "mood_tokens": 1
+                          "ideas": 3,
+                          "gold": 1
                         },
                         "action_type": {
                           "Custom": "VotingIncreaseHappiness"
@@ -320,11 +319,6 @@
                     },
                     {
                       "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 9
-                    },
-                    {
-                      "op": "replace",
                       "path": "/players/0/resources/ore",
                       "value": 5
                     }
@@ -340,7 +334,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 paid 1 food, 1 ore, 1 idea, 1 gold and 1 mood token to increase happiness in the city at C2 by 1 steps, making it Neutral and the city at B3 by 2 steps, making it Happy using Voting",
+      "Player1 paid 1 food, 1 ore, 3 ideas and 1 gold to increase happiness in the city at C2 by 1 steps, making it Neutral and the city at B3 by 2 steps, making it Happy using Voting",
       "Rituals allows spending any resource as a substitute for mood tokens"
     ]
   ],

@@ -1,51 +1,24 @@
 {
-  "state": "Playing",
-  "events": [
-    {
-      "event_type": {
-        "Incident": {
-          "active_player": 0
-        }
-      },
-      "player": 0,
-      "last_priority_used": 3,
-      "handler": {
-        "priority": 3,
-        "request": {
-          "SelectUnits": {
-            "player": 0,
-            "choices": [
-              0,
-              1,
-              3
-            ],
-            "needed": {
-              "start": 0,
-              "end": 1
-            },
-            "description": "Kill a unit to avoid losing an action"
-          }
-        },
-        "origin": {
-          "Incident": 38
-        }
-      }
+  "state": {
+    "Movement": {
+      "movement_actions_left": 2,
+      "moved_units": [
+        0
+      ]
     }
-  ],
+  },
   "players": [
     {
       "id": 0,
       "resources": {
-        "food": 1,
+        "food": 3,
         "wood": 6,
         "ore": 6,
-        "ideas": 5,
         "gold": 7,
-        "mood_tokens": 8,
-        "culture_tokens": 7
+        "culture_tokens": 6
       },
       "resource_limit": {
-        "food": 7,
+        "food": 2,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -56,11 +29,7 @@
       "cities": [
         {
           "city_pieces": {
-            "fortress": 0,
-            "temple": 1,
-            "wonders": [
-              "Pyramids"
-            ]
+            "temple": 1
           },
           "mood_state": "Neutral",
           "position": "C2"
@@ -85,14 +54,6 @@
         {
           "position": "C2",
           "unit_type": "Infantry",
-          "id": 0
-        },
-        {
-          "position": "C2",
-          "unit_type": "Infantry",
-          "movement_restrictions": [
-            "Battle"
-          ],
           "id": 1
         },
         {
@@ -123,17 +84,14 @@
       ],
       "civilization": "test0",
       "advances": [
+        "Arts",
+        "Bartering",
+        "Currency",
         "Farming",
         "Mining",
-        "StateReligion",
-        "Storage",
-        "Tactics",
-        "Voting"
+        "Tactics"
       ],
-      "wonders_built": [
-        "Pyramids"
-      ],
-      "incident_tokens": 3,
+      "incident_tokens": 1,
       "next_unit_id": 8
     },
     {
@@ -161,7 +119,7 @@
           "city_pieces": {
             "fortress": 0
           },
-          "mood_state": "Happy",
+          "mood_state": "Angry",
           "position": "A1"
         },
         {
@@ -260,13 +218,78 @@
                 {
                   "action": {
                     "Playing": {
-                      "Advance": {
-                        "advance": "Storage",
-                        "payment": {
-                          "gold": 2
+                      "ActionCard": 23
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 1
                         }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  }
+                }
+              ]
+            },
+            {
+              "index": 1,
+              "items": [
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          0
+                        ],
+                        "destination": "B1"
                       }
                     }
+                  },
+                  "combat_stats": {
+                    "position": "B1",
+                    "battleground": "Land",
+                    "attacker": {
+                      "player": 0,
+                      "present": {
+                        "infantry": 1
+                      },
+                      "losses": {
+                        "infantry": 1
+                      }
+                    },
+                    "defender": {
+                      "player": 1,
+                      "present": {
+                        "infantry": 1
+                      },
+                      "losses": {
+                        "infantry": 1
+                      }
+                    },
+                    "result": "Draw"
                   }
                 }
               ]
@@ -279,17 +302,48 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 paid 2 gold to get the Storage advance",
-      "Player gained 1 mood token as advance bonus"
+      "Player1 played the action card Negotiations"
     ],
     [
-      "A new game event has been triggered: Revolution",
-      "Player1 gained 2 gold from a Gold Mine"
+      "Player1 paid 1 culture token for the action",
+      "Player1 and Player2 are in negotiations."
+    ],
+    [
+      "Player1 ended their turn with 3 actions left"
+    ],
+    [
+      "It's Player2's turn",
+      "Player2 may not attack Player1 this turn."
+    ],
+    [
+      "Player2 ended their turn with 3 actions left"
+    ],
+    [
+      "Round 2/3"
+    ],
+    [
+      "It's Player1's turn",
+      "Player1 may attack Player2 again."
+    ],
+    [
+      "Player1 marched 1 infantry from C2 to B1"
+    ],
+    [
+      "Combat round 1",
+      "Attackers: 1 infantry",
+      "Defenders: 1 infantry",
+      "Player1 rolled 6 (Infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units.",
+      "Player2 rolled 6 (Infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against attacking units.",
+      "Player1 has to remove all of their attacking units",
+      "Player1 removed 1 infantry",
+      "Player2 has to remove all of their defending units",
+      "Player2 removed 1 infantry",
+      "Battle ends in a draw"
     ]
   ],
   "undo_limit": 1,
   "actions_left": 2,
-  "round": 1,
+  "round": 2,
   "age": 1,
   "messages": [
     "The game has started"
@@ -301,14 +355,17 @@
     10,
     10,
     10,
-    10,
-    10,
     10
   ],
   "dice_roll_log": [
+    10,
+    10,
     10
   ],
+  "wonders_left": [
+    "Pyramids"
+  ],
   "incidents_left": [
-    38
+    57
   ]
 }

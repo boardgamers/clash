@@ -10,7 +10,7 @@ use crate::content::{
 use crate::game::Game;
 use crate::incident::Incident;
 use crate::objective_card::{Objective, ObjectiveCard};
-use crate::status_phase::StatusPhaseState::DetermineFirstPlayer;
+use crate::status_phase::StatusPhaseState::{ChangeGovernmentType, DetermineFirstPlayer};
 use crate::status_phase::{
     StatusPhaseState, complete_objectives, determine_first_player, draw_cards, free_advance,
     get_status_phase, may_change_government, raze_city,
@@ -204,10 +204,11 @@ impl Cache {
 
     #[must_use]
     pub fn status_phase_handler(&self, p: &StatusPhaseState) -> &Builtin {
-        if let DetermineFirstPlayer(_) = p {
-            return &self.status_phase_handlers[&DetermineFirstPlayer(0)];
+        match p {
+            DetermineFirstPlayer(_) => &self.status_phase_handlers[&DetermineFirstPlayer(0)],
+            ChangeGovernmentType(_) => &self.status_phase_handlers[&ChangeGovernmentType(false)],
+            _ => &self.status_phase_handlers[p],
         }
-        &self.status_phase_handlers[p]
     }
 
     #[must_use]
@@ -307,7 +308,7 @@ fn status_phase_handlers() -> HashMap<StatusPhaseState, Builtin> {
         (FreeAdvance, free_advance()),
         (DrawCards, draw_cards()),
         (RazeSize1City, raze_city()),
-        (ChangeGovernmentType, may_change_government()),
+        (ChangeGovernmentType(false), may_change_government()),
         (DetermineFirstPlayer(0), determine_first_player()),
     ])
 }

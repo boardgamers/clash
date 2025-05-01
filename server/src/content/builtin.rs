@@ -15,12 +15,13 @@ use crate::content::incidents::great_warlord::use_great_warlord;
 use crate::content::incidents::trojan::{
     anarchy_advance, decide_trojan_horse, solar_eclipse_end_combat,
 };
-use crate::cultural_influence::cultural_influence_resolution;
+use crate::cultural_influence::use_cultural_influence;
 use crate::events::EventOrigin;
 use crate::explore::explore_resolution;
 use crate::game::Game;
 use crate::objective_card::select_objectives;
 use crate::pirates::{pirates_bonus, pirates_round_bonus};
+use crate::playing_actions::pay_for_action;
 use crate::unit::choose_carried_units_to_remove;
 use crate::wonder::{build_wonder, on_draw_wonder_card};
 
@@ -76,7 +77,8 @@ impl AbilityInitializerSetup for BuiltinBuilder {
 #[must_use]
 pub fn get_all_uncached() -> Vec<Builtin> {
     vec![
-        cultural_influence_resolution(),
+        pay_for_action(),
+        use_cultural_influence(),
         explore_resolution(),
         on_draw_wonder_card(),
         build_wonder(),

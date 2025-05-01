@@ -160,22 +160,13 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
         }
         PlayingAction::ActionCard(a) => {
             let card = game.cache.get_civil_card(*a);
-            let pile = &card.action_type.cost;
-            let cost = if pile.is_empty() {
-                ""
-            } else {
-                &format!(" for {pile}")
-            };
             let action = if card.action_type.free {
                 ""
             } else {
                 " as a regular action"
             };
 
-            format!(
-                "{player_name} played the action card {}{cost}{action}",
-                card.name,
-            )
+            format!("{player_name} played the action card {}{action}", card.name,)
         }
         PlayingAction::WonderCard(name) => {
             format!("{player_name} played the wonder card {}", name.name(game))

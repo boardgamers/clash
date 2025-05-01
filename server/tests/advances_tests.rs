@@ -233,7 +233,7 @@ fn test_increase_happiness_voting() {
                         (Position::from_offset("C2"), 1),
                         (Position::from_offset("B3"), 2),
                     ],
-                    ResourcePile::mood_tokens(5),
+                    ResourcePile::mood_tokens(6),
                     PlayingActionType::Custom(CustomActionType::VotingIncreaseHappiness),
                 ),
             )),
@@ -253,7 +253,7 @@ fn test_increase_happiness_voting_rituals() {
                         (Position::from_offset("C2"), 1),
                         (Position::from_offset("B3"), 2),
                     ],
-                    ResourcePile::new(1, 0, 1, 1, 1, 1, 0),
+                    ResourcePile::new(1, 0, 1, 3, 1, 0, 0),
                     PlayingActionType::Custom(CustomActionType::VotingIncreaseHappiness),
                 ),
             )),
@@ -265,13 +265,20 @@ fn test_increase_happiness_voting_rituals() {
 fn test_absolute_power() {
     JSON.test(
         "absolute_power",
-        vec![TestAction::undoable(
-            0,
-            Action::Playing(Custom(CustomEventAction::new(
-                CustomActionType::AbsolutePower,
-                None,
-            ))),
-        )],
+        vec![
+            TestAction::undoable(
+                0,
+                Action::Playing(Custom(CustomEventAction::new(
+                    CustomActionType::AbsolutePower,
+                    None,
+                ))),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::mood_tokens(2)])),
+            ),
+        ],
     );
 }
 
@@ -286,7 +293,13 @@ fn test_forced_labor() {
                     CustomActionType::ForcedLabor,
                     None,
                 ))),
-            ),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::mood_tokens(1)])),
+            )
+            .without_json_comparison(),
             TestAction::undoable(
                 0,
                 Action::Playing(Collect(playing_actions::Collect::new(
@@ -453,6 +466,11 @@ fn test_taxes() {
                     CustomActionType::Taxes,
                     None,
                 ))),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::mood_tokens(1)])),
             )
             .without_json_comparison(),
             TestAction::undoable(
@@ -650,6 +668,11 @@ fn test_collect_free_economy() {
                     PlayingActionType::Custom(CustomActionType::FreeEconomyCollect),
                 ))),
             )
+            .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::mood_tokens(1)])),
+            )
             .with_post_assert(|game| {
                 // no production focus
                 let result =
@@ -664,18 +687,27 @@ fn test_collect_free_economy() {
 fn test_cultural_influence_instant_with_arts() {
     JSON.test(
         "cultural_influence_instant_with_arts",
-        vec![TestAction::not_undoable(
-            1,
-            Action::Playing(PlayingAction::InfluenceCultureAttempt(
-                InfluenceCultureAttempt::new(
-                    SelectedStructure::new(
-                        Position::from_offset("C2"),
-                        Structure::Building(Fortress),
+        vec![
+            TestAction::undoable(
+                1,
+                Action::Playing(PlayingAction::InfluenceCultureAttempt(
+                    InfluenceCultureAttempt::new(
+                        SelectedStructure::new(
+                            Position::from_offset("C2"),
+                            Structure::Building(Fortress),
+                        ),
+                        PlayingActionType::Custom(CustomActionType::ArtsInfluenceCultureAttempt),
                     ),
-                    PlayingActionType::Custom(CustomActionType::ArtsInfluenceCultureAttempt),
-                ),
-            )),
-        )],
+                )),
+            )
+            .without_json_comparison(),
+            TestAction::not_undoable(
+                1,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
+                    1,
+                )])),
+            ),
+        ],
     )
 }
 
@@ -684,7 +716,14 @@ fn test_cultural_influence_with_conversion() {
     JSON.test(
         "cultural_influence_with_conversion",
         vec![
-            TestAction::not_undoable(1, influence_action()),
+            TestAction::undoable(1, influence_action()).without_json_comparison(),
+            TestAction::not_undoable(
+                1,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
+                    1,
+                )])),
+            )
+            .without_json_comparison(),
             TestAction::undoable(
                 1,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(

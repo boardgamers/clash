@@ -360,6 +360,17 @@
                 {
                   "action": {
                     "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 1
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
                       "SelectPositions": [
                         "B6"
                       ]
@@ -535,10 +546,13 @@
       ]
     }
   ],
-  "action_log_index": 4,
+  "action_log_index": 5,
   "log": [
     [
-      "Player2 played the action card Explorer for 1 culture token as a regular action"
+      "Player2 played the action card Explorer as a regular action"
+    ],
+    [
+      "Player2 paid 1 culture token for the action"
     ],
     [
       "Player2 explored B6"
@@ -551,7 +565,7 @@
       "Player2 decided to gain a free settler at D8"
     ]
   ],
-  "undo_limit": 2,
+  "undo_limit": 3,
   "actions_left": 2,
   "round": 1,
   "age": 1,

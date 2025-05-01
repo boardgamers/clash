@@ -4,11 +4,13 @@
     {
       "id": 0,
       "resources": {
-        "food": 3,
+        "food": 1,
         "wood": 6,
         "ore": 6,
+        "ideas": 5,
         "gold": 7,
-        "culture_tokens": 6
+        "mood_tokens": 7,
+        "culture_tokens": 5
       },
       "resource_limit": {
         "food": 2,
@@ -21,38 +23,38 @@
       },
       "cities": [
         {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "position": "A1"
+        },
+        {
           "city_pieces": {
-            "temple": 1
+            "fortress": 1
           },
-          "mood_state": "Neutral",
+          "mood_state": "Angry",
           "position": "C2"
         },
         {
           "city_pieces": {},
-          "mood_state": "Happy",
-          "position": "C1"
-        },
-        {
-          "city_pieces": {},
-          "mood_state": "Happy",
-          "position": "B2"
-        },
-        {
-          "city_pieces": {},
-          "mood_state": "Happy",
+          "mood_state": "Neutral",
           "position": "B3"
         }
       ],
       "units": [
         {
-          "position": "C2",
+          "position": "B2",
           "unit_type": "Infantry",
           "id": 0
         },
         {
           "position": "C2",
-          "unit_type": "Infantry",
+          "unit_type": "Cavalry",
           "id": 1
+        },
+        {
+          "position": "C2",
+          "unit_type": "Leader",
+          "id": 2
         },
         {
           "position": "C2",
@@ -78,19 +80,21 @@
           "position": "C2",
           "unit_type": "Settler",
           "id": 7
+        },
+        {
+          "position": "B3",
+          "unit_type": "Infantry",
+          "id": 8
         }
       ],
       "civilization": "test0",
       "advances": [
-        "Arts",
-        "Bartering",
-        "Currency",
         "Farming",
         "Mining",
         "Tactics"
       ],
       "incident_tokens": 1,
-      "next_unit_id": 8
+      "next_unit_id": 9
     },
     {
       "id": 1,
@@ -114,30 +118,21 @@
       },
       "cities": [
         {
-          "city_pieces": {
-            "fortress": 0
-          },
-          "mood_state": "Angry",
-          "position": "A1"
-        },
-        {
           "city_pieces": {},
-          "mood_state": "Happy",
-          "position": "A3"
-        },
-        {
-          "city_pieces": {
-            "fortress": 0
-          },
-          "mood_state": "Happy",
-          "position": "A4"
+          "mood_state": "Angry",
+          "position": "C1"
         }
       ],
       "units": [
         {
-          "position": "B1",
+          "position": "C1",
           "unit_type": "Infantry",
           "id": 0
+        },
+        {
+          "position": "C1",
+          "unit_type": "Infantry",
+          "id": 1
         }
       ],
       "civilization": "test1",
@@ -157,9 +152,26 @@
         "ideas": 7,
         "gold": 7
       },
+      "units": [
+        {
+          "position": "A3",
+          "unit_type": "Elephant",
+          "id": 1
+        },
+        {
+          "position": "A3",
+          "unit_type": "Infantry",
+          "id": 3
+        },
+        {
+          "position": "A3",
+          "unit_type": "Infantry",
+          "id": 4
+        }
+      ],
       "civilization": "Barbarians",
       "incident_tokens": 3,
-      "next_unit_id": 0
+      "next_unit_id": 5
     }
   ],
   "map": {
@@ -174,10 +186,6 @@
       ],
       [
         "A3",
-        "Mountain"
-      ],
-      [
-        "A4",
         "Mountain"
       ],
       [
@@ -223,66 +231,59 @@
                 {
                   "action": {
                     "Playing": {
-                      "ActionCard": 27
+                      "ActionCard": 15
                     }
                   }
                 },
                 {
                   "action": {
-                    "Playing": "EndTurn"
+                    "Playing": {
+                      "InfluenceCultureAttempt": {
+                        "selected_structure": {
+                          "position": "B3",
+                          "structure": "CityCenter"
+                        },
+                        "action_type": "InfluenceCultureAttempt"
+                      }
+                    }
                   }
-                }
-              ]
-            },
-            {
-              "index": 1,
-              "items": [
+                },
                 {
                   "action": {
-                    "Playing": "EndTurn"
+                    "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 2
+                        }
+                      ]
+                    }
                   }
                 }
               ]
-            }
-          ]
-        },
-        {
-          "players": [
-            {
-              "index": 0,
-              "items": []
             }
           ]
         }
       ]
     }
   ],
-  "action_log_index": 0,
+  "action_log_index": 3,
   "log": [
     [
-      "Player1 played the action card Assassination for 1 culture token",
-      "Player2 has been assassinated by Player1."
+      "Player1 played the action card Cultural Takeover",
+      "Cultural Takeover: You may influence Barbarian cities of size 1."
     ],
     [
-      "Player1 ended their turn with 3 actions left"
+      "Player1 tried to influence culture the City Center in the city at B3 by Barbarians with the city at A1 and paid 2 culture tokens to boost the range"
     ],
     [
-      "It's Player2's turn",
-      "Player2 has lost an action due to assassination."
-    ],
-    [
-      "Player2 ended their turn with 2 actions left"
-    ],
-    [
-      "Round 2/3"
-    ],
-    [
-      "It's Player1's turn"
+      "Cultural influence succeeded (rolled 6)",
+      "Player1 selected unit to gain: Infantry"
     ]
   ],
-  "undo_limit": 0,
-  "actions_left": 3,
-  "round": 2,
+  "undo_limit": 3,
+  "actions_left": 2,
+  "successful_cultural_influence": true,
+  "round": 1,
   "age": 1,
   "messages": [
     "The game has started"
@@ -295,16 +296,16 @@
     10,
     10,
     10,
-    10,
     10
   ],
   "dice_roll_log": [
+    10,
     10
   ],
   "wonders_left": [
     "Pyramids"
   ],
   "incidents_left": [
-    57
+    28
   ]
 }

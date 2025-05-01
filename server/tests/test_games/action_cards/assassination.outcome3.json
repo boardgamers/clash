@@ -1,53 +1,13 @@
 {
   "state": "Playing",
-  "events": [
-    {
-      "event_type": {
-        "ActionCard": {
-          "id": 2
-        }
-      },
-      "player": 0,
-      "last_priority_used": 0,
-      "handler": {
-        "priority": 0,
-        "request": {
-          "SelectAdvance": {
-            "choices": [
-              "Storage",
-              "Irrigation",
-              "Husbandry",
-              "Engineering",
-              "Sanitation",
-              "Roads",
-              "Fishing",
-              "Writing",
-              "Siegecraft",
-              "SteelWeapons",
-              "Draft",
-              "Myths",
-              "Bartering",
-              "Arts",
-              "Math"
-            ]
-          }
-        },
-        "origin": {
-          "CivilCard": 2
-        }
-      }
-    }
-  ],
   "players": [
     {
       "id": 0,
       "resources": {
-        "food": 2,
-        "wood": 7,
-        "ore": 7,
-        "ideas": 3,
+        "food": 3,
+        "wood": 6,
+        "ore": 6,
         "gold": 7,
-        "mood_tokens": 7,
         "culture_tokens": 6
       },
       "resource_limit": {
@@ -61,14 +21,26 @@
       },
       "cities": [
         {
-          "city_pieces": {},
-          "mood_state": "Happy",
-          "position": "A1"
+          "city_pieces": {
+            "temple": 1
+          },
+          "mood_state": "Neutral",
+          "position": "C2"
         },
         {
           "city_pieces": {},
-          "mood_state": "Neutral",
-          "position": "C2"
+          "mood_state": "Happy",
+          "position": "C1"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "position": "B2"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "position": "B3"
         }
       ],
       "units": [
@@ -79,13 +51,8 @@
         },
         {
           "position": "C2",
-          "unit_type": "Cavalry",
+          "unit_type": "Infantry",
           "id": 1
-        },
-        {
-          "position": "C2",
-          "unit_type": "Leader",
-          "id": 2
         },
         {
           "position": "C2",
@@ -115,11 +82,14 @@
       ],
       "civilization": "test0",
       "advances": [
+        "Arts",
+        "Bartering",
+        "Currency",
         "Farming",
         "Mining",
         "Tactics"
       ],
-      "incident_tokens": 2,
+      "incident_tokens": 1,
       "next_unit_id": 8
     },
     {
@@ -144,32 +114,52 @@
       },
       "cities": [
         {
-          "city_pieces": {},
+          "city_pieces": {
+            "fortress": 0
+          },
           "mood_state": "Angry",
-          "position": "C1"
+          "position": "A1"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "position": "A3"
+        },
+        {
+          "city_pieces": {
+            "fortress": 0
+          },
+          "mood_state": "Happy",
+          "position": "A4"
         }
       ],
       "units": [
         {
-          "position": "C1",
+          "position": "B1",
           "unit_type": "Infantry",
           "id": 0
-        },
-        {
-          "position": "C1",
-          "unit_type": "Infantry",
-          "id": 1
         }
       ],
       "civilization": "test1",
       "advances": [
-        "Fanaticism",
         "Farming",
-        "Mining",
-        "Tactics"
+        "Mining"
       ],
       "incident_tokens": 3,
       "next_unit_id": 2
+    },
+    {
+      "id": 2,
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "civilization": "Barbarians",
+      "incident_tokens": 3,
+      "next_unit_id": 0
     }
   ],
   "map": {
@@ -184,9 +174,11 @@
       ],
       [
         "A3",
-        {
-          "Exhausted": "Forest"
-        }
+        "Mountain"
+      ],
+      [
+        "A4",
+        "Mountain"
       ],
       [
         "B1",
@@ -231,39 +223,75 @@
                 {
                   "action": {
                     "Playing": {
-                      "ActionCard": 2
+                      "ActionCard": 27
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/players/0/action_cards",
-                      "value": [
-                        2
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 1
+                        }
                       ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/culture_tokens",
-                      "value": 7
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events"
                     }
-                  ]
+                  }
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  }
                 }
               ]
+            },
+            {
+              "index": 1,
+              "items": [
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": []
             }
           ]
         }
       ]
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 0,
   "log": [
     [
-      "Player1 played the action card Advance for 1 culture token"
+      "Player1 played the action card Assassination"
+    ],
+    [
+      "Player1 paid 1 culture token for the action",
+      "Player2 has been assassinated by Player1."
+    ],
+    [
+      "Player1 ended their turn with 3 actions left"
+    ],
+    [
+      "It's Player2's turn",
+      "Player2 has lost an action due to assassination."
+    ],
+    [
+      "Player2 ended their turn with 2 actions left"
+    ],
+    [
+      "Round 2/3"
+    ],
+    [
+      "It's Player1's turn"
     ]
   ],
   "undo_limit": 0,
@@ -276,15 +304,21 @@
   "dice_roll_outcomes": [
     1,
     1,
-    1,
-    1,
-    1,
-    11,
-    11,
-    11,
-    11
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10
+  ],
+  "dice_roll_log": [
+    10
   ],
   "wonders_left": [
     "Pyramids"
+  ],
+  "incidents_left": [
+    57
   ]
 }
