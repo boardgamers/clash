@@ -224,10 +224,10 @@ pub(crate) fn may_change_government() -> Builtin {
         Builtin::builder("Change Government", "Change your government"),
         |event| &mut event.status_phase,
         ChangeGovernmentOption::NotFreeAndOptional,
-        |_, _|true,
-        |v| {
+        |_, _, _| true,
+        |v, b| {
             if let StatusPhaseState::ChangeGovernmentType(paid) = v {
-                *paid = true;
+                *paid = b;
             } else {
                 panic!("Illegal state")
             }
@@ -253,8 +253,8 @@ pub(crate) fn add_change_government<A, E, V>(
     a: A,
     event: E,
     option: ChangeGovernmentOption,
-    is_active_player: impl Fn(&V, usize) -> bool + 'static + Clone + Sync + Send,
-    set_paid: impl Fn(&mut V) + 'static + Clone + Sync + Send,
+    is_active_player: impl Fn(&V, usize, &Game) -> bool + 'static + Clone + Sync + Send,
+    set_paid: impl Fn(&mut V, bool) + 'static + Clone + Sync + Send,
     has_paid: impl Fn(&mut V) -> bool + 'static + Clone + Sync + Send,
 ) -> A
 where
@@ -263,15 +263,18 @@ where
     V: Clone + PartialEq,
 {
     let event2 = event.clone();
+    let set_paid2 = set_paid.clone();
     let is_active_player2 = is_active_player.clone();
     a.add_payment_request_listener(
         event,
         1,
         move |game, player_index, v| {
-            if !is_active_player(v, player_index) {
+            set_paid(v, false);
+            
+            if !is_active_player(v, player_index, game) {
                 return None;
             }
-            
+
             if option == ChangeGovernmentOption::FreeAndMandatory {
                 return None;
             }
@@ -294,14 +297,14 @@ where
             let name = &s.player_name;
             let cost = &s.choice[0];
             game.add_info_log_item(&format!("{name} paid {cost} to change the government"));
-            set_paid(v);
+            set_paid2(v, true);
         },
     )
     .add_persistent_event_listener(
         event2,
         0,
-        move |_game, player_index, _, v| {
-            if !is_active_player2(v, player_index) {
+        move |game, player_index, _, v| {
+            if !is_active_player2(v, player_index, game) {
                 return None;
             }
             has_paid(v).then_some(PersistentEventRequest::ChangeGovernment)
