@@ -2,7 +2,7 @@ use crate::city::MoodState;
 use crate::content::custom_actions::CustomActionType;
 use crate::game::Game;
 use crate::payment::{PaymentOptions, PaymentReason};
-use crate::player::{CostTrigger, Player};
+use crate::player::CostTrigger;
 use crate::player_events::CostInfo;
 use crate::playing_actions::{PlayingActionType, base_or_custom_available};
 use crate::position::Position;
@@ -24,6 +24,7 @@ pub(crate) fn increase_happiness(
     player_index: usize,
     happiness_increases: &[(Position, u8)],
     payment: Option<ResourcePile>,
+    action_type: &PlayingActionType,
 ) {
     let trigger = game.execute_cost_trigger();
     let player = &mut game.players[player_index];
@@ -46,21 +47,27 @@ pub(crate) fn increase_happiness(
     }
 
     if let Some(r) = payment {
-        happiness_cost(player, step_sum, trigger).pay(game, &r);
+        happiness_cost(player_index, step_sum, trigger, action_type, game).pay(game, &r);
     }
 }
 
 #[must_use]
 pub fn happiness_cost(
-    p: &Player,
+    p: usize,
     city_size_steps: u8, // for each city: size * steps in that city
     execute: CostTrigger,
+    action_type: &PlayingActionType,
+    game: &Game,
 ) -> CostInfo {
-    let payment_options = PaymentOptions::sum(
-        p,
+    let mut payment_options = PaymentOptions::sum(
+        game.player(p),
         PaymentReason::IncreaseHappiness,
         city_size_steps,
         &[ResourceType::MoodTokens],
     );
-    p.trigger_cost_event(|e| &e.happiness_cost, &payment_options, &(), &(), execute)
+    // either none or both can use Colosseum
+    payment_options.default += action_type.cost(game).cost;
+
+    game.player(p)
+        .trigger_cost_event(|e| &e.happiness_cost, &payment_options, &(), &(), execute)
 }

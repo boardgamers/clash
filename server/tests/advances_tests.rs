@@ -225,26 +225,19 @@ fn test_increase_happiness_sports2() {
 fn test_increase_happiness_voting() {
     JSON.test(
         "increase_happiness_voting",
-        vec![
-            TestAction::undoable(
-                0,
-                Action::Playing(PlayingAction::IncreaseHappiness(
-                    playing_actions::IncreaseHappiness::new(
-                        vec![
-                            (Position::from_offset("C2"), 1),
-                            (Position::from_offset("B3"), 2),
-                        ],
-                        ResourcePile::mood_tokens(5),
-                        PlayingActionType::Custom(CustomActionType::VotingIncreaseHappiness),
-                    ),
-                )),
-            )
-            .without_json_comparison(),
-            TestAction::undoable(
-                0,
-                Action::Response(EventResponse::Payment(vec![ResourcePile::mood_tokens(1)])),
-            ),
-        ],
+        vec![TestAction::undoable(
+            0,
+            Action::Playing(PlayingAction::IncreaseHappiness(
+                playing_actions::IncreaseHappiness::new(
+                    vec![
+                        (Position::from_offset("C2"), 1),
+                        (Position::from_offset("B3"), 2),
+                    ],
+                    ResourcePile::mood_tokens(6),
+                    PlayingActionType::Custom(CustomActionType::VotingIncreaseHappiness),
+                ),
+            )),
+        )],
     );
 }
 
@@ -252,26 +245,19 @@ fn test_increase_happiness_voting() {
 fn test_increase_happiness_voting_rituals() {
     JSON.test(
         "increase_happiness_voting_rituals",
-        vec![
-            TestAction::undoable(
-                0,
-                Action::Playing(PlayingAction::IncreaseHappiness(
-                    playing_actions::IncreaseHappiness::new(
-                        vec![
-                            (Position::from_offset("C2"), 1),
-                            (Position::from_offset("B3"), 2),
-                        ],
-                        ResourcePile::new(1, 0, 1, 1, 1, 1, 0),
-                        PlayingActionType::Custom(CustomActionType::VotingIncreaseHappiness),
-                    ),
-                )),
-            )
-            .without_json_comparison(),
-            TestAction::undoable(
-                0,
-                Action::Response(EventResponse::Payment(vec![ResourcePile::mood_tokens(1)])),
-            ),
-        ],
+        vec![TestAction::undoable(
+            0,
+            Action::Playing(PlayingAction::IncreaseHappiness(
+                playing_actions::IncreaseHappiness::new(
+                    vec![
+                        (Position::from_offset("C2"), 1),
+                        (Position::from_offset("B3"), 2),
+                    ],
+                    ResourcePile::new(1, 0, 1, 3, 1, 0, 0),
+                    PlayingActionType::Custom(CustomActionType::VotingIncreaseHappiness),
+                ),
+            )),
+        )],
     );
 }
 

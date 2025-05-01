@@ -111,7 +111,13 @@ pub(crate) fn use_sports() -> Builtin {
                 let position = a.city.expect("city not found");
                 let pile = s.choice[0].clone();
                 let steps = pile.amount();
-                increase_happiness(game, s.player_index, &[(position, steps)], None);
+                increase_happiness(
+                    game,
+                    s.player_index,
+                    &[(position, steps)],
+                    None,
+                    &a.action.playing_action_type(),
+                );
                 game.add_info_log_item(&format!(
                     "{} paid {pile} for Sports to increase the happiness of {position} \
                         by {steps} steps, making it {:?}",

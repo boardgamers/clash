@@ -12,9 +12,7 @@ use crate::game::Game;
 use crate::log::current_player_turn_log;
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player_events::ActionInfo;
-use crate::playing_actions::{
-    PlayingAction, PlayingActionType, base_or_custom_available, remaining_resources_for_action,
-};
+use crate::playing_actions::{PlayingAction, PlayingActionType, base_or_custom_available};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::wonder::Wonder;
@@ -441,14 +439,22 @@ fn affordable_start_city(
     game: &Game,
     player_index: usize,
     target_city: &City,
-    action_type: Option<&PlayingActionType>,
+    action_type: Option<&PlayingActionType>, // none if action cost if already paid
 ) -> Result<(Position, u8), String> {
     if target_city.player_index == player_index {
         Ok((target_city.position, 0))
     } else {
         let player = game.player(player_index);
-        let available = remaining_resources_for_action(game, action_type, player);
+
+        let available = &player.resources;
         let mut tokens = available.culture_tokens;
+        if let Some(t) = action_type {
+            // either none or both can use Colosseum
+            let cost = t.cost(game).cost;
+            let c = cost.culture_tokens;
+            assert_eq!(c, cost.amount());
+            tokens -= c;
+        }
         if player.wonders_owned.contains(Wonder::Colosseum) {
             tokens += available.mood_tokens;
         }

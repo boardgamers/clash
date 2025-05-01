@@ -4,7 +4,7 @@ use crate::collect_ui::CollectResources;
 use crate::construct_ui::{ConstructionPayment, ConstructionProject};
 use crate::custom_phase_ui::{SelectedStructureInfo, SelectedStructureStatus};
 use crate::happiness_ui::{
-    add_increase_happiness, available_happiness_actions_for_city, increase_happiness_cost,
+    add_increase_happiness, available_happiness_actions_for_city, can_afford_increase_happiness,
     open_increase_happiness_dialog,
 };
 use crate::hex_ui;
@@ -86,7 +86,7 @@ fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Optio
     let p = rc.shown_player;
     let actions = available_happiness_actions_for_city(rc.game, p.index, city.position)
         .into_iter()
-        .filter(|a| increase_happiness_cost(rc, city, 1, a).is_some())
+        .filter(|a| can_afford_increase_happiness(rc, city, 1, a))
         .collect_vec();
 
     if actions.is_empty() {

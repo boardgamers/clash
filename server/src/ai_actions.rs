@@ -261,16 +261,6 @@ fn payment(ai_actions: &mut AiActions, o: &PaymentOptions, p: &Player) -> Resour
     try_payment(ai_actions, o, p).expect("expected payment")
 }
 
-fn payment_with_action(
-    o: &PaymentOptions,
-    p: &Player,
-    playing_action_type: &PlayingActionType,
-    game: &Game,
-) -> ResourcePile {
-    o.first_valid_payment(&playing_action_type.remaining_resources(p, game))
-        .expect("expected payment")
-}
-
 pub fn try_payment(
     ai_actions: &mut AiActions,
     o: &PaymentOptions,
@@ -454,7 +444,6 @@ fn calculate_increase_happiness(
     let mut all_steps: Vec<(Position, u8)> = vec![];
     let mut step_sum = 0;
     let mut cost = PaymentOptions::free();
-    let available = action_type.remaining_resources(player, game);
 
     for c in player
         .cities
@@ -469,8 +458,14 @@ fn calculate_increase_happiness(
         };
         let new_steps_sum = step_sum + steps * c.size() as u8;
 
-        let info = happiness_cost(player, new_steps_sum, CostTrigger::NoModifiers);
-        if !info.cost.can_afford(&available) {
+        let info = happiness_cost(
+            player.index,
+            new_steps_sum,
+            CostTrigger::NoModifiers,
+            action_type,
+            game,
+        );
+        if !info.cost.can_afford(&player.resources) {
             break;
         }
         all_steps.push((c.position, steps));
@@ -480,7 +475,8 @@ fn calculate_increase_happiness(
 
     (!all_steps.is_empty()).then_some(IncreaseHappiness::new(
         all_steps,
-        payment_with_action(&cost, player, action_type, game),
+        cost.first_valid_payment(&player.resources)
+            .expect("expected payment"),
         action_type.clone(),
     ))
 }

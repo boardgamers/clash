@@ -16,6 +16,7 @@ use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use crate::utils::remove_element;
+use crate::wonder::Wonder;
 use itertools::Itertools;
 
 pub(crate) fn mercenaries(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
@@ -190,5 +191,9 @@ fn barbarian_army_positions_in_range2(game: &Game, player: &Player) -> Vec<Posit
 
 fn max_mercenary_payment(player: &Player) -> u8 {
     let pile = &player.resources;
-    pile.food + pile.wood + pile.ore + pile.culture_tokens + pile.gold
+    let mut max = pile.food + pile.wood + pile.ore + pile.culture_tokens + pile.gold;
+    if player.wonders_owned.contains(Wonder::Colosseum) {
+        max += pile.mood_tokens;
+    }
+    max
 }
