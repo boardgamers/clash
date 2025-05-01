@@ -494,8 +494,11 @@ pub(crate) fn pay_for_action() -> Builtin {
                     "Pay for action",
                 )])
             },
-            |_game, _player_index, a| {
-                
+            |game, s, _| {
+                game.add_info_log_item(&format!(
+                    "{} paid {} for the action",
+                    s.player_name, s.choice[0]
+                ));
             },
         )
         .build()
