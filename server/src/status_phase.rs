@@ -4,8 +4,8 @@ use crate::advance::{Advance, do_advance, gain_advance_without_payment, remove_a
 use crate::consts::AGES;
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{
-    AdvanceRequest,  EventResponse, PaymentRequest, PersistentEventRequest,
-    PersistentEventType, PlayerRequest, PositionRequest,
+    AdvanceRequest, EventResponse, PaymentRequest, PersistentEventRequest, PersistentEventType,
+    PlayerRequest, PositionRequest,
 };
 use crate::objective_card::{
     gain_objective_card_from_pile, present_objective_cards, status_phase_completable,
@@ -224,6 +224,7 @@ pub(crate) fn may_change_government() -> Builtin {
         Builtin::builder("Change Government", "Change your government"),
         |event| &mut event.status_phase,
         ChangeGovernmentOption::NotFreeAndOptional,
+        |_, _|true,
         |v| {
             if let StatusPhaseState::ChangeGovernmentType(paid) = v {
                 *paid = true;
@@ -252,6 +253,7 @@ pub(crate) fn add_change_government<A, E, V>(
     a: A,
     event: E,
     option: ChangeGovernmentOption,
+    is_active_player: impl Fn(&V, usize) -> bool + 'static + Clone + Sync + Send,
     set_paid: impl Fn(&mut V) + 'static + Clone + Sync + Send,
     has_paid: impl Fn(&mut V) -> bool + 'static + Clone + Sync + Send,
 ) -> A
@@ -261,10 +263,15 @@ where
     V: Clone + PartialEq,
 {
     let event2 = event.clone();
+    let is_active_player2 = is_active_player.clone();
     a.add_payment_request_listener(
         event,
         1,
-        move |game, player_index, _| {
+        move |game, player_index, v| {
+            if !is_active_player(v, player_index) {
+                return None;
+            }
+            
             if option == ChangeGovernmentOption::FreeAndMandatory {
                 return None;
             }
@@ -293,7 +300,10 @@ where
     .add_persistent_event_listener(
         event2,
         0,
-        move |_game, _player_index, _, v| {
+        move |_game, player_index, _, v| {
+            if !is_active_player2(v, player_index) {
+                return None;
+            }
             has_paid(v).then_some(PersistentEventRequest::ChangeGovernment)
         },
         move |game, player_index, player_name, action, request, _| {

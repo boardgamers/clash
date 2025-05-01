@@ -252,10 +252,8 @@
                   "action": {
                     "Response": {
                       "ChangeGovernmentType": {
-                        "ChangeGovernment": {
-                          "new_government": "Theocracy",
-                          "additional_advances": []
-                        }
+                        "new_government": "Theocracy",
+                        "additional_advances": []
                       }
                     }
                   }
@@ -281,7 +279,8 @@
       "Player1 killed units: Elephant at C2"
     ],
     [
-      "Player1 declined to kill units"
+      "Player1 declined to kill units",
+      "Player1 lost an action for Revolution"
     ],
     [
       "Player1 changed their government from Democracy to Theocracy",
@@ -291,7 +290,7 @@
     ]
   ],
   "undo_limit": 4,
-  "actions_left": 2,
+  "actions_left": 1,
   "round": 1,
   "age": 1,
   "messages": [

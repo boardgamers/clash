@@ -153,6 +153,7 @@ fn revolution() -> Incident {
         b,
         |event| &mut event.incident,
         ChangeGovernmentOption::FreeAndMandatory,
+        |i, p|i.active_player == p,
         |_| {}, // don't need to pay
         |_| true,
     );
