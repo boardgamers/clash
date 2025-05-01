@@ -203,7 +203,7 @@ pub(crate) fn execute_custom_phase_action(
         }
         StatusPhase(s) => play_status_phase(game, s),
         TurnStart => game.on_start_turn(),
-        PayAction(a) => a.on_pay_action(game, player_index)?,  
+        PayAction(a) => a.on_pay_action(game, player_index)?,
         Advance(a) => {
             on_advance(game, player_index, a);
         }

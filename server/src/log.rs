@@ -166,10 +166,7 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
                 " as a regular action"
             };
 
-            format!(
-                "{player_name} played the action card {}{action}",
-                card.name,
-            )
+            format!("{player_name} played the action card {}{action}", card.name,)
         }
         PlayingAction::WonderCard(name) => {
             format!("{player_name} played the wonder card {}", name.name(game))
