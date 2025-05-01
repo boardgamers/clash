@@ -311,6 +311,10 @@ impl Assets {
                 CustomActionType::GreatLibrary,
                 load_png(include_bytes!("../assets/library-14-svgrepo-com.png")),
             ),
+            (
+                CustomActionType::GreatLighthouse,
+                load_png(include_bytes!("../assets/lighthouse-svgrepo-com.png")),
+            ),
         ]
         .iter()
         .cloned()

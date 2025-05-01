@@ -8,7 +8,7 @@ use crate::content::builtin::Builtin;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{PaymentRequest, PersistentEventType, PositionRequest};
 use crate::events::EventOrigin;
-use crate::log::current_action_log_item;
+use crate::log::{current_action_log_item, format_mood_change};
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::utils::remove_element;
@@ -26,8 +26,8 @@ pub enum Wonder {
     Pyramids,
     GreatGardens,
     GreatLibrary,
-    GreatWall,
     GreatLighthouse,
+    GreatWall,
     Colossus,
     GreatMausoleum,
 }
@@ -366,10 +366,11 @@ pub(crate) fn build_wonder() -> Builtin {
                 let name = i.name;
 
                 game.add_info_log_item(&format!(
-                    "{} built {} in city {pos} for {}",
+                    "{} built {} in city {pos} for {}{}",
                     s.player_name,
                     name.name(game),
-                    s.choice[0]
+                    s.choice[0],
+                    format_mood_change(game.player(s.player_index), pos)
                 ));
                 current_action_log_item(game).wonder_built = Some(name);
                 remove_element(&mut game.player_mut(s.player_index).wonder_cards, &name);
@@ -406,7 +407,9 @@ pub(crate) fn construct_wonder(
     let player = &mut game.players[player_index];
     player.wonders_built.push(name);
     player.wonders_owned.insert(name);
-    player.get_city_mut(city_position).pieces.wonders.push(name);
+    let city = player.get_city_mut(city_position);
+    city.pieces.wonders.push(name);
+    city.activate();
 }
 
 #[must_use]

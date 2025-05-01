@@ -56,9 +56,6 @@ pub fn can_construct(
     }
 
     can_construct_anything(city, player)?;
-    if !city.can_activate() {
-        return Err("Can't activate".to_string());
-    }
     if city.mood_state == MoodState::Angry {
         return Err("City is angry".to_string());
     }
@@ -77,6 +74,9 @@ pub fn can_construct(
 }
 
 pub(crate) fn can_construct_anything(city: &City, player: &Player) -> Result<(), String> {
+    if !city.can_activate() {
+        return Err("Can't activate".to_string());
+    }
     if city.player_index != player.index {
         return Err("Not your city".to_string());
     }

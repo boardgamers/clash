@@ -4,12 +4,13 @@ use serde::{Deserialize, Serialize};
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{ActionCardInfo, land_battle_won_action, play_action_card};
 use crate::advance::{Advance, gain_advance_without_payment};
-use crate::city::{MoodState, found_city};
+use crate::city::{ MoodState, found_city};
 use crate::collect::{PositionCollection, collect};
 use crate::construct::Construct;
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::{CustomActionType, CustomEventAction, execute_custom_action};
 use crate::content::persistent_events::{PaymentRequest, PersistentEventType};
+use crate::content::wonders::{great_lighthouse_city, great_lighthouse_spawns};
 use crate::cultural_influence::{InfluenceCultureAttempt, influence_culture_attempt};
 use crate::game::GameState;
 use crate::happiness::increase_happiness;
@@ -152,6 +153,11 @@ impl PlayingActionType {
                         p.resources.culture_tokens > 0 || p.resources.mood_tokens > 0
                     }
                     CustomActionType::ForcedLabor => any_angry(p),
+                    CustomActionType::GreatLighthouse => {
+                        great_lighthouse_city(p).can_activate()
+                            && p.available_units().ships > 0
+                            && !great_lighthouse_spawns(game, p.index).is_empty()
+                    }
                     _ => true,
                 };
                 if !can_play {
@@ -338,28 +344,19 @@ impl PlayingAction {
             PlayingAction::Advance { .. } => PlayingActionType::Advance,
             PlayingAction::FoundCity { .. } => PlayingActionType::FoundCity,
             PlayingAction::Construct(_) => PlayingActionType::Construct,
-            PlayingAction::Collect(c) => allowed_types(
-                &c.action_type,
-                &[
-                    PlayingActionType::Collect,
-                    PlayingActionType::Custom(CustomActionType::FreeEconomyCollect),
-                ],
-            ),
+            PlayingAction::Collect(c) => allowed_types(&c.action_type, &[
+                PlayingActionType::Collect,
+                PlayingActionType::Custom(CustomActionType::FreeEconomyCollect),
+            ]),
             PlayingAction::Recruit(_) => PlayingActionType::Recruit,
-            PlayingAction::IncreaseHappiness(h) => allowed_types(
-                &h.action_type,
-                &[
-                    PlayingActionType::IncreaseHappiness,
-                    PlayingActionType::Custom(CustomActionType::VotingIncreaseHappiness),
-                ],
-            ),
-            PlayingAction::InfluenceCultureAttempt(i) => allowed_types(
-                &i.action_type,
-                &[
-                    PlayingActionType::InfluenceCultureAttempt,
-                    PlayingActionType::Custom(CustomActionType::ArtsInfluenceCultureAttempt),
-                ],
-            ),
+            PlayingAction::IncreaseHappiness(h) => allowed_types(&h.action_type, &[
+                PlayingActionType::IncreaseHappiness,
+                PlayingActionType::Custom(CustomActionType::VotingIncreaseHappiness),
+            ]),
+            PlayingAction::InfluenceCultureAttempt(i) => allowed_types(&i.action_type, &[
+                PlayingActionType::InfluenceCultureAttempt,
+                PlayingActionType::Custom(CustomActionType::ArtsInfluenceCultureAttempt),
+            ]),
             PlayingAction::ActionCard(a) => PlayingActionType::ActionCard(*a),
             PlayingAction::WonderCard(name) => PlayingActionType::WonderCard(*name),
             PlayingAction::Custom(c) => PlayingActionType::Custom(c.action.clone()),
