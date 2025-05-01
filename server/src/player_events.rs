@@ -111,6 +111,7 @@ pub(crate) struct PersistentEvents {
     pub units_killed: PersistentEvent<KilledUnits>,
     pub select_objective_cards: PersistentEvent<SelectObjectivesInfo>,
     pub custom_action: PersistentEvent<CustomEventAction>,
+    pub great_mausoleum: PersistentEvent<bool>,
 }
 
 impl PersistentEvents {
@@ -144,6 +145,7 @@ impl PersistentEvents {
             select_objective_cards: Event::new("select_objective_cards"),
 
             custom_action: Event::new("custom_action_bartering"),
+            great_mausoleum: Event::new("great_mausoleum"),
         }
     }
 }

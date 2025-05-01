@@ -161,7 +161,25 @@ pub fn execute_without_undo(
         }
     }
 
+    on_action_end(game, player_index, false);
     Ok(())
+}
+
+pub(crate) fn on_action_end(
+    game: &mut Game,
+    player_index: usize,
+    use_great_mausoleum: bool,
+) {
+    let p = game.player_mut(player_index);
+    if p.great_mausoleum_action_cards > 0 {
+        p.great_mausoleum_action_cards -= 1;
+        let _ = game.trigger_persistent_event(
+            &[player_index],
+            |e| &mut e.great_mausoleum,
+            use_great_mausoleum,
+            PersistentEventType::GreatMausoleum,
+        );
+    }
 }
 
 pub(crate) fn execute_custom_phase_action(
@@ -221,6 +239,7 @@ pub(crate) fn execute_custom_phase_action(
             on_objective_cards(game, player_index, c);
         }
         CustomAction(a) => execute_custom_action(game, player_index, a),
+        GreatMausoleum(b) => on_action_end(game, player_index, b),
     }
 
     if let Some(s) = game.events.pop() {
@@ -374,3 +393,4 @@ fn execute_move_action(game: &mut Game, player_index: usize, m: &MoveUnits) -> R
 
     Ok(())
 }
+

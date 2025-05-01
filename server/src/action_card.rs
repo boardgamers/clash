@@ -14,6 +14,7 @@ use crate::playing_actions::ActionCost;
 use crate::position::Position;
 use crate::tactics_card::TacticsCard;
 use crate::utils::remove_element_by;
+use crate::wonder::Wonder;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
@@ -75,6 +76,16 @@ impl ActionCard {
             action_type,
             target: CivilCardTarget::ActivePlayer,
         }
+    }
+    
+    pub fn name(&self) -> String {
+        format!(
+            "{}/{}",
+            self.civil_card.name,
+            self.tactics_card
+                .as_ref()
+                .map_or("-".to_string(), |c| c.name.clone())
+        )
     }
 }
 
@@ -182,6 +193,18 @@ pub(crate) fn on_play_action_card(game: &mut Game, player_index: usize, i: Actio
 }
 
 pub(crate) fn gain_action_card_from_pile(game: &mut Game, player: usize) {
+    if game
+        .player(player)
+        .wonders_owned
+        .contains(Wonder::GreatMausoleum)
+    {
+        game.player_mut(player).great_mausoleum_action_cards += 1;
+    } else {
+        do_gain_action_card_from_pile(game, player);
+    }
+}
+
+pub(crate) fn do_gain_action_card_from_pile(game: &mut Game, player: usize) {
     if let Some(c) = draw_action_card_from_pile(game) {
         gain_action_card(game, player, c);
         game.add_info_log_item(&format!(

@@ -1,4 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::action_card::do_gain_action_card_from_pile;
 use crate::advance::Advance;
 use crate::city::City;
 use crate::content::builtin::Builtin;
@@ -27,6 +28,39 @@ pub fn get_all_uncached() -> Vec<WonderInfo> {
         pyramids(),
         great_gardens(),
     ]
+}
+
+pub(crate) fn use_great_mausoleum() -> Builtin {
+    Builtin::builder("Great Mausoleum", "")
+        .add_bool_request(
+            |event| &mut event.great_mausoleum,
+            0,
+            |game, player_index, _| {
+                if let Some(card) = game.action_cards_discarded.last() {
+                    Some(format!(
+                        "Do you want to draw {} from the discard pile?",
+                        game.cache.get_action_card(*card).name()
+                    ))
+                } else {
+                    do_gain_action_card_from_pile(game, player_index);
+                    None
+                }
+            },
+            |game, s, _| {
+                if s.choice {
+                    let card = game.action_cards_discarded.pop().unwrap();
+                    game.add_info_log_item(&format!(
+                        "{} drew {} from the discard pile",
+                        s.player_name,
+                        game.cache.get_action_card(card).name()
+                    ));
+                    game.player_mut(s.player_index).action_cards.push(card);
+                } else {
+                    do_gain_action_card_from_pile(game, s.player_index);
+                }
+            },
+        )
+        .build()
 }
 
 fn great_lighthouse() -> WonderInfo {

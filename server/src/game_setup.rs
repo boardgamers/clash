@@ -108,8 +108,10 @@ pub fn setup_game_with_cache(
         dropped_players: Vec::new(),
         wonders_left,
         action_cards_left,
+        action_cards_discarded: Vec::new(),
         objective_cards_left,
         incidents_left,
+        incidents_discarded: Vec::new(),
         permanent_effects: Vec::new(),
     };
     for i in 0..game.players.len() {
