@@ -53,6 +53,11 @@ impl ObjectiveCard {
     fn has_objective(&self, got: &[String]) -> bool {
         self.objectives.iter().any(|o| got.contains(&o.name))
     }
+
+    #[must_use]
+    pub fn name(&self) -> String {
+        format!("{}/{}", self.objectives[0].name, self.objectives[1].name)
+    }
 }
 
 pub struct ObjectiveBuilder {
@@ -506,12 +511,9 @@ mod tests {
 
         let mut got = combinations(&cards, &opportunities, &cache);
         got.sort();
-        assert_eq!(
-            got,
-            vec![
-                vec![(23, "Seafarers".to_string()), (25, "Aggressor".to_string()),],
-                vec![(25, "Aggressor".to_string())],
-            ]
-        );
+        assert_eq!(got, vec![
+            vec![(23, "Seafarers".to_string()), (25, "Aggressor".to_string()),],
+            vec![(25, "Aggressor".to_string())],
+        ]);
     }
 }

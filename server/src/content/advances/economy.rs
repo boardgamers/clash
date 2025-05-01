@@ -19,10 +19,12 @@ use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
 
 pub(crate) fn economy() -> AdvanceGroup {
-    advance_group_builder(
-        "Economy",
-        vec![bartering(), trade_routes(), taxes(), currency()],
-    )
+    advance_group_builder("Economy", vec![
+        bartering(),
+        trade_routes(),
+        taxes(),
+        currency(),
+    ])
 }
 
 fn currency() -> AdvanceBuilder {
@@ -68,8 +70,9 @@ pub(crate) fn use_bartering() -> Builtin {
                     panic!("Invalid type");
                 };
                 game.add_info_log_item(&format!(
-                    "{} discarded an action card for 1 gold or 1 culture token",
-                    s.player_name
+                    "{} discarded {} for 1 gold or 1 culture token",
+                    s.player_name,
+                    game.cache.get_action_card(card).name()
                 ));
                 discard_action_card(game, s.player_index, card);
             },

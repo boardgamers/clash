@@ -20,9 +20,6 @@
         "mood_tokens": 7,
         "culture_tokens": 7
       },
-      "action_cards": [
-        123
-      ],
       "cities": [
         {
           "city_pieces": {
@@ -94,6 +91,10 @@
       "incident_tokens": 2,
       "wonder_cards": [
         "Pyramids"
+      ],
+      "action_cards": [
+        4,
+        11
       ],
       "next_unit_id": 8
     },
@@ -201,24 +202,54 @@
           "players": [
             {
               "index": 0,
-              "items": []
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "ActionCard": 123
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Bool": true
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Bool": false
+                    }
+                  }
+                }
+              ]
             }
           ]
         }
       ]
     }
   ],
-  "action_log_index": 0,
-  "log": [],
-  "undo_limit": 0,
-  "actions_left": 1,
+  "action_log_index": 3,
+  "log": [
+    [
+      "Player1 played the action card Elder Statesman as a regular action"
+    ],
+    [
+      "Player1 drew Inspiration/Peltasts from the discard pile"
+    ],
+    [
+      "Player1 gained an action card from the pile"
+    ]
+  ],
+  "undo_limit": 3,
+  "actions_left": 0,
   "round": 1,
   "age": 1,
   "messages": [
     "The game has started"
   ],
-  "action_cards_discarded": [1, 2, 3, 4],
-  "action_cards_left": [11, 12, 13, 14],
   "dice_roll_outcomes": [
     1,
     1,
@@ -230,5 +261,16 @@
     10,
     10,
     10
+  ],
+  "action_cards_left": [
+    12,
+    13,
+    14
+  ],
+  "action_cards_discarded": [
+    123,
+    1,
+    2,
+    3
   ]
 }

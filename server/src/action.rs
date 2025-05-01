@@ -161,21 +161,21 @@ pub fn execute_without_undo(
         }
     }
 
-    on_action_end(game, player_index);
+    let p = game.player_mut(player_index);
+    if p.great_mausoleum_action_cards > 0 {
+        p.great_mausoleum_action_cards -= 1;
+        on_action_end(game, player_index);
+    }
     Ok(())
 }
 
 pub(crate) fn on_action_end(game: &mut Game, player_index: usize) {
-    let p = game.player_mut(player_index);
-    if p.great_mausoleum_action_cards > 0 {
-        p.great_mausoleum_action_cards -= 1;
-        let _ = game.trigger_persistent_event(
-            &[player_index],
-            |e| &mut e.great_mausoleum,
-            (),
-            |_| PersistentEventType::GreatMausoleum,
-        );
-    }
+    let _ = game.trigger_persistent_event(
+        &[player_index],
+        |e| &mut e.great_mausoleum,
+        (),
+        |_| PersistentEventType::GreatMausoleum,
+    );
 }
 
 pub(crate) fn execute_custom_phase_action(

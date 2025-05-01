@@ -200,10 +200,7 @@ fn get_swap_secrets(other: &Player, game: &Game) -> Vec<String> {
             other
                 .objective_cards
                 .iter()
-                .map(|id| {
-                    let a = game.cache.get_objective_card(*id);
-                    format!("{}/{}", a.objectives[0].name, a.objectives[1].name)
-                })
+                .map(|id| game.cache.get_objective_card(*id).name())
                 .join(", ")
         ),
         format!(
