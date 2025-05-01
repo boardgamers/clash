@@ -14,7 +14,7 @@ use crate::player_events::IncidentTarget;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::{
-    add_change_government, can_change_government_for_free, get_status_phase,
+    ChangeGovernmentOption, add_change_government, can_change_government_for_free, get_status_phase,
 };
 use crate::unit::{UnitType, kill_units};
 use crate::wonder::draw_wonder_from_pile;
@@ -134,7 +134,7 @@ fn revolution() -> Incident {
     );
     b = kill_unit_for_revolution(
         b,
-        3,
+        11,
         "Kill a unit to avoid losing an action",
         |game, _player| can_lose_action(game),
     );
@@ -145,11 +145,17 @@ fn revolution() -> Incident {
     });
     b = kill_unit_for_revolution(
         b,
-        1,
+        10,
         "Kill a unit to avoid changing government",
         |game, player| can_change_government_for_free(player, game),
     );
-    b = add_change_government(b, |event| &mut event.incident, false, ResourcePile::empty());
+    b = add_change_government(
+        b,
+        |event| &mut event.incident,
+        ChangeGovernmentOption::FreeAndMandatory,
+        |_| {}, // don't need to pay
+        |_| true,
+    );
     b.build()
 }
 

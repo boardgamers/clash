@@ -386,10 +386,10 @@ fn test_revolution() {
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::ChangeGovernmentType(
-                    ChangeGovernmentType::ChangeGovernment(ChangeGovernment::new(
+                    ChangeGovernment::new(
                         String::from("Theocracy"),
                         vec![],
-                    )),
+                    ),
                 )),
             ),
         ],

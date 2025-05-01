@@ -64,7 +64,7 @@ pub enum ActiveDialog {
     ),
     HandCardsRequest(MultiSelection<HandCard>),
     BoolRequest(String),
-    ChangeGovernmentType(ChangeGovernmentRequest),
+    ChangeGovernmentType,
     ChooseAdditionalAdvances(ChooseAdditionalAdvances),
 }
 
@@ -575,8 +575,8 @@ impl State {
                 ),
                 PersistentEventRequest::SelectPlayer(r) => ActiveDialog::PlayerRequest(r.clone()),
                 PersistentEventRequest::BoolRequest(d) => ActiveDialog::BoolRequest(d.clone()),
-                PersistentEventRequest::ChangeGovernment(r) => {
-                    ActiveDialog::ChangeGovernmentType(r.clone())
+                PersistentEventRequest::ChangeGovernment=> {
+                    ActiveDialog::ChangeGovernmentType
                 }
                 PersistentEventRequest::ExploreResolution => {
                     match &game.current_event().event_type {

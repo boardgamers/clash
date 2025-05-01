@@ -4,7 +4,7 @@ use crate::advance::{Advance, do_advance, gain_advance_without_payment, remove_a
 use crate::consts::AGES;
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{
-    AdvanceRequest, ChangeGovernmentRequest, EventResponse, PersistentEventRequest,
+    AdvanceRequest,  EventResponse, PaymentRequest, PersistentEventRequest,
     PersistentEventType, PlayerRequest, PositionRequest,
 };
 use crate::objective_card::{
@@ -22,7 +22,7 @@ pub enum StatusPhaseState {
     FreeAdvance,
     DrawCards,
     RazeSize1City,
-    ChangeGovernmentType,
+    ChangeGovernmentType(bool),
     DetermineFirstPlayer(usize),
 }
 
@@ -40,13 +40,6 @@ impl ChangeGovernment {
             additional_advances,
         }
     }
-}
-
-// Can't use Option<String> because of mongo stips null values
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub enum ChangeGovernmentType {
-    ChangeGovernment(ChangeGovernment),
-    KeepGovernment,
 }
 
 pub const CHANGE_GOVERNMENT_COST: ResourcePile = ResourcePile::new(0, 0, 0, 0, 0, 1, 1);
@@ -100,8 +93,8 @@ pub(crate) fn play_status_phase(game: &mut Game, mut phase: StatusPhaseState) {
             }
             FreeAdvance => DrawCards,
             DrawCards => RazeSize1City,
-            RazeSize1City => ChangeGovernmentType,
-            ChangeGovernmentType => DetermineFirstPlayer(player_that_chooses_next_first_player(
+            RazeSize1City => ChangeGovernmentType(false),
+            ChangeGovernmentType(_) => DetermineFirstPlayer(player_that_chooses_next_first_player(
                 &game
                     .human_players(game.starting_player_index)
                     .into_iter()
@@ -230,77 +223,114 @@ pub(crate) fn may_change_government() -> Builtin {
     add_change_government(
         Builtin::builder("Change Government", "Change your government"),
         |event| &mut event.status_phase,
-        true,
-        CHANGE_GOVERNMENT_COST,
+        ChangeGovernmentOption::NotFreeAndOptional,
+        |v| {
+            if let StatusPhaseState::ChangeGovernmentType(paid) = v {
+                *paid = true;
+            } else {
+                panic!("Illegal state")
+            }
+        },
+        |v| {
+            if let StatusPhaseState::ChangeGovernmentType(paid) = v {
+                *paid
+            } else {
+                panic!("Illegal state")
+            }
+        },
     )
     .build()
+}
+
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub(crate) enum ChangeGovernmentOption {
+    FreeAndMandatory,
+    NotFreeAndOptional,
 }
 
 pub(crate) fn add_change_government<A, E, V>(
     a: A,
     event: E,
-    optional: bool,
-    cost: ResourcePile,
+    option: ChangeGovernmentOption,
+    set_paid: impl Fn(&mut V) + 'static + Clone + Sync + Send,
+    has_paid: impl Fn(&mut V) -> bool + 'static + Clone + Sync + Send,
 ) -> A
 where
     E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone + Sync + Send,
     A: AbilityInitializerSetup,
     V: Clone + PartialEq,
 {
-    let cost2 = cost.clone();
-    a.add_persistent_event_listener(
+    let event2 = event.clone();
+    a.add_payment_request_listener(
         event,
+        1,
+        move |game, player_index, _| {
+            if option == ChangeGovernmentOption::FreeAndMandatory {
+                return None;
+            }
+
+            if !can_change_government_for_free(game.player(player_index), game) {
+                return None;
+            }
+
+            let o = change_government_cost(game, player_index);
+            if !game.player(player_index).can_afford(&o) {
+                return None;
+            }
+
+            Some(vec![PaymentRequest::mandatory(
+                o,
+                "Pay to change government",
+            )])
+        },
+        move |game, s, v| {
+            let name = &s.player_name;
+            let cost = &s.choice[0];
+            game.add_info_log_item(&format!("{name} paid {cost} to change the government"));
+            set_paid(v);
+        },
+    )
+    .add_persistent_event_listener(
+        event2,
         0,
-        move |game, player_index, _, _| {
-            let p = game.player(player_index);
-            (can_change_government_for_free(p, game)
-                && p.can_afford(&PaymentOptions::resources(
-                    p,
-                    PaymentReason::ChangeGovernment,
-                    cost.clone(),
-                )))
-            .then_some(PersistentEventRequest::ChangeGovernment(
-                ChangeGovernmentRequest::new(optional, cost.clone()),
-            ))
+        move |_game, _player_index, _, v| {
+            has_paid(v).then_some(PersistentEventRequest::ChangeGovernment)
         },
         move |game, player_index, player_name, action, request, _| {
-            if let PersistentEventRequest::ChangeGovernment(r) = &request {
-                if let EventResponse::ChangeGovernmentType(t) = action {
-                    match t {
-                        ChangeGovernmentType::ChangeGovernment(c) => {
-                            game.add_info_log_item(&format!(
-                                "{player_name} changed their government from {} to {}",
-                                game.players[game.active_player()]
-                                    .government(game)
-                                    .expect("player should have a government before changing it"),
-                                c.new_government
-                            ));
-                            game.add_info_log_item(&format!(
-                                "Additional advances: {}",
-                                if c.additional_advances.is_empty() {
-                                    "none".to_string()
-                                } else {
-                                    c.additional_advances
-                                        .iter()
-                                        .map(|a| a.name(game))
-                                        .join(", ")
-                                }
-                            ));
-                            game.players[player_index].lose_resources(cost2.clone()); // todo colosseum
-                            change_government_type(game, player_index, &c);
+            if let PersistentEventRequest::ChangeGovernment = &request {
+                if let EventResponse::ChangeGovernmentType(c) = action {
+                    game.add_info_log_item(&format!(
+                        "{player_name} changed their government from {} to {}",
+                        game.players[game.active_player()]
+                            .government(game)
+                            .expect("player should have a government before changing it"),
+                        c.new_government
+                    ));
+                    game.add_info_log_item(&format!(
+                        "Additional advances: {}",
+                        if c.additional_advances.is_empty() {
+                            "none".to_string()
+                        } else {
+                            c.additional_advances
+                                .iter()
+                                .map(|a| a.name(game))
+                                .join(", ")
                         }
-                        ChangeGovernmentType::KeepGovernment => {
-                            assert!(r.optional, "Must change government");
-                            game.add_info_log_item(&format!(
-                                "{player_name} did not change their government"
-                            ));
-                        }
-                    }
+                    ));
+                    change_government_type(game, player_index, &c);
                     return;
                 }
             }
             panic!("Illegal action")
         },
+    )
+}
+
+fn change_government_cost(game: &mut Game, player_index: usize) -> PaymentOptions {
+    PaymentOptions::resources(
+        game.player(player_index),
+        PaymentReason::ChangeGovernment,
+        CHANGE_GOVERNMENT_COST,
     )
 }
 

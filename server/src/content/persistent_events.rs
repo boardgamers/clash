@@ -21,7 +21,7 @@ use crate::player_events::{IncidentInfo, OnAdvanceInfo};
 use crate::playing_actions::{PlayingAction, Recruit};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
-use crate::status_phase::{ChangeGovernmentType, StatusPhaseState};
+use crate::status_phase::{ChangeGovernment,  StatusPhaseState};
 use crate::unit::UnitType;
 use crate::wonder::{Wonder, WonderCardInfo};
 use itertools::Itertools;
@@ -40,7 +40,7 @@ pub enum PersistentEventRequest {
     SelectStructures(StructuresRequest),
     SelectHandCards(HandCardsRequest),
     BoolRequest(String),
-    ChangeGovernment(ChangeGovernmentRequest),
+    ChangeGovernment,
     ExploreResolution,
 }
 
@@ -56,7 +56,7 @@ pub enum EventResponse {
     SelectHandCards(Vec<HandCard>),
     SelectStructures(Vec<SelectedStructure>),
     Bool(bool),
-    ChangeGovernmentType(ChangeGovernmentType),
+    ChangeGovernmentType(ChangeGovernment),
     ExploreResolution(Rotation),
 }
 
@@ -353,19 +353,6 @@ impl PlayerRequest {
             choices,
             description: description.to_string(),
         }
-    }
-}
-
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub struct ChangeGovernmentRequest {
-    pub optional: bool,
-    pub cost: ResourcePile,
-}
-
-impl ChangeGovernmentRequest {
-    #[must_use]
-    pub fn new(optional: bool, cost: ResourcePile) -> Self {
-        Self { optional, cost }
     }
 }
 

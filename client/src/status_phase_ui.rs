@@ -12,7 +12,6 @@ pub struct ChooseAdditionalAdvances {
     possible: Vec<Advance>,
     selected: Vec<Advance>,
     needed: usize,
-    request: ChangeGovernmentRequest,
 }
 
 impl ChooseAdditionalAdvances {
@@ -20,31 +19,20 @@ impl ChooseAdditionalAdvances {
         government: String,
         possible: Vec<Advance>,
         needed: usize,
-        r: &ChangeGovernmentRequest,
     ) -> Self {
         Self {
             government,
             possible,
             selected: Vec::new(),
             needed,
-            request: r.clone(),
         }
     }
 }
 
-pub fn change_government_type_dialog(
-    rc: &RenderContext,
-    r: &ChangeGovernmentRequest,
-) -> StateUpdate {
-    let current = rc.shown_player.government(rc.game).unwrap();
-    if r.optional && cancel_button_with_tooltip(rc, &format!("Keep {current}")) {
-        return StateUpdate::response(EventResponse::ChangeGovernmentType(
-            ChangeGovernmentType::KeepGovernment,
-        ));
-    }
+pub fn change_government_type_dialog(rc: &RenderContext) -> StateUpdate {
     show_advance_menu(
         rc,
-        &format!("Change government for {}", r.cost),
+        "Change government",
         |a, p| {
             if rc
                 .game
@@ -99,10 +87,10 @@ pub fn choose_additional_advances_dialog(
     };
     if ok_button(rc, t) {
         return StateUpdate::response(EventResponse::ChangeGovernmentType(
-            ChangeGovernmentType::ChangeGovernment(ChangeGovernment::new(
+            ChangeGovernment::new(
                 choose.government.clone(),
                 choose.selected.clone(),
-            )),
+            ),
         ));
     }
 

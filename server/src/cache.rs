@@ -307,7 +307,7 @@ fn status_phase_handlers() -> HashMap<StatusPhaseState, Builtin> {
         (FreeAdvance, free_advance()),
         (DrawCards, draw_cards()),
         (RazeSize1City, raze_city()),
-        (ChangeGovernmentType, may_change_government()),
+        (ChangeGovernmentType(false), may_change_government()),
         (DetermineFirstPlayer(0), determine_first_player()),
     ])
 }

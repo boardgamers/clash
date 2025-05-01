@@ -3,21 +3,15 @@
   "events": [
     {
       "event_type": {
-        "StatusPhase": "ChangeGovernmentType"
+        "StatusPhase": {
+          "ChangeGovernmentType": false
+        }
       },
       "player": 0,
       "last_priority_used": 0,
       "handler": {
         "priority": 0,
-        "request": {
-          "ChangeGovernment": {
-            "optional": true,
-            "cost": {
-              "mood_tokens": 1,
-              "culture_tokens": 1
-            }
-          }
-        },
+        "request": "ChangeGovernment",
         "origin": {
           "Builtin": "Change Government"
         }
