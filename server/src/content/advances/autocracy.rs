@@ -94,7 +94,7 @@ pub(crate) fn use_absolute_power() -> Builtin {
             |game, _, player_name, _| {
                 game.actions_left += 1;
                 game.add_info_log_item(&format!(
-                    "{player_name} paid 2 mood tokens to get an extra action using Absolute Power",
+                    "{player_name} got an extra action using Absolute Power",
                 ));
             },
         )

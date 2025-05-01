@@ -284,6 +284,100 @@
                   },
                   "undo": [
                     {
+                      "op": "remove",
+                      "path": "/events"
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "mood_tokens": 1
+                        }
+                      ]
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "PayAction": {
+                              "IncreaseHappiness": {
+                                "action_type": {
+                                  "Custom": "VotingIncreaseHappiness"
+                                },
+                                "happiness_increases": [
+                                  [
+                                    "C2",
+                                    1
+                                  ],
+                                  [
+                                    "B3",
+                                    2
+                                  ]
+                                ],
+                                "payment": {
+                                  "food": 1,
+                                  "gold": 1,
+                                  "ideas": 1,
+                                  "mood_tokens": 1,
+                                  "ore": 1
+                                }
+                              }
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "Builtin": "Pay for action card"
+                            },
+                            "priority": 0,
+                            "request": {
+                              "Payment": [
+                                {
+                                  "cost": {
+                                    "conversions": [
+                                      {
+                                        "from": [
+                                          {
+                                            "food": 1
+                                          },
+                                          {
+                                            "wood": 1
+                                          },
+                                          {
+                                            "ore": 1
+                                          },
+                                          {
+                                            "ideas": 1
+                                          }
+                                        ],
+                                        "to": {
+                                          "gold": 1
+                                        },
+                                        "type": "Unlimited"
+                                      }
+                                    ],
+                                    "default": {
+                                      "mood_tokens": 1
+                                    }
+                                  },
+                                  "name": "Pay for action",
+                                  "optional": false
+                                }
+                              ]
+                            }
+                          },
+                          "last_priority_used": 0,
+                          "player": 0
+                        }
+                      ]
+                    },
+                    {
                       "op": "add",
                       "path": "/players/0/cities/1/angry_activation",
                       "value": true
@@ -337,10 +431,13 @@
       ]
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 2,
   "log": [
     [
-      "Player1 paid 1 food, 1 ore, 1 idea, 1 gold and 1 mood token to increase happiness in the city at C2 by 1 steps, making it Neutral and the city at B3 by 2 steps, making it Happy using Voting",
+      "Player1 paid 1 food, 1 ore, 1 idea, 1 gold and 1 mood token to increase happiness in the city at C2 by 1 steps, making it Neutral and the city at B3 by 2 steps, making it Happy using Voting"
+    ],
+    [
+      "Player1 paid 1 mood token for the action",
       "Rituals allows spending any resource as a substitute for mood tokens"
     ]
   ],

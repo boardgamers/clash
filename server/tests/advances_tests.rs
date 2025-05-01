@@ -214,19 +214,25 @@ fn test_increase_happiness_sports2() {
 
 #[test]
 fn test_increase_happiness_voting() {
-    JSON.test("increase_happiness_voting", vec![TestAction::undoable(
-        0,
-        Action::Playing(PlayingAction::IncreaseHappiness(
-            playing_actions::IncreaseHappiness::new(
-                vec![
-                    (Position::from_offset("C2"), 1),
-                    (Position::from_offset("B3"), 2),
-                ],
-                ResourcePile::mood_tokens(5),
-                PlayingActionType::Custom(CustomActionType::VotingIncreaseHappiness),
-            ),
-        )),
-    )]);
+    JSON.test("increase_happiness_voting", vec![
+        TestAction::undoable(
+            0,
+            Action::Playing(PlayingAction::IncreaseHappiness(
+                playing_actions::IncreaseHappiness::new(
+                    vec![
+                        (Position::from_offset("C2"), 1),
+                        (Position::from_offset("B3"), 2),
+                    ],
+                    ResourcePile::mood_tokens(5),
+                    PlayingActionType::Custom(CustomActionType::VotingIncreaseHappiness),
+                ),
+            )),
+        ).without_json_comparison(),
+        TestAction::undoable(
+            0,
+            Action::Response(EventResponse::Payment(vec![ResourcePile::mood_tokens(1)])),
+        ),
+    ]);
 }
 
 #[test]
@@ -244,19 +250,30 @@ fn test_increase_happiness_voting_rituals() {
                     PlayingActionType::Custom(CustomActionType::VotingIncreaseHappiness),
                 ),
             )),
+        ).without_json_comparison(),
+        TestAction::undoable(
+            0,
+            Action::Response(EventResponse::Payment(vec![ResourcePile::mood_tokens(1)])),
         ),
     ]);
 }
 
 #[test]
 fn test_absolute_power() {
-    JSON.test("absolute_power", vec![TestAction::undoable(
-        0,
-        Action::Playing(Custom(CustomEventAction::new(
-            CustomActionType::AbsolutePower,
-            None,
-        ))),
-    )]);
+    JSON.test("absolute_power", vec![
+        TestAction::undoable(
+            0,
+            Action::Playing(Custom(CustomEventAction::new(
+                CustomActionType::AbsolutePower,
+                None,
+            ))),
+        )
+        .without_json_comparison(),
+        TestAction::undoable(
+            0,
+            Action::Response(EventResponse::Payment(vec![ResourcePile::mood_tokens(2)])),
+        ),
+    ]);
 }
 
 #[test]
@@ -603,6 +620,10 @@ fn test_collect_free_economy() {
                 ],
                 PlayingActionType::Custom(CustomActionType::FreeEconomyCollect),
             ))),
+        ).without_json_comparison(),
+        TestAction::undoable(
+            0,
+            Action::Response(EventResponse::Payment(vec![ResourcePile::mood_tokens(1)])),
         )
         .with_post_assert(|game| {
             // no production focus
@@ -627,13 +648,14 @@ fn test_cultural_influence_instant_with_arts() {
                     PlayingActionType::Custom(CustomActionType::ArtsInfluenceCultureAttempt),
                 ),
             )),
-        ).without_json_comparison(),
+        )
+        .without_json_comparison(),
         TestAction::not_undoable(
             1,
             Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
                 1,
             )])),
-        )
+        ),
     ])
 }
 
