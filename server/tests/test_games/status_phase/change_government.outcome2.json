@@ -4,7 +4,7 @@
     {
       "event_type": {
         "StatusPhase": {
-          "ChangeGovernmentType": true
+          "DetermineFirstPlayer": 1
         }
       },
       "players_used": [
@@ -14,9 +14,17 @@
       "last_priority_used": 0,
       "handler": {
         "priority": 0,
-        "request": "ChangeGovernment",
+        "request": {
+          "SelectPlayer": {
+            "choices": [
+              0,
+              1
+            ],
+            "description": "Determine the first player"
+          }
+        },
         "origin": {
-          "Builtin": "Change Government"
+          "Builtin": "Determine First Player"
         }
       }
     }

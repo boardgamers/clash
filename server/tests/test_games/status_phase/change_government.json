@@ -1,36 +1,36 @@
 {
   "state": "Playing",
   "events": [
-      {
-        "event_type": {
-          "StatusPhase": "RazeSize1City"
-        },
-        "players_used": [
-          0
-        ],
-        "player": 1,
-        "last_priority_used": 0,
-        "handler": {
-          "priority": 0,
-          "request": {
-            "SelectPositions": {
-              "choices": [
-                "A1",
-                "C2"
-              ],
-              "needed": {
-                "start": 0,
-                "end": 1
-              },
-              "description": "Select a city to raze"
-            }
-          },
-          "origin": {
-            "Builtin": "Raze city"
+    {
+      "event_type": {
+        "StatusPhase": "RazeSize1City"
+      },
+      "players_used": [
+        0
+      ],
+      "player": 1,
+      "last_priority_used": 0,
+      "handler": {
+        "priority": 0,
+        "request": {
+          "SelectPositions": {
+            "choices": [
+              "A1",
+              "C2"
+            ],
+            "needed": {
+              "start": 0,
+              "end": 1
+            },
+            "description": "Select a city to raze"
           }
+        },
+        "origin": {
+          "Builtin": "Raze city"
         }
       }
-    ],
+    }
+  ],
   "players": [
     {
       "id": 0,
