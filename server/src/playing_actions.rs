@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{ActionCardInfo, land_battle_won_action, play_action_card};
 use crate::advance::{Advance, gain_advance_without_payment};
-use crate::city::{ MoodState, found_city};
+use crate::city::{MoodState, found_city};
 use crate::collect::{PositionCollection, collect};
 use crate::construct::Construct;
 use crate::content::builtin::Builtin;
@@ -344,19 +344,28 @@ impl PlayingAction {
             PlayingAction::Advance { .. } => PlayingActionType::Advance,
             PlayingAction::FoundCity { .. } => PlayingActionType::FoundCity,
             PlayingAction::Construct(_) => PlayingActionType::Construct,
-            PlayingAction::Collect(c) => allowed_types(&c.action_type, &[
-                PlayingActionType::Collect,
-                PlayingActionType::Custom(CustomActionType::FreeEconomyCollect),
-            ]),
+            PlayingAction::Collect(c) => allowed_types(
+                &c.action_type,
+                &[
+                    PlayingActionType::Collect,
+                    PlayingActionType::Custom(CustomActionType::FreeEconomyCollect),
+                ],
+            ),
             PlayingAction::Recruit(_) => PlayingActionType::Recruit,
-            PlayingAction::IncreaseHappiness(h) => allowed_types(&h.action_type, &[
-                PlayingActionType::IncreaseHappiness,
-                PlayingActionType::Custom(CustomActionType::VotingIncreaseHappiness),
-            ]),
-            PlayingAction::InfluenceCultureAttempt(i) => allowed_types(&i.action_type, &[
-                PlayingActionType::InfluenceCultureAttempt,
-                PlayingActionType::Custom(CustomActionType::ArtsInfluenceCultureAttempt),
-            ]),
+            PlayingAction::IncreaseHappiness(h) => allowed_types(
+                &h.action_type,
+                &[
+                    PlayingActionType::IncreaseHappiness,
+                    PlayingActionType::Custom(CustomActionType::VotingIncreaseHappiness),
+                ],
+            ),
+            PlayingAction::InfluenceCultureAttempt(i) => allowed_types(
+                &i.action_type,
+                &[
+                    PlayingActionType::InfluenceCultureAttempt,
+                    PlayingActionType::Custom(CustomActionType::ArtsInfluenceCultureAttempt),
+                ],
+            ),
             PlayingAction::ActionCard(a) => PlayingActionType::ActionCard(*a),
             PlayingAction::WonderCard(name) => PlayingActionType::WonderCard(*name),
             PlayingAction::Custom(c) => PlayingActionType::Custom(c.action.clone()),

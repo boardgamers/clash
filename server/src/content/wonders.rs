@@ -5,6 +5,7 @@ use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::{AdvanceRequest, PaymentRequest, PositionRequest};
 use crate::game::Game;
+use crate::log::format_mood_change;
 use crate::map::Terrain;
 use crate::map::Terrain::Fertile;
 use crate::payment::{PaymentOptions, PaymentReason};
@@ -16,7 +17,6 @@ use crate::{resource_pile::ResourcePile, wonder::WonderInfo};
 use itertools::Itertools;
 use std::collections::HashSet;
 use std::sync::Arc;
-use crate::log::format_mood_change;
 
 #[must_use]
 pub fn get_all_uncached() -> Vec<WonderInfo> {
