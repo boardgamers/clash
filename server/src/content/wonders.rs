@@ -51,13 +51,16 @@ fn great_wall() -> WonderInfo {
         PaymentOptions::fixed_resources(ResourcePile::new(3, 2, 7, 0, 0, 0, 5)),
         Advance::Siegecraft,
     )
-    .add_combat_round_start_listener(6, |g, c, s, role| {
-        if c.round == 1
+    .add_combat_round_start_listener(6, |g, c, s, role, info| {
+        if info.owning_player != c.player(role)
+            && c.round == 1
             && role.is_attacker()
             && c.defender_city(g)
                 .is_some_and(|c| c.mood_state == MoodState::Happy)
         {
-            // todo
+            s.extra_combat_value -= 2;
+            s.roll_log
+                .push("Great Wall gives -2 combat value in the first round".to_string());
         }
     })
     .build()

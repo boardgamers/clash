@@ -57,11 +57,15 @@ use std::sync::Arc;
 
 struct Listener<T, U, V, W> {
     #[allow(clippy::type_complexity)]
-    callback: Arc<dyn Fn(&mut T, &U, &V, &mut W) + Sync + Send>,
+    callback: Arc<dyn Fn(&mut T, &U, &V, &mut W, &ListenerInfo) + Sync + Send>,
     priority: i32,
     id: usize,
-    origin: EventOrigin,
-    owning_player: usize,
+    info: ListenerInfo,
+}
+
+pub struct ListenerInfo {
+    pub origin: EventOrigin,
+    pub owning_player: usize,
 }
 
 impl<T, U, V, W> Listener<T, U, V, W> {
@@ -73,14 +77,16 @@ impl<T, U, V, W> Listener<T, U, V, W> {
         owning_player: usize,
     ) -> Self
     where
-        F: Fn(&mut T, &U, &V, &mut W) + 'static + Sync + Send,
+        F: Fn(&mut T, &U, &V, &mut W, &ListenerInfo) + 'static + Sync + Send,
     {
         Self {
             callback: Arc::new(callback),
             priority,
             id,
-            origin,
-            owning_player,
+            info: ListenerInfo {
+                origin,
+                owning_player,
+            },
         }
     }
 }
@@ -113,13 +119,13 @@ where
         owning_player: usize,
     ) -> usize
     where
-        F: Fn(&mut T, &U, &V, &mut W) + 'static + Sync + Send,
+        F: Fn(&mut T, &U, &V, &mut W, &ListenerInfo) + 'static + Sync + Send,
     {
         let id = self.next_id;
         if let Some(old) = self.listeners.iter().find(|l| priority == l.priority) {
             panic!(
                 "Event {}: Priority {priority} already used by listener with key {:?} when adding {key:?}",
-                self.name, old.origin
+                self.name, old.info.origin
             )
         }
         self.listeners.push(Listener::new(
@@ -140,7 +146,7 @@ where
         let _ = self.listeners.remove(
             self.listeners
                 .iter()
-                .position(|l| &l.origin == key)
+                .position(|l| &l.info.origin == key)
                 .unwrap_or_else(|| panic!("Listeners should include the key {key:?} to remove")),
         );
     }
@@ -164,7 +170,7 @@ where
 
     pub(crate) fn trigger(&self, value: &mut T, info: &U, details: &V, extra_value: &mut W) {
         for l in &self.listeners {
-            (l.callback)(value, info, details, extra_value);
+            (l.callback)(value, info, details, extra_value, &l.info);
         }
     }
 
@@ -179,14 +185,14 @@ where
     ) -> Vec<EventOrigin> {
         let mut modifiers = Vec::new();
         for l in &self.listeners {
-            if exclude.contains(&l.origin) {
+            if exclude.contains(&l.info.origin) {
                 continue;
             }
             let previous_value = value.clone();
             let previous_extra_value = extra_value.clone();
-            (l.callback)(value, info, details, extra_value);
+            (l.callback)(value, info, details, extra_value, &l.info);
             if *value != previous_value || *extra_value != previous_extra_value {
-                modifiers.push(l.origin.clone());
+                modifiers.push(l.info.origin.clone());
             }
         }
         modifiers

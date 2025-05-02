@@ -56,8 +56,8 @@ fn get_maya() -> Civilization {
                 "",
                 "",
             )
-            .add_combat_round_start_listener(4, |game, c, s, _role| {
-                if c.round == 1
+            .add_combat_round_start_listener(4, |game, c, s, role, info| {
+                if info.owning_player == c.player(role) && c.round == 1
                     && game
                         .try_get_any_city(c.defender_position)
                         .is_some_and(|city| city.pieces.obelisk.is_some())

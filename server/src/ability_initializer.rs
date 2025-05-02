@@ -7,7 +7,7 @@ use crate::content::persistent_events::{
     PersistentEventHandler, PersistentEventRequest, PlayerRequest, PositionRequest,
     ResourceRewardRequest, SelectedStructure, StructuresRequest, UnitTypeRequest, UnitsRequest,
 };
-use crate::events::{Event, EventOrigin};
+use crate::events::{Event, EventOrigin, ListenerInfo};
 use crate::player_events::{PersistentEvent, PersistentEvents, TransientEvents};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
@@ -181,26 +181,26 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             self,
             move |events| event(&mut events.transient),
             priority,
-            move |value, u, v, ()| listener(value, u, v),
+            move |value, u, v, (), _| listener(value, u, v),
         )
     }
 
     fn add_combat_round_start_listener(
         self,
         priority: i32,
-        listener: impl Fn(&Game, &Combat, &mut CombatStrength, CombatRole)
+        listener: impl Fn(&Game, &Combat, &mut CombatStrength, CombatRole, &ListenerInfo)
         + Clone
         + 'static
         + Sync
         + Send,
     ) -> Self {
-        self.add_simple_persistent_event_listener(
+        self.add_simple_persistent_event_listener_with_info(
             |event| &mut event.combat_round_start,
             priority,
-            move |game, p, _, s| {
+            move |game, p, _, s, info| {
                 update_combat_strength(game, p, s, {
                     let l = listener.clone();
-                    move |game, combat, s, role| l(game, combat, s, role)
+                    move |game, combat, s, role| l(game, combat, s, role, info)
                 });
             },
         )
@@ -210,12 +210,12 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        start_custom_phase: impl Fn(&mut Game, usize, &str, &mut V) -> Option<PersistentEventRequest>
+        start_custom_phase: impl Fn(&mut Game, usize, &str, &mut V, &ListenerInfo) -> Option<PersistentEventRequest>
         + 'static
         + Clone
         + Sync
         + Send,
-        end_custom_phase: impl Fn(&mut Game, usize, &str, EventResponse, PersistentEventRequest, &mut V)
+        end_custom_phase: impl Fn(&mut Game, usize, &str, EventResponse, PersistentEventRequest, &mut V, &ListenerInfo)
         + 'static
         + Clone
         + Sync
@@ -230,7 +230,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             self,
             move |e| event(&mut e.persistent),
             priority,
-            move |game, i, (), details| {
+            move |game, i, (), details, info| {
                 let player_index = i.player;
                 let player_name = game.player_name(player_index);
 
@@ -256,6 +256,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                                     a,
                                     r,
                                     details,
+                                    info
                                 );
                                 return;
                             }
@@ -282,7 +283,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                 // trigger another event
                 game.current_event_mut().player.last_priority_used = Some(priority);
 
-                if let Some(request) = start_custom_phase(game, player_index, &player_name, details)
+                if let Some(request) = start_custom_phase(game, player_index, &player_name, details, info)
                 {
                     game.current_event_mut().player.handler = Some(PersistentEventHandler {
                         priority,
@@ -306,15 +307,35 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         F: Fn(&mut Game, usize, &str, &mut V) + 'static + Clone + Sync + Send,
         V: Clone + PartialEq,
     {
+        self.add_simple_persistent_event_listener_with_info(
+            event,
+            priority,
+            move |game, player_index, player_name, details, _| {
+                listener(game, player_index, player_name, details);
+            },
+        )
+    }
+
+    fn add_simple_persistent_event_listener_with_info<V, E, F>(
+        self,
+        event: E,
+        priority: i32,
+        listener: F,
+    ) -> Self
+    where
+        E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone + Sync + Send,
+        F: Fn(&mut Game, usize, &str, &mut V, &ListenerInfo) + 'static + Clone + Sync + Send,
+        V: Clone + PartialEq,
+    {
         self.add_persistent_event_listener(
             event,
             priority,
-            move |game, player_index, player_name, details| {
+            move |game, player_index, player_name, details, info| {
                 // only for the listener
-                listener(game, player_index, player_name, details);
+                listener(game, player_index, player_name, details, info);
                 None
             },
-            |_, _, _, _, _, _| {},
+            |_, _, _, _, _, _, _| {},
         )
     }
 
@@ -340,7 +361,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self.add_persistent_event_listener(
             event,
             priority,
-            move |game, player_index, _player_name, details| {
+            move |game, player_index, _player_name, details, _| {
                 request(game, player_index, details)
                     .filter(|r| {
                         r.iter()
@@ -348,7 +369,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                     })
                     .map(PersistentEventRequest::Payment)
             },
-            move |game, player_index, player_name, action, request, details| {
+            move |game, player_index, player_name, action, request, details, _| {
                 if let PersistentEventRequest::Payment(requests) = &request {
                     if let EventResponse::Payment(payments) = action {
                         assert_eq!(requests.len(), payments.len());
@@ -394,7 +415,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self.add_persistent_event_listener(
             event,
             priority,
-            move |game, player_index, _player_name, details| {
+            move |game, player_index, _player_name, details, _| {
                 let req = request(game, player_index, details);
                 if let Some(r) = &req {
                     if r.reward.payment_options.possible_resource_types().len() == 1 {
@@ -413,7 +434,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                 }
                 req.map(PersistentEventRequest::ResourceReward)
             },
-            move |game, player_index, player_name, action, request, details| {
+            move |game, player_index, player_name, action, request, details, _| {
                 if let PersistentEventRequest::ResourceReward(request) = &request {
                     if let EventResponse::ResourceReward(reward) = action {
                         assert!(
@@ -450,10 +471,10 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self.add_persistent_event_listener(
             event,
             priority,
-            move |game, player_index, _player_name, details| {
+            move |game, player_index, _player_name, details,_| {
                 request(game, player_index, details).map(PersistentEventRequest::BoolRequest)
             },
-            move |game, player_index, player_name, action, request, details| {
+            move |game, player_index, player_name, action, request, details, _| {
                 if let PersistentEventRequest::BoolRequest(_) = &request {
                     if let EventResponse::Bool(reward) = action {
                         gain_reward(
@@ -753,7 +774,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self.add_persistent_event_listener(
             event,
             priority,
-            move |game, player_index, player_name, details| {
+            move |game, player_index, player_name, details, _| {
                 if let Some(r) = request(game, player_index, details) {
                     let choices = get_choices(&r);
                     if choices.is_empty() {
@@ -776,7 +797,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                 }
                 None
             },
-            move |game, player_index, player_name, action, request, details| {
+            move |game, player_index, player_name, action, request, details,_| {
                 let (choices, selected) = from_request(&request, action);
                 assert!(
                     choices.contains(&selected),
@@ -817,7 +838,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self.add_persistent_event_listener(
             event,
             priority,
-            move |game, player_index, _player_name, details| {
+            move |game, player_index, _player_name, details,_| {
                 if let Some(r) = request(game, player_index, details) {
                     let m = get_request(&r);
                     if m.choices.is_empty() || m.needed.clone().max() == Some(0) {
@@ -842,7 +863,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                 }
                 None
             },
-            move |game, player_index, player_name, action, request, details| {
+            move |game, player_index, player_name, action, request, details,_| {
                 let (choices, selected, needed) = from_request(&request, action);
                 assert!(
                     selected.iter().all(|s| choices.contains(s)),
@@ -909,7 +930,7 @@ where
     T: Clone + PartialEq,
     W: Clone + PartialEq,
     E: Fn(&mut PlayerEvents) -> &mut Event<T, U, V, W> + 'static + Clone + Sync + Send,
-    F: Fn(&mut T, &U, &V, &mut W) + 'static + Clone + Sync + Send,
+    F: Fn(&mut T, &U, &V, &mut W, &ListenerInfo) + 'static + Clone + Sync + Send,
 {
     let key = setup.get_key().clone();
     let deinitialize_event = event.clone();
