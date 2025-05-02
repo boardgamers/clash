@@ -4,7 +4,7 @@ use crate::card::{HandCard, HandCardType, hand_cards};
 use crate::content::persistent_events::{HandCardsRequest, PersistentEventType, PlayerRequest};
 use crate::content::tactics_cards::TacticsCardFactory;
 use crate::game::Game;
-use crate::player::Player;
+use crate::player::{reinit_listeners, Player};
 use crate::playing_actions::ActionCost;
 use crate::resource_pile::ResourcePile;
 use crate::utils::remove_element;
@@ -147,6 +147,9 @@ fn swap_cards(
         game.player_name(other)
     ));
 
+    reinit_listeners(player, game);
+    reinit_listeners(other, game);
+
     Ok(())
 }
 
@@ -217,6 +220,7 @@ pub(crate) fn validate_spy_cards(cards: &[HandCard], game: &Game) -> Result<(), 
         panic!("wrong event type");
     };
 
+    // too inefficient to clone the game for AI play
     swap_cards(
         &mut game.clone(),
         cards,

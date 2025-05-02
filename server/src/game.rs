@@ -119,9 +119,8 @@ impl Game {
             permanent_effects: data.permanent_effects,
             events: data.events,
         };
-        let all = game.cache.get_builtins().clone();
         for player in data.players {
-            Player::initialize_player(player, &mut game, &all);
+            Player::init(player, &mut game);
         }
         game
     }

@@ -393,6 +393,31 @@ fn test_overproduction() {
 }
 
 #[test]
+fn test_new_plans() {
+    JSON.test(
+        "new_plans",
+        vec![
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(31)))
+                .without_json_comparison(),
+            TestAction::not_undoable(
+                0,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
+                    1,
+                )])),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectHandCards(vec![
+                    HandCard::ObjectiveCard(3),
+                    HandCard::ObjectiveCard(2),
+                ])),
+            ),
+        ],
+    );
+}
+
+#[test]
 fn test_synergies() {
     JSON.test(
         "synergies",

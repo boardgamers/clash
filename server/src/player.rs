@@ -2,7 +2,6 @@ use crate::advance::Advance;
 use crate::city_pieces::{DestroyedStructures, DestroyedStructuresData};
 use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::content::builtin;
-use crate::content::builtin::Builtin;
 use crate::events::{Event, EventOrigin};
 use crate::objective_card::init_objective_card;
 use crate::payment::{PaymentOptions, PaymentReason};
@@ -101,39 +100,10 @@ pub enum CostTrigger {
 }
 
 impl Player {
-    ///
-    ///
-    /// # Panics
-    ///
-    /// Panics if elements like wonders or advances don't exist
-    pub fn initialize_player(data: PlayerData, game: &mut Game, all: &[Builtin]) {
-        let leader = data.active_leader.clone();
-        let objective_cards = data.objective_cards.clone();
-        let player = Self::from_data(data);
-        let player_index = player.index;
-        game.players.push(player);
-        builtin::init_player(game, player_index, all);
-        advance::init_player(game, player_index);
-
-        if let Some(leader) = leader {
-            Self::with_leader(&leader, game, player_index, |game, leader| {
-                leader.listeners.init(game, player_index);
-            });
-        }
-
-        let mut objectives = vec![];
-        for id in objective_cards {
-            init_objective_card(game, player_index, &mut objectives, id);
-        }
-
-        let mut cities = mem::take(&mut game.players[player_index].cities);
-        for city in &mut cities {
-            for wonder in &city.pieces.wonders {
-                let listeners = game.cache.get_wonder(*wonder).listeners.clone();
-                listeners.init(game, player_index);
-            }
-        }
-        game.players[player_index].cities = cities;
+    pub(crate) fn init(data: PlayerData, game: &mut Game) {
+        let player_index = data.id;
+        game.players.push(Self::from_data(data));
+        init_listeners(player_index, game);
     }
 
     fn from_data(data: PlayerData) -> Player {
@@ -824,6 +794,36 @@ pub fn end_turn(game: &mut Game, player: usize) {
     if let Some(a) = p.great_library_advance.take() {
         a.info(game).listeners.clone().deinit(game, player);
     }
+}
+
+pub(crate) fn reinit_listeners(player_index: usize, game: &mut Game) {
+    game.player_mut(player_index).events = PlayerEvents::new();
+    init_listeners(player_index, game);
+}
+
+pub(crate) fn init_listeners(player_index: usize, game: &mut Game) {
+    builtin::init_player(game, player_index, &game.cache.get_builtins().clone());
+    advance::init_player(game, player_index);
+
+    if let Some(leader) = game.player(player_index).active_leader.clone() {
+        Player::with_leader(&leader, game, player_index, |game, leader| {
+            leader.listeners.init(game, player_index);
+        });
+    }
+
+    let mut objectives = vec![];
+    for id in &game.player(player_index).objective_cards.clone() {
+        init_objective_card(game, player_index, &mut objectives, *id);
+    }
+
+    let mut cities = mem::take(&mut game.player_mut(player_index).cities);
+    for city in &mut cities {
+        for wonder in &city.pieces.wonders {
+            let listeners = game.cache.get_wonder(*wonder).listeners.clone();
+            listeners.init(game, player_index);
+        }
+    }
+    game.player_mut(player_index).cities = cities;
 }
 
 #[derive(Serialize, Deserialize, PartialEq)]
