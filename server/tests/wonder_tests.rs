@@ -1,6 +1,5 @@
 use crate::common::{JsonTest, TestAction, move_action};
 use server::action::{Action, execute_without_undo};
-use server::advance;
 use server::advance::Advance;
 use server::card::HandCard;
 use server::content::custom_actions::{CustomActionType, CustomEventAction};

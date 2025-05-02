@@ -25,7 +25,7 @@ fn test_barbarians_spawn() {
                 0,
                 Action::Response(EventResponse::SelectAdvance(advance::Advance::Storage)),
             ),
-            TestAction::not_undoable(
+            TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
                     "B3",
@@ -67,14 +67,14 @@ fn test_pirates_spawn() {
                 0,
                 Action::Response(EventResponse::SelectAdvance(advance::Advance::Storage)),
             ),
-            TestAction::not_undoable(0, Action::Response(EventResponse::SelectUnits(vec![7]))),
-            TestAction::not_undoable(
+            TestAction::undoable(0, Action::Response(EventResponse::SelectUnits(vec![7]))),
+            TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
                     "A2",
                 )])),
             ),
-            TestAction::not_undoable(
+            TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
                     "D2",
@@ -148,7 +148,7 @@ fn test_pestilence() {
                     payment: ResourcePile::gold(2),
                 }),
             ),
-            TestAction::not_undoable(
+            TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::mood_tokens(1)])),
             ),
@@ -203,7 +203,7 @@ fn test_epidemics() {
                     payment: ResourcePile::gold(2),
                 }),
             ),
-            TestAction::not_undoable(0, Action::Response(EventResponse::SelectUnits(vec![7]))),
+            TestAction::undoable(0, Action::Response(EventResponse::SelectUnits(vec![7]))),
         ],
     );
 }
@@ -253,7 +253,7 @@ fn test_volcano() {
                     payment: ResourcePile::gold(2),
                 }),
             ),
-            TestAction::not_undoable(
+            TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
                     "C2",
@@ -304,7 +304,7 @@ fn test_earthquake() {
                 }),
             )
             .without_json_comparison(),
-            TestAction::not_undoable(
+            TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectStructures(vec![
                     SelectedStructure::new(Position::from_offset("B2"), Structure::CityCenter),
@@ -382,11 +382,11 @@ fn test_revolution() {
                 }),
             )
             .without_json_comparison(),
-            TestAction::not_undoable(0, Action::Response(EventResponse::SelectUnits(vec![3])))
+            TestAction::undoable(0, Action::Response(EventResponse::SelectUnits(vec![3])))
                 .without_json_comparison(),
-            TestAction::not_undoable(0, Action::Response(EventResponse::SelectUnits(vec![])))
+            TestAction::undoable(0, Action::Response(EventResponse::SelectUnits(vec![])))
                 .without_json_comparison(),
-            TestAction::not_undoable(
+            TestAction::undoable(
                 0,
                 Action::Response(EventResponse::ChangeGovernmentType(ChangeGovernment::new(
                     String::from("Theocracy"),
@@ -409,7 +409,7 @@ fn test_uprising() {
                     payment: ResourcePile::gold(2),
                 }),
             ),
-            TestAction::not_undoable(
+            TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![
                     ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1),
@@ -611,7 +611,7 @@ fn test_pandemics() {
                     payment: ResourcePile::gold(2),
                 }),
             ),
-            TestAction::not_undoable(0, Action::Response(EventResponse::SelectUnits(vec![0]))),
+            TestAction::undoable(0, Action::Response(EventResponse::SelectUnits(vec![0]))),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
@@ -640,7 +640,7 @@ fn test_black_death() {
                     payment: ResourcePile::gold(2),
                 }),
             ),
-            TestAction::not_undoable(0, Action::Response(EventResponse::SelectUnits(vec![0]))),
+            TestAction::undoable(0, Action::Response(EventResponse::SelectUnits(vec![0]))),
         ],
     );
 }
@@ -685,7 +685,7 @@ fn test_fire() {
                     payment: ResourcePile::gold(2),
                 }),
             ),
-            TestAction::not_undoable(
+            TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
                     "B2",
