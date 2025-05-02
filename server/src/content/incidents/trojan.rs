@@ -17,9 +17,7 @@ pub(crate) fn trojan_incidents() -> Vec<Incident> {
     vec![trojan_horse(), solar_eclipse(), anarchy()]
 }
 
-const TROJAN_DESCRIPTION: &str = "In a land battle against a defended city (Army unit or Fortress), \
-            the attacker may pay 1 wood and 1 culture token to get 1 victory point and \
-            to deny the defender tactics cards in the first round of combat.";
+const TROJAN_DESCRIPTION: &str = "In a land battle against a defended city (Army unit or Fortress), the attacker may pay 1 wood and 1 culture token to get 1 victory point and to deny the defender tactics cards in the first round of combat.";
 
 fn trojan_horse() -> Incident {
     Incident::builder(
@@ -137,9 +135,7 @@ pub(crate) fn solar_eclipse_end_combat() -> Builtin {
 //
 //     43,
 //     "Guillotine",
-//     "Kill your leader if you have one. Then, choose one of the following: A) Choose a new
-// leader in one of your cities or armies. B) Gain 2 victory points. You cannot play
-// leaders for the remainder of the game."
+//     "Kill your leader if you have one. Then, choose one of the following: A) Choose a new leader in one of your cities or armies. B) Gain 2 victory points. You cannot play leaders for the remainder of the game."
 // IncidentBaseEffect::BarbariansSpawn,
 // )
 // .add_incident_listener(IncidentTarget::ActivePlayer, 0, |game, _player_index| {

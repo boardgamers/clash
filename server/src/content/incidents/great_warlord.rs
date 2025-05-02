@@ -40,25 +40,22 @@ pub(crate) fn great_warlord() -> ActionCard {
 
 pub(crate) fn use_great_warlord() -> Builtin {
     Builtin::builder("great_warlord", "-")
-        .add_simple_persistent_event_listener_with_info(
+        .add_simple_persistent_event_listener(
             |event| &mut event.combat_start,
             9,
-            |game, player_index, _name, c, info| {
+            |game, _player_index, _name, c| {
                 if let Movement(m) = &mut game.state {
-                    if info.owning_player == player_index
-                        && mem::replace(&mut m.great_warlord_used, false)
-                    {
+                    if mem::replace(&mut m.great_warlord_used, false) {
                         c.modifiers.push(CombatModifier::GreatWarlord);
                     }
                 }
             },
         )
-        .add_simple_persistent_event_listener_with_info(
+        .add_simple_persistent_event_listener(
             |event| &mut event.combat_round_start,
             9,
-            |_game, player_index, _name, r, info| {
-                if info.owning_player == player_index
-                    && r.combat.modifiers.contains(&CombatModifier::GreatWarlord)
+            |_game, player_index, _name, r| {
+                if r.combat.modifiers.contains(&CombatModifier::GreatWarlord)
                     && r.combat.attacker == player_index
                 {
                     r.attacker_strength.extra_combat_value += 2;
