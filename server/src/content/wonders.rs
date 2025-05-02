@@ -2,10 +2,12 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::do_gain_action_card_from_pile;
 use crate::advance::Advance;
 use crate::card::HandCard;
-use crate::city::City;
+use crate::city::{City, MoodState};
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
-use crate::content::persistent_events::{AdvanceRequest, HandCardsRequest, PaymentRequest, PositionRequest};
+use crate::content::persistent_events::{
+    AdvanceRequest, HandCardsRequest, PaymentRequest, PositionRequest,
+};
 use crate::game::Game;
 use crate::incident::draw_and_discard_incident_card_from_pile;
 use crate::log::format_mood_change;
@@ -13,7 +15,7 @@ use crate::map::Terrain;
 use crate::map::Terrain::Fertile;
 use crate::objective_card::{discard_objective_card, gain_objective_card_from_pile};
 use crate::payment::{PaymentOptions, PaymentReason};
-use crate::player::{add_unit, Player};
+use crate::player::{Player, add_unit};
 use crate::position::Position;
 use crate::unit::UnitType;
 use crate::wonder::Wonder;
@@ -21,10 +23,12 @@ use crate::{resource_pile::ResourcePile, wonder::WonderInfo};
 use itertools::Itertools;
 use std::collections::HashSet;
 use std::sync::Arc;
+use crate::tactics_card::CombatRole;
 
 #[must_use]
 pub fn get_all_uncached() -> Vec<WonderInfo> {
     vec![
+        great_wall(),
         great_statue(),
         great_mausoleum(),
         colosseum(),
@@ -33,6 +37,27 @@ pub fn get_all_uncached() -> Vec<WonderInfo> {
         pyramids(),
         great_gardens(),
     ]
+}
+
+fn great_wall() -> WonderInfo {
+    // todo war ships broken - counts for both players
+    // todo combat value
+    // todo -2 combat value in the first round
+    // todo automatically win battles if Barbarians attack any of your cities
+    WonderInfo::builder(
+        Wonder::GreatWall,
+        "Great Well",
+        "Land combat in your happy city: Attacker gets -2 combat value in the first round. \
+        You automatically win battles if Barbarians attack any of your cities.",
+        PaymentOptions::fixed_resources(ResourcePile::new(3, 2, 7, 0, 0, 0, 5)),
+        Advance::Siegecraft,
+    )
+        .add_combat_round_start_listener(6, |g, c, s, role| {
+            if c.round == 1 && role.is_attacker() && c.defender_city(g).is_some_and(|c|c.mood_state == MoodState::Happy) {
+              // todo
+            }
+        })
+            .build()
 }
 
 fn great_statue() -> WonderInfo {
@@ -45,14 +70,9 @@ fn great_statue() -> WonderInfo {
         Advance::Monuments,
     )
     .add_custom_action(CustomActionType::GreatStatue)
-        .add_one_time_ability_initializer(
-            |game, player_index| {
-                gain_objective_card_from_pile(
-                    game,
-                    player_index,
-                );
-            },
-        )
+    .add_one_time_ability_initializer(|game, player_index| {
+        gain_objective_card_from_pile(game, player_index);
+    })
     .build()
 }
 
@@ -61,33 +81,35 @@ pub(crate) fn use_great_statue() -> Builtin {
         "Great Statue",
         "Discard an objectives card from your hand: Gain 1 action.",
     )
-        .add_hand_card_request(
-            |event| &mut event.custom_action,
-            0,
-            |game, player_index, _| {
-                let player = game.player(player_index);
-                Some(HandCardsRequest::new(
-                    player.objective_cards.iter().map(
-                        |&a| HandCard::ObjectiveCard(a),
-                    ).collect_vec(),
-                    1..=1,
-                    "Select an objective card to discard",
-                ))
-            },
-            |game, s, _| {
-                let HandCard::ObjectiveCard(card) = s.choice[0] else {
-                    panic!("not an objective card")
-                };
-                game.add_info_log_item(&format!(
-                    "{} discarded {} to gain an action",
-                    s.player_name,
-                    game.cache.get_objective_card(card).name()
-                ));
-                discard_objective_card(game, s.player_index, card);
-                game.actions_left += 1;
-            },
-        )
-        .build()
+    .add_hand_card_request(
+        |event| &mut event.custom_action,
+        0,
+        |game, player_index, _| {
+            let player = game.player(player_index);
+            Some(HandCardsRequest::new(
+                player
+                    .objective_cards
+                    .iter()
+                    .map(|&a| HandCard::ObjectiveCard(a))
+                    .collect_vec(),
+                1..=1,
+                "Select an objective card to discard",
+            ))
+        },
+        |game, s, _| {
+            let HandCard::ObjectiveCard(card) = s.choice[0] else {
+                panic!("not an objective card")
+            };
+            game.add_info_log_item(&format!(
+                "{} discarded {} to gain an action",
+                s.player_name,
+                game.cache.get_objective_card(card).name()
+            ));
+            discard_objective_card(game, s.player_index, card);
+            game.actions_left += 1;
+        },
+    )
+    .build()
 }
 
 fn great_mausoleum() -> WonderInfo {
