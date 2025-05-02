@@ -296,7 +296,76 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "Incident": {
+                              "active_player": 0,
+                              "barbarians": {},
+                              "incident_id": 20
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "Incident": 20
+                            },
+                            "priority": 10,
+                            "request": {
+                              "Payment": [
+                                {
+                                  "cost": {
+                                    "conversions": [
+                                      {
+                                        "from": [
+                                          {
+                                            "food": 1
+                                          },
+                                          {
+                                            "wood": 1
+                                          },
+                                          {
+                                            "ore": 1
+                                          },
+                                          {
+                                            "ideas": 1
+                                          }
+                                        ],
+                                        "to": {
+                                          "gold": 1
+                                        },
+                                        "type": "Unlimited"
+                                      }
+                                    ],
+                                    "default": {
+                                      "culture_tokens": 1
+                                    }
+                                  },
+                                  "name": "Pay to gain the Action Card",
+                                  "optional": true
+                                }
+                              ]
+                            }
+                          },
+                          "last_priority_used": 10,
+                          "player": 0
+                        }
+                      ]
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/culture_tokens",
+                      "value": 7
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/action_cards"
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -345,6 +414,10 @@
                       "op": "replace",
                       "path": "/players/0/resources/mood_tokens",
                       "value": 8
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/action_cards_discarded"
                     },
                     {
                       "op": "remove",
@@ -529,7 +602,7 @@
       "State Religion reduced the food cost to 0"
     ]
   ],
-  "undo_limit": 2,
+  "undo_limit": 1,
   "actions_left": 1,
   "round": 1,
   "age": 1,
@@ -552,5 +625,11 @@
   ],
   "wonders_left": [
     "Pyramids"
+  ],
+  "action_cards_discarded": [
+    120
+  ],
+  "incidents_discarded": [
+    20
   ]
 }

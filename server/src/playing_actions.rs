@@ -10,6 +10,7 @@ use crate::construct::Construct;
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::{CustomActionType, CustomEventAction, execute_custom_action};
 use crate::content::persistent_events::{PaymentRequest, PersistentEventType};
+use crate::content::wonders::{great_lighthouse_city, great_lighthouse_spawns};
 use crate::cultural_influence::{InfluenceCultureAttempt, influence_culture_attempt};
 use crate::game::GameState;
 use crate::happiness::increase_happiness;
@@ -152,6 +153,12 @@ impl PlayingActionType {
                         p.resources.culture_tokens > 0 || p.resources.mood_tokens > 0
                     }
                     CustomActionType::ForcedLabor => any_angry(p),
+                    CustomActionType::GreatStatue => !p.objective_cards.is_empty(),
+                    CustomActionType::GreatLighthouse => {
+                        great_lighthouse_city(p).can_activate()
+                            && p.available_units().ships > 0
+                            && !great_lighthouse_spawns(game, p.index).is_empty()
+                    }
                     _ => true,
                 };
                 if !can_play {

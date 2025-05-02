@@ -12,6 +12,7 @@ use crate::objective_card::{
 };
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player_events::{PersistentEvent, PersistentEvents};
+use crate::wonder::Wonder;
 use crate::{game::Game, player::Player, resource_pile::ResourcePile, utils};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -464,8 +465,13 @@ pub(crate) fn determine_first_player() -> Builtin {
 fn player_that_chooses_next_first_player(players: &[&Player]) -> usize {
     players
         .iter()
-        .sorted_by_key(|p| -((p.resources.mood_tokens + p.resources.culture_tokens) as i32))
-        .next()
+        .find(|p| p.wonders_owned.contains(Wonder::GreatLighthouse))
+        .or_else(|| {
+            players
+                .iter()
+                .sorted_by_key(|p| -((p.resources.mood_tokens + p.resources.culture_tokens) as i32))
+                .next()
+        })
         .expect("no player found")
         .index
 }

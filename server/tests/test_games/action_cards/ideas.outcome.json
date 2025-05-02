@@ -211,6 +211,10 @@
                       "op": "replace",
                       "path": "/players/0/resources/ideas",
                       "value": 3
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/action_cards_discarded"
                     }
                   ]
                 }
@@ -248,5 +252,8 @@
   ],
   "wonders_left": [
     "Pyramids"
+  ],
+  "action_cards_discarded": [
+    9
   ]
 }

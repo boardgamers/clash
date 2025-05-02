@@ -15,6 +15,7 @@ use crate::content::incidents::great_warlord::use_great_warlord;
 use crate::content::incidents::trojan::{
     anarchy_advance, decide_trojan_horse, solar_eclipse_end_combat,
 };
+use crate::content::wonders::use_great_mausoleum;
 use crate::cultural_influence::use_cultural_influence;
 use crate::events::EventOrigin;
 use crate::explore::explore_resolution;
@@ -106,6 +107,8 @@ pub fn get_all_uncached() -> Vec<Builtin> {
         use_negotiations(),
         use_assassination(),
         use_teach_us(),
+        // wonder related
+        use_great_mausoleum(),
     ]
 }
 

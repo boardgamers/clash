@@ -4,6 +4,7 @@
     {
       "event_type": {
         "Incident": {
+          "incident_id": 48,
           "active_player": 2,
           "passed": "AlreadyPassed",
           "barbarians": {},
@@ -336,7 +337,7 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "incidents_left": [
+  "incidents_discarded": [
     48
   ]
 }

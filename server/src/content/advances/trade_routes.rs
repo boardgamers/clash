@@ -24,7 +24,7 @@ pub fn trade_route_reward(game: &Game) -> Option<(ResourceReward, Vec<TradeRoute
     }
 
     Some((
-        if game.players[p].has_advance(Advance::Currency) {
+        if game.players[p].can_use_advance(Advance::Currency) {
             ResourceReward::sum(
                 trade_routes.len() as u8,
                 &[ResourceType::Gold, ResourceType::Food],
@@ -109,7 +109,7 @@ pub(crate) fn find_trade_route_for_unit(
     player: &Player,
     unit: &Unit,
 ) -> Vec<TradeRoute> {
-    if !player.has_advance(Advance::TradeRoutes) {
+    if !player.can_use_advance(Advance::TradeRoutes) {
         // not only used from the regular Trade Routes method, so we need to check the advance
         return vec![];
     }

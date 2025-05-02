@@ -390,5 +390,8 @@
   ],
   "dice_roll_log": [
     10
+  ],
+  "incidents_discarded": [
+    40
   ]
 }

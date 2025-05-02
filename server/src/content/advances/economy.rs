@@ -68,8 +68,9 @@ pub(crate) fn use_bartering() -> Builtin {
                     panic!("Invalid type");
                 };
                 game.add_info_log_item(&format!(
-                    "{} discarded an action card for 1 gold or 1 culture token",
-                    s.player_name
+                    "{} discarded {} for 1 gold or 1 culture token",
+                    s.player_name,
+                    game.cache.get_action_card(card).name()
                 ));
                 discard_action_card(game, s.player_index, card);
             },
@@ -126,7 +127,7 @@ pub(crate) fn use_taxes() -> Builtin {
 #[must_use]
 pub fn tax_options(player: &Player) -> ResourceReward {
     let mut c = vec![ResourceType::Food, ResourceType::Wood, ResourceType::Ore];
-    if player.has_advance(Advance::Currency) {
+    if player.can_use_advance(Advance::Currency) {
         c.insert(0, ResourceType::Gold);
     }
     ResourceReward::sum(player.cities.len() as u8, &c)
@@ -159,7 +160,10 @@ where
         event,
         0,
         |game, player_index, _| {
-            if !game.player(player_index).has_advance(Advance::TradeRoutes) {
+            if !game
+                .player(player_index)
+                .can_use_advance(Advance::TradeRoutes)
+            {
                 return None;
             }
 

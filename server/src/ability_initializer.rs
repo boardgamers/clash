@@ -918,7 +918,12 @@ where
         e.inner
             .as_mut()
             .unwrap_or_else(|| panic!("event {} should be set: {key:?}", e.name))
-            .add_listener_mut(listener.clone(), priority + prio_delta, key.clone());
+            .add_listener_mut(
+                listener.clone(),
+                priority + prio_delta,
+                key.clone(),
+                player_index,
+            );
     };
     let key = setup.get_key().clone();
     let deinitializer = move |game: &mut Game, player_index: usize| {

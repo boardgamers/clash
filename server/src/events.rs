@@ -55,12 +55,35 @@ use crate::wonder::Wonder;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
-type Listener<T, U, V, W> = (
-    Arc<dyn Fn(&mut T, &U, &V, &mut W) + Sync + Send>,
-    i32,
-    usize,
-    EventOrigin,
-);
+struct Listener<T, U, V, W> {
+    #[allow(clippy::type_complexity)]
+    callback: Arc<dyn Fn(&mut T, &U, &V, &mut W) + Sync + Send>,
+    priority: i32,
+    id: usize,
+    origin: EventOrigin,
+    owning_player: usize,
+}
+
+impl<T, U, V, W> Listener<T, U, V, W> {
+    fn new<F>(
+        callback: F,
+        priority: i32,
+        id: usize,
+        origin: EventOrigin,
+        owning_player: usize,
+    ) -> Self
+    where
+        F: Fn(&mut T, &U, &V, &mut W) + 'static + Sync + Send,
+    {
+        Self {
+            callback: Arc::new(callback),
+            priority,
+            id,
+            origin,
+            owning_player,
+        }
+    }
+}
 
 pub struct EventMut<T, U = (), V = (), W = ()> {
     name: String, // for debugging
@@ -87,20 +110,27 @@ where
         new_listener: F,
         priority: i32,
         key: EventOrigin,
+        owning_player: usize,
     ) -> usize
     where
         F: Fn(&mut T, &U, &V, &mut W) + 'static + Sync + Send,
     {
         let id = self.next_id;
-        if let Some(old) = self.listeners.iter().find(|(_, p, _, _)| &priority == p) {
+        if let Some(old) = self.listeners.iter().find(|l| priority == l.priority) {
             panic!(
                 "Event {}: Priority {priority} already used by listener with key {:?} when adding {key:?}",
-                self.name, old.3
+                self.name, old.origin
             )
         }
-        self.listeners
-            .push((Arc::new(new_listener), priority, id, key));
-        self.listeners.sort_by_key(|(_, priority, _, _)| *priority);
+        self.listeners.push(Listener::new(
+            new_listener,
+            priority,
+            id,
+            key,
+            owning_player,
+        ));
+
+        self.listeners.sort_by_key(|l| l.priority);
         self.listeners.reverse();
         self.next_id += 1;
         id
@@ -110,7 +140,7 @@ where
         let _ = self.listeners.remove(
             self.listeners
                 .iter()
-                .position(|(_, _, _, value)| value == key)
+                .position(|l| &l.origin == key)
                 .unwrap_or_else(|| panic!("Listeners should include the key {key:?} to remove")),
         );
     }
@@ -133,8 +163,8 @@ where
     }
 
     pub(crate) fn trigger(&self, value: &mut T, info: &U, details: &V, extra_value: &mut W) {
-        for (listener, _, _, _) in &self.listeners {
-            listener(value, info, details, extra_value);
+        for l in &self.listeners {
+            (l.callback)(value, info, details, extra_value);
         }
     }
 
@@ -148,15 +178,15 @@ where
         exclude: &[EventOrigin],
     ) -> Vec<EventOrigin> {
         let mut modifiers = Vec::new();
-        for (listener, _, _, key) in &self.listeners {
-            if exclude.contains(key) {
+        for l in &self.listeners {
+            if exclude.contains(&l.origin) {
                 continue;
             }
             let previous_value = value.clone();
             let previous_extra_value = extra_value.clone();
-            listener(value, info, details, extra_value);
+            (l.callback)(value, info, details, extra_value);
             if *value != previous_value || *extra_value != previous_extra_value {
-                modifiers.push(key.clone());
+                modifiers.push(l.origin.clone());
             }
         }
         modifiers
@@ -208,12 +238,14 @@ mod tests {
             |item, constant, _, ()| *item += constant,
             0,
             EventOrigin::Advance(add_constant),
+            0,
         );
         let multiply_value = Advance::Sanitation;
         event.add_listener_mut(
             |item, _, multiplier, ()| *item *= multiplier,
             -1,
             EventOrigin::Advance(multiply_value),
+            0,
         );
         let no_change = Advance::Bartering;
         event.add_listener_mut(
@@ -223,6 +255,7 @@ mod tests {
             },
             1,
             EventOrigin::Advance(no_change),
+            0,
         );
 
         let mut item = 0;

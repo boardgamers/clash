@@ -53,6 +53,11 @@ impl ObjectiveCard {
     fn has_objective(&self, got: &[String]) -> bool {
         self.objectives.iter().any(|o| got.contains(&o.name))
     }
+
+    #[must_use]
+    pub fn name(&self) -> String {
+        format!("{}/{}", self.objectives[0].name, self.objectives[1].name)
+    }
 }
 
 pub struct ObjectiveBuilder {
@@ -264,9 +269,9 @@ pub(crate) fn complete_objective_card(game: &mut Game, player: usize, id: u8, ob
     game.player_mut(player)
         .completed_objectives
         .push(objective.clone());
-    current_action_log_item(game)
-        .completed_objectives
-        .push(objective);
+    let o = &mut current_action_log_item(game).completed_objectives;
+    o.push(objective);
+    o.dedup(); // in redo we add it again
 }
 
 pub(crate) fn match_objective_cards(
@@ -410,7 +415,6 @@ fn draw_objective_card_from_pile(game: &mut Game) -> Option<u8> {
     draw_card_from_pile(
         game,
         "Objective Card",
-        false,
         |g| &mut g.objective_cards_left,
         |g| g.cache.get_objective_cards().iter().map(|c| c.id).collect(),
         |p| p.objective_cards.clone(),

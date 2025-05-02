@@ -282,7 +282,7 @@
       "Player1 killed units: Infantry at C2"
     ],
     [
-      "Player1 discarded an action card",
+      "Player1 discarded Advance/Peltasts",
       "Player2 has to lose a total of 1 units, cards, and resources"
     ],
     [
@@ -312,5 +312,11 @@
   ],
   "wonders_left": [
     "Pyramids"
+  ],
+  "action_cards_discarded": [
+    1
+  ],
+  "incidents_discarded": [
+    49
   ]
 }

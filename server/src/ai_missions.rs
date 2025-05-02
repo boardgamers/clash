@@ -671,9 +671,9 @@ fn settling_score(
     }
     if neighbors.contains(&&Terrain::Fertile)
         || (neighbors.contains(&&Terrain::Barren)
-            && game.players[player_index].has_advance(Advance::Irrigation))
+            && game.players[player_index].can_use_advance(Advance::Irrigation))
         || neighbors.contains(&&Terrain::Water)
-            && game.players[player_index].has_advance(Advance::Fishing)
+            && game.players[player_index].can_use_advance(Advance::Fishing)
     {
         score += 1.0;
     }
@@ -685,7 +685,7 @@ fn settling_score(
         {
             score += 0.75;
         }
-        if game.players[player_index].has_advance(Advance::Fishing) {
+        if game.players[player_index].can_use_advance(Advance::Fishing) {
             score += 0.25;
         }
     }

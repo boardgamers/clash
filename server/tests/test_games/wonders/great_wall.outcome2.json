@@ -1,0 +1,362 @@
+{
+  "state": "Playing",
+  "players": [
+    {
+      "id": 0,
+      "resources": {
+        "wood": 4,
+        "ore": 7,
+        "ideas": 4,
+        "gold": 7,
+        "mood_tokens": 8,
+        "culture_tokens": 8
+      },
+      "resource_limit": {
+        "food": 7,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {
+            "wonders": [
+              "GreatWall"
+            ]
+          },
+          "mood_state": "Happy",
+          "position": "A1"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "activations": 8,
+          "position": "C2"
+        }
+      ],
+      "units": [
+        {
+          "position": "C2",
+          "unit_type": "Leader",
+          "id": 2
+        },
+        {
+          "position": "C2",
+          "unit_type": "Elephant",
+          "id": 3
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 4
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 5
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 6
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 7
+        }
+      ],
+      "civilization": "test0",
+      "advances": [
+        "Farming",
+        "Mining",
+        "Rituals",
+        "Storage"
+      ],
+      "wonders_built": [
+        "GreatLibrary"
+      ],
+      "incident_tokens": 3,
+      "wonder_cards": [
+        "Pyramids"
+      ],
+      "action_cards": [
+        123
+      ],
+      "next_unit_id": 8
+    },
+    {
+      "id": 1,
+      "resources": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 8
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {},
+          "mood_state": "Angry",
+          "position": "C1"
+        }
+      ],
+      "civilization": "test1",
+      "advances": [
+        "Farming",
+        "Mining",
+        "Tactics"
+      ],
+      "incident_tokens": 3,
+      "next_unit_id": 2
+    },
+    {
+      "id": 2,
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {},
+          "mood_state": "Neutral",
+          "position": "B3"
+        }
+      ],
+      "units": [
+        {
+          "position": "B3",
+          "unit_type": "Infantry",
+          "id": 5
+        }
+      ],
+      "civilization": "Barbarians",
+      "incident_tokens": 3,
+      "next_unit_id": 6
+    }
+  ],
+  "map": {
+    "tiles": [
+      [
+        "A1",
+        "Fertile"
+      ],
+      [
+        "A2",
+        "Forest"
+      ],
+      [
+        "A3",
+        {
+          "Exhausted": "Forest"
+        }
+      ],
+      [
+        "B1",
+        "Mountain"
+      ],
+      [
+        "B2",
+        "Forest"
+      ],
+      [
+        "B3",
+        "Fertile"
+      ],
+      [
+        "C1",
+        "Barren"
+      ],
+      [
+        "C2",
+        "Forest"
+      ],
+      [
+        "C3",
+        "Water"
+      ],
+      [
+        "D2",
+        "Water"
+      ]
+    ]
+  },
+  "starting_player_index": 0,
+  "current_player_index": 0,
+  "action_log": [
+    {
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          0,
+                          1
+                        ],
+                        "destination": "A1"
+                      }
+                    }
+                  },
+                  "combat_stats": {
+                    "position": "A1",
+                    "battleground": "City",
+                    "attacker": {
+                      "player": 1,
+                      "present": {
+                        "infantry": 2
+                      },
+                      "losses": {
+                        "infantry": 2
+                      }
+                    },
+                    "defender": {
+                      "player": 0,
+                      "present": {
+                        "infantry": 1,
+                        "cavalry": 1
+                      },
+                      "losses": {
+                        "infantry": 1,
+                        "cavalry": 1
+                      }
+                    },
+                    "result": "Draw"
+                  }
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Storage",
+                        "payment": {
+                          "ideas": 2
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "action_log_index": 1,
+  "log": [
+    [
+      "Player2 marched 2 infantry from B1 to A1"
+    ],
+    [
+      "Combat round 1",
+      "Attackers: 2 infantry",
+      "Defenders: 1 infantry and 1 cavalry",
+      "Player2 rolled 6 (Infantry, +1 combat value), 6 (Infantry, +1 combat value) for combined combat value of 14 and gets 2 hits against defending units.",
+      "Player1 rolled 6 (Infantry, +1 combat value), 6 (Infantry, no bonus) for combined combat value of 11 and gets 2 hits against attacking units.",
+      "Player1 used the following combat modifiers: Great Wall gives -2 combat value in the first round",
+      "Player2 has to remove all of their attacking units",
+      "Player2 removed 2 infantry",
+      "Player1 has to remove all of their defending units",
+      "Player1 removed 1 infantry and 1 cavalry",
+      "Battle ends in a draw"
+    ],
+    [
+      "Player2 ended their turn with 1 actions left"
+    ],
+    [
+      "Round 2/3"
+    ],
+    [
+      "It's Player1's turn"
+    ],
+    [
+      "Player1 paid 2 ideas to get the Storage advance",
+      "Player gained 1 mood token as advance bonus"
+    ],
+    [
+      "A new game event has been triggered: Envoy",
+      "Base effect: Barbarians move",
+      "Barbarians move from A2 to A1: 1 infantry and 1 elephant",
+      "Barbarians lost the battle due to the Great Wall",
+      "Player1 gained 1 gold",
+      "Barbarians spawned a new Infantry unit at B3",
+      "Player1 gained 1 idea and 1 culture token",
+      "No Wonders left to draw",
+      "Player2 was selected to gain 1 culture token."
+    ]
+  ],
+  "undo_limit": 1,
+  "actions_left": 2,
+  "round": 2,
+  "age": 1,
+  "messages": [
+    "The game has started"
+  ],
+  "dice_roll_outcomes": [
+    1,
+    1,
+    10,
+    10,
+    10,
+    10
+  ],
+  "dice_roll_log": [
+    10,
+    10,
+    10,
+    10
+  ],
+  "action_cards_left": [
+    11,
+    12,
+    13,
+    14
+  ],
+  "action_cards_discarded": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "incidents_discarded": [
+    1,
+    40
+  ]
+}

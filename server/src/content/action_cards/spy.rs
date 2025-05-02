@@ -191,16 +191,7 @@ fn get_swap_secrets(other: &Player, game: &Game) -> Vec<String> {
             other
                 .action_cards
                 .iter()
-                .map(|id| {
-                    let a = game.cache.get_action_card(*id);
-                    format!(
-                        "{}/{}",
-                        a.civil_card.name,
-                        a.tactics_card
-                            .as_ref()
-                            .map_or("-".to_string(), |c| c.name.clone())
-                    )
-                })
+                .map(|id| game.cache.get_action_card(*id).name())
                 .join(", ")
         ),
         format!(
@@ -209,10 +200,7 @@ fn get_swap_secrets(other: &Player, game: &Game) -> Vec<String> {
             other
                 .objective_cards
                 .iter()
-                .map(|id| {
-                    let a = game.cache.get_objective_card(*id);
-                    format!("{}/{}", a.objectives[0].name, a.objectives[1].name)
-                })
+                .map(|id| game.cache.get_objective_card(*id).name())
                 .join(", ")
         ),
         format!(

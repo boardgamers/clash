@@ -4,6 +4,7 @@
     {
       "event_type": {
         "Incident": {
+          "incident_id": 1,
           "active_player": 0
         }
       },
@@ -338,7 +339,7 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "incidents_left": [
+  "incidents_discarded": [
     1
   ],
   "permanent_effects": [

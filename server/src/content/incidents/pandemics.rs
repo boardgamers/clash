@@ -73,15 +73,17 @@ fn pandemics() -> Incident {
                     HandCard::ActionCard(a) => {
                         discard_action_card(game, s.player_index, *a);
                         game.add_info_log_item(&format!(
-                            "{} discarded an action card",
-                            s.player_name
+                            "{} discarded {}",
+                            s.player_name,
+                            game.cache.get_action_card(*a).name()
                         ));
                     }
                     HandCard::ObjectiveCard(o) => {
                         discard_objective_card(game, s.player_index, *o);
                         game.add_info_log_item(&format!(
-                            "{} discarded an objective card",
-                            s.player_name
+                            "{} discarded {}",
+                            s.player_name,
+                            game.cache.get_objective_card(*o).name()
                         ));
                     }
                     HandCard::Wonder(_) => panic!("Unexpected card type"),
@@ -206,7 +208,7 @@ fn vermin() -> Incident {
         IncidentTarget::AllPlayers,
         IncidentBaseEffect::None,
         |_, _| 1,
-        |p| p.has_advance(Advance::Storage),
+        |p| p.can_use_advance(Advance::Storage),
         |_, _| true,
     )
 }

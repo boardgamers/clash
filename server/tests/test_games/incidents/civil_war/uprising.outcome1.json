@@ -248,7 +248,85 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "Incident": {
+                              "active_player": 0,
+                              "incident_id": 39
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "Incident": 39
+                            },
+                            "priority": 0,
+                            "request": {
+                              "Payment": [
+                                {
+                                  "cost": {
+                                    "conversions": [
+                                      {
+                                        "from": [
+                                          {
+                                            "mood_tokens": 1
+                                          }
+                                        ],
+                                        "to": {
+                                          "culture_tokens": 1
+                                        },
+                                        "type": "Unlimited"
+                                      },
+                                      {
+                                        "from": [
+                                          {
+                                            "mood_tokens": 1
+                                          },
+                                          {
+                                            "culture_tokens": 1
+                                          }
+                                        ],
+                                        "to": {},
+                                        "type": {
+                                          "MayOverpay": 3
+                                        }
+                                      }
+                                    ],
+                                    "default": {
+                                      "mood_tokens": 4
+                                    }
+                                  },
+                                  "name": "Pay 1-4 mood or culture tokens",
+                                  "optional": false
+                                }
+                              ]
+                            }
+                          },
+                          "last_priority_used": 0,
+                          "player": 0
+                        }
+                      ]
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/culture_tokens",
+                      "value": 7
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/mood_tokens",
+                      "value": 8
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/event_victory_points"
+                    }
+                  ]
                 }
               ]
             }
@@ -270,7 +348,7 @@
       "Player1 paid 1 mood token and 1 culture token to gain 1 victory point"
     ]
   ],
-  "undo_limit": 2,
+  "undo_limit": 1,
   "actions_left": 2,
   "round": 1,
   "age": 1,
@@ -290,5 +368,8 @@
   ],
   "dice_roll_log": [
     10
+  ],
+  "incidents_discarded": [
+    39
   ]
 }

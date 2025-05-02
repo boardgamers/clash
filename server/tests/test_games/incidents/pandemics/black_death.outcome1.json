@@ -235,7 +235,114 @@
                         0
                       ]
                     }
-                  }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "Incident": {
+                              "active_player": 0,
+                              "incident_id": 50
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "Incident": 50
+                            },
+                            "priority": 0,
+                            "request": {
+                              "SelectUnits": {
+                                "choices": [
+                                  0,
+                                  1,
+                                  3,
+                                  4,
+                                  5,
+                                  6,
+                                  7
+                                ],
+                                "description": "Select units to lose",
+                                "needed": {
+                                  "end": 1,
+                                  "start": 1
+                                },
+                                "player": 0
+                              }
+                            }
+                          },
+                          "last_priority_used": 0,
+                          "player": 0
+                        }
+                      ]
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/0/id",
+                      "value": 0
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/units/0/movement_restrictions"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/1/id",
+                      "value": 1
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/units/1/movement_restrictions",
+                      "value": [
+                        "Battle"
+                      ]
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/1/unit_type",
+                      "value": "Infantry"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/2/id",
+                      "value": 3
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/2/unit_type",
+                      "value": "Elephant"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/3/id",
+                      "value": 4
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/4/id",
+                      "value": 5
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/5/id",
+                      "value": 6
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/units/6",
+                      "value": {
+                        "id": 7,
+                        "position": "C2",
+                        "unit_type": "Settler"
+                      }
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/event_victory_points"
+                    }
+                  ]
                 }
               ]
             }
@@ -258,7 +365,7 @@
       "Player1 gained 1 victory points"
     ]
   ],
-  "undo_limit": 2,
+  "undo_limit": 1,
   "actions_left": 2,
   "round": 1,
   "age": 1,
@@ -281,5 +388,8 @@
   ],
   "wonders_left": [
     "Pyramids"
+  ],
+  "incidents_discarded": [
+    50
   ]
 }

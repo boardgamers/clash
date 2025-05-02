@@ -219,6 +219,10 @@
                     },
                     {
                       "op": "remove",
+                      "path": "/action_cards_discarded"
+                    },
+                    {
+                      "op": "remove",
                       "path": "/events"
                     }
                   ]
@@ -290,7 +294,7 @@
   "log": [
     [
       "Player1 started Bartering",
-      "Player1 discarded an action card for 1 gold or 1 culture token"
+      "Player1 discarded Advance/Peltasts for 1 gold or 1 culture token"
     ],
     [
       "Player1 gained 1 gold for discarding an action card",
@@ -318,5 +322,8 @@
   ],
   "wonders_left": [
     "Pyramids"
+  ],
+  "action_cards_discarded": [
+    1
   ]
 }

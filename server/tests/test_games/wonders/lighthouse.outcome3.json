@@ -1,0 +1,481 @@
+{
+  "state": "Playing",
+  "players": [
+    {
+      "id": 0,
+      "resources": {
+        "food": 4,
+        "wood": 2,
+        "ore": 3,
+        "ideas": 5,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 2
+      },
+      "resource_limit": {
+        "food": 7,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {
+            "port": 0,
+            "wonders": [
+              "GreatLighthouse"
+            ]
+          },
+          "mood_state": "Neutral",
+          "activations": 2,
+          "position": "A1",
+          "port_position": "A2"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Neutral",
+          "activations": 8,
+          "position": "C2"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Neutral",
+          "activations": 8,
+          "position": "B3"
+        }
+      ],
+      "units": [
+        {
+          "position": "C2",
+          "unit_type": "Infantry",
+          "id": 0
+        },
+        {
+          "position": "C2",
+          "unit_type": "Cavalry",
+          "id": 1
+        },
+        {
+          "position": "C2",
+          "unit_type": "Leader",
+          "id": 2
+        },
+        {
+          "position": "C2",
+          "unit_type": "Elephant",
+          "id": 3
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 4
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 5
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 6
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 7
+        },
+        {
+          "position": "C3",
+          "unit_type": "Ship",
+          "id": 8
+        }
+      ],
+      "civilization": "test0",
+      "advances": [
+        "Cartography",
+        "Engineering",
+        "Farming",
+        "Mining"
+      ],
+      "wonders_built": [
+        "GreatLighthouse"
+      ],
+      "incident_tokens": 2,
+      "next_unit_id": 9
+    },
+    {
+      "id": 1,
+      "resources": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {},
+          "mood_state": "Angry",
+          "activations": 2,
+          "position": "C1"
+        }
+      ],
+      "units": [
+        {
+          "position": "C1",
+          "unit_type": "Infantry",
+          "id": 0
+        },
+        {
+          "position": "C1",
+          "unit_type": "Infantry",
+          "id": 1
+        }
+      ],
+      "civilization": "test1",
+      "advances": [
+        "Farming",
+        "Mining"
+      ],
+      "incident_tokens": 3,
+      "next_unit_id": 2
+    }
+  ],
+  "map": {
+    "tiles": [
+      [
+        "A1",
+        "Fertile"
+      ],
+      [
+        "A2",
+        "Water"
+      ],
+      [
+        "A3",
+        {
+          "Exhausted": "Forest"
+        }
+      ],
+      [
+        "B1",
+        "Mountain"
+      ],
+      [
+        "B2",
+        "Forest"
+      ],
+      [
+        "B3",
+        "Fertile"
+      ],
+      [
+        "C1",
+        "Barren"
+      ],
+      [
+        "C2",
+        "Forest"
+      ],
+      [
+        "C3",
+        "Water"
+      ],
+      [
+        "D2",
+        "Water"
+      ]
+    ]
+  },
+  "starting_player_index": 0,
+  "current_player_index": 0,
+  "action_log": [
+    {
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "WonderCard": "GreatLighthouse"
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 3
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events"
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "food": 3,
+                          "wood": 5,
+                          "ore": 4,
+                          "culture_tokens": 5
+                        }
+                      ]
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "WonderCard": {
+                              "discount": {
+                                "culture_tokens": 0,
+                                "ignore_required_advances": false
+                              },
+                              "name": "GreatLighthouse",
+                              "selected_position": "A1"
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "Builtin": "Build Wonder"
+                            },
+                            "priority": 10,
+                            "request": {
+                              "Payment": [
+                                {
+                                  "cost": {
+                                    "conversions": [
+                                      {
+                                        "from": [
+                                          {
+                                            "food": 1
+                                          },
+                                          {
+                                            "wood": 1
+                                          },
+                                          {
+                                            "ore": 1
+                                          },
+                                          {
+                                            "ideas": 1
+                                          }
+                                        ],
+                                        "to": {
+                                          "gold": 1
+                                        },
+                                        "type": "Unlimited"
+                                      }
+                                    ],
+                                    "default": {
+                                      "culture_tokens": 5,
+                                      "food": 3,
+                                      "ore": 4,
+                                      "wood": 5
+                                    }
+                                  },
+                                  "name": "Pay to build wonder",
+                                  "optional": false
+                                }
+                              ]
+                            }
+                          },
+                          "last_priority_used": 10,
+                          "player": 0
+                        }
+                      ]
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/cities/0/city_pieces/wonders"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/cities/0/activations"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/culture_tokens",
+                      "value": 7
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/food",
+                      "value": 7
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/ore",
+                      "value": 7
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/wood",
+                      "value": 7
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/wonder_cards",
+                      "value": [
+                        "GreatLighthouse"
+                      ]
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/wonders_built"
+                    }
+                  ],
+                  "wonder_built": "GreatLighthouse"
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Custom": {
+                        "action": "GreatLighthouse",
+                        "city": null
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "remove",
+                      "path": "/events"
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectPositions": [
+                        "C3"
+                      ]
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "CustomAction": {
+                              "action": "GreatLighthouse",
+                              "city": null
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "Builtin": "Great Lighthouse"
+                            },
+                            "priority": 0,
+                            "request": {
+                              "SelectPositions": {
+                                "choices": [
+                                  "A2",
+                                  "C3",
+                                  "D2"
+                                ],
+                                "description": "Select a sea space to place a ship",
+                                "needed": {
+                                  "end": 1,
+                                  "start": 1
+                                }
+                              }
+                            }
+                          },
+                          "last_priority_used": 0,
+                          "player": 0
+                        }
+                      ]
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/cities/0/activations",
+                      "value": 1
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/cities/0/mood_state",
+                      "value": "Happy"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/next_unit_id",
+                      "value": 8
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/units/8"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "action_log_index": 4,
+  "log": [
+    [
+      "Player1 played the wonder card Great Lighthouse",
+      "Player1 decided to build Great Lighthouse in city A1"
+    ],
+    [
+      "Player1 built Great Lighthouse in city A1 for 3 food, 5 wood, 4 ore and 5 culture tokens"
+    ],
+    [
+      "Player1 started GreatLighthouse"
+    ],
+    [
+      "Player1 activated the city at A1 used the Great Lighthouse to place a ship on C3 for free making it Neutral"
+    ]
+  ],
+  "undo_limit": 0,
+  "actions_left": 2,
+  "round": 1,
+  "age": 1,
+  "messages": [
+    "The game has started"
+  ],
+  "dice_roll_outcomes": [
+    1,
+    1,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    3,
+    4,
+    7,
+    7
+  ]
+}

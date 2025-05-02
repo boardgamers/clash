@@ -360,5 +360,8 @@
   ],
   "wonders_left": [
     "Pyramids"
+  ],
+  "incidents_discarded": [
+    42
   ]
 }

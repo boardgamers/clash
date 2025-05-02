@@ -4,6 +4,7 @@
     {
       "event_type": {
         "Incident": {
+          "incident_id": 1,
           "active_player": 0,
           "myths_payment": 1
         }
@@ -266,7 +267,60 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "undo": [
+                    {
+                      "op": "remove",
+                      "path": "/events/0/event_type/Incident/myths_payment"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/events/0/handler/priority",
+                      "value": 10
+                    },
+                    {
+                      "op": "add",
+                      "path": "/events/0/handler/request/Payment",
+                      "value": [
+                        {
+                          "cost": {
+                            "conversions": [
+                              {
+                                "from": [
+                                  {
+                                    "mood_tokens": 1
+                                  }
+                                ],
+                                "to": {},
+                                "type": {
+                                  "MayOverpay": 2
+                                }
+                              }
+                            ],
+                            "default": {
+                              "mood_tokens": 2
+                            }
+                          },
+                          "name": "You may pay 1 mood token for each city to avoid reducing the mood",
+                          "optional": false
+                        }
+                      ]
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events/0/handler/request/SelectPositions"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/events/0/last_priority_used",
+                      "value": 10
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/mood_tokens",
+                      "value": 8
+                    }
+                  ]
                 }
               ]
             }
@@ -288,7 +342,7 @@
       "Player1 paid 1 mood token to avoid the mood change using Myths"
     ]
   ],
-  "undo_limit": 2,
+  "undo_limit": 1,
   "actions_left": 2,
   "round": 1,
   "age": 1,
@@ -312,7 +366,7 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "incidents_left": [
+  "incidents_discarded": [
     1
   ]
 }

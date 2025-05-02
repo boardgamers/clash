@@ -150,7 +150,7 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
         PlayingAction::Custom(action) => {
             format!(
                 "{player_name} started {:?}{}",
-                action.action,
+                action.action, // todo custom name
                 if let Some(p) = action.city {
                     format!(" at {p}")
                 } else {
@@ -334,7 +334,7 @@ fn format_construct_log_item(
     )
 }
 
-fn format_mood_change(player: &Player, city_position: Position) -> String {
+pub(crate) fn format_mood_change(player: &Player, city_position: Position) -> String {
     if player.get_city(city_position).is_activated() {
         format!(
             " making it {:?}",

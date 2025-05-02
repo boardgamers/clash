@@ -148,7 +148,7 @@ pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
     let player_log = current_player_turn_log_mut(&mut game);
     if player_index != Some(player_log.index) {
         for l in &mut player_log.items {
-            // undo has secret information, like gained and discarded action cards
+            // undo has secret information, like gained action cards
             l.undo.clear();
             if let Action::Response(EventResponse::SelectHandCards(c)) = &mut l.action {
                 // player shouldn't see other player's hand cards

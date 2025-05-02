@@ -14,7 +14,7 @@ use crate::log::{
 use crate::movement::MoveState;
 use crate::objective_card::present_instant_objective_cards;
 use crate::pirates::get_pirates_player;
-use crate::player::CostTrigger;
+use crate::player::{CostTrigger, end_turn};
 use crate::player_events::{
     PersistentEvent, PersistentEventInfo, PersistentEvents, PlayerEvents, TransientEvents,
 };
@@ -60,8 +60,10 @@ pub struct Game {
     pub dropped_players: Vec<usize>,
     pub wonders_left: Vec<Wonder>,
     pub action_cards_left: Vec<u8>,
+    pub action_cards_discarded: Vec<u8>,
     pub objective_cards_left: Vec<u8>,
     pub incidents_left: Vec<u8>,
+    pub incidents_discarded: Vec<u8>,
     pub permanent_effects: Vec<PermanentEffect>,
 }
 
@@ -110,8 +112,10 @@ impl Game {
             dropped_players: data.dropped_players,
             wonders_left: data.wonders_left,
             action_cards_left: data.action_cards_left,
+            action_cards_discarded: data.action_cards_discarded,
             objective_cards_left: data.objective_cards_left,
             incidents_left: data.incidents_left,
+            incidents_discarded: data.incidents_discarded,
             permanent_effects: data.permanent_effects,
             events: data.events,
         };
@@ -146,8 +150,10 @@ impl Game {
             dropped_players: self.dropped_players,
             wonders_left: self.wonders_left,
             action_cards_left: self.action_cards_left,
+            action_cards_discarded: self.action_cards_discarded,
             objective_cards_left: self.objective_cards_left,
             incidents_left: self.incidents_left,
+            incidents_discarded: self.incidents_discarded,
             permanent_effects: self.permanent_effects,
         }
     }
@@ -176,8 +182,10 @@ impl Game {
             dropped_players: self.dropped_players.clone(),
             wonders_left: self.wonders_left.clone(),
             action_cards_left: self.action_cards_left.clone(),
+            action_cards_discarded: self.action_cards_discarded.clone(),
             objective_cards_left: self.objective_cards_left.clone(),
             incidents_left: self.incidents_left.clone(),
+            incidents_discarded: self.incidents_discarded.clone(),
             permanent_effects: self.permanent_effects.clone(),
         }
     }
@@ -566,7 +574,7 @@ impl Game {
     }
 
     pub fn next_turn(&mut self) {
-        self.player_mut(self.current_player_index).end_turn();
+        end_turn(self, self.current_player_index);
         for i in &mut current_player_turn_log_mut(self).items {
             i.undo.clear();
         }
@@ -733,10 +741,16 @@ pub struct GameData {
     action_cards_left: Vec<u8>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
+    action_cards_discarded: Vec<u8>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     objective_cards_left: Vec<u8>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     incidents_left: Vec<u8>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    incidents_discarded: Vec<u8>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     permanent_effects: Vec<PermanentEffect>,

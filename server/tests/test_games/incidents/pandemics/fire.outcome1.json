@@ -231,6 +231,64 @@
                       ]
                     }
                   },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "Incident": {
+                              "active_player": 0,
+                              "incident_id": 53
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "Incident": 53
+                            },
+                            "priority": 11,
+                            "request": {
+                              "SelectPositions": {
+                                "choices": [
+                                  "B2",
+                                  "C2"
+                                ],
+                                "description": "Select a city to set on fire",
+                                "needed": {
+                                  "end": 1,
+                                  "start": 1
+                                }
+                              }
+                            }
+                          },
+                          "last_priority_used": 11,
+                          "player": 0
+                        }
+                      ]
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/cities/0/mood_state",
+                      "value": "Neutral"
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/objective_cards",
+                      "value": [
+                        29
+                      ]
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/completed_objectives"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/cities/0/mood_state",
+                      "value": "Happy"
+                    }
+                  ],
                   "completed_objectives": [
                     "Terror Regime"
                   ]
@@ -259,7 +317,7 @@
       "Player1 completed objective Terror Regime"
     ]
   ],
-  "undo_limit": 2,
+  "undo_limit": 1,
   "actions_left": 2,
   "round": 1,
   "age": 1,
@@ -282,5 +340,8 @@
   ],
   "wonders_left": [
     "Pyramids"
+  ],
+  "incidents_discarded": [
+    53
   ]
 }

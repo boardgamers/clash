@@ -3,7 +3,7 @@ use crate::ability_initializer::{AbilityInitializerSetup, SelectedChoice};
 use crate::action_card::ActionCard;
 use crate::advance::Advance;
 use crate::barbarians::{barbarians_move, barbarians_spawn};
-use crate::card::{HandCard, draw_card_from_pile};
+use crate::card::{HandCard, discard_card, draw_card_from_pile};
 use crate::city::{MoodState, is_valid_city_terrain};
 use crate::content::incidents::great_persons::GREAT_PERSON_OFFSET;
 use crate::content::persistent_events::{
@@ -22,6 +22,7 @@ use crate::player_events::{IncidentInfo, IncidentPlayerInfo, IncidentTarget};
 use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
+use crate::wonder::Wonder;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
@@ -505,7 +506,7 @@ impl IncidentBuilder {
             10,
             move |game, player_index, i| {
                 let p = game.player(player_index);
-                if p.has_advance(Advance::Myths) {
+                if p.can_use_advance(Advance::Myths) {
                     let needed = amount(game, p, i);
                     if needed == 0 {
                         return None;
@@ -587,37 +588,43 @@ impl AbilityInitializerSetup for IncidentBuilder {
     }
 }
 
-pub(crate) fn on_trigger_incident(game: &mut Game, mut info: IncidentInfo) {
-    let incident_id = draw_card_from_pile(
-        game,
-        "Events",
-        true,
-        |g| &mut g.incidents_left,
-        |g| g.cache.get_incidents().iter().map(|i| i.id).collect_vec(),
-        |p| {
-            p.action_cards
-                .iter()
-                .filter_map(|a| {
-                    if *a >= GREAT_PERSON_OFFSET {
-                        Some(a - GREAT_PERSON_OFFSET)
-                    } else {
-                        None
-                    }
-                })
-                .collect()
-        },
-    )
-    .expect("incident should exist");
+pub(crate) fn trigger_incident(game: &mut Game, player_index: usize) {
+    if game
+        .player(player_index)
+        .wonders_owned
+        .contains(Wonder::GreatMausoleum)
+    {
+        on_choose_incident(game, player_index, IncidentInfo::new(0, player_index));
+    } else {
+        let info = IncidentInfo::new(
+            draw_and_discard_incident_card_from_pile(game, player_index),
+            player_index,
+        );
+        on_trigger_incident(game, info);
+    }
+}
 
+pub(crate) fn on_choose_incident(game: &mut Game, player_index: usize, info: IncidentInfo) {
+    if let Some(info) = game.trigger_persistent_event(
+        &[player_index],
+        |events| &mut events.choose_incident,
+        info,
+        PersistentEventType::ChooseIncident,
+    ) {
+        on_trigger_incident(game, info);
+    }
+}
+
+pub(crate) fn on_trigger_incident(game: &mut Game, mut info: IncidentInfo) {
     loop {
         let log: Option<String> = play_base_effect(&info).then_some(format!(
             "A new game event has been triggered: {}",
-            game.cache.get_incident(incident_id).name
+            game.cache.get_incident(info.incident_id).name
         ));
         info = match game.trigger_persistent_event_with_listener(
             &game.human_players(info.active_player),
             |events| &mut events.incident,
-            &game.cache.get_incident(incident_id).listeners.clone(),
+            &game.cache.get_incident(info.incident_id).listeners.clone(),
             info,
             PersistentEventType::Incident,
             log.as_deref(),
@@ -638,8 +645,31 @@ pub(crate) fn on_trigger_incident(game: &mut Game, mut info: IncidentInfo) {
             break;
         }
     }
+}
 
-    game.incidents_left.remove(0);
+pub(crate) fn draw_and_discard_incident_card_from_pile(game: &mut Game, player: usize) -> u8 {
+    let id = draw_card_from_pile(
+        game,
+        "Events",
+        |g| &mut g.incidents_left,
+        |g| g.cache.get_incidents().iter().map(|i| i.id).collect_vec(),
+        |p| {
+            p.action_cards
+                .iter()
+                .filter_map(|a| {
+                    if *a >= GREAT_PERSON_OFFSET {
+                        Some(a - GREAT_PERSON_OFFSET)
+                    } else {
+                        None
+                    }
+                })
+                .collect()
+        },
+    )
+    .expect("incident should exist");
+
+    discard_card(|g| &mut g.incidents_discarded, id, player, game);
+    id
 }
 
 pub(crate) fn play_base_effect(i: &IncidentInfo) -> bool {
@@ -677,7 +707,7 @@ pub fn is_active(
     }
     // protection advance does not protect against base effects
     if let Some(advance) = protection_advance {
-        if game.player(player).has_advance(*advance) {
+        if game.player(player).can_use_advance(*advance) {
             return false;
         }
     }

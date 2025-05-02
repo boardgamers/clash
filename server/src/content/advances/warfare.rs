@@ -187,7 +187,7 @@ fn draft() -> AdvanceBuilder {
 }
 
 pub(crate) fn draft_cost(player: &Player) -> u8 {
-    if player.has_advance(Advance::CivilLiberties) {
+    if player.can_use_advance(Advance::CivilLiberties) {
         2
     } else {
         1
@@ -207,9 +207,9 @@ fn steel_weapons_cost(game: &Game, combat: &Combat, player_index: usize) -> Paym
     let player = &game.players[player_index];
     let attacker = &game.players[combat.attacker];
     let defender = &game.players[combat.defender];
-    let both_steel_weapons =
-        attacker.has_advance(Advance::SteelWeapons) && defender.has_advance(Advance::SteelWeapons);
-    let cost = u8::from(!player.has_advance(Advance::Metallurgy) || both_steel_weapons);
+    let both_steel_weapons = attacker.can_use_advance(Advance::SteelWeapons)
+        && defender.can_use_advance(Advance::SteelWeapons);
+    let cost = u8::from(!player.can_use_advance(Advance::Metallurgy) || both_steel_weapons);
     PaymentOptions::sum(
         player,
         PaymentReason::AdvanceAbility,
@@ -235,8 +235,12 @@ fn fortress(game: &Game, c: &Combat, s: &mut CombatStrength, role: CombatRole) {
 }
 
 fn use_steel_weapons(game: &Game, c: &Combat, s: &mut CombatStrength, role: CombatRole) {
-    let steel_weapon_value = if game.player(c.attacker).has_advance(Advance::SteelWeapons)
-        && game.player(c.defender).has_advance(Advance::SteelWeapons)
+    let steel_weapon_value = if game
+        .player(c.attacker)
+        .can_use_advance(Advance::SteelWeapons)
+        && game
+            .player(c.defender)
+            .can_use_advance(Advance::SteelWeapons)
     {
         1
     } else {

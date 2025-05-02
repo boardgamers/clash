@@ -8,6 +8,7 @@ use crate::content::advances::democracy::use_civil_liberties;
 use crate::content::advances::economy::{use_bartering, use_taxes};
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::PersistentEventType;
+use crate::content::wonders::{use_great_library, use_great_lighthouse, use_great_statue};
 use crate::player::Player;
 use crate::playing_actions::PlayingActionType;
 use crate::position::Position;
@@ -54,6 +55,9 @@ pub enum CustomActionType {
     Sports,
     Taxes,
     Theaters,
+    GreatLibrary,
+    GreatLighthouse,
+    GreatStatue,
 }
 
 impl CustomActionType {
@@ -66,7 +70,11 @@ impl CustomActionType {
             CustomActionType::CivilLiberties | CustomActionType::Sports => {
                 CustomActionType::regular()
             }
-            CustomActionType::Bartering | CustomActionType::Theaters => {
+            CustomActionType::GreatLighthouse => CustomActionType::free(ResourcePile::empty()),
+            CustomActionType::Bartering
+            | CustomActionType::Theaters
+            | CustomActionType::GreatLibrary
+            | CustomActionType::GreatStatue => {
                 CustomActionType::free_and_once_per_turn(ResourcePile::empty())
             }
             CustomActionType::ArtsInfluenceCultureAttempt => {
@@ -127,6 +135,11 @@ impl CustomActionType {
     }
 
     #[must_use]
+    fn free(cost: ResourcePile) -> CustomActionInfo {
+        CustomActionInfo::new(true, false, cost)
+    }
+
+    #[must_use]
     fn free_and_once_per_turn(cost: ResourcePile) -> CustomActionInfo {
         CustomActionInfo::new(true, true, cost)
     }
@@ -141,6 +154,9 @@ pub(crate) fn custom_action_builtins() -> HashMap<CustomActionType, Builtin> {
         (CustomActionType::Sports, use_sports()),
         (CustomActionType::Taxes, use_taxes()),
         (CustomActionType::Theaters, use_theaters()),
+        (CustomActionType::GreatLibrary, use_great_library()),
+        (CustomActionType::GreatLighthouse, use_great_lighthouse()),
+        (CustomActionType::GreatStatue, use_great_statue()),
     ])
 }
 

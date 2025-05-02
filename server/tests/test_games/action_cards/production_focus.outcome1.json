@@ -230,6 +230,10 @@
                     },
                     {
                       "op": "remove",
+                      "path": "/action_cards_discarded"
+                    },
+                    {
+                      "op": "remove",
                       "path": "/permanent_effects"
                     }
                   ]
@@ -338,6 +342,9 @@
   ],
   "wonders_left": [
     "Pyramids"
+  ],
+  "action_cards_discarded": [
+    19
   ],
   "incidents_left": [
     26

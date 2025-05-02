@@ -289,6 +289,10 @@
                       "op": "replace",
                       "path": "/players/1/resources/culture_tokens",
                       "value": 5
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/action_cards_discarded"
                     }
                   ]
                 }
@@ -351,5 +355,11 @@
   ],
   "wonders_left": [
     "Pyramids"
+  ],
+  "action_cards_discarded": [
+    119
+  ],
+  "incidents_discarded": [
+    19
   ]
 }

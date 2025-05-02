@@ -1,7 +1,6 @@
-use crate::action::{Action, add_log_item_from_action, execute_movement_action};
+use crate::action::{Action, add_log_item_from_action, after_action, execute_movement_action};
 use crate::game::Game;
 use crate::log::{current_player_turn_log, current_player_turn_log_mut};
-use crate::resource::check_for_waste;
 use json_patch::{PatchOperation, patch};
 use serde_json::Value;
 
@@ -61,6 +60,6 @@ pub fn redo(game: &mut Game, player_index: usize) -> Result<(), String> {
         Action::Undo => return Err("undo action can't be redone".to_string()),
         Action::Redo => return Err("redo action can't be redone".to_string()),
     }?;
-    check_for_waste(game);
+    after_action(game, player_index);
     Ok(())
 }

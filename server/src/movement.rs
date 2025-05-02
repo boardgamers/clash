@@ -370,7 +370,7 @@ fn check_can_move(
             return Err("the carrier should be a ship".to_string());
         }
     }
-    if unit.unit_type.is_army_unit() && !player.has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE) {
+    if unit.unit_type.is_army_unit() && !player.can_use_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE) {
         return Err("army movement advance missing".to_string());
     }
     Ok(())
@@ -435,10 +435,10 @@ pub(crate) fn move_routes(
         .filter(|&n| game.map.is_inside(*n))
         .map(|&n| MoveRoute::free(n, vec![]))
         .collect();
-    if player.has_advance(Advance::Navigation) {
+    if player.can_use_advance(Advance::Navigation) {
         base.extend(reachable_with_navigation(player, units, &game.map));
     }
-    if player.has_advance(Advance::Roads) && embark_carrier_id.is_none() {
+    if player.can_use_advance(Advance::Roads) && embark_carrier_id.is_none() {
         base.extend(reachable_with_roads(player, units, game));
     }
     add_diplomatic_relations(player, game, &mut base);
@@ -550,7 +550,7 @@ fn reachable_with_roads(player: &Player, units: &[u32], game: &Game) -> Vec<Move
 
 #[must_use]
 fn reachable_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<MoveRoute> {
-    if !player.has_advance(Advance::Navigation) {
+    if !player.can_use_advance(Advance::Navigation) {
         return vec![];
     }
     let ship = units.iter().find_map(|&id| {

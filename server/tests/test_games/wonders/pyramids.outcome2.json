@@ -28,6 +28,7 @@
             ]
           },
           "mood_state": "Happy",
+          "activations": 1,
           "position": "A1"
         },
         {
@@ -311,6 +312,10 @@
                     {
                       "op": "remove",
                       "path": "/players/0/cities/0/city_pieces/wonders"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/cities/0/activations"
                     },
                     {
                       "op": "replace",

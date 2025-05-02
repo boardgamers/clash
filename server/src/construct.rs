@@ -51,14 +51,11 @@ pub fn can_construct(
     trigger: CostTrigger,
 ) -> Result<CostInfo, String> {
     let advance = game.cache.get_building_advance(building);
-    if !player.has_advance(advance) {
+    if !player.can_use_advance(advance) {
         return Err(format!("Missing advance: {}", advance.name(game)));
     }
 
     can_construct_anything(city, player)?;
-    if !city.can_activate() {
-        return Err("Can't activate".to_string());
-    }
     if city.mood_state == MoodState::Angry {
         return Err("City is angry".to_string());
     }
@@ -77,6 +74,9 @@ pub fn can_construct(
 }
 
 pub(crate) fn can_construct_anything(city: &City, player: &Player) -> Result<(), String> {
+    if !city.can_activate() {
+        return Err("Can't activate".to_string());
+    }
     if city.player_index != player.index {
         return Err("Not your city".to_string());
     }
