@@ -116,7 +116,12 @@ where
         F: Fn(&mut T, &U, &V, &mut W) + 'static + Sync + Send,
     {
         let id = self.next_id;
-        if let Some(old) = self.listeners.iter().find(|l| priority == l.priority) {
+        // objectives can have the same key, but you still can only fulfill one of them at a time
+        if let Some(old) = self
+            .listeners
+            .iter()
+            .find(|l| priority == l.priority && l.origin != key)
+        {
             panic!(
                 "Event {}: Priority {priority} already used by listener with key {:?} when adding {key:?}",
                 self.name, old.origin
