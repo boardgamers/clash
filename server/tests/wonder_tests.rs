@@ -172,6 +172,6 @@ fn test_great_mausoleum() {
                 payment: ResourcePile::ideas(2),
             }),
         ).without_json_comparison(),
-        TestAction::not_undoable(0, Action::Response(EventResponse::Bool(true)))
+        TestAction::undoable(0, Action::Response(EventResponse::Bool(true)))
     ]);
 }
