@@ -269,9 +269,9 @@ pub(crate) fn complete_objective_card(game: &mut Game, player: usize, id: u8, ob
     game.player_mut(player)
         .completed_objectives
         .push(objective.clone());
-    current_action_log_item(game)
-        .completed_objectives
-        .push(objective);
+    let o = &mut current_action_log_item(game).completed_objectives;
+    o.push(objective);
+    o.dedup(); // in redo we add it again
 }
 
 pub(crate) fn match_objective_cards(

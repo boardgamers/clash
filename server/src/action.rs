@@ -134,6 +134,12 @@ pub fn execute_without_undo(
         }
         _ => execute_regular_action(game, action, player_index),
     }?;
+
+    after_action(game, player_index);
+    Ok(())
+}
+
+pub(crate) fn after_action(game: &mut Game, player_index: usize) {
     check_for_waste(game);
 
     if let Some(o) = game.player_mut(player_index).gained_objective.take() {
@@ -166,7 +172,6 @@ pub fn execute_without_undo(
         p.great_mausoleum_action_cards -= 1;
         on_action_end(game, player_index);
     }
-    Ok(())
 }
 
 pub(crate) fn on_action_end(game: &mut Game, player_index: usize) {
