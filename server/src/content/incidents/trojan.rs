@@ -39,7 +39,7 @@ pub(crate) fn decide_trojan_horse() -> Builtin {
         .add_payment_request_listener(
             |event| &mut event.combat_start,
             10,
-            |game, player_index, c| {
+            |game, player_index, c, _| {
                 if is_land_battle_against_defended_city(game, player_index, c) {
                     game.permanent_effects.iter().find_map(|e| {
                         matches!(e, PermanentEffect::TrojanHorse).then_some(vec![
@@ -57,7 +57,7 @@ pub(crate) fn decide_trojan_horse() -> Builtin {
                     None
                 }
             },
-            |game, s, c| {
+            |game, s, c, _| {
                 if s.choice[0].is_empty() {
                     game.add_info_log_item(&format!(
                         "{} declined to activate the Trojan Horse",

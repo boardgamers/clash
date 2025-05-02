@@ -120,7 +120,7 @@ pub(crate) fn great_architect() -> ActionCard {
     .add_hand_card_request(
         |e| &mut e.play_action_card,
         0,
-        |game, player, _,_| {
+        |game, player, _, _| {
             Some(HandCardsRequest::new(
                 playable_wonders(game, game.player(player))
                     .iter()
@@ -130,7 +130,7 @@ pub(crate) fn great_architect() -> ActionCard {
                 "Great Architect: Select a wonder to build",
             ))
         },
-        |game, s, _,_| {
+        |game, s, _, _| {
             let HandCard::Wonder(name) = &s.choice[0] else {
                 panic!("Invalid choice");
             };

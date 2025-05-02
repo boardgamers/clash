@@ -533,7 +533,7 @@ pub(crate) fn choose_fighter_casualties() -> Builtin {
         .add_units_request(
             |event| &mut event.combat_round_end,
             1,
-            move |game, player, r,_| {
+            move |game, player, r, _| {
                 let choices = r.combat.fighting_units(game, player).clone();
 
                 let role = r.role(player);
@@ -579,7 +579,7 @@ pub(crate) fn choose_fighter_casualties() -> Builtin {
                     &format!("Remove {casualties} {role_str} units"),
                 ))
             },
-            move |game, s, e,_| {
+            move |game, s, e, _| {
                 kill_fighters(game, s.player_index, &s.choice, &mut e.combat);
             },
         )
@@ -624,7 +624,7 @@ pub(crate) fn place_settler() -> Builtin {
     .add_position_request(
         |event| &mut event.combat_end,
         102,
-        |game, player_index, i,_| {
+        |game, player_index, i, _| {
             let p = game.player(player_index);
             if i.is_defender(player_index)
                 && i.is_loser(player_index)
@@ -644,7 +644,7 @@ pub(crate) fn place_settler() -> Builtin {
                 None
             }
         },
-        |game, s, _e,_| {
+        |game, s, _e, _| {
             let pos = s.choice[0];
             game.add_info_log_item(&format!(
                 "{} gained 1 free Settler Unit at {} for losing a city",

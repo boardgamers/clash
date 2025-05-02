@@ -249,7 +249,7 @@ pub(crate) fn play_tactics_card(b: AdvanceBuilder) -> AdvanceBuilder {
     b.add_hand_card_request(
         |e| &mut e.combat_round_start,
         0,
-        |game, player, s,_| {
+        |game, player, s, _| {
             let cards = available_tactics_cards(game, player, &s.combat);
             if cards.is_empty() {
                 return None;
@@ -270,7 +270,7 @@ pub(crate) fn play_tactics_card(b: AdvanceBuilder) -> AdvanceBuilder {
 
             Some(HandCardsRequest::new(cards, 0..=1, "Play Tactics Card"))
         },
-        |game, sel, s,_| {
+        |game, sel, s, _| {
             let name = &sel.player_name;
             if sel.choice.is_empty() {
                 game.add_info_log_item(&format!("{name} did not play a Tactics Card"));

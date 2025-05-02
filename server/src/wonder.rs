@@ -328,7 +328,7 @@ pub(crate) fn build_wonder() -> Builtin {
         .add_position_request(
             |e| &mut e.play_wonder_card,
             11,
-            move |game, player_index, i,_| {
+            move |game, player_index, i, _| {
                 let p = game.player(player_index);
                 let choices = cities_for_wonder(i.name, game, p, &i.discount);
 
@@ -339,7 +339,7 @@ pub(crate) fn build_wonder() -> Builtin {
                     "Select city to build wonder",
                 ))
             },
-            |game, s, i,_| {
+            |game, s, i, _| {
                 let position = s.choice[0];
                 i.selected_position = Some(position);
                 game.add_info_log_item(&format!(
@@ -353,14 +353,14 @@ pub(crate) fn build_wonder() -> Builtin {
         .add_payment_request_listener(
             |e| &mut e.play_wonder_card,
             10,
-            move |game, player_index, i| {
+            move |game, player_index, i, _| {
                 let p = game.player(player_index);
                 let city = p.get_city(i.selected_position.expect("city not selected"));
                 let cost = can_construct_wonder(city, i.name, p, game, &i.discount)
                     .expect("can't construct wonder");
                 Some(vec![PaymentRequest::mandatory(cost, "Pay to build wonder")])
             },
-            |game, s, i| {
+            |game, s, i, _| {
                 let pos = i.selected_position.expect("city not selected");
                 let name = i.name;
 

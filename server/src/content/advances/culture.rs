@@ -98,7 +98,7 @@ pub(crate) fn use_sports() -> Builtin {
         .add_payment_request_listener(
             |event| &mut event.custom_action,
             0,
-            |game, player_index, a| {
+            |game, player_index, a, _| {
                 let p = game.player(player_index);
                 let options = sports_options(p, p.get_city(a.city.expect("city not found")))
                     .expect("Invalid options for sports");
@@ -107,7 +107,7 @@ pub(crate) fn use_sports() -> Builtin {
                     "Each culture token increases the happiness by 1 step",
                 )])
             },
-            |game, s, a| {
+            |game, s, a, _| {
                 let position = a.city.expect("city not found");
                 let pile = s.choice[0].clone();
                 let steps = pile.amount();
@@ -134,7 +134,7 @@ pub(crate) fn use_theaters() -> Builtin {
         .add_payment_request_listener(
             |event| &mut event.custom_action,
             0,
-            |game, player, _| {
+            |game, player, _,_| {
                 Some(vec![PaymentRequest::mandatory(
                     PaymentOptions::sum(
                         game.player(player),
@@ -143,7 +143,7 @@ pub(crate) fn use_theaters() -> Builtin {
                     "Convert 1 culture token into 1 mood token, or 1 mood token into 1 culture token",
                 )])
             },
-            |game, s, _| {
+            |game, s, _,_| {
                 let reward = theater_opposite(&s.choice[0]);
                 game.players[s.player_index].gain_resources(reward.clone());
                 game.add_info_log_item(

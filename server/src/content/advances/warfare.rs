@@ -19,12 +19,10 @@ use crate::tactics_card::{CombatRole, play_tactics_card};
 use crate::unit::UnitType;
 
 pub(crate) fn warfare() -> AdvanceGroup {
-    advance_group_builder("Warfare", vec![
-        tactics(),
-        siegecraft(),
-        steel_weapons(),
-        draft(),
-    ])
+    advance_group_builder(
+        "Warfare",
+        vec![tactics(), siegecraft(), steel_weapons(), draft()],
+    )
 }
 
 fn tactics() -> AdvanceBuilder {
@@ -50,18 +48,24 @@ fn siegecraft() -> AdvanceBuilder {
     .add_payment_request_listener(
         |e| &mut e.combat_start,
         0,
-        |game, player, c| {
-            // todo , &ListenerInfo
-            
+        |game, player, c, info| {
+            if info.owning_player != player {
+                return None;
+            }
+
             let p = game.player(player);
-            let extra_die = PaymentOptions::sum(p, PaymentReason::AdvanceAbility, 2, &[
-                ResourceType::Wood,
-                ResourceType::Gold,
-            ]);
-            let ignore_hit = PaymentOptions::sum(p, PaymentReason::AdvanceAbility, 2, &[
-                ResourceType::Ore,
-                ResourceType::Gold,
-            ]);
+            let extra_die = PaymentOptions::sum(
+                p,
+                PaymentReason::AdvanceAbility,
+                2,
+                &[ResourceType::Wood, ResourceType::Gold],
+            );
+            let ignore_hit = PaymentOptions::sum(
+                p,
+                PaymentReason::AdvanceAbility,
+                2,
+                &[ResourceType::Ore, ResourceType::Gold],
+            );
 
             let player = &game.players[player];
             if game
@@ -85,7 +89,7 @@ fn siegecraft() -> AdvanceBuilder {
                 None
             }
         },
-        |game, s, c| {
+        |game, s, c, _| {
             game.add_info_log_item(&format!("{} paid for siegecraft: ", s.player_name));
             let mut paid = false;
             let mut modifiers: Vec<CombatModifier> = Vec::new();
@@ -128,12 +132,13 @@ fn steel_weapons() -> AdvanceBuilder {
         even if the enemy does not use the ability.",
     )
     .add_payment_request_listener(
-        // todo also add &ListenerInfo
         |e| &mut e.combat_start,
         1,
-        |game, player_index, c| {
-            // todo , &ListenerInfo
-            
+        |game, player_index, c, info| {
+            if info.owning_player != player_index {
+                return None;
+            }
+
             let player = &game.players[player_index];
 
             let cost = steel_weapons_cost(game, c, player_index);
@@ -148,7 +153,7 @@ fn steel_weapons() -> AdvanceBuilder {
                 None
             }
         },
-        |game, s, c| {
+        |game, s, c, _| {
             let pile = &s.choice[0];
             game.add_info_log_item(&format!(
                 "{} paid for steel weapons: {}",
@@ -214,10 +219,12 @@ fn steel_weapons_cost(game: &Game, combat: &Combat, player_index: usize) -> Paym
     let both_steel_weapons = attacker.can_use_advance(Advance::SteelWeapons)
         && defender.can_use_advance(Advance::SteelWeapons);
     let cost = u8::from(!player.can_use_advance(Advance::Metallurgy) || both_steel_weapons);
-    PaymentOptions::sum(player, PaymentReason::AdvanceAbility, cost, &[
-        ResourceType::Ore,
-        ResourceType::Gold,
-    ])
+    PaymentOptions::sum(
+        player,
+        PaymentReason::AdvanceAbility,
+        cost,
+        &[ResourceType::Ore, ResourceType::Gold],
+    )
 }
 
 fn fortress(game: &Game, c: &Combat, s: &mut CombatStrength, role: CombatRole, _: &ListenerInfo) {

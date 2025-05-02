@@ -49,7 +49,7 @@ fn negotiations(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_player_request(
         |e| &mut e.play_action_card,
         0,
-        |game, player_index, _,_| {
+        |game, player_index, _, _| {
             Some(PlayerRequest::new(
                 game.players
                     .iter()
@@ -59,7 +59,7 @@ fn negotiations(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                 "Select a player to negotiate with",
             ))
         },
-        |game, s, _,_| {
+        |game, s, _, _| {
             game.permanent_effects
                 .push(PermanentEffect::Negotiations(Negotiations {
                     relations: DiplomaticRelations::new(s.player_index, s.choice),
@@ -158,13 +158,13 @@ fn assassination(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_player_request(
         |e| &mut e.play_action_card,
         0,
-        |game, player_index,_, _| {
+        |game, player_index, _, _| {
             Some(PlayerRequest::new(
                 opponents_not_affected_by_assassination(game, player_index),
                 "Select a player to assassinate",
             ))
         },
-        |game, s, _,_| {
+        |game, s, _, _| {
             game.permanent_effects
                 .push(PermanentEffect::Assassination(s.choice));
             game.add_info_log_item(&format!(
