@@ -1,5 +1,6 @@
 use crate::common::{JsonTest, TestAction, move_action};
 use server::action::{Action, execute_without_undo};
+use server::advance;
 use server::advance::Advance;
 use server::card::HandCard;
 use server::content::custom_actions::{CustomActionType, CustomEventAction};
@@ -163,6 +164,15 @@ fn test_great_mausoleum() {
             .without_json_comparison(),
         TestAction::undoable(0, Action::Response(EventResponse::Bool(true)))
             .without_json_comparison(),
-        TestAction::undoable(0, Action::Response(EventResponse::Bool(false))),
+        TestAction::not_undoable(0, Action::Response(EventResponse::Bool(false)))
+            .without_json_comparison(),
+        TestAction::undoable(
+            0,
+            Action::Playing(PlayingAction::Advance {
+                advance: Advance::Storage,
+                payment: ResourcePile::ideas(2),
+            }),
+        ).without_json_comparison(),
+        TestAction::not_undoable(0, Action::Response(EventResponse::Bool(true)))
     ]);
 }

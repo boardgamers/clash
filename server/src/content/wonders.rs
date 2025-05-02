@@ -18,6 +18,7 @@ use crate::{resource_pile::ResourcePile, wonder::WonderInfo};
 use itertools::Itertools;
 use std::collections::HashSet;
 use std::sync::Arc;
+use crate::incident::draw_and_discard_incident_card_from_pile;
 
 #[must_use]
 pub fn get_all_uncached() -> Vec<WonderInfo> {
@@ -32,7 +33,7 @@ pub fn get_all_uncached() -> Vec<WonderInfo> {
 }
 
 fn great_mausoleum() -> WonderInfo {
-    // todo draw incident 
+    // todo draw incident
     WonderInfo::builder(
         Wonder::GreatMausoleum,
         "Great Lighthouse",
@@ -48,7 +49,7 @@ fn great_mausoleum() -> WonderInfo {
 pub(crate) fn use_great_mausoleum() -> Builtin {
     Builtin::builder("Great Mausoleum", "")
         .add_bool_request(
-            |event| &mut event.great_mausoleum,
+            |event| &mut event.choose_action_card,
             0,
             |game, player_index, _| {
                 if let Some(card) = game.action_cards_discarded.last() {
@@ -63,7 +64,10 @@ pub(crate) fn use_great_mausoleum() -> Builtin {
             },
             |game, s, _| {
                 if s.choice {
-                    let card = game.action_cards_discarded.pop().unwrap();
+                    let card = game
+                        .action_cards_discarded
+                        .pop()
+                        .expect("action card not found in discard pile");
                     game.add_info_log_item(&format!(
                         "{} drew {} from the discard pile",
                         s.player_name,
@@ -72,6 +76,37 @@ pub(crate) fn use_great_mausoleum() -> Builtin {
                     game.player_mut(s.player_index).action_cards.push(card);
                 } else {
                     do_gain_action_card_from_pile(game, s.player_index);
+                }
+            },
+        )
+        .add_bool_request(
+            |event| &mut event.choose_incident,
+            0,
+            |game, player_index, i| {
+                if let Some(card) = game.incidents_discarded.last() {
+                    Some(format!(
+                        "Do you want to draw {} from the discard pile?",
+                        game.cache.get_incident(*card).name
+                    ))
+                } else {
+                    i.incident_id = draw_and_discard_incident_card_from_pile(game, player_index);
+                    None
+                }
+            },
+            |game, s, i| {
+                if s.choice {
+                    let card = game
+                        .incidents_discarded
+                        .pop()
+                        .expect("action card not found in discard pile");
+                    game.add_info_log_item(&format!(
+                        "{} drew {} from the discard pile",
+                        s.player_name,
+                        game.cache.get_incident(card).name
+                    ));
+                    i.incident_id = card;
+                } else {
+                    i.incident_id = draw_and_discard_incident_card_from_pile(game, s.player_index);
                 }
             },
         )

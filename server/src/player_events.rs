@@ -111,7 +111,8 @@ pub(crate) struct PersistentEvents {
     pub units_killed: PersistentEvent<KilledUnits>,
     pub select_objective_cards: PersistentEvent<SelectObjectivesInfo>,
     pub custom_action: PersistentEvent<CustomEventAction>,
-    pub great_mausoleum: PersistentEvent,
+    pub choose_incident: PersistentEvent<IncidentInfo>,
+    pub choose_action_card: PersistentEvent,
 }
 
 impl PersistentEvents {
@@ -145,7 +146,8 @@ impl PersistentEvents {
             select_objective_cards: Event::new("select_objective_cards"),
 
             custom_action: Event::new("custom_action_bartering"),
-            great_mausoleum: Event::new("great_mausoleum"),
+            choose_action_card: Event::new("great_mausoleum_action_card"),
+            choose_incident: Event::new("great_mausoleum_incident"),
         }
     }
 }
@@ -220,6 +222,7 @@ impl IncidentPlayerInfo {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct IncidentInfo {
+    pub incident_id: u8,
     pub active_player: usize,
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -244,9 +247,10 @@ pub struct IncidentInfo {
 
 impl IncidentInfo {
     #[must_use]
-    pub fn new(origin: usize) -> IncidentInfo {
+    pub fn new(incident_id: u8, active_player: usize) -> IncidentInfo {
         IncidentInfo {
-            active_player: origin,
+            incident_id,
+            active_player,
             passed: None,
             consumed: false,
             barbarians: None,

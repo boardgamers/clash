@@ -415,7 +415,6 @@ fn draw_objective_card_from_pile(game: &mut Game) -> Option<u8> {
     draw_card_from_pile(
         game,
         "Objective Card",
-        false,
         |g| &mut g.objective_cards_left,
         |g| g.cache.get_objective_cards().iter().map(|c| c.id).collect(),
         |p| p.objective_cards.clone(),

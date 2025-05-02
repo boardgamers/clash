@@ -304,25 +304,25 @@ fn test_action_internal(
         post_assert(game.clone());
     }
     let compare_json = test.compare_json && last_json_compare;
-    // undo_redo(
-    //     name,
-    //     test.player_index,
-    //     compare_json,
-    //     if compare_json {
-    //         read_game_str(original)
-    //     } else {
-    //         "".to_string()
-    //     },
-    //     game.clone(),
-    //     original,
-    //     outcome,
-    //     if test.compare_json {
-    //         read_game_str(outcome)
-    //     } else {
-    //         "".to_string()
-    //     },
-    //     context,
-    // );
+    undo_redo(
+        name,
+        test.player_index,
+        compare_json,
+        if compare_json {
+            read_game_str(original)
+        } else {
+            "".to_string()
+        },
+        game.clone(),
+        original,
+        outcome,
+        if test.compare_json {
+            read_game_str(outcome)
+        } else {
+            "".to_string()
+        },
+        context,
+    );
     game
 }
 

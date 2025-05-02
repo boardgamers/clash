@@ -91,7 +91,7 @@
       "wonders_built": [
         "GreatLibrary"
       ],
-      "incident_tokens": 2,
+      "incident_tokens": 1,
       "wonder_cards": [
         "Pyramids"
       ],
@@ -211,14 +211,30 @@
   "action_log_index": 0,
   "log": [],
   "undo_limit": 0,
-  "actions_left": 1,
+  "actions_left": 2,
   "round": 1,
   "age": 1,
   "messages": [
     "The game has started"
   ],
-  "action_cards_discarded": [1, 2, 3, 4],
-  "action_cards_left": [11, 12, 13, 14],
+  "action_cards_discarded": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "action_cards_left": [
+    11,
+    12,
+    13,
+    14
+  ],
+  "incidents_discarded": [
+    1
+  ],
+  "incidents_left": [
+    11
+  ],
   "dice_roll_outcomes": [
     1,
     1,

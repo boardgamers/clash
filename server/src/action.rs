@@ -13,7 +13,7 @@ use crate::cultural_influence::on_cultural_influence;
 use crate::explore::{ask_explore_resolution, move_to_unexplored_tile};
 use crate::game::GameState::{Finished, Movement, Playing};
 use crate::game::{Game, GameState};
-use crate::incident::on_trigger_incident;
+use crate::incident::{on_choose_incident, on_trigger_incident};
 use crate::log;
 use crate::log::{add_action_log_item, current_player_turn_log_mut};
 use crate::map::Terrain::Unexplored;
@@ -172,9 +172,9 @@ pub fn execute_without_undo(
 pub(crate) fn on_action_end(game: &mut Game, player_index: usize) {
     let _ = game.trigger_persistent_event(
         &[player_index],
-        |e| &mut e.great_mausoleum,
+        |e| &mut e.choose_action_card,
         (),
-        |_| PersistentEventType::GreatMausoleum,
+        |_| PersistentEventType::ChooseActionCard,
     );
 }
 
@@ -235,7 +235,8 @@ pub(crate) fn execute_custom_phase_action(
             on_objective_cards(game, player_index, c);
         }
         CustomAction(a) => execute_custom_action(game, player_index, a),
-        GreatMausoleum => on_action_end(game, player_index),
+        ChooseActionCard => on_action_end(game, player_index),
+        ChooseIncident(i) => on_choose_incident(game, player_index, i),
     }
 
     if let Some(s) = game.events.pop() {

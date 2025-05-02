@@ -165,10 +165,9 @@ pub(crate) fn draw_wonder_from_pile(game: &mut Game) -> Option<Wonder> {
     draw_card_from_pile(
         game,
         "Wonders",
-        false,
         |game| &mut game.wonders_left,
         |_| Vec::new(),
-        |_| vec![], // can't reshuffle wonders
+        |_| vec![],
     )
 }
 

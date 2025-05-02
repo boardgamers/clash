@@ -218,7 +218,6 @@ fn draw_action_card_from_pile(game: &mut Game) -> Option<u8> {
     draw_card_from_pile(
         game,
         "Action Card",
-        false,
         |g| &mut g.action_cards_left,
         |g| g.cache.get_action_cards().iter().map(|c| c.id).collect(),
         |p| p.action_cards.clone(),

@@ -37,7 +37,6 @@ pub enum HandCard {
 pub(crate) fn draw_card_from_pile<T>(
     game: &mut Game,
     name: &str,
-    leave_card: bool,
     get_pile: impl Fn(&mut Game) -> &mut Vec<T>,
     reshuffle_pile: impl Fn(&Game) -> Vec<T>,
     get_owned: impl Fn(&Player) -> Vec<T>,
@@ -67,15 +66,20 @@ where
         game.lock_undo(); // new information is revealed
     }
 
-    if leave_card {
-        get_pile(game).first().cloned()
-    } else {
-        Some(get_pile(game).remove(0))
-    }
+    Some(get_pile(game).remove(0))
 }
 
-pub(crate) fn discard_card(discard: impl Fn(&mut Game) -> &mut Vec<u8>, card: u8, player: usize, game: &mut Game) {
-    if game.player(player).wonders_owned.contains(Wonder::GreatMausoleum) {
+pub(crate) fn discard_card(
+    discard: impl Fn(&mut Game) -> &mut Vec<u8>,
+    card: u8,
+    player: usize,
+    game: &mut Game,
+) {
+    if game
+        .player(player)
+        .wonders_owned
+        .contains(Wonder::GreatMausoleum)
+    {
         discard(game).insert(0, card);
     } else {
         discard(game).push(card);

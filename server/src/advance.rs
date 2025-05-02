@@ -3,14 +3,14 @@ use crate::city_pieces::Building;
 use crate::content::persistent_events::PersistentEventType;
 use crate::events::EventOrigin;
 use crate::game::Game;
-use crate::incident::on_trigger_incident;
-use crate::player_events::{IncidentInfo, OnAdvanceInfo};
+use crate::incident::trigger_incident;
+use crate::player_events::OnAdvanceInfo;
 use crate::special_advance::SpecialAdvance;
 use crate::{ability_initializer::AbilityInitializerSetup, resource_pile::ResourcePile};
-use Bonus::*;
 use enumset::EnumSetType;
 use serde::{Deserialize, Serialize};
 use std::mem;
+use Bonus::*;
 
 // id / 4 = advance group
 #[derive(EnumSetType, Serialize, Deserialize, Debug, Ord, PartialOrd, Hash)]
@@ -304,7 +304,7 @@ pub(crate) fn on_advance(game: &mut Game, player_index: usize, info: OnAdvanceIn
         player.incident_tokens -= 1;
         if player.incident_tokens == 0 {
             player.incident_tokens = 3;
-            on_trigger_incident(game, IncidentInfo::new(player_index));
+            trigger_incident(game, player_index);
         }
     }
 }
