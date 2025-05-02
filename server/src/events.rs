@@ -241,21 +241,21 @@ mod tests {
         let mut event = EventMut::new("test");
         let add_constant = Advance::Arts;
         event.add_listener_mut(
-            |item, constant, _, (), _| *item += constant,
+            |item, constant, _, ()| *item += constant,
             0,
             EventOrigin::Advance(add_constant),
             0,
         );
         let multiply_value = Advance::Sanitation;
         event.add_listener_mut(
-            |item, _, multiplier, (), _| *item *= multiplier,
+            |item, _, multiplier, ()| *item *= multiplier,
             -1,
             EventOrigin::Advance(multiply_value),
             0,
         );
         let no_change = Advance::Bartering;
         event.add_listener_mut(
-            |item, _, _, (), _| {
+            |item, _, _, ()| {
                 *item += 1;
                 *item -= 1;
             },
