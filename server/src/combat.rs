@@ -15,10 +15,11 @@ use crate::player::remove_unit;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::tactics_card::CombatRole;
-use crate::unit::{UnitType, Units, carried_units};
+use crate::unit::{UnitType, Units, carried_units, kill_units};
 use combat_stats::active_attackers;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use crate::wonder::Wonder;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Copy)]
 pub enum CombatModifier {
@@ -425,6 +426,13 @@ fn move_to_enemy_player_tile(
             }
         }
         assert!(military, "Need military units to attack");
+    } else if city.is_some() && game.player(defender).wonders_owned.contains(Wonder::GreatWall) { 
+        // automatic loss
+        game.add_info_log_item("Barbarians lost the battle due to the Great Wall");
+        game.add_info_log_item(&format!("{} gained 1 gold", game.player_name(defender)));
+        game.player_mut(defender).gain_resources(ResourcePile::gold(1));
+        kill_units(game, unit_ids, player_index, Some(defender));
+        return true;
     }
 
     if has_defending_units || has_fortress {

@@ -6,13 +6,13 @@
       "resources": {
         "wood": 4,
         "ore": 7,
-        "ideas": 5,
-        "gold": 6,
-        "mood_tokens": 7,
-        "culture_tokens": 7
+        "ideas": 4,
+        "gold": 7,
+        "mood_tokens": 8,
+        "culture_tokens": 8
       },
       "resource_limit": {
-        "food": 2,
+        "food": 7,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -73,12 +73,13 @@
       "advances": [
         "Farming",
         "Mining",
-        "Rituals"
+        "Rituals",
+        "Storage"
       ],
       "wonders_built": [
         "GreatLibrary"
       ],
-      "incident_tokens": 1,
+      "incident_tokens": 3,
       "wonder_cards": [
         "Pyramids"
       ],
@@ -96,7 +97,7 @@
         "ideas": 7,
         "gold": 7,
         "mood_tokens": 7,
-        "culture_tokens": 7
+        "culture_tokens": 8
       },
       "resource_limit": {
         "food": 2,
@@ -111,7 +112,6 @@
         {
           "city_pieces": {},
           "mood_state": "Angry",
-          "activations": 2,
           "position": "C1"
         }
       ],
@@ -123,6 +123,33 @@
       ],
       "incident_tokens": 3,
       "next_unit_id": 2
+    },
+    {
+      "id": 2,
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {},
+          "mood_state": "Neutral",
+          "position": "B3"
+        }
+      ],
+      "units": [
+        {
+          "position": "B3",
+          "unit_type": "Infantry",
+          "id": 5
+        }
+      ],
+      "civilization": "Barbarians",
+      "incident_tokens": 3,
+      "next_unit_id": 6
     }
   ],
   "map": {
@@ -133,7 +160,7 @@
       ],
       [
         "A2",
-        "Water"
+        "Forest"
       ],
       [
         "A3",
@@ -172,7 +199,7 @@
     ]
   },
   "starting_player_index": 0,
-  "current_player_index": 1,
+  "current_player_index": 0,
   "action_log": [
     {
       "rounds": [
@@ -218,6 +245,32 @@
                     },
                     "result": "Draw"
                   }
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Storage",
+                        "payment": {
+                          "ideas": 2
+                        }
+                      }
+                    }
+                  }
                 }
               ]
             }
@@ -243,11 +296,35 @@
       "Player1 has to remove all of their defending units",
       "Player1 removed 1 infantry and 1 cavalry",
       "Battle ends in a draw"
+    ],
+    [
+      "Player2 ended their turn with 1 actions left"
+    ],
+    [
+      "Round 2/3"
+    ],
+    [
+      "It's Player1's turn"
+    ],
+    [
+      "Player1 paid 2 ideas to get the Storage advance",
+      "Player gained 1 mood token as advance bonus"
+    ],
+    [
+      "A new game event has been triggered: Envoy",
+      "Base effect: Barbarians move",
+      "Barbarians move from A2 to A1: 1 infantry and 1 elephant",
+      "Barbarians lost the battle due to the Great Wall",
+      "Player1 gained 1 gold",
+      "Barbarians spawned a new Infantry unit at B3",
+      "Player1 gained 1 idea and 1 culture token",
+      "No Wonders left to draw",
+      "Player2 was selected to gain 1 culture token."
     ]
   ],
   "undo_limit": 1,
-  "actions_left": 1,
-  "round": 1,
+  "actions_left": 2,
+  "round": 2,
   "age": 1,
   "messages": [
     "The game has started"
@@ -278,10 +355,8 @@
     3,
     4
   ],
-  "incidents_left": [
-    11
-  ],
   "incidents_discarded": [
-    1
+    1,
+    40
   ]
 }

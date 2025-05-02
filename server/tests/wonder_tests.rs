@@ -228,6 +228,15 @@ fn test_great_wall() {
             TestAction::not_undoable(
                 1,
                 move_action(vec![0, 1], Position::from_offset("A1")),
+            ).without_json_comparison(),
+            TestAction::not_undoable(1, Action::Playing(PlayingAction::EndTurn))
+                .without_json_comparison(),
+            TestAction::not_undoable(
+                0,
+                Action::Playing(PlayingAction::Advance {
+                    advance: Advance::Storage,
+                    payment: ResourcePile::ideas(2),
+                }),
             )
         ],
     );

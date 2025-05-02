@@ -145,6 +145,38 @@
       ],
       "incident_tokens": 3,
       "next_unit_id": 2
+    },
+    {
+      "id": 2,
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {},
+          "mood_state": "Neutral",
+          "position": "B3"
+        }
+      ],
+      "units": [
+        {
+          "position": "A2",
+          "unit_type": "Infantry",
+          "id": 0
+        },
+        {
+          "position": "A2",
+          "unit_type": "Elephant",
+          "id": 1
+        }
+      ],
+      "civilization": "Barbarians",
+      "incident_tokens": 3,
+      "next_unit_id": 5
     }
   ],
   "map": {
@@ -155,7 +187,7 @@
       ],
       [
         "A2",
-        "Water"
+        "Forest"
       ],
       [
         "A3",
@@ -243,7 +275,7 @@
     4
   ],
   "incidents_left": [
-    11
+    40
   ],
   "incidents_discarded": [
     1
