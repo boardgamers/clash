@@ -80,8 +80,8 @@
       "advances": [
         "Engineering",
         "Farming",
-        "Monuments",
-        "Mining"
+        "Mining",
+        "Monuments"
       ],
       "incident_tokens": 2,
       "wonder_cards": [
@@ -210,7 +210,6 @@
   "messages": [
     "The game has started"
   ],
-  "objective_cards_left": [1],
   "dice_roll_outcomes": [
     1,
     1,
@@ -222,5 +221,8 @@
     10,
     10,
     10
+  ],
+  "objective_cards_left": [
+    1
   ]
 }
