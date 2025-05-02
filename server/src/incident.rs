@@ -256,14 +256,14 @@ impl IncidentBuilder {
         self.add_position_request(
             |event| &mut event.incident,
             priority,
-            move |game, player_index, i, _| {
+            move |game, player_index, i,_| {
                 if f.is_active(game, i, player_index) {
                     request(game, player_index, i)
                 } else {
                     None
                 }
             },
-            move |game, s, i, _| {
+            move |game, s, i,_| {
                 gain_reward(game, s, i);
             },
         )
@@ -289,14 +289,14 @@ impl IncidentBuilder {
         self.add_units_request(
             |event| &mut event.incident,
             priority,
-            move |game, player_index, i, _| {
+            move |game, player_index, i,_| {
                 if f.is_active(game, i, player_index) {
                     request(game, player_index, i)
                 } else {
                     None
                 }
             },
-            move |game, s, i, _| {
+            move |game, s, i,_| {
                 gain_reward(game, s, i);
             },
         )
@@ -326,14 +326,14 @@ impl IncidentBuilder {
         self.add_structures_request(
             |event| &mut event.incident,
             priority,
-            move |game, player_index, i, _| {
+            move |game, player_index, i,_| {
                 if f.is_active(game, i, player_index) {
                     request(game, player_index, i)
                 } else {
                     None
                 }
             },
-            move |game, s, i, _| {
+            move |game, s, i,_| {
                 structures_selected(game, s, i);
             },
         )
@@ -394,14 +394,14 @@ impl IncidentBuilder {
         self.add_payment_request_listener(
             |event| &mut event.incident,
             priority,
-            move |game, player_index, i, _| {
+            move |game, player_index, i| {
                 if f.is_active(game, i, player_index) {
                     request(game, player_index, i)
                 } else {
                     None
                 }
             },
-            move |game, s, i, _| {
+            move |game, s, i| {
                 gain_reward(game, s, i);
             },
         )
@@ -427,14 +427,14 @@ impl IncidentBuilder {
         self.add_hand_card_request(
             |event| &mut event.incident,
             priority,
-            move |game, player_index, i, _| {
+            move |game, player_index, i,_| {
                 if f.is_active(game, i, player_index) {
                     request(game, player_index, i)
                 } else {
                     None
                 }
             },
-            move |game, s, i, _| {
+            move |game, s, i,_| {
                 cards_selected(game, s, i);
             },
         )
@@ -458,7 +458,7 @@ impl IncidentBuilder {
         self.add_player_request(
             |event| &mut event.incident,
             priority,
-            move |game, player_index, i, _| {
+            move |game, player_index, i,_| {
                 if f.is_active(game, i, player_index) {
                     let choices = game
                         .players
@@ -478,7 +478,7 @@ impl IncidentBuilder {
                     None
                 }
             },
-            move |game, s, i, _| {
+            move |game, s, i,_| {
                 gain_reward(game, s, i);
             },
         )

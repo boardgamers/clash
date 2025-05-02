@@ -481,7 +481,7 @@ pub(crate) fn pay_for_action() -> Builtin {
         .add_payment_request_listener(
             |e| &mut e.pay_action,
             0,
-            |game, player_index, a, _| {
+            |game, player_index, a| {
                 if matches!(a, PlayingAction::IncreaseHappiness(_)) {
                     // handled in the happiness action
                     return None;
@@ -500,7 +500,7 @@ pub(crate) fn pay_for_action() -> Builtin {
                     "Pay for action",
                 )])
             },
-            |game, s, _, _| {
+            |game, s, _| {
                 game.add_info_log_item(&format!(
                     "{} paid {} for the action",
                     s.player_name, s.choice[0]

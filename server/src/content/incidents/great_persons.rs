@@ -154,7 +154,7 @@ where
     .add_advance_request(
         |e| &mut e.play_action_card,
         10,
-        move |game, player_index, _, _| {
+        move |game, player_index, _,_| {
             let p = game.player(player_index);
             let choices = groups
                 .iter()
@@ -164,7 +164,7 @@ where
                 .collect();
             Some(AdvanceRequest::new(choices))
         },
-        |game, s, _, _| {
+        |game, s, _,_| {
             let name = s.choice;
             game.add_info_log_item(&format!("{} gained {}", s.player_name, name.name(game)));
             gain_advance_without_payment(game, name, s.player_index, ResourcePile::empty(), false);
@@ -188,7 +188,7 @@ fn great_artist() -> ActionCard {
     .add_position_request(
         |e| &mut e.play_action_card,
         0,
-        |game, player_index, _, _| {
+        |game, player_index, _,_| {
             let player = game.player(player_index);
             let cities = player
                 .cities
@@ -202,7 +202,7 @@ fn great_artist() -> ActionCard {
             let needed = 1..=1;
             Some(PositionRequest::new(cities, needed, "Make a city Happy"))
         },
-        |game, s, _, _| {
+        |game, s, _,_| {
             let position = s.choice[0];
             game.add_info_log_item(&format!(
                 "{} made city at {} Happy",
@@ -232,7 +232,7 @@ fn great_prophet() -> ActionCard {
     .add_position_request(
         |e| &mut e.play_action_card,
         1,
-        |game, player_index, _, _| {
+        |game, player_index, _,_| {
             let player = game.player(player_index);
             if !player.is_building_available(Building::Temple, game) {
                 return None;
@@ -253,7 +253,7 @@ fn great_prophet() -> ActionCard {
             let needed = 0..=1;
             Some(PositionRequest::new(cities, needed, "Build a Temple"))
         },
-        |game, s, a, _| {
+        |game, s, a,_| {
             let pos = s.choice.first().copied();
             if let Some(pos) = pos {
                 game.add_info_log_item(&format!(
@@ -269,14 +269,14 @@ fn great_prophet() -> ActionCard {
     .add_payment_request_listener(
         |e| &mut e.play_action_card,
         0,
-        |game, player, a, _| {
+        |game, player, a| {
             a.selected_position?;
             Some(vec![PaymentRequest::optional(
                 temple_cost(game, game.player(player)),
                 "Pay to build the Temple",
             )])
         },
-        |game, s, a, _| {
+        |game, s, a| {
             let pile = s.choice[0].clone();
             let name = &s.player_name;
             if pile.is_empty() {
@@ -448,7 +448,7 @@ fn great_athlete() -> ActionCard {
     .add_payment_request_listener(
         |e| &mut e.play_action_card,
         0,
-        |game, player, a, _| {
+        |game, player, a| {
             let p = game.player(player);
             let culture_to_mood = if p.resources.culture_tokens > 0 && p.resources.mood_tokens > 0 {
                 a.answer.expect("answer not found")
@@ -473,7 +473,7 @@ fn great_athlete() -> ActionCard {
 
             Some(vec![PaymentRequest::optional(options, "Convert resources")])
         },
-        |game, s, _, _| {
+        |game, s, _| {
             let from = &s.choice[0];
             if from.is_empty() {
                 game.add_info_log_item(&format!(

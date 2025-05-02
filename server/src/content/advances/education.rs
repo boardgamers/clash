@@ -90,7 +90,7 @@ fn free_education() -> AdvanceBuilder {
     .add_payment_request_listener(
         |e| &mut e.advance,
         1,
-        |game, player_index, i, _| {
+        |game, player_index, i| {
             if i.advance == Advance::FreeEducation {
                 None
             } else if i.payment.has_at_least(&ResourcePile::gold(1))
@@ -108,7 +108,7 @@ fn free_education() -> AdvanceBuilder {
                 None
             }
         },
-        |game, s, _, _| {
+        |game, s, _| {
             let pile = &s.choice[0];
             if pile.is_empty() {
                 game.add_info_log_item(&format!(

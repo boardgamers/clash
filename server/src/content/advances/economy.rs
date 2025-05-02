@@ -49,7 +49,7 @@ pub(crate) fn use_bartering() -> Builtin {
         .add_hand_card_request(
             |event| &mut event.custom_action,
             1,
-            |game, player_index, _, _| {
+            |game, player_index, _,_| {
                 let cards = game
                     .player(player_index)
                     .action_cards
@@ -63,7 +63,7 @@ pub(crate) fn use_bartering() -> Builtin {
                     "Select an action card to discard",
                 ))
             },
-            |game, s, _e, _| {
+            |game, s, _e,_| {
                 let HandCard::ActionCard(card) = s.choice[0] else {
                     panic!("Invalid type");
                 };

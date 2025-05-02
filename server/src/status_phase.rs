@@ -136,7 +136,7 @@ pub(crate) fn free_advance() -> Builtin {
         .add_advance_request(
             |event| &mut event.status_phase,
             0,
-            |game, player_index, _player_name, _| {
+            |game, player_index, _player_name,_| {
                 let choices = game
                     .cache
                     .get_advances()
@@ -149,7 +149,7 @@ pub(crate) fn free_advance() -> Builtin {
                     .collect_vec();
                 Some(AdvanceRequest::new(choices))
             },
-            |game, c, _, _| {
+            |game, c, _,_| {
                 game.add_info_log_item(&format!(
                     "{} advanced {} for free",
                     c.player_name,
@@ -185,7 +185,7 @@ pub(crate) fn raze_city() -> Builtin {
         .add_position_request(
             |event| &mut event.status_phase,
             0,
-            |game, player_index, _player_name, _| {
+            |game, player_index, _player_name,_| {
                 let player = game.player(player_index);
                 let cities = player
                     .cities
@@ -203,7 +203,7 @@ pub(crate) fn raze_city() -> Builtin {
                     "May raze a size 1 city for 1 gold",
                 ))
             },
-            |game, s, _, _| {
+            |game, s, _,_| {
                 if s.choice.is_empty() {
                     game.add_info_log_item(&format!("{} did not raze a city", s.player_name));
                     return;
@@ -269,7 +269,7 @@ where
     a.add_payment_request_listener(
         event,
         1,
-        move |game, player_index, v, _| {
+        move |game, player_index, v| {
             set_paid(v, false);
 
             if !is_active_player(v, player_index, game) {
@@ -294,7 +294,7 @@ where
                 "Pay to change government",
             )])
         },
-        move |game, s, v, _| {
+        move |game, s, v| {
             let name = &s.player_name;
             let cost = &s.choice[0];
             game.add_info_log_item(&format!("{name} paid {cost} to change the government"));
@@ -422,7 +422,7 @@ pub(crate) fn determine_first_player() -> Builtin {
         .add_player_request(
             |event| &mut event.status_phase,
             0,
-            |game, player_index, phase, _| {
+            |game, player_index, phase,_| {
                 if let StatusPhaseState::DetermineFirstPlayer(want) = phase {
                     (*want == player_index).then_some(PlayerRequest::new(
                         game.human_players(game.starting_player_index),
@@ -432,7 +432,7 @@ pub(crate) fn determine_first_player() -> Builtin {
                     panic!("Illegal state")
                 }
             },
-            |game, s, _, _| {
+            |game, s, _,_| {
                 game.add_info_log_item(&format!(
                     "{} choose {}",
                     game.player_name(s.player_index),

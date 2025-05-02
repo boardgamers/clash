@@ -358,12 +358,12 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &mut V, &ListenerInfo) -> Option<Vec<PaymentRequest>>
+        request: impl Fn(&mut Game, usize, &mut V) -> Option<Vec<PaymentRequest>>
         + 'static
         + Clone
         + Sync
         + Send,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<ResourcePile>>, &mut V, &ListenerInfo)
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<ResourcePile>>, &mut V)
         + 'static
         + Clone
         + Sync
@@ -376,15 +376,15 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self.add_persistent_event_listener(
             event,
             priority,
-            move |game, player_index, _player_name, details, info| {
-                request(game, player_index, details, info)
+            move |game, player_index, _player_name, details, _| {
+                request(game, player_index, details)
                     .filter(|r| {
                         r.iter()
                             .any(|r| game.player(player_index).can_afford(&r.cost))
                     })
                     .map(PersistentEventRequest::Payment)
             },
-            move |game, player_index, player_name, action, request, details, info| {
+            move |game, player_index, player_name, action, request, details, _| {
                 if let PersistentEventRequest::Payment(requests) = &request {
                     if let EventResponse::Payment(payments) = action {
                         assert_eq!(requests.len(), payments.len());
@@ -398,7 +398,6 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                             game,
                             &SelectedChoice::new(player_index, player_name, true, payments),
                             details,
-                            info,
                         );
                         return;
                     }
@@ -589,11 +588,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         + Clone
         + Sync
         + Send,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<usize>, &mut V, &ListenerInfo)
-        + 'static
-        + Clone
-        + Sync
-        + Send,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<usize>, &mut V, &ListenerInfo) + 'static + Clone + Sync + Send,
     ) -> Self
     where
         E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone + Sync + Send,
@@ -743,12 +738,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         + Clone
         + Sync
         + Send,
-        structures_selected: impl Fn(
-            &mut Game,
-            &SelectedChoice<Vec<SelectedStructure>>,
-            &mut V,
-            &ListenerInfo,
-        )
+        structures_selected: impl Fn(&mut Game, &SelectedChoice<Vec<SelectedStructure>>, &mut V, &ListenerInfo)
         + 'static
         + Clone
         + Sync
@@ -787,16 +777,8 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         + Clone
         + Sync
         + Send,
-        request: impl Fn(&mut Game, usize, &mut V, &ListenerInfo) -> Option<R>
-        + 'static
-        + Clone
-        + Sync
-        + Send,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<C>, &mut V, &ListenerInfo)
-        + 'static
-        + Clone
-        + Sync
-        + Send,
+        request: impl Fn(&mut Game, usize, &mut V, &ListenerInfo) -> Option<R> + 'static + Clone + Sync + Send,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<C>, &mut V, &ListenerInfo) + 'static + Clone + Sync + Send,
     ) -> Self
     where
         C: Clone + PartialEq + Debug,
@@ -822,8 +804,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                                 false,
                                 choices[0].clone(),
                             ),
-                            details,
-                            info,
+                            details,info
                         );
                         return None;
                     }
@@ -840,8 +821,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                 gain_reward(
                     game,
                     &SelectedChoice::new(player_index, player_name, true, selected),
-                    details,
-                    info,
+                    details, info,
                 );
             },
         )

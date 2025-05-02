@@ -166,7 +166,7 @@ fn remove_pirate_ships(builder: IncidentBuilder) -> IncidentBuilder {
     builder.add_units_request(
         |event| &mut event.incident,
         BASE_EFFECT_PRIORITY + 5,
-        |game, player_index, i, _| {
+        |game, player_index, i,_| {
             if !i.is_active(IncidentTarget::ActivePlayer, player_index) {
                 return None;
             }
@@ -187,7 +187,7 @@ fn remove_pirate_ships(builder: IncidentBuilder) -> IncidentBuilder {
                 "Select Pirate Ships to remove",
             ))
         },
-        |game, s, _, _| {
+        |game, s, _,_| {
             let pirates = get_pirates_player(game).index;
             game.add_info_log_item(&format!(
                 "{} removed a Pirate Ships at {}",

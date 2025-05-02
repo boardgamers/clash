@@ -8,7 +8,6 @@ use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::{
     PaymentRequest, PersistentEventType, SelectedStructure, Structure,
 };
-use crate::events::ListenerInfo;
 use crate::game::Game;
 use crate::log::current_player_turn_log;
 use crate::payment::{PaymentOptions, PaymentReason};
@@ -128,7 +127,7 @@ pub(crate) fn use_cultural_influence() -> Builtin {
         .add_payment_request_listener(
             |e| &mut e.influence_culture,
             2,
-            |game, player_index, info, _| {
+            |game, player_index, info| {
                 let cost = &info.range_boost_cost;
                 if cost.is_free() {
                     info.roll_boost_cost = range_boost_paid(game, info, player_index);
@@ -140,7 +139,7 @@ pub(crate) fn use_cultural_influence() -> Builtin {
                     &format!("Pay {cost} to increase the range of the influence"),
                 )])
             },
-            |game, s, info, _| {
+            |game, s, info| {
                 info.roll_boost_cost = range_boost_paid(game, info, s.player_index);
             },
         )
@@ -148,7 +147,7 @@ pub(crate) fn use_cultural_influence() -> Builtin {
             |e| &mut e.influence_culture,
             0,
             roll_boost_payment,
-            |game, s, info, _| roll_boost_paid(game, s.player_index, &s.choice[0], info),
+            |game, s, info| roll_boost_paid(game, s.player_index, &s.choice[0], info),
         )
         .build()
 }
@@ -198,7 +197,6 @@ fn roll_boost_payment(
     game: &mut Game,
     player_index: usize,
     info: &mut InfluenceCultureInfo,
-    _: &ListenerInfo,
 ) -> Option<Vec<PaymentRequest>> {
     let cost = &info.roll_boost_cost;
     if cost.is_free() {

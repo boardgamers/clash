@@ -47,13 +47,13 @@ fn advance(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_advance_request(
         |e| &mut e.play_action_card,
         0,
-        |game, player, _, _| {
+        |game, player, _,_| {
             Some(AdvanceRequest::new(possible_advances(
                 game.player(player),
                 game,
             )))
         },
-        |game, sel, _, _| {
+        |game, sel, _,_| {
             let advance = sel.choice;
             gain_advance_without_payment(
                 game,
@@ -94,13 +94,13 @@ fn inspiration(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_advance_request(
         |e| &mut e.play_action_card,
         0,
-        |game, player, _, _| {
+        |game, player, _,_| {
             Some(AdvanceRequest::new(possible_inspiration_advances(
                 game,
                 game.player(player),
             )))
         },
-        |game, sel, _, _| {
+        |game, sel, _,_| {
             let advance = sel.choice;
             gain_advance_without_payment(
                 game,
@@ -174,7 +174,7 @@ fn hero_general(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     b = b.add_payment_request_listener(
         |e| &mut e.play_action_card,
         1,
-        |game, player, _, _| {
+        |game, player, _| {
             let p = game.player(player);
             if cities_where_mood_can_increase(p).is_empty() {
                 return None;
@@ -189,7 +189,7 @@ fn hero_general(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                 "Pay 1 mood token to increase the mood in a city by 1",
             )])
         },
-        |game, s, a, _| {
+        |game, s, a| {
             let name = &s.player_name;
             let cost = &s.choice[0];
             if cost.is_empty() {
@@ -209,7 +209,7 @@ fn increase_mood(b: ActionCardBuilder, priority: i32, need_payment: bool) -> Act
     b.add_position_request(
         |e| &mut e.play_action_card,
         priority,
-        move |game, player, a, _| {
+        move |game, player, a,_| {
             if need_payment && a.answer.is_none() {
                 return None;
             }
@@ -221,7 +221,7 @@ fn increase_mood(b: ActionCardBuilder, priority: i32, need_payment: bool) -> Act
                 "Select a city to increase the mood by 1",
             ))
         },
-        |game, s, _, _| {
+        |game, s, _,_| {
             let pos = s.choice[0];
             let player = s.player_index;
             game.add_info_log_item(&format!(

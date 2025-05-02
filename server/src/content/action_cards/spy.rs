@@ -23,13 +23,13 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_player_request(
         |e| &mut e.play_action_card,
         1,
-        |game, player, _, _| {
+        |game, player, _,_| {
             Some(PlayerRequest::new(
                 players_with_cards(game, player),
                 "Select a player to look at all Wonder, Action, and Objective cards of",
             ))
         },
-        |game, s, a, _| {
+        |game, s, a,_| {
             let p = s.choice;
             game.add_info_log_item(&format!(
                 "{} decided to looked at all Wonder, Action, and Objective cards of {}",
@@ -42,7 +42,7 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_hand_card_request(
         |e| &mut e.play_action_card,
         0,
-        |game, player, a, _| {
+        |game, player, a,_| {
             game.lock_undo(); // you've seen the cards
 
             let p = game.player(player);
@@ -67,7 +67,7 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                 "Select a Wonder, Action, or Objective card to swap",
             ))
         },
-        |game, s, a, _| {
+        |game, s, a,_| {
             game.lock_undo(); // can't undo swap - the other player saw your card
 
             let _ = swap_cards(
