@@ -154,7 +154,7 @@ where
     .add_advance_request(
         |e| &mut e.play_action_card,
         10,
-        move |game, player_index, _,_| {
+        move |game, player_index, _| {
             let p = game.player(player_index);
             let choices = groups
                 .iter()
@@ -164,7 +164,7 @@ where
                 .collect();
             Some(AdvanceRequest::new(choices))
         },
-        |game, s, _,_| {
+        |game, s, _| {
             let name = s.choice;
             game.add_info_log_item(&format!("{} gained {}", s.player_name, name.name(game)));
             gain_advance_without_payment(game, name, s.player_index, ResourcePile::empty(), false);

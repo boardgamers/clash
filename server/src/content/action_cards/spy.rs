@@ -23,13 +23,13 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_player_request(
         |e| &mut e.play_action_card,
         1,
-        |game, player, _,_| {
+        |game, player, _| {
             Some(PlayerRequest::new(
                 players_with_cards(game, player),
                 "Select a player to look at all Wonder, Action, and Objective cards of",
             ))
         },
-        |game, s, a,_| {
+        |game, s, a| {
             let p = s.choice;
             game.add_info_log_item(&format!(
                 "{} decided to looked at all Wonder, Action, and Objective cards of {}",

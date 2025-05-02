@@ -49,13 +49,13 @@ fn synergies(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_advance_request(
         |e| &mut e.play_action_card,
         3,
-        |game, p, _,_| {
+        |game, p, _| {
             Some(AdvanceRequest::new(categories_with_2_affordable_advances(
                 game.player(p),
                 game,
             )))
         },
-        |game, sel, i,_| {
+        |game, sel, i| {
             let advance = &sel.choice;
             game.add_info_log_item(&format!(
                 "{} selected {} as first advance for Synergies.",
@@ -69,7 +69,7 @@ fn synergies(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     b = b.add_advance_request(
         |e| &mut e.play_action_card,
         1,
-        |game, p, i,_| {
+        |game, p, i| {
             let first = i.selected_advance.expect("advance not found");
             Some(AdvanceRequest::new(
                 game.cache
@@ -84,7 +84,7 @@ fn synergies(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                     .collect_vec(),
             ))
         },
-        |game, sel, i,_| {
+        |game, sel, i| {
             let advance = &sel.choice;
             game.add_info_log_item(&format!(
                 "{} selected {} as second advance for Synergies.",
@@ -214,8 +214,10 @@ pub(crate) fn use_teach_us() -> Builtin {
     )
     .add_advance_request(
         |e| &mut e.combat_end,
+        // todo , &ListenerInfo
+
         90,
-        |game, player, e, _| {
+        |game, player, e| {
             e.selected_card.map(|_| {
                 let vec = teachable_advances(
                     game.player(e.combat.opponent(player)),
@@ -225,7 +227,7 @@ pub(crate) fn use_teach_us() -> Builtin {
                 AdvanceRequest::new(vec)
             })
         },
-        |game, sel, _,_| {
+        |game, sel, _| {
             let advance = sel.choice;
             game.add_info_log_item(&format!(
                 "{} selected {} as advance for Teach Us.",
@@ -304,7 +306,7 @@ fn tech_trade(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_player_request(
         |e| &mut e.play_action_card,
         1,
-        |game, player_index, a,_| {
+        |game, player_index, a| {
             if a.active_player != Some(player_index) {
                 // only active player can select the target player
                 return None;
@@ -321,7 +323,7 @@ fn tech_trade(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                 "Select player to trade advances with",
             ))
         },
-        |game, s, a,_| {
+        |game, s, a| {
             let p = s.choice;
             game.add_info_log_item(&format!(
                 "{} selected {} as player for Technology Trade.",
@@ -334,7 +336,7 @@ fn tech_trade(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_advance_request(
         |e| &mut e.play_action_card,
         0,
-        |game, player_index, a,_| {
+        |game, player_index, a| {
             if a.active_player == Some(player_index) || a.selected_player == Some(player_index) {
                 let trade_partner = if a.active_player == Some(player_index) {
                     a.selected_player
@@ -350,7 +352,7 @@ fn tech_trade(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             }
             None
         },
-        |game, sel, _,_| {
+        |game, sel, _| {
             let advance = sel.choice;
             game.add_info_log_item(&format!(
                 "{} selected {} as advance for Technology Trade.",
@@ -382,13 +384,13 @@ fn new_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_advance_request(
         |e| &mut e.play_action_card,
         2,
-        |game, player_index, _,_| {
+        |game, player_index, _| {
             let player = game.player(player_index);
             Some(AdvanceRequest::new(advances_that_can_be_gained(
                 player, game,
             )))
         },
-        |game, sel, i,_| {
+        |game, sel, i| {
             let advance = &sel.choice;
             game.add_info_log_item(&format!(
                 "{} selected {} as advance for New Ideas.",

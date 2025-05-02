@@ -31,7 +31,7 @@ pub(crate) fn cultural_takeover(id: u8, tactics_card: TacticsCardFactory) -> Act
     .add_unit_type_request(
         |event| &mut event.play_action_card,
         1,
-        |game, player, a,_| {
+        |game, player, a| {
             if let Some(position) = a.selected_position {
                 //set in use_cultural_takeover
 
@@ -65,7 +65,7 @@ pub(crate) fn cultural_takeover(id: u8, tactics_card: TacticsCardFactory) -> Act
             }
             None
         },
-        |game, s, a,_| {
+        |game, s, a| {
             game.add_info_log_item(&format!(
                 "{} selected unit to gain: {:?}",
                 s.player_name, s.choice,

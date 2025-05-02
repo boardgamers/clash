@@ -47,13 +47,13 @@ fn advance(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_advance_request(
         |e| &mut e.play_action_card,
         0,
-        |game, player, _,_| {
+        |game, player, _| {
             Some(AdvanceRequest::new(possible_advances(
                 game.player(player),
                 game,
             )))
         },
-        |game, sel, _,_| {
+        |game, sel, _| {
             let advance = sel.choice;
             gain_advance_without_payment(
                 game,
@@ -94,13 +94,13 @@ fn inspiration(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_advance_request(
         |e| &mut e.play_action_card,
         0,
-        |game, player, _,_| {
+        |game, player, _| {
             Some(AdvanceRequest::new(possible_inspiration_advances(
                 game,
                 game.player(player),
             )))
         },
-        |game, sel, _,_| {
+        |game, sel, _| {
             let advance = sel.choice;
             gain_advance_without_payment(
                 game,

@@ -136,7 +136,7 @@ pub(crate) fn free_advance() -> Builtin {
         .add_advance_request(
             |event| &mut event.status_phase,
             0,
-            |game, player_index, _player_name,_| {
+            |game, player_index, _player_name| {
                 let choices = game
                     .cache
                     .get_advances()
@@ -149,7 +149,7 @@ pub(crate) fn free_advance() -> Builtin {
                     .collect_vec();
                 Some(AdvanceRequest::new(choices))
             },
-            |game, c, _,_| {
+            |game, c, _| {
                 game.add_info_log_item(&format!(
                     "{} advanced {} for free",
                     c.player_name,
@@ -422,7 +422,7 @@ pub(crate) fn determine_first_player() -> Builtin {
         .add_player_request(
             |event| &mut event.status_phase,
             0,
-            |game, player_index, phase,_| {
+            |game, player_index, phase| {
                 if let StatusPhaseState::DetermineFirstPlayer(want) = phase {
                     (*want == player_index).then_some(PlayerRequest::new(
                         game.human_players(game.starting_player_index),
@@ -432,7 +432,7 @@ pub(crate) fn determine_first_player() -> Builtin {
                     panic!("Illegal state")
                 }
             },
-            |game, s, _,_| {
+            |game, s, _| {
                 game.add_info_log_item(&format!(
                     "{} choose {}",
                     game.player_name(s.player_index),
