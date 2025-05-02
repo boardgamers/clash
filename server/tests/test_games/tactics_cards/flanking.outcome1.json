@@ -279,5 +279,8 @@
   ],
   "action_cards_left": [
     1
+  ],
+  "action_cards_discarded": [
+    42
   ]
 }

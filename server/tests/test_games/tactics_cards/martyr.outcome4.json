@@ -384,5 +384,9 @@
   ],
   "dice_roll_log": [
     10
+  ],
+  "action_cards_discarded": [
+    6,
+    24
   ]
 }

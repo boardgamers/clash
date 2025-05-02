@@ -20,9 +20,6 @@
         "mood_tokens": 7,
         "culture_tokens": 7
       },
-      "action_cards": [
-        123
-      ],
       "cities": [
         {
           "city_pieces": {
@@ -94,6 +91,9 @@
       "incident_tokens": 1,
       "wonder_cards": [
         "Pyramids"
+      ],
+      "action_cards": [
+        123
       ],
       "next_unit_id": 8
     },
@@ -217,24 +217,6 @@
   "messages": [
     "The game has started"
   ],
-  "action_cards_discarded": [
-    1,
-    2,
-    3,
-    4
-  ],
-  "action_cards_left": [
-    11,
-    12,
-    13,
-    14
-  ],
-  "incidents_discarded": [
-    1
-  ],
-  "incidents_left": [
-    11
-  ],
   "dice_roll_outcomes": [
     1,
     1,
@@ -246,5 +228,23 @@
     10,
     10,
     10
+  ],
+  "action_cards_left": [
+    11,
+    12,
+    13,
+    14
+  ],
+  "action_cards_discarded": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "incidents_left": [
+    11
+  ],
+  "incidents_discarded": [
+    1
   ]
 }

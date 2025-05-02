@@ -1,18 +1,49 @@
 {
   "state": "Playing",
+  "events": [
+    {
+      "event_type": {
+        "Incident": {
+          "incident_id": 1,
+          "active_player": 0
+        }
+      },
+      "player": 0,
+      "last_priority_used": 9,
+      "handler": {
+        "priority": 9,
+        "request": {
+          "SelectPositions": {
+            "choices": [
+              "A1",
+              "C2"
+            ],
+            "needed": {
+              "start": 1,
+              "end": 1
+            },
+            "description": "Select a city to decrease the mood"
+          }
+        },
+        "origin": {
+          "Incident": 1
+        }
+      }
+    }
+  ],
   "players": [
     {
       "id": 0,
       "resources": {
         "wood": 4,
         "ore": 7,
-        "ideas": 5,
+        "ideas": 3,
         "gold": 6,
-        "mood_tokens": 7,
+        "mood_tokens": 8,
         "culture_tokens": 7
       },
       "resource_limit": {
-        "food": 2,
+        "food": 7,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -83,12 +114,13 @@
       "advances": [
         "Farming",
         "Mining",
-        "Rituals"
+        "Rituals",
+        "Storage"
       ],
       "wonders_built": [
         "GreatLibrary"
       ],
-      "incident_tokens": 2,
+      "incident_tokens": 3,
       "wonder_cards": [
         "Pyramids"
       ],
@@ -223,6 +255,109 @@
                       "Bool": false
                     }
                   }
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Storage",
+                        "payment": {
+                          "ideas": 2
+                        }
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 1
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/advances/3"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/incident_tokens",
+                      "value": 1
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resource_limit/food",
+                      "value": 2
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/ideas",
+                      "value": 5
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/mood_tokens",
+                      "value": 7
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events"
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Bool": true
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events/0/event_type/ChooseIncident",
+                      "value": {
+                        "active_player": 0,
+                        "incident_id": 0
+                      }
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events/0/event_type/Incident"
+                    },
+                    {
+                      "op": "add",
+                      "path": "/events/0/handler/origin/Builtin",
+                      "value": "Great Mausoleum"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events/0/handler/origin/Incident"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/events/0/handler/priority",
+                      "value": 0
+                    },
+                    {
+                      "op": "add",
+                      "path": "/events/0/handler/request/BoolRequest",
+                      "value": "Do you want to draw Pestilence from the discard pile?"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events/0/handler/request/SelectPositions"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/events/0/last_priority_used",
+                      "value": 0
+                    },
+                    {
+                      "op": "add",
+                      "path": "/incidents_discarded",
+                      "value": [
+                        1
+                      ]
+                    }
+                  ]
                 }
               ]
             }
@@ -231,7 +366,7 @@
       ]
     }
   ],
-  "action_log_index": 3,
+  "action_log_index": 5,
   "log": [
     [
       "Player1 played the action card Elder Statesman as a regular action"
@@ -241,6 +376,16 @@
     ],
     [
       "Player1 gained an action card from the pile"
+    ],
+    [
+      "Player1 paid 2 ideas to get the Storage advance",
+      "Player gained 1 mood token as advance bonus"
+    ],
+    [
+      "Player1 drew Pestilence from the discard pile"
+    ],
+    [
+      "A new game event has been triggered: Pestilence"
     ]
   ],
   "undo_limit": 3,
@@ -272,5 +417,8 @@
     1,
     2,
     3
+  ],
+  "incidents_left": [
+    11
   ]
 }

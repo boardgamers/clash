@@ -11,6 +11,7 @@
     {
       "event_type": {
         "Incident": {
+          "incident_id": 54,
           "active_player": 0,
           "barbarians": {}
         }
@@ -326,7 +327,49 @@
                         7
                       ]
                     }
-                  }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/events/1/handler/priority",
+                      "value": 105
+                    },
+                    {
+                      "op": "add",
+                      "path": "/events/1/handler/request/SelectUnits",
+                      "value": {
+                        "choices": [
+                          5,
+                          6,
+                          7
+                        ],
+                        "description": "Select Pirate Ships to remove",
+                        "needed": {
+                          "end": 1,
+                          "start": 1
+                        },
+                        "player": 2
+                      }
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events/1/handler/request/SelectPositions"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/events/1/last_priority_used",
+                      "value": 105
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/2/units/2",
+                      "value": {
+                        "id": 7,
+                        "position": "D1",
+                        "unit_type": "Ship"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -335,7 +378,28 @@
                         "A2"
                       ]
                     }
-                  }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/events/1/handler/priority",
+                      "value": 104
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/events/1/last_priority_used",
+                      "value": 104
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/2/next_unit_id",
+                      "value": 9
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/2/units/2"
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -344,7 +408,49 @@
                         "D2"
                       ]
                     }
-                  }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/events/1/handler/priority",
+                      "value": 103
+                    },
+                    {
+                      "op": "add",
+                      "path": "/events/1/handler/request/SelectPositions",
+                      "value": {
+                        "choices": [
+                          "A2",
+                          "C3",
+                          "D1",
+                          "D2"
+                        ],
+                        "description": "Select a position for the Pirate Ship",
+                        "needed": {
+                          "end": 1,
+                          "start": 1
+                        }
+                      }
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events/1/handler/request/Payment"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/events/1/last_priority_used",
+                      "value": 103
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/2/next_unit_id",
+                      "value": 10
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/2/units/3"
+                    }
+                  ]
                 }
               ]
             }
@@ -374,7 +480,7 @@
       "Player1 must pay 1 resource or token to bribe the pirates"
     ]
   ],
-  "undo_limit": 4,
+  "undo_limit": 1,
   "actions_left": 3,
   "round": 1,
   "age": 1,
@@ -398,7 +504,7 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "incidents_left": [
+  "incidents_discarded": [
     54
   ]
 }
