@@ -1,7 +1,6 @@
 use crate::action::{Action, add_log_item_from_action, execute_movement_action, after_action};
 use crate::game::Game;
 use crate::log::{current_player_turn_log, current_player_turn_log_mut};
-use crate::resource::check_for_waste;
 use json_patch::{PatchOperation, patch};
 use serde_json::Value;
 

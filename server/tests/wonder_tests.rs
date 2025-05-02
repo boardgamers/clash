@@ -175,3 +175,25 @@ fn test_great_mausoleum() {
         TestAction::undoable(0, Action::Response(EventResponse::Bool(true)))
     ]);
 }
+
+#[test]
+fn test_great_statue() {
+    JSON.test("great_statue", vec![
+        TestAction::undoable(0, Action::Playing(WonderCard(Wonder::GreatStatue)))
+            .without_json_comparison(),
+        TestAction::not_undoable(
+            0,
+            Action::Response(EventResponse::Payment(vec![ResourcePile::new(
+                3, 4, 5, 0, 0, 0, 5,
+            )])),
+        )
+        .without_json_comparison(),
+        TestAction::undoable(
+            0,
+            Action::Playing(PlayingAction::Custom(CustomEventAction::new(
+                CustomActionType::GreatStatue,
+                None,
+            ))),
+        )
+    ]);
+}

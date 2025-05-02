@@ -153,6 +153,7 @@ impl PlayingActionType {
                         p.resources.culture_tokens > 0 || p.resources.mood_tokens > 0
                     }
                     CustomActionType::ForcedLabor => any_angry(p),
+                    CustomActionType::GreatStatue => !p.objective_cards.is_empty(),
                     CustomActionType::GreatLighthouse => {
                         great_lighthouse_city(p).can_activate()
                             && p.available_units().ships > 0

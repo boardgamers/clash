@@ -1,16 +1,19 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::do_gain_action_card_from_pile;
 use crate::advance::Advance;
+use crate::card::HandCard;
 use crate::city::City;
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
-use crate::content::persistent_events::{AdvanceRequest, PaymentRequest, PositionRequest};
+use crate::content::persistent_events::{AdvanceRequest, HandCardsRequest, PaymentRequest, PositionRequest};
 use crate::game::Game;
+use crate::incident::draw_and_discard_incident_card_from_pile;
 use crate::log::format_mood_change;
 use crate::map::Terrain;
 use crate::map::Terrain::Fertile;
+use crate::objective_card::{discard_objective_card, gain_objective_card_from_pile};
 use crate::payment::{PaymentOptions, PaymentReason};
-use crate::player::{Player, add_unit};
+use crate::player::{add_unit, Player};
 use crate::position::Position;
 use crate::unit::UnitType;
 use crate::wonder::Wonder;
@@ -18,11 +21,11 @@ use crate::{resource_pile::ResourcePile, wonder::WonderInfo};
 use itertools::Itertools;
 use std::collections::HashSet;
 use std::sync::Arc;
-use crate::incident::draw_and_discard_incident_card_from_pile;
 
 #[must_use]
 pub fn get_all_uncached() -> Vec<WonderInfo> {
     vec![
+        great_statue(),
         great_mausoleum(),
         colosseum(),
         library(),
@@ -32,8 +35,62 @@ pub fn get_all_uncached() -> Vec<WonderInfo> {
     ]
 }
 
+fn great_statue() -> WonderInfo {
+    WonderInfo::builder(
+        Wonder::GreatStatue,
+        "Great Statue",
+        "Draw 1 objective card. \
+        Once per turn, as a free action, discard an objective card from: Gain 1 action.",
+        PaymentOptions::fixed_resources(ResourcePile::new(3, 4, 5, 0, 0, 0, 5)),
+        Advance::Monuments,
+    )
+    .add_custom_action(CustomActionType::GreatStatue)
+        .add_one_time_ability_initializer(
+            |game, player_index| {
+                gain_objective_card_from_pile(
+                    game,
+                    player_index,
+                );
+            },
+        )
+    .build()
+}
+
+pub(crate) fn use_great_statue() -> Builtin {
+    Builtin::builder(
+        "Great Statue",
+        "Discard an objectives card from your hand: Gain 1 action.",
+    )
+        .add_hand_card_request(
+            |event| &mut event.custom_action,
+            0,
+            |game, player_index, _| {
+                let player = game.player(player_index);
+                Some(HandCardsRequest::new(
+                    player.objective_cards.iter().map(
+                        |&a| HandCard::ObjectiveCard(a),
+                    ).collect_vec(),
+                    1..=1,
+                    "Select an objective card to discard",
+                ))
+            },
+            |game, s, _| {
+                let HandCard::ObjectiveCard(card) = s.choice[0] else {
+                    panic!("not an objective card")
+                };
+                game.add_info_log_item(&format!(
+                    "{} discarded {} to gain an action",
+                    s.player_name,
+                    game.cache.get_objective_card(card).name()
+                ));
+                discard_objective_card(game, s.player_index, card);
+                game.actions_left += 1;
+            },
+        )
+        .build()
+}
+
 fn great_mausoleum() -> WonderInfo {
-    // todo draw incident
     WonderInfo::builder(
         Wonder::GreatMausoleum,
         "Great Lighthouse",

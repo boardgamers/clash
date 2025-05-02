@@ -315,6 +315,10 @@ impl Assets {
                 CustomActionType::GreatLighthouse,
                 load_png(include_bytes!("../assets/lighthouse-svgrepo-com.png")),
             ),
+            (
+                CustomActionType::GreatStatue,
+                load_png(include_bytes!("../assets/statue-of-david-1-svgrepo-com.png")),
+            ),
         ]
         .iter()
         .cloned()
