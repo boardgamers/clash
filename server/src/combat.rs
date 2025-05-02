@@ -337,8 +337,8 @@ pub(crate) fn conquer_city(
         city.set_mood_state(Angry);
         if attacker_is_human {
             for wonder in city.pieces.wonders.clone() {
-                deinit_wonder(game, old_player_index, &wonder);
-                init_wonder(game, new_player_index, &wonder);
+                deinit_wonder(game, old_player_index, wonder);
+                init_wonder(game, new_player_index, wonder);
                 game.player_mut(old_player_index)
                     .wonders_owned
                     .remove(wonder);

@@ -208,7 +208,7 @@ fn destroy_building(game: &mut Game, b: Building, position: Position) {
 
 fn destroy_wonder(game: &mut Game, position: Position, name: Wonder) {
     let owner = game.get_any_city(position).player_index;
-    deinit_wonder(game, owner, &name);
+    deinit_wonder(game, owner, name);
 
     let a = name.info(game).owned_victory_points;
     let p = game.player_mut(owner);

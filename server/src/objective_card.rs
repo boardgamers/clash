@@ -422,20 +422,20 @@ fn draw_objective_card_from_pile(game: &mut Game) -> Option<u8> {
 }
 
 pub(crate) fn gain_objective_card(game: &mut Game, player_index: usize, objective_card: u8) {
-    init_objective_card(game, player_index, &objective_card);
+    init_objective_card(game, player_index, objective_card);
     game.players[player_index]
         .objective_cards
         .push(objective_card);
 }
 
-pub(crate) fn init_objective_card(game: &mut Game, player_index: usize, id: &u8) {
-    for o in &game.cache.get_objective_card(*id).objectives.clone() {
+pub(crate) fn init_objective_card(game: &mut Game, player_index: usize, id: u8) {
+    for o in &game.cache.get_objective_card(id).objectives.clone() {
         o.listeners.init(game, player_index);
     }
 }
 
-pub(crate) fn deinit_objective_card(game: &mut Game, player: usize, card: &u8) {
-    for o in &game.cache.get_objective_card(*card).objectives.clone() {
+pub(crate) fn deinit_objective_card(game: &mut Game, player: usize, card: u8) {
+    for o in &game.cache.get_objective_card(card).objectives.clone() {
         o.listeners.deinit(game, player);
     }
 }
@@ -445,7 +445,7 @@ pub(crate) fn discard_objective_card(game: &mut Game, player: usize, card: u8) {
         id == card
     })
     .unwrap_or_else(|| panic!("should be able to discard objective card {card}"));
-    deinit_objective_card(game, player, &card);
+    deinit_objective_card(game, player, card);
 }
 
 #[cfg(test)]

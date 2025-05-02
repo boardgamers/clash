@@ -13,7 +13,7 @@ use crate::content::tactics_cards::{
     wedge_formation,
 };
 use crate::game::Game;
-use crate::objective_card::gain_objective_card;
+use crate::objective_card::{deinit_objective_card, gain_objective_card};
 use crate::player::{Player, add_unit};
 use crate::playing_actions::ActionCost;
 use crate::resource_pile::ResourcePile;
@@ -103,6 +103,7 @@ fn swap_objective_card(game: &mut Game, player: usize, hand_cards: &[HandCard]) 
     let p = game.player_mut(player);
     let discarded = remove_element_by(&mut p.objective_cards, |c| ids.contains(&c))
         .expect("discarded objective card");
+    deinit_objective_card(game, player, discarded);
     game.objective_cards_left.push(discarded);
 
     remove_element(&mut ids, &&discarded).expect("discarded objective card");

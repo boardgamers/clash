@@ -429,12 +429,12 @@ pub(crate) fn wonders_built_points(player: &Player, game: &Game) -> f32 {
         .sum::<f32>()
 }
 
-pub(crate) fn init_wonder(game: &mut Game, owner: usize, name: &Wonder) {
-    let wonder = game.cache.get_wonder(*name);
+pub(crate) fn init_wonder(game: &mut Game, owner: usize, name: Wonder) {
+    let wonder = game.cache.get_wonder(name);
     wonder.listeners.clone().init(game, owner);
 }
 
-pub(crate) fn deinit_wonder(game: &mut Game, owner: usize, name: &Wonder) {
-    let wonder = game.cache.get_wonder(*name);
+pub(crate) fn deinit_wonder(game: &mut Game, owner: usize, name: Wonder) {
+    let wonder = game.cache.get_wonder(name);
     wonder.listeners.clone().deinit(game, owner);
 }

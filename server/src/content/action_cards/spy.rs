@@ -125,8 +125,8 @@ fn swap_cards(
                 game,
                 player,
                 other,
-                &id,
-                &other_id,
+                id,
+                other_id,
                 |p| &mut p.action_cards,
                 |_, _, _| {}, // action cards are not initialized
                 |_, _, _| {},
@@ -141,8 +141,8 @@ fn swap_cards(
                 game,
                 player,
                 other,
-                &name,
-                &other_name,
+                name,
+                other_name,
                 |p| &mut p.wonder_cards,
                 init_wonder,
                 deinit_wonder,
@@ -157,8 +157,8 @@ fn swap_cards(
                 game,
                 player,
                 other,
-                &id,
-                &other_id,
+                id,
+                other_id,
                 |p| &mut p.objective_cards,
                 init_objective_card,
                 deinit_objective_card,
@@ -175,20 +175,20 @@ fn swap_cards(
     Ok(())
 }
 
-fn swap_card<T: PartialEq + Ord + Debug>(
+fn swap_card<T: PartialEq + Ord + Debug + Copy>(
     game: &mut Game,
     player: usize,
     other: usize,
-    id: &T,
-    other_id: &T,
+    id: T,
+    other_id: T,
     get_list: impl Fn(&mut Player) -> &mut Vec<T>,
-    init: impl Fn(&mut Game, usize, &T),
-    deinit: impl Fn(&mut Game, usize, &T),
+    init: impl Fn(&mut Game, usize, T),
+    deinit: impl Fn(&mut Game, usize, T),
 ) {
-    let card = remove_element(get_list(game.player_mut(player)), id)
+    let card = remove_element(get_list(game.player_mut(player)), &id)
         .unwrap_or_else(|| panic!("card not found {id:?}"));
     let o = game.player_mut(other);
-    let other_card = remove_element(get_list(o), other_id)
+    let other_card = remove_element(get_list(o), &other_id)
         .unwrap_or_else(|| panic!("other card not found {other_id:?}"));
 
     get_list(o).push(card);
