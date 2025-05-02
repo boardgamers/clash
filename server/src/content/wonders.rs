@@ -96,7 +96,7 @@ pub(crate) fn use_great_statue() -> Builtin {
     .add_hand_card_request(
         |event| &mut event.custom_action,
         0,
-        |game, player_index, _,_| {
+        |game, player_index, _| {
             let player = game.player(player_index);
             Some(HandCardsRequest::new(
                 player
@@ -108,7 +108,7 @@ pub(crate) fn use_great_statue() -> Builtin {
                 "Select an objective card to discard",
             ))
         },
-        |game, s, _,_| {
+        |game, s, _| {
             let HandCard::ObjectiveCard(card) = s.choice[0] else {
                 panic!("not an objective card")
             };
@@ -246,14 +246,14 @@ pub(crate) fn use_great_lighthouse() -> Builtin {
     .add_position_request(
         |event| &mut event.custom_action,
         0,
-        |game, player_index, _,_| {
+        |game, player_index, _| {
             Some(PositionRequest::new(
                 great_lighthouse_spawns(game, player_index),
                 1..=1,
                 "Select a sea space to place a ship",
             ))
         },
-        |game, s, _,_| {
+        |game, s, _| {
             let spawn = &s.choice[0];
             let city_pos = great_lighthouse_city(game.player(s.player_index)).position;
             add_unit(s.player_index, *spawn, UnitType::Ship, game);
@@ -384,7 +384,6 @@ fn colosseum() -> WonderInfo {
         |e| &mut e.combat_round_end,
         90,
         |game, player_index, e| {
-            // todo , &ListenerInfo
             let player = &game.player(player_index);
 
             let cost = PaymentOptions::tokens(player, PaymentReason::WonderAbility, 1);

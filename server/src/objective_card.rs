@@ -214,7 +214,7 @@ pub(crate) fn select_objectives() -> Builtin {
     .add_hand_card_request(
         |e| &mut e.select_objective_cards,
         0,
-        |_game, _player_index, i,_| {
+        |_game, _player_index, i| {
             let cards = &i.cards;
             Some(HandCardsRequest::new(
                 cards.clone(),
@@ -222,7 +222,7 @@ pub(crate) fn select_objectives() -> Builtin {
                 "Select cards to complete",
             ))
         },
-        |game, s, cards,_| {
+        |game, s, cards| {
             let p = s.player_index;
             for (card, objective) in
                 match_objective_cards(&s.choice, &cards.objective_opportunities, game)

@@ -36,7 +36,7 @@ pub(crate) fn mercenaries(id: u8, tactics_card: TacticsCardFactory) -> ActionCar
     .add_position_request(
         |e| &mut e.play_action_card,
         2,
-        |game, player, _,_| {
+        |game, player, _| {
             let p = game.player(player);
             let r = barbarian_army_positions_in_range2(game, p);
             if r.is_empty() {
@@ -49,7 +49,7 @@ pub(crate) fn mercenaries(id: u8, tactics_card: TacticsCardFactory) -> ActionCar
                 "Select Barbarian armies to move",
             ))
         },
-        |game, s, a,_| {
+        |game, s, a| {
             game.add_info_log_item(&format!(
                 "{} selected Barbarian armies to move: {}",
                 s.player_name,
@@ -103,7 +103,7 @@ fn move_army(b: ActionCardBuilder, i: i32) -> ActionCardBuilder {
         .add_position_request(
             |e| &mut e.play_action_card,
             src_prio,
-            |_game, _player, a,_| {
+            |_game, _player, a| {
                 a.selected_position = None;
 
                 Some(PositionRequest::new(
@@ -112,7 +112,7 @@ fn move_army(b: ActionCardBuilder, i: i32) -> ActionCardBuilder {
                     "Select Barbarian army to move",
                 ))
             },
-            |game, s, a,_| {
+            |game, s, a| {
                 let pos = s.choice[0];
                 game.add_info_log_item(&format!(
                     "{} selected Barbarian army to move: {}",
@@ -125,7 +125,7 @@ fn move_army(b: ActionCardBuilder, i: i32) -> ActionCardBuilder {
         .add_position_request(
             |e| &mut e.play_action_card,
             dst_prio,
-            |game, _player, a,_| {
+            |game, _player, a| {
                 let from = a.selected_position?;
                 let barbarian = get_barbarians_player(game);
                 let units = barbarian.get_units(from).iter().map(|u| u.id).collect_vec();
@@ -145,7 +145,7 @@ fn move_army(b: ActionCardBuilder, i: i32) -> ActionCardBuilder {
                     "Select destination for Barbarian army",
                 ))
             },
-            |game, s, a,_| {
+            |game, s, a| {
                 let to = s.choice[0];
                 game.add_info_log_item(&format!(
                     "{} selected destination for Barbarian army: {}",

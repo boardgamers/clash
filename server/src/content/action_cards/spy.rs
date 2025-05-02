@@ -42,7 +42,7 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_hand_card_request(
         |e| &mut e.play_action_card,
         0,
-        |game, player, a,_| {
+        |game, player, a| {
             game.lock_undo(); // you've seen the cards
 
             let p = game.player(player);
@@ -67,7 +67,7 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                 "Select a Wonder, Action, or Objective card to swap",
             ))
         },
-        |game, s, a,_| {
+        |game, s, a| {
             game.lock_undo(); // can't undo swap - the other player saw your card
 
             let _ = swap_cards(

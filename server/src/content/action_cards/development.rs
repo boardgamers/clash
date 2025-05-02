@@ -172,7 +172,7 @@ fn explorer(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         .add_position_request(
             |e| &mut e.play_action_card,
             0,
-            |game, player_index, _,_| {
+            |game, player_index, _| {
                 let p = game.player(player_index);
                 if p.available_units().settlers == 0 {
                     return None;
@@ -183,7 +183,7 @@ fn explorer(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                     "Gain a free settler",
                 ))
             },
-            |game, s, _a,_| {
+            |game, s, _a| {
                 if s.choice.is_empty() {
                     game.add_info_log_item(&format!(
                         "{} decided not to gain a free settler",

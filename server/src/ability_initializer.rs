@@ -210,26 +210,12 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        start_custom_phase: impl Fn(
-            &mut Game,
-            usize,
-            &str,
-            &mut V,
-            &ListenerInfo,
-        ) -> Option<PersistentEventRequest>
+        start_custom_phase: impl Fn(&mut Game, usize, &str, &mut V, &ListenerInfo) -> Option<PersistentEventRequest>
         + 'static
         + Clone
         + Sync
         + Send,
-        end_custom_phase: impl Fn(
-            &mut Game,
-            usize,
-            &str,
-            EventResponse,
-            PersistentEventRequest,
-            &mut V,
-            &ListenerInfo,
-        )
+        end_custom_phase: impl Fn(&mut Game, usize, &str, EventResponse, PersistentEventRequest, &mut V, &ListenerInfo)
         + 'static
         + Clone
         + Sync
@@ -270,7 +256,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                                     a,
                                     r,
                                     details,
-                                    info,
+                                    info
                                 );
                                 return;
                             }
@@ -297,8 +283,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                 // trigger another event
                 game.current_event_mut().player.last_priority_used = Some(priority);
 
-                if let Some(request) =
-                    start_custom_phase(game, player_index, &player_name, details, info)
+                if let Some(request) = start_custom_phase(game, player_index, &player_name, details, info)
                 {
                     game.current_event_mut().player.handler = Some(PersistentEventHandler {
                         priority,
@@ -486,7 +471,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self.add_persistent_event_listener(
             event,
             priority,
-            move |game, player_index, _player_name, details, _| {
+            move |game, player_index, _player_name, details,_| {
                 request(game, player_index, details).map(PersistentEventRequest::BoolRequest)
             },
             move |game, player_index, player_name, action, request, details, _| {
@@ -546,12 +531,12 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &mut V, &ListenerInfo) -> Option<PositionRequest>
+        request: impl Fn(&mut Game, usize, &mut V) -> Option<PositionRequest>
         + 'static
         + Clone
         + Sync
         + Send,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<Position>>, &mut V, &ListenerInfo)
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<Position>>, &mut V)
         + 'static
         + Clone
         + Sync
@@ -653,12 +638,12 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &mut V, &ListenerInfo) -> Option<HandCardsRequest>
+        request: impl Fn(&mut Game, usize, &mut V) -> Option<HandCardsRequest>
         + 'static
         + Clone
         + Sync
         + Send,
-        cards_selected: impl Fn(&mut Game, &SelectedChoice<Vec<HandCard>>, &mut V, &ListenerInfo)
+        cards_selected: impl Fn(&mut Game, &SelectedChoice<Vec<HandCard>>, &mut V)
         + 'static
         + Clone
         + Sync
@@ -690,12 +675,12 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &mut V, &ListenerInfo) -> Option<UnitsRequest>
+        request: impl Fn(&mut Game, usize, &mut V) -> Option<UnitsRequest>
         + 'static
         + Clone
         + Sync
         + Send,
-        units_selected: impl Fn(&mut Game, &SelectedChoice<Vec<u32>>, &mut V, &ListenerInfo)
+        units_selected: impl Fn(&mut Game, &SelectedChoice<Vec<u32>>, &mut V)
         + 'static
         + Clone
         + Sync
@@ -723,8 +708,8 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                 panic!("Units request expected");
             },
             request,
-            move |game, c, details, info| {
-                units_selected(game, c, details, info);
+            move |game, c, details| {
+                units_selected(game, c, details);
             },
         )
     }
@@ -733,12 +718,12 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &mut V, &ListenerInfo) -> Option<StructuresRequest>
+        request: impl Fn(&mut Game, usize, &mut V) -> Option<StructuresRequest>
         + 'static
         + Clone
         + Sync
         + Send,
-        structures_selected: impl Fn(&mut Game, &SelectedChoice<Vec<SelectedStructure>>, &mut V, &ListenerInfo)
+        structures_selected: impl Fn(&mut Game, &SelectedChoice<Vec<SelectedStructure>>, &mut V)
         + 'static
         + Clone
         + Sync
@@ -812,7 +797,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                 }
                 None
             },
-            move |game, player_index, player_name, action, request, details, _| {
+            move |game, player_index, player_name, action, request, details,_| {
                 let (choices, selected) = from_request(&request, action);
                 assert!(
                     choices.contains(&selected),
@@ -841,16 +826,8 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         + Clone
         + Sync
         + Send,
-        request: impl Fn(&mut Game, usize, &mut V, &ListenerInfo) -> Option<R>
-        + 'static
-        + Clone
-        + Sync
-        + Send,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<C>>, &mut V, &ListenerInfo)
-        + 'static
-        + Clone
-        + Sync
-        + Send,
+        request: impl Fn(&mut Game, usize, &mut V) -> Option<R> + 'static + Clone + Sync + Send,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<C>>, &mut V) + 'static + Clone + Sync + Send,
     ) -> Self
     where
         C: Clone + PartialEq + Debug,
@@ -861,8 +838,8 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self.add_persistent_event_listener(
             event,
             priority,
-            move |game, player_index, _player_name, details, info| {
-                if let Some(r) = request(game, player_index, details, info) {
+            move |game, player_index, _player_name, details,_| {
+                if let Some(r) = request(game, player_index, details) {
                     let m = get_request(&r);
                     if m.choices.is_empty() || m.needed.clone().max() == Some(0) {
                         return None;
@@ -879,7 +856,6 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                                 m.choices.clone(),
                             ),
                             details,
-                            info,
                         );
                         return None;
                     }
@@ -887,7 +863,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                 }
                 None
             },
-            move |game, player_index, player_name, action, request, details, info| {
+            move |game, player_index, player_name, action, request, details,_| {
                 let (choices, selected, needed) = from_request(&request, action);
                 assert!(
                     selected.iter().all(|s| choices.contains(s)),
@@ -904,7 +880,6 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                     game,
                     &SelectedChoice::new(player_index, player_name, true, selected),
                     details,
-                    info,
                 );
             },
         )

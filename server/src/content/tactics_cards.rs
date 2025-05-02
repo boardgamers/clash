@@ -267,14 +267,14 @@ pub(crate) fn tactical_retreat(id: u8) -> TacticsCard {
     .add_position_request(
         |event| &mut event.combat_round_start_tactics,
         0,
-        move |game, p, s,_| {
+        move |game, p, s| {
             (p == s.combat.defender).then_some(PositionRequest::new(
                 tactical_retreat_targets(&s.combat, game),
                 1..=1,
                 "Select a position to withdraw to",
             ))
         },
-        move |game, s, r,_| {
+        move |game, s, r| {
             r.final_result = Some(CombatResult::AttackerWins);
             let to = s.choice[0];
             game.add_info_log_item(&format!(
@@ -368,7 +368,7 @@ pub(crate) fn martyr(id: u8) -> TacticsCard {
     .add_units_request(
         |event| &mut event.combat_round_start_tactics,
         0,
-        move |game, p, s,_| {
+        move |game, p, s| {
             Some(UnitsRequest::new(
                 p,
                 s.combat.fighting_units(game, p),
@@ -376,7 +376,7 @@ pub(crate) fn martyr(id: u8) -> TacticsCard {
                 "Select a unit to sacrifice",
             ))
         },
-        move |game, s, r,_| {
+        move |game, s, r| {
             let unit = s.choice[0];
             game.add_info_log_item(&format!(
                 "{} sacrifices {} using Martyr",
@@ -414,7 +414,7 @@ pub(crate) fn archers(id: u8) -> TacticsCard {
     .add_units_request(
         |event| &mut event.combat_round_start_tactics,
         0,
-        move |game, p, s,_| {
+        move |game, p, s| {
             if !s.is_active(p, id, TacticsCardTarget::Opponent) {
                 return None;
             }
@@ -434,7 +434,7 @@ pub(crate) fn archers(id: u8) -> TacticsCard {
                 "Select a unit to sacrifice for Archers",
             ))
         },
-        move |game, s, r,_| {
+        move |game, s, r| {
             let unit = s.choice[0];
             game.add_info_log_item(&format!(
                 "{} sacrifices {} for Archers",

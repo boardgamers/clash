@@ -39,14 +39,14 @@ pub(crate) fn great_explorer() -> ActionCard {
         .add_position_request(
             |e| &mut e.play_action_card,
             8,
-            |game, player_index, a,_| {
+            |game, player_index, a| {
                 Some(place_city_request(
                     game,
                     player_index,
                     a.selected_positions.clone(),
                 ))
             },
-            |game, s, a,_| {
+            |game, s, a| {
                 let pos = s.choice.first().copied();
                 if let Some(pos) = pos {
                     game.add_info_log_item(&format!(
@@ -88,8 +88,8 @@ pub(crate) fn explore_adjacent_block(builder: ActionCardBuilder) -> ActionCardBu
     builder.add_position_request(
         |e| &mut e.play_action_card,
         9,
-        |game, player_index, _,_| Some(action_explore_request(game, player_index)),
-        |game, s, a,_| {
+        |game, player_index, _| Some(action_explore_request(game, player_index)),
+        |game, s, a| {
             let Some(&position) = s.choice.first() else {
                 game.add_info_log_item(&format!("{} decided not to explore", s.player_name));
                 return;
