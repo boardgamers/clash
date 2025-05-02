@@ -422,37 +422,21 @@ fn draw_objective_card_from_pile(game: &mut Game) -> Option<u8> {
 }
 
 pub(crate) fn gain_objective_card(game: &mut Game, player_index: usize, objective_card: u8) {
-    let mut o = game
-        .player(player_index)
-        .objective_cards
-        .iter()
-        .flat_map(|&id| {
-            game.cache
-                .get_objective_card(id)
-                .objectives
-                .iter()
-                .map(|o| o.name.clone())
-        })
-        .collect_vec();
-    init_objective_card(game, player_index, &mut o, objective_card);
+    init_objective_card(game, player_index, &objective_card);
     game.players[player_index]
         .objective_cards
         .push(objective_card);
 }
 
-pub(crate) fn init_objective_card(
-    game: &mut Game,
-    player_index: usize,
-    objectives: &mut Vec<String>,
-    id: u8,
-) {
-    for o in &game.cache.get_objective_card(id).objectives.clone() {
-        if objectives.contains(&o.name) {
-            // can't fulfill 2 objectives with the same name, so we can skip it here
-            continue;
-        }
+pub(crate) fn init_objective_card(game: &mut Game, player_index: usize, id: &u8) {
+    for o in &game.cache.get_objective_card(*id).objectives.clone() {
         o.listeners.init(game, player_index);
-        objectives.push(o.name.clone());
+    }
+}
+
+pub(crate) fn deinit_objective_card(game: &mut Game, player: usize, card: &u8) {
+    for o in &game.cache.get_objective_card(*card).objectives.clone() {
+        o.listeners.deinit(game, player);
     }
 }
 
@@ -461,19 +445,7 @@ pub(crate) fn discard_objective_card(game: &mut Game, player: usize, card: u8) {
         id == card
     })
     .unwrap_or_else(|| panic!("should be able to discard objective card {card}"));
-    for o in &game.cache.get_objective_card(card).objectives.clone() {
-        if game.player(player).objective_cards.iter().any(|c| {
-            game.cache
-                .get_objective_card(*c)
-                .objectives
-                .iter()
-                .any(|o2| o2.name == o.name)
-        }) {
-            // this objective is still in play
-            continue;
-        }
-        o.listeners.deinit(game, player);
-    }
+    deinit_objective_card(game, player, &card);
 }
 
 #[cfg(test)]

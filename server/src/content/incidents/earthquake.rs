@@ -8,7 +8,7 @@ use crate::game::Game;
 use crate::incident::{DecreaseMood, Incident, IncidentBaseEffect, MoodModifier};
 use crate::player_events::{IncidentInfo, IncidentTarget};
 use crate::position::Position;
-use crate::wonder::Wonder;
+use crate::wonder::{Wonder, deinit_wonder};
 use itertools::Itertools;
 
 pub(crate) fn earthquake_incidents() -> Vec<Incident> {
@@ -208,8 +208,7 @@ fn destroy_building(game: &mut Game, b: Building, position: Position) {
 
 fn destroy_wonder(game: &mut Game, position: Position, name: Wonder) {
     let owner = game.get_any_city(position).player_index;
-    let wonder = game.cache.get_wonder(name);
-    wonder.listeners.clone().deinit(game, owner);
+    deinit_wonder(game, owner, &name);
 
     let a = name.info(game).owned_victory_points;
     let p = game.player_mut(owner);

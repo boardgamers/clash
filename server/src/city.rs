@@ -5,6 +5,7 @@ use crate::content::custom_actions::CustomActionType::ForcedLabor;
 use crate::content::persistent_events::PersistentEventType;
 use crate::map::Terrain;
 use crate::utils;
+use crate::wonder::deinit_wonder;
 use crate::{
     city_pieces::{CityPieces, CityPiecesData},
     game::Game,
@@ -110,11 +111,7 @@ impl City {
     /// Panics if the city does not have a builder
     pub fn raze(self, game: &mut Game, player_index: usize) {
         for wonder in &self.pieces.wonders {
-            game.cache
-                .get_wonder(*wonder)
-                .listeners
-                .clone()
-                .deinit(game, player_index);
+            deinit_wonder(game, player_index, wonder);
         }
         for wonder in self.pieces.wonders {
             for p in &mut game.players {

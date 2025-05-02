@@ -14,7 +14,7 @@ use crate::content::tactics_cards::{
 };
 use crate::game::Game;
 use crate::objective_card::gain_objective_card;
-use crate::player::{Player, add_unit, reinit_listeners};
+use crate::player::{Player, add_unit};
 use crate::playing_actions::ActionCost;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
@@ -108,7 +108,6 @@ fn swap_objective_card(game: &mut Game, player: usize, hand_cards: &[HandCard]) 
     remove_element(&mut ids, &&discarded).expect("discarded objective card");
     let gained = ids[0];
     remove_element(&mut game.objective_cards_left, gained).expect("gained objective card");
-    reinit_listeners(player, game);
     gain_objective_card(game, player, *gained);
 }
 
