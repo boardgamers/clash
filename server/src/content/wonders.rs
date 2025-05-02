@@ -15,7 +15,7 @@ use crate::map::Terrain;
 use crate::map::Terrain::Fertile;
 use crate::objective_card::{discard_objective_card, gain_objective_card_from_pile};
 use crate::payment::{PaymentOptions, PaymentReason};
-use crate::player::{add_unit, Player};
+use crate::player::{Player, add_unit};
 use crate::position::Position;
 use crate::tactics_card::CombatRole;
 use crate::unit::UnitType;

@@ -225,10 +225,8 @@ fn test_great_wall() {
     JSON.test(
         "great_wall",
         vec![
-            TestAction::not_undoable(
-                1,
-                move_action(vec![0, 1], Position::from_offset("A1")),
-            ).without_json_comparison(),
+            TestAction::not_undoable(1, move_action(vec![0, 1], Position::from_offset("A1")))
+                .without_json_comparison(),
             TestAction::not_undoable(1, Action::Playing(PlayingAction::EndTurn))
                 .without_json_comparison(),
             TestAction::not_undoable(
@@ -237,7 +235,7 @@ fn test_great_wall() {
                     advance: Advance::Storage,
                     payment: ResourcePile::ideas(2),
                 }),
-            )
+            ),
         ],
     );
 }
