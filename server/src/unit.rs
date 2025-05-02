@@ -613,7 +613,7 @@ pub(crate) fn choose_carried_units_to_remove() -> Builtin {
     .add_units_request(
         |event| &mut event.units_killed,
         0,
-        |game, player, k| {
+        |game, player, k,_| {
             let p = game.player(player);
             let pos = k.position;
             if game.map.is_land(pos) {
@@ -640,7 +640,7 @@ pub(crate) fn choose_carried_units_to_remove() -> Builtin {
                 "Choose which carried units to remove",
             ))
         },
-        |game, s, e| {
+        |game, s, e,_| {
             if !s.choice.is_empty() {
                 let p = game.player(s.player_index);
                 let units = s

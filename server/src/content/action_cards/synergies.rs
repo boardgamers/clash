@@ -184,9 +184,10 @@ pub(crate) fn use_teach_us() -> Builtin {
     .add_hand_card_request(
         |e| &mut e.combat_end,
         91,
-        |game, player_index, e| {
+        |game, player_index, e,info| {
             let stats = &e.combat.stats;
-            if stats.is_winner(player_index) && stats.battleground.is_city() {
+
+            if info.owning_player == player_index && stats.is_winner(player_index) && stats.battleground.is_city() {
                 let p = game.player(player_index);
                 let cards = p
                     .action_cards
@@ -198,7 +199,7 @@ pub(crate) fn use_teach_us() -> Builtin {
             }
             None
         },
-        |game, s, e| {
+        |game, s, e,_| {
             if s.choice.is_empty() {
                 return;
             }
@@ -213,6 +214,8 @@ pub(crate) fn use_teach_us() -> Builtin {
     )
     .add_advance_request(
         |e| &mut e.combat_end,
+        // todo , &ListenerInfo
+
         90,
         |game, player, e| {
             e.selected_card.map(|_| {
@@ -265,7 +268,7 @@ fn militia(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_position_request(
         |e| &mut e.play_action_card,
         0,
-        |game, player_index, _| {
+        |game, player_index, _,_| {
             let player = game.player(player_index);
             let cities = cities_that_can_add_units(player);
             Some(PositionRequest::new(
@@ -274,7 +277,7 @@ fn militia(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                 "Select city to add infantry",
             ))
         },
-        |game, s, _| {
+        |game, s, _,_| {
             let position = s.choice[0];
             let city = position;
             game.add_info_log_item(&format!(

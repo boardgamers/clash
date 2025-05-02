@@ -51,6 +51,8 @@ fn siegecraft() -> AdvanceBuilder {
         |e| &mut e.combat_start,
         0,
         |game, player, c| {
+            // todo , &ListenerInfo
+            
             let p = game.player(player);
             let extra_die = PaymentOptions::sum(p, PaymentReason::AdvanceAbility, 2, &[
                 ResourceType::Wood,
@@ -130,6 +132,8 @@ fn steel_weapons() -> AdvanceBuilder {
         |e| &mut e.combat_start,
         1,
         |game, player_index, c| {
+            // todo , &ListenerInfo
+            
             let player = &game.players[player_index];
 
             let cost = steel_weapons_cost(game, c, player_index);

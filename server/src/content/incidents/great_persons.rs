@@ -188,7 +188,7 @@ fn great_artist() -> ActionCard {
     .add_position_request(
         |e| &mut e.play_action_card,
         0,
-        |game, player_index, _| {
+        |game, player_index, _,_| {
             let player = game.player(player_index);
             let cities = player
                 .cities
@@ -202,7 +202,7 @@ fn great_artist() -> ActionCard {
             let needed = 1..=1;
             Some(PositionRequest::new(cities, needed, "Make a city Happy"))
         },
-        |game, s, _| {
+        |game, s, _,_| {
             let position = s.choice[0];
             game.add_info_log_item(&format!(
                 "{} made city at {} Happy",
@@ -232,7 +232,7 @@ fn great_prophet() -> ActionCard {
     .add_position_request(
         |e| &mut e.play_action_card,
         1,
-        |game, player_index, _| {
+        |game, player_index, _,_| {
             let player = game.player(player_index);
             if !player.is_building_available(Building::Temple, game) {
                 return None;
@@ -253,7 +253,7 @@ fn great_prophet() -> ActionCard {
             let needed = 0..=1;
             Some(PositionRequest::new(cities, needed, "Build a Temple"))
         },
-        |game, s, a| {
+        |game, s, a,_| {
             let pos = s.choice.first().copied();
             if let Some(pos) = pos {
                 game.add_info_log_item(&format!(

@@ -185,7 +185,7 @@ pub(crate) fn raze_city() -> Builtin {
         .add_position_request(
             |event| &mut event.status_phase,
             0,
-            |game, player_index, _player_name| {
+            |game, player_index, _player_name,_| {
                 let player = game.player(player_index);
                 let cities = player
                     .cities
@@ -203,7 +203,7 @@ pub(crate) fn raze_city() -> Builtin {
                     "May raze a size 1 city for 1 gold",
                 ))
             },
-            |game, s, _| {
+            |game, s, _,_| {
                 if s.choice.is_empty() {
                     game.add_info_log_item(&format!("{} did not raze a city", s.player_name));
                     return;

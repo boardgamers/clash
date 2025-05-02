@@ -209,7 +209,7 @@ fn increase_mood(b: ActionCardBuilder, priority: i32, need_payment: bool) -> Act
     b.add_position_request(
         |e| &mut e.play_action_card,
         priority,
-        move |game, player, a| {
+        move |game, player, a,_| {
             if need_payment && a.answer.is_none() {
                 return None;
             }
@@ -221,7 +221,7 @@ fn increase_mood(b: ActionCardBuilder, priority: i32, need_payment: bool) -> Act
                 "Select a city to increase the mood by 1",
             ))
         },
-        |game, s, _| {
+        |game, s, _,_| {
             let pos = s.choice[0];
             let player = s.player_index;
             game.add_info_log_item(&format!(

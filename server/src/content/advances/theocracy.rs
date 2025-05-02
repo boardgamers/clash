@@ -152,8 +152,8 @@ fn fanaticism() -> AdvanceBuilder {
     .add_position_request(
         |event| &mut event.combat_end,
         104,
-        |game, player_index, i| {
-            if i.is_loser(player_index)
+        |game, player_index, i,info| {
+            if info.owning_player == player_index && i.is_loser(player_index)
                 && !game.player(player_index).cities.is_empty()
                 && game.player(player_index).available_units().infantry > 0
             {
@@ -169,7 +169,7 @@ fn fanaticism() -> AdvanceBuilder {
                 None
             }
         },
-        |game, s, _| {
+        |game, s, _,_| {
             let pos = s.choice[0];
             game.add_info_log_item(&format!(
                 "{} gained 1 free Infantry Unit at {} for Fanaticism Advance",

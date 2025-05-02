@@ -256,14 +256,14 @@ impl IncidentBuilder {
         self.add_position_request(
             |event| &mut event.incident,
             priority,
-            move |game, player_index, i| {
+            move |game, player_index, i,_| {
                 if f.is_active(game, i, player_index) {
                     request(game, player_index, i)
                 } else {
                     None
                 }
             },
-            move |game, s, i| {
+            move |game, s, i,_| {
                 gain_reward(game, s, i);
             },
         )
@@ -289,14 +289,14 @@ impl IncidentBuilder {
         self.add_units_request(
             |event| &mut event.incident,
             priority,
-            move |game, player_index, i| {
+            move |game, player_index, i,_| {
                 if f.is_active(game, i, player_index) {
                     request(game, player_index, i)
                 } else {
                     None
                 }
             },
-            move |game, s, i| {
+            move |game, s, i,_| {
                 gain_reward(game, s, i);
             },
         )
@@ -326,14 +326,14 @@ impl IncidentBuilder {
         self.add_structures_request(
             |event| &mut event.incident,
             priority,
-            move |game, player_index, i| {
+            move |game, player_index, i,_| {
                 if f.is_active(game, i, player_index) {
                     request(game, player_index, i)
                 } else {
                     None
                 }
             },
-            move |game, s, i| {
+            move |game, s, i,_| {
                 structures_selected(game, s, i);
             },
         )
@@ -427,14 +427,14 @@ impl IncidentBuilder {
         self.add_hand_card_request(
             |event| &mut event.incident,
             priority,
-            move |game, player_index, i| {
+            move |game, player_index, i,_| {
                 if f.is_active(game, i, player_index) {
                     request(game, player_index, i)
                 } else {
                     None
                 }
             },
-            move |game, s, i| {
+            move |game, s, i,_| {
                 cards_selected(game, s, i);
             },
         )
