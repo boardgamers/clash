@@ -286,7 +286,7 @@ pub(crate) fn use_great_library() -> Builtin {
     .add_advance_request(
         |event| &mut event.custom_action,
         0,
-        |game, player_index, _| {
+        |game, player_index, _,_| {
             let player = game.player(player_index);
             Some(AdvanceRequest::new(
                 game.cache
@@ -302,7 +302,7 @@ pub(crate) fn use_great_library() -> Builtin {
                     .collect_vec(),
             ))
         },
-        |game, s, _| {
+        |game, s, _,_| {
             let advance = s.choice;
             game.add_info_log_item(&format!(
                 "{} used the Great Library to use {} for the turn",

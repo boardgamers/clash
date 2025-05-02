@@ -153,7 +153,7 @@ where
     b.add_unit_type_request(
         event,
         prio,
-        move |game, player_index, v| {
+        move |game, player_index, v,_| {
             if !filter(game, player_index, v) {
                 return None;
             }
@@ -166,7 +166,7 @@ where
                 &format!("Select a unit to reinforce the barbarians at {city}"),
             ))
         },
-        move |game, s, v| {
+        move |game, s, v,_| {
             let position = get_barbarian_city2(v).expect("barbarians should exist");
             let units = Units::from_iter(vec![s.choice]);
             game.add_info_log_item(&format!("Barbarians reinforced with {units} at {position}",));

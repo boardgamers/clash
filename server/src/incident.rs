@@ -458,7 +458,7 @@ impl IncidentBuilder {
         self.add_player_request(
             |event| &mut event.incident,
             priority,
-            move |game, player_index, i| {
+            move |game, player_index, i,_| {
                 if f.is_active(game, i, player_index) {
                     let choices = game
                         .players
@@ -478,7 +478,7 @@ impl IncidentBuilder {
                     None
                 }
             },
-            move |game, s, i| {
+            move |game, s, i,_| {
                 gain_reward(game, s, i);
             },
         )

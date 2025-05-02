@@ -509,12 +509,12 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &mut V) -> Option<AdvanceRequest>
+        request: impl Fn(&mut Game, usize, &mut V, &ListenerInfo) -> Option<AdvanceRequest>
         + 'static
         + Clone
         + Sync
         + Send,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<Advance>, &mut V)
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<Advance>, &mut V, &ListenerInfo)
         + 'static
         + Clone
         + Sync
@@ -583,12 +583,12 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &mut V) -> Option<PlayerRequest>
+        request: impl Fn(&mut Game, usize, &mut V, &ListenerInfo) -> Option<PlayerRequest>
         + 'static
         + Clone
         + Sync
         + Send,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<usize>, &mut V) + 'static + Clone + Sync + Send,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<usize>, &mut V, &ListenerInfo) + 'static + Clone + Sync + Send,
     ) -> Self
     where
         E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone + Sync + Send,
@@ -616,12 +616,12 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self,
         event: E,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &mut V) -> Option<UnitTypeRequest>
+        request: impl Fn(&mut Game, usize, &mut V, &ListenerInfo) -> Option<UnitTypeRequest>
         + 'static
         + Clone
         + Sync
         + Send,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<UnitType>, &mut V)
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<UnitType>, &mut V, &ListenerInfo)
         + 'static
         + Clone
         + Sync
@@ -777,8 +777,8 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         + Clone
         + Sync
         + Send,
-        request: impl Fn(&mut Game, usize, &mut V) -> Option<R> + 'static + Clone + Sync + Send,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<C>, &mut V) + 'static + Clone + Sync + Send,
+        request: impl Fn(&mut Game, usize, &mut V, &ListenerInfo) -> Option<R> + 'static + Clone + Sync + Send,
+        gain_reward: impl Fn(&mut Game, &SelectedChoice<C>, &mut V, &ListenerInfo) + 'static + Clone + Sync + Send,
     ) -> Self
     where
         C: Clone + PartialEq + Debug,
@@ -789,8 +789,8 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self.add_persistent_event_listener(
             event,
             priority,
-            move |game, player_index, player_name, details, _| {
-                if let Some(r) = request(game, player_index, details) {
+            move |game, player_index, player_name, details, info| {
+                if let Some(r) = request(game, player_index, details, info) {
                     let choices = get_choices(&r);
                     if choices.is_empty() {
                         return None;
@@ -804,7 +804,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                                 false,
                                 choices[0].clone(),
                             ),
-                            details,
+                            details,info
                         );
                         return None;
                     }
@@ -812,7 +812,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                 }
                 None
             },
-            move |game, player_index, player_name, action, request, details, _| {
+            move |game, player_index, player_name, action, request, details, info| {
                 let (choices, selected) = from_request(&request, action);
                 assert!(
                     choices.contains(&selected),
@@ -821,7 +821,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                 gain_reward(
                     game,
                     &SelectedChoice::new(player_index, player_name, true, selected),
-                    details,
+                    details, info,
                 );
             },
         )

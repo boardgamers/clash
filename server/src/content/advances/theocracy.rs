@@ -40,7 +40,7 @@ fn dogma() -> AdvanceBuilder {
     .add_advance_request(
         |event| &mut event.construct,
         0,
-        |game, player_index, building| {
+        |game, player_index, building,_| {
             if matches!(building.building, Temple) {
                 let player = game.player(player_index);
                 let choices: Vec<Advance> = game
@@ -58,7 +58,7 @@ fn dogma() -> AdvanceBuilder {
             }
             None
         },
-        |game, c, i| {
+        |game, c, i,_| {
             let verb = if c.actively_selected {
                 "selected"
             } else {
