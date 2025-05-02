@@ -9,7 +9,6 @@ use crate::combat::{Combat, CombatModifier};
 use crate::combat_listeners::CombatStrength;
 use crate::content::advances::{AdvanceGroup, advance_group_builder};
 use crate::content::persistent_events::PaymentRequest;
-use crate::events::ListenerInfo;
 use crate::game::Game;
 use crate::payment::{PaymentConversion, PaymentOptions, PaymentReason};
 use crate::player::Player;
@@ -19,12 +18,10 @@ use crate::tactics_card::{CombatRole, play_tactics_card};
 use crate::unit::UnitType;
 
 pub(crate) fn warfare() -> AdvanceGroup {
-    advance_group_builder("Warfare", vec![
-        tactics(),
-        siegecraft(),
-        steel_weapons(),
-        draft(),
-    ])
+    advance_group_builder(
+        "Warfare",
+        vec![tactics(), siegecraft(), steel_weapons(), draft()],
+    )
 }
 
 fn tactics() -> AdvanceBuilder {
@@ -52,14 +49,18 @@ fn siegecraft() -> AdvanceBuilder {
         0,
         |game, player, c| {
             let p = game.player(player);
-            let extra_die = PaymentOptions::sum(p, PaymentReason::AdvanceAbility, 2, &[
-                ResourceType::Wood,
-                ResourceType::Gold,
-            ]);
-            let ignore_hit = PaymentOptions::sum(p, PaymentReason::AdvanceAbility, 2, &[
-                ResourceType::Ore,
-                ResourceType::Gold,
-            ]);
+            let extra_die = PaymentOptions::sum(
+                p,
+                PaymentReason::AdvanceAbility,
+                2,
+                &[ResourceType::Wood, ResourceType::Gold],
+            );
+            let ignore_hit = PaymentOptions::sum(
+                p,
+                PaymentReason::AdvanceAbility,
+                2,
+                &[ResourceType::Ore, ResourceType::Gold],
+            );
 
             let player = &game.players[player];
             if game
@@ -126,7 +127,6 @@ fn steel_weapons() -> AdvanceBuilder {
         even if the enemy does not use the ability.",
     )
     .add_payment_request_listener(
-        // todo also add &ListenerInfo
         |e| &mut e.combat_start,
         1,
         |game, player_index, c| {
@@ -210,13 +210,15 @@ fn steel_weapons_cost(game: &Game, combat: &Combat, player_index: usize) -> Paym
     let both_steel_weapons = attacker.can_use_advance(Advance::SteelWeapons)
         && defender.can_use_advance(Advance::SteelWeapons);
     let cost = u8::from(!player.can_use_advance(Advance::Metallurgy) || both_steel_weapons);
-    PaymentOptions::sum(player, PaymentReason::AdvanceAbility, cost, &[
-        ResourceType::Ore,
-        ResourceType::Gold,
-    ])
+    PaymentOptions::sum(
+        player,
+        PaymentReason::AdvanceAbility,
+        cost,
+        &[ResourceType::Ore, ResourceType::Gold],
+    )
 }
 
-fn fortress(game: &Game, c: &Combat, s: &mut CombatStrength, role: CombatRole, _: &ListenerInfo) {
+fn fortress(game: &Game, c: &Combat, s: &mut CombatStrength, role: CombatRole) {
     if role.is_attacker() || !c.defender_fortress(game) || c.round != 1 {
         return;
     }
@@ -232,13 +234,7 @@ fn fortress(game: &Game, c: &Combat, s: &mut CombatStrength, role: CombatRole, _
     }
 }
 
-fn use_steel_weapons(
-    game: &Game,
-    c: &Combat,
-    s: &mut CombatStrength,
-    role: CombatRole,
-    _: &ListenerInfo,
-) {
+fn use_steel_weapons(game: &Game, c: &Combat, s: &mut CombatStrength, role: CombatRole) {
     let steel_weapon_value = if game
         .player(c.attacker)
         .can_use_advance(Advance::SteelWeapons)

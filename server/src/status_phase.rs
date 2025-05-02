@@ -304,13 +304,13 @@ where
     .add_persistent_event_listener(
         event2,
         0,
-        move |game, player_index, _, v, _| {
+        move |game, player_index, _, v| {
             if !is_active_player2(v, player_index, game) {
                 return None;
             }
             has_paid(v).then_some(PersistentEventRequest::ChangeGovernment)
         },
-        move |game, player_index, player_name, action, request, _, _| {
+        move |game, player_index, player_name, action, request, _| {
             if let PersistentEventRequest::ChangeGovernment = &request {
                 if let EventResponse::ChangeGovernmentType(c) = action {
                     game.add_info_log_item(&format!(

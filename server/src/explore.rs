@@ -279,10 +279,10 @@ pub(crate) fn explore_resolution() -> Builtin {
     .add_persistent_event_listener(
         |e| &mut e.explore_resolution,
         0,
-        move |_game, _player_index, _player_name, _state, _| {
+        move |_game, _player_index, _player_name, _state| {
             Some(PersistentEventRequest::ExploreResolution)
         },
-        move |game, _player_index, player_name, action, _request, r, _| {
+        move |game, _player_index, player_name, action, _request, r| {
             let EventResponse::ExploreResolution(rotation) = action else {
                 panic!("Invalid action");
             };
