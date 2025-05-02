@@ -133,7 +133,7 @@ impl Assets {
                 load_png(include_bytes!("../assets/pyramid-svgrepo-com.png")),
             ),
             (
-                Wonder::Colossus,
+                Wonder::GreatStatue,
                 load_png(include_bytes!(
                     "../assets/statue-of-david-1-svgrepo-com.png"
                 )),

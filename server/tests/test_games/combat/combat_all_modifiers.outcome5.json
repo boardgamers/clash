@@ -443,5 +443,9 @@
   ],
   "wonders_left": [
     "Pyramids"
+  ],
+  "action_cards_discarded": [
+    1,
+    2
   ]
 }

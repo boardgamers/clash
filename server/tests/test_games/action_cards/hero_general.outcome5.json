@@ -256,6 +256,10 @@
                     },
                     {
                       "op": "remove",
+                      "path": "/action_cards_discarded"
+                    },
+                    {
+                      "op": "remove",
                       "path": "/events"
                     }
                   ]
@@ -491,5 +495,8 @@
   ],
   "wonders_left": [
     "Pyramids"
+  ],
+  "action_cards_discarded": [
+    5
   ]
 }

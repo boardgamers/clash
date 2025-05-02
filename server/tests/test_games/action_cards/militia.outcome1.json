@@ -291,6 +291,10 @@
                     {
                       "op": "remove",
                       "path": "/players/0/units/8"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/action_cards_discarded"
                     }
                   ]
                 }
@@ -331,5 +335,8 @@
   ],
   "wonders_left": [
     "Pyramids"
+  ],
+  "action_cards_discarded": [
+    37
   ]
 }

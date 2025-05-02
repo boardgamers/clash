@@ -305,6 +305,9 @@
   "wonders_left": [
     "Pyramids"
   ],
+  "action_cards_discarded": [
+    15
+  ],
   "incidents_left": [
     28
   ]
