@@ -78,7 +78,7 @@ pub struct Player {
     pub secrets: Vec<String>,
     pub(crate) objective_opportunities: Vec<String>, // transient
     pub(crate) gained_objective: Option<u8>,         // transient
-    pub(crate) great_mausoleum_action_cards: u8,              // transient
+    pub(crate) great_mausoleum_action_cards: u8,     // transient
 }
 
 impl Clone for Player {
@@ -627,11 +627,12 @@ impl Player {
     pub fn advance_cost(&self, advance: Advance, game: &Game, execute: CostTrigger) -> CostInfo {
         self.trigger_cost_event(
             |e| &e.advance_cost,
-            &PaymentOptions::sum(self, PaymentReason::GainAdvance, ADVANCE_COST, &[
-                ResourceType::Ideas,
-                ResourceType::Food,
-                ResourceType::Gold,
-            ]),
+            &PaymentOptions::sum(
+                self,
+                PaymentReason::GainAdvance,
+                ADVANCE_COST,
+                &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
+            ),
             &advance,
             game,
             execute,

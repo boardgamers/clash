@@ -310,7 +310,7 @@ fn test_great_diplomat() {
                 }),
             )
             .without_json_comparison(),
-             TestAction::undoable(
+            TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
                     1,

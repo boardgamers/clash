@@ -77,7 +77,8 @@ impl ActionCard {
             target: CivilCardTarget::ActivePlayer,
         }
     }
-    
+
+    #[must_use]
     pub fn name(&self) -> String {
         format!(
             "{}/{}",

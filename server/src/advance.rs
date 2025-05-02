@@ -7,10 +7,10 @@ use crate::incident::trigger_incident;
 use crate::player_events::OnAdvanceInfo;
 use crate::special_advance::SpecialAdvance;
 use crate::{ability_initializer::AbilityInitializerSetup, resource_pile::ResourcePile};
+use Bonus::*;
 use enumset::EnumSetType;
 use serde::{Deserialize, Serialize};
 use std::mem;
-use Bonus::*;
 
 // id / 4 = advance group
 #[derive(EnumSetType, Serialize, Deserialize, Debug, Ord, PartialOrd, Hash)]

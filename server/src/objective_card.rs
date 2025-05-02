@@ -510,9 +510,12 @@ mod tests {
 
         let mut got = combinations(&cards, &opportunities, &cache);
         got.sort();
-        assert_eq!(got, vec![
-            vec![(23, "Seafarers".to_string()), (25, "Aggressor".to_string()),],
-            vec![(25, "Aggressor".to_string())],
-        ]);
+        assert_eq!(
+            got,
+            vec![
+                vec![(23, "Seafarers".to_string()), (25, "Aggressor".to_string()),],
+                vec![(25, "Aggressor".to_string())],
+            ]
+        );
     }
 }

@@ -511,9 +511,12 @@ impl IncidentBuilder {
                     if needed == 0 {
                         return None;
                     }
-                    let mut options = PaymentOptions::sum(p, PaymentReason::Incident, needed, &[
-                        ResourceType::MoodTokens,
-                    ]);
+                    let mut options = PaymentOptions::sum(
+                        p,
+                        PaymentReason::Incident,
+                        needed,
+                        &[ResourceType::MoodTokens],
+                    );
                     options.conversions.push(PaymentConversion::new(
                         vec![ResourcePile::mood_tokens(1)],
                         ResourcePile::empty(),

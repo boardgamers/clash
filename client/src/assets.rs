@@ -317,7 +317,9 @@ impl Assets {
             ),
             (
                 CustomActionType::GreatStatue,
-                load_png(include_bytes!("../assets/statue-of-david-1-svgrepo-com.png")),
+                load_png(include_bytes!(
+                    "../assets/statue-of-david-1-svgrepo-com.png"
+                )),
             ),
         ]
         .iter()

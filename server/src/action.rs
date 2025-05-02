@@ -179,7 +179,7 @@ pub(crate) fn on_action_end(game: &mut Game, player_index: usize) {
         &[player_index],
         |e| &mut e.choose_action_card,
         (),
-        |_| PersistentEventType::ChooseActionCard,
+        |()| PersistentEventType::ChooseActionCard,
     );
 }
 

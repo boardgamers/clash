@@ -23,7 +23,6 @@ use crate::{resource_pile::ResourcePile, wonder::WonderInfo};
 use itertools::Itertools;
 use std::collections::HashSet;
 use std::sync::Arc;
-use crate::tactics_card::CombatRole;
 
 #[must_use]
 pub fn get_all_uncached() -> Vec<WonderInfo> {
@@ -52,12 +51,16 @@ fn great_wall() -> WonderInfo {
         PaymentOptions::fixed_resources(ResourcePile::new(3, 2, 7, 0, 0, 0, 5)),
         Advance::Siegecraft,
     )
-        .add_combat_round_start_listener(6, |g, c, s, role| {
-            if c.round == 1 && role.is_attacker() && c.defender_city(g).is_some_and(|c|c.mood_state == MoodState::Happy) {
-              // todo
-            }
-        })
-            .build()
+    .add_combat_round_start_listener(6, |g, c, s, role| {
+        if c.round == 1
+            && role.is_attacker()
+            && c.defender_city(g)
+                .is_some_and(|c| c.mood_state == MoodState::Happy)
+        {
+            // todo
+        }
+    })
+    .build()
 }
 
 fn great_statue() -> WonderInfo {
@@ -130,7 +133,7 @@ pub(crate) fn use_great_mausoleum() -> Builtin {
         .add_bool_request(
             |event| &mut event.choose_action_card,
             0,
-            |game, player_index, _| {
+            |game, player_index, ()| {
                 if let Some(card) = game.action_cards_discarded.last() {
                     Some(format!(
                         "Do you want to draw {} from the discard pile?",
@@ -141,7 +144,7 @@ pub(crate) fn use_great_mausoleum() -> Builtin {
                     None
                 }
             },
-            |game, s, _| {
+            |game, s, ()| {
                 if s.choice {
                     let card = game
                         .action_cards_discarded
