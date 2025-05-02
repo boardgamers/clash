@@ -15,8 +15,9 @@ use crate::map::Terrain;
 use crate::map::Terrain::Fertile;
 use crate::objective_card::{discard_objective_card, gain_objective_card_from_pile};
 use crate::payment::{PaymentOptions, PaymentReason};
-use crate::player::{Player, add_unit};
+use crate::player::{add_unit, Player};
 use crate::position::Position;
+use crate::tactics_card::CombatRole;
 use crate::unit::UnitType;
 use crate::wonder::Wonder;
 use crate::{resource_pile::ResourcePile, wonder::WonderInfo};
@@ -40,8 +41,6 @@ pub fn get_all_uncached() -> Vec<WonderInfo> {
 
 fn great_wall() -> WonderInfo {
     // todo war ships broken - counts for both players - really?
-    // todo combat value
-    // todo -2 combat value in the first round
     // todo automatically win battles if Barbarians attack any of your cities
     WonderInfo::builder(
         Wonder::GreatWall,
@@ -51,18 +50,23 @@ fn great_wall() -> WonderInfo {
         PaymentOptions::fixed_resources(ResourcePile::new(3, 2, 7, 0, 0, 0, 5)),
         Advance::Siegecraft,
     )
-    .add_combat_round_start_listener(6, |g, c, s, role, info| {
-        if info.owning_player != c.player(role)
-            && c.round == 1
-            && role.is_attacker()
-            && c.defender_city(g)
-                .is_some_and(|c| c.mood_state == MoodState::Happy)
-        {
-            s.extra_combat_value -= 2;
-            s.roll_log
-                .push("Great Wall gives -2 combat value in the first round".to_string());
-        }
-    })
+    .add_simple_persistent_event_listener(
+        |event| &mut event.combat_round_start,
+        0,
+        move |game, p, _name, s| {
+            let c = &s.combat;
+            if c.round == 1
+                && c.role(p) == CombatRole::Defender
+                && c.defender_city(game)
+                    .is_some_and(|c| c.mood_state == MoodState::Happy)
+            {
+                s.defender_strength.extra_combat_value -= 2;
+                s.defender_strength
+                    .roll_log
+                    .push("Great Wall gives -2 combat value in the first round".to_string());
+            }
+        },
+    )
     .build()
 }
 
