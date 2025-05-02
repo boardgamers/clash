@@ -4,7 +4,7 @@ use crate::card::{HandCard, HandCardType, hand_cards};
 use crate::content::persistent_events::{HandCardsRequest, PersistentEventType, PlayerRequest};
 use crate::content::tactics_cards::TacticsCardFactory;
 use crate::game::Game;
-use crate::player::{reinit_listeners, Player};
+use crate::player::{Player, reinit_listeners};
 use crate::playing_actions::ActionCost;
 use crate::resource_pile::ResourcePile;
 use crate::utils::remove_element;
