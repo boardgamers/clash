@@ -231,7 +231,8 @@
       "civilization": "test0",
       "advances": [
         "Farming",
-        "Mining"
+        "Mining",
+        "WarShips"
       ],
       "incident_tokens": 3,
       "next_unit_id": 2

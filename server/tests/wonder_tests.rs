@@ -219,3 +219,16 @@ fn test_great_statue() {
         ],
     );
 }
+
+#[test]
+fn test_great_wall() {
+    JSON.test(
+        "great_wall",
+        vec![
+            TestAction::not_undoable(
+                1,
+                move_action(vec![0, 1], Position::from_offset("A1")),
+            )
+        ],
+    );
+}

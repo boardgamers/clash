@@ -4,11 +4,10 @@
     {
       "id": 0,
       "resources": {
-        "food": 7,
-        "wood": 7,
+        "wood": 4,
         "ore": 7,
         "ideas": 5,
-        "gold": 7,
+        "gold": 6,
         "mood_tokens": 7,
         "culture_tokens": 7
       },
@@ -23,25 +22,29 @@
       },
       "cities": [
         {
-          "city_pieces": {},
+          "city_pieces": {
+            "wonders": [
+              "GreatWall"
+            ]
+          },
           "mood_state": "Happy",
           "position": "A1"
         },
         {
           "city_pieces": {},
-          "mood_state": "Neutral",
+          "mood_state": "Happy",
           "activations": 8,
           "position": "C2"
         }
       ],
       "units": [
         {
-          "position": "C2",
+          "position": "A1",
           "unit_type": "Infantry",
           "id": 0
         },
         {
-          "position": "C2",
+          "position": "A1",
           "unit_type": "Cavalry",
           "id": 1
         },
@@ -78,14 +81,19 @@
       ],
       "civilization": "test0",
       "advances": [
-        "Engineering",
         "Farming",
         "Mining",
-        "Monuments"
+        "Rituals"
       ],
-      "incident_tokens": 2,
+      "wonders_built": [
+        "GreatLibrary"
+      ],
+      "incident_tokens": 1,
       "wonder_cards": [
-        "GreatStatue"
+        "Pyramids"
+      ],
+      "action_cards": [
+        123
       ],
       "next_unit_id": 8
     },
@@ -119,12 +127,12 @@
       ],
       "units": [
         {
-          "position": "C1",
+          "position": "B1",
           "unit_type": "Infantry",
           "id": 0
         },
         {
-          "position": "C1",
+          "position": "B1",
           "unit_type": "Infantry",
           "id": 1
         }
@@ -157,7 +165,7 @@
       ],
       [
         "B1",
-        "Fertile"
+        "Mountain"
       ],
       [
         "B2",
@@ -186,7 +194,7 @@
     ]
   },
   "starting_player_index": 0,
-  "current_player_index": 0,
+  "current_player_index": 1,
   "action_log": [
     {
       "rounds": [
@@ -222,7 +230,22 @@
     10,
     10
   ],
-  "objective_cards_left": [
+  "action_cards_left": [
+    11,
+    12,
+    13,
+    14
+  ],
+  "action_cards_discarded": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "incidents_left": [
+    11
+  ],
+  "incidents_discarded": [
     1
   ]
 }
