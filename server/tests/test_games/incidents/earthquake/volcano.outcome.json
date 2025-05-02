@@ -4,6 +4,7 @@
     {
       "event_type": {
         "Incident": {
+          "incident_id": 29,
           "active_player": 0
         }
       },
@@ -283,7 +284,7 @@
   "dice_roll_log": [
     10
   ],
-  "incidents_left": [
+  "incidents_discarded": [
     29
   ]
 }

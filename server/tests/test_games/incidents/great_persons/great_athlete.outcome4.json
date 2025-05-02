@@ -220,7 +220,76 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "Incident": {
+                              "active_player": 0,
+                              "barbarians": {},
+                              "incident_id": 56
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "Incident": 56
+                            },
+                            "priority": 10,
+                            "request": {
+                              "Payment": [
+                                {
+                                  "cost": {
+                                    "conversions": [
+                                      {
+                                        "from": [
+                                          {
+                                            "food": 1
+                                          },
+                                          {
+                                            "wood": 1
+                                          },
+                                          {
+                                            "ore": 1
+                                          },
+                                          {
+                                            "ideas": 1
+                                          }
+                                        ],
+                                        "to": {
+                                          "gold": 1
+                                        },
+                                        "type": "Unlimited"
+                                      }
+                                    ],
+                                    "default": {
+                                      "culture_tokens": 1
+                                    }
+                                  },
+                                  "name": "Pay to gain the Action Card",
+                                  "optional": true
+                                }
+                              ]
+                            }
+                          },
+                          "last_priority_used": 10,
+                          "player": 0
+                        }
+                      ]
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/culture_tokens",
+                      "value": 7
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/action_cards"
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -274,6 +343,10 @@
                       "op": "replace",
                       "path": "/players/0/resources/culture_tokens",
                       "value": 6
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/action_cards_discarded"
                     },
                     {
                       "op": "remove",
@@ -417,7 +490,7 @@
       "Player1 converted 1 culture token mood to 1 mood token"
     ]
   ],
-  "undo_limit": 2,
+  "undo_limit": 1,
   "actions_left": 1,
   "round": 2,
   "age": 1,
@@ -434,5 +507,11 @@
     11,
     11,
     11
+  ],
+  "action_cards_discarded": [
+    156
+  ],
+  "incidents_discarded": [
+    56
   ]
 }

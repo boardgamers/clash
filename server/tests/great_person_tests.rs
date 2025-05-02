@@ -26,7 +26,7 @@ fn test_great_explorer() {
                 }),
             )
             .without_json_comparison(),
-            TestAction::not_undoable(
+            TestAction::undoable(
                 1,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
                     1,
@@ -96,7 +96,7 @@ fn test_great_prophet() {
                 }),
             )
             .without_json_comparison(),
-            TestAction::not_undoable(
+            TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
                     1,
@@ -133,7 +133,7 @@ fn test_great_warlord() {
                 }),
             )
             .without_json_comparison(),
-            TestAction::not_undoable(
+            TestAction::undoable(
                 1,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
                     1,
@@ -160,7 +160,7 @@ fn test_great_merchant() {
                 }),
             )
             .without_json_comparison(),
-            TestAction::not_undoable(
+            TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
                     1,
@@ -190,7 +190,7 @@ fn test_great_engineer() {
                 }),
             )
             .without_json_comparison(),
-            TestAction::not_undoable(
+            TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
                     1,
@@ -235,7 +235,7 @@ fn test_great_architect() {
                 }),
             )
             .without_json_comparison(),
-            TestAction::not_undoable(
+            TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
                     1,
@@ -274,7 +274,7 @@ fn test_great_athlete() {
                 }),
             )
             .without_json_comparison(),
-            TestAction::not_undoable(
+            TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
                     1,
@@ -310,7 +310,7 @@ fn test_great_diplomat() {
                 }),
             )
             .without_json_comparison(),
-            TestAction::not_undoable(
+             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
                     1,

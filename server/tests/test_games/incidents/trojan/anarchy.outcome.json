@@ -247,6 +247,9 @@
   "wonders_left": [
     "Pyramids"
   ],
+  "incidents_discarded": [
+    44
+  ],
   "permanent_effects": [
     {
       "Anarchy": {

@@ -262,6 +262,9 @@
   "wonders_left": [
     "Pyramids"
   ],
+  "incidents_discarded": [
+    42
+  ],
   "permanent_effects": [
     "TrojanHorse"
   ]

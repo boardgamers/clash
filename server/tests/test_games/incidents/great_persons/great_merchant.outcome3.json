@@ -240,7 +240,76 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "Incident": {
+                              "active_player": 0,
+                              "barbarians": {},
+                              "incident_id": 25
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "Incident": 25
+                            },
+                            "priority": 10,
+                            "request": {
+                              "Payment": [
+                                {
+                                  "cost": {
+                                    "conversions": [
+                                      {
+                                        "from": [
+                                          {
+                                            "food": 1
+                                          },
+                                          {
+                                            "wood": 1
+                                          },
+                                          {
+                                            "ore": 1
+                                          },
+                                          {
+                                            "ideas": 1
+                                          }
+                                        ],
+                                        "to": {
+                                          "gold": 1
+                                        },
+                                        "type": "Unlimited"
+                                      }
+                                    ],
+                                    "default": {
+                                      "culture_tokens": 1
+                                    }
+                                  },
+                                  "name": "Pay to gain the Action Card",
+                                  "optional": true
+                                }
+                              ]
+                            }
+                          },
+                          "last_priority_used": 10,
+                          "player": 0
+                        }
+                      ]
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/culture_tokens",
+                      "value": 7
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/action_cards"
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -264,6 +333,10 @@
                     {
                       "op": "remove",
                       "path": "/players/0/advances/7"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/action_cards_discarded"
                     },
                     {
                       "op": "remove",
@@ -359,7 +432,7 @@
       "Player1 could not store 1 gold"
     ]
   ],
-  "undo_limit": 2,
+  "undo_limit": 1,
   "actions_left": 1,
   "round": 1,
   "age": 1,
@@ -382,5 +455,11 @@
   ],
   "wonders_left": [
     "Pyramids"
+  ],
+  "action_cards_discarded": [
+    125
+  ],
+  "incidents_discarded": [
+    25
   ]
 }
