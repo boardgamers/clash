@@ -1,12 +1,12 @@
 #![allow(clippy::missing_panics_doc)]
 
-use client::client::{init, render_and_update, Features, GameSyncRequest, GameSyncResult};
+use client::client::{Features, GameSyncRequest, GameSyncResult, init, render_and_update};
 use client::client_state::State;
 use macroquad::miniquad::window::set_window_size;
 use macroquad::prelude::{next_frame, screen_width, vec2};
 use macroquad::window::screen_height;
 use server::action::execute_action;
-use server::advance::{do_advance, Advance};
+use server::advance::{Advance, do_advance};
 use server::city::City;
 use server::game::{Game, GameData};
 use server::game_setup::setup_game;
@@ -15,7 +15,7 @@ use server::player::add_unit;
 use server::position::Position;
 use server::profiling::start_profiling;
 use server::resource_pile::ResourcePile;
-use server::unit::{set_unit_position, UnitType};
+use server::unit::{UnitType, set_unit_position};
 use server::utils::remove_element;
 use server::wonder::Wonder;
 use std::fs::File;

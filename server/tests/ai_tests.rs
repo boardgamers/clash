@@ -1,22 +1,26 @@
+#[cfg(feature = "ai")]
 use crate::common::JsonTest;
-use server::action::{Action, ActionType};
-use server::ai_actions::AiActions;
-use server::collect::PositionCollection;
-use server::playing_actions::{
-    Collect, IncreaseHappiness, PlayingAction, PlayingActionType, Recruit,
-};
-use server::position::Position;
-use server::resource_pile::ResourcePile;
-use server::unit::Units;
-use server::utils::remove_element_by;
-use std::vec;
 
 mod common;
 
+#[cfg(feature = "ai")]
 const JSON: JsonTest = JsonTest::new("ai");
 
+#[cfg(feature = "ai")]
 #[test]
 fn all_actions() {
+    use server::action::{Action, ActionType};
+    use server::ai_actions::AiActions;
+    use server::collect::PositionCollection;
+    use server::playing_actions::{
+        Collect, IncreaseHappiness, PlayingAction, PlayingActionType, Recruit,
+    };
+    use server::position::Position;
+    use server::resource_pile::ResourcePile;
+    use server::unit::Units;
+    use server::utils::remove_element_by;
+    use std::vec;
+
     let game = &JSON.load_game("start");
     let mut actions = AiActions::new();
     let mut all = actions.get_available_actions(game);
