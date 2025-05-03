@@ -21,6 +21,26 @@ pub enum CollectEffect {
     Overproduction,
 }
 
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub struct GreatSeerObjective {
+    pub player: usize,
+    pub objective_card: u8,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub struct GreatSeerEffect {
+    pub player: usize,
+    pub assigned_objectives: Vec<GreatSeerObjective>,
+}
+
+impl GreatSeerEffect {
+    pub(crate) fn strip_secret(&mut self) {
+        for o in &mut self.assigned_objectives {
+            o.objective_card = 1_u8;
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub enum PermanentEffect {
     Pestilence,
@@ -35,6 +55,7 @@ pub enum PermanentEffect {
     DiplomaticRelations(DiplomaticRelations),
     Negotiations(Negotiations),
     Assassination(usize),
+    GreatSeer(GreatSeerEffect),
 }
 
 impl PermanentEffect {
@@ -60,6 +81,7 @@ impl PermanentEffect {
             PermanentEffect::CulturalTakeover => EventOrigin::CivilCard(15),
             PermanentEffect::Negotiations(_) => EventOrigin::CivilCard(23), // also 24
             PermanentEffect::Assassination(_) => EventOrigin::CivilCard(27), // also 28
+            PermanentEffect::GreatSeer(_) => EventOrigin::CivilCard(158),
         }
     }
 }

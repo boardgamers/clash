@@ -40,7 +40,6 @@ pub fn get_all_uncached() -> Vec<WonderInfo> {
 }
 
 fn great_wall() -> WonderInfo {
-    // todo automatically win battles if Barbarians attack any of your cities
     WonderInfo::builder(
         Wonder::GreatWall,
         "Great Well",

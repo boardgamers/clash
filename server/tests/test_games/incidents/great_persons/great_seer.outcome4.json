@@ -1,0 +1,341 @@
+{
+  "state": "Playing",
+  "players": [
+    {
+      "id": 0,
+      "resources": {
+        "wood": 7,
+        "ore": 7,
+        "ideas": 3,
+        "gold": 7,
+        "mood_tokens": 8,
+        "culture_tokens": 7
+      },
+      "resource_limit": {
+        "food": 7,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {},
+          "mood_state": "Happy",
+          "position": "A1"
+        }
+      ],
+      "units": [
+        {
+          "position": "C2",
+          "unit_type": "Infantry",
+          "id": 0
+        },
+        {
+          "position": "C2",
+          "unit_type": "Cavalry",
+          "id": 1
+        },
+        {
+          "position": "C2",
+          "unit_type": "Leader",
+          "id": 2
+        },
+        {
+          "position": "C2",
+          "unit_type": "Elephant",
+          "id": 3
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 4
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 5
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 6
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 7
+        }
+      ],
+      "civilization": "test0",
+      "advances": [
+        "Engineering",
+        "Farming",
+        "Mining",
+        "Storage",
+        "Tactics",
+        "Writing"
+      ],
+      "incident_tokens": 2,
+      "wonder_cards": [
+        "Pyramids"
+      ],
+      "action_cards": [
+        1
+      ],
+      "objective_cards": [
+        21
+      ],
+      "next_unit_id": 8
+    },
+    {
+      "id": 1,
+      "resources": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {
+            "temple": 1
+          },
+          "mood_state": "Angry",
+          "position": "C1"
+        },
+        {
+          "city_pieces": {},
+          "mood_state": "Neutral",
+          "position": "C2"
+        }
+      ],
+      "units": [
+        {
+          "position": "C1",
+          "unit_type": "Infantry",
+          "id": 0
+        },
+        {
+          "position": "C1",
+          "unit_type": "Infantry",
+          "id": 1
+        }
+      ],
+      "civilization": "test1",
+      "advances": [
+        "Fanaticism",
+        "Farming",
+        "Mining",
+        "Tactics"
+      ],
+      "incident_tokens": 3,
+      "next_unit_id": 2
+    },
+    {
+      "id": 2,
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "civilization": "Pirates",
+      "incident_tokens": 3,
+      "next_unit_id": 0
+    }
+  ],
+  "map": {
+    "tiles": [
+      [
+        "A1",
+        "Fertile"
+      ],
+      [
+        "A3",
+        {
+          "Exhausted": "Forest"
+        }
+      ],
+      [
+        "B1",
+        "Mountain"
+      ],
+      [
+        "B2",
+        "Forest"
+      ],
+      [
+        "B3",
+        "Fertile"
+      ],
+      [
+        "C1",
+        "Barren"
+      ],
+      [
+        "C2",
+        "Forest"
+      ]
+    ]
+  },
+  "starting_player_index": 0,
+  "current_player_index": 0,
+  "action_log": [
+    {
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Storage",
+                        "payment": {
+                          "food": 2
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 1
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "ActionCard": 158
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ObjectiveCard": 21
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Writing",
+                        "payment": {
+                          "food": 2
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "action_log_index": 5,
+  "log": [
+    [
+      "Player1 paid 2 food to get the Storage advance",
+      "Player gained 1 mood token as advance bonus"
+    ],
+    [
+      "A new game event has been triggered: Great Seer",
+      "Base effect: Pirates spawn",
+      "No valid positions for Pirate Ship"
+    ],
+    [
+      "Player1 gained Great Seer for 1 culture token"
+    ],
+    [
+      "Player1 played the action card Great Seer"
+    ],
+    [
+      "Player1 chose an objective card for player Player1",
+      "Player1 chose an objective card for player Player2"
+    ],
+    [
+      "Player1 paid 2 food to get the Writing advance",
+      "Player1 gained an action card from the pile",
+      "Player1 gained the Great Seer objective card from the pile",
+      "Player gained 1 culture token as advance bonus"
+    ]
+  ],
+  "undo_limit": 5,
+  "actions_left": 1,
+  "round": 2,
+  "age": 1,
+  "messages": [
+    "The game has started"
+  ],
+  "dice_roll_outcomes": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    11,
+    11,
+    11,
+    11
+  ],
+  "action_cards_left": [
+    2,
+    3,
+    4
+  ],
+  "action_cards_discarded": [
+    158
+  ],
+  "objective_cards_left": [
+    23,
+    24
+  ],
+  "incidents_discarded": [
+    58
+  ],
+  "permanent_effects": [
+    {
+      "GreatSeer": {
+        "player": 0,
+        "assigned_objectives": [
+          {
+            "player": 1,
+            "objective_card": 22
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 use crate::common::{JsonTest, TestAction, move_action};
 use server::action::Action;
+use server::card::HandCard;
 use server::city_pieces::Building::Fortress;
 use server::content::persistent_events::EventResponse;
 use server::movement::{MoveUnits, MovementAction};
@@ -325,6 +326,47 @@ fn test_great_diplomat() {
                     embark_carrier_id: None,
                     payment: ResourcePile::culture_tokens(2),
                 })),
+            ),
+        ],
+    );
+}
+
+#[test]
+fn test_great_seer() {
+    GREAT_PERSONS.test(
+        "great_seer",
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::Playing(Advance {
+                    advance: advance::Advance::Storage,
+                    payment: ResourcePile::food(2),
+                }),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
+                    1,
+                )])),
+            )
+            .without_json_comparison(),
+            TestAction::not_undoable(0, Action::Playing(PlayingAction::ActionCard(158)))
+                .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectHandCards(vec![
+                    HandCard::ObjectiveCard(21),
+                ])),
+            )
+            .without_json_comparison(),
+            // the player already knows the card - but we treat all designated cards as unknown
+            TestAction::not_undoable(
+                0,
+                Action::Playing(Advance {
+                    advance: advance::Advance::Writing,
+                    payment: ResourcePile::food(2),
+                }),
             ),
         ],
     );

@@ -9,7 +9,7 @@ use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player_events::{CostInfo, TransientEvents};
 use crate::resource::ResourceType;
 use crate::unit::{UnitData, UnitType};
-use crate::wonder::{Wonder, wonders_built_points, wonders_owned_points};
+use crate::wonder::{Wonder, init_wonder, wonders_built_points, wonders_owned_points};
 use crate::{
     advance,
     city::{City, CityData},
@@ -121,16 +121,14 @@ impl Player {
             });
         }
 
-        let mut objectives = vec![];
         for id in objective_cards {
-            init_objective_card(game, player_index, &mut objectives, id);
+            init_objective_card(game, player_index, id);
         }
 
         let mut cities = mem::take(&mut game.players[player_index].cities);
         for city in &mut cities {
             for wonder in &city.pieces.wonders {
-                let listeners = game.cache.get_wonder(*wonder).listeners.clone();
-                listeners.init(game, player_index);
+                init_wonder(game, player_index, *wonder);
             }
         }
         game.players[player_index].cities = cities;

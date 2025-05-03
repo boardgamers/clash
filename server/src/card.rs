@@ -1,4 +1,5 @@
 use crate::content::action_cards::spy::validate_spy_cards;
+use crate::content::action_cards::synergies::validate_new_plans;
 use crate::content::persistent_events::PersistentEventType;
 use crate::events::EventOrigin;
 use crate::game::Game;
@@ -130,6 +131,9 @@ pub fn validate_card_selection(
     match &h.origin {
         EventOrigin::CivilCard(id) if *id == 7 || *id == 8 => {
             validate_spy_cards(cards, game).map(|()| Vec::new())
+        }
+        EventOrigin::CivilCard(id) if *id == 31 || *id == 32 => {
+            validate_new_plans(cards, game).map(|()| Vec::new())
         }
         EventOrigin::Builtin(b) if b == "Select Objective Cards to Complete" => {
             let PersistentEventType::SelectObjectives(c) = &game.current_event().event_type else {

@@ -4,12 +4,13 @@ use crate::ability_initializer::{
 use crate::cache::Cache;
 use crate::card::{HandCard, draw_card_from_pile};
 use crate::content::builtin::Builtin;
+use crate::content::incidents::great_persons::find_great_seer;
 use crate::content::persistent_events::{HandCardsRequest, PersistentEventType};
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::log::current_action_log_item;
 use crate::player::Player;
-use crate::utils::remove_element_by;
+use crate::utils::{remove_element, remove_element_by};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -401,7 +402,31 @@ pub(crate) fn gain_objective_card_from_pile(game: &mut Game, player: usize) {
 }
 
 pub(crate) fn draw_and_log_objective_card_from_pile(game: &mut Game, player: usize) -> Option<u8> {
-    let card = draw_objective_card_from_pile(game);
+    if let Some(great_seer) = find_great_seer(game) {
+        if let Some(o) = great_seer.assigned_objectives.iter().find_map(|o| {
+            if o.player == player {
+                Some(o.clone())
+            } else {
+                None
+            }
+        }) {
+            remove_element(&mut great_seer.assigned_objectives, &o)
+                .unwrap_or_else(|| panic!("should be able to remove objective card {o:?}"));
+            game.add_info_log_item(&format!(
+                "{} gained the Great Seer objective card from the pile",
+                game.player_name(player)
+            ));
+            return Some(o.objective_card);
+        }
+    }
+
+    let card = draw_card_from_pile(
+        game,
+        "Objective Card",
+        |g| &mut g.objective_cards_left,
+        |g| g.cache.get_objective_cards().iter().map(|c| c.id).collect(),
+        |p| p.objective_cards.clone(),
+    );
     if card.is_some() {
         game.add_info_log_item(&format!(
             "{} gained an objective card from the pile",
@@ -411,48 +436,22 @@ pub(crate) fn draw_and_log_objective_card_from_pile(game: &mut Game, player: usi
     card
 }
 
-fn draw_objective_card_from_pile(game: &mut Game) -> Option<u8> {
-    draw_card_from_pile(
-        game,
-        "Objective Card",
-        |g| &mut g.objective_cards_left,
-        |g| g.cache.get_objective_cards().iter().map(|c| c.id).collect(),
-        |p| p.objective_cards.clone(),
-    )
-}
-
 pub(crate) fn gain_objective_card(game: &mut Game, player_index: usize, objective_card: u8) {
-    let mut o = game
-        .player(player_index)
-        .objective_cards
-        .iter()
-        .flat_map(|&id| {
-            game.cache
-                .get_objective_card(id)
-                .objectives
-                .iter()
-                .map(|o| o.name.clone())
-        })
-        .collect_vec();
-    init_objective_card(game, player_index, &mut o, objective_card);
+    init_objective_card(game, player_index, objective_card);
     game.players[player_index]
         .objective_cards
         .push(objective_card);
 }
 
-pub(crate) fn init_objective_card(
-    game: &mut Game,
-    player_index: usize,
-    objectives: &mut Vec<String>,
-    id: u8,
-) {
+pub(crate) fn init_objective_card(game: &mut Game, player_index: usize, id: u8) {
     for o in &game.cache.get_objective_card(id).objectives.clone() {
-        if objectives.contains(&o.name) {
-            // can't fulfill 2 objectives with the same name, so we can skip it here
-            continue;
-        }
         o.listeners.init(game, player_index);
-        objectives.push(o.name.clone());
+    }
+}
+
+pub(crate) fn deinit_objective_card(game: &mut Game, player: usize, card: u8) {
+    for o in &game.cache.get_objective_card(card).objectives.clone() {
+        o.listeners.deinit(game, player);
     }
 }
 
@@ -461,19 +460,7 @@ pub(crate) fn discard_objective_card(game: &mut Game, player: usize, card: u8) {
         id == card
     })
     .unwrap_or_else(|| panic!("should be able to discard objective card {card}"));
-    for o in &game.cache.get_objective_card(card).objectives.clone() {
-        if game.player(player).objective_cards.iter().any(|c| {
-            game.cache
-                .get_objective_card(*c)
-                .objectives
-                .iter()
-                .any(|o2| o2.name == o.name)
-        }) {
-            // this objective is still in play
-            continue;
-        }
-        o.listeners.deinit(game, player);
-    }
+    deinit_objective_card(game, player, card);
 }
 
 #[cfg(test)]

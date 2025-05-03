@@ -16,7 +16,7 @@ use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::tactics_card::CombatRole;
 use crate::unit::{UnitType, Units, carried_units, kill_units};
-use crate::wonder::Wonder;
+use crate::wonder::{Wonder, deinit_wonder, init_wonder};
 use combat_stats::active_attackers;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -337,9 +337,8 @@ pub(crate) fn conquer_city(
         city.set_mood_state(Angry);
         if attacker_is_human {
             for wonder in city.pieces.wonders.clone() {
-                let listeners = game.cache.get_wonder(wonder).listeners.clone();
-                listeners.deinit(game, old_player_index);
-                listeners.init(game, new_player_index);
+                deinit_wonder(game, old_player_index, wonder);
+                init_wonder(game, new_player_index, wonder);
                 game.player_mut(old_player_index)
                     .wonders_owned
                     .remove(wonder);

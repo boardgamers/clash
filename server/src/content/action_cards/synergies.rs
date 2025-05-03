@@ -13,16 +13,19 @@ use crate::content::tactics_cards::{
     wedge_formation,
 };
 use crate::game::Game;
+use crate::objective_card::{deinit_objective_card, gain_objective_card};
 use crate::player::{Player, add_unit};
 use crate::playing_actions::ActionCost;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
+use crate::utils::{Shuffle, remove_element, remove_element_by};
 use inspiration::possible_inspiration_advances;
 use itertools::Itertools;
 
 pub(crate) fn synergies_action_cards() -> Vec<ActionCard> {
     vec![
-        //todo add "New Plans" when objective cards are implemented
+        new_plans(31, flanking),
+        new_plans(32, high_morale),
         synergies(33, defensive_formation),
         synergies(34, archers),
         teach_us(35, defensive_formation),
@@ -34,6 +37,107 @@ pub(crate) fn synergies_action_cards() -> Vec<ActionCard> {
         new_ideas(41, high_morale),
         new_ideas(42, flanking),
     ]
+}
+
+fn new_plans(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
+    ActionCard::builder(
+        id,
+        "New Plans",
+        "Draw 2 objective cards. \
+        You may discard an objective card from your hand to keep 1 of them. \
+        Reshuffle the discarded and not taken cards into the deck.",
+        ActionCost::regular_with_cost(ResourcePile::culture_tokens(1)),
+        move |_game, p, _| !p.objective_cards.is_empty(),
+    )
+    .add_hand_card_request(
+        |e| &mut e.play_action_card,
+        0,
+        |game, player_index, _| {
+            game.lock_undo(); // new information revealed
+            let mut new_cards = game.objective_cards_left.iter().take(2).collect_vec();
+            new_cards.extend(&game.player(player_index).objective_cards);
+            Some(HandCardsRequest::new(
+                new_cards
+                    .iter()
+                    .map(|c| HandCard::ObjectiveCard(**c))
+                    .collect_vec(),
+                0..=2,
+                "Select objective cards to draw and discard",
+            ))
+        },
+        |game, s, _i| {
+            match s.choice.len() {
+                0 => {
+                    game.add_info_log_item(&format!(
+                        "{} selected none of the objective cards.",
+                        s.player_name
+                    ));
+                }
+                2 => {
+                    swap_objective_card(game, s.player_index, &s.choice);
+                }
+                _ => panic!("illegal selection"),
+            }
+            game.objective_cards_left.shuffle(&mut game.rng);
+        },
+    )
+    .tactics_card(tactics_card)
+    .build()
+}
+
+fn swap_objective_card(game: &mut Game, player: usize, hand_cards: &[HandCard]) {
+    let p = game.player(player);
+    game.add_info_log_item(&format!(
+        "{} discarded an objective card to draw a new one.",
+        p.get_name()
+    ));
+    let mut ids = hand_cards
+        .iter()
+        .map(|c| {
+            let HandCard::ObjectiveCard(id) = c else {
+                panic!("not an objective card")
+            };
+            id
+        })
+        .collect_vec();
+    let p = game.player_mut(player);
+    let discarded = remove_element_by(&mut p.objective_cards, |c| ids.contains(&c))
+        .expect("discarded objective card");
+    deinit_objective_card(game, player, discarded);
+    game.objective_cards_left.push(discarded);
+
+    remove_element(&mut ids, &&discarded).expect("discarded objective card");
+    let gained = ids[0];
+    remove_element(&mut game.objective_cards_left, gained).expect("gained objective card");
+    gain_objective_card(game, player, *gained);
+}
+
+pub(crate) fn validate_new_plans(cards: &[HandCard], game: &Game) -> Result<(), String> {
+    match cards.len() {
+        0 => Ok(()),
+        2 => {
+            let ids = &game
+                .player(game.current_event().player.index)
+                .objective_cards;
+            if cards
+                .iter()
+                .filter(|c| {
+                    if let HandCard::ObjectiveCard(id) = c {
+                        ids.contains(id)
+                    } else {
+                        false
+                    }
+                })
+                .count()
+                == 1
+            {
+                Ok(())
+            } else {
+                Err("must select 1 card from your hand".to_string())
+            }
+        }
+        _ => Err("must select 0 or 2 cards".to_string()),
+    }
 }
 
 fn synergies(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {

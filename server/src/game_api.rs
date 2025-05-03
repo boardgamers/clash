@@ -1,6 +1,7 @@
 use std::{cmp::Ordering::*, mem};
 
 use crate::action::execute_action;
+use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{
     EventResponse, PersistentEventRequest, PersistentEventType,
 };
@@ -106,6 +107,14 @@ pub fn civilizations(game: Game) -> Vec<String> {
 
 #[must_use]
 pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
+    for e in &mut game.permanent_effects {
+        if let PermanentEffect::GreatSeer(g) = e {
+            if player_index != Some(g.player) {
+                // player shouldn't see other player's great seer
+                g.strip_secret();
+            }
+        }
+    }
     game.incidents_left.shuffle(&mut game.rng);
     game.wonders_left.shuffle(&mut game.rng);
     game.action_cards_left.shuffle(&mut game.rng);

@@ -4,10 +4,12 @@ use crate::card::{HandCard, HandCardType, hand_cards};
 use crate::content::persistent_events::{HandCardsRequest, PersistentEventType, PlayerRequest};
 use crate::content::tactics_cards::TacticsCardFactory;
 use crate::game::Game;
+use crate::objective_card::{deinit_objective_card, init_objective_card};
 use crate::player::Player;
 use crate::playing_actions::ActionCost;
 use crate::resource_pile::ResourcePile;
 use crate::utils::remove_element;
+use crate::wonder::{deinit_wonder, init_wonder};
 use itertools::Itertools;
 use std::fmt::Debug;
 
@@ -119,25 +121,48 @@ fn swap_cards(
             let HandCard::ActionCard(other_id) = other_card else {
                 return Err("wrong card type".to_string());
             };
-            swap_card(game, player, other, &id, &other_id, |p| &mut p.action_cards);
+            swap_card(
+                game,
+                player,
+                other,
+                id,
+                other_id,
+                |p| &mut p.action_cards,
+                |_, _, _| {}, // action cards are not initialized
+                |_, _, _| {},
+            );
             "action"
         }
         HandCard::Wonder(name) => {
             let HandCard::Wonder(other_name) = other_card else {
                 return Err("wrong card type".to_string());
             };
-            swap_card(game, player, other, &name, &other_name, |p| {
-                &mut p.wonder_cards
-            });
+            swap_card(
+                game,
+                player,
+                other,
+                name,
+                other_name,
+                |p| &mut p.wonder_cards,
+                init_wonder,
+                deinit_wonder,
+            );
             "wonder"
         }
         HandCard::ObjectiveCard(id) => {
             let HandCard::ObjectiveCard(other_id) = other_card else {
                 return Err("wrong card type".to_string());
             };
-            swap_card(game, player, other, &id, &other_id, |p| {
-                &mut p.objective_cards
-            });
+            swap_card(
+                game,
+                player,
+                other,
+                id,
+                other_id,
+                |p| &mut p.objective_cards,
+                init_objective_card,
+                deinit_objective_card,
+            );
             "objective"
         }
     };
@@ -150,18 +175,20 @@ fn swap_cards(
     Ok(())
 }
 
-fn swap_card<T: PartialEq + Ord + Debug>(
+fn swap_card<T: PartialEq + Ord + Debug + Copy>(
     game: &mut Game,
     player: usize,
     other: usize,
-    id: &T,
-    other_id: &T,
+    id: T,
+    other_id: T,
     get_list: impl Fn(&mut Player) -> &mut Vec<T>,
+    init: impl Fn(&mut Game, usize, T),
+    deinit: impl Fn(&mut Game, usize, T),
 ) {
-    let card = remove_element(get_list(game.player_mut(player)), id)
+    let card = remove_element(get_list(game.player_mut(player)), &id)
         .unwrap_or_else(|| panic!("card not found {id:?}"));
     let o = game.player_mut(other);
-    let other_card = remove_element(get_list(o), other_id)
+    let other_card = remove_element(get_list(o), &other_id)
         .unwrap_or_else(|| panic!("other card not found {other_id:?}"));
 
     get_list(o).push(card);
@@ -169,6 +196,11 @@ fn swap_card<T: PartialEq + Ord + Debug>(
     let p = game.player_mut(player);
     get_list(p).push(other_card);
     get_list(p).sort();
+
+    deinit(game, player, id);
+    deinit(game, other, other_id);
+    init(game, other, id);
+    init(game, player, other_id);
 }
 
 fn get_swap_card(swap: &[HandCard], p: &Player) -> Result<HandCard, String> {
@@ -217,6 +249,7 @@ pub(crate) fn validate_spy_cards(cards: &[HandCard], game: &Game) -> Result<(), 
         panic!("wrong event type");
     };
 
+    // too inefficient to clone the game for AI play
     swap_cards(
         &mut game.clone(),
         cards,
