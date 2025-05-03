@@ -78,5 +78,8 @@ run = "./scripts/publish-client.sh test"
 
 [tools]
 "cargo:cargo-nextest" = "latest"
+"cargo:wasm-bindgen-cli" = "latest"
+"cargo:wasm-pack" = "latest"
+node = "14"
 rust = { version = "latest", components = "clippy,rustfmt" }
 
