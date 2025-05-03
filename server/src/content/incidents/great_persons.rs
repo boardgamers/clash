@@ -4,6 +4,7 @@ use crate::advance::gain_advance_without_payment;
 use crate::city::MoodState;
 use crate::city_pieces::Building;
 use crate::construct::{Construct, construct};
+use crate::consts::NON_HUMAN_PLAYERS;
 use crate::content::advances::{economy, get_governments_uncached};
 use crate::content::incidents::great_builders::{great_architect, great_engineer};
 use crate::content::incidents::great_diplomat::{choose_diplomat_partner, great_diplomat};
@@ -21,6 +22,7 @@ use crate::resource_pile::ResourcePile;
 use crate::utils::format_list;
 use itertools::Itertools;
 use std::vec;
+use crate::content::effects::{GreatSeerEffect, PermanentEffect};
 
 pub(crate) const GREAT_PERSON_OFFSET: u8 = 100;
 
@@ -56,7 +58,12 @@ pub(crate) fn great_person_incidents() -> Vec<Incident> {
         incident(IncidentBaseEffect::BarbariansSpawn, great_diplomat(), |b| {
             choose_diplomat_partner(b)
         }),
-        //todo add great seer when objective cards are implemented
+        incident(IncidentBaseEffect::PiratesSpawnAndRaid, great_seer(), |mut b| {
+            for i in 0..NON_HUMAN_PLAYERS {
+                b = choose_great_seer_cards(b, i as i32)
+            }
+            b
+        }),
     ]
 }
 
@@ -403,7 +410,7 @@ fn great_merchant() -> ActionCard {
         ),
         |e| &mut e.play_action_card,
     )
-    .build()
+    .build() 
 }
 
 fn great_athlete() -> ActionCard {
@@ -493,3 +500,55 @@ fn great_athlete() -> ActionCard {
     )
     .build()
 }
+
+fn great_seer() -> ActionCard {
+    great_person_action_card::<_, String>(
+        58,
+        "Great Seer",
+        &format!(
+            "{GREAT_PERSON_DESCRIPTION} Draw 1 objective card per player. \
+            Choose one for each player, including yourself. \
+            The next time the player draws an objective card from the pile, \
+            they draw the designated card instead.",
+        ),
+        ActionCost::free(), // todo can't be played as action card - discard immediately
+        &[],
+        |_game, _player| true,
+    )
+    .build()
+}
+
+fn choose_great_seer_cards(b: IncidentBuilder, priority: i32) -> IncidentBuilder {
+    b.add_incident_player_request(
+        IncidentTarget::SelectedPlayer,
+        "Select a player to designate an objective card",
+        |_, _, _| true, //todo how to show the cards?
+        priority,
+        |game, s, i| {
+            let effect = find_great_seer(game).unwrap_or_else(
+                || {
+                    let e = PermanentEffect::GreatSeer(GreatSeerEffect {
+                        player: s.player_index,
+                        assigned_objectives: vec![],
+                    });
+                    game.permanent_effects.push(e);
+                    e
+                }
+            );
+            x
+        },
+    )
+}
+
+pub(crate) fn find_great_seer(game: &mut Game) -> Option<&mut GreatSeerEffect> {
+    game.permanent_effects.iter_mut().find_map(
+        |e| {
+            if let PermanentEffect::GreatSeer(p) = e {
+                Some(p)
+            } else {
+                None
+            }
+        },
+    )
+}
+

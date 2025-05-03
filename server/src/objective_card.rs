@@ -2,14 +2,14 @@ use crate::ability_initializer::{
     AbilityInitializerBuilder, AbilityInitializerSetup, AbilityListeners,
 };
 use crate::cache::Cache;
-use crate::card::{HandCard, draw_card_from_pile};
+use crate::card::{draw_card_from_pile, HandCard};
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{HandCardsRequest, PersistentEventType};
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::log::current_action_log_item;
 use crate::player::Player;
-use crate::utils::remove_element_by;
+use crate::utils::{remove_element, remove_element_by};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -401,7 +401,33 @@ pub(crate) fn gain_objective_card_from_pile(game: &mut Game, player: usize) {
 }
 
 pub(crate) fn draw_and_log_objective_card_from_pile(game: &mut Game, player: usize) -> Option<u8> {
-    let card = draw_objective_card_from_pile(game);
+    if let Some(great_seer) = find_great_seer(game) {
+        if let Some(o) = great_seer.assigned_objectives.iter().find_map(
+            |o| {
+                if o.player == player {
+                    Some(o.clone())
+                } else {
+                    None
+                }
+            },
+        ) {
+            remove_element(&mut great_seer.assigned_objectives, &o)
+                .unwrap_or_else(|| panic!("should be able to remove objective card {o:?}"));
+            game.add_info_log_item(&format!(
+                "{} gained the Great Seer objective card from the pile",
+                game.player_name(player)
+            ));
+            return Some(o.objective_card);
+        }
+    }
+
+    let card = draw_card_from_pile(
+        game,
+        "Objective Card",
+        |g| &mut g.objective_cards_left,
+        |g| g.cache.get_objective_cards().iter().map(|c| c.id).collect(),
+        |p| p.objective_cards.clone(),
+    );
     if card.is_some() {
         game.add_info_log_item(&format!(
             "{} gained an objective card from the pile",
@@ -409,16 +435,6 @@ pub(crate) fn draw_and_log_objective_card_from_pile(game: &mut Game, player: usi
         ));
     }
     card
-}
-
-fn draw_objective_card_from_pile(game: &mut Game) -> Option<u8> {
-    draw_card_from_pile(
-        game,
-        "Objective Card",
-        |g| &mut g.objective_cards_left,
-        |g| g.cache.get_objective_cards().iter().map(|c| c.id).collect(),
-        |p| p.objective_cards.clone(),
-    )
 }
 
 pub(crate) fn gain_objective_card(game: &mut Game, player_index: usize, objective_card: u8) {
