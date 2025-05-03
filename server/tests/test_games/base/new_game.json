@@ -27,7 +27,12 @@
           "id": 0
         }
       ],
-      "civilization": "test3",
+      "civilization": "Klingons",
+      "available_leaders": [
+        "Khan",
+        "Kahless",
+        "Worf"
+      ],
       "advances": [
         "Farming",
         "Mining"
@@ -67,7 +72,12 @@
           "id": 0
         }
       ],
-      "civilization": "test2",
+      "civilization": "Borg",
+      "available_leaders": [
+        "Borg Queen",
+        "Seven of Nine",
+        "Jean Luc Picard"
+      ],
       "advances": [
         "Farming",
         "Mining"
@@ -392,12 +402,12 @@
       "The game has started"
     ],
     [
-      "Player1 is playing as test3",
+      "Player1 is playing as Klingons",
       "Player1 gained an action card from the pile",
       "Player1 gained an objective card from the pile"
     ],
     [
-      "Player2 is playing as test2",
+      "Player2 is playing as Borg",
       "Player2 gained an action card from the pile",
       "Player2 gained an objective card from the pile"
     ],
