@@ -23,7 +23,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "D1"
         }
@@ -61,7 +60,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Neutral",
           "activations": 1,
           "position": "D8"

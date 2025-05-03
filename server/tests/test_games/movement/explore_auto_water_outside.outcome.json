@@ -17,12 +17,10 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Neutral",
           "position": "D1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Neutral",
           "position": "C7"
         }
@@ -57,12 +55,10 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "D8"
         },
         {
-          "city_pieces": {},
           "mood_state": "Neutral",
           "position": "E7"
         }

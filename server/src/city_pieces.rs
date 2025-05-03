@@ -178,6 +178,20 @@ pub struct CityPiecesData {
     wonders: Vec<Wonder>,
 }
 
+impl CityPiecesData {
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.academy.is_none()
+            && self.market.is_none()
+            && self.obelisk.is_none()
+            && self.observatory.is_none()
+            && self.fortress.is_none()
+            && self.port.is_none()
+            && self.temple.is_none()
+            && self.wonders.is_empty()
+    }
+}
+
 pub struct DestroyedStructures {
     pub pieces: CityPieces,
     pub cities: u8,
