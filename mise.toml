@@ -68,6 +68,14 @@ description = "Run AI client with profiling"
 run = ["cargo run --release --package client --features profiling --bin local_client -- ai"]
 dir = "client"
 
+[tasks.test-pubish-server]
+description = "Test publish server (the real one is done in GitHub Actions)"
+run = "./scripts/publish-server.sh test"
+
+[tasks.test-pubish-client]
+description = "Test publish client (the real one is done in GitHub Actions)"
+run = "./scripts/publish-client.sh test"
+
 [tools]
 "cargo:cargo-nextest" = "latest"
 rust = { version = "latest", components = "clippy,rustfmt" }
