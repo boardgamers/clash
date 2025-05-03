@@ -2,6 +2,8 @@ use crate::content::incidents::great_diplomat::{DIPLOMAT_ID, DiplomaticRelations
 use crate::events::EventOrigin;
 use crate::wonder::Wonder;
 use serde::{Deserialize, Serialize};
+use crate::game::Game;
+use crate::player::Player;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct Anarchy {
@@ -60,28 +62,29 @@ pub enum PermanentEffect {
 
 impl PermanentEffect {
     #[must_use]
-    pub fn event_origin(&self) -> EventOrigin {
+    pub fn description(&self, game: &Game, player: &Player) -> Vec<String> {
+        let cache = &game.cache;
         match self {
-            PermanentEffect::Pestilence => EventOrigin::Incident(1),
+            PermanentEffect::Pestilence => cache.get_incident(1).description(game),
             PermanentEffect::Construct(c) => match c {
-                ConstructEffect::CityDevelopment => EventOrigin::CivilCard(17), // also 18
-                ConstructEffect::GreatEngineer => EventOrigin::Incident(26),
+                ConstructEffect::CityDevelopment => vec![cache.get_civil_card(17).description],
+                ConstructEffect::GreatEngineer => cache.get_incident(26).description(game),
             },
             PermanentEffect::Collect(c) => match c {
-                CollectEffect::ProductionFocus => EventOrigin::CivilCard(19), // also 20
-                CollectEffect::Overproduction => EventOrigin::Incident(29),   // also 30
+                CollectEffect::ProductionFocus => vec![cache.get_civil_card(19).description], 
+                CollectEffect::Overproduction => cache.get_incident(29).description(game),   
             },
             PermanentEffect::LoseAction(_) => EventOrigin::Incident(38),
             PermanentEffect::PublicWonderCard(_) => EventOrigin::Incident(40),
-            PermanentEffect::SolarEclipse => EventOrigin::Incident(41),
-            PermanentEffect::TrojanHorse => EventOrigin::Incident(42),
+            PermanentEffect::SolarEclipse => cache.get_incident(41).description(game),
+            PermanentEffect::TrojanHorse => cache.get_incident(42).description(game),
             PermanentEffect::Anarchy(_) => EventOrigin::Incident(44),
             PermanentEffect::DiplomaticRelations(_) => EventOrigin::Incident(DIPLOMAT_ID),
             // can also be 16, but that doesn't matter for the help text
-            PermanentEffect::CulturalTakeover => EventOrigin::CivilCard(15),
+            PermanentEffect::CulturalTakeover => vec![cache.get_civil_card(15).description],
             PermanentEffect::Negotiations(_) => EventOrigin::CivilCard(23), // also 24
             PermanentEffect::Assassination(_) => EventOrigin::CivilCard(27), // also 28
-            PermanentEffect::GreatSeer(_) => EventOrigin::CivilCard(158),
+            PermanentEffect::GreatSeer(s) => EventOrigin::CivilCard(158),
         }
     }
 }

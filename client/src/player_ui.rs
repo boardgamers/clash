@@ -301,7 +301,7 @@ fn show_permanent_effects(
     }
     label("Permanent effects:");
     for e in &game.permanent_effects {
-        for m in event_help(rc, &e.event_origin()) {
+        for m in e.description(rc.game, rc.shown_player) {
             label(&m);
         }
     }
