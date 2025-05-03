@@ -13,10 +13,43 @@ pub fn get_all() -> Vec<Civilization> {
     vec![
         Civilization::new(BARBARIANS, vec![], vec![]),
         Civilization::new(PIRATES, vec![], vec![]),
-        Civilization::new("test1", vec![], vec![]),
-        Civilization::new("test2", vec![], vec![]),
-        Civilization::new("test3", vec![], vec![]),
-        Civilization::new("test4", vec![], vec![]),
+        // until the real civilizations are implemented
+        Civilization::new(
+            "Federation",
+            vec![],
+            vec![
+                Leader::builder("James T. Kirk", "", "", "", "").build(),
+                Leader::builder("Kathryn Janeway", "", "", "", "").build(),
+                Leader::builder("Spock", "", "", "", "").build(),
+            ],
+        ),
+        Civilization::new(
+            "Borg",
+            vec![],
+            vec![
+                Leader::builder("Borg Queen", "", "", "", "").build(),
+                Leader::builder("Seven of Nine", "", "", "", "").build(),
+                Leader::builder("Jean Luc Picard", "", "", "", "").build(),
+            ],
+        ),
+        Civilization::new(
+            "Klingons",
+            vec![],
+            vec![
+                Leader::builder("Khan", "", "", "", "").build(),
+                Leader::builder("Kahless", "", "", "", "").build(),
+                Leader::builder("Worf", "", "", "", "").build(),
+            ],
+        ),
+        Civilization::new(
+            "Romulans",
+            vec![],
+            vec![
+                Leader::builder("Sela", "", "", "", "").build(),
+                Leader::builder("Narek", "", "", "", "").build(),
+                Leader::builder("Tomalak", "", "", "", "").build(),
+            ],
+        ),
     ]
 }
 
@@ -29,6 +62,10 @@ fn test0() -> Civilization {
             Leader::builder("Kleopatra", "", "", "", "").build(),
         ],
     )
+}
+
+fn test1() -> Civilization {
+    Civilization::new("test1", vec![], vec![])
 }
 
 fn maya() -> Civilization {
@@ -84,6 +121,7 @@ pub fn get_civilization(name: &str) -> Option<Civilization> {
     match name {
         "Maya" => Some(maya()),   // still needs to be implemented
         "test0" => Some(test0()), // for testing
+        "test1" => Some(test1()), // for testing
         _ => get_all()
             .into_iter()
             .find(|civilization| civilization.name == name),
