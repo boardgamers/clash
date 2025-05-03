@@ -15,6 +15,14 @@ jobs:
       - uses: jdx/mise-action@v2
         with:
           experimental: 'true' # to get lock file support
+        env:
+          MISE_DISABLE_TOOLS: node
+      - name: Use Node.js ${{ env.node_version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.node_version }}
+          # setting a registry enables the NODE_AUTH_TOKEN env variable where we can set an npm token.  REQUIRED
+          registry-url: "https://registry.npmjs.org"
       - name: Set Release Version from Tag
         run: echo "RELEASE_VERSION=$(echo ${{github.ref_name}} | sed s/v//g)" >> $GITHUB_ENV
       - name: Publish Server
