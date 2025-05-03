@@ -4,16 +4,15 @@
     {
       "id": 0,
       "resources": {
-        "food": 4,
         "wood": 7,
         "ore": 7,
         "ideas": 3,
         "gold": 7,
-        "mood_tokens": 7,
+        "mood_tokens": 8,
         "culture_tokens": 7
       },
       "resource_limit": {
-        "food": 2,
+        "food": 7,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -75,11 +74,19 @@
         "Engineering",
         "Farming",
         "Mining",
-        "Tactics"
+        "Storage",
+        "Tactics",
+        "Writing"
       ],
-      "incident_tokens": 1,
+      "incident_tokens": 2,
       "wonder_cards": [
         "Pyramids"
+      ],
+      "action_cards": [
+        1
+      ],
+      "objective_cards": [
+        21
       ],
       "next_unit_id": 8
     },
@@ -196,17 +203,97 @@
           "players": [
             {
               "index": 0,
-              "items": []
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Storage",
+                        "payment": {
+                          "food": 2
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 1
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "ActionCard": 158
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ObjectiveCard": 21
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Writing",
+                        "payment": {
+                          "food": 2
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
             }
           ]
         }
       ]
     }
   ],
-  "action_log_index": 0,
-  "log": [],
-  "undo_limit": 0,
-  "actions_left": 3,
+  "action_log_index": 5,
+  "log": [
+    [
+      "Player1 paid 2 food to get the Storage advance",
+      "Player gained 1 mood token as advance bonus"
+    ],
+    [
+      "A new game event has been triggered: Great Seer",
+      "Base effect: Pirates spawn",
+      "No valid positions for Pirate Ship"
+    ],
+    [
+      "Player1 gained Great Seer for 1 culture token"
+    ],
+    [
+      "Player1 played the action card Great Seer"
+    ],
+    [
+      "Player1 chose an objective card for player Player1",
+      "Player1 chose an objective card for player Player2"
+    ],
+    [
+      "Player1 paid 2 food to get the Writing advance",
+      "Player1 gained an action card from the pile",
+      "Player1 gained the Great Seer objective card from the pile",
+      "Player gained 1 culture token as advance bonus"
+    ]
+  ],
+  "undo_limit": 5,
+  "actions_left": 1,
   "round": 2,
   "age": 1,
   "messages": [
@@ -223,13 +310,32 @@
     11,
     11
   ],
-  "objective_cards_left": [
-    1,
+  "action_cards_left": [
     2,
     3,
     4
   ],
-  "incidents_left": [
+  "action_cards_discarded": [
+    158
+  ],
+  "objective_cards_left": [
+    23,
+    24
+  ],
+  "incidents_discarded": [
     58
+  ],
+  "permanent_effects": [
+    {
+      "GreatSeer": {
+        "player": 0,
+        "assigned_objectives": [
+          {
+            "player": 1,
+            "objective_card": 22
+          }
+        ]
+      }
+    }
   ]
 }

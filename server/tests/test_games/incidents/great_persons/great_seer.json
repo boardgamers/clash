@@ -223,17 +223,17 @@
     11,
     11
   ],
-  "objective_cards_left": [
-    21,
-    22,
-    23,
-    24
-  ],
   "action_cards_left": [
     1,
     2,
     3,
     4
+  ],
+  "objective_cards_left": [
+    21,
+    22,
+    23,
+    24
   ],
   "incidents_left": [
     58
