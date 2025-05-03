@@ -1,10 +1,10 @@
-use crate::content::incidents::great_persons::find_great_seer;
 use crate::ability_initializer::{
     AbilityInitializerBuilder, AbilityInitializerSetup, AbilityListeners,
 };
 use crate::cache::Cache;
-use crate::card::{draw_card_from_pile, HandCard};
+use crate::card::{HandCard, draw_card_from_pile};
 use crate::content::builtin::Builtin;
+use crate::content::incidents::great_persons::find_great_seer;
 use crate::content::persistent_events::{HandCardsRequest, PersistentEventType};
 use crate::events::EventOrigin;
 use crate::game::Game;
@@ -403,15 +403,13 @@ pub(crate) fn gain_objective_card_from_pile(game: &mut Game, player: usize) {
 
 pub(crate) fn draw_and_log_objective_card_from_pile(game: &mut Game, player: usize) -> Option<u8> {
     if let Some(great_seer) = find_great_seer(game) {
-        if let Some(o) = great_seer.assigned_objectives.iter().find_map(
-            |o| {
-                if o.player == player {
-                    Some(o.clone())
-                } else {
-                    None
-                }
-            },
-        ) {
+        if let Some(o) = great_seer.assigned_objectives.iter().find_map(|o| {
+            if o.player == player {
+                Some(o.clone())
+            } else {
+                None
+            }
+        }) {
             remove_element(&mut great_seer.assigned_objectives, &o)
                 .unwrap_or_else(|| panic!("should be able to remove objective card {o:?}"));
             game.add_info_log_item(&format!(

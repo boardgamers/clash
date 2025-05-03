@@ -1,5 +1,6 @@
 use crate::common::{JsonTest, TestAction, move_action};
 use server::action::Action;
+use server::card::HandCard;
 use server::city_pieces::Building::Fortress;
 use server::content::persistent_events::EventResponse;
 use server::movement::{MoveUnits, MovementAction};
@@ -8,7 +9,6 @@ use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::{advance, construct};
-use server::card::HandCard;
 
 mod common;
 
@@ -355,18 +355,19 @@ fn test_great_seer() {
                 .without_json_comparison(),
             TestAction::undoable(
                 0,
-                Action::Response(EventResponse::SelectHandCards(vec![HandCard::ObjectiveCard(
-                    21,
-                )])),
-            ).without_json_comparison(),
+                Action::Response(EventResponse::SelectHandCards(vec![
+                    HandCard::ObjectiveCard(21),
+                ])),
+            )
+            .without_json_comparison(),
             // the player already knows the card - but we treat all designated cards as unknown
-            TestAction::not_undoable( 
+            TestAction::not_undoable(
                 0,
                 Action::Playing(Advance {
                     advance: advance::Advance::Writing,
                     payment: ResourcePile::food(2),
                 }),
-            )
+            ),
         ],
     );
 }

@@ -572,7 +572,7 @@ fn choose_great_seer_cards(b: ActionCardBuilder, player_order: usize) -> ActionC
                     assigned_objectives: vec![objective],
                 });
                 game.permanent_effects.push(e);
-            };
+            }
         },
     )
 }
