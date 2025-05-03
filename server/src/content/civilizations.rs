@@ -23,6 +23,8 @@ pub fn get_all() -> Vec<Civilization> {
         ),
         Civilization::new("test1", vec![], vec![]),
         Civilization::new("test2", vec![], vec![]),
+        Civilization::new("test3", vec![], vec![]),
+        Civilization::new("test4", vec![], vec![]),
     ]
 }
 

@@ -1,11 +1,11 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::action_card::{ActionCard, ActionCardBuilder, gain_action_card_from_pile};
+use crate::action_card::{gain_action_card_from_pile, ActionCard, ActionCardBuilder};
 use crate::advance::gain_advance_without_payment;
 use crate::card::HandCard;
 use crate::city::MoodState;
 use crate::city_pieces::Building;
-use crate::construct::{Construct, construct};
-use crate::consts::NON_HUMAN_PLAYERS;
+use crate::construct::{construct, Construct};
+use crate::consts::MAX_HUMAN_PLAYERS;
 use crate::content::advances::{economy, get_governments_uncached};
 use crate::content::effects::{GreatSeerEffect, GreatSeerObjective, PermanentEffect};
 use crate::content::incidents::great_builders::{great_architect, great_engineer};
@@ -514,7 +514,7 @@ fn great_seer() -> ActionCard {
         |_game, _player| true,
     );
 
-    for i in 0..NON_HUMAN_PLAYERS {
+    for i in 0..MAX_HUMAN_PLAYERS {
         b = choose_great_seer_cards(b, i);
     }
     b.build()
@@ -523,7 +523,7 @@ fn great_seer() -> ActionCard {
 fn choose_great_seer_cards(b: ActionCardBuilder, player_order: usize) -> ActionCardBuilder {
     b.add_hand_card_request(
         |e| &mut e.play_action_card,
-        (NON_HUMAN_PLAYERS - player_order) as i32,
+        (MAX_HUMAN_PLAYERS - player_order) as i32,
         move |game, player_index, _| {
             if player_order == 0 {
                 game.lock_undo(); // new information revealed about objective cards
