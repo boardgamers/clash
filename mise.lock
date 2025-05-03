@@ -2,6 +2,18 @@
 version = "0.9.94"
 backend = "cargo:cargo-nextest"
 
+[tools."cargo:wasm-bindgen-cli"]
+version = "0.2.100"
+backend = "cargo:wasm-bindgen-cli"
+
+[tools."cargo:wasm-pack"]
+version = "0.13.1"
+backend = "cargo:wasm-pack"
+
+[tools.node]
+version = "14.21.3"
+backend = "core:node"
+
 [tools.rust]
 version = "1.86.0"
 backend = "core:rust"

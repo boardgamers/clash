@@ -1,27 +1,28 @@
-use crate::common::{GamePath, to_json, write_result};
-use async_std::task;
-use itertools::Itertools;
-use server::action::ActionType;
-use server::ai_actions::AiActions;
-use server::cache::Cache;
-use server::game::Game;
-use server::movement::{MoveUnits, MovementAction, possible_move_units_destinations};
-use server::playing_actions::PlayingActionType;
-use server::profiling::start_profiling;
-use server::{
-    action::{self, Action},
-    ai_actions,
-    game::GameState,
-    game_setup,
-    playing_actions::PlayingAction,
-    utils::{Rng, Shuffle},
-};
-use std::env;
-
 mod common;
 
+#[cfg(feature = "ai")]
 #[tokio::test]
 async fn test_random_actions() {
+    use crate::common::{GamePath, to_json, write_result};
+    use async_std::task;
+    use itertools::Itertools;
+    use server::action::ActionType;
+    use server::ai_actions::AiActions;
+    use server::cache::Cache;
+    use server::game::Game;
+    use server::movement::{MoveUnits, MovementAction, possible_move_units_destinations};
+    use server::playing_actions::PlayingActionType;
+    use server::profiling::start_profiling;
+    use server::{
+        action::{self, Action},
+        ai_actions,
+        game::GameState,
+        game_setup,
+        playing_actions::PlayingAction,
+        utils::{Rng, Shuffle},
+    };
+    use std::env;
+
     let iterations = env::var("ITERATIONS")
         .map(|v| v.parse::<usize>().ok())
         .ok()
@@ -57,6 +58,7 @@ async fn test_random_actions() {
     }
 }
 
+#[cfg(feature = "ai")]
 fn random_actions_iteration(mut rng: Rng, cache: Cache) {
     let seed = rng.range(0, 10_usize.pow(15)).to_string();
     let mut game = game_setup::setup_game_with_cache(2, seed, true, cache);
@@ -95,6 +97,7 @@ fn random_actions_iteration(mut rng: Rng, cache: Cache) {
     }
 }
 
+#[cfg(feature = "ai")]
 fn no_action_available(game: &Game) -> Action {
     if matches!(game.state, GameState::Movement(_)) {
         return Action::Movement(MovementAction::Stop);
@@ -102,6 +105,7 @@ fn no_action_available(game: &Game) -> Action {
     Action::Playing(PlayingAction::EndTurn)
 }
 
+#[cfg(feature = "ai")]
 pub fn get_movement_actions(
     ai_actions: &mut AiActions,
     game: &Game,

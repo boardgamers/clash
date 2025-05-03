@@ -2,15 +2,13 @@
 
 use client::client::{Features, GameSyncRequest, GameSyncResult, init, render_and_update};
 use client::client_state::State;
-use itertools::Itertools;
 use macroquad::miniquad::window::set_window_size;
 use macroquad::prelude::{next_frame, screen_width, vec2};
 use macroquad::window::screen_height;
 use server::action::execute_action;
 use server::advance::{Advance, do_advance};
-use server::ai::AI;
 use server::city::City;
-use server::game::{Game, GameData, GameState};
+use server::game::{Game, GameData};
 use server::game_setup::setup_game;
 use server::map::Terrain;
 use server::player::add_unit;
@@ -22,7 +20,6 @@ use server::utils::remove_element;
 use server::wonder::Wonder;
 use std::fs::File;
 use std::io::BufReader;
-use std::time::Duration;
 use std::{env, vec};
 
 #[derive(PartialEq)]
@@ -82,13 +79,7 @@ fn get_modes(args: &[String]) -> Vec<Mode> {
 async fn run(mut game: Game, features: &mut Features) {
     let mut state = init(features).await;
 
-    if features.ai {
-        state.ai_players = game
-            .human_players(0)
-            .into_iter()
-            .map(|p| AI::new(1., Duration::from_secs(5), false, &game, p))
-            .collect_vec()
-    }
+    start_ai(&mut game, features, &mut state);
 
     let mut sync_result = GameSyncResult::None;
     state.show_player = game.active_player();
@@ -125,6 +116,28 @@ async fn run(mut game: Game, features: &mut Features) {
     }
 }
 
+#[cfg(not(feature = "ai"))]
+fn start_ai(_: &mut Game, _: &mut Features, _: &mut State) {}
+
+#[cfg(feature = "ai")]
+fn start_ai(game: &mut Game, features: &mut Features, state: &mut State) {
+    use server::ai::AI;
+
+    if features.ai {
+        state.ai_players = game
+            .human_players(0)
+            .into_iter()
+            .map(|p| AI::new(1., Duration::from_secs(5), false, &game, p))
+            .collect_vec()
+    }
+}
+
+#[cfg(not(feature = "ai"))]
+fn ai_autoplay(_: Game, _: &mut Features, _: &mut State) -> Game {
+    panic!("should not be called");
+}
+
+#[cfg(feature = "ai")]
 fn ai_autoplay(mut game: Game, f: &mut Features, state: &mut State) -> Game {
     if f.ai {
         while state.ai_autoplay && game.state != GameState::Finished {
