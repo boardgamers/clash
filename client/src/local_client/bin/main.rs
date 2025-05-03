@@ -40,9 +40,10 @@ async fn main() {
 
     let mut args: Vec<String> = env::args().collect();
     args.remove(0); // program name
-    let players = args.remove(0).parse().expect(
-        "Please provide the number of players as the first argument",
-    );
+    let players = args
+        .remove(0)
+        .parse()
+        .expect("Please provide the number of players as the first argument");
     let modes = get_modes(&args);
 
     let mut features = Features {

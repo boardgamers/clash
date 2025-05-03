@@ -1,10 +1,10 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::action_card::{gain_action_card_from_pile, ActionCard, ActionCardBuilder};
+use crate::action_card::{ActionCard, ActionCardBuilder, gain_action_card_from_pile};
 use crate::advance::gain_advance_without_payment;
 use crate::card::HandCard;
 use crate::city::MoodState;
 use crate::city_pieces::Building;
-use crate::construct::{construct, Construct};
+use crate::construct::{Construct, construct};
 use crate::consts::MAX_HUMAN_PLAYERS;
 use crate::content::advances::{economy, get_governments_uncached};
 use crate::content::effects::{GreatSeerEffect, GreatSeerObjective, PermanentEffect};
@@ -530,7 +530,7 @@ fn choose_great_seer_cards(b: ActionCardBuilder, player_order: usize) -> ActionC
             }
 
             let players = game.human_players(player_index);
-            let target = game.player_name(players[player_order]);
+            let target = game.player_name(*players.get(player_order)?);
             let cards = game
                 .objective_cards_left
                 .iter()

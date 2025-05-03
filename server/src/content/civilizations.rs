@@ -21,10 +21,14 @@ pub fn get_all() -> Vec<Civilization> {
 }
 
 fn test0() -> Civilization {
-    Civilization::new("test0", vec![], vec![
-        Leader::builder("Alexander", "", "", "", "").build(),
-        Leader::builder("Kleopatra", "", "", "", "").build(),
-    ])
+    Civilization::new(
+        "test0",
+        vec![],
+        vec![
+            Leader::builder("Alexander", "", "", "", "").build(),
+            Leader::builder("Kleopatra", "", "", "", "").build(),
+        ],
+    )
 }
 
 fn maya() -> Civilization {
@@ -78,7 +82,7 @@ fn maya() -> Civilization {
 #[must_use]
 pub fn get_civilization(name: &str) -> Option<Civilization> {
     match name {
-        "Maya" => Some(maya()), // still needs to be implemented
+        "Maya" => Some(maya()),   // still needs to be implemented
         "test0" => Some(test0()), // for testing
         _ => get_all()
             .into_iter()
