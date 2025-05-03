@@ -14,9 +14,13 @@ pub mod ability_initializer;
 pub mod action;
 pub mod action_card;
 pub mod advance;
+#[cfg(feature = "ai")]
 pub mod ai;
+#[cfg(feature = "ai")]
 pub mod ai_actions;
+#[cfg(feature = "ai")]
 pub mod ai_collect;
+#[cfg(feature = "ai")]
 pub mod ai_missions;
 mod barbarians;
 pub mod cache;

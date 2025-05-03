@@ -433,17 +433,6 @@ impl Player {
         self.resources -= resources;
     }
 
-    pub(crate) fn can_gain_resource(&self, r: ResourceType, amount: u8) -> bool {
-        match r {
-            ResourceType::MoodTokens | ResourceType::CultureTokens => true,
-            _ => self.resources.get(&r) + amount <= self.resource_limit.get(&r),
-        }
-    }
-
-    pub(crate) fn can_gain(&self, r: ResourcePile) -> bool {
-        r.into_iter().all(|(t, a)| self.can_gain_resource(t, a))
-    }
-
     #[must_use]
     pub fn can_advance_ignore_contradicting(&self, advance: Advance, game: &Game) -> bool {
         if self.has_advance(advance) {

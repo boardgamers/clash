@@ -19,7 +19,6 @@ use crate::status_phase_ui::ChooseAdditionalAdvances;
 use macroquad::prelude::*;
 use server::action::Action;
 use server::advance::Advance;
-use server::ai::AI;
 use server::card::HandCard;
 use server::city::{City, MoodState};
 use server::content::persistent_events::{
@@ -392,6 +391,7 @@ pub struct State {
     pub show_permanent_effects: bool,
     pub ai_autoplay: bool,
     pub pan_map: bool,
+    #[cfg(feature = "ai")]
     pub ai_players: Vec<AI>,
 }
 
@@ -420,6 +420,7 @@ impl State {
             pan_map: false,
             show_permanent_effects: false,
             ai_autoplay: false,
+            #[cfg(feature = "ai")]
             ai_players: vec![],
         }
     }

@@ -30,6 +30,7 @@ pyroscope_pprofrs = { version = "0.2.8", optional = true }
 
 [features]
 profiling = ["dep:pyroscope", "dep:pyroscope_pprofrs"]
+ai = []
 
 [[bin]]
 name = "local_client"

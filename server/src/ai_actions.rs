@@ -340,7 +340,7 @@ fn collect_actions(p: &Player, game: &Game) -> Vec<Action> {
                 .into_iter()
                 .filter_map(|c| {
                     let total = total_collect(&c);
-                    if !p.can_gain(total.clone()) {
+                    if !can_gain(p, total.clone()) {
                         return None;
                     }
 
@@ -690,4 +690,15 @@ pub(crate) fn get_construct_actions(
                 .collect_vec()
         })
         .collect()
+}
+
+pub(crate) fn can_gain_resource(player: &Player, r: ResourceType, amount: u8) -> bool {
+    match r {
+        ResourceType::MoodTokens | ResourceType::CultureTokens => true,
+        _ => player.resources.get(&r) + amount <= player.resource_limit.get(&r),
+    }
+}
+
+pub(crate) fn can_gain(player: &Player, r: ResourcePile) -> bool {
+    r.into_iter().all(|(t, a)| player.can_gain_resource(t, a))
 }
