@@ -1,16 +1,20 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{ActionCard, ActionCardBuilder, gain_action_card_from_pile};
 use crate::advance::gain_advance_without_payment;
+use crate::card::HandCard;
 use crate::city::MoodState;
 use crate::city_pieces::Building;
 use crate::construct::{Construct, construct};
 use crate::consts::NON_HUMAN_PLAYERS;
 use crate::content::advances::{economy, get_governments_uncached};
+use crate::content::effects::{GreatSeerEffect, GreatSeerObjective, PermanentEffect};
 use crate::content::incidents::great_builders::{great_architect, great_engineer};
 use crate::content::incidents::great_diplomat::{choose_diplomat_partner, great_diplomat};
 use crate::content::incidents::great_explorer::great_explorer;
 use crate::content::incidents::great_warlord::great_warlord;
-use crate::content::persistent_events::{AdvanceRequest, PaymentRequest, PositionRequest};
+use crate::content::persistent_events::{
+    AdvanceRequest, HandCardsRequest, PaymentRequest, PositionRequest,
+};
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, IncidentBuilder};
 use crate::payment::{PaymentOptions, PaymentReason};
@@ -19,10 +23,9 @@ use crate::player_events::IncidentTarget;
 use crate::playing_actions::ActionCost;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
-use crate::utils::format_list;
+use crate::utils::{format_list, remove_element};
 use itertools::Itertools;
 use std::vec;
-use crate::content::effects::{GreatSeerEffect, PermanentEffect};
 
 pub(crate) const GREAT_PERSON_OFFSET: u8 = 100;
 
@@ -58,12 +61,7 @@ pub(crate) fn great_person_incidents() -> Vec<Incident> {
         incident(IncidentBaseEffect::BarbariansSpawn, great_diplomat(), |b| {
             choose_diplomat_partner(b)
         }),
-        incident(IncidentBaseEffect::PiratesSpawnAndRaid, great_seer(), |mut b| {
-            for i in 0..NON_HUMAN_PLAYERS {
-                b = choose_great_seer_cards(b, i as i32)
-            }
-            b
-        }),
+        incident(IncidentBaseEffect::PiratesSpawnAndRaid, great_seer(), |b| b),
     ]
 }
 
@@ -410,7 +408,7 @@ fn great_merchant() -> ActionCard {
         ),
         |e| &mut e.play_action_card,
     )
-    .build() 
+    .build()
 }
 
 fn great_athlete() -> ActionCard {
@@ -502,7 +500,7 @@ fn great_athlete() -> ActionCard {
 }
 
 fn great_seer() -> ActionCard {
-    great_person_action_card::<_, String>(
+    let mut b = great_person_action_card::<_, String>(
         58,
         "Great Seer",
         &format!(
@@ -511,44 +509,80 @@ fn great_seer() -> ActionCard {
             The next time the player draws an objective card from the pile, \
             they draw the designated card instead.",
         ),
-        ActionCost::free(), // todo can't be played as action card - discard immediately
+        ActionCost::free(),
         &[],
         |_game, _player| true,
-    )
-    .build()
+    );
+
+    for i in 0..NON_HUMAN_PLAYERS {
+        b = choose_great_seer_cards(b, i);
+    }
+    b.build()
 }
 
-fn choose_great_seer_cards(b: IncidentBuilder, priority: i32) -> IncidentBuilder {
-    b.add_incident_player_request(
-        IncidentTarget::SelectedPlayer,
-        "Select a player to designate an objective card",
-        |_, _, _| true, //todo how to show the cards?
-        priority,
-        |game, s, i| {
-            let effect = find_great_seer(game).unwrap_or_else(
-                || {
-                    let e = PermanentEffect::GreatSeer(GreatSeerEffect {
-                        player: s.player_index,
-                        assigned_objectives: vec![],
-                    });
-                    game.permanent_effects.push(e);
-                    e
-                }
-            );
-            x
+fn choose_great_seer_cards(b: ActionCardBuilder, player_order: usize) -> ActionCardBuilder {
+    b.add_hand_card_request(
+        |e| &mut e.play_action_card,
+        (NON_HUMAN_PLAYERS - player_order) as i32,
+        move |game, player_index, _| {
+            if player_order == 0 {
+                game.lock_undo(); // new information revealed about objective cards
+            }
+
+            let players = game.human_players(player_index);
+            let target = game.player_name(players[player_order]);
+            let cards = game
+                .objective_cards_left
+                .iter()
+                .take(players.len() - player_order)
+                .map(|c| HandCard::ObjectiveCard(*c))
+                .collect_vec();
+
+            let suffix = if player_order == 0 { " (yourself)" } else { "" };
+
+            Some(HandCardsRequest::new(
+                cards,
+                1..=1,
+                &format!("Select an objective card for player {target}{suffix}"),
+            ))
+        },
+        move |game, s, _| {
+            let players = game.human_players(s.player_index);
+            let target = players[player_order];
+            game.add_info_log_item(&format!(
+                "{} chose an objective card for player {}",
+                s.player_name,
+                game.player_name(target)
+            ));
+
+            let HandCard::ObjectiveCard(card) = &s.choice[0] else {
+                panic!("Expected an objective card");
+            };
+            remove_element(&mut game.objective_cards_left, card);
+            let objective = GreatSeerObjective {
+                player: target,
+                objective_card: *card,
+            };
+
+            if let Some(effect) = find_great_seer(game) {
+                effect.assigned_objectives.push(objective);
+            } else {
+                let e = PermanentEffect::GreatSeer(GreatSeerEffect {
+                    player: s.player_index,
+                    assigned_objectives: vec![objective],
+                });
+                game.permanent_effects.push(e);
+            };
         },
     )
 }
 
 pub(crate) fn find_great_seer(game: &mut Game) -> Option<&mut GreatSeerEffect> {
-    game.permanent_effects.iter_mut().find_map(
-        |e| {
-            if let PermanentEffect::GreatSeer(p) = e {
-                Some(p)
-            } else {
-                None
-            }
-        },
-    )
+    game.permanent_effects.iter_mut().find_map(|e| {
+        if let PermanentEffect::GreatSeer(p) = e {
+            Some(p)
+        } else {
+            None
+        }
+    })
 }
-

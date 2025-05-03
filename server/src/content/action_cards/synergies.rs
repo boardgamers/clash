@@ -47,7 +47,7 @@ fn new_plans(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         You may discard an objective card from your hand to keep 1 of them. \
         Reshuffle the discarded and not taken cards into the deck.",
         ActionCost::regular_with_cost(ResourcePile::culture_tokens(1)),
-        move |game, p, _| !p.objective_cards.is_empty() && !game.objective_cards_left.is_empty(),
+        move |_game, p, _| !p.objective_cards.is_empty(),
     )
     .add_hand_card_request(
         |e| &mut e.play_action_card,

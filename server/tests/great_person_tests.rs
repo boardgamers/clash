@@ -8,6 +8,7 @@ use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::{advance, construct};
+use server::card::HandCard;
 
 mod common;
 
@@ -326,6 +327,46 @@ fn test_great_diplomat() {
                     payment: ResourcePile::culture_tokens(2),
                 })),
             ),
+        ],
+    );
+}
+
+#[test]
+fn test_great_seer() {
+    GREAT_PERSONS.test(
+        "great_seer",
+        vec![
+            TestAction::not_undoable(
+                0,
+                Action::Playing(Advance {
+                    advance: advance::Advance::Storage,
+                    payment: ResourcePile::food(2),
+                }),
+            )
+            .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
+                    1,
+                )])),
+            )
+            .without_json_comparison(),
+            TestAction::not_undoable(0, Action::Playing(PlayingAction::ActionCard(158)))
+                .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectHandCards(vec![HandCard::ObjectiveCard(
+                    21,
+                )])),
+            ).without_json_comparison(),
+            // the player already knows the card - but we treat all designated cards as unknown
+            TestAction::not_undoable( 
+                0,
+                Action::Playing(Advance {
+                    advance: advance::Advance::Writing,
+                    payment: ResourcePile::food(2),
+                }),
+            )
         ],
     );
 }

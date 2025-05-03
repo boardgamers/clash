@@ -1,3 +1,4 @@
+use crate::content::incidents::great_persons::find_great_seer;
 use crate::ability_initializer::{
     AbilityInitializerBuilder, AbilityInitializerSetup, AbilityListeners,
 };
