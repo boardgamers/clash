@@ -38,7 +38,12 @@ async fn main() {
 
     set_window_size(1200, 600);
 
-    let args: Vec<String> = env::args().collect();
+    let mut args: Vec<String> = env::args().collect();
+    args.remove(0); // program name
+    let players = args
+        .remove(0)
+        .parse()
+        .expect("Please provide the number of players as the first argument");
     let modes = get_modes(&args);
 
     let mut features = Features {
@@ -55,14 +60,14 @@ async fn main() {
         } else {
             "a".repeat(32)
         };
-        setup_game(2, seed, true)
+        setup_game(players, seed, true)
     };
 
     run(game, &mut features).await;
 }
 
 fn get_modes(args: &[String]) -> Vec<Mode> {
-    match args.get(1) {
+    match args.first() {
         Some(arg) => match arg.as_str() {
             "generate" => vec![Mode::Local],
             "ai" => vec![Mode::AI, Mode::Local],

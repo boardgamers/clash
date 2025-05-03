@@ -5,7 +5,7 @@ use crate::card::HandCard;
 use crate::city::MoodState;
 use crate::city_pieces::Building;
 use crate::construct::{Construct, construct};
-use crate::consts::NON_HUMAN_PLAYERS;
+use crate::consts::MAX_HUMAN_PLAYERS;
 use crate::content::advances::{economy, get_governments_uncached};
 use crate::content::effects::{GreatSeerEffect, GreatSeerObjective, PermanentEffect};
 use crate::content::incidents::great_builders::{great_architect, great_engineer};
@@ -514,7 +514,7 @@ fn great_seer() -> ActionCard {
         |_game, _player| true,
     );
 
-    for i in 0..NON_HUMAN_PLAYERS {
+    for i in 0..MAX_HUMAN_PLAYERS {
         b = choose_great_seer_cards(b, i);
     }
     b.build()
@@ -523,14 +523,14 @@ fn great_seer() -> ActionCard {
 fn choose_great_seer_cards(b: ActionCardBuilder, player_order: usize) -> ActionCardBuilder {
     b.add_hand_card_request(
         |e| &mut e.play_action_card,
-        (NON_HUMAN_PLAYERS - player_order) as i32,
+        (MAX_HUMAN_PLAYERS - player_order) as i32,
         move |game, player_index, _| {
             if player_order == 0 {
                 game.lock_undo(); // new information revealed about objective cards
             }
 
             let players = game.human_players(player_index);
-            let target = game.player_name(players[player_order]);
+            let target = game.player_name(*players.get(player_order)?);
             let cards = game
                 .objective_cards_left
                 .iter()

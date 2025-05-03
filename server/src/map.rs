@@ -414,6 +414,13 @@ pub struct BlockPosition {
     pub rotation: Rotation,
 }
 
+impl BlockPosition {
+    #[must_use]
+    pub fn new(top_tile: Position, rotation: Rotation) -> Self {
+        Self { top_tile, rotation }
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct UnexploredBlock {
     pub position: BlockPosition,
@@ -425,65 +432,99 @@ pub struct MapHomePosition {
     pub block: Block,
 }
 
+impl MapHomePosition {
+    #[must_use]
+    pub fn new(top_tile: Position, rotation: Rotation, block: Block) -> Self {
+        Self {
+            position: BlockPosition::new(top_tile, rotation),
+            block,
+        }
+    }
+}
+
 pub struct MapSetup {
     pub home_positions: Vec<MapHomePosition>,
     pub free_positions: Vec<BlockPosition>,
 }
 
+impl MapSetup {
+    #[must_use]
+    pub fn new(home_positions: Vec<MapHomePosition>, free_positions: Vec<BlockPosition>) -> Self {
+        Self {
+            home_positions,
+            free_positions,
+        }
+    }
+}
+
 #[must_use]
 pub(crate) fn get_map_setup(player_count: usize) -> MapSetup {
-    let setup = vec![MapSetup {
-        home_positions: vec![
-            MapHomePosition {
-                position: BlockPosition {
-                    top_tile: Position::from_offset("D1"),
-                    rotation: 0,
-                },
-                block: STARTING_BLOCKS[0].clone(),
-            },
-            MapHomePosition {
-                position: BlockPosition {
-                    top_tile: Position::from_offset("D7"),
-                    rotation: 3,
-                },
-                block: STARTING_BLOCKS[0].clone(),
-            },
-        ],
-        free_positions: vec![
-            BlockPosition {
-                top_tile: Position::from_offset("B2"),
-                rotation: 0,
-            },
-            BlockPosition {
-                top_tile: Position::from_offset("F2"),
-                rotation: 0,
-            },
-            BlockPosition {
-                top_tile: Position::from_offset("D3"),
-                rotation: 0,
-            },
-            BlockPosition {
-                top_tile: Position::from_offset("B4"),
-                rotation: 0,
-            },
-            BlockPosition {
-                top_tile: Position::from_offset("F4"),
-                rotation: 0,
-            },
-            BlockPosition {
-                top_tile: Position::from_offset("D5"),
-                rotation: 0,
-            },
-            BlockPosition {
-                top_tile: Position::from_offset("B6"),
-                rotation: 0,
-            },
-            BlockPosition {
-                top_tile: Position::from_offset("F6"),
-                rotation: 0,
-            },
-        ],
-    }];
+    let setup = vec![
+        // 2 players
+        MapSetup::new(
+            vec![
+                MapHomePosition::new(Position::from_offset("D1"), 3, STARTING_BLOCKS[1].clone()),
+                MapHomePosition::new(Position::from_offset("D7"), 0, STARTING_BLOCKS[1].clone()),
+            ],
+            vec![
+                BlockPosition::new(Position::from_offset("B2"), 0),
+                BlockPosition::new(Position::from_offset("F2"), 0),
+                BlockPosition::new(Position::from_offset("D3"), 0),
+                BlockPosition::new(Position::from_offset("B4"), 0),
+                BlockPosition::new(Position::from_offset("F4"), 0),
+                BlockPosition::new(Position::from_offset("D5"), 0),
+                BlockPosition::new(Position::from_offset("B6"), 0),
+                BlockPosition::new(Position::from_offset("F6"), 0),
+            ],
+        ),
+        // 3 players
+        MapSetup::new(
+            vec![
+                MapHomePosition::new(Position::from_offset("E3"), 3, STARTING_BLOCKS[1].clone()),
+                MapHomePosition::new(Position::from_offset("A8"), 5, STARTING_BLOCKS[1].clone()),
+                MapHomePosition::new(Position::from_offset("G8"), 1, STARTING_BLOCKS[1].clone()),
+            ],
+            vec![
+                BlockPosition::new(Position::from_offset("C2"), 0),
+                BlockPosition::new(Position::from_offset("A5"), 4),
+                BlockPosition::new(Position::from_offset("C5"), 5),
+                BlockPosition::new(Position::from_offset("E5"), 4),
+                BlockPosition::new(Position::from_offset("G5"), 5),
+                BlockPosition::new(Position::from_offset("C6"), 0),
+                BlockPosition::new(Position::from_offset("G6"), 0),
+                BlockPosition::new(Position::from_offset("I7"), 4),
+                BlockPosition::new(Position::from_offset("C8"), 4),
+                BlockPosition::new(Position::from_offset("E8"), 5),
+                BlockPosition::new(Position::from_offset("A10"), 5),
+                BlockPosition::new(Position::from_offset("E9"), 0),
+            ],
+        ),
+        // 4 players
+        MapSetup::new(
+            vec![
+                MapHomePosition::new(Position::from_offset("C1"), 3, STARTING_BLOCKS[1].clone()),
+                MapHomePosition::new(Position::from_offset("I1"), 3, STARTING_BLOCKS[0].clone()),
+                MapHomePosition::new(Position::from_offset("C8"), 0, STARTING_BLOCKS[0].clone()),
+                MapHomePosition::new(Position::from_offset("I8"), 0, STARTING_BLOCKS[1].clone()),
+            ],
+            vec![
+                BlockPosition::new(Position::from_offset("B3"), 0),
+                BlockPosition::new(Position::from_offset("B5"), 0),
+                BlockPosition::new(Position::from_offset("D2"), 0),
+                BlockPosition::new(Position::from_offset("D4"), 0),
+                BlockPosition::new(Position::from_offset("D6"), 0),
+                BlockPosition::new(Position::from_offset("F1"), 0),
+                BlockPosition::new(Position::from_offset("F3"), 0),
+                BlockPosition::new(Position::from_offset("F5"), 0),
+                BlockPosition::new(Position::from_offset("F7"), 0),
+                BlockPosition::new(Position::from_offset("H2"), 0),
+                BlockPosition::new(Position::from_offset("H4"), 0),
+                BlockPosition::new(Position::from_offset("H6"), 0),
+                BlockPosition::new(Position::from_offset("J3"), 0),
+                BlockPosition::new(Position::from_offset("J5"), 0),
+            ],
+        ),
+    ];
     setup
         .into_iter()
         .find(|s| s.home_positions.len() == player_count)

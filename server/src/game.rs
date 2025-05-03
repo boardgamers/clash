@@ -491,7 +491,7 @@ impl Game {
             .permanent_effects
             .iter()
             .position(
-                |e| matches!(e, PermanentEffect::LoseAction(p) if *p == self.current_player_index),
+                |e| matches!(e, PermanentEffect::CivilWarLoseAction(p) if *p == self.current_player_index),
             )
             .map(|i| self.permanent_effects.remove(i));
         if lost_action.is_some() {
