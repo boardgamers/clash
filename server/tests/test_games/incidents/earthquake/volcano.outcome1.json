@@ -23,17 +23,14 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "C1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "B2"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "B3"
         }
@@ -259,20 +256,14 @@
                     },
                     {
                       "op": "add",
-                      "path": "/players/0/cities/0/city_pieces/fortress",
-                      "value": 0
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/cities/0/city_pieces/temple",
-                      "value": 1
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/cities/0/city_pieces/wonders",
-                      "value": [
-                        "Pyramids"
-                      ]
+                      "path": "/players/0/cities/0/city_pieces",
+                      "value": {
+                        "fortress": 0,
+                        "temple": 1,
+                        "wonders": [
+                          "Pyramids"
+                        ]
+                      }
                     },
                     {
                       "op": "replace",
@@ -293,7 +284,6 @@
                       "op": "add",
                       "path": "/players/0/cities/3",
                       "value": {
-                        "city_pieces": {},
                         "mood_state": "Happy",
                         "position": "B3"
                       }

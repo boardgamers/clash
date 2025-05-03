@@ -49,7 +49,6 @@
           "position": "B1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Neutral",
           "position": "B3"
         }
@@ -128,7 +127,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "position": "C1"
         },

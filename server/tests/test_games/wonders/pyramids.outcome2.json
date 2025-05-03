@@ -32,7 +32,6 @@
           "position": "A1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Neutral",
           "activations": 8,
           "position": "C2"
@@ -118,7 +117,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "activations": 2,
           "position": "C1"
@@ -311,11 +309,11 @@
                     },
                     {
                       "op": "remove",
-                      "path": "/players/0/cities/0/city_pieces/wonders"
+                      "path": "/players/0/cities/0/activations"
                     },
                     {
                       "op": "remove",
-                      "path": "/players/0/cities/0/activations"
+                      "path": "/players/0/cities/0/city_pieces"
                     },
                     {
                       "op": "replace",

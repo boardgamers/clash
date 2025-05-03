@@ -32,7 +32,6 @@
           "port_position": "A2"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "C2"
         }
@@ -111,7 +110,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "position": "C1"
         }
@@ -226,11 +224,11 @@
                     },
                     {
                       "op": "remove",
-                      "path": "/players/0/cities/0/city_pieces/port"
+                      "path": "/players/0/cities/0/activations"
                     },
                     {
                       "op": "remove",
-                      "path": "/players/0/cities/0/activations"
+                      "path": "/players/0/cities/0/city_pieces"
                     },
                     {
                       "op": "remove",

@@ -172,6 +172,8 @@ impl City {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct CityData {
+    #[serde(default)]
+    #[serde(skip_serializing_if = "CityPiecesData::is_empty")]
     city_pieces: CityPiecesData,
     mood_state: MoodState,
     #[serde(default)]

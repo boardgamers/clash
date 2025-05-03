@@ -74,7 +74,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Neutral",
           "position": "D8"
         }

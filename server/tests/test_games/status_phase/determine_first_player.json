@@ -130,7 +130,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "position": "C1"
         }

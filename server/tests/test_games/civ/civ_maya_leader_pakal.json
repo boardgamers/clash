@@ -40,7 +40,6 @@
           "port_position": "C3"
         },
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "activations": 4,
           "angry_activation": true,
@@ -150,7 +149,6 @@
           "position": "B1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "activations": 2,
           "position": "C1"

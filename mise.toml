@@ -68,6 +68,14 @@ description = "Run AI client with profiling"
 run = ["cargo run --release --package client --features profiling --bin local_client -- ai"]
 dir = "client"
 
+[tasks.build-remote-server]
+description = "Build remote server"
+run = "./scripts/build-remote-server.sh test"
+
+[tasks.build-remote-client]
+description = "Build remote client"
+run = "./scripts/build-remote-client.sh"
+
 [tasks.test-pubish-server]
 description = "Test publish server (the real one is done in GitHub Actions)"
 run = "./scripts/publish-server.sh test"

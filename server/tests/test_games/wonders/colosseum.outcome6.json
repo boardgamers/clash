@@ -43,13 +43,11 @@
           "position": "A1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "activations": 8,
           "position": "C2"
         },
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "activations": 2,
           "position": "C1"
@@ -542,7 +540,6 @@
                       "value": [
                         {
                           "activations": 2,
-                          "city_pieces": {},
                           "mood_state": "Angry",
                           "position": "C1"
                         }

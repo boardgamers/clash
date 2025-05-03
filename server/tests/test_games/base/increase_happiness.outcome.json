@@ -48,7 +48,6 @@
           "position": "B1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "activations": 4,
           "position": "B3"
@@ -143,7 +142,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "activations": 2,
           "position": "C1"

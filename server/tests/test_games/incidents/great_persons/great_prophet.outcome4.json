@@ -87,12 +87,10 @@
           "position": "C1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "B2"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "B3"
         }
@@ -183,7 +181,6 @@
           "position": "A1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "A3"
         },
@@ -550,11 +547,11 @@
                     },
                     {
                       "op": "remove",
-                      "path": "/players/0/cities/1/city_pieces/temple"
+                      "path": "/players/0/cities/1/activations"
                     },
                     {
                       "op": "remove",
-                      "path": "/players/0/cities/1/activations"
+                      "path": "/players/0/cities/1/city_pieces"
                     },
                     {
                       "op": "replace",
