@@ -13,14 +13,6 @@ pub fn get_all() -> Vec<Civilization> {
     vec![
         Civilization::new(BARBARIANS, vec![], vec![]),
         Civilization::new(PIRATES, vec![], vec![]),
-        Civilization::new(
-            "test0",
-            vec![],
-            vec![
-                Leader::builder("Alexander", "", "", "", "").build(),
-                Leader::builder("Kleopatra", "", "", "", "").build(),
-            ],
-        ),
         Civilization::new("test1", vec![], vec![]),
         Civilization::new("test2", vec![], vec![]),
         Civilization::new("test3", vec![], vec![]),
@@ -28,7 +20,14 @@ pub fn get_all() -> Vec<Civilization> {
     ]
 }
 
-fn get_maya() -> Civilization {
+fn test0() -> Civilization {
+    Civilization::new("test0", vec![], vec![
+        Leader::builder("Alexander", "", "", "", "").build(),
+        Leader::builder("Kleopatra", "", "", "", "").build(),
+    ])
+}
+
+fn maya() -> Civilization {
     Civilization::new(
         "Maya",
         vec![
@@ -78,12 +77,13 @@ fn get_maya() -> Civilization {
 
 #[must_use]
 pub fn get_civilization(name: &str) -> Option<Civilization> {
-    if name == "Maya" {
-        return Some(get_maya());
+    match name {
+        "Maya" => Some(maya()), // still needs to be implemented
+        "test0" => Some(test0()), // for testing
+        _ => get_all()
+            .into_iter()
+            .find(|civilization| civilization.name == name),
     }
-    get_all()
-        .into_iter()
-        .find(|civilization| civilization.name == name)
 }
 
 #[cfg(test)]

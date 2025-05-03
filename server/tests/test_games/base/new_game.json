@@ -17,17 +17,17 @@
         {
           "city_pieces": {},
           "mood_state": "Happy",
-          "position": "D1"
+          "position": "D2"
         }
       ],
       "units": [
         {
-          "position": "D1",
+          "position": "D2",
           "unit_type": "Settler",
           "id": 0
         }
       ],
-      "civilization": "test2",
+      "civilization": "test3",
       "advances": [
         "Farming",
         "Mining"
@@ -57,21 +57,17 @@
         {
           "city_pieces": {},
           "mood_state": "Happy",
-          "position": "D8"
+          "position": "D7"
         }
       ],
       "units": [
         {
-          "position": "D8",
+          "position": "D7",
           "unit_type": "Settler",
           "id": 0
         }
       ],
-      "civilization": "test0",
-      "available_leaders": [
-        "Alexander",
-        "Kleopatra"
-      ],
+      "civilization": "test2",
       "advances": [
         "Farming",
         "Mining"
@@ -164,11 +160,11 @@
       ],
       [
         "D1",
-        "Fertile"
+        "Barren"
       ],
       [
         "D2",
-        "Barren"
+        "Fertile"
       ],
       [
         "D3",
@@ -188,11 +184,11 @@
       ],
       [
         "D7",
-        "Barren"
+        "Fertile"
       ],
       [
         "D8",
-        "Fertile"
+        "Barren"
       ],
       [
         "E2",
@@ -396,12 +392,12 @@
       "The game has started"
     ],
     [
-      "Player1 is playing as test2",
+      "Player1 is playing as test3",
       "Player1 gained an action card from the pile",
       "Player1 gained an objective card from the pile"
     ],
     [
-      "Player2 is playing as test0",
+      "Player2 is playing as test2",
       "Player2 gained an action card from the pile",
       "Player2 gained an objective card from the pile"
     ],
