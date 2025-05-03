@@ -18,6 +18,7 @@ use server::card::{HandCard, HandCardType, hand_cards, validate_card_selection};
 use server::content::persistent_events::EventResponse;
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::tactics_card::CombatRole;
+use server::wonder::Wonder;
 
 pub struct HandCardObject {
     id: HandCard,
@@ -216,6 +217,12 @@ fn get_card_object(
             vec!["Hidden Objective Card".to_string()],
         ),
         HandCard::ObjectiveCard(id) => objective_card_object(rc, *id, selection),
+        HandCard::Wonder(n) if n == &Wonder::Hidden => HandCardObject::new(
+            card.clone(),
+            WONDER_CARD_COLOR,
+            "Wonder Card",
+            vec!["Hidden Wonder Card".to_string()],
+        ),
         HandCard::Wonder(name) => {
             let w = rc.game.cache.get_wonder(*name);
             HandCardObject::new(

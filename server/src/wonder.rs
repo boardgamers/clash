@@ -30,6 +30,7 @@ pub enum Wonder {
     GreatMausoleum,
     GreatStatue,
     GreatWall,
+    Hidden,
 }
 
 impl Wonder {
