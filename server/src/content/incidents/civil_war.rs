@@ -208,7 +208,7 @@ fn lose_action(game: &mut Game, player: usize) {
     if get_status_phase(game).is_some() {
         game.add_info_log_item(&format!("{name} lost an action for the next turn"));
         game.permanent_effects
-            .push(PermanentEffect::LoseAction(player));
+            .push(PermanentEffect::CivilWarLoseAction(player));
     } else {
         game.add_info_log_item(&format!("{name} lost an action for Revolution"));
         game.actions_left -= 1;
@@ -267,9 +267,9 @@ fn envoy() -> Incident {
         40,
         "Envoy",
         "Gain 1 idea and 1 culture token. \
-                      Select another player to gain 1 culture token. \
-                      Draw the top card from the wonder deck. \
-                      This card can be taken by anyone instead of drawing from the wonder pile.",
+        Select another player to gain 1 culture token. \
+        Draw the top card from the wonder deck. \
+        This card can be taken by anyone instead of drawing from the wonder pile.",
         IncidentBaseEffect::BarbariansMove,
     )
     .add_simple_incident_listener(

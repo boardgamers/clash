@@ -3,7 +3,6 @@ use crate::city_ui::city_labels;
 use crate::client::Features;
 use crate::client_state::StateUpdate;
 use crate::dialog_ui::{OkTooltip, ok_button};
-use crate::event_ui::event_help;
 use crate::layout_ui::{
     ICON_SIZE, bottom_center_texture, bottom_centered_text, bottom_right_texture, icon_pos,
     left_mouse_button_pressed_in_rect, top_center_anchor, top_center_texture,
@@ -301,7 +300,7 @@ fn show_permanent_effects(
     }
     label("Permanent effects:");
     for e in &game.permanent_effects {
-        for m in e.description(rc.game, rc.shown_player) {
+        for m in e.description(rc.game) {
             label(&m);
         }
     }

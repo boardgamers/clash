@@ -166,7 +166,7 @@ fn assassination(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         },
         |game, s, _| {
             game.permanent_effects
-                .push(PermanentEffect::Assassination(s.choice));
+                .push(PermanentEffect::AssassinationLoseAction(s.choice));
             game.add_info_log_item(&format!(
                 "{} has been assassinated by {}.",
                 game.player_name(s.choice),
@@ -215,7 +215,7 @@ pub(crate) fn use_assassination() -> Builtin {
 }
 
 fn is_assassinated(e: &PermanentEffect, player: usize) -> bool {
-    matches!(e, PermanentEffect::Assassination(p) if player == *p)
+    matches!(e, PermanentEffect::AssassinationLoseAction(p) if player == *p)
 }
 
 fn overproduction(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
