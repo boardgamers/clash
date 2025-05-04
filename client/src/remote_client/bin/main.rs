@@ -129,19 +129,24 @@ impl RemoteClient {
 
     fn update_state(&mut self) -> GameSyncResult {
         let s = self.control.receive_state();
-        if s.is_object() {
-            log("received state");
-            let cache = self.game.take().map_or_else(Cache::new, |g| g.cache);
-            let g = Game::from_data(
-                serde_wasm_bindgen::from_value(s).expect("game should be of type game data"),
-                cache,
-            );
-            self.state.show_player = g.active_player();
-            self.game = Some(g);
-            self.sync_state = SyncState::Playing;
-            self.control.send_ready();
-            return GameSyncResult::Update;
+        if !s.is_null() {
+            if let Some(state) = s.as_string() {
+                log("received state");
+                let cache = self.game.take().map_or_else(Cache::new, |g| g.cache);
+                let g = Game::from_data(
+                    serde_json::from_str(&state).expect("game should be of type game data"),
+                    cache,
+                );
+                self.state.show_player = g.active_player();
+                self.game = Some(g);
+                self.sync_state = SyncState::Playing;
+                self.control.send_ready();
+                return GameSyncResult::Update;
+            } else {
+                log("received state but it was not a string");
+            }
         }
+
         match &self.sync_state {
             SyncState::New => GameSyncResult::None,
             SyncState::WaitingForUpdate => GameSyncResult::WaitingForUpdate,
