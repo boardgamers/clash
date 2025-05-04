@@ -74,7 +74,7 @@ run = "./scripts/build-remote-server.sh test"
 
 [tasks.build-remote-client]
 description = "Build remote client"
-run = "./scripts/build-remote-client.sh"
+run = "./scripts/build-remote-client.sh --release"
 
 [tasks.test-pubish-server]
 description = "Test publish server (the real one is done in GitHub Actions)"
