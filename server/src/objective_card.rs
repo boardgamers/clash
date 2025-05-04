@@ -4,6 +4,7 @@ use crate::ability_initializer::{
 use crate::cache::Cache;
 use crate::card::{HandCard, draw_card_from_pile};
 use crate::content::builtin::Builtin;
+use crate::content::effects::PermanentEffect;
 use crate::content::incidents::great_persons::find_great_seer;
 use crate::content::persistent_events::{HandCardsRequest, PersistentEventType};
 use crate::events::EventOrigin;
@@ -402,6 +403,27 @@ pub(crate) fn gain_objective_card_from_pile(game: &mut Game, player: usize) {
 }
 
 pub(crate) fn draw_and_log_objective_card_from_pile(game: &mut Game, player: usize) -> Option<u8> {
+    draw_great_seer_card(game, player).or_else(|| {
+        let card = draw_card_from_pile(
+            game,
+            "Objective Card",
+            |g| &mut g.objective_cards_left,
+            |g| g.cache.get_objective_cards().iter().map(|c| c.id).collect(),
+            |p| p.objective_cards.clone(),
+        );
+        if card.is_some() {
+            game.add_info_log_item(&format!(
+                "{} gained an objective card from the pile",
+                game.player_name(player)
+            ));
+        }
+        card
+    })
+}
+
+fn draw_great_seer_card(game: &mut Game, player: usize) -> Option<u8> {
+    let mut remove_great_seer = false;
+    let mut result = None;
     if let Some(great_seer) = find_great_seer(game) {
         if let Some(o) = great_seer.assigned_objectives.iter().find_map(|o| {
             if o.player == player {
@@ -412,28 +434,22 @@ pub(crate) fn draw_and_log_objective_card_from_pile(game: &mut Game, player: usi
         }) {
             remove_element(&mut great_seer.assigned_objectives, &o)
                 .unwrap_or_else(|| panic!("should be able to remove objective card {o:?}"));
+            remove_great_seer = great_seer.assigned_objectives.is_empty();
             game.add_info_log_item(&format!(
                 "{} gained the Great Seer objective card from the pile",
                 game.player_name(player)
             ));
-            return Some(o.objective_card);
+            result = Some(o.objective_card);
         }
     }
 
-    let card = draw_card_from_pile(
-        game,
-        "Objective Card",
-        |g| &mut g.objective_cards_left,
-        |g| g.cache.get_objective_cards().iter().map(|c| c.id).collect(),
-        |p| p.objective_cards.clone(),
-    );
-    if card.is_some() {
-        game.add_info_log_item(&format!(
-            "{} gained an objective card from the pile",
-            game.player_name(player)
-        ));
+    if remove_great_seer {
+        remove_element_by(&mut game.permanent_effects, |e| {
+            matches!(e, PermanentEffect::GreatSeer(_))
+        })
+        .unwrap_or_else(|| panic!("should be able to remove great seer"));
     }
-    card
+    result
 }
 
 pub(crate) fn gain_objective_card(game: &mut Game, player_index: usize, objective_card: u8) {
