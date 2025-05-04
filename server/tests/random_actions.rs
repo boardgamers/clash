@@ -62,7 +62,7 @@ async fn test_random_actions() {
 fn random_actions_iteration(mut rng: Rng, cache: Cache) {
     let seed = rng.range(0, 10_usize.pow(15)).to_string();
     let mut game = game_setup::setup_game_with_cache(2, seed, true, cache);
-    game.ai_mode = true;
+    game.context = GameContext::AI;
     let mut ai_actions = AiActions::new();
     loop {
         if matches!(game.state, GameState::Finished) {

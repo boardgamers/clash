@@ -34,7 +34,15 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::vec;
 
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub enum GameContext {
+    Client,
+    Server,
+    AI,
+}
+
 pub struct Game {
+    pub context: GameContext, // trasient
     pub cache: Cache,
     pub state: GameState,
     pub events: Vec<PersistentEventState>,
@@ -48,7 +56,6 @@ pub struct Game {
     pub action_log_index: usize,
     pub log: Vec<Vec<String>>,
     pub undo_limit: usize,
-    pub ai_mode: bool,
     pub actions_left: u32,
     pub successful_cultural_influence: bool,
     pub round: u32, // starts at 1
@@ -69,9 +76,7 @@ pub struct Game {
 
 impl Clone for Game {
     fn clone(&self) -> Self {
-        let mut game = Self::from_data(self.cloned_data(), self.cache.clone());
-        game.ai_mode = self.ai_mode;
-        game
+        Self::from_data(self.cloned_data(), self.cache.clone(), self.context.clone())
     }
 }
 
@@ -88,8 +93,9 @@ impl Game {
     ///
     /// Panics if any wonder does not exist
     #[must_use]
-    pub fn from_data(data: GameData, cache: Cache) -> Self {
+    pub fn from_data(data: GameData, cache: Cache, context: GameContext) -> Self {
         let mut game = Self {
+            context,
             cache,
             state: data.state,
             players: Vec::new(),
@@ -102,7 +108,6 @@ impl Game {
             action_log_index: data.action_log_index,
             log: data.log,
             undo_limit: data.undo_limit,
-            ai_mode: false,
             round: data.round,
             age: data.age,
             messages: data.messages,
@@ -233,7 +238,7 @@ impl Game {
     }
 
     pub(crate) fn lock_undo(&mut self) {
-        if !self.ai_mode {
+        if self.context != GameContext::AI {
             self.undo_limit = self.action_log_index;
             current_player_turn_log_mut(self).clear_undo();
         }
@@ -414,7 +419,7 @@ impl Game {
 
     #[must_use]
     pub(crate) fn execute_cost_trigger(&self) -> CostTrigger {
-        if self.ai_mode {
+        if self.context == GameContext::AI {
             CostTrigger::NoModifiers
         } else {
             CostTrigger::WithModifiers
@@ -423,12 +428,13 @@ impl Game {
 
     #[must_use]
     pub fn can_undo(&self) -> bool {
-        !self.ai_mode && self.undo_limit < self.action_log_index
+        self.context != GameContext::AI && self.undo_limit < self.action_log_index
     }
 
     #[must_use]
     pub fn can_redo(&self) -> bool {
-        !self.ai_mode && self.action_log_index < current_player_turn_log(self).items.len()
+        self.context != GameContext::AI
+            && self.action_log_index < current_player_turn_log(self).items.len()
     }
 
     pub(crate) fn is_pirate_zone(&self, position: Position) -> bool {

@@ -4,7 +4,7 @@ use crate::cache::Cache;
 use crate::consts::{ACTIONS, NON_HUMAN_PLAYERS};
 use crate::content::civilizations::{BARBARIANS, PIRATES};
 use crate::content::{builtin, civilizations};
-use crate::game::{Game, GameState};
+use crate::game::{Game, GameContext, GameState};
 use crate::map::Map;
 use crate::objective_card::gain_objective_card_from_pile;
 use crate::player::{Player, add_unit};
@@ -82,6 +82,7 @@ pub fn setup_game_with_cache(
         .shuffled(&mut rng);
     let all = &cache.get_builtins().clone();
     let mut game = Game {
+        context: GameContext::Server,
         cache,
         state: GameState::Playing,
         events: Vec::new(),
@@ -96,7 +97,6 @@ pub fn setup_game_with_cache(
             .map(|s| vec![s.clone()])
             .collect(),
         undo_limit: 0,
-        ai_mode: false,
         actions_left: ACTIONS,
         successful_cultural_influence: false,
         round: 1,

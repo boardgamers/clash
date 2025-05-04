@@ -1,4 +1,4 @@
-use server::game::Game;
+use server::game::{Game, GameContext};
 
 use macroquad::prelude::next_frame;
 
@@ -136,6 +136,7 @@ impl RemoteClient {
                 let g = Game::from_data(
                     serde_json::from_str(&state).expect("game should be of type game data"),
                     cache,
+                    GameContext::Client,
                 );
                 self.state.show_player = g.active_player();
                 self.game = Some(g);

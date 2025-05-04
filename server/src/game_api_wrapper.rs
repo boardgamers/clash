@@ -1,6 +1,7 @@
 #![allow(clippy::pedantic)]
 
 use crate::cache::Cache;
+use crate::game::GameContext;
 use crate::{game::Game, game_api};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
@@ -17,6 +18,7 @@ fn get_game(data: String) -> Game {
     Game::from_data(
         serde_json::from_str(&data).expect("Could not deserialize game data"),
         Cache::new(),
+        GameContext::Server,
     )
 }
 

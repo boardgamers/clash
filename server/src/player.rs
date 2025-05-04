@@ -122,6 +122,10 @@ impl Player {
         }
 
         for id in objective_cards {
+            if id == 0 {
+                // hidden
+                continue;
+            }
             init_objective_card(game, player_index, id);
         }
 

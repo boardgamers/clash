@@ -13,7 +13,7 @@
 
 - `./scripts/build-remote-client.sh`
 - `cd client/js/dist && basic-http-server .`
-- `google-chrome --disable-web-security --user-data-dir=/tmp http://localhost:8612`
+- `google-chrome --js-flags='--stack-trace-limit 100' --disable-web-security --user-data-dir=/tmp http://localhost:8612`
 
 ### Server wrapper
 

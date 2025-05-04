@@ -12,7 +12,7 @@ use crate::content::persistent_events::{EventResponse, PersistentEventType};
 use crate::cultural_influence::on_cultural_influence;
 use crate::explore::{ask_explore_resolution, move_to_unexplored_tile};
 use crate::game::GameState::{Finished, Movement, Playing};
-use crate::game::{Game, GameState};
+use crate::game::{Game, GameContext, GameState};
 use crate::incident::{on_choose_incident, on_trigger_incident};
 use crate::log;
 use crate::log::{add_action_log_item, current_player_turn_log_mut};
@@ -73,7 +73,7 @@ pub enum ActionType {
 pub fn execute_action(mut game: Game, action: Action, player_index: usize) -> Game {
     assert_eq!(player_index, game.active_player(), "Not your turn");
 
-    if game.ai_mode {
+    if game.context == GameContext::AI {
         execute_without_undo(&mut game, action, player_index).expect("action should be executed");
         return game;
     }
