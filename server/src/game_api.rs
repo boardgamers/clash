@@ -1,5 +1,4 @@
-use std::{cmp::Ordering::*, mem};
-
+use super::player::Player;
 use crate::action::execute_action;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{
@@ -10,10 +9,11 @@ use crate::log::current_player_turn_log_mut;
 use crate::utils::Shuffle;
 use crate::{
     action::Action,
-    game::{Game, GameState::*, Messages},
+    game::{Game, GameState::*},
     log::LogSliceOptions,
     utils::Rng,
 };
+use std::cmp::Ordering::*;
 // Game API methods, see https://docs.boardgamers.space/guide/engine-api.html#required-methods
 
 #[must_use]
@@ -33,11 +33,11 @@ pub fn ended(game: &Game) -> bool {
 
 #[must_use]
 pub fn scores(game: &Game) -> Vec<f32> {
-    let mut scores: Vec<f32> = Vec::new();
-    for player in &game.players {
-        scores.push(player.victory_points(game));
-    }
-    scores
+    game.players
+        .iter()
+        .filter(|p| p.is_human())
+        .map(|player| player.victory_points(game))
+        .collect()
 }
 
 #[must_use]
@@ -78,6 +78,9 @@ pub fn set_player_name(mut game: Game, player_index: usize, name: String) -> Gam
 pub fn rankings(game: &Game) -> Vec<u32> {
     let mut rankings = Vec::new();
     for player in &game.players {
+        if !player.is_human() {
+            continue;
+        }
         let mut rank = 1;
         for other in &game.players {
             if other.compare_score(player, game) == Greater {
@@ -101,6 +104,7 @@ pub fn round(game: &Game) -> Option<u32> {
 pub fn civilizations(game: Game) -> Vec<String> {
     game.players
         .into_iter()
+        .filter(Player::is_human)
         .map(|player| player.civilization.name)
         .collect()
 }
@@ -167,10 +171,4 @@ pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
     }
 
     game
-}
-
-#[must_use]
-pub fn messages(mut game: Game) -> Messages {
-    let messages = mem::take(&mut game.messages);
-    Messages::new(messages, game.data())
 }

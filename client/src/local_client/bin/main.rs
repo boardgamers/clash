@@ -8,7 +8,7 @@ use macroquad::window::screen_height;
 use server::action::execute_action;
 use server::advance::{Advance, do_advance};
 use server::city::City;
-use server::game::{Game, GameData};
+use server::game::{Game, GameContext, GameData};
 use server::game_setup::setup_game;
 use server::map::Terrain;
 use server::player::add_unit;
@@ -332,7 +332,7 @@ fn import(game: Game) -> Game {
     let file = File::open(EXPORT_FILE).expect("Failed to open export file");
     let reader = BufReader::new(file);
     let data: GameData = serde_json::from_reader(reader).expect("Failed to read export file");
-    Game::from_data(data, game.cache)
+    Game::from_data(data, game.cache, GameContext::Server)
 }
 
 fn export(game: &Game) {

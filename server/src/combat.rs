@@ -510,7 +510,7 @@ pub mod tests {
     use crate::action::Action;
 
     use crate::cache::Cache;
-    use crate::game::GameState;
+    use crate::game::{GameContext, GameState};
     use crate::log::{ActionLogAge, ActionLogItem, ActionLogPlayer, ActionLogRound};
     use crate::movement::MovementAction;
     use crate::utils::tests::FloatEq;
@@ -535,6 +535,7 @@ pub mod tests {
         round.players.push(log);
         age.rounds.push(round);
         Game {
+            context: GameContext::Server,
             cache: Cache::new(),
             state: GameState::Playing,
             events: Vec::new(),
@@ -546,7 +547,6 @@ pub mod tests {
             action_log_index: 0,
             log: Vec::new(),
             undo_limit: 0,
-            ai_mode: false,
             actions_left: 3,
             successful_cultural_influence: false,
             round: 1,

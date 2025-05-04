@@ -13,7 +13,7 @@
 
 - `./scripts/build-remote-client.sh`
 - `cd client/js/dist && basic-http-server .`
-- `google-chrome --disable-web-security --user-data-dir=/tmp http://localhost:8612`
+- `google-chrome --js-flags='--stack-trace-limit 100' --disable-web-security --user-data-dir=/tmp http://localhost:8612`
 
 ### Server wrapper
 
@@ -41,7 +41,7 @@
 old
 
 - https://github.com/boardgamers/boardgamers-mono/blob/683f4d473586ffe359ad7e58f7bf08d95c96d821/.gitpod.yml#L12-L18 (if
-  you have't already)
+  you haven't already)
     - This will create three users, with emails admin@test.com, user@test.com and user2@test.com, and "password"
       password".
 

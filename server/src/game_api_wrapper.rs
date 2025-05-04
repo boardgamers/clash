@@ -1,8 +1,10 @@
 #![allow(clippy::pedantic)]
 
 use crate::cache::Cache;
+use crate::game::GameContext;
 use crate::{game::Game, game_api};
 use serde::{Deserialize, Serialize};
+use std::mem;
 use wasm_bindgen::prelude::*;
 
 extern crate console_error_panic_hook;
@@ -17,6 +19,7 @@ fn get_game(data: String) -> Game {
     Game::from_data(
         serde_json::from_str(&data).expect("Could not deserialize game data"),
         Cache::new(),
+        GameContext::Server,
     )
 }
 
@@ -37,9 +40,9 @@ pub async fn init(
 }
 
 #[wasm_bindgen(js_name = move)]
-pub fn execute_move(game: String, move_data: JsValue, player_index: usize) -> String {
+pub fn execute_move(game: String, move_data: String, player_index: usize) -> String {
     let game = get_game(game);
-    let action = serde_wasm_bindgen::from_value(move_data).expect("move should be of type action");
+    let action = serde_json::from_str(&move_data).expect("move should be of type action");
     let game = game_api::execute(game, action, player_index);
     from_game(game)
 }
@@ -132,7 +135,20 @@ pub fn strip_secret(game: String, player_index: Option<usize>) -> String {
 
 #[wasm_bindgen]
 pub fn messages(game: String) -> JsValue {
-    let game = get_game(game);
-    let messages = game_api::messages(game);
+    let mut game = get_game(game);
+    let messages = Messages::new(mem::take(&mut game.messages), from_game(game));
     serde_wasm_bindgen::to_value(&messages).expect("messages should be serializable")
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct Messages {
+    messages: Vec<String>,
+    data: String,
+}
+
+impl Messages {
+    #[must_use]
+    pub fn new(messages: Vec<String>, data: String) -> Self {
+        Self { messages, data }
+    }
 }

@@ -55,6 +55,22 @@ fn pestilence() -> Incident {
     .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, _, _, _| {
         game.permanent_effects.push(PermanentEffect::Pestilence);
     })
+    .add_simple_persistent_event_listener(
+        |event| &mut event.advance,
+        11,
+        |game, _player_index, _player_name, i| {
+            if i.advance == Advance::Sanitation
+                && game
+                    .players
+                    .iter()
+                    .all(|p| !p.is_human() || p.has_advance(Advance::Sanitation))
+            {
+                game.permanent_effects
+                    .retain(|e| e != &PermanentEffect::Pestilence);
+                game.add_info_log_item("Pestilence removed");
+            }
+        },
+    )
     .build()
 }
 

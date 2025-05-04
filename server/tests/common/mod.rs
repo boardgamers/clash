@@ -4,7 +4,7 @@ use server::action::Action;
 use server::cache::Cache;
 use server::city_pieces::Building::Temple;
 use server::content::persistent_events::{SelectedStructure, Structure};
-use server::game::Game;
+use server::game::{Game, GameContext};
 use server::log::current_player_turn_log_mut;
 use server::movement::MoveUnits;
 use server::movement::MovementAction::Move;
@@ -419,6 +419,7 @@ pub fn load_game(path: &GamePath) -> Game {
         serde_json::from_str(&read_game_str(path))
             .unwrap_or_else(|e| panic!("the game file should be deserializable {path}: {e}",)),
         Cache::new(),
+        GameContext::Server,
     );
     if update_expected() {
         write_result(&to_json(&game), path);

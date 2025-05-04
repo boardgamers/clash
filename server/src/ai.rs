@@ -8,6 +8,7 @@ use tokio::runtime::Runtime;
 
 use crate::ai_actions::AiActions;
 use crate::cache::Cache;
+use crate::game::GameContext;
 use crate::movement::MovementAction;
 use crate::{
     action::{self, Action, ActionType},
@@ -313,9 +314,7 @@ fn monte_carlo_score(
 }
 
 fn game_from_data(game_data: GameData, cache: Cache) -> Game {
-    let mut game = Game::from_data(game_data, cache);
-    game.ai_mode = true;
-    game
+    Game::from_data(game_data, cache, GameContext::AI)
 }
 
 fn monte_carlo_run(
