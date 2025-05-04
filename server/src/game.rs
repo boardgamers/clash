@@ -772,16 +772,3 @@ pub enum GameState {
     Movement(MoveState),
     Finished,
 }
-
-#[derive(Serialize, Deserialize)]
-pub struct Messages {
-    messages: Vec<String>,
-    data: GameData,
-}
-
-impl Messages {
-    #[must_use]
-    pub fn new(messages: Vec<String>, data: GameData) -> Self {
-        Self { messages, data }
-    }
-}

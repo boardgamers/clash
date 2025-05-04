@@ -1,5 +1,3 @@
-use std::{cmp::Ordering::*, mem};
-
 use crate::action::execute_action;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{
@@ -10,10 +8,11 @@ use crate::log::current_player_turn_log_mut;
 use crate::utils::Shuffle;
 use crate::{
     action::Action,
-    game::{Game, GameState::*, Messages},
+    game::{Game, GameState::*},
     log::LogSliceOptions,
     utils::Rng,
 };
+use std::cmp::Ordering::*;
 // Game API methods, see https://docs.boardgamers.space/guide/engine-api.html#required-methods
 
 #[must_use]
@@ -167,10 +166,4 @@ pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
     }
 
     game
-}
-
-#[must_use]
-pub fn messages(mut game: Game) -> Messages {
-    let messages = mem::take(&mut game.messages);
-    Messages::new(messages, game.data())
 }
