@@ -70,11 +70,7 @@ pub async fn drop_player(game: String, player_index: usize) -> String {
 #[wasm_bindgen(js_name = "currentPlayer")]
 pub fn current_player(game: String) -> JsValue {
     let game = get_game(game);
-    let player_index = game_api::current_player(&game);
-    match player_index {
-        Some(index) => JsValue::from_f64(index as f64),
-        None => JsValue::undefined(),
-    }
+    JsValue::from_f64(game.active_player() as f64)
 }
 
 #[wasm_bindgen(js_name = "logLength")]
@@ -112,11 +108,7 @@ pub fn rankings(game: String) -> JsValue {
 #[wasm_bindgen(js_name = "roundNumber")]
 pub fn round_number(game: String) -> JsValue {
     let game = get_game(game);
-    let round = game_api::round(&game);
-    match round {
-        Some(round) => JsValue::from_f64(round as f64),
-        None => JsValue::undefined(),
-    }
+    JsValue::from_f64(game_api::round(&game) as f64)
 }
 
 #[wasm_bindgen]

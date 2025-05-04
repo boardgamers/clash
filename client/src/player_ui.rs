@@ -371,8 +371,11 @@ pub fn show_global_controls(rc: &RenderContext, features: &Features) -> StateUpd
 }
 
 fn can_end_move(game: &Game) -> Option<&str> {
+    if !game.events.is_empty() {
+        return None;
+    }
     match game.state {
-        GameState::Movement { .. } => Some("End movement"),
+        GameState::Movement(_) => Some("End movement"),
         GameState::Playing => Some("End turn"),
         GameState::Finished => None,
     }
