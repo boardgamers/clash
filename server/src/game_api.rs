@@ -47,14 +47,6 @@ pub fn drop_player(mut game: Game, player_index: usize) -> Game {
 }
 
 #[must_use]
-pub fn current_player(game: &Game) -> Option<usize> {
-    match game.state {
-        Finished => None,
-        _ => Some(game.active_player()),
-    }
-}
-
-#[must_use]
 pub fn log_length(game: &Game) -> usize {
     game.log.len()
 }
@@ -93,11 +85,8 @@ pub fn rankings(game: &Game) -> Vec<u32> {
 }
 
 #[must_use]
-pub fn round(game: &Game) -> Option<u32> {
-    match game.state {
-        Playing => Some((game.age - 1) * 3 + game.round),
-        _ => None,
-    }
+pub fn round(game: &Game) -> u32 {
+    (game.age - 1) * 3 + game.round
 }
 
 #[must_use]
