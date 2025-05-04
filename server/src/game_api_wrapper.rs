@@ -105,7 +105,7 @@ pub fn rankings(game: String) -> JsValue {
     serde_wasm_bindgen::to_value(&rankings).expect("rankings should be serializable")
 }
 
-#[wasm_bindgen(js_name = "roundNumber")]
+#[wasm_bindgen(js_name = "round")]
 pub fn round_number(game: String) -> JsValue {
     let game = get_game(game);
     JsValue::from_f64(game_api::round(&game) as f64)
