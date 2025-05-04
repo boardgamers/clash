@@ -133,8 +133,8 @@ fn start_ai(game: &mut Game, features: &mut Features, state: &mut State) {
 }
 
 #[cfg(not(feature = "ai"))]
-fn ai_autoplay(_: Game, _: &mut Features, _: &mut State) -> Game {
-    panic!("should not be called");
+fn ai_autoplay(game: Game, _: &mut Features, _: &mut State) -> Game {
+    game
 }
 
 #[cfg(feature = "ai")]
