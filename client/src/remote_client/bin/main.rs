@@ -157,8 +157,7 @@ impl RemoteClient {
 
     fn execute_action(&mut self, a: &Action) {
         if let SyncState::Playing = &self.sync_state {
-            self.control
-                .send_move(serde_json::to_string(&a).unwrap());
+            self.control.send_move(serde_json::to_string(&a).unwrap());
             self.sync_state = SyncState::WaitingForUpdate;
         } else {
             log("cannot execute action");

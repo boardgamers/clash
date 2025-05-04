@@ -1,3 +1,4 @@
+use super::player::Player;
 use crate::action::execute_action;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{
@@ -103,7 +104,7 @@ pub fn round(game: &Game) -> Option<u32> {
 pub fn civilizations(game: Game) -> Vec<String> {
     game.players
         .into_iter()
-        .filter(|p| p.is_human())
+        .filter(Player::is_human)
         .map(|player| player.civilization.name)
         .collect()
 }
