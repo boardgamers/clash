@@ -27,7 +27,7 @@ pathfinding = "4.14.0"
 tokio = { version = "1.45.0", features = ["full"], optional = true }
 num_cpus = "1.16.0"
 readonly = "0.2.13"
-enumset = { version = "1.1.5" }
+enumset = { version = "1.1.6" }
 rustc-hash = "2.1.1"
 pyroscope = { version = "0.5.8", optional = true }
 pyroscope_pprofrs = { version = "0.2.10", optional = true }
