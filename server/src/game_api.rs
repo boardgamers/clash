@@ -1,10 +1,10 @@
-use crate::game::GameOptions;
 use super::player::Player;
 use crate::action::execute_action;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{
     EventResponse, PersistentEventRequest, PersistentEventType,
 };
+use crate::game::GameOptions;
 use crate::game_setup::setup_game;
 use crate::log::current_player_turn_log_mut;
 use crate::utils::Shuffle;

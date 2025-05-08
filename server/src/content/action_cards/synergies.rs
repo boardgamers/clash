@@ -88,8 +88,7 @@ fn new_plans(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
 fn swap_objective_card(game: &mut Game, player: usize, hand_cards: &[HandCard]) {
     let p = game.player(player);
     game.add_info_log_item(&format!(
-        "{} discarded an objective card to draw a new one.",
-        p.get_name()
+        "{p} discarded an objective card to draw a new one.",
     ));
     let mut ids = hand_cards
         .iter()

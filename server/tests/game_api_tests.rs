@@ -4,6 +4,7 @@ use playing_actions::PlayingActionType;
 use server::card::HandCard;
 use server::collect::PositionCollection;
 use server::content::persistent_events::{EventResponse, SelectedStructure, Structure};
+use server::game::GameOptions;
 use server::game_setup::setup_game;
 use server::log::current_player_turn_log;
 use server::unit::Units;
@@ -23,7 +24,6 @@ use server::{
     resource_pile::ResourcePile,
 };
 use std::{collections::HashMap, vec};
-use server::game::GameOptions;
 
 mod common;
 

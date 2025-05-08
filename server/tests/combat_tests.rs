@@ -80,28 +80,33 @@ fn test_combat_all_modifiers() {
             TestAction::undoable(
                 0,
                 move_action(vec![0, 1, 2, 3, 4, 5], Position::from_offset("C1")),
-            ).without_json_comparison(),
+            )
+            .without_json_comparison(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::ore(1)])),
-            ).without_json_comparison(),
+            )
+            .without_json_comparison(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![
                     ResourcePile::empty(),
                     ResourcePile::ore(2),
                 ])),
-            ).without_json_comparison(),
+            )
+            .without_json_comparison(),
             TestAction::not_undoable(
                 1,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::ore(1)])),
-            ).without_json_comparison(),
+            )
+            .without_json_comparison(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
                     1,
                 )])),
-            ).without_json_comparison(),
+            )
+            .without_json_comparison(),
             TestAction::not_undoable(
                 1,
                 Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(

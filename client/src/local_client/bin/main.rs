@@ -57,9 +57,14 @@ async fn main() {
         } else {
             "a".repeat(32)
         };
-        setup_game(players, seed, true, GameOptions {
-            undo: UndoOption::SamePlayer,
-        }) // todo make configurable
+        setup_game(
+            players,
+            seed,
+            true,
+            GameOptions {
+                undo: UndoOption::SamePlayer,
+            },
+        ) // todo make configurable
     };
 
     run(game, &mut features).await;

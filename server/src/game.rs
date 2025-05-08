@@ -50,19 +50,11 @@ impl UndoOption {
     }
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Clone, Default)]
 pub struct GameOptions {
     #[serde(default)]
     #[serde(skip_serializing_if = "UndoOption::is_default")]
-    pub undo: UndoOption
-}
-
-impl Default for GameOptions {
-    fn default() -> Self {
-        Self {
-            undo: UndoOption::default(),
-        }
-    }
+    pub undo: UndoOption,
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]
@@ -277,11 +269,11 @@ impl Game {
             self.lock_undo();
         }
     }
-    
+
     pub(crate) fn player_changed(&mut self) {
         self.lock_undo();
     }
-    
+
     fn lock_undo(&mut self) {
         if self.context != GameContext::AI {
             self.undo_limit = self.action_log_index;

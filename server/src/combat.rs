@@ -372,7 +372,12 @@ pub(crate) fn conquer_city(
     }
 }
 
-pub(crate) fn capture_position(game: &mut Game, old_player: usize, position: Position, new_player: usize) {
+pub(crate) fn capture_position(
+    game: &mut Game,
+    old_player: usize,
+    position: Position,
+    new_player: usize,
+) {
     let captured_settlers = game.players[old_player]
         .get_units(position)
         .iter()
@@ -478,18 +483,8 @@ pub(crate) fn move_with_possible_combat(
         ) {
             return;
         }
-    } else {
-        move_units(
-            game,
-            player_index,
-            &m.units,
-            m.destination,
-            m.embark_carrier_id,
-        );
-    }
 
-    // there was no combat
-    if let Some(defender) = enemy {
+        // there was no combat
         capture_position(game, defender, m.destination, player_index);
 
         let mut s = new_combat_stats(game, defender, m.destination, player_index, &m.units);
@@ -497,6 +492,14 @@ pub(crate) fn move_with_possible_combat(
         current_action_log_item(game).combat_stats = Some(s.clone());
         on_capture_undefended_position(game, player_index, s);
     }
+
+    move_units(
+        game,
+        player_index,
+        &m.units,
+        m.destination,
+        m.embark_carrier_id,
+    );
 }
 
 pub(crate) fn on_capture_undefended_position(game: &mut Game, player_index: usize, s: CombatStats) {
