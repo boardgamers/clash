@@ -111,3 +111,18 @@ fn test_change_government() {
         ],
     );
 }
+
+#[test]
+fn test_keep_government() {
+    JSON.test(
+        "keep_government",
+        vec![
+            TestAction::not_undoable(1, Action::Response(EventResponse::SelectPositions(vec![])))
+                .without_json_comparison(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::Payment(vec![ResourcePile::empty()])),
+            ),
+        ],
+    );
+}

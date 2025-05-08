@@ -101,7 +101,7 @@ pub fn setup_game_with_cache(
         successful_cultural_influence: false,
         round: 1,
         age: 0,
-        messages: vec![String::from("The game has started")],
+        messages: vec![],
         rng,
         dice_roll_outcomes: Vec::new(),
         dice_roll_log: Vec::new(),
