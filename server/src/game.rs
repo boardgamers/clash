@@ -34,6 +34,29 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::vec;
 
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Default)]
+pub enum UndoOption {
+    // prevent undoing when secret information is revealed (default)
+    #[default]
+    ProtectSecrets,
+    // allow undoing any action when the same player is playing
+    SamePlayer,
+}
+
+impl UndoOption {
+    #[must_use]
+    pub fn is_default(&self) -> bool {
+        self == &UndoOption::ProtectSecrets
+    }
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Clone, Default)]
+pub struct GameOptions {
+    #[serde(default)]
+    #[serde(skip_serializing_if = "UndoOption::is_default")]
+    pub undo: UndoOption,
+}
+
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub enum GameContext {
     Client,
@@ -43,6 +66,7 @@ pub enum GameContext {
 
 pub struct Game {
     pub context: GameContext, // trasient
+    pub options: GameOptions,
     pub cache: Cache,
     pub state: GameState,
     pub events: Vec<PersistentEventState>,
@@ -97,6 +121,7 @@ impl Game {
         let mut game = Self {
             context,
             cache,
+            options: data.options,
             state: data.state,
             players: Vec::new(),
             map: Map::from_data(data.map),
@@ -135,6 +160,7 @@ impl Game {
     pub fn data(self) -> GameData {
         GameData {
             state: self.state,
+            options: self.options,
             events: self.events,
             players: self.players.into_iter().map(Player::data).collect(),
             map: self.map.data(),
@@ -167,6 +193,7 @@ impl Game {
     pub fn cloned_data(&self) -> GameData {
         GameData {
             state: self.state.clone(),
+            options: self.options.clone(),
             events: self.events.clone(),
             players: self.players.iter().map(Player::cloned_data).collect(),
             map: self.map.cloned_data(),
@@ -237,7 +264,17 @@ impl Game {
             .find_map(|player| player.try_get_city(position))
     }
 
-    pub(crate) fn lock_undo(&mut self) {
+    pub(crate) fn information_revealed(&mut self) {
+        if self.options.undo == UndoOption::ProtectSecrets {
+            self.lock_undo();
+        }
+    }
+
+    pub(crate) fn player_changed(&mut self) {
+        self.lock_undo();
+    }
+
+    fn lock_undo(&mut self) {
         if self.context != GameContext::AI {
             self.undo_limit = self.action_log_index;
             current_player_turn_log_mut(self).clear_undo();
@@ -634,7 +671,7 @@ impl Game {
     }
 
     pub(crate) fn next_dice_roll(&mut self) -> CombatDieRoll {
-        self.lock_undo(); // dice rolls are not undoable
+        self.information_revealed();
         let dice_roll = if self.dice_roll_outcomes.is_empty() {
             self.rng.range(0, 12) as u8
         } else {
@@ -706,6 +743,8 @@ impl Game {
 
 #[derive(Serialize, Deserialize, PartialEq)]
 pub struct GameData {
+    #[serde(default)]
+    options: GameOptions,
     state: GameState,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]

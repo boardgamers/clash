@@ -1,4 +1,5 @@
 {
+  "options": {},
   "state": {
     "Movement": {
       "movement_actions_left": 1,
@@ -77,6 +78,24 @@
           "id": 0
         },
         {
+          "position": "B2",
+          "unit_type": "Cavalry",
+          "movement_restrictions": [
+            "Battle",
+            "Forest"
+          ],
+          "id": 1
+        },
+        {
+          "position": "B2",
+          "unit_type": "Elephant",
+          "movement_restrictions": [
+            "Battle",
+            "Forest"
+          ],
+          "id": 2
+        },
+        {
           "position": "B3",
           "unit_type": "Settler",
           "id": 3
@@ -99,30 +118,12 @@
         {
           "position": "C3",
           "unit_type": "Ship",
-          "id": 7,
-          "carried_units": [
-            {
-              "unit_type": "Elephant",
-              "movement_restrictions": [
-                "Battle"
-              ],
-              "id": 2
-            }
-          ]
+          "id": 7
         },
         {
           "position": "C3",
           "unit_type": "Ship",
-          "id": 8,
-          "carried_units": [
-            {
-              "unit_type": "Cavalry",
-              "movement_restrictions": [
-                "Battle"
-              ],
-              "id": 1
-            }
-          ]
+          "id": 8
         }
       ],
       "civilization": "test1",
@@ -282,12 +283,110 @@
                       "path": "/players/0/cities/4"
                     },
                     {
-                      "op": "remove",
-                      "path": "/players/0/units/5/carried_units/0/movement_restrictions"
+                      "op": "replace",
+                      "path": "/players/0/units/1/id",
+                      "value": 3
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/1/position",
+                      "value": "B3"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/1/unit_type",
+                      "value": "Settler"
                     },
                     {
                       "op": "remove",
-                      "path": "/players/0/units/6/carried_units/0/movement_restrictions"
+                      "path": "/players/0/units/1/movement_restrictions"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/2/id",
+                      "value": 4
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/2/position",
+                      "value": "B3"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/2/unit_type",
+                      "value": "Settler"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/units/2/movement_restrictions"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/3/id",
+                      "value": 5
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/4/id",
+                      "value": 6
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/units/5/carried_units",
+                      "value": [
+                        {
+                          "id": 2,
+                          "unit_type": "Elephant"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/5/id",
+                      "value": 7
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/5/position",
+                      "value": "C3"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/5/unit_type",
+                      "value": "Ship"
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/units/6/carried_units",
+                      "value": [
+                        {
+                          "id": 1,
+                          "unit_type": "Cavalry"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/6/id",
+                      "value": 8
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/6/position",
+                      "value": "C3"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/6/unit_type",
+                      "value": "Ship"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/units/7"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/units/7"
                     },
                     {
                       "op": "add",

@@ -67,7 +67,7 @@ pub fn player_select(rc: &RenderContext) -> StateUpdate {
 
         let rect = Rect::new(x, pos.y, w, size);
         let tooltip = if state.control_player.is_some_and(|p| p == pl.index) {
-            format!("{} (You)", pl.get_name())
+            format!("{pl} (You)")
         } else {
             pl.get_name()
         };

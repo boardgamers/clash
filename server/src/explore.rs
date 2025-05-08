@@ -48,7 +48,7 @@ pub(crate) fn move_to_unexplored_block(
     start: Position,
     destination: Option<Position>,
 ) -> bool {
-    game.lock_undo(); // tile is revealed, so we can't undo the move
+    game.information_revealed(); // tile is revealed
 
     let base = move_to.position.rotation;
     let opposite = (base + 3) as Rotation;

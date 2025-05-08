@@ -1,4 +1,5 @@
 {
+  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -269,7 +270,7 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 started CivilLiberties",
+      "Player1 started Civil Liberties",
       "Player1 gained 3 mood tokens using Civil Liberties"
     ],
     [

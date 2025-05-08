@@ -53,7 +53,7 @@ fn new_plans(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |e| &mut e.play_action_card,
         0,
         |game, player_index, _| {
-            game.lock_undo(); // new information revealed
+            game.information_revealed();
             let mut new_cards = game.objective_cards_left.iter().take(2).collect_vec();
             new_cards.extend(&game.player(player_index).objective_cards);
             Some(HandCardsRequest::new(
@@ -88,8 +88,7 @@ fn new_plans(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
 fn swap_objective_card(game: &mut Game, player: usize, hand_cards: &[HandCard]) {
     let p = game.player(player);
     game.add_info_log_item(&format!(
-        "{} discarded an objective card to draw a new one.",
-        p.get_name()
+        "{p} discarded an objective card to draw a new one.",
     ));
     let mut ids = hand_cards
         .iter()

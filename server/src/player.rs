@@ -34,6 +34,7 @@ use itertools::Itertools;
 use num::Zero;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::fmt::Display;
 use std::{
     cmp::Ordering::{self, *},
     mem,
@@ -79,6 +80,12 @@ pub struct Player {
     pub(crate) objective_opportunities: Vec<String>, // transient
     pub(crate) gained_objective: Option<u8>,         // transient
     pub(crate) great_mausoleum_action_cards: u8,     // transient
+}
+
+impl Display for Player {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.get_name())
+    }
 }
 
 impl Clone for Player {

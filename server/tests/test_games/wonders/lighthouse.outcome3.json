@@ -1,4 +1,5 @@
 {
+  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -446,7 +447,7 @@
       "Player1 built Great Lighthouse in city A1 for 3 food, 5 wood, 4 ore and 5 culture tokens"
     ],
     [
-      "Player1 started GreatLighthouse"
+      "Player1 started Great Lighthouse"
     ],
     [
       "Player1 activated the city at A1 used the Great Lighthouse to place a ship on C3 for free making it Neutral"

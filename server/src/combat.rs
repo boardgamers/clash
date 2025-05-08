@@ -220,7 +220,6 @@ pub(crate) fn log_round(game: &mut Game, c: &Combat) {
 }
 
 pub(crate) fn start_combat(game: &mut Game, combat: Combat) {
-    game.lock_undo(); // combat should not be undoable
     stop_current_move(game);
 
     let c = match game.trigger_persistent_event(
@@ -373,7 +372,12 @@ pub(crate) fn conquer_city(
     }
 }
 
-pub fn capture_position(game: &mut Game, old_player: usize, position: Position, new_player: usize) {
+pub(crate) fn capture_position(
+    game: &mut Game,
+    old_player: usize,
+    position: Position,
+    new_player: usize,
+) {
     let captured_settlers = game.players[old_player]
         .get_units(position)
         .iter()
@@ -479,17 +483,8 @@ pub(crate) fn move_with_possible_combat(
         ) {
             return;
         }
-    } else {
-        move_units(
-            game,
-            player_index,
-            &m.units,
-            m.destination,
-            m.embark_carrier_id,
-        );
-    }
 
-    if let Some(defender) = enemy {
+        // there was no combat
         capture_position(game, defender, m.destination, player_index);
 
         let mut s = new_combat_stats(game, defender, m.destination, player_index, &m.units);
@@ -497,6 +492,14 @@ pub(crate) fn move_with_possible_combat(
         current_action_log_item(game).combat_stats = Some(s.clone());
         on_capture_undefended_position(game, player_index, s);
     }
+
+    move_units(
+        game,
+        player_index,
+        &m.units,
+        m.destination,
+        m.embark_carrier_id,
+    );
 }
 
 pub(crate) fn on_capture_undefended_position(game: &mut Game, player_index: usize, s: CombatStats) {
@@ -517,7 +520,7 @@ pub mod tests {
     use crate::action::Action;
 
     use crate::cache::Cache;
-    use crate::game::{GameContext, GameState};
+    use crate::game::{GameContext, GameOptions, GameState};
     use crate::log::{ActionLogAge, ActionLogItem, ActionLogPlayer, ActionLogRound};
     use crate::movement::MovementAction;
     use crate::utils::tests::FloatEq;
@@ -543,6 +546,7 @@ pub mod tests {
         age.rounds.push(round);
         Game {
             context: GameContext::Server,
+            options: GameOptions::default(),
             cache: Cache::new(),
             state: GameState::Playing,
             events: Vec::new(),

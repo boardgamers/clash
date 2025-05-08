@@ -4,6 +4,7 @@ use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{
     EventResponse, PersistentEventRequest, PersistentEventType,
 };
+use crate::game::GameOptions;
 use crate::game_setup::setup_game;
 use crate::log::current_player_turn_log_mut;
 use crate::utils::Shuffle;
@@ -17,8 +18,8 @@ use std::cmp::Ordering::*;
 // Game API methods, see https://docs.boardgamers.space/guide/engine-api.html#required-methods
 
 #[must_use]
-pub fn init(player_amount: usize, seed: String) -> Game {
-    setup_game(player_amount, seed, true)
+pub fn init(player_amount: usize, seed: String, options: GameOptions) -> Game {
+    setup_game(player_amount, seed, true, options)
 }
 
 #[must_use]

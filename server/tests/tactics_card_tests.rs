@@ -14,7 +14,7 @@ fn test_peltasts() {
     JSON.test(
         "peltasts",
         vec![
-            TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("C1"))),
+            TestAction::undoable(0, move_action(vec![0], Position::from_offset("C1"))),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
@@ -30,7 +30,7 @@ fn test_encircled() {
     JSON.test(
         "encircled",
         vec![
-            TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("C1"))),
+            TestAction::undoable(0, move_action(vec![0], Position::from_offset("C1"))),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
@@ -46,7 +46,7 @@ fn test_wedge_formation() {
     JSON.test(
         "wedge_formation",
         vec![
-            TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("C1")))
+            TestAction::undoable(0, move_action(vec![0], Position::from_offset("C1")))
                 .without_json_comparison(),
             TestAction::not_undoable(
                 0,
@@ -63,7 +63,7 @@ fn test_high_morale() {
     JSON.test(
         "high_morale",
         vec![
-            TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("C1")))
+            TestAction::undoable(0, move_action(vec![0], Position::from_offset("C1")))
                 .without_json_comparison(),
             TestAction::not_undoable(
                 0,
@@ -97,7 +97,7 @@ fn test_high_ground() {
     JSON.test(
         "high_ground",
         vec![
-            TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("C1")))
+            TestAction::undoable(0, move_action(vec![0], Position::from_offset("C1")))
                 .without_json_comparison(),
             TestAction::not_undoable(
                 0,
@@ -138,7 +138,7 @@ fn test_siege() {
     JSON.test(
         "siege",
         vec![
-            TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("C1")))
+            TestAction::undoable(0, move_action(vec![0], Position::from_offset("C1")))
                 .without_json_comparison(),
             TestAction::not_undoable(
                 0,
@@ -155,7 +155,7 @@ fn test_scout() {
     JSON.test(
         "scout",
         vec![
-            TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("C1")))
+            TestAction::undoable(0, move_action(vec![0], Position::from_offset("C1")))
                 .without_json_comparison(),
             TestAction::not_undoable(
                 0,
@@ -179,7 +179,7 @@ fn test_martyr() {
     JSON.test(
         "martyr",
         vec![
-            TestAction::not_undoable(0, move_action(vec![7, 8], Position::from_offset("D2")))
+            TestAction::undoable(0, move_action(vec![7, 8], Position::from_offset("D2")))
                 .without_json_comparison(),
             TestAction::not_undoable(
                 0,
@@ -207,7 +207,7 @@ fn test_archers() {
     JSON.test(
         "archers",
         vec![
-            TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("C1")))
+            TestAction::undoable(0, move_action(vec![0], Position::from_offset("C1")))
                 .without_json_comparison(),
             TestAction::not_undoable(
                 0,
@@ -226,7 +226,7 @@ fn test_flanking() {
     JSON.test(
         "flanking",
         vec![
-            TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("C1")))
+            TestAction::undoable(0, move_action(vec![0], Position::from_offset("C1")))
                 .without_json_comparison(),
             TestAction::not_undoable(
                 0,

@@ -94,7 +94,7 @@ pub fn execute_action(mut game: Game, action: Action, player_index: usize) -> Ga
     let new_player = game.active_player();
     let patch = json_patch::diff(&new, &old);
     if old_player != new_player {
-        game.lock_undo(); // don't undo player change
+        game.player_changed();
     } else if add_undo && game.can_undo() {
         let i = game.action_log_index - 1;
         current_player_turn_log_mut(&mut game).items[i].undo = clean_patch(patch.0);

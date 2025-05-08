@@ -1,7 +1,7 @@
 #![allow(clippy::pedantic)]
 
 use crate::cache::Cache;
-use crate::game::GameContext;
+use crate::game::{GameContext, GameOptions};
 use crate::{game::Game, game_api};
 use serde::{Deserialize, Serialize};
 use std::mem;
@@ -31,11 +31,13 @@ fn from_game(game: Game) -> String {
 pub async fn init(
     player_amount: usize,
     _expansions: JsValue,
-    _options: JsValue,
+    options: JsValue,
     seed: String,
     _creator: JsValue,
 ) -> String {
-    let game = game_api::init(player_amount, seed);
+    let options = serde_wasm_bindgen::from_value::<GameOptions>(options)
+        .expect("options should be serializable");
+    let game = game_api::init(player_amount, seed, options);
     from_game(game)
 }
 

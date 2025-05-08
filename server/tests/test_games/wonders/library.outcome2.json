@@ -1,4 +1,5 @@
 {
+  "options": {},
   "state": "Playing",
   "events": [
     {
@@ -383,7 +384,7 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player1 started GreatLibrary"
+      "Player1 started Great Library"
     ],
     [
       "Player1 used the Great Library to use Engineering for the turn"

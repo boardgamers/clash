@@ -54,7 +54,7 @@ fn test_hero_general() {
     JSON.test(
         "hero_general",
         vec![
-            TestAction::not_undoable(
+            TestAction::undoable(
                 0,
                 move_action(vec![0, 1, 2, 3, 4, 5], Position::from_offset("C1")),
             )

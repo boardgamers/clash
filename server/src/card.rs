@@ -64,7 +64,7 @@ where
     }
 
     if game.age > 0 {
-        game.lock_undo(); // new information is revealed
+        game.information_revealed();
     }
 
     Some(get_pile(game).remove(0))

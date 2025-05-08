@@ -1,5 +1,7 @@
 {
-  "options": {},
+  "options": {
+    "undo": "SamePlayer"
+  },
   "state": "Playing",
   "players": [
     {
@@ -8,9 +10,9 @@
         "food": 2,
         "wood": 7,
         "ore": 7,
-        "ideas": 7,
+        "ideas": 5,
         "gold": 7,
-        "mood_tokens": 7,
+        "mood_tokens": 6,
         "culture_tokens": 7
       },
       "resource_limit": {
@@ -28,7 +30,7 @@
           "position": "A1"
         },
         {
-          "mood_state": "Neutral",
+          "mood_state": "Happy",
           "activations": 8,
           "position": "C2"
         }
@@ -55,7 +57,7 @@
           "id": 3
         },
         {
-          "position": "B6",
+          "position": "C2",
           "unit_type": "Settler",
           "id": 4
         },
@@ -78,12 +80,10 @@
       "civilization": "test0",
       "advances": [
         "Farming",
+        "Math",
         "Mining"
       ],
-      "incident_tokens": 3,
-      "objective_cards": [
-        27
-      ],
+      "incident_tokens": 2,
       "next_unit_id": 8
     },
     {
@@ -163,18 +163,6 @@
         "Fertile"
       ],
       [
-        "B4",
-        "Fertile"
-      ],
-      [
-        "B5",
-        "Fertile"
-      ],
-      [
-        "B6",
-        "Fertile"
-      ],
-      [
         "C1",
         "Barren"
       ],
@@ -211,7 +199,7 @@
   "action_log_index": 0,
   "log": [],
   "undo_limit": 0,
-  "actions_left": 2,
+  "actions_left": 1,
   "round": 1,
   "age": 1,
   "messages": [
@@ -231,5 +219,8 @@
   ],
   "wonders_left": [
     "Pyramids"
+  ],
+  "action_cards_left": [
+    1
   ]
 }
