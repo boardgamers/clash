@@ -55,7 +55,7 @@ pub fn player_select(rc: &RenderContext) -> StateUpdate {
         if game.active_player() == pl.index {
             draw_texture_ex(
                 &rc.assets().active_player,
-                x - 25.,
+                x - 35.,
                 pos.y + 10.,
                 WHITE,
                 DrawTextureParams {

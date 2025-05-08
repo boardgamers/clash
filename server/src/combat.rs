@@ -438,7 +438,7 @@ fn move_to_enemy_player_tile(
         game.player_mut(defender)
             .gain_resources(ResourcePile::gold(1));
 
-        let mut s = new_combat_stats(game, defender, destination, player_index, &unit_ids);
+        let mut s = new_combat_stats(game, defender, destination, player_index, unit_ids);
         s.result = Some(CombatResult::DefenderWins);
         current_action_log_item(game).combat_stats = Some(s.clone());
 

@@ -97,7 +97,7 @@ pub(crate) fn great_battle() -> Objective {
             if !s.is_battle() {
                 return;
             }
-            
+
             let b = s.battleground;
             let army_units_present: u8 =
                 s.attacker.fighters(b).amount() + s.defender.fighters(b).amount();
@@ -217,7 +217,7 @@ pub(crate) fn legendary_battle() -> Objective {
             if !s.is_battle() {
                 return;
             }
-            
+
             if let Some(city) = game.try_get_any_city(s.position) {
                 let fighters = s.player(player).fighters(s.battleground).amount() >= 3;
                 let city_size = city.size() >= 5;
@@ -340,7 +340,7 @@ pub(crate) fn great_commander() -> Objective {
             if !s.is_battle() {
                 return;
             }
-            
+
             let b = s.battleground;
             let o = s.opponent(player);
             let not_more_fighters = s.player(player).fighters(b).amount() <= o.fighters(b).amount();
@@ -392,7 +392,7 @@ pub(crate) fn trample() -> Objective {
             if !s.is_battle() {
                 return;
             }
-            
+
             let p = s.player(player);
             let mut survived = p.present.clone();
             for l in p.losses.clone().to_vec() {

@@ -72,7 +72,7 @@ pub(crate) fn show_cards(rc: &RenderContext) -> StateUpdate {
         .iter()
         .flat_map(|s| {
             s.selection
-                .request
+                .request                
                 .choices
                 .clone()
                 .into_iter()
@@ -80,10 +80,10 @@ pub(crate) fn show_cards(rc: &RenderContext) -> StateUpdate {
         })
         .collect_vec();
 
-    if let Some(value) = draw_cards(rc, &cards, selection.as_ref(), size, -75.) {
+    if let Some(value) = draw_cards(rc, &cards, selection.as_ref(), size, -85.) {
         return value;
     }
-    if let Some(value) = draw_cards(rc, &swap_cards, selection.as_ref(), size, -300.) {
+    if let Some(value) = draw_cards(rc, &swap_cards, selection.as_ref(), size, -310.) {
         return value;
     }
     StateUpdate::None

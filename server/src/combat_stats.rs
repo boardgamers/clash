@@ -165,7 +165,7 @@ impl CombatStats {
     pub fn is_winner(&self, player: usize) -> bool {
         Some(self.role(player)) == self.winner()
     }
-    
+
     #[must_use]
     pub fn is_battle(&self) -> bool {
         // defender can win with a fortress or great wall

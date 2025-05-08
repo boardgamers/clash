@@ -173,7 +173,8 @@ impl PlayingActionType {
                 let civil_card = game.cache.get_civil_card(*id);
                 let mut satisfying_action: Option<usize> = None;
                 if let Some(r) = &civil_card.combat_requirement {
-                    if let Some(action_log_index) = combat_requirement_met(game, player_index, *id, r)
+                    if let Some(action_log_index) =
+                        combat_requirement_met(game, player_index, *id, r)
                     {
                         satisfying_action = Some(action_log_index);
                     } else {

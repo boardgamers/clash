@@ -235,8 +235,9 @@ fn test_great_wall() {
                     advance: Advance::Storage,
                     payment: ResourcePile::ideas(2),
                 }),
-            ).without_json_comparison(),
-            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(5)))
+            )
+            .without_json_comparison(),
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(5))),
         ],
     );
 }
