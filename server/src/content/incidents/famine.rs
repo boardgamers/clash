@@ -156,8 +156,7 @@ pub(crate) fn kill_incident_units(game: &mut Game, s: &SelectedChoice<Vec<u32>>)
 
     let p = game.player(s.player_index);
     game.add_info_log_item(&format!(
-        "{} killed units: {}",
-        p.get_name(),
+        "{p} killed units: {}",
         s.choice
             .iter()
             .map(|u| {

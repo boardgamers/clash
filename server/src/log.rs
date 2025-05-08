@@ -132,12 +132,12 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
     match action {
         PlayingAction::Advance { advance, payment } => {
             format!(
-                "{player_name} paid {payment} to get the {} advance",
+                "{player} paid {payment} to get the {} advance",
                 advance.name(game)
             )
         }
         PlayingAction::FoundCity { settler } => format!(
-            "{player_name} founded a city at {}",
+            "{player} founded a city at {}",
             player.get_unit(*settler).position
         ),
         PlayingAction::Construct(c) => format_construct_log_item(game, player, &player_name, c),
@@ -347,13 +347,12 @@ pub(crate) fn format_mood_change(player: &Player, city_position: Position) -> St
 
 fn format_movement_action_log_item(action: &MovementAction, game: &Game) -> String {
     let player = &game.players[game.active_player()];
-    let player_name = player.get_name();
     match action {
         MovementAction::Move(m) if m.units.is_empty() => {
-            format!("{player_name} used a movement actions but moved no units")
+            format!("{player} used a movement actions but moved no units")
         }
         MovementAction::Move(m) => move_action_log(game, player, m),
-        MovementAction::Stop => format!("{player_name} ended the movement action"),
+        MovementAction::Stop => format!("{player} ended the movement action"),
     }
 }
 
@@ -389,10 +388,7 @@ pub(crate) fn move_action_log(game: &Game, player: &Player, m: &MoveUnits) -> St
     } else {
         format!(" for {payment}")
     };
-    format!(
-        "{} {verb} {units_str} from {start} to {dest}{suffix}{cost}",
-        player.get_name()
-    )
+    format!("{player} {verb} {units_str} from {start} to {dest}{suffix}{cost}",)
 }
 
 pub(crate) fn add_action_log_item(game: &mut Game, item: Action) {

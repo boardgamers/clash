@@ -99,10 +99,7 @@ fn incident(
                         "Pay to gain the Action Card",
                     )])
                 } else {
-                    game.add_info_log_item(&format!(
-                        "{} cannot afford to buy {name}",
-                        p.get_name()
-                    ));
+                    game.add_info_log_item(&format!("{p} cannot afford to buy {name}",));
                     None
                 }
             },

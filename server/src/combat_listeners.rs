@@ -547,10 +547,9 @@ pub(crate) fn choose_fighter_casualties() -> Builtin {
                     return None;
                 }
                 let p = game.player(player);
-                let name = p.get_name();
                 if casualties == choices.len() as u8 {
                     game.add_info_log_item(&format!(
-                        "{name} has to remove all of their {role_str} units",
+                        "{p} has to remove all of their {role_str} units",
                     ));
                     kill_fighters(game, player, &choices, &mut r.combat);
                     return None;
@@ -563,14 +562,14 @@ pub(crate) fn choose_fighter_casualties() -> Builtin {
                     || !p.is_human()
                 {
                     game.add_info_log_item(&format!(
-                        "{name} has to remove {casualties} of their {role_str} units",
+                        "{p} has to remove {casualties} of their {role_str} units",
                     ));
                     kill_fighters(game, player, &choices[..casualties as usize], &mut r.combat);
                     return None;
                 }
 
                 game.add_info_log_item(&format!(
-                    "{name} has to remove {casualties} of their {role_str} units",
+                    "{p} has to remove {casualties} of their {role_str} units",
                 ));
                 Some(UnitsRequest::new(
                     player,
@@ -659,8 +658,7 @@ pub(crate) fn place_settler() -> Builtin {
 fn kill_fighters(game: &mut Game, player: usize, killed_unit_ids: &[u32], c: &mut Combat) {
     let p = game.player(player);
     game.add_info_log_item(&format!(
-        "{} removed {}",
-        p.get_name(),
+        "{p} removed {}",
         killed_unit_ids
             .iter()
             .map(|id| p.get_unit(*id).unit_type)

@@ -122,11 +122,7 @@ pub fn setup_game_with_cache(
 
     for player_index in 0..player_amount {
         let p = game.player(player_index);
-        game.add_info_log_group(format!(
-            "{} is playing as {}",
-            p.get_name(),
-            p.civilization.name
-        ));
+        game.add_info_log_group(format!("{p} is playing as {}", p.civilization.name));
         gain_action_card_from_pile(&mut game, player_index);
         gain_objective_card_from_pile(&mut game, player_index);
         let p = game.player(player_index);
