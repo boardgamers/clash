@@ -72,7 +72,7 @@ pub(crate) fn show_cards(rc: &RenderContext) -> StateUpdate {
         .iter()
         .flat_map(|s| {
             s.selection
-                .request                
+                .request
                 .choices
                 .clone()
                 .into_iter()
