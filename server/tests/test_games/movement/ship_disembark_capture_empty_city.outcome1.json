@@ -314,7 +314,23 @@
                       "op": "remove",
                       "path": "/events"
                     }
-                  ]
+                  ],
+                  "combat_stats": {
+                    "position": "B2",
+                    "battleground": "City",
+                    "disembarked": true,
+                    "attacker": {
+                      "player": 0,
+                      "present": {
+                        "cavalry": 1,
+                        "elephants": 1
+                      }
+                    },
+                    "defender": {
+                      "player": 1
+                    },
+                    "result": "AttackerWins"
+                  }
                 },
                 {
                   "action": {

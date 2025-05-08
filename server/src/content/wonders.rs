@@ -50,7 +50,7 @@ fn great_wall() -> WonderInfo {
     )
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_round_start,
-        0,
+        8,
         move |game, p, _name, s| {
             let c = &s.combat;
             if c.round == 1

@@ -86,6 +86,8 @@ pub fn rankings(game: &Game) -> Vec<u32> {
 
 #[must_use]
 pub fn round(game: &Game) -> u32 {
+    // idea: you can easily see that "12" is age 1, round 2
+    // round 4 is status phase
     (game.age) * 10 + game.round
 }
 

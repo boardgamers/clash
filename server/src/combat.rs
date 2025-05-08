@@ -10,6 +10,7 @@ use crate::combat_stats;
 use crate::combat_stats::{CombatStats, active_defenders, new_combat_stats};
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
+use crate::log::current_action_log_item;
 use crate::movement::{MoveUnits, MovementRestriction, move_units, stop_current_move};
 use crate::player::remove_unit;
 use crate::position::Position;
@@ -436,6 +437,11 @@ fn move_to_enemy_player_tile(
         game.add_info_log_item(&format!("{} gained 1 gold", game.player_name(defender)));
         game.player_mut(defender)
             .gain_resources(ResourcePile::gold(1));
+
+        let mut s = new_combat_stats(game, defender, destination, player_index, &unit_ids);
+        s.result = Some(CombatResult::DefenderWins);
+        current_action_log_item(game).combat_stats = Some(s.clone());
+
         kill_units(game, unit_ids, player_index, Some(defender));
         return true;
     }
@@ -488,6 +494,7 @@ pub(crate) fn move_with_possible_combat(
 
         let mut s = new_combat_stats(game, defender, m.destination, player_index, &m.units);
         s.result = Some(CombatResult::AttackerWins);
+        current_action_log_item(game).combat_stats = Some(s.clone());
         on_capture_undefended_position(game, player_index, s);
     }
 }

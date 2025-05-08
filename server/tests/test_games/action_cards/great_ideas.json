@@ -118,18 +118,6 @@
           "position": "C1"
         }
       ],
-      "units": [
-        {
-          "position": "C1",
-          "unit_type": "Infantry",
-          "id": 0
-        },
-        {
-          "position": "C1",
-          "unit_type": "Infantry",
-          "id": 1
-        }
-      ],
       "civilization": "test1",
       "advances": [
         "Fanaticism",

@@ -31,7 +31,7 @@
           "position": "A1"
         },
         {
-          "mood_state": "Happy",
+          "mood_state": "Angry",
           "activations": 8,
           "position": "C2"
         }
@@ -92,7 +92,7 @@
         "Pyramids"
       ],
       "action_cards": [
-        123
+        5
       ],
       "next_unit_id": 8
     },

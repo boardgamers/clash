@@ -1,5 +1,58 @@
 {
   "state": "Playing",
+  "events": [
+    {
+      "event_type": {
+        "ActionCard": {
+          "id": 5,
+          "satisfying_action": 0
+        }
+      },
+      "player": 0,
+      "last_priority_used": 1,
+      "handler": {
+        "priority": 1,
+        "request": {
+          "Payment": [
+            {
+              "cost": {
+                "default": {
+                  "mood_tokens": 1
+                },
+                "conversions": [
+                  {
+                    "from": [
+                      {
+                        "food": 1
+                      },
+                      {
+                        "wood": 1
+                      },
+                      {
+                        "ore": 1
+                      },
+                      {
+                        "ideas": 1
+                      }
+                    ],
+                    "to": {
+                      "gold": 1
+                    },
+                    "type": "Unlimited"
+                  }
+                ]
+              },
+              "name": "Pay 1 mood token to increase the mood in a city by 1",
+              "optional": true
+            }
+          ]
+        },
+        "origin": {
+          "CivilCard": 5
+        }
+      }
+    }
+  ],
   "players": [
     {
       "id": 0,
@@ -31,7 +84,7 @@
           "position": "A1"
         },
         {
-          "mood_state": "Happy",
+          "mood_state": "Neutral",
           "activations": 8,
           "position": "C2"
         }
@@ -81,9 +134,6 @@
       "incident_tokens": 3,
       "wonder_cards": [
         "Pyramids"
-      ],
-      "action_cards": [
-        123
       ],
       "next_unit_id": 8
     },
@@ -267,7 +317,54 @@
                         }
                       }
                     }
+                  },
+                  "combat_stats": {
+                    "position": "A1",
+                    "battleground": "City",
+                    "attacker": {
+                      "player": 2,
+                      "present": {
+                        "infantry": 1,
+                        "elephants": 1
+                      }
+                    },
+                    "defender": {
+                      "player": 0
+                    },
+                    "result": "DefenderWins",
+                    "claimed_action_cards": [
+                      5
+                    ]
                   }
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "ActionCard": 5
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "remove",
+                      "path": "/action_cards_discarded/4"
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/action_cards",
+                      "value": [
+                        5
+                      ]
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/cities/1/mood_state",
+                      "value": "Angry"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events"
+                    }
+                  ]
                 }
               ]
             }
@@ -276,7 +373,7 @@
       ]
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 2,
   "log": [
     [
       "Player2 marched 2 infantry from B1 to A1"
@@ -317,6 +414,10 @@
       "Player1 gained 1 idea and 1 culture token",
       "No Wonders left to draw",
       "Player2 was selected to gain 1 culture token."
+    ],
+    [
+      "Player1 played the action card Hero General",
+      "Player1 selected city C2 to increase the mood by 1"
     ]
   ],
   "undo_limit": 1,
@@ -350,7 +451,8 @@
     1,
     2,
     3,
-    4
+    4,
+    5
   ],
   "incidents_discarded": [
     1,
