@@ -220,7 +220,6 @@ pub(crate) fn log_round(game: &mut Game, c: &Combat) {
 }
 
 pub(crate) fn start_combat(game: &mut Game, combat: Combat) {
-    game.information_revealed(); // todo remove
     stop_current_move(game);
 
     let c = match game.trigger_persistent_event(
@@ -373,7 +372,7 @@ pub(crate) fn conquer_city(
     }
 }
 
-pub fn capture_position(game: &mut Game, old_player: usize, position: Position, new_player: usize) {
+pub(crate) fn capture_position(game: &mut Game, old_player: usize, position: Position, new_player: usize) {
     let captured_settlers = game.players[old_player]
         .get_units(position)
         .iter()
@@ -489,6 +488,7 @@ pub(crate) fn move_with_possible_combat(
         );
     }
 
+    // there was no combat
     if let Some(defender) = enemy {
         capture_position(game, defender, m.destination, player_index);
 

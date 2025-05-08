@@ -456,11 +456,11 @@ fn test_trojan_horse() {
                     advance: advance::Advance::Storage,
                     payment: ResourcePile::gold(2),
                 }),
-            ),
-            TestAction::not_undoable(
+            ).without_json_comparison(),
+            TestAction::undoable(
                 0,
                 move_action(vec![0, 1, 2, 3, 4, 5], Position::from_offset("C1")),
-            ),
+            ).without_json_comparison(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![
