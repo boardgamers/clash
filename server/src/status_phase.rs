@@ -16,6 +16,7 @@ use crate::wonder::Wonder;
 use crate::{game::Game, player::Player, resource_pile::ResourcePile, utils};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use std::fmt::Display;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub enum StatusPhaseState {
@@ -25,6 +26,19 @@ pub enum StatusPhaseState {
     RazeSize1City,
     ChangeGovernmentType(bool),
     DetermineFirstPlayer(usize),
+}
+
+impl Display for StatusPhaseState {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            StatusPhaseState::CompleteObjectives => write!(f, "Complete Objectives"),
+            StatusPhaseState::FreeAdvance => write!(f, "Free Advance"),
+            StatusPhaseState::DrawCards => write!(f, "Draw Cards"),
+            StatusPhaseState::RazeSize1City => write!(f, "Raze Size 1 City"),
+            StatusPhaseState::ChangeGovernmentType(_) => write!(f, "Change Government"),
+            StatusPhaseState::DetermineFirstPlayer(_) => write!(f, "Determine First Player"),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]

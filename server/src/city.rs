@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::fmt::Display;
 use std::ops::{Add, Sub};
 
 use crate::content::custom_actions::CustomActionType::ForcedLabor;
@@ -214,6 +215,16 @@ pub enum MoodState {
     Happy = 2,
     Neutral = 1,
     Angry = 0,
+}
+
+impl Display for MoodState {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Happy => write!(f, "Happy"),
+            Neutral => write!(f, "Neutral"),
+            Angry => write!(f, "Angry"),
+        }
+    }
 }
 
 impl Add<u8> for MoodState {

@@ -189,7 +189,7 @@ pub fn show_top_left(rc: &RenderContext) {
         _ => label(&format!("Age {}", game.age)),
     }
     if let Some(s) = get_status_phase(game) {
-        label(&format!("Status Phase: {s:?}"));
+        label(&format!("Status Phase: {s}"));
     } else {
         label(&format!("Round {}", game.round));
     }

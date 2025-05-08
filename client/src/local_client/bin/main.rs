@@ -157,7 +157,7 @@ fn ai_autoplay(mut game: Game, f: &mut Features, state: &mut State) -> Game {
 #[must_use]
 fn setup_local_game() -> Game {
     let mut game = setup_game(2, "0".to_string(), false);
-    game.round = 6;
+    game.round = 1;
     game.dice_roll_outcomes = vec![1, 1, 10, 10, 10, 10, 10, 10, 10, 10];
     let add_unit = |game: &mut Game, pos: &str, player_index: usize, unit_type: UnitType| {
         add_unit(player_index, Position::from_offset(pos), unit_type, game);

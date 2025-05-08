@@ -162,7 +162,7 @@ pub(crate) fn kill_incident_units(game: &mut Game, s: &SelectedChoice<Vec<u32>>)
             .iter()
             .map(|u| {
                 let unit = p.get_unit(*u);
-                format!("{:?} at {}", unit.unit_type, unit.position)
+                format!("{} at {}", unit.unit_type, unit.position)
             })
             .join(", ")
     ));

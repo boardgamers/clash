@@ -199,7 +199,7 @@ fn destroy_building(game: &mut Game, b: Building, position: Position) {
     o.destroyed_structures.add_building(b);
     remove_building(game.player_mut(city_owner).get_city_mut(position), b);
     game.add_info_log_item(&format!(
-        "{} gained 2 points for the {:?} at {}",
+        "{} gained 2 points for the {} at {}",
         game.player_name(owner),
         b,
         position

@@ -17,7 +17,6 @@ use server::action::Action;
 use server::card::{HandCard, HandCardType, hand_cards, validate_card_selection};
 use server::content::persistent_events::EventResponse;
 use server::playing_actions::{PlayingAction, PlayingActionType};
-use server::tactics_card::CombatRole;
 use server::wonder::Wonder;
 
 pub struct HandCardObject {
@@ -275,24 +274,21 @@ fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
                 "Unit Types: {}",
                 t.fighter_requirement
                     .iter()
-                    .map(|f| format!("{f:?}"))
+                    .map(|f| format!("{f}"))
                     .join(", ")
             ),
             format!(
-                "Role: {:?}",
+                "Role: {}",
                 match t.role_requirement {
                     None => "Attacker or Defender".to_string(),
-                    Some(r) => match r {
-                        CombatRole::Attacker => "Attacker".to_string(),
-                        CombatRole::Defender => "Defender".to_string(),
-                    },
+                    Some(r) => format!("{r}"),
                 }
             ),
             format!(
-                "Location: {:?}",
+                "Location: {}",
                 match &t.location_requirement {
                     None => "Any".to_string(),
-                    Some(l) => format!("{l:?}"),
+                    Some(l) => format!("{l}"),
                 }
             ),
         ]);

@@ -37,8 +37,7 @@ fn building_lead(objective: &'static str, building: Building) -> Objective {
     Objective::builder(
         objective,
         &format!(
-            "You have more cities with a {} than any other player",
-            building.name()
+            "You have more cities with a {building} than any other player",
         ),
     )
     .status_phase_check(move |game, player| {
