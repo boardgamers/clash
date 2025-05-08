@@ -46,7 +46,15 @@ impl ResourceType {
 
 impl fmt::Display for ResourceType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{self:?}")
+        match self {
+            ResourceType::Food => write!(f, "Food"),
+            ResourceType::Wood => write!(f, "Wood"),
+            ResourceType::Ore => write!(f, "Ore"),
+            ResourceType::Ideas => write!(f, "Ideas"),
+            ResourceType::Gold => write!(f, "Gold"),
+            ResourceType::MoodTokens => write!(f, "Mood Tokens"),
+            ResourceType::CultureTokens => write!(f, "Culture Tokens"),
+        }
     }
 }
 

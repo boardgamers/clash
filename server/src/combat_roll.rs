@@ -262,6 +262,6 @@ fn add_roll_log_effect(roll_log: &mut [String], effect: &str) {
 
 fn roll_die(game: &mut Game, roll_log: &mut Vec<String>) -> CombatDieRoll {
     let roll = game.next_dice_roll();
-    roll_log.push(format!("{} ({:?}, ", roll.value, roll.bonus));
+    roll_log.push(format!("{} ({}, ", roll.value, roll.bonus));
     roll.clone()
 }

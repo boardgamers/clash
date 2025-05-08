@@ -416,8 +416,8 @@
     [
       "It's Player2's turn",
       "Player1 gains 1 gold for using a Market in a trade route",
-      "Ship at E7 traded with city at D6",
-      "Settler at E7 traded with city at E6",
+      "ship at E7 traded with city at D6",
+      "settler at E7 traded with city at E6",
       "Total reward is 2 food",
       "Player2 could not store 1 food"
     ]

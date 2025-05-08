@@ -1,13 +1,13 @@
-use hex2d::Angle;
-use itertools::Itertools;
-use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-
 use crate::city::{City, MoodState};
 use crate::consts::NON_HUMAN_PLAYERS;
 use crate::player::Player;
 use crate::position::Position;
 use crate::utils::{Rng, Shuffle};
+use hex2d::Angle;
+use itertools::Itertools;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::fmt::Display;
 
 #[derive(Clone)]
 pub struct Map {
@@ -179,6 +179,20 @@ impl Terrain {
     #[must_use]
     pub fn is_land(&self) -> bool {
         !self.is_water() && !self.is_unexplored()
+    }
+}
+
+impl Display for Terrain {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Terrain::Barren => write!(f, "Barren"),
+            Terrain::Mountain => write!(f, "Mountain"),
+            Terrain::Fertile => write!(f, "Fertile"),
+            Terrain::Forest => write!(f, "Forest"),
+            Terrain::Exhausted(_) => write!(f, "Exhausted"),
+            Terrain::Water => write!(f, "Water"),
+            Terrain::Unexplored => write!(f, "Unexplored"),
+        }
     }
 }
 

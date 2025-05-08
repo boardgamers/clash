@@ -149,8 +149,8 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
         }
         PlayingAction::Custom(action) => {
             format!(
-                "{player_name} started {:?}{}",
-                action.action, // todo custom name
+                "{player_name} started {}{}",
+                action.action,
                 if let Some(p) = action.city {
                     format!(" at {p}")
                 } else {
@@ -221,7 +221,7 @@ pub(crate) fn format_city_happiness_increase(
     steps: u8,
 ) -> String {
     format!(
-        "the city at {position} by {steps} steps, making it {:?}",
+        "the city at {position} by {steps} steps, making it {}",
         player.get_city(position).mood_state.clone() + steps
     )
 }
@@ -330,14 +330,14 @@ fn format_construct_log_item(
 
     let mood = format_mood_change(player, city_position);
     format!(
-        "{player_name} paid {payment} to construct a {city_piece:?} in the city at {city_position}{port_pos}{mood}"
+        "{player_name} paid {payment} to construct a {city_piece} in the city at {city_position}{port_pos}{mood}"
     )
 }
 
 pub(crate) fn format_mood_change(player: &Player, city_position: Position) -> String {
     if player.get_city(city_position).is_activated() {
         format!(
-            " making it {:?}",
+            " making it {}",
             player.get_city(city_position).mood_state.clone() - 1
         )
     } else {

@@ -1,6 +1,3 @@
-use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-
 use crate::city::City;
 use crate::content::advances::autocracy::{use_absolute_power, use_forced_labor};
 use crate::content::advances::culture::{sports_options, use_sports, use_theaters};
@@ -13,6 +10,9 @@ use crate::player::Player;
 use crate::playing_actions::PlayingActionType;
 use crate::position::Position;
 use crate::{game::Game, playing_actions::ActionCost, resource_pile::ResourcePile};
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::fmt::Display;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub struct CustomEventAction {
@@ -142,6 +142,30 @@ impl CustomActionType {
     #[must_use]
     fn free_and_once_per_turn(cost: ResourcePile) -> CustomActionInfo {
         CustomActionInfo::new(true, true, cost)
+    }
+}
+
+impl Display for CustomActionType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            CustomActionType::AbsolutePower => write!(f, "Absolute Power"),
+            CustomActionType::ForcedLabor => write!(f, "Forced Labor"),
+            CustomActionType::CivilLiberties => write!(f, "Civil Liberties"),
+            CustomActionType::Bartering => write!(f, "Bartering"),
+            CustomActionType::ArtsInfluenceCultureAttempt => {
+                write!(f, "Arts Influence Culture Attempt")
+            }
+            CustomActionType::VotingIncreaseHappiness => {
+                write!(f, "Voting Increase Happiness")
+            }
+            CustomActionType::FreeEconomyCollect => write!(f, "Free Economy Collect"),
+            CustomActionType::Sports => write!(f, "Sports"),
+            CustomActionType::Taxes => write!(f, "Taxes"),
+            CustomActionType::Theaters => write!(f, "Theaters"),
+            CustomActionType::GreatLibrary => write!(f, "Great Library"),
+            CustomActionType::GreatLighthouse => write!(f, "Great Lighthouse"),
+            CustomActionType::GreatStatue => write!(f, "Great Statue"),
+        }
     }
 }
 

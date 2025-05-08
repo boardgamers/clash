@@ -1,5 +1,5 @@
-use std::fmt::Display;
 use serde::{Deserialize, Serialize};
+use std::fmt::Display;
 
 use crate::city::City;
 use crate::wonder::Wonder;

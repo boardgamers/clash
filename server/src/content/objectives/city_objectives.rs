@@ -36,9 +36,7 @@ pub(crate) fn legacy() -> Objective {
 fn building_lead(objective: &'static str, building: Building) -> Objective {
     Objective::builder(
         objective,
-        &format!(
-            "You have more cities with a {building} than any other player",
-        ),
+        &format!("You have more cities with a {building} than any other player",),
     )
     .status_phase_check(move |game, player| {
         leading_player(game, player, 1, move |p, _| buildings(p, building))
