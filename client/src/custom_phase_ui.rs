@@ -19,19 +19,26 @@ use server::cultural_influence::InfluenceCultureAttempt;
 use server::game::Game;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
+use server::resource_pile::ResourcePile;
 use server::unit::Unit;
 
 pub fn custom_phase_payment_dialog(
     rc: &RenderContext,
     payments: &[Payment<String>],
 ) -> StateUpdate {
-    multi_payment_dialog(
+    let update = multi_payment_dialog(
         rc,
         payments,
         |p| ActiveDialog::PaymentRequest(p.clone()),
-        false,
+        payments.len() == 1 && payments[0].optional,
         |p| StateUpdate::Execute(Action::Response(EventResponse::Payment(p.clone()))),
-    )
+    );
+    if matches!(update, StateUpdate::Cancel) {
+        return StateUpdate::Execute(Action::Response(EventResponse::Payment(vec![
+            ResourcePile::empty(),
+        ])));
+    }
+    update
 }
 
 pub fn payment_reward_dialog(rc: &RenderContext, payment: &Payment<String>) -> StateUpdate {
