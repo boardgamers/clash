@@ -23,6 +23,7 @@ use server::{
     resource_pile::ResourcePile,
 };
 use std::{collections::HashMap, vec};
+use server::game::GameOptions;
 
 mod common;
 
@@ -31,14 +32,14 @@ const JSON: JsonTest = JsonTest::new("base");
 #[test]
 fn new_game() {
     let seed = String::new();
-    let game = setup_game(2, seed, true);
+    let game = setup_game(2, seed, true, GameOptions::default());
     JSON.compare_game("new_game", &game);
 }
 
 #[test]
 fn basic_actions() {
     let seed = String::new();
-    let mut game = setup_game(1, seed, false);
+    let mut game = setup_game(1, seed, false, GameOptions::default());
 
     game.wonders_left.retain(|w| *w == Wonder::Pyramids);
     let founded_city_position = Position::new(0, 1);
@@ -215,7 +216,7 @@ fn increase_happiness(game: Game) -> Game {
 
 #[test]
 fn undo() {
-    let mut game = setup_game(1, String::new(), false);
+    let mut game = setup_game(1, String::new(), false, GameOptions::default());
     game.players[0]
         .cities
         .push(City::new(0, Position::new(0, 0)));

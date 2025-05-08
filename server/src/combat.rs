@@ -220,7 +220,7 @@ pub(crate) fn log_round(game: &mut Game, c: &Combat) {
 }
 
 pub(crate) fn start_combat(game: &mut Game, combat: Combat) {
-    game.lock_undo(); // combat should not be undoable
+    game.information_revealed(); // todo remove
     stop_current_move(game);
 
     let c = match game.trigger_persistent_event(
@@ -517,7 +517,7 @@ pub mod tests {
     use crate::action::Action;
 
     use crate::cache::Cache;
-    use crate::game::{GameContext, GameState};
+    use crate::game::{GameContext, GameOptions, GameState};
     use crate::log::{ActionLogAge, ActionLogItem, ActionLogPlayer, ActionLogRound};
     use crate::movement::MovementAction;
     use crate::utils::tests::FloatEq;
@@ -543,6 +543,7 @@ pub mod tests {
         age.rounds.push(round);
         Game {
             context: GameContext::Server,
+            options: GameOptions::default(),
             cache: Cache::new(),
             state: GameState::Playing,
             events: Vec::new(),

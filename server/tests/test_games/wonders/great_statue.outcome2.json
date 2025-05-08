@@ -1,4 +1,5 @@
 {
+  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -269,7 +270,7 @@
       "Player1 gained an objective card from the pile"
     ],
     [
-      "Player1 started GreatStatue",
+      "Player1 started Great Statue",
       "Player1 discarded Large Civilization/Draft to gain an action"
     ]
   ],

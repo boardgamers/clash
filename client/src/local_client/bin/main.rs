@@ -8,7 +8,7 @@ use macroquad::window::screen_height;
 use server::action::execute_action;
 use server::advance::{Advance, do_advance};
 use server::city::City;
-use server::game::{Game, GameContext, GameData};
+use server::game::{Game, GameContext, GameData, GameOptions, UndoOption};
 use server::game_setup::setup_game;
 use server::map::Terrain;
 use server::player::add_unit;
@@ -57,7 +57,9 @@ async fn main() {
         } else {
             "a".repeat(32)
         };
-        setup_game(players, seed, true)
+        setup_game(players, seed, true, GameOptions {
+            undo: UndoOption::SamePlayer,
+        }) // todo make configurable
     };
 
     run(game, &mut features).await;
@@ -156,7 +158,7 @@ fn ai_autoplay(mut game: Game, f: &mut Features, state: &mut State) -> Game {
 
 #[must_use]
 fn setup_local_game() -> Game {
-    let mut game = setup_game(2, "0".to_string(), false);
+    let mut game = setup_game(2, "0".to_string(), false, GameOptions::default());
     game.round = 1;
     game.dice_roll_outcomes = vec![1, 1, 10, 10, 10, 10, 10, 10, 10, 10];
     let add_unit = |game: &mut Game, pos: &str, player_index: usize, unit_type: UnitType| {

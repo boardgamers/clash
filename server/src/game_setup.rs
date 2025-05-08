@@ -4,7 +4,7 @@ use crate::cache::Cache;
 use crate::consts::{ACTIONS, NON_HUMAN_PLAYERS};
 use crate::content::civilizations::{BARBARIANS, PIRATES};
 use crate::content::{builtin, civilizations};
-use crate::game::{Game, GameContext, GameState};
+use crate::game::{Game, GameContext, GameOptions, GameState};
 use crate::map::Map;
 use crate::objective_card::gain_objective_card_from_pile;
 use crate::player::{Player, add_unit};
@@ -20,8 +20,8 @@ use std::collections::HashMap;
 ///
 /// Panics only if there is an internal bug
 #[must_use]
-pub fn setup_game(player_amount: usize, seed: String, setup: bool) -> Game {
-    setup_game_with_cache(player_amount, seed, setup, Cache::new())
+pub fn setup_game(player_amount: usize, seed: String, setup: bool, options: GameOptions) -> Game {
+    setup_game_with_cache(player_amount, seed, setup, options, Cache::new())
 }
 
 /// Creates a new [`Game`].
@@ -34,6 +34,7 @@ pub fn setup_game_with_cache(
     player_amount: usize,
     seed: String,
     setup: bool,
+    options: GameOptions,
     cache: Cache,
 ) -> Game {
     let mut rng = init_rng(seed);
@@ -83,6 +84,7 @@ pub fn setup_game_with_cache(
     let all = &cache.get_builtins().clone();
     let mut game = Game {
         context: GameContext::Server,
+        options,
         cache,
         state: GameState::Playing,
         events: Vec::new(),

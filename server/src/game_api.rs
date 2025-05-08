@@ -1,3 +1,4 @@
+use crate::game::GameOptions;
 use super::player::Player;
 use crate::action::execute_action;
 use crate::content::effects::PermanentEffect;
@@ -17,8 +18,8 @@ use std::cmp::Ordering::*;
 // Game API methods, see https://docs.boardgamers.space/guide/engine-api.html#required-methods
 
 #[must_use]
-pub fn init(player_amount: usize, seed: String) -> Game {
-    setup_game(player_amount, seed, true)
+pub fn init(player_amount: usize, seed: String, options: GameOptions) -> Game {
+    setup_game(player_amount, seed, true, options)
 }
 
 #[must_use]

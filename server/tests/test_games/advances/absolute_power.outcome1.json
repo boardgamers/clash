@@ -1,4 +1,5 @@
 {
+  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -340,7 +341,7 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 started AbsolutePower"
+      "Player1 started Absolute Power"
     ],
     [
       "Player1 paid 2 mood tokens for the action",

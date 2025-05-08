@@ -53,7 +53,7 @@ fn new_plans(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |e| &mut e.play_action_card,
         0,
         |game, player_index, _| {
-            game.lock_undo(); // new information revealed
+            game.information_revealed();
             let mut new_cards = game.objective_cards_left.iter().take(2).collect_vec();
             new_cards.extend(&game.player(player_index).objective_cards);
             Some(HandCardsRequest::new(

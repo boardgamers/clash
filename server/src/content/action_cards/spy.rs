@@ -45,7 +45,7 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |e| &mut e.play_action_card,
         0,
         |game, player, a| {
-            game.lock_undo(); // you've seen the cards
+            game.information_revealed(); // you've seen the cards
 
             let p = game.player(player);
             let other = game.player(a.selected_player.expect("player not found"));
@@ -70,7 +70,7 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             ))
         },
         |game, s, a| {
-            game.lock_undo(); // can't undo swap - the other player saw your card
+            game.information_revealed(); // can't undo swap - the other player saw your card
 
             let _ = swap_cards(
                 game,

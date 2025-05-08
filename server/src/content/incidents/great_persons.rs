@@ -526,7 +526,7 @@ fn choose_great_seer_cards(b: ActionCardBuilder, player_order: usize) -> ActionC
         (MAX_HUMAN_PLAYERS - player_order) as i32,
         move |game, player_index, _| {
             if player_order == 0 {
-                game.lock_undo(); // new information revealed about objective cards
+                game.information_revealed(); // new information revealed about objective cards
             }
 
             let players = game.human_players(player_index);

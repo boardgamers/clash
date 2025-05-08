@@ -587,7 +587,7 @@ fn save_carried_units(game: &mut Game, player: usize, pos: Position) {
         return;
     }
 
-    game.lock_undo(); // strange bug when redoing this
+     game.information_revealed(); // strange bug when redoing this
 
     let mut embark = vec![];
 
