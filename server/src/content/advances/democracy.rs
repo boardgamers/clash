@@ -55,7 +55,7 @@ fn civil_liberties() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::CivilLiberties,
         "Civil Liberties",
-        "As a free action, you may gain 3 mood tokens. \
+        "As an action, you may gain 3 mood tokens. \
         The cost of Draft is increased to 2 mood token",
     )
     .add_custom_action(CivilLiberties)

@@ -120,7 +120,7 @@ pub(crate) fn use_sports() -> Builtin {
                 );
                 game.add_info_log_item(&format!(
                     "{} paid {pile} for Sports to increase the happiness of {position} \
-                        by {steps} steps, making it {:?}",
+                        by {steps} steps, making it {}",
                     s.player_name,
                     game.get_any_city(position).mood_state
                 ));

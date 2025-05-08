@@ -85,13 +85,13 @@ where
         self.current
             .iter_mut()
             .find(|p| p.resource == r)
-            .unwrap_or_else(|| panic!("Resource {r:?} not found in payment"))
+            .unwrap_or_else(|| panic!("Resource {r} not found in payment"))
     }
     pub fn get(&self, r: ResourceType) -> &ResourcePayment {
         self.current
             .iter()
             .find(|p| p.resource == r)
-            .unwrap_or_else(|| panic!("Resource {r:?} not found in payment"))
+            .unwrap_or_else(|| panic!("Resource {r} not found in payment"))
     }
 
     fn current(r: &[ResourcePayment], resource_type: ResourceType) -> u8 {

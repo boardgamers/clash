@@ -263,7 +263,7 @@ fn add_block_tiles_with_log(
 
     let s = tiles
         .into_iter()
-        .map(|(position, tile)| format!("{position}={tile:?}"))
+        .map(|(position, tile)| format!("{position}={tile}"))
         .sorted()
         .join(", ");
 

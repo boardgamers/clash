@@ -1,4 +1,4 @@
-name: Check Server
+name: Test Release
 
 on: [pull_request]
 
@@ -12,6 +12,8 @@ jobs:
       with:
         experimental: 'true' # to get lock file support
       env:
-        MISE_DISABLE_TOOLS: cargo:wasm-pack,cargo:wasm-bindgen-cli,node
-    - name: Check all
-      run: mise run ci-server
+        MISE_DISABLE_TOOLS: node
+    - name: Test server release
+      run: mise run build-remote-server
+    - name: Test client release
+      run: mise run build-remote-client

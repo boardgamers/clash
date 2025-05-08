@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::fmt::Display;
 
 use crate::city::City;
 use crate::wonder::Wonder;
@@ -341,5 +342,11 @@ impl Building {
             }
             Temple => "Gain 1 mood or culture token when constructed",
         }
+    }
+}
+
+impl Display for Building {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.name())
     }
 }

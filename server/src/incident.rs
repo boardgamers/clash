@@ -784,11 +784,11 @@ pub(crate) fn decrease_mod_and_log(
                 let mood_state = &game.player(s.player_index).get_city(pos).mood_state;
                 if s.actively_selected {
                     game.add_info_log_item(&format!(
-                        "{name} selected to decrease the mood in city {pos} to {mood_state:?}",
+                        "{name} selected to decrease the mood in city {pos} to {mood_state}",
                     ));
                 } else {
                     game.add_info_log_item(&format!(
-                        "{name} decreased the mood in city {pos} to {mood_state:?}",
+                        "{name} decreased the mood in city {pos} to {mood_state}",
                     ));
                 }
             }

@@ -116,10 +116,10 @@ async fn run(mut game: Game, features: &mut Features) {
     }
 }
 
-#[cfg(not(feature = "ai"))]
+#[cfg(target_arch = "wasm32")]
 fn start_ai(_: &mut Game, _: &mut Features, _: &mut State) {}
 
-#[cfg(feature = "ai")]
+#[cfg(not(target_arch = "wasm32"))]
 fn start_ai(game: &mut Game, features: &mut Features, state: &mut State) {
     use server::ai::AI;
 
@@ -127,20 +127,20 @@ fn start_ai(game: &mut Game, features: &mut Features, state: &mut State) {
         state.ai_players = game
             .human_players(0)
             .into_iter()
-            .map(|p| AI::new(1., Duration::from_secs(5), false, &game, p))
-            .collect_vec()
+            .map(|p| AI::new(1., std::time::Duration::from_secs(5), false, game, p))
+            .collect()
     }
 }
 
-#[cfg(not(feature = "ai"))]
+#[cfg(target_arch = "wasm32")]
 fn ai_autoplay(game: Game, _: &mut Features, _: &mut State) -> Game {
     game
 }
 
-#[cfg(feature = "ai")]
+#[cfg(not(target_arch = "wasm32"))]
 fn ai_autoplay(mut game: Game, f: &mut Features, state: &mut State) -> Game {
     if f.ai {
-        while state.ai_autoplay && game.state != GameState::Finished {
+        while state.ai_autoplay && game.state != server::game::GameState::Finished {
             // todo does this block the ui?
             // state.ai_autoplay = false;
             let active_player = game.active_player();
@@ -157,7 +157,7 @@ fn ai_autoplay(mut game: Game, f: &mut Features, state: &mut State) -> Game {
 #[must_use]
 fn setup_local_game() -> Game {
     let mut game = setup_game(2, "0".to_string(), false);
-    game.round = 6;
+    game.round = 1;
     game.dice_roll_outcomes = vec![1, 1, 10, 10, 10, 10, 10, 10, 10, 10];
     let add_unit = |game: &mut Game, pos: &str, player_index: usize, unit_type: UnitType| {
         add_unit(player_index, Position::from_offset(pos), unit_type, game);

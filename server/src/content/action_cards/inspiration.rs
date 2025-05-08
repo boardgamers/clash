@@ -16,6 +16,7 @@ use crate::playing_actions::ActionCost;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
+use std::sync::Arc;
 use std::vec;
 
 pub(crate) fn inspiration_action_cards() -> Vec<ActionCard> {
@@ -167,7 +168,9 @@ fn hero_general(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         ActionCost::free(),
         |_game, player, _| !cities_where_mood_can_increase(player).is_empty(),
     )
-    .requirement_land_battle_won()
+    .combat_requirement(Arc::new(|s, p| {
+        s.is_winner(p.index) && s.is_battle() && s.battleground.is_land()
+    }))
     .tactics_card(tactics_card);
 
     b = increase_mood(b, 2, false);
@@ -278,11 +281,13 @@ fn great_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     ActionCard::builder(
         id,
         "Great Ideas",
-        "After capturing a city or winning a land battle: Gain 2 ideas.",
+        "You captured a city or won a land battle this turn: Gain 2 ideas.",
         ActionCost::free(),
         |_game, player, _| player.resources.ideas < player.resource_limit.ideas,
     )
-    .requirement_land_battle_won()
+    .combat_requirement(Arc::new(|s, p| {
+        s.is_winner(p.index) && s.battleground.is_land()
+    }))
     .tactics_card(tactics_card)
     .add_simple_persistent_event_listener(
         |e| &mut e.play_action_card,

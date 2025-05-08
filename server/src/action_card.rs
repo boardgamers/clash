@@ -3,7 +3,7 @@ use crate::ability_initializer::{
 };
 use crate::advance::Advance;
 use crate::card::{discard_card, draw_card_from_pile};
-use crate::combat_listeners::CombatResult;
+use crate::combat_stats::CombatStats;
 use crate::content::persistent_events::PersistentEventType;
 use crate::content::tactics_cards::TacticsCardFactory;
 use crate::events::EventOrigin;
@@ -19,6 +19,7 @@ use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
 pub type CanPlayCard = Arc<dyn Fn(&Game, &Player, &ActionCardInfo) -> bool + Sync + Send>;
+pub type CombatRequirement = Arc<dyn Fn(&CombatStats, &Player) -> bool + Sync + Send>;
 
 #[derive(PartialEq, Eq, Copy, Clone)]
 pub enum CivilCardTarget {
@@ -33,7 +34,7 @@ pub struct CivilCard {
     pub can_play: CanPlayCard,
     pub listeners: AbilityListeners,
     pub action_type: ActionCost,
-    pub requirement_land_battle_won: bool,
+    pub combat_requirement: Option<CombatRequirement>,
     pub(crate) target: CivilCardTarget,
 }
 
@@ -70,7 +71,7 @@ impl ActionCard {
             name: name.to_string(),
             description: description.to_string(),
             can_play: Arc::new(can_play),
-            requirement_land_battle_won: false,
+            combat_requirement: None,
             builder: AbilityInitializerBuilder::new(),
             tactics_card: None,
             action_type,
@@ -96,7 +97,7 @@ pub struct ActionCardBuilder {
     description: String,
     action_type: ActionCost,
     can_play: CanPlayCard,
-    requirement_land_battle_won: bool,
+    combat_requirement: Option<CombatRequirement>,
     tactics_card: Option<TacticsCard>,
     builder: AbilityInitializerBuilder,
     target: CivilCardTarget,
@@ -110,8 +111,8 @@ impl ActionCardBuilder {
     }
 
     #[must_use]
-    pub fn requirement_land_battle_won(mut self) -> Self {
-        self.requirement_land_battle_won = true;
+    pub fn combat_requirement(mut self, requirement: CombatRequirement) -> Self {
+        self.combat_requirement = Some(requirement);
         self
     }
 
@@ -129,7 +130,7 @@ impl ActionCardBuilder {
                 name: self.name,
                 description: self.description,
                 can_play: self.can_play,
-                requirement_land_battle_won: self.requirement_land_battle_won,
+                combat_requirement: self.combat_requirement,
                 listeners: self.builder.build(),
                 action_type: self.action_type,
                 target: self.target,
@@ -154,8 +155,8 @@ pub(crate) fn play_action_card(game: &mut Game, player_index: usize, id: u8) {
     let mut satisfying_action: Option<usize> = None;
     let card = game.cache.get_civil_card(id);
     let civil_card_target = card.target;
-    if card.requirement_land_battle_won {
-        if let Some(action_log_index) = land_battle_won_action(game, player_index, id) {
+    if let Some(r) = &card.combat_requirement {
+        if let Some(action_log_index) = combat_requirement_met(game, player_index, id, r) {
             satisfying_action = Some(action_log_index);
             current_player_turn_log_mut(game).items[action_log_index]
                 .combat_stats
@@ -278,7 +279,12 @@ impl ActionCardInfo {
 }
 
 #[must_use]
-pub fn land_battle_won_action(game: &Game, player: usize, action_card_id: u8) -> Option<usize> {
+pub fn combat_requirement_met(
+    game: &Game,
+    player: usize,
+    action_card_id: u8,
+    requirement: &CombatRequirement,
+) -> Option<usize> {
     let sister_card = if action_card_id % 2 == 0 {
         action_card_id - 1
     } else {
@@ -287,9 +293,7 @@ pub fn land_battle_won_action(game: &Game, player: usize, action_card_id: u8) ->
 
     current_player_turn_log(game).items.iter().position(|a| {
         if let Some(stats) = &a.combat_stats {
-            if stats.result == Some(CombatResult::AttackerWins)
-                && stats.battleground.is_land()
-                && stats.attacker.player == player
+            if requirement(stats, game.player(player))
                 && !stats.claimed_action_cards.contains(&sister_card)
             {
                 return true;

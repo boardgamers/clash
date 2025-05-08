@@ -17,7 +17,6 @@ use server::action::Action;
 use server::card::{HandCard, HandCardType, hand_cards, validate_card_selection};
 use server::content::persistent_events::EventResponse;
 use server::playing_actions::{PlayingAction, PlayingActionType};
-use server::tactics_card::CombatRole;
 use server::wonder::Wonder;
 
 pub struct HandCardObject {
@@ -81,10 +80,10 @@ pub(crate) fn show_cards(rc: &RenderContext) -> StateUpdate {
         })
         .collect_vec();
 
-    if let Some(value) = draw_cards(rc, &cards, selection.as_ref(), size, -75.) {
+    if let Some(value) = draw_cards(rc, &cards, selection.as_ref(), size, -85.) {
         return value;
     }
-    if let Some(value) = draw_cards(rc, &swap_cards, selection.as_ref(), size, -300.) {
+    if let Some(value) = draw_cards(rc, &swap_cards, selection.as_ref(), size, -310.) {
         return value;
     }
     StateUpdate::None
@@ -275,24 +274,21 @@ fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
                 "Unit Types: {}",
                 t.fighter_requirement
                     .iter()
-                    .map(|f| format!("{f:?}"))
+                    .map(|f| format!("{f}"))
                     .join(", ")
             ),
             format!(
-                "Role: {:?}",
+                "Role: {}",
                 match t.role_requirement {
                     None => "Attacker or Defender".to_string(),
-                    Some(r) => match r {
-                        CombatRole::Attacker => "Attacker".to_string(),
-                        CombatRole::Defender => "Defender".to_string(),
-                    },
+                    Some(r) => format!("{r}"),
                 }
             ),
             format!(
-                "Location: {:?}",
+                "Location: {}",
                 match &t.location_requirement {
                     None => "Any".to_string(),
-                    Some(l) => format!("{l:?}"),
+                    Some(l) => format!("{l}"),
                 }
             ),
         ]);

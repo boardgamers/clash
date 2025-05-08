@@ -377,6 +377,9 @@ pub enum CameraMode {
     World,
 }
 
+#[cfg(not(target_arch = "wasm32"))]
+use server::ai::AI;
+
 pub struct State {
     pub assets: Assets,
     pub control_player: Option<usize>,
@@ -391,7 +394,7 @@ pub struct State {
     pub show_permanent_effects: bool,
     pub ai_autoplay: bool,
     pub pan_map: bool,
-    #[cfg(feature = "ai")]
+    #[cfg(not(target_arch = "wasm32"))]
     pub ai_players: Vec<AI>,
 }
 
@@ -420,7 +423,7 @@ impl State {
             pan_map: false,
             show_permanent_effects: false,
             ai_autoplay: false,
-            #[cfg(feature = "ai")]
+            #[cfg(not(target_arch = "wasm32"))]
             ai_players: vec![],
         }
     }

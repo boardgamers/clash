@@ -1,12 +1,12 @@
-#[cfg(feature = "ai")]
+#[cfg(not(target_arch = "wasm32"))]
 use crate::common::JsonTest;
 
 mod common;
 
-#[cfg(feature = "ai")]
+#[cfg(not(target_arch = "wasm32"))]
 const JSON: JsonTest = JsonTest::new("ai");
 
-#[cfg(feature = "ai")]
+#[cfg(not(target_arch = "wasm32"))]
 #[test]
 fn all_actions() {
     use server::action::{Action, ActionType};

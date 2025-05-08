@@ -700,5 +700,5 @@ pub(crate) fn can_gain_resource(player: &Player, r: ResourceType, amount: u8) ->
 }
 
 pub(crate) fn can_gain(player: &Player, r: ResourcePile) -> bool {
-    r.into_iter().all(|(t, a)| player.can_gain_resource(t, a))
+    r.into_iter().all(|(t, a)| can_gain_resource(player, t, a))
 }

@@ -32,7 +32,7 @@ pub fn player_select(rc: &RenderContext) -> StateUpdate {
     let game = rc.game;
     let players = game.human_players(game.starting_player_index);
 
-    let size = 40.;
+    let size = 50.;
     let mut y = (players.len() as f32 * -size) / 2.;
 
     for player_index in players {
@@ -50,13 +50,13 @@ pub fn player_select(rc: &RenderContext) -> StateUpdate {
         let text = format!("{}", pl.victory_points(game));
 
         let state = rc.state;
-        state.draw_text(&text, pos.x + 10., pos.y + 22.);
+        state.draw_text(&text, pos.x + 10., pos.y + 27.);
 
         if game.active_player() == pl.index {
             draw_texture_ex(
                 &rc.assets().active_player,
-                x - 25.,
-                pos.y + 10.,
+                x - 20.,
+                pos.y + 13.,
                 WHITE,
                 DrawTextureParams {
                     dest_size: Some(vec2(20., 20.)),
@@ -189,7 +189,7 @@ pub fn show_top_left(rc: &RenderContext) {
         _ => label(&format!("Age {}", game.age)),
     }
     if let Some(s) = get_status_phase(game) {
-        label(&format!("Status Phase: {s:?}"));
+        label(&format!("Status Phase: {s}"));
     } else {
         label(&format!("Round {}", game.round));
     }

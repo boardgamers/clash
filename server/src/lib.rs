@@ -14,13 +14,13 @@ pub mod ability_initializer;
 pub mod action;
 pub mod action_card;
 pub mod advance;
-#[cfg(feature = "ai")]
+#[cfg(not(target_arch = "wasm32"))]
 pub mod ai;
-#[cfg(feature = "ai")]
+#[cfg(not(target_arch = "wasm32"))]
 pub mod ai_actions;
-#[cfg(feature = "ai")]
+#[cfg(not(target_arch = "wasm32"))]
 pub mod ai_collect;
-#[cfg(feature = "ai")]
+#[cfg(not(target_arch = "wasm32"))]
 pub mod ai_missions;
 mod barbarians;
 pub mod cache;

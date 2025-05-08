@@ -2,7 +2,7 @@ use itertools::{Either, Itertools};
 use serde::{Deserialize, Serialize};
 
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::action_card::{ActionCardInfo, land_battle_won_action, play_action_card};
+use crate::action_card::{ActionCardInfo, combat_requirement_met, play_action_card};
 use crate::advance::{Advance, gain_advance_without_payment};
 use crate::city::{MoodState, found_city};
 use crate::collect::{PositionCollection, collect};
@@ -172,8 +172,9 @@ impl PlayingActionType {
 
                 let civil_card = game.cache.get_civil_card(*id);
                 let mut satisfying_action: Option<usize> = None;
-                if civil_card.requirement_land_battle_won {
-                    if let Some(action_log_index) = land_battle_won_action(game, player_index, *id)
+                if let Some(r) = &civil_card.combat_requirement {
+                    if let Some(action_log_index) =
+                        combat_requirement_met(game, player_index, *id, r)
                     {
                         satisfying_action = Some(action_log_index);
                     } else {

@@ -12,6 +12,7 @@ use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use action_card::discard_action_card;
+use std::fmt::Display;
 use std::sync::Arc;
 
 #[derive(Clone, PartialEq, Eq, Copy)]
@@ -52,6 +53,16 @@ pub enum FighterRequirement {
     Ship,
 }
 
+impl Display for FighterRequirement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            FighterRequirement::Army => write!(f, "Army"),
+            FighterRequirement::Fortress => write!(f, "Fortress"),
+            FighterRequirement::Ship => write!(f, "Ship"),
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub enum CombatLocation {
     City,
@@ -59,10 +70,29 @@ pub enum CombatLocation {
     Land,
 }
 
+impl Display for CombatLocation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            CombatLocation::City => write!(f, "City"),
+            CombatLocation::Sea => write!(f, "Sea"),
+            CombatLocation::Land => write!(f, "Land"),
+        }
+    }
+}
+
 #[derive(Clone, PartialEq, Eq, Copy)]
 pub enum CombatRole {
     Attacker,
     Defender,
+}
+
+impl Display for CombatRole {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            CombatRole::Attacker => write!(f, "Attacker"),
+            CombatRole::Defender => write!(f, "Defender"),
+        }
+    }
 }
 
 impl CombatRole {

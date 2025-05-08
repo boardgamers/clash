@@ -224,11 +224,7 @@ pub fn city_labels(game: &Game, city: &City) -> Vec<String> {
             "City: {}, {}, {} {}",
             game.player_name(city.player_index),
             city.size(),
-            match city.mood_state {
-                MoodState::Happy => "Happy",
-                MoodState::Neutral => "Neutral",
-                MoodState::Angry => "Angry",
-            },
+            city.mood_state,
             if city.is_activated() {
                 " (activated)"
             } else {
@@ -243,7 +239,7 @@ pub fn city_labels(game: &Game, city: &City) -> Vec<String> {
                     if city.player_index == *o {
                         b.name().to_string()
                     } else {
-                        format!("{} (owned by {})", b.name(), game.player_name(*o))
+                        format!("{b} (owned by {})", game.player_name(*o))
                     }
                 })
             })
@@ -343,7 +339,7 @@ fn draw_mood_state(rc: &RenderContext, city: &City, c: Vec2) {
         draw_scaled_icon(
             rc,
             t,
-            &format!("Happiness: {:?}", city.mood_state),
+            &format!("Happiness: {}", city.mood_state),
             c + vec2(-size / 2., -size / 2.),
             size,
         );
