@@ -441,6 +441,21 @@ fn test_construct() {
 }
 
 #[test]
+fn test_same_player_undo() {
+    JSON.test(
+        "same_player_undo",
+        vec![TestAction::undoable(
+            0,
+            Action::Playing(Construct(construct::Construct::new(
+                Position::from_offset("C2"),
+                Observatory,
+                ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
+            ))),
+        )],
+    );
+}
+
+#[test]
 fn test_construct_port() {
     JSON.test(
         "construct_port",
