@@ -86,7 +86,7 @@ pub fn rankings(game: &Game) -> Vec<u32> {
 
 #[must_use]
 pub fn round(game: &Game) -> u32 {
-    (game.age - 1) * 3 + game.round
+    (game.age) * 10 + game.round
 }
 
 #[must_use]
