@@ -121,10 +121,8 @@ fn test_keep_government() {
                 .without_json_comparison(),
             TestAction::undoable(
                 0,
-                Action::Response(EventResponse::Payment(vec![
-                    ResourcePile::empty()
-                ])),
-            )
+                Action::Response(EventResponse::Payment(vec![ResourcePile::empty()])),
+            ),
         ],
     );
 }

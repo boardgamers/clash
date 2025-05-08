@@ -423,9 +423,7 @@
   "actions_left": 3,
   "round": 1,
   "age": 1,
-  "messages": [
-    "The game has started"
-  ],
+  "messages": [],
   "rng": "187713005158128829250871947649707797698",
   "wonders_left": [
     "GreatLibrary",
