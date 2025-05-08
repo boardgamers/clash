@@ -8,7 +8,7 @@ use macroquad::window::screen_height;
 use server::action::execute_action;
 use server::advance::{Advance, do_advance};
 use server::city::City;
-use server::game::{Game, GameContext, GameData};
+use server::game::{Game, GameContext, GameData, GameState};
 use server::game_setup::setup_game;
 use server::map::Terrain;
 use server::player::add_unit;
@@ -116,10 +116,10 @@ async fn run(mut game: Game, features: &mut Features) {
     }
 }
 
-#[cfg(not(feature = "ai"))]
+#[cfg(target_arch = "wasm32")]
 fn start_ai(_: &mut Game, _: &mut Features, _: &mut State) {}
 
-#[cfg(feature = "ai")]
+#[cfg(not(target_arch = "wasm32"))]
 fn start_ai(game: &mut Game, features: &mut Features, state: &mut State) {
     use server::ai::AI;
 
@@ -132,12 +132,12 @@ fn start_ai(game: &mut Game, features: &mut Features, state: &mut State) {
     }
 }
 
-#[cfg(not(feature = "ai"))]
+#[cfg(target_arch = "wasm32")]
 fn ai_autoplay(game: Game, _: &mut Features, _: &mut State) -> Game {
     game
 }
 
-#[cfg(feature = "ai")]
+#[cfg(not(target_arch = "wasm32"))]
 fn ai_autoplay(mut game: Game, f: &mut Features, state: &mut State) -> Game {
     if f.ai {
         while state.ai_autoplay && game.state != GameState::Finished {
