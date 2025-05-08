@@ -2,6 +2,7 @@
 
 use client::client::{Features, GameSyncRequest, GameSyncResult, init, render_and_update};
 use client::client_state::State;
+use itertools::Itertools;
 use macroquad::miniquad::window::set_window_size;
 use macroquad::prelude::{next_frame, screen_width, vec2};
 use macroquad::window::screen_height;
@@ -20,6 +21,7 @@ use server::utils::remove_element;
 use server::wonder::Wonder;
 use std::fs::File;
 use std::io::BufReader;
+use std::time::Duration;
 use std::{env, vec};
 
 #[derive(PartialEq)]
@@ -127,7 +129,7 @@ fn start_ai(game: &mut Game, features: &mut Features, state: &mut State) {
         state.ai_players = game
             .human_players(0)
             .into_iter()
-            .map(|p| AI::new(1., Duration::from_secs(5), false, &game, p))
+            .map(|p| AI::new(1., Duration::from_secs(5), false, game, p))
             .collect_vec()
     }
 }
