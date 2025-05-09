@@ -18,6 +18,7 @@ use macroquad::math::vec2;
 use macroquad::prelude::*;
 use server::action::Action;
 use server::combat::Combat;
+use server::combat_stats::CombatStats;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::content::persistent_events::PersistentEventType;
 use server::game::{Game, GameState};
@@ -229,9 +230,9 @@ pub fn show_top_left(rc: &RenderContext) {
     }
 
     if let Some(c) = get_combat(game) {
-        if c.attacker == player.index {
+        if c.attacker.player == player.index {
             label(&format!("Attack - combat round {}", c.round));
-        } else if c.defender == player.index {
+        } else if c.defender.player == player.index {
             label(&format!("Defend - combat round {}", c.round));
         }
     }
@@ -306,12 +307,12 @@ fn show_permanent_effects(
     }
 }
 
-pub fn get_combat(game: &Game) -> Option<&Combat> {
+pub fn get_combat(game: &Game) -> Option<&CombatStats> {
     game.events.last().and_then(|e| match &e.event_type {
-        PersistentEventType::CombatStart(c) => Some(c),
-        PersistentEventType::CombatRoundStart(s) => Some(&s.combat),
-        PersistentEventType::CombatRoundEnd(e) => Some(&e.combat),
-        PersistentEventType::CombatStats(e) => Some(&e.combat),
+        PersistentEventType::CombatStart(c) => Some(&c.stats),
+        PersistentEventType::CombatRoundStart(s) => Some(&s.combat.stats),
+        PersistentEventType::CombatRoundEnd(e) => Some(&e.combat.stats),
+        PersistentEventType::CombatStats(s) => Some(s),
         _ => None,
     })
 }

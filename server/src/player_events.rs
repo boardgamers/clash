@@ -3,7 +3,7 @@ use crate::advance::Advance;
 use crate::barbarians::BarbariansEventState;
 use crate::collect::{CollectContext, CollectInfo};
 use crate::combat::Combat;
-use crate::combat_listeners::{CombatEnd, CombatRoundEnd, CombatRoundStart};
+use crate::combat_listeners::{CombatRoundEnd, CombatRoundStart};
 use crate::combat_stats::CombatStats;
 use crate::construct::ConstructInfo;
 use crate::content::custom_actions::CustomEventAction;

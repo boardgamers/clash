@@ -1,5 +1,4 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::combat_stats::CombatStats;
 use crate::content::advances::trade_routes::find_trade_route_for_unit;
 use crate::game::Game;
 use crate::log::current_player_turn_log;
@@ -46,7 +45,7 @@ pub(crate) fn warmonger() -> Objective {
             if stat.len() < 2
                 || !stat.iter().any(|s| s.is_winner(player))
                 // we just check that the combat position is different - not tracking the actual unit IDs
-                || stat.iter().all(|s| s.position == stat[0].position)
+                || stat.iter().all(|s| s.defender.position == stat[0].defender.position)
             {
                 return;
             }
@@ -203,7 +202,7 @@ pub(crate) fn legendary_battle() -> Objective {
                 return;
             }
 
-            if let Some(city) = game.try_get_any_city(s.position) {
+            if let Some(city) = game.try_get_any_city(s.defender.position) {
                 let fighters = s.player(player).fighters(s.battleground).amount() >= 3;
                 let city_size = city.size() >= 5;
                 let wonders = !city.pieces.wonders.is_empty();
@@ -232,7 +231,7 @@ pub(crate) fn scavenger() -> Objective {
             let units = &o.losses;
             if units.settlers > 0 || units.ships > 0 {
                 // just the position and type matter
-                let unit = Unit::new(o.player, s.position, UnitType::Settler, 0);
+                let unit = Unit::new(o.player, s.defender.position, UnitType::Settler, 0);
                 if !find_trade_route_for_unit(game, opponent, &unit).is_empty() {
                     objective_is_ready(game.player_mut(player), name);
                 }

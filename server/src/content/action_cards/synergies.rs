@@ -319,7 +319,7 @@ pub(crate) fn use_teach_us() -> Builtin {
         |game, player, e| {
             e.selected_card.map(|_| {
                 let vec = teachable_advances(
-                    game.player(e.opponent_player(player)),
+                    e.opponent_player(player, game),
                     game.player(player),
                     game,
                 );

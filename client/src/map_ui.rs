@@ -22,6 +22,7 @@ use server::unit::UnitType;
 use std::collections::HashMap;
 use std::ops::{Add, Mul, Rem, Sub};
 use std::vec;
+use server::combat_stats::CombatStats;
 
 const MOVE_DESTINATION: Color = color(51, 255, 72, 0.4);
 
@@ -193,9 +194,9 @@ fn with_alpha(base: Color, alpha: f32) -> Color {
     Color::from_vec(v)
 }
 
-fn draw_combat_arrow(c: &Combat) {
-    let from = hex_ui::center(c.attacker_position);
-    let to = hex_ui::center(c.defender_position);
+fn draw_combat_arrow(c: &CombatStats) {
+    let from = hex_ui::center(c.attacker.position);
+    let to = hex_ui::center(c.defender.position);
     let to_vec = vec2(to.x, to.y);
     let from_vec = vec2(from.x, from.y);
     let end = from_vec.add(to_vec.sub(from_vec).mul(0.7));

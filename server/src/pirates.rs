@@ -53,8 +53,7 @@ pub(crate) fn pirates_bonus() -> Builtin {
         |event| &mut event.combat_stats,
         103,
         |game, player_index, i| {
-            if game
-                .player(i.opponent_player(player_index))
+            if i.opponent_player(player_index, game)
                 .civilization
                 .is_pirates()
             {

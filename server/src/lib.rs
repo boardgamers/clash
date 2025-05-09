@@ -32,7 +32,7 @@ pub mod collect;
 pub mod combat;
 mod combat_listeners;
 mod combat_roll;
-mod combat_stats;
+pub mod combat_stats;
 pub mod construct;
 pub mod consts;
 pub mod content;

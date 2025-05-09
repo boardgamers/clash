@@ -1,5 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::combat::{capture_position, Combat, CombatRetreatState};
+use crate::combat::{capture_position, log_round, Combat, CombatRetreatState};
 use crate::combat_roll::CombatHits;
 use crate::combat_stats::CombatStats;
 use crate::content::builtin::Builtin;
@@ -298,7 +298,8 @@ pub(crate) fn combat_round_end(game: &mut Game, r: CombatRoundEnd) -> Option<Com
     } else {
         let mut c = e.combat;
         c.round += 1;
-        crate::combat::log_round(game, &c);
+        c.stats.round = c.round;
+        log_round(game, &c);
         Some(c)
     }
 }
@@ -587,7 +588,7 @@ pub(crate) fn place_settler() -> Builtin {
             let p = game.player(player_index);
             if i.is_defender(player_index)
                 && i.is_loser(player_index)
-                && game.try_get_any_city(i.position).is_some()
+                && game.try_get_any_city(i.defender.position).is_some()
                 && !p.cities.is_empty()
                 && p.available_units().settlers > 0
                 && p.is_human()

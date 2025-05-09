@@ -12,6 +12,7 @@ use std::mem;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CombatPlayerStats {
+    pub position: Position,
     pub player: usize,
     #[serde(default)]
     #[serde(skip_serializing_if = "Units::is_empty")]
@@ -23,11 +24,12 @@ pub struct CombatPlayerStats {
 
 impl CombatPlayerStats {
     #[must_use]
-    pub fn new(player: usize, present: Units) -> Self {
+    pub fn new(player: usize, present: Units, position: Position) -> Self {
         Self {
             player,
             present,
             losses: Units::empty(),
+            position
         }
     }
 
@@ -70,7 +72,7 @@ impl Battleground {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CombatStats {
-    pub position: Position,
+    pub round: u32, //starts with one,
     pub battleground: Battleground,
     #[serde(default)]
     #[serde(skip_serializing_if = "utils::is_false")]
@@ -91,7 +93,6 @@ pub struct CombatStats {
 impl CombatStats {
     #[must_use]
     pub fn new(
-        position: Position,
         battleground: Battleground,
         disembarked: bool,
         attacker: CombatPlayerStats,
@@ -99,7 +100,6 @@ impl CombatStats {
         result: Option<CombatResult>,
     ) -> Self {
         Self {
-            position,
             battleground,
             disembarked,
             attacker,
@@ -136,12 +136,12 @@ impl CombatStats {
 
     #[must_use]
     pub fn opponent_is_human(&self, player: usize, game: &Game) -> bool {
-        game.player(self.opponent_player(player)).is_human()
+        self.opponent_player(player, game).is_human()
     }
-    
+
     #[must_use]
-    pub fn opponent_player(&self, player: usize) -> usize {
-        self.opponent(player).player
+    pub fn opponent_player<'a>(&self, player: usize, game: &'a Game) -> &'a Player {
+        game.player(self.opponent(player).player)
     }
 
     #[must_use]
@@ -201,9 +201,7 @@ impl CombatStats {
     pub fn captured_city(&self, player: usize, game: &Game) -> bool {
         self.is_attacker(player)
             && self.is_winner(player)
-            && game
-                .try_get_any_city(self.position)
-                .is_some()
+            && game.try_get_any_city(self.defender.position).is_some()
     }
 }
 
@@ -231,17 +229,18 @@ pub(crate) fn new_combat_stats(
 
     let a = game.player(attacker);
     let d = game.player(defender);
+    let attacker_position = a.get_unit(attackers[0]).position;
     let stats = CombatStats::new(
-        defender_position,
         battleground,
-        battleground.is_land() && game.map.is_sea(a.get_unit(attackers[0]).position),
-        CombatPlayerStats::new(attacker, to_units(attackers, a)),
+        battleground.is_land() && game.map.is_sea(attacker_position),
+        CombatPlayerStats::new(attacker, to_units(attackers, a), attacker_position),
         CombatPlayerStats::new(
             defender,
             d.get_units(defender_position)
                 .iter()
                 .map(|unit| unit.unit_type)
                 .collect(),
+            defender_position,
         ),
         result,
     );

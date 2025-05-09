@@ -67,8 +67,7 @@ pub(crate) fn barbarians_bonus() -> Builtin {
             105,
             |game, player_index, i| {
                 if i.is_winner(player_index)
-                    && game
-                        .player(i.opponent_player(player_index))
+                    && i.opponent_player(player_index, game)
                         .civilization
                         .is_barbarian()
                 {
