@@ -11,33 +11,21 @@
   "events": [
     {
       "event_type": {
-        "CombatEnd": {
-          "result": "AttackerWins",
-          "combat": {
-            "round": 1,
-            "defender": 1,
-            "defender_position": "B1",
-            "attacker": 0,
-            "attacker_position": "A1",
-            "attackers": [
-              10
-            ],
-            "retreat": "CanRetreat",
-            "stats": {
-              "position": "B1",
-              "battleground": "CityWithFortress",
-              "attacker": {
-                "player": 0,
-                "present": {
-                  "leaders": 1
-                }
-              },
-              "defender": {
-                "player": 1
-              },
-              "result": "AttackerWins"
+        "CombatStats": {
+          "round": 1,
+          "battleground": "CityWithFortress",
+          "attacker": {
+            "position": "A1",
+            "player": 0,
+            "present": {
+              "leaders": 1
             }
-          }
+          },
+          "defender": {
+            "position": "B1",
+            "player": 1
+          },
+          "result": "AttackerWins"
         }
       },
       "players_used": [
@@ -357,15 +345,17 @@
                     }
                   },
                   "combat_stats": {
-                    "position": "B1",
+                    "round": 1,
                     "battleground": "CityWithFortress",
                     "attacker": {
+                      "position": "A1",
                       "player": 0,
                       "present": {
                         "leaders": 1
                       }
                     },
                     "defender": {
+                      "position": "B1",
                       "player": 1
                     },
                     "result": "AttackerWins"

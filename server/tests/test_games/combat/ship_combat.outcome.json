@@ -33,9 +33,10 @@
             ],
             "retreat": "CanRetreat",
             "stats": {
-              "position": "D2",
+              "round": 1,
               "battleground": "Sea",
               "attacker": {
+                "position": "C3",
                 "player": 0,
                 "present": {
                   "ships": 2
@@ -45,6 +46,7 @@
                 }
               },
               "defender": {
+                "position": "D2",
                 "player": 1,
                 "present": {
                   "ships": 1

@@ -4,41 +4,30 @@
   "events": [
     {
       "event_type": {
-        "CombatEnd": {
-          "result": "AttackerWins",
-          "combat": {
-            "round": 1,
-            "defender": 2,
-            "defender_position": "C3",
-            "attacker": 0,
-            "attacker_position": "C2",
-            "attackers": [
-              12
-            ],
-            "retreat": "CannotRetreat",
-            "stats": {
-              "position": "C3",
-              "battleground": "Sea",
-              "attacker": {
-                "player": 0,
-                "present": {
-                  "ships": 3
-                },
-                "losses": {
-                  "ships": 2
-                }
-              },
-              "defender": {
-                "player": 2,
-                "present": {
-                  "ships": 2
-                },
-                "losses": {
-                  "ships": 2
-                }
-              }
+        "CombatStats": {
+          "round": 1,
+          "battleground": "Sea",
+          "attacker": {
+            "position": "C2",
+            "player": 0,
+            "present": {
+              "ships": 3
+            },
+            "losses": {
+              "ships": 2
             }
-          }
+          },
+          "defender": {
+            "position": "C3",
+            "player": 2,
+            "present": {
+              "ships": 2
+            },
+            "losses": {
+              "ships": 2
+            }
+          },
+          "result": "AttackerWins"
         }
       },
       "player": 0,
@@ -333,6 +322,31 @@
                         "gold": 1
                       }
                     }
+                  },
+                  "combat_stats": {
+                    "round": 1,
+                    "battleground": "Sea",
+                    "attacker": {
+                      "position": "C2",
+                      "player": 0,
+                      "present": {
+                        "ships": 3
+                      },
+                      "losses": {
+                        "ships": 2
+                      }
+                    },
+                    "defender": {
+                      "position": "C3",
+                      "player": 2,
+                      "present": {
+                        "ships": 2
+                      },
+                      "losses": {
+                        "ships": 2
+                      }
+                    },
+                    "result": "AttackerWins"
                   }
                 }
               ]

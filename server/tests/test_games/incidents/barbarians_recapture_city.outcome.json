@@ -212,9 +212,10 @@
                     }
                   },
                   "combat_stats": {
-                    "position": "C2",
+                    "round": 1,
                     "battleground": "CityWithFortress",
                     "attacker": {
+                      "position": "B1",
                       "player": 0,
                       "present": {
                         "elephants": 4
@@ -224,6 +225,7 @@
                       }
                     },
                     "defender": {
+                      "position": "C2",
                       "player": 2,
                       "present": {
                         "infantry": 3
