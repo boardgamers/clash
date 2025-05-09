@@ -175,7 +175,7 @@ pub fn initiate_combat(
 ) {
     let stats = new_combat_stats(game, defender, defender_position, attacker, &attackers, None);
     let combat = Combat::new(
-        1,
+        stats.round,
         defender,
         defender_position,
         attacker,

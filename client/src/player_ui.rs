@@ -17,7 +17,6 @@ use itertools::Itertools;
 use macroquad::math::vec2;
 use macroquad::prelude::*;
 use server::action::Action;
-use server::combat::Combat;
 use server::combat_stats::CombatStats;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::content::persistent_events::PersistentEventType;

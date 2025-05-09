@@ -285,7 +285,7 @@ pub(crate) fn use_teach_us() -> Builtin {
              without changing the Game Event counter.",
     )
     .add_hand_card_request(
-        |e| &mut e.combat_stats, // todo new event that includes all combat stats
+        |e| &mut e.combat_stats, 
         91,
         |game, player_index, s| {
             if s.is_winner(player_index) && s.battleground.is_city() {

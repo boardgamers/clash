@@ -41,10 +41,12 @@ impl CombatPlayerStats {
         self.losses = losses;
     }
 
+    #[must_use]
     pub fn fighters(&self, battleground: Battleground) -> Units {
         filter_fighters(battleground, &self.present)
     }
 
+    #[must_use]
     pub fn fighter_losses(&self, battleground: Battleground) -> Units {
         filter_fighters(battleground, &self.losses)
     }
@@ -107,6 +109,7 @@ impl CombatStats {
             result,
             claimed_action_cards: Vec::new(),
             selected_card: None,
+            round: 1,
         }
     }
 
