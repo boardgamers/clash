@@ -15,10 +15,9 @@ pub(crate) fn conqueror() -> Objective {
         "You conquered a city with at least 1 Army unit or Fortress this turn.",
     )
     .add_simple_persistent_event_listener(
-        |event| &mut event.combat_end,
+        |event| &mut event.combat_stats,
         1,
-        |game, player, _, e| {
-            let s = &e.combat.stats;
+        |game, player, _, s| {
             if s.is_winner(player) && s.battleground.is_city() && s.opponent_is_human(player, game)
             {
                 objective_is_ready(game.player_mut(player), name);
@@ -36,7 +35,7 @@ pub(crate) fn warmonger() -> Objective {
         one of which you've won.",
     )
     .add_simple_persistent_event_listener(
-        |event| &mut event.combat_end,
+        |event| &mut event.combat_stats,
         2,
         |game, player, _, _e| {
             let stat = current_player_turn_log(game)
@@ -64,10 +63,9 @@ pub(crate) fn general() -> Objective {
         "You killed at least 3 enemy units in a single land combat this turn.",
     )
     .add_simple_persistent_event_listener(
-        |event| &mut event.combat_end,
+        |event| &mut event.combat_stats,
         3,
-        |game, player, _, e| {
-            let s = &e.combat.stats;
+        |game, player, _, s| {
             let army_units_killed_by_you: u8 = s
                 .opponent(player)
                 .fighter_losses(s.battleground)
@@ -90,10 +88,9 @@ pub(crate) fn great_battle() -> Objective {
         "You participated in a land battle with at least 6 army units",
     )
     .add_simple_persistent_event_listener(
-        |event| &mut event.combat_end,
+        |event| &mut event.combat_stats,
         4,
-        |game, player, _, e| {
-            let s = &e.combat.stats;
+        |game, player, _, s| {
             if !s.is_battle() {
                 return;
             }
@@ -116,10 +113,9 @@ pub(crate) fn defiance() -> Objective {
         "You won a battle against a human player despite having fewer units than them.",
     )
     .add_simple_persistent_event_listener(
-        |event| &mut event.combat_end,
+        |event| &mut event.combat_stats,
         5,
-        |game, player, _, e| {
-            let s = &e.combat.stats;
+        |game, player, _, s| {
             if !s.is_battle() {
                 return;
             }
@@ -142,28 +138,19 @@ pub(crate) fn naval_assault() -> Objective {
         "You captured a city with army units that disembarked from a ship.",
     )
     .add_simple_persistent_event_listener(
-        |event| &mut event.capture_undefended_position,
-        0,
-        |game, p, _, s| eval_naval_assault(game, p, s),
-    )
-    .add_simple_persistent_event_listener(
-        |event| &mut event.combat_end,
+        |event| &mut event.combat_stats,
         6,
         |game, p, _, e| {
-            eval_naval_assault(game, p, &e.combat.stats);
+            if e.disembarked
+                && e.opponent_is_human(p, game)
+                && e.is_winner(p)
+                && e.battleground.is_city()
+            {
+                objective_is_ready(game.player_mut(p), "Naval Assault");
+            }
         },
     )
     .build()
-}
-
-fn eval_naval_assault(game: &mut Game, player: usize, s: &CombatStats) {
-    if s.disembarked
-        && s.opponent_is_human(player, game)
-        && s.is_winner(player)
-        && s.battleground.is_city()
-    {
-        objective_is_ready(game.player_mut(player), "Naval Assault");
-    }
 }
 
 pub(crate) fn bold() -> Objective {
@@ -173,10 +160,9 @@ pub(crate) fn bold() -> Objective {
         "You won a battle against a player that has more Warfare advances - or despite having fewer units than them.",
     )
     .add_simple_persistent_event_listener(
-        |event| &mut event.combat_end,
+        |event| &mut event.combat_stats,
         7,
-        |game, player, _, e| {
-            let s = &e.combat.stats;
+        |game, player, _, s| {
             if !s.is_battle() {
                 return;
             }
@@ -210,10 +196,9 @@ pub(crate) fn legendary_battle() -> Objective {
         "You fought a battle against a city of size 5 with at least 1 wonder.",
     )
     .add_simple_persistent_event_listener(
-        |event| &mut event.combat_end,
+        |event| &mut event.combat_stats,
         8,
-        |game, player, _, e| {
-            let s = &e.combat.stats;
+        |game, player, _, s| {
             if !s.is_battle() {
                 return;
             }
@@ -239,10 +224,9 @@ pub(crate) fn scavenger() -> Objective {
         "You killed a settler or ship that could have been used for Trade Routes.",
     )
     .add_simple_persistent_event_listener(
-        |event| &mut event.combat_end,
+        |event| &mut event.combat_stats,
         9,
-        |game, player, _, e| {
-            let s = &e.combat.stats;
+        |game, player, _, s| {
             let o = s.opponent(player);
             let opponent = game.player(o.player);
             let units = &o.losses;
@@ -265,10 +249,9 @@ pub(crate) fn aggressor() -> Objective {
         "You won a land battle as attacker in which you killed at least 2 army units.",
     )
     .add_simple_persistent_event_listener(
-        |event| &mut event.combat_end,
+        |event| &mut event.combat_stats,
         10,
-        |game, player, _, e| {
-            let s = &e.combat.stats;
+        |game, player, _, s| {
             if s.is_winner(player)
                 && s.battleground.is_land()
                 && s.opponent(player).fighter_losses(s.battleground).amount() >= 2
@@ -287,10 +270,9 @@ pub(crate) fn barbarian_conquest() -> Objective {
         "You captured a barbarian city with at least 2 army units.",
     )
     .add_simple_persistent_event_listener(
-        |event| &mut event.combat_end,
+        |event| &mut event.combat_stats,
         11,
-        |game, player, _, e| {
-            let s = &e.combat.stats;
+        |game, player, _, s| {
             if s.is_winner(player)
                 && s.battleground.is_city()
                 && !s.opponent_is_human(player, game)
@@ -310,10 +292,9 @@ pub(crate) fn resistance() -> Objective {
         "You captured a barbarian city with at least 2 army units.",
     )
     .add_simple_persistent_event_listener(
-        |event| &mut event.combat_end,
+        |event| &mut event.combat_stats,
         12,
-        |game, player, _, e| {
-            let s = &e.combat.stats;
+        |game, player, _, s| {
             if s.is_winner(player)
                 && !s.opponent_is_human(player, game)
                 && s.battleground.is_city()
@@ -333,10 +314,9 @@ pub(crate) fn great_commander() -> Objective {
         "You won a battle with a leader where you did not have more army units than your opponent.",
     )
     .add_simple_persistent_event_listener(
-        |event| &mut event.combat_end,
+        |event| &mut event.combat_stats,
         13,
-        |game, player, _, e| {
-            let s = &e.combat.stats;
+        |game, player, _, s| {
             if !s.is_battle() {
                 return;
             }
@@ -357,10 +337,9 @@ pub(crate) fn brutus() -> Objective {
     let name = "Brutus";
     Objective::builder(name, "You killed a leader and 2 army units in a battle.")
         .add_simple_persistent_event_listener(
-            |event| &mut event.combat_end,
+            |event| &mut event.combat_stats,
             14,
-            |game, player, _, e| {
-                let s = &e.combat.stats;
+            |game, player, _, s| {
                 let l = &s.opponent(player).losses;
 
                 if l.leaders > 0
@@ -385,10 +364,9 @@ pub(crate) fn trample() -> Objective {
         "You won a land battle as attacker where 1 elephant or 1 cavalry unit survived.",
     )
     .add_simple_persistent_event_listener(
-        |event| &mut event.combat_end,
+        |event| &mut event.combat_stats,
         15,
-        |game, player, _, e| {
-            let s = &e.combat.stats;
+        |game, player, _, s| {
             if !s.is_battle() {
                 return;
             }

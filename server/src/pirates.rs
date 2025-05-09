@@ -50,11 +50,11 @@ pub(crate) fn pirates_bonus() -> Builtin {
         "Select a reward for fighting the Pirates",
     )
     .add_resource_request(
-        |event| &mut event.combat_end,
+        |event| &mut event.combat_stats,
         103,
         |game, player_index, i| {
             if game
-                .player(i.opponent(player_index))
+                .player(i.opponent_player(player_index))
                 .civilization
                 .is_pirates()
             {

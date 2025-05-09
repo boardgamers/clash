@@ -285,11 +285,10 @@ pub(crate) fn use_teach_us() -> Builtin {
              without changing the Game Event counter.",
     )
     .add_hand_card_request(
-        |e| &mut e.combat_end,
+        |e| &mut e.combat_stats, // todo new event that includes all combat stats
         91,
-        |game, player_index, e| {
-            let stats = &e.combat.stats;
-            if stats.is_winner(player_index) && stats.battleground.is_city() {
+        |game, player_index, s| {
+            if s.is_winner(player_index) && s.battleground.is_city() {
                 let p = game.player(player_index);
                 let cards = p
                     .action_cards
@@ -315,12 +314,12 @@ pub(crate) fn use_teach_us() -> Builtin {
         },
     )
     .add_advance_request(
-        |e| &mut e.combat_end,
+        |e| &mut e.combat_stats,
         90,
         |game, player, e| {
             e.selected_card.map(|_| {
                 let vec = teachable_advances(
-                    game.player(e.combat.opponent(player)),
+                    game.player(e.opponent_player(player)),
                     game.player(player),
                     game,
                 );

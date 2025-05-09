@@ -83,6 +83,9 @@ pub struct CombatStats {
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub claimed_action_cards: Vec<u8>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub selected_card: Option<u8>, // for "Teach Us Now" action
 }
 
 impl CombatStats {
@@ -93,6 +96,7 @@ impl CombatStats {
         disembarked: bool,
         attacker: CombatPlayerStats,
         defender: CombatPlayerStats,
+        result: Option<CombatResult>,
     ) -> Self {
         Self {
             position,
@@ -100,8 +104,9 @@ impl CombatStats {
             disembarked,
             attacker,
             defender,
-            result: None,
+            result,
             claimed_action_cards: Vec::new(),
+            selected_card: None,
         }
     }
 
@@ -131,7 +136,12 @@ impl CombatStats {
 
     #[must_use]
     pub fn opponent_is_human(&self, player: usize, game: &Game) -> bool {
-        game.player(self.opponent(player).player).is_human()
+        game.player(self.opponent_player(player)).is_human()
+    }
+    
+    #[must_use]
+    pub fn opponent_player(&self, player: usize) -> usize {
+        self.opponent(player).player
     }
 
     #[must_use]
@@ -153,6 +163,16 @@ impl CombatStats {
     }
 
     #[must_use]
+    pub fn is_attacker(&self, player: usize) -> bool {
+        self.role(player) == CombatRole::Attacker
+    }
+
+    #[must_use]
+    pub fn is_defender(&self, player: usize) -> bool {
+        self.role(player) == CombatRole::Defender
+    }
+
+    #[must_use]
     pub fn winner(&self) -> Option<CombatRole> {
         self.result.as_ref().and_then(|result| match result {
             CombatResult::AttackerWins => Some(CombatRole::Attacker),
@@ -167,9 +187,23 @@ impl CombatStats {
     }
 
     #[must_use]
+    pub fn is_loser(&self, player: usize) -> bool {
+        Some(self.opponent_role(player)) == self.winner()
+    }
+
+    #[must_use]
     pub fn is_battle(&self) -> bool {
         // defender can win with a fortress or great wall
         self.defender.present.amount() > 0 || self.winner() == Some(CombatRole::Defender)
+    }
+
+    #[must_use]
+    pub fn captured_city(&self, player: usize, game: &Game) -> bool {
+        self.is_attacker(player)
+            && self.is_winner(player)
+            && game
+                .try_get_any_city(self.position)
+                .is_some()
     }
 }
 
@@ -179,6 +213,7 @@ pub(crate) fn new_combat_stats(
     defender_position: Position,
     attacker: usize,
     attackers: &[u32],
+    result: Option<CombatResult>,
 ) -> CombatStats {
     let city = game.try_get_any_city(defender_position);
 
@@ -208,6 +243,7 @@ pub(crate) fn new_combat_stats(
                 .map(|unit| unit.unit_type)
                 .collect(),
         ),
+        result,
     );
     stats
 }

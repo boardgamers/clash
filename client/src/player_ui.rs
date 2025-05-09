@@ -311,7 +311,7 @@ pub fn get_combat(game: &Game) -> Option<&Combat> {
         PersistentEventType::CombatStart(c) => Some(c),
         PersistentEventType::CombatRoundStart(s) => Some(&s.combat),
         PersistentEventType::CombatRoundEnd(e) => Some(&e.combat),
-        PersistentEventType::CombatEnd(e) => Some(&e.combat),
+        PersistentEventType::CombatStats(e) => Some(&e.combat),
         _ => None,
     })
 }

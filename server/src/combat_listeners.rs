@@ -1,16 +1,17 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::combat::{Combat, CombatRetreatState, capture_position};
+use crate::combat::{capture_position, Combat, CombatRetreatState};
 use crate::combat_roll::CombatHits;
+use crate::combat_stats::CombatStats;
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{PersistentEventType, PositionRequest, UnitsRequest};
 use crate::game::Game;
-use crate::log::current_player_turn_log_mut;
+use crate::log::current_action_log_item;
 use crate::movement::move_units;
 use crate::player::add_unit;
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::position::Position;
 use crate::tactics_card::{CombatRole, TacticsCard, TacticsCardTarget};
-use crate::unit::{UnitType, Units, kill_units};
+use crate::unit::{kill_units, UnitType, Units};
 use crate::utils;
 use itertools::Itertools;
 use num::Zero;
@@ -132,9 +133,6 @@ impl CombatResult {
 pub struct CombatEnd {
     pub result: CombatResult,
     pub combat: Combat,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub selected_card: Option<u8>,
 }
 
 impl CombatEnd {
@@ -143,54 +141,7 @@ impl CombatEnd {
         Self {
             result,
             combat,
-            selected_card: None,
         }
-    }
-
-    #[must_use]
-    pub fn is_attacker(&self, player: usize) -> bool {
-        self.combat.attacker == player
-    }
-
-    #[must_use]
-    pub fn is_defender(&self, player: usize) -> bool {
-        self.combat.attacker != player
-    }
-
-    #[must_use]
-    pub fn is_loser(&self, player: usize) -> bool {
-        if self.is_attacker(player) {
-            self.result == CombatResult::DefenderWins
-        } else {
-            self.result == CombatResult::AttackerWins
-        }
-    }
-
-    #[must_use]
-    pub fn is_winner(&self, player: usize) -> bool {
-        if self.is_attacker(player) {
-            self.result == CombatResult::AttackerWins
-        } else {
-            self.result == CombatResult::DefenderWins
-        }
-    }
-
-    #[must_use]
-    pub fn opponent(&self, player: usize) -> usize {
-        if self.is_attacker(player) {
-            self.combat.defender
-        } else {
-            self.combat.attacker
-        }
-    }
-
-    #[must_use]
-    pub fn captured_city(&self, player: usize, game: &Game) -> bool {
-        self.is_attacker(player)
-            && self.is_winner(player)
-            && game
-                .try_get_any_city(self.combat.defender_position)
-                .is_some()
     }
 }
 
@@ -376,14 +327,23 @@ pub(crate) fn draw(game: &mut Game, c: Combat) {
     end_combat(game, CombatEnd::new(CombatResult::Draw, c));
 }
 
-pub(crate) fn end_combat(game: &mut Game, info: CombatEnd) {
-    let c = &info.combat;
+fn end_combat(game: &mut Game, e: CombatEnd) {
+    let mut stats = e.combat.stats;
+    stats.result = Some(e.result.clone());
+    report_combat_stats(game, stats);
+}
 
+pub(crate) fn report_combat_stats(game: &mut Game, s: CombatStats) {
+    current_action_log_item(game).combat_stats = Some(s.clone());
+    on_combat_stats(game, s);
+}
+
+pub(crate) fn on_combat_stats(game: &mut Game, stats: CombatStats) {
     let _ = game.trigger_persistent_event(
-        &c.players(),
-        |events| &mut events.combat_end,
-        info,
-        PersistentEventType::CombatEnd,
+        &[stats.attacker.player, stats.defender.player],
+        |events| &mut events.combat_stats,
+        stats,
+        PersistentEventType::CombatStats,
     );
 }
 
@@ -621,13 +581,13 @@ pub(crate) fn place_settler() -> Builtin {
         "After losing a city, place a settler in another city.",
     )
     .add_position_request(
-        |event| &mut event.combat_end,
+        |event| &mut event.combat_stats,
         102,
         |game, player_index, i| {
             let p = game.player(player_index);
             if i.is_defender(player_index)
                 && i.is_loser(player_index)
-                && game.try_get_any_city(i.combat.defender_position).is_some()
+                && game.try_get_any_city(i.position).is_some()
                 && !p.cities.is_empty()
                 && p.available_units().settlers > 0
                 && p.is_human()
@@ -687,22 +647,4 @@ pub(crate) fn kill_combat_units(
             c.attackers.retain(|id| id != unit);
         }
     }
-}
-
-pub(crate) fn combat_stats() -> Builtin {
-    Builtin::builder("Combat stats", "")
-        .add_simple_persistent_event_listener(
-            |event| &mut event.combat_end,
-            100,
-            |game, _player, _name, e| {
-                e.combat.stats.result = Some(e.result.clone());
-
-                let i = current_player_turn_log_mut(game)
-                    .items
-                    .last_mut()
-                    .expect("last item");
-                i.combat_stats = Some(e.combat.stats.clone());
-            },
-        )
-        .build()
 }

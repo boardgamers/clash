@@ -150,7 +150,7 @@ fn fanaticism() -> AdvanceBuilder {
         }
     })
     .add_position_request(
-        |event| &mut event.combat_end,
+        |event| &mut event.combat_stats,
         104,
         |game, player_index, i| {
             if i.is_loser(player_index)

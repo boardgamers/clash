@@ -2,10 +2,8 @@ use crate::action_card::on_play_action_card;
 use crate::advance::on_advance;
 use crate::city::{MoodState, on_found_city};
 use crate::collect::on_collect;
-use crate::combat::{
-    combat_loop, move_with_possible_combat, on_capture_undefended_position, start_combat,
-};
-use crate::combat_listeners::{combat_round_end, combat_round_start, end_combat};
+use crate::combat::{combat_loop, move_with_possible_combat, start_combat};
+use crate::combat_listeners::{combat_round_end, combat_round_start,  on_combat_stats};
 use crate::construct::on_construct;
 use crate::content::custom_actions::execute_custom_action;
 use crate::content::persistent_events::{EventResponse, PersistentEventType};
@@ -214,11 +212,8 @@ pub(crate) fn execute_custom_phase_action(
                 combat_loop(game, crate::combat_listeners::CombatRoundStart::new(c));
             }
         }
-        CombatEnd(r) => {
-            end_combat(game, r);
-        }
-        CaptureUndefendedPosition(c) => {
-            on_capture_undefended_position(game, player_index, c);
+        CombatStats(s) => {
+            on_combat_stats(game, s);
         }
         StatusPhase(s) => play_status_phase(game, s),
         TurnStart => game.on_start_turn(),

@@ -1,23 +1,22 @@
 use crate::city::City;
 use crate::city::MoodState::Angry;
-use crate::city_pieces::{Building, remove_building};
+use crate::city_pieces::{remove_building, Building};
 use crate::combat_listeners::{
-    CombatEventPhase, CombatResult, CombatRoundEnd, CombatRoundStart, CombatStrength,
-    combat_round_end, combat_round_start,
+    combat_round_end, combat_round_start, report_combat_stats, CombatEventPhase, CombatResult,
+    CombatRoundEnd, CombatRoundStart, CombatStrength,
 };
 use crate::combat_roll::{CombatHits, CombatRoundStats};
 use crate::combat_stats;
-use crate::combat_stats::{CombatStats, active_defenders, new_combat_stats};
+use crate::combat_stats::{active_defenders, new_combat_stats, CombatStats};
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
-use crate::log::current_action_log_item;
-use crate::movement::{MoveUnits, MovementRestriction, move_units, stop_current_move};
+use crate::movement::{move_units, stop_current_move, MoveUnits, MovementRestriction};
 use crate::player::remove_unit;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::tactics_card::CombatRole;
-use crate::unit::{UnitType, Units, carried_units, kill_units};
-use crate::wonder::{Wonder, deinit_wonder, init_wonder};
+use crate::unit::{carried_units, kill_units, UnitType, Units};
+use crate::wonder::{deinit_wonder, init_wonder, Wonder};
 use combat_stats::active_attackers;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -174,7 +173,7 @@ pub fn initiate_combat(
     attackers: Vec<u32>,
     can_retreat: bool,
 ) {
-    let stats = new_combat_stats(game, defender, defender_position, attacker, &attackers);
+    let stats = new_combat_stats(game, defender, defender_position, attacker, &attackers, None);
     let combat = Combat::new(
         1,
         defender,
@@ -442,11 +441,18 @@ fn move_to_enemy_player_tile(
         game.player_mut(defender)
             .gain_resources(ResourcePile::gold(1));
 
-        let mut s = new_combat_stats(game, defender, destination, player_index, unit_ids);
-        s.result = Some(CombatResult::DefenderWins);
-        current_action_log_item(game).combat_stats = Some(s.clone());
-
+        let s = new_combat_stats(
+            game,
+            defender,
+            destination,
+            player_index,
+            unit_ids,
+            Some(CombatResult::DefenderWins),
+        );
         kill_units(game, unit_ids, player_index, Some(defender));
+        // todo are kills counted it stats?
+
+        report_combat_stats(game, s);
         return true;
     }
 
@@ -481,41 +487,48 @@ pub(crate) fn move_with_possible_combat(
             starting_position,
             defender,
         ) {
+            // combat was initiated todo change boolean to enum
             return;
         }
 
         // there was no combat
         capture_position(game, defender, m.destination, player_index);
 
-        let mut s = new_combat_stats(game, defender, m.destination, player_index, &m.units);
-        s.result = Some(CombatResult::AttackerWins);
-        current_action_log_item(game).combat_stats = Some(s.clone());
-        on_capture_undefended_position(game, player_index, s);
+        move_units(
+            game,
+            player_index,
+            &m.units,
+            m.destination,
+            m.embark_carrier_id,
+        );
+
+        report_combat_stats(
+            game,
+            new_combat_stats(
+                game,
+                defender,
+                m.destination,
+                player_index,
+                &m.units,
+                Some(CombatResult::AttackerWins),
+            ),
+        )
+    } else {
+        move_units(
+            game,
+            player_index,
+            &m.units,
+            m.destination,
+            m.embark_carrier_id,
+        );
     }
-
-    move_units(
-        game,
-        player_index,
-        &m.units,
-        m.destination,
-        m.embark_carrier_id,
-    );
-}
-
-pub(crate) fn on_capture_undefended_position(game: &mut Game, player_index: usize, s: CombatStats) {
-    let _ = game.trigger_persistent_event(
-        &[player_index],
-        |events| &mut events.capture_undefended_position,
-        s,
-        PersistentEventType::CaptureUndefendedPosition,
-    );
 }
 
 #[cfg(test)]
 pub mod tests {
     use std::collections::HashMap;
 
-    use super::{Game, conquer_city};
+    use super::{conquer_city, Game};
 
     use crate::action::Action;
 
@@ -524,7 +537,7 @@ pub mod tests {
     use crate::log::{ActionLogAge, ActionLogItem, ActionLogPlayer, ActionLogRound};
     use crate::movement::MovementAction;
     use crate::utils::tests::FloatEq;
-    use crate::wonder::{Wonder, construct_wonder, wonders_owned_points};
+    use crate::wonder::{construct_wonder, wonders_owned_points, Wonder};
     use crate::{
         city::{City, MoodState::*},
         city_pieces::Building::*,

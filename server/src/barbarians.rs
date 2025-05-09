@@ -63,12 +63,12 @@ impl BarbariansEventState {
 pub(crate) fn barbarians_bonus() -> Builtin {
     Builtin::builder("Barbarians bonus", "-")
         .add_resource_request(
-            |event| &mut event.combat_end,
+            |event| &mut event.combat_stats,
             105,
             |game, player_index, i| {
                 if i.is_winner(player_index)
                     && game
-                        .player(i.opponent(player_index))
+                        .player(i.opponent_player(player_index))
                         .civilization
                         .is_barbarian()
                 {
