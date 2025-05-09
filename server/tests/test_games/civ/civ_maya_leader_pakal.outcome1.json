@@ -304,15 +304,17 @@
                     }
                   },
                   "combat_stats": {
-                    "position": "B1",
+                    "round": 1,
                     "battleground": "CityWithFortress",
                     "attacker": {
+                      "position": "A1",
                       "player": 0,
                       "present": {
                         "leaders": 1
                       }
                     },
                     "defender": {
+                      "position": "B1",
                       "player": 1
                     },
                     "result": "AttackerWins"
@@ -325,20 +327,6 @@
                         "B2"
                       ]
                     }
-                  },
-                  "combat_stats": {
-                    "position": "B1",
-                    "battleground": "CityWithFortress",
-                    "attacker": {
-                      "player": 0,
-                      "present": {
-                        "leaders": 1
-                      }
-                    },
-                    "defender": {
-                      "player": 1
-                    },
-                    "result": "AttackerWins"
                   }
                 }
               ]

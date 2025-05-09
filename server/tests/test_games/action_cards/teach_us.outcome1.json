@@ -211,9 +211,10 @@
                     }
                   },
                   "combat_stats": {
-                    "position": "C1",
+                    "round": 1,
                     "battleground": "City",
                     "attacker": {
+                      "position": "C2",
                       "player": 0,
                       "present": {
                         "settlers": 2,
@@ -224,6 +225,7 @@
                       }
                     },
                     "defender": {
+                      "position": "C1",
                       "player": 1,
                       "present": {
                         "infantry": 2
@@ -244,30 +246,6 @@
                         }
                       ]
                     }
-                  },
-                  "combat_stats": {
-                    "position": "C1",
-                    "battleground": "City",
-                    "attacker": {
-                      "player": 0,
-                      "present": {
-                        "settlers": 2,
-                        "infantry": 1,
-                        "cavalry": 1,
-                        "elephants": 1,
-                        "leaders": 1
-                      }
-                    },
-                    "defender": {
-                      "player": 1,
-                      "present": {
-                        "infantry": 2
-                      },
-                      "losses": {
-                        "infantry": 2
-                      }
-                    },
-                    "result": "AttackerWins"
                   }
                 }
               ]
