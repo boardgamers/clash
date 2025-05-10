@@ -23,11 +23,6 @@
           },
           "final_result": "AttackerWins",
           "combat": {
-            "round": 1,
-            "defender": 1,
-            "defender_position": "D2",
-            "attacker": 0,
-            "attacker_position": "C3",
             "attackers": [
               8
             ],

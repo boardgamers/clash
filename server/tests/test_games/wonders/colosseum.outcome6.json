@@ -378,18 +378,13 @@
                                 "opponent_fighters": 2
                               },
                               "combat": {
-                                "attacker": 0,
-                                "attacker_position": "C2",
                                 "attackers": [
                                   0,
                                   1,
                                   2,
                                   3
                                 ],
-                                "defender": 1,
-                                "defender_position": "C1",
                                 "retreat": "CanRetreat",
-                                "round": 1,
                                 "stats": {
                                   "attacker": {
                                     "player": 0,
