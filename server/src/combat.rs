@@ -1,21 +1,17 @@
 use crate::city::City;
 use crate::city::MoodState::Angry;
 use crate::city_pieces::{remove_building, Building};
-use crate::combat_listeners::{
-    combat_round_end, combat_round_start, report_combat_stats, CombatEventPhase, CombatResult,
-    CombatRoundEnd, CombatRoundStart, CombatStrength,
-};
+use crate::combat_listeners::{combat_round_end, combat_round_start, end_combat, kill_units_with_stats, CombatEventPhase, CombatResult, CombatRoundEnd, CombatRoundStart, CombatStrength};
 use crate::combat_roll::{CombatHits, CombatRoundStats};
 use crate::combat_stats;
 use crate::combat_stats::{active_defenders, new_combat_stats, CombatStats};
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
 use crate::movement::{move_units, stop_current_move, MoveUnits, MovementRestriction};
-use crate::player::remove_unit;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::tactics_card::CombatRole;
-use crate::unit::{carried_units, kill_units, UnitType, Units};
+use crate::unit::{carried_units, UnitType, Units};
 use crate::wonder::{deinit_wonder, init_wonder, Wonder};
 use combat_stats::active_attackers;
 use itertools::Itertools;
@@ -124,15 +120,6 @@ impl Combat {
     }
 
     #[must_use]
-    pub fn position(&self, player: usize) -> Position {
-        if player == self.attacker {
-            self.attacker_position
-        } else {
-            self.defender_position
-        }
-    }
-
-    #[must_use]
     pub fn opponent(&self, player: usize) -> usize {
         if player == self.attacker {
             self.defender
@@ -173,7 +160,14 @@ pub fn initiate_combat(
     attackers: Vec<u32>,
     can_retreat: bool,
 ) {
-    let stats = new_combat_stats(game, defender, defender_position, attacker, &attackers, None);
+    let stats = new_combat_stats(
+        game,
+        defender,
+        defender_position,
+        attacker,
+        &attackers,
+        None,
+    );
     let combat = Combat::new(
         stats.round,
         defender,
@@ -373,10 +367,10 @@ pub(crate) fn conquer_city(
 
 pub(crate) fn capture_position(
     game: &mut Game,
-    old_player: usize,
-    position: Position,
-    new_player: usize,
+    stats: &mut CombatStats,
 ) {
+    let old_player = stats.defender.player;
+    let position = stats.defender.position;
     let captured_settlers = game.players[old_player]
         .get_units(position)
         .iter()
@@ -389,11 +383,9 @@ pub(crate) fn capture_position(
             game.player_name(old_player)
         ));
     }
-    for id in captured_settlers {
-        remove_unit(old_player, id, game);
-    }
+    kill_units_with_stats(stats, game, old_player, &captured_settlers);
     if game.player(old_player).try_get_city(position).is_some() {
-        conquer_city(game, position, new_player, old_player);
+        conquer_city(game, position, stats.attacker.player, old_player);
     }
 }
 
@@ -441,7 +433,7 @@ fn move_to_enemy_player_tile(
         game.player_mut(defender)
             .gain_resources(ResourcePile::gold(1));
 
-        let s = new_combat_stats(
+        let mut s = new_combat_stats(
             game,
             defender,
             destination,
@@ -449,10 +441,8 @@ fn move_to_enemy_player_tile(
             unit_ids,
             Some(CombatResult::DefenderWins),
         );
-        kill_units(game, unit_ids, player_index, Some(defender));
-        // todo are kills counted it stats?
-
-        report_combat_stats(game, s);
+        kill_units_with_stats(&mut s, game, player_index, unit_ids);
+        end_combat(game, s);
         return true;
     }
 
@@ -492,8 +482,17 @@ pub(crate) fn move_with_possible_combat(
         }
 
         // there was no combat
-        capture_position(game, defender, m.destination, player_index);
+        let mut stats = new_combat_stats(
+            game,
+            defender,
+            m.destination,
+            player_index,
+            &m.units,
+            Some(CombatResult::AttackerWins),
+        );
 
+        capture_position(game, &mut stats);
+        
         move_units(
             game,
             player_index,
@@ -502,17 +501,7 @@ pub(crate) fn move_with_possible_combat(
             m.embark_carrier_id,
         );
 
-        report_combat_stats(
-            game,
-            new_combat_stats(
-                game,
-                defender,
-                m.destination,
-                player_index,
-                &m.units,
-                Some(CombatResult::AttackerWins),
-            ),
-        )
+        end_combat(game, stats);
     } else {
         move_units(
             game,

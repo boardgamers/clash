@@ -285,7 +285,7 @@ pub(crate) fn use_teach_us() -> Builtin {
              without changing the Game Event counter.",
     )
     .add_hand_card_request(
-        |e| &mut e.combat_stats, 
+        |e| &mut e.end_combat,
         91,
         |game, player_index, s| {
             if s.is_winner(player_index) && s.battleground.is_city() {
@@ -314,7 +314,7 @@ pub(crate) fn use_teach_us() -> Builtin {
         },
     )
     .add_advance_request(
-        |e| &mut e.combat_stats,
+        |e| &mut e.end_combat,
         90,
         |game, player, e| {
             e.selected_card.map(|_| {

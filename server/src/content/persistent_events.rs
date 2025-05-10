@@ -103,7 +103,7 @@ pub enum PersistentEventType {
     CombatStart(Combat),
     CombatRoundStart(CombatRoundStart),
     CombatRoundEnd(CombatRoundEnd),
-    CombatStats(CombatStats),
+    EndCombat(CombatStats),
     StatusPhase(StatusPhaseState),
     TurnStart,
     PayAction(PlayingAction),
