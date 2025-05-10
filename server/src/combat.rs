@@ -381,13 +381,19 @@ pub(crate) fn capture_position(game: &mut Game, stats: &mut CombatStats) {
     }
 }
 
+#[derive(Clone, PartialEq, Eq, Debug)]
+enum MoveResult {
+    Combat,
+    Move,
+}
+
 fn move_to_enemy_player_tile(
     game: &mut Game,
     player_index: usize,
     unit_ids: &Vec<u32>,
     destination: Position,
     defender: usize,
-) -> bool {
+) -> MoveResult {
     let has_defending_units = game
         .player(defender)
         .get_units(destination)
@@ -431,7 +437,7 @@ fn move_to_enemy_player_tile(
         );
         kill_units_with_stats(&mut s, game, player_index, unit_ids);
         end_combat(game, s);
-        return true;
+        return MoveResult::Combat;
     }
 
     if has_defending_units || has_fortress {
@@ -443,16 +449,17 @@ fn move_to_enemy_player_tile(
             unit_ids.clone(),
             game.player(player_index).is_human(),
         );
-        return true;
+        return MoveResult::Combat;
     }
-    false
+    MoveResult::Move
 }
 
 pub(crate) fn move_with_possible_combat(game: &mut Game, player_index: usize, m: &MoveUnits) {
     let enemy = game.enemy_player(player_index, m.destination);
     if let Some(defender) = enemy {
-        if move_to_enemy_player_tile(game, player_index, &m.units, m.destination, defender) {
-            // combat was initiated todo change boolean to enum
+        if move_to_enemy_player_tile(game, player_index, &m.units, m.destination, defender)
+            == MoveResult::Combat
+        {
             return;
         }
 
