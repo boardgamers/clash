@@ -302,7 +302,13 @@ pub(crate) fn combat_round_end(game: &mut Game, r: CombatRoundEnd) -> Option<Com
 
 fn attacker_wins(game: &mut Game, mut c: Combat) {
     game.add_info_log_item("Attacker wins");
-    move_units(game, c.attacker(), &c.attackers, c.defender_position(), None);
+    move_units(
+        game,
+        c.attacker(),
+        &c.attackers,
+        c.defender_position(),
+        None,
+    );
     capture_position(game, &mut c.stats);
     end_combat_and_store_stats(game, CombatEnd::new(CombatResult::AttackerWins, c));
 }

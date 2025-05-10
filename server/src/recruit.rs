@@ -101,14 +101,7 @@ pub(crate) fn on_recruit(game: &mut Game, player_index: usize, r: Recruit) {
                 {
                     set_unit_position(player_index, ship, city_position, game);
                 }
-                combat::initiate_combat(
-                    game,
-                    defender,
-                    port_position,
-                    player_index,
-                    ships,
-                    false,
-                );
+                combat::initiate_combat(game, defender, port_position, player_index, ships, false);
             }
         }
     }

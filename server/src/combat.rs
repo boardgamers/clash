@@ -49,11 +49,7 @@ pub struct Combat {
 
 impl Combat {
     #[must_use]
-    pub fn new(
-        attackers: Vec<u32>,
-        can_retreat: bool,
-        stats: CombatStats,
-    ) -> Self {
+    pub fn new(attackers: Vec<u32>, can_retreat: bool, stats: CombatStats) -> Self {
         Self {
             attackers,
             modifiers: vec![],
@@ -65,7 +61,7 @@ impl Combat {
             stats,
         }
     }
-    
+
     #[must_use]
     pub fn first_round(&self) -> bool {
         self.stats.round == 1
@@ -75,17 +71,17 @@ impl Combat {
     pub fn attacker(&self) -> usize {
         self.stats.attacker.player
     }
-    
+
     #[must_use]
     pub fn defender(&self) -> usize {
         self.stats.defender.player
     }
-    
+
     #[must_use]
     pub fn defender_position(&self) -> Position {
         self.stats.defender.position
     }
-    
+
     #[must_use]
     pub fn fighting_units(&self, game: &Game, player: usize) -> Vec<u32> {
         if player == self.attacker() {
@@ -97,7 +93,12 @@ impl Combat {
 
     #[must_use]
     pub(crate) fn active_attackers(&self, game: &Game) -> Vec<u32> {
-        active_attackers(game, self.attacker(), &self.attackers, self.defender_position())
+        active_attackers(
+            game,
+            self.attacker(),
+            &self.attackers,
+            self.defender_position(),
+        )
     }
 
     #[must_use]
@@ -171,11 +172,7 @@ pub fn initiate_combat(
         &attackers,
         None,
     );
-    let combat = Combat::new(
-        attackers,
-        can_retreat,
-        stats,
-    );
+    let combat = Combat::new(attackers, can_retreat, stats);
     log_round(game, &combat);
     start_combat(game, combat);
 }
@@ -451,20 +448,10 @@ fn move_to_enemy_player_tile(
     false
 }
 
-pub(crate) fn move_with_possible_combat(
-    game: &mut Game,
-    player_index: usize,
-    m: &MoveUnits,
-) {
+pub(crate) fn move_with_possible_combat(game: &mut Game, player_index: usize, m: &MoveUnits) {
     let enemy = game.enemy_player(player_index, m.destination);
     if let Some(defender) = enemy {
-        if move_to_enemy_player_tile(
-            game,
-            player_index,
-            &m.units,
-            m.destination,
-            defender,
-        ) {
+        if move_to_enemy_player_tile(game, player_index, &m.units, m.destination, defender) {
             // combat was initiated todo change boolean to enum
             return;
         }
