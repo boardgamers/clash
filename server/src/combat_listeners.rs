@@ -339,9 +339,9 @@ pub(crate) fn end_combat(game: &mut Game, s: CombatStats) {
 pub(crate) fn on_end_combat(game: &mut Game, stats: CombatStats) {
     let _ = game.trigger_persistent_event(
         &[stats.attacker.player, stats.defender.player],
-        |events| &mut events.end_combat,
+        |events| &mut events.combat_end,
         stats,
-        PersistentEventType::EndCombat,
+        PersistentEventType::CombatEnd,
     );
 }
 
@@ -579,7 +579,7 @@ pub(crate) fn place_settler() -> Builtin {
         "After losing a city, place a settler in another city.",
     )
     .add_position_request(
-        |event| &mut event.end_combat,
+        |event| &mut event.combat_end,
         102,
         |game, player_index, i| {
             let p = game.player(player_index);
@@ -642,14 +642,14 @@ pub(crate) fn kill_combat_units(
 
 pub(crate) fn kill_units_with_stats(
     stats: &mut CombatStats,
-    game: &mut Game, 
+    game: &mut Game,
     player: usize,
     killed_unit_ids: &[u32],
 ) {
     if killed_unit_ids.is_empty() {
         return;
     }
-    
+
     let p = game.player(player);
     stats.player_mut(stats.role(player)).add_losses(
         &killed_unit_ids
@@ -657,5 +657,10 @@ pub(crate) fn kill_units_with_stats(
             .map(|id| p.get_unit(*id).unit_type)
             .collect_vec(),
     );
-    kill_units(game, killed_unit_ids, player, Some(stats.opponent(player).player));
+    kill_units(
+        game,
+        killed_unit_ids,
+        player,
+        Some(stats.opponent(player).player),
+    );
 }

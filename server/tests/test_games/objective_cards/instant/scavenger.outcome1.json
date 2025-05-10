@@ -394,9 +394,10 @@
                     }
                   },
                   "combat_stats": {
-                    "position": "E7",
+                    "round": 1,
                     "battleground": "Sea",
                     "attacker": {
+                      "position": "F6",
                       "player": 0,
                       "present": {
                         "ships": 2
@@ -406,6 +407,7 @@
                       }
                     },
                     "defender": {
+                      "position": "E7",
                       "player": 1,
                       "present": {
                         "ships": 1

@@ -197,9 +197,10 @@
                     }
                   },
                   "combat_stats": {
-                    "position": "C1",
+                    "round": 1,
                     "battleground": "CityWithFortress",
                     "attacker": {
+                      "position": "C2",
                       "player": 0,
                       "present": {
                         "infantry": 1,
@@ -211,6 +212,7 @@
                       }
                     },
                     "defender": {
+                      "position": "C1",
                       "player": 1,
                       "present": {
                         "infantry": 1
@@ -235,9 +237,10 @@
                     }
                   },
                   "combat_stats": {
-                    "position": "B1",
+                    "round": 1,
                     "battleground": "Land",
                     "attacker": {
+                      "position": "C2",
                       "player": 0,
                       "present": {
                         "elephants": 1,
@@ -245,6 +248,7 @@
                       }
                     },
                     "defender": {
+                      "position": "B1",
                       "player": 1,
                       "present": {
                         "infantry": 1

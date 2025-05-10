@@ -1,9 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::barbarians::barbarians_bonus;
-use crate::combat_listeners::{
-    choose_fighter_casualties,  offer_retreat, place_settler,
-};
+use crate::combat_listeners::{choose_fighter_casualties, offer_retreat, place_settler};
 use crate::content::action_cards::cultural_takeover::use_cultural_takeover;
 use crate::content::action_cards::development::collect_only;
 use crate::content::action_cards::negotiation::{use_assassination, use_negotiations};

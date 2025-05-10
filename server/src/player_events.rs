@@ -106,7 +106,7 @@ pub(crate) struct PersistentEvents {
     pub combat_round_start_tactics: PersistentEvent<CombatRoundStart>,
     pub combat_round_end: PersistentEvent<CombatRoundEnd>,
     pub combat_round_end_tactics: PersistentEvent<CombatRoundEnd>,
-    pub end_combat: PersistentEvent<CombatStats>,
+    pub combat_end: PersistentEvent<CombatStats>,
     pub units_killed: PersistentEvent<KilledUnits>,
     pub select_objective_cards: PersistentEvent<SelectObjectivesInfo>,
     pub custom_action: PersistentEvent<CustomEventAction>,
@@ -139,7 +139,7 @@ impl PersistentEvents {
             combat_round_start_tactics: Event::new("combat_round_start_tactics"),
             combat_round_end: Event::new("combat_round_end"),
             combat_round_end_tactics: Event::new("combat_round_end_tactics"),
-            end_combat: Event::new("combat_end"),
+            combat_end: Event::new("combat_end"),
             units_killed: Event::new("units_killed"),
             select_objective_cards: Event::new("select_objective_cards"),
 

@@ -271,6 +271,9 @@
                       "player": 0,
                       "present": {
                         "settlers": 4
+                      },
+                      "losses": {
+                        "settlers": 4
                       }
                     },
                     "result": "AttackerWins"

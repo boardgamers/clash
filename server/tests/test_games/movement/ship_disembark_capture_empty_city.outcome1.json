@@ -178,6 +178,11 @@
           "position": "C1",
           "unit_type": "Infantry",
           "id": 1
+        },
+        {
+          "position": "C1",
+          "unit_type": "Settler",
+          "id": 2
         }
       ],
       "civilization": "test0",
@@ -186,7 +191,7 @@
         "Mining"
       ],
       "incident_tokens": 3,
-      "next_unit_id": 2
+      "next_unit_id": 3
     }
   ],
   "map": {
@@ -402,6 +407,15 @@
                     },
                     {
                       "op": "replace",
+                      "path": "/players/1/next_unit_id",
+                      "value": 2
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/1/units/2"
+                    },
+                    {
+                      "op": "replace",
                       "path": "/state/Movement/movement_actions_left",
                       "value": 2
                     },
@@ -415,10 +429,11 @@
                     }
                   ],
                   "combat_stats": {
-                    "position": "B2",
+                    "round": 1,
                     "battleground": "City",
                     "disembarked": true,
                     "attacker": {
+                      "position": "C3",
                       "player": 0,
                       "present": {
                         "cavalry": 1,
@@ -426,6 +441,7 @@
                       }
                     },
                     "defender": {
+                      "position": "B2",
                       "player": 1
                     },
                     "result": "AttackerWins"
@@ -511,6 +527,7 @@
   "log": [
     [
       "Player1 disembarked 1 cavalry and 1 elephant from C3 to B2 and captured Player2's city at B2",
+      "Player2 gained 1 free Settler Unit at C1 for losing a city",
       "Player1 could not store 2 gold"
     ],
     [

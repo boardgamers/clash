@@ -212,7 +212,7 @@ pub(crate) fn execute_custom_phase_action(
                 combat_loop(game, crate::combat_listeners::CombatRoundStart::new(c));
             }
         }
-        EndCombat(s) => {
+        CombatEnd(s) => {
             on_end_combat(game, s);
         }
         StatusPhase(s) => play_status_phase(game, s),

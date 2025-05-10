@@ -13,7 +13,8 @@ use crate::{collect_ui, hex_ui, unit_ui};
 use macroquad::math::{f32, vec2};
 use macroquad::prelude::*;
 use server::action::Action;
-    use server::content::persistent_events::EventResponse;
+use server::combat_stats::CombatStats;
+use server::content::persistent_events::EventResponse;
 use server::map::{Rotation, Terrain, UnexploredBlock};
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
@@ -21,7 +22,6 @@ use server::unit::UnitType;
 use std::collections::HashMap;
 use std::ops::{Add, Mul, Rem, Sub};
 use std::vec;
-use server::combat_stats::CombatStats;
 
 const MOVE_DESTINATION: Color = color(51, 255, 72, 0.4);
 

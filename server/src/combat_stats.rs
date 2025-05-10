@@ -29,7 +29,7 @@ impl CombatPlayerStats {
             player,
             present,
             losses: Units::empty(),
-            position
+            position,
         }
     }
 

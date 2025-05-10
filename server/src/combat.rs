@@ -1,18 +1,21 @@
 use crate::city::City;
 use crate::city::MoodState::Angry;
-use crate::city_pieces::{remove_building, Building};
-use crate::combat_listeners::{combat_round_end, combat_round_start, end_combat, kill_units_with_stats, CombatEventPhase, CombatResult, CombatRoundEnd, CombatRoundStart, CombatStrength};
+use crate::city_pieces::{Building, remove_building};
+use crate::combat_listeners::{
+    CombatEventPhase, CombatResult, CombatRoundEnd, CombatRoundStart, CombatStrength,
+    combat_round_end, combat_round_start, end_combat, kill_units_with_stats,
+};
 use crate::combat_roll::{CombatHits, CombatRoundStats};
 use crate::combat_stats;
-use crate::combat_stats::{active_defenders, new_combat_stats, CombatStats};
+use crate::combat_stats::{CombatStats, active_defenders, new_combat_stats};
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
-use crate::movement::{move_units, stop_current_move, MoveUnits, MovementRestriction};
+use crate::movement::{MoveUnits, MovementRestriction, move_units, stop_current_move};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::tactics_card::CombatRole;
-use crate::unit::{carried_units, UnitType, Units};
-use crate::wonder::{deinit_wonder, init_wonder, Wonder};
+use crate::unit::{UnitType, Units, carried_units};
+use crate::wonder::{Wonder, deinit_wonder, init_wonder};
 use combat_stats::active_attackers;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -365,10 +368,7 @@ pub(crate) fn conquer_city(
     }
 }
 
-pub(crate) fn capture_position(
-    game: &mut Game,
-    stats: &mut CombatStats,
-) {
+pub(crate) fn capture_position(game: &mut Game, stats: &mut CombatStats) {
     let old_player = stats.defender.player;
     let position = stats.defender.position;
     let captured_settlers = game.players[old_player]
@@ -429,9 +429,6 @@ fn move_to_enemy_player_tile(
     {
         // automatic loss
         game.add_info_log_item("Barbarians lost the battle due to the Great Wall");
-        game.add_info_log_item(&format!("{} gained 1 gold", game.player_name(defender)));
-        game.player_mut(defender)
-            .gain_resources(ResourcePile::gold(1));
 
         let mut s = new_combat_stats(
             game,
@@ -492,7 +489,7 @@ pub(crate) fn move_with_possible_combat(
         );
 
         capture_position(game, &mut stats);
-        
+
         move_units(
             game,
             player_index,
@@ -517,7 +514,7 @@ pub(crate) fn move_with_possible_combat(
 pub mod tests {
     use std::collections::HashMap;
 
-    use super::{conquer_city, Game};
+    use super::{Game, conquer_city};
 
     use crate::action::Action;
 
@@ -526,7 +523,7 @@ pub mod tests {
     use crate::log::{ActionLogAge, ActionLogItem, ActionLogPlayer, ActionLogRound};
     use crate::movement::MovementAction;
     use crate::utils::tests::FloatEq;
-    use crate::wonder::{construct_wonder, wonders_owned_points, Wonder};
+    use crate::wonder::{Wonder, construct_wonder, wonders_owned_points};
     use crate::{
         city::{City, MoodState::*},
         city_pieces::Building::*,

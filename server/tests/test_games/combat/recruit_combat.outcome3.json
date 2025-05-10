@@ -302,7 +302,7 @@
                       "value": [
                         {
                           "event_type": {
-                            "CombatStats": {
+                            "EndCombat": {
                               "attacker": {
                                 "losses": {
                                   "ships": 2
