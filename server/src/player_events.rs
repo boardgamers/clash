@@ -3,7 +3,7 @@ use crate::advance::Advance;
 use crate::barbarians::BarbariansEventState;
 use crate::collect::{CollectContext, CollectInfo};
 use crate::combat::Combat;
-use crate::combat_listeners::{CombatEnd, CombatRoundEnd, CombatRoundStart};
+use crate::combat_listeners::{CombatRoundEnd, CombatRoundStart};
 use crate::combat_stats::CombatStats;
 use crate::construct::ConstructInfo;
 use crate::content::custom_actions::CustomEventAction;
@@ -106,8 +106,7 @@ pub(crate) struct PersistentEvents {
     pub combat_round_start_tactics: PersistentEvent<CombatRoundStart>,
     pub combat_round_end: PersistentEvent<CombatRoundEnd>,
     pub combat_round_end_tactics: PersistentEvent<CombatRoundEnd>,
-    pub combat_end: PersistentEvent<CombatEnd>,
-    pub capture_undefended_position: PersistentEvent<CombatStats>,
+    pub combat_end: PersistentEvent<CombatStats>,
     pub units_killed: PersistentEvent<KilledUnits>,
     pub select_objective_cards: PersistentEvent<SelectObjectivesInfo>,
     pub custom_action: PersistentEvent<CustomEventAction>,
@@ -141,7 +140,6 @@ impl PersistentEvents {
             combat_round_end: Event::new("combat_round_end"),
             combat_round_end_tactics: Event::new("combat_round_end_tactics"),
             combat_end: Event::new("combat_end"),
-            capture_undefended_position: Event::new("capture_undefended_position"),
             units_killed: Event::new("units_killed"),
             select_objective_cards: Event::new("select_objective_cards"),
 

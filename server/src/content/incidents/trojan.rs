@@ -79,7 +79,7 @@ pub(crate) fn decide_trojan_horse() -> Builtin {
 
 fn is_land_battle_against_defended_city(game: &Game, player_index: usize, combat: &Combat) -> bool {
     !combat.is_sea_battle(game)
-        && combat.attacker == player_index
+        && combat.attacker() == player_index
         && combat.defender_city(game).is_some()
 }
 
@@ -108,13 +108,13 @@ pub(crate) fn solar_eclipse_end_combat() -> Builtin {
                     .iter()
                     .position(|e| matches!(e, PermanentEffect::SolarEclipse))
                 {
-                    if r.combat.round == 1 && !r.combat.is_sea_battle(game) {
+                    if r.combat.first_round() && !r.combat.is_sea_battle(game) {
                         game.permanent_effects.remove(p);
                         r.combat.retreat = CombatRetreatState::EndAfterCurrentRound;
 
                         let p = match &r.final_result {
-                            Some(CombatResult::AttackerWins) => r.combat.attacker,
-                            _ => r.combat.defender,
+                            Some(CombatResult::AttackerWins) => r.combat.attacker(),
+                            _ => r.combat.defender(),
                         };
                         let p = game.player_mut(p);
                         p.event_victory_points += 1_f32;

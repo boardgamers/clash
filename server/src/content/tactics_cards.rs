@@ -88,7 +88,7 @@ pub(crate) fn wedge_formation(id: u8) -> TacticsCard {
     .fighter_requirement(FighterRequirement::Army)
     .role_requirement(CombatRole::Attacker)
     .add_reveal_listener(10, |_player, game, c, s| {
-        let v = c.fighting_units(game, c.defender).len() as i8;
+        let v = c.fighting_units(game, c.defender()).len() as i8;
         s.extra_combat_value += v;
         s.roll_log
             .push(format!("Wedge Formation added {v} combat value",));
@@ -268,7 +268,7 @@ pub(crate) fn tactical_retreat(id: u8) -> TacticsCard {
         |event| &mut event.combat_round_start_tactics,
         0,
         move |game, p, s| {
-            (p == s.combat.defender).then_some(PositionRequest::new(
+            (p == s.combat.defender()).then_some(PositionRequest::new(
                 tactical_retreat_targets(&s.combat, game),
                 1..=1,
                 "Select a position to withdraw to",
@@ -284,7 +284,7 @@ pub(crate) fn tactical_retreat(id: u8) -> TacticsCard {
             ));
             for unit in game
                 .player_mut(s.player_index)
-                .get_units_mut(r.combat.defender_position)
+                .get_units_mut(r.combat.defender_position())
                 .iter()
                 .map(|u| u.id)
                 .collect_vec()
@@ -297,8 +297,8 @@ pub(crate) fn tactical_retreat(id: u8) -> TacticsCard {
 }
 
 fn tactical_retreat_targets(c: &Combat, game: &Game) -> Vec<Position> {
-    let player = c.defender;
-    c.defender_position
+    let player = c.defender();
+    c.defender_position()
         .neighbors()
         .into_iter()
         .filter(|&p| game.map.is_land(p) && game.enemy_player(player, p).is_none())

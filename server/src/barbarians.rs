@@ -67,8 +67,7 @@ pub(crate) fn barbarians_bonus() -> Builtin {
             105,
             |game, player_index, i| {
                 if i.is_winner(player_index)
-                    && game
-                        .player(i.opponent(player_index))
+                    && i.opponent_player(player_index, game)
                         .civilization
                         .is_barbarian()
                 {
@@ -247,7 +246,6 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
                     move_with_possible_combat(
                         game,
                         get_barbarians_player(game).index,
-                        from,
                         &MoveUnits::new(units, to, None, ResourcePile::empty()),
                     );
                 },

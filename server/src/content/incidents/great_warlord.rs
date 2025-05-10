@@ -56,7 +56,7 @@ pub(crate) fn use_great_warlord() -> Builtin {
             9,
             |_game, player_index, _name, r| {
                 if r.combat.modifiers.contains(&CombatModifier::GreatWarlord)
-                    && r.combat.attacker == player_index
+                    && r.combat.attacker() == player_index
                 {
                     r.attacker_strength.extra_combat_value += 2;
                     r.attacker_strength

@@ -161,7 +161,7 @@ fn move_army(b: ActionCardBuilder, i: i32) -> ActionCardBuilder {
                 let m = MoveUnits::new(units, to, None, ResourcePile::empty());
                 game.add_info_log_item(&move_action_log(game, b, &m));
 
-                move_with_possible_combat(game, barbarian, from, &m);
+                move_with_possible_combat(game, barbarian, &m);
             },
         );
 

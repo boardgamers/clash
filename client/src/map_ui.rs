@@ -13,7 +13,7 @@ use crate::{collect_ui, hex_ui, unit_ui};
 use macroquad::math::{f32, vec2};
 use macroquad::prelude::*;
 use server::action::Action;
-use server::combat::Combat;
+use server::combat_stats::CombatStats;
 use server::content::persistent_events::EventResponse;
 use server::map::{Rotation, Terrain, UnexploredBlock};
 use server::playing_actions::{PlayingAction, PlayingActionType};
@@ -193,9 +193,9 @@ fn with_alpha(base: Color, alpha: f32) -> Color {
     Color::from_vec(v)
 }
 
-fn draw_combat_arrow(c: &Combat) {
-    let from = hex_ui::center(c.attacker_position);
-    let to = hex_ui::center(c.defender_position);
+fn draw_combat_arrow(c: &CombatStats) {
+    let from = hex_ui::center(c.attacker.position);
+    let to = hex_ui::center(c.defender.position);
     let to_vec = vec2(to.x, to.y);
     let from_vec = vec2(from.x, from.y);
     let end = from_vec.add(to_vec.sub(from_vec).mul(0.7));

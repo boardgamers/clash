@@ -86,7 +86,7 @@ impl CombatRoundStats {
         let combat_value = rolls.combat_value as u8;
         let hit_cancels = rolls.hit_cancels + strength.hit_cancels;
 
-        let opponent_str = if c.defender == player {
+        let opponent_str = if c.defender() == player {
             "attacking"
         } else {
             "defending"

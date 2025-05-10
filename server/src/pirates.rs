@@ -53,8 +53,7 @@ pub(crate) fn pirates_bonus() -> Builtin {
         |event| &mut event.combat_end,
         103,
         |game, player_index, i| {
-            if game
-                .player(i.opponent(player_index))
+            if i.opponent_player(player_index, game)
                 .civilization
                 .is_pirates()
             {
@@ -94,8 +93,7 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
 
                 if player.resources.amount() > 0 {
                     game.add_info_log_item(&format!(
-                        "{} must pay 1 resource or token to bribe the pirates",
-                        player.get_name()
+                        "{player} must pay 1 resource or token to bribe the pirates",
                     ));
                     Some(vec![PaymentRequest::mandatory(
                         PaymentOptions::sum(
@@ -138,8 +136,7 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
                 }
 
                 game.add_info_log_item(&format!(
-                    "{} must reduce Mood in a city adjacent to pirates",
-                    player.get_name()
+                    "{player} must reduce Mood in a city adjacent to pirates",
                 ));
 
                 let needed = 1..=1;

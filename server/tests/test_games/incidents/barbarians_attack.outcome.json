@@ -253,9 +253,10 @@
                     }
                   },
                   "combat_stats": {
-                    "position": "C2",
+                    "round": 1,
                     "battleground": "CityWithFortress",
                     "attacker": {
+                      "position": "B2",
                       "player": 2,
                       "present": {
                         "infantry": 2,
@@ -266,8 +267,12 @@
                       }
                     },
                     "defender": {
+                      "position": "C2",
                       "player": 0,
                       "present": {
+                        "settlers": 4
+                      },
+                      "losses": {
                         "settlers": 4
                       }
                     },

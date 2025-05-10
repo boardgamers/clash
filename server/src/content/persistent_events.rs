@@ -5,7 +5,7 @@ use crate::card::HandCard;
 use crate::city_pieces::Building;
 use crate::collect::CollectInfo;
 use crate::combat::Combat;
-use crate::combat_listeners::{CombatEnd, CombatRoundEnd, CombatRoundStart};
+use crate::combat_listeners::{CombatRoundEnd, CombatRoundStart};
 use crate::combat_stats::CombatStats;
 use crate::construct::ConstructInfo;
 use crate::content::custom_actions::CustomEventAction;
@@ -103,8 +103,7 @@ pub enum PersistentEventType {
     CombatStart(Combat),
     CombatRoundStart(CombatRoundStart),
     CombatRoundEnd(CombatRoundEnd),
-    CombatEnd(CombatEnd),
-    CaptureUndefendedPosition(CombatStats),
+    CombatEnd(CombatStats),
     StatusPhase(StatusPhaseState),
     TurnStart,
     PayAction(PlayingAction),

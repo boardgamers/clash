@@ -24,19 +24,15 @@
             "combat_value": 12
           },
           "combat": {
-            "round": 1,
-            "defender": 1,
-            "defender_position": "D2",
-            "attacker": 0,
-            "attacker_position": "C3",
             "attackers": [
               8
             ],
             "retreat": "CanRetreat",
             "stats": {
-              "position": "D2",
+              "round": 1,
               "battleground": "Sea",
               "attacker": {
+                "position": "C3",
                 "player": 0,
                 "present": {
                   "ships": 2
@@ -46,6 +42,7 @@
                 }
               },
               "defender": {
+                "position": "D2",
                 "player": 1,
                 "present": {
                   "ships": 2

@@ -222,9 +222,10 @@
                     }
                   },
                   "combat_stats": {
-                    "position": "C1",
+                    "round": 1,
                     "battleground": "City",
                     "attacker": {
+                      "position": "C2",
                       "player": 0,
                       "present": {
                         "infantry": 1
@@ -234,6 +235,7 @@
                       }
                     },
                     "defender": {
+                      "position": "C1",
                       "player": 1,
                       "present": {
                         "infantry": 2

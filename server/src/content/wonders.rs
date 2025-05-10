@@ -53,7 +53,7 @@ fn great_wall() -> WonderInfo {
         8,
         move |game, p, _name, s| {
             let c = &s.combat;
-            if c.round == 1
+            if c.first_round()
                 && c.role(p) == CombatRole::Defender
                 && c.defender_city(game)
                     .is_some_and(|c| c.mood_state == MoodState::Happy)

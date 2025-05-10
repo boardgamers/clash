@@ -260,6 +260,31 @@
                         "gold": 1
                       }
                     }
+                  },
+                  "combat_stats": {
+                    "round": 1,
+                    "battleground": "Sea",
+                    "attacker": {
+                      "position": "C2",
+                      "player": 0,
+                      "present": {
+                        "ships": 3
+                      },
+                      "losses": {
+                        "ships": 2
+                      }
+                    },
+                    "defender": {
+                      "position": "C3",
+                      "player": 2,
+                      "present": {
+                        "ships": 2
+                      },
+                      "losses": {
+                        "ships": 2
+                      }
+                    },
+                    "result": "AttackerWins"
                   }
                 },
                 {
@@ -278,40 +303,29 @@
                         {
                           "event_type": {
                             "CombatEnd": {
-                              "combat": {
-                                "attacker": 0,
-                                "attacker_position": "C2",
-                                "attackers": [
-                                  12
-                                ],
-                                "defender": 2,
-                                "defender_position": "C3",
-                                "retreat": "CannotRetreat",
-                                "round": 1,
-                                "stats": {
-                                  "attacker": {
-                                    "losses": {
-                                      "ships": 2
-                                    },
-                                    "player": 0,
-                                    "present": {
-                                      "ships": 3
-                                    }
-                                  },
-                                  "battleground": "Sea",
-                                  "defender": {
-                                    "losses": {
-                                      "ships": 2
-                                    },
-                                    "player": 2,
-                                    "present": {
-                                      "ships": 2
-                                    }
-                                  },
-                                  "position": "C3"
+                              "attacker": {
+                                "losses": {
+                                  "ships": 2
+                                },
+                                "player": 0,
+                                "position": "C2",
+                                "present": {
+                                  "ships": 3
                                 }
                               },
-                              "result": "AttackerWins"
+                              "battleground": "Sea",
+                              "defender": {
+                                "losses": {
+                                  "ships": 2
+                                },
+                                "player": 2,
+                                "position": "C3",
+                                "present": {
+                                  "ships": 2
+                                }
+                              },
+                              "result": "AttackerWins",
+                              "round": 1
                             }
                           },
                           "handler": {
@@ -353,30 +367,7 @@
                       "path": "/players/0/resources/culture_tokens",
                       "value": 10
                     }
-                  ],
-                  "combat_stats": {
-                    "position": "C3",
-                    "battleground": "Sea",
-                    "attacker": {
-                      "player": 0,
-                      "present": {
-                        "ships": 3
-                      },
-                      "losses": {
-                        "ships": 2
-                      }
-                    },
-                    "defender": {
-                      "player": 2,
-                      "present": {
-                        "ships": 2
-                      },
-                      "losses": {
-                        "ships": 2
-                      }
-                    },
-                    "result": "AttackerWins"
-                  }
+                  ]
                 }
               ]
             }

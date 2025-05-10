@@ -47,7 +47,7 @@ pub(crate) fn move_to_unexplored_block(
     units: &[u32],
     start: Position,
     destination: Option<Position>,
-) -> bool {
+) {
     game.information_revealed(); // tile is revealed
 
     let base = move_to.position.rotation;
@@ -71,7 +71,6 @@ pub(crate) fn move_to_unexplored_block(
                 ship_can_teleport,
             );
         }
-        true // no current event is active
     };
 
     let mut ship_can_teleport = false;
@@ -138,8 +137,6 @@ pub(crate) fn move_to_unexplored_block(
         ship_can_teleport,
     };
     ask_explore_resolution(game, player_index, resolution_state);
-
-    true // current event is active
 }
 
 pub(crate) fn ask_explore_resolution(

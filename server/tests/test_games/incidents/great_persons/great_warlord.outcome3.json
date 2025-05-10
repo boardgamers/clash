@@ -401,15 +401,17 @@
                     }
                   },
                   "combat_stats": {
-                    "position": "C8",
+                    "round": 1,
                     "battleground": "Land",
                     "attacker": {
+                      "position": "D7",
                       "player": 1,
                       "present": {
                         "infantry": 1
                       }
                     },
                     "defender": {
+                      "position": "C8",
                       "player": 0,
                       "present": {
                         "infantry": 1

@@ -286,8 +286,8 @@ pub(crate) fn play_tactics_card(b: AdvanceBuilder) -> AdvanceBuilder {
             }
 
             let c = &s.combat;
-            if player == c.defender
-                && c.round == 1
+            if player == c.defender()
+                && c.first_round()
                 && c.modifiers.contains(&CombatModifier::TrojanHorse)
             {
                 update_combat_strength(game, player, s, |_game, _c, s, _role| {
@@ -341,7 +341,7 @@ fn can_play_tactics_card(game: &Game, player: usize, card: &ActionCard, combat: 
                 || card.fighter_requirement.iter().any(|r| match r {
                     FighterRequirement::Army => !combat.is_sea_battle(game),
                     FighterRequirement::Fortress => {
-                        combat.defender_fortress(game) && combat.defender == player
+                        combat.defender_fortress(game) && combat.defender() == player
                     }
                     FighterRequirement::Ship => combat.is_sea_battle(game),
                 });

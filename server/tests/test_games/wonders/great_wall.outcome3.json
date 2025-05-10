@@ -269,9 +269,10 @@
                     }
                   },
                   "combat_stats": {
-                    "position": "A1",
+                    "round": 1,
                     "battleground": "City",
                     "attacker": {
+                      "position": "B1",
                       "player": 1,
                       "present": {
                         "infantry": 2
@@ -281,6 +282,7 @@
                       }
                     },
                     "defender": {
+                      "position": "A1",
                       "player": 0,
                       "present": {
                         "infantry": 1,
@@ -320,16 +322,22 @@
                     }
                   },
                   "combat_stats": {
-                    "position": "A1",
+                    "round": 1,
                     "battleground": "City",
                     "attacker": {
+                      "position": "A2",
                       "player": 2,
                       "present": {
+                        "infantry": 1,
+                        "elephants": 1
+                      },
+                      "losses": {
                         "infantry": 1,
                         "elephants": 1
                       }
                     },
                     "defender": {
+                      "position": "A1",
                       "player": 0
                     },
                     "result": "DefenderWins",
@@ -410,7 +418,7 @@
       "Base effect: Barbarians move",
       "Barbarians move from A2 to A1: 1 infantry and 1 elephant",
       "Barbarians lost the battle due to the Great Wall",
-      "Player1 gained 1 gold",
+      "Player1 gained 1 gold for winning a combat against the Barbarians",
       "Barbarians spawned a new Infantry unit at B3",
       "Player1 gained 1 idea and 1 culture token",
       "No Wonders left to draw",

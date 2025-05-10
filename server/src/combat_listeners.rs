@@ -1,10 +1,11 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::combat::{Combat, CombatRetreatState, capture_position};
+use crate::combat::{Combat, CombatRetreatState, capture_position, log_round};
 use crate::combat_roll::CombatHits;
+use crate::combat_stats::CombatStats;
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{PersistentEventType, PositionRequest, UnitsRequest};
 use crate::game::Game;
-use crate::log::current_player_turn_log_mut;
+use crate::log::current_action_log_item;
 use crate::movement::move_units;
 use crate::player::add_unit;
 use crate::player_events::{PersistentEvent, PersistentEvents};
@@ -132,65 +133,12 @@ impl CombatResult {
 pub struct CombatEnd {
     pub result: CombatResult,
     pub combat: Combat,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub selected_card: Option<u8>,
 }
 
 impl CombatEnd {
     #[must_use]
     pub fn new(result: CombatResult, combat: Combat) -> Self {
-        Self {
-            result,
-            combat,
-            selected_card: None,
-        }
-    }
-
-    #[must_use]
-    pub fn is_attacker(&self, player: usize) -> bool {
-        self.combat.attacker == player
-    }
-
-    #[must_use]
-    pub fn is_defender(&self, player: usize) -> bool {
-        self.combat.attacker != player
-    }
-
-    #[must_use]
-    pub fn is_loser(&self, player: usize) -> bool {
-        if self.is_attacker(player) {
-            self.result == CombatResult::DefenderWins
-        } else {
-            self.result == CombatResult::AttackerWins
-        }
-    }
-
-    #[must_use]
-    pub fn is_winner(&self, player: usize) -> bool {
-        if self.is_attacker(player) {
-            self.result == CombatResult::AttackerWins
-        } else {
-            self.result == CombatResult::DefenderWins
-        }
-    }
-
-    #[must_use]
-    pub fn opponent(&self, player: usize) -> usize {
-        if self.is_attacker(player) {
-            self.combat.defender
-        } else {
-            self.combat.attacker
-        }
-    }
-
-    #[must_use]
-    pub fn captured_city(&self, player: usize, game: &Game) -> bool {
-        self.is_attacker(player)
-            && self.is_winner(player)
-            && game
-                .try_get_any_city(self.combat.defender_position)
-                .is_some()
+        Self { result, combat }
     }
 }
 
@@ -346,43 +294,58 @@ pub(crate) fn combat_round_end(game: &mut Game, r: CombatRoundEnd) -> Option<Com
         None
     } else {
         let mut c = e.combat;
-        c.round += 1;
-        crate::combat::log_round(game, &c);
+        c.stats.round += 1;
+        log_round(game, &c);
         Some(c)
     }
 }
 
-fn attacker_wins(game: &mut Game, c: Combat) {
+fn attacker_wins(game: &mut Game, mut c: Combat) {
     game.add_info_log_item("Attacker wins");
-    move_units(game, c.attacker, &c.attackers, c.defender_position, None);
-    capture_position(game, c.defender, c.defender_position, c.attacker);
-    end_combat(game, CombatEnd::new(CombatResult::AttackerWins, c));
+    move_units(
+        game,
+        c.attacker(),
+        &c.attackers,
+        c.defender_position(),
+        None,
+    );
+    capture_position(game, &mut c.stats);
+    end_combat_and_store_stats(game, CombatEnd::new(CombatResult::AttackerWins, c));
 }
 
 fn defender_wins(game: &mut Game, c: Combat) {
     game.add_info_log_item("Defender wins");
-    end_combat(game, CombatEnd::new(CombatResult::DefenderWins, c));
+    end_combat_and_store_stats(game, CombatEnd::new(CombatResult::DefenderWins, c));
 }
 
 pub(crate) fn draw(game: &mut Game, c: Combat) {
-    if c.defender_fortress(game) && c.round == 1 {
+    if c.defender_fortress(game) && c.first_round() {
         game.add_info_log_item(&format!(
             "{} wins the battle because he has a defending fortress",
-            game.player_name(c.defender)
+            game.player_name(c.defender())
         ));
-        return end_combat(game, CombatEnd::new(CombatResult::DefenderWins, c));
+        return end_combat_and_store_stats(game, CombatEnd::new(CombatResult::DefenderWins, c));
     }
     game.add_info_log_item("Battle ends in a draw");
-    end_combat(game, CombatEnd::new(CombatResult::Draw, c));
+    end_combat_and_store_stats(game, CombatEnd::new(CombatResult::Draw, c));
 }
 
-pub(crate) fn end_combat(game: &mut Game, info: CombatEnd) {
-    let c = &info.combat;
+fn end_combat_and_store_stats(game: &mut Game, e: CombatEnd) {
+    let mut stats = e.combat.stats;
+    stats.result = Some(e.result.clone());
+    end_combat(game, stats);
+}
 
+pub(crate) fn end_combat(game: &mut Game, s: CombatStats) {
+    current_action_log_item(game).combat_stats = Some(s.clone());
+    on_end_combat(game, s);
+}
+
+pub(crate) fn on_end_combat(game: &mut Game, stats: CombatStats) {
     let _ = game.trigger_persistent_event(
-        &c.players(),
+        &[stats.attacker.player, stats.defender.player],
         |events| &mut events.combat_end,
-        info,
+        stats,
         PersistentEventType::CombatEnd,
     );
 }
@@ -547,10 +510,9 @@ pub(crate) fn choose_fighter_casualties() -> Builtin {
                     return None;
                 }
                 let p = game.player(player);
-                let name = p.get_name();
                 if casualties == choices.len() as u8 {
                     game.add_info_log_item(&format!(
-                        "{name} has to remove all of their {role_str} units",
+                        "{p} has to remove all of their {role_str} units",
                     ));
                     kill_fighters(game, player, &choices, &mut r.combat);
                     return None;
@@ -563,14 +525,14 @@ pub(crate) fn choose_fighter_casualties() -> Builtin {
                     || !p.is_human()
                 {
                     game.add_info_log_item(&format!(
-                        "{name} has to remove {casualties} of their {role_str} units",
+                        "{p} has to remove {casualties} of their {role_str} units",
                     ));
                     kill_fighters(game, player, &choices[..casualties as usize], &mut r.combat);
                     return None;
                 }
 
                 game.add_info_log_item(&format!(
-                    "{name} has to remove {casualties} of their {role_str} units",
+                    "{p} has to remove {casualties} of their {role_str} units",
                 ));
                 Some(UnitsRequest::new(
                     player,
@@ -593,7 +555,7 @@ pub(crate) fn offer_retreat() -> Builtin {
             0,
             |game, player, r| {
                 let c = &r.combat;
-                if c.attacker == player && r.can_retreat() {
+                if c.attacker() == player && r.can_retreat() {
                     let name = game.player_name(player);
                     game.add_info_log_item(&format!("{name} can retreat",));
                     Some("Do you want to retreat?".to_string())
@@ -628,7 +590,7 @@ pub(crate) fn place_settler() -> Builtin {
             let p = game.player(player_index);
             if i.is_defender(player_index)
                 && i.is_loser(player_index)
-                && game.try_get_any_city(i.combat.defender_position).is_some()
+                && game.try_get_any_city(i.defender.position).is_some()
                 && !p.cities.is_empty()
                 && p.available_units().settlers > 0
                 && p.is_human()
@@ -659,8 +621,7 @@ pub(crate) fn place_settler() -> Builtin {
 fn kill_fighters(game: &mut Game, player: usize, killed_unit_ids: &[u32], c: &mut Combat) {
     let p = game.player(player);
     game.add_info_log_item(&format!(
-        "{} removed {}",
-        p.get_name(),
+        "{p} removed {}",
         killed_unit_ids
             .iter()
             .map(|id| p.get_unit(*id).unit_type)
@@ -676,35 +637,35 @@ pub(crate) fn kill_combat_units(
     player: usize,
     killed_unit_ids: &[u32],
 ) {
-    let p = game.player(player);
-    c.stats.player_mut(c.role(player)).add_losses(
-        &killed_unit_ids
-            .iter()
-            .map(|id| p.get_unit(*id).unit_type)
-            .collect_vec(),
-    );
-    kill_units(game, killed_unit_ids, player, Some(c.opponent(player)));
+    kill_units_with_stats(&mut c.stats, game, player, killed_unit_ids);
     for unit in killed_unit_ids {
-        if player == c.attacker {
+        if player == c.attacker() {
             c.attackers.retain(|id| id != unit);
         }
     }
 }
 
-pub(crate) fn combat_stats() -> Builtin {
-    Builtin::builder("Combat stats", "")
-        .add_simple_persistent_event_listener(
-            |event| &mut event.combat_end,
-            100,
-            |game, _player, _name, e| {
-                e.combat.stats.result = Some(e.result.clone());
+pub(crate) fn kill_units_with_stats(
+    stats: &mut CombatStats,
+    game: &mut Game,
+    player: usize,
+    killed_unit_ids: &[u32],
+) {
+    if killed_unit_ids.is_empty() {
+        return;
+    }
 
-                let i = current_player_turn_log_mut(game)
-                    .items
-                    .last_mut()
-                    .expect("last item");
-                i.combat_stats = Some(e.combat.stats.clone());
-            },
-        )
-        .build()
+    let p = game.player(player);
+    stats.player_mut(stats.role(player)).add_losses(
+        &killed_unit_ids
+            .iter()
+            .map(|id| p.get_unit(*id).unit_type)
+            .collect_vec(),
+    );
+    kill_units(
+        game,
+        killed_unit_ids,
+        player,
+        Some(stats.opponent(player).player),
+    );
 }

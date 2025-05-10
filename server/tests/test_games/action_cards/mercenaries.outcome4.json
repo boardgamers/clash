@@ -277,9 +277,10 @@
                     }
                   },
                   "combat_stats": {
-                    "position": "B2",
+                    "round": 1,
                     "battleground": "Land",
                     "attacker": {
+                      "position": "A3",
                       "player": 2,
                       "present": {
                         "infantry": 2,
@@ -290,6 +291,7 @@
                       }
                     },
                     "defender": {
+                      "position": "B2",
                       "player": 0,
                       "present": {
                         "infantry": 1
