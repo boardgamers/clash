@@ -4,7 +4,7 @@
   "events": [
     {
       "event_type": {
-        "EndCombat": {
+        "CombatEnd": {
           "round": 1,
           "battleground": "Sea",
           "attacker": {

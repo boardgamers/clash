@@ -11,7 +11,7 @@
   "events": [
     {
       "event_type": {
-        "EndCombat": {
+        "CombatEnd": {
           "round": 1,
           "battleground": "CityWithFortress",
           "attacker": {
