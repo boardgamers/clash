@@ -64,7 +64,7 @@ fn siegecraft() -> AdvanceBuilder {
 
             let player = &game.players[player];
             if game
-                .try_get_any_city(c.defender_position)
+                .try_get_any_city(c.defender_position())
                 .is_some_and(|c| c.pieces.fortress.is_some())
                 && (player.can_afford(&extra_die) || player.can_afford(&ignore_hit))
             {
@@ -195,7 +195,7 @@ pub(crate) fn draft_cost(player: &Player) -> u8 {
 }
 
 fn add_steel_weapons(player_index: usize, c: &mut Combat) {
-    if player_index == c.attacker {
+    if player_index == c.attacker() {
         c.modifiers.push(SteelWeaponsAttacker);
     } else {
         c.modifiers.push(SteelWeaponsDefender);
@@ -205,8 +205,8 @@ fn add_steel_weapons(player_index: usize, c: &mut Combat) {
 #[must_use]
 fn steel_weapons_cost(game: &Game, combat: &Combat, player_index: usize) -> PaymentOptions {
     let player = &game.players[player_index];
-    let attacker = &game.players[combat.attacker];
-    let defender = &game.players[combat.defender];
+    let attacker = &game.players[combat.attacker()];
+    let defender = &game.players[combat.defender()];
     let both_steel_weapons = attacker.can_use_advance(Advance::SteelWeapons)
         && defender.can_use_advance(Advance::SteelWeapons);
     let cost = u8::from(!player.can_use_advance(Advance::Metallurgy) || both_steel_weapons);
@@ -219,7 +219,7 @@ fn steel_weapons_cost(game: &Game, combat: &Combat, player_index: usize) -> Paym
 }
 
 fn fortress(game: &Game, c: &Combat, s: &mut CombatStrength, role: CombatRole) {
-    if role.is_attacker() || !c.defender_fortress(game) || c.round != 1 {
+    if role.is_attacker() || !c.defender_fortress(game) || c.stats.round != 1 {
         return;
     }
 
@@ -236,10 +236,10 @@ fn fortress(game: &Game, c: &Combat, s: &mut CombatStrength, role: CombatRole) {
 
 fn use_steel_weapons(game: &Game, c: &Combat, s: &mut CombatStrength, role: CombatRole) {
     let steel_weapon_value = if game
-        .player(c.attacker)
+        .player(c.attacker())
         .can_use_advance(Advance::SteelWeapons)
         && game
-            .player(c.defender)
+            .player(c.defender())
             .can_use_advance(Advance::SteelWeapons)
     {
         1

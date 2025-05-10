@@ -143,7 +143,7 @@ fn fanaticism() -> AdvanceBuilder {
         place it in one of your cities.",
     )
     .add_combat_round_start_listener(1, |game, c, s, _role| {
-        if c.round == 1 && c.defender_temple(game) {
+        if c.first_round() && c.defender_temple(game) {
             s.extra_combat_value += 2;
             s.roll_log
                 .push("Player gets +2 combat value for Fanaticism Advance".to_string());

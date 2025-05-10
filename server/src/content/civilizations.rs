@@ -84,9 +84,9 @@ fn maya() -> Civilization {
                 "",
             )
             .add_combat_round_start_listener(4, |game, c, s, _role| {
-                if c.round == 1
+                if c.first_round()
                     && game
-                        .try_get_any_city(c.defender_position)
+                        .try_get_any_city(c.defender_position())
                         .is_some_and(|city| city.pieces.obelisk.is_some())
                 {
                     s.roll_log.push(

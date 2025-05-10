@@ -294,8 +294,7 @@ pub(crate) fn combat_round_end(game: &mut Game, r: CombatRoundEnd) -> Option<Com
         None
     } else {
         let mut c = e.combat;
-        c.round += 1;
-        c.stats.round = c.round;
+        c.stats.round += 1;
         log_round(game, &c);
         Some(c)
     }
@@ -303,7 +302,7 @@ pub(crate) fn combat_round_end(game: &mut Game, r: CombatRoundEnd) -> Option<Com
 
 fn attacker_wins(game: &mut Game, mut c: Combat) {
     game.add_info_log_item("Attacker wins");
-    move_units(game, c.attacker, &c.attackers, c.defender_position, None);
+    move_units(game, c.attacker(), &c.attackers, c.defender_position(), None);
     capture_position(game, &mut c.stats);
     end_combat_and_store_stats(game, CombatEnd::new(CombatResult::AttackerWins, c));
 }
@@ -314,10 +313,10 @@ fn defender_wins(game: &mut Game, c: Combat) {
 }
 
 pub(crate) fn draw(game: &mut Game, c: Combat) {
-    if c.defender_fortress(game) && c.round == 1 {
+    if c.defender_fortress(game) && c.first_round() {
         game.add_info_log_item(&format!(
             "{} wins the battle because he has a defending fortress",
-            game.player_name(c.defender)
+            game.player_name(c.defender())
         ));
         return end_combat_and_store_stats(game, CombatEnd::new(CombatResult::DefenderWins, c));
     }
@@ -550,7 +549,7 @@ pub(crate) fn offer_retreat() -> Builtin {
             0,
             |game, player, r| {
                 let c = &r.combat;
-                if c.attacker == player && r.can_retreat() {
+                if c.attacker() == player && r.can_retreat() {
                     let name = game.player_name(player);
                     game.add_info_log_item(&format!("{name} can retreat",));
                     Some("Do you want to retreat?".to_string())
@@ -634,7 +633,7 @@ pub(crate) fn kill_combat_units(
 ) {
     kill_units_with_stats(&mut c.stats, game, player, killed_unit_ids);
     for unit in killed_unit_ids {
-        if player == c.attacker {
+        if player == c.attacker() {
             c.attackers.retain(|id| id != unit);
         }
     }

@@ -385,7 +385,7 @@ fn execute_move_action(game: &mut Game, player_index: usize, m: &MoveUnits) -> R
             m.destination,
         );
     } else {
-        move_with_possible_combat(game, player_index, starting_position, m);
+        move_with_possible_combat(game, player_index, m);
     }
 
     Ok(())

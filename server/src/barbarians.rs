@@ -246,7 +246,6 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
                     move_with_possible_combat(
                         game,
                         get_barbarians_player(game).index,
-                        from,
                         &MoveUnits::new(units, to, None, ResourcePile::empty()),
                     );
                 },

@@ -39,11 +39,6 @@ pub enum CombatRetreatState {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct Combat {
-    pub round: u32, //starts with one,
-    pub defender: usize,
-    pub defender_position: Position,
-    pub attacker: usize,
-    pub attacker_position: Position,
     pub attackers: Vec<u32>,
     pub retreat: CombatRetreatState,
     #[serde(default)]
@@ -55,21 +50,11 @@ pub struct Combat {
 impl Combat {
     #[must_use]
     pub fn new(
-        round: u32,
-        defender: usize,
-        defender_position: Position,
-        attacker: usize,
-        attacker_position: Position,
         attackers: Vec<u32>,
         can_retreat: bool,
         stats: CombatStats,
     ) -> Self {
         Self {
-            round,
-            defender,
-            defender_position,
-            attacker,
-            attacker_position,
             attackers,
             modifiers: vec![],
             retreat: if can_retreat {
@@ -80,10 +65,30 @@ impl Combat {
             stats,
         }
     }
+    
+    #[must_use]
+    pub fn first_round(&self) -> bool {
+        self.stats.round == 1
+    }
 
     #[must_use]
+    pub fn attacker(&self) -> usize {
+        self.stats.attacker.player
+    }
+    
+    #[must_use]
+    pub fn defender(&self) -> usize {
+        self.stats.defender.player
+    }
+    
+    #[must_use]
+    pub fn defender_position(&self) -> Position {
+        self.stats.defender.position
+    }
+    
+    #[must_use]
     pub fn fighting_units(&self, game: &Game, player: usize) -> Vec<u32> {
-        if player == self.attacker {
+        if player == self.attacker() {
             self.active_attackers(game)
         } else {
             self.active_defenders(game)
@@ -92,12 +97,12 @@ impl Combat {
 
     #[must_use]
     pub(crate) fn active_attackers(&self, game: &Game) -> Vec<u32> {
-        active_attackers(game, self.attacker, &self.attackers, self.defender_position)
+        active_attackers(game, self.attacker(), &self.attackers, self.defender_position())
     }
 
     #[must_use]
     pub fn active_defenders(&self, game: &Game) -> Vec<u32> {
-        active_defenders(game, self.defender, self.defender_position)
+        active_defenders(game, self.defender(), self.defender_position())
     }
 
     #[must_use]
@@ -108,7 +113,7 @@ impl Combat {
 
     #[must_use]
     pub fn defender_city<'a>(&self, game: &'a Game) -> Option<&'a City> {
-        game.players[self.defender].try_get_city(self.defender_position)
+        game.players[self.defender()].try_get_city(self.defender_position())
     }
 
     #[must_use]
@@ -119,37 +124,33 @@ impl Combat {
 
     #[must_use]
     pub fn is_sea_battle(&self, game: &Game) -> bool {
-        game.map.is_sea(self.defender_position)
+        game.map.is_sea(self.defender_position())
     }
 
     #[must_use]
     pub fn opponent(&self, player: usize) -> usize {
-        if player == self.attacker {
-            self.defender
+        if player == self.attacker() {
+            self.defender()
         } else {
-            self.attacker
+            self.attacker()
         }
     }
 
     #[must_use]
     pub fn players(&self) -> [usize; 2] {
-        [self.attacker, self.defender]
+        [self.attacker(), self.defender()]
     }
 
     #[must_use]
     pub fn role(&self, player: usize) -> CombatRole {
-        if player == self.attacker {
-            CombatRole::Attacker
-        } else {
-            CombatRole::Defender
-        }
+        self.stats.role(player)
     }
 
     #[must_use]
     pub fn player(&self, role: CombatRole) -> usize {
         match role {
-            CombatRole::Attacker => self.attacker,
-            CombatRole::Defender => self.defender,
+            CombatRole::Attacker => self.attacker(),
+            CombatRole::Defender => self.defender(),
         }
     }
 }
@@ -159,7 +160,6 @@ pub fn initiate_combat(
     defender: usize,
     defender_position: Position,
     attacker: usize,
-    attacker_position: Position,
     attackers: Vec<u32>,
     can_retreat: bool,
 ) {
@@ -172,11 +172,6 @@ pub fn initiate_combat(
         None,
     );
     let combat = Combat::new(
-        stats.round,
-        defender,
-        defender_position,
-        attacker,
-        attacker_position,
         attackers,
         can_retreat,
         stats,
@@ -186,13 +181,13 @@ pub fn initiate_combat(
 }
 
 pub(crate) fn log_round(game: &mut Game, c: &Combat) {
-    game.add_info_log_group(format!("Combat round {}", c.round));
+    game.add_info_log_group(format!("Combat round {}", c.stats.round));
     game.add_info_log_item(&format!(
         "Attackers: {}",
         c.attackers
             .iter()
             .flat_map(|u| {
-                let p = game.player(c.attacker);
+                let p = game.player(c.attacker());
                 let u = p.get_unit(*u);
                 vec![u.unit_type]
                     .into_iter()
@@ -207,8 +202,8 @@ pub(crate) fn log_round(game: &mut Game, c: &Combat) {
     ));
     game.add_info_log_item(&format!(
         "Defenders: {}",
-        game.player(c.defender)
-            .get_units(c.defender_position)
+        game.player(c.defender())
+            .get_units(c.defender_position())
             .iter()
             .map(|u| u.unit_type)
             .collect::<Units>()
@@ -237,14 +232,14 @@ pub(crate) fn update_combat_strength(
     e: &mut CombatRoundStart,
     update: impl Fn(&mut Game, &Combat, &mut CombatStrength, CombatRole) + Clone + Sync + Send,
 ) {
-    if player == e.combat.attacker {
+    if player == e.combat.attacker() {
         update(
             game,
             &e.combat,
             &mut e.attacker_strength,
             CombatRole::Attacker,
         );
-    } else if player == e.combat.defender {
+    } else if player == e.combat.defender() {
         update(
             game,
             &e.combat,
@@ -280,8 +275,8 @@ pub(crate) fn combat_loop(game: &mut Game, mut s: CombatRoundStart) {
             round_end.phase = CombatEventPhase::Default;
             round_end
         } else {
-            let mut a = CombatRoundStats::roll(c.attacker, &c, game, s.attacker_strength);
-            let mut d = CombatRoundStats::roll(c.defender, &c, game, s.defender_strength);
+            let mut a = CombatRoundStats::roll(c.attacker(), &c, game, s.attacker_strength);
+            let mut d = CombatRoundStats::roll(c.defender(), &c, game, s.defender_strength);
 
             CombatRoundEnd::new(
                 a.determine_hits(&d, game, a_t),
@@ -394,7 +389,6 @@ fn move_to_enemy_player_tile(
     player_index: usize,
     unit_ids: &Vec<u32>,
     destination: Position,
-    starting_position: Position,
     defender: usize,
 ) -> bool {
     let has_defending_units = game
@@ -449,7 +443,6 @@ fn move_to_enemy_player_tile(
             defender,
             destination,
             player_index,
-            starting_position,
             unit_ids.clone(),
             game.player(player_index).is_human(),
         );
@@ -461,7 +454,6 @@ fn move_to_enemy_player_tile(
 pub(crate) fn move_with_possible_combat(
     game: &mut Game,
     player_index: usize,
-    starting_position: Position,
     m: &MoveUnits,
 ) {
     let enemy = game.enemy_player(player_index, m.destination);
@@ -471,7 +463,6 @@ pub(crate) fn move_with_possible_combat(
             player_index,
             &m.units,
             m.destination,
-            starting_position,
             defender,
         ) {
             // combat was initiated todo change boolean to enum

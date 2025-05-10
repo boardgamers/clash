@@ -233,6 +233,7 @@ pub(crate) fn new_combat_stats(
     let a = game.player(attacker);
     let d = game.player(defender);
     let attacker_position = a.get_unit(attackers[0]).position;
+    assert_ne!(defender_position, attacker_position);
     let stats = CombatStats::new(
         battleground,
         battleground.is_land() && game.map.is_sea(attacker_position),

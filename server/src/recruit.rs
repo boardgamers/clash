@@ -106,7 +106,6 @@ pub(crate) fn on_recruit(game: &mut Game, player_index: usize, r: Recruit) {
                     defender,
                     port_position,
                     player_index,
-                    city_position,
                     ships,
                     false,
                 );
