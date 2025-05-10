@@ -6,7 +6,7 @@ use crate::content::persistent_events::{
 };
 use crate::game::GameOptions;
 use crate::game_setup::setup_game;
-use crate::log::current_player_turn_log_mut;
+use crate::log::{current_player_turn_log_mut, linear_action_log};
 use crate::utils::Shuffle;
 use crate::{
     action::Action,

@@ -1,13 +1,12 @@
 #![allow(clippy::pedantic)]
 
+extern crate console_error_panic_hook;
 use crate::cache::Cache;
 use crate::game::{GameContext, GameOptions};
 use crate::{game::Game, game_api};
 use serde::{Deserialize, Serialize};
 use std::mem;
 use wasm_bindgen::prelude::*;
-
-extern crate console_error_panic_hook;
 
 #[derive(Serialize, Deserialize)]
 pub struct PlayerMetaData {

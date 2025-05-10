@@ -8,6 +8,7 @@ use client::client_state::State;
 use macroquad::math::vec2;
 use server::action::Action;
 use server::cache::Cache;
+use server::game_data;
 use std::panic;
 use wasm_bindgen::prelude::*;
 

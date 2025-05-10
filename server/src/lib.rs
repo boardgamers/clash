@@ -42,6 +42,7 @@ mod explore;
 pub mod game;
 pub mod game_api;
 pub mod game_api_wrapper;
+pub mod game_data;
 pub mod game_setup;
 pub mod happiness;
 pub mod incident;
