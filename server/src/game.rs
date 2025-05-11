@@ -62,9 +62,10 @@ pub enum GameContext {
 }
 
 pub struct Game {
+    pub cache: Cache,
     pub context: GameContext, // trasient
     pub options: GameOptions,
-    pub cache: Cache,
+    pub version: u16, // JSON schema version
     pub state: GameState,
     pub events: Vec<PersistentEventState>,
     // in turn order starting from starting_player_index and wrapping around
@@ -82,6 +83,7 @@ pub struct Game {
     pub round: u32, // starts at 1
     pub age: u32,   // starts at 1
     pub messages: Vec<String>,
+    pub seed: String,
     pub rng: Rng,
     pub dice_roll_outcomes: Vec<u8>, // for testing
     pub dice_roll_log: Vec<u8>,

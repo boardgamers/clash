@@ -1,6 +1,7 @@
 use crate::advance::Advance;
 use crate::{resource_pile::ResourcePile, unit::Units};
 
+pub const JSON_SCHEMA_VERSION: u16 = 2;
 pub const MAX_CITY_PIECES: usize = 4; // i.e. city size 5
 pub const AGES: u32 = 6;
 pub const ADVANCE_COST: u8 = 2;

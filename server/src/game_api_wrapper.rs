@@ -3,7 +3,8 @@
 extern crate console_error_panic_hook;
 use crate::cache::Cache;
 use crate::game::{GameContext, GameOptions};
-use crate::{game::Game, game_api};
+use crate::replay::ReplayGameData;
+use crate::{game::Game, game_api, replay};
 use serde::{Deserialize, Serialize};
 use std::mem;
 use wasm_bindgen::prelude::*;
@@ -87,6 +88,23 @@ pub fn log_slice(game: String, options: JsValue) -> JsValue {
     let options = serde_wasm_bindgen::from_value(options).expect("options should be serializable");
     let log = game_api::log_slice(&game, &options);
     serde_wasm_bindgen::to_value(&log).expect("log should be serializable")
+}
+
+#[derive(Serialize, Deserialize, PartialEq)]
+struct ReplayOptions {
+    to: Option<usize>,
+}
+
+#[wasm_bindgen(js_name = "replay")]
+pub fn replay(game: String, options: JsValue) -> String {
+    console_error_panic_hook::set_once();
+
+    let r: ReplayGameData = serde_json::from_str(&game).expect("Could not deserialize game data");
+    let to = serde_wasm_bindgen::from_value::<ReplayOptions>(options)
+        .ok()
+        .and_then(|o| o.to);
+    let game = replay::replay(r, to);
+    from_game(game)
 }
 
 #[wasm_bindgen(js_name = "setPlayerMetaData")]

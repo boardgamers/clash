@@ -49,14 +49,15 @@ pub fn drop_player(mut game: Game, player_index: usize) -> Game {
 
 #[must_use]
 pub fn log_length(game: &Game) -> usize {
-    game.log.len()
+    linear_action_log(game).len()
 }
 
 #[must_use]
-pub fn log_slice(game: &Game, options: &LogSliceOptions) -> Vec<Vec<String>> {
+pub fn log_slice(game: &Game, options: &LogSliceOptions) -> Vec<Action> {
+    let l = linear_action_log(game);
     match options.end {
-        Some(end) => &game.log[options.start..=end],
-        None => &game.log[options.start..],
+        Some(end) => &l[options.start..=end],
+        None => &l[options.start..],
     }
     .to_vec()
 }

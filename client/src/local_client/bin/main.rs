@@ -9,7 +9,6 @@ use server::action::execute_action;
 use server::advance::{Advance, do_advance};
 use server::city::City;
 use server::game::{Game, GameContext, GameOptions, UndoOption};
-use server::game_data;
 use server::game_data::GameData;
 use server::game_setup::setup_game;
 use server::map::Terrain;

@@ -530,6 +530,8 @@ pub mod tests {
         age.rounds.push(round);
         Game {
             context: GameContext::Server,
+            version: 0,
+            seed: String::new(),
             options: GameOptions::default(),
             cache: Cache::new(),
             state: GameState::Playing,

@@ -1,7 +1,7 @@
 use crate::action_card::gain_action_card_from_pile;
 use crate::advance::Advance;
 use crate::cache::Cache;
-use crate::consts::{ACTIONS, NON_HUMAN_PLAYERS};
+use crate::consts::{ACTIONS, JSON_SCHEMA_VERSION, NON_HUMAN_PLAYERS};
 use crate::content::civilizations::{BARBARIANS, PIRATES};
 use crate::content::{builtin, civilizations};
 use crate::game::{Game, GameContext, GameOptions, GameState};
@@ -37,7 +37,7 @@ pub fn setup_game_with_cache(
     options: GameOptions,
     cache: Cache,
 ) -> Game {
-    let mut rng = init_rng(seed);
+    let mut rng = init_rng(seed.clone());
     let mut players = init_human_players(player_amount, &mut rng);
 
     let starting_player = rng.range(0, players.len());
@@ -83,7 +83,9 @@ pub fn setup_game_with_cache(
         .shuffled(&mut rng);
     let all = &cache.get_builtins().clone();
     let mut game = Game {
+        seed,
         context: GameContext::Server,
+        version: JSON_SCHEMA_VERSION,
         options,
         cache,
         state: GameState::Playing,

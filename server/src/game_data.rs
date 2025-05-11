@@ -8,12 +8,19 @@ use crate::player::{Player, PlayerData};
 use crate::utils;
 use crate::utils::Rng;
 use crate::wonder::Wonder;
+use num::Zero;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, PartialEq)]
 pub struct GameData {
     #[serde(default)]
     options: GameOptions,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "u16::is_zero")]
+    version: u16,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "String::is_empty")]
+    seed: String,
     state: GameState,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
@@ -81,6 +88,7 @@ pub fn from_data(data: GameData, cache: Cache, context: GameContext) -> Game {
         context,
         cache,
         options: data.options,
+        version: data.version,
         state: data.state,
         players: Vec::new(),
         map: Map::from_data(data.map),
@@ -95,6 +103,7 @@ pub fn from_data(data: GameData, cache: Cache, context: GameContext) -> Game {
         round: data.round,
         age: data.age,
         messages: data.messages,
+        seed: data.seed,
         rng: Rng::from_seed_string(&data.rng),
         dice_roll_outcomes: data.dice_roll_outcomes,
         dice_roll_log: data.dice_roll_log,
@@ -118,8 +127,9 @@ pub fn from_data(data: GameData, cache: Cache, context: GameContext) -> Game {
 #[must_use]
 pub fn data(game: Game) -> GameData {
     GameData {
-        state: game.state,
         options: game.options,
+        version: game.version,
+        state: game.state,
         events: game.events,
         players: game.players.into_iter().map(Player::data).collect(),
         map: game.map.data(),
@@ -134,6 +144,7 @@ pub fn data(game: Game) -> GameData {
         round: game.round,
         age: game.age,
         messages: game.messages,
+        seed: game.seed,
         rng: game.rng.seed.to_string(),
         dice_roll_outcomes: game.dice_roll_outcomes,
         dice_roll_log: game.dice_roll_log,
@@ -151,8 +162,9 @@ pub fn data(game: Game) -> GameData {
 #[must_use]
 pub fn cloned_data(game: &Game) -> GameData {
     GameData {
-        state: game.state.clone(),
         options: game.options.clone(),
+        version: game.version,
+        state: game.state.clone(),
         events: game.events.clone(),
         players: game.players.iter().map(Player::cloned_data).collect(),
         map: game.map.cloned_data(),
@@ -167,6 +179,7 @@ pub fn cloned_data(game: &Game) -> GameData {
         round: game.round,
         age: game.age,
         messages: game.messages.clone(),
+        seed: game.seed.clone(),
         rng: game.rng.seed.to_string(),
         dice_roll_outcomes: game.dice_roll_outcomes.clone(),
         dice_roll_log: game.dice_roll_log.clone(),

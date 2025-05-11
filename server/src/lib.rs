@@ -59,6 +59,7 @@ pub mod playing_actions;
 pub mod position;
 pub mod profiling;
 pub mod recruit;
+mod replay;
 pub mod resource;
 pub mod resource_pile;
 mod special_advance;
