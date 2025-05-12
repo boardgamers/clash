@@ -11,6 +11,10 @@ description = "A server for Clash of Cultures"
 name = "server"
 crate-type = ["cdylib", "rlib"]
 
+[[bin]]
+name = "api_tool"
+path = "src/api_tool/bin/main.rs"
+
 [dependencies]
 hex2d = "1.1.0"
 serde = { version = "1.0.219", features = ["derive"] }

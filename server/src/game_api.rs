@@ -5,8 +5,8 @@ use crate::content::persistent_events::{
     EventResponse, PersistentEventRequest, PersistentEventType,
 };
 use crate::game::GameOptions;
-use crate::game_setup::setup_game;
-use crate::log::current_player_turn_log_mut;
+use crate::game_setup::{GameSetupBuilder, setup_game};
+use crate::log::{current_player_turn_log_mut, linear_action_log};
 use crate::utils::Shuffle;
 use crate::{
     action::Action,
@@ -19,7 +19,12 @@ use std::cmp::Ordering::*;
 
 #[must_use]
 pub fn init(player_amount: usize, seed: String, options: GameOptions) -> Game {
-    setup_game(player_amount, seed, true, options)
+    setup_game(
+        GameSetupBuilder::new(player_amount)
+            .seed(seed)
+            .options(options)
+            .build(),
+    )
 }
 
 #[must_use]
@@ -49,14 +54,15 @@ pub fn drop_player(mut game: Game, player_index: usize) -> Game {
 
 #[must_use]
 pub fn log_length(game: &Game) -> usize {
-    game.log.len()
+    linear_action_log(game).len()
 }
 
 #[must_use]
-pub fn log_slice(game: &Game, options: &LogSliceOptions) -> Vec<Vec<String>> {
+pub fn log_slice(game: &Game, options: &LogSliceOptions) -> Vec<Action> {
+    let l = linear_action_log(game);
     match options.end {
-        Some(end) => &game.log[options.start..=end],
-        None => &game.log[options.start..],
+        Some(end) => &l[options.start..=end],
+        None => &l[options.start..],
     }
     .to_vec()
 }
@@ -115,6 +121,7 @@ pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
     game.wonders_left.shuffle(&mut game.rng);
     game.action_cards_left.shuffle(&mut game.rng);
     game.objective_cards_left.shuffle(&mut game.rng);
+    game.seed = String::new();
     game.rng = Rng::default();
     for (i, player) in game.players.iter_mut().enumerate() {
         if player_index != Some(i) {

@@ -8,8 +8,9 @@ use macroquad::window::screen_height;
 use server::action::execute_action;
 use server::advance::{Advance, do_advance};
 use server::city::City;
-use server::game::{Game, GameContext, GameData, GameOptions, UndoOption};
-use server::game_setup::setup_game;
+use server::game::{Game, GameContext, GameOptions, UndoOption};
+use server::game_data::GameData;
+use server::game_setup::{GameSetupBuilder, setup_game};
 use server::map::Terrain;
 use server::player::add_unit;
 use server::position::Position;
@@ -58,12 +59,12 @@ async fn main() {
             "a".repeat(32)
         };
         setup_game(
-            players,
-            seed,
-            true,
-            GameOptions {
-                undo: UndoOption::SamePlayer,
-            },
+            GameSetupBuilder::new(players)
+                .seed(seed)
+                .options(GameOptions {
+                    undo: UndoOption::SamePlayer,
+                })
+                .build(),
         ) // todo make configurable
     };
 
@@ -163,7 +164,7 @@ fn ai_autoplay(mut game: Game, f: &mut Features, state: &mut State) -> Game {
 
 #[must_use]
 fn setup_local_game() -> Game {
-    let mut game = setup_game(2, "0".to_string(), false, GameOptions::default());
+    let mut game = setup_game(GameSetupBuilder::new(2).skip_random_map().build());
     game.round = 1;
     game.dice_roll_outcomes = vec![1, 1, 10, 10, 10, 10, 10, 10, 10, 10];
     let add_unit = |game: &mut Game, pos: &str, player_index: usize, unit_type: UnitType| {
@@ -339,7 +340,7 @@ fn import(game: Game) -> Game {
     let file = File::open(EXPORT_FILE).expect("Failed to open export file");
     let reader = BufReader::new(file);
     let data: GameData = serde_json::from_reader(reader).expect("Failed to read export file");
-    Game::from_data(data, game.cache, GameContext::Server)
+    Game::from_data(data, game.cache, GameContext::Play)
 }
 
 fn export(game: &Game) {

@@ -4,8 +4,7 @@ use playing_actions::PlayingActionType;
 use server::card::HandCard;
 use server::collect::PositionCollection;
 use server::content::persistent_events::{EventResponse, SelectedStructure, Structure};
-use server::game::GameOptions;
-use server::game_setup::setup_game;
+use server::game_setup::{GameSetupBuilder, setup_game};
 use server::log::current_player_turn_log;
 use server::unit::Units;
 use server::wonder::Wonder;
@@ -31,15 +30,13 @@ const JSON: JsonTest = JsonTest::new("base");
 
 #[test]
 fn new_game() {
-    let seed = String::new();
-    let game = setup_game(2, seed, true, GameOptions::default());
+    let game = setup_game(GameSetupBuilder::new(2).build());
     JSON.compare_game("new_game", &game);
 }
 
 #[test]
 fn basic_actions() {
-    let seed = String::new();
-    let mut game = setup_game(1, seed, false, GameOptions::default());
+    let mut game = setup_game(GameSetupBuilder::new(1).skip_random_map().build());
 
     game.wonders_left.retain(|w| *w == Wonder::Pyramids);
     let founded_city_position = Position::new(0, 1);
@@ -216,7 +213,7 @@ fn increase_happiness(game: Game) -> Game {
 
 #[test]
 fn undo() {
-    let mut game = setup_game(1, String::new(), false, GameOptions::default());
+    let mut game = setup_game(GameSetupBuilder::new(1).skip_random_map().build());
     game.players[0]
         .cities
         .push(City::new(0, Position::new(0, 0)));

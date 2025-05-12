@@ -9,11 +9,12 @@ use tokio::runtime::Runtime;
 use crate::ai_actions::AiActions;
 use crate::cache::Cache;
 use crate::game::GameContext;
+use crate::game_data::GameData;
 use crate::movement::MovementAction;
 use crate::{
     action::{self, Action, ActionType},
     ai_missions::ActiveMissions,
-    game::{Game, GameData, GameState},
+    game::{Game, GameState},
     playing_actions::{PlayingAction, PlayingActionType},
     utils::{self, Rng},
 };

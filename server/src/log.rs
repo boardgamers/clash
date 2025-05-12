@@ -104,6 +104,20 @@ pub struct LogSliceOptions {
     pub end: Option<usize>,
 }
 
+pub(crate) fn linear_action_log(game: &Game) -> Vec<Action> {
+    game.action_log
+        .iter()
+        .flat_map(|age| {
+            age.rounds.iter().flat_map(|round| {
+                round
+                    .players
+                    .iter()
+                    .flat_map(|player| player.items.iter().map(|item| item.action.clone()))
+            })
+        })
+        .collect()
+}
+
 ///
 ///
 /// # Panics
@@ -112,7 +126,7 @@ pub struct LogSliceOptions {
 ///
 /// this is called before the action is executed
 #[must_use]
-pub fn format_action_log_item(action: &Action, game: &Game) -> Vec<String> {
+pub(crate) fn format_action_log_item(action: &Action, game: &Game) -> Vec<String> {
     match action {
         Action::Playing(action) => vec![format_playing_action_log_item(action, game)],
         Action::Movement(action) => vec![format_movement_action_log_item(action, game)],

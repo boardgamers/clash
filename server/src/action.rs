@@ -68,26 +68,39 @@ pub enum ActionType {
 ///
 /// Panics if the action is illegal
 #[must_use]
-pub fn execute_action(mut game: Game, action: Action, player_index: usize) -> Game {
-    assert_eq!(player_index, game.active_player(), "Not your turn");
+pub fn execute_action(game: Game, action: Action, player_index: usize) -> Game {
+    try_execute_action(game, action, player_index).expect("could not execute action")
+}
+
+///
+///
+/// # Errors
+///
+/// Returns an error if the action is not valid
+pub fn try_execute_action(
+    mut game: Game,
+    action: Action,
+    player_index: usize,
+) -> Result<Game, String> {
+    if player_index != game.active_player() {
+        return Err(format!("Player {player_index} is not the active player"));
+    }
 
     if game.context == GameContext::AI {
-        execute_without_undo(&mut game, action, player_index).expect("action should be executed");
-        return game;
+        return execute_without_undo(&mut game, action, player_index).map(|()| game);
     }
 
     if let Action::Undo = action {
-        assert!(
-            game.can_undo(),
-            "actions revealing new information can't be undone"
-        );
-        return undo(game).expect("cannot undo");
+        if !game.can_undo() {
+            return Err("action can't be undone".to_string());
+        }
+        return undo(game);
     }
 
     let add_undo = !matches!(&action, Action::Undo);
     let old = to_serde_value(&game);
     let old_player = game.active_player();
-    execute_without_undo(&mut game, action, player_index).expect("action should be executed");
+    execute_without_undo(&mut game, action, player_index)?;
     let new = to_serde_value(&game);
     let new_player = game.active_player();
     let patch = json_patch::diff(&new, &old);
@@ -97,7 +110,7 @@ pub fn execute_action(mut game: Game, action: Action, player_index: usize) -> Ga
         let i = game.action_log_index - 1;
         current_player_turn_log_mut(&mut game).items[i].undo = clean_patch(patch.0);
     }
-    game
+    Ok(game)
 }
 
 ///
@@ -120,12 +133,22 @@ pub fn execute_without_undo(
     add_log_item_from_action(game, &action);
     add_action_log_item(game, action.clone());
 
+    if game.context == GameContext::Replay
+        && !game.events.is_empty()
+        && !matches!(action, Action::Response(_))
+    {
+        // ignore missing response in replay
+        game.events.clear();
+    }
+
     match game.current_event_handler_mut() {
         Some(s) => {
             s.response = if let Action::Response(v) = action {
                 Some(v)
             } else {
-                return Err(format!("action should be a response: {action:?}"));
+                return Err(format!(
+                    "action should be a response: {action:?} - event: {s:?}"
+                ));
             };
             let details = game.current_event().event_type.clone();
             execute_custom_phase_action(game, player_index, details)
@@ -337,9 +360,17 @@ fn execute_move_action(game: &mut Game, player_index: usize, m: &MoveUnits) -> R
     )?;
 
     let (dest, result) = destinations
-        .into_iter()
+        .iter()
         .find(|(route, _)| route.destination == m.destination)
-        .expect("destination should be a valid destination");
+        .map_or_else(
+            || {
+                Err(format!(
+                    "destination {} not found in {:?}",
+                    m.destination, destinations
+                ))
+            },
+            |(dest, r)| Ok((dest, r.clone())),
+        )?;
     result?;
 
     let c = &dest.cost;

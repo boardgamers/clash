@@ -136,7 +136,7 @@ impl RemoteClient {
                 let g = Game::from_data(
                     serde_json::from_str(&state).expect("game should be of type game data"),
                     cache,
-                    GameContext::Client,
+                    GameContext::Play,
                 );
                 self.state.show_player = g.active_player();
                 self.game = Some(g);
