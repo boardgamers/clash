@@ -5,7 +5,7 @@ use crate::content::persistent_events::{
     EventResponse, PersistentEventRequest, PersistentEventType,
 };
 use crate::game::GameOptions;
-use crate::game_setup::setup_game;
+use crate::game_setup::{GameSetupBuilder, setup_game};
 use crate::log::{current_player_turn_log_mut, linear_action_log};
 use crate::utils::Shuffle;
 use crate::{
@@ -19,7 +19,12 @@ use std::cmp::Ordering::*;
 
 #[must_use]
 pub fn init(player_amount: usize, seed: String, options: GameOptions) -> Game {
-    setup_game(player_amount, seed, true, options)
+    setup_game(
+        GameSetupBuilder::new(player_amount)
+            .seed(seed)
+            .options(options)
+            .build(),
+    )
 }
 
 #[must_use]

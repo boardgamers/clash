@@ -56,9 +56,9 @@ pub struct GameOptions {
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub enum GameContext {
-    Client,
-    Server,
+    Play,
     AI,
+    Replay,
 }
 
 pub struct Game {

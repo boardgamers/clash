@@ -19,7 +19,7 @@ fn get_game(data: String) -> Game {
     Game::from_data(
         serde_json::from_str(&data).expect("Could not deserialize game data"),
         Cache::new(),
-        GameContext::Server,
+        GameContext::Play,
     )
 }
 

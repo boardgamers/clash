@@ -4,7 +4,8 @@ use itertools::Itertools;
 use server::action::ActionType;
 use server::ai_actions::AiActions;
 use server::cache::Cache;
-use server::game::{Game, GameContext, GameOptions};
+use server::game::{Game, GameContext};
+use server::game_setup::GameSetupBuilder;
 use server::movement::{MoveUnits, MovementAction, possible_move_units_destinations};
 use server::playing_actions::PlayingActionType;
 use server::profiling::start_profiling;
@@ -60,7 +61,8 @@ async fn test_random_actions() {
 #[cfg(not(target_arch = "wasm32"))]
 fn random_actions_iteration(mut rng: Rng, cache: Cache) {
     let seed = rng.range(0, 10_usize.pow(15)).to_string();
-    let mut game = game_setup::setup_game_with_cache(2, seed, true, GameOptions::default(), cache);
+    let mut game =
+        game_setup::setup_game_with_cache(GameSetupBuilder::new(2).seed(seed).build(), cache);
     game.context = GameContext::AI;
     let mut ai_actions = AiActions::new();
     loop {

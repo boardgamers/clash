@@ -419,7 +419,7 @@ pub fn load_game(path: &GamePath) -> Game {
         serde_json::from_str(&read_game_str(path))
             .unwrap_or_else(|e| panic!("the game file should be deserializable {path}: {e}",)),
         Cache::new(),
-        GameContext::Server,
+        GameContext::Play,
     );
     if update_expected() {
         write_result(&to_json(&game), path);

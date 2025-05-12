@@ -1,11 +1,10 @@
 #![allow(clippy::missing_panics_doc)]
 
-
 use server::game::Game;
 use server::replay;
 use server::replay::ReplayGameData;
-use std::{env, fs};
 use std::fs::File;
+use std::{env, fs};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -26,7 +25,8 @@ fn main() {
 }
 
 fn replay() {
-    let data: ReplayGameData = serde_json::from_str(&read_game_str()).expect("Failed to read export file");
+    let data: ReplayGameData =
+        serde_json::from_str(&read_game_str()).expect("Failed to read export file");
     let game = replay::replay(data, None);
     export(game)
 }
