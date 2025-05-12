@@ -337,9 +337,12 @@ fn execute_move_action(game: &mut Game, player_index: usize, m: &MoveUnits) -> R
     )?;
 
     let (dest, result) = destinations
-        .into_iter()
+        .iter()
         .find(|(route, _)| route.destination == m.destination)
-        .expect("destination should be a valid destination");
+        .map_or_else(
+            || Err(format!("destination {} not found in {:?}", m.destination, destinations)),
+            |(dest, r)| Ok((dest, r.clone())),
+        )?;
     result?;
 
     let c = &dest.cost;

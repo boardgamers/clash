@@ -8,4 +8,5 @@ wbindgen/
 *.result.json
 failure*.json
 game.json
+escaped-game.json
 node_modules/
