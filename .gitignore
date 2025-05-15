@@ -10,3 +10,4 @@ failure*.json
 game.json
 escaped-game.json
 node_modules/
+mise.local.toml

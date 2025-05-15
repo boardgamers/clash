@@ -11,7 +11,5 @@ jobs:
     - uses: jdx/mise-action@v2
       with:
         experimental: 'true' # to get lock file support
-      env:
-        MISE_DISABLE_TOOLS: node
     - name: Check all
       run: mise run ci

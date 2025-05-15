@@ -66,6 +66,5 @@ run = "./scripts/publish-client.sh test"
 "cargo:cargo-nextest" = "latest"
 "cargo:wasm-bindgen-cli" = "latest"
 "cargo:wasm-pack" = "latest"
-node = "14"
-rust = { version = "latest", targets = "wasm32-unknown-unknown" }
+rust = { version = "latest", targets = "wasm32-unknown-unknown", components = "clippy,rustfmt" }
 
