@@ -287,9 +287,14 @@ pub(crate) fn use_teach_us() -> Builtin {
     .add_hand_card_request(
         |e| &mut e.combat_end,
         91,
-        |game, player_index, s| {
-            if s.is_winner(player_index) && s.battleground.is_city() {
-                let p = game.player(player_index);
+        |game, player, s| {
+            s.selected_card = None;
+            if s.is_winner(player)
+                && s.battleground.is_city()
+                && !teachable_advances(s.opponent_player(player, game), game.player(player), game)
+                    .is_empty()
+            {
+                let p = game.player(player);
                 let cards = p
                     .action_cards
                     .iter()
@@ -318,9 +323,11 @@ pub(crate) fn use_teach_us() -> Builtin {
         90,
         |game, player, e| {
             e.selected_card.map(|_| {
-                let vec =
-                    teachable_advances(e.opponent_player(player, game), game.player(player), game);
-                AdvanceRequest::new(vec)
+                AdvanceRequest::new(teachable_advances(
+                    e.opponent_player(player, game),
+                    game.player(player),
+                    game,
+                ))
             })
         },
         |game, sel, _| {

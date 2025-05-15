@@ -138,6 +138,10 @@ pub fn execute_without_undo(
         && !matches!(action, Action::Response(_))
     {
         // ignore missing response in replay
+        game.add_info_log_item(&format!(
+            "interrupted {} events in replay due to a missing response",
+            game.events.len()
+        ));
         game.events.clear();
     }
 
