@@ -15,8 +15,6 @@ jobs:
       - uses: jdx/mise-action@v2
         with:
           experimental: 'true' # to get lock file support
-        env:
-          MISE_DISABLE_TOOLS: node
       - name: Use Node.js ${{ env.node_version }}
         uses: actions/setup-node@v4
         with:

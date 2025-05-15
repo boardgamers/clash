@@ -25,42 +25,20 @@ run = 'cargo test --jobs 2 {{arg(name="test", default="")}}'
 env = { UPDATE_EXPECTED = "true", RUSTFLAGS = '' }
 dir = "server"
 
-[tasks.server-format-and-lint]
-description = "Format and lint all code"
-run = [
-    "cargo fmt",
-    "cargo clippy --fix --allow-dirty --allow-staged"
-]
-dir = "server"
-
-[tasks.client-format-and-lint]
-description = "Format and lint all code"
-run = [
-    "cargo fmt",
-    "cargo clippy --fix --allow-dirty --allow-staged"
-]
-dir = "client"
-
 [tasks.format-and-lint]
-depends = ["server-format-and-lint", "client-format-and-lint"]
+description = "Format and lint all code"
+run = [
+    "cargo fmt",
+    "cargo clippy --fix --allow-dirty --allow-staged"
+]
 
-[tasks.ci-server]
+[tasks.ci]
 description = "Run CI tasks server"
-dir = "server"
 run = [
     "cargo build",
     "cargo fmt --check",
     "cargo clippy",
     "cargo nextest run"
-]
-
-[tasks.ci-client]
-description = "Run CI tasks server"
-dir = "client"
-run = [
-    "cargo build",
-    "cargo fmt --check",
-    "cargo clippy",
 ]
 
 [tasks.profile]
@@ -88,6 +66,5 @@ run = "./scripts/publish-client.sh test"
 "cargo:cargo-nextest" = "latest"
 "cargo:wasm-bindgen-cli" = "latest"
 "cargo:wasm-pack" = "latest"
-node = "14"
-rust = { version = "latest", components = "clippy,rustfmt" }
+rust = { version = "latest", targets = "wasm32-unknown-unknown", components = "clippy,rustfmt" }
 

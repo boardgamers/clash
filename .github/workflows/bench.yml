@@ -11,7 +11,5 @@ jobs:
     - uses: jdx/mise-action@v2
       with:
         experimental: 'true' # to get lock file support
-      env:
-        MISE_DISABLE_TOOLS: cargo:wasm-pack,cargo:wasm-bindgen-cli,node
     - name: Random actions test
       run: mise run random-actions

@@ -47,7 +47,7 @@ pushd client
 
 PROJECT_NAME=remote_client
 
-TARGET_DIR="target/wasm32-unknown-unknown"
+TARGET_DIR="../target/wasm32-unknown-unknown"
 # Build
 echo "Building $PROJECT_NAME..."
 if [ "$RELEASE" == "yes" ]; then
