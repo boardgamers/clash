@@ -60,7 +60,7 @@ pub struct Assets {
 
 impl Assets {
     pub async fn new(features: &Features) -> Self {
-        let font_name = features.get_asset("Roboto-Regular.ttf");
+        let font_name = features.get_asset("SourceSans3-Regular.ttf");
         Self {
             font: load_ttf_font(&font_name).await.unwrap(), // can't share font - causes panic
             terrain: Self::terrain(features).await,

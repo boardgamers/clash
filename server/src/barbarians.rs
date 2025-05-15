@@ -65,17 +65,18 @@ pub(crate) fn barbarians_bonus() -> Builtin {
         .add_resource_request(
             |event| &mut event.combat_end,
             105,
-            |game, player_index, i| {
-                if i.is_winner(player_index)
-                    && i.opponent_player(player_index, game)
-                        .civilization
-                        .is_barbarian()
+            |game, player, i| {
+                if i.is_winner(player)
+                    && i.opponent_player(player, game).civilization.is_barbarian()
                 {
-                    let sum = if i.captured_city(player_index, game) {
-                        2
-                    } else {
-                        1
-                    };
+                    let mut sum = 0;
+                    if i.captured_city(player, game) {
+                        sum += 1;
+                    }
+                    if i.opponent(player).losses.amount() > 0 {
+                        sum += 1;
+                    }
+
                     Some(ResourceRewardRequest::new(
                         ResourceReward::sum(sum, &[ResourceType::Gold]),
                         "-".to_string(),
@@ -442,10 +443,9 @@ fn barbarian_fighters() -> Vec<UnitType> {
 }
 
 fn is_base_barbarian_spawn_pos(game: &Game, pos: Position, player: &Player) -> bool {
-    game.map
-        .get(pos)
-        .is_some_and(|t| t.is_land() && !matches!(t, Terrain::Barren))
-        && !anything_present(game, pos)
+    game.map.get(pos).is_some_and(|t| {
+        t.is_land() && !matches!(t, Terrain::Barren) && !matches!(t, Terrain::Exhausted(_))
+    }) && !anything_present(game, pos)
         && cities_in_range(game, |p| p.index != player.index, pos, 2).is_empty()
 }
 

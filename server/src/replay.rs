@@ -20,6 +20,9 @@ pub struct ReplayGameData {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     action_log: Vec<ReplayActionLogAge>,
     players: Vec<ReplayPlayerData>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    dropped_players: Vec<usize>,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
@@ -73,6 +76,7 @@ pub fn replay(mut data: ReplayGameData, to: Option<usize>) -> Game {
             )
             .build(),
     );
+    game.dropped_players = data.dropped_players;
     for player in &data.players {
         if let Some(name) = &player.name {
             game.players[player.id].set_name(name.clone());
