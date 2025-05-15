@@ -1,0 +1,10 @@
+[workspace]
+resolver = "3"
+members = ["client", "server"]
+
+[profile.dev]
+debug = true
+
+[profile.release]
+debug = true
+
