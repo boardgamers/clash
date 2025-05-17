@@ -8,6 +8,7 @@ use crate::game::Game;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use std::collections::HashSet;
+use crate::player::gain_resources;
 
 pub(crate) fn seafaring() -> AdvanceGroup {
     advance_group_builder(
@@ -81,13 +82,20 @@ fn cartography() -> AdvanceBuilder {
                     }
                 }
                 if ship {
-                    let player = game.player_mut(i.player);
-                    player.event_info.insert("Cartography".to_string(), key);
-                    player.gain_resources(ResourcePile::ideas(1));
-                    game.add_info_log_item("Cartography gained 1 idea");
+                    game.player_mut(i.player).event_info.insert("Cartography".to_string(), key);
+                    gain_resources(
+                        game,
+                        i.player,
+                        ResourcePile::ideas(1),
+                        |name, pile| format!("{name} gained {pile} from Cartography"),
+                    );
                     if navigation {
-                        game.player_mut(i.player).gain_resources(ResourcePile::culture_tokens(1));
-                        game.add_info_log_item(" and 1 culture token (for using navigation)");
+                        gain_resources(
+                            game,
+                            i.player,
+                            ResourcePile::culture_tokens(1),
+                            |name, pile| format!("{name} gained {pile} from Cartography"),
+                        );
                     }
                 }
             },

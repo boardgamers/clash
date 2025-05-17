@@ -12,17 +12,19 @@ use crate::content::custom_actions::CustomActionType::Taxes;
 use crate::content::persistent_events::{HandCardsRequest, ResourceRewardRequest};
 use crate::game::Game;
 use crate::payment::ResourceReward;
-use crate::player::Player;
+use crate::player::{Player, gain_resources};
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
 
 pub(crate) fn economy() -> AdvanceGroup {
-    advance_group_builder(
-        "Economy",
-        vec![bartering(), trade_routes(), taxes(), currency()],
-    )
+    advance_group_builder("Economy", vec![
+        bartering(),
+        trade_routes(),
+        taxes(),
+        currency(),
+    ])
 }
 
 fn currency() -> AdvanceBuilder {
@@ -200,10 +202,8 @@ fn gain_market_bonus(game: &mut Game, routes: &[TradeRoute]) {
         .unique()
         .collect_vec();
     for p in players {
-        let name = game.player_name(p);
-        game.add_info_log_item(&format!(
-            "{name} gains 1 gold for using a Market in a trade route",
-        ));
-        game.player_mut(p).gain_resources(ResourcePile::gold(1));
+        gain_resources(game, p, ResourcePile::gold(1), |name, pile| {
+            format!("{name} gained {pile} for using a Market in a trade route")
+        });
     }
 }

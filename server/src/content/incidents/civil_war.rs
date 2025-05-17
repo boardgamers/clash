@@ -9,7 +9,7 @@ use crate::incident::{
     DecreaseMood, Incident, IncidentBaseEffect, IncidentBuilder, MoodModifier, decrease_mod_and_log,
 };
 use crate::payment::{PaymentConversion, PaymentConversionType, PaymentOptions, PaymentReason};
-use crate::player::Player;
+use crate::player::{gain_resources, Player};
 use crate::player_events::IncidentTarget;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
@@ -276,9 +276,12 @@ fn envoy() -> Incident {
         IncidentTarget::ActivePlayer,
         1,
         |game, player, player_name, _| {
-            game.add_info_log_item(&format!("{player_name} gained 1 idea and 1 culture token"));
-            game.player_mut(player)
-                .gain_resources(ResourcePile::culture_tokens(1) + ResourcePile::ideas(1));
+            gain_resources(
+                game,
+                player,
+                ResourcePile::ideas(1) + ResourcePile::culture_tokens(1),
+                |name, pile| format!("{name} gained {pile} for Envoy event"),
+            );
 
             if let Some(wonder) = draw_wonder_from_pile(game) {
                 game.add_info_log_item(&format!(

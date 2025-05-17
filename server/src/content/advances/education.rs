@@ -7,18 +7,16 @@ use crate::content::advances::{AdvanceGroup, advance_group_builder};
 use crate::content::persistent_events::PaymentRequest;
 use crate::objective_card::draw_and_log_objective_card_from_pile;
 use crate::payment::{PaymentOptions, PaymentReason};
+use crate::player::gain_resources;
 use crate::resource_pile::ResourcePile;
 
 pub(crate) fn education() -> AdvanceGroup {
-    advance_group_builder(
-        "Education",
-        vec![
-            writing(),
-            public_education(),
-            free_education(),
-            philosophy(),
-        ],
-    )
+    advance_group_builder("Education", vec![
+        writing(),
+        public_education(),
+        free_education(),
+        philosophy(),
+    ])
 }
 
 fn writing() -> AdvanceBuilder {
@@ -109,20 +107,20 @@ fn free_education() -> AdvanceBuilder {
             }
         },
         |game, s, _| {
-            let pile = &s.choice[0];
-            if pile.is_empty() {
+            let payment = &s.choice[0];
+            if payment.is_empty() {
                 game.add_info_log_item(&format!(
                     "{} declined to pay for free education",
                     s.player_name
                 ));
                 return;
             }
-            game.add_info_log_item(&format!(
-                "{} paid {} for free education to gain 1 mood token",
-                s.player_name, pile
-            ));
-            game.player_mut(s.player_index)
-                .gain_resources(ResourcePile::mood_tokens(1));
+            gain_resources(
+                game,
+                s.player_index,
+                ResourcePile::mood_tokens(1),
+                |name, pile| format!("{name} paid {payment} for free education to gain {pile}",),
+            );
         },
     )
 }

@@ -14,7 +14,7 @@ use crate::content::tactics_cards::{
 };
 use crate::game::Game;
 use crate::objective_card::{deinit_objective_card, gain_objective_card};
-use crate::player::{Player, add_unit};
+use crate::player::{Player, add_unit, gain_resources};
 use crate::playing_actions::ActionCost;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
@@ -508,9 +508,9 @@ fn new_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             |e| &mut e.play_action_card,
             0,
             |game, player_index, player_name, _| {
-                game.add_info_log_item(&format!("{player_name} used gain 2 ideas from New Ideas."));
-                game.player_mut(player_index)
-                    .gain_resources(ResourcePile::ideas(2));
+                gain_resources(game, player_index, ResourcePile::ideas(2), |name, pile| {
+                    format!("{player_name} gained {pile} from New Ideas.")
+                });
             },
         )
         .build()

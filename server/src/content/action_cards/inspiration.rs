@@ -260,10 +260,12 @@ fn ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |e| &mut e.play_action_card,
         0,
         |game, player, name, _| {
-            let p = game.player_mut(player);
-            let pile = ResourcePile::ideas(academies(p));
-            p.gain_resources(pile.clone());
-            game.add_info_log_item(&format!("{name} gained {pile} (1 for each Academy)"));
+            gain_resources(
+                game,
+                player,
+                ResourcePile::ideas(academies(game.player(player))),
+                |name, pile| format!("{name} gained {pile} for Ideas"),
+            );
         },
     )
     .build()
