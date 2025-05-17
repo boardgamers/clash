@@ -30,6 +30,7 @@ use serde::{Deserialize, Serialize};
 use std::cmp::Ordering::{self, *};
 use std::collections::HashMap;
 use std::fmt::Display;
+use crate::special_advance::SpecialAdvance;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq)]
 pub enum PlayerType {
@@ -53,7 +54,7 @@ pub struct Player {
     pub available_leaders: Vec<String>,
     pub advances: EnumSet<Advance>,
     pub great_library_advance: Option<Advance>,
-    pub unlocked_special_advances: Vec<String>,
+    pub unlocked_special_advances: EnumSet<SpecialAdvance>,
     pub wonders_built: Vec<Wonder>,
     pub wonders_owned: EnumSet<Wonder>, // transient
     pub incident_tokens: u8,
@@ -271,6 +272,11 @@ impl Player {
     #[must_use]
     pub fn has_advance(&self, advance: Advance) -> bool {
         self.advances.contains(advance)
+    }
+    
+    #[must_use]
+    pub fn has_special_advance(&self, advance: SpecialAdvance) -> bool {
+        self.unlocked_special_advances.contains(advance)
     }
 
     #[must_use]

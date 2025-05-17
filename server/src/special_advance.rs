@@ -1,3 +1,4 @@
+use enumset::EnumSetType;
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::advance::Advance;
@@ -5,7 +6,7 @@ use crate::events::EventOrigin;
 use crate::game::Game;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Debug, Hash, Ord, PartialOrd)]
+#[derive(EnumSetType, Serialize, Deserialize, Debug, Ord, PartialOrd, Hash)]
 pub enum SpecialAdvance {
     // Maya
     Terrace,

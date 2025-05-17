@@ -6,7 +6,7 @@ use crate::game::Game;
 use crate::incident::trigger_incident;
 use crate::player::gain_resources;
 use crate::player_events::OnAdvanceInfo;
-use crate::special_advance::SpecialAdvanceInfo;
+use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo};
 use crate::{ability_initializer::AbilityInitializerSetup, resource_pile::ResourcePile};
 use Bonus::*;
 use enumset::EnumSetType;
@@ -240,24 +240,16 @@ pub fn do_advance(game: &mut Game, advance: Advance, player_index: usize) {
     let info = advance.info(game).clone();
     let bonus = info.bonus.clone();
     info.listeners.one_time_init(game, player_index);
-    for i in 0..game.players[player_index]
+
+    if let Some(special_advance) = game.players[player_index]
         .civilization
         .special_advances
-        .len()
+        .iter()
+        .find_map(|s| (s.required_advance == advance).then_some(s.advance))
     {
-        if game.players[player_index].civilization.special_advances[i].required_advance == advance {
-            let special_advance = game.players[player_index]
-                .civilization
-                .special_advances
-                .remove(i);
-            unlock_special_advance(game, &special_advance, player_index);
-            game.players[player_index]
-                .civilization
-                .special_advances
-                .insert(i, special_advance);
-            break;
-        }
+        unlock_special_advance(game, special_advance, player_index);
     }
+
     if let Some(advance_bonus) = &bonus {
         gain_resources(
             game,
@@ -278,15 +270,11 @@ pub(crate) fn gain_advance_without_payment(
     take_incident_token: bool,
 ) {
     do_advance(game, advance, player_index);
-    on_advance(
-        game,
-        player_index,
-        OnAdvanceInfo {
-            advance,
-            payment,
-            take_incident_token,
-        },
-    );
+    on_advance(game, player_index, OnAdvanceInfo {
+        advance,
+        payment,
+        take_incident_token,
+    });
 }
 
 pub(crate) fn on_advance(game: &mut Game, player_index: usize, info: OnAdvanceInfo) {
@@ -315,24 +303,15 @@ pub(crate) fn remove_advance(game: &mut Game, advance: Advance, player_index: us
     let bonus = info.bonus.clone();
     info.listeners.clone().undo(game, player_index);
 
-    for i in 0..game.players[player_index]
+    if let Some(special_advance) = game.players[player_index]
         .civilization
         .special_advances
-        .len()
+        .iter()
+        .find_map(|s| (s.required_advance == advance).then_some(s.advance))
     {
-        if game.players[player_index].civilization.special_advances[i].required_advance == advance {
-            let special_advance = game.players[player_index]
-                .civilization
-                .special_advances
-                .remove(i);
-            undo_unlock_special_advance(game, &special_advance, player_index);
-            game.players[player_index]
-                .civilization
-                .special_advances
-                .insert(i, special_advance);
-            break;
-        }
+        undo_unlock_special_advance(game, special_advance, player_index);
     }
+
     let player = &mut game.players[player_index];
     if let Some(advance_bonus) = &bonus {
         player.lose_resources(advance_bonus.resources());
@@ -340,20 +319,28 @@ pub(crate) fn remove_advance(game: &mut Game, advance: Advance, player_index: us
     game.player_mut(player_index).advances.remove(advance);
 }
 
-fn unlock_special_advance(game: &mut Game, special_advance: &SpecialAdvanceInfo, player_index: usize) {
-    special_advance.listeners.one_time_init(game, player_index);
+fn unlock_special_advance(game: &mut Game, special_advance: SpecialAdvance, player_index: usize) {
+    special_advance
+        .info(game)
+        .listeners
+        .one_time_init(game, player_index);
     game.players[player_index]
         .unlocked_special_advances
-        .push(special_advance.name.clone());
+        .insert(special_advance);
 }
 
 fn undo_unlock_special_advance(
     game: &mut Game,
-    special_advance: &SpecialAdvanceInfo,
+    special_advance: SpecialAdvance,
     player_index: usize,
 ) {
-    special_advance.listeners.undo(game, player_index);
-    game.players[player_index].unlocked_special_advances.pop();
+    special_advance
+        .info(game)
+        .listeners
+        .undo(game, player_index);
+    game.players[player_index]
+        .unlocked_special_advances
+        .remove(special_advance);
 }
 
 pub(crate) fn init_player(game: &mut Game, player_index: usize) {

@@ -22,6 +22,7 @@ use crate::player_events::{IncidentInfo, IncidentPlayerInfo, IncidentTarget};
 use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
+use crate::special_advance::SpecialAdvance;
 use crate::wonder::Wonder;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -37,6 +38,7 @@ pub struct Incident {
     pub name: String,
     description: String,
     protection_advance: Option<Advance>,
+    protection_special_advance: Option<SpecialAdvance>,
     pub base_effect: IncidentBaseEffect,
     pub listeners: AbilityListeners,
     pub(crate) action_card: Option<ActionCard>,
@@ -61,6 +63,9 @@ impl Incident {
             h.push(self.base_effect.to_string());
         }
         if let Some(p) = &self.protection_advance {
+            h.push(format!("Protection advance: {}", p.name(game)));
+        }
+        if let Some(p) = &self.protection_special_advance {
             h.push(format!("Protection advance: {}", p.name(game)));
         }
         h.push(self.description.clone());
@@ -102,14 +107,21 @@ pub(crate) struct IncidentFilter {
     role: IncidentTarget,
     priority: i32,
     protection_advance: Option<Advance>,
+    protection_special_advance: Option<SpecialAdvance>,
 }
 
 impl IncidentFilter {
-    pub fn new(role: IncidentTarget, priority: i32, protection_advance: Option<Advance>) -> Self {
+    pub fn new(
+        role: IncidentTarget,
+        priority: i32,
+        protection_advance: Option<Advance>,
+        protection_special_advance: Option<SpecialAdvance>,
+    ) -> Self {
         Self {
             role,
             priority,
             protection_advance,
+            protection_special_advance,
         }
     }
 
@@ -117,6 +129,7 @@ impl IncidentFilter {
     pub fn is_active(&self, game: &Game, i: &IncidentInfo, player: usize) -> bool {
         is_active(
             &self.protection_advance,
+            &self.protection_special_advance,
             self.priority,
             game,
             i,
@@ -161,6 +174,7 @@ pub struct IncidentBuilder {
     description: String,
     base_effect: IncidentBaseEffect,
     protection_advance: Option<Advance>,
+    protection_special_advance: Option<SpecialAdvance>,
     action_card: Option<ActionCard>,
     builder: AbilityInitializerBuilder,
 }
@@ -175,6 +189,7 @@ impl IncidentBuilder {
             base_effect,
             builder: AbilityInitializerBuilder::new(),
             protection_advance: None,
+            protection_special_advance: None,
             action_card: None,
         }
     }
@@ -199,6 +214,7 @@ impl IncidentBuilder {
             base_effect: builder.base_effect,
             listeners: builder.builder.build(),
             protection_advance: builder.protection_advance,
+            protection_special_advance: builder.protection_special_advance,
             action_card: builder.action_card,
         }
     }
@@ -206,6 +222,12 @@ impl IncidentBuilder {
     #[must_use]
     pub fn with_protection_advance(mut self, advance: Advance) -> Self {
         self.protection_advance = Some(advance);
+        self
+    }
+    
+    #[must_use]
+    pub fn with_protection_special_advance(mut self, advance: SpecialAdvance) -> Self {
+        self.protection_special_advance = Some(advance);
         self
     }
 
@@ -371,7 +393,7 @@ impl IncidentBuilder {
     }
 
     fn new_filter(&self, role: IncidentTarget, priority: i32) -> IncidentFilter {
-        IncidentFilter::new(role, priority, self.protection_advance)
+        IncidentFilter::new(role, priority, self.protection_advance, self.protection_special_advance)
     }
 
     #[must_use]
@@ -511,12 +533,9 @@ impl IncidentBuilder {
                     if needed == 0 {
                         return None;
                     }
-                    let mut options = PaymentOptions::sum(
-                        p,
-                        PaymentReason::Incident,
-                        needed,
-                        &[ResourceType::MoodTokens],
-                    );
+                    let mut options = PaymentOptions::sum(p, PaymentReason::Incident, needed, &[
+                        ResourceType::MoodTokens,
+                    ]);
                     options.conversions.push(PaymentConversion::new(
                         vec![ResourcePile::mood_tokens(1)],
                         ResourcePile::empty(),
@@ -693,6 +712,7 @@ fn passed_to_player(game: &mut Game, i: &mut IncidentInfo) -> bool {
 #[must_use]
 pub fn is_active(
     protection_advance: &Option<Advance>,
+    protection_special_advance: &Option<SpecialAdvance>,
     priority: i32,
     game: &Game,
     i: &IncidentInfo,
@@ -708,6 +728,11 @@ pub fn is_active(
     // protection advance does not protect against base effects
     if let Some(advance) = protection_advance {
         if game.player(player).can_use_advance(*advance) {
+            return false;
+        }
+    } 
+    if let Some(advance) = protection_special_advance {
+        if game.player(player).has_special_advance(*advance) {
             return false;
         }
     }
