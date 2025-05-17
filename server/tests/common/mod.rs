@@ -460,5 +460,5 @@ pub fn influence_action() -> Action {
 pub fn payment_response(
     payment: ResourcePile,
 ) -> Action {
-    Action::Response(EventResponse::Payment(vec![payment]))
+    payment_response(payment)
 }

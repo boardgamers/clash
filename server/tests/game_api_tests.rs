@@ -304,16 +304,12 @@ fn test_cultural_influence() {
             TestAction::undoable(1, influence_action()).skip_json(),
             TestAction::not_undoable(
                 1,
-                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
-                    1,
-                )])),
+payment_response(ResourcePile::culture_tokens(1)),
             )
             .skip_json(),
             TestAction::undoable(
                 1,
-                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
-                    4,
-                )])),
+payment_response(ResourcePile::culture_tokens(4)),
             ),
         ],
     );

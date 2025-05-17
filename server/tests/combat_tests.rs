@@ -1,6 +1,6 @@
 // combat
 
-use crate::common::{TestAction, move_action};
+use crate::common::{TestAction, move_action, payment_response};
 use common::JsonTest;
 use server::action::Action;
 use server::card::HandCard;
@@ -84,7 +84,7 @@ fn test_combat_all_modifiers() {
             .skip_json(),
             TestAction::undoable(
                 0,
-                Action::Response(EventResponse::Payment(vec![ResourcePile::ore(1)])),
+                payment_response(ResourcePile::ore(1)),
             )
             .skip_json(),
             TestAction::not_undoable(
@@ -97,7 +97,7 @@ fn test_combat_all_modifiers() {
             .skip_json(),
             TestAction::not_undoable(
                 1,
-                Action::Response(EventResponse::Payment(vec![ResourcePile::ore(1)])),
+                payment_response(ResourcePile::ore(1)),
             )
             .skip_json(),
             TestAction::not_undoable(

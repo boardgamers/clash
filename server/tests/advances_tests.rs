@@ -1,5 +1,6 @@
 use crate::common::{
     JsonTest, TestAction, advance_action, custom_action, illegal_action_test, influence_action,
+    payment_response,
 };
 use advance::Advance;
 use server::action::{Action, execute_action};
@@ -255,10 +256,7 @@ fn test_increase_happiness_voting_rituals() {
 fn test_absolute_power() {
     JSON.test("absolute_power", vec![
         TestAction::undoable(0, custom_action(CustomActionType::AbsolutePower)).skip_json(),
-        TestAction::undoable(
-            0,
-            Action::Response(EventResponse::Payment(vec![ResourcePile::mood_tokens(2)])),
-        ),
+        TestAction::undoable(0, payment_response(ResourcePile::mood_tokens(2))),
     ]);
 }
 
@@ -266,11 +264,7 @@ fn test_absolute_power() {
 fn test_forced_labor() {
     JSON.test("forced_labor", vec![
         TestAction::undoable(0, custom_action(CustomActionType::ForcedLabor)).skip_json(),
-        TestAction::undoable(
-            0,
-            Action::Response(EventResponse::Payment(vec![ResourcePile::mood_tokens(1)])),
-        )
-        .skip_json(),
+        TestAction::undoable(0, payment_response(ResourcePile::mood_tokens(1))).skip_json(),
         TestAction::undoable(
             0,
             Action::Playing(Collect(playing_actions::Collect::new(
@@ -380,11 +374,7 @@ fn get_destinations(game: &Game, units: &[u32], position: &str) -> Vec<String> {
 #[test]
 fn test_theaters() {
     JSON.test("theaters", vec![
-        TestAction::undoable(
-            0,
-            custom_action(CustomActionType::Theaters),
-        )
-        .skip_json(),
+        TestAction::undoable(0, custom_action(CustomActionType::Theaters)).skip_json(),
         TestAction::undoable(
             0,
             Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
@@ -397,16 +387,8 @@ fn test_theaters() {
 #[test]
 fn test_taxes() {
     JSON.test("taxes", vec![
-        TestAction::undoable(
-            0,
-            custom_action(CustomActionType::Taxes),
-        )
-        .skip_json(),
-        TestAction::undoable(
-            0,
-            Action::Response(EventResponse::Payment(vec![ResourcePile::mood_tokens(1)])),
-        )
-        .skip_json(),
+        TestAction::undoable(0, custom_action(CustomActionType::Taxes)).skip_json(),
+        TestAction::undoable(0, payment_response(ResourcePile::mood_tokens(1))).skip_json(),
         TestAction::undoable(
             0,
             Action::Response(EventResponse::ResourceReward(ResourcePile::new(
@@ -519,10 +501,7 @@ fn test_free_education() {
                 ResourcePile::food(1) + ResourcePile::gold(1),
             ),
         ),
-        TestAction::undoable(
-            0,
-            Action::Response(EventResponse::Payment(vec![ResourcePile::ideas(1)])),
-        ),
+        TestAction::undoable(0, payment_response(ResourcePile::ideas(1))),
     ]);
 }
 
@@ -587,16 +566,14 @@ fn test_collect_free_economy() {
             ))),
         )
         .skip_json(),
-        TestAction::undoable(
-            0,
-            Action::Response(EventResponse::Payment(vec![ResourcePile::mood_tokens(1)])),
-        )
-        .with_post_assert(|game| {
-            // no production focus
-            let result =
-                PlayingActionType::ActionCard(19).is_available(&game, game.active_player());
-            assert!(result.is_err());
-        }),
+        TestAction::undoable(0, payment_response(ResourcePile::mood_tokens(1))).with_post_assert(
+            |game| {
+                // no production focus
+                let result =
+                    PlayingActionType::ActionCard(19).is_available(&game, game.active_player());
+                assert!(result.is_err());
+            },
+        ),
     ]);
 }
 
