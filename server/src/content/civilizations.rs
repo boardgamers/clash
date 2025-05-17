@@ -14,42 +14,26 @@ pub fn get_all() -> Vec<Civilization> {
         Civilization::new(BARBARIANS, vec![], vec![]),
         Civilization::new(PIRATES, vec![], vec![]),
         // until the real civilizations are implemented
-        Civilization::new(
-            "Federation",
-            vec![],
-            vec![
-                Leader::builder("James T. Kirk", "", "", "", "").build(),
-                Leader::builder("Kathryn Janeway", "", "", "", "").build(),
-                Leader::builder("Spock", "", "", "", "").build(),
-            ],
-        ),
-        Civilization::new(
-            "Borg",
-            vec![],
-            vec![
-                Leader::builder("Borg Queen", "", "", "", "").build(),
-                Leader::builder("Seven of Nine", "", "", "", "").build(),
-                Leader::builder("Jean Luc Picard", "", "", "", "").build(),
-            ],
-        ),
-        Civilization::new(
-            "Klingons",
-            vec![],
-            vec![
-                Leader::builder("Khan", "", "", "", "").build(),
-                Leader::builder("Kahless", "", "", "", "").build(),
-                Leader::builder("Worf", "", "", "", "").build(),
-            ],
-        ),
-        Civilization::new(
-            "Romulans",
-            vec![],
-            vec![
-                Leader::builder("Sela", "", "", "", "").build(),
-                Leader::builder("Narek", "", "", "", "").build(),
-                Leader::builder("Tomalak", "", "", "", "").build(),
-            ],
-        ),
+        Civilization::new("Federation", vec![], vec![
+            Leader::builder("James T. Kirk", "", "", "", "").build(),
+            Leader::builder("Kathryn Janeway", "", "", "", "").build(),
+            Leader::builder("Spock", "", "", "", "").build(),
+        ]),
+        Civilization::new("Borg", vec![], vec![
+            Leader::builder("Borg Queen", "", "", "", "").build(),
+            Leader::builder("Seven of Nine", "", "", "", "").build(),
+            Leader::builder("Jean Luc Picard", "", "", "", "").build(),
+        ]),
+        Civilization::new("Klingons", vec![], vec![
+            Leader::builder("Khan", "", "", "", "").build(),
+            Leader::builder("Kahless", "", "", "", "").build(),
+            Leader::builder("Worf", "", "", "", "").build(),
+        ]),
+        Civilization::new("Romulans", vec![], vec![
+            Leader::builder("Sela", "", "", "", "").build(),
+            Leader::builder("Narek", "", "", "", "").build(),
+            Leader::builder("Tomalak", "", "", "", "").build(),
+        ]),
     ]
 }
 
@@ -58,22 +42,27 @@ fn maya() -> Civilization {
         "Maya",
         vec![
             // todo add other effects
-            SpecialAdvanceInfo::builder(SpecialAdvance::Terrace, "Terrace", Advance::Irrigation)
-                .add_transient_event_listener(
-                    |events| &mut events.terrain_collect_options,
-                    2,
-                    |m, (), ()| {
-                        m.insert(
-                            Terrain::Mountain,
-                            std::collections::HashSet::from([
-                                ResourcePile::food(1),
-                                ResourcePile::wood(1),
-                                ResourcePile::ore(1),
-                            ]),
-                        );
-                    },
-                )
-                .build(),
+            SpecialAdvanceInfo::builder(
+                SpecialAdvance::Terrace,
+                Advance::Irrigation,
+                "Terrace",
+                "todo",
+            )
+            .add_transient_event_listener(
+                |events| &mut events.terrain_collect_options,
+                2,
+                |m, (), ()| {
+                    m.insert(
+                        Terrain::Mountain,
+                        std::collections::HashSet::from([
+                            ResourcePile::food(1),
+                            ResourcePile::wood(1),
+                            ResourcePile::ore(1),
+                        ]),
+                    );
+                },
+            )
+            .build(),
         ],
         vec![
             Leader::builder(
@@ -106,14 +95,10 @@ pub fn get_civilization(name: &str) -> Option<Civilization> {
     match name {
         "Maya" => Some(maya()), // still needs to be implemented
         // for integration testing
-        "test0" => Some(Civilization::new(
-            "test0",
-            vec![],
-            vec![
-                Leader::builder("Alexander", "", "", "", "").build(),
-                Leader::builder("Kleopatra", "", "", "", "").build(),
-            ],
-        )), // for testing
+        "test0" => Some(Civilization::new("test0", vec![], vec![
+            Leader::builder("Alexander", "", "", "", "").build(),
+            Leader::builder("Kleopatra", "", "", "", "").build(),
+        ])), // for testing
         "test1" => Some(Civilization::new("test1", vec![], vec![])),
         "test2" => Some(Civilization::new("test2", vec![], vec![])),
         _ => get_all()

@@ -28,10 +28,11 @@ impl SpecialAdvanceInfo {
     #[must_use]
     pub fn builder(
         advance: SpecialAdvance,
-        name: &str,
         required_advance: Advance,
+        name: &str,
+        description: &str,
     ) -> SpecialAdvanceBuilder {
-        SpecialAdvanceBuilder::new(advance, name.to_string(), required_advance)
+        SpecialAdvanceBuilder::new(advance, required_advance, name.to_string(), description.to_string())
     }
 
     fn new(
@@ -60,11 +61,11 @@ pub struct SpecialAdvanceBuilder {
 }
 
 impl SpecialAdvanceBuilder {
-    fn new(advance: SpecialAdvance, name: String, required_advance: Advance) -> Self {
+    fn new(advance: SpecialAdvance, required_advance: Advance, name: String, description: String) -> Self {
         Self {
             advance,
             name,
-            description: String::new(),
+            description,
             required_advance,
             builder: AbilityInitializerBuilder::new(),
         }
