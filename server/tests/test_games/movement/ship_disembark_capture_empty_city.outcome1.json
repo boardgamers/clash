@@ -527,6 +527,7 @@
   "log": [
     [
       "Player1 disembarked 1 cavalry and 1 elephant from C3 to B2 and captured Player2's city at B2",
+      "Player1 gained 2 gold for capturing a city",
       "Player2 gained 1 free Settler Unit at C1 for losing a city",
       "Player1 could not store 2 gold"
     ],

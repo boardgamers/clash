@@ -290,7 +290,7 @@
   "log": [
     [
       "Player1 paid 2 gold to get the Storage advance",
-      "Player gained 1 mood token as advance bonus"
+      "Player1 gained 1 mood token as advance bonus"
     ],
     [
       "A new game event has been triggered: Solar Eclipse",
@@ -310,7 +310,8 @@
       "Player2 reveals Tactics Card Tactical Retreat",
       "Player2 withdraws to B1",
       "Player1 gained 1 victory point for the Solar Eclipse",
-      "Attacker wins and captured Player2's city at C1"
+      "Attacker wins and captured Player2's city at C1",
+      "Player1 gained 1 gold for capturing a city"
     ]
   ],
   "undo_limit": 3,

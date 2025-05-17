@@ -228,7 +228,7 @@
   "log": [
     [
       "Player1 played the action card Ideas",
-      "Player1 gained 1 idea (1 for each Academy)"
+      "Player1 gained 1 idea for Ideas"
     ]
   ],
   "undo_limit": 0,

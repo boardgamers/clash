@@ -467,7 +467,7 @@
   "log": [
     [
       "Player1 paid 2 food to get the Storage advance",
-      "Player gained 1 mood token as advance bonus"
+      "Player1 gained 1 mood token as advance bonus"
     ],
     [
       "A new game event has been triggered: Great Athlete",
@@ -480,13 +480,13 @@
     [
       "Player1 played the action card Great Athlete as a regular action",
       "Player1 gained Arts",
-      "Player gained 1 culture token as advance bonus"
+      "Player1 gained 1 culture token as advance bonus"
     ],
     [
       "Player1 decided to convert culture to mood tokens"
     ],
     [
-      "Player1 converted 1 culture token mood to 1 mood token"
+      "Player1 converted 1 culture token to 1 mood token"
     ]
   ],
   "undo_limit": 1,

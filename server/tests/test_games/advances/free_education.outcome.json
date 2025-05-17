@@ -426,7 +426,7 @@
   "log": [
     [
       "Player1 paid 1 food and 1 gold to get the Draft advance",
-      "Player gained 1 culture token as advance bonus"
+      "Player1 gained 1 culture token as advance bonus"
     ]
   ],
   "undo_limit": 0,

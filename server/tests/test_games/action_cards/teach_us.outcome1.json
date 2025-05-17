@@ -269,6 +269,7 @@
       "Player2 has to remove all of their defending units",
       "Player2 removed 2 infantry",
       "Attacker wins and captured Player2's city at C1",
+      "Player1 gained 1 gold for capturing a city",
       "Player1 could not store 1 gold"
     ],
     [
@@ -276,7 +277,7 @@
       "Player1 selected Writing as advance for Teach Us.",
       "Player1 gained an action card from the pile",
       "Player1 gained an objective card from the pile",
-      "Player gained 1 culture token as advance bonus"
+      "Player1 gained 1 culture token as advance bonus"
     ]
   ],
   "undo_limit": 2,

@@ -304,7 +304,7 @@
   "log": [
     [
       "Player1 paid 2 food to get the Storage advance",
-      "Player gained 1 mood token as advance bonus"
+      "Player1 gained 1 mood token as advance bonus"
     ],
     [
       "A new game event has been triggered: Great Artist",
@@ -325,7 +325,7 @@
     [
       "Player2 played the action card Great Artist as a regular action",
       "Player2 gained Arts",
-      "Player gained 1 culture token as advance bonus",
+      "Player2 gained 1 culture token as advance bonus",
       "Player2 made city at A1 Happy"
     ]
   ],

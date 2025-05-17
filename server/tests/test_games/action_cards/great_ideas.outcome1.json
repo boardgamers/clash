@@ -337,6 +337,7 @@
   "log": [
     [
       "Player1 marched 2 settlers, 1 infantry, 1 cavalry, 1 elephant and a leader from C2 to C1 and captured Player2's city at C1",
+      "Player1 gained 1 gold for capturing a city",
       "Player1 could not store 1 gold"
     ],
     [
