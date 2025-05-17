@@ -299,13 +299,12 @@ fn envoy() -> Incident {
         |_p, _, _| true,
         0,
         |game, s, _| {
-            let p = s.choice;
-            game.add_info_log_item(&format!(
-                "{} was selected to gain 1 culture token.",
-                game.player_name(p)
-            ));
-            game.player_mut(p)
-                .gain_resources(ResourcePile::culture_tokens(1));
+            gain_resources(
+                game,
+                s.choice,
+                ResourcePile::culture_tokens(1),
+                |name, pile| format!("{name} gained {pile} for Envoy event"),
+            );
         },
     )
     .build()

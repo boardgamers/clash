@@ -39,8 +39,12 @@ fn writing() -> AdvanceBuilder {
         3,
         |game, player_index, _player_name, b| {
             if matches!(b.building, Building::Academy) {
-                game.players[player_index].gain_resources(ResourcePile::ideas(2));
-                game.add_info_log_item("Academy gained 2 ideas");
+                gain_resources(
+                    game,
+                    player_index,
+                    ResourcePile::ideas(2),
+                    |name, pile| format!("{name} gained {pile} from Academy"),
+                );
             }
         },
     )
@@ -132,7 +136,12 @@ fn philosophy() -> AdvanceBuilder {
         "Immediately gain 1 idea after getting a Science advance",
     )
     .add_one_time_ability_initializer(|game, player_index| {
-        game.players[player_index].gain_resources(ResourcePile::ideas(1));
+        gain_resources(
+            game,
+            player_index,
+            ResourcePile::ideas(1),
+            |name, pile| format!("{name} gained {pile} from Philosophy"),
+        );
     })
     .add_simple_persistent_event_listener(
         |event| &mut event.advance,
@@ -145,9 +154,12 @@ fn philosophy() -> AdvanceBuilder {
                 .iter()
                 .any(|a| a.advance == advance.advance)
             {
-                let player = game.player_mut(player_index);
-                player.gain_resources(ResourcePile::ideas(1));
-                game.add_info_log_item(&format!("{player_name} gained 1 idea from Philosophy"));
+                gain_resources(
+                    game,
+                    player_index,
+                    ResourcePile::ideas(1),
+                    |name, pile| format!("{name} gained {pile} from Philosophy"),
+                );
             }
         },
     )

@@ -1,7 +1,7 @@
 use crate::content::persistent_events::{PositionRequest, ResourceRewardRequest};
 use crate::incident::{Incident, IncidentBaseEffect, IncidentBuilder};
 use crate::payment::ResourceReward;
-use crate::player::add_unit;
+use crate::player::{add_unit, gain_resources};
 use crate::player_events::IncidentTarget;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
@@ -156,13 +156,12 @@ fn good_year(mut builder: IncidentBuilder, amount: u8, good_year_type: &GoodYear
                 |p, _, _| p.resources.food < p.resource_limit.food,
                 i as i32,
                 move |game, c, _| {
-                    game.add_info_log_item(&format!(
-                        "{} gained 1 food from {}",
-                        game.player_name(c.choice),
-                        n.clone(),
-                    ));
-                    game.player_mut(c.choice)
-                        .gain_resources(ResourcePile::food(1));
+                    gain_resources(
+                        game,
+                        c.choice,
+                        ResourcePile::food(1),
+                        |name, pile| format!("{name} gained {pile} from {n}"),
+                    );
                 },
             );
         }
