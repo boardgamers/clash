@@ -93,16 +93,16 @@ pub fn setup_game(setup: GameSetup) -> Game {
 pub fn setup_game_with_cache(setup: GameSetup, cache: Cache) -> Game {
     let mut rng = init_rng(setup.seed.clone());
 
-    let mut players = init_human_players(&setup, &mut rng);
+    let mut players = init_human_players(&setup, &mut rng, &cache);
 
     let starting_player = rng.range(0, players.len());
 
     players.push(Player::new(
-        civilizations::get_civilization(BARBARIANS).expect("civ not found"),
+        cache.get_civilization(BARBARIANS),
         players.len(),
     ));
     players.push(Player::new(
-        civilizations::get_civilization(PIRATES).expect("civ not found"),
+        cache.get_civilization(PIRATES),
         players.len(),
     ));
 
@@ -210,16 +210,15 @@ fn init_rng(seed: String) -> Rng {
     Rng::from_seed(seed)
 }
 
-fn init_human_players(setup: &GameSetup, rng: &mut Rng) -> Vec<Player> {
+fn init_human_players(setup: &GameSetup, rng: &mut Rng, cache: &Cache) -> Vec<Player> {
     let mut players = Vec::new();
-    let mut civilizations = civilizations::get_all();
+    let mut civilizations = civilizations::get_all_uncached();
     for player_index in 0..setup.player_amount {
         let civilization = if setup.civilizations.is_empty() {
             civilizations.remove(rng.range(NON_HUMAN_PLAYERS, civilizations.len()))
         } else {
             rng.next_seed(); // need to call next_seed to have the same number of calls to rng
-            civilizations::get_civilization(&setup.civilizations[player_index])
-                .expect("civilization not found")
+            cache.get_civilization(&setup.civilizations[player_index])
         };
         let mut player = Player::new(civilization, player_index);
         player.resource_limit = ResourcePile::new(2, 7, 7, 7, 7, 0, 0);

@@ -6,7 +6,7 @@ use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::PersistentEventState;
-use crate::content::{builtin, civilizations};
+use crate::content::builtin;
 use crate::game::{Game, GameContext, GameOptions, GameState};
 use crate::log::ActionLogAge;
 use crate::map::{Map, MapData};
@@ -16,7 +16,7 @@ use crate::player_events::PlayerEvents;
 use crate::resource_pile::ResourcePile;
 use crate::unit::{Unit, UnitData};
 use crate::utils::Rng;
-use crate::wonder::{Wonder, init_wonder};
+use crate::wonder::{init_wonder, Wonder};
 use crate::{advance, utils};
 use enumset::EnumSet;
 use itertools::Itertools;
@@ -293,7 +293,7 @@ pub struct PlayerData {
 fn initialize_player(data: PlayerData, game: &mut Game, all: &[Builtin]) {
     let leader = data.active_leader.clone();
     let objective_cards = data.objective_cards.clone();
-    let player = player_from_data(data);
+    let player = player_from_data(data, game);
     let player_index = player.index;
     game.players.push(player);
     builtin::init_player(game, player_index, all);
@@ -322,7 +322,7 @@ fn initialize_player(data: PlayerData, game: &mut Game, all: &[Builtin]) {
     game.players[player_index].cities = cities;
 }
 
-fn player_from_data(data: PlayerData) -> Player {
+fn player_from_data(data: PlayerData, game: &Game) -> Player {
     let units = data
         .units
         .into_iter()
@@ -354,8 +354,7 @@ fn player_from_data(data: PlayerData) -> Player {
         events: PlayerEvents::new(),
         destroyed_structures: DestroyedStructures::from_data(data.destroyed_structures),
         units,
-        civilization: civilizations::get_civilization(&data.civilization)
-            .expect("player data should have a valid civilization"),
+        civilization: game.cache.get_civilization(&data.civilization),
         active_leader: data.active_leader,
         available_leaders: data.available_leaders,
         advances: EnumSet::from_iter(data.advances),

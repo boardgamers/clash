@@ -1,21 +1,35 @@
-use enumset::EnumSetType;
-use serde::{Deserialize, Serialize};
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::advance::Advance;
 use crate::events::EventOrigin;
+use crate::game::Game;
+use serde::{Deserialize, Serialize};
 
-#[derive(EnumSetType, Serialize, Deserialize, Debug, Ord, PartialOrd, Hash)]
+#[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Debug, Hash, Ord, PartialOrd)]
 pub enum SpecialAdvance {
     // Maya
     Terrace,
 
     // Rome
-
-
-
+    Aqueduct,
+    RomanRoads,
+    Captivi,
+    Provinces,
 }
 
+impl SpecialAdvance {
+    #[must_use]
+    pub fn info<'a>(&self, game: &'a Game) -> &'a SpecialAdvanceInfo {
+        game.cache.get_special_advance(*self)
+    }
+
+    #[must_use]
+    pub fn name<'a>(&self, game: &'a Game) -> &'a str {
+        self.info(game).name.as_str()
+    }
+}
+
+#[derive(Clone)]
 pub struct SpecialAdvanceInfo {
     pub advance: SpecialAdvance,
     pub name: String,

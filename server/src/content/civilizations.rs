@@ -9,7 +9,7 @@ pub const BARBARIANS: &str = "Barbarians";
 pub const PIRATES: &str = "Pirates";
 
 #[must_use]
-pub fn get_all() -> Vec<Civilization> {
+pub fn get_all_uncached() -> Vec<Civilization> {
     vec![
         Civilization::new(BARBARIANS, vec![], vec![]),
         Civilization::new(PIRATES, vec![], vec![]),
@@ -37,7 +37,7 @@ pub fn get_all() -> Vec<Civilization> {
     ]
 }
 
-fn maya() -> Civilization {
+pub(crate) fn maya() -> Civilization {
     Civilization::new(
         "Maya",
         vec![
@@ -88,23 +88,6 @@ fn maya() -> Civilization {
             .build(),
         ],
     )
-}
-
-#[must_use]
-pub fn get_civilization(name: &str) -> Option<Civilization> {
-    match name {
-        "Maya" => Some(maya()), // still needs to be implemented
-        // for integration testing
-        "test0" => Some(Civilization::new("test0", vec![], vec![
-            Leader::builder("Alexander", "", "", "", "").build(),
-            Leader::builder("Kleopatra", "", "", "", "").build(),
-        ])), // for testing
-        "test1" => Some(Civilization::new("test1", vec![], vec![])),
-        "test2" => Some(Civilization::new("test2", vec![], vec![])),
-        _ => get_all()
-            .into_iter()
-            .find(|civilization| civilization.name == name),
-    }
 }
 
 #[cfg(test)]

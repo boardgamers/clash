@@ -2,6 +2,7 @@ use crate::content::civilizations::{BARBARIANS, PIRATES};
 use crate::{leader::Leader, special_advance::SpecialAdvanceInfo};
 
 //todo add optional special starting tile
+#[derive(Clone)]
 pub struct Civilization {
     pub name: String,
     pub special_advances: Vec<SpecialAdvanceInfo>,

@@ -2,6 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::events::EventOrigin;
 
+#[derive(Clone)]
 pub struct Leader {
     pub name: String,
     pub first_ability: String,
