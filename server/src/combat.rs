@@ -338,7 +338,12 @@ pub(crate) fn conquer_city(
     }
 }
 
-fn take_over_city(game: &mut Game, city: &mut City, old_player_index: usize, new_player_index: usize) {
+fn take_over_city(
+    game: &mut Game,
+    city: &mut City,
+    old_player_index: usize,
+    new_player_index: usize,
+) {
     for wonder in city.pieces.wonders.clone() {
         deinit_wonder(game, old_player_index, wonder);
         init_wonder(game, new_player_index, wonder);

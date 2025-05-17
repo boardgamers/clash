@@ -1,18 +1,14 @@
 use crate::advance::Advance;
-use crate::city_pieces::{DestroyedStructures, DestroyedStructuresData};
+use crate::city_pieces::DestroyedStructures;
 use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
-use crate::content::builtin;
-use crate::content::builtin::Builtin;
 use crate::events::{Event, EventOrigin};
-use crate::objective_card::init_objective_card;
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player_events::{CostInfo, TransientEvents};
 use crate::resource::ResourceType;
-use crate::unit::{UnitData, UnitType};
-use crate::wonder::{Wonder, init_wonder, wonders_built_points, wonders_owned_points};
+use crate::unit::UnitType;
+use crate::wonder::{Wonder, wonders_built_points, wonders_owned_points};
 use crate::{
-    advance,
-    city::{City, CityData},
+    city::City,
     city_pieces::Building::{self},
     civilization::Civilization,
     consts::{
@@ -20,7 +16,7 @@ use crate::{
         CAPTURED_LEADER_VICTORY_POINTS, CITY_LIMIT, CITY_PIECE_LIMIT, OBJECTIVE_VICTORY_POINTS,
         UNIT_LIMIT,
     },
-    content::{civilizations, custom_actions::CustomActionType},
+    content::custom_actions::CustomActionType,
     game::Game,
     leader::Leader,
     player_events::PlayerEvents,
@@ -31,14 +27,10 @@ use crate::{
 };
 use enumset::EnumSet;
 use itertools::Itertools;
-use num::Zero;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt::Display;
-use std::{
-    cmp::Ordering::{self, *},
-    mem,
-};
+use std::cmp::Ordering::{self, *};
 
 #[derive(Serialize, Deserialize, PartialEq, Eq)]
 pub enum PlayerType {
@@ -47,7 +39,7 @@ pub enum PlayerType {
 }
 
 pub struct Player {
-    name: Option<String>,
+    pub(crate) name: Option<String>,
     pub index: usize,
     pub resources: ResourcePile,
     pub resource_limit: ResourcePile,
@@ -88,19 +80,6 @@ impl Display for Player {
     }
 }
 
-impl Clone for Player {
-    fn clone(&self) -> Self {
-        let data = self.cloned_data();
-        Self::from_data(data)
-    }
-}
-
-impl PartialEq for Player {
-    fn eq(&self, other: &Self) -> bool {
-        self.cloned_data() == other.cloned_data()
-    }
-}
-
 #[derive(PartialEq, Eq, Copy, Clone)]
 pub enum CostTrigger {
     WithModifiers,
@@ -108,192 +87,6 @@ pub enum CostTrigger {
 }
 
 impl Player {
-    ///
-    ///
-    /// # Panics
-    ///
-    /// Panics if elements like wonders or advances don't exist
-    pub fn initialize_player(data: PlayerData, game: &mut Game, all: &[Builtin]) {
-        let leader = data.active_leader.clone();
-        let objective_cards = data.objective_cards.clone();
-        let player = Self::from_data(data);
-        let player_index = player.index;
-        game.players.push(player);
-        builtin::init_player(game, player_index, all);
-        advance::init_player(game, player_index);
-
-        if let Some(leader) = leader {
-            Self::with_leader(&leader, game, player_index, |game, leader| {
-                leader.listeners.init(game, player_index);
-            });
-        }
-
-        for id in objective_cards {
-            if id == 0 {
-                // hidden
-                continue;
-            }
-            init_objective_card(game, player_index, id);
-        }
-
-        let mut cities = mem::take(&mut game.players[player_index].cities);
-        for city in &mut cities {
-            for wonder in &city.pieces.wonders {
-                init_wonder(game, player_index, *wonder);
-            }
-        }
-        game.players[player_index].cities = cities;
-    }
-
-    fn from_data(data: PlayerData) -> Player {
-        let units = data
-            .units
-            .into_iter()
-            .flat_map(|u| Unit::from_data(data.id, u))
-            .collect_vec();
-        units
-            .iter()
-            .into_group_map_by(|unit| unit.id)
-            .iter()
-            .for_each(|(id, units)| {
-                assert!(
-                    units.len() == 1,
-                    "player data {} should not contain duplicate units {id}",
-                    data.id
-                );
-            });
-        let cities = data
-            .cities
-            .into_iter()
-            .map(|d| City::from_data(d, data.id))
-            .collect_vec();
-        Self {
-            name: data.name,
-            index: data.id,
-            resources: data.resources,
-            resource_limit: data.resource_limit,
-            wasted_resources: ResourcePile::empty(),
-            events: PlayerEvents::new(),
-            destroyed_structures: DestroyedStructures::from_data(data.destroyed_structures),
-            units,
-            civilization: civilizations::get_civilization(&data.civilization)
-                .expect("player data should have a valid civilization"),
-            active_leader: data.active_leader,
-            available_leaders: data.available_leaders,
-            advances: EnumSet::from_iter(data.advances),
-            great_library_advance: data.great_library_advance,
-            unlocked_special_advances: data.unlocked_special_advance,
-            wonders_built: data.wonders_built,
-            wonders_owned: cities
-                .iter()
-                .flat_map(|city| city.pieces.wonders.iter().copied())
-                .collect(),
-            cities,
-            incident_tokens: data.incident_tokens,
-            completed_objectives: data.completed_objectives,
-            captured_leaders: data.captured_leaders,
-            event_victory_points: data.event_victory_points,
-            custom_actions: HashMap::new(),
-            wonder_cards: data.wonder_cards,
-            action_cards: data.action_cards,
-            objective_cards: data.objective_cards,
-            next_unit_id: data.next_unit_id,
-            played_once_per_turn_actions: data.played_once_per_turn_actions,
-            event_info: data.event_info,
-            secrets: data.secrets,
-            objective_opportunities: Vec::new(),
-            gained_objective: None,
-            great_mausoleum_action_cards: 0,
-        }
-    }
-
-    #[must_use]
-    pub fn data(self) -> PlayerData {
-        let units = self
-            .units
-            .iter()
-            // carried units are added to carriers
-            .filter(|unit| {
-                if let Some(carrier_id) = unit.carrier_id {
-                    // satety check
-                    let _ = self.get_unit(carrier_id);
-                }
-                unit.carrier_id.is_none()
-            })
-            .sorted_by_key(|unit| unit.id)
-            .map(|u| u.data(&self))
-            .collect();
-        PlayerData {
-            name: self.name,
-            id: self.index,
-            resources: self.resources,
-            resource_limit: self.resource_limit,
-            cities: self.cities.into_iter().map(City::data).collect(),
-            destroyed_structures: self.destroyed_structures.data(),
-            units,
-            civilization: self.civilization.name,
-            active_leader: self.active_leader,
-            available_leaders: self.available_leaders.into_iter().collect(),
-            advances: self
-                .advances
-                .into_iter()
-                .sorted_by_key(Advance::id)
-                .collect(),
-            great_library_advance: self.great_library_advance,
-            unlocked_special_advance: self.unlocked_special_advances,
-            wonders_built: self.wonders_built,
-            incident_tokens: self.incident_tokens,
-            completed_objectives: self.completed_objectives,
-            captured_leaders: self.captured_leaders,
-            event_victory_points: self.event_victory_points,
-            wonder_cards: self.wonder_cards,
-            action_cards: self.action_cards,
-            objective_cards: self.objective_cards,
-            next_unit_id: self.next_unit_id,
-            played_once_per_turn_actions: self.played_once_per_turn_actions,
-            event_info: self.event_info,
-            secrets: self.secrets,
-        }
-    }
-
-    pub fn cloned_data(&self) -> PlayerData {
-        let units = self
-            .units
-            .iter()
-            // carried units are added to carriers
-            .filter(|unit| unit.carrier_id.is_none())
-            .sorted_by_key(|unit| unit.id)
-            .map(|u| u.data(self))
-            .collect();
-        PlayerData {
-            name: self.name.clone(),
-            id: self.index,
-            resources: self.resources.clone(),
-            resource_limit: self.resource_limit.clone(),
-            cities: self.cities.iter().map(City::cloned_data).collect(),
-            destroyed_structures: self.destroyed_structures.cloned_data(),
-            units,
-            civilization: self.civilization.name.clone(),
-            active_leader: self.active_leader.clone(),
-            available_leaders: self.available_leaders.clone(),
-            advances: self.advances.iter().sorted_by_key(Advance::id).collect(),
-            great_library_advance: self.great_library_advance,
-            unlocked_special_advance: self.unlocked_special_advances.clone(),
-            wonders_built: self.wonders_built.clone(),
-            incident_tokens: self.incident_tokens,
-            completed_objectives: self.completed_objectives.clone(),
-            captured_leaders: self.captured_leaders.clone(),
-            event_victory_points: self.event_victory_points,
-            wonder_cards: self.wonder_cards.clone(),
-            action_cards: self.action_cards.clone(),
-            objective_cards: self.objective_cards.clone(),
-            next_unit_id: self.next_unit_id,
-            played_once_per_turn_actions: self.played_once_per_turn_actions.clone(),
-            event_info: self.event_info.clone(),
-            secrets: self.secrets.clone(),
-        }
-    }
-
     ///
     /// # Panics
     /// Panics if the civilization does not exist
@@ -824,75 +617,12 @@ pub fn end_turn(game: &mut Game, player: usize) {
     }
 }
 
-#[derive(Serialize, Deserialize, PartialEq)]
-pub struct PlayerData {
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    name: Option<String>,
-    id: usize,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "ResourcePile::is_empty")]
+pub fn gain_resources(
+    game: &mut Game,
+    player: usize,
     resources: ResourcePile,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "ResourcePile::is_empty")]
-    resource_limit: ResourcePile,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    cities: Vec<CityData>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "DestroyedStructuresData::is_empty")]
-    destroyed_structures: DestroyedStructuresData,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    units: Vec<UnitData>,
-    civilization: String,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    active_leader: Option<String>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    available_leaders: Vec<String>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    advances: Vec<Advance>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    great_library_advance: Option<Advance>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    unlocked_special_advance: Vec<String>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    wonders_built: Vec<Wonder>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "u8::is_zero")]
-    incident_tokens: u8,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    completed_objectives: Vec<String>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    captured_leaders: Vec<String>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "f32::is_zero")]
-    event_victory_points: f32,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    wonder_cards: Vec<Wonder>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    action_cards: Vec<u8>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    objective_cards: Vec<u8>,
-    next_unit_id: u32,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    played_once_per_turn_actions: Vec<CustomActionType>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "HashMap::is_empty")]
-    event_info: HashMap<String, String>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    secrets: Vec<String>,
+    log: impl Fn(&str, &ResourcePile) -> String,
+) {
+    game.add_info_log_item(&log(&game.player_name(player), &resources));
+    game.player_mut(player).gain_resources(resources);
 }

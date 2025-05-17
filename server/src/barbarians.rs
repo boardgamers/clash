@@ -387,7 +387,7 @@ fn possible_barbarians_spawns(game: &Game, player: &Player) -> Vec<Position> {
         .keys()
         .filter(|&pos| {
             is_base_barbarian_spawn_pos(game, *pos, player)
-                && cities_in_range(game, |p| p == player, *pos, 1).is_empty()
+                && cities_in_range(game, |p| p.index == player.index, *pos, 1).is_empty()
                 && !steps_towards_land_range2_cites(game, player, *pos).is_empty()
         })
         .copied()

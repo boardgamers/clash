@@ -11,7 +11,7 @@ use crate::content::tactics_cards::{
 };
 use crate::game::Game;
 use crate::payment::{PaymentOptions, PaymentReason};
-use crate::player::Player;
+use crate::player::{Player, gain_resources};
 use crate::playing_actions::ActionCost;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
@@ -292,11 +292,10 @@ fn great_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_simple_persistent_event_listener(
         |e| &mut e.play_action_card,
         0,
-        |game, player, name, _| {
-            let p = game.player_mut(player);
-            let pile = ResourcePile::ideas(2);
-            p.gain_resources(pile.clone());
-            game.add_info_log_item(&format!("{name} gained {pile} for Great Ideas"));
+        |game, player, _, _| {
+            gain_resources(game, player, ResourcePile::ideas(2), |name, pile| {
+                format!("{name} gained {pile} for Great Ideas")
+            });
         },
     )
     .build()
