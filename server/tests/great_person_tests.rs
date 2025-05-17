@@ -9,6 +9,7 @@ use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::{advance, construct};
+use server::advance::AdvanceAction;
 
 mod common;
 
@@ -21,10 +22,7 @@ fn test_great_explorer() {
         vec![
             TestAction::not_undoable(
                 1,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Storage,
-                    payment: ResourcePile::food(2),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::food(2)))),
             )
             .without_json_comparison(),
             TestAction::undoable(
@@ -67,10 +65,7 @@ fn test_great_artist() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Storage,
-                    payment: ResourcePile::food(2),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::food(2)))),
             ),
             TestAction::not_undoable(
                 1,
@@ -91,10 +86,7 @@ fn test_great_prophet() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Storage,
-                    payment: ResourcePile::food(2),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::food(2)))),
             )
             .without_json_comparison(),
             TestAction::undoable(
@@ -128,10 +120,7 @@ fn test_great_warlord() {
         vec![
             TestAction::not_undoable(
                 1,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Storage,
-                    payment: ResourcePile::food(2),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::food(2)))),
             )
             .without_json_comparison(),
             TestAction::undoable(
@@ -155,10 +144,7 @@ fn test_great_merchant() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Storage,
-                    payment: ResourcePile::food(2),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::food(2)))),
             )
             .without_json_comparison(),
             TestAction::undoable(
@@ -185,10 +171,7 @@ fn test_great_engineer() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Storage,
-                    payment: ResourcePile::food(2),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::food(2)))),
             )
             .without_json_comparison(),
             TestAction::undoable(
@@ -230,10 +213,7 @@ fn test_great_architect() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Storage,
-                    payment: ResourcePile::food(2),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::food(2)))),
             )
             .without_json_comparison(),
             TestAction::undoable(
@@ -269,10 +249,7 @@ fn test_great_athlete() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Storage,
-                    payment: ResourcePile::food(2),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::food(2)))),
             )
             .without_json_comparison(),
             TestAction::undoable(
@@ -305,10 +282,7 @@ fn test_great_diplomat() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Storage,
-                    payment: ResourcePile::food(2),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::food(2)))),
             )
             .without_json_comparison(),
             TestAction::undoable(
@@ -338,10 +312,7 @@ fn test_great_seer() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Storage,
-                    payment: ResourcePile::food(2),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::food(2)))),
             )
             .without_json_comparison(),
             TestAction::undoable(
@@ -363,10 +334,7 @@ fn test_great_seer() {
             // the player already knows the card - but we treat all designated cards as unknown
             TestAction::not_undoable(
                 0,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Writing,
-                    payment: ResourcePile::food(2),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Writing, ResourcePile::food(2)))),
             ),
         ],
     );

@@ -41,20 +41,14 @@ fn basic_actions() {
     game.wonders_left.retain(|w| *w == Wonder::Pyramids);
     let founded_city_position = Position::new(0, 1);
     game.map.tiles = HashMap::from([(founded_city_position, Forest)]);
-    let advance_action = Action::Playing(Advance {
-        advance: advance::Advance::Math,
-        payment: ResourcePile::food(2),
-    });
+    let advance_action = Action::Playing(Advance(AdvanceAction::new(advance::Advance::Math, ResourcePile::food(2))));
     let game = game_api::execute(game, advance_action, 0);
     let player = &game.players[0];
 
     assert_eq!(ResourcePile::culture_tokens(1), player.resources);
     assert_eq!(2, game.actions_left);
 
-    let advance_action = Action::Playing(Advance {
-        advance: advance::Advance::Engineering,
-        payment: ResourcePile::empty(),
-    });
+    let advance_action = Action::Playing(Advance(AdvanceAction::new(advance::Advance::Engineering, ResourcePile::empty())));
     let mut game = game_api::execute(game, advance_action, 0);
     let player = &game.players[0];
 
@@ -255,19 +249,13 @@ fn undo() {
     assert_undo(&game, false, true, 2, 0, 0);
     assert_eq!(Angry, game.players[0].cities[0].mood_state);
 
-    let advance_action = Action::Playing(Advance {
-        advance: advance::Advance::Math,
-        payment: ResourcePile::food(2),
-    });
+    let advance_action = Action::Playing(Advance(AdvanceAction::new(advance::Advance::Math, ResourcePile::food(2))));
     let game = game_api::execute(game, advance_action, 0);
     assert_undo(&game, true, false, 1, 1, 0);
     let game = game_api::execute(game, Action::Undo, 0);
     assert_undo(&game, false, true, 1, 0, 0);
     assert_eq!(2, game.players[0].advances.len());
-    let advance_action = Action::Playing(Advance {
-        advance: advance::Advance::Engineering,
-        payment: ResourcePile::food(2),
-    });
+    let advance_action = Action::Playing(Advance(AdvanceAction::new(advance::Advance::Engineering, ResourcePile::food(2))));
     let game = game_api::execute(game, advance_action, 0);
     assert_undo(&game, false, false, 1, 1, 1);
 }

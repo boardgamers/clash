@@ -23,6 +23,7 @@ use server::unit::Units;
 use server::wonder::Wonder;
 use server::{advance, construct, playing_actions};
 use std::vec;
+use server::advance::AdvanceAction;
 
 mod common;
 
@@ -79,10 +80,7 @@ fn test_separation_of_power() {
         if test.fail {
             game = execute_action(
                 game,
-                Action::Playing(Advance {
-                    advance: advance::Advance::SeparationOfPower,
-                    payment: ResourcePile::food(1) + ResourcePile::gold(1),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::SeparationOfPower, ResourcePile::food(1) + ResourcePile::gold(1)))),
                 0,
             );
         }
@@ -100,10 +98,7 @@ fn test_devotion() {
         if test.fail {
             game = execute_action(
                 game,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Devotion,
-                    payment: ResourcePile::food(1) + ResourcePile::gold(1),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Devotion, ResourcePile::food(1) + ResourcePile::gold(1)))),
                 0,
             );
         }
@@ -125,10 +120,7 @@ fn test_totalitarianism() {
         if test.fail {
             game = execute_action(
                 game,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Totalitarianism,
-                    payment: ResourcePile::food(1) + ResourcePile::gold(1),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Totalitarianism, ResourcePile::food(1) + ResourcePile::gold(1)))),
                 0,
             );
         }
@@ -146,10 +138,7 @@ fn test_monuments() {
         if test.fail {
             game = execute_action(
                 game,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Monuments,
-                    payment: ResourcePile::food(1) + ResourcePile::gold(1),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Monuments, ResourcePile::food(1) + ResourcePile::gold(1)))),
                 0,
             );
         }
@@ -520,10 +509,7 @@ fn test_dogma_with_anarchy() {
         vec![
             TestAction::undoable(
                 1,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Dogma,
-                    payment: ResourcePile::ideas(2),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Dogma, ResourcePile::ideas(2)))),
             )
             .without_json_comparison(),
             TestAction::undoable(
@@ -557,24 +543,15 @@ fn test_priesthood() {
         vec![
             TestAction::undoable(
                 1,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Math,
-                    payment: ResourcePile::empty(),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Math, ResourcePile::empty()))),
             ),
             TestAction::undoable(
                 1,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Astronomy,
-                    payment: ResourcePile::gold(2),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Astronomy, ResourcePile::gold(2)))),
             ),
             TestAction::illegal(
                 1,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Astronomy,
-                    payment: ResourcePile::empty(),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Astronomy, ResourcePile::empty()))),
             ),
         ],
     );
@@ -587,10 +564,7 @@ fn test_writing() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Writing,
-                    payment: ResourcePile::food(1) + ResourcePile::gold(1),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Writing, ResourcePile::food(1) + ResourcePile::gold(1)))),
             )
             .without_json_comparison(),
             TestAction::undoable(
@@ -611,10 +585,7 @@ fn test_free_education() {
         vec![
             TestAction::undoable(
                 0,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Draft,
-                    payment: ResourcePile::food(1) + ResourcePile::gold(1),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Draft, ResourcePile::food(1) + ResourcePile::gold(1)))),
             ),
             TestAction::undoable(
                 0,

@@ -11,6 +11,7 @@ use server::unit::UnitType;
 use server::wonder::Wonder;
 use server::{advance, construct};
 use std::vec;
+use server::advance::AdvanceAction;
 
 mod common;
 
@@ -143,10 +144,7 @@ fn test_pestilence() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Storage,
-                    payment: ResourcePile::gold(2),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
             ),
             TestAction::undoable(
                 0,
@@ -166,10 +164,7 @@ fn test_pestilence() {
             TestAction::undoable(
                 //no compare
                 0,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Sanitation,
-                    payment: ResourcePile::gold(2),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Sanitation, ResourcePile::gold(2)))),
             )
             .without_json_comparison(),
             TestAction::undoable(0, cons).without_json_comparison(),
@@ -183,10 +178,7 @@ fn test_famine() {
         "famine",
         vec![TestAction::not_undoable(
             0,
-            Action::Playing(Advance {
-                advance: advance::Advance::Storage,
-                payment: ResourcePile::gold(2),
-            }),
+            Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
         )],
     );
 }
@@ -198,10 +190,7 @@ fn test_epidemics() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Storage,
-                    payment: ResourcePile::gold(2),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
             ),
             TestAction::undoable(0, Action::Response(EventResponse::SelectUnits(vec![7]))),
         ],
@@ -248,10 +237,7 @@ fn test_volcano() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Storage,
-                    payment: ResourcePile::gold(2),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
             ),
             TestAction::undoable(
                 0,
@@ -270,10 +256,7 @@ fn test_flood() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Storage,
-                    payment: ResourcePile::gold(2),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
             ),
             TestAction::not_undoable(
                 0,
@@ -298,10 +281,7 @@ fn test_earthquake() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Storage,
-                    payment: ResourcePile::gold(2),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
             )
             .without_json_comparison(),
             TestAction::undoable(
@@ -347,10 +327,7 @@ fn test_migration() {
         "migration",
         vec![TestAction::not_undoable(
             0,
-            Action::Playing(Advance {
-                advance: advance::Advance::Storage,
-                payment: ResourcePile::gold(2),
-            }),
+            Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
         )],
     );
 }
@@ -361,10 +338,7 @@ fn test_civil_war() {
         "civil_war",
         vec![TestAction::not_undoable(
             0,
-            Action::Playing(Advance {
-                advance: advance::Advance::Storage,
-                payment: ResourcePile::gold(2),
-            }),
+            Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
         )],
     );
 }
@@ -376,10 +350,7 @@ fn test_revolution() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Storage,
-                    payment: ResourcePile::gold(2),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
             )
             .without_json_comparison(),
             TestAction::undoable(0, Action::Response(EventResponse::SelectUnits(vec![3])))
@@ -404,10 +375,7 @@ fn test_uprising() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Storage,
-                    payment: ResourcePile::gold(2),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
             ),
             TestAction::undoable(
                 0,
@@ -426,17 +394,11 @@ fn test_envoy() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Storage,
-                    payment: ResourcePile::gold(2),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
             ),
             TestAction::undoable(
                 0,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Monuments,
-                    payment: ResourcePile::gold(2),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Monuments, ResourcePile::gold(2)))),
             ),
             TestAction::undoable(0, Action::Response(EventResponse::Bool(true))),
         ],
@@ -452,10 +414,7 @@ fn test_trojan_horse() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Storage,
-                    payment: ResourcePile::gold(2),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
             )
             .without_json_comparison(),
             TestAction::undoable(
@@ -480,10 +439,7 @@ fn test_solar_eclipse() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Storage,
-                    payment: ResourcePile::gold(2),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
             )
             .without_json_comparison(),
             TestAction::not_undoable(
@@ -508,17 +464,11 @@ fn test_anarchy() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Storage,
-                    payment: ResourcePile::gold(2),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
             ),
             TestAction::undoable(
                 0,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Dogma,
-                    payment: ResourcePile::gold(2),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Dogma, ResourcePile::gold(2)))),
             ),
         ],
     );
@@ -532,10 +482,7 @@ fn test_scientific_trade() {
         "scientific_trade",
         vec![TestAction::not_undoable(
             0,
-            Action::Playing(Advance {
-                advance: advance::Advance::Storage,
-                payment: ResourcePile::gold(2),
-            }),
+            Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
         )],
     );
 }
@@ -546,10 +493,7 @@ fn test_flourishing_trade() {
         "flourishing_trade",
         vec![TestAction::not_undoable(
             0,
-            Action::Playing(Advance {
-                advance: advance::Advance::Storage,
-                payment: ResourcePile::gold(2),
-            }),
+            Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
         )],
     );
 }
@@ -561,10 +505,7 @@ fn test_era_of_stability() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Storage,
-                    payment: ResourcePile::gold(2),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
             ),
             TestAction::not_undoable(
                 0,
@@ -589,10 +530,7 @@ fn test_reformation() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Storage,
-                    payment: ResourcePile::gold(2),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
             ),
             TestAction::not_undoable(2, Action::Response(EventResponse::SelectPlayer(1))),
         ],
@@ -608,10 +546,7 @@ fn test_pandemics() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Storage,
-                    payment: ResourcePile::gold(2),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
             ),
             TestAction::undoable(0, Action::Response(EventResponse::SelectUnits(vec![0]))),
             TestAction::not_undoable(
@@ -637,10 +572,7 @@ fn test_black_death() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Storage,
-                    payment: ResourcePile::gold(2),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
             ),
             TestAction::undoable(0, Action::Response(EventResponse::SelectUnits(vec![0]))),
         ],
@@ -653,10 +585,7 @@ fn test_vermin() {
         "vermin",
         vec![TestAction::not_undoable(
             0,
-            Action::Playing(Advance {
-                advance: advance::Advance::Storage,
-                payment: ResourcePile::gold(2),
-            }),
+            Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
         )],
     );
 }
@@ -667,10 +596,7 @@ fn test_drought() {
         "drought",
         vec![TestAction::not_undoable(
             0,
-            Action::Playing(Advance {
-                advance: advance::Advance::Storage,
-                payment: ResourcePile::gold(2),
-            }),
+            Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
         )],
     );
 }
@@ -682,10 +608,7 @@ fn test_fire() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Storage,
-                    payment: ResourcePile::gold(2),
-                }),
+                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
             ),
             TestAction::undoable(
                 0,

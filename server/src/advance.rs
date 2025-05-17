@@ -387,6 +387,7 @@ pub(crate) fn base_advance_cost(player: &Player) -> PaymentOptions {
     ])
 }
 
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub struct AdvanceAction {
     pub advance: Advance,
     pub payment: ResourcePile,

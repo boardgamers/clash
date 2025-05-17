@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{can_play_action_card, play_action_card};
-use crate::advance::{Advance, base_advance_cost, gain_advance_without_payment, AdvanceAction};
+use crate::advance::{ base_advance_cost, gain_advance_without_payment, AdvanceAction};
 use crate::city::found_city;
 use crate::collect::{PositionCollection, collect};
 use crate::construct::Construct;
@@ -434,6 +434,8 @@ pub(crate) fn base_or_custom_available(
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct ActionPayment {
     pub action: PlayingAction,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "ResourcePile::is_empty")]
     pub payment: ResourcePile,
 }
 
