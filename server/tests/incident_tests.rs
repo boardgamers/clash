@@ -1,9 +1,10 @@
-use crate::common::{JsonTest, TestAction, move_action};
+use crate::common::{JsonTest, TestAction, advance_action, move_action};
+use advance::Advance;
 use server::action::Action;
 use server::card::HandCard;
 use server::city_pieces::Building::Fortress;
 use server::content::persistent_events::{EventResponse, SelectedStructure, Structure};
-use server::playing_actions::PlayingAction::{Advance, Construct};
+use server::playing_actions::PlayingAction::Construct;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::status_phase::ChangeGovernment;
@@ -11,7 +12,6 @@ use server::unit::UnitType;
 use server::wonder::Wonder;
 use server::{advance, construct};
 use std::vec;
-use server::advance::AdvanceAction;
 
 mod common;
 
@@ -24,7 +24,7 @@ fn test_barbarians_spawn() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Response(EventResponse::SelectAdvance(advance::Advance::Storage)),
+                Action::Response(EventResponse::SelectAdvance(Advance::Storage)),
             ),
             TestAction::undoable(
                 0,
@@ -47,7 +47,7 @@ fn test_barbarians_move() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Response(EventResponse::SelectAdvance(advance::Advance::Storage)),
+                Action::Response(EventResponse::SelectAdvance(Advance::Storage)),
             ),
             TestAction::not_undoable(
                 0,
@@ -66,7 +66,7 @@ fn test_pirates_spawn() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Response(EventResponse::SelectAdvance(advance::Advance::Storage)),
+                Action::Response(EventResponse::SelectAdvance(Advance::Storage)),
             ),
             TestAction::undoable(0, Action::Response(EventResponse::SelectUnits(vec![7]))),
             TestAction::undoable(
@@ -95,7 +95,7 @@ fn test_barbarians_attack() {
         "barbarians_attack",
         vec![TestAction::not_undoable(
             0,
-            Action::Response(EventResponse::SelectAdvance(advance::Advance::Storage)),
+            Action::Response(EventResponse::SelectAdvance(Advance::Storage)),
         )],
     );
 }
@@ -118,7 +118,7 @@ fn test_exhausted_land() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Response(EventResponse::SelectAdvance(advance::Advance::Storage)),
+                Action::Response(EventResponse::SelectAdvance(Advance::Storage)),
             ),
             TestAction::not_undoable(
                 0,
@@ -142,10 +142,7 @@ fn test_pestilence() {
     FAMINE.test(
         "pestilence",
         vec![
-            TestAction::not_undoable(
-                0,
-                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
-            ),
+            TestAction::not_undoable(0, advance_action(Advance::Storage, ResourcePile::gold(2))),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::mood_tokens(1)])),
@@ -164,7 +161,7 @@ fn test_pestilence() {
             TestAction::undoable(
                 //no compare
                 0,
-                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Sanitation, ResourcePile::gold(2)))),
+                advance_action(Advance::Sanitation, ResourcePile::gold(2)),
             )
             .without_json_comparison(),
             TestAction::undoable(0, cons).without_json_comparison(),
@@ -178,7 +175,7 @@ fn test_famine() {
         "famine",
         vec![TestAction::not_undoable(
             0,
-            Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
+            advance_action(Advance::Storage, ResourcePile::gold(2)),
         )],
     );
 }
@@ -188,10 +185,7 @@ fn test_epidemics() {
     FAMINE.test(
         "epidemics",
         vec![
-            TestAction::not_undoable(
-                0,
-                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
-            ),
+            TestAction::not_undoable(0, advance_action(Advance::Storage, ResourcePile::gold(2))),
             TestAction::undoable(0, Action::Response(EventResponse::SelectUnits(vec![7]))),
         ],
     );
@@ -206,7 +200,7 @@ fn test_good_year_with_player_select() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Response(EventResponse::SelectAdvance(advance::Advance::Storage)),
+                Action::Response(EventResponse::SelectAdvance(Advance::Storage)),
             )
             .without_json_comparison(),
             TestAction::not_undoable(
@@ -223,7 +217,7 @@ fn test_successful_year() {
         "successful_year",
         vec![TestAction::not_undoable(
             0,
-            Action::Response(EventResponse::SelectAdvance(advance::Advance::Storage)),
+            Action::Response(EventResponse::SelectAdvance(Advance::Storage)),
         )],
     );
 }
@@ -235,10 +229,7 @@ fn test_volcano() {
     EARTHQUAKE.test(
         "volcano",
         vec![
-            TestAction::not_undoable(
-                0,
-                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
-            ),
+            TestAction::not_undoable(0, advance_action(Advance::Storage, ResourcePile::gold(2))),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
@@ -254,10 +245,7 @@ fn test_flood() {
     EARTHQUAKE.test(
         "flood",
         vec![
-            TestAction::not_undoable(
-                0,
-                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
-            ),
+            TestAction::not_undoable(0, advance_action(Advance::Storage, ResourcePile::gold(2))),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
@@ -279,11 +267,8 @@ fn test_earthquake() {
     EARTHQUAKE.test(
         "earthquake",
         vec![
-            TestAction::not_undoable(
-                0,
-                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
-            )
-            .without_json_comparison(),
+            TestAction::not_undoable(0, advance_action(Advance::Storage, ResourcePile::gold(2)))
+                .without_json_comparison(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectStructures(vec![
@@ -327,7 +312,7 @@ fn test_migration() {
         "migration",
         vec![TestAction::not_undoable(
             0,
-            Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
+            advance_action(Advance::Storage, ResourcePile::gold(2)),
         )],
     );
 }
@@ -338,7 +323,7 @@ fn test_civil_war() {
         "civil_war",
         vec![TestAction::not_undoable(
             0,
-            Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
+            advance_action(Advance::Storage, ResourcePile::gold(2)),
         )],
     );
 }
@@ -348,11 +333,8 @@ fn test_revolution() {
     CIVIL_WAR.test(
         "revolution",
         vec![
-            TestAction::not_undoable(
-                0,
-                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
-            )
-            .without_json_comparison(),
+            TestAction::not_undoable(0, advance_action(Advance::Storage, ResourcePile::gold(2)))
+                .without_json_comparison(),
             TestAction::undoable(0, Action::Response(EventResponse::SelectUnits(vec![3])))
                 .without_json_comparison(),
             TestAction::undoable(0, Action::Response(EventResponse::SelectUnits(vec![])))
@@ -373,10 +355,7 @@ fn test_uprising() {
     CIVIL_WAR.test(
         "uprising",
         vec![
-            TestAction::not_undoable(
-                0,
-                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
-            ),
+            TestAction::not_undoable(0, advance_action(Advance::Storage, ResourcePile::gold(2))),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![
@@ -392,14 +371,8 @@ fn test_envoy() {
     CIVIL_WAR.test(
         "envoy",
         vec![
-            TestAction::not_undoable(
-                0,
-                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
-            ),
-            TestAction::undoable(
-                0,
-                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Monuments, ResourcePile::gold(2)))),
-            ),
+            TestAction::not_undoable(0, advance_action(Advance::Storage, ResourcePile::gold(2))),
+            TestAction::undoable(0, advance_action(Advance::Monuments, ResourcePile::gold(2))),
             TestAction::undoable(0, Action::Response(EventResponse::Bool(true))),
         ],
     );
@@ -412,11 +385,8 @@ fn test_trojan_horse() {
     TROJAN.test(
         "trojan_horse",
         vec![
-            TestAction::not_undoable(
-                0,
-                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
-            )
-            .without_json_comparison(),
+            TestAction::not_undoable(0, advance_action(Advance::Storage, ResourcePile::gold(2)))
+                .without_json_comparison(),
             TestAction::undoable(
                 0,
                 move_action(vec![0, 1, 2, 3, 4, 5], Position::from_offset("C1")),
@@ -437,11 +407,8 @@ fn test_solar_eclipse() {
     TROJAN.test(
         "solar_eclipse",
         vec![
-            TestAction::not_undoable(
-                0,
-                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
-            )
-            .without_json_comparison(),
+            TestAction::not_undoable(0, advance_action(Advance::Storage, ResourcePile::gold(2)))
+                .without_json_comparison(),
             TestAction::not_undoable(
                 0,
                 move_action(vec![0, 1, 2, 3, 4, 5], Position::from_offset("C1")),
@@ -462,14 +429,8 @@ fn test_anarchy() {
     TROJAN.test(
         "anarchy",
         vec![
-            TestAction::not_undoable(
-                0,
-                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
-            ),
-            TestAction::undoable(
-                0,
-                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Dogma, ResourcePile::gold(2)))),
-            ),
+            TestAction::not_undoable(0, advance_action(Advance::Storage, ResourcePile::gold(2))),
+            TestAction::undoable(0, advance_action(Advance::Dogma, ResourcePile::gold(2))),
         ],
     );
 }
@@ -482,7 +443,7 @@ fn test_scientific_trade() {
         "scientific_trade",
         vec![TestAction::not_undoable(
             0,
-            Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
+            advance_action(Advance::Storage, ResourcePile::gold(2)),
         )],
     );
 }
@@ -493,7 +454,7 @@ fn test_flourishing_trade() {
         "flourishing_trade",
         vec![TestAction::not_undoable(
             0,
-            Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
+            advance_action(Advance::Storage, ResourcePile::gold(2)),
         )],
     );
 }
@@ -503,10 +464,7 @@ fn test_era_of_stability() {
     TRADE.test(
         "era_of_stability",
         vec![
-            TestAction::not_undoable(
-                0,
-                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
-            ),
+            TestAction::not_undoable(0, advance_action(Advance::Storage, ResourcePile::gold(2))),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::ResourceReward(ResourcePile::culture_tokens(
@@ -528,10 +486,7 @@ fn test_reformation() {
     TRADE.test(
         "reformation",
         vec![
-            TestAction::not_undoable(
-                0,
-                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
-            ),
+            TestAction::not_undoable(0, advance_action(Advance::Storage, ResourcePile::gold(2))),
             TestAction::not_undoable(2, Action::Response(EventResponse::SelectPlayer(1))),
         ],
     );
@@ -544,10 +499,7 @@ fn test_pandemics() {
     PANDEMICS.test(
         "pandemics",
         vec![
-            TestAction::not_undoable(
-                0,
-                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
-            ),
+            TestAction::not_undoable(0, advance_action(Advance::Storage, ResourcePile::gold(2))),
             TestAction::undoable(0, Action::Response(EventResponse::SelectUnits(vec![0]))),
             TestAction::not_undoable(
                 0,
@@ -570,10 +522,7 @@ fn test_black_death() {
     PANDEMICS.test(
         "black_death",
         vec![
-            TestAction::not_undoable(
-                0,
-                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
-            ),
+            TestAction::not_undoable(0, advance_action(Advance::Storage, ResourcePile::gold(2))),
             TestAction::undoable(0, Action::Response(EventResponse::SelectUnits(vec![0]))),
         ],
     );
@@ -585,7 +534,7 @@ fn test_vermin() {
         "vermin",
         vec![TestAction::not_undoable(
             0,
-            Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
+            advance_action(Advance::Storage, ResourcePile::gold(2)),
         )],
     );
 }
@@ -596,7 +545,7 @@ fn test_drought() {
         "drought",
         vec![TestAction::not_undoable(
             0,
-            Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
+            advance_action(Advance::Storage, ResourcePile::gold(2)),
         )],
     );
 }
@@ -606,10 +555,7 @@ fn test_fire() {
     PANDEMICS.test(
         "fire",
         vec![
-            TestAction::not_undoable(
-                0,
-                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Storage, ResourcePile::gold(2)))),
-            ),
+            TestAction::not_undoable(0, advance_action(Advance::Storage, ResourcePile::gold(2))),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(

@@ -284,8 +284,7 @@
                   "action": {
                     "Playing": {
                       "Custom": {
-                        "action": "Theaters",
-                        "city": null
+                        "action": "Theaters"
                       }
                     }
                   },
@@ -318,8 +317,7 @@
                         {
                           "event_type": {
                             "CustomAction": {
-                              "action": "Theaters",
-                              "city": null
+                              "action": "Theaters"
                             }
                           },
                           "handler": {

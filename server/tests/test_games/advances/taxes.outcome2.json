@@ -284,8 +284,7 @@
                   "action": {
                     "Playing": {
                       "Custom": {
-                        "action": "Taxes",
-                        "city": null
+                        "action": "Taxes"
                       }
                     }
                   },
@@ -320,9 +319,10 @@
                       "op": "add",
                       "path": "/events/0/event_type/PayAction",
                       "value": {
-                        "Custom": {
-                          "action": "Taxes",
-                          "city": null
+                        "action": {
+                          "Custom": {
+                            "action": "Taxes"
+                          }
                         }
                       }
                     },
@@ -403,7 +403,9 @@
                           "event_type": {
                             "CustomAction": {
                               "action": "Taxes",
-                              "city": null
+                              "payment": {
+                                "mood_tokens": 1
+                              }
                             }
                           },
                           "handler": {

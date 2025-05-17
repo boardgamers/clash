@@ -208,7 +208,9 @@ pub fn pay_advance_dialog(ap: &Payment<Advance>, rc: &RenderContext) -> StateUpd
     }
     payment_dialog(rc, ap, true, ActiveDialog::AdvancePayment, |payment| {
         StateUpdate::execute_with_warning(
-            Action::Playing(PlayingAction::Advance(AdvanceAction::new(ap.value, payment)),
+            Action::Playing(PlayingAction::Advance(AdvanceAction::new(
+                ap.value, payment,
+            ))),
             if rc.shown_player.incident_tokens == 1 {
                 vec!["A game event will be triggered".to_string()]
             } else {

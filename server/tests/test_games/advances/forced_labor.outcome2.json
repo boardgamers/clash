@@ -235,8 +235,7 @@
                   "action": {
                     "Playing": {
                       "Custom": {
-                        "action": "ForcedLabor",
-                        "city": null
+                        "action": "ForcedLabor"
                       }
                     }
                   },
@@ -269,9 +268,10 @@
                         {
                           "event_type": {
                             "PayAction": {
-                              "Custom": {
-                                "action": "ForcedLabor",
-                                "city": null
+                              "action": {
+                                "Custom": {
+                                  "action": "ForcedLabor"
+                                }
                               }
                             }
                           },

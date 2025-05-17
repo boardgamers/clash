@@ -221,7 +221,9 @@
                         {
                           "event_type": {
                             "PayAction": {
-                              "ActionCard": 37
+                              "action": {
+                                "ActionCard": 37
+                              }
                             }
                           },
                           "handler": {

@@ -1,4 +1,5 @@
-use crate::common::{JsonTest, TestAction, illegal_action_test, influence_action};
+use crate::common::{JsonTest, TestAction, advance_action, illegal_action_test, influence_action};
+use advance::Advance;
 use server::action::{Action, execute_action};
 use server::city_pieces::Building::{Academy, Fortress, Temple};
 use server::collect::{PositionCollection, possible_resource_collections};
@@ -13,7 +14,7 @@ use server::movement::MovementAction::Move;
 use server::movement::{MoveUnits, possible_move_units_destinations};
 use server::player::CostTrigger;
 use server::playing_actions::PlayingAction::{
-    Advance, Collect, Construct, Custom, EndTurn, Recruit, WonderCard,
+    Collect, Construct, Custom, EndTurn, Recruit, WonderCard,
 };
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
@@ -23,7 +24,6 @@ use server::unit::Units;
 use server::wonder::Wonder;
 use server::{advance, construct, playing_actions};
 use std::vec;
-use server::advance::AdvanceAction;
 
 mod common;
 
@@ -62,8 +62,8 @@ fn test_sanitation_and_draft() {
                 assert_eq!(ResourcePile::mood_tokens(1), options.conversions[1].to);
                 assert_eq!(
                     vec![
-                        EventOrigin::Advance(advance::Advance::Sanitation),
-                        EventOrigin::Advance(advance::Advance::Draft)
+                        EventOrigin::Advance(Advance::Sanitation),
+                        EventOrigin::Advance(Advance::Draft)
                     ],
                     options.modifiers
                 );
@@ -80,7 +80,10 @@ fn test_separation_of_power() {
         if test.fail {
             game = execute_action(
                 game,
-                Action::Playing(Advance(AdvanceAction::new(advance::Advance::SeparationOfPower, ResourcePile::food(1) + ResourcePile::gold(1)))),
+                advance_action(
+                    Advance::SeparationOfPower,
+                    ResourcePile::food(1) + ResourcePile::gold(1),
+                ),
                 0,
             );
         }
@@ -98,7 +101,10 @@ fn test_devotion() {
         if test.fail {
             game = execute_action(
                 game,
-                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Devotion, ResourcePile::food(1) + ResourcePile::gold(1)))),
+                advance_action(
+                    Advance::Devotion,
+                    ResourcePile::food(1) + ResourcePile::gold(1),
+                ),
                 0,
             );
         }
@@ -120,7 +126,10 @@ fn test_totalitarianism() {
         if test.fail {
             game = execute_action(
                 game,
-                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Totalitarianism, ResourcePile::food(1) + ResourcePile::gold(1)))),
+                advance_action(
+                    Advance::Totalitarianism,
+                    ResourcePile::food(1) + ResourcePile::gold(1),
+                ),
                 0,
             );
         }
@@ -138,7 +147,10 @@ fn test_monuments() {
         if test.fail {
             game = execute_action(
                 game,
-                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Monuments, ResourcePile::food(1) + ResourcePile::gold(1)))),
+                advance_action(
+                    Advance::Monuments,
+                    ResourcePile::food(1) + ResourcePile::gold(1),
+                ),
                 0,
             );
         }
@@ -507,11 +519,8 @@ fn test_dogma_with_anarchy() {
     JSON.test(
         "dogma",
         vec![
-            TestAction::undoable(
-                1,
-                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Dogma, ResourcePile::ideas(2)))),
-            )
-            .without_json_comparison(),
+            TestAction::undoable(1, advance_action(Advance::Dogma, ResourcePile::ideas(2)))
+                .without_json_comparison(),
             TestAction::undoable(
                 1,
                 Action::Playing(Construct(construct::Construct::new(
@@ -530,7 +539,7 @@ fn test_dogma_with_anarchy() {
             .without_json_comparison(),
             TestAction::not_undoable(
                 1,
-                Action::Response(EventResponse::SelectAdvance(advance::Advance::Fanaticism)),
+                Action::Response(EventResponse::SelectAdvance(Advance::Fanaticism)),
             ),
         ],
     );
@@ -541,18 +550,9 @@ fn test_priesthood() {
     JSON.test(
         "priesthood",
         vec![
-            TestAction::undoable(
-                1,
-                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Math, ResourcePile::empty()))),
-            ),
-            TestAction::undoable(
-                1,
-                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Astronomy, ResourcePile::gold(2)))),
-            ),
-            TestAction::illegal(
-                1,
-                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Astronomy, ResourcePile::empty()))),
-            ),
+            TestAction::undoable(1, advance_action(Advance::Math, ResourcePile::empty())),
+            TestAction::undoable(1, advance_action(Advance::Astronomy, ResourcePile::gold(2))),
+            TestAction::illegal(1, advance_action(Advance::Astronomy, ResourcePile::empty())),
         ],
     );
 }
@@ -564,7 +564,10 @@ fn test_writing() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Writing, ResourcePile::food(1) + ResourcePile::gold(1)))),
+                advance_action(
+                    Advance::Writing,
+                    ResourcePile::food(1) + ResourcePile::gold(1),
+                ),
             )
             .without_json_comparison(),
             TestAction::undoable(
@@ -585,7 +588,10 @@ fn test_free_education() {
         vec![
             TestAction::undoable(
                 0,
-                Action::Playing(Advance(AdvanceAction::new(advance::Advance::Draft, ResourcePile::food(1) + ResourcePile::gold(1)))),
+                advance_action(
+                    Advance::Draft,
+                    ResourcePile::food(1) + ResourcePile::gold(1),
+                ),
             ),
             TestAction::undoable(
                 0,

@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 #[derive(EnumSetType, Serialize, Deserialize, Debug, Ord, PartialOrd, Hash)]
 pub enum SpecialAdvance {
     // Maya
-    Terrace,
+    // Terrace,
 
     // Rome
     Aqueduct,
@@ -18,6 +18,7 @@ pub enum SpecialAdvance {
     Provinces,
 }
 
+#[allow(clippy::trivially_copy_pass_by_ref)]
 impl SpecialAdvance {
     #[must_use]
     pub fn info<'a>(&self, game: &'a Game) -> &'a SpecialAdvanceInfo {

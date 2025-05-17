@@ -23,6 +23,8 @@ use std::fmt::Display;
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub struct CustomAction {
     pub action: CustomActionType,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub city: Option<Position>,
 }
 
@@ -37,6 +39,8 @@ impl CustomAction {
 pub struct CustomActionActivation {
     #[serde(flatten)]
     pub action: CustomAction,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "ResourcePile::is_empty")]
     pub payment: ResourcePile,
 }
 

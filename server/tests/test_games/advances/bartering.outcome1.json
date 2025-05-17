@@ -199,8 +199,7 @@
                   "action": {
                     "Playing": {
                       "Custom": {
-                        "action": "Bartering",
-                        "city": null
+                        "action": "Bartering"
                       }
                     }
                   },
@@ -242,8 +241,7 @@
                         {
                           "event_type": {
                             "CustomAction": {
-                              "action": "Bartering",
-                              "city": null
+                              "action": "Bartering"
                             }
                           },
                           "handler": {

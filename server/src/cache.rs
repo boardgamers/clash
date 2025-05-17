@@ -4,7 +4,6 @@ use crate::city_pieces::Building;
 use crate::civilization::Civilization;
 use crate::content::advances::AdvanceGroup;
 use crate::content::builtin::Builtin;
-use crate::content::civilizations::maya;
 use crate::content::custom_actions::custom_action_builtins;
 use crate::content::{
     action_cards, advances, builtin, civilizations, incidents, objective_cards, objectives, wonders,
@@ -324,7 +323,7 @@ impl Cache {
     #[must_use]
     pub(crate) fn get_civilization(&self, name: &str) -> Civilization {
         match name {
-            "Maya" => maya::maya(), // still needs to be implemented
+            // "Maya" => maya::maya(), // still needs to be implemented
             // for integration testing
             "test0" => Civilization::new(
                 "test0",

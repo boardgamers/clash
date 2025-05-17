@@ -217,7 +217,9 @@
                       "op": "add",
                       "path": "/events/0/event_type/PayAction",
                       "value": {
-                        "ActionCard": 2
+                        "action": {
+                          "ActionCard": 2
+                        }
                       }
                     },
                     {

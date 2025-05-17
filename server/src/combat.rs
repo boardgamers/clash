@@ -529,6 +529,7 @@ pub mod tests {
     use crate::action::Action;
 
     use crate::cache::Cache;
+    use crate::civilization::Civilization;
     use crate::game::{GameContext, GameOptions, GameState};
     use crate::log::{ActionLogAge, ActionLogItem, ActionLogPlayer, ActionLogRound};
     use crate::movement::MovementAction;
@@ -542,7 +543,6 @@ pub mod tests {
         position::Position,
         utils::Rng,
     };
-    use crate::civilization::Civilization;
 
     #[must_use]
     pub fn test_game() -> Game {

@@ -1,4 +1,5 @@
 use crate::action::{Action, ActionType};
+use crate::advance::AdvanceAction;
 use crate::ai_collect::{possible_collections, total_collect};
 use crate::card::validate_card_selection;
 use crate::city::{City, MoodState};
@@ -30,7 +31,6 @@ use crate::wonder::Wonder;
 use itertools::Itertools;
 use rustc_hash::FxHashMap;
 use std::vec;
-use crate::advance::AdvanceAction;
 //todo
 //nicht nur maximale anzahl rekrutieren
 //bewegung:
@@ -310,9 +310,7 @@ fn advances(ai_actions: &mut AiActions, p: &Player, game: &Game) -> Vec<Action> 
                 &p.advance_cost(a, game, CostTrigger::NoModifiers).cost,
                 p,
             )
-            .map(|r| {
-                Action::Playing(PlayingAction::Advance(AdvanceAction::new(a, r)))
-            })
+            .map(|r| Action::Playing(PlayingAction::Advance(AdvanceAction::new(a, r))))
         })
         .collect()
 }

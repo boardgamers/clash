@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{can_play_action_card, play_action_card};
-use crate::advance::{ base_advance_cost, gain_advance_without_payment, AdvanceAction};
+use crate::advance::{AdvanceAction, base_advance_cost, gain_advance_without_payment};
 use crate::city::found_city;
 use crate::collect::{PositionCollection, collect};
 use crate::construct::Construct;
@@ -142,7 +142,7 @@ impl PlayingActionType {
                 can_play_custom_action(game, p, c)?;
             }
             PlayingActionType::ActionCard(id) => {
-                can_play_action_card(game, p, id)?;
+                can_play_action_card(game, p, *id)?;
             }
             PlayingActionType::WonderCard(name) => {
                 if !p.wonder_cards.contains(name) {
@@ -183,9 +183,7 @@ impl PlayingActionType {
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub enum PlayingAction {
     Advance(AdvanceAction),
-    FoundCity {
-        settler: u32,
-    },
+    FoundCity { settler: u32 },
     Construct(Construct),
     Collect(Collect),
     Recruit(Recruit),
@@ -228,7 +226,7 @@ impl PlayingAction {
         self,
         game: &mut Game,
         player_index: usize,
-        payment: ResourcePile,
+        action_payment: ResourcePile,
     ) -> Result<(), String> {
         use crate::construct;
         use PlayingAction::*;
@@ -240,8 +238,8 @@ impl PlayingAction {
                 }
                 game.player(player_index)
                     .advance_cost(advance, game, game.execute_cost_trigger())
-                    .pay(game, &payment);
-                gain_advance_without_payment(game, advance, player_index, payment, true);
+                    .pay(game, &a.payment);
+                gain_advance_without_payment(game, advance, player_index, a.payment, true);
             }
             FoundCity { settler } => {
                 let settler = remove_unit(player_index, settler, game);
@@ -277,7 +275,7 @@ impl PlayingAction {
                 execute_custom_action(
                     game,
                     player_index,
-                    CustomActionActivation::new(custom_action, payment),
+                    CustomActionActivation::new(custom_action, action_payment),
                 );
             }
             EndTurn => game.next_turn(),

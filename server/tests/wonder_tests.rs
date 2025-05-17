@@ -1,6 +1,6 @@
-use crate::common::{JsonTest, TestAction, move_action};
+use crate::common::{JsonTest, TestAction, advance_action, move_action};
 use server::action::{Action, execute_without_undo};
-use server::advance::{Advance, AdvanceAction};
+use server::advance::Advance;
 use server::card::HandCard;
 use server::content::custom_actions::{CustomAction, CustomActionType};
 use server::content::persistent_events::EventResponse;
@@ -182,11 +182,8 @@ fn test_great_mausoleum() {
                 .without_json_comparison(),
             TestAction::not_undoable(0, Action::Response(EventResponse::Bool(false)))
                 .without_json_comparison(),
-            TestAction::undoable(
-                0,
-                Action::Playing(PlayingAction::Advance(AdvanceAction::new(Advance::Storage, ResourcePile::ideas(2)))),
-            )
-            .without_json_comparison(),
+            TestAction::undoable(0, advance_action(Advance::Storage, ResourcePile::ideas(2)))
+                .without_json_comparison(),
             TestAction::undoable(0, Action::Response(EventResponse::Bool(true))),
         ],
     );
@@ -226,11 +223,8 @@ fn test_great_wall() {
                 .without_json_comparison(),
             TestAction::not_undoable(1, Action::Playing(PlayingAction::EndTurn))
                 .without_json_comparison(),
-            TestAction::not_undoable(
-                0,
-                Action::Playing(PlayingAction::Advance(AdvanceAction::new(Advance::Storage, ResourcePile::ideas(2)))),
-            )
-            .without_json_comparison(),
+            TestAction::not_undoable(0, advance_action(Advance::Storage, ResourcePile::ideas(2)))
+                .without_json_comparison(),
             TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(5))),
         ],
     );
