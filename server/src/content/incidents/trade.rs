@@ -4,7 +4,7 @@ use crate::content::persistent_events::{PositionRequest, ResourceRewardRequest};
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, PassedIncident};
 use crate::payment::ResourceReward;
-use crate::player::Player;
+use crate::player::{gain_resources, Player};
 use crate::player_events::IncidentTarget;
 use crate::resource_pile::ResourcePile;
 
@@ -39,9 +39,12 @@ fn scientific_trade() -> Incident {
             ideas = ideas.max(2);
         }
 
-        let pile = ResourcePile::ideas(ideas as u8);
-        player.gain_resources(pile.clone());
-        game.add_info_log_item(&format!("{name} gained {pile}"));
+        gain_resources(
+            game,
+            p,
+            ResourcePile::ideas(ideas as u8),
+            |name, pile| format!("{name} gained {pile} from Scientific Trade"),
+        )
     })
     .build()
 }
@@ -71,9 +74,12 @@ fn flourishing_trade() -> Incident {
             gold = gold.max(1);
         }
 
-        let pile = ResourcePile::gold(gold as u8);
-        player.gain_resources(pile.clone());
-        game.add_info_log_item(&format!("{name} gained {pile}"));
+        gain_resources(
+            game,
+            p,
+            ResourcePile::gold(gold as u8),
+            |name, pile| format!("{name} gained {pile} from Flourishing Trade"),
+        );
     })
     .build()
 }

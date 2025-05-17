@@ -11,6 +11,7 @@ use Bonus::*;
 use enumset::EnumSetType;
 use serde::{Deserialize, Serialize};
 use std::mem;
+use crate::player::gain_resources;
 
 // id / 4 = advance group
 #[derive(EnumSetType, Serialize, Deserialize, Debug, Ord, PartialOrd, Hash)]
@@ -261,9 +262,12 @@ pub fn do_advance(game: &mut Game, advance: Advance, player_index: usize) {
         }
     }
     if let Some(advance_bonus) = &bonus {
-        let pile = advance_bonus.resources();
-        game.add_info_log_item(&format!("Player gained {pile} as advance bonus"));
-        game.players[player_index].gain_resources(pile);
+        gain_resources(
+            game,
+            player_index,
+            advance_bonus.resources(),
+            |name, pile| format!("{name} gained {pile} as advance bonus"),
+        );
     }
     let player = &mut game.players[player_index];
     player.advances.insert(advance);
