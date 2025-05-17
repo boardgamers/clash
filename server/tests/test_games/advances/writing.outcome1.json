@@ -351,11 +351,11 @@
       "Player1 paid 1 food and 1 gold to get the Writing advance",
       "Player1 gained an action card from the pile",
       "Player1 gained an objective card from the pile",
-      "Player gained 1 culture token as advance bonus"
+      "Player1 gained 1 culture token as advance bonus"
     ],
     [
       "Player1 paid 1 food, 1 wood and 1 ore to construct a Academy in the city at A1",
-      "Academy gained 2 ideas"
+      "Player1 gained 2 ideas from Academy"
     ]
   ],
   "undo_limit": 1,

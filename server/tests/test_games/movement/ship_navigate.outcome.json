@@ -359,8 +359,8 @@
   "log": [
     [
       "Player2 sailed 1 ship from B5 to A7",
-      "Cartography gained 1 idea",
-      " and 1 culture token (for using navigation)"
+      "Player2 gained 1 idea from Cartography",
+      "Player2 gained 1 culture token from Cartography"
     ]
   ],
   "undo_limit": 0,

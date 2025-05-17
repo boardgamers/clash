@@ -8,6 +8,7 @@ use crate::content::custom_actions::CustomActionType::{
     CivilLiberties, FreeEconomyCollect, VotingIncreaseHappiness,
 };
 use crate::log::current_player_turn_log;
+use crate::player::gain_resources;
 use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::resource_pile::ResourcePile;
 
@@ -66,12 +67,13 @@ pub(crate) fn use_civil_liberties() -> Builtin {
         .add_simple_persistent_event_listener(
             |event| &mut event.custom_action,
             0,
-            |game, player_index, player_name, _| {
-                game.player_mut(player_index)
-                    .gain_resources(ResourcePile::mood_tokens(3));
-                game.add_info_log_item(&format!(
-                    "{player_name} gained 3 mood tokens using Civil Liberties"
-                ));
+            |game, player_index, _, _| {
+                gain_resources(
+                    game,
+                    player_index,
+                    ResourcePile::mood_tokens(3),
+                    |name, pile| format!("{name} used Civil Liberties to gain {pile}",),
+                );
             },
         )
         .build()

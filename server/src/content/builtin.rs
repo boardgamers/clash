@@ -6,6 +6,7 @@ use crate::content::action_cards::cultural_takeover::use_cultural_takeover;
 use crate::content::action_cards::development::collect_only;
 use crate::content::action_cards::negotiation::{use_assassination, use_negotiations};
 use crate::content::action_cards::synergies::use_teach_us;
+use crate::content::advances::seafaring::fishing_collect;
 use crate::content::incidents::famine::pestilence_permanent_effect;
 use crate::content::incidents::great_builders::construct_only;
 use crate::content::incidents::great_diplomat::use_diplomatic_relations;
@@ -76,6 +77,7 @@ impl AbilityInitializerSetup for BuiltinBuilder {
 #[must_use]
 pub fn get_all_uncached() -> Vec<Builtin> {
     vec![
+        fishing_collect(),
         pay_for_action(),
         use_cultural_influence(),
         explore_resolution(),

@@ -216,14 +216,14 @@
   "log": [
     [
       "Player1 paid 2 gold to get the Storage advance",
-      "Player gained 1 mood token as advance bonus"
+      "Player1 gained 1 mood token as advance bonus"
     ],
     [
       "A new game event has been triggered: Scientific Trade",
       "Base effect: Pirates spawn",
       "No valid positions for Pirate Ship",
-      "Player1 gained 2 ideas",
-      "Player2 gained 1 idea",
+      "Player1 gained 2 ideas from Scientific Trade",
+      "Player2 gained 1 idea from Scientific Trade",
       "Player2 could not store 1 idea"
     ]
   ],

@@ -11,6 +11,7 @@ use crate::combat_stats::{CombatStats, active_defenders, new_combat_stats};
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
 use crate::movement::{MoveUnits, MovementRestriction, move_units, stop_current_move};
+use crate::player::gain_resources;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::tactics_card::CombatRole;
@@ -316,7 +317,12 @@ pub(crate) fn conquer_city(
     let attacker_is_human = game.player(new_player_index).is_human();
     let size = city.mood_modified_size(&game.players[new_player_index]);
     if attacker_is_human {
-        game.players[new_player_index].gain_resources(ResourcePile::gold(size as u8));
+        gain_resources(
+            game,
+            new_player_index,
+            ResourcePile::gold(size as u8),
+            |name, pile| format!("{name} gained {pile} for capturing a city",),
+        );
     }
     let take_over = game.player(new_player_index).is_city_available();
 
@@ -324,39 +330,58 @@ pub(crate) fn conquer_city(
         city.player_index = new_player_index;
         city.set_mood_state(Angry);
         if attacker_is_human {
-            for wonder in city.pieces.wonders.clone() {
-                deinit_wonder(game, old_player_index, wonder);
-                init_wonder(game, new_player_index, wonder);
-                game.player_mut(old_player_index)
-                    .wonders_owned
-                    .remove(wonder);
-                game.player_mut(new_player_index)
-                    .wonders_owned
-                    .insert(wonder);
-            }
-
-            for (building, owner) in city.pieces.building_owners() {
-                if matches!(building, Building::Obelisk) {
-                    continue;
-                }
-                let Some(owner) = owner else {
-                    continue;
-                };
-                if owner != old_player_index {
-                    continue;
-                }
-                if game.players[new_player_index].is_building_available(building, game) {
-                    city.pieces.set_building(building, new_player_index);
-                } else {
-                    remove_building(&mut city, building);
-                    game.players[new_player_index].gain_resources(ResourcePile::gold(1));
-                }
-            }
+            take_over_city(game, &mut city, old_player_index, new_player_index);
         }
         game.players[new_player_index].cities.push(city);
     } else {
-        game.players[new_player_index].gain_resources(ResourcePile::gold(city.size() as u8));
+        gain_resources(
+            game,
+            new_player_index,
+            ResourcePile::gold(city.size() as u8),
+            |name, pile| format!("{name} gained {pile} for razing the city",),
+        );
         city.raze(game, old_player_index);
+    }
+}
+
+fn take_over_city(
+    game: &mut Game,
+    city: &mut City,
+    old_player_index: usize,
+    new_player_index: usize,
+) {
+    for wonder in city.pieces.wonders.clone() {
+        deinit_wonder(game, old_player_index, wonder);
+        init_wonder(game, new_player_index, wonder);
+        game.player_mut(old_player_index)
+            .wonders_owned
+            .remove(wonder);
+        game.player_mut(new_player_index)
+            .wonders_owned
+            .insert(wonder);
+    }
+
+    for (building, owner) in city.pieces.building_owners() {
+        if matches!(building, Building::Obelisk) {
+            continue;
+        }
+        let Some(owner) = owner else {
+            continue;
+        };
+        if owner != old_player_index {
+            continue;
+        }
+        if game.players[new_player_index].is_building_available(building, game) {
+            city.pieces.set_building(building, new_player_index);
+        } else {
+            remove_building(city, building);
+            gain_resources(
+                game,
+                new_player_index,
+                ResourcePile::gold(1),
+                |name, pile| format!("{name} gained {pile} for razing a {building}",),
+            );
+        }
     }
 }
 

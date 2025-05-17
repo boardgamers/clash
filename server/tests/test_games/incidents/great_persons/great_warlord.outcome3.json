@@ -434,7 +434,7 @@
   "log": [
     [
       "Player2 paid 2 food to get the Storage advance",
-      "Player gained 1 mood token as advance bonus"
+      "Player2 gained 1 mood token as advance bonus"
     ],
     [
       "A new game event has been triggered: Great Warlord",
@@ -446,7 +446,7 @@
     [
       "Player2 played the action card Great Warlord as a regular action",
       "Player2 gained Tactics",
-      "Player gained 1 culture token as advance bonus"
+      "Player2 gained 1 culture token as advance bonus"
     ],
     [
       "Player2 marched 1 infantry from D7 to C8"

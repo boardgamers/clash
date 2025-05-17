@@ -244,7 +244,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 razed the city at A1 and gained 1 gold"
+      "Player1 razed a city and gained 1 gold"
     ]
   ],
   "undo_limit": 1,

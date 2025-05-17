@@ -7,6 +7,7 @@ use crate::content::advances::{AdvanceGroup, advance_group_builder};
 use crate::content::persistent_events::PaymentRequest;
 use crate::objective_card::draw_and_log_objective_card_from_pile;
 use crate::payment::{PaymentOptions, PaymentReason};
+use crate::player::gain_resources;
 use crate::resource_pile::ResourcePile;
 
 pub(crate) fn education() -> AdvanceGroup {
@@ -41,8 +42,9 @@ fn writing() -> AdvanceBuilder {
         3,
         |game, player_index, _player_name, b| {
             if matches!(b.building, Building::Academy) {
-                game.players[player_index].gain_resources(ResourcePile::ideas(2));
-                game.add_info_log_item("Academy gained 2 ideas");
+                gain_resources(game, player_index, ResourcePile::ideas(2), |name, pile| {
+                    format!("{name} gained {pile} from Academy")
+                });
             }
         },
     )
@@ -109,20 +111,20 @@ fn free_education() -> AdvanceBuilder {
             }
         },
         |game, s, _| {
-            let pile = &s.choice[0];
-            if pile.is_empty() {
+            let payment = &s.choice[0];
+            if payment.is_empty() {
                 game.add_info_log_item(&format!(
                     "{} declined to pay for free education",
                     s.player_name
                 ));
                 return;
             }
-            game.add_info_log_item(&format!(
-                "{} paid {} for free education to gain 1 mood token",
-                s.player_name, pile
-            ));
-            game.player_mut(s.player_index)
-                .gain_resources(ResourcePile::mood_tokens(1));
+            gain_resources(
+                game,
+                s.player_index,
+                ResourcePile::mood_tokens(1),
+                |name, pile| format!("{name} paid {payment} for free education to gain {pile}",),
+            );
         },
     )
 }
@@ -134,12 +136,14 @@ fn philosophy() -> AdvanceBuilder {
         "Immediately gain 1 idea after getting a Science advance",
     )
     .add_one_time_ability_initializer(|game, player_index| {
-        game.players[player_index].gain_resources(ResourcePile::ideas(1));
+        gain_resources(game, player_index, ResourcePile::ideas(1), |name, pile| {
+            format!("{name} gained {pile} from Philosophy")
+        });
     })
     .add_simple_persistent_event_listener(
         |event| &mut event.advance,
         0,
-        |game, player_index, player_name, advance| {
+        |game, player_index, _, advance| {
             if game
                 .cache
                 .get_advance_group("Science")
@@ -147,9 +151,9 @@ fn philosophy() -> AdvanceBuilder {
                 .iter()
                 .any(|a| a.advance == advance.advance)
             {
-                let player = game.player_mut(player_index);
-                player.gain_resources(ResourcePile::ideas(1));
-                game.add_info_log_item(&format!("{player_name} gained 1 idea from Philosophy"));
+                gain_resources(game, player_index, ResourcePile::ideas(1), |name, pile| {
+                    format!("{name} gained {pile} from Philosophy")
+                });
             }
         },
     )

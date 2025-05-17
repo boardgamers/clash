@@ -9,7 +9,7 @@ use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::PaymentRequest;
 use crate::happiness::increase_happiness;
 use crate::payment::{PaymentOptions, PaymentReason};
-use crate::player::Player;
+use crate::player::{Player, gain_resources};
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use crate::wonder::draw_wonder_card;
@@ -144,14 +144,14 @@ pub(crate) fn use_theaters() -> Builtin {
                 )])
             },
             |game, s, _| {
-                let reward = theater_opposite(&s.choice[0]);
-                game.players[s.player_index].gain_resources(reward.clone());
-                game.add_info_log_item(
-                    &format!(
-                        "{} used Theaters to convert {} into {}",
-                        s.player_name,
+                gain_resources(
+                    game,
+                    s.player_index,
+                    theater_opposite(&s.choice[0]),
+                    |name,pile|
+                    format!(
+                        "{name} used Theaters to convert {} into {pile}",
                         s.choice[0],
-                        reward
                     ),
                 );
             },

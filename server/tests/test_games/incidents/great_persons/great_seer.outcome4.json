@@ -267,7 +267,7 @@
   "log": [
     [
       "Player1 paid 2 food to get the Storage advance",
-      "Player gained 1 mood token as advance bonus"
+      "Player1 gained 1 mood token as advance bonus"
     ],
     [
       "A new game event has been triggered: Great Seer",
@@ -288,7 +288,7 @@
       "Player1 paid 2 food to get the Writing advance",
       "Player1 gained an action card from the pile",
       "Player1 gained the Great Seer objective card from the pile",
-      "Player gained 1 culture token as advance bonus"
+      "Player1 gained 1 culture token as advance bonus"
     ]
   ],
   "undo_limit": 5,

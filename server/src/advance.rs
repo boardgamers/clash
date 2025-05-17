@@ -4,6 +4,7 @@ use crate::content::persistent_events::PersistentEventType;
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::incident::trigger_incident;
+use crate::player::gain_resources;
 use crate::player_events::OnAdvanceInfo;
 use crate::special_advance::SpecialAdvance;
 use crate::{ability_initializer::AbilityInitializerSetup, resource_pile::ResourcePile};
@@ -261,9 +262,12 @@ pub fn do_advance(game: &mut Game, advance: Advance, player_index: usize) {
         }
     }
     if let Some(advance_bonus) = &bonus {
-        let pile = advance_bonus.resources();
-        game.add_info_log_item(&format!("Player gained {pile} as advance bonus"));
-        game.players[player_index].gain_resources(pile);
+        gain_resources(
+            game,
+            player_index,
+            advance_bonus.resources(),
+            |name, pile| format!("{name} gained {pile} as advance bonus"),
+        );
     }
     let player = &mut game.players[player_index];
     player.advances.insert(advance);

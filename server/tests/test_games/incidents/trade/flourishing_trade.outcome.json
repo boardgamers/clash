@@ -216,14 +216,14 @@
   "log": [
     [
       "Player1 paid 2 gold to get the Storage advance",
-      "Player gained 1 mood token as advance bonus"
+      "Player1 gained 1 mood token as advance bonus"
     ],
     [
       "A new game event has been triggered: Flourishing Trade",
       "Base effect: Pirates spawn",
       "No valid positions for Pirate Ship",
-      "Player1 gained 1 gold",
-      "Player2 gained 1 gold",
+      "Player1 gained 1 gold from Flourishing Trade",
+      "Player2 gained 1 gold from Flourishing Trade",
       "Player2 could not store 1 gold"
     ]
   ],

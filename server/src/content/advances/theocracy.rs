@@ -4,7 +4,7 @@ use crate::city_pieces::Building::Temple;
 use crate::consts::STACK_LIMIT;
 use crate::content::advances::{AdvanceGroup, advance_group_builder};
 use crate::content::persistent_events::{AdvanceRequest, PositionRequest};
-use crate::player::{Player, add_unit};
+use crate::player::{Player, add_unit, gain_resources};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
@@ -28,11 +28,14 @@ fn dogma() -> AdvanceBuilder {
     .add_one_time_ability_initializer(|game, player_index| {
         let p = &mut game.players[player_index];
         p.resource_limit.ideas = 2;
-        p.gain_resources(ResourcePile::ideas(0)); // to trigger the limit
-        let name = p.get_name();
-        game.add_info_log_item(&format!(
-            "{name} is now limited to a maximum of 2 ideas for Dogma Advance",
-        ));
+        gain_resources(
+            game,
+            player_index,
+            ResourcePile::ideas(0), // to trigger the limit
+            |name, _pile| {
+                format!("{name} is now limited to a maximum of 2 ideas for Dogma Advance")
+            },
+        );
     })
     .add_ability_undo_deinitializer(|game, player_index| {
         game.players[player_index].resource_limit.ideas = 7;
@@ -122,11 +125,11 @@ fn conversion() -> AdvanceBuilder {
         0,
         |game, outcome, ()| {
             if outcome.success {
-                game.player_mut(outcome.player)
-                    .gain_resources(ResourcePile::culture_tokens(1));
-                game.add_info_log_item(
-                    "Player gained 1 culture token for a successful \
-                    Influence Culture attempt for Conversion Advance",
+                gain_resources(
+                    game,
+                    outcome.player,
+                    ResourcePile::culture_tokens(1),
+                    |name, pile| format!("{name} gained {pile} for Conversion Advance"),
                 );
             }
         },

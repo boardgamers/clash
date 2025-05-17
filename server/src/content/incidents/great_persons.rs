@@ -18,7 +18,7 @@ use crate::content::persistent_events::{
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, IncidentBuilder};
 use crate::payment::{PaymentOptions, PaymentReason};
-use crate::player::Player;
+use crate::player::{Player, gain_resources};
 use crate::player_events::IncidentTarget;
 use crate::playing_actions::ActionCost;
 use crate::resource::ResourceType;
@@ -327,10 +327,10 @@ fn great_philosopher() -> ActionCard {
     .add_simple_persistent_event_listener(
         |e| &mut e.play_action_card,
         0,
-        |game, player_index, player_name, _| {
-            game.add_info_log_item(&format!("{player_name} gained 2 ideas",));
-            game.player_mut(player_index)
-                .gain_resources(ResourcePile::ideas(2));
+        |game, player_index, _, _| {
+            gain_resources(game, player_index, ResourcePile::ideas(2), |name, pile| {
+                format!("{name} gained {pile} from Great Philosopher")
+            });
         },
     )
     .build()
@@ -352,10 +352,10 @@ fn great_scientist() -> ActionCard {
     .add_simple_persistent_event_listener(
         |e| &mut e.play_action_card,
         0,
-        |game, player_index, player_name, _| {
-            game.add_info_log_item(&format!("{player_name} gained 1 idea",));
-            game.player_mut(player_index)
-                .gain_resources(ResourcePile::ideas(1));
+        |game, player_index, _, _| {
+            gain_resources(game, player_index, ResourcePile::ideas(1), |name, pile| {
+                format!("{name} gained {pile} from Great Scientist")
+            });
             gain_action_card_from_pile(game, player_index);
         },
     )
@@ -489,8 +489,9 @@ fn great_athlete() -> ActionCard {
             } else {
                 ResourcePile::culture_tokens(from.mood_tokens)
             };
-            game.add_info_log_item(&format!("{} converted {from} mood to {to}", s.player_name));
-            game.player_mut(s.player_index).gain_resources(to);
+            gain_resources(game, s.player_index, to, |name, pile| {
+                format!("{name} converted {from} to {pile}")
+            });
         },
     )
     .build()
