@@ -3,7 +3,7 @@
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub enum EventOrigin {
     Advance(Advance),
-    SpecialAdvance(Advance),
+    SpecialAdvance(SpecialAdvance),
     Leader(String),
     Wonder(Wonder),
     Builtin(String),
@@ -54,6 +54,7 @@ use crate::player::CostTrigger;
 use crate::wonder::Wonder;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
+use crate::special_advance::SpecialAdvance;
 
 struct Listener<T, U, V, W> {
     #[allow(clippy::type_complexity)]

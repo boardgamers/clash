@@ -6,7 +6,7 @@ use crate::game::Game;
 use crate::incident::trigger_incident;
 use crate::player::gain_resources;
 use crate::player_events::OnAdvanceInfo;
-use crate::special_advance::SpecialAdvance;
+use crate::special_advance::SpecialAdvanceInfo;
 use crate::{ability_initializer::AbilityInitializerSetup, resource_pile::ResourcePile};
 use Bonus::*;
 use enumset::EnumSetType;
@@ -87,9 +87,6 @@ pub enum Advance {
     Devotion = 45,
     Conversion = 46,
     Fanaticism = 47,
-
-    // Civ specific
-    Terrace = 48,
 }
 
 impl Advance {
@@ -343,7 +340,7 @@ pub(crate) fn remove_advance(game: &mut Game, advance: Advance, player_index: us
     game.player_mut(player_index).advances.remove(advance);
 }
 
-fn unlock_special_advance(game: &mut Game, special_advance: &SpecialAdvance, player_index: usize) {
+fn unlock_special_advance(game: &mut Game, special_advance: &SpecialAdvanceInfo, player_index: usize) {
     special_advance.listeners.one_time_init(game, player_index);
     game.players[player_index]
         .unlocked_special_advances
@@ -352,7 +349,7 @@ fn unlock_special_advance(game: &mut Game, special_advance: &SpecialAdvance, pla
 
 fn undo_unlock_special_advance(
     game: &mut Game,
-    special_advance: &SpecialAdvance,
+    special_advance: &SpecialAdvanceInfo,
     player_index: usize,
 ) {
     special_advance.listeners.undo(game, player_index);

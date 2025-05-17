@@ -2,7 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Advance;
 use crate::map::Terrain;
 use crate::resource_pile::ResourcePile;
-use crate::special_advance::SpecialAdvance;
+use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo};
 use crate::{civilization::Civilization, leader::Leader};
 
 pub const BARBARIANS: &str = "Barbarians";
@@ -58,7 +58,7 @@ fn maya() -> Civilization {
         "Maya",
         vec![
             // todo add other effects
-            SpecialAdvance::builder(Advance::Terrace, "Terrace", Advance::Irrigation)
+            SpecialAdvanceInfo::builder(SpecialAdvance::Terrace, "Terrace", Advance::Irrigation)
                 .add_transient_event_listener(
                     |events| &mut events.terrain_collect_options,
                     2,

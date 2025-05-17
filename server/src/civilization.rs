@@ -1,15 +1,15 @@
 use crate::content::civilizations::{BARBARIANS, PIRATES};
-use crate::{leader::Leader, special_advance::SpecialAdvance};
+use crate::{leader::Leader, special_advance::SpecialAdvanceInfo};
 
 //todo add optional special starting tile
 pub struct Civilization {
     pub name: String,
-    pub special_advances: Vec<SpecialAdvance>,
+    pub special_advances: Vec<SpecialAdvanceInfo>,
     pub leaders: Vec<Leader>,
 }
 
 impl Civilization {
-    pub fn new(name: &str, special_advances: Vec<SpecialAdvance>, leaders: Vec<Leader>) -> Self {
+    pub fn new(name: &str, special_advances: Vec<SpecialAdvanceInfo>, leaders: Vec<Leader>) -> Self {
         Self {
             name: name.to_string(),
             special_advances,

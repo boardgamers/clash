@@ -79,7 +79,7 @@ impl WonderInfo {
 pub struct WonderBuilder {
     wonder: Wonder,
     name: String,
-    descriptions: Vec<String>,
+    description: String,
     cost: PaymentOptions,
     required_advance: Advance,
     placement_requirement: Option<PlacementChecker>,
@@ -99,7 +99,7 @@ impl WonderBuilder {
         Self {
             wonder,
             name: name.to_string(),
-            descriptions: vec![description.to_string()],
+            description: description.to_string(),
             cost,
             required_advance,
             placement_requirement: None,
@@ -132,7 +132,7 @@ impl WonderBuilder {
         WonderInfo {
             wonder: self.wonder,
             name: self.name,
-            description: String::from("✦ ") + &self.descriptions.join("\n✦ "),
+            description: self.description,
             cost: self.cost,
             required_advance: self.required_advance,
             placement_requirement: self.placement_requirement,

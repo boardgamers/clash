@@ -1,20 +1,33 @@
+use enumset::EnumSetType;
+use serde::{Deserialize, Serialize};
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::advance::Advance;
 use crate::events::EventOrigin;
 
-pub struct SpecialAdvance {
-    pub advance: Advance,
+#[derive(EnumSetType, Serialize, Deserialize, Debug, Ord, PartialOrd, Hash)]
+pub enum SpecialAdvance {
+    // Maya
+    Terrace,
+
+    // Rome
+
+
+
+}
+
+pub struct SpecialAdvanceInfo {
+    pub advance: SpecialAdvance,
     pub name: String,
     pub description: String,
     pub required_advance: Advance,
     pub listeners: AbilityListeners,
 }
 
-impl SpecialAdvance {
+impl SpecialAdvanceInfo {
     #[must_use]
     pub fn builder(
-        advance: Advance,
+        advance: SpecialAdvance,
         name: &str,
         required_advance: Advance,
     ) -> SpecialAdvanceBuilder {
@@ -22,7 +35,7 @@ impl SpecialAdvance {
     }
 
     fn new(
-        advance: Advance,
+        advance: SpecialAdvance,
         name: String,
         description: String,
         required_advance: Advance,
@@ -39,29 +52,29 @@ impl SpecialAdvance {
 }
 
 pub struct SpecialAdvanceBuilder {
-    advance: Advance,
+    advance: SpecialAdvance,
     name: String,
-    descriptions: Vec<String>,
+    description: String,
     required_advance: Advance,
     builder: AbilityInitializerBuilder,
 }
 
 impl SpecialAdvanceBuilder {
-    fn new(advance: Advance, name: String, required_advance: Advance) -> Self {
+    fn new(advance: SpecialAdvance, name: String, required_advance: Advance) -> Self {
         Self {
             advance,
             name,
-            descriptions: Vec::new(),
+            description: String::new(),
             required_advance,
             builder: AbilityInitializerBuilder::new(),
         }
     }
 
-    pub fn build(self) -> SpecialAdvance {
-        SpecialAdvance::new(
+    pub fn build(self) -> SpecialAdvanceInfo {
+        SpecialAdvanceInfo::new(
             self.advance,
             self.name,
-            String::from("✦ ") + &self.descriptions.join("\n✦ "),
+            self.description,
             self.required_advance,
             self.builder.build(),
         )
