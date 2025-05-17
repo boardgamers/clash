@@ -634,6 +634,40 @@ fn test_free_education() {
 }
 
 #[test]
+fn test_collect_fishing() {
+    JSON.test(
+        "collect_fishing",
+        vec![
+            TestAction::undoable(0, Action::Playing(Collect(playing_actions::Collect::new(
+                Position::from_offset("C2"),
+                vec![PositionCollection::new(
+                    Position::from_offset("C3"),
+                    ResourcePile::food(1),
+                )],
+                PlayingActionType::Collect,
+            )))),
+        ],
+    );
+}
+
+#[test]
+fn test_collect_port() {
+    JSON.test(
+        "collect_port",
+        vec![
+            TestAction::undoable(0, Action::Playing(Collect(playing_actions::Collect::new(
+                Position::from_offset("C2"),
+                vec![PositionCollection::new(
+                    Position::from_offset("C3"),
+                    ResourcePile::mood_tokens(1),
+                )],
+                PlayingActionType::Collect,
+            )))),
+        ],
+    );
+}
+
+#[test]
 fn test_collect_husbandry() {
     let action = Action::Playing(Collect(playing_actions::Collect::new(
         Position::from_offset("B3"),
