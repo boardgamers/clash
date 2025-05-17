@@ -17,6 +17,7 @@ use crate::{game::Game, player::Player, resource_pile::ResourcePile, utils};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
+use crate::player::gain_resources;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub enum StatusPhaseState {
@@ -222,13 +223,13 @@ pub(crate) fn raze_city() -> Builtin {
                     game.add_info_log_item(&format!("{} did not raze a city", s.player_name));
                     return;
                 }
-                let pos = s.choice[0];
-                game.add_info_log_item(&format!(
-                    "{} razed the city at {pos} and gained 1 gold",
-                    s.player_name
-                ));
-                game.raze_city(pos, s.player_index);
-                game.players[s.player_index].gain_resources(ResourcePile::gold(1));
+                gain_resources(
+                    game,
+                    s.player_index,
+                    ResourcePile::gold(1),
+                    |name, pile| format!("{name} razed a city and gained {pile}"),
+                );
+                game.raze_city(s.choice[0], s.player_index);
             },
         )
         .build()

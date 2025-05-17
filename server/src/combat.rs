@@ -376,12 +376,12 @@ fn take_over_city(
             city.pieces.set_building(building, new_player_index);
         } else {
             remove_building(city, building);
-            let pile = ResourcePile::gold(1);
-            game.add_info_log_item(&format!(
-                "{} gained {pile} for razing a {building}",
-                game.player_name(new_player_index)
-            ));
-            game.players[new_player_index].gain_resources(pile);
+            gain_resources(
+                game,
+                new_player_index,
+                ResourcePile::gold(1),
+                |name, pile| format!("{name} gained {pile} for razing a {building}", ),
+            );
         }
     }
 }
