@@ -165,9 +165,7 @@ fn test_monuments() {
         );
         game = execute_action(
             game,
-            Action::Response(EventResponse::Payment(vec![ResourcePile::new(
-                2, 3, 6, 0, 1, 0, 5,
-            )])),
+            payment_response(ResourcePile::new(2, 3, 6, 0, 1, 0, 5)),
             0,
         );
         game = execute_action(game, Action::Playing(EndTurn), 0);
@@ -187,12 +185,7 @@ fn test_increase_happiness_sports() {
             ))),
         )
         .skip_json(),
-        TestAction::undoable(
-            0,
-            Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
-                1,
-            )])),
-        ),
+        TestAction::undoable(0, payment_response(ResourcePile::culture_tokens(1))),
     ]);
 }
 
@@ -207,12 +200,7 @@ fn test_increase_happiness_sports2() {
             ))),
         )
         .skip_json(),
-        TestAction::undoable(
-            0,
-            Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
-                2,
-            )])),
-        ),
+        TestAction::undoable(0, payment_response(ResourcePile::culture_tokens(2))),
     ]);
 }
 
@@ -377,9 +365,7 @@ fn test_theaters() {
         TestAction::undoable(0, custom_action(CustomActionType::Theaters)).skip_json(),
         TestAction::undoable(
             0,
-            Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
-                1,
-            )])),
+            payment_response(ResourcePile::culture_tokens(1)),
         ),
     ]);
 }
@@ -593,12 +579,7 @@ fn test_cultural_influence_instant_with_arts() {
             )),
         )
         .skip_json(),
-        TestAction::not_undoable(
-            1,
-            Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
-                1,
-            )])),
-        ),
+        TestAction::not_undoable(1, payment_response(ResourcePile::culture_tokens(1))),
     ])
 }
 
@@ -606,19 +587,8 @@ fn test_cultural_influence_instant_with_arts() {
 fn test_cultural_influence_with_conversion() {
     JSON.test("cultural_influence_with_conversion", vec![
         TestAction::undoable(1, influence_action()).skip_json(),
-        TestAction::not_undoable(
-            1,
-            Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
-                1,
-            )])),
-        )
-        .skip_json(),
-        TestAction::undoable(
-            1,
-            Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
-                3,
-            )])),
-        ),
+        TestAction::not_undoable(1, payment_response(ResourcePile::culture_tokens(1))).skip_json(),
+        TestAction::undoable(1, payment_response(ResourcePile::culture_tokens(3))),
     ]);
 }
 

@@ -284,9 +284,7 @@ fn test_uprising() {
         TestAction::not_undoable(0, advance_action(Advance::Storage, ResourcePile::gold(2))),
         TestAction::undoable(
             0,
-            Action::Response(EventResponse::Payment(vec![
-                ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1),
-            ])),
+            payment_response(ResourcePile::culture_tokens(1) + ResourcePile::mood_tokens(1)),
         ),
     ]);
 }
@@ -314,9 +312,7 @@ fn test_trojan_horse() {
         .skip_json(),
         TestAction::not_undoable(
             0,
-            Action::Response(EventResponse::Payment(vec![
-                ResourcePile::culture_tokens(1) + ResourcePile::gold(1),
-            ])),
+            payment_response(ResourcePile::culture_tokens(1) + ResourcePile::gold(1)),
         ),
     ]);
 }

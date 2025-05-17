@@ -76,9 +76,7 @@ fn test_change_government() {
             .skip_json(),
         TestAction::undoable(
             0,
-            Action::Response(EventResponse::Payment(vec![
-                ResourcePile::culture_tokens(1) + ResourcePile::mood_tokens(1),
-            ])),
+            payment_response(ResourcePile::culture_tokens(1) + ResourcePile::mood_tokens(1)),
         )
         .skip_json(),
         TestAction::not_undoable(
