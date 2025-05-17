@@ -1,8 +1,6 @@
-use crate::ability_initializer::AbilityInitializerSetup;
-use crate::advance::Advance;
-use crate::map::Terrain;
-use crate::resource_pile::ResourcePile;
-use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo};
+mod rome;
+pub(crate) mod maya;
+
 use crate::{civilization::Civilization, leader::Leader};
 
 pub const BARBARIANS: &str = "Barbarians";
@@ -13,6 +11,8 @@ pub fn get_all_uncached() -> Vec<Civilization> {
     vec![
         Civilization::new(BARBARIANS, vec![], vec![]),
         Civilization::new(PIRATES, vec![], vec![]),
+        rome::rome(),
+        // not finished yet: maya
         // until the real civilizations are implemented
         Civilization::new("Federation", vec![], vec![
             Leader::builder("James T. Kirk", "", "", "", "").build(),
@@ -35,67 +35,4 @@ pub fn get_all_uncached() -> Vec<Civilization> {
             Leader::builder("Tomalak", "", "", "", "").build(),
         ]),
     ]
-}
-
-pub(crate) fn maya() -> Civilization {
-    Civilization::new(
-        "Maya",
-        vec![
-            // todo add other effects
-            SpecialAdvanceInfo::builder(
-                SpecialAdvance::Terrace,
-                Advance::Irrigation,
-                "Terrace",
-                "todo",
-            )
-            .add_transient_event_listener(
-                |events| &mut events.terrain_collect_options,
-                2,
-                |m, (), ()| {
-                    m.insert(
-                        Terrain::Mountain,
-                        std::collections::HashSet::from([
-                            ResourcePile::food(1),
-                            ResourcePile::wood(1),
-                            ResourcePile::ore(1),
-                        ]),
-                    );
-                },
-            )
-            .build(),
-        ],
-        vec![
-            Leader::builder(
-                "Kʼinich Janaab Pakal I",
-                "Shield of the sun",
-                "ignore the first hit in a battle with an Obelisk",
-                "",
-                "",
-            )
-            .add_combat_round_start_listener(4, |game, c, s, _role| {
-                if c.first_round()
-                    && game
-                        .try_get_any_city(c.defender_position())
-                        .is_some_and(|city| city.pieces.obelisk.is_some())
-                {
-                    s.roll_log.push(
-                        "Kʼinich Janaab Pakal I ignores the first hit in a battle with an Obelisk"
-                            .to_string(),
-                    );
-                    s.hit_cancels += 1;
-                }
-            })
-            .build(),
-        ],
-    )
-}
-
-#[cfg(test)]
-pub mod tests {
-    use crate::civilization::Civilization;
-
-    #[must_use]
-    pub fn get_test_civilization() -> Civilization {
-        Civilization::new("test", vec![], vec![])
-    }
 }

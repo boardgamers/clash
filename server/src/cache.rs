@@ -22,6 +22,7 @@ use crate::tactics_card::TacticsCard;
 use crate::wonder::{Wonder, WonderInfo};
 use itertools::Itertools;
 use std::collections::HashMap;
+use crate::content::civilizations::maya;
 
 #[derive(Clone)]
 pub struct Cache {
@@ -321,9 +322,9 @@ impl Cache {
     }
 
     #[must_use]
-    pub fn get_civilization(&self, name: &str) -> Civilization {
+    pub(crate) fn get_civilization(&self, name: &str) -> Civilization {
         match name {
-            "Maya" => civilizations::maya(), // still needs to be implemented
+            "Maya" => maya::maya(), // still needs to be implemented
             // for integration testing
             "test0" => Civilization::new("test0", vec![], vec![
                 Leader::builder("Alexander", "", "", "", "").build(),
