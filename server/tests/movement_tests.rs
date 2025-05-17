@@ -151,7 +151,7 @@ fn test_ship_disembark_capture_empty_city() {
         "ship_disembark_capture_empty_city",
         vec![
             TestAction::undoable(0, move_action(vec![1, 2], Position::from_offset("B2")))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![

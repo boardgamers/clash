@@ -228,8 +228,7 @@
                   "action": {
                     "Playing": {
                       "Custom": {
-                        "action": "GreatStatue",
-                        "city": null
+                        "action": "GreatStatue"
                       }
                     }
                   },

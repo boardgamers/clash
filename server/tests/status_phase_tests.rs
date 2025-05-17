@@ -93,14 +93,14 @@ fn test_change_government() {
         "change_government",
         vec![
             TestAction::not_undoable(1, Action::Response(EventResponse::SelectPositions(vec![])))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![
                     ResourcePile::culture_tokens(1) + ResourcePile::mood_tokens(1),
                 ])),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::ChangeGovernmentType(ChangeGovernment::new(
@@ -118,7 +118,7 @@ fn test_keep_government() {
         "keep_government",
         vec![
             TestAction::not_undoable(1, Action::Response(EventResponse::SelectPositions(vec![])))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::empty()])),

@@ -314,14 +314,19 @@ impl Cache {
 
     ///
     /// # Panics
+    ///
     /// Panics if incident does not exist
     #[must_use]
     pub fn get_incident(&self, id: u8) -> &Incident {
         self.incidents_by_id.get(&id).expect("incident not found")
     }
 
+    ///
+    /// # Panics
+    ///
+    /// Panics if civilization does not exist
     #[must_use]
-    pub(crate) fn get_civilization(&self, name: &str) -> Civilization {
+    pub fn get_civilization(&self, name: &str) -> Civilization {
         match name {
             // "Maya" => maya::maya(), // still needs to be implemented
             // for integration testing

@@ -157,14 +157,14 @@ fn test_pestilence() {
                 1,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::mood_tokens(1)])),
             ),
-            TestAction::illegal(0, cons.clone()).without_json_comparison(),
+            TestAction::illegal(0, cons.clone()).skip_json(),
             TestAction::undoable(
                 //no compare
                 0,
                 advance_action(Advance::Sanitation, ResourcePile::gold(2)),
             )
-            .without_json_comparison(),
-            TestAction::undoable(0, cons).without_json_comparison(),
+            .skip_json(),
+            TestAction::undoable(0, cons).skip_json(),
         ],
     );
 }
@@ -202,7 +202,7 @@ fn test_good_year_with_player_select() {
                 0,
                 Action::Response(EventResponse::SelectAdvance(Advance::Storage)),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::SelectUnitType(UnitType::Elephant)),
@@ -268,7 +268,7 @@ fn test_earthquake() {
         "earthquake",
         vec![
             TestAction::not_undoable(0, advance_action(Advance::Storage, ResourcePile::gold(2)))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectStructures(vec![
@@ -283,12 +283,12 @@ fn test_earthquake() {
                     ),
                 ])),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::mood_tokens(1)])),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::not_undoable(
                 1,
                 Action::Response(EventResponse::SelectStructures(vec![
@@ -334,11 +334,11 @@ fn test_revolution() {
         "revolution",
         vec![
             TestAction::not_undoable(0, advance_action(Advance::Storage, ResourcePile::gold(2)))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::undoable(0, Action::Response(EventResponse::SelectUnits(vec![3])))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::undoable(0, Action::Response(EventResponse::SelectUnits(vec![])))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::ChangeGovernmentType(ChangeGovernment::new(
@@ -386,12 +386,12 @@ fn test_trojan_horse() {
         "trojan_horse",
         vec![
             TestAction::not_undoable(0, advance_action(Advance::Storage, ResourcePile::gold(2)))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::undoable(
                 0,
                 move_action(vec![0, 1, 2, 3, 4, 5], Position::from_offset("C1")),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![
@@ -408,12 +408,12 @@ fn test_solar_eclipse() {
         "solar_eclipse",
         vec![
             TestAction::not_undoable(0, advance_action(Advance::Storage, ResourcePile::gold(2)))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::not_undoable(
                 0,
                 move_action(vec![0, 1, 2, 3, 4, 5], Position::from_offset("C1")),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::not_undoable(
                 1,
                 Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(

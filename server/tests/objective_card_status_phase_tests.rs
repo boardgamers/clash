@@ -14,7 +14,7 @@ fn test_large_civ() {
         "large_civ",
         vec![
             TestAction::not_undoable(1, Action::Playing(PlayingAction::EndTurn))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![
@@ -55,7 +55,7 @@ fn test_colony() {
         "colony",
         vec![
             TestAction::not_undoable(0, Action::Playing(PlayingAction::EndTurn))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::undoable(
                 1,
                 Action::Response(EventResponse::SelectHandCards(vec![
@@ -73,7 +73,7 @@ fn test_standing_army() {
         "standing_army",
         vec![
             TestAction::not_undoable(1, Action::Playing(PlayingAction::EndTurn))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![

@@ -22,14 +22,14 @@ fn test_advance() {
         "advance",
         vec![
             TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(2)))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
                     1,
                 )])),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectAdvance(advance::Advance::Storage)),
@@ -58,22 +58,22 @@ fn test_hero_general() {
                 0,
                 move_action(vec![0, 1, 2, 3, 4, 5], Position::from_offset("C1")),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::not_undoable(0, Action::Response(EventResponse::SelectHandCards(vec![]))),
             TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(5)))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
                     "C1",
                 )])),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::mood_tokens(1)])),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
@@ -90,14 +90,14 @@ fn test_spy() {
         "spy",
         vec![
             TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(7)))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
                     1,
                 )])),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![
@@ -129,7 +129,7 @@ fn test_great_ideas() {
                 0,
                 move_action(vec![0, 1, 2, 3, 4, 5], Position::from_offset("C1")),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(11))),
         ],
     );
@@ -141,7 +141,7 @@ fn test_mercenaries() {
         "mercenaries",
         vec![
             TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(13)))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectPositions(vec![
@@ -149,19 +149,19 @@ fn test_mercenaries() {
                     Position::from_offset("B3"),
                 ])),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::ore(2)])),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
                     "A3",
                 )])),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
@@ -178,7 +178,7 @@ fn test_cultural_takeover() {
         "cultural_takeover",
         vec![
             TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(15)))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Playing(PlayingAction::InfluenceCultureAttempt(
@@ -188,7 +188,7 @@ fn test_cultural_takeover() {
                     ),
                 )),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
@@ -205,14 +205,14 @@ fn test_city_development() {
         "city_development",
         vec![
             TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(17)))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
                     1,
                 )])),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Playing(Construct(construct::Construct::new(
@@ -231,7 +231,7 @@ fn test_production_focus() {
         "production_focus",
         vec![
             TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(19)))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Playing(PlayingAction::Collect(playing_actions::Collect::new(
@@ -259,23 +259,23 @@ fn test_explorer() {
         "explorer",
         vec![
             TestAction::undoable(1, Action::Playing(PlayingAction::ActionCard(21)))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::undoable(
                 1,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
                     1,
                 )])),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::not_undoable(
                 1,
                 Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
                     "B6",
                 )])),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::undoable(1, Action::Response(EventResponse::ExploreResolution(0)))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::undoable(
                 1,
                 Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
@@ -292,14 +292,14 @@ fn test_negotiations() {
         "negotiations",
         vec![
             TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(23)))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
                     1,
                 )])),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::not_undoable(0, Action::Playing(PlayingAction::EndTurn))
                 .with_pre_assert(|game| {
                     assert!(
@@ -316,7 +316,7 @@ fn test_negotiations() {
                             .any(|r| r.destination == Position::from_offset("B1")))
                     );
                 })
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::not_undoable(1, Action::Playing(PlayingAction::EndTurn))
                 .with_pre_assert(|game| {
                     assert!(
@@ -333,7 +333,7 @@ fn test_negotiations() {
                             .any(|r| r.destination == Position::from_offset("C2")))
                     );
                 })
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("B1"))),
         ],
     );
@@ -345,16 +345,16 @@ fn test_assassination() {
         "assassination",
         vec![
             TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(27)))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
                     1,
                 )])),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::not_undoable(0, Action::Playing(PlayingAction::EndTurn))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::not_undoable(1, Action::Playing(PlayingAction::EndTurn)).with_pre_assert(
                 |game| {
                     assert_eq!(game.actions_left, 2);
@@ -370,7 +370,7 @@ fn test_overproduction() {
         "overproduction",
         vec![
             TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(29)))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Playing(PlayingAction::Collect(playing_actions::Collect::new(
@@ -396,14 +396,14 @@ fn test_new_plans() {
         "new_plans",
         vec![
             TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(31)))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
                     1,
                 )])),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![
@@ -421,22 +421,22 @@ fn test_synergies() {
         "synergies",
         vec![
             TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(34)))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectAdvance(advance::Advance::Cartography)),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::ideas(2)])),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectAdvance(advance::Advance::WarShips)),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::ideas(2)])),
@@ -454,7 +454,7 @@ fn test_teach_us() {
                 0,
                 move_action(vec![0, 1, 2, 3, 4, 5], Position::from_offset("C1")),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
@@ -471,7 +471,7 @@ fn test_militia() {
         "militia",
         vec![
             TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(37)))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
@@ -488,7 +488,7 @@ fn test_tech_trade() {
         "tech_trade",
         vec![
             TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(39)))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
@@ -505,12 +505,12 @@ fn test_new_ideas() {
         "new_ideas",
         vec![
             TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(41)))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectAdvance(advance::Advance::Storage)),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::food(2)])),

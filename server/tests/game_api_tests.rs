@@ -36,7 +36,12 @@ fn new_game() {
 
 #[test]
 fn basic_actions() {
-    let mut game = setup_game(GameSetupBuilder::new(1).skip_random_map().build());
+    let mut game = setup_game(
+        GameSetupBuilder::new(1)
+            .civilizations(vec!["Klingons".to_string(), "Romulans".to_string()])
+            .skip_random_map()
+            .build(),
+    );
 
     game.wonders_left.retain(|w| *w == Wonder::Pyramids);
     let founded_city_position = Position::new(0, 1);
@@ -296,14 +301,14 @@ fn test_cultural_influence() {
     JSON.test(
         "cultural_influence",
         vec![
-            TestAction::undoable(1, influence_action()).without_json_comparison(),
+            TestAction::undoable(1, influence_action()).skip_json(),
             TestAction::not_undoable(
                 1,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
                     1,
                 )])),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::undoable(
                 1,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
@@ -320,7 +325,7 @@ fn test_found_city() {
         "found_city",
         vec![
             TestAction::undoable(0, Action::Playing(FoundCity { settler: 4 }))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![

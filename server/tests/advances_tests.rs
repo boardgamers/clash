@@ -188,7 +188,7 @@ fn test_increase_happiness_sports() {
                     Some(Position::from_offset("C2")),
                 ))),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
@@ -211,7 +211,7 @@ fn test_increase_happiness_sports2() {
                     Some(Position::from_offset("C2")),
                 ))),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
@@ -274,7 +274,7 @@ fn test_absolute_power() {
                     None,
                 ))),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::mood_tokens(2)])),
@@ -295,12 +295,12 @@ fn test_forced_labor() {
                     None,
                 ))),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::mood_tokens(1)])),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Playing(Collect(playing_actions::Collect::new(
@@ -349,7 +349,7 @@ fn test_bartering() {
                 0,
                 Action::Playing(Custom(CustomAction::new(CustomActionType::Bartering, None))),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::ResourceReward(ResourcePile::gold(1))),
@@ -439,7 +439,7 @@ fn test_theaters() {
                 0,
                 Action::Playing(Custom(CustomAction::new(CustomActionType::Theaters, None))),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
@@ -459,12 +459,12 @@ fn test_taxes() {
                 0,
                 Action::Playing(Custom(CustomAction::new(CustomActionType::Taxes, None))),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::mood_tokens(1)])),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::ResourceReward(ResourcePile::new(
@@ -520,7 +520,7 @@ fn test_dogma_with_anarchy() {
         "dogma",
         vec![
             TestAction::undoable(1, advance_action(Advance::Dogma, ResourcePile::ideas(2)))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::undoable(
                 1,
                 Action::Playing(Construct(construct::Construct::new(
@@ -529,14 +529,14 @@ fn test_dogma_with_anarchy() {
                     ResourcePile::new(0, 1, 1, 0, 0, 0, 0),
                 ))),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::undoable(
                 1,
                 Action::Response(EventResponse::ResourceReward(ResourcePile::culture_tokens(
                     1,
                 ))),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::not_undoable(
                 1,
                 Action::Response(EventResponse::SelectAdvance(Advance::Fanaticism)),
@@ -569,7 +569,7 @@ fn test_writing() {
                     ResourcePile::food(1) + ResourcePile::gold(1),
                 ),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Playing(Construct(construct::Construct::new(
@@ -672,7 +672,7 @@ fn test_collect_free_economy() {
                     PlayingActionType::Custom(CustomActionType::FreeEconomyCollect),
                 ))),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::mood_tokens(1)])),
@@ -704,7 +704,7 @@ fn test_cultural_influence_instant_with_arts() {
                     ),
                 )),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::not_undoable(
                 1,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
@@ -720,14 +720,14 @@ fn test_cultural_influence_with_conversion() {
     JSON.test(
         "cultural_influence_with_conversion",
         vec![
-            TestAction::undoable(1, influence_action()).without_json_comparison(),
+            TestAction::undoable(1, influence_action()).skip_json(),
             TestAction::not_undoable(
                 1,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
                     1,
                 )])),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::undoable(
                 1,
                 Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
@@ -769,7 +769,7 @@ fn test_husbandry() {
                     PlayingActionType::Collect,
                 ))),
             )
-            .without_json_comparison()
+            .skip_json()
             .with_post_assert(|game| {
                 // but not again
                 assert!(has_husbandry_field(&game))
@@ -786,7 +786,7 @@ fn test_husbandry() {
                     PlayingActionType::Collect,
                 ))),
             )
-            .without_json_comparison()
+            .skip_json()
             .with_post_assert(|game| {
                 // but not again
                 assert!(!has_husbandry_field(&game))
