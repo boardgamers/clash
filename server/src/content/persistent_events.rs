@@ -8,7 +8,7 @@ use crate::combat::Combat;
 use crate::combat_listeners::{CombatRoundEnd, CombatRoundStart};
 use crate::combat_stats::CombatStats;
 use crate::construct::ConstructInfo;
-use crate::content::custom_actions::CustomEventAction;
+use crate::content::custom_actions::CustomActionActivation;
 use crate::cultural_influence::InfluenceCultureInfo;
 use crate::events::EventOrigin;
 use crate::explore::ExploreResolutionState;
@@ -18,7 +18,7 @@ use crate::objective_card::SelectObjectivesInfo;
 use crate::payment::{PaymentOptions, ResourceReward};
 use crate::player::Player;
 use crate::player_events::{IncidentInfo, OnAdvanceInfo};
-use crate::playing_actions::{PlayingAction, Recruit};
+use crate::playing_actions::{ActionPayment, Recruit};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::{ChangeGovernment, StatusPhaseState};
@@ -106,7 +106,7 @@ pub enum PersistentEventType {
     CombatEnd(CombatStats),
     StatusPhase(StatusPhaseState),
     TurnStart,
-    PayAction(PlayingAction),
+    PayAction(ActionPayment),
     Advance(OnAdvanceInfo),
     Construct(ConstructInfo),
     Recruit(Recruit),
@@ -116,7 +116,7 @@ pub enum PersistentEventType {
     WonderCard(WonderCardInfo),
     DrawWonderCard,
     SelectObjectives(SelectObjectivesInfo),
-    CustomAction(CustomEventAction),
+    CustomAction(CustomActionActivation),
     ChooseActionCard,
     ChooseIncident(IncidentInfo),
 }

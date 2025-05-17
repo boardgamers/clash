@@ -6,7 +6,7 @@ use crate::combat::Combat;
 use crate::combat_listeners::{CombatRoundEnd, CombatRoundStart};
 use crate::combat_stats::CombatStats;
 use crate::construct::ConstructInfo;
-use crate::content::custom_actions::CustomEventAction;
+use crate::content::custom_actions::CustomActionActivation;
 use crate::content::persistent_events::KilledUnits;
 use crate::cultural_influence::{InfluenceCultureInfo, InfluenceCultureOutcome};
 use crate::events::Event;
@@ -16,7 +16,7 @@ use crate::incident::PassedIncident;
 use crate::map::Terrain;
 use crate::objective_card::SelectObjectivesInfo;
 use crate::payment::PaymentOptions;
-use crate::playing_actions::{PlayingAction, PlayingActionType, Recruit};
+use crate::playing_actions::{ActionPayment, PlayingActionType, Recruit};
 use crate::status_phase::StatusPhaseState;
 use crate::unit::Units;
 use crate::utils;
@@ -93,7 +93,7 @@ pub(crate) struct PersistentEvents {
     pub found_city: PersistentEvent<Position>,
     pub influence_culture: PersistentEvent<InfluenceCultureInfo>,
     pub explore_resolution: PersistentEvent<ExploreResolutionState>,
-    pub pay_action: PersistentEvent<PlayingAction>,
+    pub pay_action: PersistentEvent<ActionPayment>,
     pub play_action_card: PersistentEvent<ActionCardInfo>,
     pub play_wonder_card: PersistentEvent<WonderCardInfo>,
 
@@ -109,7 +109,7 @@ pub(crate) struct PersistentEvents {
     pub combat_end: PersistentEvent<CombatStats>,
     pub units_killed: PersistentEvent<KilledUnits>,
     pub select_objective_cards: PersistentEvent<SelectObjectivesInfo>,
-    pub custom_action: PersistentEvent<CustomEventAction>,
+    pub custom_action: PersistentEvent<CustomActionActivation>,
     pub choose_incident: PersistentEvent<IncidentInfo>,
     pub choose_action_card: PersistentEvent,
 }

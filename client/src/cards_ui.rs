@@ -262,8 +262,8 @@ fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
         }
         .to_string(),
     );
-    let cost = &action_type.cost;
-    if !cost.is_empty() {
+    let cost = &action_type.payment_options(rc.shown_player);
+    if !cost.is_free() {
         description.push(format!("Cost: {cost}"));
     }
     break_text(a.civil_card.description.as_str(), 30, &mut description);

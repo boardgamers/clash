@@ -1,29 +1,49 @@
-use crate::city::City;
+use crate::advance::{Advance, base_advance_cost};
+use crate::city::{City, MoodState};
 use crate::content::advances::autocracy::{use_absolute_power, use_forced_labor};
 use crate::content::advances::culture::{sports_options, use_sports, use_theaters};
 use crate::content::advances::democracy::use_civil_liberties;
 use crate::content::advances::economy::{use_bartering, use_taxes};
 use crate::content::builtin::Builtin;
+use crate::content::civilizations::rome::use_aqueduct;
 use crate::content::persistent_events::PersistentEventType;
-use crate::content::wonders::{use_great_library, use_great_lighthouse, use_great_statue};
+use crate::content::wonders::{
+    great_lighthouse_city, great_lighthouse_spawns, use_great_library, use_great_lighthouse,
+    use_great_statue,
+};
 use crate::player::Player;
-use crate::playing_actions::PlayingActionType;
+use crate::playing_actions::{ActionResourceCost, PlayingActionType};
 use crate::position::Position;
+use crate::wonder::Wonder;
 use crate::{game::Game, playing_actions::ActionCost, resource_pile::ResourcePile};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt::Display;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
-pub struct CustomEventAction {
+pub struct CustomAction {
     pub action: CustomActionType,
     pub city: Option<Position>,
 }
 
-impl CustomEventAction {
+impl CustomAction {
     #[must_use]
     pub fn new(action: CustomActionType, city: Option<Position>) -> Self {
         Self { action, city }
+    }
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
+pub struct CustomActionActivation {
+    #[serde(flatten)]
+    pub action: CustomAction,
+    pub payment: ResourcePile,
+}
+
+impl CustomActionActivation {
+    #[must_use]
+    pub fn new(action: CustomAction, payment: ResourcePile) -> Self {
+        Self { action, payment }
     }
 }
 
@@ -35,7 +55,7 @@ pub struct CustomActionInfo {
 
 impl CustomActionInfo {
     #[must_use]
-    fn new(free: bool, once_per_turn: bool, cost: ResourcePile) -> CustomActionInfo {
+    fn new(free: bool, once_per_turn: bool, cost: ActionResourceCost) -> CustomActionInfo {
         CustomActionInfo {
             action_type: ActionCost::new(free, cost),
             once_per_turn,
@@ -58,6 +78,7 @@ pub enum CustomActionType {
     GreatLibrary,
     GreatLighthouse,
     GreatStatue,
+    Aqueduct,
 }
 
 impl CustomActionType {
@@ -88,6 +109,9 @@ impl CustomActionType {
             }
             CustomActionType::Taxes => {
                 CustomActionType::once_per_turn(ResourcePile::mood_tokens(1))
+            }
+            CustomActionType::Aqueduct => {
+                CustomActionType::free_and_advance_cost_without_discounts()
             }
         }
     }
@@ -121,27 +145,32 @@ impl CustomActionType {
 
     #[must_use]
     fn regular() -> CustomActionInfo {
-        CustomActionInfo::new(false, false, ResourcePile::empty())
+        CustomActionInfo::new(false, false, ActionResourceCost::free())
     }
 
     #[must_use]
     fn cost(cost: ResourcePile) -> CustomActionInfo {
-        CustomActionInfo::new(true, false, cost)
+        CustomActionInfo::new(true, false, ActionResourceCost::resources(cost))
     }
 
     #[must_use]
     fn once_per_turn(cost: ResourcePile) -> CustomActionInfo {
-        CustomActionInfo::new(false, true, cost)
+        CustomActionInfo::new(false, true, ActionResourceCost::resources(cost))
     }
 
     #[must_use]
     fn free(cost: ResourcePile) -> CustomActionInfo {
-        CustomActionInfo::new(true, false, cost)
+        CustomActionInfo::new(true, false, ActionResourceCost::resources(cost))
     }
 
     #[must_use]
     fn free_and_once_per_turn(cost: ResourcePile) -> CustomActionInfo {
-        CustomActionInfo::new(true, true, cost)
+        CustomActionInfo::new(true, true, ActionResourceCost::resources(cost))
+    }
+
+    #[must_use]
+    fn free_and_advance_cost_without_discounts() -> CustomActionInfo {
+        CustomActionInfo::new(true, false, ActionResourceCost::AdvanceCostWithoutDiscount)
     }
 }
 
@@ -165,6 +194,7 @@ impl Display for CustomActionType {
             CustomActionType::GreatLibrary => write!(f, "Great Library"),
             CustomActionType::GreatLighthouse => write!(f, "Great Lighthouse"),
             CustomActionType::GreatStatue => write!(f, "Great Statue"),
+            CustomActionType::Aqueduct => write!(f, "Aqueduct"),
         }
     }
 }
@@ -181,21 +211,81 @@ pub(crate) fn custom_action_builtins() -> HashMap<CustomActionType, Builtin> {
         (CustomActionType::GreatLibrary, use_great_library()),
         (CustomActionType::GreatLighthouse, use_great_lighthouse()),
         (CustomActionType::GreatStatue, use_great_statue()),
+        (CustomActionType::Aqueduct, use_aqueduct()),
     ])
 }
 
 pub(crate) fn execute_custom_action(
     game: &mut Game,
     player_index: usize,
-    action: CustomEventAction,
+    a: CustomActionActivation,
 ) {
     let _ = game.trigger_persistent_event_with_listener(
         &[player_index],
         |e| &mut e.custom_action,
-        &custom_action_builtins()[&action.action.clone()].listeners,
-        action,
+        &custom_action_builtins()[&a.action.action.clone()].listeners,
+        a,
         PersistentEventType::CustomAction,
         None,
         |_| {},
     );
+}
+
+pub(crate) fn can_play_custom_action(
+    game: &Game,
+    p: &Player,
+    c: &CustomActionType,
+) -> Result<(), String> {
+    if !p.custom_actions.contains_key(c) {
+        return Err("Custom action not available".to_string());
+    }
+
+    if c.info().once_per_turn && p.played_once_per_turn_actions.contains(c) {
+        return Err("Custom action already played this turn".to_string());
+    }
+
+    let can_play = match c {
+        CustomActionType::Bartering => !p.action_cards.is_empty(),
+        CustomActionType::Sports => can_use_sports(p),
+        CustomActionType::Theaters => p.resources.culture_tokens > 0 || p.resources.mood_tokens > 0,
+        CustomActionType::ForcedLabor => any_angry(p),
+        CustomActionType::GreatStatue => !p.objective_cards.is_empty(),
+        CustomActionType::GreatLighthouse => {
+            great_lighthouse_city(p).can_activate()
+                && p.available_units().ships > 0
+                && !great_lighthouse_spawns(game, p.index).is_empty()
+        }
+        CustomActionType::Aqueduct => {
+            !p.has_advance(Advance::Sanitation) && p.can_afford(&base_advance_cost(p))
+        }
+        _ => true,
+    };
+    if !can_play {
+        return Err("Cannot play custom action".to_string());
+    }
+    Ok(())
+}
+
+fn can_use_sports(p: &Player) -> bool {
+    if !any_non_happy(p) {
+        return false;
+    }
+    if p.resources.culture_tokens > 0 {
+        return true;
+    }
+    p.wonders_owned.contains(Wonder::Colosseum) && p.resources.mood_tokens > 0
+}
+
+fn any_non_happy(player: &Player) -> bool {
+    player
+        .cities
+        .iter()
+        .any(|city| city.mood_state != MoodState::Happy)
+}
+
+fn any_angry(player: &Player) -> bool {
+    player
+        .cities
+        .iter()
+        .any(|city| city.mood_state == MoodState::Angry)
 }

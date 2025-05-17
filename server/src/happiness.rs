@@ -53,21 +53,21 @@ pub(crate) fn increase_happiness(
 
 #[must_use]
 pub fn happiness_cost(
-    p: usize,
+    player: usize,
     city_size_steps: u8, // for each city: size * steps in that city
     execute: CostTrigger,
     action_type: &PlayingActionType,
     game: &Game,
 ) -> CostInfo {
+    let p = game.player(player);
     let mut payment_options = PaymentOptions::sum(
-        game.player(p),
+        p,
         PaymentReason::IncreaseHappiness,
         city_size_steps,
         &[ResourceType::MoodTokens],
     );
     // either none or both can use Colosseum
-    payment_options.default += action_type.cost(game).cost;
+    payment_options.default += action_type.cost(game).payment_options(p).default;
 
-    game.player(p)
-        .trigger_cost_event(|e| &e.happiness_cost, &payment_options, &(), &(), execute)
+    p.trigger_cost_event(|e| &e.happiness_cost, &payment_options, &(), &(), execute)
 }

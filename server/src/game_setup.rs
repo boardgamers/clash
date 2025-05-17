@@ -101,10 +101,7 @@ pub fn setup_game_with_cache(setup: GameSetup, cache: Cache) -> Game {
         cache.get_civilization(BARBARIANS),
         players.len(),
     ));
-    players.push(Player::new(
-        cache.get_civilization(PIRATES),
-        players.len(),
-    ));
+    players.push(Player::new(cache.get_civilization(PIRATES), players.len()));
 
     let map = if setup.random_map {
         Map::random_map(&mut players, &mut rng)

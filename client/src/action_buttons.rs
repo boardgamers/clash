@@ -9,7 +9,7 @@ use crate::move_ui::MoveIntent;
 use crate::render_context::RenderContext;
 use server::action::Action;
 use server::city::City;
-use server::content::custom_actions::{CustomActionType, CustomEventAction};
+use server::content::custom_actions::{CustomAction, CustomActionType};
 use server::cultural_influence::available_influence_actions;
 use server::happiness::available_happiness_actions;
 use server::playing_actions::{PlayingAction, PlayingActionType, base_and_custom_action};
@@ -130,15 +130,12 @@ fn generic_custom_action(
         return custom_action_type
             .is_available_city(rc.shown_player, city)
             .then_some(StateUpdate::execute(Action::Playing(
-                PlayingAction::Custom(CustomEventAction::new(
-                    custom_action_type,
-                    Some(city.position),
-                )),
+                PlayingAction::Custom(CustomAction::new(custom_action_type, Some(city.position))),
             )));
     }
 
     (!custom_action_type.is_city_bound()).then_some(StateUpdate::execute(Action::Playing(
-        PlayingAction::Custom(CustomEventAction::new(custom_action_type, None)),
+        PlayingAction::Custom(CustomAction::new(custom_action_type, None)),
     )))
 }
 

@@ -2,7 +2,7 @@ use crate::common::{JsonTest, TestAction, move_action};
 use server::action::{Action, execute_without_undo};
 use server::advance::Advance;
 use server::card::HandCard;
-use server::content::custom_actions::{CustomActionType, CustomEventAction};
+use server::content::custom_actions::{CustomAction, CustomActionType};
 use server::content::persistent_events::EventResponse;
 use server::playing_actions::PlayingAction;
 use server::playing_actions::PlayingAction::WonderCard;
@@ -30,7 +30,7 @@ fn test_colosseum() {
             .without_json_comparison(),
             TestAction::undoable(
                 0,
-                Action::Playing(PlayingAction::Custom(CustomEventAction::new(
+                Action::Playing(PlayingAction::Custom(CustomAction::new(
                     CustomActionType::Sports,
                     Some(Position::from_offset("C2")),
                 ))),
@@ -90,7 +90,7 @@ fn test_library() {
         vec![
             TestAction::undoable(
                 0,
-                Action::Playing(PlayingAction::Custom(CustomEventAction::new(
+                Action::Playing(PlayingAction::Custom(CustomAction::new(
                     CustomActionType::GreatLibrary,
                     None,
                 ))),
@@ -123,7 +123,7 @@ fn test_lighthouse() {
             .without_json_comparison(),
             TestAction::undoable(
                 0,
-                Action::Playing(PlayingAction::Custom(CustomEventAction::new(
+                Action::Playing(PlayingAction::Custom(CustomAction::new(
                     CustomActionType::GreatLighthouse,
                     None,
                 ))),
@@ -211,7 +211,7 @@ fn test_great_statue() {
             .without_json_comparison(),
             TestAction::undoable(
                 0,
-                Action::Playing(PlayingAction::Custom(CustomEventAction::new(
+                Action::Playing(PlayingAction::Custom(CustomAction::new(
                     CustomActionType::GreatStatue,
                     None,
                 ))),

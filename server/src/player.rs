@@ -1,10 +1,10 @@
-use crate::advance::Advance;
+use crate::advance::{Advance, base_advance_cost};
 use crate::city_pieces::DestroyedStructures;
 use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::events::{Event, EventOrigin};
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player_events::{CostInfo, TransientEvents};
-use crate::resource::ResourceType;
+use crate::special_advance::SpecialAdvance;
 use crate::unit::UnitType;
 use crate::wonder::{Wonder, wonders_built_points, wonders_owned_points};
 use crate::{
@@ -12,7 +12,7 @@ use crate::{
     city_pieces::Building::{self},
     civilization::Civilization,
     consts::{
-        ADVANCE_COST, ADVANCE_VICTORY_POINTS, BUILDING_COST, BUILDING_VICTORY_POINTS,
+        ADVANCE_VICTORY_POINTS, BUILDING_COST, BUILDING_VICTORY_POINTS,
         CAPTURED_LEADER_VICTORY_POINTS, CITY_LIMIT, CITY_PIECE_LIMIT, OBJECTIVE_VICTORY_POINTS,
         UNIT_LIMIT,
     },
@@ -30,7 +30,6 @@ use serde::{Deserialize, Serialize};
 use std::cmp::Ordering::{self, *};
 use std::collections::HashMap;
 use std::fmt::Display;
-use crate::special_advance::SpecialAdvance;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq)]
 pub enum PlayerType {
@@ -273,7 +272,7 @@ impl Player {
     pub fn has_advance(&self, advance: Advance) -> bool {
         self.advances.contains(advance)
     }
-    
+
     #[must_use]
     pub fn has_special_advance(&self, advance: SpecialAdvance) -> bool {
         self.unlocked_special_advances.contains(advance)
@@ -423,12 +422,7 @@ impl Player {
     pub fn advance_cost(&self, advance: Advance, game: &Game, execute: CostTrigger) -> CostInfo {
         self.trigger_cost_event(
             |e| &e.advance_cost,
-            &PaymentOptions::sum(
-                self,
-                PaymentReason::GainAdvance,
-                ADVANCE_COST,
-                &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
-            ),
+            &base_advance_cost(self),
             &advance,
             game,
             execute,

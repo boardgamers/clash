@@ -224,7 +224,7 @@ impl IncidentBuilder {
         self.protection_advance = Some(advance);
         self
     }
-    
+
     #[must_use]
     pub fn with_protection_special_advance(mut self, advance: SpecialAdvance) -> Self {
         self.protection_special_advance = Some(advance);
@@ -393,7 +393,12 @@ impl IncidentBuilder {
     }
 
     fn new_filter(&self, role: IncidentTarget, priority: i32) -> IncidentFilter {
-        IncidentFilter::new(role, priority, self.protection_advance, self.protection_special_advance)
+        IncidentFilter::new(
+            role,
+            priority,
+            self.protection_advance,
+            self.protection_special_advance,
+        )
     }
 
     #[must_use]
@@ -533,9 +538,12 @@ impl IncidentBuilder {
                     if needed == 0 {
                         return None;
                     }
-                    let mut options = PaymentOptions::sum(p, PaymentReason::Incident, needed, &[
-                        ResourceType::MoodTokens,
-                    ]);
+                    let mut options = PaymentOptions::sum(
+                        p,
+                        PaymentReason::Incident,
+                        needed,
+                        &[ResourceType::MoodTokens],
+                    );
                     options.conversions.push(PaymentConversion::new(
                         vec![ResourcePile::mood_tokens(1)],
                         ResourcePile::empty(),
@@ -730,7 +738,7 @@ pub fn is_active(
         if game.player(player).can_use_advance(*advance) {
             return false;
         }
-    } 
+    }
     if let Some(advance) = protection_special_advance {
         if game.player(player).has_special_advance(*advance) {
             return false;

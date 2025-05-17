@@ -12,10 +12,10 @@ use crate::player_events::IncidentTarget;
 use crate::playing_actions::PlayingActionType;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
+use crate::special_advance::SpecialAdvance;
 use crate::unit::kill_units;
 use itertools::Itertools;
 use std::vec;
-use crate::special_advance::SpecialAdvance;
 
 pub(crate) fn pestilence_incidents() -> Vec<Incident> {
     let mut r = vec![pestilence(), epidemics()];

@@ -1,9 +1,9 @@
-use enumset::EnumSetType;
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::advance::Advance;
 use crate::events::EventOrigin;
 use crate::game::Game;
+use enumset::EnumSetType;
 use serde::{Deserialize, Serialize};
 
 #[derive(EnumSetType, Serialize, Deserialize, Debug, Ord, PartialOrd, Hash)]
@@ -47,7 +47,12 @@ impl SpecialAdvanceInfo {
         name: &str,
         description: &str,
     ) -> SpecialAdvanceBuilder {
-        SpecialAdvanceBuilder::new(advance, required_advance, name.to_string(), description.to_string())
+        SpecialAdvanceBuilder::new(
+            advance,
+            required_advance,
+            name.to_string(),
+            description.to_string(),
+        )
     }
 
     fn new(
@@ -76,7 +81,12 @@ pub struct SpecialAdvanceBuilder {
 }
 
 impl SpecialAdvanceBuilder {
-    fn new(advance: SpecialAdvance, required_advance: Advance, name: String, description: String) -> Self {
+    fn new(
+        advance: SpecialAdvance,
+        required_advance: Advance,
+        name: String,
+        description: String,
+    ) -> Self {
         Self {
             advance,
             name,

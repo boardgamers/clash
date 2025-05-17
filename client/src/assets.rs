@@ -321,6 +321,10 @@ impl Assets {
                     "../assets/statue-of-david-1-svgrepo-com.png"
                 )),
             ),
+            (
+                CustomActionType::Aqueduct,
+                load_png(include_bytes!("../assets/aqueduct-svgrepo-com.png")),
+            ),
         ]
         .iter()
         .cloned()

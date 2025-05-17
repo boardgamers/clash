@@ -4,7 +4,7 @@ use crate::card::validate_card_selection;
 use crate::city::{City, MoodState};
 use crate::collect::{available_collect_actions, possible_resource_collections};
 use crate::construct::{Construct, available_buildings, new_building_positions};
-use crate::content::custom_actions::CustomEventAction;
+use crate::content::custom_actions::CustomAction;
 use crate::content::persistent_events::{
     EventResponse, HandCardsRequest, MultiRequest, PersistentEventRequest, PersistentEventState,
     PositionRequest, SelectedStructure, is_selected_structures_valid,
@@ -208,9 +208,10 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
         for c in cities {
             actions.push((
                 ActionType::Playing(PlayingActionType::Custom(a.clone())),
-                vec![Action::Playing(PlayingAction::Custom(
-                    CustomEventAction::new(a.clone(), c),
-                ))],
+                vec![Action::Playing(PlayingAction::Custom(CustomAction::new(
+                    a.clone(),
+                    c,
+                )))],
             ));
         }
     }

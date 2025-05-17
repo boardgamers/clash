@@ -302,3 +302,23 @@ pub fn combat_requirement_met(
         false
     })
 }
+
+pub(crate) fn can_play_action_card(game: &Game, p: &Player, id: &u8) -> Result<(), String> {
+    if !p.action_cards.contains(id) {
+        return Err("Action card not available".to_string());
+    }
+
+    let civil_card = game.cache.get_civil_card(*id);
+    let mut satisfying_action: Option<usize> = None;
+    if let Some(r) = &civil_card.combat_requirement {
+        if let Some(action_log_index) = combat_requirement_met(game, p.index, *id, r) {
+            satisfying_action = Some(action_log_index);
+        } else {
+            return Err("Requirement not met".to_string());
+        }
+    }
+    if !(civil_card.can_play)(game, p, &ActionCardInfo::new(*id, satisfying_action, None)) {
+        return Err("Cannot play action card".to_string());
+    }
+    Ok(())
+}

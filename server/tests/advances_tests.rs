@@ -4,7 +4,7 @@ use server::city_pieces::Building::{Academy, Fortress, Temple};
 use server::collect::{PositionCollection, possible_resource_collections};
 use server::consts::BUILDING_COST;
 use server::content::advances::trade_routes::find_trade_routes;
-use server::content::custom_actions::{CustomActionType, CustomEventAction};
+use server::content::custom_actions::{CustomAction, CustomActionType};
 use server::content::persistent_events::{EventResponse, SelectedStructure, Structure};
 use server::cultural_influence::InfluenceCultureAttempt;
 use server::events::EventOrigin;
@@ -182,7 +182,7 @@ fn test_increase_happiness_sports() {
         vec![
             TestAction::undoable(
                 0,
-                Action::Playing(Custom(CustomEventAction::new(
+                Action::Playing(Custom(CustomAction::new(
                     CustomActionType::Sports,
                     Some(Position::from_offset("C2")),
                 ))),
@@ -205,7 +205,7 @@ fn test_increase_happiness_sports2() {
         vec![
             TestAction::undoable(
                 0,
-                Action::Playing(Custom(CustomEventAction::new(
+                Action::Playing(Custom(CustomAction::new(
                     CustomActionType::Sports,
                     Some(Position::from_offset("C2")),
                 ))),
@@ -268,7 +268,7 @@ fn test_absolute_power() {
         vec![
             TestAction::undoable(
                 0,
-                Action::Playing(Custom(CustomEventAction::new(
+                Action::Playing(Custom(CustomAction::new(
                     CustomActionType::AbsolutePower,
                     None,
                 ))),
@@ -289,7 +289,7 @@ fn test_forced_labor() {
         vec![
             TestAction::undoable(
                 0,
-                Action::Playing(Custom(CustomEventAction::new(
+                Action::Playing(Custom(CustomAction::new(
                     CustomActionType::ForcedLabor,
                     None,
                 ))),
@@ -322,7 +322,7 @@ fn test_civil_liberties() {
         vec![
             TestAction::undoable(
                 0,
-                Action::Playing(Custom(CustomEventAction::new(
+                Action::Playing(Custom(CustomAction::new(
                     CustomActionType::CivilLiberties,
                     None,
                 ))),
@@ -346,10 +346,7 @@ fn test_bartering() {
         vec![
             TestAction::undoable(
                 0,
-                Action::Playing(Custom(CustomEventAction::new(
-                    CustomActionType::Bartering,
-                    None,
-                ))),
+                Action::Playing(Custom(CustomAction::new(CustomActionType::Bartering, None))),
             )
             .without_json_comparison(),
             TestAction::undoable(
@@ -439,10 +436,7 @@ fn test_theaters() {
         vec![
             TestAction::undoable(
                 0,
-                Action::Playing(Custom(CustomEventAction::new(
-                    CustomActionType::Theaters,
-                    None,
-                ))),
+                Action::Playing(Custom(CustomAction::new(CustomActionType::Theaters, None))),
             )
             .without_json_comparison(),
             TestAction::undoable(
@@ -462,10 +456,7 @@ fn test_taxes() {
         vec![
             TestAction::undoable(
                 0,
-                Action::Playing(Custom(CustomEventAction::new(
-                    CustomActionType::Taxes,
-                    None,
-                ))),
+                Action::Playing(Custom(CustomAction::new(CustomActionType::Taxes, None))),
             )
             .without_json_comparison(),
             TestAction::undoable(
@@ -637,16 +628,17 @@ fn test_free_education() {
 fn test_collect_fishing() {
     JSON.test(
         "collect_fishing",
-        vec![
-            TestAction::undoable(0, Action::Playing(Collect(playing_actions::Collect::new(
+        vec![TestAction::undoable(
+            0,
+            Action::Playing(Collect(playing_actions::Collect::new(
                 Position::from_offset("C2"),
                 vec![PositionCollection::new(
                     Position::from_offset("C3"),
                     ResourcePile::food(1),
                 )],
                 PlayingActionType::Collect,
-            )))),
-        ],
+            ))),
+        )],
     );
 }
 
@@ -654,16 +646,17 @@ fn test_collect_fishing() {
 fn test_collect_port() {
     JSON.test(
         "collect_port",
-        vec![
-            TestAction::undoable(0, Action::Playing(Collect(playing_actions::Collect::new(
+        vec![TestAction::undoable(
+            0,
+            Action::Playing(Collect(playing_actions::Collect::new(
                 Position::from_offset("C2"),
                 vec![PositionCollection::new(
                     Position::from_offset("C3"),
                     ResourcePile::mood_tokens(1),
                 )],
                 PlayingActionType::Collect,
-            )))),
-        ],
+            ))),
+        )],
     );
 }
 

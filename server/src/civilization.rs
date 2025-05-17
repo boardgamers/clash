@@ -10,7 +10,11 @@ pub struct Civilization {
 }
 
 impl Civilization {
-    pub fn new(name: &str, special_advances: Vec<SpecialAdvanceInfo>, leaders: Vec<Leader>) -> Self {
+    pub fn new(
+        name: &str,
+        special_advances: Vec<SpecialAdvanceInfo>,
+        leaders: Vec<Leader>,
+    ) -> Self {
         Self {
             name: name.to_string(),
             special_advances,

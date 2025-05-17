@@ -4,6 +4,7 @@ use crate::city_pieces::Building;
 use crate::civilization::Civilization;
 use crate::content::advances::AdvanceGroup;
 use crate::content::builtin::Builtin;
+use crate::content::civilizations::maya;
 use crate::content::custom_actions::custom_action_builtins;
 use crate::content::{
     action_cards, advances, builtin, civilizations, incidents, objective_cards, objectives, wonders,
@@ -22,7 +23,6 @@ use crate::tactics_card::TacticsCard;
 use crate::wonder::{Wonder, WonderInfo};
 use itertools::Itertools;
 use std::collections::HashMap;
-use crate::content::civilizations::maya;
 
 #[derive(Clone)]
 pub struct Cache {
@@ -239,7 +239,7 @@ impl Cache {
 
     ///
     /// # Panics
-    /// 
+    ///
     /// Panics if action card does not exist
     #[must_use]
     pub fn get_action_card(&self, id: u8) -> &ActionCard {
@@ -326,10 +326,14 @@ impl Cache {
         match name {
             "Maya" => maya::maya(), // still needs to be implemented
             // for integration testing
-            "test0" => Civilization::new("test0", vec![], vec![
-                Leader::builder("Alexander", "", "", "", "").build(),
-                Leader::builder("Kleopatra", "", "", "", "").build(),
-            ]), // for testing
+            "test0" => Civilization::new(
+                "test0",
+                vec![],
+                vec![
+                    Leader::builder("Alexander", "", "", "", "").build(),
+                    Leader::builder("Kleopatra", "", "", "", "").build(),
+                ],
+            ), // for testing
             "test1" => Civilization::new("test1", vec![], vec![]),
             "test2" => Civilization::new("test2", vec![], vec![]),
             _ => self

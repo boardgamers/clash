@@ -1,17 +1,20 @@
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::city_pieces::Building;
+use crate::consts::ADVANCE_COST;
 use crate::content::persistent_events::PersistentEventType;
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::incident::trigger_incident;
-use crate::player::gain_resources;
+use crate::payment::{PaymentOptions, PaymentReason};
+use crate::player::{Player, gain_resources};
 use crate::player_events::OnAdvanceInfo;
+use crate::resource::ResourceType;
 use crate::special_advance::SpecialAdvance;
 use crate::{ability_initializer::AbilityInitializerSetup, resource_pile::ResourcePile};
+use Bonus::*;
 use enumset::EnumSetType;
 use serde::{Deserialize, Serialize};
 use std::mem;
-use Bonus::*;
 
 // id / 4 = advance group
 #[derive(EnumSetType, Serialize, Deserialize, Debug, Ord, PartialOrd, Hash)]
@@ -270,11 +273,15 @@ pub(crate) fn gain_advance_without_payment(
     take_incident_token: bool,
 ) {
     do_advance(game, advance, player_index);
-    on_advance(game, player_index, OnAdvanceInfo {
-        advance,
-        payment,
-        take_incident_token,
-    });
+    on_advance(
+        game,
+        player_index,
+        OnAdvanceInfo {
+            advance,
+            payment,
+            take_incident_token,
+        },
+    );
 }
 
 pub(crate) fn on_advance(game: &mut Game, player_index: usize, info: OnAdvanceInfo) {
@@ -374,4 +381,13 @@ pub(crate) fn init_player(game: &mut Game, player_index: usize) {
         }
     }
     game.player_mut(player_index).advances = advances;
+}
+
+pub(crate) fn base_advance_cost(player: &Player) -> PaymentOptions {
+    PaymentOptions::sum(
+        player,
+        PaymentReason::GainAdvance,
+        ADVANCE_COST,
+        &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
+    )
 }

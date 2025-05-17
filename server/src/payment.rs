@@ -374,7 +374,10 @@ pub fn can_convert(
     None
 }
 
-fn payment_options_sum(cost: u8, types_by_preference: &[ResourceType]) -> PaymentOptions {
+pub(crate) fn payment_options_sum(
+    cost: u8,
+    types_by_preference: &[ResourceType],
+) -> PaymentOptions {
     let mut conversions = vec![];
     types_by_preference.windows(2).for_each(|pair| {
         conversions.push(PaymentConversion::unlimited(
