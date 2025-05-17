@@ -5,12 +5,11 @@
     {
       "id": 0,
       "resources": {
-        "food": 2,
         "wood": 5,
         "ore": 5,
         "ideas": 3,
         "gold": 5,
-        "mood_tokens": 7,
+        "mood_tokens": 8,
         "culture_tokens": 9
       },
       "resource_limit": {
@@ -58,9 +57,10 @@
       "advances": [
         "Engineering",
         "Farming",
-        "Mining"
+        "Mining",
+        "Sanitation"
       ],
-      "incident_tokens": 3,
+      "incident_tokens": 2,
       "wonder_cards": [
         "Pyramids"
       ],
@@ -209,15 +209,134 @@
           "players": [
             {
               "index": 0,
-              "items": []
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Custom": {
+                        "action": "Aqueduct"
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "remove",
+                      "path": "/events"
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "food": 2
+                        }
+                      ]
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "PayAction": {
+                              "action": {
+                                "Custom": {
+                                  "action": "Aqueduct"
+                                }
+                              }
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "Builtin": "Pay for action card"
+                            },
+                            "priority": 0,
+                            "request": {
+                              "Payment": [
+                                {
+                                  "cost": {
+                                    "conversions": [
+                                      {
+                                        "from": [
+                                          {
+                                            "ideas": 1
+                                          }
+                                        ],
+                                        "to": {
+                                          "food": 1
+                                        },
+                                        "type": "Unlimited"
+                                      },
+                                      {
+                                        "from": [
+                                          {
+                                            "food": 1
+                                          }
+                                        ],
+                                        "to": {
+                                          "gold": 1
+                                        },
+                                        "type": "Unlimited"
+                                      }
+                                    ],
+                                    "default": {
+                                      "ideas": 2
+                                    }
+                                  },
+                                  "name": "Pay for action",
+                                  "optional": false
+                                }
+                              ]
+                            }
+                          },
+                          "last_priority_used": 0,
+                          "player": 0
+                        }
+                      ]
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/advances/3"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/incident_tokens",
+                      "value": 3
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/resources/food",
+                      "value": 2
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/mood_tokens",
+                      "value": 7
+                    }
+                  ]
+                }
+              ]
             }
           ]
         }
       ]
     }
   ],
-  "action_log_index": 0,
-  "log": [],
+  "action_log_index": 2,
+  "log": [
+    [
+      "Player1 started Aqueduct"
+    ],
+    [
+      "Player1 paid 2 food for the action",
+      "Player1 uses Aqueduct to gain Sanitation as a free action",
+      "Player1 gained 1 mood token as advance bonus"
+    ]
+  ],
   "undo_limit": 0,
   "actions_left": 2,
   "round": 6,
