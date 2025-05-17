@@ -494,10 +494,9 @@ fn player_that_chooses_next_first_player(players: &[&Player]) -> usize {
 
 #[cfg(test)]
 mod tests {
-    use crate::content;
+    use crate::civilization::Civilization;
     use crate::player::Player;
     use crate::resource_pile::ResourcePile;
-    use content::civilizations::tests as civ;
 
     fn assert_next_player(
         name: &str,
@@ -506,11 +505,11 @@ mod tests {
         player2_mood: u8,
         expected_player_index: usize,
     ) {
-        let mut player0 = Player::new(civ::get_test_civilization(), 0);
+        let mut player0 = Player::new(get_test_civilization(), 0);
         player0.gain_resources(ResourcePile::mood_tokens(player0_mood));
-        let mut player1 = Player::new(civ::get_test_civilization(), 1);
+        let mut player1 = Player::new(get_test_civilization(), 1);
         player1.gain_resources(ResourcePile::mood_tokens(player1_mood));
-        let mut player2 = Player::new(civ::get_test_civilization(), 2);
+        let mut player2 = Player::new(get_test_civilization(), 2);
         player2.gain_resources(ResourcePile::mood_tokens(player2_mood));
         let players = vec![&player2, &player1, &player0];
         let got = super::player_that_chooses_next_first_player(&players);
@@ -530,4 +529,9 @@ mod tests {
             2,
         );
     }
+
+    #[must_use]
+        pub fn get_test_civilization() -> Civilization {
+            Civilization::new("test", vec![], vec![])
+        }
 }

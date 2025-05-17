@@ -537,12 +537,12 @@ pub mod tests {
     use crate::{
         city::{City, MoodState::*},
         city_pieces::Building::*,
-        content::civilizations,
         map::Map,
         player::Player,
         position::Position,
         utils::Rng,
     };
+    use crate::civilization::Civilization;
 
     #[must_use]
     pub fn test_game() -> Game {
@@ -590,8 +590,8 @@ pub mod tests {
 
     #[test]
     fn conquer_test() {
-        let old = Player::new(civilizations::tests::get_test_civilization(), 0);
-        let new = Player::new(civilizations::tests::get_test_civilization(), 1);
+        let old = Player::new(get_test_civilization(), 0);
+        let new = Player::new(get_test_civilization(), 1);
 
         let mut game = test_game();
         game.add_info_log_group("combat".into()); // usually filled in combat
@@ -622,5 +622,10 @@ pub mod tests {
         assert_eq!(2, wonders_owned_points(new, &game));
         assert_eq!(1, old.owned_buildings(&game));
         assert_eq!(1, new.owned_buildings(&game));
+    }
+
+    #[must_use]
+    pub fn get_test_civilization() -> Civilization {
+        Civilization::new("test", vec![], vec![])
     }
 }

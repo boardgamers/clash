@@ -5,12 +5,12 @@ use server::position::Position;
 
 mod common;
 
-const JSON: JsonTest = JsonTest::new("civ");
+const JSON: JsonTest = JsonTest::child("civilizations", "rome");
 
 #[test]
-fn test_civ_maya_leader_pakal_and_place_settler() {
+fn aqueduct_discount() {
     JSON.test(
-        "civ_maya_leader_pakal",
+        "aqueduct_discount",
         vec![
             TestAction::not_undoable(0, move_action(vec![10], Position::from_offset("B1"))),
             TestAction::not_undoable(
