@@ -1,4 +1,4 @@
-use crate::common::{JsonTest, TestAction, advance_action, move_action};
+use crate::common::{JsonTest, TestAction, advance_action, move_action, custom_action};
 use server::action::{Action, execute_without_undo};
 use server::advance::Advance;
 use server::card::HandCard;
@@ -90,10 +90,7 @@ fn test_library() {
         vec![
             TestAction::undoable(
                 0,
-                Action::Playing(PlayingAction::Custom(CustomAction::new(
-                    CustomActionType::GreatLibrary,
-                    None,
-                ))),
+                custom_action(CustomActionType::GreatLibrary),
             )
             .skip_json(),
             TestAction::undoable(
@@ -123,10 +120,7 @@ fn test_lighthouse() {
             .skip_json(),
             TestAction::undoable(
                 0,
-                Action::Playing(PlayingAction::Custom(CustomAction::new(
-                    CustomActionType::GreatLighthouse,
-                    None,
-                ))),
+                custom_action(CustomActionType::GreatLighthouse),
             )
             .skip_json(),
             TestAction::undoable(
@@ -205,10 +199,7 @@ fn test_great_statue() {
             .skip_json(),
             TestAction::undoable(
                 0,
-                Action::Playing(PlayingAction::Custom(CustomAction::new(
-                    CustomActionType::GreatStatue,
-                    None,
-                ))),
+                custom_action(CustomActionType::GreatStatue),
             ),
         ],
     );
