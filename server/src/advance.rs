@@ -4,6 +4,7 @@ use crate::content::persistent_events::PersistentEventType;
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::incident::trigger_incident;
+use crate::player::gain_resources;
 use crate::player_events::OnAdvanceInfo;
 use crate::special_advance::SpecialAdvance;
 use crate::{ability_initializer::AbilityInitializerSetup, resource_pile::ResourcePile};
@@ -11,7 +12,6 @@ use Bonus::*;
 use enumset::EnumSetType;
 use serde::{Deserialize, Serialize};
 use std::mem;
-use crate::player::gain_resources;
 
 // id / 4 = advance group
 #[derive(EnumSetType, Serialize, Deserialize, Debug, Ord, PartialOrd, Hash)]

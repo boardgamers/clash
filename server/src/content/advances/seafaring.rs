@@ -2,13 +2,13 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city_pieces::Building::Port;
-use crate::collect::{CollectContext, CollectInfo};
 use crate::content::advances::{AdvanceGroup, advance_group_builder};
+use crate::content::builtin::Builtin;
 use crate::game::Game;
+use crate::player::gain_resources;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use std::collections::HashSet;
-use crate::player::gain_resources;
 
 pub(crate) fn seafaring() -> AdvanceGroup {
     advance_group_builder(
@@ -23,7 +23,6 @@ fn fishing() -> AdvanceBuilder {
         "Fishing",
         "Your cities may Collect food from one Sea space",
     )
-    .add_transient_event_listener(|event| &mut event.collect_options, 1, fishing_collect)
     .with_advance_bonus(MoodToken)
     .with_unlocked_building(Port)
 }
@@ -107,28 +106,49 @@ fn is_enemy_player_or_pirate_zone(game: &Game, player_index: usize, position: Po
     game.enemy_player(player_index, position).is_some() || game.is_pirate_zone(position)
 }
 
-fn fishing_collect(i: &mut CollectInfo, c: &CollectContext, game: &Game) {
-    let city = game.get_any_city(c.city_position);
-    let port = city.port_position;
-    if let Some(position) = port
-        .filter(|p| !is_enemy_player_or_pirate_zone(game, c.player_index, *p))
-        .or_else(|| {
-            c.city_position.neighbors().into_iter().find(|p| {
-                game.map.is_sea(*p) && !is_enemy_player_or_pirate_zone(game, c.player_index, *p)
-            })
-        })
-    {
-        i.choices.insert(
-            position,
-            if Some(position) == port {
-                HashSet::from([
-                    ResourcePile::food(1),
-                    ResourcePile::gold(1),
-                    ResourcePile::mood_tokens(1),
-                ])
-            } else {
-                HashSet::from([ResourcePile::food(1)])
+pub(crate) fn fishing_collect() -> Builtin {
+    Builtin::builder("Fishing", "")
+        .add_transient_event_listener(
+            |event| &mut event.collect_options,
+            1,
+            |i, c, game| {
+                let city = game.get_any_city(c.city_position);
+                let port = city.port_position;
+                let fishing = game.player(c.player_index).has_advance(Advance::Fishing);
+                if !fishing && port.is_none() {
+                    // short circuit
+                    return;
+                }
+
+                if let Some(position) = port
+                    .filter(|p| !is_enemy_player_or_pirate_zone(game, c.player_index, *p))
+                    .or_else(|| {
+                        c.city_position.neighbors().into_iter().find(|p| {
+                            game.map.is_sea(*p)
+                                && !is_enemy_player_or_pirate_zone(game, c.player_index, *p)
+                        })
+                    })
+                {
+                    i.choices.insert(
+                        position,
+                        if Some(position) == port {
+                            if fishing {
+                                HashSet::from([
+                                    ResourcePile::food(1),
+                                    ResourcePile::gold(1),
+                                    ResourcePile::mood_tokens(1),
+                                ])
+                            } else {
+                                HashSet::from([ResourcePile::gold(1), ResourcePile::mood_tokens(1)])
+                            }
+                        } else if fishing {
+                            HashSet::from([ResourcePile::food(1)])
+                        } else {
+                            HashSet::new()
+                        },
+                    );
+                }
             },
-        );
-    }
+        )
+        .build()
 }

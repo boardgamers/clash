@@ -9,7 +9,7 @@ use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::PaymentRequest;
 use crate::happiness::increase_happiness;
 use crate::payment::{PaymentOptions, PaymentReason};
-use crate::player::{gain_resources, Player};
+use crate::player::{Player, gain_resources};
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use crate::wonder::draw_wonder_card;

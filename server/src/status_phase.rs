@@ -11,13 +11,13 @@ use crate::objective_card::{
     gain_objective_card_from_pile, present_objective_cards, status_phase_completable,
 };
 use crate::payment::{PaymentOptions, PaymentReason};
+use crate::player::gain_resources;
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::wonder::Wonder;
 use crate::{game::Game, player::Player, resource_pile::ResourcePile, utils};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
-use crate::player::gain_resources;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub enum StatusPhaseState {
@@ -223,12 +223,9 @@ pub(crate) fn raze_city() -> Builtin {
                     game.add_info_log_item(&format!("{} did not raze a city", s.player_name));
                     return;
                 }
-                gain_resources(
-                    game,
-                    s.player_index,
-                    ResourcePile::gold(1),
-                    |name, pile| format!("{name} razed a city and gained {pile}"),
-                );
+                gain_resources(game, s.player_index, ResourcePile::gold(1), |name, pile| {
+                    format!("{name} razed a city and gained {pile}")
+                });
                 game.raze_city(s.choice[0], s.player_index);
             },
         )

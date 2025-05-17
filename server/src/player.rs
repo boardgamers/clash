@@ -26,11 +26,10 @@ use crate::{
     utils,
 };
 use enumset::EnumSet;
-use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use std::cmp::Ordering::{self, *};
 use std::collections::HashMap;
 use std::fmt::Display;
-use std::cmp::Ordering::{self, *};
 
 #[derive(Serialize, Deserialize, PartialEq, Eq)]
 pub enum PlayerType {

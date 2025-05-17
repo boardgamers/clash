@@ -11,12 +11,15 @@ use crate::player::gain_resources;
 use crate::resource_pile::ResourcePile;
 
 pub(crate) fn education() -> AdvanceGroup {
-    advance_group_builder("Education", vec![
-        writing(),
-        public_education(),
-        free_education(),
-        philosophy(),
-    ])
+    advance_group_builder(
+        "Education",
+        vec![
+            writing(),
+            public_education(),
+            free_education(),
+            philosophy(),
+        ],
+    )
 }
 
 fn writing() -> AdvanceBuilder {
@@ -39,12 +42,9 @@ fn writing() -> AdvanceBuilder {
         3,
         |game, player_index, _player_name, b| {
             if matches!(b.building, Building::Academy) {
-                gain_resources(
-                    game,
-                    player_index,
-                    ResourcePile::ideas(2),
-                    |name, pile| format!("{name} gained {pile} from Academy"),
-                );
+                gain_resources(game, player_index, ResourcePile::ideas(2), |name, pile| {
+                    format!("{name} gained {pile} from Academy")
+                });
             }
         },
     )
@@ -136,17 +136,14 @@ fn philosophy() -> AdvanceBuilder {
         "Immediately gain 1 idea after getting a Science advance",
     )
     .add_one_time_ability_initializer(|game, player_index| {
-        gain_resources(
-            game,
-            player_index,
-            ResourcePile::ideas(1),
-            |name, pile| format!("{name} gained {pile} from Philosophy"),
-        );
+        gain_resources(game, player_index, ResourcePile::ideas(1), |name, pile| {
+            format!("{name} gained {pile} from Philosophy")
+        });
     })
     .add_simple_persistent_event_listener(
         |event| &mut event.advance,
         0,
-        |game, player_index, player_name, advance| {
+        |game, player_index, _, advance| {
             if game
                 .cache
                 .get_advance_group("Science")
@@ -154,12 +151,9 @@ fn philosophy() -> AdvanceBuilder {
                 .iter()
                 .any(|a| a.advance == advance.advance)
             {
-                gain_resources(
-                    game,
-                    player_index,
-                    ResourcePile::ideas(1),
-                    |name, pile| format!("{name} gained {pile} from Philosophy"),
-                );
+                gain_resources(game, player_index, ResourcePile::ideas(1), |name, pile| {
+                    format!("{name} gained {pile} from Philosophy")
+                });
             }
         },
     )

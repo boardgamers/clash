@@ -259,7 +259,7 @@ fn ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_simple_persistent_event_listener(
         |e| &mut e.play_action_card,
         0,
-        |game, player, name, _| {
+        |game, player, _, _| {
             gain_resources(
                 game,
                 player,

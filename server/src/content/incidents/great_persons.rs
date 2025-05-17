@@ -18,7 +18,7 @@ use crate::content::persistent_events::{
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, IncidentBuilder};
 use crate::payment::{PaymentOptions, PaymentReason};
-use crate::player::{gain_resources, Player};
+use crate::player::{Player, gain_resources};
 use crate::player_events::IncidentTarget;
 use crate::playing_actions::ActionCost;
 use crate::resource::ResourceType;
@@ -327,13 +327,10 @@ fn great_philosopher() -> ActionCard {
     .add_simple_persistent_event_listener(
         |e| &mut e.play_action_card,
         0,
-        |game, player_index, player_name, _| {
-            gain_resources(
-                game,
-                player_index,
-                ResourcePile::ideas(2),
-                |name, pile| format!("{name} gained {pile} from Great Philosopher"),
-            );
+        |game, player_index, _, _| {
+            gain_resources(game, player_index, ResourcePile::ideas(2), |name, pile| {
+                format!("{name} gained {pile} from Great Philosopher")
+            });
         },
     )
     .build()
@@ -355,13 +352,10 @@ fn great_scientist() -> ActionCard {
     .add_simple_persistent_event_listener(
         |e| &mut e.play_action_card,
         0,
-        |game, player_index, player_name, _| {
-            gain_resources(
-                game,
-                player_index,
-                ResourcePile::ideas(1),
-                |name, pile| format!("{name} gained {pile} from Great Scientist"),
-            );
+        |game, player_index, _, _| {
+            gain_resources(game, player_index, ResourcePile::ideas(1), |name, pile| {
+                format!("{name} gained {pile} from Great Scientist")
+            });
             gain_action_card_from_pile(game, player_index);
         },
     )
@@ -495,12 +489,9 @@ fn great_athlete() -> ActionCard {
             } else {
                 ResourcePile::culture_tokens(from.mood_tokens)
             };
-            gain_resources(
-                game,
-                s.player_index,
-                to,
-                |name, pile| format!("{name} converted {from} to {pile}"),
-            );
+            gain_resources(game, s.player_index, to, |name, pile| {
+                format!("{name} converted {from} to {pile}")
+            });
         },
     )
     .build()

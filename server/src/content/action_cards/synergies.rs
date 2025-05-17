@@ -507,9 +507,9 @@ fn new_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         .add_simple_persistent_event_listener(
             |e| &mut e.play_action_card,
             0,
-            |game, player_index, player_name, _| {
+            |game, player_index, _, _| {
                 gain_resources(game, player_index, ResourcePile::ideas(2), |name, pile| {
-                    format!("{player_name} gained {pile} from New Ideas.")
+                    format!("{name} gained {pile} from New Ideas.")
                 });
             },
         )

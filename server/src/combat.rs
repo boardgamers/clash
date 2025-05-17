@@ -11,6 +11,7 @@ use crate::combat_stats::{CombatStats, active_defenders, new_combat_stats};
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
 use crate::movement::{MoveUnits, MovementRestriction, move_units, stop_current_move};
+use crate::player::gain_resources;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::tactics_card::CombatRole;
@@ -19,7 +20,6 @@ use crate::wonder::{Wonder, deinit_wonder, init_wonder};
 use combat_stats::active_attackers;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use crate::player::gain_resources;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Copy)]
 pub enum CombatModifier {
@@ -316,13 +316,12 @@ pub(crate) fn conquer_city(
     ));
     let attacker_is_human = game.player(new_player_index).is_human();
     let size = city.mood_modified_size(&game.players[new_player_index]);
-    let name = game.player_name(new_player_index);
     if attacker_is_human {
         gain_resources(
             game,
             new_player_index,
             ResourcePile::gold(size as u8),
-            |name, pile| format!("{name} gained {pile} for capturing a city", ),
+            |name, pile| format!("{name} gained {pile} for capturing a city",),
         );
     }
     let take_over = game.player(new_player_index).is_city_available();
@@ -339,7 +338,7 @@ pub(crate) fn conquer_city(
             game,
             new_player_index,
             ResourcePile::gold(city.size() as u8),
-            |name, pile| format!("{name} gained {pile} for razing the city", ),
+            |name, pile| format!("{name} gained {pile} for razing the city",),
         );
         city.raze(game, old_player_index);
     }
@@ -380,7 +379,7 @@ fn take_over_city(
                 game,
                 new_player_index,
                 ResourcePile::gold(1),
-                |name, pile| format!("{name} gained {pile} for razing a {building}", ),
+                |name, pile| format!("{name} gained {pile} for razing a {building}",),
             );
         }
     }

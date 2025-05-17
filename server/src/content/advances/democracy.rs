@@ -13,12 +13,15 @@ use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::resource_pile::ResourcePile;
 
 pub(crate) fn democracy() -> AdvanceGroup {
-    advance_group_builder("Democracy", vec![
-        voting(),
-        separation_of_power(),
-        civil_liberties(),
-        free_economy(),
-    ])
+    advance_group_builder(
+        "Democracy",
+        vec![
+            voting(),
+            separation_of_power(),
+            civil_liberties(),
+            free_economy(),
+        ],
+    )
 }
 
 fn voting() -> AdvanceBuilder {
@@ -64,7 +67,7 @@ pub(crate) fn use_civil_liberties() -> Builtin {
         .add_simple_persistent_event_listener(
             |event| &mut event.custom_action,
             0,
-            |game, player_index, player_name, _| {
+            |game, player_index, _, _| {
                 gain_resources(
                     game,
                     player_index,

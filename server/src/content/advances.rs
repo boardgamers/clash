@@ -6,7 +6,7 @@ pub(crate) mod democracy;
 pub mod economy;
 mod education;
 mod science;
-mod seafaring;
+pub(crate) mod seafaring;
 mod spirituality;
 pub(crate) mod theocracy;
 pub mod trade_routes;
