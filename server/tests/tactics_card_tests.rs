@@ -46,8 +46,7 @@ fn test_wedge_formation() {
     JSON.test(
         "wedge_formation",
         vec![
-            TestAction::undoable(0, move_action(vec![0], Position::from_offset("C1")))
-                .skip_json(),
+            TestAction::undoable(0, move_action(vec![0], Position::from_offset("C1"))).skip_json(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
@@ -63,8 +62,7 @@ fn test_high_morale() {
     JSON.test(
         "high_morale",
         vec![
-            TestAction::undoable(0, move_action(vec![0], Position::from_offset("C1")))
-                .skip_json(),
+            TestAction::undoable(0, move_action(vec![0], Position::from_offset("C1"))).skip_json(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
@@ -97,8 +95,7 @@ fn test_high_ground() {
     JSON.test(
         "high_ground",
         vec![
-            TestAction::undoable(0, move_action(vec![0], Position::from_offset("C1")))
-                .skip_json(),
+            TestAction::undoable(0, move_action(vec![0], Position::from_offset("C1"))).skip_json(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
@@ -138,8 +135,7 @@ fn test_siege() {
     JSON.test(
         "siege",
         vec![
-            TestAction::undoable(0, move_action(vec![0], Position::from_offset("C1")))
-                .skip_json(),
+            TestAction::undoable(0, move_action(vec![0], Position::from_offset("C1"))).skip_json(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
@@ -155,8 +151,7 @@ fn test_scout() {
     JSON.test(
         "scout",
         vec![
-            TestAction::undoable(0, move_action(vec![0], Position::from_offset("C1")))
-                .skip_json(),
+            TestAction::undoable(0, move_action(vec![0], Position::from_offset("C1"))).skip_json(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
@@ -207,8 +202,7 @@ fn test_archers() {
     JSON.test(
         "archers",
         vec![
-            TestAction::undoable(0, move_action(vec![0], Position::from_offset("C1")))
-                .skip_json(),
+            TestAction::undoable(0, move_action(vec![0], Position::from_offset("C1"))).skip_json(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
@@ -226,8 +220,7 @@ fn test_flanking() {
     JSON.test(
         "flanking",
         vec![
-            TestAction::undoable(0, move_action(vec![0], Position::from_offset("C1")))
-                .skip_json(),
+            TestAction::undoable(0, move_action(vec![0], Position::from_offset("C1"))).skip_json(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(

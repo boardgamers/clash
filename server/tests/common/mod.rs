@@ -4,6 +4,7 @@ use server::action::Action;
 use server::advance::AdvanceAction;
 use server::cache::Cache;
 use server::city_pieces::Building::Temple;
+use server::content::custom_actions::{CustomAction, CustomActionType};
 use server::content::persistent_events::{EventResponse, SelectedStructure, Structure};
 use server::game::{Game, GameContext};
 use server::log::current_player_turn_log_mut;
@@ -24,7 +25,6 @@ use std::{
     path::MAIN_SEPARATOR as SEPARATOR,
     vec,
 };
-use server::content::custom_actions::{CustomAction, CustomActionType};
 
 #[derive(Clone)]
 pub struct GamePath {
@@ -442,9 +442,7 @@ pub fn advance_action(advance: advance::Advance, payment: ResourcePile) -> Actio
     Action::Playing(Advance(AdvanceAction::new(advance, payment)))
 }
 
-pub fn custom_action(
-    action: CustomActionType,
-) -> Action {
+pub fn custom_action(action: CustomActionType) -> Action {
     Action::Playing(PlayingAction::Custom(CustomAction::new(action, None)))
 }
 
@@ -457,8 +455,6 @@ pub fn influence_action() -> Action {
     ))
 }
 
-pub fn payment_response(
-    payment: ResourcePile,
-) -> Action {
-    payment_response(payment)
+pub fn payment_response(payment: ResourcePile) -> Action {
+    Action::Response(EventResponse::Payment(vec![payment]))
 }

@@ -63,8 +63,7 @@ fn test_defiance() {
         vec![
             TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("C1")))
                 .skip_json(),
-            TestAction::not_undoable(0, Action::Response(EventResponse::Bool(false)))
-                .skip_json(),
+            TestAction::not_undoable(0, Action::Response(EventResponse::Bool(false))).skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![

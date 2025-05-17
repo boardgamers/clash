@@ -16,20 +16,20 @@ pub(crate) fn rome() -> Civilization {
                 "Ignore Famine events. \
                 Sanitation cost is reduced to 0 resources or a free action",
             )
-                .add_custom_action(CustomActionType::Aqueduct)
-                .add_transient_event_listener(
-                    |event| &mut event.advance_cost,
-                    3,
-                    |i, &a, _| {
-                        if a == Advance::Sanitation {
-                            i.set_zero();
-                            i.info
-                                .log
-                                .push("Aqueduct reduced the cost to 0".to_string());
-                        }
-                    },
-                )
-                .build(),
+            .add_custom_action(CustomActionType::Aqueduct)
+            .add_transient_event_listener(
+                |event| &mut event.advance_cost,
+                3,
+                |i, &a, _| {
+                    if a == Advance::Sanitation {
+                        i.set_zero();
+                        i.info
+                            .log
+                            .push("Aqueduct reduced the cost to 0".to_string());
+                    }
+                },
+            )
+            .build(),
         ],
         vec![],
     )
@@ -41,11 +41,9 @@ pub(crate) fn use_aqueduct() -> Builtin {
             |event| &mut event.custom_action,
             0,
             |game, player, name, a| {
-                game.add_info_log_item(
-                    &format!(
-                        "{name} uses Aqueduct to gain Sanitation as a free action",
-                    ),
-                );
+                game.add_info_log_item(&format!(
+                    "{name} uses Aqueduct to gain Sanitation as a free action",
+                ));
                 gain_advance_without_payment(
                     game,
                     Advance::Sanitation,

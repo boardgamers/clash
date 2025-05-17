@@ -82,11 +82,7 @@ fn test_combat_all_modifiers() {
                 move_action(vec![0, 1, 2, 3, 4, 5], Position::from_offset("C1")),
             )
             .skip_json(),
-            TestAction::undoable(
-                0,
-                payment_response(ResourcePile::ore(1)),
-            )
-            .skip_json(),
+            TestAction::undoable(0, payment_response(ResourcePile::ore(1))).skip_json(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![
@@ -95,11 +91,7 @@ fn test_combat_all_modifiers() {
                 ])),
             )
             .skip_json(),
-            TestAction::not_undoable(
-                1,
-                payment_response(ResourcePile::ore(1)),
-            )
-            .skip_json(),
+            TestAction::not_undoable(1, payment_response(ResourcePile::ore(1))).skip_json(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
