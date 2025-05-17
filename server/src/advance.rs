@@ -6,12 +6,12 @@ use crate::game::Game;
 use crate::incident::trigger_incident;
 use crate::player::gain_resources;
 use crate::player_events::OnAdvanceInfo;
-use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo};
+use crate::special_advance::SpecialAdvance;
 use crate::{ability_initializer::AbilityInitializerSetup, resource_pile::ResourcePile};
-use Bonus::*;
 use enumset::EnumSetType;
 use serde::{Deserialize, Serialize};
 use std::mem;
+use Bonus::*;
 
 // id / 4 = advance group
 #[derive(EnumSetType, Serialize, Deserialize, Debug, Ord, PartialOrd, Hash)]
@@ -323,6 +323,7 @@ fn unlock_special_advance(game: &mut Game, special_advance: SpecialAdvance, play
     special_advance
         .info(game)
         .listeners
+        .clone()
         .one_time_init(game, player_index);
     game.players[player_index]
         .unlocked_special_advances
@@ -337,6 +338,7 @@ fn undo_unlock_special_advance(
     special_advance
         .info(game)
         .listeners
+        .clone()
         .undo(game, player_index);
     game.players[player_index]
         .unlocked_special_advances

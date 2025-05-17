@@ -6,7 +6,6 @@ pub(crate) fn rome() -> Civilization {
     Civilization::new(
         "Rome",
         vec![
-            // todo ignore famine events
             // todo sanitation cost 0 resources or free action
             SpecialAdvanceInfo::builder(
                 SpecialAdvance::Aqueduct,

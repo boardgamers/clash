@@ -110,7 +110,7 @@ impl Player {
                 .collect(),
             civilization,
             advances: EnumSet::empty(),
-            unlocked_special_advances: Vec::new(),
+            unlocked_special_advances: EnumSet::empty(),
             great_library_advance: None,
             incident_tokens: 0,
             completed_objectives: Vec::new(),

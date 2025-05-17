@@ -125,7 +125,7 @@ pub(crate) fn barbarians_spawn(mut builder: IncidentBuilder) -> IncidentBuilder 
         |e| &mut e.incident,
         BASE_EFFECT_PRIORITY,
         |game, p, i| {
-            IncidentFilter::new(IncidentTarget::ActivePlayer, BASE_EFFECT_PRIORITY, None)
+            IncidentFilter::new(IncidentTarget::ActivePlayer, BASE_EFFECT_PRIORITY, None, None)
                 .is_active(game, i, p)
         },
         |i| {
