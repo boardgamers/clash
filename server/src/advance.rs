@@ -273,15 +273,11 @@ pub(crate) fn gain_advance_without_payment(
     take_incident_token: bool,
 ) {
     do_advance(game, advance, player_index);
-    on_advance(
-        game,
-        player_index,
-        OnAdvanceInfo {
-            advance,
-            payment,
-            take_incident_token,
-        },
-    );
+    on_advance(game, player_index, OnAdvanceInfo {
+        advance,
+        payment,
+        take_incident_token,
+    });
 }
 
 pub(crate) fn on_advance(game: &mut Game, player_index: usize, info: OnAdvanceInfo) {
@@ -384,10 +380,19 @@ pub(crate) fn init_player(game: &mut Game, player_index: usize) {
 }
 
 pub(crate) fn base_advance_cost(player: &Player) -> PaymentOptions {
-    PaymentOptions::sum(
-        player,
-        PaymentReason::GainAdvance,
-        ADVANCE_COST,
-        &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
-    )
+    PaymentOptions::sum(player, PaymentReason::GainAdvance, ADVANCE_COST, &[
+        ResourceType::Ideas,
+        ResourceType::Food,
+        ResourceType::Gold,
+    ])
 }
+
+pub struct AdvanceAction {
+    pub advance: Advance,
+    pub payment: ResourcePile,
+}
+
+impl AdvanceAction {
+    pub fn new(advance: Advance, payment: ResourcePile) -> Self {
+        Self { advance, payment }
+    }}

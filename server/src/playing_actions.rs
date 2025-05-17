@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{can_play_action_card, play_action_card};
-use crate::advance::{Advance, base_advance_cost, gain_advance_without_payment};
+use crate::advance::{Advance, base_advance_cost, gain_advance_without_payment, AdvanceAction};
 use crate::city::found_city;
 use crate::collect::{PositionCollection, collect};
 use crate::construct::Construct;
@@ -182,10 +182,7 @@ impl PlayingActionType {
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub enum PlayingAction {
-    Advance {
-        advance: Advance,
-        payment: ResourcePile,
-    },
+    Advance(AdvanceAction),
     FoundCity {
         settler: u32,
     },
@@ -236,7 +233,8 @@ impl PlayingAction {
         use crate::construct;
         use PlayingAction::*;
         match self {
-            Advance { advance, payment } => {
+            Advance(a) => {
+                let advance = a.advance;
                 if !game.player(player_index).can_advance(advance, game) {
                     return Err("Cannot advance".to_string());
                 }
@@ -290,7 +288,7 @@ impl PlayingAction {
     #[must_use]
     pub fn playing_action_type(&self) -> PlayingActionType {
         match self {
-            PlayingAction::Advance { .. } => PlayingActionType::Advance,
+            PlayingAction::Advance(_) => PlayingActionType::Advance,
             PlayingAction::FoundCity { .. } => PlayingActionType::FoundCity,
             PlayingAction::Construct(_) => PlayingActionType::Construct,
             PlayingAction::Collect(c) => allowed_types(

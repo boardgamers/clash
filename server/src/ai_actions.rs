@@ -30,6 +30,7 @@ use crate::wonder::Wonder;
 use itertools::Itertools;
 use rustc_hash::FxHashMap;
 use std::vec;
+use crate::advance::AdvanceAction;
 //todo
 //nicht nur maximale anzahl rekrutieren
 //bewegung:
@@ -310,10 +311,7 @@ fn advances(ai_actions: &mut AiActions, p: &Player, game: &Game) -> Vec<Action> 
                 p,
             )
             .map(|r| {
-                Action::Playing(PlayingAction::Advance {
-                    advance: a,
-                    payment: r,
-                })
+                Action::Playing(PlayingAction::Advance(AdvanceAction::new(a, r)))
             })
         })
         .collect()

@@ -144,10 +144,11 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
     let player = &game.players[game.active_player()];
     let player_name = player.get_name();
     match action {
-        PlayingAction::Advance { advance, payment } => {
+        PlayingAction::Advance(a) => {
             format!(
-                "{player} paid {payment} to get the {} advance",
-                advance.name(game)
+                "{player} paid {} to get the {} advance",
+                a.payment,
+                a.advance.name(game)
             )
         }
         PlayingAction::FoundCity { settler } => format!(
@@ -185,13 +186,12 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
         PlayingAction::WonderCard(name) => {
             format!("{player_name} played the wonder card {}", name.name(game))
         }
-        PlayingAction::EndTurn => format!(
-            "{player_name} ended their turn{}",
-            match game.actions_left {
-                0 => String::new(),
-                actions_left => format!(" with {actions_left} actions left"),
-            }
-        ),
+        PlayingAction::EndTurn => format!("{player_name} ended their turn{}", match game
+            .actions_left
+        {
+            0 => String::new(),
+            actions_left => format!(" with {actions_left} actions left"),
+        }),
     }
 }
 

@@ -12,7 +12,7 @@ use macroquad::prelude::{
     BLACK, BLUE, GRAY, Rect, WHITE, YELLOW, draw_rectangle, draw_rectangle_lines,
 };
 use server::action::Action;
-use server::advance::{Advance, AdvanceInfo, Bonus};
+use server::advance::{Advance, AdvanceAction, AdvanceInfo, Bonus};
 use server::game::GameState;
 use server::player::{CostTrigger, Player};
 use server::playing_actions::PlayingAction;
@@ -208,10 +208,7 @@ pub fn pay_advance_dialog(ap: &Payment<Advance>, rc: &RenderContext) -> StateUpd
     }
     payment_dialog(rc, ap, true, ActiveDialog::AdvancePayment, |payment| {
         StateUpdate::execute_with_warning(
-            Action::Playing(PlayingAction::Advance {
-                advance: ap.value,
-                payment,
-            }),
+            Action::Playing(PlayingAction::Advance(AdvanceAction::new(ap.value, payment)),
             if rc.shown_player.incident_tokens == 1 {
                 vec!["A game event will be triggered".to_string()]
             } else {
