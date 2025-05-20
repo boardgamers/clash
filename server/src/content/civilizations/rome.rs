@@ -36,7 +36,7 @@ pub(crate) fn rome() -> Civilization {
 }
 
 pub(crate) fn use_aqueduct() -> Builtin {
-    Builtin::builder("Gain Aqueduct as a free action", "")
+    Builtin::builder("Aqueduct", "Gain Sanitation as a free action")
         .add_simple_persistent_event_listener(
             |event| &mut event.custom_action,
             0,
