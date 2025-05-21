@@ -745,7 +745,7 @@ pub fn is_active(
         }
     }
     if let Some(advance) = protection_special_advance {
-        if game.player(player).has_special_advance(*advance) {
+        if game.player(player).can_use_special_advance(*advance, game) {
             return false;
         }
     }

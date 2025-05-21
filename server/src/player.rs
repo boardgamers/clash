@@ -284,6 +284,11 @@ impl Player {
     }
 
     #[must_use]
+    pub fn can_use_special_advance(&self, advance: SpecialAdvance, game: &Game) -> bool {
+        self.can_use_advance(advance.info(game).required_advance)
+    }
+
+    #[must_use]
     pub fn victory_points(&self, game: &Game) -> f32 {
         self.victory_points_parts(game).iter().map(|(_, v)| v).sum()
     }
