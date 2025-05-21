@@ -9,7 +9,8 @@ use crate::collect::{PositionCollection, collect};
 use crate::construct::Construct;
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::{
-    CustomAction, CustomActionActivation, CustomActionType, can_play_custom_action, execute_custom_action,
+    CustomAction, CustomActionActivation, CustomActionType, can_play_custom_action,
+    execute_custom_action,
 };
 use crate::content::persistent_events::{
     PaymentRequest, PersistentEventType, TriggerPersistentEventParams, trigger_persistent_event_ext,

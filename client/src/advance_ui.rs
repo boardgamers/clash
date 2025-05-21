@@ -8,7 +8,9 @@ use crate::unit_ui::add_unit_description;
 use itertools::Itertools;
 use macroquad::color::Color;
 use macroquad::math::vec2;
-use macroquad::prelude::{BLACK, BLUE, GRAY, Rect, WHITE, YELLOW, draw_rectangle, draw_rectangle_lines, GREEN};
+use macroquad::prelude::{
+    BLACK, BLUE, GRAY, GREEN, Rect, WHITE, YELLOW, draw_rectangle, draw_rectangle_lines,
+};
 use server::action::Action;
 use server::advance::{Advance, AdvanceAction, AdvanceInfo, Bonus};
 use server::game::GameState;
@@ -176,10 +178,13 @@ fn description(rc: &RenderContext, a: &AdvanceInfo) -> Vec<String> {
         ));
     }
     if let Some(b) = &a.bonus {
-        parts.push(format!("Bonus: {}", match b {
-            Bonus::MoodToken => "Mood Token",
-            Bonus::CultureToken => "Culture Token",
-        }));
+        parts.push(format!(
+            "Bonus: {}",
+            match b {
+                Bonus::MoodToken => "Mood Token",
+                Bonus::CultureToken => "Culture Token",
+            }
+        ));
     }
     if let Some(g) = &a.government {
         parts.push(format!("Government: {g}"));

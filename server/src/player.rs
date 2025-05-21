@@ -287,15 +287,13 @@ impl Player {
     pub fn can_use_special_advance(&self, advance: SpecialAdvance, game: &Game) -> bool {
         self.can_use_advance(advance.info(game).required_advance)
     }
-    
+
     #[must_use]
-    pub fn special_advance(
-        &self,
-        advance: Advance,
-    ) -> Option<&SpecialAdvanceInfo>                    {
-        self.civilization.special_advances.iter().find(
-            |sa| sa.required_advance == advance,
-        )
+    pub fn special_advance(&self, advance: Advance) -> Option<&SpecialAdvanceInfo> {
+        self.civilization
+            .special_advances
+            .iter()
+            .find(|sa| sa.required_advance == advance)
     }
 
     #[must_use]
