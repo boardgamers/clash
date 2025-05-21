@@ -339,3 +339,18 @@ pub struct PlayingActionInfo {
     pub player: usize,
     pub action_type: PlayingActionType,
 }
+
+pub(crate) fn trigger_event_with_game_value<U, V, W>(
+    game: &mut Game,
+    player_index: usize,
+    event: impl Fn(&mut PlayerEvents) -> &mut Event<Game, U, V, W>,
+    info: &U,
+    details: &V,
+    extra_value: &mut W,
+) where
+    W: Clone + PartialEq,
+{
+    let e = event(&mut game.players[player_index].events).take();
+    e.trigger(game, info, details, extra_value);
+    event(&mut game.players[player_index].events).set(e);
+}

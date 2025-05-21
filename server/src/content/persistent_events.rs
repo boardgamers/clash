@@ -14,10 +14,10 @@ use crate::events::EventOrigin;
 use crate::explore::ExploreResolutionState;
 use crate::game::Game;
 use crate::map::Rotation;
-use crate::objective_card::SelectObjectivesInfo;
+use crate::objective_card::{present_instant_objective_cards, SelectObjectivesInfo};
 use crate::payment::{PaymentOptions, ResourceReward};
 use crate::player::Player;
-use crate::player_events::{IncidentInfo, OnAdvanceInfo};
+use crate::player_events::{trigger_event_with_game_value, IncidentInfo, OnAdvanceInfo, PersistentEvent, PersistentEventInfo, PersistentEvents};
 use crate::playing_actions::{ActionPayment, Recruit};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
@@ -27,6 +27,7 @@ use crate::wonder::{Wonder, WonderCardInfo};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::ops::RangeInclusive;
+use crate::ability_initializer::AbilityListeners;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum PersistentEventRequest {
@@ -367,3 +368,117 @@ impl EventResponse {
         execute_custom_phase_action(game, player_index, details)
     }
 }
+
+
+#[derive(Debug, Clone)]
+pub struct TriggerPersistentEventParams {
+
+}
+
+fn remaining_persistent_event_players(
+    players: &[usize],
+    state: &PersistentEventState,
+) -> Vec<usize> {
+    players
+        .iter()
+        .filter(|p| !state.players_used.contains(p))
+        .copied()
+        .collect_vec()
+}
+
+#[must_use]
+pub(crate) fn trigger_persistent_event_ext<V>(
+    game: &mut Game,
+    players: &[usize],
+    event: fn(&mut PersistentEvents) -> &mut PersistentEvent<V>,
+    mut value: V,
+    to_event_type: impl Fn(V) -> PersistentEventType,
+    log: Option<&str>,
+    next_player: fn(&mut V) -> (),
+) -> Option<V>
+where
+    V: Clone + PartialEq,
+{
+    let current_event_type = to_event_type(value.clone());
+    if game
+        .events
+        .last()
+        .is_none_or(|s| s.event_type != current_event_type)
+    {
+        if let Some(log) = log {
+            game.add_info_log_group(log.to_string());
+        }
+        game.events
+            .push(PersistentEventState::new(players[0], current_event_type));
+    }
+
+    let event_index = game.events.len() - 1;
+
+    for player_index in remaining_persistent_event_players(players, game.current_event())
+    {
+        let info = PersistentEventInfo {
+            player: player_index,
+        };
+        trigger_event_with_game_value(
+            game,
+            player_index,
+            move |e| event(&mut e.persistent),
+            &info,
+            &(),
+            &mut value,
+        );
+
+        if game.current_event().player.handler.is_some() {
+            game.events[event_index].event_type = to_event_type(value);
+            return None;
+        }
+        let state = game.current_event_mut();
+        state.players_used.push(player_index);
+        if let Some(&p) = remaining_persistent_event_players(players, state).first() {
+            state.player = PersistentEventPlayer::new(p);
+            next_player(&mut value);
+        }
+    }
+    game.events.pop();
+
+    if game.events.is_empty() {
+        present_instant_objective_cards(game);
+    }
+
+    Some(value)
+}
+
+pub(crate) fn trigger_persistent_event_with_listener<V>(
+    game: &mut Game,
+    players: &[usize],
+    event: fn(&mut PersistentEvents) -> &mut PersistentEvent<V>,
+    listeners: &AbilityListeners,
+    event_type: V,
+    store_type: impl Fn(V) -> PersistentEventType,
+    log: Option<&str>,
+    next_player: fn(&mut V) -> (),
+) -> Option<V>
+where
+    V: Clone + PartialEq,
+{
+    for p in players {
+        listeners.init(game, *p);
+    }
+
+    let result = trigger_persistent_event_ext(
+        game,
+        players,
+        event,
+        event_type,
+        store_type,
+        log,
+        next_player,
+    );
+
+    for p in players {
+        listeners.deinit(game, *p);
+    }
+    result
+}
+
+

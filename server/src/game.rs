@@ -1,11 +1,8 @@
-use crate::ability_initializer::AbilityListeners;
 use crate::cache::Cache;
 use crate::combat_roll::{COMBAT_DIE_SIDES, CombatDieRoll};
 use crate::consts::ACTIONS;
 use crate::content::effects::PermanentEffect;
-use crate::content::persistent_events::{
-    PersistentEventHandler, PersistentEventPlayer, PersistentEventState, PersistentEventType,
-};
+use crate::content::persistent_events::{trigger_persistent_event_ext, PersistentEventHandler, PersistentEventState, PersistentEventType};
 use crate::events::{Event, EventOrigin};
 use crate::game_data::GameData;
 use crate::log::{
@@ -13,12 +10,9 @@ use crate::log::{
     current_player_turn_log_mut,
 };
 use crate::movement::MoveState;
-use crate::objective_card::present_instant_objective_cards;
 use crate::pirates::get_pirates_player;
 use crate::player::{CostTrigger, end_turn};
-use crate::player_events::{
-    PersistentEvent, PersistentEventInfo, PersistentEvents, PlayerEvents, TransientEvents,
-};
+use crate::player_events::{trigger_event_with_game_value, PersistentEvent, PersistentEvents, TransientEvents};
 use crate::resource::check_for_waste;
 use crate::status_phase::enter_status_phase;
 use crate::utils::Rng;
@@ -208,38 +202,6 @@ impl Game {
             .and_then(|s| s.player.handler.as_mut())
     }
 
-    pub(crate) fn trigger_persistent_event_with_listener<V>(
-        &mut self,
-        players: &[usize],
-        event: fn(&mut PersistentEvents) -> &mut PersistentEvent<V>,
-        listeners: &AbilityListeners,
-        event_type: V,
-        store_type: impl Fn(V) -> PersistentEventType,
-        log: Option<&str>,
-        next_player: fn(&mut V) -> (),
-    ) -> Option<V>
-    where
-        V: Clone + PartialEq,
-    {
-        for p in players {
-            listeners.init(self, *p);
-        }
-
-        let result = self.trigger_persistent_event_ext(
-            players,
-            event,
-            event_type,
-            store_type,
-            log,
-            next_player,
-        );
-
-        for p in players {
-            listeners.deinit(self, *p);
-        }
-        result
-    }
-
     #[must_use]
     pub(crate) fn trigger_persistent_event<V>(
         &mut self,
@@ -251,79 +213,7 @@ impl Game {
     where
         V: Clone + PartialEq,
     {
-        self.trigger_persistent_event_ext(players, event, value, to_event_type, None, |_| {})
-    }
-
-    #[must_use]
-    pub(crate) fn trigger_persistent_event_ext<V>(
-        &mut self,
-        players: &[usize],
-        event: fn(&mut PersistentEvents) -> &mut PersistentEvent<V>,
-        mut value: V,
-        to_event_type: impl Fn(V) -> PersistentEventType,
-        log: Option<&str>,
-        next_player: fn(&mut V) -> (),
-    ) -> Option<V>
-    where
-        V: Clone + PartialEq,
-    {
-        let current_event_type = to_event_type(value.clone());
-        if self
-            .events
-            .last()
-            .is_none_or(|s| s.event_type != current_event_type)
-        {
-            if let Some(log) = log {
-                self.add_info_log_group(log.to_string());
-            }
-            self.events
-                .push(PersistentEventState::new(players[0], current_event_type));
-        }
-
-        let event_index = self.events.len() - 1;
-
-        for player_index in Self::remaining_persistent_event_players(players, self.current_event())
-        {
-            let info = PersistentEventInfo {
-                player: player_index,
-            };
-            self.trigger_event_with_game_value(
-                player_index,
-                move |e| event(&mut e.persistent),
-                &info,
-                &(),
-                &mut value,
-            );
-
-            if self.current_event().player.handler.is_some() {
-                self.events[event_index].event_type = to_event_type(value);
-                return None;
-            }
-            let state = self.current_event_mut();
-            state.players_used.push(player_index);
-            if let Some(&p) = Self::remaining_persistent_event_players(players, state).first() {
-                state.player = PersistentEventPlayer::new(p);
-                next_player(&mut value);
-            }
-        }
-        self.events.pop();
-
-        if self.events.is_empty() {
-            present_instant_objective_cards(self);
-        }
-
-        Some(value)
-    }
-
-    fn remaining_persistent_event_players(
-        players: &[usize],
-        state: &PersistentEventState,
-    ) -> Vec<usize> {
-        players
-            .iter()
-            .filter(|p| !state.players_used.contains(p))
-            .copied()
-            .collect_vec()
+        trigger_persistent_event_ext(self, players, event, value, to_event_type, None, |_| {})
     }
 
     pub(crate) fn trigger_transient_event_with_game_value<U, V>(
@@ -333,28 +223,14 @@ impl Game {
         info: &U,
         details: &V,
     ) {
-        self.trigger_event_with_game_value(
+        trigger_event_with_game_value(
+            self,
             player_index,
             move |e| event(&mut e.transient),
             info,
             details,
             &mut (),
         );
-    }
-
-    fn trigger_event_with_game_value<U, V, W>(
-        &mut self,
-        player_index: usize,
-        event: impl Fn(&mut PlayerEvents) -> &mut Event<Game, U, V, W>,
-        info: &U,
-        details: &V,
-        extra_value: &mut W,
-    ) where
-        W: Clone + PartialEq,
-    {
-        let e = event(&mut self.players[player_index].events).take();
-        e.trigger(self, info, details, extra_value);
-        event(&mut self.players[player_index].events).set(e);
     }
 
     #[must_use]

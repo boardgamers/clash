@@ -6,7 +6,7 @@ use crate::content::advances::democracy::use_civil_liberties;
 use crate::content::advances::economy::{use_bartering, use_taxes};
 use crate::content::builtin::Builtin;
 use crate::content::civilizations::rome::use_aqueduct;
-use crate::content::persistent_events::PersistentEventType;
+use crate::content::persistent_events::{trigger_persistent_event_with_listener, PersistentEventType};
 use crate::content::wonders::{
     great_lighthouse_city, great_lighthouse_spawns, use_great_library, use_great_lighthouse,
     use_great_statue,
@@ -224,7 +224,8 @@ pub(crate) fn execute_custom_action(
     player_index: usize,
     a: CustomActionActivation,
 ) {
-    let _ = game.trigger_persistent_event_with_listener(
+    let _ = trigger_persistent_event_with_listener(
+        game,
         &[player_index],
         |e| &mut e.custom_action,
         &custom_action_builtins()[&a.action.action.clone()].listeners,
