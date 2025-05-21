@@ -377,6 +377,13 @@
                       "path": "/events/0/handler/request/ResourceReward"
                     },
                     {
+                      "op": "add",
+                      "path": "/events/0/origin_override",
+                      "value": {
+                        "Builtin": "Taxes"
+                      }
+                    },
+                    {
                       "op": "replace",
                       "path": "/players/0/resources/mood_tokens",
                       "value": 11

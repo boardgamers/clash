@@ -9,8 +9,7 @@ use crate::collect::{PositionCollection, collect};
 use crate::construct::Construct;
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::{
-    CustomAction, CustomActionActivation, CustomActionType, can_play_custom_action,
-    custom_action_builtins, execute_custom_action,
+    CustomAction, CustomActionActivation, CustomActionType, can_play_custom_action, execute_custom_action,
 };
 use crate::content::persistent_events::{
     PaymentRequest, PersistentEventType, TriggerPersistentEventParams, trigger_persistent_event_ext,
@@ -221,9 +220,7 @@ impl PlayingAction {
                         .played_once_per_turn_actions
                         .push(c);
                 }
-                Some(EventOrigin::Builtin(
-                    custom_action_builtins()[&c].name.clone(),
-                ))
+                Some(c.event_origin())
             }
             PlayingActionType::ActionCard(c) => Some(EventOrigin::CivilCard(c)),
             _ => None,

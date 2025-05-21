@@ -13,23 +13,21 @@ use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::resource_pile::ResourcePile;
 
 pub(crate) fn democracy() -> AdvanceGroup {
-    advance_group_builder(
-        "Democracy",
-        vec![
-            voting(),
-            separation_of_power(),
-            civil_liberties(),
-            free_economy(),
-        ],
-    )
+    advance_group_builder("Democracy", vec![
+        voting(),
+        separation_of_power(),
+        civil_liberties(),
+        free_economy(),
+    ])
 }
 
-pub(crate) const VOTING: &str =
-    "As a free action, you may spend 1 mood token to gain an action 'Increase happiness'";
-
 fn voting() -> AdvanceBuilder {
-    AdvanceInfo::builder(Advance::Voting, "Voting", VOTING)
-        .add_custom_action(VotingIncreaseHappiness)
+    AdvanceInfo::builder(
+        Advance::Voting,
+        "Voting",
+        "As a free action, you may spend 1 mood token to gain an action 'Increase happiness'",
+    )
+    .add_custom_action(VotingIncreaseHappiness)
 }
 
 fn separation_of_power() -> AdvanceBuilder {
@@ -76,37 +74,38 @@ pub(crate) fn use_civil_liberties() -> Builtin {
         .build()
 }
 
-pub(crate) const FREE_ECONOMY: &str = "As a free action, you may spend 1 mood token to collect \
-                  resources in one city. This must be your only collect action this turn";
-
 fn free_economy() -> AdvanceBuilder {
-    AdvanceInfo::builder(Advance::FreeEconomy, "Free Economy", FREE_ECONOMY)
-        .add_custom_action(FreeEconomyCollect)
-        .add_transient_event_listener(
-            |event| &mut event.is_playing_action_available,
-            0,
-            |available, game, i| {
-                let p = game.player(i.player);
-                match &i.action_type {
-                    PlayingActionType::Collect
-                        if p.played_once_per_turn_actions.contains(&FreeEconomyCollect) =>
-                    {
-                        *available =
-                            Err("Cannot collect when Free Economy Collect was used".to_string());
-                    }
-                    PlayingActionType::Custom(i)
-                        if *i == FreeEconomyCollect
-                            && current_player_turn_log(game).items.iter().any(|item| {
-                                matches!(&item.action, Action::Playing(PlayingAction::Collect(c)) if
-                                c.action_type == PlayingActionType::Collect)
-                            }) =>
-                    {
-                        *available = Err(
-                            "Cannot use Free Economy Collect when Collect was used".to_string()
-                        );
-                    }
-                    _ => {}
+    AdvanceInfo::builder(
+        Advance::FreeEconomy,
+        "Free Economy",
+        "As a free action, you may spend 1 mood token to collect \
+            resources in one city. This must be your only collect action this turn",
+    )
+    .add_custom_action(FreeEconomyCollect)
+    .add_transient_event_listener(
+        |event| &mut event.is_playing_action_available,
+        0,
+        |available, game, i| {
+            let p = game.player(i.player);
+            match &i.action_type {
+                PlayingActionType::Collect
+                    if p.played_once_per_turn_actions.contains(&FreeEconomyCollect) =>
+                {
+                    *available =
+                        Err("Cannot collect when Free Economy Collect was used".to_string());
                 }
-            },
-        )
+                PlayingActionType::Custom(i)
+                    if *i == FreeEconomyCollect
+                        && current_player_turn_log(game).items.iter().any(|item| {
+                            matches!(&item.action, Action::Playing(PlayingAction::Collect(c)) if
+                                c.action_type == PlayingActionType::Collect)
+                        }) =>
+                {
+                    *available =
+                        Err("Cannot use Free Economy Collect when Collect was used".to_string());
+                }
+                _ => {}
+            }
+        },
+    )
 }

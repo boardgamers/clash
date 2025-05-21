@@ -504,12 +504,7 @@ impl Game {
             .clone()
             .into_iter()
             .filter(|(t, _)| {
-                if matches!(
-                    t,
-                    CustomActionType::ArtsInfluenceCultureAttempt
-                        | CustomActionType::FreeEconomyCollect
-                        | CustomActionType::VotingIncreaseHappiness
-                ) {
+                if t.base_action_advance().is_some() {
                     // returned as part of "base_or_custom_available"
                     return false;
                 }

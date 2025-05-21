@@ -278,6 +278,13 @@
                     },
                     {
                       "op": "add",
+                      "path": "/events/0/origin_override",
+                      "value": {
+                        "CivilCard": 2
+                      }
+                    },
+                    {
+                      "op": "add",
                       "path": "/players/0/action_cards",
                       "value": [
                         2

@@ -280,6 +280,9 @@
                             }
                           },
                           "last_priority_used": 0,
+                          "origin_override": {
+                            "CivilCard": 39
+                          },
                           "player": 0
                         }
                       ]

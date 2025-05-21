@@ -19,14 +19,16 @@ pub(crate) fn culture() -> AdvanceGroup {
     advance_group_builder("Culture", vec![arts(), sports(), monuments(), theaters()])
 }
 
-pub(crate) const ARTS: &str = "Once per turn, as a free action, you may spend \
-        1 culture token to get an influence culture action";
-
 fn arts() -> AdvanceBuilder {
-    AdvanceInfo::builder(Advance::Arts, "Arts", ARTS)
-        .with_advance_bonus(CultureToken)
-        .with_unlocked_building(Obelisk)
-        .add_custom_action(CustomActionType::ArtsInfluenceCultureAttempt)
+    AdvanceInfo::builder(
+        Advance::Arts,
+        "Arts",
+        "Once per turn, as a free action, you may spend \
+            1 culture token to get an influence culture action",
+    )
+    .with_advance_bonus(CultureToken)
+    .with_unlocked_building(Obelisk)
+    .add_custom_action(CustomActionType::ArtsInfluenceCultureAttempt)
 }
 
 const SPORTS_DESC: &str = "As an action, you may spend \

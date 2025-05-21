@@ -13,6 +13,7 @@ use crate::content::wonders::{
     great_lighthouse_city, great_lighthouse_spawns, use_great_library, use_great_lighthouse,
     use_great_statue,
 };
+use crate::events::EventOrigin;
 use crate::player::Player;
 use crate::playing_actions::{ActionResourceCost, PlayingActionType};
 use crate::position::Position;
@@ -177,6 +178,24 @@ impl CustomActionType {
     #[must_use]
     fn free_and_advance_cost_without_discounts() -> CustomActionInfo {
         CustomActionInfo::new(true, false, ActionResourceCost::AdvanceCostWithoutDiscount)
+    }
+
+    #[must_use]
+    pub fn base_action_advance(&self) -> Option<Advance> {
+        match self {
+            CustomActionType::ArtsInfluenceCultureAttempt => Some(Advance::Arts),
+            CustomActionType::FreeEconomyCollect => Some(Advance::FreeEconomy),
+            CustomActionType::VotingIncreaseHappiness => Some(Advance::Voting),
+            _ => None,
+        }
+    }
+
+    #[must_use]
+    pub fn event_origin(&self) -> EventOrigin {
+        self.base_action_advance().map_or_else(
+            || EventOrigin::Builtin(custom_action_builtins()[self].name.clone()),
+            EventOrigin::Advance,
+        )
     }
 }
 

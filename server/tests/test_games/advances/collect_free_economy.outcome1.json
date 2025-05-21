@@ -322,6 +322,9 @@
                             }
                           },
                           "last_priority_used": 0,
+                          "origin_override": {
+                            "Advance": "FreeEconomy"
+                          },
                           "player": 0
                         }
                       ]
