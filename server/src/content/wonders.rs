@@ -294,7 +294,6 @@ pub(crate) fn use_great_library() -> Builtin {
                         .get_advances()
                         .iter()
                         .filter_map(
-                            // todo special advances
                             |a| {
                                 (a.government.is_none() && !player.has_advance(a.advance))
                                     .then_some(a.advance)
