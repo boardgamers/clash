@@ -4,7 +4,7 @@ use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::events::{Event, EventOrigin};
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player_events::{CostInfo, TransientEvents};
-use crate::special_advance::SpecialAdvance;
+use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo};
 use crate::unit::UnitType;
 use crate::wonder::{Wonder, wonders_built_points, wonders_owned_points};
 use crate::{
@@ -286,6 +286,16 @@ impl Player {
     #[must_use]
     pub fn can_use_special_advance(&self, advance: SpecialAdvance, game: &Game) -> bool {
         self.can_use_advance(advance.info(game).required_advance)
+    }
+    
+    #[must_use]
+    pub fn special_advance(
+        &self,
+        advance: Advance,
+    ) -> Option<&SpecialAdvanceInfo>                    {
+        self.civilization.special_advances.iter().find(
+            |sa| sa.required_advance == advance,
+        )
     }
 
     #[must_use]

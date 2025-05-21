@@ -8,9 +8,7 @@ use crate::unit_ui::add_unit_description;
 use itertools::Itertools;
 use macroquad::color::Color;
 use macroquad::math::vec2;
-use macroquad::prelude::{
-    BLACK, BLUE, GRAY, Rect, WHITE, YELLOW, draw_rectangle, draw_rectangle_lines,
-};
+use macroquad::prelude::{BLACK, BLUE, GRAY, Rect, WHITE, YELLOW, draw_rectangle, draw_rectangle_lines, GREEN};
 use server::action::Action;
 use server::advance::{Advance, AdvanceAction, AdvanceInfo, Bonus};
 use server::game::GameState;
@@ -98,22 +96,25 @@ pub fn show_advance_menu(
                     );
                     state.draw_text(name, pos.x + 10., pos.y + 22.);
 
-                    let thickness = match &state.active_dialog {
-                        ActiveDialog::AdvancePayment(p) => {
-                            if p.name == *name {
-                                8.
-                            } else {
-                                4.
-                            }
-                        }
-                        _ => 4.,
-                    };
+                    if rc.shown_player.special_advance(a.advance).is_some() {
+                        draw_rectangle_lines(rect.x, rect.y, rect.w, rect.h, 12., GREEN);
+                    }
+
                     draw_rectangle_lines(
                         rect.x,
                         rect.y,
                         rect.w,
                         rect.h,
-                        thickness,
+                        match &state.active_dialog {
+                            ActiveDialog::AdvancePayment(p) => {
+                                if p.name == *name {
+                                    8.
+                                } else {
+                                    4.
+                                }
+                            }
+                            _ => 4.,
+                        },
                         border_color(a),
                     );
                 } else {
@@ -175,13 +176,10 @@ fn description(rc: &RenderContext, a: &AdvanceInfo) -> Vec<String> {
         ));
     }
     if let Some(b) = &a.bonus {
-        parts.push(format!(
-            "Bonus: {}",
-            match b {
-                Bonus::MoodToken => "Mood Token",
-                Bonus::CultureToken => "Culture Token",
-            }
-        ));
+        parts.push(format!("Bonus: {}", match b {
+            Bonus::MoodToken => "Mood Token",
+            Bonus::CultureToken => "Culture Token",
+        }));
     }
     if let Some(g) = &a.government {
         parts.push(format!("Government: {g}"));
@@ -195,6 +193,11 @@ fn description(rc: &RenderContext, a: &AdvanceInfo) -> Vec<String> {
         add_unit_description(&mut parts, UnitType::Cavalry);
         parts.push("Can build in a city with a Market: elephant".to_string());
         add_unit_description(&mut parts, UnitType::Elephant);
+    }
+
+    if let Some(s) = rc.shown_player.special_advance(a.advance) {
+        parts.push(format!("Special advance: {}", s.name));
+        add_tooltip_description(&mut parts, &s.description);
     }
 
     parts
