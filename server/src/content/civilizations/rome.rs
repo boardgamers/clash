@@ -6,33 +6,42 @@ use crate::content::custom_actions::CustomActionType;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo};
 
 pub(crate) fn rome() -> Civilization {
-    Civilization::new(
-        "Rome",
-        vec![
-            SpecialAdvanceInfo::builder(
-                SpecialAdvance::Aqueduct,
-                Advance::Engineering,
-                "Aqueduct",
-                "Ignore Famine events. \
+    Civilization::new("Rome", vec![aqueduct(), roman_roads()], vec![])
+}
+
+fn aqueduct() -> SpecialAdvanceInfo {
+    SpecialAdvanceInfo::builder(
+        SpecialAdvance::Aqueduct,
+        Advance::Engineering,
+        "Aqueduct",
+        "Ignore Famine events. \
                 Sanitation cost is reduced to 0 resources or a free action",
-            )
-            .add_custom_action(CustomActionType::Aqueduct)
-            .add_transient_event_listener(
-                |event| &mut event.advance_cost,
-                3,
-                |i, &a, _| {
-                    if a == Advance::Sanitation {
-                        i.set_zero();
-                        i.info
-                            .log
-                            .push("Aqueduct reduced the cost to 0".to_string());
-                    }
-                },
-            )
-            .build(),
-        ],
-        vec![],
     )
+    .add_custom_action(CustomActionType::Aqueduct)
+    .add_transient_event_listener(
+        |event| &mut event.advance_cost,
+        3,
+        |i, &a, _| {
+            if a == Advance::Sanitation {
+                i.set_zero();
+                i.info
+                    .log
+                    .push("Aqueduct reduced the cost to 0".to_string());
+            }
+        },
+    )
+    .build()
+}
+
+fn roman_roads() -> SpecialAdvanceInfo {
+    SpecialAdvanceInfo::builder(
+        SpecialAdvance::RomanRoads,
+        Advance::Roads,
+        "Roman Roads",
+        "Roads distance is increased by 2 if travelling between your cities",
+    )
+    // is checked explicitly
+    .build()
 }
 
 pub(crate) fn use_aqueduct() -> Builtin {

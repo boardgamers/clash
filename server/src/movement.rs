@@ -231,7 +231,7 @@ pub(crate) fn move_units_destinations(
     }
 
     Ok(
-        move_routes(start, player, unit_ids, game, embark_carrier_id)
+        move_routes(start, player, unit_ids, game, embark_carrier_id, stack_size)
             .into_iter()
             .map(|route| {
                 let result = move_route_result(
@@ -285,7 +285,6 @@ fn move_route_result(
             .filter(|unit| unit.unit_type.is_army_unit() && !unit.is_transported())
             .count()
             + stack_size
-            + route.stack_size_used
             > STACK_LIMIT
     {
         return Err("stack limit exceeded".to_string());
@@ -380,7 +379,6 @@ fn check_can_move(
 pub struct MoveRoute {
     pub destination: Position,
     pub cost: PaymentOptions,
-    pub stack_size_used: usize,
     pub ignore_terrain_movement_restrictions: bool,
 }
 
@@ -391,7 +389,6 @@ impl MoveRoute {
         Self {
             destination,
             cost: options,
-            stack_size_used: 0,
             ignore_terrain_movement_restrictions: false,
         }
     }
@@ -428,6 +425,7 @@ pub(crate) fn move_routes(
     units: &[u32],
     game: &Game,
     embark_carrier_id: Option<u32>,
+    stack_size: usize,
 ) -> Vec<MoveRoute> {
     let mut base: Vec<MoveRoute> = starting
         .neighbors()
@@ -439,7 +437,7 @@ pub(crate) fn move_routes(
         base.extend(reachable_with_navigation(player, units, &game.map));
     }
     if player.can_use_advance(Advance::Roads) && embark_carrier_id.is_none() {
-        base.extend(reachable_with_roads(player, units, game));
+        base.extend(reachable_with_roads(player, units, game, stack_size));
     }
     add_diplomatic_relations(player, game, &mut base);
     add_negotiations(player, game, &mut base);
@@ -466,7 +464,12 @@ fn add_negotiations(player: &Player, game: &Game, base: &mut Vec<MoveRoute>) {
 }
 
 #[must_use]
-fn reachable_with_roads(player: &Player, units: &[u32], game: &Game) -> Vec<MoveRoute> {
+fn reachable_with_roads(
+    player: &Player,
+    units: &[u32],
+    game: &Game,
+    stack_size: usize,
+) -> Vec<MoveRoute> {
     let start = units.iter().find_map(|&id| {
         let unit = player.get_unit(id);
         if unit.unit_type.is_land_based() {
@@ -486,66 +489,74 @@ fn reachable_with_roads(player: &Player, units: &[u32], game: &Game) -> Vec<Move
         return start
             .neighbors()
             .into_iter()
-            .flat_map(|middle| {
-                // don't move over enemy units or cities
-                let stack_size_used = player
-                    .get_units(middle)
-                    .iter()
-                    .filter(|unit| unit.unit_type.is_army_unit())
-                    .count();
-
-                if map.is_land(middle) && game.enemy_player(player.index, middle).is_none() {
-                    let mut dest: Vec<(Position, usize)> = middle
-                        .neighbors()
-                        .into_iter()
-                        .map(move |n| (n, stack_size_used))
-                        .collect();
-                    dest.push((middle, stack_size_used));
-                    dest.retain(|&(p, _)| p != start);
-                    dest
-                } else {
-                    vec![]
-                }
-            })
-            .into_group_map_by(|&(p, _)| p)
+            .flat_map(|middle| next_road_step(player, game, map, middle, stack_size))
+            .into_group_map_by(|&p| p)
             .into_iter()
-            .filter_map(|(destination, stack_sizes_used)| {
-                if destination.distance(start) == 1 {
-                    // can go directly without using roads
-                    return None;
-                }
-
-                // but can stop on enemy units
-                if map.is_land(destination)
-                    && (
-                        // from or to owned city
-                        player.try_get_city(start).is_some()
-                            || player.try_get_city(destination).is_some()
-                    )
-                {
-                    let stack_size_used =
-                        stack_sizes_used.iter().map(|&(_, s)| s).min().expect("min");
-                    let mut cost = PaymentOptions::resources(
-                        player,
-                        PaymentReason::Move,
-                        ResourcePile::ore(1) + ResourcePile::food(1),
-                    );
-                    let origin = EventOrigin::Advance(Advance::Roads);
-                    cost.modifiers = vec![origin.clone()];
-                    let route = MoveRoute {
-                        destination,
-                        cost,
-                        stack_size_used,
-                        ignore_terrain_movement_restrictions: true,
-                    };
-                    Some(route)
-                } else {
-                    None
-                }
-            })
+            .filter_map(|(destination, _)| road_route(player, start, map, destination))
             .collect();
     }
     vec![]
+}
+
+fn road_route(
+    player: &Player,
+    start: Position,
+    map: &Map,
+    destination: Position,
+) -> Option<MoveRoute> {
+    if destination.distance(start) <= 1 {
+        // can go directly without using roads
+        return None;
+    }
+
+    // but can stop on enemy units
+    if map.is_land(destination)
+        && (
+            // from or to owned city
+            player.try_get_city(start).is_some() || player.try_get_city(destination).is_some()
+        )
+    {
+        let mut cost = PaymentOptions::resources(
+            player,
+            PaymentReason::Move,
+            ResourcePile::ore(1) + ResourcePile::food(1),
+        );
+        let origin = EventOrigin::Advance(Advance::Roads);
+        cost.modifiers = vec![origin.clone()];
+        let route = MoveRoute {
+            destination,
+            cost,
+            ignore_terrain_movement_restrictions: true,
+        };
+        Some(route)
+    } else {
+        None
+    }
+}
+
+fn next_road_step(
+    player: &Player,
+    game: &Game,
+    map: &Map,
+    from: Position,
+    stack_size: usize,
+) -> Vec<Position> {
+    // don't move over enemy units or cities
+    let stack_size_used = player
+        .get_units(from)
+        .iter()
+        .filter(|unit| unit.unit_type.is_army_unit())
+        .count();
+
+    if stack_size_used + stack_size > STACK_LIMIT {
+        return vec![];
+    }
+
+    if map.is_land(from) && game.enemy_player(player.index, from).is_none() {
+        from.neighbors()
+    } else {
+        vec![]
+    }
 }
 
 #[must_use]
