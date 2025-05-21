@@ -15,7 +15,7 @@ use crate::map::Terrain;
 use crate::map::Terrain::Fertile;
 use crate::objective_card::{discard_objective_card, gain_objective_card_from_pile};
 use crate::payment::{PaymentOptions, PaymentReason};
-use crate::player::{Player, add_unit};
+use crate::player::{add_unit, Player};
 use crate::position::Position;
 use crate::tactics_card::CombatRole;
 use crate::unit::UnitType;
@@ -267,13 +267,15 @@ pub(crate) fn use_great_lighthouse() -> Builtin {
     .build()
 }
 
+ const GREAT_LIBRARY: &str = "Once per turn, as a free action, \
+        you may choose a non-government, non-civilization advance: \
+        Use the effect until the end of your turn.";
+
 fn library() -> WonderInfo {
     WonderInfo::builder(
         Wonder::GreatLibrary,
         "Great Library",
-        "Once per turn, as a free action, \
-        you may choose a non-government, non-civilization advance: \
-        Use the effect until the end of your turn.",
+        GREAT_LIBRARY,
         PaymentOptions::fixed_resources(ResourcePile::new(3, 6, 3, 0, 0, 0, 5)),
         Advance::Philosophy,
     )
@@ -283,7 +285,7 @@ fn library() -> WonderInfo {
 pub(crate) fn use_great_library() -> Builtin {
     Builtin::builder(
         "Great Library",
-        "Use the effect of a non-government, non-civilization advance",
+        GREAT_LIBRARY,
     )
     .add_advance_request(
         |event| &mut event.custom_action,

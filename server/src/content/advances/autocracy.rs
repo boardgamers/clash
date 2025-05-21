@@ -7,15 +7,12 @@ use crate::content::persistent_events::ResourceRewardRequest;
 use crate::payment::ResourceReward;
 
 pub(crate) fn autocracy() -> AdvanceGroup {
-    advance_group_builder(
-        "Autocracy",
-        vec![
-            nationalism(),
-            totalitarianism(),
-            absolute_power(),
-            forced_labor(),
-        ],
-    )
+    advance_group_builder("Autocracy", vec![
+        nationalism(),
+        totalitarianism(),
+        absolute_power(),
+        forced_labor(),
+    ])
 }
 
 fn nationalism() -> AdvanceBuilder {
@@ -77,17 +74,16 @@ fn totalitarianism() -> AdvanceBuilder {
     )
 }
 
+const ABSOLUTE_POWER: &str =
+    "Once per turn, as a free action, you may spend 2 mood tokens to get an additional action";
+
 fn absolute_power() -> AdvanceBuilder {
-    AdvanceInfo::builder(
-        Advance::AbsolutePower,
-        "Absolute Power",
-        "Once per turn, as a free action, you may spend 2 mood tokens to get an additional action",
-    )
-    .add_custom_action(AbsolutePower)
+    AdvanceInfo::builder(Advance::AbsolutePower, "Absolute Power", ABSOLUTE_POWER)
+        .add_custom_action(AbsolutePower)
 }
 
 pub(crate) fn use_absolute_power() -> Builtin {
-    Builtin::builder("Absolute Power", "")
+    Builtin::builder("Absolute Power", ABSOLUTE_POWER)
         .add_simple_persistent_event_listener(
             |event| &mut event.custom_action,
             0,
@@ -101,17 +97,16 @@ pub(crate) fn use_absolute_power() -> Builtin {
         .build()
 }
 
+const FORCED_LABOR: &str = "Once per turn, as a free action, \
+    you may spend 1 mood token to treat your Angry cities as neutral for the rest of the turn";
+
 fn forced_labor() -> AdvanceBuilder {
-    AdvanceInfo::builder(
-        Advance::ForcedLabor,
-        "Forced Labor",
-        "Once per turn, as a free action, you may spend 1 mood token to treat your Angry cities as neutral for the rest of the turn",
-    )
+    AdvanceInfo::builder(Advance::ForcedLabor, "Forced Labor", FORCED_LABOR)
         .add_custom_action(ForcedLabor)
 }
 
 pub(crate) fn use_forced_labor() -> Builtin {
-    Builtin::builder("Forced Labor", "")
+    Builtin::builder("Forced Labor", FORCED_LABOR)
         .add_simple_persistent_event_listener(
             |event| &mut event.custom_action,
             0,
