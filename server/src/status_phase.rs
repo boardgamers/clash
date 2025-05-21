@@ -3,7 +3,11 @@ use crate::action_card::gain_action_card_from_pile;
 use crate::advance::{Advance, do_advance, gain_advance_without_payment, remove_advance};
 use crate::consts::AGES;
 use crate::content::builtin::Builtin;
-use crate::content::persistent_events::{trigger_persistent_event_with_listener, AdvanceRequest, EventResponse, PaymentRequest, PersistentEventRequest, PersistentEventType, PlayerRequest, PositionRequest, TriggerPersistentEventParams};
+use crate::content::persistent_events::{
+    AdvanceRequest, EventResponse, PaymentRequest, PersistentEventRequest, PersistentEventType,
+    PlayerRequest, PositionRequest, TriggerPersistentEventParams,
+    trigger_persistent_event_with_listener,
+};
 use crate::objective_card::{
     gain_objective_card_from_pile, present_objective_cards, status_phase_completable,
 };
@@ -84,7 +88,7 @@ pub(crate) fn play_status_phase(game: &mut Game, mut phase: StatusPhaseState) {
             &game.cache.status_phase_handler(&phase).listeners.clone(),
             phase,
             PersistentEventType::StatusPhase,
-            TriggerPersistentEventParams::default()
+            TriggerPersistentEventParams::default(),
         ) {
             Some(s) => s,
             None => return,

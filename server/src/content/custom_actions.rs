@@ -6,7 +6,9 @@ use crate::content::advances::democracy::use_civil_liberties;
 use crate::content::advances::economy::{use_bartering, use_taxes};
 use crate::content::builtin::Builtin;
 use crate::content::civilizations::rome::use_aqueduct;
-use crate::content::persistent_events::{trigger_persistent_event_with_listener, PersistentEventType, TriggerPersistentEventParams};
+use crate::content::persistent_events::{
+    PersistentEventType, TriggerPersistentEventParams, trigger_persistent_event_with_listener,
+};
 use crate::content::wonders::{
     great_lighthouse_city, great_lighthouse_spawns, use_great_library, use_great_lighthouse,
     use_great_statue,
@@ -144,7 +146,7 @@ impl CustomActionType {
 
     #[must_use]
     pub fn playing_action_type(&self) -> PlayingActionType {
-        PlayingActionType::Custom(self.clone())
+        PlayingActionType::Custom(*self)
     }
 
     #[must_use]
@@ -231,20 +233,20 @@ pub(crate) fn execute_custom_action(
         &custom_action_builtins()[&a.action.action.clone()].listeners,
         a,
         PersistentEventType::CustomAction,
-        TriggerPersistentEventParams::default()
+        TriggerPersistentEventParams::default(),
     );
 }
 
 pub(crate) fn can_play_custom_action(
     game: &Game,
     p: &Player,
-    c: &CustomActionType,
+    c: CustomActionType,
 ) -> Result<(), String> {
-    if !p.custom_actions.contains_key(c) {
+    if !p.custom_actions.contains_key(&c) {
         return Err("Custom action not available".to_string());
     }
 
-    if c.info().once_per_turn && p.played_once_per_turn_actions.contains(c) {
+    if c.info().once_per_turn && p.played_once_per_turn_actions.contains(&c) {
         return Err("Custom action already played this turn".to_string());
     }
 

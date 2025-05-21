@@ -69,7 +69,7 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
     }
     let mut i = 0;
     for (a, origin) in game.available_custom_actions(rc.shown_player.index) {
-        if let Some(action) = generic_custom_action(rc, a.clone(), None) {
+        if let Some(action) = generic_custom_action(rc, a, None) {
             if bottom_left_texture(
                 rc,
                 &assets.custom_actions[&a],
@@ -97,7 +97,7 @@ pub fn custom_action_buttons<'a>(
         .available_custom_actions(rc.shown_player.index)
         .into_iter()
         .filter_map(|(a, origin)| {
-            generic_custom_action(rc, a.clone(), city).map(|action| {
+            generic_custom_action(rc, a, city).map(|action| {
                 IconAction::new(
                     &rc.assets().custom_actions[&a],
                     event_help(rc, &origin),

@@ -542,6 +542,6 @@ pub fn available_influence_actions(game: &Game, player: usize) -> Vec<PlayingAct
         game,
         player,
         PlayingActionType::InfluenceCultureAttempt,
-        &CustomActionType::ArtsInfluenceCultureAttempt,
+        CustomActionType::ArtsInfluenceCultureAttempt,
     )
 }

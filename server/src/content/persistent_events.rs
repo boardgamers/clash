@@ -477,7 +477,7 @@ pub(crate) fn trigger_persistent_event_with_listener<V>(
     listeners: &AbilityListeners,
     event_type: V,
     store_type: impl Fn(V) -> PersistentEventType,
-    params: TriggerPersistentEventParams<V>
+    params: TriggerPersistentEventParams<V>,
 ) -> Option<V>
 where
     V: Clone + PartialEq,
@@ -486,14 +486,7 @@ where
         listeners.init(game, *p);
     }
 
-    let result = trigger_persistent_event_ext(
-        game,
-        players,
-        event,
-        event_type,
-        store_type,
-        params,
-    );
+    let result = trigger_persistent_event_ext(game, players, event, event_type, store_type, params);
 
     for p in players {
         listeners.deinit(game, *p);

@@ -6,7 +6,11 @@ use crate::barbarians::{barbarians_move, barbarians_spawn};
 use crate::card::{HandCard, discard_card, draw_card_from_pile};
 use crate::city::{MoodState, is_valid_city_terrain};
 use crate::content::incidents::great_persons::GREAT_PERSON_OFFSET;
-use crate::content::persistent_events::{trigger_persistent_event_with_listener, HandCardsRequest, PaymentRequest, PersistentEventType, PlayerRequest, PositionRequest, ResourceRewardRequest, SelectedStructure, StructuresRequest, TriggerPersistentEventParams, UnitsRequest};
+use crate::content::persistent_events::{
+    HandCardsRequest, PaymentRequest, PersistentEventType, PlayerRequest, PositionRequest,
+    ResourceRewardRequest, SelectedStructure, StructuresRequest, TriggerPersistentEventParams,
+    UnitsRequest, trigger_persistent_event_with_listener,
+};
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::map::Terrain;
@@ -655,8 +659,8 @@ pub(crate) fn on_trigger_incident(game: &mut Game, mut info: IncidentInfo) {
             TriggerPersistentEventParams {
                 log,
                 next_player: |i| i.player = IncidentPlayerInfo::new(),
-                .. Default::default()
-            }
+                ..Default::default()
+            },
         ) {
             Some(p) => p,
             None => return,

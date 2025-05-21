@@ -208,10 +208,9 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
 
         for c in cities {
             actions.push((
-                ActionType::Playing(PlayingActionType::Custom(a.clone())),
+                ActionType::Playing(PlayingActionType::Custom(a)),
                 vec![Action::Playing(PlayingAction::Custom(CustomAction::new(
-                    a.clone(),
-                    c,
+                    a, c,
                 )))],
             ));
         }

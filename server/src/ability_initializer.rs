@@ -865,11 +865,11 @@ pub(crate) trait AbilityInitializerSetup: Sized {
     }
 
     fn add_custom_action(self, action: CustomActionType) -> Self {
-        let deinitializer_action = action.clone();
+        let deinitializer_action = action;
         let key = self.get_key().clone();
         self.add_ability_initializer(move |game, player_index, _prio_delta| {
             let player = &mut game.players[player_index];
-            player.custom_actions.insert(action.clone(), key.clone());
+            player.custom_actions.insert(action, key.clone());
         })
         .add_ability_deinitializer(move |game, player_index| {
             let player = &mut game.players[player_index];

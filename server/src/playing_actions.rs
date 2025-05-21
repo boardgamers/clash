@@ -8,21 +8,26 @@ use crate::city::found_city;
 use crate::collect::{PositionCollection, collect};
 use crate::construct::Construct;
 use crate::content::builtin::Builtin;
-use crate::content::custom_actions::{CustomAction, CustomActionActivation, CustomActionType, can_play_custom_action, execute_custom_action, custom_action_builtins};
-use crate::content::persistent_events::{trigger_persistent_event_ext, PaymentRequest, PersistentEventType, TriggerPersistentEventParams};
+use crate::content::custom_actions::{
+    CustomAction, CustomActionActivation, CustomActionType, can_play_custom_action,
+    custom_action_builtins, execute_custom_action,
+};
+use crate::content::persistent_events::{
+    PaymentRequest, PersistentEventType, TriggerPersistentEventParams, trigger_persistent_event_ext,
+};
 use crate::cultural_influence::{InfluenceCultureAttempt, influence_culture_attempt};
+use crate::events::EventOrigin;
 use crate::game::GameState;
 use crate::happiness::increase_happiness;
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::{Player, remove_unit};
-use crate::player_events::{PlayingActionInfo};
+use crate::player_events::PlayingActionInfo;
 use crate::recruit::recruit;
 use crate::unit::Units;
 use crate::wonder::{
     Wonder, WonderCardInfo, WonderDiscount, cities_for_wonder, on_play_wonder_card,
 };
 use crate::{game::Game, position::Position, resource_pile::ResourcePile};
-use crate::events::EventOrigin;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub struct Collect {
@@ -137,7 +142,7 @@ impl PlayingActionType {
 
         match self {
             PlayingActionType::Custom(c) => {
-                can_play_custom_action(game, p, c)?;
+                can_play_custom_action(game, p, *c)?;
             }
             PlayingActionType::ActionCard(id) => {
                 can_play_action_card(game, p, *id)?;
@@ -209,21 +214,20 @@ impl PlayingAction {
             game.actions_left -= 1;
         }
 
-        let origin_override =
-            match playing_action_type {
-                PlayingActionType::Custom(c) => {
-                    if c.info().once_per_turn {
-                        game.players[player_index]
-                            .played_once_per_turn_actions
-                            .push(c);
-                    }
-                    Some(EventOrigin::Builtin(custom_action_builtins()[&c].name.clone()))
+        let origin_override = match playing_action_type {
+            PlayingActionType::Custom(c) => {
+                if c.info().once_per_turn {
+                    game.players[player_index]
+                        .played_once_per_turn_actions
+                        .push(c);
                 }
-                PlayingActionType::ActionCard(c) => {
-                    Some(EventOrigin::CivilCard(c))
-                }
-                _ => None,
-            };
+                Some(EventOrigin::Builtin(
+                    custom_action_builtins()[&c].name.clone(),
+                ))
+            }
+            PlayingActionType::ActionCard(c) => Some(EventOrigin::CivilCard(c)),
+            _ => None,
+        };
 
         ActionPayment::new(self).on_pay_action(game, player_index, origin_override)
     }
@@ -414,7 +418,7 @@ pub fn base_and_custom_action(
 ) -> (Option<PlayingActionType>, Option<CustomActionType>) {
     let (mut custom, mut action): (Vec<_>, Vec<_>) = actions.into_iter().partition_map(|a| {
         if let PlayingActionType::Custom(c) = a {
-            Either::Left(c.clone())
+            Either::Left(c)
         } else {
             Either::Right(a.clone())
         }
@@ -427,7 +431,7 @@ pub(crate) fn base_or_custom_available(
     game: &Game,
     player: usize,
     action: PlayingActionType,
-    custom: &CustomActionType,
+    custom: CustomActionType,
 ) -> Vec<PlayingActionType> {
     vec![action, custom.playing_action_type()]
         .into_iter()
@@ -452,7 +456,12 @@ impl ActionPayment {
         }
     }
 
-    pub(crate) fn on_pay_action(self, game: &mut Game, player_index: usize, origin_override: Option<EventOrigin>) -> Result<(), String> {
+    pub(crate) fn on_pay_action(
+        self,
+        game: &mut Game,
+        player_index: usize,
+        origin_override: Option<EventOrigin>,
+    ) -> Result<(), String> {
         let Some(a) = trigger_persistent_event_ext(
             game,
             &[player_index],
@@ -461,9 +470,8 @@ impl ActionPayment {
             PersistentEventType::PayAction,
             TriggerPersistentEventParams {
                 origin_override,
-                .. Default::default()
-            }
-
+                ..Default::default()
+            },
         ) else {
             return Ok(());
         };

@@ -15,7 +15,7 @@ use crate::map::Terrain;
 use crate::map::Terrain::Fertile;
 use crate::objective_card::{discard_objective_card, gain_objective_card_from_pile};
 use crate::payment::{PaymentOptions, PaymentReason};
-use crate::player::{add_unit, Player};
+use crate::player::{Player, add_unit};
 use crate::position::Position;
 use crate::tactics_card::CombatRole;
 use crate::unit::UnitType;
@@ -267,7 +267,7 @@ pub(crate) fn use_great_lighthouse() -> Builtin {
     .build()
 }
 
- const GREAT_LIBRARY: &str = "Once per turn, as a free action, \
+const GREAT_LIBRARY: &str = "Once per turn, as a free action, \
         you may choose a non-government, non-civilization advance: \
         Use the effect until the end of your turn.";
 
@@ -283,45 +283,42 @@ fn library() -> WonderInfo {
     .build()
 }
 pub(crate) fn use_great_library() -> Builtin {
-    Builtin::builder(
-        "Great Library",
-        GREAT_LIBRARY,
-    )
-    .add_advance_request(
-        |event| &mut event.custom_action,
-        0,
-        |game, player_index, _| {
-            let player = game.player(player_index);
-            Some(AdvanceRequest::new(
-                game.cache
-                    .get_advances()
-                    .iter()
-                    .filter_map(
-                        // todo special advances
-                        |a| {
-                            (a.government.is_none() && !player.has_advance(a.advance))
-                                .then_some(a.advance)
-                        },
-                    )
-                    .collect_vec(),
-            ))
-        },
-        |game, s, _| {
-            let advance = s.choice;
-            game.add_info_log_item(&format!(
-                "{} used the Great Library to use {} for the turn",
-                s.player_name,
-                advance.name(game)
-            ));
-            advance
-                .info(game)
-                .listeners
-                .clone()
-                .init(game, s.player_index);
-            game.player_mut(s.player_index).great_library_advance = Some(advance);
-        },
-    )
-    .build()
+    Builtin::builder("Great Library", GREAT_LIBRARY)
+        .add_advance_request(
+            |event| &mut event.custom_action,
+            0,
+            |game, player_index, _| {
+                let player = game.player(player_index);
+                Some(AdvanceRequest::new(
+                    game.cache
+                        .get_advances()
+                        .iter()
+                        .filter_map(
+                            // todo special advances
+                            |a| {
+                                (a.government.is_none() && !player.has_advance(a.advance))
+                                    .then_some(a.advance)
+                            },
+                        )
+                        .collect_vec(),
+                ))
+            },
+            |game, s, _| {
+                let advance = s.choice;
+                game.add_info_log_item(&format!(
+                    "{} used the Great Library to use {} for the turn",
+                    s.player_name,
+                    advance.name(game)
+                ));
+                advance
+                    .info(game)
+                    .listeners
+                    .clone()
+                    .init(game, s.player_index);
+                game.player_mut(s.player_index).great_library_advance = Some(advance);
+            },
+        )
+        .build()
 }
 
 fn great_gardens() -> WonderInfo {
