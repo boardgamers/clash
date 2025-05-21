@@ -6,7 +6,7 @@ use crate::content::advances::democracy::use_civil_liberties;
 use crate::content::advances::economy::{use_bartering, use_taxes};
 use crate::content::builtin::Builtin;
 use crate::content::civilizations::rome::use_aqueduct;
-use crate::content::persistent_events::{trigger_persistent_event_with_listener, PersistentEventType};
+use crate::content::persistent_events::{trigger_persistent_event_with_listener, PersistentEventType, TriggerPersistentEventParams};
 use crate::content::wonders::{
     great_lighthouse_city, great_lighthouse_spawns, use_great_library, use_great_lighthouse,
     use_great_statue,
@@ -67,7 +67,7 @@ impl CustomActionInfo {
     }
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Hash, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Copy, Hash, Debug)]
 pub enum CustomActionType {
     AbsolutePower,
     ForcedLabor,
@@ -231,8 +231,7 @@ pub(crate) fn execute_custom_action(
         &custom_action_builtins()[&a.action.action.clone()].listeners,
         a,
         PersistentEventType::CustomAction,
-        None,
-        |_| {},
+        TriggerPersistentEventParams::default()
     );
 }
 

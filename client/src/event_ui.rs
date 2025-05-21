@@ -48,11 +48,17 @@ pub fn custom_phase_event_help(rc: &RenderContext, description: &str) -> Vec<Str
 #[must_use]
 pub fn custom_phase_event_origin(rc: &RenderContext) -> EventOrigin {
     rc.game
-        .current_event_handler()
-        .as_ref()
-        .unwrap()
-        .origin
+        .current_event()
+        .origin_override
         .clone()
+        .unwrap_or_else(|| {
+            rc.game
+                .current_event_handler()
+                .as_ref()
+                .unwrap()
+                .origin
+                .clone()
+        })
 }
 
 pub fn pay_help<T: Clone>(rc: &RenderContext, p: &Payment<T>) -> Vec<String> {

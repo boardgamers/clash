@@ -2,7 +2,10 @@ use crate::cache::Cache;
 use crate::combat_roll::{COMBAT_DIE_SIDES, CombatDieRoll};
 use crate::consts::ACTIONS;
 use crate::content::effects::PermanentEffect;
-use crate::content::persistent_events::{trigger_persistent_event_ext, PersistentEventHandler, PersistentEventState, PersistentEventType};
+use crate::content::persistent_events::{
+    PersistentEventHandler, PersistentEventState, PersistentEventType,
+    TriggerPersistentEventParams, trigger_persistent_event_ext,
+};
 use crate::events::{Event, EventOrigin};
 use crate::game_data::GameData;
 use crate::log::{
@@ -12,7 +15,9 @@ use crate::log::{
 use crate::movement::MoveState;
 use crate::pirates::get_pirates_player;
 use crate::player::{CostTrigger, end_turn};
-use crate::player_events::{trigger_event_with_game_value, PersistentEvent, PersistentEvents, TransientEvents};
+use crate::player_events::{
+    PersistentEvent, PersistentEvents, TransientEvents, trigger_event_with_game_value,
+};
 use crate::resource::check_for_waste;
 use crate::status_phase::enter_status_phase;
 use crate::utils::Rng;
@@ -213,7 +218,14 @@ impl Game {
     where
         V: Clone + PartialEq,
     {
-        trigger_persistent_event_ext(self, players, event, value, to_event_type, None, |_| {})
+        trigger_persistent_event_ext(
+            self,
+            players,
+            event,
+            value,
+            to_event_type,
+            TriggerPersistentEventParams::default(),
+        )
     }
 
     pub(crate) fn trigger_transient_event_with_game_value<U, V>(

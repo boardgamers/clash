@@ -8,23 +8,21 @@ use crate::city::found_city;
 use crate::collect::{PositionCollection, collect};
 use crate::construct::Construct;
 use crate::content::builtin::Builtin;
-use crate::content::custom_actions::{
-    CustomAction, CustomActionActivation, CustomActionType, can_play_custom_action,
-    execute_custom_action,
-};
-use crate::content::persistent_events::{PaymentRequest, PersistentEventType};
+use crate::content::custom_actions::{CustomAction, CustomActionActivation, CustomActionType, can_play_custom_action, execute_custom_action, custom_action_builtins};
+use crate::content::persistent_events::{trigger_persistent_event_ext, PaymentRequest, PersistentEventType, TriggerPersistentEventParams};
 use crate::cultural_influence::{InfluenceCultureAttempt, influence_culture_attempt};
 use crate::game::GameState;
 use crate::happiness::increase_happiness;
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::{Player, remove_unit};
-use crate::player_events::PlayingActionInfo;
+use crate::player_events::{PlayingActionInfo};
 use crate::recruit::recruit;
 use crate::unit::Units;
 use crate::wonder::{
     Wonder, WonderCardInfo, WonderDiscount, cities_for_wonder, on_play_wonder_card,
 };
 use crate::{game::Game, position::Position, resource_pile::ResourcePile};
+use crate::events::EventOrigin;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub struct Collect {
@@ -211,15 +209,23 @@ impl PlayingAction {
             game.actions_left -= 1;
         }
 
-        if let PlayingActionType::Custom(c) = playing_action_type {
-            if c.info().once_per_turn {
-                game.players[player_index]
-                    .played_once_per_turn_actions
-                    .push(c);
-            }
-        }
+        let origin_override =
+            match playing_action_type {
+                PlayingActionType::Custom(c) => {
+                    if c.info().once_per_turn {
+                        game.players[player_index]
+                            .played_once_per_turn_actions
+                            .push(c);
+                    }
+                    Some(EventOrigin::Builtin(custom_action_builtins()[&c].name.clone()))
+                }
+                PlayingActionType::ActionCard(c) => {
+                    Some(EventOrigin::CivilCard(c))
+                }
+                _ => None,
+            };
 
-        ActionPayment::new(self).on_pay_action(game, player_index)
+        ActionPayment::new(self).on_pay_action(game, player_index, origin_override)
     }
 
     pub(crate) fn execute_without_cost(
@@ -313,7 +319,7 @@ impl PlayingAction {
             ),
             PlayingAction::ActionCard(a) => PlayingActionType::ActionCard(*a),
             PlayingAction::WonderCard(name) => PlayingActionType::WonderCard(*name),
-            PlayingAction::Custom(c) => PlayingActionType::Custom(c.action.clone()),
+            PlayingAction::Custom(c) => PlayingActionType::Custom(c.action),
             PlayingAction::EndTurn => PlayingActionType::EndTurn,
         }
     }
@@ -446,12 +452,18 @@ impl ActionPayment {
         }
     }
 
-    pub(crate) fn on_pay_action(self, game: &mut Game, player_index: usize) -> Result<(), String> {
-        let Some(a) = game.trigger_persistent_event(
+    pub(crate) fn on_pay_action(self, game: &mut Game, player_index: usize, origin_override: Option<EventOrigin>) -> Result<(), String> {
+        let Some(a) = trigger_persistent_event_ext(
+            game,
             &[player_index],
             |e| &mut e.pay_action,
             self,
             PersistentEventType::PayAction,
+            TriggerPersistentEventParams {
+                origin_override,
+                .. Default::default()
+            }
+
         ) else {
             return Ok(());
         };

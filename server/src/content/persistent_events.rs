@@ -1,3 +1,4 @@
+use crate::ability_initializer::AbilityListeners;
 use crate::action::execute_custom_phase_action;
 use crate::action_card::ActionCardInfo;
 use crate::advance::Advance;
@@ -14,10 +15,13 @@ use crate::events::EventOrigin;
 use crate::explore::ExploreResolutionState;
 use crate::game::Game;
 use crate::map::Rotation;
-use crate::objective_card::{present_instant_objective_cards, SelectObjectivesInfo};
+use crate::objective_card::{SelectObjectivesInfo, present_instant_objective_cards};
 use crate::payment::{PaymentOptions, ResourceReward};
 use crate::player::Player;
-use crate::player_events::{trigger_event_with_game_value, IncidentInfo, OnAdvanceInfo, PersistentEvent, PersistentEventInfo, PersistentEvents};
+use crate::player_events::{
+    IncidentInfo, OnAdvanceInfo, PersistentEvent, PersistentEventInfo, PersistentEvents,
+    trigger_event_with_game_value,
+};
 use crate::playing_actions::{ActionPayment, Recruit};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
@@ -27,7 +31,6 @@ use crate::wonder::{Wonder, WonderCardInfo};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::ops::RangeInclusive;
-use crate::ability_initializer::AbilityListeners;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum PersistentEventRequest {
@@ -126,20 +129,27 @@ pub enum PersistentEventType {
 pub struct PersistentEventState {
     pub event_type: PersistentEventType,
     #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub origin_override: Option<EventOrigin>,
+    #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub players_used: Vec<usize>,
-
     #[serde(flatten)]
     pub player: PersistentEventPlayer,
 }
 
 impl PersistentEventState {
     #[must_use]
-    pub fn new(current_player: usize, event_type: PersistentEventType) -> Self {
+    pub fn new(
+        current_player: usize,
+        event_type: PersistentEventType,
+        origin_override: Option<EventOrigin>,
+    ) -> Self {
         Self {
             event_type,
             players_used: vec![],
             player: PersistentEventPlayer::new(current_player),
+            origin_override,
         }
     }
 
@@ -369,10 +379,21 @@ impl EventResponse {
     }
 }
 
-
 #[derive(Debug, Clone)]
-pub struct TriggerPersistentEventParams {
+pub struct TriggerPersistentEventParams<V> {
+    pub log: Option<String>,
+    pub next_player: fn(&mut V) -> (),
+    pub origin_override: Option<EventOrigin>,
+}
 
+impl<V> Default for TriggerPersistentEventParams<V> {
+    fn default() -> Self {
+        Self {
+            log: None,
+            next_player: |_| {},
+            origin_override: None,
+        }
+    }
 }
 
 fn remaining_persistent_event_players(
@@ -393,8 +414,7 @@ pub(crate) fn trigger_persistent_event_ext<V>(
     event: fn(&mut PersistentEvents) -> &mut PersistentEvent<V>,
     mut value: V,
     to_event_type: impl Fn(V) -> PersistentEventType,
-    log: Option<&str>,
-    next_player: fn(&mut V) -> (),
+    params: TriggerPersistentEventParams<V>,
 ) -> Option<V>
 where
     V: Clone + PartialEq,
@@ -405,17 +425,19 @@ where
         .last()
         .is_none_or(|s| s.event_type != current_event_type)
     {
-        if let Some(log) = log {
+        if let Some(log) = params.log {
             game.add_info_log_group(log.to_string());
         }
-        game.events
-            .push(PersistentEventState::new(players[0], current_event_type));
+        game.events.push(PersistentEventState::new(
+            players[0],
+            current_event_type,
+            params.origin_override,
+        ));
     }
 
     let event_index = game.events.len() - 1;
 
-    for player_index in remaining_persistent_event_players(players, game.current_event())
-    {
+    for player_index in remaining_persistent_event_players(players, game.current_event()) {
         let info = PersistentEventInfo {
             player: player_index,
         };
@@ -436,7 +458,7 @@ where
         state.players_used.push(player_index);
         if let Some(&p) = remaining_persistent_event_players(players, state).first() {
             state.player = PersistentEventPlayer::new(p);
-            next_player(&mut value);
+            (params.next_player)(&mut value);
         }
     }
     game.events.pop();
@@ -455,8 +477,7 @@ pub(crate) fn trigger_persistent_event_with_listener<V>(
     listeners: &AbilityListeners,
     event_type: V,
     store_type: impl Fn(V) -> PersistentEventType,
-    log: Option<&str>,
-    next_player: fn(&mut V) -> (),
+    params: TriggerPersistentEventParams<V>
 ) -> Option<V>
 where
     V: Clone + PartialEq,
@@ -471,8 +492,7 @@ where
         event,
         event_type,
         store_type,
-        log,
-        next_player,
+        params,
     );
 
     for p in players {
@@ -480,5 +500,3 @@ where
     }
     result
 }
-
-
