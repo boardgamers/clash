@@ -78,6 +78,19 @@ pub struct PaymentOptions {
 
 impl PaymentOptions {
     #[must_use]
+    pub fn new(
+        default: ResourcePile,
+        conversions: Vec<PaymentConversion>,
+        modifiers: Vec<EventOrigin>,
+    ) -> Self {
+        PaymentOptions {
+            default,
+            conversions,
+            modifiers,
+        }
+    }
+
+    #[must_use]
     pub fn first_valid_payment(&self, available: &ResourcePile) -> Option<ResourcePile> {
         let discount_left = self
             .conversions
@@ -149,15 +162,15 @@ impl PaymentOptions {
     ) -> PaymentOptions {
         let max = r.clone().max().expect("range empty");
         let d = max - r.min().expect("range empty");
-        PaymentOptions {
-            default: ResourcePile::of(t, max),
-            conversions: vec![PaymentConversion::new(
+        PaymentOptions::new(
+            ResourcePile::of(t, max),
+            vec![PaymentConversion::new(
                 vec![ResourcePile::of(t, 1)],
                 ResourcePile::empty(),
                 PaymentConversionType::MayOverpay(d),
             )],
-            modifiers: vec![],
-        }
+            vec![],
+        )
         .add_extra_options(player, reason)
     }
 
@@ -177,12 +190,10 @@ impl PaymentOptions {
 
     #[must_use]
     pub(crate) fn tokens(player: &Player, reason: PaymentReason, cost: u8) -> Self {
-        Self::sum(
-            player,
-            reason,
-            cost,
-            &[ResourceType::MoodTokens, ResourceType::CultureTokens],
-        )
+        Self::sum(player, reason, cost, &[
+            ResourceType::MoodTokens,
+            ResourceType::CultureTokens,
+        ])
     }
 
     #[must_use]
@@ -210,11 +221,7 @@ impl PaymentOptions {
             ));
         }
 
-        PaymentOptions {
-            default: cost,
-            conversions,
-            modifiers: vec![],
-        }
+        PaymentOptions::new(cost, conversions, vec![])
     }
 
     #[must_use]
@@ -293,10 +300,10 @@ impl ResourceReward {
 
     #[must_use]
     pub(crate) fn tokens(cost: u8) -> Self {
-        Self::sum(
-            cost,
-            &[ResourceType::MoodTokens, ResourceType::CultureTokens],
-        )
+        Self::sum(cost, &[
+            ResourceType::MoodTokens,
+            ResourceType::CultureTokens,
+        ])
     }
 }
 
@@ -385,11 +392,11 @@ pub(crate) fn payment_options_sum(
             ResourcePile::of(pair[1], 1),
         ));
     });
-    PaymentOptions {
-        default: ResourcePile::of(types_by_preference[0], cost),
+    PaymentOptions::new(
+        ResourcePile::of(types_by_preference[0], cost),
         conversions,
-        modifiers: vec![],
-    }
+        vec![],
+    )
 }
 
 #[cfg(test)]
@@ -461,15 +468,15 @@ mod tests {
 
     #[test]
     fn test_find_valid_payment() {
-        let cost = PaymentOptions {
-            default: ResourcePile::food(1),
-            conversions: vec![PaymentConversion {
+        let cost = PaymentOptions::new(
+            ResourcePile::food(1),
+            vec![PaymentConversion {
                 from: vec![ResourcePile::food(1)],
                 to: ResourcePile::wood(1),
                 payment_conversion_type: PaymentConversionType::Unlimited,
             }],
-            modifiers: vec![],
-        };
+            vec![],
+        );
         let available = ResourcePile::wood(1) + ResourcePile::ore(1);
         assert_eq!(
             cost.first_valid_payment(&available),
@@ -483,39 +490,35 @@ mod tests {
         let test_cases = vec![
             ValidPaymentTestCase {
                 name: "no conversions".to_string(),
-                options: PaymentOptions {
-                    default: ResourcePile::food(1),
-                    conversions: vec![],
-                    modifiers: vec![],
-                },
+                options: PaymentOptions::new(ResourcePile::food(1), vec![], vec![]),
                 valid: vec![ResourcePile::food(1)],
                 invalid: vec![ResourcePile::food(2)],
             },
             ValidPaymentTestCase {
                 name: "food to wood".to_string(),
-                options: PaymentOptions {
-                    default: ResourcePile::food(1),
-                    conversions: vec![PaymentConversion {
+                options: PaymentOptions::new(
+                    ResourcePile::food(1),
+                    vec![PaymentConversion {
                         from: vec![ResourcePile::food(1)],
                         to: ResourcePile::wood(1),
                         payment_conversion_type: PaymentConversionType::Unlimited,
                     }],
-                    modifiers: vec![],
-                },
+                    vec![],
+                ),
                 valid: vec![ResourcePile::food(1), ResourcePile::wood(1)],
                 invalid: vec![ResourcePile::food(2), ResourcePile::ore(1)],
             },
             ValidPaymentTestCase {
                 name: "food to wood with amount".to_string(),
-                options: PaymentOptions {
-                    default: ResourcePile::food(2),
-                    conversions: vec![PaymentConversion {
+                options: PaymentOptions::new(
+                    ResourcePile::food(2),
+                    vec![PaymentConversion {
                         from: vec![ResourcePile::food(1)],
                         to: ResourcePile::wood(1),
                         payment_conversion_type: PaymentConversionType::Unlimited,
                     }],
-                    modifiers: vec![],
-                },
+                    vec![],
+                ),
                 valid: vec![
                     ResourcePile::food(2),
                     ResourcePile::food(1) + ResourcePile::wood(1),
@@ -525,15 +528,15 @@ mod tests {
             },
             ValidPaymentTestCase {
                 name: "food to wood with limit".to_string(),
-                options: PaymentOptions {
-                    default: ResourcePile::food(2),
-                    conversions: vec![PaymentConversion {
+                options: PaymentOptions::new(
+                    ResourcePile::food(2),
+                    vec![PaymentConversion {
                         from: vec![ResourcePile::food(1)],
                         to: ResourcePile::wood(1),
                         payment_conversion_type: PaymentConversionType::MayNotOverpay(1),
                     }],
-                    modifiers: vec![],
-                },
+                    vec![],
+                ),
                 valid: vec![
                     ResourcePile::food(2),
                     ResourcePile::wood(1) + ResourcePile::food(1),
@@ -542,15 +545,15 @@ mod tests {
             },
             ValidPaymentTestCase {
                 name: "3 infantry with draft".to_string(),
-                options: PaymentOptions {
-                    default: ResourcePile::food(3) + ResourcePile::ore(3),
-                    conversions: vec![PaymentConversion {
+                options: PaymentOptions::new(
+                    ResourcePile::food(3) + ResourcePile::ore(3),
+                    vec![PaymentConversion {
                         from: vec![ResourcePile::food(1) + ResourcePile::ore(1)],
                         to: ResourcePile::mood_tokens(1),
                         payment_conversion_type: PaymentConversionType::MayNotOverpay(1),
                     }],
-                    modifiers: vec![],
-                },
+                    vec![],
+                ),
                 valid: vec![
                     ResourcePile::food(3) + ResourcePile::ore(3),
                     ResourcePile::food(2) + ResourcePile::ore(2) + ResourcePile::mood_tokens(1),
@@ -562,29 +565,29 @@ mod tests {
             },
             ValidPaymentTestCase {
                 name: "discount must be used".to_string(),
-                options: PaymentOptions {
-                    default: ResourcePile::food(3),
-                    conversions: vec![PaymentConversion {
+                options: PaymentOptions::new(
+                    ResourcePile::food(3),
+                    vec![PaymentConversion {
                         from: vec![ResourcePile::food(1)],
                         to: ResourcePile::empty(),
                         payment_conversion_type: PaymentConversionType::MayNotOverpay(2),
                     }],
-                    modifiers: vec![],
-                },
+                    vec![],
+                ),
                 valid: vec![ResourcePile::food(1)],
                 invalid: vec![ResourcePile::food(2)],
             },
             ValidPaymentTestCase {
                 name: "discount with overpay".to_string(),
-                options: PaymentOptions {
-                    default: ResourcePile::food(3),
-                    conversions: vec![PaymentConversion {
+                options: PaymentOptions::new(
+                    ResourcePile::food(3),
+                    vec![PaymentConversion {
                         from: vec![ResourcePile::food(1)],
                         to: ResourcePile::empty(),
                         payment_conversion_type: PaymentConversionType::MayOverpay(2),
                     }],
-                    modifiers: vec![],
-                },
+                    vec![],
+                ),
                 valid: vec![
                     ResourcePile::food(1),
                     ResourcePile::food(2),
@@ -594,9 +597,9 @@ mod tests {
             },
             ValidPaymentTestCase {
                 name: "food to wood to ore".to_string(),
-                options: PaymentOptions {
-                    default: ResourcePile::food(1),
-                    conversions: vec![
+                options: PaymentOptions::new(
+                    ResourcePile::food(1),
+                    vec![
                         PaymentConversion {
                             from: vec![ResourcePile::food(1)],
                             to: ResourcePile::wood(1),
@@ -608,8 +611,8 @@ mod tests {
                             payment_conversion_type: PaymentConversionType::Unlimited,
                         },
                     ],
-                    modifiers: vec![],
-                },
+                    vec![],
+                ),
                 valid: vec![
                     ResourcePile::food(1),
                     ResourcePile::wood(1),
@@ -619,9 +622,9 @@ mod tests {
             },
             ValidPaymentTestCase {
                 name: "food to wood to ore with reversed conversion order".to_string(),
-                options: PaymentOptions {
-                    default: ResourcePile::food(1),
-                    conversions: vec![
+                options: PaymentOptions::new(
+                    ResourcePile::food(1),
+                    vec![
                         PaymentConversion {
                             from: vec![ResourcePile::wood(1)],
                             to: ResourcePile::ore(1),
@@ -633,8 +636,8 @@ mod tests {
                             payment_conversion_type: PaymentConversionType::Unlimited,
                         },
                     ],
-                    modifiers: vec![],
-                },
+                    vec![],
+                ),
                 valid: vec![
                     ResourcePile::food(1),
                     ResourcePile::wood(1),
@@ -644,11 +647,9 @@ mod tests {
             },
             ValidPaymentTestCase {
                 name: "gold can replace anything but mood and culture tokens".to_string(),
-                options: PaymentOptions {
-                    default: ResourcePile::food(1)
-                        + ResourcePile::wood(1)
-                        + ResourcePile::mood_tokens(1),
-                    conversions: vec![PaymentConversion {
+                options: PaymentOptions::new(
+                    ResourcePile::food(1) + ResourcePile::wood(1) + ResourcePile::mood_tokens(1),
+                    vec![PaymentConversion {
                         from: vec![
                             ResourcePile::food(1),
                             ResourcePile::wood(1),
@@ -658,8 +659,8 @@ mod tests {
                         to: ResourcePile::gold(1),
                         payment_conversion_type: PaymentConversionType::Unlimited,
                     }],
-                    modifiers: vec![],
-                },
+                    vec![],
+                ),
                 valid: vec![
                     ResourcePile::food(1) + ResourcePile::wood(1) + ResourcePile::mood_tokens(1),
                     ResourcePile::food(1) + ResourcePile::gold(1) + ResourcePile::mood_tokens(1),
