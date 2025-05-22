@@ -411,7 +411,7 @@ pub(crate) fn init_player(game: &mut Game, player_index: usize) {
             .init(game, player_index);
 
         for s in game.player(player_index).special_advances {
-            if is_special_advance_active(s, &game.player(player_index).advances, game) {
+            if is_special_advance_active(s, game.player(player_index).advances, game) {
                 s.info(game).listeners.clone().init(game, player_index);
             }
         }

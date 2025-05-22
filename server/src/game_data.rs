@@ -359,7 +359,7 @@ fn player_from_data(data: PlayerData, game: &Game) -> Player {
         special_advances: civilization
             .special_advances
             .iter()
-            .filter(|s| is_special_advance_active(s.advance, &advances, game))
+            .filter(|s| is_special_advance_active(s.advance, advances, game))
             .map(|s| s.advance)
             .collect(),
         civilization,
