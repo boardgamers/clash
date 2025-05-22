@@ -38,7 +38,7 @@ fn roman_roads() -> SpecialAdvanceInfo {
         SpecialAdvance::RomanRoads,
         Advance::Roads,
         "Roman Roads",
-        "Roads distance is increased by 2 if travelling between your cities",
+        "Roads distance is increased to 4 if travelling between your cities",
     )
     // is checked explicitly
     .build()

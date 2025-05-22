@@ -53,6 +53,7 @@ pub struct Player {
     pub available_leaders: Vec<String>,
     pub advances: EnumSet<Advance>,
     pub great_library_advance: Option<Advance>,
+    pub great_library_special_advance: Option<Advance>, // transient
     pub unlocked_special_advances: EnumSet<SpecialAdvance>,
     pub wonders_built: Vec<Wonder>,
     pub wonders_owned: EnumSet<Wonder>, // transient
@@ -285,6 +286,7 @@ impl Player {
 
     #[must_use]
     pub fn can_use_special_advance(&self, advance: SpecialAdvance, game: &Game) -> bool {
+        // todo check for civilization
         self.can_use_advance(advance.info(game).required_advance)
     }
 

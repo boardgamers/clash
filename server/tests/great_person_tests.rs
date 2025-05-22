@@ -189,12 +189,12 @@ fn test_great_diplomat() {
             TestAction::undoable(0, payment_response(ResourcePile::culture_tokens(1))).skip_json(),
             TestAction::not_undoable(
                 0,
-                Action::Movement(MovementAction::Move(MoveUnits {
+                Action::Movement(MovementAction::Move(MoveUnits::new(
                     units,
                     destination,
-                    embark_carrier_id: None,
-                    payment: ResourcePile::culture_tokens(2),
-                })),
+                     None,
+                    ResourcePile::culture_tokens(2),
+                ))),
             ),
         ],
     );
