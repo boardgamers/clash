@@ -259,7 +259,8 @@ pub fn do_advance(game: &mut Game, advance: Advance, player_index: usize) {
     player.advances.insert(advance);
 }
 
-#[must_use] pub fn find_special_advance(advance: Advance, p: &Player) -> Option<SpecialAdvance> {
+#[must_use]
+pub fn find_special_advance(advance: Advance, p: &Player) -> Option<SpecialAdvance> {
     p.civilization
         .special_advances
         .iter()

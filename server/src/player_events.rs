@@ -51,7 +51,7 @@ pub(crate) struct TransientEvents {
     pub on_influence_culture_resolve: Event<Game, InfluenceCultureOutcome>,
     pub before_move: Event<Game, MoveInfo>,
 
-    pub construct_cost: Event<CostInfo, Building, Game>,
+    pub building_cost: Event<CostInfo, Building, Game>,
     pub advance_cost: Event<CostInfo, Advance, Game>,
     pub happiness_cost: Event<CostInfo>,
     pub recruit_cost: Event<CostInfo, Units, Player>,
@@ -70,7 +70,7 @@ impl TransientEvents {
             on_influence_culture_resolve: Event::new("on_influence_culture_resolve"),
             before_move: Event::new("before_move"),
 
-            construct_cost: Event::new("construct_cost"),
+            building_cost: Event::new("building_cost"),
             advance_cost: Event::new("advance_cost"),
             happiness_cost: Event::new("happiness_cost"),
             recruit_cost: Event::new("recruit_cost"),

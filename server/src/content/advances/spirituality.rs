@@ -120,7 +120,7 @@ fn state_religion() -> AdvanceBuilder {
     )
     .with_advance_bonus(MoodToken)
     .add_transient_event_listener(
-        |event| &mut event.construct_cost,
+        |event| &mut event.building_cost,
         0,
         |i, &b, _| {
             if matches!(b, Temple) {

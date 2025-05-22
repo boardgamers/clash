@@ -419,7 +419,7 @@ impl Player {
     #[must_use]
     pub fn building_cost(&self, game: &Game, building: Building, execute: CostTrigger) -> CostInfo {
         self.trigger_cost_event(
-            |e| &e.construct_cost,
+            |e| &e.building_cost,
             &PaymentOptions::resources(self, PaymentReason::Building, BUILDING_COST),
             &building,
             game,

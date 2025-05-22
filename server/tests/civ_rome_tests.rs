@@ -1,6 +1,4 @@
-use crate::common::{
-    JsonTest, TestAction, advance_action, custom_action, payment_response,
-};
+use crate::common::{JsonTest, TestAction, advance_action, custom_action, payment_response};
 use server::action::Action;
 use server::advance::Advance;
 use server::content::custom_actions::CustomActionType;
