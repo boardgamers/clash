@@ -192,7 +192,7 @@ fn test_great_diplomat() {
                 Action::Movement(MovementAction::Move(MoveUnits::new(
                     units,
                     destination,
-                     None,
+                    None,
                     ResourcePile::culture_tokens(2),
                 ))),
             ),

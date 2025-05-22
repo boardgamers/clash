@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::do_gain_action_card_from_pile;
-use crate::advance::Advance;
+use crate::advance::{Advance, init_great_library};
 use crate::card::HandCard;
 use crate::city::{City, MoodState};
 use crate::content::builtin::Builtin;
@@ -282,6 +282,7 @@ fn library() -> WonderInfo {
     .add_custom_action(CustomActionType::GreatLibrary)
     .build()
 }
+
 pub(crate) fn use_great_library() -> Builtin {
     Builtin::builder("Great Library", GREAT_LIBRARY)
         .add_advance_request(
@@ -293,12 +294,10 @@ pub(crate) fn use_great_library() -> Builtin {
                     game.cache
                         .get_advances()
                         .iter()
-                        .filter_map(
-                            |a| {
-                                (a.government.is_none() && !player.has_advance(a.advance))
-                                    .then_some(a.advance)
-                            },
-                        )
+                        .filter_map(|a| {
+                            (a.government.is_none() && !player.has_advance(a.advance))
+                                .then_some(a.advance)
+                        })
                         .collect_vec(),
                 ))
             },
@@ -309,12 +308,18 @@ pub(crate) fn use_great_library() -> Builtin {
                     s.player_name,
                     advance.name(game)
                 ));
-                advance
-                    .info(game)
-                    .listeners
-                    .clone()
-                    .init(game, s.player_index);
                 game.player_mut(s.player_index).great_library_advance = Some(advance);
+                init_great_library(game, s.player_index);
+
+                if let Some(special_advance) =
+                    game.player(s.player_index).great_library_special_advance
+                {
+                    game.add_info_log_item(&format!(
+                        "{} used the Great Library to use {} for the turn",
+                        s.player_name,
+                        special_advance.name(game)
+                    ));
+                }
             },
         )
         .build()

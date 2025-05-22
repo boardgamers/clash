@@ -356,7 +356,8 @@ fn player_from_data(data: PlayerData, game: &Game) -> Player {
         active_leader: data.active_leader,
         available_leaders: data.available_leaders,
         great_library_advance: data.great_library_advance,
-        unlocked_special_advances: civilization
+        great_library_special_advance: None, // is set in init_player
+        special_advances: civilization
             .special_advances
             .iter()
             .filter(|s| advances.contains(s.required_advance))

@@ -1,7 +1,6 @@
 use crate::payment_ui::Payment;
 use crate::render_context::RenderContext;
 use crate::tooltip::add_tooltip_description;
-use server::content::wonders::get_all_uncached;
 use server::events::EventOrigin;
 
 #[must_use]

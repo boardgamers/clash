@@ -54,18 +54,6 @@
           "position": "E2"
         }
       ],
-      "civilization": "Rome",
-      "advances": [
-        "Roads",
-        "Farming",
-        "Mining",
-        "Tactics"
-      ],
-      "incident_tokens": 3,
-      "wonder_cards": [
-        "Pyramids"
-      ],
-      "next_unit_id": 10,
       "units": [
         {
           "position": "E2",
@@ -97,7 +85,19 @@
           "unit_type": "Settler",
           "id": 5
         }
-      ]
+      ],
+      "civilization": "Rome",
+      "advances": [
+        "Farming",
+        "Mining",
+        "Roads",
+        "Tactics"
+      ],
+      "incident_tokens": 3,
+      "wonder_cards": [
+        "Pyramids"
+      ],
+      "next_unit_id": 10
     },
     {
       "id": 1,

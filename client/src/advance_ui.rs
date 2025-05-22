@@ -12,7 +12,7 @@ use macroquad::prelude::{
     BLACK, BLUE, GRAY, GREEN, Rect, WHITE, YELLOW, draw_rectangle, draw_rectangle_lines,
 };
 use server::action::Action;
-use server::advance::{find_special_advance, Advance, AdvanceAction, AdvanceInfo, Bonus};
+use server::advance::{Advance, AdvanceAction, AdvanceInfo, Bonus, find_special_advance};
 use server::game::GameState;
 use server::player::{CostTrigger, Player};
 use server::playing_actions::PlayingAction;

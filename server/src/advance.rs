@@ -14,7 +14,6 @@ use crate::{ability_initializer::AbilityInitializerSetup, resource_pile::Resourc
 use Bonus::*;
 use enumset::EnumSetType;
 use serde::{Deserialize, Serialize};
-use std::mem;
 
 // id / 4 = advance group
 #[derive(EnumSetType, Serialize, Deserialize, Debug, Ord, PartialOrd, Hash)]
@@ -260,7 +259,7 @@ pub fn do_advance(game: &mut Game, advance: Advance, player_index: usize) {
     player.advances.insert(advance);
 }
 
-pub fn find_special_advance(advance: Advance, p: &Player) -> Option<SpecialAdvance> {
+#[must_use] pub fn find_special_advance(advance: Advance, p: &Player) -> Option<SpecialAdvance> {
     p.civilization
         .special_advances
         .iter()
@@ -275,11 +274,15 @@ pub(crate) fn gain_advance_without_payment(
     take_incident_token: bool,
 ) {
     do_advance(game, advance, player_index);
-    on_advance(game, player_index, OnAdvanceInfo {
-        advance,
-        payment,
-        take_incident_token,
-    });
+    on_advance(
+        game,
+        player_index,
+        OnAdvanceInfo {
+            advance,
+            payment,
+            take_incident_token,
+        },
+    );
 }
 
 pub(crate) fn on_advance(game: &mut Game, player_index: usize, info: OnAdvanceInfo) {
@@ -326,7 +329,7 @@ fn unlock_special_advance(game: &mut Game, special_advance: SpecialAdvance, play
         .clone()
         .one_time_init(game, player_index);
     game.players[player_index]
-        .unlocked_special_advances
+        .special_advances
         .insert(special_advance);
 }
 
@@ -341,13 +344,12 @@ fn undo_unlock_special_advance(
         .clone()
         .undo(game, player_index);
     game.players[player_index]
-        .unlocked_special_advances
+        .special_advances
         .remove(special_advance);
 }
 
 pub(crate) fn init_player(game: &mut Game, player_index: usize) {
-    let advances = mem::take(&mut game.player_mut(player_index).advances);
-    for advance in advances.iter() {
+    for advance in game.player(player_index).advances {
         advance
             .info(game)
             .listeners
@@ -362,15 +364,34 @@ pub(crate) fn init_player(game: &mut Game, player_index: usize) {
                 .init(game, player_index);
         }
     }
-    game.player_mut(player_index).advances = advances;
+}
+
+pub(crate) fn init_great_library(game: &mut Game, player_index: usize) {
+    if let Some(advance) = game.player(player_index).great_library_advance {
+        advance
+            .info(game)
+            .listeners
+            .clone()
+            .init(game, player_index);
+
+        if let Some(special_advance) = find_special_advance(advance, game.player(player_index)) {
+            special_advance
+                .info(game)
+                .listeners
+                .clone()
+                .init(game, player_index);
+            game.player_mut(player_index).great_library_special_advance = Some(special_advance);
+        }
+    }
 }
 
 pub(crate) fn base_advance_cost(player: &Player) -> PaymentOptions {
-    PaymentOptions::sum(player, PaymentReason::GainAdvance, ADVANCE_COST, &[
-        ResourceType::Ideas,
-        ResourceType::Food,
-        ResourceType::Gold,
-    ])
+    PaymentOptions::sum(
+        player,
+        PaymentReason::GainAdvance,
+        ADVANCE_COST,
+        &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
+    )
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]

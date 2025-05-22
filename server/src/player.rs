@@ -4,7 +4,7 @@ use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::events::{Event, EventOrigin};
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player_events::{CostInfo, TransientEvents};
-use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo};
+use crate::special_advance::SpecialAdvance;
 use crate::unit::UnitType;
 use crate::wonder::{Wonder, wonders_built_points, wonders_owned_points};
 use crate::{
@@ -53,8 +53,8 @@ pub struct Player {
     pub available_leaders: Vec<String>,
     pub advances: EnumSet<Advance>,
     pub great_library_advance: Option<Advance>,
-    pub great_library_special_advance: Option<Advance>, // transient
-    pub unlocked_special_advances: EnumSet<SpecialAdvance>,
+    pub great_library_special_advance: Option<SpecialAdvance>, // transient
+    pub special_advances: EnumSet<SpecialAdvance>,
     pub wonders_built: Vec<Wonder>,
     pub wonders_owned: EnumSet<Wonder>, // transient
     pub incident_tokens: u8,
@@ -110,8 +110,9 @@ impl Player {
                 .collect(),
             civilization,
             advances: EnumSet::empty(),
-            unlocked_special_advances: EnumSet::empty(),
+            special_advances: EnumSet::empty(),
             great_library_advance: None,
+            great_library_special_advance: None,
             incident_tokens: 0,
             completed_objectives: Vec::new(),
             captured_leaders: Vec::new(),
@@ -276,7 +277,7 @@ impl Player {
 
     #[must_use]
     pub fn has_special_advance(&self, advance: SpecialAdvance) -> bool {
-        self.unlocked_special_advances.contains(advance)
+        self.special_advances.contains(advance)
     }
 
     #[must_use]
@@ -285,9 +286,11 @@ impl Player {
     }
 
     #[must_use]
-    pub fn can_use_special_advance(&self, advance: SpecialAdvance, game: &Game) -> bool {
-        // todo check for civilization
-        self.can_use_advance(advance.info(game).required_advance)
+    pub fn can_use_special_advance(&self, advance: SpecialAdvance) -> bool {
+        self.has_special_advance(advance)
+            || self
+                .great_library_special_advance
+                .is_some_and(|a| a == advance)
     }
 
     #[must_use]
@@ -304,8 +307,7 @@ impl Player {
             ),
             (
                 "Advances",
-                (self.advances.len() + self.unlocked_special_advances.len()) as f32
-                    * ADVANCE_VICTORY_POINTS,
+                (self.advances.len() + self.special_advances.len()) as f32 * ADVANCE_VICTORY_POINTS,
             ),
             (
                 "Objectives",
@@ -619,6 +621,9 @@ pub fn end_turn(game: &mut Game, player: usize) {
     p.played_once_per_turn_actions.clear();
     p.event_info.clear();
     if let Some(a) = p.great_library_advance.take() {
+        a.info(game).listeners.clone().deinit(game, player);
+    }
+    if let Some(a) = game.player_mut(player).great_library_special_advance.take() {
         a.info(game).listeners.clone().deinit(game, player);
     }
 }

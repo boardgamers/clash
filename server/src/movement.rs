@@ -488,7 +488,7 @@ fn reachable_with_roads(
             return vec![];
         }
 
-        let roman_roads = player.can_use_special_advance(SpecialAdvance::RomanRoads, game);
+        let roman_roads = player.can_use_special_advance(SpecialAdvance::RomanRoads);
         let mut routes: Vec<MoveRoute> = next_road_step(player, game, start, stack_size)
             .into_iter()
             .flat_map(|middle| next_road_step(player, game, middle, stack_size))
@@ -568,7 +568,7 @@ fn road_route(
     if from_city && to_city && ignore_city_to_city {
         return None;
     }
-    
+
     let mut cost = PaymentOptions::resources(
         player,
         PaymentReason::Move,
