@@ -244,12 +244,7 @@ pub fn do_advance(game: &mut Game, advance: Advance, player_index: usize) {
     let bonus = info.bonus.clone();
     info.listeners.one_time_init(game, player_index);
 
-    if let Some(special_advance) = game.players[player_index]
-        .civilization
-        .special_advances
-        .iter()
-        .find_map(|s| (s.required_advance == advance).then_some(s.advance))
-    {
+    if let Some(special_advance) = find_special_advance(advance, game.player(player_index)) {
         unlock_special_advance(game, special_advance, player_index);
     }
 
@@ -265,6 +260,13 @@ pub fn do_advance(game: &mut Game, advance: Advance, player_index: usize) {
     player.advances.insert(advance);
 }
 
+pub fn find_special_advance(advance: Advance, p: &Player) -> Option<SpecialAdvance> {
+    p.civilization
+        .special_advances
+        .iter()
+        .find_map(|s| (s.required_advance == advance).then_some(s.advance))
+}
+
 pub(crate) fn gain_advance_without_payment(
     game: &mut Game,
     advance: Advance,
@@ -273,15 +275,11 @@ pub(crate) fn gain_advance_without_payment(
     take_incident_token: bool,
 ) {
     do_advance(game, advance, player_index);
-    on_advance(
-        game,
-        player_index,
-        OnAdvanceInfo {
-            advance,
-            payment,
-            take_incident_token,
-        },
-    );
+    on_advance(game, player_index, OnAdvanceInfo {
+        advance,
+        payment,
+        take_incident_token,
+    });
 }
 
 pub(crate) fn on_advance(game: &mut Game, player_index: usize, info: OnAdvanceInfo) {
@@ -310,12 +308,7 @@ pub(crate) fn remove_advance(game: &mut Game, advance: Advance, player_index: us
     let bonus = info.bonus.clone();
     info.listeners.clone().undo(game, player_index);
 
-    if let Some(special_advance) = game.players[player_index]
-        .civilization
-        .special_advances
-        .iter()
-        .find_map(|s| (s.required_advance == advance).then_some(s.advance))
-    {
+    if let Some(special_advance) = find_special_advance(advance, game.player(player_index)) {
         undo_unlock_special_advance(game, special_advance, player_index);
     }
 
@@ -355,41 +348,29 @@ fn undo_unlock_special_advance(
 pub(crate) fn init_player(game: &mut Game, player_index: usize) {
     let advances = mem::take(&mut game.player_mut(player_index).advances);
     for advance in advances.iter() {
-        let info = advance.info(game);
-        info.listeners.clone().init(game, player_index);
-        for i in 0..game
-            .player(player_index)
-            .civilization
-            .special_advances
-            .len()
-        {
-            if game.players[player_index].civilization.special_advances[i].required_advance
-                == advance
-            {
-                let special_advance = game
-                    .player_mut(player_index)
-                    .civilization
-                    .special_advances
-                    .remove(i);
-                special_advance.listeners.init(game, player_index);
-                game.players[player_index]
-                    .civilization
-                    .special_advances
-                    .insert(i, special_advance);
-                break;
-            }
+        advance
+            .info(game)
+            .listeners
+            .clone()
+            .init(game, player_index);
+
+        if let Some(special_advance) = find_special_advance(advance, game.player(player_index)) {
+            special_advance
+                .info(game)
+                .listeners
+                .clone()
+                .init(game, player_index);
         }
     }
     game.player_mut(player_index).advances = advances;
 }
 
 pub(crate) fn base_advance_cost(player: &Player) -> PaymentOptions {
-    PaymentOptions::sum(
-        player,
-        PaymentReason::GainAdvance,
-        ADVANCE_COST,
-        &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
-    )
+    PaymentOptions::sum(player, PaymentReason::GainAdvance, ADVANCE_COST, &[
+        ResourceType::Ideas,
+        ResourceType::Food,
+        ResourceType::Gold,
+    ])
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]

@@ -1,6 +1,7 @@
 use crate::payment_ui::Payment;
 use crate::render_context::RenderContext;
 use crate::tooltip::add_tooltip_description;
+use server::content::wonders::get_all_uncached;
 use server::events::EventOrigin;
 
 #[must_use]
@@ -23,16 +24,7 @@ pub fn event_help(rc: &RenderContext, origin: &EventOrigin) -> Vec<String> {
                 l.first_ability_description, l.second_ability_description
             )
         }],
-        EventOrigin::SpecialAdvance(s) => vec![{
-            let s = rc
-                .shown_player
-                .civilization
-                .special_advances
-                .iter()
-                .find(|sa| &sa.advance == s)
-                .unwrap();
-            s.description.clone()
-        }],
+        EventOrigin::SpecialAdvance(s) => vec![s.info(rc.game).description.clone()],
     };
     h.extend(d);
     h

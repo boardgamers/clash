@@ -12,7 +12,7 @@ use macroquad::prelude::{
     BLACK, BLUE, GRAY, GREEN, Rect, WHITE, YELLOW, draw_rectangle, draw_rectangle_lines,
 };
 use server::action::Action;
-use server::advance::{Advance, AdvanceAction, AdvanceInfo, Bonus};
+use server::advance::{find_special_advance, Advance, AdvanceAction, AdvanceInfo, Bonus};
 use server::game::GameState;
 use server::player::{CostTrigger, Player};
 use server::playing_actions::PlayingAction;
@@ -98,7 +98,7 @@ pub fn show_advance_menu(
                     );
                     state.draw_text(name, pos.x + 10., pos.y + 22.);
 
-                    if rc.shown_player.special_advance(a.advance).is_some() {
+                    if find_special_advance(a.advance, rc.shown_player).is_some() {
                         draw_rectangle_lines(rect.x, rect.y, rect.w, rect.h, 12., GREEN);
                     }
 
@@ -200,7 +200,8 @@ fn description(rc: &RenderContext, a: &AdvanceInfo) -> Vec<String> {
         add_unit_description(&mut parts, UnitType::Elephant);
     }
 
-    if let Some(s) = rc.shown_player.special_advance(a.advance) {
+    if let Some(a) = find_special_advance(a.advance, rc.shown_player) {
+        let s = a.info(rc.game);
         parts.push(format!("Special advance: {}", s.name));
         add_tooltip_description(&mut parts, &s.description);
     }

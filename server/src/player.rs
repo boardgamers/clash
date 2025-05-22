@@ -291,14 +291,6 @@ impl Player {
     }
 
     #[must_use]
-    pub fn special_advance(&self, advance: Advance) -> Option<&SpecialAdvanceInfo> {
-        self.civilization
-            .special_advances
-            .iter()
-            .find(|sa| sa.required_advance == advance)
-    }
-
-    #[must_use]
     pub fn victory_points(&self, game: &Game) -> f32 {
         self.victory_points_parts(game).iter().map(|(_, v)| v).sum()
     }
