@@ -310,16 +310,6 @@ pub(crate) fn use_great_library() -> Builtin {
                 ));
                 game.player_mut(s.player_index).great_library_advance = Some(advance);
                 init_great_library(game, s.player_index);
-
-                if let Some(special_advance) =
-                    game.player(s.player_index).great_library_special_advance
-                {
-                    game.add_info_log_item(&format!(
-                        "{} used the Great Library to use {} for the turn",
-                        s.player_name,
-                        special_advance.name(game)
-                    ));
-                }
             },
         )
         .build()

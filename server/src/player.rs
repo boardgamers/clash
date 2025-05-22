@@ -1,4 +1,4 @@
-use crate::advance::{Advance, base_advance_cost};
+use crate::advance::{Advance, base_advance_cost, player_government};
 use crate::city_pieces::DestroyedStructures;
 use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::events::{Event, EventOrigin};
@@ -53,7 +53,6 @@ pub struct Player {
     pub available_leaders: Vec<String>,
     pub advances: EnumSet<Advance>,
     pub great_library_advance: Option<Advance>,
-    pub great_library_special_advance: Option<SpecialAdvance>, // transient
     pub special_advances: EnumSet<SpecialAdvance>,
     pub wonders_built: Vec<Wonder>,
     pub wonders_owned: EnumSet<Wonder>, // transient
@@ -112,7 +111,6 @@ impl Player {
             advances: EnumSet::empty(),
             special_advances: EnumSet::empty(),
             great_library_advance: None,
-            great_library_special_advance: None,
             incident_tokens: 0,
             completed_objectives: Vec::new(),
             captured_leaders: Vec::new(),
@@ -198,9 +196,7 @@ impl Player {
     /// Panics if the player has advances which don't exist
     #[must_use]
     pub fn government(&self, game: &Game) -> Option<String> {
-        self.advances
-            .iter()
-            .find_map(|advance| advance.info(game).government.clone())
+        player_government(game, self.advances)
     }
 
     pub fn gain_resources(&mut self, resources: ResourcePile) {
@@ -283,14 +279,6 @@ impl Player {
     #[must_use]
     pub fn can_use_advance(&self, advance: Advance) -> bool {
         self.has_advance(advance) || self.great_library_advance.is_some_and(|a| a == advance)
-    }
-
-    #[must_use]
-    pub fn can_use_special_advance(&self, advance: SpecialAdvance) -> bool {
-        self.has_special_advance(advance)
-            || self
-                .great_library_special_advance
-                .is_some_and(|a| a == advance)
     }
 
     #[must_use]
@@ -621,9 +609,6 @@ pub fn end_turn(game: &mut Game, player: usize) {
     p.played_once_per_turn_actions.clear();
     p.event_info.clear();
     if let Some(a) = p.great_library_advance.take() {
-        a.info(game).listeners.clone().deinit(game, player);
-    }
-    if let Some(a) = game.player_mut(player).great_library_special_advance.take() {
         a.info(game).listeners.clone().deinit(game, player);
     }
 }

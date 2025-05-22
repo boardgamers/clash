@@ -1,4 +1,4 @@
-use crate::advance::Advance;
+use crate::advance::{Advance, is_special_advance_active};
 use crate::cache::Cache;
 use crate::city::{City, CityData};
 use crate::city_pieces::{DestroyedStructures, DestroyedStructuresData};
@@ -356,11 +356,10 @@ fn player_from_data(data: PlayerData, game: &Game) -> Player {
         active_leader: data.active_leader,
         available_leaders: data.available_leaders,
         great_library_advance: data.great_library_advance,
-        great_library_special_advance: None, // is set in init_player
         special_advances: civilization
             .special_advances
             .iter()
-            .filter(|s| advances.contains(s.required_advance))
+            .filter(|s| is_special_advance_active(s.advance, &advances, game))
             .map(|s| s.advance)
             .collect(),
         civilization,

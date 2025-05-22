@@ -98,7 +98,7 @@ pub fn show_advance_menu(
                     );
                     state.draw_text(name, pos.x + 10., pos.y + 22.);
 
-                    if find_special_advance(a.advance, rc.shown_player).is_some() {
+                    if find_special_advance(a.advance, rc.game, rc.shown_player.index).is_some() {
                         draw_rectangle_lines(rect.x, rect.y, rect.w, rect.h, 12., GREEN);
                     }
 
@@ -200,7 +200,7 @@ fn description(rc: &RenderContext, a: &AdvanceInfo) -> Vec<String> {
         add_unit_description(&mut parts, UnitType::Elephant);
     }
 
-    if let Some(a) = find_special_advance(a.advance, rc.shown_player) {
+    if let Some(a) = find_special_advance(a.advance, rc.game, rc.shown_player.index) {
         let s = a.info(rc.game);
         parts.push(format!("Special advance: {}", s.name));
         add_tooltip_description(&mut parts, &s.description);

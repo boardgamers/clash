@@ -32,11 +32,17 @@ impl SpecialAdvance {
 }
 
 #[derive(Clone)]
+pub enum SpecialAdvanceRequirement {
+    AnyGovernment,
+    Advance(Advance),
+}
+
+#[derive(Clone)]
 pub struct SpecialAdvanceInfo {
     pub advance: SpecialAdvance,
     pub name: String,
     pub description: String,
-    pub required_advance: Advance,
+    pub requirement: SpecialAdvanceRequirement,
     pub listeners: AbilityListeners,
 }
 
@@ -44,13 +50,13 @@ impl SpecialAdvanceInfo {
     #[must_use]
     pub fn builder(
         advance: SpecialAdvance,
-        required_advance: Advance,
+        requirement: SpecialAdvanceRequirement,
         name: &str,
         description: &str,
     ) -> SpecialAdvanceBuilder {
         SpecialAdvanceBuilder::new(
             advance,
-            required_advance,
+            requirement,
             name.to_string(),
             description.to_string(),
         )
@@ -60,14 +66,14 @@ impl SpecialAdvanceInfo {
         advance: SpecialAdvance,
         name: String,
         description: String,
-        required_advance: Advance,
+        requirement: SpecialAdvanceRequirement,
         listeners: AbilityListeners,
     ) -> Self {
         Self {
             advance,
             name,
             description,
-            required_advance,
+            requirement,
             listeners,
         }
     }
@@ -77,14 +83,14 @@ pub struct SpecialAdvanceBuilder {
     advance: SpecialAdvance,
     name: String,
     description: String,
-    required_advance: Advance,
+    requirement: SpecialAdvanceRequirement,
     builder: AbilityInitializerBuilder,
 }
 
 impl SpecialAdvanceBuilder {
     fn new(
         advance: SpecialAdvance,
-        required_advance: Advance,
+        requirement: SpecialAdvanceRequirement,
         name: String,
         description: String,
     ) -> Self {
@@ -92,7 +98,7 @@ impl SpecialAdvanceBuilder {
             advance,
             name,
             description,
-            required_advance,
+            requirement,
             builder: AbilityInitializerBuilder::new(),
         }
     }
@@ -102,7 +108,7 @@ impl SpecialAdvanceBuilder {
             self.advance,
             self.name,
             self.description,
-            self.required_advance,
+            self.requirement,
             self.builder.build(),
         )
     }

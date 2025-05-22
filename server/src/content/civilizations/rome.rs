@@ -6,16 +6,20 @@ use crate::content::custom_actions::CustomActionType;
 use crate::payment::{PaymentConversion, PaymentConversionType, base_resources};
 use crate::player::gain_resources;
 use crate::resource_pile::ResourcePile;
-use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo};
+use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
 
 pub(crate) fn rome() -> Civilization {
-    Civilization::new("Rome", vec![aqueduct(), roman_roads(), captivi()], vec![])
+    Civilization::new(
+        "Rome",
+        vec![aqueduct(), roman_roads(), captivi(), provinces()],
+        vec![],
+    )
 }
 
 fn aqueduct() -> SpecialAdvanceInfo {
     SpecialAdvanceInfo::builder(
         SpecialAdvance::Aqueduct,
-        Advance::Engineering,
+        SpecialAdvanceRequirement::Advance(Advance::Engineering),
         "Aqueduct",
         "Ignore Famine events. \
                 Sanitation cost is reduced to 0 resources or a free action",
@@ -60,7 +64,7 @@ pub(crate) fn use_aqueduct() -> Builtin {
 fn roman_roads() -> SpecialAdvanceInfo {
     SpecialAdvanceInfo::builder(
         SpecialAdvance::RomanRoads,
-        Advance::Roads,
+        SpecialAdvanceRequirement::Advance(Advance::Roads),
         "Roman Roads",
         "Roads distance is increased to 4 if travelling between your cities",
     )
@@ -71,7 +75,7 @@ fn roman_roads() -> SpecialAdvanceInfo {
 fn captivi() -> SpecialAdvanceInfo {
     SpecialAdvanceInfo::builder(
         SpecialAdvance::Captivi,
-        Advance::Bartering,
+        SpecialAdvanceRequirement::Advance(Advance::Bartering),
         "Captivi",
         "Gain 1 gold and 1 mood token when you win a battle. \
         You may replace any resources with mood tokens when paying for buildings.",
@@ -103,6 +107,21 @@ fn captivi() -> SpecialAdvanceInfo {
                 .log
                 .push("Captivi allows to replace resources with mood tokens".to_string());
         },
+    )
+    .build()
+}
+
+fn provinces() -> SpecialAdvanceInfo {
+    // todo You can recruit Cavalry units in any city \
+    //         that is at least 3 spaces away from your capital
+    // todo Captured cities become Neutral instead of Angry - or Happy if you pay 1 culture token
+    SpecialAdvanceInfo::builder(
+        SpecialAdvance::Provinces,
+        SpecialAdvanceRequirement::AnyGovernment,
+        "Provinces",
+        "You can recruit Cavalry units in any city \
+        that is at least 3 spaces away from your capital. \
+        Captured cities become Neutral instead of Angry - or Happy if you pay 1 culture token.",
     )
     .build()
 }
