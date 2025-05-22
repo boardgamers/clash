@@ -3,6 +3,7 @@ use crate::advance::{Advance, gain_advance_without_payment};
 use crate::civilization::Civilization;
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
+use crate::payment::{PaymentConversion, PaymentConversionType, base_resources};
 use crate::player::gain_resources;
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo};
@@ -68,7 +69,6 @@ fn roman_roads() -> SpecialAdvanceInfo {
 }
 
 fn captivi() -> SpecialAdvanceInfo {
-    // todo You may replace any resources with mood tokens when paying for buildings
     SpecialAdvanceInfo::builder(
         SpecialAdvance::Captivi,
         Advance::Bartering,
@@ -92,16 +92,16 @@ fn captivi() -> SpecialAdvanceInfo {
     )
     .add_transient_event_listener(
         |event| &mut event.building_cost,
-        0,
-        |i, &b, _| {
-            i.cost.conversions.push(PaymentConversion::limited(
-                ResourcePile::of(ResourceType::Food, 1),
-                ResourcePile::empty(),
-                1,
+        2,
+        |i, _b, _| {
+            i.cost.conversions.push(PaymentConversion::new(
+                base_resources(),
+                ResourcePile::mood_tokens(1),
+                PaymentConversionType::Unlimited,
             ));
             i.info
                 .log
-                .push("State Religion reduced the food cost to 0".to_string());
+                .push("Captivi allows to replace resources with mood tokens".to_string());
         },
     )
     .build()

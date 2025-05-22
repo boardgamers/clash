@@ -201,21 +201,16 @@ impl PaymentOptions {
         cost: ResourcePile,
         discount_type: PaymentConversionType,
     ) -> Self {
-        let base_resources = vec![
-            ResourcePile::food(1),
-            ResourcePile::wood(1),
-            ResourcePile::ore(1),
-            ResourcePile::ideas(1),
-        ];
+        let base = base_resources();
 
         let mut conversions = vec![PaymentConversion::new(
-            base_resources.clone(),
+            base.clone(),
             ResourcePile::gold(1),
             PaymentConversionType::Unlimited,
         )];
         if !matches!(discount_type, PaymentConversionType::Unlimited) {
             conversions.push(PaymentConversion::new(
-                base_resources.clone(),
+                base.clone(),
                 ResourcePile::empty(),
                 discount_type,
             ));
@@ -691,4 +686,13 @@ mod tests {
             }
         }
     }
+}
+
+pub(crate) fn base_resources() -> Vec<ResourcePile> {
+    vec![
+        ResourcePile::food(1),
+        ResourcePile::wood(1),
+        ResourcePile::ore(1),
+        ResourcePile::ideas(1),
+    ]
 }
