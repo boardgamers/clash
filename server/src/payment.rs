@@ -190,10 +190,12 @@ impl PaymentOptions {
 
     #[must_use]
     pub(crate) fn tokens(player: &Player, reason: PaymentReason, cost: u8) -> Self {
-        Self::sum(player, reason, cost, &[
-            ResourceType::MoodTokens,
-            ResourceType::CultureTokens,
-        ])
+        Self::sum(
+            player,
+            reason,
+            cost,
+            &[ResourceType::MoodTokens, ResourceType::CultureTokens],
+        )
     }
 
     #[must_use]
@@ -295,10 +297,10 @@ impl ResourceReward {
 
     #[must_use]
     pub(crate) fn tokens(cost: u8) -> Self {
-        Self::sum(cost, &[
-            ResourceType::MoodTokens,
-            ResourceType::CultureTokens,
-        ])
+        Self::sum(
+            cost,
+            &[ResourceType::MoodTokens, ResourceType::CultureTokens],
+        )
     }
 }
 
@@ -392,6 +394,15 @@ pub(crate) fn payment_options_sum(
         conversions,
         vec![],
     )
+}
+
+pub(crate) fn base_resources() -> Vec<ResourcePile> {
+    vec![
+        ResourcePile::food(1),
+        ResourcePile::wood(1),
+        ResourcePile::ore(1),
+        ResourcePile::ideas(1),
+    ]
 }
 
 #[cfg(test)]
@@ -686,13 +697,4 @@ mod tests {
             }
         }
     }
-}
-
-pub(crate) fn base_resources() -> Vec<ResourcePile> {
-    vec![
-        ResourcePile::food(1),
-        ResourcePile::wood(1),
-        ResourcePile::ore(1),
-        ResourcePile::ideas(1),
-    ]
 }
