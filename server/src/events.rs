@@ -4,7 +4,7 @@
 pub enum EventOrigin {
     Advance(Advance),
     SpecialAdvance(SpecialAdvance),
-    Leader(String),
+    LeaderAbility(String),
     Wonder(Wonder),
     Builtin(String),
     Incident(u8),
@@ -21,7 +21,7 @@ impl EventOrigin {
             EventOrigin::Wonder(name) => format!("{name:?}"),
             EventOrigin::Advance(name) => format!("{name:?}"),
             EventOrigin::SpecialAdvance(name) => format!("{name:?}"),
-            EventOrigin::Leader(name)
+            EventOrigin::LeaderAbility(name)
             | EventOrigin::Objective(name)
             | EventOrigin::Builtin(name) => name.to_string(),
             EventOrigin::CivilCard(id)
@@ -37,7 +37,7 @@ impl EventOrigin {
             EventOrigin::Advance(name) => name.name(game).to_string(),
             EventOrigin::SpecialAdvance(name) => name.name(game).to_string(),
             EventOrigin::Wonder(name) => name.name(game).to_string(),
-            EventOrigin::Leader(name)
+            EventOrigin::LeaderAbility(name)
             | EventOrigin::Objective(name)
             | EventOrigin::Builtin(name) => name.to_string(),
             EventOrigin::CivilCard(id) => cache.get_civil_card(*id).name.clone(),

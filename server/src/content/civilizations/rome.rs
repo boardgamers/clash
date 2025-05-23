@@ -5,6 +5,7 @@ use crate::civilization::Civilization;
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::PaymentRequest;
+use crate::leader::{Leader, LeaderAbility};
 use crate::payment::{
     PaymentConversion, PaymentConversionType, PaymentOptions, PaymentReason, base_resources,
 };
@@ -16,7 +17,7 @@ pub(crate) fn rome() -> Civilization {
     Civilization::new(
         "Rome",
         vec![aqueduct(), roman_roads(), captivi(), provinces()],
-        vec![],
+        vec![augustus()],
     )
 }
 
@@ -158,4 +159,25 @@ fn provinces() -> SpecialAdvanceInfo {
         },
     )
     .build()
+}
+
+fn augustus() -> Leader {
+    // todo princeps
+    // todo imperator
+    Leader::new(
+        "Augustus",
+        LeaderAbility::builder(
+            "Princeps",
+            "As an action, gain 1 culture token and activate the city where Augustus is: \
+            Draw 1 action and 1 objective card. \
+            Then discard 1 action and 1 objective card.",
+        )
+        .build(),
+        LeaderAbility::builder(
+            "Imperator",
+            "If you don't own a city in the region: \
+            Gain 2 combat value in every combat round",
+        )
+        .build(),
+    )
 }

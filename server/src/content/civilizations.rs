@@ -1,7 +1,8 @@
 pub(crate) mod maya;
 pub(crate) mod rome;
 
-use crate::{civilization::Civilization, leader::Leader};
+use crate::civilization::Civilization;
+use crate::leader::{Leader, LeaderAbility};
 
 pub const BARBARIANS: &str = "Barbarians";
 pub const PIRATES: &str = "Pirates";
@@ -18,37 +19,45 @@ pub fn get_all_uncached() -> Vec<Civilization> {
             "Federation",
             vec![],
             vec![
-                Leader::builder("James T. Kirk", "", "", "", "").build(),
-                Leader::builder("Kathryn Janeway", "", "", "", "").build(),
-                Leader::builder("Spock", "", "", "", "").build(),
+                test_leader("James T. Kirk"),
+                test_leader("Kathryn Janeway"),
+                test_leader("Spock"),
             ],
         ),
         Civilization::new(
             "Borg",
             vec![],
             vec![
-                Leader::builder("Borg Queen", "", "", "", "").build(),
-                Leader::builder("Seven of Nine", "", "", "", "").build(),
-                Leader::builder("Jean Luc Picard", "", "", "", "").build(),
+                test_leader("Borg Queen"),
+                test_leader("Seven of Nine"),
+                test_leader("Jean Luc Picard"),
             ],
         ),
         Civilization::new(
             "Klingons",
             vec![],
             vec![
-                Leader::builder("Khan", "", "", "", "").build(),
-                Leader::builder("Kahless", "", "", "", "").build(),
-                Leader::builder("Worf", "", "", "", "").build(),
+                test_leader("Khan"),
+                test_leader("Kahless"),
+                test_leader("Worf"),
             ],
         ),
         Civilization::new(
             "Romulans",
             vec![],
             vec![
-                Leader::builder("Sela", "", "", "", "").build(),
-                Leader::builder("Narek", "", "", "", "").build(),
-                Leader::builder("Tomalak", "", "", "", "").build(),
+                test_leader("Sela"),
+                test_leader("Narek"),
+                test_leader("Tomalak"),
             ],
         ),
     ]
+}
+
+fn test_leader(name: &str) -> Leader {
+    Leader::new(
+        name,
+        LeaderAbility::builder("", "").build(),
+        LeaderAbility::builder("", "").build(),
+    )
 }

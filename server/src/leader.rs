@@ -5,78 +5,64 @@ use crate::events::EventOrigin;
 #[derive(Clone)]
 pub struct Leader {
     pub name: String,
-    pub first_ability: String,
-    pub first_ability_description: String,
-    pub second_ability: String,
-    pub second_ability_description: String,
-    pub listeners: AbilityListeners,
+    pub abilities: Vec<LeaderAbility>,
 }
 
 impl Leader {
     #[must_use]
-    pub fn builder(
-        name: &str,
-        first_ability: &str,
-        first_ability_description: &str,
-        second_ability: &str,
-        second_ability_description: &str,
-    ) -> LeaderBuilder {
-        LeaderBuilder::new(
-            name.to_string(),
-            first_ability.to_string(),
-            first_ability_description.to_string(),
-            second_ability.to_string(),
-            second_ability_description.to_string(),
-        )
+    pub fn new(name: &str, first_ability: LeaderAbility, second_ability: LeaderAbility) -> Leader {
+        Self {
+            name: name.to_string(),
+            abilities: vec![first_ability, second_ability],
+        }
     }
 }
 
-pub struct LeaderBuilder {
+#[derive(Clone)]
+pub struct LeaderAbility {
+    pub name: String,
+    pub description: String,
+    pub listeners: AbilityListeners,
+}
+
+impl LeaderAbility {
+    #[must_use]
+    pub fn builder(name: &str, description: &str) -> LeaderAbilityBuilder {
+        LeaderAbilityBuilder::new(name.to_string(), description.to_string())
+    }
+}
+
+pub struct LeaderAbilityBuilder {
     name: String,
-    first_ability: String,
-    first_ability_description: String,
-    second_ability: String,
-    second_ability_description: String,
+    description: String,
     builder: AbilityInitializerBuilder,
 }
 
-impl LeaderBuilder {
-    fn new(
-        name: String,
-        first_ability: String,
-        first_ability_description: String,
-        second_ability: String,
-        second_ability_description: String,
-    ) -> Self {
+impl LeaderAbilityBuilder {
+    fn new(name: String, description: String) -> Self {
         Self {
             name,
-            first_ability,
-            first_ability_description,
-            second_ability,
-            second_ability_description,
+            description,
             builder: AbilityInitializerBuilder::new(),
         }
     }
 
     #[must_use]
-    pub fn build(self) -> Leader {
-        Leader {
+    pub fn build(self) -> LeaderAbility {
+        LeaderAbility {
             name: self.name,
-            first_ability: self.first_ability,
-            first_ability_description: self.first_ability_description,
-            second_ability: self.second_ability,
-            second_ability_description: self.second_ability_description,
+            description: self.description,
             listeners: self.builder.build(),
         }
     }
 }
 
-impl AbilityInitializerSetup for LeaderBuilder {
+impl AbilityInitializerSetup for LeaderAbilityBuilder {
     fn builder(&mut self) -> &mut AbilityInitializerBuilder {
         &mut self.builder
     }
 
     fn get_key(&self) -> EventOrigin {
-        EventOrigin::Leader(self.name.clone())
+        EventOrigin::LeaderAbility(self.name.clone())
     }
 }

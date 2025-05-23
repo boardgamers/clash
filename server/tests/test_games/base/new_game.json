@@ -29,6 +29,9 @@
         }
       ],
       "civilization": "Rome",
+      "available_leaders": [
+        "Augustus"
+      ],
       "advances": [
         "Farming",
         "Mining"

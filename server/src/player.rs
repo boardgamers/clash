@@ -2,6 +2,7 @@ use crate::advance::{Advance, base_advance_cost, player_government};
 use crate::city_pieces::DestroyedStructures;
 use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::events::{Event, EventOrigin};
+use crate::leader::LeaderAbility;
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player_events::{CostInfo, TransientEvents};
 use crate::special_advance::SpecialAdvance;
@@ -135,22 +136,40 @@ impl Player {
     pub fn active_leader(&self) -> Option<&Leader> {
         self.active_leader
             .as_ref()
-            .and_then(|name| self.get_leader(name))
+            .map(|name| self.get_leader(name))
     }
 
+    ///
+    /// # Panics
+    ///
+    /// Panics if the leader does not exist
     #[must_use]
-    pub fn get_leader(&self, name: &String) -> Option<&Leader> {
+    pub fn get_leader(&self, name: &str) -> &Leader {
         self.civilization
             .leaders
             .iter()
             .find(|leader| &leader.name == name)
+            .unwrap_or_else(|| panic!("Leader {name} not found"))
+    }
+
+    ///
+    /// # Panics
+    ///
+    /// Panics if the leader ability does not exist
+    #[must_use]
+    pub fn get_leader_ability(&self, name: &str) -> &LeaderAbility {
+        self.civilization
+            .leaders
+            .iter()
+            .find_map(|leader| leader.abilities.iter().find(|l| &l.name == name))
+            .unwrap_or_else(|| panic!("Leader ability {name} not found"))
     }
 
     pub(crate) fn with_leader(
         leader: &str,
         game: &mut Game,
         player_index: usize,
-        f: impl FnOnce(&mut Game, &Leader),
+        f: impl FnOnce(&mut Game, &LeaderAbility) + Clone,
     ) {
         let pos = game.players[player_index]
             .civilization
@@ -159,7 +178,9 @@ impl Player {
             .position(|l| l.name == leader)
             .expect("player should have the leader");
         let l = game.players[player_index].civilization.leaders.remove(pos);
-        f(game, &l);
+        for a in &l.abilities {
+            (f.clone())(game, a);
+        }
         game.players[player_index]
             .civilization
             .leaders
@@ -170,7 +191,7 @@ impl Player {
     pub fn available_leaders(&self) -> Vec<&Leader> {
         self.available_leaders
             .iter()
-            .filter_map(|name| self.get_leader(name))
+            .map(|name| self.get_leader(name))
             .collect()
     }
 

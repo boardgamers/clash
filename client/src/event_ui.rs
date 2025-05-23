@@ -15,14 +15,9 @@ pub fn event_help(rc: &RenderContext, origin: &EventOrigin) -> Vec<String> {
         EventOrigin::TacticsCard(id) => vec![cache.get_tactics_card(*id).description.clone()],
         EventOrigin::Incident(id) => cache.get_incident(*id).description(rc.game),
         EventOrigin::Objective(name) => vec![cache.get_objective(name).description.clone()],
-        EventOrigin::Leader(l) => vec![{
-            let l = rc.shown_player.get_leader(l).unwrap();
-            // todo: leader should have a 2 event sources - no each event source should have a description
-            format!(
-                "{}, {}",
-                l.first_ability_description, l.second_ability_description
-            )
-        }],
+        EventOrigin::LeaderAbility(l) => {
+            vec![rc.shown_player.get_leader_ability(l).description.clone()]
+        }
         EventOrigin::SpecialAdvance(s) => vec![s.info(rc.game).description.clone()],
     };
     h.extend(d);

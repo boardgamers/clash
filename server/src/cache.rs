@@ -10,7 +10,7 @@ use crate::content::{
 };
 use crate::game::Game;
 use crate::incident::Incident;
-use crate::leader::Leader;
+use crate::leader::{Leader, LeaderAbility};
 use crate::objective_card::{Objective, ObjectiveCard};
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo};
 use crate::status_phase::StatusPhaseState::{ChangeGovernmentType, DetermineFirstPlayer};
@@ -334,8 +334,16 @@ impl Cache {
                 "test0",
                 vec![],
                 vec![
-                    Leader::builder("Alexander", "", "", "", "").build(),
-                    Leader::builder("Kleopatra", "", "", "", "").build(),
+                    Leader::new(
+                        "Alexander",
+                        LeaderAbility::builder("", "").build(),
+                        LeaderAbility::builder("", "").build(),
+                    ),
+                    Leader::new(
+                        "Kleopatra",
+                        LeaderAbility::builder("", "").build(),
+                        LeaderAbility::builder("", "").build(),
+                    ),
                 ],
             ), // for testing
             "test1" => Civilization::new("test1", vec![], vec![]),
