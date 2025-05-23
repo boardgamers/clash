@@ -146,7 +146,7 @@ fn provinces() -> SpecialAdvanceInfo {
                 game.add_info_log_item(&format!(
                     "Provinces made the city Happy instead of Angry for {pile}"
                 ));
-            };
+            }
 
             game.player_mut(s.attacker.player)
                 .get_city_mut(s.defender.position)

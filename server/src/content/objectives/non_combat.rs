@@ -4,7 +4,7 @@ use crate::content::advances::warfare::draft_cost;
 use crate::game::Game;
 use crate::log::{ActionLogItem, ActionLogPlayer};
 use crate::map::home_position;
-use crate::objective_card::{objective_is_ready, Objective};
+use crate::objective_card::{Objective, objective_is_ready};
 use itertools::Itertools;
 
 pub(crate) fn draft() -> Objective {
@@ -100,4 +100,3 @@ fn last_round(game: &Game) -> Vec<&ActionLogPlayer> {
         .flat_map(|r| r.players.iter())
         .collect_vec()
 }
-

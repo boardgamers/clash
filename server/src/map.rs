@@ -1,5 +1,6 @@
 use crate::city::{City, MoodState};
 use crate::consts::NON_HUMAN_PLAYERS;
+use crate::game::Game;
 use crate::player::Player;
 use crate::position::Position;
 use crate::utils::{Rng, Shuffle};
@@ -8,7 +9,6 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt::Display;
-use crate::game::Game;
 
 #[derive(Clone)]
 pub struct Map {

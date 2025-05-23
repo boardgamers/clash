@@ -494,9 +494,13 @@ fn reachable_with_roads(
             .flat_map(|middle| next_road_step(player, game, middle, stack_size))
             .unique()
             .filter_map(|destination| {
-                road_route(player, start, destination, roman_roads, vec![
-                    EventOrigin::Advance(Advance::Roads),
-                ])
+                road_route(
+                    player,
+                    start,
+                    destination,
+                    roman_roads,
+                    vec![EventOrigin::Advance(Advance::Roads)],
+                )
             })
             .collect();
 
@@ -546,10 +550,16 @@ fn roman_roads_routes(
             if len > ROMAN_ROADS_LENGTH {
                 return None;
             }
-            road_route(player, start, dst, false, vec![
-                EventOrigin::Advance(Advance::Roads),
-                EventOrigin::SpecialAdvance(SpecialAdvance::RomanRoads),
-            ])
+            road_route(
+                player,
+                start,
+                dst,
+                false,
+                vec![
+                    EventOrigin::Advance(Advance::Roads),
+                    EventOrigin::SpecialAdvance(SpecialAdvance::RomanRoads),
+                ],
+            )
         })
         .collect()
 }

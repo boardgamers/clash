@@ -384,7 +384,12 @@ fn recruit(ai_actions: &mut AiActions, p: &Player, game: &Game) -> Vec<Action> {
         .collect()
 }
 
-fn recruit_actions(ai_actions: &mut AiActions, player: &Player, city: &City, game: &Game) -> Vec<Action> {
+fn recruit_actions(
+    ai_actions: &mut AiActions,
+    player: &Player,
+    city: &City,
+    game: &Game,
+) -> Vec<Action> {
     recruit_strategies()
         .iter()
         .map(|strategy| {

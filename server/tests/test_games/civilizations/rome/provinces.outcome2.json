@@ -12,7 +12,6 @@
     {
       "id": 0,
       "resources": {
-        "food": 2,
         "wood": 5,
         "ore": 5,
         "ideas": 3,
@@ -109,10 +108,11 @@
       "advances": [
         "Farming",
         "Mining",
+        "Philosophy",
         "Tactics",
         "Voting"
       ],
-      "incident_tokens": 3,
+      "incident_tokens": 2,
       "wonder_cards": [
         "Pyramids"
       ],
@@ -263,6 +263,39 @@
               "items": [
                 {
                   "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Voting",
+                        "payment": {
+                          "food": 2
+                        }
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 2
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/advances/4"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/incident_tokens",
+                      "value": 3
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/resources/food",
+                      "value": 2
+                    }
+                  ]
+                },
+                {
+                  "action": {
                     "Movement": {
                       "Move": {
                         "units": [
@@ -276,7 +309,7 @@
                     {
                       "op": "replace",
                       "path": "/actions_left",
-                      "value": 2
+                      "value": 1
                     },
                     {
                       "op": "remove",
@@ -443,8 +476,12 @@
       ]
     }
   ],
-  "action_log_index": 2,
+  "action_log_index": 3,
   "log": [
+    [
+      "Player1 paid 2 food to get the Voting advance",
+      "Player1 unlocked Provinces"
+    ],
     [
       "Player1 marched 1 infantry from C2 to B2 and captured Player2's city at B2",
       "Player1 gained 2 gold for capturing a city"
@@ -455,7 +492,7 @@
     ]
   ],
   "undo_limit": 0,
-  "actions_left": 1,
+  "actions_left": 0,
   "round": 6,
   "age": 1,
   "messages": [

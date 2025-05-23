@@ -28,20 +28,16 @@ fn nationalism() -> AdvanceBuilder {
         |event| &mut event.recruit,
         1,
         |_game, _player_index, recruit| {
-            if recruit
+            recruit
                 .units
                 .clone()
                 .to_vec()
                 .iter()
                 .any(|u| u.is_army_unit() || u.is_ship())
-            {
-                Some(ResourceRewardRequest::new(
+                .then_some(ResourceRewardRequest::new(
                     ResourceReward::tokens(1),
                     "Select token to gain".to_string(),
                 ))
-            } else {
-                None
-            }
         },
         |_game, resource, _| {
             vec![format!(

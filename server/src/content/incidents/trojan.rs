@@ -174,8 +174,10 @@ fn anarchy() -> Incident {
                 remove_advance(game, a, player_index);
             }
 
-            if let Some(special_advance) = find_government_special_advance(game, player_index) {
-                undo_unlock_special_advance(game, special_advance, player_index);
+            if game.player(player_index).government(game).is_some() {
+                if let Some(special_advance) = find_government_special_advance(game, player_index) {
+                    undo_unlock_special_advance(game, special_advance, player_index);
+                }
             }
 
             let p = game.player_mut(player_index);

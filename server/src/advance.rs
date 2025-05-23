@@ -377,6 +377,11 @@ pub(crate) fn remove_advance(game: &mut Game, advance: Advance, player_index: us
 }
 
 fn unlock_special_advance(game: &mut Game, special_advance: SpecialAdvance, player_index: usize) {
+    game.add_info_log_item(&format!(
+        "{} unlocked {}",
+        game.player_name(player_index),
+        special_advance.info(game).name
+    ));
     special_advance
         .info(game)
         .listeners
