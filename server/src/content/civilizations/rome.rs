@@ -1,9 +1,13 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::{Advance, gain_advance_without_payment};
+use crate::city::MoodState;
 use crate::civilization::Civilization;
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
-use crate::payment::{PaymentConversion, PaymentConversionType, base_resources};
+use crate::content::persistent_events::PaymentRequest;
+use crate::payment::{
+    PaymentConversion, PaymentConversionType, PaymentOptions, PaymentReason, base_resources,
+};
 use crate::player::gain_resources;
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
@@ -112,7 +116,6 @@ fn captivi() -> SpecialAdvanceInfo {
 }
 
 fn provinces() -> SpecialAdvanceInfo {
-    // todo Captured cities become Neutral instead of Angry - or Happy if you pay 1 culture token
     SpecialAdvanceInfo::builder(
         SpecialAdvance::Provinces,
         SpecialAdvanceRequirement::AnyGovernment,
@@ -120,6 +123,39 @@ fn provinces() -> SpecialAdvanceInfo {
         "You can recruit Cavalry units in any city \
         that is at least 3 spaces away from your capital. \
         Captured cities become Neutral instead of Angry - or Happy if you pay 1 culture token.",
+    )
+    .add_payment_request_listener(
+        |event| &mut event.combat_end,
+        21,
+        |game, player, s| {
+            s.captured_city(player, game)
+                .then_some(vec![PaymentRequest::optional(
+                    PaymentOptions::resources(
+                        game.player(player),
+                        PaymentReason::AdvanceAbility,
+                        ResourcePile::culture_tokens(1),
+                    ),
+                    "Pay 1 culture token to make the city happy",
+                )])
+        },
+        |game, c, s| {
+            let pile = &c.choice[0];
+            if pile.is_empty() {
+                game.add_info_log_item("Provinces made the city Neutral instead of Angry");
+            } else {
+                game.add_info_log_item(&format!(
+                    "Provinces made the city Happy instead of Angry for {pile}"
+                ));
+            };
+
+            game.player_mut(s.attacker.player)
+                .get_city_mut(s.defender.position)
+                .set_mood_state(if pile.is_empty() {
+                    MoodState::Neutral
+                } else {
+                    MoodState::Happy
+                });
+        },
     )
     .build()
 }
