@@ -148,7 +148,7 @@ impl Player {
         self.civilization
             .leaders
             .iter()
-            .find(|leader| &leader.name == name)
+            .find(|leader| leader.name == name)
             .unwrap_or_else(|| panic!("Leader {name} not found"))
     }
 
@@ -161,7 +161,7 @@ impl Player {
         self.civilization
             .leaders
             .iter()
-            .find_map(|leader| leader.abilities.iter().find(|l| &l.name == name))
+            .find_map(|leader| leader.abilities.iter().find(|l| l.name == name))
             .unwrap_or_else(|| panic!("Leader ability {name} not found"))
     }
 
