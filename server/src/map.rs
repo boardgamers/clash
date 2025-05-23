@@ -8,6 +8,7 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt::Display;
+use crate::game::Game;
 
 #[derive(Clone)]
 pub struct Map {
@@ -549,4 +550,10 @@ pub fn setup_home_city(player: &mut Player, pos: Position) {
     let mut city = City::new(player.index, pos);
     city.set_mood_state(MoodState::Happy);
     player.cities.push(city);
+}
+
+pub(crate) fn home_position(game: &Game, player: &Player) -> Position {
+    let setup = get_map_setup(game.human_players_count());
+    let h = &setup.home_positions[player.index];
+    h.block.tiles(&h.position, h.position.rotation)[0].0
 }

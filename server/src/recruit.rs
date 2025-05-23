@@ -2,16 +2,19 @@ use crate::combat;
 use crate::consts::STACK_LIMIT;
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
+use crate::map::home_position;
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::{CostTrigger, Player, add_unit};
 use crate::player_events::CostInfo;
 use crate::playing_actions::Recruit;
 use crate::position::Position;
+use crate::special_advance::SpecialAdvance;
 use crate::unit::{UnitType, Units, kill_units, set_unit_position};
 use itertools::Itertools;
 
 pub(crate) fn recruit(game: &mut Game, player_index: usize, r: Recruit) -> Result<(), String> {
     let cost = recruit_cost(
+        game,
         game.player(player_index),
         &r.units,
         r.city_position,
@@ -112,6 +115,7 @@ pub(crate) fn on_recruit(game: &mut Game, player_index: usize, r: Recruit) {
 ///
 /// Errors if the cost cannot be paid
 pub fn recruit_cost(
+    game: &Game,
     player: &Player,
     units: &Units,
     city_position: Position,
@@ -133,7 +137,7 @@ pub fn recruit_cost(
     if require_replace != replaced_units {
         return Err("Invalid replacement".to_string());
     }
-    recruit_cost_without_replaced(player, units, city_position, leader_name, execute)
+    recruit_cost_without_replaced(game, player, units, city_position, leader_name, execute)
 }
 
 ///
@@ -141,6 +145,7 @@ pub fn recruit_cost(
 ///
 /// Errors if the cost cannot be paid
 pub fn recruit_cost_without_replaced(
+    game: &Game,
     player: &Player,
     units: &Units,
     city_position: Position,
@@ -148,7 +153,10 @@ pub fn recruit_cost_without_replaced(
     execute: CostTrigger,
 ) -> Result<CostInfo, String> {
     let city = player.get_city(city_position);
-    if (units.cavalry > 0 || units.elephants > 0) && city.pieces.market.is_none() {
+    if city.pieces.market.is_none()
+        && (units.elephants > 0
+            || (units.cavalry > 0 && !is_cavalry_province_city(player, city_position, game)))
+    {
         return Err("No market".to_string());
     }
     if units.ships > 0 && city.pieces.port.is_none() {
@@ -203,4 +211,9 @@ pub fn recruit_cost_without_replaced(
         return Err("Invalid leader".to_string());
     }
     Ok(cost)
+}
+
+fn is_cavalry_province_city(player: &Player, city: Position, game: &Game) -> bool {
+    player.has_special_advance(SpecialAdvance::Provinces)
+        && home_position(game, player).distance(city) >= 3
 }

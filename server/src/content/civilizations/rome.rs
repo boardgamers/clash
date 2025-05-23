@@ -112,8 +112,6 @@ fn captivi() -> SpecialAdvanceInfo {
 }
 
 fn provinces() -> SpecialAdvanceInfo {
-    // todo You can recruit Cavalry units in any city \
-    //         that is at least 3 spaces away from your capital
     // todo Captured cities become Neutral instead of Angry - or Happy if you pay 1 culture token
     SpecialAdvanceInfo::builder(
         SpecialAdvance::Provinces,

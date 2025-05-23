@@ -52,6 +52,7 @@ fn test_sanitation_and_draft() {
             )
             .with_pre_assert(move |game| {
                 let options = recruit_cost_without_replaced(
+                    &game,
                     &game.players[0],
                     &units,
                     city_position,

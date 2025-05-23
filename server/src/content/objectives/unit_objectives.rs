@@ -1,10 +1,11 @@
 use crate::content::advances::trade_routes::find_trade_routes;
 use crate::content::objectives::city_objectives::leading_player;
-use crate::content::objectives::non_combat::{home_position, last_player_round};
+use crate::content::objectives::non_combat::{last_player_round};
 use crate::objective_card::Objective;
 use crate::player::Player;
 use crate::unit::UnitType;
 use itertools::Itertools;
+use crate::map::home_position;
 
 pub(crate) fn sea_blockade() -> Objective {
     Objective::builder(

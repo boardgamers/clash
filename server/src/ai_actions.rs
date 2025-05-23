@@ -371,12 +371,12 @@ fn recruit_strategies() -> Vec<Vec<UnitType>> {
     ]
 }
 
-fn recruit(ai_actions: &mut AiActions, p: &Player, _game: &Game) -> Vec<Action> {
+fn recruit(ai_actions: &mut AiActions, p: &Player, game: &Game) -> Vec<Action> {
     p.cities
         .iter()
         .flat_map(|city| {
             if city.can_activate() {
-                recruit_actions(ai_actions, p, city)
+                recruit_actions(ai_actions, p, city, game)
             } else {
                 vec![]
             }
@@ -384,7 +384,7 @@ fn recruit(ai_actions: &mut AiActions, p: &Player, _game: &Game) -> Vec<Action> 
         .collect()
 }
 
-fn recruit_actions(ai_actions: &mut AiActions, player: &Player, city: &City) -> Vec<Action> {
+fn recruit_actions(ai_actions: &mut AiActions, player: &Player, city: &City, game: &Game) -> Vec<Action> {
     recruit_strategies()
         .iter()
         .map(|strategy| {
@@ -400,6 +400,7 @@ fn recruit_actions(ai_actions: &mut AiActions, player: &Player, city: &City) -> 
                 let mut next = units.clone();
                 next += &unit_type;
                 match recruit_cost(
+                    game,
                     player,
                     &next,
                     city.position,
