@@ -493,7 +493,11 @@ fn reachable_with_roads(
             .into_iter()
             .flat_map(|middle| next_road_step(player, game, middle, stack_size))
             .unique()
-            .filter_map(|destination| road_route(player, start, destination, roman_roads))
+            .filter_map(|destination| {
+                road_route(player, start, destination, roman_roads, vec![
+                    EventOrigin::Advance(Advance::Roads),
+                ])
+            })
             .collect();
 
         if roman_roads {
@@ -542,7 +546,10 @@ fn roman_roads_routes(
             if len > ROMAN_ROADS_LENGTH {
                 return None;
             }
-            road_route(player, start, dst, false)
+            road_route(player, start, dst, false, vec![
+                EventOrigin::Advance(Advance::Roads),
+                EventOrigin::SpecialAdvance(SpecialAdvance::RomanRoads),
+            ])
         })
         .collect()
 }
@@ -552,6 +559,7 @@ fn road_route(
     start: Position,
     destination: Position,
     ignore_city_to_city: bool,
+    modifiers: Vec<EventOrigin>,
 ) -> Option<MoveRoute> {
     if destination.distance(start) <= 1 {
         // can go directly without using roads
@@ -574,8 +582,7 @@ fn road_route(
         PaymentReason::Move,
         ResourcePile::ore(1) + ResourcePile::food(1),
     );
-    let origin = EventOrigin::Advance(Advance::Roads);
-    cost.modifiers = vec![origin.clone()];
+    cost.modifiers = modifiers;
     Some(MoveRoute {
         destination,
         cost,
