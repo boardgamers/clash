@@ -1,6 +1,13 @@
 {
   "options": {},
-  "state": "Playing",
+  "state": {
+    "Movement": {
+      "movement_actions_left": 2,
+      "moved_units": [
+        0
+      ]
+    }
+  },
   "players": [
     {
       "id": 0,
@@ -9,9 +16,9 @@
         "wood": 5,
         "ore": 5,
         "ideas": 3,
-        "gold": 5,
+        "gold": 7,
         "mood_tokens": 7,
-        "culture_tokens": 9
+        "culture_tokens": 8
       },
       "resource_limit": {
         "food": 2,
@@ -52,12 +59,24 @@
           "mood_state": "Happy",
           "activations": 4,
           "position": "E2"
+        },
+        {
+          "city_pieces": {
+            "port": 0
+          },
+          "mood_state": "Happy",
+          "position": "B2",
+          "port_position": "C3"
         }
       ],
       "units": [
         {
-          "position": "C2",
+          "position": "B2",
           "unit_type": "Infantry",
+          "movement_restrictions": [
+            "Battle",
+            "Forest"
+          ],
           "id": 0
         },
         {
@@ -90,8 +109,8 @@
       "advances": [
         "Farming",
         "Mining",
-        "Voting",
-        "Tactics"
+        "Tactics",
+        "Voting"
       ],
       "incident_tokens": 3,
       "wonder_cards": [
@@ -122,14 +141,13 @@
           "mood_state": "Angry",
           "activations": 2,
           "position": "C1"
-        },
+        }
+      ],
+      "units": [
         {
-          "city_pieces": {
-            "port": 1
-          },
-          "mood_state": "Neutral",
-          "position": "B2",
-          "port_position": "C3"
+          "position": "C1",
+          "unit_type": "Settler",
+          "id": 2
         }
       ],
       "civilization": "test1",
@@ -138,7 +156,7 @@
         "Mining"
       ],
       "incident_tokens": 3,
-      "next_unit_id": 2
+      "next_unit_id": 3
     },
     {
       "id": 2,
@@ -242,17 +260,202 @@
           "players": [
             {
               "index": 0,
-              "items": []
+              "items": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          0
+                        ],
+                        "destination": "B2"
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 2
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/cities/4"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/gold",
+                      "value": 5
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/0/position",
+                      "value": "C2"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/units/0/movement_restrictions"
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/1/cities/1",
+                      "value": {
+                        "city_pieces": {
+                          "port": 1
+                        },
+                        "mood_state": "Neutral",
+                        "port_position": "C3",
+                        "position": "B2"
+                      }
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/state",
+                      "value": "Playing"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events"
+                    }
+                  ],
+                  "combat_stats": {
+                    "round": 1,
+                    "battleground": "City",
+                    "attacker": {
+                      "position": "C2",
+                      "player": 0,
+                      "present": {
+                        "infantry": 1
+                      }
+                    },
+                    "defender": {
+                      "position": "B2",
+                      "player": 1
+                    },
+                    "result": "AttackerWins"
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 1
+                        }
+                      ]
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "CombatEnd": {
+                              "attacker": {
+                                "player": 0,
+                                "position": "C2",
+                                "present": {
+                                  "infantry": 1
+                                }
+                              },
+                              "battleground": "City",
+                              "defender": {
+                                "player": 1,
+                                "position": "B2"
+                              },
+                              "result": "AttackerWins",
+                              "round": 1
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "SpecialAdvance": "Provinces"
+                            },
+                            "priority": 21,
+                            "request": {
+                              "Payment": [
+                                {
+                                  "cost": {
+                                    "conversions": [
+                                      {
+                                        "from": [
+                                          {
+                                            "food": 1
+                                          },
+                                          {
+                                            "wood": 1
+                                          },
+                                          {
+                                            "ore": 1
+                                          },
+                                          {
+                                            "ideas": 1
+                                          }
+                                        ],
+                                        "to": {
+                                          "gold": 1
+                                        },
+                                        "type": "Unlimited"
+                                      }
+                                    ],
+                                    "default": {
+                                      "culture_tokens": 1
+                                    }
+                                  },
+                                  "name": "Pay 1 culture token to make the city happy",
+                                  "optional": true
+                                }
+                              ]
+                            }
+                          },
+                          "last_priority_used": 21,
+                          "player": 0
+                        }
+                      ]
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/cities/4/mood_state",
+                      "value": "Angry"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/resources/culture_tokens",
+                      "value": 9
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/next_unit_id",
+                      "value": 2
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/1/units"
+                    }
+                  ]
+                }
+              ]
             }
           ]
         }
       ]
     }
   ],
-  "action_log_index": 0,
-  "log": [],
+  "action_log_index": 2,
+  "log": [
+    [
+      "Player1 marched 1 infantry from C2 to B2 and captured Player2's city at B2",
+      "Player1 gained 2 gold for capturing a city"
+    ],
+    [
+      "Provinces made the city Happy instead of Angry for 1 culture token",
+      "Player2 gained 1 free Settler Unit at C1 for losing a city"
+    ]
+  ],
   "undo_limit": 0,
-  "actions_left": 2,
+  "actions_left": 1,
   "round": 6,
   "age": 1,
   "messages": [
