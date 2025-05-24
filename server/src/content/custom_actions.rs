@@ -5,7 +5,7 @@ use crate::content::advances::culture::{sports_options, use_sports, use_theaters
 use crate::content::advances::democracy::use_civil_liberties;
 use crate::content::advances::economy::{use_bartering, use_taxes};
 use crate::content::builtin::Builtin;
-use crate::content::civilizations::rome::use_aqueduct;
+use crate::content::civilizations::rome::{use_aqueduct, use_princeps};
 use crate::content::persistent_events::{
     PersistentEventType, TriggerPersistentEventParams, trigger_persistent_event_with_listener,
 };
@@ -72,6 +72,7 @@ impl CustomActionInfo {
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Copy, Hash, Debug)]
 pub enum CustomActionType {
+    // Advances
     AbsolutePower,
     ForcedLabor,
     CivilLiberties,
@@ -82,10 +83,15 @@ pub enum CustomActionType {
     Sports,
     Taxes,
     Theaters,
+    
+    // Wonders
     GreatLibrary,
     GreatLighthouse,
     GreatStatue,
+    
+    // Civilizations,
     Aqueduct,
+    Princeps,
 }
 
 impl CustomActionType {
@@ -110,6 +116,9 @@ impl CustomActionType {
             }
             CustomActionType::VotingIncreaseHappiness => {
                 CustomActionType::cost(ResourcePile::mood_tokens(1))
+            }
+            CustomActionType::Princeps => {
+                CustomActionType::cost(ResourcePile::culture_tokens(1))
             }
             CustomActionType::FreeEconomyCollect | CustomActionType::ForcedLabor => {
                 CustomActionType::free_and_once_per_turn(ResourcePile::mood_tokens(1))
@@ -220,6 +229,7 @@ impl Display for CustomActionType {
             CustomActionType::GreatLighthouse => write!(f, "Great Lighthouse"),
             CustomActionType::GreatStatue => write!(f, "Great Statue"),
             CustomActionType::Aqueduct => write!(f, "Aqueduct"),
+            CustomActionType::Princeps => write!(f, "Princeps"),
         }
     }
 }
@@ -237,6 +247,7 @@ pub(crate) fn custom_action_builtins() -> HashMap<CustomActionType, Builtin> {
         (CustomActionType::GreatLighthouse, use_great_lighthouse()),
         (CustomActionType::GreatStatue, use_great_statue()),
         (CustomActionType::Aqueduct, use_aqueduct()),
+        (CustomActionType::Princeps, use_princeps()),
     ])
 }
 
@@ -283,6 +294,10 @@ pub(crate) fn can_play_custom_action(
         CustomActionType::Aqueduct => {
             !p.has_advance(Advance::Sanitation) && p.can_afford(&base_advance_cost(p))
         }
+        CustomActionType::Princeps => p.try_active_leader().is_some_and(|l| {
+            game.try_get_any_city(l.position(p))
+                .is_some_and(City::can_activate)
+        }),
         _ => true,
     };
     if !can_play {

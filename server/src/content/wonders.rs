@@ -1,7 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::do_gain_action_card_from_pile;
 use crate::advance::{Advance, init_great_library};
-use crate::card::HandCard;
+use crate::card::{all_objective_hand_cards, HandCard};
 use crate::city::{City, MoodState};
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
@@ -95,11 +95,7 @@ pub(crate) fn use_great_statue() -> Builtin {
         |game, player_index, _| {
             let player = game.player(player_index);
             Some(HandCardsRequest::new(
-                player
-                    .objective_cards
-                    .iter()
-                    .map(|&a| HandCard::ObjectiveCard(a))
-                    .collect_vec(),
+                all_objective_hand_cards(player),
                 1..=1,
                 "Select an objective card to discard",
             ))

@@ -1,5 +1,6 @@
 use crate::content::action_cards::spy::validate_spy_cards;
 use crate::content::action_cards::synergies::validate_new_plans;
+use crate::content::civilizations::rome::validate_princeps_cards;
 use crate::content::persistent_events::PersistentEventType;
 use crate::events::EventOrigin;
 use crate::game::Game;
@@ -128,7 +129,11 @@ pub fn validate_card_selection(
     let Some(h) = &game.current_event().player.handler.as_ref() else {
         return Err("no selection handler".to_string());
     };
-    match &h.origin {
+    validate_card_selection_for_origin(cards, &game, &h.origin)
+}
+
+pub(crate) fn validate_card_selection_for_origin(cards: &[HandCard], game: &Game, o: &EventOrigin) -> Result<Vec<(u8, String)>, String> {
+    match o {
         EventOrigin::CivilCard(id) if *id == 7 || *id == 8 => {
             validate_spy_cards(cards, game).map(|()| Vec::new())
         }
@@ -142,6 +147,26 @@ pub fn validate_card_selection(
 
             match_objective_cards(cards, &c.objective_opportunities, game)
         }
+        EventOrigin::Builtin(b) if b == "Princeps" => {
+            validate_princeps_cards(cards).map(|()| Vec::new())
+        }
         _ => Ok(Vec::new()),
     }
 }
+
+pub(crate) fn all_action_hand_cards(p: &Player) -> Vec<HandCard> {
+    p
+        .action_cards
+        .iter()
+        .map(|a| HandCard::ActionCard(*a))
+        .collect_vec()
+}
+
+pub(crate) fn all_objective_hand_cards(player: &Player) -> Vec<HandCard> {
+    player
+        .objective_cards
+        .iter()
+        .map(|&a| HandCard::ObjectiveCard(a))
+        .collect_vec()
+}
+

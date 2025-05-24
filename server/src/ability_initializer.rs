@@ -1,6 +1,6 @@
 use crate::advance::Advance;
-use crate::card::HandCard;
-use crate::combat::{Combat, update_combat_strength};
+use crate::card::{validate_card_selection_for_origin, HandCard};
+use crate::combat::{update_combat_strength, Combat};
 use crate::combat_listeners::CombatStrength;
 use crate::content::persistent_events::{
     AdvanceRequest, EventResponse, HandCardsRequest, MultiRequest, PaymentRequest,
@@ -632,6 +632,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone + Sync + Send,
         V: Clone + PartialEq,
     {
+        let origin = self.get_key().clone();
         self.add_multi_choice_reward_request_listener::<E, HandCard, HandCardsRequest, V>(
             event,
             priority,
@@ -646,7 +647,11 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                 panic!("Hand Cards request expected");
             },
             request,
-            cards_selected,
+            move|game, c, details| {
+                validate_card_selection_for_origin(&c.choice, game, &origin)
+                    .expect("Invalid card selection - this should not happen");
+                cards_selected(game, c, details);
+            },
         )
     }
 

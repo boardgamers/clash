@@ -1,17 +1,21 @@
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::action_card::{discard_action_card, gain_action_card_from_pile};
 use crate::advance::{Advance, gain_advance_without_payment};
+use crate::card::{HandCard, all_action_hand_cards, all_objective_hand_cards};
 use crate::city::MoodState;
 use crate::civilization::Civilization;
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
-use crate::content::persistent_events::PaymentRequest;
+use crate::content::persistent_events::{HandCardsRequest, PaymentRequest};
 use crate::leader::{Leader, LeaderAbility};
+use crate::objective_card::{discard_objective_card, gain_objective_card_from_pile};
 use crate::payment::{
     PaymentConversion, PaymentConversionType, PaymentOptions, PaymentReason, base_resources,
 };
 use crate::player::gain_resources;
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
+use itertools::Itertools;
 
 pub(crate) fn rome() -> Civilization {
     Civilization::new(
@@ -162,17 +166,12 @@ fn provinces() -> SpecialAdvanceInfo {
 }
 
 fn augustus() -> Leader {
-    // todo princeps
     // todo imperator
     Leader::new(
         "Augustus",
-        LeaderAbility::builder(
-            "Princeps",
-            "As an action, gain 1 culture token and activate the city where Augustus is: \
-            Draw 1 action and 1 objective card. \
-            Then discard 1 action and 1 objective card.",
-        )
-        .build(),
+        LeaderAbility::builder("Princeps", PRINCEPS)
+            .add_custom_action(CustomActionType::Princeps)
+            .build(),
         LeaderAbility::builder(
             "Imperator",
             "If you don't own a city in the region: \
@@ -180,4 +179,82 @@ fn augustus() -> Leader {
         )
         .build(),
     )
+}
+
+const PRINCEPS: &str = "As an action, pay 1 culture token and \
+    activate the city where Augustus is: \
+    Draw 1 action and 1 objective card. \
+    Then discard 1 action and 1 objective card.";
+
+pub(crate) fn use_princeps() -> Builtin {
+    Builtin::builder("Princeps", PRINCEPS)
+        .add_hand_card_request(
+            |event| &mut event.custom_action,
+            0,
+            |game, player, _| {
+                let p = game.player_mut(player);
+                let position = p.active_leader().position(p);
+                p.get_city_mut(position).activate();
+                game.add_info_log_item(&format!(
+                    "{} activates the city {position} \
+                        to draw 1 action and 1 objective card using Princeps",
+                    game.player_name(player)
+                ));
+                gain_action_card_from_pile(game, player);
+                gain_objective_card_from_pile(game, player);
+
+                let p = game.player(player);
+                Some(HandCardsRequest::new(
+                    all_action_hand_cards(p)
+                        .into_iter()
+                        .chain(all_objective_hand_cards(p))
+                        .collect_vec(),
+                    2..=2,
+                    "Select 1 action and 1 objective card from your hand",
+                ))
+            },
+            |game, s, _| {
+                let p = s.player_index;
+                for c in &s.choice {
+                    match c {
+                        HandCard::ActionCard(card) => {
+                            game.add_info_log_item(&format!(
+                                "{} discarded action card {} for Princeps",
+                                s.player_name,
+                                game.cache.get_action_card(*card).name()
+                            ));
+                            discard_action_card(game, p, *card);
+                        }
+                        HandCard::ObjectiveCard(card) => {
+                            game.add_info_log_item(&format!(
+                                "{} discarded objective card {} for Princeps",
+                                s.player_name,
+                                game.cache.get_objective_card(*card).name()
+                            ));
+                            discard_objective_card(game, p, *card);
+                        }
+                        _ => panic!("Invalid hand card type"),
+                    };
+                }
+            },
+        )
+        .build()
+}
+
+pub(crate) fn validate_princeps_cards(cards: &[HandCard]) -> Result<(), String> {
+    match cards.len() {
+        2 => {
+            if cards
+                .iter()
+                .filter(|c| matches!(c, HandCard::ObjectiveCard(_)))
+                .count()
+                == 1
+            {
+                Ok(())
+            } else {
+                Err("must select 1 action and 1 objective card from your hand".to_string())
+            }
+        }
+        _ => Err("must select 2 cards".to_string()),
+    }
 }
