@@ -8,6 +8,7 @@ use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::{HandCardsRequest, PaymentRequest};
 use crate::leader::{Leader, LeaderAbility, leader_position};
+use crate::map::{block_for_position, block_has_player_city};
 use crate::objective_card::{discard_objective_card, gain_objective_card_from_pile};
 use crate::payment::{
     PaymentConversion, PaymentConversionType, PaymentOptions, PaymentReason, base_resources,
@@ -177,6 +178,21 @@ fn augustus() -> Leader {
             "If you don't own a city in the region: \
             Gain 2 combat value in every combat round",
         )
+        .add_combat_round_start_listener(6, |game, c, s, r| {
+            if c.has_leader(r, game)
+                && !block_has_player_city(
+                    game,
+                    &block_for_position(game, c.defender_position()),
+                    c.player(r),
+                )
+            {
+                s.extra_combat_value += 2;
+                s.roll_log.push(format!(
+                    "{} gains 2 combat value for Imperator",
+                    game.player_name(c.player(r))
+                ));
+            }
+        })
         .build(),
     )
 }

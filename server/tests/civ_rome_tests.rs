@@ -91,3 +91,13 @@ fn princeps() {
         ],
     );
 }
+
+#[test]
+fn imperator() {
+    JSON.test(
+        "imperator",
+        vec![
+            TestAction::undoable(0, move_action(vec![0], Position::from_offset("D8"))),
+        ],
+    );
+}

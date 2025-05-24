@@ -155,6 +155,16 @@ impl Combat {
             CombatRole::Defender => self.defender(),
         }
     }
+    
+    #[must_use]
+    pub fn has_leader(&self, role: CombatRole, game: &Game) -> bool {
+        let p = self.player(role);
+        self.fighting_units(game, p)
+            .iter()
+            .any(|&unit_id| {
+                game.player(p).get_unit(unit_id).unit_type == UnitType::Leader
+            })
+    }
 }
 
 pub fn initiate_combat(

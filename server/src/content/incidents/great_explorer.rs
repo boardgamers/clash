@@ -7,7 +7,7 @@ use crate::content::incidents::great_persons::{
 use crate::content::persistent_events::{PaymentRequest, PositionRequest};
 use crate::explore::move_to_unexplored_block;
 use crate::game::Game;
-use crate::map::{BlockPosition, UNEXPLORED_BLOCK, get_map_setup};
+use crate::map::{block_has_player_city, block_tiles, get_map_setup, BlockPosition};
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::Player;
 use crate::playing_actions::ActionCost;
@@ -99,10 +99,10 @@ pub(crate) fn explore_adjacent_block(builder: ActionCardBuilder) -> ActionCardBu
                 .map
                 .unexplored_blocks
                 .iter()
-                .find(|b| tiles(&b.position).iter().any(|p| *p == position))
+                .find(|b| block_tiles(&b.position).iter().any(|p| *p == position))
                 .cloned()
                 .expect("Block not found");
-            a.selected_positions = tiles(&dest.position);
+            a.selected_positions = block_tiles(&dest.position);
             move_to_unexplored_block(game, s.player_index, &dest, &[], position, None);
         },
     )
@@ -145,7 +145,7 @@ pub(crate) fn action_explore_request(game: &Game, player_index: usize) -> Positi
         .map(|b| b.position)
         .filter_map(|b| {
             free.iter()
-                .any(|p| has_any_city(game, p, player_index) && block_adjacent(&b, p))
+                .any(|p| block_has_player_city(game, p, player_index) && block_adjacent(&b, p))
                 .then_some(b.top_tile)
         })
         .collect_vec();
@@ -153,21 +153,8 @@ pub(crate) fn action_explore_request(game: &Game, player_index: usize) -> Positi
 }
 
 fn block_adjacent(p1: &BlockPosition, p2: &BlockPosition) -> bool {
-    let v1 = tiles(p1);
-    let v2 = tiles(p2);
+    let v1 = block_tiles(p1);
+    let v2 = block_tiles(p2);
     v1.iter().any(|p| v2.iter().any(|p2| p.is_neighbor(*p2)))
 }
 
-fn tiles(p1: &BlockPosition) -> Vec<Position> {
-    UNEXPLORED_BLOCK
-        .tiles(p1, p1.rotation)
-        .into_iter()
-        .map(|(p, _)| p)
-        .collect_vec()
-}
-
-fn has_any_city(game: &Game, p: &BlockPosition, player: usize) -> bool {
-    tiles(p)
-        .iter()
-        .any(|p| game.player(player).try_get_city(*p).is_some())
-}

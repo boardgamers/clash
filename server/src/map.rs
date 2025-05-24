@@ -557,3 +557,32 @@ pub(crate) fn home_position(game: &Game, player: &Player) -> Position {
     let h = &setup.home_positions[player.index];
     h.block.tiles(&h.position, h.position.rotation)[0].0
 }
+
+pub(crate) fn block_tiles(p1: &BlockPosition) -> Vec<Position> {
+    UNEXPLORED_BLOCK
+        .tiles(p1, p1.rotation)
+        .into_iter()
+        .map(|(p, _)| p)
+        .collect_vec()
+}
+
+pub(crate) fn block_has_player_city(game: &Game, p: &BlockPosition, player: usize) -> bool {
+    block_tiles(p)
+        .iter()
+        .any(|p| game.player(player).try_get_city(*p).is_some())
+}
+
+pub(crate) fn block_for_position(game: &Game, position: Position) -> BlockPosition {
+    let setup = get_map_setup(game.human_players_count());
+    for p in &setup.free_positions {
+        if block_tiles(p).iter().any(|t| *t == position) {
+            return p.clone();
+        }
+    }
+    let h = setup
+        .home_positions
+        .iter()
+        .find(|h| block_tiles(&h.position).iter().any(|t| *t == position))
+        .expect("Position not found in home positions");
+    h.position.clone()
+}
