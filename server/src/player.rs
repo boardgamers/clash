@@ -138,12 +138,6 @@ impl Player {
             .as_ref()
             .map(|name| self.get_leader(name))
     }
-    
-    #[must_use]
-    pub fn active_leader(&self) -> &Leader {
-        self.try_active_leader()
-            .unwrap_or_else(|| panic!("Player {} has no active leader", self.index))
-    }
 
     ///
     /// # Panics

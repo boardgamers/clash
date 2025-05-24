@@ -129,10 +129,14 @@ pub fn validate_card_selection(
     let Some(h) = &game.current_event().player.handler.as_ref() else {
         return Err("no selection handler".to_string());
     };
-    validate_card_selection_for_origin(cards, &game, &h.origin)
+    validate_card_selection_for_origin(cards, game, &h.origin)
 }
 
-pub(crate) fn validate_card_selection_for_origin(cards: &[HandCard], game: &Game, o: &EventOrigin) -> Result<Vec<(u8, String)>, String> {
+pub(crate) fn validate_card_selection_for_origin(
+    cards: &[HandCard],
+    game: &Game,
+    o: &EventOrigin,
+) -> Result<Vec<(u8, String)>, String> {
     match o {
         EventOrigin::CivilCard(id) if *id == 7 || *id == 8 => {
             validate_spy_cards(cards, game).map(|()| Vec::new())
@@ -155,8 +159,7 @@ pub(crate) fn validate_card_selection_for_origin(cards: &[HandCard], game: &Game
 }
 
 pub(crate) fn all_action_hand_cards(p: &Player) -> Vec<HandCard> {
-    p
-        .action_cards
+    p.action_cards
         .iter()
         .map(|a| HandCard::ActionCard(*a))
         .collect_vec()
@@ -169,4 +172,3 @@ pub(crate) fn all_objective_hand_cards(player: &Player) -> Vec<HandCard> {
         .map(|&a| HandCard::ObjectiveCard(a))
         .collect_vec()
 }
-

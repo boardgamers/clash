@@ -14,6 +14,7 @@ use crate::content::wonders::{
     use_great_statue,
 };
 use crate::events::EventOrigin;
+use crate::leader::leader_position;
 use crate::player::Player;
 use crate::playing_actions::{ActionResourceCost, PlayingActionType};
 use crate::position::Position;
@@ -83,12 +84,12 @@ pub enum CustomActionType {
     Sports,
     Taxes,
     Theaters,
-    
+
     // Wonders
     GreatLibrary,
     GreatLighthouse,
     GreatStatue,
-    
+
     // Civilizations,
     Aqueduct,
     Princeps,
@@ -117,9 +118,7 @@ impl CustomActionType {
             CustomActionType::VotingIncreaseHappiness => {
                 CustomActionType::cost(ResourcePile::mood_tokens(1))
             }
-            CustomActionType::Princeps => {
-                CustomActionType::cost(ResourcePile::culture_tokens(1))
-            }
+            CustomActionType::Princeps => CustomActionType::cost(ResourcePile::culture_tokens(1)),
             CustomActionType::FreeEconomyCollect | CustomActionType::ForcedLabor => {
                 CustomActionType::free_and_once_per_turn(ResourcePile::mood_tokens(1))
             }
@@ -294,8 +293,8 @@ pub(crate) fn can_play_custom_action(
         CustomActionType::Aqueduct => {
             !p.has_advance(Advance::Sanitation) && p.can_afford(&base_advance_cost(p))
         }
-        CustomActionType::Princeps => p.try_active_leader().is_some_and(|l| {
-            game.try_get_any_city(l.position(p))
+        CustomActionType::Princeps => p.try_active_leader().is_some_and(|_l| {
+            game.try_get_any_city(leader_position(p))
                 .is_some_and(City::can_activate)
         }),
         _ => true,

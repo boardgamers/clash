@@ -7,7 +7,7 @@ use crate::civilization::Civilization;
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::{HandCardsRequest, PaymentRequest};
-use crate::leader::{Leader, LeaderAbility};
+use crate::leader::{Leader, LeaderAbility, leader_position};
 use crate::objective_card::{discard_objective_card, gain_objective_card_from_pile};
 use crate::payment::{
     PaymentConversion, PaymentConversionType, PaymentOptions, PaymentReason, base_resources,
@@ -193,7 +193,7 @@ pub(crate) fn use_princeps() -> Builtin {
             0,
             |game, player, _| {
                 let p = game.player_mut(player);
-                let position = p.active_leader().position(p);
+                let position = leader_position(p);
                 p.get_city_mut(position).activate();
                 game.add_info_log_item(&format!(
                     "{} activates the city {position} \
@@ -233,8 +233,8 @@ pub(crate) fn use_princeps() -> Builtin {
                             ));
                             discard_objective_card(game, p, *card);
                         }
-                        _ => panic!("Invalid hand card type"),
-                    };
+                        HandCard::Wonder(_) => panic!("Invalid hand card type"),
+                    }
                 }
             },
         )

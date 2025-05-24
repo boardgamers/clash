@@ -19,15 +19,6 @@ impl Leader {
             abilities: vec![first_ability, second_ability],
         }
     }
-
-    #[must_use]
-    pub fn position(&self, player: &Player) -> Position {
-        player
-            .units
-            .iter()
-            .find_map(|unit| (unit.unit_type == UnitType::Leader).then_some(unit.position))
-            .expect("unit not found")
-    }
 }
 
 #[derive(Clone)]
@@ -77,4 +68,13 @@ impl AbilityInitializerSetup for LeaderAbilityBuilder {
     fn get_key(&self) -> EventOrigin {
         EventOrigin::LeaderAbility(self.name.clone())
     }
+}
+
+#[must_use]
+pub(crate) fn leader_position(player: &Player) -> Position {
+    player
+        .units
+        .iter()
+        .find_map(|unit| (unit.unit_type == UnitType::Leader).then_some(unit.position))
+        .expect("unit not found")
 }

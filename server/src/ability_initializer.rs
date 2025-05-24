@@ -1,6 +1,6 @@
 use crate::advance::Advance;
-use crate::card::{validate_card_selection_for_origin, HandCard};
-use crate::combat::{update_combat_strength, Combat};
+use crate::card::{HandCard, validate_card_selection_for_origin};
+use crate::combat::{Combat, update_combat_strength};
 use crate::combat_listeners::CombatStrength;
 use crate::content::persistent_events::{
     AdvanceRequest, EventResponse, HandCardsRequest, MultiRequest, PaymentRequest,
@@ -647,7 +647,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                 panic!("Hand Cards request expected");
             },
             request,
-            move|game, c, details| {
+            move |game, c, details| {
                 validate_card_selection_for_origin(&c.choice, game, &origin)
                     .expect("Invalid card selection - this should not happen");
                 cards_selected(game, c, details);
