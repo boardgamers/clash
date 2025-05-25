@@ -220,7 +220,7 @@ impl PlayingAction {
                         .played_once_per_turn_actions
                         .push(c);
                 }
-                Some(c.event_origin())
+                Some(game.player(player_index).custom_action_origin(&c))
             }
             PlayingActionType::ActionCard(c) => Some(EventOrigin::CivilCard(c)),
             _ => None,
@@ -294,29 +294,20 @@ impl PlayingAction {
             PlayingAction::Advance(_) => PlayingActionType::Advance,
             PlayingAction::FoundCity { .. } => PlayingActionType::FoundCity,
             PlayingAction::Construct(_) => PlayingActionType::Construct,
-            PlayingAction::Collect(c) => allowed_types(
-                &c.action_type,
-                &[
-                    PlayingActionType::Collect,
-                    PlayingActionType::Custom(CustomActionType::FreeEconomyCollect),
-                ],
-            ),
+            PlayingAction::Collect(c) => allowed_types(&c.action_type, &[
+                PlayingActionType::Collect,
+                PlayingActionType::Custom(CustomActionType::FreeEconomyCollect),
+            ]),
             PlayingAction::Recruit(_) => PlayingActionType::Recruit,
-            PlayingAction::IncreaseHappiness(h) => allowed_types(
-                &h.action_type,
-                &[
-                    PlayingActionType::IncreaseHappiness,
-                    PlayingActionType::Custom(CustomActionType::VotingIncreaseHappiness),
-                    PlayingActionType::Custom(CustomActionType::StatesmanIncreaseHappiness),
-                ],
-            ),
-            PlayingAction::InfluenceCultureAttempt(i) => allowed_types(
-                &i.action_type,
-                &[
-                    PlayingActionType::InfluenceCultureAttempt,
-                    PlayingActionType::Custom(CustomActionType::ArtsInfluenceCultureAttempt),
-                ],
-            ),
+            PlayingAction::IncreaseHappiness(h) => allowed_types(&h.action_type, &[
+                PlayingActionType::IncreaseHappiness,
+                PlayingActionType::Custom(CustomActionType::VotingIncreaseHappiness),
+                PlayingActionType::Custom(CustomActionType::StatesmanIncreaseHappiness),
+            ]),
+            PlayingAction::InfluenceCultureAttempt(i) => allowed_types(&i.action_type, &[
+                PlayingActionType::InfluenceCultureAttempt,
+                PlayingActionType::Custom(CustomActionType::ArtsInfluenceCultureAttempt),
+            ]),
             PlayingAction::ActionCard(a) => PlayingActionType::ActionCard(*a),
             PlayingAction::WonderCard(name) => PlayingActionType::WonderCard(*name),
             PlayingAction::Custom(c) => PlayingActionType::Custom(c.action),

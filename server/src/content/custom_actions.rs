@@ -1,4 +1,4 @@
-use crate::advance::{Advance, base_advance_cost};
+use crate::advance::{base_advance_cost, Advance};
 use crate::city::{City, MoodState};
 use crate::content::advances::autocracy::{use_absolute_power, use_forced_labor};
 use crate::content::advances::culture::{sports_options, use_sports, use_theaters};
@@ -7,13 +7,12 @@ use crate::content::advances::economy::{use_bartering, use_taxes};
 use crate::content::builtin::Builtin;
 use crate::content::civilizations::rome::{use_aqueduct, use_princeps};
 use crate::content::persistent_events::{
-    PersistentEventType, TriggerPersistentEventParams, trigger_persistent_event_with_listener,
+    trigger_persistent_event_with_listener, PersistentEventType, TriggerPersistentEventParams,
 };
 use crate::content::wonders::{
     great_lighthouse_city, great_lighthouse_spawns, use_great_library, use_great_lighthouse,
     use_great_statue,
 };
-use crate::events::EventOrigin;
 use crate::leader::leader_position;
 use crate::player::Player;
 use crate::playing_actions::{ActionResourceCost, PlayingActionType};
@@ -193,22 +192,13 @@ impl CustomActionType {
     }
 
     #[must_use]
-    pub fn base_action_advance(&self) -> Option<Advance> {
-        match self {
-            CustomActionType::ArtsInfluenceCultureAttempt => Some(Advance::Arts),
-            CustomActionType::FreeEconomyCollect => Some(Advance::FreeEconomy),
-            CustomActionType::VotingIncreaseHappiness | CustomActionType::StatesmanIncreaseHappiness => {
-                Some(Advance::Voting)
-            }
-            _ => None,
-        }
-    }
-
-    #[must_use]
-    pub fn event_origin(&self) -> EventOrigin {
-        self.base_action_advance().map_or_else(
-            || EventOrigin::Builtin(custom_action_builtins()[self].name.clone()),
-            EventOrigin::Advance,
+    pub fn is_modifier(&self) -> bool {
+        matches!(
+            self,
+            CustomActionType::ArtsInfluenceCultureAttempt
+                | CustomActionType::FreeEconomyCollect
+                | CustomActionType::VotingIncreaseHappiness
+                | CustomActionType::StatesmanIncreaseHappiness
         )
     }
 }
@@ -303,9 +293,6 @@ pub(crate) fn can_play_custom_action(
         CustomActionType::Princeps => game
             .try_get_any_city(leader_position(p))
             .is_some_and(City::can_activate),
-        CustomActionType::StatesmanIncreaseHappiness => game
-            .try_get_any_city(leader_position(p))
-            .is_some_and(|c| c.mood_state != MoodState::Happy),
         _ => true,
     };
     if !can_play {

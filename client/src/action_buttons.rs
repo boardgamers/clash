@@ -33,23 +33,17 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
     }
 
     if rc.can_play_action(&PlayingActionType::MoveUnits)
-        && bottom_left_texture(
-            rc,
-            &assets.move_units,
-            icon_pos(0, -3),
-            &["Move units".to_string()],
-        )
+        && bottom_left_texture(rc, &assets.move_units, icon_pos(0, -3), &[
+            "Move units".to_string()
+        ])
     {
         return global_move(rc);
     }
 
     if rc.can_play_action(&PlayingActionType::Advance)
-        && bottom_left_texture(
-            rc,
-            &assets.advances,
-            icon_pos(1, -3),
-            &["Research advances".to_string()],
-        )
+        && bottom_left_texture(rc, &assets.advances, icon_pos(1, -3), &[
+            "Research advances".to_string(),
+        ])
     {
         return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
     }
@@ -151,13 +145,16 @@ pub fn base_or_custom_action(
         action_types
             .iter()
             .map(|action_type| match action_type {
-                PlayingActionType::Custom(c) => (
-                    Some(c.event_origin()),
-                    execute(BaseOrCustomDialog {
-                        action_type: action_type.clone(),
-                        title: format!("{title} with {}", c.event_origin().name(rc.game)),
-                    }),
-                ),
+                PlayingActionType::Custom(c) => {
+                    let origin = rc.shown_player.custom_action_origin(c);
+                    (
+                        Some(origin.clone()),
+                        execute(BaseOrCustomDialog {
+                            action_type: action_type.clone(),
+                            title: format!("{title} with {}", origin.name(rc.game)),
+                        }),
+                    )
+                }
                 _ => (
                     None,
                     execute(BaseOrCustomDialog {

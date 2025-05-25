@@ -504,7 +504,7 @@ impl Game {
             .clone()
             .into_iter()
             .filter(|(t, _)| {
-                if t.base_action_advance().is_some() {
+                if t.is_modifier() {
                     // returned as part of "base_or_custom_available"
                     return false;
                 }

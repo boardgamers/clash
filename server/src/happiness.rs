@@ -46,6 +46,9 @@ pub(crate) fn increase_happiness(
     let mut angry_activations = vec![];
     let mut step_sum = 0;
     for &(city_position, steps) in happiness_increases {
+        if steps == 0 {
+            continue;
+        }
         if restriction.is_some_and(|r| r != city_position) {
             return Err(format!(
                 "Cannot increase happiness in city {city_position}, \
@@ -54,9 +57,6 @@ pub(crate) fn increase_happiness(
         }
 
         let city = player.get_city(city_position);
-        if steps == 0 {
-            continue;
-        }
         step_sum += steps * city.size() as u8;
 
         if city.mood_state == MoodState::Angry {
