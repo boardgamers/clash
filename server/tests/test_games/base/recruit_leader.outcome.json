@@ -332,7 +332,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 paid 1 mood token and 1 culture token to recruit a leader choosing Alexander as their leader in the city at A1"
+      "Player1 paid 1 mood token and 1 culture token to recruit Alexander in the city at A1"
     ]
   ],
   "undo_limit": 0,

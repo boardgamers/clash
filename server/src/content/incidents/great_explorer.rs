@@ -7,7 +7,7 @@ use crate::content::incidents::great_persons::{
 use crate::content::persistent_events::{PaymentRequest, PositionRequest};
 use crate::explore::move_to_unexplored_block;
 use crate::game::Game;
-use crate::map::{block_has_player_city, block_tiles, get_map_setup, BlockPosition};
+use crate::map::{BlockPosition, block_has_player_city, block_tiles, get_map_setup};
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::Player;
 use crate::playing_actions::ActionCost;
@@ -157,4 +157,3 @@ fn block_adjacent(p1: &BlockPosition, p2: &BlockPosition) -> bool {
     let v2 = block_tiles(p2);
     v1.iter().any(|p| v2.iter().any(|p2| p.is_neighbor(*p2)))
 }
-

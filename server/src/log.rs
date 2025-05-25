@@ -242,22 +242,10 @@ pub(crate) fn format_city_happiness_increase(
 }
 
 fn format_recruit_log_item(player: &Player, player_name: &String, r: &Recruit) -> String {
-    let leader_name = r.leader_name.clone();
     let city_position = &r.city_position;
     let units = &r.units;
     let payment = &r.payment;
     let replaced_units = &r.replaced_units;
-    let leader_str = leader_name.map_or(String::new(), |leader_name| {
-        format!(
-            " {} {} as their leader",
-            if player.available_leaders.len() > 1 {
-                "choosing"
-            } else {
-                "getting"
-            },
-            &leader_name
-        )
-    });
     let mood = format_mood_change(player, *city_position);
     let replace_str = match replaced_units.len() {
         0 => "",
@@ -273,7 +261,8 @@ fn format_recruit_log_item(player: &Player, player_name: &String, r: &Recruit) -
         "",
     );
     format!(
-        "{player_name} paid {payment} to recruit {}{leader_str} in the city at {city_position}{mood}{replace_str}{replace_pos}", units.to_string(None)
+        "{player_name} paid {payment} to recruit {} in the city at {city_position}{mood}{replace_str}{replace_pos}",
+        units.to_string(r.leader_name.as_ref())
     )
 }
 
@@ -376,7 +365,8 @@ pub(crate) fn move_action_log(game: &Game, player: &Player, m: &MoveUnits) -> St
         .units
         .iter()
         .map(|unit| player.get_unit(*unit).unit_type)
-        .collect::<Units>().to_string(player.active_leader.as_ref());
+        .collect::<Units>()
+        .to_string(player.active_leader.as_ref());
     let start = player.get_unit(m.units[0]).position;
     let start_is_water = game.map.is_sea(start);
     let dest = m.destination;

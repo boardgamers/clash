@@ -286,13 +286,8 @@ fn open_dialog(rc: &RenderContext, city: Position, sel: RecruitSelection) -> Sta
         rc,
         rc.game.city(p, city),
         &format!(
-            "Recruit {}{} in {}",
-            sel.amount.units.to_string(None),
-            sel.amount
-                .leader_name
-                .clone()
-                .map_or(String::new(), |name| format!(" ({name})")),
-            city
+            "Recruit {} in {city}",
+            sel.amount.units.to_string(sel.amount.leader_name.as_ref()),
         ),
         ConstructionProject::Units(sel),
         &cost,

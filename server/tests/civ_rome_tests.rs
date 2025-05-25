@@ -96,8 +96,9 @@ fn princeps() {
 fn imperator() {
     JSON.test(
         "imperator",
-        vec![
-            TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("D8"))),
-        ],
+        vec![TestAction::not_undoable(
+            0,
+            move_action(vec![0], Position::from_offset("D8")),
+        )],
     );
 }

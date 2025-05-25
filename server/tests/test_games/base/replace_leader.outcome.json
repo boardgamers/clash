@@ -337,7 +337,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 paid 1 mood token and 1 culture token to recruit a leader getting Kleopatra as their leader in the city at A1 making it Neutral and replaces the unit at A1"
+      "Player1 paid 1 mood token and 1 culture token to recruit Kleopatra in the city at A1 making it Neutral and replaces the unit at A1"
     ]
   ],
   "undo_limit": 0,
