@@ -273,7 +273,7 @@ fn format_recruit_log_item(player: &Player, player_name: &String, r: &Recruit) -
         "",
     );
     format!(
-        "{player_name} paid {payment} to recruit {}{leader_str} in the city at {city_position}{mood}{replace_str}{replace_pos}", units.to_string(player)
+        "{player_name} paid {payment} to recruit {}{leader_str} in the city at {city_position}{mood}{replace_str}{replace_pos}", units.to_string(None)
     )
 }
 
@@ -376,7 +376,7 @@ pub(crate) fn move_action_log(game: &Game, player: &Player, m: &MoveUnits) -> St
         .units
         .iter()
         .map(|unit| player.get_unit(*unit).unit_type)
-        .collect::<Units>().to_string(player);
+        .collect::<Units>().to_string(player.active_leader.as_ref());
     let start = player.get_unit(m.units[0]).position;
     let start_is_water = game.map.is_sea(start);
     let dest = m.destination;

@@ -354,7 +354,7 @@ impl Units {
         units_to_replace
     }
 
-    pub fn to_string(&self, player: &Player) -> String {
+    pub fn to_string(&self, leader_name: Option<&String>) -> String {
         let mut unit_types = Vec::new();
         if self.settlers > 0 {
             unit_types.push(format!(
@@ -393,9 +393,7 @@ impl Units {
         }
         if self.leaders > 0 {
             unit_types.push(if self.leaders == 1 {
-                player
-                    .active_leader
-                    .as_ref()
+                leader_name
                     .map_or("a leader", |v| v)
                     .to_string()
             } else {
@@ -670,7 +668,7 @@ pub(crate) fn choose_carried_units_to_remove() -> Builtin {
                 game.add_info_log_item(&format!(
                     "{} killed carried units: {}",
                     s.player_name,
-                    units.into_iter().collect::<Units>().to_string(game.player(s.player_index))
+                    units.into_iter().collect::<Units>().to_string(game.player(s.player_index).active_leader.as_ref())
                 ));
             }
             kill_units_without_event(game, &s.choice, s.player_index, e.killer);

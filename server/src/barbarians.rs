@@ -176,7 +176,7 @@ where
             let units = Units::from_iter(vec![s.choice]);
             game.add_info_log_item(&format!(
                 "Barbarians reinforced with {} at {position}",
-                units.to_string(get_barbarians_player(game))
+                units.to_string(None)
             ));
             add_unit(get_barbarians_player(game).index, position, s.choice, game);
         },
@@ -251,7 +251,7 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
                     let unit_types = ids.iter().map(|u| u.unit_type).collect::<Units>();
                     game.add_info_log_item(&format!(
                         "Barbarians move from {from} to {to}: {}",
-                        unit_types.to_string(get_barbarians_player(game))
+                        unit_types.to_string(None)
                     ));
                     move_with_possible_combat(
                         game,

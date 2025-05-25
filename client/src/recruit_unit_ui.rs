@@ -287,7 +287,7 @@ fn open_dialog(rc: &RenderContext, city: Position, sel: RecruitSelection) -> Sta
         rc.game.city(p, city),
         &format!(
             "Recruit {}{} in {}",
-            sel.amount.units.to_string(rc.shown_player),
+            sel.amount.units.to_string(None),
             sel.amount
                 .leader_name
                 .clone()
