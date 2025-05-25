@@ -206,7 +206,7 @@ pub(crate) fn log_round(game: &mut Game, c: &Combat) {
                     )
                     .collect_vec()
             })
-            .collect::<Units>()
+            .collect::<Units>().to_string(game.player(c.attacker()))
     ));
     game.add_info_log_item(&format!(
         "Defenders: {}",
@@ -214,7 +214,7 @@ pub(crate) fn log_round(game: &mut Game, c: &Combat) {
             .get_units(c.defender_position())
             .iter()
             .map(|u| u.unit_type)
-            .collect::<Units>()
+            .collect::<Units>().to_string(game.player(c.defender()))
     ));
 }
 

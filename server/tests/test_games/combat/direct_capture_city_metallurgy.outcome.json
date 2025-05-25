@@ -256,12 +256,12 @@
     [
       "Combat round 1",
       "Attackers: 1 infantry, 1 cavalry, 1 elephant and a leader",
-      "Defenders: a leader",
+      "Defenders: Alexander",
       "Player1 rolled 2 (elephant, -1 hits, no combat value), 2 (elephant, no bonus), 2 (elephant, no bonus), 1 (leader, re-roll), 1 (leader, re-roll), 6 (infantry, +1 combat value) for combined combat value of 13 and gets 1 hits against defending units.",
       "Player1 used the following combat modifiers: steel weapons added 2 combat value",
       "Player2 rolled 6 (infantry, no bonus) for combined combat value of 6 and gets 0 hits against attacking units.",
       "Player2 has to remove all of their defending units",
-      "Player2 removed a leader",
+      "Player2 removed Alexander",
       "Attacker wins and captured Player2's city at C1",
       "Player1 gained 1 gold for capturing a city",
       "Player1 could not store 1 gold"

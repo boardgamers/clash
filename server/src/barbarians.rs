@@ -174,7 +174,10 @@ where
         move |game, s, v| {
             let position = get_barbarian_city2(v).expect("barbarians should exist");
             let units = Units::from_iter(vec![s.choice]);
-            game.add_info_log_item(&format!("Barbarians reinforced with {units} at {position}",));
+            game.add_info_log_item(&format!(
+                "Barbarians reinforced with {} at {position}",
+                units.to_string(get_barbarians_player(game))
+            ));
             add_unit(get_barbarians_player(game).index, position, s.choice, game);
         },
     )
@@ -247,7 +250,8 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
                     state.moved_units.extend(units.iter());
                     let unit_types = ids.iter().map(|u| u.unit_type).collect::<Units>();
                     game.add_info_log_item(&format!(
-                        "Barbarians move from {from} to {to}: {unit_types}"
+                        "Barbarians move from {from} to {to}: {}",
+                        unit_types.to_string(get_barbarians_player(game))
                     ));
                     move_with_possible_combat(
                         game,

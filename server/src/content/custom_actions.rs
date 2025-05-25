@@ -293,7 +293,7 @@ pub(crate) fn can_play_custom_action(
         CustomActionType::Aqueduct => {
             !p.has_advance(Advance::Sanitation) && p.can_afford(&base_advance_cost(p))
         }
-        CustomActionType::Princeps => p.try_active_leader().is_some_and(|_l| {
+        CustomActionType::Princeps => p.active_leader.as_ref().is_some_and(|_name| {
             game.try_get_any_city(leader_position(p))
                 .is_some_and(City::can_activate)
         }),

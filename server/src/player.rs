@@ -132,13 +132,6 @@ impl Player {
         }
     }
 
-    #[must_use]
-    pub fn try_active_leader(&self) -> Option<&Leader> {
-        self.active_leader
-            .as_ref()
-            .map(|name| self.get_leader(name))
-    }
-
     ///
     /// # Panics
     ///

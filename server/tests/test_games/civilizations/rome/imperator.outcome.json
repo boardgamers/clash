@@ -5,7 +5,8 @@
     {
       "id": 0,
       "resources": {
-        "food": 2
+        "food": 2,
+        "gold": 2
       },
       "resource_limit": {
         "food": 2,
@@ -18,12 +19,19 @@
         {
           "mood_state": "Happy",
           "position": "D1"
+        },
+        {
+          "mood_state": "Angry",
+          "position": "D8"
         }
       ],
       "units": [
         {
-          "position": "E8",
+          "position": "D8",
           "unit_type": "Leader",
+          "movement_restrictions": [
+            "Battle"
+          ],
           "id": 0
         }
       ],
@@ -50,19 +58,6 @@
         "ideas": 7,
         "gold": 7
       },
-      "cities": [
-        {
-          "mood_state": "Happy",
-          "position": "D8"
-        }
-      ],
-      "units": [
-        {
-          "position": "D7",
-          "unit_type": "Settler",
-          "id": 0
-        }
-      ],
       "civilization": "test0",
       "advances": [
         "Farming",
@@ -359,17 +354,68 @@
           "players": [
             {
               "index": 0,
-              "items": []
+              "items": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          0
+                        ],
+                        "destination": "D8"
+                      }
+                    }
+                  },
+                  "combat_stats": {
+                    "round": 1,
+                    "battleground": "City",
+                    "attacker": {
+                      "position": "E8",
+                      "player": 0,
+                      "present": {
+                        "leaders": 1
+                      }
+                    },
+                    "defender": {
+                      "position": "D8",
+                      "player": 1,
+                      "present": {
+                        "infantry": 1
+                      },
+                      "losses": {
+                        "infantry": 1
+                      }
+                    },
+                    "result": "AttackerWins"
+                  }
+                }
+              ]
             }
           ]
         }
       ]
     }
   ],
-  "action_log_index": 0,
-  "log": [],
-  "undo_limit": 0,
-  "actions_left": 3,
+  "action_log_index": 1,
+  "log": [
+    [
+      "Player1 marched Augustus from E8 to D8"
+    ],
+    [
+      "Combat round 1",
+      "Attackers: Augustus",
+      "Defenders: 1 infantry",
+      "Player1 rolled 5 (cavalry, no bonus) for combined combat value of 7 and gets 1 hits against defending units.",
+      "Player1 used the following combat modifiers: Player1 gains 2 combat value for Imperator",
+      "Player2 rolled 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units.",
+      "Player2 has to remove all of their defending units",
+      "Player2 removed 1 infantry",
+      "Attacker wins and captured Player2's city at D8",
+      "Player1 gained 2 gold for capturing a city"
+    ]
+  ],
+  "undo_limit": 1,
+  "actions_left": 2,
   "round": 1,
   "age": 1,
   "messages": [
@@ -573,9 +619,11 @@
     10,
     6,
     2,
-    0,
-    2,
-    8
+    0
+  ],
+  "dice_roll_log": [
+    8,
+    2
   ],
   "wonders_left": [
     "Pyramids"
