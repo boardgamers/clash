@@ -258,15 +258,13 @@ impl PlayingAction {
             Construct(c) => construct::construct(game, player_index, &c)?,
             Collect(c) => collect(game, player_index, &c)?,
             Recruit(r) => recruit(game, player_index, r)?,
-            IncreaseHappiness(i) => {
-                increase_happiness(
-                    game,
-                    player_index,
-                    &i.happiness_increases,
-                    Some(i.payment),
-                    &i.action_type,
-                );
-            }
+            IncreaseHappiness(i) => increase_happiness(
+                game,
+                player_index,
+                &i.happiness_increases,
+                Some(i.payment),
+                &i.action_type,
+            )?,
             InfluenceCultureAttempt(c) => {
                 influence_culture_attempt(game, player_index, &c.selected_structure)?;
             }
@@ -309,7 +307,7 @@ impl PlayingAction {
                 &[
                     PlayingActionType::IncreaseHappiness,
                     PlayingActionType::Custom(CustomActionType::VotingIncreaseHappiness),
-                    PlayingActionType::Custom(CustomActionType::Statesman),
+                    PlayingActionType::Custom(CustomActionType::StatesmanIncreaseHappiness),
                 ],
             ),
             PlayingAction::InfluenceCultureAttempt(i) => allowed_types(

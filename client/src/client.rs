@@ -186,15 +186,16 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
 }
 
 fn dialog_chooser(rc: &RenderContext, c: &DialogChooser) -> StateUpdate {
+    let h = -50.;
     bottom_centered_text_with_offset(
         rc,
         &c.title,
-        vec2(0., c.options.len() as f32 * -100. - 130.),
+        vec2(0., c.options.len() as f32 * h + 50.),
         &[],
     );
 
     for (i, (origin, d)) in c.options.iter().enumerate() {
-        let offset = vec2(0., i as f32 * -100. - 30.);
+        let offset = vec2(0., i as f32 * h + 35.);
         let (name, tooltip) = origin.as_ref().map_or_else(
             || ("standard action".to_string(), vec![]),
             |o| (o.name(rc.game), event_help(rc, o)),
@@ -205,7 +206,7 @@ fn dialog_chooser(rc: &RenderContext, c: &DialogChooser) -> StateUpdate {
             rc,
             &rc.assets().ok,
             &tooltip,
-            bottom_center_anchor(rc) + offset + vec2(100., -10.),
+            bottom_center_anchor(rc) + offset + vec2(100., -70.),
             ICON_SIZE,
         ) {
             return StateUpdate::OpenDialog(d.clone());
@@ -249,7 +250,9 @@ fn controlling_player_click(rc: &RenderContext, mouse_pos: Vec2, pos: Position) 
         ActiveDialog::UnitsRequest(s) => unit_selection_click(rc, pos, mouse_pos, s, |new| {
             StateUpdate::OpenDialog(ActiveDialog::UnitsRequest(new.clone()))
         }),
-        ActiveDialog::IncreaseHappiness(h) => increase_happiness_click(rc, pos, h),
+        ActiveDialog::IncreaseHappiness(h) if h.city_restriction.is_none_or(|r| r == pos) => {
+            increase_happiness_click(rc, pos, h)
+        }
         _ => StateUpdate::SetFocusedTile(pos),
     }
 }

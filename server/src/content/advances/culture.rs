@@ -117,7 +117,8 @@ pub(crate) fn use_sports() -> Builtin {
                     &[(position, steps)],
                     None,
                     &a.action.action.playing_action_type(),
-                );
+                )
+                .expect("Failed to increase happiness");
                 game.add_info_log_item(&format!(
                     "{} paid {pile} for Sports to increase the happiness of {position} \
                         by {steps} steps, making it {}",

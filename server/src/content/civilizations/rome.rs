@@ -22,7 +22,7 @@ pub(crate) fn rome() -> Civilization {
     Civilization::new(
         "Rome",
         vec![aqueduct(), roman_roads(), captivi(), provinces()],
-        vec![augustus()],
+        vec![augustus(), ceasar()],
     )
 }
 
@@ -167,7 +167,6 @@ fn provinces() -> SpecialAdvanceInfo {
 }
 
 fn augustus() -> Leader {
-    // todo imperator
     Leader::new(
         "Augustus",
         LeaderAbility::builder("Princeps", PRINCEPS)
@@ -196,7 +195,6 @@ fn augustus() -> Leader {
         .build(),
     )
 }
-
 const PRINCEPS: &str = "As an action, pay 1 culture token and \
     activate the city where Augustus is: \
     Draw 1 action and 1 objective card. \
@@ -273,4 +271,19 @@ pub(crate) fn validate_princeps_cards(cards: &[HandCard]) -> Result<(), String> 
         }
         _ => Err("must select 2 cards".to_string()),
     }
+}
+
+fn ceasar() -> Leader {
+    // todo proconsul action
+    Leader::new(
+        "Gaius Julius Caesar",
+        LeaderAbility::builder(
+            "Statesman",
+            "As a free action, you may use 'Increase happiness' \
+                to increase happiness in the city where Caesar is.",
+        )
+        .add_custom_action(CustomActionType::StatesmanIncreaseHappiness)
+        .build(),
+        LeaderAbility::builder("Proconsul", "todo").build(),
+    )
 }

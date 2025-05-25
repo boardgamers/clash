@@ -217,10 +217,10 @@ pub fn format_happiness_increase(
             }
         })
         .collect_vec();
-    let suffix = if let PlayingActionType::Custom(_) = i.action_type {
-        " using Voting"
+    let suffix = if let PlayingActionType::Custom(c) = i.action_type {
+        format!(" using {c}")
     } else {
-        ""
+        String::new()
     };
 
     format!(

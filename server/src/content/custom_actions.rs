@@ -94,7 +94,7 @@ pub enum CustomActionType {
     // Rome
     Aqueduct,
     Princeps,
-    Statesman,
+    StatesmanIncreaseHappiness,
 }
 
 impl CustomActionType {
@@ -107,7 +107,7 @@ impl CustomActionType {
             CustomActionType::CivilLiberties | CustomActionType::Sports => {
                 CustomActionType::regular()
             }
-            CustomActionType::GreatLighthouse | CustomActionType::Statesman => {
+            CustomActionType::GreatLighthouse | CustomActionType::StatesmanIncreaseHappiness => {
                 CustomActionType::free(ResourcePile::empty())
             }
             CustomActionType::Bartering
@@ -197,7 +197,7 @@ impl CustomActionType {
         match self {
             CustomActionType::ArtsInfluenceCultureAttempt => Some(Advance::Arts),
             CustomActionType::FreeEconomyCollect => Some(Advance::FreeEconomy),
-            CustomActionType::VotingIncreaseHappiness | CustomActionType::Statesman => {
+            CustomActionType::VotingIncreaseHappiness | CustomActionType::StatesmanIncreaseHappiness => {
                 Some(Advance::Voting)
             }
             _ => None,
@@ -235,7 +235,7 @@ impl Display for CustomActionType {
             CustomActionType::GreatStatue => write!(f, "Great Statue"),
             CustomActionType::Aqueduct => write!(f, "Aqueduct"),
             CustomActionType::Princeps => write!(f, "Princeps"),
-            CustomActionType::Statesman => write!(f, "Statesman"),
+            CustomActionType::StatesmanIncreaseHappiness => write!(f, "Statesman"),
         }
     }
 }
@@ -303,7 +303,7 @@ pub(crate) fn can_play_custom_action(
         CustomActionType::Princeps => game
             .try_get_any_city(leader_position(p))
             .is_some_and(City::can_activate),
-        CustomActionType::Statesman => game
+        CustomActionType::StatesmanIncreaseHappiness => game
             .try_get_any_city(leader_position(p))
             .is_some_and(|c| c.mood_state != MoodState::Happy),
         _ => true,

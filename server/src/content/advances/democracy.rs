@@ -28,7 +28,7 @@ fn voting() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::Voting,
         "Voting",
-        "As a free action, you may spend 1 mood token to gain an action 'Increase happiness'",
+        "As a free action, you may spend 1 mood token to use 'Increase happiness'",
     )
     .add_custom_action(VotingIncreaseHappiness)
 }

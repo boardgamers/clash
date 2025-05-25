@@ -1,8 +1,9 @@
 use crate::city::MoodState;
 use crate::content::custom_actions::CustomActionType;
 use crate::game::Game;
+use crate::leader::leader_position;
 use crate::payment::{PaymentOptions, PaymentReason};
-use crate::player::CostTrigger;
+use crate::player::{CostTrigger, Player};
 use crate::player_events::CostInfo;
 use crate::playing_actions::{PlayingActionType, base_or_custom_available};
 use crate::position::Position;
@@ -17,9 +18,19 @@ pub fn available_happiness_actions(game: &Game, player: usize) -> Vec<PlayingAct
         PlayingActionType::IncreaseHappiness,
         vec![
             CustomActionType::VotingIncreaseHappiness,
-            CustomActionType::Statesman,
+            CustomActionType::StatesmanIncreaseHappiness,
         ],
     )
+}
+
+#[must_use]
+pub fn happiness_city_restriction(player: &Player, action: &PlayingActionType) -> Option<Position> {
+    match action {
+        PlayingActionType::Custom(custom) if custom == &CustomActionType::StatesmanIncreaseHappiness => {
+            Some(leader_position(player))
+        }
+        _ => None,
+    }
 }
 
 pub(crate) fn increase_happiness(
@@ -28,12 +39,20 @@ pub(crate) fn increase_happiness(
     happiness_increases: &[(Position, u8)],
     payment: Option<ResourcePile>,
     action_type: &PlayingActionType,
-) {
+) -> Result<(), String> {
     let trigger = game.execute_cost_trigger();
     let player = &mut game.players[player_index];
+    let restriction = happiness_city_restriction(player, action_type);
     let mut angry_activations = vec![];
     let mut step_sum = 0;
     for &(city_position, steps) in happiness_increases {
+        if restriction.is_some_and(|r| r != city_position) {
+            return Err(format!(
+                "Cannot increase happiness in city {city_position}, \
+                 only in {restriction:?} with {action_type:?}"
+            ));
+        }
+
         let city = player.get_city(city_position);
         if steps == 0 {
             continue;
@@ -52,6 +71,7 @@ pub(crate) fn increase_happiness(
     if let Some(r) = payment {
         happiness_cost(player_index, step_sum, trigger, action_type, game).pay(game, &r);
     }
+    Ok(())
 }
 
 #[must_use]
