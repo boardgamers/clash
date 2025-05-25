@@ -91,8 +91,10 @@ pub enum CustomActionType {
     GreatStatue,
 
     // Civilizations,
+    // Rome
     Aqueduct,
     Princeps,
+    Statesman,
 }
 
 impl CustomActionType {
@@ -105,7 +107,9 @@ impl CustomActionType {
             CustomActionType::CivilLiberties | CustomActionType::Sports => {
                 CustomActionType::regular()
             }
-            CustomActionType::GreatLighthouse => CustomActionType::free(ResourcePile::empty()),
+            CustomActionType::GreatLighthouse | CustomActionType::Statesman => {
+                CustomActionType::free(ResourcePile::empty())
+            }
             CustomActionType::Bartering
             | CustomActionType::Theaters
             | CustomActionType::GreatLibrary
@@ -193,7 +197,9 @@ impl CustomActionType {
         match self {
             CustomActionType::ArtsInfluenceCultureAttempt => Some(Advance::Arts),
             CustomActionType::FreeEconomyCollect => Some(Advance::FreeEconomy),
-            CustomActionType::VotingIncreaseHappiness => Some(Advance::Voting),
+            CustomActionType::VotingIncreaseHappiness | CustomActionType::Statesman => {
+                Some(Advance::Voting)
+            }
             _ => None,
         }
     }
@@ -229,6 +235,7 @@ impl Display for CustomActionType {
             CustomActionType::GreatStatue => write!(f, "Great Statue"),
             CustomActionType::Aqueduct => write!(f, "Aqueduct"),
             CustomActionType::Princeps => write!(f, "Princeps"),
+            CustomActionType::Statesman => write!(f, "Statesman"),
         }
     }
 }
@@ -293,10 +300,12 @@ pub(crate) fn can_play_custom_action(
         CustomActionType::Aqueduct => {
             !p.has_advance(Advance::Sanitation) && p.can_afford(&base_advance_cost(p))
         }
-        CustomActionType::Princeps => p.active_leader.as_ref().is_some_and(|_name| {
-            game.try_get_any_city(leader_position(p))
-                .is_some_and(City::can_activate)
-        }),
+        CustomActionType::Princeps => game
+            .try_get_any_city(leader_position(p))
+            .is_some_and(City::can_activate),
+        CustomActionType::Statesman => game
+            .try_get_any_city(leader_position(p))
+            .is_some_and(|c| c.mood_state != MoodState::Happy),
         _ => true,
     };
     if !can_play {

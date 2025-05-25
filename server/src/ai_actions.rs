@@ -19,7 +19,7 @@ use crate::happiness::{available_happiness_actions, happiness_cost};
 use crate::payment::PaymentOptions;
 use crate::player::{CostTrigger, Player};
 use crate::playing_actions::{
-    Collect, IncreaseHappiness, PlayingAction, PlayingActionType, Recruit, base_and_custom_action,
+    Collect, IncreaseHappiness, PlayingAction, PlayingActionType, Recruit,
 };
 use crate::position::Position;
 use crate::recruit::recruit_cost;
@@ -142,10 +142,8 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
 
     // IncreaseHappiness
     let happiness = available_happiness_actions(game, p.index);
-    // if !happiness.is_empty() {
-    // let action_type = prefer_custom_action(happiness); // todo custom action is buggy
-    if let Some(action_type) = base_and_custom_action(happiness).0 {
-        if let Some(h) = calculate_increase_happiness(p, &action_type, game) {
+    if !happiness.is_empty() {
+        if let Some(h) = calculate_increase_happiness(p, &prefer_custom_action(&happiness), game) {
             actions.push((
                 ActionType::Playing(PlayingActionType::IncreaseHappiness),
                 vec![Action::Playing(PlayingAction::IncreaseHappiness(h))],
@@ -156,7 +154,7 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
     // InfluenceCultureAttempt,
     let influence = available_influence_actions(game, p.index);
     if !influence.is_empty() {
-        let action_type = prefer_custom_action(influence);
+        let action_type = prefer_custom_action(&influence);
         if let Some(i) = calculate_influence(game, p, &action_type) {
             actions.push((
                 ActionType::Playing(PlayingActionType::Collect),
@@ -319,7 +317,7 @@ fn collect_actions(p: &Player, game: &Game) -> Vec<Action> {
     if collect.is_empty() {
         return vec![];
     }
-    let action_type = prefer_custom_action(collect);
+    let action_type = prefer_custom_action(&collect);
 
     p.cities
         .iter()
@@ -483,11 +481,17 @@ fn calculate_increase_happiness(
     ))
 }
 
-fn prefer_custom_action(actions: Vec<PlayingActionType>) -> PlayingActionType {
-    let (action, custom) = base_and_custom_action(actions);
-    action.unwrap_or_else(|| {
-        PlayingActionType::Custom(custom.expect("custom action should be present"))
-    })
+fn prefer_custom_action(actions: &[PlayingActionType]) -> PlayingActionType {
+    actions
+        .iter()
+        .find(|a| matches!(a, PlayingActionType::Custom(_)))
+        .or_else(|| {
+            actions
+                .iter()
+                .find(|a| !matches!(a, PlayingActionType::Custom(_)))
+        })
+        .cloned()
+        .expect("expected at least one action type, either custom or base")
 }
 
 #[allow(clippy::match_same_arms)]

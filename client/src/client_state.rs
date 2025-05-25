@@ -219,8 +219,7 @@ pub struct PendingUpdate {
 #[derive(Clone)]
 pub struct DialogChooser {
     pub title: String,
-    pub yes: ActiveDialog,
-    pub no: ActiveDialog,
+    pub options: Vec<(Option<EventOrigin>, ActiveDialog)>,
 }
 
 #[must_use]
@@ -288,26 +287,17 @@ impl StateUpdate {
 
     pub fn dialog_chooser(
         title: &str,
-        yes: Option<ActiveDialog>,
-        no: Option<ActiveDialog>,
+        options: Vec<(Option<EventOrigin>, ActiveDialog)>,
     ) -> StateUpdate {
-        match yes {
-            Some(yes) => match no {
-                Some(no) => {
-                    StateUpdate::OpenDialog(ActiveDialog::DialogChooser(Box::new(DialogChooser {
-                        title: title.to_string(),
-                        yes,
-                        no,
-                    })))
-                }
-                _ => StateUpdate::OpenDialog(yes),
-            },
-            _ => match no {
-                Some(no) => StateUpdate::OpenDialog(no),
-                _ => {
-                    panic!("no dialog to open")
-                }
-            },
+        match options.len() {
+            0 => {
+                panic!("no dialog options provided");
+            }
+            1 => StateUpdate::OpenDialog(options[0].1.clone()),
+            _ => StateUpdate::OpenDialog(ActiveDialog::DialogChooser(Box::new(DialogChooser {
+                title: title.to_string(),
+                options,
+            }))),
         }
     }
 
@@ -379,6 +369,7 @@ pub enum CameraMode {
 
 #[cfg(not(target_arch = "wasm32"))]
 use server::ai::AI;
+use server::events::EventOrigin;
 
 pub struct State {
     pub assets: Assets,

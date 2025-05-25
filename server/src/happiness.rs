@@ -15,7 +15,10 @@ pub fn available_happiness_actions(game: &Game, player: usize) -> Vec<PlayingAct
         game,
         player,
         PlayingActionType::IncreaseHappiness,
-        CustomActionType::VotingIncreaseHappiness,
+        vec![
+            CustomActionType::VotingIncreaseHappiness,
+            CustomActionType::Statesman,
+        ],
     )
 }
 

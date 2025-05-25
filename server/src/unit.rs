@@ -354,7 +354,8 @@ impl Units {
         units_to_replace
     }
 
-    #[must_use] pub fn to_string(&self, leader_name: Option<&String>) -> String {
+    #[must_use]
+    pub fn to_string(&self, leader_name: Option<&String>) -> String {
         let mut unit_types = Vec::new();
         if self.settlers > 0 {
             unit_types.push(format!(

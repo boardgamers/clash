@@ -97,7 +97,7 @@ fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Optio
         &rc.assets().resources[&ResourceType::MoodTokens],
         vec!["Increase happiness".to_string()],
         Box::new(move || {
-            open_increase_happiness_dialog(rc, actions.clone(), |mut happiness| {
+            open_increase_happiness_dialog(rc, &actions, |mut happiness| {
                 let mut target = city.mood_state.clone();
                 while target != MoodState::Happy {
                     happiness = add_increase_happiness(rc, city, happiness)
@@ -200,7 +200,7 @@ fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option
         &rc.assets().resources[&ResourceType::Food],
         vec!["Collect Resources".to_string()],
         Box::new(move || {
-            base_or_custom_action(rc, actions.clone(), "Collect resources", |custom| {
+            base_or_custom_action(rc, &actions, "Collect resources", |custom| {
                 let i = possible_resource_collections(
                     rc.game,
                     city.position,

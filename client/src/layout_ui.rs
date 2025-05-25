@@ -59,13 +59,24 @@ pub fn bottom_center_texture(
     draw_icon(rc, texture, tooltip, anchor + p)
 }
 
-pub fn bottom_centered_text_with_offset(rc: &RenderContext, text: &str, offset: Vec2) {
+pub fn bottom_centered_text_with_offset(
+    rc: &RenderContext,
+    text: &str,
+    offset: Vec2,
+    tooltip: &[String],
+) {
     let dimensions = rc.state.measure_text(text);
-    bottom_center_text(rc, text, vec2(-dimensions.width / 2., -50.) + offset);
+    let p = vec2(-dimensions.width / 2., -50.) + offset;
+    bottom_center_text(rc, text, p);
+    if !tooltip.is_empty() {
+        let rect = Rect::new(p.x, p.y, dimensions.width, dimensions.height);
+
+        tooltip::show_tooltip_for_rect(rc, tooltip, rect, 50.);
+    }
 }
 
 pub fn bottom_centered_text(rc: &RenderContext, text: &str) {
-    bottom_centered_text_with_offset(rc, text, vec2(0., 0.));
+    bottom_centered_text_with_offset(rc, text, vec2(0., 0.), &[]);
 }
 
 pub fn bottom_center_text(rc: &RenderContext, text: &str, p: Vec2) {

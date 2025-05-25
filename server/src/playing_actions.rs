@@ -1,4 +1,3 @@
-use itertools::{Either, Itertools};
 use serde::{Deserialize, Serialize};
 
 use crate::ability_initializer::AbilityInitializerSetup;
@@ -310,6 +309,7 @@ impl PlayingAction {
                 &[
                     PlayingActionType::IncreaseHappiness,
                     PlayingActionType::Custom(CustomActionType::VotingIncreaseHappiness),
+                    PlayingActionType::Custom(CustomActionType::Statesman),
                 ],
             ),
             PlayingAction::InfluenceCultureAttempt(i) => allowed_types(
@@ -411,28 +411,15 @@ impl ActionCost {
 }
 
 #[must_use]
-pub fn base_and_custom_action(
-    actions: Vec<PlayingActionType>,
-) -> (Option<PlayingActionType>, Option<CustomActionType>) {
-    let (mut custom, mut action): (Vec<_>, Vec<_>) = actions.into_iter().partition_map(|a| {
-        if let PlayingActionType::Custom(c) = a {
-            Either::Left(c)
-        } else {
-            Either::Right(a.clone())
-        }
-    });
-    (action.pop(), custom.pop())
-}
-
-#[must_use]
 pub(crate) fn base_or_custom_available(
     game: &Game,
     player: usize,
     action: PlayingActionType,
-    custom: CustomActionType,
+    custom: Vec<CustomActionType>,
 ) -> Vec<PlayingActionType> {
-    vec![action, custom.playing_action_type()]
+    vec![action]
         .into_iter()
+        .chain(custom.into_iter().map(|c| c.playing_action_type()))
         .filter_map(|a| a.is_available(game, player).map(|()| a).ok())
         .collect()
 }

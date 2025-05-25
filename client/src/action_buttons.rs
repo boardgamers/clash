@@ -7,12 +7,13 @@ use crate::influence_ui::new_cultural_influence_dialog;
 use crate::layout_ui::{bottom_left_texture, icon_pos};
 use crate::move_ui::MoveIntent;
 use crate::render_context::RenderContext;
+use itertools::Itertools;
 use server::action::Action;
 use server::city::City;
 use server::content::custom_actions::{CustomAction, CustomActionType};
 use server::cultural_influence::available_influence_actions;
 use server::happiness::available_happiness_actions;
-use server::playing_actions::{PlayingAction, PlayingActionType, base_and_custom_action};
+use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::resource::ResourceType;
 
 pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
@@ -28,7 +29,7 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
             &["Increase happiness".to_string()],
         )
     {
-        return open_increase_happiness_dialog(rc, happiness, |h| h);
+        return open_increase_happiness_dialog(rc, &happiness, |h| h);
     }
 
     if rc.can_play_action(&PlayingActionType::MoveUnits)
@@ -63,7 +64,7 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
             &["Cultural Influence".to_string()],
         )
     {
-        return base_or_custom_action(rc, influence, "Influence culture", |d| {
+        return base_or_custom_action(rc, &influence, "Influence culture", |d| {
             new_cultural_influence_dialog(rc.game, rc.shown_player.index, d)
         });
     }
@@ -141,33 +142,30 @@ fn generic_custom_action(
 
 pub fn base_or_custom_action(
     rc: &RenderContext,
-    actions: Vec<PlayingActionType>,
+    action_types: &[PlayingActionType],
     title: &str,
     execute: impl Fn(BaseOrCustomDialog) -> ActiveDialog,
 ) -> StateUpdate {
-    let (action, custom) = base_and_custom_action(actions);
-
-    let base = action.map(|action_type| {
-        execute(BaseOrCustomDialog {
-            action_type,
-            title: title.to_string(),
-        })
-    });
-
-    let special = custom.map(|a| {
-        let origin = &rc.shown_player.custom_actions[&a];
-        let dialog = execute(BaseOrCustomDialog {
-            action_type: PlayingActionType::Custom(a),
-            title: format!("{title} with {}", origin.name(rc.game)),
-        });
-
-        StateUpdate::dialog_chooser(
-            &format!("Use special action from {}?", origin.name(rc.game)),
-            Some(dialog),
-            base.clone(),
-        )
-    });
-    special
-        .or_else(|| base.map(StateUpdate::OpenDialog))
-        .unwrap_or(StateUpdate::None)
+    StateUpdate::dialog_chooser(
+        &format!("Choose action: {title}"),
+        action_types
+            .iter()
+            .map(|action_type| match action_type {
+                PlayingActionType::Custom(c) => (
+                    Some(c.event_origin()),
+                    execute(BaseOrCustomDialog {
+                        action_type: action_type.clone(),
+                        title: format!("{title} with {}", c.event_origin().name(rc.game)),
+                    }),
+                ),
+                _ => (
+                    None,
+                    execute(BaseOrCustomDialog {
+                        action_type: action_type.clone(),
+                        title: title.to_string(),
+                    }),
+                ),
+            })
+            .collect_vec(),
+    )
 }

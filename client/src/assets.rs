@@ -321,6 +321,7 @@ impl Assets {
                     "../assets/statue-of-david-1-svgrepo-com.png"
                 )),
             ),
+            //Rome
             (
                 CustomActionType::Aqueduct,
                 load_png(include_bytes!("../assets/aqueduct-svgrepo-com.png")),

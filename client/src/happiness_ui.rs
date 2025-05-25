@@ -55,7 +55,7 @@ impl IncreaseHappinessConfig {
 
 pub fn open_increase_happiness_dialog(
     rc: &RenderContext,
-    actions: Vec<PlayingActionType>,
+    actions: &[PlayingActionType],
     init: impl Fn(IncreaseHappinessConfig) -> IncreaseHappinessConfig,
 ) -> StateUpdate {
     base_or_custom_action(rc, actions, "Increase happiness", |custom| {
