@@ -586,19 +586,21 @@ impl Player {
         }
         cost_info
     }
-    
+
     ///
     /// # Panics
     /// Panics if the custom action type does not exist for this player
     #[must_use]
     pub fn custom_action_origin(&self, custom_action_type: &CustomActionType) -> EventOrigin {
-        self.custom_actions.get(custom_action_type).cloned().unwrap_or_else(|| {
-            panic!(
-                "Custom action {} not found for player {}",
-                custom_action_type,
-                self.index
-            )
-        })
+        self.custom_actions
+            .get(custom_action_type)
+            .cloned()
+            .unwrap_or_else(|| {
+                panic!(
+                    "Custom action {} not found for player {}",
+                    custom_action_type, self.index
+                )
+            })
     }
 }
 

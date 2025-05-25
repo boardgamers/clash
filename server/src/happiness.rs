@@ -26,7 +26,9 @@ pub fn available_happiness_actions(game: &Game, player: usize) -> Vec<PlayingAct
 #[must_use]
 pub fn happiness_city_restriction(player: &Player, action: &PlayingActionType) -> Option<Position> {
     match action {
-        PlayingActionType::Custom(custom) if custom == &CustomActionType::StatesmanIncreaseHappiness => {
+        PlayingActionType::Custom(custom)
+            if custom == &CustomActionType::StatesmanIncreaseHappiness =>
+        {
             Some(leader_position(player))
         }
         _ => None,

@@ -70,7 +70,12 @@ pub fn bottom_centered_text_with_offset(
     bottom_center_text(rc, text, p);
     if !tooltip.is_empty() {
         let p = bottom_center_anchor(rc) + p;
-        let rect = Rect::new(p.x, p.y - dimensions.offset_y, dimensions.width, dimensions.height);
+        let rect = Rect::new(
+            p.x,
+            p.y - dimensions.offset_y,
+            dimensions.width,
+            dimensions.height,
+        );
         tooltip::show_tooltip_for_rect(rc, tooltip, rect, 50.);
     }
 }
