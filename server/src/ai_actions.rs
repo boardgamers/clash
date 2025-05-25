@@ -152,9 +152,7 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
     }
 
     // InfluenceCultureAttempt,
-    let influence = available_influence_actions(game, p.index);
-    if !influence.is_empty() {
-        let action_type = prefer_custom_action(&influence);
+    for action_type in available_influence_actions(game, p.index) {
         if let Some(i) = calculate_influence(game, p, &action_type) {
             actions.push((
                 ActionType::Playing(PlayingActionType::Collect),
