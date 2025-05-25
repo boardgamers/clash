@@ -318,7 +318,7 @@
                           },
                           "last_priority_used": 0,
                           "origin_override": {
-                            "Builtin": "Forced Labor"
+                            "Advance": "ForcedLabor"
                           },
                           "player": 0
                         }

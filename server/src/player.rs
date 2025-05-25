@@ -1,6 +1,6 @@
 use crate::advance::{Advance, base_advance_cost, player_government};
 use crate::city_pieces::DestroyedStructures;
-use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
+use crate::consts::{STACK_LIMIT, UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::events::{Event, EventOrigin};
 use crate::leader::LeaderAbility;
 use crate::payment::{PaymentOptions, PaymentReason};
@@ -542,7 +542,7 @@ impl Player {
             .filter(|unit| unit.position == position)
             .collect()
     }
-
+    
     #[must_use]
     pub fn get_units_mut(&mut self, position: Position) -> Vec<&mut Unit> {
         self.units
@@ -651,4 +651,12 @@ pub fn gain_resources(
 ) {
     game.add_info_log_item(&log(&game.player_name(player), &resources));
     game.player_mut(player).gain_resources(resources);
+}
+
+pub(crate) fn can_add_army_unit(p: &Player, position: Position) -> bool {
+    p.get_units(position)
+        .iter()
+        .filter(|u| u.unit_type.is_army_unit())
+        .count()
+        < STACK_LIMIT
 }

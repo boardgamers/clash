@@ -321,7 +321,7 @@
                           },
                           "last_priority_used": 0,
                           "origin_override": {
-                            "Builtin": "Absolute Power"
+                            "Advance": "AbsolutePower"
                           },
                           "player": 0
                         }

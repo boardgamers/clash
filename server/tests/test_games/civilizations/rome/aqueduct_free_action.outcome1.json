@@ -295,7 +295,7 @@
                           },
                           "last_priority_used": 0,
                           "origin_override": {
-                            "Builtin": "Aqueduct"
+                            "SpecialAdvance": "Aqueduct"
                           },
                           "player": 0
                         }

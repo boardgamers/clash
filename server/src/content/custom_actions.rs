@@ -211,12 +211,12 @@ impl Display for CustomActionType {
             CustomActionType::CivilLiberties => write!(f, "Civil Liberties"),
             CustomActionType::Bartering => write!(f, "Bartering"),
             CustomActionType::ArtsInfluenceCultureAttempt => {
-                write!(f, "Arts Influence Culture Attempt")
+                write!(f, "Arts")
             }
             CustomActionType::VotingIncreaseHappiness => {
-                write!(f, "Voting Increase Happiness")
+                write!(f, "Voting")
             }
-            CustomActionType::FreeEconomyCollect => write!(f, "Free Economy Collect"),
+            CustomActionType::FreeEconomyCollect => write!(f, "Free Economy"),
             CustomActionType::Sports => write!(f, "Sports"),
             CustomActionType::Taxes => write!(f, "Taxes"),
             CustomActionType::Theaters => write!(f, "Theaters"),

@@ -23,6 +23,7 @@ pub enum PaymentReason {
     InfluenceCulture,
     Move,
     ChangeGovernment,
+    LeaderAbility,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]

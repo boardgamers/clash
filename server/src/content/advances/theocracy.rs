@@ -1,19 +1,20 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city_pieces::Building::Temple;
-use crate::consts::STACK_LIMIT;
-use crate::content::advances::{AdvanceGroup, advance_group_builder};
+use crate::content::advances::{advance_group_builder, AdvanceGroup};
 use crate::content::persistent_events::{AdvanceRequest, PositionRequest};
-use crate::player::{Player, add_unit, gain_resources};
+use crate::player::{add_unit, can_add_army_unit, gain_resources, Player};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
 
 pub(crate) fn theocracy() -> AdvanceGroup {
-    advance_group_builder(
-        "Theocracy",
-        vec![dogma(), devotion(), conversion(), fanaticism()],
-    )
+    advance_group_builder("Theocracy", vec![
+        dogma(),
+        devotion(),
+        conversion(),
+        fanaticism(),
+    ])
 }
 
 fn dogma() -> AdvanceBuilder {
@@ -187,14 +188,9 @@ pub(crate) fn cities_that_can_add_units(p: &Player) -> Vec<Position> {
     let choices: Vec<Position> = p
         .cities
         .iter()
-        .filter(|c| {
-            p.get_units(c.position)
-                .iter()
-                .filter(|u| u.unit_type.is_army_unit())
-                .count()
-                < STACK_LIMIT
-        })
+        .filter(|c| can_add_army_unit(p, c.position))
         .map(|c| c.position)
         .collect();
     choices
 }
+
