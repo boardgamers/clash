@@ -542,7 +542,7 @@ impl Player {
             .filter(|unit| unit.position == position)
             .collect()
     }
-    
+
     #[must_use]
     pub fn get_units_mut(&mut self, position: Position) -> Vec<&mut Unit> {
         self.units
