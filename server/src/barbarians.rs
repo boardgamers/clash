@@ -4,14 +4,15 @@ use crate::combat::move_with_possible_combat;
 use crate::consts::STACK_LIMIT;
 use crate::content::advances::theocracy::cities_that_can_add_units;
 use crate::content::builtin::Builtin;
-use crate::content::civilizations::rome::owner_of_sulla_in_range;
-use crate::content::persistent_events::{PositionRequest, ResourceRewardRequest, UnitTypeRequest};
+use crate::content::persistent_events::{
+    PersistentEventType, PositionRequest, ResourceRewardRequest, UnitTypeRequest,
+};
 use crate::game::Game;
-use crate::incident::{play_base_effect, IncidentBuilder, IncidentFilter, BASE_EFFECT_PRIORITY};
+use crate::incident::{BASE_EFFECT_PRIORITY, IncidentBuilder, IncidentFilter, play_base_effect};
 use crate::map::Terrain;
 use crate::movement::MoveUnits;
 use crate::payment::ResourceReward;
-use crate::player::{add_unit, end_turn, Player};
+use crate::player::{Player, add_unit, end_turn};
 use crate::player_events::{IncidentTarget, PersistentEvent, PersistentEvents};
 use crate::position::Position;
 use crate::resource::ResourceType;
@@ -184,6 +185,46 @@ where
     )
 }
 
+pub(crate) fn on_stop_barbarian_movement(game: &mut Game, movable: Vec<Position>) {
+    let old_movable = movable.clone();
+    match game.trigger_persistent_event(
+        &game.human_players(0),
+        |events| &mut events.stop_barbarian_movement,
+        movable,
+        PersistentEventType::StopBarbarianMovement,
+    ) {
+        None => (),
+        Some(movable) => {
+            let mut event_state = game
+                .events
+                .pop()
+                .expect("StopBarbarianMovement should be present");
+            if let PersistentEventType::Incident(i) = &mut event_state
+                .event_type
+            {
+                let state = i.get_barbarian_state();
+                for pos in old_movable {
+                    if !movable.contains(&pos) {
+                        // if the position was not selected, it means the unit cannot move
+                        let units = get_barbarians_player(game)
+                            .get_units(pos)
+                            .iter()
+                            .map(|u| u.id)
+                            .collect_vec();
+                        state.moved_units.extend(units);
+                    }
+                }
+                game.events.push(event_state);
+            } else {
+                panic!(
+                    "StopBarbarianMovement should only be triggered from an Incident, not {:?}",
+                    game.current_event().event_type
+                )
+            }
+        }
+    }
+}
+
 pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
     let event_name = "Barbarians move";
     builder = set_info(builder, event_name, |state, game, human| {
@@ -193,9 +234,16 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
             state.move_units = true;
         }
     });
-    builder = add_barbarians_city(builder, event_name);
-
-    builder = add_sulla_control(builder);
+    builder = add_barbarians_city(builder, event_name).add_simple_incident_listener(
+        IncidentTarget::ActivePlayer,
+        BASE_EFFECT_PRIORITY + 99,
+        |game, _, _, i| {
+            on_stop_barbarian_movement(
+                game,
+                get_movable_units(game, i.active_player, i.get_barbarian_state()),
+            )
+        },
+    );
 
     for army in 0..18 {
         builder = builder
@@ -280,60 +328,6 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
     )
 }
 
-fn add_sulla_control(builder: IncidentBuilder) -> IncidentBuilder {
-    builder.add_incident_position_request(
-        IncidentTarget::AllPlayers,
-        BASE_EFFECT_PRIORITY + 99,
-        |game, player_index, i| {
-            let units = get_movable_units(game, i.active_player, i.get_barbarian_state())
-                .into_iter()
-                .filter(|&pos| owner_of_sulla_in_range(pos, game).is_some())
-                .collect_vec();
-            if units.is_empty() {
-                return None;
-            }
-            let owner = owner_of_sulla_in_range(units[0], game).expect(
-                "Sulla owner should exist in the game",
-            );
-            if player_index != owner {
-                return None;
-            }
-
-            Some(
-                PositionRequest::new(
-                    units.clone(),
-                    0..=units.len() as u8,
-                    "Select Barbarian Armies that may NOT move",
-                )
-            )
-        },
-        |game, s, i| {
-            let may_not_move = &s.choice;
-            game.add_info_log_item(&format!(
-                "{} selected Barbarian Armies that may NOT move: {}",
-                s.player_name,
-                may_not_move
-                    .iter()
-                    .map(ToString::to_string)
-                    .collect_vec()
-                    .join(", ")
-            ));
-            
-            let state = i.get_barbarian_state();
-            let barbarian = get_barbarians_player(game);
-            for pos in may_not_move {
-                state.moved_units.extend(
-                    barbarian
-                        .get_units(*pos)
-                        .iter()
-                        .map(|u| u.id)
-                        .collect_vec()
-                );
-            }
-        },
-    )
-}
-
 fn reinforce_after_move(game: &mut Game, player_index: usize) {
     let player = game.player(player_index);
     let barbarian = get_barbarians_player(game).index;
@@ -353,7 +347,7 @@ fn reinforce_after_move(game: &mut Game, player_index: usize) {
     }
 }
 
-fn get_movable_units(
+pub(crate) fn get_movable_units(
     game: &Game,
     target_player: usize,
     state: &BarbariansEventState,

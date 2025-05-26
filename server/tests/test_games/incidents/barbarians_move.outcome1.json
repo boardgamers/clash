@@ -6,38 +6,34 @@
       "event_type": {
         "StatusPhase": "FreeAdvance"
       },
-      "player": 0,
-      "last_priority_used": 0
-    },
-    {
-      "event_type": {
-        "Incident": {
-          "incident_id": 28,
-          "active_player": 0,
-          "barbarians": {
-            "move_units": true
-          }
-        }
-      },
-      "player": 0,
-      "last_priority_used": 136,
+      "players_used": [
+        0
+      ],
+      "player": 1,
+      "last_priority_used": 0,
       "handler": {
-        "priority": 136,
+        "priority": 0,
         "request": {
-          "SelectPositions": {
+          "SelectAdvance": {
             "choices": [
-              "A3",
-              "B3"
-            ],
-            "needed": {
-              "start": 1,
-              "end": 1
-            },
-            "description": "Select a Barbarian Army to move next"
+              "Storage",
+              "Irrigation",
+              "Husbandry",
+              "Engineering",
+              "Sanitation",
+              "Roads",
+              "Fishing",
+              "Writing",
+              "Tactics",
+              "Myths",
+              "Bartering",
+              "Arts",
+              "Math"
+            ]
           }
         },
         "origin": {
-          "Incident": 28
+          "Builtin": "Free Advance"
         }
       }
     }
@@ -156,23 +152,29 @@
       ],
       "units": [
         {
-          "position": "C1",
-          "unit_type": "Infantry",
+          "position": "A1",
+          "unit_type": "Leader",
           "id": 0
         },
         {
           "position": "C1",
           "unit_type": "Infantry",
           "id": 1
+        },
+        {
+          "position": "C1",
+          "unit_type": "Settler",
+          "id": 2
         }
       ],
-      "civilization": "test1",
+      "civilization": "Rome",
+      "active_leader": "Sulla",
       "advances": [
         "Farming",
         "Mining"
       ],
       "incident_tokens": 3,
-      "next_unit_id": 2
+      "next_unit_id": 3
     },
     {
       "id": 2,
@@ -191,7 +193,7 @@
       ],
       "units": [
         {
-          "position": "B3",
+          "position": "B2",
           "unit_type": "Infantry",
           "id": 0
         },
@@ -201,24 +203,24 @@
           "id": 1
         },
         {
-          "position": "B3",
+          "position": "B2",
           "unit_type": "Infantry",
           "id": 2
         },
         {
           "position": "A3",
           "unit_type": "Infantry",
-          "id": 3
+          "id": 4
         },
         {
-          "position": "A3",
+          "position": "B3",
           "unit_type": "Infantry",
-          "id": 4
+          "id": 5
         }
       ],
       "civilization": "Barbarians",
       "incident_tokens": 3,
-      "next_unit_id": 5
+      "next_unit_id": 6
     }
   ],
   "map": {
@@ -281,6 +283,110 @@
                       "SelectAdvance": "Storage"
                     }
                   }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectPositions": [
+                        "A3"
+                      ]
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/events/0/player",
+                      "value": 0
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events/0/handler"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events/0/players_used"
+                    },
+                    {
+                      "op": "add",
+                      "path": "/events/1",
+                      "value": {
+                        "event_type": {
+                          "Incident": {
+                            "active_player": 0,
+                            "barbarians": {
+                              "move_units": true
+                            },
+                            "incident_id": 28
+                          }
+                        },
+                        "last_priority_used": 199,
+                        "player": 0
+                      }
+                    },
+                    {
+                      "op": "add",
+                      "path": "/events/2",
+                      "value": {
+                        "event_type": {
+                          "StopBarbarianMovement": [
+                            "A3",
+                            "B3"
+                          ]
+                        },
+                        "handler": {
+                          "origin": {
+                            "LeaderAbility": "Dictator"
+                          },
+                          "priority": 0,
+                          "request": {
+                            "SelectPositions": {
+                              "choices": [
+                                "A3"
+                              ],
+                              "description": "Select Barbarian Armies that may NOT move",
+                              "needed": {
+                                "end": 1,
+                                "start": 0
+                              }
+                            }
+                          }
+                        },
+                        "last_priority_used": 0,
+                        "player": 1,
+                        "players_used": [
+                          0
+                        ]
+                      }
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/1/next_unit_id",
+                      "value": 2
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/1/units/2"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/2/next_unit_id",
+                      "value": 5
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/2/units/0/position",
+                      "value": "B3"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/2/units/2/position",
+                      "value": "B3"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/2/units/4"
+                    }
+                  ]
                 }
               ]
             }
@@ -289,7 +395,7 @@
       ]
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 2,
   "log": [
     [
       "Player1 advanced Storage for free",
@@ -298,6 +404,13 @@
     [
       "A new game event has been triggered: Population Boom",
       "Base effect: Barbarians move"
+    ],
+    [
+      "Player2 selected Barbarian Armies that may NOT move: A3",
+      "Barbarians move from B3 to B2: 2 infantry",
+      "Barbarians spawned a new Infantry unit at B3",
+      "Player2 was selected to gain 1 settler.",
+      "Player2 gained 1 settler in C1"
     ]
   ],
   "undo_limit": 1,

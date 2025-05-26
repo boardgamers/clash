@@ -190,11 +190,6 @@
         {
           "position": "A3",
           "unit_type": "Infantry",
-          "id": 3
-        },
-        {
-          "position": "A3",
-          "unit_type": "Infantry",
           "id": 4
         }
       ],

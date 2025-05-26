@@ -1,24 +1,25 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{discard_action_card, gain_action_card_from_pile};
-use crate::advance::{Advance, gain_advance_without_payment};
-use crate::card::{HandCard, all_action_hand_cards, all_objective_hand_cards};
+use crate::advance::{gain_advance_without_payment, Advance};
+use crate::card::{all_action_hand_cards, all_objective_hand_cards, HandCard};
 use crate::city::MoodState;
 use crate::civilization::Civilization;
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
-use crate::content::persistent_events::{HandCardsRequest, PaymentRequest};
+use crate::content::persistent_events::{HandCardsRequest, PaymentRequest, PositionRequest};
 use crate::game::Game;
-use crate::leader::{Leader, LeaderAbility, leader_position};
+use crate::leader::{leader_position, Leader, LeaderAbility, LeaderAbilityBuilder};
 use crate::map::{block_for_position, block_has_player_city};
 use crate::objective_card::{discard_objective_card, gain_objective_card_from_pile};
 use crate::payment::{
-    PaymentConversion, PaymentConversionType, PaymentOptions, PaymentReason, base_resources,
+    base_resources, PaymentConversion, PaymentConversionType, PaymentOptions, PaymentReason,
 };
 use crate::player::{add_unit, can_add_army_unit, gain_resources};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
 use crate::unit::UnitType;
+use crate::utils::remove_element;
 use itertools::Itertools;
 
 pub(crate) fn rome() -> Civilization {
@@ -327,12 +328,11 @@ fn ceasar() -> Leader {
 }
 
 fn sulla() -> Leader {
-    // todo dictator ability Barbarians within 2 spaces of Sulla may only move if you agree to it
     // todo civilization ability
 
     Leader::new(
         "Sulla",
-        LeaderAbility::builder(
+        add_barbarian_control(LeaderAbility::builder(
             "Dictator",
             "The city where Sulla is may not be the target of influence culture attempts.\
             Barbarians within 2 spaces of Sulla may only move if you agree to it.",
@@ -351,7 +351,7 @@ fn sulla() -> Leader {
                     }
                 }
             },
-        )
+        ))
         .build(),
         LeaderAbility::builder("Civilization", "todo").build(),
     )
@@ -364,4 +364,42 @@ pub(crate) fn owner_of_sulla_in_range(position: Position, game: &Game) -> Option
             .is_some_and(|l| l == "Sulla" && leader_position(p).distance(position) <= 2)
             .then_some(p.index)
     })
+}
+
+fn add_barbarian_control(builder: LeaderAbilityBuilder) -> LeaderAbilityBuilder {
+    builder.add_position_request(
+        |event| &mut event.stop_barbarian_movement,
+        0,
+        |game, _player_index, movable| {
+            let units = movable
+                .clone()
+                .into_iter()
+                .filter(|&pos| owner_of_sulla_in_range(pos, game).is_some())
+                .collect_vec();
+            if units.is_empty() {
+                return None;
+            }
+
+            Some(PositionRequest::new(
+                units.clone(),
+                0..=units.len() as u8,
+                "Select Barbarian Armies that may NOT move",
+            ))
+        },
+        |game, s, movable| {
+            let may_not_move = &s.choice;
+            game.add_info_log_item(&format!(
+                "{} selected Barbarian Armies that may NOT move: {}",
+                s.player_name,
+                may_not_move
+                    .iter()
+                    .map(ToString::to_string)
+                    .collect_vec()
+                    .join(", ")
+            ));
+            for pos in may_not_move {
+                remove_element(movable, pos);
+            }
+        },
+    )
 }

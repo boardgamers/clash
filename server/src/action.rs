@@ -30,6 +30,7 @@ use crate::unit::{get_current_move, units_killed};
 use crate::wonder::{draw_wonder_card, on_play_wonder_card};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use crate::barbarians::on_stop_barbarian_movement;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub enum Action {
@@ -260,6 +261,7 @@ pub(crate) fn execute_custom_phase_action(
         }
         FoundCity(p) => on_found_city(game, player_index, p),
         Incident(i) => on_trigger_incident(game, i),
+        StopBarbarianMovement(movable) => on_stop_barbarian_movement(game, movable),
         ActionCard(a) => on_play_action_card(game, player_index, a),
         WonderCard(w) => on_play_wonder_card(game, player_index, w),
         SelectObjectives(c) => {

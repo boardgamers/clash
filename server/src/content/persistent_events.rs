@@ -116,6 +116,7 @@ pub enum PersistentEventType {
     Recruit(Recruit),
     FoundCity(Position),
     Incident(IncidentInfo),
+    StopBarbarianMovement(Vec<Position>),
     ActionCard(ActionCardInfo),
     WonderCard(WonderCardInfo),
     DrawWonderCard,
