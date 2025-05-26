@@ -49,12 +49,6 @@ fn test_barbarians_move() {
                 0,
                 Action::Response(EventResponse::SelectAdvance(Advance::Storage)),
             ),
-            TestAction::not_undoable(
-                0,
-                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
-                    "B3",
-                )])),
-            ),
         ],
     );
 }

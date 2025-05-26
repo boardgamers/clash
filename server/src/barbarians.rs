@@ -4,13 +4,14 @@ use crate::combat::move_with_possible_combat;
 use crate::consts::STACK_LIMIT;
 use crate::content::advances::theocracy::cities_that_can_add_units;
 use crate::content::builtin::Builtin;
+use crate::content::civilizations::rome::owner_of_sulla_in_range;
 use crate::content::persistent_events::{PositionRequest, ResourceRewardRequest, UnitTypeRequest};
 use crate::game::Game;
-use crate::incident::{BASE_EFFECT_PRIORITY, IncidentBuilder, IncidentFilter, play_base_effect};
+use crate::incident::{play_base_effect, IncidentBuilder, IncidentFilter, BASE_EFFECT_PRIORITY};
 use crate::map::Terrain;
 use crate::movement::MoveUnits;
 use crate::payment::ResourceReward;
-use crate::player::{Player, add_unit, end_turn};
+use crate::player::{add_unit, end_turn, Player};
 use crate::player_events::{IncidentTarget, PersistentEvent, PersistentEvents};
 use crate::position::Position;
 use crate::resource::ResourceType;
@@ -193,6 +194,9 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
         }
     });
     builder = add_barbarians_city(builder, event_name);
+
+    builder = add_sulla_control(builder);
+
     for army in 0..18 {
         builder = builder
             .add_incident_position_request(
@@ -276,6 +280,60 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
     )
 }
 
+fn add_sulla_control(builder: IncidentBuilder) -> IncidentBuilder {
+    builder.add_incident_position_request(
+        IncidentTarget::AllPlayers,
+        BASE_EFFECT_PRIORITY + 99,
+        |game, player_index, i| {
+            let units = get_movable_units(game, i.active_player, i.get_barbarian_state())
+                .into_iter()
+                .filter(|&pos| owner_of_sulla_in_range(pos, game).is_some())
+                .collect_vec();
+            if units.is_empty() {
+                return None;
+            }
+            let owner = owner_of_sulla_in_range(units[0], game).expect(
+                "Sulla owner should exist in the game",
+            );
+            if player_index != owner {
+                return None;
+            }
+
+            Some(
+                PositionRequest::new(
+                    units.clone(),
+                    0..=units.len() as u8,
+                    "Select Barbarian Armies that may NOT move",
+                )
+            )
+        },
+        |game, s, i| {
+            let may_not_move = &s.choice;
+            game.add_info_log_item(&format!(
+                "{} selected Barbarian Armies that may NOT move: {}",
+                s.player_name,
+                may_not_move
+                    .iter()
+                    .map(ToString::to_string)
+                    .collect_vec()
+                    .join(", ")
+            ));
+            
+            let state = i.get_barbarian_state();
+            let barbarian = get_barbarians_player(game);
+            for pos in may_not_move {
+                state.moved_units.extend(
+                    barbarian
+                        .get_units(*pos)
+                        .iter()
+                        .map(|u| u.id)
+                        .collect_vec()
+                );
+            }
+        },
+    )
+}
+
 fn reinforce_after_move(game: &mut Game, player_index: usize) {
     let player = game.player(player_index);
     let barbarian = get_barbarians_player(game).index;
@@ -295,8 +353,12 @@ fn reinforce_after_move(game: &mut Game, player_index: usize) {
     }
 }
 
-fn get_movable_units(game: &Game, human: usize, state: &BarbariansEventState) -> Vec<Position> {
-    let human = game.player(human);
+fn get_movable_units(
+    game: &Game,
+    target_player: usize,
+    state: &BarbariansEventState,
+) -> Vec<Position> {
+    let target = game.player(target_player);
     let barbarian = get_barbarians_player(game);
 
     game.map
@@ -309,7 +371,7 @@ fn get_movable_units(game: &Game, human: usize, state: &BarbariansEventState) ->
                 .iter()
                 .filter(|u| !state.moved_units.contains(&u.id))
                 .count();
-            stack > 0 && !barbarian_march_steps(game, human, *pos, stack).is_empty()
+            stack > 0 && !barbarian_march_steps(game, target, *pos, stack).is_empty()
         })
         .copied()
         .collect()

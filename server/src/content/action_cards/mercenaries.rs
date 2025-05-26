@@ -4,6 +4,7 @@ use crate::barbarians::{barbarian_reinforcement, get_barbarians_player};
 use crate::combat::move_with_possible_combat;
 use crate::consts::STACK_LIMIT;
 use crate::content::action_cards::inspiration::player_positions;
+use crate::content::civilizations::rome::owner_of_sulla_in_range;
 use crate::content::persistent_events::{PaymentRequest, PositionRequest};
 use crate::content::tactics_cards::TacticsCardFactory;
 use crate::game::Game;
@@ -29,7 +30,8 @@ pub(crate) fn mercenaries(id: u8, tactics_card: TacticsCardFactory) -> ActionCar
         Reinforce all Barbarian cities where you moved units out of according to the usual rules.",
         ActionCost::regular(),
         |game, p, _| {
-            !barbarian_army_positions_in_range2(game, p).is_empty() && max_mercenary_payment(p) > 0
+            !barbarian_army_positions_in_range2(game, p).0.is_empty()
+                && max_mercenary_payment(p) > 0
         },
     )
     .tactics_card(tactics_card)
@@ -37,12 +39,14 @@ pub(crate) fn mercenaries(id: u8, tactics_card: TacticsCardFactory) -> ActionCar
         |e| &mut e.play_action_card,
         2,
         |game, player, _| {
-            let p = game.player(player);
-            let r = barbarian_army_positions_in_range2(game, p);
+            let (r, log) = barbarian_army_positions_in_range2(game, game.player(player));
+            for l in log {
+                game.add_info_log_item(&l);
+            }
             if r.is_empty() {
                 return None;
             }
-            let max = (r.len() as u8).min(max_mercenary_payment(p));
+            let max = (r.len() as u8).min(max_mercenary_payment(game.player(player)));
             Some(PositionRequest::new(
                 r,
                 1..=max,
@@ -178,15 +182,42 @@ fn move_army(b: ActionCardBuilder, i: i32) -> ActionCardBuilder {
     )
 }
 
-fn barbarian_army_positions_in_range2(game: &Game, player: &Player) -> Vec<Position> {
+fn barbarian_army_positions_in_range2(
+    game: &Game,
+    player: &Player,
+) -> (Vec<Position>, Vec<String>) {
     let my = player_positions(player);
+    let mut log = Vec::new();
 
-    get_barbarians_player(game)
+    let positions = get_barbarians_player(game)
         .units
         .iter()
         .map(|u| u.position)
-        .filter(|b| my.iter().any(|my_pos| my_pos.distance(*b) <= 2))
-        .collect()
+        .filter(|&p| {
+            my.iter().any(|my_pos| {
+                if my_pos.distance(p) > 2 {
+                    return false;
+                }
+                if owner_of_sulla_in_range(p, game)
+                    .is_some_and(|sulla_owner| player.index != sulla_owner)
+                {
+                    log.push(format!(
+                        "{player} cannot move Barbarian army at {p} because Sulla is in range",
+                    ));
+                    return false;
+                }
+                true
+            })
+        })
+        .collect();
+    
+    log.sort();
+    log.dedup();
+    
+    (
+        positions,
+        log,
+    )
 }
 
 fn max_mercenary_payment(player: &Player) -> u8 {

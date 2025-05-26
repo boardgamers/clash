@@ -91,6 +91,7 @@
     },
     {
       "id": 1,
+      "active_leader": "Sulla",
       "resources": {
         "food": 2,
         "wood": 7,
@@ -117,8 +118,8 @@
       ],
       "units": [
         {
-          "position": "C1",
-          "unit_type": "Infantry",
+          "position": "A1",
+          "unit_type": "Leader",
           "id": 0
         },
         {
@@ -127,7 +128,7 @@
           "id": 1
         }
       ],
-      "civilization": "test1",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Mining"

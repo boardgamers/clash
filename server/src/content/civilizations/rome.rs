@@ -7,6 +7,7 @@ use crate::civilization::Civilization;
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::{HandCardsRequest, PaymentRequest};
+use crate::game::Game;
 use crate::leader::{Leader, LeaderAbility, leader_position};
 use crate::map::{block_for_position, block_has_player_city};
 use crate::objective_card::{discard_objective_card, gain_objective_card_from_pile};
@@ -14,6 +15,7 @@ use crate::payment::{
     PaymentConversion, PaymentConversionType, PaymentOptions, PaymentReason, base_resources,
 };
 use crate::player::{add_unit, can_add_army_unit, gain_resources};
+use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
 use crate::unit::UnitType;
@@ -23,7 +25,7 @@ pub(crate) fn rome() -> Civilization {
     Civilization::new(
         "Rome",
         vec![aqueduct(), roman_roads(), captivi(), provinces()],
-        vec![augustus(), ceasar()],
+        vec![augustus(), ceasar(), sulla()],
     )
 }
 
@@ -196,6 +198,7 @@ fn augustus() -> Leader {
         .build(),
     )
 }
+
 const PRINCEPS: &str = "As an action, pay 1 culture token and \
     activate the city where Augustus is: \
     Draw 1 action and 1 objective card. \
@@ -321,4 +324,44 @@ fn ceasar() -> Leader {
         )
         .build(),
     )
+}
+
+fn sulla() -> Leader {
+    // todo dictator ability Barbarians within 2 spaces of Sulla may only move if you agree to it
+    // todo civilization ability
+
+    Leader::new(
+        "Sulla",
+        LeaderAbility::builder(
+            "Dictator",
+            "The city where Sulla is may not be the target of influence culture attempts.\
+            Barbarians within 2 spaces of Sulla may only move if you agree to it.",
+        )
+        .add_transient_event_listener(
+            |event| &mut event.on_influence_culture_attempt,
+            6,
+            |r, city, game| {
+                if let Ok(info) = r {
+                    if info.is_defender
+                        && leader_position(game.player(city.player_index)) == city.position
+                    {
+                        *r =
+                            Err("Sulla prevents influence culture attempts in this city"
+                                .to_string());
+                    }
+                }
+            },
+        )
+        .build(),
+        LeaderAbility::builder("Civilization", "todo").build(),
+    )
+}
+
+pub(crate) fn owner_of_sulla_in_range(position: Position, game: &Game) -> Option<usize> {
+    // Check if Sulla is within 2 spaces of the given position
+    game.players.iter().find_map(|p| {
+        p.active_leader.as_ref()
+            .is_some_and(|l| l == "Sulla" && leader_position(p).distance(position) <= 2)
+            .then_some(p.index)
+    })
 }
