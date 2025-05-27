@@ -28,11 +28,11 @@
           "id": 0
         }
       ],
-      "civilization": "Rome",
+      "civilization": "Federation",
       "available_leaders": [
-        "Augustus",
-        "Gaius Julius Caesar",
-        "Sulla"
+        "James T. Kirk",
+        "Kathryn Janeway",
+        "Spock"
       ],
       "advances": [
         "Farming",
@@ -402,7 +402,7 @@
       "The game has started"
     ],
     [
-      "Player1 is playing as Rome",
+      "Player1 is playing as Federation",
       "Player1 gained an action card from the pile",
       "Player1 gained an objective card from the pile"
     ],
