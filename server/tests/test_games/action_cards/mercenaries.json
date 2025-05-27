@@ -91,7 +91,6 @@
     },
     {
       "id": 1,
-      "active_leader": "Sulla",
       "resources": {
         "food": 2,
         "wood": 7,
@@ -129,6 +128,7 @@
         }
       ],
       "civilization": "Rome",
+      "active_leader": "Sulla",
       "advances": [
         "Farming",
         "Mining"

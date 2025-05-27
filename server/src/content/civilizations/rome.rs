@@ -1,18 +1,18 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{discard_action_card, gain_action_card_from_pile};
-use crate::advance::{gain_advance_without_payment, Advance};
-use crate::card::{all_action_hand_cards, all_objective_hand_cards, HandCard};
+use crate::advance::{Advance, gain_advance_without_payment};
+use crate::card::{HandCard, all_action_hand_cards, all_objective_hand_cards};
 use crate::city::MoodState;
 use crate::civilization::Civilization;
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::{HandCardsRequest, PaymentRequest, PositionRequest};
 use crate::game::Game;
-use crate::leader::{leader_position, Leader, LeaderAbility, LeaderAbilityBuilder};
+use crate::leader::{Leader, LeaderAbility, LeaderAbilityBuilder, leader_position};
 use crate::map::{block_for_position, block_has_player_city};
 use crate::objective_card::{discard_objective_card, gain_objective_card_from_pile};
 use crate::payment::{
-    base_resources, PaymentConversion, PaymentConversionType, PaymentOptions, PaymentReason,
+    PaymentConversion, PaymentConversionType, PaymentOptions, PaymentReason, base_resources,
 };
 use crate::player::{add_unit, can_add_army_unit, gain_resources};
 use crate::position::Position;
@@ -190,10 +190,7 @@ fn augustus() -> Leader {
                 )
             {
                 s.extra_combat_value += 2;
-                s.roll_log.push(format!(
-                    "{} gains 2 combat value for Imperator",
-                    game.player_name(c.player(r))
-                ));
+                s.roll_log.push("Imperator adds 2 combat value".to_string());
             }
         })
         .build(),
@@ -328,39 +325,49 @@ fn ceasar() -> Leader {
 }
 
 fn sulla() -> Leader {
-    // todo civilization ability
-
     Leader::new(
         "Sulla",
-        add_barbarian_control(LeaderAbility::builder(
-            "Dictator",
-            "The city where Sulla is may not be the target of influence culture attempts.\
+        add_barbarian_control(
+            LeaderAbility::builder(
+                "Dictator",
+                "The city where Sulla is may not be the target of influence culture attempts.\
             Barbarians within 2 spaces of Sulla may only move if you agree to it.",
-        )
-        .add_transient_event_listener(
-            |event| &mut event.on_influence_culture_attempt,
-            6,
-            |r, city, game| {
-                if let Ok(info) = r {
-                    if info.is_defender
-                        && leader_position(game.player(city.player_index)) == city.position
-                    {
-                        *r =
-                            Err("Sulla prevents influence culture attempts in this city"
+            )
+            .add_transient_event_listener(
+                |event| &mut event.on_influence_culture_attempt,
+                6,
+                |r, city, game| {
+                    if let Ok(info) = r {
+                        if info.is_defender
+                            && leader_position(game.player(city.player_index)) == city.position
+                        {
+                            *r = Err("Sulla prevents influence culture attempts in this city"
                                 .to_string());
+                        }
                     }
-                }
-            },
-        ))
+                },
+            ),
+        )
         .build(),
-        LeaderAbility::builder("Civilization", "todo").build(),
+        LeaderAbility::builder(
+            "Civilizer",
+            "In every combat round against barbarians: Gain 2 combat value",
+        )
+        .add_combat_round_start_listener(5, |game, c, s, r| {
+            if c.has_leader(r, game) && c.is_barbarian_battle(r, game) {
+                s.extra_combat_value += 2;
+                s.roll_log.push("Sulla adds 2 combat value".to_string());
+            }
+        })
+        .build(),
     )
 }
 
 pub(crate) fn owner_of_sulla_in_range(position: Position, game: &Game) -> Option<usize> {
     // Check if Sulla is within 2 spaces of the given position
     game.players.iter().find_map(|p| {
-        p.active_leader.as_ref()
+        p.active_leader
+            .as_ref()
             .is_some_and(|l| l == "Sulla" && leader_position(p).distance(position) <= 2)
             .then_some(p.index)
     })

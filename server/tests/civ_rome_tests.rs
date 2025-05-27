@@ -129,3 +129,14 @@ fn proconsul() {
         ],
     );
 }
+#[test]
+fn civilizer() {
+    JSON.test(
+        "civilizer",
+        vec![TestAction::not_undoable(
+            0,
+            move_action(vec![0], Position::from_offset("D8")),
+        )],
+    );
+}
+
