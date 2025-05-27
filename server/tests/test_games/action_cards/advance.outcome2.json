@@ -217,7 +217,9 @@
                       "op": "add",
                       "path": "/events/0/event_type/PayAction",
                       "value": {
-                        "ActionCard": 2
+                        "action": {
+                          "ActionCard": 2
+                        }
                       }
                     },
                     {
@@ -273,6 +275,13 @@
                     {
                       "op": "remove",
                       "path": "/events/0/handler/request/SelectAdvance"
+                    },
+                    {
+                      "op": "add",
+                      "path": "/events/0/origin_override",
+                      "value": {
+                        "CivilCard": 2
+                      }
                     },
                     {
                       "op": "add",

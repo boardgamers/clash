@@ -202,8 +202,8 @@ pub fn show_top_left(rc: &RenderContext) {
 
     label(&format!(
         "Leader {}",
-        if let Some(l) = &player.active_leader() {
-            &l.name
+        if let Some(l) = &player.active_leader {
+            l
         } else {
             "-"
         }

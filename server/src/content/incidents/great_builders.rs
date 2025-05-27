@@ -75,7 +75,7 @@ pub(crate) fn construct_only() -> Builtin {
             },
         )
         .add_transient_event_listener(
-            |event| &mut event.construct_cost,
+            |event| &mut event.building_cost,
             1,
             |c, _, game| {
                 if game

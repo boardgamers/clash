@@ -1,10 +1,14 @@
-use crate::common::{JsonTest, TestAction, illegal_action_test, influence_action};
+use crate::common::{
+    JsonTest, TestAction, advance_action, custom_action, illegal_action_test, influence_action,
+    payment_response,
+};
+use advance::Advance;
 use server::action::{Action, execute_action};
 use server::city_pieces::Building::{Academy, Fortress, Temple};
 use server::collect::{PositionCollection, possible_resource_collections};
 use server::consts::BUILDING_COST;
 use server::content::advances::trade_routes::find_trade_routes;
-use server::content::custom_actions::{CustomActionType, CustomEventAction};
+use server::content::custom_actions::{CustomAction, CustomActionType};
 use server::content::persistent_events::{EventResponse, SelectedStructure, Structure};
 use server::cultural_influence::InfluenceCultureAttempt;
 use server::events::EventOrigin;
@@ -13,7 +17,7 @@ use server::movement::MovementAction::Move;
 use server::movement::{MoveUnits, possible_move_units_destinations};
 use server::player::CostTrigger;
 use server::playing_actions::PlayingAction::{
-    Advance, Collect, Construct, Custom, EndTurn, Recruit, WonderCard,
+    Collect, Construct, Custom, EndTurn, Recruit, WonderCard,
 };
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
@@ -48,6 +52,7 @@ fn test_sanitation_and_draft() {
             )
             .with_pre_assert(move |game| {
                 let options = recruit_cost_without_replaced(
+                    &game,
                     &game.players[0],
                     &units,
                     city_position,
@@ -61,8 +66,8 @@ fn test_sanitation_and_draft() {
                 assert_eq!(ResourcePile::mood_tokens(1), options.conversions[1].to);
                 assert_eq!(
                     vec![
-                        EventOrigin::Advance(advance::Advance::Sanitation),
-                        EventOrigin::Advance(advance::Advance::Draft)
+                        EventOrigin::Advance(Advance::Sanitation),
+                        EventOrigin::Advance(Advance::Draft)
                     ],
                     options.modifiers
                 );
@@ -79,10 +84,10 @@ fn test_separation_of_power() {
         if test.fail {
             game = execute_action(
                 game,
-                Action::Playing(Advance {
-                    advance: advance::Advance::SeparationOfPower,
-                    payment: ResourcePile::food(1) + ResourcePile::gold(1),
-                }),
+                advance_action(
+                    Advance::SeparationOfPower,
+                    ResourcePile::food(1) + ResourcePile::gold(1),
+                ),
                 0,
             );
         }
@@ -100,10 +105,10 @@ fn test_devotion() {
         if test.fail {
             game = execute_action(
                 game,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Devotion,
-                    payment: ResourcePile::food(1) + ResourcePile::gold(1),
-                }),
+                advance_action(
+                    Advance::Devotion,
+                    ResourcePile::food(1) + ResourcePile::gold(1),
+                ),
                 0,
             );
         }
@@ -125,10 +130,10 @@ fn test_totalitarianism() {
         if test.fail {
             game = execute_action(
                 game,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Totalitarianism,
-                    payment: ResourcePile::food(1) + ResourcePile::gold(1),
-                }),
+                advance_action(
+                    Advance::Totalitarianism,
+                    ResourcePile::food(1) + ResourcePile::gold(1),
+                ),
                 0,
             );
         }
@@ -146,10 +151,10 @@ fn test_monuments() {
         if test.fail {
             game = execute_action(
                 game,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Monuments,
-                    payment: ResourcePile::food(1) + ResourcePile::gold(1),
-                }),
+                advance_action(
+                    Advance::Monuments,
+                    ResourcePile::food(1) + ResourcePile::gold(1),
+                ),
                 0,
             );
         }
@@ -164,9 +169,7 @@ fn test_monuments() {
         );
         game = execute_action(
             game,
-            Action::Response(EventResponse::Payment(vec![ResourcePile::new(
-                2, 3, 6, 0, 1, 0, 5,
-            )])),
+            payment_response(ResourcePile::new(2, 3, 6, 0, 1, 0, 5)),
             0,
         );
         game = execute_action(game, Action::Playing(EndTurn), 0);
@@ -182,18 +185,13 @@ fn test_increase_happiness_sports() {
         vec![
             TestAction::undoable(
                 0,
-                Action::Playing(Custom(CustomEventAction::new(
+                Action::Playing(Custom(CustomAction::new(
                     CustomActionType::Sports,
                     Some(Position::from_offset("C2")),
                 ))),
             )
-            .without_json_comparison(),
-            TestAction::undoable(
-                0,
-                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
-                    1,
-                )])),
-            ),
+            .skip_json(),
+            TestAction::undoable(0, payment_response(ResourcePile::culture_tokens(1))),
         ],
     );
 }
@@ -205,18 +203,13 @@ fn test_increase_happiness_sports2() {
         vec![
             TestAction::undoable(
                 0,
-                Action::Playing(Custom(CustomEventAction::new(
+                Action::Playing(Custom(CustomAction::new(
                     CustomActionType::Sports,
                     Some(Position::from_offset("C2")),
                 ))),
             )
-            .without_json_comparison(),
-            TestAction::undoable(
-                0,
-                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
-                    2,
-                )])),
-            ),
+            .skip_json(),
+            TestAction::undoable(0, payment_response(ResourcePile::culture_tokens(2))),
         ],
     );
 }
@@ -266,18 +259,8 @@ fn test_absolute_power() {
     JSON.test(
         "absolute_power",
         vec![
-            TestAction::undoable(
-                0,
-                Action::Playing(Custom(CustomEventAction::new(
-                    CustomActionType::AbsolutePower,
-                    None,
-                ))),
-            )
-            .without_json_comparison(),
-            TestAction::undoable(
-                0,
-                Action::Response(EventResponse::Payment(vec![ResourcePile::mood_tokens(2)])),
-            ),
+            TestAction::undoable(0, custom_action(CustomActionType::AbsolutePower)).skip_json(),
+            TestAction::undoable(0, payment_response(ResourcePile::mood_tokens(2))),
         ],
     );
 }
@@ -287,19 +270,8 @@ fn test_forced_labor() {
     JSON.test(
         "forced_labor",
         vec![
-            TestAction::undoable(
-                0,
-                Action::Playing(Custom(CustomEventAction::new(
-                    CustomActionType::ForcedLabor,
-                    None,
-                ))),
-            )
-            .without_json_comparison(),
-            TestAction::undoable(
-                0,
-                Action::Response(EventResponse::Payment(vec![ResourcePile::mood_tokens(1)])),
-            )
-            .without_json_comparison(),
+            TestAction::undoable(0, custom_action(CustomActionType::ForcedLabor)).skip_json(),
+            TestAction::undoable(0, payment_response(ResourcePile::mood_tokens(1))).skip_json(),
             TestAction::undoable(
                 0,
                 Action::Playing(Collect(playing_actions::Collect::new(
@@ -320,13 +292,7 @@ fn test_civil_liberties() {
     JSON.test(
         "civil_liberties",
         vec![
-            TestAction::undoable(
-                0,
-                Action::Playing(Custom(CustomEventAction::new(
-                    CustomActionType::CivilLiberties,
-                    None,
-                ))),
-            ),
+            TestAction::undoable(0, custom_action(CustomActionType::CivilLiberties)),
             TestAction::undoable(
                 0,
                 Action::Playing(Recruit(playing_actions::Recruit::new(
@@ -344,14 +310,7 @@ fn test_bartering() {
     JSON.test(
         "bartering",
         vec![
-            TestAction::undoable(
-                0,
-                Action::Playing(Custom(CustomEventAction::new(
-                    CustomActionType::Bartering,
-                    None,
-                ))),
-            )
-            .without_json_comparison(),
+            TestAction::undoable(0, custom_action(CustomActionType::Bartering)).skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::ResourceReward(ResourcePile::gold(1))),
@@ -368,12 +327,12 @@ fn test_movement_on_roads_from_city() {
         "movement_on_roads_from_city",
         vec![TestAction::undoable(
             1,
-            Action::Movement(Move(MoveUnits {
+            Action::Movement(Move(MoveUnits::new(
                 units,
                 destination,
-                embark_carrier_id: None,
-                payment: ResourcePile::food(1) + ResourcePile::ore(1),
-            })),
+                None,
+                ResourcePile::food(1) + ResourcePile::ore(1),
+            ))),
         )],
     );
 }
@@ -386,12 +345,12 @@ fn test_movement_on_roads_to_city() {
         "movement_on_roads_to_city",
         vec![TestAction::undoable(
             1,
-            Action::Movement(Move(MoveUnits {
+            Action::Movement(Move(MoveUnits::new(
                 units,
                 destination,
-                embark_carrier_id: None,
-                payment: ResourcePile::food(1) + ResourcePile::ore(1),
-            })),
+                None,
+                ResourcePile::food(1) + ResourcePile::ore(1),
+            ))),
         )],
     );
 }
@@ -410,6 +369,7 @@ fn test_road_coordinates() {
     // so only 2 can move over them towards F7
     assert!(get_destinations(game, &[0, 1], "D8").contains(&"F7".to_string()));
     let city_dest = get_destinations(game, &[0, 1, 2], "D8");
+    // all 3 units could move around E8 if we had roman roads
     assert!(!city_dest.contains(&"F7".to_string()));
 
     // all 3 city units can move around the mountain to C7
@@ -437,20 +397,8 @@ fn test_theaters() {
     JSON.test(
         "theaters",
         vec![
-            TestAction::undoable(
-                0,
-                Action::Playing(Custom(CustomEventAction::new(
-                    CustomActionType::Theaters,
-                    None,
-                ))),
-            )
-            .without_json_comparison(),
-            TestAction::undoable(
-                0,
-                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
-                    1,
-                )])),
-            ),
+            TestAction::undoable(0, custom_action(CustomActionType::Theaters)).skip_json(),
+            TestAction::undoable(0, payment_response(ResourcePile::culture_tokens(1))),
         ],
     );
 }
@@ -460,19 +408,8 @@ fn test_taxes() {
     JSON.test(
         "taxes",
         vec![
-            TestAction::undoable(
-                0,
-                Action::Playing(Custom(CustomEventAction::new(
-                    CustomActionType::Taxes,
-                    None,
-                ))),
-            )
-            .without_json_comparison(),
-            TestAction::undoable(
-                0,
-                Action::Response(EventResponse::Payment(vec![ResourcePile::mood_tokens(1)])),
-            )
-            .without_json_comparison(),
+            TestAction::undoable(0, custom_action(CustomActionType::Taxes)).skip_json(),
+            TestAction::undoable(0, payment_response(ResourcePile::mood_tokens(1))).skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::ResourceReward(ResourcePile::new(
@@ -527,14 +464,8 @@ fn test_dogma_with_anarchy() {
     JSON.test(
         "dogma",
         vec![
-            TestAction::undoable(
-                1,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Dogma,
-                    payment: ResourcePile::ideas(2),
-                }),
-            )
-            .without_json_comparison(),
+            TestAction::undoable(1, advance_action(Advance::Dogma, ResourcePile::ideas(2)))
+                .skip_json(),
             TestAction::undoable(
                 1,
                 Action::Playing(Construct(construct::Construct::new(
@@ -543,17 +474,17 @@ fn test_dogma_with_anarchy() {
                     ResourcePile::new(0, 1, 1, 0, 0, 0, 0),
                 ))),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::undoable(
                 1,
                 Action::Response(EventResponse::ResourceReward(ResourcePile::culture_tokens(
                     1,
                 ))),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::not_undoable(
                 1,
-                Action::Response(EventResponse::SelectAdvance(advance::Advance::Fanaticism)),
+                Action::Response(EventResponse::SelectAdvance(Advance::Fanaticism)),
             ),
         ],
     );
@@ -564,27 +495,9 @@ fn test_priesthood() {
     JSON.test(
         "priesthood",
         vec![
-            TestAction::undoable(
-                1,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Math,
-                    payment: ResourcePile::empty(),
-                }),
-            ),
-            TestAction::undoable(
-                1,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Astronomy,
-                    payment: ResourcePile::gold(2),
-                }),
-            ),
-            TestAction::illegal(
-                1,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Astronomy,
-                    payment: ResourcePile::empty(),
-                }),
-            ),
+            TestAction::undoable(1, advance_action(Advance::Math, ResourcePile::empty())),
+            TestAction::undoable(1, advance_action(Advance::Astronomy, ResourcePile::gold(2))),
+            TestAction::illegal(1, advance_action(Advance::Astronomy, ResourcePile::empty())),
         ],
     );
 }
@@ -596,12 +509,12 @@ fn test_writing() {
         vec![
             TestAction::not_undoable(
                 0,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Writing,
-                    payment: ResourcePile::food(1) + ResourcePile::gold(1),
-                }),
+                advance_action(
+                    Advance::Writing,
+                    ResourcePile::food(1) + ResourcePile::gold(1),
+                ),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Playing(Construct(construct::Construct::new(
@@ -620,16 +533,49 @@ fn test_free_education() {
         vec![
             TestAction::undoable(
                 0,
-                Action::Playing(Advance {
-                    advance: advance::Advance::Draft,
-                    payment: ResourcePile::food(1) + ResourcePile::gold(1),
-                }),
+                advance_action(
+                    Advance::Draft,
+                    ResourcePile::food(1) + ResourcePile::gold(1),
+                ),
             ),
-            TestAction::undoable(
-                0,
-                Action::Response(EventResponse::Payment(vec![ResourcePile::ideas(1)])),
-            ),
+            TestAction::undoable(0, payment_response(ResourcePile::ideas(1))),
         ],
+    );
+}
+
+#[test]
+fn test_collect_fishing() {
+    JSON.test(
+        "collect_fishing",
+        vec![TestAction::undoable(
+            0,
+            Action::Playing(Collect(playing_actions::Collect::new(
+                Position::from_offset("C2"),
+                vec![PositionCollection::new(
+                    Position::from_offset("C3"),
+                    ResourcePile::food(1),
+                )],
+                PlayingActionType::Collect,
+            ))),
+        )],
+    );
+}
+
+#[test]
+fn test_collect_port() {
+    JSON.test(
+        "collect_port",
+        vec![TestAction::undoable(
+            0,
+            Action::Playing(Collect(playing_actions::Collect::new(
+                Position::from_offset("C2"),
+                vec![PositionCollection::new(
+                    Position::from_offset("C3"),
+                    ResourcePile::mood_tokens(1),
+                )],
+                PlayingActionType::Collect,
+            ))),
+        )],
     );
 }
 
@@ -668,17 +614,14 @@ fn test_collect_free_economy() {
                     PlayingActionType::Custom(CustomActionType::FreeEconomyCollect),
                 ))),
             )
-            .without_json_comparison(),
-            TestAction::undoable(
-                0,
-                Action::Response(EventResponse::Payment(vec![ResourcePile::mood_tokens(1)])),
-            )
-            .with_post_assert(|game| {
-                // no production focus
-                let result =
-                    PlayingActionType::ActionCard(19).is_available(&game, game.active_player());
-                assert!(result.is_err());
-            }),
+            .skip_json(),
+            TestAction::undoable(0, payment_response(ResourcePile::mood_tokens(1)))
+                .with_post_assert(|game| {
+                    // no production focus
+                    let result =
+                        PlayingActionType::ActionCard(19).is_available(&game, game.active_player());
+                    assert!(result.is_err());
+                }),
         ],
     );
 }
@@ -700,13 +643,8 @@ fn test_cultural_influence_instant_with_arts() {
                     ),
                 )),
             )
-            .without_json_comparison(),
-            TestAction::not_undoable(
-                1,
-                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
-                    1,
-                )])),
-            ),
+            .skip_json(),
+            TestAction::not_undoable(1, payment_response(ResourcePile::culture_tokens(1))),
         ],
     )
 }
@@ -716,20 +654,10 @@ fn test_cultural_influence_with_conversion() {
     JSON.test(
         "cultural_influence_with_conversion",
         vec![
-            TestAction::undoable(1, influence_action()).without_json_comparison(),
-            TestAction::not_undoable(
-                1,
-                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
-                    1,
-                )])),
-            )
-            .without_json_comparison(),
-            TestAction::undoable(
-                1,
-                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
-                    3,
-                )])),
-            ),
+            TestAction::undoable(1, influence_action()).skip_json(),
+            TestAction::not_undoable(1, payment_response(ResourcePile::culture_tokens(1)))
+                .skip_json(),
+            TestAction::undoable(1, payment_response(ResourcePile::culture_tokens(3))),
         ],
     );
 }
@@ -765,7 +693,7 @@ fn test_husbandry() {
                     PlayingActionType::Collect,
                 ))),
             )
-            .without_json_comparison()
+            .skip_json()
             .with_post_assert(|game| {
                 // but not again
                 assert!(has_husbandry_field(&game))
@@ -782,7 +710,7 @@ fn test_husbandry() {
                     PlayingActionType::Collect,
                 ))),
             )
-            .without_json_comparison()
+            .skip_json()
             .with_post_assert(|game| {
                 // but not again
                 assert!(!has_husbandry_field(&game))

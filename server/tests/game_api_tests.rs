@@ -36,26 +36,31 @@ fn new_game() {
 
 #[test]
 fn basic_actions() {
-    let mut game = setup_game(GameSetupBuilder::new(1).skip_random_map().build());
+    let mut game = setup_game(
+        GameSetupBuilder::new(1)
+            .civilizations(vec!["Klingons".to_string(), "Romulans".to_string()])
+            .skip_random_map()
+            .build(),
+    );
 
     game.wonders_left.retain(|w| *w == Wonder::Pyramids);
     let founded_city_position = Position::new(0, 1);
     game.map.tiles = HashMap::from([(founded_city_position, Forest)]);
-    let advance_action = Action::Playing(Advance {
-        advance: advance::Advance::Math,
-        payment: ResourcePile::food(2),
-    });
-    let game = game_api::execute(game, advance_action, 0);
+    let game = game_api::execute(
+        game,
+        advance_action(advance::Advance::Math, ResourcePile::food(2)),
+        0,
+    );
     let player = &game.players[0];
 
     assert_eq!(ResourcePile::culture_tokens(1), player.resources);
     assert_eq!(2, game.actions_left);
 
-    let advance_action = Action::Playing(Advance {
-        advance: advance::Advance::Engineering,
-        payment: ResourcePile::empty(),
-    });
-    let mut game = game_api::execute(game, advance_action, 0);
+    let mut game = game_api::execute(
+        game,
+        advance_action(advance::Advance::Engineering, ResourcePile::empty()),
+        0,
+    );
     let player = &game.players[0];
 
     assert_eq!(
@@ -117,9 +122,7 @@ fn basic_actions() {
     game = game_api::execute(game, Action::Playing(WonderCard(Wonder::Pyramids)), 0);
     game = game_api::execute(
         game,
-        Action::Response(EventResponse::Payment(vec![ResourcePile::new(
-            2, 3, 6, 0, 1, 0, 5,
-        )])),
+        payment_response(ResourcePile::new(2, 3, 6, 0, 1, 0, 5)),
         0,
     );
     let player = &game.players[0];
@@ -255,20 +258,20 @@ fn undo() {
     assert_undo(&game, false, true, 2, 0, 0);
     assert_eq!(Angry, game.players[0].cities[0].mood_state);
 
-    let advance_action = Action::Playing(Advance {
-        advance: advance::Advance::Math,
-        payment: ResourcePile::food(2),
-    });
-    let game = game_api::execute(game, advance_action, 0);
+    let game = game_api::execute(
+        game,
+        advance_action(advance::Advance::Math, ResourcePile::food(2)),
+        0,
+    );
     assert_undo(&game, true, false, 1, 1, 0);
     let game = game_api::execute(game, Action::Undo, 0);
     assert_undo(&game, false, true, 1, 0, 0);
     assert_eq!(2, game.players[0].advances.len());
-    let advance_action = Action::Playing(Advance {
-        advance: advance::Advance::Engineering,
-        payment: ResourcePile::food(2),
-    });
-    let game = game_api::execute(game, advance_action, 0);
+    let game = game_api::execute(
+        game,
+        advance_action(advance::Advance::Engineering, ResourcePile::food(2)),
+        0,
+    );
     assert_undo(&game, false, false, 1, 1, 1);
 }
 
@@ -296,20 +299,10 @@ fn test_cultural_influence() {
     JSON.test(
         "cultural_influence",
         vec![
-            TestAction::undoable(1, influence_action()).without_json_comparison(),
-            TestAction::not_undoable(
-                1,
-                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
-                    1,
-                )])),
-            )
-            .without_json_comparison(),
-            TestAction::undoable(
-                1,
-                Action::Response(EventResponse::Payment(vec![ResourcePile::culture_tokens(
-                    4,
-                )])),
-            ),
+            TestAction::undoable(1, influence_action()).skip_json(),
+            TestAction::not_undoable(1, payment_response(ResourcePile::culture_tokens(1)))
+                .skip_json(),
+            TestAction::undoable(1, payment_response(ResourcePile::culture_tokens(4))),
         ],
     );
 }
@@ -319,8 +312,7 @@ fn test_found_city() {
     JSON.test(
         "found_city",
         vec![
-            TestAction::undoable(0, Action::Playing(FoundCity { settler: 4 }))
-                .without_json_comparison(),
+            TestAction::undoable(0, Action::Playing(FoundCity { settler: 4 })).skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![

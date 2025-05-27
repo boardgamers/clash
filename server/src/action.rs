@@ -1,5 +1,6 @@
 use crate::action_card::on_play_action_card;
 use crate::advance::on_advance;
+use crate::barbarians::on_stop_barbarian_movement;
 use crate::city::{MoodState, on_found_city};
 use crate::collect::on_collect;
 use crate::combat::{combat_loop, move_with_possible_combat, start_combat};
@@ -244,7 +245,11 @@ pub(crate) fn execute_custom_phase_action(
         }
         StatusPhase(s) => play_status_phase(game, s),
         TurnStart => game.on_start_turn(),
-        PayAction(a) => a.on_pay_action(game, player_index)?,
+        PayAction(a) => a.on_pay_action(
+            game,
+            player_index,
+            game.current_event().origin_override.clone(),
+        )?,
         Advance(a) => {
             on_advance(game, player_index, a);
         }
@@ -256,6 +261,7 @@ pub(crate) fn execute_custom_phase_action(
         }
         FoundCity(p) => on_found_city(game, player_index, p),
         Incident(i) => on_trigger_incident(game, i),
+        StopBarbarianMovement(movable) => on_stop_barbarian_movement(game, movable),
         ActionCard(a) => on_play_action_card(game, player_index, a),
         WonderCard(w) => on_play_wonder_card(game, player_index, w),
         SelectObjectives(c) => {

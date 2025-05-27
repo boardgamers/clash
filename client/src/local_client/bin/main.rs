@@ -65,7 +65,7 @@ async fn main() {
                     undo: UndoOption::SamePlayer,
                 })
                 .build(),
-        ) // todo make configurable
+        )
     };
 
     run(game, &mut features).await;
@@ -149,8 +149,6 @@ fn ai_autoplay(game: Game, _: &mut Features, _: &mut State) -> Game {
 fn ai_autoplay(mut game: Game, f: &mut Features, state: &mut State) -> Game {
     if f.ai {
         while state.ai_autoplay && game.state != server::game::GameState::Finished {
-            // todo does this block the ui?
-            // state.ai_autoplay = false;
             let active_player = game.active_player();
             let ai = &mut state.ai_players[active_player];
             let action = ai.next_action(&game);

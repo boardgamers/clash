@@ -4,7 +4,9 @@ use crate::combat::move_with_possible_combat;
 use crate::consts::STACK_LIMIT;
 use crate::content::advances::theocracy::cities_that_can_add_units;
 use crate::content::builtin::Builtin;
-use crate::content::persistent_events::{PositionRequest, ResourceRewardRequest, UnitTypeRequest};
+use crate::content::persistent_events::{
+    PersistentEventType, PositionRequest, ResourceRewardRequest, UnitTypeRequest,
+};
 use crate::game::Game;
 use crate::incident::{BASE_EFFECT_PRIORITY, IncidentBuilder, IncidentFilter, play_base_effect};
 use crate::map::Terrain;
@@ -125,8 +127,13 @@ pub(crate) fn barbarians_spawn(mut builder: IncidentBuilder) -> IncidentBuilder 
         |e| &mut e.incident,
         BASE_EFFECT_PRIORITY,
         |game, p, i| {
-            IncidentFilter::new(IncidentTarget::ActivePlayer, BASE_EFFECT_PRIORITY, None)
-                .is_active(game, i, p)
+            IncidentFilter::new(
+                IncidentTarget::ActivePlayer,
+                BASE_EFFECT_PRIORITY,
+                None,
+                None,
+            )
+            .is_active(game, i, p)
         },
         |i| {
             i.barbarians
@@ -169,10 +176,53 @@ where
         move |game, s, v| {
             let position = get_barbarian_city2(v).expect("barbarians should exist");
             let units = Units::from_iter(vec![s.choice]);
-            game.add_info_log_item(&format!("Barbarians reinforced with {units} at {position}",));
+            game.add_info_log_item(&format!(
+                "Barbarians reinforced with {} at {position}",
+                units.to_string(None)
+            ));
             add_unit(get_barbarians_player(game).index, position, s.choice, game);
         },
     )
+}
+
+pub(crate) fn on_stop_barbarian_movement(game: &mut Game, movable: Vec<Position>) {
+    let old_movable = movable.clone();
+    match game.trigger_persistent_event(
+        &game.human_players(0),
+        |events| &mut events.stop_barbarian_movement,
+        movable,
+        PersistentEventType::StopBarbarianMovement,
+    ) {
+        None => (),
+        Some(movable) => {
+            if movable == old_movable {
+                // nothing changed, so we can skip the rest
+                return;
+            }
+
+            let mut event_state = game.events.pop().expect("event should exist");
+            if let PersistentEventType::Incident(i) = &mut event_state.event_type {
+                let state = i.get_barbarian_state();
+                for pos in old_movable {
+                    if !movable.contains(&pos) {
+                        // if the position was not selected, it means the unit cannot move
+                        let units = get_barbarians_player(game)
+                            .get_units(pos)
+                            .iter()
+                            .map(|u| u.id)
+                            .collect_vec();
+                        state.moved_units.extend(units);
+                    }
+                }
+                game.events.push(event_state);
+            } else {
+                panic!(
+                    "StopBarbarianMovement should only be triggered from an Incident, not {:?}",
+                    game.current_event().event_type
+                )
+            }
+        }
+    }
 }
 
 pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
@@ -184,7 +234,19 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
             state.move_units = true;
         }
     });
-    builder = add_barbarians_city(builder, event_name);
+    builder = add_barbarians_city(builder, event_name).add_simple_incident_listener(
+        IncidentTarget::ActivePlayer,
+        BASE_EFFECT_PRIORITY + 99,
+        |game, _, _, i| {
+            let movable = get_movable_units(game, i.active_player, i.get_barbarian_state());
+            if movable.is_empty() {
+                return;
+            }
+
+            on_stop_barbarian_movement(game, movable);
+        },
+    );
+
     for army in 0..18 {
         builder = builder
             .add_incident_position_request(
@@ -242,7 +304,8 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
                     state.moved_units.extend(units.iter());
                     let unit_types = ids.iter().map(|u| u.unit_type).collect::<Units>();
                     game.add_info_log_item(&format!(
-                        "Barbarians move from {from} to {to}: {unit_types}"
+                        "Barbarians move from {from} to {to}: {}",
+                        unit_types.to_string(None)
                     ));
                     move_with_possible_combat(
                         game,
@@ -286,8 +349,12 @@ fn reinforce_after_move(game: &mut Game, player_index: usize) {
     }
 }
 
-fn get_movable_units(game: &Game, human: usize, state: &BarbariansEventState) -> Vec<Position> {
-    let human = game.player(human);
+pub(crate) fn get_movable_units(
+    game: &Game,
+    target_player: usize,
+    state: &BarbariansEventState,
+) -> Vec<Position> {
+    let target = game.player(target_player);
     let barbarian = get_barbarians_player(game);
 
     game.map
@@ -300,8 +367,9 @@ fn get_movable_units(game: &Game, human: usize, state: &BarbariansEventState) ->
                 .iter()
                 .filter(|u| !state.moved_units.contains(&u.id))
                 .count();
-            stack > 0 && !barbarian_march_steps(game, human, *pos, stack).is_empty()
+            stack > 0 && !barbarian_march_steps(game, target, *pos, stack).is_empty()
         })
+        .sorted()
         .copied()
         .collect()
 }

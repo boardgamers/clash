@@ -95,7 +95,7 @@ pub(crate) fn advance_group_builder(name: &str, advances: Vec<AdvanceBuilder>) -
         .enumerate()
         .map(|(index, builder)| {
             let builder = if let Some(g) = &government {
-                builder.with_government(g.name)
+                builder.with_government(g.name, index == 0)
             } else {
                 builder
             };

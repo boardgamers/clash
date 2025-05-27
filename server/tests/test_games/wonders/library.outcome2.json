@@ -266,8 +266,7 @@
                   "action": {
                     "Playing": {
                       "Custom": {
-                        "action": "GreatLibrary",
-                        "city": null
+                        "action": "GreatLibrary"
                       }
                     }
                   },
@@ -296,8 +295,7 @@
                         {
                           "event_type": {
                             "CustomAction": {
-                              "action": "GreatLibrary",
-                              "city": null
+                              "action": "GreatLibrary"
                             }
                           },
                           "handler": {

@@ -13,11 +13,13 @@ use crate::client_state::{
 };
 use crate::collect_ui::collect_dialog;
 use crate::construct_ui::pay_construction_dialog;
-use crate::dialog_ui::{OkTooltip, cancel_button, ok_button};
-use crate::event_ui::custom_phase_event_origin;
+use crate::event_ui::{custom_phase_event_origin, event_help};
 use crate::happiness_ui::{increase_happiness_click, increase_happiness_menu};
 use crate::hex_ui::pixel_to_coordinate;
-use crate::layout_ui::{bottom_centered_text, icon_pos, top_right_texture};
+use crate::layout_ui::{
+    ICON_SIZE, bottom_center_anchor, bottom_centered_text_with_offset,
+    draw_scaled_icon_with_tooltip, icon_pos, top_right_texture,
+};
 use crate::log_ui::show_log;
 use crate::map_ui::{draw_map, explore_dialog, show_tile_menu};
 use crate::player_ui::{player_select, show_global_controls, show_top_center, show_top_left};
@@ -184,14 +186,33 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
 }
 
 fn dialog_chooser(rc: &RenderContext, c: &DialogChooser) -> StateUpdate {
-    bottom_centered_text(rc, &c.title);
-    if ok_button(rc, OkTooltip::Valid("OK".to_string())) {
-        StateUpdate::OpenDialog(c.yes.clone())
-    } else if cancel_button(rc) {
-        StateUpdate::OpenDialog(c.no.clone())
-    } else {
-        StateUpdate::None
+    let h = -50.;
+    bottom_centered_text_with_offset(
+        rc,
+        &c.title,
+        vec2(0., c.options.len() as f32 * h + 50.),
+        &[],
+    );
+
+    for (i, (origin, d)) in c.options.iter().enumerate() {
+        let offset = vec2(0., i as f32 * h + 35.);
+        let (name, tooltip) = origin.as_ref().map_or_else(
+            || ("standard action".to_string(), vec![]),
+            |o| (o.name(rc.game), event_help(rc, o)),
+        );
+
+        bottom_centered_text_with_offset(rc, &name, offset, &tooltip);
+        if draw_scaled_icon_with_tooltip(
+            rc,
+            &rc.assets().ok,
+            &tooltip,
+            bottom_center_anchor(rc) + offset + vec2(100., -70.),
+            ICON_SIZE,
+        ) {
+            return StateUpdate::OpenDialog(d.clone());
+        }
     }
+    StateUpdate::None
 }
 
 pub fn try_click(rc: &RenderContext) -> StateUpdate {
@@ -229,7 +250,9 @@ fn controlling_player_click(rc: &RenderContext, mouse_pos: Vec2, pos: Position) 
         ActiveDialog::UnitsRequest(s) => unit_selection_click(rc, pos, mouse_pos, s, |new| {
             StateUpdate::OpenDialog(ActiveDialog::UnitsRequest(new.clone()))
         }),
-        ActiveDialog::IncreaseHappiness(h) => increase_happiness_click(rc, pos, h),
+        ActiveDialog::IncreaseHappiness(h) if h.city_restriction.is_none_or(|r| r == pos) => {
+            increase_happiness_click(rc, pos, h)
+        }
         _ => StateUpdate::SetFocusedTile(pos),
     }
 }

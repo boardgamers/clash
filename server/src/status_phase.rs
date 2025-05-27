@@ -5,7 +5,8 @@ use crate::consts::AGES;
 use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{
     AdvanceRequest, EventResponse, PaymentRequest, PersistentEventRequest, PersistentEventType,
-    PlayerRequest, PositionRequest,
+    PlayerRequest, PositionRequest, TriggerPersistentEventParams,
+    trigger_persistent_event_with_listener,
 };
 use crate::objective_card::{
     gain_objective_card_from_pile, present_objective_cards, status_phase_completable,
@@ -80,14 +81,14 @@ pub(crate) fn play_status_phase(game: &mut Game, mut phase: StatusPhaseState) {
     use StatusPhaseState::*;
 
     loop {
-        phase = match game.trigger_persistent_event_with_listener(
+        phase = match trigger_persistent_event_with_listener(
+            game,
             &game.human_players(game.starting_player_index),
             |events| &mut events.status_phase,
             &game.cache.status_phase_handler(&phase).listeners.clone(),
             phase,
             PersistentEventType::StatusPhase,
-            None,
-            |_| {},
+            TriggerPersistentEventParams::default(),
         ) {
             Some(s) => s,
             None => return,
@@ -494,10 +495,9 @@ fn player_that_chooses_next_first_player(players: &[&Player]) -> usize {
 
 #[cfg(test)]
 mod tests {
-    use crate::content;
+    use crate::civilization::Civilization;
     use crate::player::Player;
     use crate::resource_pile::ResourcePile;
-    use content::civilizations::tests as civ;
 
     fn assert_next_player(
         name: &str,
@@ -506,11 +506,11 @@ mod tests {
         player2_mood: u8,
         expected_player_index: usize,
     ) {
-        let mut player0 = Player::new(civ::get_test_civilization(), 0);
+        let mut player0 = Player::new(get_test_civilization(), 0);
         player0.gain_resources(ResourcePile::mood_tokens(player0_mood));
-        let mut player1 = Player::new(civ::get_test_civilization(), 1);
+        let mut player1 = Player::new(get_test_civilization(), 1);
         player1.gain_resources(ResourcePile::mood_tokens(player1_mood));
-        let mut player2 = Player::new(civ::get_test_civilization(), 2);
+        let mut player2 = Player::new(get_test_civilization(), 2);
         player2.gain_resources(ResourcePile::mood_tokens(player2_mood));
         let players = vec![&player2, &player1, &player0];
         let got = super::player_that_chooses_next_first_player(&players);
@@ -529,5 +529,10 @@ mod tests {
             1,
             2,
         );
+    }
+
+    #[must_use]
+    pub fn get_test_civilization() -> Civilization {
+        Civilization::new("test", vec![], vec![])
     }
 }

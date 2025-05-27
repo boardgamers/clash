@@ -1,18 +1,20 @@
 #![allow(dead_code)]
 
 use server::action::Action;
+use server::advance::AdvanceAction;
 use server::cache::Cache;
 use server::city_pieces::Building::Temple;
-use server::content::persistent_events::{SelectedStructure, Structure};
+use server::content::custom_actions::{CustomAction, CustomActionType};
+use server::content::persistent_events::{EventResponse, SelectedStructure, Structure};
 use server::game::{Game, GameContext};
 use server::log::current_player_turn_log_mut;
 use server::movement::MoveUnits;
 use server::movement::MovementAction::Move;
-use server::playing_actions::PlayingAction::InfluenceCultureAttempt;
-use server::playing_actions::PlayingActionType;
+use server::playing_actions::PlayingAction::{Advance, InfluenceCultureAttempt};
+use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
-use server::{cultural_influence, game_api};
+use server::{advance, cultural_influence, game_api};
 use std::fmt::Display;
 use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::{
@@ -197,7 +199,7 @@ impl TestAction {
         self
     }
 
-    pub fn without_json_comparison(mut self) -> Self {
+    pub fn skip_json(mut self) -> Self {
         self.compare_json = false;
         self
     }
@@ -436,6 +438,14 @@ pub fn move_action(units: Vec<u32>, destination: Position) -> Action {
     }))
 }
 
+pub fn advance_action(advance: advance::Advance, payment: ResourcePile) -> Action {
+    Action::Playing(Advance(AdvanceAction::new(advance, payment)))
+}
+
+pub fn custom_action(action: CustomActionType) -> Action {
+    Action::Playing(PlayingAction::Custom(CustomAction::new(action, None)))
+}
+
 pub fn influence_action() -> Action {
     Action::Playing(InfluenceCultureAttempt(
         cultural_influence::InfluenceCultureAttempt::new(
@@ -443,4 +453,8 @@ pub fn influence_action() -> Action {
             PlayingActionType::InfluenceCultureAttempt,
         ),
     ))
+}
+
+pub fn payment_response(payment: ResourcePile) -> Action {
+    Action::Response(EventResponse::Payment(vec![payment]))
 }

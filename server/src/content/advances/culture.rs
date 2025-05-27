@@ -24,7 +24,7 @@ fn arts() -> AdvanceBuilder {
         Advance::Arts,
         "Arts",
         "Once per turn, as a free action, you may spend \
-        1 culture token to get an influence culture action",
+            1 culture token to get an influence culture action",
     )
     .with_advance_bonus(CultureToken)
     .with_unlocked_building(Obelisk)
@@ -100,7 +100,7 @@ pub(crate) fn use_sports() -> Builtin {
             0,
             |game, player_index, a| {
                 let p = game.player(player_index);
-                let options = sports_options(p, p.get_city(a.city.expect("city not found")))
+                let options = sports_options(p, p.get_city(a.action.city.expect("city not found")))
                     .expect("Invalid options for sports");
                 Some(vec![PaymentRequest::mandatory(
                     options,
@@ -108,7 +108,7 @@ pub(crate) fn use_sports() -> Builtin {
                 )])
             },
             |game, s, a| {
-                let position = a.city.expect("city not found");
+                let position = a.action.city.expect("city not found");
                 let pile = s.choice[0].clone();
                 let steps = pile.amount();
                 increase_happiness(
@@ -116,8 +116,9 @@ pub(crate) fn use_sports() -> Builtin {
                     s.player_index,
                     &[(position, steps)],
                     None,
-                    &a.action.playing_action_type(),
-                );
+                    &a.action.action.playing_action_type(),
+                )
+                .expect("Failed to increase happiness");
                 game.add_info_log_item(&format!(
                     "{} paid {pile} for Sports to increase the happiness of {position} \
                         by {steps} steps, making it {}",

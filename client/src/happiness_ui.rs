@@ -3,10 +3,11 @@ use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::dialog_ui::BaseOrCustomDialog;
 use crate::payment_ui::{Payment, payment_dialog};
 use crate::render_context::RenderContext;
+use itertools::Itertools;
 use server::action::Action;
 use server::city::{City, MoodState};
 use server::game::Game;
-use server::happiness::{available_happiness_actions, happiness_cost};
+use server::happiness::{available_happiness_actions, happiness_city_restriction, happiness_cost};
 use server::player::CostTrigger;
 use server::playing_actions::{IncreaseHappiness, PlayingAction, PlayingActionType};
 use server::position::Position;
@@ -16,17 +17,20 @@ pub struct IncreaseHappinessConfig {
     pub steps: Vec<(Position, u8)>,
     pub payment: Payment<String>,
     pub custom: BaseOrCustomDialog,
+    pub city_restriction: Option<Position>,
 }
 
 impl IncreaseHappinessConfig {
     pub fn new(rc: &RenderContext, custom: BaseOrCustomDialog) -> IncreaseHappinessConfig {
         let p = rc.shown_player;
         let steps = p.cities.iter().map(|c| (c.position, 0)).collect();
+        let city_restriction = happiness_city_restriction(rc.shown_player, &custom.action_type);
         IncreaseHappinessConfig {
             steps,
             payment: Self::happiness_payment(rc, 0, &custom)
                 .expect("Happiness payment should be available"),
             custom,
+            city_restriction,
         }
     }
 
@@ -55,7 +59,7 @@ impl IncreaseHappinessConfig {
 
 pub fn open_increase_happiness_dialog(
     rc: &RenderContext,
-    actions: Vec<PlayingActionType>,
+    actions: &[PlayingActionType],
     init: impl Fn(IncreaseHappinessConfig) -> IncreaseHappinessConfig,
 ) -> StateUpdate {
     base_or_custom_action(rc, actions, "Increase happiness", |custom| {
@@ -172,9 +176,15 @@ pub fn available_happiness_actions_for_city(
     player: usize,
     position: Position,
 ) -> Vec<PlayingActionType> {
-    let city = game.player(player).get_city(position);
+    let p = game.player(player);
+    let city = p.get_city(position);
     if city.can_activate() && city.mood_state != MoodState::Happy {
         available_happiness_actions(game, player)
+            .into_iter()
+            .filter(|action_type| {
+                happiness_city_restriction(p, action_type).is_none_or(|r| r == position)
+            })
+            .collect_vec()
     } else {
         vec![]
     }
@@ -190,6 +200,7 @@ pub fn increase_happiness_menu(rc: &RenderContext, h: &IncreaseHappinessConfig) 
                 steps: h.steps.clone(),
                 payment,
                 custom: h.custom.clone(),
+                city_restriction: h.city_restriction,
             })
         },
         |payment| {

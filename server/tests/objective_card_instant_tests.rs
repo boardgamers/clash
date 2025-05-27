@@ -22,8 +22,8 @@ fn test_draft() {
     JSON.test(
         "draft",
         vec![
-            TestAction::undoable(0, r.clone()).without_json_comparison(),
-            TestAction::undoable(0, r).without_json_comparison(),
+            TestAction::undoable(0, r.clone()).skip_json(),
+            TestAction::undoable(0, r).skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![
@@ -43,7 +43,7 @@ fn test_conqueror() {
                 0,
                 move_action(vec![0, 1, 2, 3], Position::from_offset("C1")),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![
@@ -62,9 +62,8 @@ fn test_defiance() {
         "defiance",
         vec![
             TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("C1")))
-                .without_json_comparison(),
-            TestAction::not_undoable(0, Action::Response(EventResponse::Bool(false)))
-                .without_json_comparison(),
+                .skip_json(),
+            TestAction::not_undoable(0, Action::Response(EventResponse::Bool(false))).skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![
@@ -81,9 +80,9 @@ fn test_warmonger() {
         "warmonger",
         vec![
             TestAction::not_undoable(0, move_action(vec![0, 1], Position::from_offset("C1")))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::not_undoable(0, move_action(vec![2, 3], Position::from_offset("B1")))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![
@@ -117,7 +116,7 @@ fn test_scavenger() {
         "scavenger",
         vec![
             TestAction::not_undoable(0, move_action(vec![0, 1], Position::from_offset("E7")))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![

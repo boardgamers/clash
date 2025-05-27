@@ -196,8 +196,7 @@
                   "action": {
                     "Playing": {
                       "Custom": {
-                        "action": "CivilLiberties",
-                        "city": null
+                        "action": "CivilLiberties"
                       }
                     }
                   },

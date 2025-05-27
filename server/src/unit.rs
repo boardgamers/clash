@@ -353,6 +353,54 @@ impl Units {
         }
         units_to_replace
     }
+
+    #[must_use]
+    pub fn to_string(&self, leader_name: Option<&String>) -> String {
+        let mut unit_types = Vec::new();
+        if self.settlers > 0 {
+            unit_types.push(format!(
+                "{} {}",
+                self.settlers,
+                if self.settlers == 1 {
+                    "settler"
+                } else {
+                    "settlers"
+                }
+            ));
+        }
+        if self.infantry > 0 {
+            unit_types.push(format!("{} infantry", self.infantry,));
+        }
+        if self.ships > 0 {
+            unit_types.push(format!(
+                "{} {}",
+                self.ships,
+                if self.ships == 1 { "ship" } else { "ships" }
+            ));
+        }
+        if self.cavalry > 0 {
+            unit_types.push(format!("{} cavalry", self.cavalry,));
+        }
+        if self.elephants > 0 {
+            unit_types.push(format!(
+                "{} {}",
+                self.elephants,
+                if self.elephants == 1 {
+                    "elephant"
+                } else {
+                    "elephants"
+                }
+            ));
+        }
+        if self.leaders > 0 {
+            unit_types.push(if self.leaders == 1 {
+                leader_name.map_or("a leader", |v| v).to_string()
+            } else {
+                format!("{} leaders", self.leaders)
+            });
+        }
+        utils::format_and(&unit_types, "no units")
+    }
 }
 
 impl Default for Units {
@@ -430,55 +478,6 @@ impl Iterator for UnitsIntoIterator {
             5 => Some((Leader, u.leaders)),
             _ => None,
         }
-    }
-}
-
-impl Display for Units {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut unit_types = Vec::new();
-        if self.settlers > 0 {
-            unit_types.push(format!(
-                "{} {}",
-                self.settlers,
-                if self.settlers == 1 {
-                    "settler"
-                } else {
-                    "settlers"
-                }
-            ));
-        }
-        if self.infantry > 0 {
-            unit_types.push(format!("{} infantry", self.infantry,));
-        }
-        if self.ships > 0 {
-            unit_types.push(format!(
-                "{} {}",
-                self.ships,
-                if self.ships == 1 { "ship" } else { "ships" }
-            ));
-        }
-        if self.cavalry > 0 {
-            unit_types.push(format!("{} cavalry", self.cavalry,));
-        }
-        if self.elephants > 0 {
-            unit_types.push(format!(
-                "{} {}",
-                self.elephants,
-                if self.elephants == 1 {
-                    "elephant"
-                } else {
-                    "elephants"
-                }
-            ));
-        }
-        if self.leaders > 0 {
-            unit_types.push(if self.leaders == 1 {
-                String::from("a leader")
-            } else {
-                format!("{} leaders", self.leaders)
-            });
-        }
-        write!(f, "{}", utils::format_and(&unit_types, "no units"))
     }
 }
 
@@ -668,7 +667,10 @@ pub(crate) fn choose_carried_units_to_remove() -> Builtin {
                 game.add_info_log_item(&format!(
                     "{} killed carried units: {}",
                     s.player_name,
-                    units.into_iter().collect::<Units>()
+                    units
+                        .into_iter()
+                        .collect::<Units>()
+                        .to_string(game.player(s.player_index).active_leader.as_ref())
                 ));
             }
             kill_units_without_event(game, &s.choice, s.player_index, e.killer);

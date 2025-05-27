@@ -15,9 +15,11 @@ use crate::game::{Game, GameState};
 use crate::player::Player;
 use crate::player_events::MoveInfo;
 use crate::position::Position;
+use crate::special_advance::SpecialAdvance;
 use crate::unit::{carried_units, get_current_move};
 use crate::wonder::Wonder;
 use itertools::Itertools;
+use pathfinding::prelude::astar;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
@@ -231,7 +233,7 @@ pub(crate) fn move_units_destinations(
     }
 
     Ok(
-        move_routes(start, player, unit_ids, game, embark_carrier_id)
+        move_routes(start, player, unit_ids, game, embark_carrier_id, stack_size)
             .into_iter()
             .map(|route| {
                 let result = move_route_result(
@@ -285,7 +287,6 @@ fn move_route_result(
             .filter(|unit| unit.unit_type.is_army_unit() && !unit.is_transported())
             .count()
             + stack_size
-            + route.stack_size_used
             > STACK_LIMIT
     {
         return Err("stack limit exceeded".to_string());
@@ -343,9 +344,7 @@ fn is_move_restricted(
         && game
             .try_get_any_city(dest)
             .is_some_and(|city| city.pieces.wonders.contains(&Wonder::GreatGardens))
-        && movement_restrictions
-            .iter()
-            .any(|&r| r == &MovementRestriction::Fertile)
+        && movement_restrictions.contains(&(&MovementRestriction::Fertile))
     {
         return Err("fertile movement attack great gardens restriction".to_string());
     }
@@ -380,7 +379,6 @@ fn check_can_move(
 pub struct MoveRoute {
     pub destination: Position,
     pub cost: PaymentOptions,
-    pub stack_size_used: usize,
     pub ignore_terrain_movement_restrictions: bool,
 }
 
@@ -391,7 +389,6 @@ impl MoveRoute {
         Self {
             destination,
             cost: options,
-            stack_size_used: 0,
             ignore_terrain_movement_restrictions: false,
         }
     }
@@ -428,6 +425,7 @@ pub(crate) fn move_routes(
     units: &[u32],
     game: &Game,
     embark_carrier_id: Option<u32>,
+    stack_size: usize,
 ) -> Vec<MoveRoute> {
     let mut base: Vec<MoveRoute> = starting
         .neighbors()
@@ -439,7 +437,7 @@ pub(crate) fn move_routes(
         base.extend(reachable_with_navigation(player, units, &game.map));
     }
     if player.can_use_advance(Advance::Roads) && embark_carrier_id.is_none() {
-        base.extend(reachable_with_roads(player, units, game));
+        base.extend(reachable_with_roads(player, units, game, stack_size));
     }
     add_diplomatic_relations(player, game, &mut base);
     add_negotiations(player, game, &mut base);
@@ -466,7 +464,12 @@ fn add_negotiations(player: &Player, game: &Game, base: &mut Vec<MoveRoute>) {
 }
 
 #[must_use]
-fn reachable_with_roads(player: &Player, units: &[u32], game: &Game) -> Vec<MoveRoute> {
+fn reachable_with_roads(
+    player: &Player,
+    units: &[u32],
+    game: &Game,
+    stack_size: usize,
+) -> Vec<MoveRoute> {
     let start = units.iter().find_map(|&id| {
         let unit = player.get_unit(id);
         if unit.unit_type.is_land_based() {
@@ -483,69 +486,138 @@ fn reachable_with_roads(player: &Player, units: &[u32], game: &Game) -> Vec<Move
             return vec![];
         }
 
-        return start
-            .neighbors()
+        let roman_roads = player.has_special_advance(SpecialAdvance::RomanRoads);
+        let mut routes: Vec<MoveRoute> = next_road_step(player, game, start, stack_size)
             .into_iter()
-            .flat_map(|middle| {
-                // don't move over enemy units or cities
-                let stack_size_used = player
-                    .get_units(middle)
-                    .iter()
-                    .filter(|unit| unit.unit_type.is_army_unit())
-                    .count();
-
-                if map.is_land(middle) && game.enemy_player(player.index, middle).is_none() {
-                    let mut dest: Vec<(Position, usize)> = middle
-                        .neighbors()
-                        .into_iter()
-                        .map(move |n| (n, stack_size_used))
-                        .collect();
-                    dest.push((middle, stack_size_used));
-                    dest.retain(|&(p, _)| p != start);
-                    dest
-                } else {
-                    vec![]
-                }
-            })
-            .into_group_map_by(|&(p, _)| p)
-            .into_iter()
-            .filter_map(|(destination, stack_sizes_used)| {
-                if destination.distance(start) == 1 {
-                    // can go directly without using roads
-                    return None;
-                }
-
-                // but can stop on enemy units
-                if map.is_land(destination)
-                    && (
-                        // from or to owned city
-                        player.try_get_city(start).is_some()
-                            || player.try_get_city(destination).is_some()
-                    )
-                {
-                    let stack_size_used =
-                        stack_sizes_used.iter().map(|&(_, s)| s).min().expect("min");
-                    let mut cost = PaymentOptions::resources(
-                        player,
-                        PaymentReason::Move,
-                        ResourcePile::ore(1) + ResourcePile::food(1),
-                    );
-                    let origin = EventOrigin::Advance(Advance::Roads);
-                    cost.modifiers = vec![origin.clone()];
-                    let route = MoveRoute {
-                        destination,
-                        cost,
-                        stack_size_used,
-                        ignore_terrain_movement_restrictions: true,
-                    };
-                    Some(route)
-                } else {
-                    None
-                }
+            .flat_map(|middle| next_road_step(player, game, middle, stack_size))
+            .unique()
+            .filter_map(|destination| {
+                road_route(
+                    player,
+                    start,
+                    destination,
+                    roman_roads,
+                    vec![EventOrigin::Advance(Advance::Roads)],
+                )
             })
             .collect();
+
+        if roman_roads {
+            routes.extend(roman_roads_routes(player, game, start, stack_size));
+        }
+
+        return routes;
     }
     vec![]
+}
+
+const ROMAN_ROADS_LENGTH: u8 = 4;
+
+fn roman_roads_routes(
+    player: &Player,
+    game: &Game,
+    start: Position,
+    stack_size: usize,
+) -> Vec<MoveRoute> {
+    if game.try_get_any_city(start).is_none() {
+        return vec![];
+    }
+
+    player
+        .cities
+        .iter()
+        .filter_map(|city| {
+            let distance = city.position.distance(start) as u8;
+            if distance > ROMAN_ROADS_LENGTH {
+                return None;
+            }
+            let dst = city.position;
+
+            let len = astar(
+                &start,
+                |p| {
+                    next_road_step(player, game, *p, stack_size)
+                        .iter()
+                        .map(|&n| (n, 1))
+                        .collect_vec()
+                },
+                |p| p.distance(dst),
+                |&p| p == dst,
+            )
+            .map_or(u8::MAX, |(_path, len)| len as u8);
+            if len > ROMAN_ROADS_LENGTH {
+                return None;
+            }
+            road_route(
+                player,
+                start,
+                dst,
+                false,
+                vec![
+                    EventOrigin::Advance(Advance::Roads),
+                    EventOrigin::SpecialAdvance(SpecialAdvance::RomanRoads),
+                ],
+            )
+        })
+        .collect()
+}
+
+fn road_route(
+    player: &Player,
+    start: Position,
+    destination: Position,
+    ignore_city_to_city: bool,
+    modifiers: Vec<EventOrigin>,
+) -> Option<MoveRoute> {
+    if destination.distance(start) <= 1 {
+        // can go directly without using roads
+        return None;
+    }
+
+    // but can stop on enemy units
+
+    let from_city = player.try_get_city(start).is_some();
+    let to_city = player.try_get_city(destination).is_some();
+    if !from_city && !to_city {
+        return None;
+    }
+    if from_city && to_city && ignore_city_to_city {
+        return None;
+    }
+
+    let mut cost = PaymentOptions::resources(
+        player,
+        PaymentReason::Move,
+        ResourcePile::ore(1) + ResourcePile::food(1),
+    );
+    cost.modifiers = modifiers;
+    Some(MoveRoute {
+        destination,
+        cost,
+        ignore_terrain_movement_restrictions: true,
+    })
+}
+
+fn next_road_step(
+    player: &Player,
+    game: &Game,
+    from: Position,
+    stack_size: usize,
+) -> Vec<Position> {
+    // don't move over enemy units or cities
+    from.neighbors()
+        .into_iter()
+        .filter(|to| {
+            let on_target = player
+                .get_units(*to)
+                .iter()
+                .filter(|unit| unit.unit_type.is_army_unit())
+                .count();
+            game.map.is_land(*to)
+                && game.enemy_player(player.index, *to).is_none()
+                && on_target + stack_size <= STACK_LIMIT
+        })
+        .collect_vec()
 }
 
 #[must_use]

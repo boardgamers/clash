@@ -352,8 +352,7 @@
                   "action": {
                     "Playing": {
                       "Custom": {
-                        "action": "GreatLighthouse",
-                        "city": null
+                        "action": "GreatLighthouse"
                       }
                     }
                   },
@@ -380,8 +379,7 @@
                         {
                           "event_type": {
                             "CustomAction": {
-                              "action": "GreatLighthouse",
-                              "city": null
+                              "action": "GreatLighthouse"
                             }
                           },
                           "handler": {

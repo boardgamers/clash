@@ -28,7 +28,7 @@ fn voting() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::Voting,
         "Voting",
-        "As a free action, you may spend 1 mood token to gain an action 'Increase happiness'",
+        "As a free action, you may spend 1 mood token to use 'Increase happiness'",
     )
     .add_custom_action(VotingIncreaseHappiness)
 }
@@ -52,18 +52,16 @@ fn separation_of_power() -> AdvanceBuilder {
     )
 }
 
+const CIVIL_LIBERTIES: &str = "As an action, you may gain 3 mood tokens. \
+        The cost of Draft is increased to 2 mood token";
+
 fn civil_liberties() -> AdvanceBuilder {
-    AdvanceInfo::builder(
-        Advance::CivilLiberties,
-        "Civil Liberties",
-        "As an action, you may gain 3 mood tokens. \
-        The cost of Draft is increased to 2 mood token",
-    )
-    .add_custom_action(CivilLiberties)
+    AdvanceInfo::builder(Advance::CivilLiberties, "Civil Liberties", CIVIL_LIBERTIES)
+        .add_custom_action(CivilLiberties)
 }
 
 pub(crate) fn use_civil_liberties() -> Builtin {
-    Builtin::builder("Civil Liberties", "")
+    Builtin::builder("Civil Liberties", CIVIL_LIBERTIES)
         .add_simple_persistent_event_listener(
             |event| &mut event.custom_action,
             0,
@@ -84,7 +82,7 @@ fn free_economy() -> AdvanceBuilder {
         Advance::FreeEconomy,
         "Free Economy",
         "As a free action, you may spend 1 mood token to collect \
-                  resources in one city. This must be your only collect action this turn",
+            resources in one city. This must be your only collect action this turn",
     )
     .add_custom_action(FreeEconomyCollect)
     .add_transient_event_listener(

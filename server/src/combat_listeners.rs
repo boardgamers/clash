@@ -626,6 +626,7 @@ fn kill_fighters(game: &mut Game, player: usize, killed_unit_ids: &[u32], c: &mu
             .iter()
             .map(|id| p.get_unit(*id).unit_type)
             .collect::<Units>()
+            .to_string(p.active_leader.as_ref())
     ));
 
     kill_combat_units(game, c, player, killed_unit_ids);

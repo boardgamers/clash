@@ -4,7 +4,9 @@ use crate::ability_initializer::{
 use crate::advance::Advance;
 use crate::card::{discard_card, draw_card_from_pile};
 use crate::combat_stats::CombatStats;
-use crate::content::persistent_events::PersistentEventType;
+use crate::content::persistent_events::{
+    PersistentEventType, TriggerPersistentEventParams, trigger_persistent_event_with_listener,
+};
 use crate::content::tactics_cards::TacticsCardFactory;
 use crate::events::EventOrigin;
 use crate::game::Game;
@@ -183,14 +185,14 @@ pub(crate) fn on_play_action_card(game: &mut Game, player_index: usize, i: Actio
         CivilCardTarget::AllPlayers => game.human_players(player_index),
     };
 
-    let _ = game.trigger_persistent_event_with_listener(
+    let _ = trigger_persistent_event_with_listener(
+        game,
         &players,
         |e| &mut e.play_action_card,
         &game.cache.get_civil_card(i.id).listeners.clone(),
         i,
         PersistentEventType::ActionCard,
-        None,
-        |_| {},
+        TriggerPersistentEventParams::default(),
     );
 }
 
@@ -301,4 +303,24 @@ pub fn combat_requirement_met(
         }
         false
     })
+}
+
+pub(crate) fn can_play_action_card(game: &Game, p: &Player, id: u8) -> Result<(), String> {
+    if !p.action_cards.contains(&id) {
+        return Err("Action card not available".to_string());
+    }
+
+    let civil_card = game.cache.get_civil_card(id);
+    let mut satisfying_action: Option<usize> = None;
+    if let Some(r) = &civil_card.combat_requirement {
+        if let Some(action_log_index) = combat_requirement_met(game, p.index, id, r) {
+            satisfying_action = Some(action_log_index);
+        } else {
+            return Err("Requirement not met".to_string());
+        }
+    }
+    if !(civil_card.can_play)(game, p, &ActionCardInfo::new(id, satisfying_action, None)) {
+        return Err("Cannot play action card".to_string());
+    }
+    Ok(())
 }

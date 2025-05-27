@@ -9,10 +9,10 @@ use itertools::Itertools;
 use macroquad::color::Color;
 use macroquad::math::vec2;
 use macroquad::prelude::{
-    BLACK, BLUE, GRAY, Rect, WHITE, YELLOW, draw_rectangle, draw_rectangle_lines,
+    BLACK, BLUE, GRAY, GREEN, Rect, WHITE, YELLOW, draw_rectangle, draw_rectangle_lines,
 };
 use server::action::Action;
-use server::advance::{Advance, AdvanceInfo, Bonus};
+use server::advance::{Advance, AdvanceAction, AdvanceInfo, Bonus, find_special_advance};
 use server::game::GameState;
 use server::player::{CostTrigger, Player};
 use server::playing_actions::PlayingAction;
@@ -98,22 +98,25 @@ pub fn show_advance_menu(
                     );
                     state.draw_text(name, pos.x + 10., pos.y + 22.);
 
-                    let thickness = match &state.active_dialog {
-                        ActiveDialog::AdvancePayment(p) => {
-                            if p.name == *name {
-                                8.
-                            } else {
-                                4.
-                            }
-                        }
-                        _ => 4.,
-                    };
+                    if find_special_advance(a.advance, rc.game, rc.shown_player.index).is_some() {
+                        draw_rectangle_lines(rect.x, rect.y, rect.w, rect.h, 12., GREEN);
+                    }
+
                     draw_rectangle_lines(
                         rect.x,
                         rect.y,
                         rect.w,
                         rect.h,
-                        thickness,
+                        match &state.active_dialog {
+                            ActiveDialog::AdvancePayment(p) => {
+                                if p.name == *name {
+                                    8.
+                                } else {
+                                    4.
+                                }
+                            }
+                            _ => 4.,
+                        },
                         border_color(a),
                     );
                 } else {
@@ -197,6 +200,12 @@ fn description(rc: &RenderContext, a: &AdvanceInfo) -> Vec<String> {
         add_unit_description(&mut parts, UnitType::Elephant);
     }
 
+    if let Some(a) = find_special_advance(a.advance, rc.game, rc.shown_player.index) {
+        let s = a.info(rc.game);
+        parts.push(format!("Special advance: {}", s.name));
+        add_tooltip_description(&mut parts, &s.description);
+    }
+
     parts
 }
 
@@ -208,10 +217,9 @@ pub fn pay_advance_dialog(ap: &Payment<Advance>, rc: &RenderContext) -> StateUpd
     }
     payment_dialog(rc, ap, true, ActiveDialog::AdvancePayment, |payment| {
         StateUpdate::execute_with_warning(
-            Action::Playing(PlayingAction::Advance {
-                advance: ap.value,
-                payment,
-            }),
+            Action::Playing(PlayingAction::Advance(AdvanceAction::new(
+                ap.value, payment,
+            ))),
             if rc.shown_player.incident_tokens == 1 {
                 vec!["A game event will be triggered".to_string()]
             } else {

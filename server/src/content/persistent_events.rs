@@ -1,3 +1,4 @@
+use crate::ability_initializer::AbilityListeners;
 use crate::action::execute_custom_phase_action;
 use crate::action_card::ActionCardInfo;
 use crate::advance::Advance;
@@ -8,17 +9,20 @@ use crate::combat::Combat;
 use crate::combat_listeners::{CombatRoundEnd, CombatRoundStart};
 use crate::combat_stats::CombatStats;
 use crate::construct::ConstructInfo;
-use crate::content::custom_actions::CustomEventAction;
+use crate::content::custom_actions::CustomActionActivation;
 use crate::cultural_influence::InfluenceCultureInfo;
 use crate::events::EventOrigin;
 use crate::explore::ExploreResolutionState;
 use crate::game::Game;
 use crate::map::Rotation;
-use crate::objective_card::SelectObjectivesInfo;
+use crate::objective_card::{SelectObjectivesInfo, present_instant_objective_cards};
 use crate::payment::{PaymentOptions, ResourceReward};
 use crate::player::Player;
-use crate::player_events::{IncidentInfo, OnAdvanceInfo};
-use crate::playing_actions::{PlayingAction, Recruit};
+use crate::player_events::{
+    IncidentInfo, OnAdvanceInfo, PersistentEvent, PersistentEventInfo, PersistentEvents,
+    trigger_event_with_game_value,
+};
+use crate::playing_actions::{ActionPayment, Recruit};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::{ChangeGovernment, StatusPhaseState};
@@ -106,17 +110,18 @@ pub enum PersistentEventType {
     CombatEnd(CombatStats),
     StatusPhase(StatusPhaseState),
     TurnStart,
-    PayAction(PlayingAction),
+    PayAction(ActionPayment),
     Advance(OnAdvanceInfo),
     Construct(ConstructInfo),
     Recruit(Recruit),
     FoundCity(Position),
     Incident(IncidentInfo),
+    StopBarbarianMovement(Vec<Position>),
     ActionCard(ActionCardInfo),
     WonderCard(WonderCardInfo),
     DrawWonderCard,
     SelectObjectives(SelectObjectivesInfo),
-    CustomAction(CustomEventAction),
+    CustomAction(CustomActionActivation),
     ChooseActionCard,
     ChooseIncident(IncidentInfo),
 }
@@ -125,20 +130,27 @@ pub enum PersistentEventType {
 pub struct PersistentEventState {
     pub event_type: PersistentEventType,
     #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub origin_override: Option<EventOrigin>,
+    #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub players_used: Vec<usize>,
-
     #[serde(flatten)]
     pub player: PersistentEventPlayer,
 }
 
 impl PersistentEventState {
     #[must_use]
-    pub fn new(current_player: usize, event_type: PersistentEventType) -> Self {
+    pub fn new(
+        current_player: usize,
+        event_type: PersistentEventType,
+        origin_override: Option<EventOrigin>,
+    ) -> Self {
         Self {
             event_type,
             players_used: vec![],
             player: PersistentEventPlayer::new(current_player),
+            origin_override,
         }
     }
 
@@ -366,4 +378,119 @@ impl EventResponse {
         let details = game.current_event().event_type.clone();
         execute_custom_phase_action(game, player_index, details)
     }
+}
+
+#[derive(Debug, Clone)]
+pub struct TriggerPersistentEventParams<V> {
+    pub log: Option<String>,
+    pub next_player: fn(&mut V) -> (),
+    pub origin_override: Option<EventOrigin>,
+}
+
+impl<V> Default for TriggerPersistentEventParams<V> {
+    fn default() -> Self {
+        Self {
+            log: None,
+            next_player: |_| {},
+            origin_override: None,
+        }
+    }
+}
+
+fn remaining_persistent_event_players(
+    players: &[usize],
+    state: &PersistentEventState,
+) -> Vec<usize> {
+    players
+        .iter()
+        .filter(|p| !state.players_used.contains(p))
+        .copied()
+        .collect_vec()
+}
+
+#[must_use]
+pub(crate) fn trigger_persistent_event_ext<V>(
+    game: &mut Game,
+    players: &[usize],
+    event: fn(&mut PersistentEvents) -> &mut PersistentEvent<V>,
+    mut value: V,
+    to_event_type: impl Fn(V) -> PersistentEventType,
+    params: TriggerPersistentEventParams<V>,
+) -> Option<V>
+where
+    V: Clone + PartialEq,
+{
+    let current_event_type = to_event_type(value.clone());
+    if game
+        .events
+        .last()
+        .is_none_or(|s| s.event_type != current_event_type)
+    {
+        if let Some(log) = params.log {
+            game.add_info_log_group(log.to_string());
+        }
+        game.events.push(PersistentEventState::new(
+            players[0],
+            current_event_type,
+            params.origin_override,
+        ));
+    }
+
+    let event_index = game.events.len() - 1;
+
+    for player_index in remaining_persistent_event_players(players, game.current_event()) {
+        let info = PersistentEventInfo {
+            player: player_index,
+        };
+        trigger_event_with_game_value(
+            game,
+            player_index,
+            move |e| event(&mut e.persistent),
+            &info,
+            &(),
+            &mut value,
+        );
+
+        if game.current_event().player.handler.is_some() {
+            game.events[event_index].event_type = to_event_type(value);
+            return None;
+        }
+        let state = game.current_event_mut();
+        state.players_used.push(player_index);
+        if let Some(&p) = remaining_persistent_event_players(players, state).first() {
+            state.player = PersistentEventPlayer::new(p);
+            (params.next_player)(&mut value);
+        }
+    }
+    game.events.pop();
+
+    if game.events.is_empty() {
+        present_instant_objective_cards(game);
+    }
+
+    Some(value)
+}
+
+pub(crate) fn trigger_persistent_event_with_listener<V>(
+    game: &mut Game,
+    players: &[usize],
+    event: fn(&mut PersistentEvents) -> &mut PersistentEvent<V>,
+    listeners: &AbilityListeners,
+    event_type: V,
+    store_type: impl Fn(V) -> PersistentEventType,
+    params: TriggerPersistentEventParams<V>,
+) -> Option<V>
+where
+    V: Clone + PartialEq,
+{
+    for p in players {
+        listeners.init(game, *p);
+    }
+
+    let result = trigger_persistent_event_ext(game, players, event, event_type, store_type, params);
+
+    for p in players {
+        listeners.deinit(game, *p);
+    }
+    result
 }

@@ -163,6 +163,7 @@ pub fn multi_payment_dialog<T: Clone>(
             rc,
             &format!("{name} for {cost}{suffix}"),
             offset + vec2(0., -30.),
+            &[],
         );
         let result = select_ui::count_dialog(
             rc,

@@ -63,6 +63,10 @@
         {
           "mood_state": "Neutral",
           "position": "D8"
+        },
+        {
+          "mood_state": "Neutral",
+          "position": "F7"
         }
       ],
       "units": [
@@ -246,6 +250,10 @@
         "Forest"
       ],
       [
+        "E9",
+        "Forest"
+      ],
+      [
         "F2",
         "Unexplored"
       ],
@@ -267,6 +275,10 @@
       ],
       [
         "F7",
+        "Fertile"
+      ],
+      [
+        "F8",
         "Fertile"
       ],
       [

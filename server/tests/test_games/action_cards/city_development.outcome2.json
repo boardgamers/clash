@@ -256,7 +256,9 @@
                         {
                           "event_type": {
                             "PayAction": {
-                              "ActionCard": 17
+                              "action": {
+                                "ActionCard": 17
+                              }
                             }
                           },
                           "handler": {
@@ -301,6 +303,9 @@
                             }
                           },
                           "last_priority_used": 0,
+                          "origin_override": {
+                            "CivilCard": 17
+                          },
                           "player": 0
                         }
                       ]

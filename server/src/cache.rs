@@ -1,15 +1,18 @@
 use crate::action_card::{ActionCard, CivilCard};
 use crate::advance::{Advance, AdvanceInfo};
 use crate::city_pieces::Building;
+use crate::civilization::Civilization;
 use crate::content::advances::AdvanceGroup;
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::custom_action_builtins;
 use crate::content::{
-    action_cards, advances, builtin, incidents, objective_cards, objectives, wonders,
+    action_cards, advances, builtin, civilizations, incidents, objective_cards, objectives, wonders,
 };
 use crate::game::Game;
 use crate::incident::Incident;
+use crate::leader::{Leader, LeaderAbility};
 use crate::objective_card::{Objective, ObjectiveCard};
+use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo};
 use crate::status_phase::StatusPhaseState::{ChangeGovernmentType, DetermineFirstPlayer};
 use crate::status_phase::{
     StatusPhaseState, complete_objectives, determine_first_player, draw_cards, free_advance,
@@ -45,6 +48,9 @@ pub struct Cache {
 
     all_incidents: Vec<Incident>,
     incidents_by_id: HashMap<u8, Incident>,
+
+    civilizations_by_name: HashMap<String, Civilization>,
+    all_special_advances: Vec<SpecialAdvanceInfo>,
 }
 
 impl Default for Cache {
@@ -69,7 +75,6 @@ impl Cache {
                 .collect(),
             status_phase_handlers: status_phase_handlers(),
 
-            // todo special advances
             all_advances: advances::get_all_uncached(),
 
             all_advance_groups: advances::get_groups_uncached(),
@@ -127,6 +132,16 @@ impl Cache {
                 .into_iter()
                 .map(|incident| (incident.id, incident))
                 .collect(),
+
+            civilizations_by_name: civilizations::get_all_uncached()
+                .into_iter()
+                .map(|c| (c.name.clone(), c))
+                .collect(),
+            all_special_advances: civilizations::get_all_uncached()
+                .into_iter()
+                .flat_map(|c| c.special_advances)
+                .sorted_by_key(|s| s.advance)
+                .collect(),
         }
     }
 
@@ -138,6 +153,11 @@ impl Cache {
     #[must_use]
     pub fn get_advance(&self, a: Advance) -> &AdvanceInfo {
         &self.all_advances[a as usize]
+    }
+
+    #[must_use]
+    pub fn get_special_advance(&self, a: SpecialAdvance) -> &SpecialAdvanceInfo {
+        &self.all_special_advances[a as usize]
     }
 
     #[must_use]
@@ -218,6 +238,7 @@ impl Cache {
 
     ///
     /// # Panics
+    ///
     /// Panics if action card does not exist
     #[must_use]
     pub fn get_action_card(&self, id: u8) -> &ActionCard {
@@ -293,10 +314,46 @@ impl Cache {
 
     ///
     /// # Panics
+    ///
     /// Panics if incident does not exist
     #[must_use]
     pub fn get_incident(&self, id: u8) -> &Incident {
         self.incidents_by_id.get(&id).expect("incident not found")
+    }
+
+    ///
+    /// # Panics
+    ///
+    /// Panics if civilization does not exist
+    #[must_use]
+    pub fn get_civilization(&self, name: &str) -> Civilization {
+        match name {
+            // "Maya" => maya::maya(), // still needs to be implemented
+            // for integration testing
+            "test0" => Civilization::new(
+                "test0",
+                vec![],
+                vec![
+                    Leader::new(
+                        "Alexander",
+                        LeaderAbility::builder("", "").build(),
+                        LeaderAbility::builder("", "").build(),
+                    ),
+                    Leader::new(
+                        "Kleopatra",
+                        LeaderAbility::builder("", "").build(),
+                        LeaderAbility::builder("", "").build(),
+                    ),
+                ],
+            ), // for testing
+            "test1" => Civilization::new("test1", vec![], vec![]),
+            "test2" => Civilization::new("test2", vec![], vec![]),
+            _ => self
+                .civilizations_by_name
+                .get(name)
+                .cloned()
+                .expect("civilization not found"),
+        }
     }
 }
 

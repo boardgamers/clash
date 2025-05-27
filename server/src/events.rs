@@ -3,8 +3,8 @@
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub enum EventOrigin {
     Advance(Advance),
-    SpecialAdvance(Advance),
-    Leader(String),
+    SpecialAdvance(SpecialAdvance),
+    LeaderAbility(String),
     Wonder(Wonder),
     Builtin(String),
     Incident(u8),
@@ -17,11 +17,11 @@ impl EventOrigin {
     #[must_use]
     pub fn id(&self) -> String {
         match self {
-            EventOrigin::Wonder(name) => format!("{name:?}"),
-            | EventOrigin::Advance(name)
             // can't call to_string, because cache is not constructed
-            | EventOrigin::SpecialAdvance(name) => format!("{name:?}"),
-            | EventOrigin::Leader(name)
+            EventOrigin::Wonder(name) => format!("{name:?}"),
+            EventOrigin::Advance(name) => format!("{name:?}"),
+            EventOrigin::SpecialAdvance(name) => format!("{name:?}"),
+            EventOrigin::LeaderAbility(name)
             | EventOrigin::Objective(name)
             | EventOrigin::Builtin(name) => name.to_string(),
             EventOrigin::CivilCard(id)
@@ -34,11 +34,10 @@ impl EventOrigin {
     pub fn name(&self, game: &Game) -> String {
         let cache = &game.cache;
         match self {
-            EventOrigin::Advance(name) | EventOrigin::SpecialAdvance(name) => {
-                name.name(game).to_string()
-            }
+            EventOrigin::Advance(name) => name.name(game).to_string(),
+            EventOrigin::SpecialAdvance(name) => name.name(game).to_string(),
             EventOrigin::Wonder(name) => name.name(game).to_string(),
-            EventOrigin::Leader(name)
+            EventOrigin::LeaderAbility(name)
             | EventOrigin::Objective(name)
             | EventOrigin::Builtin(name) => name.to_string(),
             EventOrigin::CivilCard(id) => cache.get_civil_card(*id).name.clone(),
@@ -51,6 +50,7 @@ impl EventOrigin {
 use crate::advance::Advance;
 use crate::game::Game;
 use crate::player::CostTrigger;
+use crate::special_advance::SpecialAdvance;
 use crate::wonder::Wonder;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;

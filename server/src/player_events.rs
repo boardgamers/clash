@@ -6,7 +6,7 @@ use crate::combat::Combat;
 use crate::combat_listeners::{CombatRoundEnd, CombatRoundStart};
 use crate::combat_stats::CombatStats;
 use crate::construct::ConstructInfo;
-use crate::content::custom_actions::CustomEventAction;
+use crate::content::custom_actions::CustomActionActivation;
 use crate::content::persistent_events::KilledUnits;
 use crate::cultural_influence::{InfluenceCultureInfo, InfluenceCultureOutcome};
 use crate::events::Event;
@@ -16,7 +16,7 @@ use crate::incident::PassedIncident;
 use crate::map::Terrain;
 use crate::objective_card::SelectObjectivesInfo;
 use crate::payment::PaymentOptions;
-use crate::playing_actions::{PlayingAction, PlayingActionType, Recruit};
+use crate::playing_actions::{ActionPayment, PlayingActionType, Recruit};
 use crate::status_phase::StatusPhaseState;
 use crate::unit::Units;
 use crate::utils;
@@ -51,7 +51,7 @@ pub(crate) struct TransientEvents {
     pub on_influence_culture_resolve: Event<Game, InfluenceCultureOutcome>,
     pub before_move: Event<Game, MoveInfo>,
 
-    pub construct_cost: Event<CostInfo, Building, Game>,
+    pub building_cost: Event<CostInfo, Building, Game>,
     pub advance_cost: Event<CostInfo, Advance, Game>,
     pub happiness_cost: Event<CostInfo>,
     pub recruit_cost: Event<CostInfo, Units, Player>,
@@ -70,7 +70,7 @@ impl TransientEvents {
             on_influence_culture_resolve: Event::new("on_influence_culture_resolve"),
             before_move: Event::new("before_move"),
 
-            construct_cost: Event::new("construct_cost"),
+            building_cost: Event::new("building_cost"),
             advance_cost: Event::new("advance_cost"),
             happiness_cost: Event::new("happiness_cost"),
             recruit_cost: Event::new("recruit_cost"),
@@ -93,13 +93,14 @@ pub(crate) struct PersistentEvents {
     pub found_city: PersistentEvent<Position>,
     pub influence_culture: PersistentEvent<InfluenceCultureInfo>,
     pub explore_resolution: PersistentEvent<ExploreResolutionState>,
-    pub pay_action: PersistentEvent<PlayingAction>,
+    pub pay_action: PersistentEvent<ActionPayment>,
     pub play_action_card: PersistentEvent<ActionCardInfo>,
     pub play_wonder_card: PersistentEvent<WonderCardInfo>,
 
     pub status_phase: PersistentEvent<StatusPhaseState>,
     pub turn_start: PersistentEvent,
     pub incident: PersistentEvent<IncidentInfo>,
+    pub stop_barbarian_movement: PersistentEvent<Vec<Position>>,
     pub combat_start: PersistentEvent<Combat>,
     pub combat_round_start: PersistentEvent<CombatRoundStart>,
     pub combat_round_start_reveal_tactics: PersistentEvent<CombatRoundStart>,
@@ -109,7 +110,7 @@ pub(crate) struct PersistentEvents {
     pub combat_end: PersistentEvent<CombatStats>,
     pub units_killed: PersistentEvent<KilledUnits>,
     pub select_objective_cards: PersistentEvent<SelectObjectivesInfo>,
-    pub custom_action: PersistentEvent<CustomEventAction>,
+    pub custom_action: PersistentEvent<CustomActionActivation>,
     pub choose_incident: PersistentEvent<IncidentInfo>,
     pub choose_action_card: PersistentEvent,
 }
@@ -133,6 +134,7 @@ impl PersistentEvents {
             status_phase: Event::new("status_phase"),
             turn_start: Event::new("turn_start"),
             incident: Event::new("incident"),
+            stop_barbarian_movement: Event::new("stop_barbarian_movement"),
             combat_start: Event::new("combat_start"),
             combat_round_start: Event::new("combat_round_start"),
             combat_round_start_reveal_tactics: Event::new("combat_round_start_reveal_tactics"),
@@ -338,4 +340,19 @@ impl MoveInfo {
 pub struct PlayingActionInfo {
     pub player: usize,
     pub action_type: PlayingActionType,
+}
+
+pub(crate) fn trigger_event_with_game_value<U, V, W>(
+    game: &mut Game,
+    player_index: usize,
+    event: impl Fn(&mut PlayerEvents) -> &mut Event<Game, U, V, W>,
+    info: &U,
+    details: &V,
+    extra_value: &mut W,
+) where
+    W: Clone + PartialEq,
+{
+    let e = event(&mut game.players[player_index].events).take();
+    e.trigger(game, info, details, extra_value);
+    event(&mut game.players[player_index].events).set(e);
 }

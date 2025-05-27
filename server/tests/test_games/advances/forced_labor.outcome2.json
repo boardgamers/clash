@@ -235,8 +235,7 @@
                   "action": {
                     "Playing": {
                       "Custom": {
-                        "action": "ForcedLabor",
-                        "city": null
+                        "action": "ForcedLabor"
                       }
                     }
                   },
@@ -269,9 +268,10 @@
                         {
                           "event_type": {
                             "PayAction": {
-                              "Custom": {
-                                "action": "ForcedLabor",
-                                "city": null
+                              "action": {
+                                "Custom": {
+                                  "action": "ForcedLabor"
+                                }
                               }
                             }
                           },
@@ -317,6 +317,9 @@
                             }
                           },
                           "last_priority_used": 0,
+                          "origin_override": {
+                            "Advance": "ForcedLabor"
+                          },
                           "player": 0
                         }
                       ]

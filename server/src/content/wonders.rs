@@ -1,7 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::do_gain_action_card_from_pile;
-use crate::advance::Advance;
-use crate::card::HandCard;
+use crate::advance::{Advance, init_great_library};
+use crate::card::{HandCard, all_objective_hand_cards};
 use crate::city::{City, MoodState};
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
@@ -95,11 +95,7 @@ pub(crate) fn use_great_statue() -> Builtin {
         |game, player_index, _| {
             let player = game.player(player_index);
             Some(HandCardsRequest::new(
-                player
-                    .objective_cards
-                    .iter()
-                    .map(|&a| HandCard::ObjectiveCard(a))
-                    .collect_vec(),
+                all_objective_hand_cards(player),
                 1..=1,
                 "Select an objective card to discard",
             ))
@@ -267,59 +263,52 @@ pub(crate) fn use_great_lighthouse() -> Builtin {
     .build()
 }
 
+const GREAT_LIBRARY: &str = "Once per turn, as a free action, \
+        you may choose a non-government, non-civilization advance: \
+        Use the effect until the end of your turn.";
+
 fn library() -> WonderInfo {
     WonderInfo::builder(
         Wonder::GreatLibrary,
         "Great Library",
-        "Once per turn, as a free action, \
-        you may choose a non-government, non-civilization advance: \
-        Use the effect until the end of your turn.",
+        GREAT_LIBRARY,
         PaymentOptions::fixed_resources(ResourcePile::new(3, 6, 3, 0, 0, 0, 5)),
         Advance::Philosophy,
     )
     .add_custom_action(CustomActionType::GreatLibrary)
     .build()
 }
+
 pub(crate) fn use_great_library() -> Builtin {
-    Builtin::builder(
-        "Great Library",
-        "Use the effect of a non-government, non-civilization advance",
-    )
-    .add_advance_request(
-        |event| &mut event.custom_action,
-        0,
-        |game, player_index, _| {
-            let player = game.player(player_index);
-            Some(AdvanceRequest::new(
-                game.cache
-                    .get_advances()
-                    .iter()
-                    .filter_map(
-                        // todo special advances
-                        |a| {
+    Builtin::builder("Great Library", GREAT_LIBRARY)
+        .add_advance_request(
+            |event| &mut event.custom_action,
+            0,
+            |game, player_index, _| {
+                let player = game.player(player_index);
+                Some(AdvanceRequest::new(
+                    game.cache
+                        .get_advances()
+                        .iter()
+                        .filter_map(|a| {
                             (a.government.is_none() && !player.has_advance(a.advance))
                                 .then_some(a.advance)
-                        },
-                    )
-                    .collect_vec(),
-            ))
-        },
-        |game, s, _| {
-            let advance = s.choice;
-            game.add_info_log_item(&format!(
-                "{} used the Great Library to use {} for the turn",
-                s.player_name,
-                advance.name(game)
-            ));
-            advance
-                .info(game)
-                .listeners
-                .clone()
-                .init(game, s.player_index);
-            game.player_mut(s.player_index).great_library_advance = Some(advance);
-        },
-    )
-    .build()
+                        })
+                        .collect_vec(),
+                ))
+            },
+            |game, s, _| {
+                let advance = s.choice;
+                game.add_info_log_item(&format!(
+                    "{} used the Great Library to use {} for the turn",
+                    s.player_name,
+                    advance.name(game)
+                ));
+                game.player_mut(s.player_index).great_library_advance = Some(advance);
+                init_great_library(game, s.player_index);
+            },
+        )
+        .build()
 }
 
 fn great_gardens() -> WonderInfo {

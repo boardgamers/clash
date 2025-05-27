@@ -233,8 +233,7 @@
                   "action": {
                     "Playing": {
                       "Custom": {
-                        "action": "AbsolutePower",
-                        "city": null
+                        "action": "AbsolutePower"
                       }
                     }
                   },
@@ -272,9 +271,10 @@
                         {
                           "event_type": {
                             "PayAction": {
-                              "Custom": {
-                                "action": "AbsolutePower",
-                                "city": null
+                              "action": {
+                                "Custom": {
+                                  "action": "AbsolutePower"
+                                }
                               }
                             }
                           },
@@ -320,6 +320,9 @@
                             }
                           },
                           "last_priority_used": 0,
+                          "origin_override": {
+                            "Advance": "AbsolutePower"
+                          },
                           "player": 0
                         }
                       ]

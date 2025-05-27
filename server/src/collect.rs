@@ -322,6 +322,6 @@ pub fn available_collect_actions(game: &Game, player: usize) -> Vec<PlayingActio
         game,
         player,
         PlayingActionType::Collect,
-        &CustomActionType::FreeEconomyCollect,
+        vec![CustomActionType::FreeEconomyCollect],
     )
 }

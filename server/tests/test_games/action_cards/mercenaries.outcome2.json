@@ -7,7 +7,7 @@
       "resources": {
         "food": 1,
         "wood": 6,
-        "ore": 4,
+        "ore": 5,
         "ideas": 5,
         "gold": 7,
         "mood_tokens": 7,
@@ -109,8 +109,8 @@
       ],
       "units": [
         {
-          "position": "C1",
-          "unit_type": "Infantry",
+          "position": "A1",
+          "unit_type": "Leader",
           "id": 0
         },
         {
@@ -119,7 +119,8 @@
           "id": 1
         }
       ],
-      "civilization": "test1",
+      "civilization": "Rome",
+      "active_leader": "Sulla",
       "advances": [
         "Farming",
         "Mining"
@@ -144,12 +145,9 @@
       ],
       "units": [
         {
-          "position": "B2",
-          "unit_type": "Infantry",
-          "movement_restrictions": [
-            "Forest"
-          ],
-          "id": 0
+          "position": "A3",
+          "unit_type": "Elephant",
+          "id": 1
         },
         {
           "position": "B2",
@@ -160,19 +158,13 @@
           "id": 2
         },
         {
-          "position": "B2",
+          "position": "A3",
           "unit_type": "Infantry",
-          "movement_restrictions": [
-            "Forest"
-          ],
           "id": 3
         },
         {
-          "position": "B2",
+          "position": "A3",
           "unit_type": "Infantry",
-          "movement_restrictions": [
-            "Forest"
-          ],
           "id": 4
         },
         {
@@ -251,7 +243,6 @@
                   "action": {
                     "Response": {
                       "SelectPositions": [
-                        "A3",
                         "B3"
                       ]
                     }
@@ -262,17 +253,8 @@
                     "Response": {
                       "Payment": [
                         {
-                          "ore": 2
+                          "ore": 1
                         }
-                      ]
-                    }
-                  }
-                },
-                {
-                  "action": {
-                    "Response": {
-                      "SelectPositions": [
-                        "A3"
                       ]
                     }
                   },
@@ -280,14 +262,13 @@
                     "round": 1,
                     "battleground": "Land",
                     "attacker": {
-                      "position": "A3",
+                      "position": "B3",
                       "player": 2,
                       "present": {
-                        "infantry": 2,
-                        "elephants": 1
+                        "infantry": 2
                       },
                       "losses": {
-                        "elephants": 1
+                        "infantry": 1
                       }
                     },
                     "defender": {
@@ -302,79 +283,6 @@
                     },
                     "result": "AttackerWins"
                   }
-                },
-                {
-                  "action": {
-                    "Response": {
-                      "SelectPositions": [
-                        "B2"
-                      ]
-                    }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "ActionCard": {
-                              "id": 13,
-                              "selected_position": "B3"
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "CivilCard": 13
-                            },
-                            "priority": -9,
-                            "request": {
-                              "SelectPositions": {
-                                "choices": [
-                                  "A3",
-                                  "B2"
-                                ],
-                                "description": "Select destination for Barbarian army",
-                                "needed": {
-                                  "end": 1,
-                                  "start": 1
-                                }
-                              }
-                            }
-                          },
-                          "last_priority_used": -9,
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/2/next_unit_id",
-                      "value": 5
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/2/units/0/position",
-                      "value": "B3"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/2/units/0/movement_restrictions"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/2/units/1/position",
-                      "value": "B3"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/2/units/1/movement_restrictions"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/2/units/4"
-                    }
-                  ]
                 }
               ]
             }
@@ -383,42 +291,36 @@
       ]
     }
   ],
-  "action_log_index": 5,
+  "action_log_index": 3,
   "log": [
     [
-      "Player1 played the action card Mercenaries as a regular action"
+      "Player1 played the action card Mercenaries as a regular action",
+      "Player1 cannot move Barbarian army at A3 because Sulla is in range"
     ],
     [
-      "Player1 selected Barbarian armies to move: A3, B3"
+      "Player1 selected Barbarian armies to move: B3"
     ],
     [
-      "Player1 paid for mercenaries: 2 ore"
-    ],
-    [
-      "Player1 selected Barbarian army to move: A3",
+      "Player1 paid for mercenaries: 1 ore",
+      "Player1 selected Barbarian army to move: B3",
       "Player1 selected destination for Barbarian army: B2",
-      "Barbarians marched 2 infantry and 1 elephant from A3 to B2"
+      "Barbarians marched 2 infantry from B3 to B2"
     ],
     [
       "Combat round 1",
-      "Attackers: 2 infantry and 1 elephant",
+      "Attackers: 2 infantry",
       "Defenders: 1 infantry",
-      "Barbarians rolled 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 20 and gets 1 hits against defending units.",
+      "Barbarians rolled 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against defending units.",
       "Player1 rolled 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against attacking units.",
       "Barbarians has to remove 1 of their attacking units",
-      "Barbarians removed 1 elephant",
+      "Barbarians removed 1 infantry",
       "Player1 has to remove all of their defending units",
       "Player1 removed 1 infantry",
       "Attacker wins",
-      "Player1 selected Barbarian army to move: B3"
-    ],
-    [
-      "Player1 selected destination for Barbarian army: B2",
-      "Barbarians marched 2 infantry from B3 to B2",
       "Barbarians reinforced with 1 infantry at B3"
     ]
   ],
-  "undo_limit": 4,
+  "undo_limit": 3,
   "actions_left": 2,
   "round": 1,
   "age": 1,
@@ -430,10 +332,10 @@
     1,
     10,
     10,
+    10,
     10
   ],
   "dice_roll_log": [
-    10,
     10,
     10,
     10,

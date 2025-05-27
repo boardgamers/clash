@@ -137,8 +137,8 @@
       ],
       "units": [
         {
-          "position": "C1",
-          "unit_type": "Infantry",
+          "position": "A1",
+          "unit_type": "Leader",
           "id": 0
         },
         {
@@ -147,7 +147,8 @@
           "id": 1
         }
       ],
-      "civilization": "test1",
+      "civilization": "Rome",
+      "active_leader": "Sulla",
       "advances": [
         "Farming",
         "Mining"
@@ -185,11 +186,6 @@
           "position": "B3",
           "unit_type": "Infantry",
           "id": 2
-        },
-        {
-          "position": "A3",
-          "unit_type": "Infantry",
-          "id": 3
         },
         {
           "position": "A3",

@@ -1,10 +1,11 @@
-use crate::advance::Advance;
+use crate::advance::{Advance, base_advance_cost, player_government};
 use crate::city_pieces::DestroyedStructures;
-use crate::consts::{UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
+use crate::consts::{STACK_LIMIT, UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::events::{Event, EventOrigin};
+use crate::leader::LeaderAbility;
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player_events::{CostInfo, TransientEvents};
-use crate::resource::ResourceType;
+use crate::special_advance::SpecialAdvance;
 use crate::unit::UnitType;
 use crate::wonder::{Wonder, wonders_built_points, wonders_owned_points};
 use crate::{
@@ -12,7 +13,7 @@ use crate::{
     city_pieces::Building::{self},
     civilization::Civilization,
     consts::{
-        ADVANCE_COST, ADVANCE_VICTORY_POINTS, BUILDING_COST, BUILDING_VICTORY_POINTS,
+        ADVANCE_VICTORY_POINTS, BUILDING_COST, BUILDING_VICTORY_POINTS,
         CAPTURED_LEADER_VICTORY_POINTS, CITY_LIMIT, CITY_PIECE_LIMIT, OBJECTIVE_VICTORY_POINTS,
         UNIT_LIMIT,
     },
@@ -53,7 +54,7 @@ pub struct Player {
     pub available_leaders: Vec<String>,
     pub advances: EnumSet<Advance>,
     pub great_library_advance: Option<Advance>,
-    pub unlocked_special_advances: Vec<String>,
+    pub special_advances: EnumSet<SpecialAdvance>,
     pub wonders_built: Vec<Wonder>,
     pub wonders_owned: EnumSet<Wonder>, // transient
     pub incident_tokens: u8,
@@ -109,7 +110,7 @@ impl Player {
                 .collect(),
             civilization,
             advances: EnumSet::empty(),
-            unlocked_special_advances: Vec::new(),
+            special_advances: EnumSet::empty(),
             great_library_advance: None,
             incident_tokens: 0,
             completed_objectives: Vec::new(),
@@ -131,26 +132,37 @@ impl Player {
         }
     }
 
+    ///
+    /// # Panics
+    ///
+    /// Panics if the leader does not exist
     #[must_use]
-    pub fn active_leader(&self) -> Option<&Leader> {
-        self.active_leader
-            .as_ref()
-            .and_then(|name| self.get_leader(name))
-    }
-
-    #[must_use]
-    pub fn get_leader(&self, name: &String) -> Option<&Leader> {
+    pub fn get_leader(&self, name: &str) -> &Leader {
         self.civilization
             .leaders
             .iter()
-            .find(|leader| &leader.name == name)
+            .find(|leader| leader.name == name)
+            .unwrap_or_else(|| panic!("Leader {name} not found"))
+    }
+
+    ///
+    /// # Panics
+    ///
+    /// Panics if the leader ability does not exist
+    #[must_use]
+    pub fn get_leader_ability(&self, name: &str) -> &LeaderAbility {
+        self.civilization
+            .leaders
+            .iter()
+            .find_map(|leader| leader.abilities.iter().find(|l| l.name == name))
+            .unwrap_or_else(|| panic!("Leader ability {name} not found"))
     }
 
     pub(crate) fn with_leader(
         leader: &str,
         game: &mut Game,
         player_index: usize,
-        f: impl FnOnce(&mut Game, &Leader),
+        f: impl FnOnce(&mut Game, &LeaderAbility) + Clone,
     ) {
         let pos = game.players[player_index]
             .civilization
@@ -159,7 +171,9 @@ impl Player {
             .position(|l| l.name == leader)
             .expect("player should have the leader");
         let l = game.players[player_index].civilization.leaders.remove(pos);
-        f(game, &l);
+        for a in &l.abilities {
+            (f.clone())(game, a);
+        }
         game.players[player_index]
             .civilization
             .leaders
@@ -170,7 +184,7 @@ impl Player {
     pub fn available_leaders(&self) -> Vec<&Leader> {
         self.available_leaders
             .iter()
-            .filter_map(|name| self.get_leader(name))
+            .map(|name| self.get_leader(name))
             .collect()
     }
 
@@ -196,9 +210,7 @@ impl Player {
     /// Panics if the player has advances which don't exist
     #[must_use]
     pub fn government(&self, game: &Game) -> Option<String> {
-        self.advances
-            .iter()
-            .find_map(|advance| advance.info(game).government.clone())
+        player_government(game, self.advances)
     }
 
     pub fn gain_resources(&mut self, resources: ResourcePile) {
@@ -274,6 +286,11 @@ impl Player {
     }
 
     #[must_use]
+    pub fn has_special_advance(&self, advance: SpecialAdvance) -> bool {
+        self.special_advances.contains(advance)
+    }
+
+    #[must_use]
     pub fn can_use_advance(&self, advance: Advance) -> bool {
         self.has_advance(advance) || self.great_library_advance.is_some_and(|a| a == advance)
     }
@@ -292,8 +309,7 @@ impl Player {
             ),
             (
                 "Advances",
-                (self.advances.len() + self.unlocked_special_advances.len()) as f32
-                    * ADVANCE_VICTORY_POINTS,
+                (self.advances.len() + self.special_advances.len()) as f32 * ADVANCE_VICTORY_POINTS,
             ),
             (
                 "Objectives",
@@ -405,7 +421,7 @@ impl Player {
     #[must_use]
     pub fn building_cost(&self, game: &Game, building: Building, execute: CostTrigger) -> CostInfo {
         self.trigger_cost_event(
-            |e| &e.construct_cost,
+            |e| &e.building_cost,
             &PaymentOptions::resources(self, PaymentReason::Building, BUILDING_COST),
             &building,
             game,
@@ -417,12 +433,7 @@ impl Player {
     pub fn advance_cost(&self, advance: Advance, game: &Game, execute: CostTrigger) -> CostInfo {
         self.trigger_cost_event(
             |e| &e.advance_cost,
-            &PaymentOptions::sum(
-                self,
-                PaymentReason::GainAdvance,
-                ADVANCE_COST,
-                &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
-            ),
+            &base_advance_cost(self),
             &advance,
             game,
             execute,
@@ -575,6 +586,22 @@ impl Player {
         }
         cost_info
     }
+
+    ///
+    /// # Panics
+    /// Panics if the custom action type does not exist for this player
+    #[must_use]
+    pub fn custom_action_origin(&self, custom_action_type: &CustomActionType) -> EventOrigin {
+        self.custom_actions
+            .get(custom_action_type)
+            .cloned()
+            .unwrap_or_else(|| {
+                panic!(
+                    "Custom action {} not found for player {}",
+                    custom_action_type, self.index
+                )
+            })
+    }
 }
 
 pub fn add_unit(player: usize, position: Position, unit_type: UnitType, game: &mut Game) {
@@ -592,13 +619,13 @@ pub fn add_unit(player: usize, position: Position, unit_type: UnitType, game: &m
 pub(crate) fn remove_unit(player: usize, id: u32, game: &mut Game) -> Unit {
     // carried units can be transferred to another ship - which has to be selected later
     let p = game.player_mut(player);
-    let u = p.units.remove(
+
+    p.units.remove(
         p.units
             .iter()
             .position(|unit| unit.id == id)
             .expect("unit should exist"),
-    );
-    u
+    )
 }
 
 pub fn end_turn(game: &mut Game, player: usize) {
@@ -624,4 +651,12 @@ pub fn gain_resources(
 ) {
     game.add_info_log_item(&log(&game.player_name(player), &resources));
     game.player_mut(player).gain_resources(resources);
+}
+
+pub(crate) fn can_add_army_unit(p: &Player, position: Position) -> bool {
+    p.get_units(position)
+        .iter()
+        .filter(|u| u.unit_type.is_army_unit())
+        .count()
+        < STACK_LIMIT
 }

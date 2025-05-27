@@ -254,27 +254,29 @@
                         {
                           "event_type": {
                             "PayAction": {
-                              "Collect": {
-                                "action_type": {
-                                  "Custom": "FreeEconomyCollect"
-                                },
-                                "city_position": "C2",
-                                "collections": [
-                                  {
-                                    "pile": {
-                                      "ore": 1
-                                    },
-                                    "position": "B1",
-                                    "times": 1
+                              "action": {
+                                "Collect": {
+                                  "action_type": {
+                                    "Custom": "FreeEconomyCollect"
                                   },
-                                  {
-                                    "pile": {
-                                      "ore": 1
+                                  "city_position": "C2",
+                                  "collections": [
+                                    {
+                                      "pile": {
+                                        "ore": 1
+                                      },
+                                      "position": "B1",
+                                      "times": 1
                                     },
-                                    "position": "B2",
-                                    "times": 1
-                                  }
-                                ]
+                                    {
+                                      "pile": {
+                                        "ore": 1
+                                      },
+                                      "position": "B2",
+                                      "times": 1
+                                    }
+                                  ]
+                                }
                               }
                             }
                           },
@@ -320,6 +322,9 @@
                             }
                           },
                           "last_priority_used": 0,
+                          "origin_override": {
+                            "Advance": "FreeEconomy"
+                          },
                           "player": 0
                         }
                       ]

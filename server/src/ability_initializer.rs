@@ -1,5 +1,5 @@
 use crate::advance::Advance;
-use crate::card::HandCard;
+use crate::card::{HandCard, validate_card_selection_for_origin};
 use crate::combat::{Combat, update_combat_strength};
 use crate::combat_listeners::CombatStrength;
 use crate::content::persistent_events::{
@@ -632,6 +632,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone + Sync + Send,
         V: Clone + PartialEq,
     {
+        let origin = self.get_key().clone();
         self.add_multi_choice_reward_request_listener::<E, HandCard, HandCardsRequest, V>(
             event,
             priority,
@@ -646,7 +647,11 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                 panic!("Hand Cards request expected");
             },
             request,
-            cards_selected,
+            move |game, c, details| {
+                validate_card_selection_for_origin(&c.choice, game, &origin)
+                    .expect("Invalid card selection - this should not happen");
+                cards_selected(game, c, details);
+            },
         )
     }
 
@@ -865,11 +870,11 @@ pub(crate) trait AbilityInitializerSetup: Sized {
     }
 
     fn add_custom_action(self, action: CustomActionType) -> Self {
-        let deinitializer_action = action.clone();
+        let deinitializer_action = action;
         let key = self.get_key().clone();
         self.add_ability_initializer(move |game, player_index, _prio_delta| {
             let player = &mut game.players[player_index];
-            player.custom_actions.insert(action.clone(), key.clone());
+            player.custom_actions.insert(action, key.clone());
         })
         .add_ability_deinitializer(move |game, player_index| {
             let player = &mut game.players[player_index];

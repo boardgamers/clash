@@ -450,7 +450,7 @@ fn affordable_start_city(
         let mut tokens = available.culture_tokens;
         if let Some(t) = action_type {
             // either none or both can use Colosseum
-            let cost = t.cost(game).cost;
+            let cost = t.cost(game).payment_options(player).default;
             let c = cost.culture_tokens;
             assert_eq!(c, cost.amount());
             tokens -= c;
@@ -542,6 +542,6 @@ pub fn available_influence_actions(game: &Game, player: usize) -> Vec<PlayingAct
         game,
         player,
         PlayingActionType::InfluenceCultureAttempt,
-        &CustomActionType::ArtsInfluenceCultureAttempt,
+        vec![CustomActionType::ArtsInfluenceCultureAttempt],
     )
 }

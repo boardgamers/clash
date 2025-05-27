@@ -1,5 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::advance::remove_advance;
+use crate::advance::undo_unlock_special_advance;
+use crate::advance::{find_government_special_advance, remove_advance};
 use crate::combat::{Combat, CombatModifier, CombatRetreatState};
 use crate::combat_listeners::CombatResult;
 use crate::content::builtin::Builtin;
@@ -171,6 +172,12 @@ fn anarchy() -> Incident {
                 .collect_vec();
             for a in remove {
                 remove_advance(game, a, player_index);
+            }
+
+            if game.player(player_index).government(game).is_some() {
+                if let Some(special_advance) = find_government_special_advance(game, player_index) {
+                    undo_unlock_special_advance(game, special_advance, player_index);
+                }
             }
 
             let p = game.player_mut(player_index);

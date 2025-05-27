@@ -1,3 +1,4 @@
+use crate::barbarians::get_barbarians_player;
 use crate::city::City;
 use crate::city::MoodState::Angry;
 use crate::city_pieces::{Building, remove_building};
@@ -155,6 +156,19 @@ impl Combat {
             CombatRole::Defender => self.defender(),
         }
     }
+
+    #[must_use]
+    pub fn has_leader(&self, role: CombatRole, game: &Game) -> bool {
+        let p = self.player(role);
+        self.fighting_units(game, p)
+            .iter()
+            .any(|&unit_id| game.player(p).get_unit(unit_id).unit_type == UnitType::Leader)
+    }
+
+    #[must_use]
+    pub fn is_barbarian_battle(&self, role: CombatRole, game: &Game) -> bool {
+        self.opponent(self.player(role)) == get_barbarians_player(game).index
+    }
 }
 
 pub fn initiate_combat(
@@ -197,6 +211,7 @@ pub(crate) fn log_round(game: &mut Game, c: &Combat) {
                     .collect_vec()
             })
             .collect::<Units>()
+            .to_string(game.player(c.attacker()).active_leader.as_ref())
     ));
     game.add_info_log_item(&format!(
         "Defenders: {}",
@@ -205,6 +220,7 @@ pub(crate) fn log_round(game: &mut Game, c: &Combat) {
             .iter()
             .map(|u| u.unit_type)
             .collect::<Units>()
+            .to_string(game.player(c.defender()).active_leader.as_ref())
     ));
 }
 
@@ -529,6 +545,7 @@ pub mod tests {
     use crate::action::Action;
 
     use crate::cache::Cache;
+    use crate::civilization::Civilization;
     use crate::game::{GameContext, GameOptions, GameState};
     use crate::log::{ActionLogAge, ActionLogItem, ActionLogPlayer, ActionLogRound};
     use crate::movement::MovementAction;
@@ -537,7 +554,6 @@ pub mod tests {
     use crate::{
         city::{City, MoodState::*},
         city_pieces::Building::*,
-        content::civilizations,
         map::Map,
         player::Player,
         position::Position,
@@ -590,8 +606,8 @@ pub mod tests {
 
     #[test]
     fn conquer_test() {
-        let old = Player::new(civilizations::tests::get_test_civilization(), 0);
-        let new = Player::new(civilizations::tests::get_test_civilization(), 1);
+        let old = Player::new(get_test_civilization(), 0);
+        let new = Player::new(get_test_civilization(), 1);
 
         let mut game = test_game();
         game.add_info_log_group("combat".into()); // usually filled in combat
@@ -622,5 +638,10 @@ pub mod tests {
         assert_eq!(2, wonders_owned_points(new, &game));
         assert_eq!(1, old.owned_buildings(&game));
         assert_eq!(1, new.owned_buildings(&game));
+    }
+
+    #[must_use]
+    pub fn get_test_civilization() -> Civilization {
+        Civilization::new("test", vec![], vec![])
     }
 }

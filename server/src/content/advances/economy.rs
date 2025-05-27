@@ -2,7 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::discard_action_card;
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
-use crate::card::HandCard;
+use crate::card::{HandCard, all_action_hand_cards};
 use crate::city_pieces::Building::Market;
 use crate::content::advances::trade_routes::{TradeRoute, trade_route_log, trade_route_reward};
 use crate::content::advances::{AdvanceGroup, advance_group_builder};
@@ -50,15 +50,8 @@ pub(crate) fn use_bartering() -> Builtin {
             |event| &mut event.custom_action,
             1,
             |game, player_index, _| {
-                let cards = game
-                    .player(player_index)
-                    .action_cards
-                    .iter()
-                    .map(|a| HandCard::ActionCard(*a))
-                    .collect_vec();
-
                 Some(HandCardsRequest::new(
-                    cards,
+                    all_action_hand_cards(game.player(player_index)),
                     1..=1,
                     "Select an action card to discard",
                 ))

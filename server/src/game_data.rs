@@ -1,12 +1,12 @@
-use crate::advance::Advance;
+use crate::advance::{Advance, is_special_advance_active};
 use crate::cache::Cache;
 use crate::city::{City, CityData};
 use crate::city_pieces::{DestroyedStructures, DestroyedStructuresData};
+use crate::content::builtin;
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::PersistentEventState;
-use crate::content::{builtin, civilizations};
 use crate::game::{Game, GameContext, GameOptions, GameState};
 use crate::log::ActionLogAge;
 use crate::map::{Map, MapData};
@@ -248,9 +248,6 @@ pub struct PlayerData {
     great_library_advance: Option<Advance>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    unlocked_special_advance: Vec<String>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
     wonders_built: Vec<Wonder>,
     #[serde(default)]
     #[serde(skip_serializing_if = "u8::is_zero")]
@@ -293,7 +290,7 @@ pub struct PlayerData {
 fn initialize_player(data: PlayerData, game: &mut Game, all: &[Builtin]) {
     let leader = data.active_leader.clone();
     let objective_cards = data.objective_cards.clone();
-    let player = player_from_data(data);
+    let player = player_from_data(data, game);
     let player_index = player.index;
     game.players.push(player);
     builtin::init_player(game, player_index, all);
@@ -322,7 +319,7 @@ fn initialize_player(data: PlayerData, game: &mut Game, all: &[Builtin]) {
     game.players[player_index].cities = cities;
 }
 
-fn player_from_data(data: PlayerData) -> Player {
+fn player_from_data(data: PlayerData, game: &Game) -> Player {
     let units = data
         .units
         .into_iter()
@@ -345,6 +342,8 @@ fn player_from_data(data: PlayerData) -> Player {
         .into_iter()
         .map(|d| City::from_data(d, data.id))
         .collect_vec();
+    let advances = EnumSet::from_iter(data.advances);
+    let civilization = game.cache.get_civilization(&data.civilization);
     Player {
         name: data.name,
         index: data.id,
@@ -354,13 +353,17 @@ fn player_from_data(data: PlayerData) -> Player {
         events: PlayerEvents::new(),
         destroyed_structures: DestroyedStructures::from_data(data.destroyed_structures),
         units,
-        civilization: civilizations::get_civilization(&data.civilization)
-            .expect("player data should have a valid civilization"),
         active_leader: data.active_leader,
         available_leaders: data.available_leaders,
-        advances: EnumSet::from_iter(data.advances),
         great_library_advance: data.great_library_advance,
-        unlocked_special_advances: data.unlocked_special_advance,
+        special_advances: civilization
+            .special_advances
+            .iter()
+            .filter(|s| is_special_advance_active(s.advance, advances, game))
+            .map(|s| s.advance)
+            .collect(),
+        civilization,
+        advances,
         wonders_built: data.wonders_built,
         wonders_owned: cities
             .iter()
@@ -412,13 +415,8 @@ pub fn player_data(player: Player) -> PlayerData {
         civilization: player.civilization.name,
         active_leader: player.active_leader,
         available_leaders: player.available_leaders.into_iter().collect(),
-        advances: player
-            .advances
-            .into_iter()
-            .sorted_by_key(Advance::id)
-            .collect(),
+        advances: player.advances.iter().sorted_by_key(Advance::id).collect(),
         great_library_advance: player.great_library_advance,
-        unlocked_special_advance: player.unlocked_special_advances,
         wonders_built: player.wonders_built,
         incident_tokens: player.incident_tokens,
         completed_objectives: player.completed_objectives,
@@ -456,7 +454,6 @@ pub fn cloned_player_data(player: &Player) -> PlayerData {
         available_leaders: player.available_leaders.clone(),
         advances: player.advances.iter().sorted_by_key(Advance::id).collect(),
         great_library_advance: player.great_library_advance,
-        unlocked_special_advance: player.unlocked_special_advances.clone(),
         wonders_built: player.wonders_built.clone(),
         incident_tokens: player.incident_tokens,
         completed_objectives: player.completed_objectives.clone(),

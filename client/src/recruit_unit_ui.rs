@@ -51,7 +51,7 @@ impl RecruitAmount {
         let player = game.player(player_index);
         let selectable: Vec<SelectableUnit> = new_units(player)
             .into_iter()
-            .map(|u| selectable_unit(city_position, &units, leader_name, player, &u))
+            .map(|u| selectable_unit(city_position, &units, leader_name, player, &u, game))
             .collect();
 
         StateUpdate::OpenDialog(ActiveDialog::RecruitUnitSelection(RecruitAmount {
@@ -70,6 +70,7 @@ fn selectable_unit(
     leader_name: Option<&String>,
     player: &Player,
     unit: &NewUnit,
+    game: &Game,
 ) -> SelectableUnit {
     let mut all = units.clone();
     all += &unit.unit_type;
@@ -81,6 +82,7 @@ fn selectable_unit(
     };
 
     let cost = recruit_cost_without_replaced(
+        game,
         player,
         &all,
         city_position,
@@ -165,6 +167,7 @@ impl RecruitSelection {
 
     pub fn confirm(&self, game: &Game) -> OkTooltip {
         recruit_cost(
+            game,
             game.player(self.amount.player_index),
             &self.amount.units,
             self.amount.city_position,
@@ -270,6 +273,7 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
 fn open_dialog(rc: &RenderContext, city: Position, sel: RecruitSelection) -> StateUpdate {
     let p = rc.shown_player.index;
     let cost = recruit_cost(
+        rc.game,
         rc.shown_player,
         &sel.amount.units,
         city,
@@ -282,13 +286,8 @@ fn open_dialog(rc: &RenderContext, city: Position, sel: RecruitSelection) -> Sta
         rc,
         rc.game.city(p, city),
         &format!(
-            "Recruit {}{} in {}",
-            sel.amount.units,
-            sel.amount
-                .leader_name
-                .clone()
-                .map_or(String::new(), |name| format!(" ({name})")),
-            city
+            "Recruit {} in {city}",
+            sel.amount.units.to_string(sel.amount.leader_name.as_ref()),
         ),
         ConstructionProject::Units(sel),
         &cost,

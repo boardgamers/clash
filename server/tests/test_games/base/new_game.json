@@ -28,11 +28,11 @@
           "id": 0
         }
       ],
-      "civilization": "Klingons",
+      "civilization": "Rome",
       "available_leaders": [
-        "Khan",
-        "Kahless",
-        "Worf"
+        "Augustus",
+        "Gaius Julius Caesar",
+        "Sulla"
       ],
       "advances": [
         "Farming",
@@ -72,11 +72,11 @@
           "id": 0
         }
       ],
-      "civilization": "Borg",
+      "civilization": "Klingons",
       "available_leaders": [
-        "Borg Queen",
-        "Seven of Nine",
-        "Jean Luc Picard"
+        "Khan",
+        "Kahless",
+        "Worf"
       ],
       "advances": [
         "Farming",
@@ -402,12 +402,12 @@
       "The game has started"
     ],
     [
-      "Player1 is playing as Klingons",
+      "Player1 is playing as Rome",
       "Player1 gained an action card from the pile",
       "Player1 gained an objective card from the pile"
     ],
     [
-      "Player2 is playing as Borg",
+      "Player2 is playing as Klingons",
       "Player2 gained an action card from the pile",
       "Player2 gained an objective card from the pile"
     ],

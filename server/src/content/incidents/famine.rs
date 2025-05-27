@@ -12,6 +12,7 @@ use crate::player_events::IncidentTarget;
 use crate::playing_actions::PlayingActionType;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
+use crate::special_advance::SpecialAdvance;
 use crate::unit::kill_units;
 use itertools::Itertools;
 use std::vec;
@@ -215,6 +216,7 @@ pub(crate) fn famine(
     let city_pred2 = city_pred.clone();
     Incident::builder(id, name, description, incident_base_effect)
         .with_protection_advance(Advance::Irrigation)
+        .with_protection_special_advance(SpecialAdvance::Aqueduct)
         .add_simple_incident_listener(target, 11, move |game, player_index, player_name, i| {
             // we lose the food regardless of the outcome
             let p = game.player(player_index);
