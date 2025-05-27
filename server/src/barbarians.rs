@@ -369,6 +369,7 @@ pub(crate) fn get_movable_units(
                 .count();
             stack > 0 && !barbarian_march_steps(game, target, *pos, stack).is_empty()
         })
+        .sorted()
         .copied()
         .collect()
 }
