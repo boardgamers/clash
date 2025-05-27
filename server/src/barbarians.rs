@@ -195,13 +195,13 @@ pub(crate) fn on_stop_barbarian_movement(game: &mut Game, movable: Vec<Position>
     ) {
         None => (),
         Some(movable) => {
-            let mut event_state = game
-                .events
-                .pop()
-                .expect("StopBarbarianMovement should be present");
-            if let PersistentEventType::Incident(i) = &mut event_state
-                .event_type
-            {
+            if movable == old_movable {
+                // nothing changed, so we can skip the rest
+                return;
+            }
+            
+            let mut event_state = game.events.pop().expect("event should exist");
+            if let PersistentEventType::Incident(i) = &mut event_state.event_type {
                 let state = i.get_barbarian_state();
                 for pos in old_movable {
                     if !movable.contains(&pos) {
@@ -238,10 +238,12 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
         IncidentTarget::ActivePlayer,
         BASE_EFFECT_PRIORITY + 99,
         |game, _, _, i| {
-            on_stop_barbarian_movement(
-                game,
-                get_movable_units(game, i.active_player, i.get_barbarian_state()),
-            )
+            let movable = get_movable_units(game, i.active_player, i.get_barbarian_state());
+            if movable.is_empty() {
+                return;
+            }
+
+            on_stop_barbarian_movement(game, movable);
         },
     );
 

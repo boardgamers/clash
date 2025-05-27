@@ -49,7 +49,7 @@ fn test_barbarians_move() {
                 0,
                 Action::Response(EventResponse::SelectAdvance(Advance::Storage)),
             ).skip_json(),
-            TestAction::not_undoable(
+            TestAction::undoable(
                 1,
                 Action::Response(EventResponse::SelectPositions(vec![Position::from_offset("A3")])),
             )
