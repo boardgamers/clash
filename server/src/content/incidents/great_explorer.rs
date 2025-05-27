@@ -99,7 +99,7 @@ pub(crate) fn explore_adjacent_block(builder: ActionCardBuilder) -> ActionCardBu
                 .map
                 .unexplored_blocks
                 .iter()
-                .find(|b| block_tiles(&b.position).iter().any(|p| *p == position))
+                .find(|b| block_tiles(&b.position).contains(&position))
                 .cloned()
                 .expect("Block not found");
             a.selected_positions = block_tiles(&dest.position);

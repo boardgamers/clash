@@ -216,8 +216,7 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
 }
 
 fn available_action_cards(game: &Game, p: &Player) -> Vec<Action> {
-    let action_cards = p
-        .action_cards
+    p.action_cards
         .iter()
         .filter_map(|card| {
             if *card == 126 || *card == 17 || *card == 18 {
@@ -250,8 +249,7 @@ fn available_action_cards(game: &Game, p: &Player) -> Vec<Action> {
                 .is_ok()
                 .then_some(Action::Playing(PlayingAction::ActionCard(*card)))
         })
-        .collect_vec();
-    action_cards
+        .collect_vec()
 }
 
 fn payment(ai_actions: &mut AiActions, o: &PaymentOptions, p: &Player) -> ResourcePile {

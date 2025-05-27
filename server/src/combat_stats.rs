@@ -8,7 +8,6 @@ use crate::unit::{UnitType, Units};
 use crate::utils;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use std::mem;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CombatPlayerStats {
@@ -34,7 +33,7 @@ impl CombatPlayerStats {
     }
 
     pub fn add_losses(&mut self, units: &[UnitType]) {
-        let mut losses = mem::replace(&mut self.losses, Units::empty());
+        let mut losses = std::mem::take(&mut self.losses);
         for t in units {
             losses += t;
         }
@@ -234,7 +233,8 @@ pub(crate) fn new_combat_stats(
     let d = game.player(defender);
     let attacker_position = a.get_unit(attackers[0]).position;
     assert_ne!(defender_position, attacker_position);
-    let stats = CombatStats::new(
+
+    CombatStats::new(
         battleground,
         battleground.is_land() && game.map.is_sea(attacker_position),
         CombatPlayerStats::new(attacker, to_units(attackers, a), attacker_position),
@@ -247,8 +247,7 @@ pub(crate) fn new_combat_stats(
             defender_position,
         ),
         result,
-    );
-    stats
+    )
 }
 
 fn to_units(units: &[u32], p: &Player) -> Units {

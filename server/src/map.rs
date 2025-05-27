@@ -575,14 +575,14 @@ pub(crate) fn block_has_player_city(game: &Game, p: &BlockPosition, player: usiz
 pub(crate) fn block_for_position(game: &Game, position: Position) -> BlockPosition {
     let setup = get_map_setup(game.human_players_count());
     for p in &setup.free_positions {
-        if block_tiles(p).iter().any(|t| *t == position) {
+        if block_tiles(p).contains(&position) {
             return p.clone();
         }
     }
     let h = setup
         .home_positions
         .iter()
-        .find(|h| block_tiles(&h.position).iter().any(|t| *t == position))
+        .find(|h| block_tiles(&h.position).contains(&position))
         .expect("Position not found in home positions");
     h.position.clone()
 }

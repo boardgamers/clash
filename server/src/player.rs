@@ -619,13 +619,13 @@ pub fn add_unit(player: usize, position: Position, unit_type: UnitType, game: &m
 pub(crate) fn remove_unit(player: usize, id: u32, game: &mut Game) -> Unit {
     // carried units can be transferred to another ship - which has to be selected later
     let p = game.player_mut(player);
-    let u = p.units.remove(
+
+    p.units.remove(
         p.units
             .iter()
             .position(|unit| unit.id == id)
             .expect("unit should exist"),
-    );
-    u
+    )
 }
 
 pub fn end_turn(game: &mut Game, player: usize) {

@@ -344,9 +344,7 @@ fn is_move_restricted(
         && game
             .try_get_any_city(dest)
             .is_some_and(|city| city.pieces.wonders.contains(&Wonder::GreatGardens))
-        && movement_restrictions
-            .iter()
-            .any(|&r| r == &MovementRestriction::Fertile)
+        && movement_restrictions.contains(&(&MovementRestriction::Fertile))
     {
         return Err("fertile movement attack great gardens restriction".to_string());
     }
