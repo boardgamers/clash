@@ -199,7 +199,7 @@ pub(crate) fn on_stop_barbarian_movement(game: &mut Game, movable: Vec<Position>
                 // nothing changed, so we can skip the rest
                 return;
             }
-            
+
             let mut event_state = game.events.pop().expect("event should exist");
             if let PersistentEventType::Incident(i) = &mut event_state.event_type {
                 let state = i.get_barbarian_state();

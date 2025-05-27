@@ -210,14 +210,11 @@ fn barbarian_army_positions_in_range2(
             })
         })
         .collect();
-    
+
     log.sort();
     log.dedup();
-    
-    (
-        positions,
-        log,
-    )
+
+    (positions, log)
 }
 
 fn max_mercenary_payment(player: &Player) -> u8 {

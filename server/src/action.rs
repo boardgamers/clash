@@ -1,5 +1,6 @@
 use crate::action_card::on_play_action_card;
 use crate::advance::on_advance;
+use crate::barbarians::on_stop_barbarian_movement;
 use crate::city::{MoodState, on_found_city};
 use crate::collect::on_collect;
 use crate::combat::{combat_loop, move_with_possible_combat, start_combat};
@@ -30,7 +31,6 @@ use crate::unit::{get_current_move, units_killed};
 use crate::wonder::{draw_wonder_card, on_play_wonder_card};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use crate::barbarians::on_stop_barbarian_movement;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub enum Action {

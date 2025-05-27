@@ -1,3 +1,4 @@
+use crate::barbarians::get_barbarians_player;
 use crate::city::City;
 use crate::city::MoodState::Angry;
 use crate::city_pieces::{Building, remove_building};
@@ -20,7 +21,6 @@ use crate::wonder::{Wonder, deinit_wonder, init_wonder};
 use combat_stats::active_attackers;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use crate::barbarians::get_barbarians_player;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Copy)]
 pub enum CombatModifier {
@@ -164,7 +164,7 @@ impl Combat {
             .iter()
             .any(|&unit_id| game.player(p).get_unit(unit_id).unit_type == UnitType::Leader)
     }
-    
+
     #[must_use]
     pub fn is_barbarian_battle(&self, role: CombatRole, game: &Game) -> bool {
         self.opponent(self.player(role)) == get_barbarians_player(game).index

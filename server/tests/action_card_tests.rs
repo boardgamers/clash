@@ -125,9 +125,9 @@ fn test_mercenaries() {
             TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(13))).skip_json(),
             TestAction::undoable(
                 0,
-                Action::Response(EventResponse::SelectPositions(vec![
-                    Position::from_offset("B3"),
-                ])),
+                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+                    "B3",
+                )])),
             )
             .skip_json(),
             TestAction::not_undoable(0, payment_response(ResourcePile::ore(1))),
