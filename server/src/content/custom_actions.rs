@@ -57,12 +57,16 @@ impl CustomActionActivation {
 #[derive(Clone, Debug, PartialEq)]
 pub struct CustomActionInfo {
     pub action_type: ActionCost,
-    pub once_per_turn: bool,
+    pub once_per_turn: Option<CustomActionType>,
 }
 
 impl CustomActionInfo {
     #[must_use]
-    fn new(free: bool, once_per_turn: bool, cost: ActionResourceCost) -> CustomActionInfo {
+    fn new(
+        free: bool,
+        once_per_turn: Option<CustomActionType>,
+        cost: ActionResourceCost,
+    ) -> CustomActionInfo {
         CustomActionInfo {
             action_type: ActionCost::new(free, cost),
             once_per_turn,
@@ -94,6 +98,9 @@ pub enum CustomActionType {
     Aqueduct,
     Princeps,
     StatesmanIncreaseHappiness,
+
+    // Greece
+    HellenisticInfluenceCultureAttempt,
 }
 
 impl CustomActionType {
@@ -101,7 +108,7 @@ impl CustomActionType {
     pub fn info(&self) -> CustomActionInfo {
         match self {
             CustomActionType::AbsolutePower => {
-                CustomActionType::free_and_once_per_turn(ResourcePile::mood_tokens(2))
+                self.free_and_once_per_turn(ResourcePile::mood_tokens(2))
             }
             CustomActionType::CivilLiberties | CustomActionType::Sports => {
                 CustomActionType::regular()
@@ -112,22 +119,24 @@ impl CustomActionType {
             CustomActionType::Bartering
             | CustomActionType::Theaters
             | CustomActionType::GreatLibrary
-            | CustomActionType::GreatStatue => {
-                CustomActionType::free_and_once_per_turn(ResourcePile::empty())
-            }
+            | CustomActionType::GreatStatue => self.free_and_once_per_turn(ResourcePile::empty()),
             CustomActionType::ArtsInfluenceCultureAttempt => {
-                CustomActionType::free_and_once_per_turn(ResourcePile::culture_tokens(1))
+                self.free_and_once_per_turn(ResourcePile::culture_tokens(1))
+            }
+            CustomActionType::HellenisticInfluenceCultureAttempt => {
+                CustomActionType::free_and_once_per_turn_mutually_exclusive(
+                    ResourcePile::mood_tokens(2),
+                    CustomActionType::ArtsInfluenceCultureAttempt,
+                )
             }
             CustomActionType::VotingIncreaseHappiness => {
                 CustomActionType::cost(ResourcePile::mood_tokens(1))
             }
             CustomActionType::Princeps => CustomActionType::cost(ResourcePile::culture_tokens(1)),
             CustomActionType::FreeEconomyCollect | CustomActionType::ForcedLabor => {
-                CustomActionType::free_and_once_per_turn(ResourcePile::mood_tokens(1))
+                self.free_and_once_per_turn(ResourcePile::mood_tokens(1))
             }
-            CustomActionType::Taxes => {
-                CustomActionType::once_per_turn(ResourcePile::mood_tokens(1))
-            }
+            CustomActionType::Taxes => self.once_per_turn(ResourcePile::mood_tokens(1)),
             CustomActionType::Aqueduct => {
                 CustomActionType::free_and_advance_cost_without_discounts()
             }
@@ -163,32 +172,44 @@ impl CustomActionType {
 
     #[must_use]
     fn regular() -> CustomActionInfo {
-        CustomActionInfo::new(false, false, ActionResourceCost::free())
+        CustomActionInfo::new(false, None, ActionResourceCost::free())
     }
 
     #[must_use]
     fn cost(cost: ResourcePile) -> CustomActionInfo {
-        CustomActionInfo::new(true, false, ActionResourceCost::resources(cost))
+        CustomActionInfo::new(true, None, ActionResourceCost::resources(cost))
     }
 
     #[must_use]
-    fn once_per_turn(cost: ResourcePile) -> CustomActionInfo {
-        CustomActionInfo::new(false, true, ActionResourceCost::resources(cost))
+    fn once_per_turn(self, cost: ResourcePile) -> CustomActionInfo {
+        CustomActionInfo::new(false, Some(self), ActionResourceCost::resources(cost))
     }
 
     #[must_use]
     fn free(cost: ResourcePile) -> CustomActionInfo {
-        CustomActionInfo::new(true, false, ActionResourceCost::resources(cost))
+        CustomActionInfo::new(true, None, ActionResourceCost::resources(cost))
     }
 
     #[must_use]
-    fn free_and_once_per_turn(cost: ResourcePile) -> CustomActionInfo {
-        CustomActionInfo::new(true, true, ActionResourceCost::resources(cost))
+    fn free_and_once_per_turn(self, cost: ResourcePile) -> CustomActionInfo {
+        CustomActionInfo::new(true, Some(self), ActionResourceCost::resources(cost))
+    }
+
+    #[must_use]
+    fn free_and_once_per_turn_mutually_exclusive(
+        cost: ResourcePile,
+        mutually_exclusive: CustomActionType,
+    ) -> CustomActionInfo {
+        CustomActionInfo::new(
+            true,
+            Some(mutually_exclusive),
+            ActionResourceCost::resources(cost),
+        )
     }
 
     #[must_use]
     fn free_and_advance_cost_without_discounts() -> CustomActionInfo {
-        CustomActionInfo::new(true, false, ActionResourceCost::AdvanceCostWithoutDiscount)
+        CustomActionInfo::new(true, None, ActionResourceCost::AdvanceCostWithoutDiscount)
     }
 
     #[must_use]
@@ -196,6 +217,7 @@ impl CustomActionType {
         matches!(
             self,
             CustomActionType::ArtsInfluenceCultureAttempt
+                | CustomActionType::HellenisticInfluenceCultureAttempt
                 | CustomActionType::FreeEconomyCollect
                 | CustomActionType::VotingIncreaseHappiness
                 | CustomActionType::StatesmanIncreaseHappiness
@@ -226,6 +248,9 @@ impl Display for CustomActionType {
             CustomActionType::Aqueduct => write!(f, "Aqueduct"),
             CustomActionType::Princeps => write!(f, "Princeps"),
             CustomActionType::StatesmanIncreaseHappiness => write!(f, "Statesman"),
+            CustomActionType::HellenisticInfluenceCultureAttempt => {
+                write!(f, "Hellenistic Culture")
+            }
         }
     }
 }
@@ -272,8 +297,10 @@ pub(crate) fn can_play_custom_action(
         return Err("Custom action not available".to_string());
     }
 
-    if c.info().once_per_turn && p.played_once_per_turn_actions.contains(&c) {
-        return Err("Custom action already played this turn".to_string());
+    if let Some(key) = c.info().once_per_turn {
+        if p.played_once_per_turn_actions.contains(&key) {
+            return Err("Custom action already played this turn".to_string());
+        }
     }
 
     let can_play = match c {

@@ -176,7 +176,12 @@ fn is_barbarian_takeover(game: &Game, c: &InfluenceCultureInfo) -> bool {
 fn is_influence(i: &PlayingActionInfo) -> bool {
     match &i.action_type {
         PlayingActionType::InfluenceCultureAttempt => true,
-        PlayingActionType::Custom(i) if *i == CustomActionType::ArtsInfluenceCultureAttempt => true,
+        PlayingActionType::Custom(i)
+            if *i == CustomActionType::ArtsInfluenceCultureAttempt
+                || *i == CustomActionType::HellenisticInfluenceCultureAttempt =>
+        {
+            true
+        }
         _ => false,
     }
 }

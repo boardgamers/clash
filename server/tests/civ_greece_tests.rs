@@ -1,7 +1,10 @@
-use crate::common::{JsonTest, TestAction, move_action};
+use crate::common::{JsonTest, TestAction, move_action, payment_response};
 use server::action::Action;
-use server::cultural_influence::affordable_start_city;
-use server::playing_actions::{PlayingAction, Recruit};
+use server::city_pieces::Building;
+use server::content::custom_actions::CustomActionType;
+use server::content::persistent_events::{SelectedStructure, Structure};
+use server::cultural_influence::{InfluenceCultureAttempt, affordable_start_city};
+use server::playing_actions::{PlayingAction, PlayingActionType, Recruit};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::unit::Units;
@@ -37,7 +40,7 @@ fn sparta_battle() {
 }
 
 #[test]
-fn hellenistic_culture() {
+fn hellenistic_culture_staring_point() {
     let game = &JSON.load_game("hellenistic_culture");
 
     assert_eq!(
@@ -60,4 +63,29 @@ fn hellenistic_culture() {
         .unwrap(),
         (Position::from_offset("C2"), 0)
     );
+}
+
+#[test]
+fn hellenistic_culture_cost() {
+    JSON.test(
+        "hellenistic_culture",
+        vec![
+            TestAction::undoable(
+                0,
+                Action::Playing(PlayingAction::InfluenceCultureAttempt(
+                    InfluenceCultureAttempt::new(
+                        SelectedStructure::new(
+                            Position::from_offset("C2"),
+                            Structure::Building(Building::Port),
+                        ),
+                        PlayingActionType::Custom(
+                            CustomActionType::HellenisticInfluenceCultureAttempt,
+                        ),
+                    ),
+                )),
+            )
+            .skip_json(),
+            TestAction::not_undoable(0, payment_response(ResourcePile::mood_tokens(2))),
+        ],
+    )
 }

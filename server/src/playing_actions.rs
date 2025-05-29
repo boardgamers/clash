@@ -215,10 +215,10 @@ impl PlayingAction {
 
         let origin_override = match playing_action_type {
             PlayingActionType::Custom(c) => {
-                if c.info().once_per_turn {
+                if let Some(key) = c.info().once_per_turn {
                     game.players[player_index]
                         .played_once_per_turn_actions
-                        .push(c);
+                        .push(key);
                 }
                 Some(game.player(player_index).custom_action_origin(&c))
             }
@@ -315,6 +315,7 @@ impl PlayingAction {
                 &[
                     PlayingActionType::InfluenceCultureAttempt,
                     PlayingActionType::Custom(CustomActionType::ArtsInfluenceCultureAttempt),
+                    PlayingActionType::Custom(CustomActionType::HellenisticInfluenceCultureAttempt),
                 ],
             ),
             PlayingAction::ActionCard(a) => PlayingActionType::ActionCard(*a),

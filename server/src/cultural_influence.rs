@@ -456,15 +456,21 @@ pub fn affordable_start_city(
 
         let available = &player.resources;
         let mut tokens = available.culture_tokens;
+        let mut action_cost = ResourcePile::empty();
         if let Some(t) = action_type {
-            // either none or both can use Colosseum
-            let cost = t.cost(game).payment_options(player).default;
-            let c = cost.culture_tokens;
-            assert_eq!(c, cost.amount());
-            tokens -= c;
+            // either none (action cost and boost cost) or both can use Colosseum
+            action_cost = t.cost(game).payment_options(player).default;
+            let c = action_cost.culture_tokens;
+            if c > 0 {
+                tokens -= c;
+            }
         }
         if player.wonders_owned.contains(Wonder::Colosseum) {
             tokens += available.mood_tokens;
+            let m = action_cost.mood_tokens;
+            if m > 0 {
+                tokens -= m;
+            }
         }
 
         let mut start = player
@@ -563,6 +569,9 @@ pub fn available_influence_actions(game: &Game, player: usize) -> Vec<PlayingAct
         game,
         player,
         PlayingActionType::InfluenceCultureAttempt,
-        vec![CustomActionType::ArtsInfluenceCultureAttempt],
+        vec![
+            CustomActionType::ArtsInfluenceCultureAttempt,
+            CustomActionType::HellenisticInfluenceCultureAttempt,
+        ],
     )
 }

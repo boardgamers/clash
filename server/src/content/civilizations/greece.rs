@@ -4,6 +4,7 @@ use crate::civilization::Civilization;
 use crate::combat::update_combat_strength;
 use crate::combat_listeners::CombatStrength;
 use crate::content::advances::warfare::draft_cost;
+use crate::content::custom_actions::CustomActionType;
 use crate::payment::PaymentConversion;
 use crate::player::gain_resources;
 use crate::resource_pile::ResourcePile;
@@ -88,7 +89,6 @@ fn sparta() -> SpecialAdvanceInfo {
 }
 
 fn hellenistic_culture() -> SpecialAdvanceInfo {
-    // todo You may replace the cost of Arts with 2 mood tokens.
     SpecialAdvanceInfo::builder(
         SpecialAdvance::HellenisticCulture,
         SpecialAdvanceRequirement::Advance(Advance::Arts),
@@ -96,5 +96,6 @@ fn hellenistic_culture() -> SpecialAdvanceInfo {
         "Cultural influence: You may use any influenced city as a starting point. \
         You may replace the cost of Arts with 2 mood tokens.",
     )
+    .add_custom_action(CustomActionType::HellenisticInfluenceCultureAttempt)
     .build()
 }
