@@ -10,6 +10,7 @@ use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::{HandCardsRequest, PositionRequest};
 use crate::game::Game;
 use crate::leader::{Leader, LeaderAbility};
+use crate::map::{block_has_player_city, get_map_setup};
 use crate::payment::PaymentConversion;
 use crate::player::{Player, gain_resources};
 use crate::playing_actions::{PlayingAction, PlayingActionType};
@@ -183,7 +184,6 @@ const IDOL: &str = "As a free action, pay 1 culture token to \
             play an action card as a free action";
 
 fn alexander() -> Leader {
-    // todo ruler of the world
     Leader::new(
         "Alexander the Great",
         LeaderAbility::builder("Idol", IDOL)
@@ -194,6 +194,27 @@ fn alexander() -> Leader {
             "In a land battle, gain 1 combat value for each region
             with a city you control, except the starting region.",
         )
+        .add_combat_strength_listener(7, |game, c, s, r| {
+            if !c.is_sea_battle(game) {
+                let setup = get_map_setup(game.human_players_count());
+                let player = c.player(r);
+                let extra = setup
+                    .free_positions
+                    .into_iter()
+                    .chain(
+                        setup
+                            .home_positions
+                            .iter()
+                            .enumerate()
+                            .filter_map(|(i, h)| (i != player).then_some(h.position.clone())),
+                    )
+                    .filter(|b| block_has_player_city(game, b, player))
+                    .count();
+                s.extra_combat_value += extra as i8;
+                s.roll_log
+                    .push(format!("Ruler of the World adds {extra} combat value",));
+            }
+        })
         .build(),
     )
 }

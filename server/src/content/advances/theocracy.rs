@@ -144,7 +144,7 @@ fn fanaticism() -> AdvanceBuilder {
         If you lose the battle, you get 1 free Infantry Unit after the battle and \
         place it in one of your cities.",
     )
-    .add_combat_round_start_listener(1, |game, c, s, _role| {
+    .add_combat_strength_listener(1, |game, c, s, _role| {
         if c.first_round() && c.defender_temple(game) {
             s.extra_combat_value += 2;
             s.roll_log

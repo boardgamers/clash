@@ -181,7 +181,7 @@ fn augustus() -> Leader {
             "If you don't own a city in the region: \
             Gain 2 combat value in every combat round",
         )
-        .add_combat_round_start_listener(6, |game, c, s, r| {
+        .add_combat_strength_listener(6, |game, c, s, r| {
             if c.has_leader(r, game)
                 && !block_has_player_city(
                     game,
@@ -353,7 +353,7 @@ fn sulla() -> Leader {
             "Civilizer",
             "In every combat round against barbarians: Gain 2 combat value",
         )
-        .add_combat_round_start_listener(5, |game, c, s, r| {
+        .add_combat_strength_listener(5, |game, c, s, r| {
             if c.has_leader(r, game) && c.is_barbarian_battle(r, game) {
                 s.extra_combat_value += 2;
                 s.roll_log.push("Sulla adds 2 combat value".to_string());

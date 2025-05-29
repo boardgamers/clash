@@ -125,3 +125,14 @@ fn idol() {
         ],
     )
 }
+
+#[test]
+fn ruler_of_the_world() {
+    JSON.test(
+        "ruler_of_the_world",
+        vec![TestAction::not_undoable(
+            0,
+            move_action(vec![0], Position::from_offset("D8")),
+        )],
+    );
+}
