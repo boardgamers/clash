@@ -46,16 +46,15 @@ fn sparta() -> SpecialAdvanceInfo {
         0,
         |cost, units, player| {
             if units.infantry > 0 {
-                let amount = draft_cost(player);
                 cost.info
                     .log
                     .push("Sparta allows to pay the Draft cost as culture tokes".to_string());
                 cost.cost.conversions.insert(
                     0,
                     PaymentConversion::limited(
-                        ResourcePile::mood_tokens(amount),
-                        ResourcePile::culture_tokens(amount),
-                        1,
+                        ResourcePile::mood_tokens(1),
+                        ResourcePile::culture_tokens(1),
+                        draft_cost(player),
                     ),
                 );
             }
