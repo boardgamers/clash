@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::events::EventOrigin;
@@ -5,16 +6,47 @@ use crate::player::Player;
 use crate::position::Position;
 use crate::unit::UnitType;
 
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum Leader {
+    // Test
+    Kirk,
+    Janeway,
+    Spock,
+    BorgQueen,
+    SevenOfNine,
+    Picard,
+    Khan,
+    Kahless,
+    Worf,
+    Sela,
+    Narek,
+    Tomalak,
+
+    // for Egypt later
+    Kleopatra,
+
+    // Rome
+    Augustus,
+    Ceasar,
+    Sulla,
+    // Greece
+    Alexander,
+    Leonidas,
+    Pericles,
+}
+
 #[derive(Clone)]
-pub struct Leader {
+pub struct LeaderInfo {
+    pub leader: Leader,
     pub name: String,
     pub abilities: Vec<LeaderAbility>,
 }
 
-impl Leader {
+impl LeaderInfo {
     #[must_use]
-    pub fn new(name: &str, first_ability: LeaderAbility, second_ability: LeaderAbility) -> Leader {
+    pub fn new(leader: Leader, name: &str, first_ability: LeaderAbility, second_ability: LeaderAbility) -> LeaderInfo {
         Self {
+            leader,
             name: name.to_string(),
             abilities: vec![first_ability, second_ability],
         }

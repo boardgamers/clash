@@ -9,7 +9,7 @@ use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::{HandCardsRequest, PositionRequest};
 use crate::game::Game;
-use crate::leader::{Leader, LeaderAbility};
+use crate::leader::{LeaderInfo, LeaderAbility, Leader};
 use crate::map::{block_has_player_city, get_map_setup};
 use crate::payment::PaymentConversion;
 use crate::player::{Player, gain_resources};
@@ -183,8 +183,9 @@ fn city_states() -> SpecialAdvanceInfo {
 const IDOL: &str = "As a free action, pay 1 culture token to \
             play an action card as a free action";
 
-fn alexander() -> Leader {
-    Leader::new(
+fn alexander() -> LeaderInfo {
+    LeaderInfo::new(
+        Leader::Alexander,
         "Alexander the Great",
         LeaderAbility::builder("Idol", IDOL)
             .add_custom_action(CustomActionType::Idol)

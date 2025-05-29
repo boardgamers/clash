@@ -19,7 +19,7 @@ use crate::{
     },
     content::custom_actions::CustomActionType,
     game::Game,
-    leader::Leader,
+    leader::LeaderInfo,
     player_events::PlayerEvents,
     position::Position,
     resource_pile::ResourcePile,
@@ -137,7 +137,7 @@ impl Player {
     ///
     /// Panics if the leader does not exist
     #[must_use]
-    pub fn get_leader(&self, name: &str) -> &Leader {
+    pub fn get_leader(&self, name: &str) -> &LeaderInfo {
         self.civilization
             .leaders
             .iter()
@@ -181,7 +181,7 @@ impl Player {
     }
 
     #[must_use]
-    pub fn available_leaders(&self) -> Vec<&Leader> {
+    pub fn available_leaders(&self) -> Vec<&LeaderInfo> {
         self.available_leaders
             .iter()
             .map(|name| self.get_leader(name))

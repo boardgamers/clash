@@ -8,7 +8,7 @@ use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::{HandCardsRequest, PaymentRequest, PositionRequest};
 use crate::game::Game;
-use crate::leader::{Leader, LeaderAbility, LeaderAbilityBuilder, leader_position};
+use crate::leader::{LeaderInfo, LeaderAbility, LeaderAbilityBuilder, leader_position, Leader};
 use crate::map::{block_for_position, block_has_player_city};
 use crate::objective_card::{discard_objective_card, gain_objective_card_from_pile};
 use crate::payment::{
@@ -170,8 +170,9 @@ fn provinces() -> SpecialAdvanceInfo {
     .build()
 }
 
-fn augustus() -> Leader {
-    Leader::new(
+fn augustus() -> LeaderInfo {
+    LeaderInfo::new(
+        Leader::Augustus,
         "Augustus",
         LeaderAbility::builder("Princeps", PRINCEPS)
             .add_custom_action(CustomActionType::Princeps)
@@ -275,8 +276,9 @@ pub(crate) fn validate_princeps_cards(cards: &[HandCard]) -> Result<(), String> 
     }
 }
 
-fn ceasar() -> Leader {
-    Leader::new(
+fn ceasar() -> LeaderInfo {
+    LeaderInfo::new(
+        Leader::Ceasar,
         "Gaius Julius Caesar",
         LeaderAbility::builder(
             "Statesman",
@@ -324,8 +326,9 @@ fn ceasar() -> Leader {
     )
 }
 
-fn sulla() -> Leader {
-    Leader::new(
+fn sulla() -> LeaderInfo {
+    LeaderInfo::new(
+        Leader::Sulla,
         "Sulla",
         add_barbarian_control(
             LeaderAbility::builder(
