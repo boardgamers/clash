@@ -15,22 +15,28 @@ const JSON: JsonTest = JsonTest::child("civilizations", "greece");
 
 #[test]
 fn sparta_draft() {
-    JSON.test("sparta_draft", vec![TestAction::undoable(
-        0,
-        Action::Playing(PlayingAction::Recruit(Recruit::new(
-            &Units::new(0, 1, 0, 0, 0, 0),
-            Position::from_offset("A1"),
-            ResourcePile::culture_tokens(1),
-        ))),
-    )]);
+    JSON.test(
+        "sparta_draft",
+        vec![TestAction::undoable(
+            0,
+            Action::Playing(PlayingAction::Recruit(Recruit::new(
+                &Units::new(0, 1, 0, 0, 0, 0),
+                Position::from_offset("A1"),
+                ResourcePile::culture_tokens(1),
+            ))),
+        )],
+    );
 }
 
 #[test]
 fn sparta_battle() {
-    JSON.test("sparta_battle", vec![TestAction::not_undoable(
-        0,
-        move_action(vec![0], Position::from_offset("C1")),
-    )]);
+    JSON.test(
+        "sparta_battle",
+        vec![TestAction::not_undoable(
+            0,
+            move_action(vec![0], Position::from_offset("C1")),
+        )],
+    );
 }
 
 #[test]
@@ -61,36 +67,49 @@ fn hellenistic_culture_staring_point() {
 
 #[test]
 fn hellenistic_culture_cost() {
-    JSON.test("hellenistic_culture", vec![
-        TestAction::undoable(
-            0,
-            Action::Playing(PlayingAction::InfluenceCultureAttempt(
-                InfluenceCultureAttempt::new(
-                    SelectedStructure::new(
-                        Position::from_offset("C2"),
-                        Structure::Building(Building::Port),
+    JSON.test(
+        "hellenistic_culture",
+        vec![
+            TestAction::undoable(
+                0,
+                Action::Playing(PlayingAction::InfluenceCultureAttempt(
+                    InfluenceCultureAttempt::new(
+                        SelectedStructure::new(
+                            Position::from_offset("C2"),
+                            Structure::Building(Building::Port),
+                        ),
+                        PlayingActionType::Custom(
+                            CustomActionType::HellenisticInfluenceCultureAttempt,
+                        ),
                     ),
-                    PlayingActionType::Custom(CustomActionType::HellenisticInfluenceCultureAttempt),
-                ),
-            )),
-        )
-        .skip_json(),
-        TestAction::not_undoable(0, payment_response(ResourcePile::mood_tokens(2))),
-    ])
+                )),
+            )
+            .skip_json(),
+            TestAction::not_undoable(0, payment_response(ResourcePile::mood_tokens(2))),
+        ],
+    )
 }
 
 #[test]
 fn city_states() {
-    JSON.test("city_states", vec![
-        TestAction::undoable(
-            0,
-            Action::Playing(PlayingAction::Recruit(Recruit::new(
-                &Units::new(0, 1, 0, 0, 0, 0),
-                Position::from_offset("A1"),
-                ResourcePile::culture_tokens(1),
-            ))),
-        )
-        .skip_json(),
-        TestAction::undoable(0, Action::Response(EventResponse::SelectPositions(vec![Position::from_offset("B3")]))),
-    ])
+    JSON.test(
+        "city_states",
+        vec![
+            TestAction::undoable(
+                0,
+                Action::Playing(PlayingAction::Recruit(Recruit::new(
+                    &Units::new(0, 1, 0, 0, 0, 0),
+                    Position::from_offset("A1"),
+                    ResourcePile::culture_tokens(1),
+                ))),
+            )
+            .skip_json(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+                    "B3",
+                )])),
+            ),
+        ],
+    )
 }
