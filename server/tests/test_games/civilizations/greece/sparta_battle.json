@@ -54,7 +54,6 @@
           "position": "B3"
         }
       ],
-      "civilization": "Greece",
       "units": [
         {
           "position": "C2",
@@ -62,6 +61,7 @@
           "id": 0
         }
       ],
+      "civilization": "Greece",
       "advances": [
         "Draft",
         "Farming",
@@ -107,7 +107,6 @@
           "port_position": "C3"
         }
       ],
-      "civilization": "test1",
       "units": [
         {
           "position": "C1",
@@ -120,15 +119,16 @@
           "id": 1
         }
       ],
-      "action_cards": [
-        7
-      ],
+      "civilization": "test1",
       "advances": [
         "Farming",
         "Mining",
         "Tactics"
       ],
       "incident_tokens": 3,
+      "action_cards": [
+        7
+      ],
       "next_unit_id": 2
     },
     {

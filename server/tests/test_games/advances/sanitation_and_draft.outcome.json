@@ -338,8 +338,8 @@
   "log": [
     [
       "Player1 paid 2 gold and 1 mood token to recruit 1 settler and 1 infantry in the city at A1",
-      "Sanitation reduced the cost of 1 Settler to 1 mood token",
-      "Draft reduced the cost of 1 Infantry to 1 mood token"
+      "Draft reduced the cost of 1 Infantry to 1 mood token",
+      "Sanitation reduced the cost of 1 Settler to 1 mood token"
     ]
   ],
   "undo_limit": 0,

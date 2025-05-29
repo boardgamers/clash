@@ -66,8 +66,8 @@ fn test_sanitation_and_draft() {
                 assert_eq!(ResourcePile::mood_tokens(1), options.conversions[1].to);
                 assert_eq!(
                     vec![
+                        EventOrigin::Advance(Advance::Draft),
                         EventOrigin::Advance(Advance::Sanitation),
-                        EventOrigin::Advance(Advance::Draft)
                     ],
                     options.modifiers
                 );
