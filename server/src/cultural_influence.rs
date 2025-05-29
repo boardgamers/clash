@@ -15,6 +15,7 @@ use crate::player_events::ActionInfo;
 use crate::playing_actions::{PlayingAction, PlayingActionType, base_or_custom_available};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
+use crate::special_advance::SpecialAdvance;
 use crate::wonder::Wonder;
 use itertools::Itertools;
 use pathfinding::prelude::astar;
@@ -435,11 +436,18 @@ fn attempt_failed(game: &mut Game, player: usize, city_position: Position) {
     );
 }
 
-fn affordable_start_city(
+/// Returns the position of the starting city and the cost to boost the influence range.
+///
+/// # Errors
+/// This function returns an error if no starting city is available or if the player can't afford the boost.
+///
+/// # Panics
+/// This function panics in an inconsistent state
+pub fn affordable_start_city(
     game: &Game,
     player_index: usize,
     target_city: &City,
-    action_type: Option<&PlayingActionType>, // none if action cost if already paid
+    action_type: Option<&PlayingActionType>, // none if action cost is already paid
 ) -> Result<(Position, u8), String> {
     if target_city.player_index == player_index {
         Ok((target_city.position, 0))
@@ -459,30 +467,43 @@ fn affordable_start_city(
             tokens += available.mood_tokens;
         }
 
-        player
+        let mut start = player
             .cities
             .iter()
-            .filter_map(|c| {
-                if c.influenced() {
-                    return None;
-                }
-
-                let min_cost = c
-                    .position
+            .filter_map(|c| (!c.influenced()).then_some((c.position, c.size())))
+            .collect_vec();
+        if player.has_special_advance(SpecialAdvance::HellenisticCulture) {
+            let extra = game
+                .players
+                .iter()
+                .flat_map(|p| {
+                    p.cities.iter().filter_map(|c| {
+                        let t = (c.position, c.size());
+                        (!c.pieces.buildings(Some(player.index)).is_empty() && !start.contains(&t))
+                            .then_some(t)
+                    })
+                })
+                .collect_vec();
+            start.extend(extra);
+        }
+        start
+            .iter()
+            .filter_map(|&(position, size)| {
+                let min_cost = position
                     .distance(target_city.position)
-                    .saturating_sub(c.size() as u32) as u8;
+                    .saturating_sub(size as u32) as u8;
 
                 if min_cost > tokens {
                     // avoid unnecessary calculations
                     return None;
                 }
 
-                let distance = influence_distance(game, c.position, target_city.position);
-                let boost_cost = distance.saturating_sub(c.size() as u8);
+                let distance = influence_distance(game, position, target_city.position);
+                let boost_cost = distance.saturating_sub(size as u8);
                 if boost_cost > tokens {
                     return None;
                 }
-                Some((c.position, boost_cost))
+                Some((position, boost_cost))
             })
             .min_by_key(|(_, boost)| *boost)
             .ok_or("No starting city available".to_string())

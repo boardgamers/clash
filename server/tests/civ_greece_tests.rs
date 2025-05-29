@@ -1,5 +1,6 @@
 use crate::common::{JsonTest, TestAction, move_action};
 use server::action::Action;
+use server::cultural_influence::affordable_start_city;
 use server::playing_actions::{PlayingAction, Recruit};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
@@ -32,5 +33,31 @@ fn sparta_battle() {
             0,
             move_action(vec![0], Position::from_offset("C1")),
         )],
+    );
+}
+
+#[test]
+fn hellenistic_culture() {
+    let game = &JSON.load_game("hellenistic_culture");
+
+    assert_eq!(
+        affordable_start_city(
+            game,
+            0,
+            game.get_any_city(Position::from_offset("D1")),
+            None,
+        )
+        .unwrap(),
+        (Position::from_offset("C2"), 0)
+    );
+    assert_eq!(
+        affordable_start_city(
+            game,
+            0,
+            game.get_any_city(Position::from_offset("C2")),
+            None,
+        )
+        .unwrap(),
+        (Position::from_offset("C2"), 0)
     );
 }

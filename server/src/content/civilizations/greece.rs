@@ -10,7 +10,11 @@ use crate::resource_pile::ResourcePile;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
 
 pub(crate) fn greece() -> Civilization {
-    Civilization::new("Greece", vec![study(), sparta()], vec![])
+    Civilization::new(
+        "Greece",
+        vec![study(), sparta(), hellenistic_culture()],
+        vec![],
+    )
 }
 
 fn study() -> SpecialAdvanceInfo {
@@ -35,7 +39,6 @@ fn study() -> SpecialAdvanceInfo {
 }
 
 fn sparta() -> SpecialAdvanceInfo {
-    // todo In land battles with fewer units than your enemy: Your enemy may nut play tactics cards.
     SpecialAdvanceInfo::builder(
         SpecialAdvance::Sparta,
         SpecialAdvanceRequirement::Advance(Advance::Draft),
@@ -80,6 +83,18 @@ fn sparta() -> SpecialAdvanceInfo {
                 );
             }
         },
+    )
+    .build()
+}
+
+fn hellenistic_culture() -> SpecialAdvanceInfo {
+    // todo You may replace the cost of Arts with 2 mood tokens.
+    SpecialAdvanceInfo::builder(
+        SpecialAdvance::HellenisticCulture,
+        SpecialAdvanceRequirement::Advance(Advance::Arts),
+        "Hellenistic Culture",
+        "Cultural influence: You may use any influenced city as a starting point. \
+        You may replace the cost of Arts with 2 mood tokens.",
     )
     .build()
 }
