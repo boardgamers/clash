@@ -1,5 +1,5 @@
 use crate::advance::Advance;
-use crate::content::custom_actions::CustomActionType;
+use crate::content::custom_actions::collect_modifiers;
 use crate::content::persistent_events::PersistentEventType;
 use crate::events::EventOrigin;
 use crate::game::Game;
@@ -322,6 +322,6 @@ pub fn available_collect_actions(game: &Game, player: usize) -> Vec<PlayingActio
         game,
         player,
         PlayingActionType::Collect,
-        vec![CustomActionType::FreeEconomyCollect],
+        collect_modifiers(),
     )
 }

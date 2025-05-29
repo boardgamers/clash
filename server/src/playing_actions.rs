@@ -9,7 +9,7 @@ use crate::construct::Construct;
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::{
     CustomAction, CustomActionActivation, CustomActionType, can_play_custom_action,
-    execute_custom_action,
+    collect_modifiers, execute_custom_action, happiness_modifiers, influence_modifiers,
 };
 use crate::content::persistent_events::{
     PaymentRequest, PersistentEventType, TriggerPersistentEventParams, trigger_persistent_event_ext,
@@ -294,29 +294,21 @@ impl PlayingAction {
             PlayingAction::Advance(_) => PlayingActionType::Advance,
             PlayingAction::FoundCity { .. } => PlayingActionType::FoundCity,
             PlayingAction::Construct(_) => PlayingActionType::Construct,
-            PlayingAction::Collect(c) => allowed_types(
+            PlayingAction::Collect(c) => assert_allowed(
                 &c.action_type,
-                &[
-                    PlayingActionType::Collect,
-                    PlayingActionType::Custom(CustomActionType::FreeEconomyCollect),
-                ],
+                &PlayingActionType::Collect,
+                &collect_modifiers(),
             ),
             PlayingAction::Recruit(_) => PlayingActionType::Recruit,
-            PlayingAction::IncreaseHappiness(h) => allowed_types(
+            PlayingAction::IncreaseHappiness(h) => assert_allowed(
                 &h.action_type,
-                &[
-                    PlayingActionType::IncreaseHappiness,
-                    PlayingActionType::Custom(CustomActionType::VotingIncreaseHappiness),
-                    PlayingActionType::Custom(CustomActionType::StatesmanIncreaseHappiness),
-                ],
+                &PlayingActionType::IncreaseHappiness,
+                &happiness_modifiers(),
             ),
-            PlayingAction::InfluenceCultureAttempt(i) => allowed_types(
+            PlayingAction::InfluenceCultureAttempt(i) => assert_allowed(
                 &i.action_type,
-                &[
-                    PlayingActionType::InfluenceCultureAttempt,
-                    PlayingActionType::Custom(CustomActionType::ArtsInfluenceCultureAttempt),
-                    PlayingActionType::Custom(CustomActionType::HellenisticInfluenceCultureAttempt),
-                ],
+                &PlayingActionType::InfluenceCultureAttempt,
+                &influence_modifiers(),
             ),
             PlayingAction::ActionCard(a) => PlayingActionType::ActionCard(*a),
             PlayingAction::WonderCard(name) => PlayingActionType::WonderCard(*name),
@@ -326,11 +318,19 @@ impl PlayingAction {
     }
 }
 
-fn allowed_types(
+fn assert_allowed(
     playing_action_type: &PlayingActionType,
-    allowed: &[PlayingActionType],
+    base_type: &PlayingActionType,
+    allowed_modifiers: &[CustomActionType],
 ) -> PlayingActionType {
-    assert!(allowed.iter().any(|a| a == playing_action_type));
+    match playing_action_type {
+        PlayingActionType::Custom(c) => {
+            assert!(allowed_modifiers.contains(c));
+        }
+        _ => {
+            assert!(base_type == playing_action_type);
+        }
+    }
     playing_action_type.clone()
 }
 

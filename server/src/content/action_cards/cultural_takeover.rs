@@ -2,7 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{ActionCard, ActionCardInfo, on_play_action_card};
 use crate::barbarians::get_barbarians_player;
 use crate::content::builtin::Builtin;
-use crate::content::custom_actions::CustomActionType;
+use crate::content::custom_actions::influence_modifiers;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{SelectedStructure, Structure, UnitTypeRequest};
 use crate::content::tactics_cards::TacticsCardFactory;
@@ -176,12 +176,7 @@ fn is_barbarian_takeover(game: &Game, c: &InfluenceCultureInfo) -> bool {
 fn is_influence(i: &PlayingActionInfo) -> bool {
     match &i.action_type {
         PlayingActionType::InfluenceCultureAttempt => true,
-        PlayingActionType::Custom(i)
-            if *i == CustomActionType::ArtsInfluenceCultureAttempt
-                || *i == CustomActionType::HellenisticInfluenceCultureAttempt =>
-        {
-            true
-        }
+        PlayingActionType::Custom(i) if influence_modifiers().contains(i) => true,
         _ => false,
     }
 }

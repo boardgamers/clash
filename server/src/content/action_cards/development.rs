@@ -4,7 +4,7 @@ use crate::collect::available_collect_actions_for_city;
 use crate::content::action_cards::cultural_takeover::cultural_takeover;
 use crate::content::action_cards::mercenaries::mercenaries;
 use crate::content::builtin::Builtin;
-use crate::content::custom_actions::CustomActionType;
+use crate::content::custom_actions::collect_modifiers;
 use crate::content::effects::{CollectEffect, ConstructEffect, PermanentEffect};
 use crate::content::incidents::great_builders::can_construct_anything;
 use crate::content::incidents::great_explorer::{action_explore_request, explore_adjacent_block};
@@ -148,7 +148,7 @@ pub(crate) fn collect_only() -> Builtin {
 fn is_collect(i: &PlayingActionInfo) -> bool {
     match &i.action_type {
         PlayingActionType::Collect => true,
-        PlayingActionType::Custom(c) if *c == CustomActionType::FreeEconomyCollect => true,
+        PlayingActionType::Custom(c) if collect_modifiers().contains(c) => true,
         _ => false,
     }
 }

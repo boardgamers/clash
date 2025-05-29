@@ -214,14 +214,9 @@ impl CustomActionType {
 
     #[must_use]
     pub fn is_modifier(&self) -> bool {
-        matches!(
-            self,
-            CustomActionType::ArtsInfluenceCultureAttempt
-                | CustomActionType::HellenisticInfluenceCultureAttempt
-                | CustomActionType::FreeEconomyCollect
-                | CustomActionType::VotingIncreaseHappiness
-                | CustomActionType::StatesmanIncreaseHappiness
-        )
+        collect_modifiers().contains(self)
+            || influence_modifiers().contains(self)
+            || happiness_modifiers().contains(self)
     }
 }
 
@@ -350,4 +345,22 @@ fn any_angry(player: &Player) -> bool {
         .cities
         .iter()
         .any(|city| city.mood_state == MoodState::Angry)
+}
+
+pub(crate) fn influence_modifiers() -> Vec<CustomActionType> {
+    vec![
+        CustomActionType::ArtsInfluenceCultureAttempt,
+        CustomActionType::HellenisticInfluenceCultureAttempt,
+    ]
+}
+
+pub(crate) fn happiness_modifiers() -> Vec<CustomActionType> {
+    vec![
+        CustomActionType::VotingIncreaseHappiness,
+        CustomActionType::StatesmanIncreaseHappiness,
+    ]
+}
+
+pub(crate) fn collect_modifiers() -> Vec<CustomActionType> {
+    vec![CustomActionType::FreeEconomyCollect]
 }

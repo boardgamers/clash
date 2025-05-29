@@ -4,7 +4,7 @@ use crate::city::City;
 use crate::city_pieces::Building;
 use crate::consts::INFLUENCE_MIN_ROLL;
 use crate::content::builtin::Builtin;
-use crate::content::custom_actions::CustomActionType;
+use crate::content::custom_actions::influence_modifiers;
 use crate::content::persistent_events::{
     PaymentRequest, PersistentEventType, SelectedStructure, Structure,
 };
@@ -569,9 +569,6 @@ pub fn available_influence_actions(game: &Game, player: usize) -> Vec<PlayingAct
         game,
         player,
         PlayingActionType::InfluenceCultureAttempt,
-        vec![
-            CustomActionType::ArtsInfluenceCultureAttempt,
-            CustomActionType::HellenisticInfluenceCultureAttempt,
-        ],
+        influence_modifiers(),
     )
 }
