@@ -1,13 +1,18 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Advance;
+use crate::card::HandCard;
 use crate::civilization::Civilization;
 use crate::combat::update_combat_strength;
 use crate::combat_listeners::CombatStrength;
 use crate::content::advances::warfare::draft_cost;
+use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
-use crate::content::persistent_events::PositionRequest;
+use crate::content::persistent_events::{HandCardsRequest, PositionRequest};
+use crate::game::Game;
+use crate::leader::{Leader, LeaderAbility};
 use crate::payment::PaymentConversion;
-use crate::player::gain_resources;
+use crate::player::{Player, gain_resources};
+use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
 use itertools::Itertools;
@@ -16,7 +21,7 @@ pub(crate) fn greece() -> Civilization {
     Civilization::new(
         "Greece",
         vec![study(), sparta(), hellenistic_culture(), city_states()],
-        vec![],
+        vec![alexander()],
     )
 }
 
@@ -119,8 +124,7 @@ fn city_states() -> SpecialAdvanceInfo {
             if game
                 .player_mut(player_index)
                 .event_info
-                .insert("city_states".to_string(), "used".to_string())
-                .is_some()
+                .contains_key("city_states")
             {
                 return None;
             }
@@ -167,8 +171,77 @@ fn city_states() -> SpecialAdvanceInfo {
                 let p = game.player_mut(s.player_index);
                 p.get_city_mut(choice).activate();
                 p.get_city_mut(*position).increase_mood_state();
+                p.event_info
+                    .insert("city_states".to_string(), "used".to_string());
             }
         },
     )
     .build()
+}
+
+const IDOL: &str = "As a free action, pay 1 culture token to \
+            play an action card as a free action";
+
+fn alexander() -> Leader {
+    // todo ruler of the world
+    Leader::new(
+        "Alexander the Great",
+        LeaderAbility::builder("Idol", IDOL)
+            .add_custom_action(CustomActionType::Idol)
+            .build(),
+        LeaderAbility::builder(
+            "Ruler of the World",
+            "In a land battle, gain 1 combat value for each region
+            with a city you control, except the starting region.",
+        )
+        .build(),
+    )
+}
+
+pub(crate) fn use_idol() -> Builtin {
+    Builtin::builder("Idol", IDOL)
+        .add_hand_card_request(
+            |event| &mut event.custom_action,
+            0,
+            |game, player, _| {
+                Some(HandCardsRequest::new(
+                    idol_cards(game, game.player(player), &ResourcePile::empty()),
+                    1..=1,
+                    "Select an action card to play as a free action using Idol",
+                ))
+            },
+            |game, s, _| {
+                let HandCard::ActionCard(id) = s.choice[0] else {
+                    panic!("expected action card");
+                };
+                game.add_info_log_item(&format!(
+                    "{} decided to play {} as a free action using Idol",
+                    s.player_name,
+                    game.cache.get_civil_card(id).name
+                ));
+
+                PlayingAction::ActionCard(id)
+                    .execute_without_action_cost(game, s.player_index)
+                    .expect("playing action card with Idol");
+            },
+        )
+        .build()
+}
+
+pub(crate) fn idol_cards(game: &Game, p: &Player, extra_cost: &ResourcePile) -> Vec<HandCard> {
+    p.action_cards
+        .iter()
+        .filter_map(|&a| {
+            let action_cost = PlayingActionType::ActionCard(a).cost(game);
+            if action_cost.free {
+                // can play directly
+                return None;
+            }
+
+            let mut payment_options = action_cost.payment_options(p);
+            payment_options.default += extra_cost.clone();
+            p.can_afford(&payment_options)
+                .then_some(HandCard::ActionCard(a))
+        })
+        .collect_vec()
 }

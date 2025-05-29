@@ -332,6 +332,13 @@ impl Assets {
                     "../assets/augustus-of-prima-porta-svgrepo-com.png"
                 )),
             ),
+            // Greece
+            (
+                CustomActionType::Idol,
+                load_png(include_bytes!(
+                    "../assets/alexander-the-great-svgrepo-com.png"
+                )),
+            ),
         ]
         .iter()
         .cloned()

@@ -305,7 +305,7 @@ pub fn combat_requirement_met(
     })
 }
 
-pub(crate) fn can_play_action_card(game: &Game, p: &Player, id: u8) -> Result<(), String> {
+pub(crate) fn can_play_civil_card(game: &Game, p: &Player, id: u8) -> Result<(), String> {
     if !p.action_cards.contains(&id) {
         return Err("Action card not available".to_string());
     }

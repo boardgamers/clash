@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::action_card::{can_play_action_card, play_action_card};
+use crate::action_card::{can_play_civil_card, play_action_card};
 use crate::advance::{AdvanceAction, base_advance_cost, gain_advance_without_payment};
 use crate::city::found_city;
 use crate::collect::{PositionCollection, collect};
@@ -144,7 +144,7 @@ impl PlayingActionType {
                 can_play_custom_action(game, p, *c)?;
             }
             PlayingActionType::ActionCard(id) => {
-                can_play_action_card(game, p, *id)?;
+                can_play_civil_card(game, p, *id)?;
             }
             PlayingActionType::WonderCard(name) => {
                 if !p.wonder_cards.contains(name) {
@@ -213,7 +213,15 @@ impl PlayingAction {
             game.actions_left -= 1;
         }
 
-        let origin_override = match playing_action_type {
+        self.execute_without_action_cost(game, player_index)
+    }
+
+    pub(crate) fn execute_without_action_cost(
+        self,
+        game: &mut Game,
+        player_index: usize,
+    ) -> Result<(), String> {
+        let origin_override = match self.playing_action_type() {
             PlayingActionType::Custom(c) => {
                 if let Some(key) = c.info().once_per_turn {
                     game.players[player_index]

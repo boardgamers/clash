@@ -1,4 +1,4 @@
-use crate::common::{JsonTest, TestAction, move_action, payment_response};
+use crate::common::{JsonTest, TestAction, custom_action, move_action, payment_response};
 use server::action::Action;
 use server::city_pieces::Building;
 use server::content::custom_actions::CustomActionType;
@@ -110,6 +110,18 @@ fn city_states() {
                     "B3",
                 )])),
             ),
+        ],
+    )
+}
+
+#[test]
+fn idol() {
+    JSON.test(
+        "idol",
+        vec![
+            TestAction::undoable(0, custom_action(CustomActionType::Idol)).skip_json(),
+            TestAction::undoable(0, payment_response(ResourcePile::culture_tokens(1))).skip_json(),
+            TestAction::undoable(0, payment_response(ResourcePile::culture_tokens(1))),
         ],
     )
 }
