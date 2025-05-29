@@ -124,6 +124,7 @@ pub enum PersistentEventType {
     CustomAction(CustomActionActivation),
     ChooseActionCard,
     ChooseIncident(IncidentInfo),
+    CityActivationMoodDecreased(Position),
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]

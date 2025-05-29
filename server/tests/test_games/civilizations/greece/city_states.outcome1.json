@@ -5,16 +5,16 @@
     {
       "id": 0,
       "resources": {
-        "food": 7,
+        "food": 2,
         "wood": 5,
         "ore": 5,
-        "ideas": 1,
-        "gold": 3,
-        "mood_tokens": 10,
-        "culture_tokens": 10
+        "ideas": 3,
+        "gold": 5,
+        "mood_tokens": 7,
+        "culture_tokens": 8
       },
       "resource_limit": {
-        "food": 7,
+        "food": 2,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -26,7 +26,7 @@
             "market": 1
           },
           "mood_state": "Happy",
-          "activations": 1,
+          "activations": 2,
           "position": "A1"
         },
         {
@@ -36,7 +36,6 @@
           },
           "mood_state": "Angry",
           "activations": 6,
-          "angry_activation": true,
           "position": "C2",
           "port_position": "C3"
         },
@@ -51,9 +50,11 @@
           "position": "B1"
         },
         {
-          "mood_state": "Angry",
-          "activations": 4,
-          "angry_activation": true,
+          "city_pieces": {
+            "market": 1
+          },
+          "mood_state": "Neutral",
+          "activations": 5,
           "position": "B3"
         }
       ],
@@ -64,71 +65,26 @@
           "id": 0
         },
         {
-          "position": "B3",
-          "unit_type": "Settler",
-          "id": 5
-        },
-        {
-          "position": "B3",
-          "unit_type": "Settler",
-          "id": 6
-        },
-        {
-          "position": "C3",
-          "unit_type": "Ship",
-          "id": 7,
-          "carried_units": [
-            {
-              "unit_type": "Cavalry",
-              "id": 1
-            },
-            {
-              "unit_type": "Elephant",
-              "id": 2
-            }
-          ]
-        },
-        {
-          "position": "C3",
-          "unit_type": "Ship",
-          "id": 8
-        },
-        {
-          "position": "C3",
-          "unit_type": "Ship",
-          "id": 9
-        },
-        {
-          "position": "A1",
-          "unit_type": "Settler",
-          "id": 10
-        },
-        {
           "position": "A1",
           "unit_type": "Infantry",
-          "id": 11
+          "id": 10
         }
       ],
-      "civilization": "test2",
-      "available_leaders": [
-        "Kʼinich Janaab Pakal I"
-      ],
+      "civilization": "Greece",
       "advances": [
         "Draft",
         "Farming",
-        "FreeEconomy",
-        "FreeEducation",
         "Mining",
-        "Sanitation",
-        "Storage",
-        "Voting",
-        "Writing"
+        "Voting"
       ],
-      "incident_tokens": 2,
+      "incident_tokens": 3,
       "wonder_cards": [
-        "GreatGardens"
+        "Pyramids"
       ],
-      "next_unit_id": 12
+      "next_unit_id": 11,
+      "event_info": {
+        "city_states": "used"
+      }
     },
     {
       "id": 1,
@@ -175,17 +131,27 @@
           "id": 1
         }
       ],
-      "civilization": "test0",
-      "available_leaders": [
-        "Alexander",
-        "Kleopatra"
-      ],
+      "civilization": "test1",
       "advances": [
         "Farming",
-        "Mining"
+        "Mining",
+        "Tactics"
       ],
       "incident_tokens": 3,
+      "action_cards": [
+        7
+      ],
       "next_unit_id": 2
+    },
+    {
+      "id": 2,
+      "civilization": "Barbarians",
+      "next_unit_id": 0
+    },
+    {
+      "id": 3,
+      "civilization": "Pirates",
+      "next_unit_id": 0
     }
   ],
   "map": {
@@ -207,6 +173,10 @@
       [
         "A4",
         "Mountain"
+      ],
+      [
+        "A5",
+        "Fertile"
       ],
       [
         "B1",
@@ -281,13 +251,11 @@
                     "Playing": {
                       "Recruit": {
                         "units": {
-                          "settlers": 1,
                           "infantry": 1
                         },
                         "city_position": "A1",
                         "payment": {
-                          "gold": 2,
-                          "mood_tokens": 1
+                          "culture_tokens": 1
                         }
                       }
                     }
@@ -296,11 +264,17 @@
                     {
                       "op": "replace",
                       "path": "/actions_left",
+                      "value": 2
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/cities/0/activations",
                       "value": 1
                     },
                     {
-                      "op": "remove",
-                      "path": "/players/0/cities/0/activations"
+                      "op": "replace",
+                      "path": "/players/0/cities/0/mood_state",
+                      "value": "Happy"
                     },
                     {
                       "op": "replace",
@@ -309,21 +283,77 @@
                     },
                     {
                       "op": "replace",
-                      "path": "/players/0/resources/gold",
-                      "value": 5
+                      "path": "/players/0/resources/culture_tokens",
+                      "value": 9
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/units/1"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/event_info"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events"
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectPositions": [
+                        "B3"
+                      ]
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "CityActivationMoodDecreased": "A1"
+                          },
+                          "handler": {
+                            "origin": {
+                              "SpecialAdvance": "CityStates"
+                            },
+                            "priority": 0,
+                            "request": {
+                              "SelectPositions": {
+                                "choices": [
+                                  "B3"
+                                ],
+                                "description": "Select a city to decrease its mood instead of the activated city",
+                                "needed": {
+                                  "end": 1,
+                                  "start": 0
+                                }
+                              }
+                            }
+                          },
+                          "last_priority_used": 0,
+                          "player": 0
+                        }
+                      ]
                     },
                     {
                       "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 11
+                      "path": "/players/0/cities/0/mood_state",
+                      "value": "Neutral"
                     },
                     {
-                      "op": "remove",
-                      "path": "/players/0/units/6"
+                      "op": "replace",
+                      "path": "/players/0/cities/3/activations",
+                      "value": 4
                     },
                     {
-                      "op": "remove",
-                      "path": "/players/0/units/6"
+                      "op": "replace",
+                      "path": "/players/0/cities/3/mood_state",
+                      "value": "Happy"
                     }
                   ]
                 }
@@ -334,16 +364,19 @@
       ]
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 2,
   "log": [
     [
-      "Player1 paid 2 gold and 1 mood token to recruit 1 settler and 1 infantry in the city at A1",
+      "Player1 paid 1 culture token to recruit 1 infantry in the city at A1 making it Neutral",
       "Draft reduced the cost of 1 Infantry to 1 mood token",
-      "Sanitation reduced the cost of 1 Settler to 1 mood token"
+      "Sparta allows to pay the Draft cost as culture tokes"
+    ],
+    [
+      "Player1 decided to decrease the mood of B3 instead of A1 using City States"
     ]
   ],
   "undo_limit": 0,
-  "actions_left": 0,
+  "actions_left": 1,
   "round": 6,
   "age": 1,
   "messages": [
@@ -361,8 +394,5 @@
     10,
     10
   ],
-  "rng": "46312381643103681595563341886777350953",
-  "wonders_left": [
-    "Pyramids"
-  ]
+  "rng": "234162992961072890508432380903651342097"
 }

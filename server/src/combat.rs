@@ -240,6 +240,16 @@ pub(crate) fn start_combat(game: &mut Game, combat: Combat) {
     combat_loop(game, CombatRoundStart::new(c));
 }
 
+pub(crate) fn get_combat_strength(player: usize, e: &CombatRoundStart) -> &CombatStrength {
+    if player == e.combat.attacker() {
+        &e.attacker_strength
+    } else if player == e.combat.defender() {
+        &e.defender_strength
+    } else {
+        panic!("Invalid player index")
+    }
+}
+
 pub(crate) fn update_combat_strength(
     game: &mut Game,
     player: usize,

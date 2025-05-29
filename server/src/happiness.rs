@@ -1,5 +1,5 @@
 use crate::city::MoodState;
-use crate::content::custom_actions::CustomActionType;
+use crate::content::custom_actions::{CustomActionType, happiness_modifiers};
 use crate::game::Game;
 use crate::leader::leader_position;
 use crate::payment::{PaymentOptions, PaymentReason};
@@ -16,10 +16,7 @@ pub fn available_happiness_actions(game: &Game, player: usize) -> Vec<PlayingAct
         game,
         player,
         PlayingActionType::IncreaseHappiness,
-        vec![
-            CustomActionType::VotingIncreaseHappiness,
-            CustomActionType::StatesmanIncreaseHappiness,
-        ],
+        happiness_modifiers(),
     )
 }
 

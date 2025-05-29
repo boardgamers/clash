@@ -102,6 +102,7 @@ pub(crate) struct PersistentEvents {
     pub incident: PersistentEvent<IncidentInfo>,
     pub stop_barbarian_movement: PersistentEvent<Vec<Position>>,
     pub combat_start: PersistentEvent<Combat>,
+    pub combat_round_start_allow_tactics: PersistentEvent<CombatRoundStart>,
     pub combat_round_start: PersistentEvent<CombatRoundStart>,
     pub combat_round_start_reveal_tactics: PersistentEvent<CombatRoundStart>,
     pub combat_round_start_tactics: PersistentEvent<CombatRoundStart>,
@@ -113,6 +114,7 @@ pub(crate) struct PersistentEvents {
     pub custom_action: PersistentEvent<CustomActionActivation>,
     pub choose_incident: PersistentEvent<IncidentInfo>,
     pub choose_action_card: PersistentEvent,
+    pub city_activation_mood_decreased: PersistentEvent<Position>,
 }
 
 impl PersistentEvents {
@@ -138,6 +140,7 @@ impl PersistentEvents {
             combat_start: Event::new("combat_start"),
             combat_round_start: Event::new("combat_round_start"),
             combat_round_start_reveal_tactics: Event::new("combat_round_start_reveal_tactics"),
+            combat_round_start_allow_tactics: Event::new("combat_round_start_allow_tactics"),
             combat_round_start_tactics: Event::new("combat_round_start_tactics"),
             combat_round_end: Event::new("combat_round_end"),
             combat_round_end_tactics: Event::new("combat_round_end_tactics"),
@@ -148,6 +151,7 @@ impl PersistentEvents {
             custom_action: Event::new("custom_action_bartering"),
             choose_action_card: Event::new("great_mausoleum_action_card"),
             choose_incident: Event::new("great_mausoleum_incident"),
+            city_activation_mood_decreased: Event::new("city_activation_mood_decreased"),
         }
     }
 }

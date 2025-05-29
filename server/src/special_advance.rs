@@ -16,6 +16,12 @@ pub enum SpecialAdvance {
     RomanRoads,
     Captivi,
     Provinces,
+
+    // Greece
+    Study,
+    Sparta,
+    HellenisticCulture,
+    CityStates,
 }
 
 #[allow(clippy::trivially_copy_pass_by_ref)]

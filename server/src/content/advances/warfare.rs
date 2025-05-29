@@ -168,7 +168,7 @@ fn draft() -> AdvanceBuilder {
     .with_advance_bonus(CultureToken)
     .add_transient_event_listener(
         |event| &mut event.recruit_cost,
-        0,
+        2,
         |cost, units, player| {
             if units.infantry > 0 {
                 // insert at beginning so that it's preferred over gold

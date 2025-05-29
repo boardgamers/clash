@@ -22,6 +22,7 @@ use crate::movement::{
 };
 use crate::objective_card::{complete_objective_card, gain_objective_card, on_objective_cards};
 use crate::playing_actions::{PlayingAction, PlayingActionType};
+use crate::position::Position;
 use crate::recruit::on_recruit;
 use crate::resource::check_for_waste;
 use crate::resource_pile::ResourcePile;
@@ -198,6 +199,29 @@ pub(crate) fn after_action(game: &mut Game, player_index: usize) {
         p.great_mausoleum_action_cards -= 1;
         on_action_end(game, player_index);
     }
+    let mut city: Option<Position> = None;
+    for c in &mut game.player_mut(player_index).cities {
+        if c.activation_mood_decreased {
+            city = Some(c.position);
+        }
+        c.activation_mood_decreased = false;
+    }
+    if let Some(pos) = city {
+        on_city_activation_mood_decreased(game, player_index, pos);
+    }
+}
+
+pub(crate) fn on_city_activation_mood_decreased(
+    game: &mut Game,
+    player_index: usize,
+    pos: Position,
+) {
+    let _ = game.trigger_persistent_event(
+        &[player_index],
+        |e| &mut e.city_activation_mood_decreased,
+        pos,
+        PersistentEventType::CityActivationMoodDecreased,
+    );
 }
 
 pub(crate) fn on_action_end(game: &mut Game, player_index: usize) {
@@ -270,6 +294,9 @@ pub(crate) fn execute_custom_phase_action(
         CustomAction(a) => execute_custom_action(game, player_index, a),
         ChooseActionCard => on_action_end(game, player_index),
         ChooseIncident(i) => on_choose_incident(game, player_index, i),
+        CityActivationMoodDecreased(p) => {
+            on_city_activation_mood_decreased(game, player_index, p);
+        }
     }
 
     if let Some(s) = game.events.pop() {
