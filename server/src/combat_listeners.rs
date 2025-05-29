@@ -37,6 +37,9 @@ pub struct CombatStrength {
     #[serde(default)]
     #[serde(skip_serializing_if = "utils::is_false")]
     pub deny_combat_abilities: bool,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "utils::is_false")]
+    pub deny_tactics_card: bool,
 }
 
 impl Default for CombatStrength {
@@ -55,12 +58,14 @@ impl CombatStrength {
             roll_log: vec![],
             tactics_card: None,
             deny_combat_abilities: false,
+            deny_tactics_card: false,
         }
     }
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Default)]
 pub enum CombatEventPhase {
+    AllowTacticsCard,
     #[default]
     Default,
     RevealTacticsCard,
@@ -95,7 +100,7 @@ impl CombatRoundStart {
             combat,
             attacker_strength: CombatStrength::new(),
             defender_strength: CombatStrength::new(),
-            phase: CombatEventPhase::Default,
+            phase: CombatEventPhase::AllowTacticsCard,
             final_result: None,
         }
     }
@@ -233,7 +238,8 @@ impl CombatRoundEnd {
     }
 }
 
-const ROUND_START_TYPES: &[CombatEventPhase; 3] = &[
+const ROUND_START_TYPES: &[CombatEventPhase; 4] = &[
+    CombatEventPhase::AllowTacticsCard,
     CombatEventPhase::Default,
     CombatEventPhase::RevealTacticsCard,
     CombatEventPhase::TacticsCard,
@@ -249,6 +255,7 @@ pub(crate) fn combat_round_start(
         PersistentEventType::CombatRoundStart,
         ROUND_START_TYPES,
         |phase| match phase {
+            CombatEventPhase::AllowTacticsCard => |e| &mut e.combat_round_start_allow_tactics,
             CombatEventPhase::Default => |e| &mut e.combat_round_start,
             CombatEventPhase::RevealTacticsCard => |e| &mut e.combat_round_start_reveal_tactics,
             CombatEventPhase::TacticsCard => |e| &mut e.combat_round_start_tactics,
@@ -377,7 +384,7 @@ pub(crate) fn event_with_tactics<T: Clone + PartialEq>(
         let reveal_card = matches!(t, CombatEventPhase::RevealTacticsCard);
 
         event_type = (match t {
-            CombatEventPhase::Default => game.trigger_persistent_event(
+            CombatEventPhase::Default | CombatEventPhase::AllowTacticsCard => game.trigger_persistent_event(
                 &get_combat(&event_type).players(),
                 event,
                 event_type,

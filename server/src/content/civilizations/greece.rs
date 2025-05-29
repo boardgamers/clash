@@ -1,6 +1,8 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Advance;
 use crate::civilization::Civilization;
+use crate::combat::update_combat_strength;
+use crate::combat_listeners::CombatStrength;
 use crate::content::advances::warfare::draft_cost;
 use crate::payment::PaymentConversion;
 use crate::player::gain_resources;
@@ -56,6 +58,25 @@ fn sparta() -> SpecialAdvanceInfo {
                         ResourcePile::culture_tokens(1),
                         draft_cost(player),
                     ),
+                );
+            }
+        },
+    )
+    .add_simple_persistent_event_listener(
+        |event| &mut event.combat_round_start_allow_tactics,
+        0,
+        |game, player, _name, r| {
+            let opponent = r.combat.opponent(player);
+            if r.combat.fighting_units(game, player) < r.combat.fighting_units(game, opponent) {
+                update_combat_strength(
+                    game,
+                    opponent,
+                    r,
+                    |_game, _combat, s: &mut CombatStrength, _role| {
+                        s.roll_log
+                            .push("Sparta denies playing tactics cards".to_string());
+                        s.deny_tactics_card = true;
+                    },
                 );
             }
         },

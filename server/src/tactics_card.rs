@@ -5,7 +5,7 @@ use crate::action_card;
 use crate::action_card::ActionCard;
 use crate::advance::AdvanceBuilder;
 use crate::card::HandCard;
-use crate::combat::{Combat, CombatModifier, update_combat_strength};
+use crate::combat::{Combat, CombatModifier, update_combat_strength, get_combat_strength};
 use crate::combat_listeners::{CombatRoundEnd, CombatRoundStart, CombatStrength};
 use crate::content::persistent_events::HandCardsRequest;
 use crate::events::EventOrigin;
@@ -280,6 +280,10 @@ pub(crate) fn play_tactics_card(b: AdvanceBuilder) -> AdvanceBuilder {
         |e| &mut e.combat_round_start,
         0,
         |game, player, s| {
+            if get_combat_strength(player, s).deny_tactics_card {
+                return None;
+            }
+
             let cards = available_tactics_cards(game, player, &s.combat);
             if cards.is_empty() {
                 return None;
