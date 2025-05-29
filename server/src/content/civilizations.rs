@@ -1,6 +1,6 @@
+mod greece;
 pub(crate) mod maya;
 pub(crate) mod rome;
-mod greece;
 
 use crate::civilization::Civilization;
 use crate::leader::{Leader, LeaderAbility};

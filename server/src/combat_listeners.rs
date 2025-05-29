@@ -384,12 +384,13 @@ pub(crate) fn event_with_tactics<T: Clone + PartialEq>(
         let reveal_card = matches!(t, CombatEventPhase::RevealTacticsCard);
 
         event_type = (match t {
-            CombatEventPhase::Default | CombatEventPhase::AllowTacticsCard => game.trigger_persistent_event(
-                &get_combat(&event_type).players(),
-                event,
-                event_type,
-                store_type,
-            ),
+            CombatEventPhase::Default | CombatEventPhase::AllowTacticsCard => game
+                .trigger_persistent_event(
+                    &get_combat(&event_type).players(),
+                    event,
+                    event_type,
+                    store_type,
+                ),
             CombatEventPhase::RevealTacticsCard | CombatEventPhase::TacticsCard => {
                 trigger_tactics_event(
                     game,

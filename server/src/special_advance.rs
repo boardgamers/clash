@@ -16,7 +16,7 @@ pub enum SpecialAdvance {
     RomanRoads,
     Captivi,
     Provinces,
-    
+
     // Greece
     Study,
     Sparta,
