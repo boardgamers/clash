@@ -23,6 +23,7 @@ pub struct City {
     #[readonly]
     pub mood_state: MoodState,
     pub activations: u32,
+    pub activation_mood_decreased: bool, // transient
     pub angry_activation: bool,
     pub player_index: usize,
     pub position: Position,
@@ -37,6 +38,7 @@ impl City {
             mood_state: data.mood_state,
             activations: data.activations,
             angry_activation: data.angry_activation,
+            activation_mood_decreased: false, // transient, not in data
             player_index,
             position: data.position,
             port_position: data.port_position,
@@ -74,6 +76,7 @@ impl City {
             mood_state: Neutral,
             activations: 0,
             angry_activation: false,
+            activation_mood_decreased: false, // transient, not in data
             player_index,
             position,
             port_position: None,
@@ -91,6 +94,7 @@ impl City {
         }
         if self.is_activated() {
             self.decrease_mood_state();
+            self.activation_mood_decreased = true;
         }
         self.activations += 1;
     }
@@ -210,7 +214,7 @@ impl CityData {
     }
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone, Ord, PartialOrd, Eq)]
 pub enum MoodState {
     Happy = 2,
     Neutral = 1,

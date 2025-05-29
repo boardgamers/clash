@@ -114,6 +114,7 @@ pub(crate) struct PersistentEvents {
     pub custom_action: PersistentEvent<CustomActionActivation>,
     pub choose_incident: PersistentEvent<IncidentInfo>,
     pub choose_action_card: PersistentEvent,
+    pub city_activation_mood_decreased: PersistentEvent<Position>,
 }
 
 impl PersistentEvents {
@@ -150,6 +151,7 @@ impl PersistentEvents {
             custom_action: Event::new("custom_action_bartering"),
             choose_action_card: Event::new("great_mausoleum_action_card"),
             choose_incident: Event::new("great_mausoleum_incident"),
+            city_activation_mood_decreased: Event::new("city_activation_mood_decreased"),
         }
     }
 }
