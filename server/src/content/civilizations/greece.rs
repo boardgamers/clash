@@ -9,7 +9,7 @@ use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::{HandCardsRequest, PositionRequest};
 use crate::game::Game;
-use crate::leader::{Leader, LeaderAbility, LeaderInfo};
+use crate::leader::{Leader, LeaderAbility, LeaderInfo, leader_position};
 use crate::map::{block_has_player_city, get_map_setup};
 use crate::payment::PaymentConversion;
 use crate::player::{Player, gain_resources};
@@ -22,7 +22,7 @@ pub(crate) fn greece() -> Civilization {
     Civilization::new(
         "Greece",
         vec![study(), sparta(), hellenistic_culture(), city_states()],
-        vec![alexander()],
+        vec![alexander(), leonidas()],
     )
 }
 
@@ -266,4 +266,48 @@ pub(crate) fn idol_cards(game: &Game, p: &Player, extra_cost: &ResourcePile) -> 
                 .then_some(HandCard::ActionCard(a))
         })
         .collect_vec()
+}
+
+fn leonidas() -> LeaderInfo {
+    LeaderInfo::new(
+        Leader::Leonidas,
+        "Leonidas I",
+        LeaderAbility::builder(
+            "That's Sparta",
+            "Gain 1 culture token when recruiting in the city where Leonidas is present.",
+        )
+        .add_simple_persistent_event_listener(
+            |event| &mut event.recruit,
+            4,
+            |game, player_index, _player_name, r| {
+                if leader_position(game.player(player_index)) == r.city_position {
+                    gain_resources(
+                        game,
+                        player_index,
+                        ResourcePile::culture_tokens(1),
+                        |name, pile| format!("{name} gained {pile} for That's Sparta"),
+                    );
+                }
+            },
+        )
+        .build(),
+        LeaderAbility::builder(
+            "Hero of Thermopylae",
+            "In land battle: \
+            Get +2 combat value per army unit you have less than your enemy.",
+        )
+        .add_combat_strength_listener(8, |game, c, s, r| {
+            let p = c.player(r);
+            let pl = c.fighting_units(game, p).len();
+            let op = c.fighting_units(game, c.opponent(p)).len();
+
+            let extra = op.saturating_sub(pl) * 2;
+            if extra > 0 {
+                s.extra_combat_value += extra as i8;
+                s.roll_log
+                    .push(format!("Hero of Thermopylae adds {extra} combat value",));
+            }
+        })
+        .build(),
+    )
 }
