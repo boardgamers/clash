@@ -2,9 +2,9 @@ use serde::{Deserialize, Serialize};
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::events::EventOrigin;
+use crate::game::Game;
 use crate::player::Player;
 use crate::position::Position;
-use crate::unit::UnitType;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Copy, Hash)]
 pub enum Leader {
@@ -33,6 +33,13 @@ pub enum Leader {
     Alexander,
     Leonidas,
     Pericles,
+}
+
+impl Leader {
+    #[must_use]
+    pub fn name(&self, game: &Game) -> String {
+        game.cache.get_leader(self).name.clone()
+    }
 }
 
 #[derive(Clone)]
@@ -107,6 +114,6 @@ pub(crate) fn leader_position(player: &Player) -> Position {
     player
         .units
         .iter()
-        .find_map(|unit| (unit.unit_type == UnitType::Leader).then_some(unit.position))
+        .find_map(|unit| unit.unit_type.is_leader().then_some(unit.position))
         .expect("unit not found")
 }

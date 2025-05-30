@@ -37,7 +37,7 @@ fn test_sanitation_and_draft() {
     // we should figure out that sanitation or draft are used, but not both
     // actually that code turns out to be too complicated and slow, so the log now says you
     // used both
-    let units = Units::new(1, 1, 0, 0, 0, 0);
+    let units = Units::new(1, 1, 0, 0, 0, None);
     let city_position = Position::from_offset("A1");
     JSON.test(
         "sanitation_and_draft",
@@ -296,7 +296,7 @@ fn test_civil_liberties() {
             TestAction::undoable(
                 0,
                 Action::Playing(Recruit(playing_actions::Recruit::new(
-                    &Units::new(0, 1, 0, 0, 0, 0),
+                    &Units::new(0, 1, 0, 0, 0, None),
                     Position::from_offset("A1"),
                     ResourcePile::mood_tokens(2),
                 ))),
@@ -669,7 +669,7 @@ fn test_overpay() {
         vec![TestAction::illegal(
             0,
             Action::Playing(Recruit(playing_actions::Recruit::new(
-                &Units::new(0, 1, 0, 0, 0, 0),
+                &Units::new(0, 1, 0, 0, 0, None),
                 Position::from_offset("A1"),
                 ResourcePile::mood_tokens(1) + ResourcePile::gold(2), //paid too much
             ))),

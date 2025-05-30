@@ -172,7 +172,7 @@ fn test_recruit_combat() {
             TestAction::undoable(
                 0,
                 Action::Playing(Recruit(server::playing_actions::Recruit::new(
-                    &Units::new(0, 0, 3, 0, 0, 0),
+                    &Units::new(0, 0, 3, 0, 0, None),
                     Position::from_offset("C2"),
                     ResourcePile::wood(5) + ResourcePile::gold(1),
                 ))),

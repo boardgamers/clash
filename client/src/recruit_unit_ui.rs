@@ -1,15 +1,6 @@
 use itertools::Itertools;
 use macroquad::prelude::*;
 
-use server::game::Game;
-use server::leader;
-use server::player::{CostTrigger, Player};
-use server::player_events::CostInfo;
-use server::position::Position;
-use server::recruit::{recruit_cost, recruit_cost_without_replaced};
-use server::unit::{get_units_to_replace, Unit, UnitType, Units};
-use server::unit::UnitType::*;
-use server::utils::remove_element;
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::construct_ui::{ConstructionPayment, ConstructionProject};
 use crate::dialog_ui::{OkTooltip, cancel_button, ok_button};
@@ -18,6 +9,15 @@ use crate::select_ui;
 use crate::select_ui::{CountSelector, HasCountSelectableObject, HighlightType};
 use crate::tooltip::show_tooltip_for_circle;
 use crate::unit_ui::{UnitSelection, add_unit_description, draw_unit_type};
+use server::game::Game;
+use server::leader;
+use server::player::{CostTrigger, Player};
+use server::player_events::CostInfo;
+use server::position::Position;
+use server::recruit::{recruit_cost, recruit_cost_without_replaced};
+use server::unit::UnitType::*;
+use server::unit::{Unit, UnitType, Units, get_units_to_replace};
+use server::utils::remove_element;
 
 #[derive(Clone)]
 pub struct SelectableUnit {
@@ -30,7 +30,7 @@ pub struct SelectableUnit {
 pub struct RecruitAmount {
     player_index: usize,
     city_position: Position,
-    pub units: Vec<UnitType>,
+    pub units: Units,
     pub selectable: Vec<SelectableUnit>,
 }
 
@@ -45,19 +45,18 @@ impl RecruitAmount {
         game: &Game,
         player_index: usize,
         city_position: Position,
-        units: Vec<UnitType>,
+        units: Units,
     ) -> StateUpdate {
         let player = game.player(player_index);
         let selectable: Vec<SelectableUnit> = new_units(player)
             .into_iter()
-            .map(|u| selectable_unit(city_position, &units, player, &u, game))
+            .map(|u| selectable_unit(city_position, &units, player, u, game))
             .collect();
 
         StateUpdate::OpenDialog(ActiveDialog::RecruitUnitSelection(RecruitAmount {
             player_index,
             city_position,
             units,
-            leader_name: leader_name.cloned(),
             selectable,
         }))
     }
@@ -65,18 +64,15 @@ impl RecruitAmount {
 
 fn selectable_unit(
     city_position: Position,
-    units: &Vec<UnitType>,
+    units: &Units,
     player: &Player,
-    unit: UnitType,
+    unit_type: UnitType,
     game: &Game,
 ) -> SelectableUnit {
     let mut all = units.clone();
-    all.push(unit);
+    all += &unit_type;
 
-    let current: u8 =
-        units.iter().filter(
-            |&u| u == unit
-        ).count() as u8;
+    let current: u8 = units.get(&unit_type);
 
     let cost = recruit_cost_without_replaced(
         game,
@@ -87,7 +83,7 @@ fn selectable_unit(
     );
     let max = if cost.is_ok() { current + 1 } else { current };
     SelectableUnit {
-        unit_type: unit.unit_type,
+        unit_type,
         cost,
         selectable: CountSelector {
             current,
@@ -104,8 +100,8 @@ fn new_units(player: &Player) -> Vec<UnitType> {
             player
                 .available_leaders
                 .iter()
-                .map(|l| Leader(l))
-                .collect_vec()
+                .map(|l| Leader(*l))
+                .collect_vec(),
         )
         .collect()
 }
@@ -151,10 +147,10 @@ impl RecruitSelection {
             self.replaced_units.as_slice(),
             CostTrigger::WithModifiers,
         )
-            .map_or_else(
-                |_| OkTooltip::Invalid("Replace exact amount of units".to_string()),
-                |_| OkTooltip::Valid("Recruit units".to_string()),
-            )
+        .map_or_else(
+            |_| OkTooltip::Invalid("Replace exact amount of units".to_string()),
+            |_| OkTooltip::Valid("Recruit units".to_string()),
+        )
     }
 }
 
@@ -216,20 +212,12 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
         |s, u| {
             let mut units = s.units.clone();
             units.push(u.unit_type);
-            update_selection(
-                game,
-                s,
-                units,
-            )
+            update_selection(game, s, units)
         },
         |s, u| {
             let mut units = s.units.clone();
             remove_element(&mut units, &u.unit_type);
-            update_selection(
-                game,
-                s,
-                units,
-            )
+            update_selection(game, s, units)
         },
         Vec2::new(0., 0.),
         true,
@@ -246,7 +234,7 @@ fn open_dialog(rc: &RenderContext, city: Position, sel: RecruitSelection) -> Sta
         &sel.replaced_units,
         CostTrigger::WithModifiers,
     )
-        .unwrap();
+    .unwrap();
     StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
         rc,
         rc.game.city(p, city),
@@ -259,11 +247,7 @@ fn open_dialog(rc: &RenderContext, city: Position, sel: RecruitSelection) -> Sta
     )))
 }
 
-fn update_selection(
-    game: &Game,
-    s: &RecruitAmount,
-    units: Vec<UnitType>,
-) -> StateUpdate {
+fn update_selection(game: &Game, s: &RecruitAmount, units: Vec<UnitType>) -> StateUpdate {
     RecruitAmount::new_selection(game, s.player_index, s.city_position, units, leader_name)
 }
 

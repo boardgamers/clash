@@ -361,9 +361,9 @@ impl Cache {
     }
 
     #[must_use]
-    pub fn get_leader(&self, leader: Leader) -> &LeaderInfo {
+    pub fn get_leader(&self, leader: &Leader) -> &LeaderInfo {
         self.leaders
-            .get(&leader)
+            .get(leader)
             .unwrap_or_else(|| panic!("leader not found: {leader:?}"))
     }
 }

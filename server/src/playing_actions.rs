@@ -22,7 +22,7 @@ use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::{Player, remove_unit};
 use crate::player_events::PlayingActionInfo;
 use crate::recruit::recruit;
-use crate::unit::{UnitType, Units};
+use crate::unit::{ Units};
 use crate::wonder::{
     Wonder, WonderCardInfo, WonderDiscount, cities_for_wonder, on_play_wonder_card,
 };
@@ -52,7 +52,7 @@ impl Collect {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct Recruit {
-    pub units: Vec<UnitType>,
+    pub units: Units,
     pub city_position: Position,
     pub payment: ResourcePile,
     #[serde(default)]
@@ -62,9 +62,9 @@ pub struct Recruit {
 
 impl Recruit {
     #[must_use]
-    pub fn new(units: Vec<UnitType>, city_position: Position, payment: ResourcePile) -> Self {
+    pub fn new(units: &Units, city_position: Position, payment: ResourcePile) -> Self {
         Self {
-            units,
+            units: units.clone(),
             city_position,
             payment,
             replaced_units: Vec::new(),

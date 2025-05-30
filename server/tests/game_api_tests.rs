@@ -23,6 +23,7 @@ use server::{
     resource_pile::ResourcePile,
 };
 use std::{collections::HashMap, vec};
+use server::leader::Leader;
 
 mod common;
 
@@ -159,7 +160,7 @@ fn basic_actions() {
     let player = &mut game.players[0];
     player.gain_resources(ResourcePile::food(1));
     let recruit_action = Action::Playing(Recruit(playing_actions::Recruit::new(
-        &Units::new(1, 0, 0, 0, 0, 0),
+        &Units::new(1, 0, 0, 0, 0, None),
         city_position,
         ResourcePile::food(2),
     )));
@@ -349,7 +350,7 @@ fn test_recruit() {
             0,
             Action::Playing(Recruit(
                 playing_actions::Recruit::new(
-                    &Units::new(1, 1, 0, 0, 0, 0),
+                    &Units::new(1, 1, 0, 0, 0, None),
                     Position::from_offset("A1"),
                     ResourcePile::food(1) + ResourcePile::ore(1) + ResourcePile::gold(2),
                 )
@@ -367,11 +368,10 @@ fn test_recruit_leader() {
             0,
             Action::Playing(Recruit(
                 playing_actions::Recruit::new(
-                    &Units::new(0, 0, 0, 0, 0, 1),
+                    &Units::new(0, 0, 0, 0, 0, Some(Leader::Augustus)),
                     Position::from_offset("A1"),
                     ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1),
                 )
-                .with_leader("Alexander"),
             )),
         )],
     );
@@ -385,11 +385,10 @@ fn test_replace_leader() {
             0,
             Action::Playing(Recruit(
                 playing_actions::Recruit::new(
-                    &Units::new(0, 0, 0, 0, 0, 1),
+                    &Units::new(0, 0, 0, 0, 0, Some(Leader::Sulla)),
                     Position::from_offset("A1"),
                     ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1),
                 )
-                .with_leader("Kleopatra")
                 .with_replaced_units(&[10]),
             )),
         )],

@@ -53,7 +53,7 @@ pub(crate) fn trade_route_log(
     for t in trade_routes {
         log.push(format!(
             "{} at {} traded with city at {}",
-            game.players[player_index].get_unit(t.unit_id).unit_type,
+            game.players[player_index].get_unit(t.unit_id).unit_type.non_leader_name(),
             t.from,
             t.to,
         ));

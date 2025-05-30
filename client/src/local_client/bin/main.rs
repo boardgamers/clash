@@ -211,8 +211,6 @@ fn setup_local_game() -> Game {
     add_unit(&mut game, "B3", player_index1, UnitType::Settler);
     add_unit(&mut game, "B3", player_index1, UnitType::Settler);
     add_unit(&mut game, "B3", player_index1, UnitType::Settler);
-    // game.players[player_index1].active_leader =
-    //     Some(Leader::builder("Alexander", "", "", "", "").build());
 
     add_unit(&mut game, "C1", player_index2, UnitType::Infantry);
     add_unit(&mut game, "C1", player_index2, UnitType::Infantry);

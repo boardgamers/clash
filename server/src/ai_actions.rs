@@ -26,7 +26,7 @@ use crate::recruit::recruit_cost;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::{government_advances, ChangeGovernment};
-use crate::unit::UnitType;
+use crate::unit::{UnitType, Units};
 use crate::wonder::Wonder;
 use itertools::Itertools;
 use rustc_hash::FxHashMap;
@@ -387,7 +387,7 @@ fn recruit_actions(
     recruit_strategies()
         .iter()
         .map(|strategy| {
-            let mut units = vec![];
+            let mut units = Units::empty();
             let mut cost = ResourcePile::empty();
             let mut i = 0;
             loop {
@@ -397,7 +397,7 @@ fn recruit_actions(
                 i = (i + 1) % strategy.len();
 
                 let mut next = units.clone();
-                next.push(unit_type);
+                next += &unit_type;
                 match recruit_cost(
                     game,
                     player,
@@ -418,9 +418,11 @@ fn recruit_actions(
             }
             (units, cost)
         })
+        .filter(|(units, _cost)| units.amount() > 0)
+        .unique()
         .map(|(units, cost)| {
             Action::Playing(PlayingAction::Recruit(Recruit::new(
-                units,
+                &units,
                 city.position,
                 cost,
             )))

@@ -20,7 +20,7 @@ fn sparta_draft() {
         vec![TestAction::undoable(
             0,
             Action::Playing(PlayingAction::Recruit(Recruit::new(
-                &Units::new(0, 1, 0, 0, 0, 0),
+                &Units::new(0, 1, 0, 0, 0, None),
                 Position::from_offset("A1"),
                 ResourcePile::culture_tokens(1),
             ))),
@@ -98,7 +98,7 @@ fn city_states() {
             TestAction::undoable(
                 0,
                 Action::Playing(PlayingAction::Recruit(Recruit::new(
-                    &Units::new(0, 1, 0, 0, 0, 0),
+                    &Units::new(0, 1, 0, 0, 0, None),
                     Position::from_offset("A1"),
                     ResourcePile::culture_tokens(1),
                 ))),

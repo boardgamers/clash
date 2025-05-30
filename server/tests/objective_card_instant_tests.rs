@@ -15,7 +15,7 @@ const JSON: JsonTest = JsonTest::child("objective_cards", "instant");
 #[test]
 fn test_draft() {
     let r = Action::Playing(PlayingAction::Recruit(playing_actions::Recruit::new(
-        &Units::new(0, 1, 0, 0, 0, 0),
+        &Units::new(0, 1, 0, 0, 0, None),
         Position::from_offset("A1"),
         ResourcePile::mood_tokens(1),
     )));

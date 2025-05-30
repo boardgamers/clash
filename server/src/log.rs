@@ -157,7 +157,7 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
         ),
         PlayingAction::Construct(c) => format_construct_log_item(game, player, &player_name, c),
         PlayingAction::Collect(c) => format_collect_log_item(player, &player_name, c),
-        PlayingAction::Recruit(r) => format_recruit_log_item(player, &player_name, r),
+        PlayingAction::Recruit(r) => format_recruit_log_item(player, &player_name, r, game),
         PlayingAction::IncreaseHappiness(i) => format_happiness_increase(player, &player_name, i),
         PlayingAction::InfluenceCultureAttempt(c) => {
             format_cultural_influence_attempt_log_item(game, player.index, &player_name, c)
@@ -241,7 +241,7 @@ pub(crate) fn format_city_happiness_increase(
     )
 }
 
-fn format_recruit_log_item(player: &Player, player_name: &String, r: &Recruit) -> String {
+fn format_recruit_log_item(player: &Player, player_name: &String, r: &Recruit, game: &Game) -> String {
     let city_position = &r.city_position;
     let units = &r.units;
     let payment = &r.payment;
@@ -262,7 +262,7 @@ fn format_recruit_log_item(player: &Player, player_name: &String, r: &Recruit) -
     );
     format!(
         "{player_name} paid {payment} to recruit {} in the city at {city_position}{mood}{replace_str}{replace_pos}",
-        units.to_string(r.leader_name.as_ref())
+        units.to_string(Some(game))
     )
 }
 
@@ -366,7 +366,7 @@ pub(crate) fn move_action_log(game: &Game, player: &Player, m: &MoveUnits) -> St
         .iter()
         .map(|unit| player.get_unit(*unit).unit_type)
         .collect::<Units>()
-        .to_string(player.active_leader.as_ref());
+        .to_string(Some(game));
     let start = player.get_unit(m.units[0]).position;
     let start_is_water = game.map.is_sea(start);
     let dest = m.destination;

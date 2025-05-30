@@ -1,5 +1,5 @@
 use crate::advance::Advance;
-use crate::{resource_pile::ResourcePile, unit::Units};
+use crate::{resource_pile::ResourcePile, unit, unit::Units};
 
 pub const JSON_SCHEMA_VERSION: u16 = 2;
 pub const MAX_CITY_PIECES: usize = 4; // i.e. city size 5
@@ -27,7 +27,7 @@ pub const UNIT_LIMIT: Units = Units {
     ships: 4,
     cavalry: 4,
     elephants: 4,
-    leaders: 1,
+    leader: Some(unit::LEADER),
 };
 pub const UNIT_LIMIT_BARBARIANS: Units = Units {
     settlers: 0,
@@ -35,7 +35,7 @@ pub const UNIT_LIMIT_BARBARIANS: Units = Units {
     ships: 0,
     cavalry: 4,
     elephants: 4,
-    leaders: 0,
+    leader: None,
 };
 pub const UNIT_LIMIT_PIRATES: Units = Units {
     settlers: 0,
@@ -43,7 +43,7 @@ pub const UNIT_LIMIT_PIRATES: Units = Units {
     ships: 4,
     cavalry: 0,
     elephants: 0,
-    leaders: 0,
+    leader: None,
 };
 pub const BUILDING_COST: ResourcePile = ResourcePile {
     food: 1,

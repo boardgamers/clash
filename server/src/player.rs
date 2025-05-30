@@ -31,6 +31,7 @@ use serde::{Deserialize, Serialize};
 use std::cmp::Ordering::{self, *};
 use std::collections::HashMap;
 use std::fmt::Display;
+use itertools::Itertools;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq)]
 pub enum PlayerType {
@@ -50,7 +51,6 @@ pub struct Player {
     pub destroyed_structures: DestroyedStructures,
     pub units: Vec<Unit>,
     pub civilization: Civilization,
-    pub active_leader: Option<String>, // todo remove this, it is not used
     pub available_leaders: Vec<Leader>,
     pub advances: EnumSet<Advance>,
     pub great_library_advance: Option<Advance>,
@@ -59,7 +59,7 @@ pub struct Player {
     pub wonders_owned: EnumSet<Wonder>, // transient
     pub incident_tokens: u8,
     pub completed_objectives: Vec<String>,
-    pub captured_leaders: Vec<String>,
+    pub captured_leaders: Vec<Leader>,
     pub event_victory_points: f32,
     pub custom_actions: HashMap<CustomActionType, EventOrigin>,
     pub wonder_cards: Vec<Wonder>,
@@ -102,12 +102,9 @@ impl Player {
             cities: Vec::new(),
             destroyed_structures: DestroyedStructures::new(),
             units: Vec::new(),
-            active_leader: None,
-            available_leaders: civilization
-                .leaders
-                .iter()
-                .map(|l| l.name.clone())
-                .collect(),
+            available_leaders: civilization.leaders.iter().map(
+                |leader| leader.leader,
+            ).collect_vec(),
             civilization,
             advances: EnumSet::empty(),
             special_advances: EnumSet::empty(),
@@ -137,12 +134,12 @@ impl Player {
     ///
     /// Panics if the leader does not exist
     #[must_use]
-    pub fn get_leader(&self, name: &str) -> &LeaderInfo {
+    pub fn get_leader(&self, name: Leader) -> &LeaderInfo {
         self.civilization
             .leaders
             .iter()
-            .find(|leader| leader.name == name)
-            .unwrap_or_else(|| panic!("Leader {name} not found"))
+            .find(|leader| leader.leader == name)
+            .unwrap_or_else(|| panic!("Leader {name:?} not found"))
     }
 
     ///
@@ -168,7 +165,7 @@ impl Player {
             .civilization
             .leaders
             .iter()
-            .position(|l| l.name == leader)
+            .position(|l| l.leader == leader)
             .expect("player should have the leader");
         let l = game.players[player_index].civilization.leaders.remove(pos);
         for a in &l.abilities {
@@ -184,7 +181,7 @@ impl Player {
     pub fn available_leaders(&self) -> Vec<&LeaderInfo> {
         self.available_leaders
             .iter()
-            .map(|name| self.get_leader(name))
+            .map(|name| self.get_leader(*name))
             .collect()
     }
 
@@ -549,6 +546,17 @@ impl Player {
             .iter_mut()
             .filter(|unit| unit.position == position)
             .collect()
+    }
+
+    #[must_use]
+    pub fn active_leader(&self) -> Option<Leader> {
+        self.units.iter().find_map(|unit| {
+            if let UnitType::Leader(l) = unit.unit_type {
+                Some(l)
+            } else {
+                None
+            }
+        })
     }
 
     pub(crate) fn trigger_event<T, U, V>(

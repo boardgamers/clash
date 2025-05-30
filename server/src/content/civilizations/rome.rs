@@ -369,9 +369,8 @@ fn sulla() -> LeaderInfo {
 pub(crate) fn owner_of_sulla_in_range(position: Position, game: &Game) -> Option<usize> {
     // Check if Sulla is within 2 spaces of the given position
     game.players.iter().find_map(|p| {
-        p.active_leader
-            .as_ref()
-            .is_some_and(|l| l == "Sulla" && leader_position(p).distance(position) <= 2)
+        p.active_leader()
+            .is_some_and(|l| l == Leader::Sulla && leader_position(p).distance(position) <= 2)
             .then_some(p.index)
     })
 }
