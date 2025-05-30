@@ -123,9 +123,7 @@ pub fn recruit_cost(
         .map(|id| {
             let unit_type = player.get_unit(*id).unit_type;
             if unit_type.is_leader() {
-                require_replace
-                    .leader
-                    .map_or(unit_type, UnitType::Leader)
+                require_replace.leader.map_or(unit_type, UnitType::Leader)
             } else {
                 unit_type
             }

@@ -10,14 +10,12 @@ use crate::select_ui::{CountSelector, HasCountSelectableObject, HighlightType};
 use crate::tooltip::show_tooltip_for_circle;
 use crate::unit_ui::{UnitSelection, add_unit_description, draw_unit_type};
 use server::game::Game;
-use server::leader;
 use server::player::{CostTrigger, Player};
 use server::player_events::CostInfo;
 use server::position::Position;
 use server::recruit::{recruit_cost, recruit_cost_without_replaced};
-use server::unit::UnitType::*;
+use server::unit::UnitType::{Cavalry, Elephant, Infantry, Leader, Settler, Ship};
 use server::unit::{Unit, UnitType, Units, get_units_to_replace};
-use server::utils::remove_element;
 
 #[derive(Clone)]
 pub struct SelectableUnit {
@@ -211,12 +209,12 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
         |_s, _u| true,
         |s, u| {
             let mut units = s.units.clone();
-            units.push(u.unit_type);
+            units += &u.unit_type;
             update_selection(game, s, units)
         },
         |s, u| {
             let mut units = s.units.clone();
-            remove_element(&mut units, &u.unit_type);
+            units -= &u.unit_type;
             update_selection(game, s, units)
         },
         Vec2::new(0., 0.),
@@ -240,15 +238,15 @@ fn open_dialog(rc: &RenderContext, city: Position, sel: RecruitSelection) -> Sta
         rc.game.city(p, city),
         &format!(
             "Recruit {} in {city}",
-            sel.amount.units.to_string(sel.amount.leader_name.as_ref()),
+            sel.amount.units.to_string(Some(rc.game)),
         ),
         ConstructionProject::Units(sel),
         &cost,
     )))
 }
 
-fn update_selection(game: &Game, s: &RecruitAmount, units: Vec<UnitType>) -> StateUpdate {
-    RecruitAmount::new_selection(game, s.player_index, s.city_position, units, leader_name)
+fn update_selection(game: &Game, s: &RecruitAmount, units: Units) -> StateUpdate {
+    RecruitAmount::new_selection(game, s.player_index, s.city_position, units)
 }
 
 pub fn replace_dialog(rc: &RenderContext, sel: &RecruitSelection) -> StateUpdate {

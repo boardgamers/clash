@@ -161,6 +161,10 @@ impl UnitType {
         }
     }
 
+    ///
+    /// # Panics
+    ///
+    /// Panics if called on a leader unit.
     #[must_use]
     pub fn non_leader_name(&self) -> &'static str {
         match self {
@@ -687,9 +691,9 @@ pub fn get_units_to_replace(available: &Units, new_units: &Units) -> Units {
 }
 
 // ignore the concrete leader here, it is just a placeholder
-pub(crate) const LEADER: leader::Leader = leader::Leader::Alexander;
+pub const LEADER: leader::Leader = leader::Leader::Alexander;
 
-pub(crate) const LEADER_UNIT: UnitType = Leader(LEADER);
+pub const LEADER_UNIT: UnitType = Leader(LEADER);
 
 #[cfg(test)]
 mod tests {

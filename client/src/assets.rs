@@ -6,6 +6,7 @@ use server::content::custom_actions::CustomActionType;
 use server::map::Terrain;
 use server::player::Player;
 use server::resource::ResourceType;
+use server::unit;
 use server::unit::UnitType;
 use server::wonder::Wonder;
 use std::collections::HashMap;
@@ -190,7 +191,7 @@ impl Assets {
                 )),
             ),
             (
-                UnitType::Leader,
+                unit::LEADER_UNIT,
                 None,
                 load_png(include_bytes!("../assets/flag-svgrepo-com.png")),
             ),
@@ -386,7 +387,10 @@ impl Assets {
         CivAssets { units }
     }
 
-    pub fn unit(&self, unit_type: UnitType, player: &Player) -> &Texture2D {
+    pub fn unit(&self, mut unit_type: UnitType, player: &Player) -> &Texture2D {
+        if unit_type.is_leader() {
+            unit_type = unit::LEADER_UNIT;
+        }
         self.civ
             .get(&player.civilization.name)
             .and_then(|c| c.units.get(&unit_type))

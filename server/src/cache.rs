@@ -347,6 +347,10 @@ impl Cache {
         }
     }
 
+    ///
+    /// # Panics
+    ///
+    /// Panics if special advance does not exist
     #[must_use]
     pub fn get_leader(&self, leader: &Leader) -> &LeaderInfo {
         self.leaders
