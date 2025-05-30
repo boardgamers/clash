@@ -5,6 +5,7 @@ use crate::unit::UnitType::{Cavalry, Elephant, Infantry, Leader};
 use crate::unit::{UnitType, Units};
 use num::Zero;
 use serde::{Deserialize, Serialize};
+use crate::leader;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub(crate) struct CombatHits {
@@ -160,9 +161,12 @@ impl CombatDieRoll {
     }
 }
 
+// ignore the concrete leader here, it is just a placeholder
+pub(crate) const LEADER: UnitType = Leader(leader::Leader::Alexander);
+
 pub(crate) const COMBAT_DIE_SIDES: [CombatDieRoll; 12] = [
-    CombatDieRoll::new(1, Leader),
-    CombatDieRoll::new(1, Leader),
+    CombatDieRoll::new(1, LEADER),
+    CombatDieRoll::new(1, LEADER),
     CombatDieRoll::new(2, Cavalry),
     CombatDieRoll::new(2, Elephant),
     CombatDieRoll::new(3, Elephant),
@@ -238,7 +242,7 @@ fn dice_roll_with_leader_reroll(
 ) -> CombatDieRoll {
     let side = roll_die(game, roll_log);
 
-    if deny_combat_abilities || side.bonus != Leader || !unit_types.has_unit(&Leader) {
+    if deny_combat_abilities || side.bonus != LEADER || !unit_types.has_unit(&Leader) {
         return side;
     }
 
@@ -249,7 +253,7 @@ fn dice_roll_with_leader_reroll(
         add_roll_log_effect(roll_log, "re-roll");
         let side = roll_die(game, roll_log);
 
-        if side.bonus != Leader {
+        if side.bonus != LEADER {
             return side;
         }
     }

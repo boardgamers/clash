@@ -381,7 +381,7 @@ pub(crate) fn martyr(id: u8) -> TacticsCard {
             game.add_info_log_item(&format!(
                 "{} sacrifices {} using Martyr",
                 game.player_name(s.player_index),
-                a_or_an(game.player(s.player_index).get_unit(unit).unit_type.name())
+                a_or_an(game.player(s.player_index).get_unit(unit).unit_type.name(game))
             ));
             kill_combat_units(game, &mut r.combat, s.player_index, &[unit]);
         },
@@ -439,7 +439,7 @@ pub(crate) fn archers(id: u8) -> TacticsCard {
             game.add_info_log_item(&format!(
                 "{} sacrifices {} for Archers",
                 game.player_name(s.player_index),
-                a_or_an(game.player(s.player_index).get_unit(unit).unit_type.name())
+                a_or_an(game.player(s.player_index).get_unit(unit).unit_type.name(game))
             ));
             kill_combat_units(game, &mut r.combat, s.player_index, &[unit]);
         },

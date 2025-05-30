@@ -2,12 +2,13 @@ use itertools::Itertools;
 use macroquad::prelude::*;
 
 use server::game::Game;
+use server::leader;
 use server::player::{CostTrigger, Player};
 use server::player_events::CostInfo;
 use server::position::Position;
 use server::recruit::{recruit_cost, recruit_cost_without_replaced};
 use server::unit::{Unit, UnitType, Units};
-
+use server::unit::UnitType::*;
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::construct_ui::{ConstructionPayment, ConstructionProject};
 use crate::dialog_ui::{OkTooltip, cancel_button, ok_button};
@@ -21,7 +22,6 @@ use crate::unit_ui::{UnitSelection, add_unit_description, draw_unit_type};
 pub struct SelectableUnit {
     pub unit_type: UnitType,
     pub selectable: CountSelector,
-    leader_name: Option<String>,
     cost: Result<CostInfo, String>,
 }
 
@@ -46,7 +46,7 @@ impl RecruitAmount {
         player_index: usize,
         city_position: Position,
         units: Units,
-        leader_name: Option<&String>,
+        leader_name: Option<leader::Leader>,
     ) -> StateUpdate {
         let player = game.player(player_index);
         let selectable: Vec<SelectableUnit> = new_units(player)
@@ -67,15 +67,14 @@ impl RecruitAmount {
 fn selectable_unit(
     city_position: Position,
     units: &Units,
-    leader_name: Option<&String>,
     player: &Player,
-    unit: &NewUnit,
+    unit: &UnitType,
     game: &Game,
 ) -> SelectableUnit {
     let mut all = units.clone();
     all += &unit.unit_type;
 
-    let current: u8 = if matches!(unit.unit_type, UnitType::Leader) {
+    let current: u8 = if matches!(unit.unit_type, Leader) {
         u8::from(leader_name.is_some_and(|i| *i == unit.leader_name.clone().unwrap()))
     } else {
         units.get(&unit.unit_type)
@@ -86,7 +85,7 @@ fn selectable_unit(
         player,
         &all,
         city_position,
-        unit.leader_name.as_ref().or(leader_name),
+        if unit.leader_name.as_ref().or(leader_name),
         CostTrigger::WithModifiers,
     );
     let max = if cost.is_ok() { current + 1 } else { current };
@@ -98,38 +97,19 @@ fn selectable_unit(
             min: 0,
             max,
         },
-        leader_name: unit.leader_name.clone(),
     }
 }
 
-struct NewUnit {
-    unit_type: UnitType,
-    leader_name: Option<String>,
-}
-
-impl NewUnit {
-    fn new(unit_type: UnitType, leader_name: Option<String>) -> NewUnit {
-        NewUnit {
-            unit_type,
-            leader_name,
-        }
-    }
-}
-
-fn new_units(player: &Player) -> Vec<NewUnit> {
-    UnitType::get_all()
+fn new_units(player: &Player) -> Vec<UnitType> {
+    vec![Settler, Infantry, Ship, Cavalry, Elephant]
         .into_iter()
-        .flat_map(|u| {
-            if u == UnitType::Leader {
-                player
-                    .available_leaders
-                    .iter()
-                    .map(|l| NewUnit::new(UnitType::Leader, Some(l.to_string())))
-                    .collect_vec()
-            } else {
-                vec![NewUnit::new(u, None::<String>)]
-            }
-        })
+        .chain(
+            player
+               .available_leaders
+               .iter()
+               .map(|l| Leader(l))
+               .collect_vec()
+        )
         .collect()
 }
 
@@ -223,7 +203,7 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
                 Err(e) => format!(" ({e})"),
             };
             let name = match s.leader_name.as_ref() {
-                None => s.unit_type.name().to_string(),
+                None => s.unit_type.name(rc.game).to_string(),
                 Some(n) => n.to_string(),
             };
             let mut tooltip = vec![format!("Recruit {}{}", name, suffix)];
@@ -248,7 +228,6 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
                 game,
                 s,
                 units,
-                u.leader_name.as_ref().or(s.leader_name.as_ref()),
             )
         },
         |s, u| {
@@ -258,11 +237,6 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
                 game,
                 s,
                 units,
-                if matches!(u.unit_type, UnitType::Leader) {
-                    None
-                } else {
-                    s.leader_name.as_ref()
-                },
             )
         },
         Vec2::new(0., 0.),
@@ -298,7 +272,6 @@ fn update_selection(
     game: &Game,
     s: &RecruitAmount,
     units: Units,
-    leader_name: Option<&String>,
 ) -> StateUpdate {
     RecruitAmount::new_selection(game, s.player_index, s.city_position, units, leader_name)
 }

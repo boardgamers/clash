@@ -17,7 +17,7 @@ use crate::explore::is_any_ship;
 use crate::game::GameState;
 use crate::movement::{CurrentMove, MovementRestriction};
 use crate::player::{Player, remove_unit};
-use crate::{game::Game, position::Position, resource_pile::ResourcePile, utils};
+use crate::{combat_roll, game::Game, position::Position, resource_pile::ResourcePile, utils};
 
 #[readonly::make]
 #[derive(Clone)]
@@ -151,25 +151,31 @@ pub enum UnitType {
     Ship,
     Cavalry,
     Elephant,
-    Leader,
+    Leader(server::leader::Leader),
 }
 
 impl UnitType {
     #[must_use]
-    pub fn get_all() -> Vec<Self> {
-        vec![Settler, Infantry, Ship, Cavalry, Elephant, Leader]
-    }
-
-    #[must_use]
-    pub fn name(&self) -> &'static str {
+    pub fn non_leader_name(&self) -> &'static str {
         match self {
             Settler => "settler",
             Infantry => "infantry",
             Ship => "ship",
             Cavalry => "cavalry",
             Elephant => "elephant",
-            Leader => "leader",
+            Leader(l) => panic!(
+                "UnitType::non_leader_name called on a leader unit: {}",
+                l.name
+            ),
         }
+    }
+
+    #[must_use]
+    pub fn name(&self, game: &Game) -> &'static str {
+        if let Leader(l) = self {
+            return game.cache.get_leader(l).name;
+        }
+        self.non_leader_name()
     }
 
     #[must_use]
@@ -179,7 +185,7 @@ impl UnitType {
             Infantry => ResourcePile::food(1) + ResourcePile::ore(1),
             Ship => ResourcePile::wood(2),
             Cavalry => ResourcePile::food(1) + ResourcePile::wood(1),
-            Leader => ResourcePile::culture_tokens(1) + ResourcePile::mood_tokens(1),
+            Leader(_) => ResourcePile::culture_tokens(1) + ResourcePile::mood_tokens(1),
         }
     }
 
@@ -200,10 +206,10 @@ impl UnitType {
                 "Army unit. Combat abilities: -1 hit but no combat value on {}",
                 Self::sides(Elephant)
             ),
-            Leader => format!(
+            Leader(_) => format!(
                 "Army unit. Combat abilities: Reroll the die until you get a \
              non-leader roll on {}",
-                Self::sides(Leader)
+                Self::sides(combat_roll::LEADER)
             ),
         }
     }
@@ -228,7 +234,7 @@ impl UnitType {
 
     #[must_use]
     pub fn is_army_unit(&self) -> bool {
-        matches!(self, Infantry | Cavalry | Elephant | Leader)
+        matches!(self, Infantry | Cavalry | Elephant | Leader(_))
     }
 
     #[must_use]
@@ -239,12 +245,6 @@ impl UnitType {
     #[must_use]
     pub fn is_military(&self) -> bool {
         !self.is_settler()
-    }
-}
-
-impl Display for UnitType {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.name())
     }
 }
 
@@ -313,7 +313,7 @@ impl Units {
             Ship => self.ships,
             Cavalry => self.cavalry,
             Elephant => self.elephants,
-            Leader => self.leaders,
+            Leader(_) => self.leaders,
         }
     }
 
@@ -325,7 +325,7 @@ impl Units {
             Ship => &mut self.ships,
             Cavalry => &mut self.cavalry,
             Elephant => &mut self.elephants,
-            Leader => &mut self.leaders,
+            Leader(_) => &mut self.leaders,
         }
     }
 
@@ -417,7 +417,7 @@ impl AddAssign<&UnitType> for Units {
             Ship => self.ships += 1,
             Cavalry => self.cavalry += 1,
             Elephant => self.elephants += 1,
-            Leader => self.leaders += 1,
+            Leader(_) => self.leaders += 1,
         }
     }
 }
@@ -430,7 +430,7 @@ impl SubAssign<&UnitType> for Units {
             Ship => self.ships -= 1,
             Cavalry => self.cavalry -= 1,
             Elephant => self.elephants -= 1,
-            Leader => self.leaders -= 1,
+            Leader(_) => self.leaders -= 1,
         }
     }
 }
@@ -551,11 +551,7 @@ pub(crate) fn units_killed(game: &mut Game, player_index: usize, killed_units: K
 
 fn kill_unit(game: &mut Game, unit_id: u32, player_index: usize, killer: Option<usize>) {
     let unit = remove_unit(player_index, unit_id, game);
-    if matches!(unit.unit_type, UnitType::Leader) {
-        let leader = game.players[player_index]
-            .active_leader
-            .take()
-            .expect("A player should have an active leader when having a leader unit");
+    if let Leader(leader) = unit.unit_type {
         Player::with_leader(&leader, game, player_index, |game, leader| {
             leader.listeners.deinit(game, player_index);
         });
@@ -691,26 +687,14 @@ mod tests {
     #[test]
     fn into_iter() {
         let units = Units::new(0, 1, 0, 2, 1, 1);
-        assert_eq!(
-            units.into_iter().collect::<Vec<_>>(),
-            vec![
-                (Settler, 0),
-                (Infantry, 1),
-                (Ship, 0),
-                (Cavalry, 2),
-                (Elephant, 1),
-                (Leader, 1),
-            ]
-        );
-    }
-
-    #[test]
-    fn to_vec() {
-        let units = Units::new(0, 1, 0, 2, 1, 1);
-        assert_eq!(
-            units.to_vec(),
-            vec![Infantry, Cavalry, Cavalry, Elephant, Leader]
-        );
+        assert_eq!(units.into_iter().collect::<Vec<_>>(), vec![
+            (Settler, 0),
+            (Infantry, 1),
+            (Ship, 0),
+            (Cavalry, 2),
+            (Elephant, 1),
+            (Leader, 1),
+        ]);
     }
 
     #[test]

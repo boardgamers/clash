@@ -2,7 +2,7 @@ use crate::advance::{Advance, base_advance_cost, player_government};
 use crate::city_pieces::DestroyedStructures;
 use crate::consts::{STACK_LIMIT, UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::events::{Event, EventOrigin};
-use crate::leader::LeaderAbility;
+use crate::leader::{Leader, LeaderAbility};
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player_events::{CostInfo, TransientEvents};
 use crate::special_advance::SpecialAdvance;
@@ -50,8 +50,8 @@ pub struct Player {
     pub destroyed_structures: DestroyedStructures,
     pub units: Vec<Unit>,
     pub civilization: Civilization,
-    pub active_leader: Option<String>,
-    pub available_leaders: Vec<String>,
+    pub active_leader: Option<String>, // todo remove this, it is not used
+    pub available_leaders: Vec<Leader>,
     pub advances: EnumSet<Advance>,
     pub great_library_advance: Option<Advance>,
     pub special_advances: EnumSet<SpecialAdvance>,

@@ -11,6 +11,7 @@ use crate::position::Position;
 use crate::special_advance::SpecialAdvance;
 use crate::unit::{UnitType, Units, kill_units, set_unit_position};
 use itertools::Itertools;
+use crate::leader::Leader;
 
 pub(crate) fn recruit(game: &mut Game, player_index: usize, r: Recruit) -> Result<(), String> {
     let cost = recruit_cost(
@@ -149,7 +150,7 @@ pub fn recruit_cost_without_replaced(
     player: &Player,
     units: &Units,
     city_position: Position,
-    leader_name: Option<&String>,
+    leader_name: Option<Leader>,
     execute: CostTrigger,
 ) -> Result<CostInfo, String> {
     let city = player.get_city(city_position);

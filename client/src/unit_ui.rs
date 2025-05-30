@@ -283,15 +283,8 @@ pub fn units_on_tile(game: &Game, pos: Position) -> impl Iterator<Item = (usize,
     })
 }
 
-pub fn name(u: &UnitType) -> &str {
-    if let UnitType::Leader = u {
-        return "Leader";
-    }
-    u.name()
-}
-
 pub fn unit_label(unit: &Unit, army_move: bool, game: &Game) -> String {
-    let name = name(&unit.unit_type);
+    let name = unit.unit_type.name(game);
     let mut notes = vec![];
 
     if unit.unit_type.is_army_unit() && !army_move {
