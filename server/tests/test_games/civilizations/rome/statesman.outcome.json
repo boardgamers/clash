@@ -57,7 +57,7 @@
       "units": [
         {
           "position": "A1",
-          "unit_type": "Leader",
+          "unit_type": "Infantry",
           "id": 0
         },
         {

@@ -56,7 +56,6 @@ fn test_sanitation_and_draft() {
                     &game.players[0],
                     &units,
                     city_position,
-                    None,
                     CostTrigger::WithModifiers,
                 )
                 .unwrap()

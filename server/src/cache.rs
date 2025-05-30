@@ -10,13 +10,13 @@ use crate::content::{
 };
 use crate::game::Game;
 use crate::incident::Incident;
-use crate::leader::{Leader, LeaderAbility, LeaderInfo};
+use crate::leader::{Leader, LeaderInfo};
 use crate::objective_card::{Objective, ObjectiveCard};
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo};
 use crate::status_phase::StatusPhaseState::{ChangeGovernmentType, DetermineFirstPlayer};
 use crate::status_phase::{
-    StatusPhaseState, complete_objectives, determine_first_player, draw_cards, free_advance,
-    get_status_phase, may_change_government, raze_city,
+    complete_objectives, determine_first_player, draw_cards, free_advance, get_status_phase,
+    may_change_government, raze_city, StatusPhaseState,
 };
 use crate::tactics_card::TacticsCard;
 use crate::wonder::{Wonder, WonderInfo};

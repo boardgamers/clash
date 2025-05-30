@@ -163,7 +163,7 @@
         },
         {
           "position": "B1",
-          "unit_type": "Leader",
+          "unit_type": "Infantry",
           "movement_restrictions": [
             "Battle",
             "Mountain"

@@ -28,7 +28,7 @@
       "units": [
         {
           "position": "D8",
-          "unit_type": "Leader",
+          "unit_type": "Infantry",
           "movement_restrictions": [
             "Battle"
           ],

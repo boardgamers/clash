@@ -85,7 +85,7 @@
         },
         {
           "position": "C2",
-          "unit_type": "Leader",
+          "unit_type": "Infantry",
           "id": 2
         },
         {
@@ -153,7 +153,7 @@
       "units": [
         {
           "position": "A1",
-          "unit_type": "Leader",
+          "unit_type": "Infantry",
           "id": 0
         },
         {
