@@ -336,20 +336,7 @@ impl Cache {
         match name {
             // "Maya" => maya::maya(), // still needs to be implemented
             // for integration testing
-            "test0" => Civilization::new("test0", vec![], vec![
-                LeaderInfo::new(
-                    Leader::Alexander,
-                    "Alexander",
-                    LeaderAbility::builder("", "").build(),
-                    LeaderAbility::builder("", "").build(),
-                ),
-                LeaderInfo::new(
-                    Leader::Kleopatra,
-                    "Kleopatra",
-                    LeaderAbility::builder("", "").build(),
-                    LeaderAbility::builder("", "").build(),
-                ),
-            ]), // for testing
+            "test0" => Civilization::new("test0", vec![], vec![]),
             "test1" => Civilization::new("test1", vec![], vec![]),
             "test2" => Civilization::new("test2", vec![], vec![]),
             _ => self

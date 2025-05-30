@@ -688,7 +688,7 @@ pub fn get_units_to_replace(available: &Units, new_units: &Units) -> Units {
 
 #[cfg(test)]
 mod tests {
-    use crate::unit;
+    use crate::{leader, unit};
     use crate::unit::UnitType::*;
     use crate::unit::{Units, get_units_to_replace};
 
@@ -701,17 +701,17 @@ mod tests {
             (Ship, 0),
             (Cavalry, 2),
             (Elephant, 1),
-            (Leader, 1),
+            (Leader(leader::Leader::Sulla), 1),
         ]);
     }
 
     #[test]
     fn test_get_units_to_replace() {
-        let units = Units::new(0, 1, 0, 2, 1, unit::LEADER_UNIT);
-        let new_units = Units::new(0, 2, 0, 1, 1, Some(Some(leader::Leader::Sulla)));
+        let available = Units::new(0, 1, 0, 2, 1, Some(unit::LEADER));
+        let new_units = Units::new(0, 2, 0, 1, 1, Some(leader::Leader::Sulla));
         assert_eq!(
-            get_units_to_replace(&units, &new_units),
-            Units::new(0, 1, 0, 0, 0, 0)
+            get_units_to_replace(&available, &new_units),
+            Units::new(0, 1, 0, 0, 0, None)
         );
     }
 }
