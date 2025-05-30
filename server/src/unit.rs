@@ -354,6 +354,10 @@ impl Units {
             .collect()
     }
 
+    ///
+    /// # Panics
+    ///
+    /// Panics if `game` is `None` and the units contain a leader.
     #[must_use]
     pub fn to_string(&self, game: Option<&Game>) -> String {
         let mut unit_types = Vec::new();
