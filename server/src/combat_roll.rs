@@ -2,7 +2,7 @@ use crate::combat::Combat;
 use crate::combat_listeners::CombatStrength;
 use crate::game::Game;
 use crate::unit::UnitType::{Cavalry, Elephant, Infantry};
-use crate::unit::{UnitType, Units, LEADER_UNIT};
+use crate::unit::{LEADER_UNIT, UnitType, Units};
 use num::Zero;
 use serde::{Deserialize, Serialize};
 

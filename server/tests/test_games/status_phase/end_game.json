@@ -105,7 +105,6 @@
         }
       ],
       "civilization": "test2",
-      "available_leaders": [],
       "advances": [
         "Farming",
         "Fishing",
@@ -167,7 +166,6 @@
         }
       ],
       "civilization": "test0",
-      "available_leaders": [],
       "advances": [
         "Farming",
         "Fishing",

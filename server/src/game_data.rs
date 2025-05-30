@@ -8,6 +8,7 @@ use crate::content::custom_actions::CustomActionType;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::PersistentEventState;
 use crate::game::{Game, GameContext, GameOptions, GameState};
+use crate::leader::Leader;
 use crate::log::ActionLogAge;
 use crate::map::{Map, MapData};
 use crate::objective_card::init_objective_card;
@@ -24,7 +25,6 @@ use num::Zero;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::mem;
-use crate::leader::Leader;
 
 #[derive(Serialize, Deserialize, PartialEq)]
 pub struct GameData {

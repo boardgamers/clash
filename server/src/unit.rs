@@ -472,7 +472,7 @@ impl Iterator for UnitsIntoIterator {
             3 => Some((Cavalry, u.cavalry)),
             4 => Some((Elephant, u.elephants)),
             5 => Some((
-                self.units.leader.map_or(unit::LEADER_UNIT, |l| Leader(l)),
+                self.units.leader.map_or(unit::LEADER_UNIT, Leader),
                 u.leaders(),
             )),
             _ => None,
@@ -686,23 +686,31 @@ pub fn get_units_to_replace(available: &Units, new_units: &Units) -> Units {
     units_to_replace
 }
 
+// ignore the concrete leader here, it is just a placeholder
+pub(crate) const LEADER: leader::Leader = leader::Leader::Alexander;
+
+pub(crate) const LEADER_UNIT: UnitType = Leader(LEADER);
+
 #[cfg(test)]
 mod tests {
-    use crate::{leader, unit};
     use crate::unit::UnitType::*;
     use crate::unit::{Units, get_units_to_replace};
+    use crate::{leader, unit};
 
     #[test]
     fn into_iter() {
         let units = Units::new(0, 1, 0, 2, 1, Some(leader::Leader::Sulla));
-        assert_eq!(units.into_iter().collect::<Vec<_>>(), vec![
-            (Settler, 0),
-            (Infantry, 1),
-            (Ship, 0),
-            (Cavalry, 2),
-            (Elephant, 1),
-            (Leader(leader::Leader::Sulla), 1),
-        ]);
+        assert_eq!(
+            units.into_iter().collect::<Vec<_>>(),
+            vec![
+                (Settler, 0),
+                (Infantry, 1),
+                (Ship, 0),
+                (Cavalry, 2),
+                (Elephant, 1),
+                (Leader(leader::Leader::Sulla), 1),
+            ]
+        );
     }
 
     #[test]
@@ -715,8 +723,3 @@ mod tests {
         );
     }
 }
-
-// ignore the concrete leader here, it is just a placeholder
-pub(crate) const LEADER: leader::Leader = leader::Leader::Alexander;
-
-pub(crate) const LEADER_UNIT: UnitType = Leader(LEADER);

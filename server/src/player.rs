@@ -27,11 +27,11 @@ use crate::{
     utils,
 };
 use enumset::EnumSet;
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering::{self, *};
 use std::collections::HashMap;
 use std::fmt::Display;
-use itertools::Itertools;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq)]
 pub enum PlayerType {
@@ -102,9 +102,11 @@ impl Player {
             cities: Vec::new(),
             destroyed_structures: DestroyedStructures::new(),
             units: Vec::new(),
-            available_leaders: civilization.leaders.iter().map(
-                |leader| leader.leader,
-            ).collect_vec(),
+            available_leaders: civilization
+                .leaders
+                .iter()
+                .map(|leader| leader.leader)
+                .collect_vec(),
             civilization,
             advances: EnumSet::empty(),
             special_advances: EnumSet::empty(),

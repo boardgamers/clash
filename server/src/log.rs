@@ -241,7 +241,12 @@ pub(crate) fn format_city_happiness_increase(
     )
 }
 
-fn format_recruit_log_item(player: &Player, player_name: &String, r: &Recruit, game: &Game) -> String {
+fn format_recruit_log_item(
+    player: &Player,
+    player_name: &String,
+    r: &Recruit,
+    game: &Game,
+) -> String {
     let city_position = &r.city_position;
     let units = &r.units;
     let payment = &r.payment;

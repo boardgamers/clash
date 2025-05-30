@@ -8,7 +8,7 @@ use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::{HandCardsRequest, PaymentRequest, PositionRequest};
 use crate::game::Game;
-use crate::leader::{LeaderInfo, LeaderAbility, LeaderAbilityBuilder, leader_position, Leader};
+use crate::leader::{Leader, LeaderAbility, LeaderAbilityBuilder, LeaderInfo, leader_position};
 use crate::map::{block_for_position, block_has_player_city};
 use crate::objective_card::{discard_objective_card, gain_objective_card_from_pile};
 use crate::payment::{

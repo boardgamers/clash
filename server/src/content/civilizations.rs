@@ -3,7 +3,7 @@ pub(crate) mod maya;
 pub(crate) mod rome;
 
 use crate::civilization::Civilization;
-use crate::leader::{LeaderInfo, LeaderAbility, Leader};
+use crate::leader::{Leader, LeaderAbility, LeaderInfo};
 
 pub const BARBARIANS: &str = "Barbarians";
 pub const PIRATES: &str = "Pirates";
@@ -31,7 +31,7 @@ pub fn get_all_uncached() -> Vec<Civilization> {
             vec![],
             vec![
                 test_leader(Leader::BorgQueen, "Borg Queen"),
-                test_leader(Leader::SevenOfNine,"Seven of Nine"),
+                test_leader(Leader::SevenOfNine, "Seven of Nine"),
                 test_leader(Leader::Picard, "Jean Luc Picard"),
             ],
         ),
@@ -39,18 +39,18 @@ pub fn get_all_uncached() -> Vec<Civilization> {
             "Klingons",
             vec![],
             vec![
-                test_leader(Leader::Khan,"Khan"),
-                test_leader(Leader::Kahless,"Kahless"),
-                test_leader(Leader::Worf,"Worf"),
+                test_leader(Leader::Khan, "Khan"),
+                test_leader(Leader::Kahless, "Kahless"),
+                test_leader(Leader::Worf, "Worf"),
             ],
         ),
         Civilization::new(
             "Romulans",
             vec![],
             vec![
-                test_leader(Leader::Sela,"Sela"),
-                test_leader(Leader::Narek,"Narek"),
-                test_leader(Leader::Tomalak,"Tomalak"),
+                test_leader(Leader::Sela, "Sela"),
+                test_leader(Leader::Narek, "Narek"),
+                test_leader(Leader::Tomalak, "Tomalak"),
             ],
         ),
     ]

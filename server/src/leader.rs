@@ -1,10 +1,10 @@
-use serde::{Deserialize, Serialize};
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::player::Player;
 use crate::position::Position;
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Copy, Hash)]
 pub enum Leader {
@@ -51,7 +51,12 @@ pub struct LeaderInfo {
 
 impl LeaderInfo {
     #[must_use]
-    pub fn new(leader: Leader, name: &str, first_ability: LeaderAbility, second_ability: LeaderAbility) -> LeaderInfo {
+    pub fn new(
+        leader: Leader,
+        name: &str,
+        first_ability: LeaderAbility,
+        second_ability: LeaderAbility,
+    ) -> LeaderInfo {
         Self {
             leader,
             name: name.to_string(),

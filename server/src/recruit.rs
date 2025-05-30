@@ -1,16 +1,16 @@
+use crate::combat;
 use crate::consts::STACK_LIMIT;
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
 use crate::leader::Leader;
 use crate::map::home_position;
 use crate::payment::{PaymentOptions, PaymentReason};
-use crate::player::{add_unit, CostTrigger, Player};
+use crate::player::{CostTrigger, Player, add_unit};
 use crate::player_events::CostInfo;
 use crate::playing_actions::Recruit;
 use crate::position::Position;
 use crate::special_advance::SpecialAdvance;
-use crate::unit::{kill_units, set_unit_position, UnitType, Units};
-use crate::combat;
+use crate::unit::{UnitType, Units, kill_units, set_unit_position};
 use itertools::Itertools;
 
 pub(crate) fn recruit(game: &mut Game, player_index: usize, r: Recruit) -> Result<(), String> {
@@ -123,7 +123,9 @@ pub fn recruit_cost(
         .map(|id| {
             let unit_type = player.get_unit(*id).unit_type;
             if unit_type.is_leader() {
-                require_replace.leader.map(|l|UnitType::Leader(l)).unwrap_or(unit_type)
+                require_replace
+                    .leader
+                    .map_or(unit_type, UnitType::Leader)
             } else {
                 unit_type
             }

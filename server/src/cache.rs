@@ -15,8 +15,8 @@ use crate::objective_card::{Objective, ObjectiveCard};
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo};
 use crate::status_phase::StatusPhaseState::{ChangeGovernmentType, DetermineFirstPlayer};
 use crate::status_phase::{
-    complete_objectives, determine_first_player, draw_cards, free_advance, get_status_phase,
-    may_change_government, raze_city, StatusPhaseState,
+    StatusPhaseState, complete_objectives, determine_first_player, draw_cards, free_advance,
+    get_status_phase, may_change_government, raze_city,
 };
 use crate::tactics_card::TacticsCard;
 use crate::wonder::{Wonder, WonderInfo};
@@ -146,7 +146,7 @@ impl Cache {
             leaders: civilizations::get_all_uncached()
                 .into_iter()
                 .flat_map(|c| c.leaders)
-                .map(|l| (l.leader.clone(), l))
+                .map(|l| (l.leader, l))
                 .collect(),
         }
     }

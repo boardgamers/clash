@@ -22,7 +22,7 @@ use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::{Player, remove_unit};
 use crate::player_events::PlayingActionInfo;
 use crate::recruit::recruit;
-use crate::unit::{ Units};
+use crate::unit::Units;
 use crate::wonder::{
     Wonder, WonderCardInfo, WonderDiscount, cities_for_wonder, on_play_wonder_card,
 };

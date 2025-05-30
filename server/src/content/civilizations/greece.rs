@@ -9,7 +9,7 @@ use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::{HandCardsRequest, PositionRequest};
 use crate::game::Game;
-use crate::leader::{LeaderInfo, LeaderAbility, Leader};
+use crate::leader::{Leader, LeaderAbility, LeaderInfo};
 use crate::map::{block_has_player_city, get_map_setup};
 use crate::payment::PaymentConversion;
 use crate::player::{Player, gain_resources};

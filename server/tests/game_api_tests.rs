@@ -5,6 +5,7 @@ use server::card::HandCard;
 use server::collect::PositionCollection;
 use server::content::persistent_events::{EventResponse, SelectedStructure, Structure};
 use server::game_setup::{GameSetupBuilder, setup_game};
+use server::leader::Leader;
 use server::log::current_player_turn_log;
 use server::unit::Units;
 use server::wonder::Wonder;
@@ -23,7 +24,6 @@ use server::{
     resource_pile::ResourcePile,
 };
 use std::{collections::HashMap, vec};
-use server::leader::Leader;
 
 mod common;
 
@@ -366,13 +366,11 @@ fn test_recruit_leader() {
         "recruit_leader",
         vec![TestAction::undoable(
             0,
-            Action::Playing(Recruit(
-                playing_actions::Recruit::new(
-                    &Units::new(0, 0, 0, 0, 0, Some(Leader::Augustus)),
-                    Position::from_offset("A1"),
-                    ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1),
-                )
-            )),
+            Action::Playing(Recruit(playing_actions::Recruit::new(
+                &Units::new(0, 0, 0, 0, 0, Some(Leader::Augustus)),
+                Position::from_offset("A1"),
+                ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1),
+            ))),
         )],
     );
 }
