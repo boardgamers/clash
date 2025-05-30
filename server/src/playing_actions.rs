@@ -335,6 +335,7 @@ fn assert_allowed(
 #[derive(Clone, Debug, PartialEq)]
 pub enum ActionResourceCost {
     Resources(ResourcePile),
+    Tokens(u8),
     AdvanceCostWithoutDiscount,
 }
 
@@ -374,6 +375,9 @@ impl ActionCost {
         match &self.cost {
             ActionResourceCost::Resources(c) => {
                 PaymentOptions::resources(player, PaymentReason::ActionCard, c.clone())
+            }
+            ActionResourceCost::Tokens(tokens) => {
+                PaymentOptions::tokens(player, PaymentReason::ActionCard, *tokens)
             }
             ActionResourceCost::AdvanceCostWithoutDiscount => base_advance_cost(player),
         }

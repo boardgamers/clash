@@ -340,6 +340,10 @@ impl Assets {
                     "../assets/alexander-the-great-svgrepo-com.png"
                 )),
             ),
+            (
+                CustomActionType::Master,
+                load_png(include_bytes!("../assets/greek-pillar-svgrepo-com.png")),
+            ),
         ]
         .iter()
         .cloned()

@@ -5,7 +5,9 @@ use crate::content::advances::culture::{sports_options, use_sports, use_theaters
 use crate::content::advances::democracy::use_civil_liberties;
 use crate::content::advances::economy::{use_bartering, use_taxes};
 use crate::content::builtin::Builtin;
-use crate::content::civilizations::greece::{idol_cards, use_idol};
+use crate::content::civilizations::greece::{
+    idol_cards, master_education_advances, use_idol, use_master,
+};
 use crate::content::civilizations::rome::{use_aqueduct, use_princeps};
 use crate::content::persistent_events::{
     PersistentEventType, TriggerPersistentEventParams, trigger_persistent_event_with_listener,
@@ -103,6 +105,7 @@ pub enum CustomActionType {
     // Greece
     HellenisticInfluenceCultureAttempt,
     Idol,
+    Master,
 }
 
 impl CustomActionType {
@@ -143,6 +146,9 @@ impl CustomActionType {
                 CustomActionType::free_and_advance_cost_without_discounts()
             }
             CustomActionType::Idol => CustomActionType::free(ResourcePile::culture_tokens(1)),
+            CustomActionType::Master => {
+                CustomActionInfo::new(false, None, ActionResourceCost::Tokens(1))
+            }
         }
     }
 
@@ -250,6 +256,7 @@ impl Display for CustomActionType {
                 write!(f, "Hellenistic Culture")
             }
             CustomActionType::Idol => write!(f, "Idol"),
+            CustomActionType::Master => write!(f, "Master"),
         }
     }
 }
@@ -269,6 +276,7 @@ pub(crate) fn custom_action_builtins() -> HashMap<CustomActionType, Builtin> {
         (CustomActionType::Aqueduct, use_aqueduct()),
         (CustomActionType::Princeps, use_princeps()),
         (CustomActionType::Idol, use_idol()),
+        (CustomActionType::Master, use_master()),
     ])
 }
 
@@ -321,6 +329,7 @@ pub(crate) fn can_play_custom_action(
             .try_get_any_city(leader_position(p))
             .is_some_and(City::can_activate),
         CustomActionType::Idol => !idol_cards(game, p, &ResourcePile::culture_tokens(1)).is_empty(),
+        CustomActionType::Master => !master_education_advances(game, p).is_empty(),
         _ => true,
     };
     if !can_play {

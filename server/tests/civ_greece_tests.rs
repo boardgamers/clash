@@ -136,3 +136,14 @@ fn ruler_of_the_world() {
         )],
     );
 }
+
+#[test]
+fn master() {
+    JSON.test(
+        "master",
+        vec![
+            TestAction::undoable(0, custom_action(CustomActionType::Master)).skip_json(),
+            TestAction::not_undoable(0, payment_response(ResourcePile::mood_tokens(1))),
+        ],
+    );
+}

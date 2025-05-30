@@ -1,5 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::advance::Advance;
+use crate::advance::{Advance, gain_advance_without_payment};
 use crate::card::HandCard;
 use crate::civilization::Civilization;
 use crate::combat::update_combat_strength;
@@ -7,7 +7,7 @@ use crate::combat_listeners::CombatStrength;
 use crate::content::advances::warfare::draft_cost;
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
-use crate::content::persistent_events::{HandCardsRequest, PositionRequest};
+use crate::content::persistent_events::{AdvanceRequest, HandCardsRequest, PositionRequest};
 use crate::game::Game;
 use crate::leader::{Leader, LeaderAbility, LeaderInfo, leader_position};
 use crate::map::{block_has_player_city, get_map_setup};
@@ -22,7 +22,7 @@ pub(crate) fn greece() -> Civilization {
     Civilization::new(
         "Greece",
         vec![study(), sparta(), hellenistic_culture(), city_states()],
-        vec![alexander(), leonidas()],
+        vec![alexander(), leonidas(), pericles()],
     )
 }
 
@@ -310,4 +310,65 @@ fn leonidas() -> LeaderInfo {
         })
         .build(),
     )
+}
+
+const MASTER: &str = "Pericles is in a Happy city: Gain 1 education advance for free.";
+
+fn pericles() -> LeaderInfo {
+    LeaderInfo::new(
+        Leader::Pericles,
+        "Pericles",
+        LeaderAbility::builder("Master", MASTER)
+            .add_custom_action(CustomActionType::Master)
+            .build(),
+        LeaderAbility::builder("Admiral", "In Sea battles: Gain +2 combat value")
+            .add_combat_strength_listener(9, |game, c, s, _r| {
+                if c.is_sea_battle(game) {
+                    s.extra_combat_value += 2;
+                    s.roll_log.push("Admiral adds +2 combat value".to_string());
+                }
+            })
+            .build(),
+    )
+}
+
+pub(crate) fn use_master() -> Builtin {
+    Builtin::builder("Master", MASTER)
+        .add_advance_request(
+            |event| &mut event.custom_action,
+            0,
+            |game, player_index, _| {
+                let player = game.player(player_index);
+                Some(AdvanceRequest::new(master_education_advances(game, player)))
+            },
+            |game, s, c| {
+                let advance = s.choice;
+                game.add_info_log_item(&format!(
+                    "{} decided to gain {} for free using Master",
+                    s.player_name,
+                    advance.name(game)
+                ));
+                gain_advance_without_payment(
+                    game,
+                    advance,
+                    s.player_index,
+                    c.payment.clone(),
+                    true,
+                );
+            },
+        )
+        .build()
+}
+
+pub(crate) fn master_education_advances(game: &Game, player: &Player) -> Vec<Advance> {
+    game.cache
+        .get_advance_group("Education")
+        .advances
+        .iter()
+        .filter_map(|a| {
+            player
+                .can_advance_free(a.advance, game)
+                .then_some(a.advance)
+        })
+        .collect_vec()
 }
