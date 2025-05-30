@@ -17,7 +17,7 @@ use crate::explore::is_any_ship;
 use crate::game::GameState;
 use crate::movement::{CurrentMove, MovementRestriction};
 use crate::player::{Player, remove_unit};
-use crate::{combat_roll, game::Game, position::Position, resource_pile::ResourcePile, utils};
+use crate::{combat_roll, game::Game, leader, position::Position, resource_pile::ResourcePile, utils};
 
 #[readonly::make]
 #[derive(Clone)]
@@ -151,7 +151,7 @@ pub enum UnitType {
     Ship,
     Cavalry,
     Elephant,
-    Leader(server::leader::Leader),
+    Leader(leader::Leader),
 }
 
 impl UnitType {
@@ -173,7 +173,7 @@ impl UnitType {
     #[must_use]
     pub fn name(&self, game: &Game) -> &'static str {
         if let Leader(l) = self {
-            return game.cache.get_leader(l).name;
+            return &game.cache.get_leader(l).name;
         }
         self.non_leader_name()
     }
@@ -245,6 +245,11 @@ impl UnitType {
     #[must_use]
     pub fn is_military(&self) -> bool {
         !self.is_settler()
+    }
+
+    #[must_use]
+    pub fn is_leader(&self) -> bool {
+        matches!(self, Leader(_))
     }
 }
 
@@ -335,26 +340,6 @@ impl Units {
     }
 
     #[must_use]
-    pub fn to_vec(self) -> Vec<UnitType> {
-        self.into_iter()
-            .flat_map(|(u, c)| std::iter::repeat_n(u, c as usize))
-            .collect()
-    }
-
-    #[must_use]
-    pub fn get_units_to_replace(&self, new_units: &Units) -> Units {
-        let mut units_to_replace = Units::empty();
-        for (unit_type, count) in self.clone() {
-            let new_count = new_units.get(&unit_type) as i8;
-            let replace = new_count - count as i8;
-            if replace > 0 {
-                *units_to_replace.get_mut(&unit_type) += replace as u8;
-            }
-        }
-        units_to_replace
-    }
-
-    #[must_use]
     pub fn to_string(&self, leader_name: Option<&String>) -> String {
         let mut unit_types = Vec::new();
         if self.settlers > 0 {
@@ -442,42 +427,6 @@ impl FromIterator<UnitType> for Units {
             units += &unit;
         }
         units
-    }
-}
-
-impl IntoIterator for Units {
-    type Item = (UnitType, u8);
-    type IntoIter = UnitsIntoIterator;
-
-    fn into_iter(self) -> Self::IntoIter {
-        UnitsIntoIterator {
-            units: self,
-            index: 0,
-        }
-    }
-}
-
-pub struct UnitsIntoIterator {
-    units: Units,
-    index: u8,
-}
-
-impl Iterator for UnitsIntoIterator {
-    type Item = (UnitType, u8);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let index = self.index;
-        self.index += 1;
-        let u = &self.units;
-        match index {
-            0 => Some((Settler, u.settlers)),
-            1 => Some((Infantry, u.infantry)),
-            2 => Some((Ship, u.ships)),
-            3 => Some((Cavalry, u.cavalry)),
-            4 => Some((Elephant, u.elephants)),
-            5 => Some((Leader, u.leaders)),
-            _ => None,
-        }
     }
 }
 
@@ -679,10 +628,23 @@ pub fn set_unit_position(player: usize, unit_id: u32, position: Position, game: 
     game.player_mut(player).get_unit_mut(unit_id).position = position;
 }
 
+#[must_use]
+pub fn get_units_to_replace(available: &Units, new_units: &Vec<UnitType>) -> Units {
+    let mut units_to_replace = Units::empty();
+    for (unit_type, count) in available.clone() {
+        let new_count = new_units.iter().filter(|&u| u == unit_type).count();
+        let replace = (new_count - count) as i8;
+        if replace > 0 {
+            *units_to_replace.get_mut(&unit_type) += replace as u8;
+        }
+    }
+    units_to_replace
+}
+
 #[cfg(test)]
 mod tests {
     use crate::unit::UnitType::*;
-    use crate::unit::Units;
+    use crate::unit::{Units, get_units_to_replace};
 
     #[test]
     fn into_iter() {
@@ -698,11 +660,11 @@ mod tests {
     }
 
     #[test]
-    fn get_units_to_replace() {
+    fn test_get_units_to_replace() {
         let units = Units::new(0, 1, 0, 2, 1, 1);
         let new_units = Units::new(0, 2, 0, 1, 1, 1);
         assert_eq!(
-            units.get_units_to_replace(&new_units),
+            get_units_to_replace(&units, &new_units),
             Units::new(0, 1, 0, 0, 0, 0)
         );
     }

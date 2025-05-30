@@ -7,8 +7,9 @@ use server::player::{CostTrigger, Player};
 use server::player_events::CostInfo;
 use server::position::Position;
 use server::recruit::{recruit_cost, recruit_cost_without_replaced};
-use server::unit::{Unit, UnitType, Units};
+use server::unit::{get_units_to_replace, Unit, UnitType, Units};
 use server::unit::UnitType::*;
+use server::utils::remove_element;
 use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::construct_ui::{ConstructionPayment, ConstructionProject};
 use crate::dialog_ui::{OkTooltip, cancel_button, ok_button};
@@ -29,8 +30,7 @@ pub struct SelectableUnit {
 pub struct RecruitAmount {
     player_index: usize,
     city_position: Position,
-    pub units: Units,
-    pub leader_name: Option<String>,
+    pub units: Vec<UnitType>,
     pub selectable: Vec<SelectableUnit>,
 }
 
@@ -45,13 +45,12 @@ impl RecruitAmount {
         game: &Game,
         player_index: usize,
         city_position: Position,
-        units: Units,
-        leader_name: Option<leader::Leader>,
+        units: Vec<UnitType>,
     ) -> StateUpdate {
         let player = game.player(player_index);
         let selectable: Vec<SelectableUnit> = new_units(player)
             .into_iter()
-            .map(|u| selectable_unit(city_position, &units, leader_name, player, &u, game))
+            .map(|u| selectable_unit(city_position, &units, player, &u, game))
             .collect();
 
         StateUpdate::OpenDialog(ActiveDialog::RecruitUnitSelection(RecruitAmount {
@@ -66,26 +65,24 @@ impl RecruitAmount {
 
 fn selectable_unit(
     city_position: Position,
-    units: &Units,
+    units: &Vec<UnitType>,
     player: &Player,
-    unit: &UnitType,
+    unit: UnitType,
     game: &Game,
 ) -> SelectableUnit {
     let mut all = units.clone();
-    all += &unit.unit_type;
+    all.push(unit);
 
-    let current: u8 = if matches!(unit.unit_type, Leader) {
-        u8::from(leader_name.is_some_and(|i| *i == unit.leader_name.clone().unwrap()))
-    } else {
-        units.get(&unit.unit_type)
-    };
+    let current: u8 =
+        units.iter().filter(
+            |&u| u == unit
+        ).count() as u8;
 
     let cost = recruit_cost_without_replaced(
         game,
         player,
         &all,
         city_position,
-        if unit.leader_name.as_ref().or(leader_name),
         CostTrigger::WithModifiers,
     );
     let max = if cost.is_ok() { current + 1 } else { current };
@@ -105,10 +102,10 @@ fn new_units(player: &Player) -> Vec<UnitType> {
         .into_iter()
         .chain(
             player
-               .available_leaders
-               .iter()
-               .map(|l| Leader(l))
-               .collect_vec()
+                .available_leaders
+                .iter()
+                .map(|l| Leader(l))
+                .collect_vec()
         )
         .collect()
 }
@@ -130,7 +127,7 @@ impl RecruitSelection {
         replaced_units: Vec<u32>,
     ) -> RecruitSelection {
         let available_units = game.player(amount.player_index).available_units();
-        let need_replacement = available_units.get_units_to_replace(&amount.units);
+        let need_replacement = get_units_to_replace(&available_units, &amount.units);
 
         RecruitSelection {
             player,
@@ -151,14 +148,13 @@ impl RecruitSelection {
             game.player(self.amount.player_index),
             &self.amount.units,
             self.amount.city_position,
-            self.amount.leader_name.as_ref(),
             self.replaced_units.as_slice(),
             CostTrigger::WithModifiers,
         )
-        .map_or_else(
-            |_| OkTooltip::Invalid("Replace exact amount of units".to_string()),
-            |_| OkTooltip::Valid("Recruit units".to_string()),
-        )
+            .map_or_else(
+                |_| OkTooltip::Invalid("Replace exact amount of units".to_string()),
+                |_| OkTooltip::Valid("Recruit units".to_string()),
+            )
     }
 }
 
@@ -202,11 +198,7 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
                 Ok(_) => format!(" ({} available with current resources)", s.selectable.max),
                 Err(e) => format!(" ({e})"),
             };
-            let name = match s.leader_name.as_ref() {
-                None => s.unit_type.name(rc.game).to_string(),
-                Some(n) => n.to_string(),
-            };
-            let mut tooltip = vec![format!("Recruit {}{}", name, suffix)];
+            let mut tooltip = vec![format!("Recruit {}{}", s.unit_type.name(game), suffix)];
             add_unit_description(&mut tooltip, s.unit_type);
             show_tooltip_for_circle(rc, &tooltip, p, radius);
         },
@@ -223,7 +215,7 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
         |_s, _u| true,
         |s, u| {
             let mut units = s.units.clone();
-            units += &u.unit_type;
+            units.push(u.unit_type);
             update_selection(
                 game,
                 s,
@@ -232,7 +224,7 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
         },
         |s, u| {
             let mut units = s.units.clone();
-            units -= &u.unit_type;
+            remove_element(&mut units, &u.unit_type);
             update_selection(
                 game,
                 s,
@@ -251,11 +243,10 @@ fn open_dialog(rc: &RenderContext, city: Position, sel: RecruitSelection) -> Sta
         rc.shown_player,
         &sel.amount.units,
         city,
-        sel.amount.leader_name.as_ref(),
         &sel.replaced_units,
         CostTrigger::WithModifiers,
     )
-    .unwrap();
+        .unwrap();
     StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
         rc,
         rc.game.city(p, city),
@@ -271,7 +262,7 @@ fn open_dialog(rc: &RenderContext, city: Position, sel: RecruitSelection) -> Sta
 fn update_selection(
     game: &Game,
     s: &RecruitAmount,
-    units: Units,
+    units: Vec<UnitType>,
 ) -> StateUpdate {
     RecruitAmount::new_selection(game, s.player_index, s.city_position, units, leader_name)
 }

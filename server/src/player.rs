@@ -159,7 +159,7 @@ impl Player {
     }
 
     pub(crate) fn with_leader(
-        leader: &str,
+        leader: Leader,
         game: &mut Game,
         player_index: usize,
         f: impl FnOnce(&mut Game, &LeaderAbility) + Clone,

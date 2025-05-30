@@ -22,7 +22,7 @@ use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::{Player, remove_unit};
 use crate::player_events::PlayingActionInfo;
 use crate::recruit::recruit;
-use crate::unit::Units;
+use crate::unit::{UnitType, Units};
 use crate::wonder::{
     Wonder, WonderCardInfo, WonderDiscount, cities_for_wonder, on_play_wonder_card,
 };
@@ -52,12 +52,9 @@ impl Collect {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct Recruit {
-    pub units: Units,
+    pub units: Vec<UnitType>,
     pub city_position: Position,
     pub payment: ResourcePile,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub leader_name: Option<String>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub replaced_units: Vec<u32>,
@@ -65,20 +62,13 @@ pub struct Recruit {
 
 impl Recruit {
     #[must_use]
-    pub fn new(units: &Units, city_position: Position, payment: ResourcePile) -> Self {
+    pub fn new(units: Vec<UnitType>, city_position: Position, payment: ResourcePile) -> Self {
         Self {
-            units: units.clone(),
+            units,
             city_position,
             payment,
-            leader_name: None,
             replaced_units: Vec::new(),
         }
-    }
-
-    #[must_use]
-    pub fn with_leader(mut self, leader_name: &str) -> Self {
-        self.leader_name = Some(leader_name.to_string());
-        self
     }
 
     #[must_use]

@@ -4,14 +4,14 @@ use crate::ai_collect::{possible_collections, total_collect};
 use crate::card::validate_card_selection;
 use crate::city::{City, MoodState};
 use crate::collect::{available_collect_actions, possible_resource_collections};
-use crate::construct::{Construct, available_buildings, new_building_positions};
+use crate::construct::{available_buildings, new_building_positions, Construct};
 use crate::content::custom_actions::CustomAction;
 use crate::content::persistent_events::{
-    EventResponse, HandCardsRequest, MultiRequest, PersistentEventRequest, PersistentEventState,
-    PositionRequest, SelectedStructure, is_selected_structures_valid,
+    is_selected_structures_valid, EventResponse, HandCardsRequest, MultiRequest, PersistentEventRequest,
+    PersistentEventState, PositionRequest, SelectedStructure,
 };
 use crate::cultural_influence::{
-    InfluenceCultureAttempt, available_influence_actions, available_influence_culture,
+    available_influence_actions, available_influence_culture, InfluenceCultureAttempt,
 };
 use crate::events::EventOrigin;
 use crate::game::Game;
@@ -25,8 +25,8 @@ use crate::position::Position;
 use crate::recruit::recruit_cost;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
-use crate::status_phase::{ChangeGovernment, government_advances};
-use crate::unit::{UnitType, Units};
+use crate::status_phase::{government_advances, ChangeGovernment};
+use crate::unit::UnitType;
 use crate::wonder::Wonder;
 use itertools::Itertools;
 use rustc_hash::FxHashMap;
@@ -387,7 +387,7 @@ fn recruit_actions(
     recruit_strategies()
         .iter()
         .map(|strategy| {
-            let mut units = Units::empty();
+            let mut units = vec![];
             let mut cost = ResourcePile::empty();
             let mut i = 0;
             loop {
@@ -397,13 +397,12 @@ fn recruit_actions(
                 i = (i + 1) % strategy.len();
 
                 let mut next = units.clone();
-                next += &unit_type;
+                next.push(unit_type);
                 match recruit_cost(
                     game,
                     player,
                     &next,
                     city.position,
-                    None,
                     &[],
                     CostTrigger::NoModifiers,
                 ) {
@@ -419,11 +418,9 @@ fn recruit_actions(
             }
             (units, cost)
         })
-        .filter(|(units, _cost)| units.amount() > 0)
-        .unique()
         .map(|(units, cost)| {
             Action::Playing(PlayingAction::Recruit(Recruit::new(
-                &units,
+                units,
                 city.position,
                 cost,
             )))

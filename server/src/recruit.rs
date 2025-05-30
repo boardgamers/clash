@@ -4,13 +4,14 @@ use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
 use crate::map::home_position;
 use crate::payment::{PaymentOptions, PaymentReason};
-use crate::player::{CostTrigger, Player, add_unit};
+use crate::player::{add_unit, CostTrigger, Player};
 use crate::player_events::CostInfo;
 use crate::playing_actions::Recruit;
 use crate::position::Position;
 use crate::special_advance::SpecialAdvance;
-use crate::unit::{UnitType, Units, kill_units, set_unit_position};
+use crate::unit::{kill_units, set_unit_position, UnitType};
 use itertools::Itertools;
+use std::collections::HashMap;
 use crate::leader::Leader;
 
 pub(crate) fn recruit(game: &mut Game, player_index: usize, r: Recruit) -> Result<(), String> {
@@ -19,7 +20,6 @@ pub(crate) fn recruit(game: &mut Game, player_index: usize, r: Recruit) -> Resul
         game.player(player_index),
         &r.units,
         r.city_position,
-        r.leader_name.as_ref(),
         &r.replaced_units,
         game.execute_cost_trigger(),
     )?;
@@ -28,24 +28,15 @@ pub(crate) fn recruit(game: &mut Game, player_index: usize, r: Recruit) -> Resul
         // kill separately, because they may be on different positions
         kill_units(game, &[*unit], player_index, None);
     }
-    if let Some(leader_name) = &r.leader_name {
-        if let Some(previous_leader) = game.player_mut(player_index).active_leader.take() {
-            Player::with_leader(
-                &previous_leader,
-                game,
-                player_index,
-                |game, previous_leader| {
-                    previous_leader.listeners.deinit(game, player_index);
-                },
-            );
-        }
-        set_active_leader(game, leader_name.clone(), player_index);
-    }
     let player = game.player_mut(player_index);
     let vec = r.units.clone().to_vec();
     player.units.reserve_exact(vec.len());
     player.get_city_mut(r.city_position).activate();
     for unit_type in vec {
+        if let UnitType::Leader(l) = &unit_type {
+            set_active_leader(game, *l, player_index);
+        }
+
         let position = match &unit_type {
             UnitType::Ship => game
                 .player(player_index)
@@ -60,14 +51,13 @@ pub(crate) fn recruit(game: &mut Game, player_index: usize, r: Recruit) -> Resul
     Ok(())
 }
 
-fn set_active_leader(game: &mut Game, leader_name: String, player_index: usize) {
+fn set_active_leader(game: &mut Game, leader: Leader, player_index: usize) {
     game.players[player_index]
         .available_leaders
-        .retain(|name| name != &leader_name);
-    Player::with_leader(&leader_name, game, player_index, |game, leader| {
+        .retain(|name| name != &leader);
+    Player::with_leader(leader, game, player_index, |game, leader| {
         leader.listeners.one_time_init(game, player_index);
     });
-    game.player_mut(player_index).active_leader = Some(leader_name);
 }
 
 pub(crate) fn on_recruit(game: &mut Game, player_index: usize, r: Recruit) {
@@ -118,9 +108,8 @@ pub(crate) fn on_recruit(game: &mut Game, player_index: usize, r: Recruit) {
 pub fn recruit_cost(
     game: &Game,
     player: &Player,
-    units: &Units,
+    units: &Vec<UnitType>,
     city_position: Position,
-    leader_name: Option<&String>,
     replaced_units: &[u32],
     execute: CostTrigger,
 ) -> Result<CostInfo, String> {
@@ -138,7 +127,7 @@ pub fn recruit_cost(
     if require_replace != replaced_units {
         return Err("Invalid replacement".to_string());
     }
-    recruit_cost_without_replaced(game, player, units, city_position, leader_name, execute)
+    recruit_cost_without_replaced(game, player, units, city_position, execute)
 }
 
 ///
@@ -148,19 +137,22 @@ pub fn recruit_cost(
 pub fn recruit_cost_without_replaced(
     game: &Game,
     player: &Player,
-    units: &Units,
+    units: &Vec<UnitType>,
     city_position: Position,
-    leader_name: Option<Leader>,
     execute: CostTrigger,
 ) -> Result<CostInfo, String> {
     let city = player.get_city(city_position);
+    let map: HashMap<UnitType, Vec<UnitType>> = units.iter().into_grouping_map().collect();
+
+    let num = |u| map.get(u).map_or(0, |v| v.len());
+
     if city.pieces.market.is_none()
-        && (units.elephants > 0
-            || (units.cavalry > 0 && !is_cavalry_province_city(player, city_position, game)))
+        && (num(UnitType::Elephant) > 0
+            || (num(UnitType::Cavalry) > 0 && !is_cavalry_province_city(player, city_position, game)))
     {
         return Err("No market".to_string());
     }
-    if units.ships > 0 && city.pieces.port.is_none() {
+    if num(UnitType::Ship) > 0 && city.pieces.port.is_none() {
         return Err("No port".to_string());
     }
 
@@ -196,21 +188,27 @@ pub fn recruit_cost_without_replaced(
         .filter(|unit| unit.unit_type.is_army_unit())
         .count() as u8
         + units.amount()
-        - units.settlers
-        - units.ships
+        - num(UnitType::Settler)
+        - num(UnitType::Ship)
         > STACK_LIMIT as u8
     {
         return Err("Too many units in stack".to_string());
     }
 
-    let match_leader = match units.leaders {
-        0 => leader_name.is_none(),
-        1 => leader_name.is_some_and(|n| player.available_leaders.contains(n)),
-        _ => false,
-    };
-    if !match_leader {
-        return Err("Invalid leader".to_string());
-    }
+    let leaders = units
+        .iter()
+        .filter(|u| u.is_leader())
+        .collect_vec();
+
+    match leaders.len() {
+        0 => Ok(()),
+        1 => if player.available_leaders.contains(leaders[0]) {
+            Ok(())
+        } else {
+            Err(format!("Leader {} not available", leaders[0]))
+        },
+        _ => Err("more than 1 leader".to_string()),
+    }?;
     Ok(cost)
 }
 

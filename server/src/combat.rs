@@ -162,7 +162,7 @@ impl Combat {
         let p = self.player(role);
         self.fighting_units(game, p)
             .iter()
-            .any(|&unit_id| game.player(p).get_unit(unit_id).unit_type == UnitType::Leader)
+            .any(|&unit_id| game.player(p).get_unit(unit_id).unit_type.is_leader())
     }
 
     #[must_use]

@@ -6,7 +6,7 @@ use crate::player::Player;
 use crate::position::Position;
 use crate::unit::UnitType;
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Copy, Hash)]
 pub enum Leader {
     // Test
     Kirk,
