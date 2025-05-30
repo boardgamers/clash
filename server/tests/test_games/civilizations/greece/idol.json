@@ -36,10 +36,10 @@
         "Mining",
         "Tactics"
       ],
+      "incident_tokens": 1,
       "action_cards": [
         17
       ],
-      "incident_tokens": 1,
       "next_unit_id": 1
     },
     {

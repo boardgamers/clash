@@ -24,7 +24,9 @@
       "units": [
         {
           "position": "D8",
-          "unit_type": "Infantry",
+          "unit_type": {
+            "Leader": "Sulla"
+          },
           "movement_restrictions": [
             "Battle"
           ],
@@ -32,7 +34,6 @@
         }
       ],
       "civilization": "Rome",
-      "active_leader": "Sulla",
       "advances": [
         "Farming",
         "Mining",
@@ -374,7 +375,7 @@
                       "position": "E8",
                       "player": 0,
                       "present": {
-                        "leaders": 1
+                        "leader": "Sulla"
                       }
                     },
                     "defender": {

@@ -105,9 +105,6 @@
         }
       ],
       "civilization": "test2",
-      "available_leaders": [
-        "Kʼinich Janaab Pakal I"
-      ],
       "advances": [
         "Farming",
         "Fishing",
@@ -168,7 +165,6 @@
         }
       ],
       "civilization": "test0",
-      "available_leaders": [],
       "advances": [
         "Dogma",
         "Farming",

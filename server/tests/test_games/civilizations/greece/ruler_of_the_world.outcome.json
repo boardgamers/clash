@@ -32,7 +32,9 @@
       "units": [
         {
           "position": "D8",
-          "unit_type": "Infantry",
+          "unit_type": {
+            "Leader": "Alexander"
+          },
           "movement_restrictions": [
             "Battle"
           ],
@@ -40,7 +42,6 @@
         }
       ],
       "civilization": "Greece",
-      "active_leader": "Alexander the Great",
       "advances": [
         "Farming",
         "Mining",
@@ -377,7 +378,7 @@
                       "position": "E8",
                       "player": 0,
                       "present": {
-                        "leaders": 1
+                        "leader": "Alexander"
                       }
                     },
                     "defender": {
