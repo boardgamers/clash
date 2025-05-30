@@ -292,10 +292,6 @@
                     },
                     {
                       "op": "remove",
-                      "path": "/players/0/event_info"
-                    },
-                    {
-                      "op": "remove",
                       "path": "/events"
                     }
                   ]
@@ -354,6 +350,10 @@
                       "op": "replace",
                       "path": "/players/0/cities/3/mood_state",
                       "value": "Happy"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/event_info"
                     }
                   ]
                 }

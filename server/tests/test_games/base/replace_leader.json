@@ -110,14 +110,15 @@
         },
         {
           "position": "A1",
-          "unit_type": "Leader",
+          "unit_type": {
+            "Leader": "Sulla"
+          },
           "id": 10
         }
       ],
-      "civilization": "test0",
-      "active_leader": "Alexander",
+      "civilization": "Rome",
       "available_leaders": [
-        "Kleopatra"
+        "Augustus"
       ],
       "advances": [
         "Farming",

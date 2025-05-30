@@ -35,7 +35,8 @@ run = [
 [tasks.ci]
 description = "Run CI tasks server"
 run = [
-    "rustup component add rustfmt", # should be dony by `tools` section, but doesn't work in CI
+    "rustup component add rustfmt", # should be dony by `tools` section, but doesn't work reliably in CI
+    "rustup component add clippy", # should be dony by `tools` section, but doesn't work reliably in CI
     "cargo build",
     "cargo fmt --check",
     "cargo clippy",

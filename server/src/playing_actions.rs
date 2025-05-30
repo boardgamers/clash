@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::action_card::{can_play_action_card, play_action_card};
+use crate::action_card::{can_play_civil_card, play_action_card};
 use crate::advance::{AdvanceAction, base_advance_cost, gain_advance_without_payment};
 use crate::city::found_city;
 use crate::collect::{PositionCollection, collect};
@@ -56,9 +56,6 @@ pub struct Recruit {
     pub city_position: Position,
     pub payment: ResourcePile,
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub leader_name: Option<String>,
-    #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub replaced_units: Vec<u32>,
 }
@@ -70,15 +67,8 @@ impl Recruit {
             units: units.clone(),
             city_position,
             payment,
-            leader_name: None,
             replaced_units: Vec::new(),
         }
-    }
-
-    #[must_use]
-    pub fn with_leader(mut self, leader_name: &str) -> Self {
-        self.leader_name = Some(leader_name.to_string());
-        self
     }
 
     #[must_use]
@@ -144,7 +134,7 @@ impl PlayingActionType {
                 can_play_custom_action(game, p, *c)?;
             }
             PlayingActionType::ActionCard(id) => {
-                can_play_action_card(game, p, *id)?;
+                can_play_civil_card(game, p, *id)?;
             }
             PlayingActionType::WonderCard(name) => {
                 if !p.wonder_cards.contains(name) {
@@ -213,7 +203,15 @@ impl PlayingAction {
             game.actions_left -= 1;
         }
 
-        let origin_override = match playing_action_type {
+        self.execute_without_action_cost(game, player_index)
+    }
+
+    pub(crate) fn execute_without_action_cost(
+        self,
+        game: &mut Game,
+        player_index: usize,
+    ) -> Result<(), String> {
+        let origin_override = match self.playing_action_type() {
             PlayingActionType::Custom(c) => {
                 if let Some(key) = c.info().once_per_turn {
                     game.players[player_index]
@@ -337,6 +335,7 @@ fn assert_allowed(
 #[derive(Clone, Debug, PartialEq)]
 pub enum ActionResourceCost {
     Resources(ResourcePile),
+    Tokens(u8),
     AdvanceCostWithoutDiscount,
 }
 
@@ -376,6 +375,9 @@ impl ActionCost {
         match &self.cost {
             ActionResourceCost::Resources(c) => {
                 PaymentOptions::resources(player, PaymentReason::ActionCard, c.clone())
+            }
+            ActionResourceCost::Tokens(tokens) => {
+                PaymentOptions::tokens(player, PaymentReason::ActionCard, *tokens)
             }
             ActionResourceCost::AdvanceCostWithoutDiscount => base_advance_cost(player),
         }

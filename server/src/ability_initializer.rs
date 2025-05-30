@@ -185,7 +185,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         )
     }
 
-    fn add_combat_round_start_listener(
+    fn add_combat_strength_listener(
         self,
         priority: i32,
         listener: impl Fn(&Game, &Combat, &mut CombatStrength, CombatRole)

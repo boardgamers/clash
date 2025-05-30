@@ -163,7 +163,7 @@
         },
         {
           "position": "B1",
-          "unit_type": "Leader",
+          "unit_type": "Infantry",
           "movement_restrictions": [
             "Battle",
             "Mountain"
@@ -233,10 +233,7 @@
         }
       ],
       "civilization": "test0",
-      "available_leaders": [
-        "Alexander",
-        "Kleopatra"
-      ],
+      "available_leaders": [],
       "advances": [
         "Farming",
         "Mining"

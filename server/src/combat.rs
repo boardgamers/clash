@@ -162,7 +162,7 @@ impl Combat {
         let p = self.player(role);
         self.fighting_units(game, p)
             .iter()
-            .any(|&unit_id| game.player(p).get_unit(unit_id).unit_type == UnitType::Leader)
+            .any(|&unit_id| game.player(p).get_unit(unit_id).unit_type.is_leader())
     }
 
     #[must_use]
@@ -211,7 +211,7 @@ pub(crate) fn log_round(game: &mut Game, c: &Combat) {
                     .collect_vec()
             })
             .collect::<Units>()
-            .to_string(game.player(c.attacker()).active_leader.as_ref())
+            .to_string(Some(game))
     ));
     game.add_info_log_item(&format!(
         "Defenders: {}",
@@ -220,7 +220,7 @@ pub(crate) fn log_round(game: &mut Game, c: &Combat) {
             .iter()
             .map(|u| u.unit_type)
             .collect::<Units>()
-            .to_string(game.player(c.defender()).active_leader.as_ref())
+            .to_string(Some(game))
     ));
 }
 

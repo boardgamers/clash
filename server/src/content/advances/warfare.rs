@@ -33,7 +33,7 @@ fn tactics() -> AdvanceBuilder {
         )
         .with_advance_bonus(CultureToken)
         .with_unlocked_building(Fortress)
-        .add_combat_round_start_listener(3, fortress),
+        .add_combat_strength_listener(3, fortress),
     )
 }
 
@@ -156,7 +156,7 @@ fn steel_weapons() -> AdvanceBuilder {
             add_steel_weapons(s.player_index, c);
         },
     )
-    .add_combat_round_start_listener(2, use_steel_weapons)
+    .add_combat_strength_listener(2, use_steel_weapons)
 }
 
 fn draft() -> AdvanceBuilder {

@@ -8,6 +8,7 @@ use crate::content::custom_actions::CustomActionType;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::PersistentEventState;
 use crate::game::{Game, GameContext, GameOptions, GameState};
+use crate::leader::Leader;
 use crate::log::ActionLogAge;
 use crate::map::{Map, MapData};
 use crate::objective_card::init_objective_card;
@@ -235,11 +236,8 @@ pub struct PlayerData {
     units: Vec<UnitData>,
     civilization: String,
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    active_leader: Option<String>,
-    #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    available_leaders: Vec<String>,
+    available_leaders: Vec<Leader>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     advances: Vec<Advance>,
@@ -257,7 +255,7 @@ pub struct PlayerData {
     completed_objectives: Vec<String>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    captured_leaders: Vec<String>,
+    captured_leaders: Vec<Leader>,
     #[serde(default)]
     #[serde(skip_serializing_if = "f32::is_zero")]
     event_victory_points: f32,
@@ -288,7 +286,6 @@ pub struct PlayerData {
 ///
 /// Panics if elements like wonders or advances don't exist
 fn initialize_player(data: PlayerData, game: &mut Game, all: &[Builtin]) {
-    let leader = data.active_leader.clone();
     let objective_cards = data.objective_cards.clone();
     let player = player_from_data(data, game);
     let player_index = player.index;
@@ -296,8 +293,8 @@ fn initialize_player(data: PlayerData, game: &mut Game, all: &[Builtin]) {
     builtin::init_player(game, player_index, all);
     advance::init_player(game, player_index);
 
-    if let Some(leader) = leader {
-        Player::with_leader(&leader, game, player_index, |game, leader| {
+    if let Some(leader) = game.player(player_index).active_leader() {
+        Player::with_leader(leader, game, player_index, |game, leader| {
             leader.listeners.init(game, player_index);
         });
     }
@@ -353,7 +350,6 @@ fn player_from_data(data: PlayerData, game: &Game) -> Player {
         events: PlayerEvents::new(),
         destroyed_structures: DestroyedStructures::from_data(data.destroyed_structures),
         units,
-        active_leader: data.active_leader,
         available_leaders: data.available_leaders,
         great_library_advance: data.great_library_advance,
         special_advances: civilization
@@ -413,7 +409,6 @@ pub fn player_data(player: Player) -> PlayerData {
         destroyed_structures: player.destroyed_structures.data(),
         units,
         civilization: player.civilization.name,
-        active_leader: player.active_leader,
         available_leaders: player.available_leaders.into_iter().collect(),
         advances: player.advances.iter().sorted_by_key(Advance::id).collect(),
         great_library_advance: player.great_library_advance,
@@ -450,7 +445,6 @@ pub fn cloned_player_data(player: &Player) -> PlayerData {
         destroyed_structures: player.destroyed_structures.cloned_data(),
         units,
         civilization: player.civilization.name.clone(),
-        active_leader: player.active_leader.clone(),
         available_leaders: player.available_leaders.clone(),
         advances: player.advances.iter().sorted_by_key(Advance::id).collect(),
         great_library_advance: player.great_library_advance,

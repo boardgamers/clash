@@ -36,7 +36,7 @@ fn all_actions() {
             (
                 ActionType::Playing(PlayingActionType::Recruit),
                 vec![Action::Playing(PlayingAction::Recruit(Recruit::new(
-                    &Units::new(1, 0, 0, 0, 0, 0),
+                    &Units::new(1, 0, 0, 0, 0, None),
                     Position::from_offset("D8"),
                     ResourcePile::food(2)
                 )))]

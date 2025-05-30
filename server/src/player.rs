@@ -2,7 +2,7 @@ use crate::advance::{Advance, base_advance_cost, player_government};
 use crate::city_pieces::DestroyedStructures;
 use crate::consts::{STACK_LIMIT, UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::events::{Event, EventOrigin};
-use crate::leader::LeaderAbility;
+use crate::leader::{Leader, LeaderAbility};
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player_events::{CostInfo, TransientEvents};
 use crate::special_advance::SpecialAdvance;
@@ -19,7 +19,7 @@ use crate::{
     },
     content::custom_actions::CustomActionType,
     game::Game,
-    leader::Leader,
+    leader::LeaderInfo,
     player_events::PlayerEvents,
     position::Position,
     resource_pile::ResourcePile,
@@ -27,6 +27,7 @@ use crate::{
     utils,
 };
 use enumset::EnumSet;
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering::{self, *};
 use std::collections::HashMap;
@@ -50,8 +51,7 @@ pub struct Player {
     pub destroyed_structures: DestroyedStructures,
     pub units: Vec<Unit>,
     pub civilization: Civilization,
-    pub active_leader: Option<String>,
-    pub available_leaders: Vec<String>,
+    pub available_leaders: Vec<Leader>,
     pub advances: EnumSet<Advance>,
     pub great_library_advance: Option<Advance>,
     pub special_advances: EnumSet<SpecialAdvance>,
@@ -59,7 +59,7 @@ pub struct Player {
     pub wonders_owned: EnumSet<Wonder>, // transient
     pub incident_tokens: u8,
     pub completed_objectives: Vec<String>,
-    pub captured_leaders: Vec<String>,
+    pub captured_leaders: Vec<Leader>,
     pub event_victory_points: f32,
     pub custom_actions: HashMap<CustomActionType, EventOrigin>,
     pub wonder_cards: Vec<Wonder>,
@@ -102,12 +102,11 @@ impl Player {
             cities: Vec::new(),
             destroyed_structures: DestroyedStructures::new(),
             units: Vec::new(),
-            active_leader: None,
             available_leaders: civilization
                 .leaders
                 .iter()
-                .map(|l| l.name.clone())
-                .collect(),
+                .map(|leader| leader.leader)
+                .collect_vec(),
             civilization,
             advances: EnumSet::empty(),
             special_advances: EnumSet::empty(),
@@ -137,12 +136,12 @@ impl Player {
     ///
     /// Panics if the leader does not exist
     #[must_use]
-    pub fn get_leader(&self, name: &str) -> &Leader {
+    pub fn get_leader(&self, name: Leader) -> &LeaderInfo {
         self.civilization
             .leaders
             .iter()
-            .find(|leader| leader.name == name)
-            .unwrap_or_else(|| panic!("Leader {name} not found"))
+            .find(|leader| leader.leader == name)
+            .unwrap_or_else(|| panic!("Leader {name:?} not found"))
     }
 
     ///
@@ -159,7 +158,7 @@ impl Player {
     }
 
     pub(crate) fn with_leader(
-        leader: &str,
+        leader: Leader,
         game: &mut Game,
         player_index: usize,
         f: impl FnOnce(&mut Game, &LeaderAbility) + Clone,
@@ -168,7 +167,7 @@ impl Player {
             .civilization
             .leaders
             .iter()
-            .position(|l| l.name == leader)
+            .position(|l| l.leader == leader)
             .expect("player should have the leader");
         let l = game.players[player_index].civilization.leaders.remove(pos);
         for a in &l.abilities {
@@ -181,10 +180,10 @@ impl Player {
     }
 
     #[must_use]
-    pub fn available_leaders(&self) -> Vec<&Leader> {
+    pub fn available_leaders(&self) -> Vec<&LeaderInfo> {
         self.available_leaders
             .iter()
-            .map(|name| self.get_leader(name))
+            .map(|name| self.get_leader(*name))
             .collect()
     }
 
@@ -549,6 +548,17 @@ impl Player {
             .iter_mut()
             .filter(|unit| unit.position == position)
             .collect()
+    }
+
+    #[must_use]
+    pub fn active_leader(&self) -> Option<Leader> {
+        self.units.iter().find_map(|unit| {
+            if let UnitType::Leader(l) = unit.unit_type {
+                Some(l)
+            } else {
+                None
+            }
+        })
     }
 
     pub(crate) fn trigger_event<T, U, V>(

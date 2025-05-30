@@ -15,7 +15,7 @@ const JSON: JsonTest = JsonTest::child("objective_cards", "instant");
 #[test]
 fn test_draft() {
     let r = Action::Playing(PlayingAction::Recruit(playing_actions::Recruit::new(
-        &Units::new(0, 1, 0, 0, 0, 0),
+        &Units::new(0, 1, 0, 0, 0, None),
         Position::from_offset("A1"),
         ResourcePile::mood_tokens(1),
     )));
@@ -83,6 +83,8 @@ fn test_warmonger() {
                 .skip_json(),
             TestAction::not_undoable(0, move_action(vec![2, 3], Position::from_offset("B1")))
                 .skip_json(),
+            TestAction::not_undoable(0, Action::Response(EventResponse::Bool(false))).skip_json(),
+            TestAction::not_undoable(0, Action::Response(EventResponse::Bool(false))).skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![
@@ -90,17 +92,11 @@ fn test_warmonger() {
                 ])),
             )
             .with_pre_assert(|game| {
-                let PersistentEventRequest::SelectHandCards(c) = &game
-                    .events
-                    .last()
-                    .expect("last event")
-                    .player
-                    .handler
-                    .as_ref()
-                    .expect("handler")
-                    .request
+                let h = &game.events.last().expect("last event").player.handler;
+                let PersistentEventRequest::SelectHandCards(c) =
+                    &h.as_ref().expect("handler").request
                 else {
-                    panic!("Expected SelectHandCards request");
+                    panic!("Expected SelectHandCards request, got: {h:?}");
                 };
                 //can't fulfill both objectives with same name
                 assert_eq!(c.choices.len(), 2);

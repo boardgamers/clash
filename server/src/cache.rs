@@ -10,7 +10,7 @@ use crate::content::{
 };
 use crate::game::Game;
 use crate::incident::Incident;
-use crate::leader::{Leader, LeaderAbility};
+use crate::leader::{Leader, LeaderInfo};
 use crate::objective_card::{Objective, ObjectiveCard};
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo};
 use crate::status_phase::StatusPhaseState::{ChangeGovernmentType, DetermineFirstPlayer};
@@ -51,6 +51,7 @@ pub struct Cache {
 
     civilizations_by_name: HashMap<String, Civilization>,
     all_special_advances: Vec<SpecialAdvanceInfo>,
+    leaders: HashMap<Leader, LeaderInfo>,
 }
 
 impl Default for Cache {
@@ -141,6 +142,11 @@ impl Cache {
                 .into_iter()
                 .flat_map(|c| c.special_advances)
                 .sorted_by_key(|s| s.advance)
+                .collect(),
+            leaders: civilizations::get_all_uncached()
+                .into_iter()
+                .flat_map(|c| c.leaders)
+                .map(|l| (l.leader, l))
                 .collect(),
         }
     }
@@ -330,22 +336,7 @@ impl Cache {
         match name {
             // "Maya" => maya::maya(), // still needs to be implemented
             // for integration testing
-            "test0" => Civilization::new(
-                "test0",
-                vec![],
-                vec![
-                    Leader::new(
-                        "Alexander",
-                        LeaderAbility::builder("", "").build(),
-                        LeaderAbility::builder("", "").build(),
-                    ),
-                    Leader::new(
-                        "Kleopatra",
-                        LeaderAbility::builder("", "").build(),
-                        LeaderAbility::builder("", "").build(),
-                    ),
-                ],
-            ), // for testing
+            "test0" => Civilization::new("test0", vec![], vec![]),
             "test1" => Civilization::new("test1", vec![], vec![]),
             "test2" => Civilization::new("test2", vec![], vec![]),
             _ => self
@@ -354,6 +345,17 @@ impl Cache {
                 .cloned()
                 .expect("civilization not found"),
         }
+    }
+
+    ///
+    /// # Panics
+    ///
+    /// Panics if special advance does not exist
+    #[must_use]
+    pub fn get_leader(&self, leader: &Leader) -> &LeaderInfo {
+        self.leaders
+            .get(leader)
+            .unwrap_or_else(|| panic!("leader not found: {leader:?}"))
     }
 }
 

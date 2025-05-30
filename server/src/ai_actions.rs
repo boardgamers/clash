@@ -403,7 +403,6 @@ fn recruit_actions(
                     player,
                     &next,
                     city.position,
-                    None,
                     &[],
                     CostTrigger::NoModifiers,
                 ) {

@@ -1,8 +1,8 @@
 use crate::combat::Combat;
 use crate::combat_listeners::CombatStrength;
 use crate::game::Game;
-use crate::unit::UnitType::{Cavalry, Elephant, Infantry, Leader};
-use crate::unit::{UnitType, Units};
+use crate::unit::UnitType::{Cavalry, Elephant, Infantry};
+use crate::unit::{LEADER_UNIT, UnitType, Units};
 use num::Zero;
 use serde::{Deserialize, Serialize};
 
@@ -161,8 +161,8 @@ impl CombatDieRoll {
 }
 
 pub(crate) const COMBAT_DIE_SIDES: [CombatDieRoll; 12] = [
-    CombatDieRoll::new(1, Leader),
-    CombatDieRoll::new(1, Leader),
+    CombatDieRoll::new(1, LEADER_UNIT),
+    CombatDieRoll::new(1, LEADER_UNIT),
     CombatDieRoll::new(2, Cavalry),
     CombatDieRoll::new(2, Elephant),
     CombatDieRoll::new(3, Elephant),
@@ -238,18 +238,18 @@ fn dice_roll_with_leader_reroll(
 ) -> CombatDieRoll {
     let side = roll_die(game, roll_log);
 
-    if deny_combat_abilities || side.bonus != Leader || !unit_types.has_unit(&Leader) {
+    if deny_combat_abilities || side.bonus != LEADER_UNIT || !unit_types.has_unit(&LEADER_UNIT) {
         return side;
     }
 
-    *unit_types -= &Leader;
+    *unit_types -= &LEADER_UNIT;
 
     // if used, the leader grants unlimited rerolls of 1s
     loop {
         add_roll_log_effect(roll_log, "re-roll");
         let side = roll_die(game, roll_log);
 
-        if side.bonus != Leader {
+        if side.bonus != LEADER_UNIT {
             return side;
         }
     }
@@ -262,6 +262,6 @@ fn add_roll_log_effect(roll_log: &mut [String], effect: &str) {
 
 fn roll_die(game: &mut Game, roll_log: &mut Vec<String>) -> CombatDieRoll {
     let roll = game.next_dice_roll();
-    roll_log.push(format!("{} ({}, ", roll.value, roll.bonus));
+    roll_log.push(format!("{} ({}, ", roll.value, roll.bonus.generic_name()));
     roll.clone()
 }

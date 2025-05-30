@@ -68,7 +68,8 @@ pub(crate) fn cultural_takeover(id: u8, tactics_card: TacticsCardFactory) -> Act
         |game, s, a| {
             game.add_info_log_item(&format!(
                 "{} selected unit to gain: {}",
-                s.player_name, s.choice,
+                s.player_name,
+                s.choice.non_leader_name(),
             ));
             add_unit(
                 s.player_index,

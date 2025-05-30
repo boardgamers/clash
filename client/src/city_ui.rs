@@ -179,13 +179,7 @@ fn recruit_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconActio
         rc.assets().unit(UnitType::Infantry, rc.shown_player),
         vec!["Recruit Units".to_string()],
         Box::new(|| {
-            RecruitAmount::new_selection(
-                rc.game,
-                city.player_index,
-                city.position,
-                Units::empty(),
-                None,
-            )
+            RecruitAmount::new_selection(rc.game, city.player_index, city.position, Units::empty())
         }),
     ))
 }

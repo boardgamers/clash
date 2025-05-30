@@ -65,9 +65,6 @@
         }
       ],
       "civilization": "test2",
-      "available_leaders": [
-        "Kʼinich Janaab Pakal I"
-      ],
       "advances": [
         "Farming",
         "Mining"

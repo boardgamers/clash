@@ -23,12 +23,13 @@
       "units": [
         {
           "position": "E8",
-          "unit_type": "Leader",
+          "unit_type": {
+            "Leader": "Augustus"
+          },
           "id": 0
         }
       ],
       "civilization": "Rome",
-      "active_leader": "Augustus",
       "advances": [
         "Farming",
         "Mining",

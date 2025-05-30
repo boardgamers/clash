@@ -100,12 +100,13 @@
         },
         {
           "position": "A1",
-          "unit_type": "Leader",
+          "unit_type": {
+            "Leader": "Pakal"
+          },
           "id": 10
         }
       ],
       "civilization": "Maya",
-      "active_leader": "Kʼinich Janaab Pakal I",
       "advances": [
         "Farming",
         "FreeEconomy",
@@ -176,10 +177,7 @@
         }
       ],
       "civilization": "test0",
-      "available_leaders": [
-        "Alexander",
-        "Kleopatra"
-      ],
+      "available_leaders": [],
       "advances": [
         "Farming",
         "Mining"

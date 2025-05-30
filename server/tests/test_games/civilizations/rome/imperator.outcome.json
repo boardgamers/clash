@@ -28,7 +28,9 @@
       "units": [
         {
           "position": "D8",
-          "unit_type": "Leader",
+          "unit_type": {
+            "Leader": "Augustus"
+          },
           "movement_restrictions": [
             "Battle"
           ],
@@ -36,7 +38,6 @@
         }
       ],
       "civilization": "Rome",
-      "active_leader": "Augustus",
       "advances": [
         "Farming",
         "Mining",
@@ -373,7 +374,7 @@
                       "position": "E8",
                       "player": 0,
                       "present": {
-                        "leaders": 1
+                        "leader": "Augustus"
                       }
                     },
                     "defender": {

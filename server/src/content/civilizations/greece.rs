@@ -1,13 +1,19 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::advance::Advance;
+use crate::advance::{Advance, gain_advance_without_payment};
+use crate::card::HandCard;
 use crate::civilization::Civilization;
 use crate::combat::update_combat_strength;
 use crate::combat_listeners::CombatStrength;
 use crate::content::advances::warfare::draft_cost;
+use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
-use crate::content::persistent_events::PositionRequest;
+use crate::content::persistent_events::{AdvanceRequest, HandCardsRequest, PositionRequest};
+use crate::game::Game;
+use crate::leader::{Leader, LeaderAbility, LeaderInfo, leader_position};
+use crate::map::{block_has_player_city, get_map_setup};
 use crate::payment::PaymentConversion;
-use crate::player::gain_resources;
+use crate::player::{Player, gain_resources};
+use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
 use itertools::Itertools;
@@ -16,7 +22,7 @@ pub(crate) fn greece() -> Civilization {
     Civilization::new(
         "Greece",
         vec![study(), sparta(), hellenistic_culture(), city_states()],
-        vec![],
+        vec![alexander(), leonidas(), pericles()],
     )
 }
 
@@ -119,8 +125,7 @@ fn city_states() -> SpecialAdvanceInfo {
             if game
                 .player_mut(player_index)
                 .event_info
-                .insert("city_states".to_string(), "used".to_string())
-                .is_some()
+                .contains_key("city_states")
             {
                 return None;
             }
@@ -167,8 +172,203 @@ fn city_states() -> SpecialAdvanceInfo {
                 let p = game.player_mut(s.player_index);
                 p.get_city_mut(choice).activate();
                 p.get_city_mut(*position).increase_mood_state();
+                p.event_info
+                    .insert("city_states".to_string(), "used".to_string());
             }
         },
     )
     .build()
+}
+
+const IDOL: &str = "As a free action, pay 1 culture token to \
+            play an action card as a free action";
+
+fn alexander() -> LeaderInfo {
+    LeaderInfo::new(
+        Leader::Alexander,
+        "Alexander the Great",
+        LeaderAbility::builder("Idol", IDOL)
+            .add_custom_action(CustomActionType::Idol)
+            .build(),
+        LeaderAbility::builder(
+            "Ruler of the World",
+            "In a land battle, gain 1 combat value for each region
+            with a city you control, except the starting region.",
+        )
+        .add_combat_strength_listener(7, |game, c, s, r| {
+            if !c.is_sea_battle(game) {
+                let setup = get_map_setup(game.human_players_count());
+                let player = c.player(r);
+                let extra = setup
+                    .free_positions
+                    .into_iter()
+                    .chain(
+                        setup
+                            .home_positions
+                            .iter()
+                            .enumerate()
+                            .filter_map(|(i, h)| (i != player).then_some(h.position.clone())),
+                    )
+                    .filter(|b| block_has_player_city(game, b, player))
+                    .count();
+                s.extra_combat_value += extra as i8;
+                s.roll_log
+                    .push(format!("Ruler of the World adds {extra} combat value",));
+            }
+        })
+        .build(),
+    )
+}
+
+pub(crate) fn use_idol() -> Builtin {
+    Builtin::builder("Idol", IDOL)
+        .add_hand_card_request(
+            |event| &mut event.custom_action,
+            0,
+            |game, player, _| {
+                Some(HandCardsRequest::new(
+                    idol_cards(game, game.player(player), &ResourcePile::empty()),
+                    1..=1,
+                    "Select an action card to play as a free action using Idol",
+                ))
+            },
+            |game, s, _| {
+                let HandCard::ActionCard(id) = s.choice[0] else {
+                    panic!("expected action card");
+                };
+                game.add_info_log_item(&format!(
+                    "{} decided to play {} as a free action using Idol",
+                    s.player_name,
+                    game.cache.get_civil_card(id).name
+                ));
+
+                PlayingAction::ActionCard(id)
+                    .execute_without_action_cost(game, s.player_index)
+                    .expect("playing action card with Idol");
+            },
+        )
+        .build()
+}
+
+pub(crate) fn idol_cards(game: &Game, p: &Player, extra_cost: &ResourcePile) -> Vec<HandCard> {
+    p.action_cards
+        .iter()
+        .filter_map(|&a| {
+            let action_cost = PlayingActionType::ActionCard(a).cost(game);
+            if action_cost.free {
+                // can play directly
+                return None;
+            }
+
+            let mut payment_options = action_cost.payment_options(p);
+            payment_options.default += extra_cost.clone();
+            p.can_afford(&payment_options)
+                .then_some(HandCard::ActionCard(a))
+        })
+        .collect_vec()
+}
+
+fn leonidas() -> LeaderInfo {
+    LeaderInfo::new(
+        Leader::Leonidas,
+        "Leonidas I",
+        LeaderAbility::builder(
+            "That's Sparta",
+            "Gain 1 culture token when recruiting in the city where Leonidas is present.",
+        )
+        .add_simple_persistent_event_listener(
+            |event| &mut event.recruit,
+            4,
+            |game, player_index, _player_name, r| {
+                if leader_position(game.player(player_index)) == r.city_position {
+                    gain_resources(
+                        game,
+                        player_index,
+                        ResourcePile::culture_tokens(1),
+                        |name, pile| format!("{name} gained {pile} for That's Sparta"),
+                    );
+                }
+            },
+        )
+        .build(),
+        LeaderAbility::builder(
+            "Hero of Thermopylae",
+            "In land battle: \
+            Get +2 combat value per army unit you have less than your enemy.",
+        )
+        .add_combat_strength_listener(8, |game, c, s, r| {
+            let p = c.player(r);
+            let pl = c.fighting_units(game, p).len();
+            let op = c.fighting_units(game, c.opponent(p)).len();
+
+            let extra = op.saturating_sub(pl) * 2;
+            if extra > 0 {
+                s.extra_combat_value += extra as i8;
+                s.roll_log
+                    .push(format!("Hero of Thermopylae adds {extra} combat value",));
+            }
+        })
+        .build(),
+    )
+}
+
+const MASTER: &str = "Pericles is in a Happy city: Gain 1 education advance for free.";
+
+fn pericles() -> LeaderInfo {
+    LeaderInfo::new(
+        Leader::Pericles,
+        "Pericles",
+        LeaderAbility::builder("Master", MASTER)
+            .add_custom_action(CustomActionType::Master)
+            .build(),
+        LeaderAbility::builder("Admiral", "In Sea battles: Gain +2 combat value")
+            .add_combat_strength_listener(20, |game, c, s, _r| {
+                if c.is_sea_battle(game) {
+                    s.extra_combat_value += 2;
+                    s.roll_log.push("Admiral adds +2 combat value".to_string());
+                }
+            })
+            .build(),
+    )
+}
+
+pub(crate) fn use_master() -> Builtin {
+    Builtin::builder("Master", MASTER)
+        .add_advance_request(
+            |event| &mut event.custom_action,
+            0,
+            |game, player_index, _| {
+                let player = game.player(player_index);
+                Some(AdvanceRequest::new(master_education_advances(game, player)))
+            },
+            |game, s, c| {
+                let advance = s.choice;
+                game.add_info_log_item(&format!(
+                    "{} decided to gain {} for free using Master",
+                    s.player_name,
+                    advance.name(game)
+                ));
+                gain_advance_without_payment(
+                    game,
+                    advance,
+                    s.player_index,
+                    c.payment.clone(),
+                    true,
+                );
+            },
+        )
+        .build()
+}
+
+pub(crate) fn master_education_advances(game: &Game, player: &Player) -> Vec<Advance> {
+    game.cache
+        .get_advance_group("Education")
+        .advances
+        .iter()
+        .filter_map(|a| {
+            player
+                .can_advance_free(a.advance, game)
+                .then_some(a.advance)
+        })
+        .collect_vec()
 }

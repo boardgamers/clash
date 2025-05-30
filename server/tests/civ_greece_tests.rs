@@ -1,4 +1,4 @@
-use crate::common::{JsonTest, TestAction, move_action, payment_response};
+use crate::common::{JsonTest, TestAction, custom_action, move_action, payment_response};
 use server::action::Action;
 use server::city_pieces::Building;
 use server::content::custom_actions::CustomActionType;
@@ -20,7 +20,7 @@ fn sparta_draft() {
         vec![TestAction::undoable(
             0,
             Action::Playing(PlayingAction::Recruit(Recruit::new(
-                &Units::new(0, 1, 0, 0, 0, 0),
+                &Units::new(0, 1, 0, 0, 0, None),
                 Position::from_offset("A1"),
                 ResourcePile::culture_tokens(1),
             ))),
@@ -98,7 +98,7 @@ fn city_states() {
             TestAction::undoable(
                 0,
                 Action::Playing(PlayingAction::Recruit(Recruit::new(
-                    &Units::new(0, 1, 0, 0, 0, 0),
+                    &Units::new(0, 1, 0, 0, 0, None),
                     Position::from_offset("A1"),
                     ResourcePile::culture_tokens(1),
                 ))),
@@ -112,4 +112,38 @@ fn city_states() {
             ),
         ],
     )
+}
+
+#[test]
+fn idol() {
+    JSON.test(
+        "idol",
+        vec![
+            TestAction::undoable(0, custom_action(CustomActionType::Idol)).skip_json(),
+            TestAction::undoable(0, payment_response(ResourcePile::culture_tokens(1))).skip_json(),
+            TestAction::undoable(0, payment_response(ResourcePile::culture_tokens(1))),
+        ],
+    )
+}
+
+#[test]
+fn ruler_of_the_world() {
+    JSON.test(
+        "ruler_of_the_world",
+        vec![TestAction::not_undoable(
+            0,
+            move_action(vec![0], Position::from_offset("D8")),
+        )],
+    );
+}
+
+#[test]
+fn master() {
+    JSON.test(
+        "master",
+        vec![
+            TestAction::undoable(0, custom_action(CustomActionType::Master)).skip_json(),
+            TestAction::not_undoable(0, payment_response(ResourcePile::mood_tokens(1))),
+        ],
+    );
 }

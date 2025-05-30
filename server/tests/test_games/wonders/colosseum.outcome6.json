@@ -65,7 +65,7 @@
         },
         {
           "position": "C1",
-          "unit_type": "Leader",
+          "unit_type": "Infantry",
           "movement_restrictions": [
             "Battle"
           ],
@@ -392,8 +392,7 @@
                                     "present": {
                                       "cavalry": 1,
                                       "elephants": 1,
-                                      "infantry": 1,
-                                      "leaders": 1
+                                      "infantry": 2
                                     }
                                   },
                                   "battleground": "City",
@@ -489,7 +488,7 @@
                     {
                       "op": "replace",
                       "path": "/players/0/units/2/unit_type",
-                      "value": "Leader"
+                      "value": "Infantry"
                     },
                     {
                       "op": "replace",
@@ -567,10 +566,9 @@
                       "position": "C2",
                       "player": 0,
                       "present": {
-                        "infantry": 1,
+                        "infantry": 2,
                         "cavalry": 1,
-                        "elephants": 1,
-                        "leaders": 1
+                        "elephants": 1
                       },
                       "losses": {
                         "infantry": 1
@@ -612,11 +610,11 @@
       "Player1 paid 1 mood token for Sports to increase the happiness of C2 by 1 steps, making it Happy"
     ],
     [
-      "Player1 marched 1 infantry, 1 cavalry, 1 elephant and a leader from C2 to C1"
+      "Player1 marched 2 infantry, 1 cavalry and 1 elephant from C2 to C1"
     ],
     [
       "Combat round 1",
-      "Attackers: 1 infantry, 1 cavalry, 1 elephant and a leader",
+      "Attackers: 2 infantry, 1 cavalry and 1 elephant",
       "Defenders: 2 infantry",
       "Player1 rolled 4 (elephant, -1 hits, no combat value), 4 (elephant, no bonus), 3 (elephant, no bonus), 2 (elephant, no bonus) for combined combat value of 9 and gets 1 hits against defending units.",
       "Player2 rolled 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against attacking units."

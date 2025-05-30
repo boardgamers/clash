@@ -70,7 +70,7 @@
         },
         {
           "position": "C1",
-          "unit_type": "Leader",
+          "unit_type": "Infantry",
           "movement_restrictions": [
             "Battle"
           ],
@@ -263,10 +263,9 @@
                       "player": 0,
                       "present": {
                         "settlers": 2,
-                        "infantry": 1,
+                        "infantry": 2,
                         "cavalry": 1,
-                        "elephants": 1,
-                        "leaders": 1
+                        "elephants": 1
                       }
                     },
                     "defender": {
@@ -298,11 +297,11 @@
       "No valid positions for Pirate Ship"
     ],
     [
-      "Player1 marched 2 settlers, 1 infantry, 1 cavalry, 1 elephant and a leader from C2 to C1"
+      "Player1 marched 2 settlers, 2 infantry, 1 cavalry and 1 elephant from C2 to C1"
     ],
     [
       "Combat round 1",
-      "Attackers: 2 settlers, 1 infantry, 1 cavalry, 1 elephant and a leader",
+      "Attackers: 2 settlers, 2 infantry, 1 cavalry and 1 elephant",
       "Defenders: 2 infantry"
     ],
     [

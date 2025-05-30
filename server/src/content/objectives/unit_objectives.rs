@@ -239,7 +239,7 @@ pub(crate) fn unit_versatility(objective: &str, unit_type: UnitType) -> Objectiv
         objective,
         &format!(
             "You have at least 3 army groups with at least 1 {} unit each.",
-            unit_type.name()
+            unit_type.non_leader_name()
         ),
     )
     .status_phase_check(move |_game, player| {

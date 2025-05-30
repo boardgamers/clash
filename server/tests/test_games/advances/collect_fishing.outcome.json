@@ -108,10 +108,6 @@
         }
       ],
       "civilization": "test0",
-      "available_leaders": [
-        "Alexander",
-        "Kleopatra"
-      ],
       "advances": [
         "Farming",
         "Fishing",

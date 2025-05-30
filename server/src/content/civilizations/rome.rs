@@ -8,7 +8,7 @@ use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::{HandCardsRequest, PaymentRequest, PositionRequest};
 use crate::game::Game;
-use crate::leader::{Leader, LeaderAbility, LeaderAbilityBuilder, leader_position};
+use crate::leader::{Leader, LeaderAbility, LeaderAbilityBuilder, LeaderInfo, leader_position};
 use crate::map::{block_for_position, block_has_player_city};
 use crate::objective_card::{discard_objective_card, gain_objective_card_from_pile};
 use crate::payment::{
@@ -26,7 +26,7 @@ pub(crate) fn rome() -> Civilization {
     Civilization::new(
         "Rome",
         vec![aqueduct(), roman_roads(), captivi(), provinces()],
-        vec![augustus(), ceasar(), sulla()],
+        vec![augustus(), caesar(), sulla()],
     )
 }
 
@@ -170,8 +170,9 @@ fn provinces() -> SpecialAdvanceInfo {
     .build()
 }
 
-fn augustus() -> Leader {
-    Leader::new(
+fn augustus() -> LeaderInfo {
+    LeaderInfo::new(
+        Leader::Augustus,
         "Augustus",
         LeaderAbility::builder("Princeps", PRINCEPS)
             .add_custom_action(CustomActionType::Princeps)
@@ -181,7 +182,7 @@ fn augustus() -> Leader {
             "If you don't own a city in the region: \
             Gain 2 combat value in every combat round",
         )
-        .add_combat_round_start_listener(6, |game, c, s, r| {
+        .add_combat_strength_listener(6, |game, c, s, r| {
             if c.has_leader(r, game)
                 && !block_has_player_city(
                     game,
@@ -275,8 +276,9 @@ pub(crate) fn validate_princeps_cards(cards: &[HandCard]) -> Result<(), String> 
     }
 }
 
-fn ceasar() -> Leader {
-    Leader::new(
+fn caesar() -> LeaderInfo {
+    LeaderInfo::new(
+        Leader::Caesar,
         "Gaius Julius Caesar",
         LeaderAbility::builder(
             "Statesman",
@@ -324,8 +326,9 @@ fn ceasar() -> Leader {
     )
 }
 
-fn sulla() -> Leader {
-    Leader::new(
+fn sulla() -> LeaderInfo {
+    LeaderInfo::new(
+        Leader::Sulla,
         "Sulla",
         add_barbarian_control(
             LeaderAbility::builder(
@@ -353,7 +356,7 @@ fn sulla() -> Leader {
             "Civilizer",
             "In every combat round against barbarians: Gain 2 combat value",
         )
-        .add_combat_round_start_listener(5, |game, c, s, r| {
+        .add_combat_strength_listener(5, |game, c, s, r| {
             if c.has_leader(r, game) && c.is_barbarian_battle(r, game) {
                 s.extra_combat_value += 2;
                 s.roll_log.push("Sulla adds 2 combat value".to_string());
@@ -366,9 +369,8 @@ fn sulla() -> Leader {
 pub(crate) fn owner_of_sulla_in_range(position: Position, game: &Game) -> Option<usize> {
     // Check if Sulla is within 2 spaces of the given position
     game.players.iter().find_map(|p| {
-        p.active_leader
-            .as_ref()
-            .is_some_and(|l| l == "Sulla" && leader_position(p).distance(position) <= 2)
+        p.active_leader()
+            .is_some_and(|l| l == Leader::Sulla && leader_position(p).distance(position) <= 2)
             .then_some(p.index)
     })
 }

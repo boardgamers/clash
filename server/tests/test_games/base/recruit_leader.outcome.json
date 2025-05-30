@@ -110,14 +110,15 @@
         },
         {
           "position": "A1",
-          "unit_type": "Leader",
+          "unit_type": {
+            "Leader": "Augustus"
+          },
           "id": 10
         }
       ],
-      "civilization": "test0",
-      "active_leader": "Alexander",
+      "civilization": "Rome",
       "available_leaders": [
-        "Kleopatra"
+        "Sulla"
       ],
       "advances": [
         "Farming",
@@ -266,14 +267,13 @@
                     "Playing": {
                       "Recruit": {
                         "units": {
-                          "leaders": 1
+                          "leader": "Augustus"
                         },
                         "city_position": "A1",
                         "payment": {
                           "mood_tokens": 1,
                           "culture_tokens": 1
-                        },
-                        "leader_name": "Alexander"
+                        }
                       }
                     }
                   },
@@ -284,14 +284,9 @@
                       "value": 3
                     },
                     {
-                      "op": "replace",
-                      "path": "/players/0/available_leaders/0",
-                      "value": "Alexander"
-                    },
-                    {
                       "op": "add",
                       "path": "/players/0/available_leaders/1",
-                      "value": "Kleopatra"
+                      "value": "Augustus"
                     },
                     {
                       "op": "remove",
@@ -315,10 +310,6 @@
                     {
                       "op": "remove",
                       "path": "/players/0/units/10"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/active_leader"
                     }
                   ]
                 }
@@ -332,7 +323,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 paid 1 mood token and 1 culture token to recruit Alexander in the city at A1"
+      "Player1 paid 1 mood token and 1 culture token to recruit Augustus in the city at A1"
     ]
   ],
   "undo_limit": 0,

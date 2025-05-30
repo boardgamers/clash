@@ -108,10 +108,10 @@
           "id": 9
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "available_leaders": [
-        "Alexander",
-        "Kleopatra"
+        "Sulla",
+        "Augustus"
       ],
       "advances": [
         "Farming",
