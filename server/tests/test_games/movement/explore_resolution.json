@@ -32,7 +32,6 @@
         }
       ],
       "civilization": "test2",
-      "available_leaders": [],
       "advances": [
         "Farming",
         "Mining"

@@ -27,7 +27,7 @@ pub enum Leader {
 
     // Rome
     Augustus,
-    Ceasar,
+    Caesar,
     Sulla,
     // Greece
     Alexander,

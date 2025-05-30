@@ -26,7 +26,7 @@ pub(crate) fn rome() -> Civilization {
     Civilization::new(
         "Rome",
         vec![aqueduct(), roman_roads(), captivi(), provinces()],
-        vec![augustus(), ceasar(), sulla()],
+        vec![augustus(), caesar(), sulla()],
     )
 }
 
@@ -276,9 +276,9 @@ pub(crate) fn validate_princeps_cards(cards: &[HandCard]) -> Result<(), String> 
     }
 }
 
-fn ceasar() -> LeaderInfo {
+fn caesar() -> LeaderInfo {
     LeaderInfo::new(
-        Leader::Ceasar,
+        Leader::Caesar,
         "Gaius Julius Caesar",
         LeaderAbility::builder(
             "Statesman",

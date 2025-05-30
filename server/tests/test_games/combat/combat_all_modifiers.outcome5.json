@@ -13,88 +13,6 @@
       ]
     }
   },
-  "events": [
-    {
-      "event_type": {
-        "CombatRoundEnd": {
-          "attacker": {
-            "tactics_card": 1,
-            "opponent_fighters": 2,
-            "combat_value": 24
-          },
-          "defender": {
-            "tactics_card": 2,
-            "opponent_hit_cancels": 1,
-            "opponent_fighters": 4,
-            "combat_value": 12
-          },
-          "final_result": "AttackerWins",
-          "combat": {
-            "attackers": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5
-            ],
-            "retreat": "CanRetreat",
-            "modifiers": [
-              "SteelWeaponsAttacker",
-              "CancelFortressIgnoreHit",
-              "SteelWeaponsDefender"
-            ],
-            "stats": {
-              "round": 1,
-              "battleground": "CityWithFortress",
-              "attacker": {
-                "position": "C2",
-                "player": 0,
-                "present": {
-                  "settlers": 2,
-                  "infantry": 1,
-                  "cavalry": 1,
-                  "elephants": 1,
-                  "leaders": 1
-                }
-              },
-              "defender": {
-                "position": "C1",
-                "player": 1,
-                "present": {
-                  "infantry": 2
-                }
-              }
-            }
-          }
-        }
-      },
-      "player": 0,
-      "last_priority_used": 1,
-      "handler": {
-        "priority": 1,
-        "request": {
-          "SelectUnits": {
-            "player": 0,
-            "choices": [
-              0,
-              1,
-              2,
-              3
-            ],
-            "needed": {
-              "start": 1,
-              "end": 1
-            },
-            "description": "Remove 1 attacking units"
-          }
-        },
-        "origin": {
-          "Builtin": "Choose Casualties"
-        }
-      }
-    }
-  ],
   "players": [
     {
       "id": 0,
@@ -124,11 +42,18 @@
         {
           "mood_state": "Neutral",
           "position": "C2"
+        },
+        {
+          "city_pieces": {
+            "fortress": 0
+          },
+          "mood_state": "Angry",
+          "position": "C1"
         }
       ],
       "units": [
         {
-          "position": "C2",
+          "position": "C1",
           "unit_type": "Infantry",
           "movement_restrictions": [
             "Battle"
@@ -136,7 +61,7 @@
           "id": 0
         },
         {
-          "position": "C2",
+          "position": "C1",
           "unit_type": "Cavalry",
           "movement_restrictions": [
             "Battle"
@@ -144,7 +69,7 @@
           "id": 1
         },
         {
-          "position": "C2",
+          "position": "C1",
           "unit_type": "Infantry",
           "movement_restrictions": [
             "Battle"
@@ -152,7 +77,7 @@
           "id": 2
         },
         {
-          "position": "C2",
+          "position": "C1",
           "unit_type": "Elephant",
           "movement_restrictions": [
             "Battle"
@@ -160,12 +85,12 @@
           "id": 3
         },
         {
-          "position": "C2",
+          "position": "C1",
           "unit_type": "Settler",
           "id": 4
         },
         {
-          "position": "C2",
+          "position": "C1",
           "unit_type": "Settler",
           "id": 5
         },
@@ -211,27 +136,6 @@
         "mood_tokens": 7,
         "culture_tokens": 7
       },
-      "cities": [
-        {
-          "city_pieces": {
-            "fortress": 1
-          },
-          "mood_state": "Angry",
-          "position": "C1"
-        }
-      ],
-      "units": [
-        {
-          "position": "C1",
-          "unit_type": "Infantry",
-          "id": 0
-        },
-        {
-          "position": "C1",
-          "unit_type": "Infantry",
-          "id": 1
-        }
-      ],
       "civilization": "test1",
       "advances": [
         "Fanaticism",
@@ -371,6 +275,31 @@
                         }
                       ]
                     }
+                  },
+                  "combat_stats": {
+                    "round": 1,
+                    "battleground": "CityWithFortress",
+                    "attacker": {
+                      "position": "C2",
+                      "player": 0,
+                      "present": {
+                        "settlers": 2,
+                        "infantry": 2,
+                        "cavalry": 1,
+                        "elephants": 1
+                      }
+                    },
+                    "defender": {
+                      "position": "C1",
+                      "player": 1,
+                      "present": {
+                        "infantry": 2
+                      },
+                      "losses": {
+                        "infantry": 2
+                      }
+                    },
+                    "result": "AttackerWins"
                   }
                 }
               ]
@@ -383,11 +312,11 @@
   "action_log_index": 6,
   "log": [
     [
-      "Player1 marched 2 settlers, 1 infantry, 1 cavalry, 1 elephant and a leader from C2 to C1"
+      "Player1 marched 2 settlers, 2 infantry, 1 cavalry and 1 elephant from C2 to C1"
     ],
     [
       "Combat round 1",
-      "Attackers: 2 settlers, 1 infantry, 1 cavalry, 1 elephant and a leader",
+      "Attackers: 2 settlers, 2 infantry, 1 cavalry and 1 elephant",
       "Defenders: 2 infantry"
     ],
     [
@@ -406,12 +335,16 @@
       "Player2 played a Tactics Card",
       "Player1 reveals Tactics Card Peltasts",
       "Player2 reveals Tactics Card Encircled",
-      "Player1 rolled 6 (infantry, +1 combat value), 6 (infantry, no bonus), 6 (infantry, no bonus), 1 (leader, re-roll), 1 (leader, re-roll), 1 (leader, re-roll), 1 (leader, re-roll), 1 (leader, re-roll), 2 (cavalry, +2 combat value) for combined combat value of 24 and gets 2 hits against defending units.",
+      "Player1 rolled 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 1 (leader, no bonus) for combined combat value of 22 and gets 2 hits against defending units.",
       "Player1 used the following combat modifiers: steel weapons added 1 combat value, Peltasts rolled a 6 and ignored a hit",
-      "Player2 rolled 6 (infantry, +1 combat value), 1 (leader, no bonus), 3 (elephant, no bonus) for combined combat value of 12 and gets 1 hits against attacking units.",
+      "Player2 rolled 1 (leader, no bonus), 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 4 and gets 0 hits against attacking units.",
       "Player2 used the following combat modifiers: fortress added one extra die, steel weapons added 1 combat value",
       "Encircled cannot do damage - opponent has fewer losses",
-      "Player1 has to remove 1 of their attacking units"
+      "Player2 has to remove all of their defending units",
+      "Player2 removed 2 infantry",
+      "Attacker wins and captured Player2's city at C1",
+      "Player1 gained 1 gold for capturing a city",
+      "Player1 could not store 1 gold"
     ]
   ],
   "undo_limit": 6,
@@ -421,7 +354,9 @@
   "messages": [
     "The game has started"
   ],
-  "rng": "295838188732677981854465749010340725692",
+  "dice_roll_outcomes": [
+    1
+  ],
   "dice_roll_log": [
     11,
     11,
@@ -430,12 +365,7 @@
     1,
     1,
     1,
-    1,
-    1,
-    2,
-    10,
-    0,
-    4
+    1
   ],
   "wonders_left": [
     "Pyramids"

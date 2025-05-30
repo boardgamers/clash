@@ -28,7 +28,9 @@
       "units": [
         {
           "position": "D8",
-          "unit_type": "Infantry",
+          "unit_type": {
+            "Leader": "Caesar"
+          },
           "movement_restrictions": [
             "Battle"
           ],
@@ -41,7 +43,6 @@
         }
       ],
       "civilization": "Rome",
-      "active_leader": "Gaius Julius Caesar",
       "advances": [
         "Farming",
         "Mining",
@@ -378,7 +379,7 @@
                       "position": "E8",
                       "player": 0,
                       "present": {
-                        "leaders": 1
+                        "leader": "Caesar"
                       }
                     },
                     "defender": {
@@ -416,7 +417,7 @@
                                 "player": 0,
                                 "position": "E8",
                                 "present": {
-                                  "leaders": 1
+                                  "leader": "Caesar"
                                 }
                               },
                               "battleground": "City",

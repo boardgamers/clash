@@ -107,7 +107,6 @@
         }
       ],
       "civilization": "test0",
-      "available_leaders": [],
       "advances": [
         "Farming",
         "FreeEconomy",
