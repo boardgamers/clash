@@ -138,7 +138,9 @@
       "units": [
         {
           "position": "A1",
-          "unit_type": "Leader",
+          "unit_type": {
+            "Leader": "Sulla"
+          },
           "id": 0
         },
         {
@@ -148,7 +150,6 @@
         }
       ],
       "civilization": "Rome",
-      "active_leader": "Sulla",
       "advances": [
         "Farming",
         "Mining"

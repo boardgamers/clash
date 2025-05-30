@@ -385,7 +385,7 @@ fn test_replace_leader() {
             0,
             Action::Playing(Recruit(
                 playing_actions::Recruit::new(
-                    &Units::new(0, 0, 0, 0, 0, Some(Leader::Sulla)),
+                    &Units::new(0, 0, 0, 0, 0, Some(Leader::Augustus)),
                     Position::from_offset("A1"),
                     ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1),
                 )

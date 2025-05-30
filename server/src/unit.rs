@@ -471,7 +471,10 @@ impl Iterator for UnitsIntoIterator {
             2 => Some((Ship, u.ships)),
             3 => Some((Cavalry, u.cavalry)),
             4 => Some((Elephant, u.elephants)),
-            5 => Some((unit::LEADER_UNIT, u.leaders())),
+            5 => Some((
+                self.units.leader.map_or(unit::LEADER_UNIT, |l| Leader(l)),
+                u.leaders(),
+            )),
             _ => None,
         }
     }

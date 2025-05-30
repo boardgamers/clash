@@ -24,12 +24,13 @@
       "units": [
         {
           "position": "E8",
-          "unit_type": "Leader",
+          "unit_type": {
+            "Leader": "Alexander"
+          },
           "id": 0
         }
       ],
       "civilization": "Greece",
-      "active_leader": "Alexander the Great",
       "advances": [
         "Farming",
         "Mining",

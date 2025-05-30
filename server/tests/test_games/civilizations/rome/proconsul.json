@@ -23,12 +23,13 @@
       "units": [
         {
           "position": "E8",
-          "unit_type": "Leader",
+          "unit_type": {
+            "Leader": "Caesar"
+          },
           "id": 0
         }
       ],
       "civilization": "Rome",
-      "active_leader": "Gaius Julius Caesar",
       "advances": [
         "Farming",
         "Mining",

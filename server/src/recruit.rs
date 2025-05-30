@@ -28,13 +28,14 @@ pub(crate) fn recruit(game: &mut Game, player_index: usize, r: Recruit) -> Resul
         kill_units(game, &[*unit], player_index, None);
     }
     let player = game.player_mut(player_index);
-    if let Some(l) = r.units.leader {
-        set_active_leader(game, l, player_index);
-    }
     let vec = r.units.clone().to_vec();
     player.units.reserve_exact(vec.len());
     player.get_city_mut(r.city_position).activate();
     for unit_type in vec {
+        if let UnitType::Leader(l) = &unit_type {
+            set_active_leader(game, *l, player_index);
+        }
+
         let position = match &unit_type {
             UnitType::Ship => game
                 .player(player_index)
@@ -119,7 +120,14 @@ pub fn recruit_cost(
     }
     let replaced_units = replaced_units
         .iter()
-        .map(|id| player.get_unit(*id).unit_type)
+        .map(|id| {
+            let unit_type = player.get_unit(*id).unit_type;
+            if unit_type.is_leader() {
+                require_replace.leader.map(|l|UnitType::Leader(l)).unwrap_or(unit_type)
+            } else {
+                unit_type
+            }
+        })
         .collect();
     if require_replace != replaced_units {
         return Err("Invalid replacement".to_string());
