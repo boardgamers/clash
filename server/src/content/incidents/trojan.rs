@@ -136,7 +136,9 @@ pub(crate) fn solar_eclipse_end_combat() -> Builtin {
 //
 //     43,
 //     "Guillotine",
-//     "Kill your leader if you have one. Then, choose one of the following: A) Choose a new leader in one of your cities or armies. B) Gain 2 victory points. You cannot play leaders for the remainder of the game."
+//     "Kill your leader if you have one. Then, choose one of the following:
+// A) Choose a new leader in one of your cities or armies.
+// B) Gain 2 victory points. You cannot play leaders for the remainder of the game."
 // IncidentBaseEffect::BarbariansSpawn,
 // )
 // .add_incident_listener(IncidentTarget::ActivePlayer, 0, |game, _player_index| {

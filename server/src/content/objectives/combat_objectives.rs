@@ -389,18 +389,18 @@ pub(crate) fn trample() -> Objective {
     .build()
 }
 
-// pub(crate) fn sea_cleansing() -> Objective {
-//     let name = "Sea Cleansing";
-//     Objective::builder(
-//         name,
-//         "You won the second battle against Pirates this turn.",
-//     )
-//     .add_simple_persistent_event_listener(
-//         |event| &mut event.combat_end,
-//         16,
-//         |game, player, _, e| {
-//
-//         },
-//     )
-//     .build()
-// }
+pub(crate) fn sea_cleansing() -> Objective {
+    let name = "Sea Cleansing";
+    Objective::builder(
+        name,
+        "You won the second battle against Pirates this turn.",
+    )
+    .add_simple_persistent_event_listener(
+        |event| &mut event.combat_end,
+        16,
+        |game, player, _, e| {
+
+        },
+    )
+    .build()
+}
