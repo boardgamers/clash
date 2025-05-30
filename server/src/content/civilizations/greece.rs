@@ -322,7 +322,7 @@ fn pericles() -> LeaderInfo {
             .add_custom_action(CustomActionType::Master)
             .build(),
         LeaderAbility::builder("Admiral", "In Sea battles: Gain +2 combat value")
-            .add_combat_strength_listener(9, |game, c, s, _r| {
+            .add_combat_strength_listener(20, |game, c, s, _r| {
                 if c.is_sea_battle(game) {
                     s.extra_combat_value += 2;
                     s.roll_log.push("Admiral adds +2 combat value".to_string());
