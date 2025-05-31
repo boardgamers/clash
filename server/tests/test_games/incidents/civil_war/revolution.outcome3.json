@@ -82,7 +82,7 @@
           "id": 7
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Dogma",
         "Farming",
@@ -439,6 +439,7 @@
       "Player1 changed their government from Democracy to Theocracy",
       "Additional advances: none",
       "Player1 is now limited to a maximum of 2 ideas for Dogma Advance",
+      "Player1 unlocked Provinces",
       "Player1 could not store 3 ideas"
     ]
   ],

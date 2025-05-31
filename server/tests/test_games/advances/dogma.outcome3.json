@@ -169,7 +169,7 @@
           "id": 1
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Fishing",
@@ -338,6 +338,7 @@
     [
       "Player2 paid 2 ideas to get the Dogma advance",
       "Player2 is now limited to a maximum of 2 ideas for Dogma Advance",
+      "Player2 unlocked Provinces",
       "Player2 could not store 2 ideas"
     ],
     [
