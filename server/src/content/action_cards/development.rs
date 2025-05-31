@@ -14,7 +14,7 @@ use crate::content::tactics_cards::{
     improved_defenses, peltasts, tactical_retreat,
 };
 use crate::game::Game;
-use crate::player::{Player, add_unit};
+use crate::player::{Player, gain_unit};
 use crate::player_events::PlayingActionInfo;
 use crate::playing_actions::{ActionCost, PlayingActionType};
 use crate::resource_pile::ResourcePile;
@@ -195,7 +195,7 @@ fn explorer(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                         "{} decided to gain a free settler at {}",
                         s.player_name, pos
                     ));
-                    add_unit(s.player_index, pos, UnitType::Settler, game);
+                    gain_unit(s.player_index, pos, UnitType::Settler, game);
                 }
             },
         )

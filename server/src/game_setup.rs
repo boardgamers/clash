@@ -7,7 +7,7 @@ use crate::content::{builtin, civilizations};
 use crate::game::{Game, GameContext, GameOptions, GameState};
 use crate::map::Map;
 use crate::objective_card::gain_objective_card_from_pile;
-use crate::player::{Player, add_unit};
+use crate::player::{Player, gain_unit};
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
 use crate::utils::{Rng, Shuffle};
@@ -181,7 +181,7 @@ pub fn setup_game_with_cache(setup: GameSetup, cache: Cache) -> Game {
         gain_objective_card_from_pile(&mut game, player_index);
         let p = game.player(player_index);
         if setup.random_map {
-            add_unit(p.index, p.cities[0].position, UnitType::Settler, &mut game);
+            gain_unit(p.index, p.cities[0].position, UnitType::Settler, &mut game);
         }
     }
 

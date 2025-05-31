@@ -5,17 +5,21 @@ use crate::combat::{Combat, CombatModifier, CombatRetreatState};
 use crate::combat_listeners::CombatResult;
 use crate::content::builtin::Builtin;
 use crate::content::effects::{Anarchy, PermanentEffect};
-use crate::content::persistent_events::PaymentRequest;
+use crate::content::persistent_events::{PaymentRequest, PositionRequest, UnitTypeRequest};
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect};
+use crate::leader::Leader;
 use crate::payment::{PaymentOptions, PaymentReason};
-use crate::player_events::IncidentTarget;
+use crate::player::{Player, can_add_army_unit, gain_unit};
+use crate::player_events::{IncidentInfo, IncidentTarget};
+use crate::position::Position;
 use crate::resource_pile::ResourcePile;
+use crate::unit::{UnitType, kill_units};
 use crate::utils::remove_and_map_element_by;
 use itertools::Itertools;
 
 pub(crate) fn trojan_incidents() -> Vec<Incident> {
-    vec![trojan_horse(), solar_eclipse(), anarchy()]
+    vec![trojan_horse(), solar_eclipse(), anarchy(), guillotine()]
 }
 
 const TROJAN_DESCRIPTION: &str = "In a land battle against a defended city (Army unit or Fortress), the attacker may pay 1 wood and 1 culture token to get 1 victory point and to deny the defender tactics cards in the first round of combat.";
@@ -129,22 +133,143 @@ pub(crate) fn solar_eclipse_end_combat() -> Builtin {
         .build()
 }
 
-// fn guillotine() -> Incident {
+fn guillotine() -> Incident {
+    Incident::builder(
+        43,
+        "Guillotine",
+        "Kill your leader if you have one. \
+        Then, choose one of the following: Choose a new leader in one of your cities or armies. \
+        Alternatively, Gain 2 victory points. \
+        You cannot play leaders for the remainder of the game.",
+        IncidentBaseEffect::BarbariansSpawn,
+    )
+    .add_bool_request(
+        |e| &mut e.incident,
+        3,
+        |game, player_index, i| {
+            i.is_active(IncidentTarget::ActivePlayer, player_index)
+                .then(|| should_choose_new_leader(game, player_index))
+                .flatten()
+        },
+        |game, s, i| {
+            if s.choice {
+                game.add_info_log_item(&format!("{} chose to select a new leader", s.player_name));
+                i.selected_player = Some(s.player_index);
+            } else {
+                game.add_info_log_item(&format!(
+                    "{} gained 2 victory points instead of choosing a new leader",
+                    s.player_name
+                ));
+                game.player_mut(s.player_index).event_victory_points += 2_f32;
+            }
+        },
+    )
+    .add_incident_position_request(
+        IncidentTarget::ActivePlayer,
+        2,
+        |game, player_index, i| {
+            new_leader_chosen(player_index, i).then(|| {
+                PositionRequest::new(
+                    new_leader_positions(game.player(player_index)),
+                    1..=1,
+                    "Select a city to choose a new leader in",
+                )
+            })
+        },
+        |game, s, i| {
+            let pos = s.choice[0];
+            game.add_info_log_item(&format!("{} chose a new leader in {pos}", s.player_name));
+            i.selected_position = Some(pos);
+        },
+    )
+    .add_unit_type_request(
+        |e| &mut e.incident,
+        1,
+        |game, player_index, i| {
+            new_leader_chosen(player_index, i).then(|| {
+                UnitTypeRequest::new(
+                    game.player(player_index)
+                        .available_leaders
+                        .iter()
+                        .map(Leader::unit_type)
+                        .collect_vec(),
+                    player_index,
+                    "Select a new leader to replace the killed one",
+                )
+            })
+        },
+        |game, s, i| {
+            let pos = i.selected_position.expect("position should be set");
+            game.add_info_log_item(&format!(
+                "{} gained {} in {pos}",
+                s.player_name,
+                s.choice.name(game)
+            ));
+            gain_unit(s.player_index, pos, s.choice, game);
+        },
+    )
+    .add_simple_incident_listener(
+        IncidentTarget::ActivePlayer,
+        0,
+        |game, player_index, player_name, _i| {
+            let available_leaders = &game.player(player_index).available_leaders;
+            if !available_leaders.is_empty() {
+                game.add_info_log_item(&format!(
+                    "{player_name} has lost leaders due to the Guillotine: {}",
+                    available_leaders.iter().map(|l| l.name(game)).join(", ")
+                ));
+                game.player_mut(player_index).available_leaders = vec![];
+            }
+        },
+    )
+    .build()
+}
 
-// Incident::builder(
-// todo implement when leaders are implemented
-//
-//     43,
-//     "Guillotine",
-//     "Kill your leader if you have one. Then, choose one of the following: A) Choose a new leader in one of your cities or armies. B) Gain 2 victory points. You cannot play leaders for the remainder of the game."
-// IncidentBaseEffect::BarbariansSpawn,
-// )
-// .add_incident_listener(IncidentTarget::ActivePlayer, 0, |game, _player_index| {
-//     game.permanent_effects
-//         .push(PermanentIncidentEffect::Guillotine);
-// })
-// .build()
-// }
+fn should_choose_new_leader(game: &mut Game, player_index: usize) -> Option<String> {
+    kill_leader(game, player_index);
+
+    let p = game.player(player_index);
+    if p.available_leaders.is_empty() || new_leader_positions(p).is_empty() {
+        game.add_info_log_item(&format!(
+            "{p} has no leaders left to choose from after the Guillotine - \
+                                gained 2 victory points",
+        ));
+        game.player_mut(player_index).event_victory_points += 2_f32;
+        None
+    } else {
+        Some("Do you want to choose a new leader instead of 2 victory points?".to_string())
+    }
+}
+
+fn new_leader_chosen(player_index: usize, i: &mut IncidentInfo) -> bool {
+    i.selected_player == Some(player_index)
+}
+
+fn kill_leader(game: &mut Game, player_index: usize) {
+    let p = game.player(player_index);
+    let leader = p.units.iter().find_map(|u| {
+        if let UnitType::Leader(l) = u.unit_type {
+            Some((u.id, l))
+        } else {
+            None
+        }
+    });
+    if let Some((id, leader)) = leader {
+        game.add_info_log_item(&format!(
+            "{} was killed due to the Guillotine",
+            leader.name(game)
+        ));
+        kill_units(game, &[id], player_index, None);
+    }
+}
+
+fn new_leader_positions(player: &Player) -> Vec<Position> {
+    player
+        .cities
+        .iter()
+        .filter_map(|c| can_add_army_unit(player, c.position).then_some(c.position))
+        .collect()
+}
 
 fn anarchy() -> Incident {
     Incident::builder(

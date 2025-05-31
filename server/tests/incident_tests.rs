@@ -4,6 +4,7 @@ use server::action::Action;
 use server::card::HandCard;
 use server::city_pieces::Building::Fortress;
 use server::content::persistent_events::{EventResponse, SelectedStructure, Structure};
+use server::leader::Leader;
 use server::playing_actions::PlayingAction::Construct;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
@@ -415,6 +416,24 @@ fn test_anarchy() {
         vec![
             TestAction::not_undoable(0, advance_action(Advance::Storage, ResourcePile::gold(2))),
             TestAction::undoable(0, advance_action(Advance::Dogma, ResourcePile::gold(2))),
+        ],
+    );
+}
+
+#[test]
+fn test_guillotine() {
+    TROJAN.test(
+        "guillotine",
+        vec![
+            TestAction::not_undoable(0, advance_action(Advance::Storage, ResourcePile::gold(2)))
+                .skip_json(),
+            TestAction::undoable(0, Action::Response(EventResponse::Bool(true))).skip_json(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectUnitType(UnitType::Leader(
+                    Leader::Augustus,
+                ))),
+            ),
         ],
     );
 }

@@ -614,7 +614,15 @@ impl Player {
     }
 }
 
-pub fn add_unit(player: usize, position: Position, unit_type: UnitType, game: &mut Game) {
+pub fn gain_unit(player: usize, position: Position, unit_type: UnitType, game: &mut Game) {
+    if let UnitType::Leader(leader) = &unit_type {
+        game.players[player]
+            .available_leaders
+            .retain(|name| name != leader);
+        Player::with_leader(*leader, game, player, |game, leader| {
+            leader.listeners.one_time_init(game, player);
+        });
+    }
     let p = game.player_mut(player);
     let unit = Unit::new(player, position, unit_type, p.next_unit_id);
     p.units.push(unit);

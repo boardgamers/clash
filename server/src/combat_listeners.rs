@@ -7,7 +7,7 @@ use crate::content::persistent_events::{PersistentEventType, PositionRequest, Un
 use crate::game::Game;
 use crate::log::current_action_log_item;
 use crate::movement::move_units;
-use crate::player::add_unit;
+use crate::player::gain_unit;
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::position::Position;
 use crate::tactics_card::{CombatRole, TacticsCard, TacticsCardTarget};
@@ -620,7 +620,7 @@ pub(crate) fn place_settler() -> Builtin {
                 "{} gained 1 free Settler Unit at {} for losing a city",
                 s.player_name, pos
             ));
-            add_unit(s.player_index, pos, UnitType::Settler, game);
+            gain_unit(s.player_index, pos, UnitType::Settler, game);
         },
     )
     .build()

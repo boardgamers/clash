@@ -4,17 +4,14 @@
   "players": [
     {
       "id": 0,
-      "objective_cards": [
-        38
-      ],
       "resources": {
-        "food": 6,
-        "wood": 7,
-        "ore": 7,
-        "ideas": 5,
-        "gold": 7,
-        "mood_tokens": 9,
-        "culture_tokens": 10
+        "food": 2,
+        "wood": 5,
+        "ore": 5,
+        "ideas": 3,
+        "gold": 5,
+        "mood_tokens": 7,
+        "culture_tokens": 9
       },
       "resource_limit": {
         "food": 2,
@@ -28,68 +25,56 @@
           "city_pieces": {
             "market": 1
           },
-          "mood_state": "Happy",
-          "position": "A1"
-        },
-        {
-          "city_pieces": {
-            "academy": 1,
-            "obelisk": 0,
-            "port": 1
-          },
-          "mood_state": "Happy",
-          "activations": 4,
-          "position": "C2",
-          "port_position": "C3"
-        },
-        {
-          "city_pieces": {
-            "obelisk": 1,
-            "observatory": 1,
-            "fortress": 1,
-            "temple": 1
-          },
-          "mood_state": "Neutral",
-          "position": "B1"
-        },
-        {
           "mood_state": "Angry",
-          "activations": 4,
-          "angry_activation": true,
-          "position": "B3"
+          "position": "A1"
         }
       ],
       "units": [
         {
-          "position": "C2",
-          "unit_type": "Infantry",
+          "position": "A1",
+          "unit_type": {
+            "Leader": "Caesar"
+          },
           "id": 0
         },
         {
-          "position": "B3",
+          "position": "E2",
+          "unit_type": "Cavalry",
+          "id": 1
+        },
+        {
+          "position": "E2",
+          "unit_type": "Elephant",
+          "id": 2
+        },
+        {
+          "position": "E2",
+          "unit_type": "Settler",
+          "id": 3
+        },
+        {
+          "position": "E2",
           "unit_type": "Settler",
           "id": 4
         },
         {
-          "position": "B3",
+          "position": "E2",
           "unit_type": "Settler",
           "id": 5
-        },
-        {
-          "position": "B3",
-          "unit_type": "Settler",
-          "id": 6
         }
       ],
-      "civilization": "test1",
+      "civilization": "Rome",
+      "available_leaders": [
+        "Augustus",
+        "Sulla"
+      ],
       "advances": [
         "Farming",
-        "Fishing",
-        "Medicine",
         "Mining",
-        "Nationalism"
+        "Philosophy",
+        "Tactics"
       ],
-      "incident_tokens": 3,
+      "incident_tokens": 1,
       "wonder_cards": [
         "Pyramids"
       ],
@@ -98,11 +83,11 @@
     {
       "id": 1,
       "resources": {
-        "food": 6,
-        "wood": 7,
-        "ore": 7,
-        "ideas": 7,
-        "gold": 7,
+        "food": 2,
+        "wood": 5,
+        "ore": 5,
+        "ideas": 5,
+        "gold": 5,
         "mood_tokens": 9,
         "culture_tokens": 9
       },
@@ -128,43 +113,23 @@
           "port_position": "C3"
         }
       ],
-      "civilization": "test0",
+      "civilization": "test1",
       "advances": [
         "Farming",
         "Mining"
       ],
       "incident_tokens": 3,
-      "next_unit_id": 3
+      "next_unit_id": 2
     },
     {
       "id": 2,
-      "resource_limit": {
-        "food": 2,
-        "wood": 7,
-        "ore": 7,
-        "ideas": 7,
-        "gold": 7
-      },
-      "units": [
-        {
-          "position": "C3",
-          "unit_type": "Ship",
-          "id": 1
-        },
-        {
-          "position": "C3",
-          "unit_type": "Ship",
-          "id": 2
-        },
-        {
-          "position": "C4",
-          "unit_type": "Ship",
-          "id": 3
-        }
-      ],
+      "civilization": "Barbarians",
+      "next_unit_id": 0
+    },
+    {
+      "id": 3,
       "civilization": "Pirates",
-      "incident_tokens": 3,
-      "next_unit_id": 9
+      "next_unit_id": 0
     }
   ],
   "map": {
@@ -188,6 +153,10 @@
         "Mountain"
       ],
       [
+        "A5",
+        "Fertile"
+      ],
+      [
         "B1",
         "Mountain"
       ],
@@ -201,6 +170,14 @@
       ],
       [
         "B4",
+        "Fertile"
+      ],
+      [
+        "B5",
+        "Fertile"
+      ],
+      [
+        "B6",
         "Fertile"
       ],
       [
@@ -230,6 +207,10 @@
       [
         "D2",
         "Water"
+      ],
+      [
+        "E2",
+        "Fertile"
       ]
     ]
   },
@@ -250,11 +231,7 @@
     }
   ],
   "action_log_index": 0,
-  "log": [
-    [
-      "Player1 ended the movement action"
-    ]
-  ],
+  "log": [],
   "undo_limit": 0,
   "actions_left": 2,
   "round": 6,
@@ -273,5 +250,15 @@
     10,
     10,
     10
+  ],
+  "rng": "234162992961072890508432380903651342097",
+  "action_cards_left": [
+    1
+  ],
+  "objective_cards_left": [
+    1
+  ],
+  "incidents_left": [
+    43
   ]
 }

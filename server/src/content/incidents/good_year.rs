@@ -1,7 +1,7 @@
 use crate::content::persistent_events::{PositionRequest, ResourceRewardRequest};
 use crate::incident::{Incident, IncidentBaseEffect, IncidentBuilder};
 use crate::payment::ResourceReward;
-use crate::player::{add_unit, gain_resources};
+use crate::player::{gain_resources, gain_unit};
 use crate::player_events::IncidentTarget;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
@@ -224,7 +224,7 @@ fn select_settler(b: IncidentBuilder, priority: i32, target: IncidentTarget) -> 
         |game, s, _| {
             let pos = s.choice[0];
             game.add_info_log_item(&format!("{} gained 1 settler in {}", s.player_name, pos));
-            add_unit(s.player_index, pos, UnitType::Settler, game);
+            gain_unit(s.player_index, pos, UnitType::Settler, game);
         },
     )
 }

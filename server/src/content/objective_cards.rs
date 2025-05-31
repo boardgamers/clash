@@ -1,6 +1,7 @@
 use crate::content::objectives::combat_objectives::{
     aggressor, barbarian_conquest, bold, brutus, conqueror, defiance, general, great_battle,
-    great_commander, legendary_battle, naval_assault, resistance, scavenger, trample, warmonger,
+    great_commander, legendary_battle, naval_assault, resistance, scavenger, sea_cleansing,
+    trample, warmonger,
 };
 use crate::content::objectives::non_combat::{
     city_founder, draft, magnificent_culture, terror_regime,
@@ -8,7 +9,7 @@ use crate::content::objectives::non_combat::{
 
 use crate::content::objectives::advance_objectives::{
     city_planner, culture_focus, diversified_research, education_lead, goal_focused, government,
-    militarized, science_focus, seafarers, trade_focus,
+    high_culture, militarized, science_focus, seafarers, trade_focus,
 };
 use crate::content::objectives::city_objectives::{
     advanced_culture, architecture, coastal_lead, consulate, culture_power, expansionist,
@@ -66,8 +67,7 @@ pub(crate) fn get_all_uncached() -> Vec<ObjectiveCard> {
         ObjectiveCard::new(35, versatility(), brutus()),
         ObjectiveCard::new(36, legacy(), ivory_tower()),
         ObjectiveCard::new(37, migration(), trample()),
-        // todo needs civilizations implemented
-        // ObjectiveCard::new(38, high_culture(), sea_cleansing()),
+        ObjectiveCard::new(38, high_culture(), sea_cleansing()),
     ];
     assert_eq!(
         all.iter().unique_by(|i| i.id).count(),
