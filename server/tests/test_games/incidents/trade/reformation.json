@@ -83,7 +83,7 @@
           "id": 7
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Arts",
         "Farming",
@@ -128,7 +128,7 @@
           "position": "A4"
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining"
@@ -165,7 +165,7 @@
           "position": "A1"
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining"

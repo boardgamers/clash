@@ -117,6 +117,9 @@
         }
       ],
       "civilization": "Rome",
+      "recruited_leaders": [
+        "Augustus"
+      ],
       "advances": [
         "Farming",
         "FreeEconomy",
@@ -174,7 +177,7 @@
           "id": 1
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining"
@@ -324,6 +327,10 @@
                       "op": "replace",
                       "path": "/players/0/units/10/unit_type/Leader",
                       "value": "Sulla"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/recruited_leaders"
                     }
                   ]
                 }

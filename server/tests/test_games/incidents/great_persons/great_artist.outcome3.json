@@ -77,7 +77,7 @@
           "id": 7
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Arts",
         "Farming",
@@ -130,7 +130,7 @@
           "position": "A4"
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Arts",
         "Farming",
@@ -325,6 +325,7 @@
     [
       "Player2 played the action card Great Artist as a regular action",
       "Player2 gained Arts",
+      "Player2 unlocked Hellenistic Culture",
       "Player2 gained 1 culture token as advance bonus",
       "Player2 made city at A1 Happy"
     ]

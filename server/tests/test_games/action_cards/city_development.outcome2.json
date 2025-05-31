@@ -83,7 +83,7 @@
           "id": 7
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Arts",
         "Bartering",
@@ -135,7 +135,7 @@
           "position": "A4"
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining"
@@ -385,7 +385,8 @@
       "City Development: You may build a building in a city without spending an action and without paying for it."
     ],
     [
-      "Player1 paid nothing to construct a Fortress in the city at C2"
+      "Player1 paid nothing to construct a Fortress in the city at C2",
+      "Captivi allows to replace resources with mood tokens"
     ]
   ],
   "undo_limit": 0,

@@ -82,7 +82,7 @@
           "id": 7
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Arts",
         "Bartering",
@@ -139,7 +139,7 @@
           "position": "A4"
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining"
@@ -376,13 +376,15 @@
     ],
     [
       "Player1 gained Engineering",
-      "Player1 drew a wonder card from the pile"
+      "Player1 drew a wonder card from the pile",
+      "Player1 unlocked Aqueduct"
     ],
     [
       "Great Engineer: You may build a building in a city without spending an action and without activating it."
     ],
     [
-      "Player1 paid 1 food, 1 wood and 1 ore to construct a Fortress in the city at C2"
+      "Player1 paid 1 food, 1 wood and 1 ore to construct a Fortress in the city at C2",
+      "Captivi allows to replace resources with mood tokens"
     ]
   ],
   "undo_limit": 4,

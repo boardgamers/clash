@@ -27,7 +27,7 @@
           "id": 0
         }
       ],
-      "civilization": "test2",
+      "civilization": "China",
       "advances": [
         "Farming",
         "Mining"
@@ -80,7 +80,7 @@
           "id": 2
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining"
@@ -518,7 +518,7 @@
       "Player1 gained an objective card from the pile"
     ],
     [
-      "Player2 is playing as test1",
+      "Player2 is playing as Greece",
       "Player2 gained an action card from the pile",
       "Player2 gained an objective card from the pile"
     ],

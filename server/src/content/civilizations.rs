@@ -1,3 +1,4 @@
+pub(crate) mod china;
 pub(crate) mod greece;
 pub(crate) mod maya;
 pub(crate) mod rome;
@@ -15,6 +16,7 @@ pub fn get_all_uncached() -> Vec<Civilization> {
         Civilization::new(PIRATES, vec![], vec![]),
         rome::rome(),
         greece::greece(),
+        china::china(),
         // not finished yet: maya
         // until the real civilizations are implemented
         Civilization::new(

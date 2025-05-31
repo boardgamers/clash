@@ -64,6 +64,9 @@
         }
       ],
       "civilization": "Rome",
+      "recruited_leaders": [
+        "Augustus"
+      ],
       "advances": [
         "Farming",
         "Mining",
@@ -110,7 +113,7 @@
           "port_position": "C3"
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining"
@@ -333,6 +336,10 @@
                     {
                       "op": "remove",
                       "path": "/players/0/units/5"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/recruited_leaders"
                     }
                   ]
                 }

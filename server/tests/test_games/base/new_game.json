@@ -28,11 +28,11 @@
           "id": 0
         }
       ],
-      "civilization": "Federation",
+      "civilization": "Romulans",
       "available_leaders": [
-        "Kirk",
-        "Janeway",
-        "Spock"
+        "Sela",
+        "Narek",
+        "Tomalak"
       ],
       "advances": [
         "Farming",
@@ -72,11 +72,11 @@
           "id": 0
         }
       ],
-      "civilization": "Klingons",
+      "civilization": "Borg",
       "available_leaders": [
-        "Khan",
-        "Kahless",
-        "Worf"
+        "BorgQueen",
+        "SevenOfNine",
+        "Picard"
       ],
       "advances": [
         "Farming",
@@ -402,12 +402,12 @@
       "The game has started"
     ],
     [
-      "Player1 is playing as Federation",
+      "Player1 is playing as Romulans",
       "Player1 gained an action card from the pile",
       "Player1 gained an objective card from the pile"
     ],
     [
-      "Player2 is playing as Klingons",
+      "Player2 is playing as Borg",
       "Player2 gained an action card from the pile",
       "Player2 gained an objective card from the pile"
     ],

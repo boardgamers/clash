@@ -52,6 +52,7 @@ pub struct Player {
     pub units: Vec<Unit>,
     pub civilization: Civilization,
     pub available_leaders: Vec<Leader>,
+    pub recruited_leaders: Vec<Leader>,
     pub advances: EnumSet<Advance>,
     pub great_library_advance: Option<Advance>,
     pub special_advances: EnumSet<SpecialAdvance>,
@@ -107,6 +108,7 @@ impl Player {
                 .iter()
                 .map(|leader| leader.leader)
                 .collect_vec(),
+            recruited_leaders: Vec::new(),
             civilization,
             advances: EnumSet::empty(),
             special_advances: EnumSet::empty(),
@@ -616,9 +618,9 @@ impl Player {
 
 pub fn gain_unit(player: usize, position: Position, unit_type: UnitType, game: &mut Game) {
     if let UnitType::Leader(leader) = &unit_type {
-        game.players[player]
-            .available_leaders
-            .retain(|name| name != leader);
+        let p = game.player_mut(player);
+        p.available_leaders.retain(|name| name != leader);
+        p.recruited_leaders.push(*leader);
         Player::with_leader(*leader, game, player, |game, leader| {
             leader.listeners.one_time_init(game, player);
         });

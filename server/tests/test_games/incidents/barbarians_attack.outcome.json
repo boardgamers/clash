@@ -77,7 +77,7 @@
           "id": 9
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Mining",
@@ -130,7 +130,7 @@
           "id": 2
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining"

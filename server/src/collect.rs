@@ -124,7 +124,7 @@ pub(crate) fn apply_total_collect(
     };
 
     i.total = total;
-    player.trigger_event(|e| &e.collect_total, &mut i, game, &());
+    player.trigger_event(|e| &e.collect_total, &mut i, game, &collections.to_vec());
     Ok(i)
 }
 

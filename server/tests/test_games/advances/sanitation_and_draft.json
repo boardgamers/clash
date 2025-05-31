@@ -98,7 +98,7 @@
           "id": 9
         }
       ],
-      "civilization": "test2",
+      "civilization": "China",
       "advances": [
         "Draft",
         "Farming",
@@ -161,7 +161,7 @@
           "id": 1
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Mining"

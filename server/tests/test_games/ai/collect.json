@@ -89,7 +89,7 @@
           "id": 9
         }
       ],
-      "civilization": "test2",
+      "civilization": "China",
       "available_leaders": [],
       "advances": [
         "Farming",
@@ -156,7 +156,7 @@
           "id": 1
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "available_leaders": [],
       "advances": [
         "Farming",
@@ -291,7 +291,7 @@
       "Player1 gained an objective card from the pile"
     ],
     [
-      "Player2 is playing as test0",
+      "Player2 is playing as Rome",
       "Player2 gained an action card from the pile",
       "Player2 gained an objective card from the pile"
     ],

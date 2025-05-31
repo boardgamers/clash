@@ -9,6 +9,7 @@
 #![allow(clippy::cast_possible_wrap)]
 #![allow(clippy::implicit_hasher)]
 #![allow(clippy::struct_field_names)]
+extern crate core;
 
 pub mod ability_initializer;
 pub mod action;

@@ -22,6 +22,12 @@ pub enum SpecialAdvance {
     Sparta,
     HellenisticCulture,
     CityStates,
+
+    // China
+    RiceCultivation,
+    Expansion,
+    Fireworks,
+    ImperialArmy,
 }
 
 #[allow(clippy::trivially_copy_pass_by_ref)]

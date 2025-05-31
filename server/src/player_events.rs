@@ -1,7 +1,7 @@
 use crate::action_card::ActionCardInfo;
 use crate::advance::Advance;
 use crate::barbarians::BarbariansEventState;
-use crate::collect::{CollectContext, CollectInfo};
+use crate::collect::{CollectContext, CollectInfo, PositionCollection};
 use crate::combat::Combat;
 use crate::combat_listeners::{CombatRoundEnd, CombatRoundStart};
 use crate::combat_stats::CombatStats;
@@ -60,7 +60,7 @@ pub(crate) struct TransientEvents {
 
     pub terrain_collect_options: Event<HashMap<Terrain, HashSet<ResourcePile>>>,
     pub collect_options: Event<CollectInfo, CollectContext, Game>,
-    pub collect_total: Event<CollectInfo, Game>,
+    pub collect_total: Event<CollectInfo, Game, Vec<PositionCollection>>,
 }
 
 impl TransientEvents {

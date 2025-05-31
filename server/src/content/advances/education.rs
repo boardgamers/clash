@@ -60,7 +60,7 @@ fn public_education() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.collect_total,
         1,
-        |i, game, ()| {
+        |i, game, _| {
             let city = game.get_any_city(i.city);
             if city.pieces.academy.is_some() {
                 once_per_turn_advance(

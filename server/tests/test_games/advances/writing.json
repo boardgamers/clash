@@ -105,7 +105,7 @@
           "id": 9
         }
       ],
-      "civilization": "test2",
+      "civilization": "China",
       "incident_tokens": 2,
       "wonder_cards": [
         "GreatGardens"
@@ -157,7 +157,7 @@
           "id": 1
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Mining"

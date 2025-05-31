@@ -105,7 +105,7 @@
           "id": 7
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Mining",
@@ -148,7 +148,7 @@
           "id": 1
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Fanaticism",
         "Farming",

@@ -106,7 +106,7 @@
           "id": 9
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "FreeEconomy",
@@ -164,7 +164,7 @@
           "id": 1
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining"

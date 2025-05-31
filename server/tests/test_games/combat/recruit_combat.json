@@ -4,9 +4,6 @@
   "players": [
     {
       "id": 0,
-      "objective_cards": [
-        38
-      ],
       "resources": {
         "food": 6,
         "wood": 7,
@@ -81,7 +78,7 @@
           "id": 6
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Fishing",
@@ -92,6 +89,9 @@
       "incident_tokens": 3,
       "wonder_cards": [
         "Pyramids"
+      ],
+      "objective_cards": [
+        38
       ],
       "next_unit_id": 10
     },
@@ -128,7 +128,7 @@
           "port_position": "C3"
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Mining"

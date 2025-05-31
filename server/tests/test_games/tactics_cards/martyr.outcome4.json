@@ -108,7 +108,7 @@
           ]
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "FreeEconomy",
@@ -151,7 +151,7 @@
           "port_position": "C3"
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Mining",
