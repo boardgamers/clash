@@ -4,6 +4,7 @@ use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::player::Player;
 use crate::position::Position;
+use crate::unit::UnitType;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Copy, Hash)]
@@ -39,6 +40,11 @@ impl Leader {
     #[must_use]
     pub fn name(&self, game: &Game) -> String {
         game.cache.get_leader(self).name.clone()
+    }
+
+    #[must_use]
+    pub fn unit_type(&self) -> UnitType {
+        UnitType::Leader(*self)
     }
 }
 

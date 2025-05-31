@@ -10,7 +10,7 @@ use crate::cultural_influence::{
     InfluenceCultureInfo, available_influence_actions, influence_culture_boost_cost,
 };
 use crate::game::Game;
-use crate::player::{Player, add_unit, remove_unit};
+use crate::player::{Player, gain_unit, remove_unit};
 use crate::player_events::PlayingActionInfo;
 use crate::playing_actions::{ActionCost, PlayingActionType};
 use crate::unit::UnitType;
@@ -71,7 +71,7 @@ pub(crate) fn cultural_takeover(id: u8, tactics_card: TacticsCardFactory) -> Act
                 s.player_name,
                 s.choice.non_leader_name(),
             ));
-            add_unit(
+            gain_unit(
                 s.player_index,
                 a.selected_position.expect("unit position"),
                 s.choice,

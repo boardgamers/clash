@@ -1,4 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::combat_stats::Battleground;
 use crate::content::advances::trade_routes::find_trade_route_for_unit;
 use crate::game::Game;
 use crate::log::current_player_turn_log;
@@ -391,16 +392,26 @@ pub(crate) fn trample() -> Objective {
 
 pub(crate) fn sea_cleansing() -> Objective {
     let name = "Sea Cleansing";
-    Objective::builder(
-        name,
-        "You won the second battle against Pirates this turn.",
-    )
-    .add_simple_persistent_event_listener(
-        |event| &mut event.combat_end,
-        16,
-        |game, player, _, e| {
-
-        },
-    )
-    .build()
+    Objective::builder(name, "You won the second battle against Pirates this turn.")
+        .add_simple_persistent_event_listener(
+            |event| &mut event.combat_end,
+            16,
+            |game, player, _, _e| {
+                let battles = current_player_turn_log(game)
+                    .items
+                    .iter()
+                    .filter_map(|i| {
+                        i.combat_stats.as_ref().filter(|s| {
+                            s.is_winner(player)
+                                && s.battleground == Battleground::Sea
+                                && !s.opponent_is_human(player, game)
+                        })
+                    })
+                    .count();
+                if battles >= 2 {
+                    objective_is_ready(game.player_mut(player), name);
+                }
+            },
+        )
+        .build()
 }

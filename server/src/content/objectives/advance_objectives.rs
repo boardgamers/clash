@@ -98,7 +98,7 @@ pub(crate) fn high_culture() -> Objective {
         "You have gained all 4 of your civilization advances \
         and recruited at least 2 of your leaders.",
     )
-    .status_phase_check(|game, player| {
+    .status_phase_check(|_game, player| {
         player
             .civilization
             .special_advances

@@ -12,7 +12,7 @@ use crate::incident::{BASE_EFFECT_PRIORITY, IncidentBuilder, IncidentFilter, pla
 use crate::map::Terrain;
 use crate::movement::MoveUnits;
 use crate::payment::ResourceReward;
-use crate::player::{Player, add_unit, end_turn};
+use crate::player::{Player, end_turn, gain_unit};
 use crate::player_events::{IncidentTarget, PersistentEvent, PersistentEvents};
 use crate::position::Position;
 use crate::resource::ResourceType;
@@ -180,7 +180,7 @@ where
                 "Barbarians reinforced with {} at {position}",
                 units.to_string(None)
             ));
-            add_unit(get_barbarians_player(game).index, position, s.choice, game);
+            gain_unit(get_barbarians_player(game).index, position, s.choice, game);
         },
     )
 }
@@ -344,7 +344,7 @@ fn reinforce_after_move(game: &mut Game, player_index: usize) {
         .take(available)
         .collect();
     for pos in cities {
-        add_unit(barbarian, pos, UnitType::Infantry, game);
+        gain_unit(barbarian, pos, UnitType::Infantry, game);
         game.add_info_log_item(&format!("Barbarians spawned a new Infantry unit at {pos}",));
     }
 }
@@ -443,7 +443,7 @@ fn add_barbarians_city(builder: IncidentBuilder, event_name: &'static str) -> In
             let b = get_barbarians_player(game).index;
             let p = game.player_mut(b);
             p.cities.push(City::new(b, pos));
-            add_unit(b, pos, UnitType::Infantry, game);
+            gain_unit(b, pos, UnitType::Infantry, game);
         },
     )
 }

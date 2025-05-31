@@ -14,7 +14,7 @@ use crate::content::tactics_cards::{
 };
 use crate::game::Game;
 use crate::objective_card::{deinit_objective_card, gain_objective_card};
-use crate::player::{Player, add_unit, gain_resources};
+use crate::player::{Player, gain_resources, gain_unit};
 use crate::playing_actions::ActionCost;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
@@ -388,7 +388,7 @@ fn militia(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                 s.player_name, city
             ));
 
-            add_unit(s.player_index, position, UnitType::Infantry, game);
+            gain_unit(s.player_index, position, UnitType::Infantry, game);
         },
     )
     .build()

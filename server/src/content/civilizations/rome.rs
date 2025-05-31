@@ -14,7 +14,7 @@ use crate::objective_card::{discard_objective_card, gain_objective_card_from_pil
 use crate::payment::{
     PaymentConversion, PaymentConversionType, PaymentOptions, PaymentReason, base_resources,
 };
-use crate::player::{add_unit, can_add_army_unit, gain_resources};
+use crate::player::{can_add_army_unit, gain_resources, gain_unit};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
@@ -182,7 +182,7 @@ fn augustus() -> LeaderInfo {
             "If you don't own a city in the region: \
             Gain 2 combat value in every combat round",
         )
-        .add_combat_strength_listener(6, |game, c, s, r| {
+        .add_combat_strength_listener(103, |game, c, s, r| {
             if c.has_leader(r, game)
                 && !block_has_player_city(
                     game,
@@ -313,7 +313,7 @@ fn caesar() -> LeaderInfo {
                 if !c.choice.is_empty() {
                     let p = c.player_index;
                     let position = leader_position(game.player(p));
-                    add_unit(p, position, UnitType::Infantry, game);
+                    gain_unit(p, position, UnitType::Infantry, game);
                     game.add_info_log_item(&format!(
                         "{} used Proconsul to gain 1 infantry in {position} for {}",
                         game.player_name(p),
@@ -356,7 +356,7 @@ fn sulla() -> LeaderInfo {
             "Civilizer",
             "In every combat round against barbarians: Gain 2 combat value",
         )
-        .add_combat_strength_listener(5, |game, c, s, r| {
+        .add_combat_strength_listener(104, |game, c, s, r| {
             if c.has_leader(r, game) && c.is_barbarian_battle(r, game) {
                 s.extra_combat_value += 2;
                 s.roll_log.push("Sulla adds 2 combat value".to_string());

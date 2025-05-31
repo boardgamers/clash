@@ -8,7 +8,7 @@ use crate::content::persistent_events::{
 use crate::game::Game;
 use crate::incident::{BASE_EFFECT_PRIORITY, IncidentBuilder};
 use crate::payment::{PaymentOptions, PaymentReason, ResourceReward};
-use crate::player::{Player, add_unit, remove_unit};
+use crate::player::{Player, gain_unit, remove_unit};
 use crate::player_events::IncidentTarget;
 use crate::position::Position;
 use crate::resource::ResourceType;
@@ -249,7 +249,7 @@ fn place_pirate_ship(builder: IncidentBuilder, priority: i32, blockade: bool) ->
             let pirate = get_pirates_player(game).index;
             let pos = s.choice[0];
             game.add_info_log_item(&format!("Pirates spawned a Pirate Ship at {pos}"));
-            add_unit(pirate, pos, UnitType::Ship, game);
+            gain_unit(pirate, pos, UnitType::Ship, game);
         },
     )
 }

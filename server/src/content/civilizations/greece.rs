@@ -195,7 +195,7 @@ fn alexander() -> LeaderInfo {
             "In a land battle, gain 1 combat value for each region
             with a city you control, except the starting region.",
         )
-        .add_combat_strength_listener(7, |game, c, s, r| {
+        .add_combat_strength_listener(100, |game, c, s, r| {
             if !c.is_sea_battle(game) {
                 let setup = get_map_setup(game.human_players_count());
                 let player = c.player(r);
@@ -296,7 +296,7 @@ fn leonidas() -> LeaderInfo {
             "In land battle: \
             Get +2 combat value per army unit you have less than your enemy.",
         )
-        .add_combat_strength_listener(8, |game, c, s, r| {
+        .add_combat_strength_listener(101, |game, c, s, r| {
             let p = c.player(r);
             let pl = c.fighting_units(game, p).len();
             let op = c.fighting_units(game, c.opponent(p)).len();
@@ -322,7 +322,7 @@ fn pericles() -> LeaderInfo {
             .add_custom_action(CustomActionType::Master)
             .build(),
         LeaderAbility::builder("Admiral", "In Sea battles: Gain +2 combat value")
-            .add_combat_strength_listener(20, |game, c, s, _r| {
+            .add_combat_strength_listener(102, |game, c, s, _r| {
                 if c.is_sea_battle(game) {
                     s.extra_combat_value += 2;
                     s.roll_log.push("Admiral adds +2 combat value".to_string());

@@ -172,24 +172,43 @@ fn test_recruit_combat() {
             TestAction::undoable(
                 0,
                 Action::Playing(Recruit(server::playing_actions::Recruit::new(
-                    &Units::new(0, 0, 3, 0, 0, None),
+                    &Units::new(0, 0, 4, 0, 0, None),
                     Position::from_offset("C2"),
-                    ResourcePile::wood(5) + ResourcePile::gold(1),
+                    ResourcePile::wood(5) + ResourcePile::gold(3),
                 ))),
-            ),
+            )
+            .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::ResourceReward(ResourcePile::mood_tokens(1))),
-            ),
+            )
+            .skip_json(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::ResourceReward(ResourcePile::gold(1))),
-            ),
+            )
+            .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::ResourceReward(ResourcePile::culture_tokens(
                     1,
                 ))),
+            )
+            .skip_json(),
+            TestAction::not_undoable(0, move_action(vec![12, 13], Position::from_offset("C4")))
+                .skip_json(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::ResourceReward(ResourcePile::culture_tokens(
+                    1,
+                ))),
+            )
+            .skip_json(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectHandCards(vec![
+                    HandCard::ObjectiveCard(38),
+                ])),
             ),
         ],
     );

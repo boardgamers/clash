@@ -12,7 +12,7 @@ use server::game::{Game, GameContext, GameOptions, UndoOption};
 use server::game_data::GameData;
 use server::game_setup::{GameSetupBuilder, setup_game};
 use server::map::Terrain;
-use server::player::add_unit;
+use server::player::gain_unit;
 use server::position::Position;
 use server::profiling::start_profiling;
 use server::resource_pile::ResourcePile;
@@ -166,7 +166,7 @@ fn setup_local_game() -> Game {
     game.round = 1;
     game.dice_roll_outcomes = vec![1, 1, 10, 10, 10, 10, 10, 10, 10, 10];
     let add_unit = |game: &mut Game, pos: &str, player_index: usize, unit_type: UnitType| {
-        add_unit(player_index, Position::from_offset(pos), unit_type, game);
+        gain_unit(player_index, Position::from_offset(pos), unit_type, game);
     };
 
     let player_index1 = 0;

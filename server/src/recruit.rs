@@ -2,10 +2,9 @@ use crate::combat;
 use crate::consts::STACK_LIMIT;
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
-use crate::leader::Leader;
 use crate::map::home_position;
 use crate::payment::{PaymentOptions, PaymentReason};
-use crate::player::{CostTrigger, Player, add_unit};
+use crate::player::{CostTrigger, Player, gain_unit};
 use crate::player_events::CostInfo;
 use crate::playing_actions::Recruit;
 use crate::position::Position;
@@ -32,10 +31,6 @@ pub(crate) fn recruit(game: &mut Game, player_index: usize, r: Recruit) -> Resul
     player.units.reserve_exact(vec.len());
     player.get_city_mut(r.city_position).activate();
     for unit_type in vec {
-        if let UnitType::Leader(l) = &unit_type {
-            set_active_leader(game, *l, player_index);
-        }
-
         let position = match &unit_type {
             UnitType::Ship => game
                 .player(player_index)
@@ -44,19 +39,10 @@ pub(crate) fn recruit(game: &mut Game, player_index: usize, r: Recruit) -> Resul
                 .expect("there should be a port in the city"),
             _ => r.city_position,
         };
-        add_unit(player_index, position, unit_type, game);
+        gain_unit(player_index, position, unit_type, game);
     }
     on_recruit(game, player_index, r);
     Ok(())
-}
-
-fn set_active_leader(game: &mut Game, leader: Leader, player_index: usize) {
-    game.players[player_index]
-        .available_leaders
-        .retain(|name| name != &leader);
-    Player::with_leader(leader, game, player_index, |game, leader| {
-        leader.listeners.one_time_init(game, player_index);
-    });
 }
 
 pub(crate) fn on_recruit(game: &mut Game, player_index: usize, r: Recruit) {
