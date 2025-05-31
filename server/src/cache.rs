@@ -333,16 +333,11 @@ impl Cache {
     /// Panics if civilization does not exist
     #[must_use]
     pub fn get_civilization(&self, name: &str) -> Civilization {
-        match name {
-            // "Maya" => maya::maya(), // still needs to be implemented
-            // for integration testing
-            "test2" => Civilization::new("test2", vec![], vec![]),
-            _ => self
-                .civilizations_by_name
-                .get(name)
-                .cloned()
-                .expect("civilization not found"),
-        }
+        self
+            .civilizations_by_name
+            .get(name)
+            .cloned()
+            .expect("civilization not found"),
     }
 
     ///
