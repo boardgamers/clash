@@ -117,7 +117,7 @@ fn metallurgy() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.collect_total,
         0,
-        |i, _, ()| {
+        |i, _, _| {
             if i.total.ore >= 2 {
                 i.total.ore -= 1;
                 i.total.gold += 1;

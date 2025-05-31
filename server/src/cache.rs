@@ -337,7 +337,7 @@ impl Cache {
             .civilizations_by_name
             .get(name)
             .cloned()
-            .expect("civilization not found"),
+            .expect("civilization not found")
     }
 
     ///
