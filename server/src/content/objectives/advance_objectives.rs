@@ -104,7 +104,7 @@ pub(crate) fn high_culture() -> Objective {
             .special_advances
             .iter()
             .all(|a| player.has_special_advance(a.advance))
-            && player.available_leaders.len() <= 1
+            && player.recruited_leaders.len() >= 2
     })
     .build()
 }

@@ -240,6 +240,9 @@ pub struct PlayerData {
     available_leaders: Vec<Leader>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
+    recruited_leaders: Vec<Leader>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     advances: Vec<Advance>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -351,6 +354,7 @@ fn player_from_data(data: PlayerData, game: &Game) -> Player {
         destroyed_structures: DestroyedStructures::from_data(data.destroyed_structures),
         units,
         available_leaders: data.available_leaders,
+        recruited_leaders: data.recruited_leaders,
         great_library_advance: data.great_library_advance,
         special_advances: civilization
             .special_advances
@@ -409,7 +413,8 @@ pub fn player_data(player: Player) -> PlayerData {
         destroyed_structures: player.destroyed_structures.data(),
         units,
         civilization: player.civilization.name,
-        available_leaders: player.available_leaders.into_iter().collect(),
+        available_leaders: player.available_leaders,
+        recruited_leaders: player.recruited_leaders,
         advances: player.advances.iter().sorted_by_key(Advance::id).collect(),
         great_library_advance: player.great_library_advance,
         wonders_built: player.wonders_built,
@@ -446,6 +451,7 @@ pub fn cloned_player_data(player: &Player) -> PlayerData {
         units,
         civilization: player.civilization.name.clone(),
         available_leaders: player.available_leaders.clone(),
+        recruited_leaders: player.recruited_leaders.clone(),
         advances: player.advances.iter().sorted_by_key(Advance::id).collect(),
         great_library_advance: player.great_library_advance,
         wonders_built: player.wonders_built.clone(),
