@@ -336,7 +336,6 @@ impl Cache {
         match name {
             // "Maya" => maya::maya(), // still needs to be implemented
             // for integration testing
-            "test1" => Civilization::new("test1", vec![], vec![]),
             "test2" => Civilization::new("test2", vec![], vec![]),
             _ => self
                 .civilizations_by_name
