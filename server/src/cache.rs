@@ -333,8 +333,7 @@ impl Cache {
     /// Panics if civilization does not exist
     #[must_use]
     pub fn get_civilization(&self, name: &str) -> Civilization {
-        self
-            .civilizations_by_name
+        self.civilizations_by_name
             .get(name)
             .cloned()
             .expect("civilization not found")

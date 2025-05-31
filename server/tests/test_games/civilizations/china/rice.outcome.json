@@ -4,11 +4,8 @@
   "players": [
     {
       "id": 0,
-      "objective_cards": [
-        38
-      ],
       "resources": {
-        "food": 6,
+        "food": 2,
         "wood": 7,
         "ore": 7,
         "ideas": 5,
@@ -54,6 +51,8 @@
         },
         {
           "mood_state": "Angry",
+          "activations": 1,
+          "angry_activation": true,
           "position": "B3"
         }
       ],
@@ -88,6 +87,9 @@
       "incident_tokens": 3,
       "wonder_cards": [
         "Pyramids"
+      ],
+      "objective_cards": [
+        38
       ],
       "next_unit_id": 10
     },
@@ -233,21 +235,64 @@
           "players": [
             {
               "index": 0,
-              "items": []
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "city_position": "B3",
+                        "collections": [
+                          {
+                            "position": "B4",
+                            "pile": {
+                              "food": 1
+                            },
+                            "times": 1
+                          }
+                        ],
+                        "action_type": "Collect"
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 2
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/cities/3/activations"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/cities/3/angry_activation"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/resources/food"
+                    }
+                  ]
+                }
+              ]
             }
           ]
         }
       ]
     }
   ],
-  "action_log_index": 0,
+  "action_log_index": 1,
   "log": [
     [
       "Player1 ended the movement action"
+    ],
+    [
+      "Player1 collects 1 food in the city at B3",
+      "Rice Cultivation added 1 food"
     ]
   ],
   "undo_limit": 0,
-  "actions_left": 2,
+  "actions_left": 1,
   "round": 6,
   "age": 1,
   "messages": [

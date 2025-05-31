@@ -120,6 +120,9 @@
       "available_leaders": [
         "Sulla"
       ],
+      "recruited_leaders": [
+        "Augustus"
+      ],
       "advances": [
         "Farming",
         "FreeEconomy",
@@ -310,6 +313,10 @@
                     {
                       "op": "remove",
                       "path": "/players/0/units/10"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/recruited_leaders"
                     }
                   ]
                 }

@@ -40,7 +40,7 @@ fn rice() -> SpecialAdvanceInfo {
             i.info.log.push(format!(
                 "Rice Cultivation added {}",
                 ResourcePile::food(food as u8)
-            ))
+            ));
         },
     )
     .build()

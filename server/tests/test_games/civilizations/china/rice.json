@@ -4,9 +4,6 @@
   "players": [
     {
       "id": 0,
-      "objective_cards": [
-        38
-      ],
       "resources": {
         "wood": 7,
         "ore": 7,
@@ -87,6 +84,9 @@
       "incident_tokens": 3,
       "wonder_cards": [
         "Pyramids"
+      ],
+      "objective_cards": [
+        38
       ],
       "next_unit_id": 10
     },

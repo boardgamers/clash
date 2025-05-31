@@ -28,7 +28,6 @@ pub enum SpecialAdvance {
     Expansion,
     Fireworks,
     ImperialArmy,
-
 }
 
 #[allow(clippy::trivially_copy_pass_by_ref)]

@@ -1,7 +1,7 @@
+pub(crate) mod china;
 pub(crate) mod greece;
 pub(crate) mod maya;
 pub(crate) mod rome;
-pub(crate) mod china;
 
 use crate::civilization::Civilization;
 use crate::leader::{Leader, LeaderAbility, LeaderInfo};
