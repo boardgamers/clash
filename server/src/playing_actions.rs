@@ -58,6 +58,12 @@ pub struct Recruit {
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub replaced_units: Vec<u32>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub moved_units: Vec<u32>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub selected_position: Option<Position>,
 }
 
 impl Recruit {
@@ -68,6 +74,8 @@ impl Recruit {
             city_position,
             payment,
             replaced_units: Vec::new(),
+            moved_units: Vec::new(),
+            selected_position: None,
         }
     }
 
