@@ -5,7 +5,7 @@ use server::card::HandCard;
 use server::city_pieces::Building::Fortress;
 use server::collect::PositionCollection;
 use server::content::persistent_events::{EventResponse, SelectedStructure, Structure};
-use server::movement::possible_move_units_destinations;
+use server::movement::possible_move_routes;
 use server::playing_actions::PlayingAction::Construct;
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
@@ -238,7 +238,7 @@ fn test_negotiations() {
             TestAction::not_undoable(0, Action::Playing(PlayingAction::EndTurn))
                 .with_pre_assert(|game| {
                     assert!(
-                        !possible_move_units_destinations(
+                        !possible_move_routes(
                             game.player(0),
                             &game,
                             &[0],
@@ -255,7 +255,7 @@ fn test_negotiations() {
             TestAction::not_undoable(1, Action::Playing(PlayingAction::EndTurn))
                 .with_pre_assert(|game| {
                     assert!(
-                        !possible_move_units_destinations(
+                        !possible_move_routes(
                             game.player(1),
                             &game,
                             &[0],

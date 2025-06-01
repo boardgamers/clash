@@ -6,15 +6,16 @@ use crate::unit_ui::{click_unit, unit_selection_clicked};
 use macroquad::math::{Vec2, u32};
 use macroquad::prelude::Texture2D;
 use server::action::Action;
-use server::events::EventOrigin;
 use server::game::{Game, GameState};
-use server::movement::{CurrentMove, MoveUnits, MovementAction, possible_move_units_destinations};
+use server::movement::{
+    CurrentMove, MoveDestination, MoveDestinations, MoveUnits, MovementAction,
+    possible_move_destinations,
+};
 use server::payment::PaymentOptions;
 use server::player::Player;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::unit::{Unit, UnitType};
-use std::collections::HashSet;
 
 #[derive(Clone, Copy)]
 pub enum MoveIntent {
@@ -52,38 +53,6 @@ impl MoveIntent {
             MoveIntent::Sea => rc.assets().unit(UnitType::Ship, rc.shown_player),
             MoveIntent::Disembark => &rc.assets().export,
         }
-    }
-}
-
-pub fn possible_destinations(
-    game: &Game,
-    start: Position,
-    player_index: usize,
-    units: &[u32],
-) -> MoveDestinations {
-    let player = game.player(player_index);
-    let mut modifiers = HashSet::new();
-
-    let mut res = possible_move_units_destinations(player, game, units, start, None)
-        .unwrap_or_default()
-        .into_iter()
-        .map(|route| {
-            modifiers.extend(route.cost.modifiers.clone());
-            MoveDestination::Tile(route.destination, route.cost)
-        })
-        .collect::<Vec<_>>();
-
-    player.units.iter().for_each(|u| {
-        if u.unit_type.is_ship()
-            && possible_move_units_destinations(player, game, units, start, Some(u.id))
-                .is_ok_and(|v| v.iter().any(|route| route.destination == u.position))
-        {
-            res.push(MoveDestination::Carrier(u.id));
-        }
-    });
-    MoveDestinations {
-        list: res,
-        modifiers,
     }
 }
 
@@ -169,7 +138,7 @@ fn unit_selection_changed(pos: Position, game: &Game, mut new: MoveSelection) ->
         new.destinations.list.clear();
         new.start = None;
     } else {
-        new.destinations = possible_destinations(game, pos, new.player_index, &new.units);
+        new.destinations = possible_move_destinations(game, new.player_index, &new.units, pos);
     }
     StateUpdate::OpenDialog(ActiveDialog::MoveUnits(new))
 }
@@ -185,24 +154,12 @@ pub fn movable_units(
         .filter(|u| {
             u.position == pos
                 && pred(u)
-                && !possible_destinations(game, pos, p.index, &[u.id])
+                && !possible_move_destinations(game, p.index, &[u.id], pos)
                     .list
                     .is_empty()
         })
         .map(|u| u.id)
         .collect()
-}
-
-#[derive(Clone, Debug)]
-pub struct MoveDestinations {
-    pub list: Vec<MoveDestination>,
-    pub modifiers: HashSet<EventOrigin>,
-}
-
-#[derive(Clone, Debug)]
-pub enum MoveDestination {
-    Tile(Position, PaymentOptions),
-    Carrier(u32),
 }
 
 #[derive(Clone, Debug)]
@@ -227,7 +184,7 @@ impl MoveSelection {
                 player_index,
                 start: Some(fleet_pos),
                 units: units.clone(),
-                destinations: possible_destinations(game, fleet_pos, player_index, units),
+                destinations: possible_move_destinations(game, player_index, units, fleet_pos),
             };
         }
 
@@ -245,7 +202,12 @@ impl MoveSelection {
                 MoveSelection {
                     player_index,
                     start: Some(pos),
-                    destinations: possible_destinations(game, pos, player_index, &movable_units),
+                    destinations: possible_move_destinations(
+                        game,
+                        player_index,
+                        &movable_units,
+                        pos,
+                    ),
                     units: movable_units,
                 }
             }
@@ -258,10 +220,7 @@ impl MoveSelection {
             player_index,
             start: None,
             units: vec![],
-            destinations: MoveDestinations {
-                list: vec![],
-                modifiers: HashSet::new(),
-            },
+            destinations: MoveDestinations::empty(),
         }
     }
 }

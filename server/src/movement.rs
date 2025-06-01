@@ -3,14 +3,17 @@ use crate::map::Terrain::{Fertile, Forest, Mountain, Unexplored};
 use crate::resource_pile::ResourcePile;
 use crate::unit::{Unit, set_unit_position};
 use crate::utils;
+use std::collections::HashSet;
 
 use crate::combat::move_with_possible_combat;
 use crate::consts::{ARMY_MOVEMENT_REQUIRED_ADVANCE, MOVEMENT_ACTIONS, SHIP_CAPACITY, STACK_LIMIT};
+use crate::events::EventOrigin;
 use crate::explore::move_to_unexplored_tile;
 use crate::game::GameState::Movement;
 use crate::game::{Game, GameState};
 use crate::move_routes::{MoveRoute, move_routes};
 use crate::movement::MovementAction::{Move, Stop};
+use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::player_events::MoveInfo;
 use crate::position::Position;
@@ -161,6 +164,60 @@ fn move_unit(
     }
 }
 
+#[derive(Clone, Debug)]
+pub enum MoveDestination {
+    Tile(Position, PaymentOptions),
+    Carrier(u32),
+}
+
+#[derive(Clone, Debug)]
+pub struct MoveDestinations {
+    pub list: Vec<MoveDestination>,
+    pub modifiers: HashSet<EventOrigin>,
+}
+
+impl MoveDestinations {
+    #[must_use]
+    pub fn new(list: Vec<MoveDestination>, modifiers: HashSet<EventOrigin>) -> Self {
+        MoveDestinations { list, modifiers }
+    }
+
+    #[must_use]
+    pub fn empty() -> Self {
+        MoveDestinations::new(Vec::new(), HashSet::new())
+    }
+}
+
+#[must_use]
+pub fn possible_move_destinations(
+    game: &Game,
+    player_index: usize,
+    units: &[u32],
+    start: Position,
+) -> MoveDestinations {
+    let player = game.player(player_index);
+    let mut modifiers = HashSet::new();
+
+    let mut res = possible_move_routes(player, game, units, start, None)
+        .unwrap_or_default()
+        .into_iter()
+        .map(|route| {
+            modifiers.extend(route.cost.modifiers.clone());
+            MoveDestination::Tile(route.destination, route.cost)
+        })
+        .collect::<Vec<_>>();
+
+    player.units.iter().for_each(|u| {
+        if u.unit_type.is_ship()
+            && possible_move_routes(player, game, units, start, Some(u.id))
+                .is_ok_and(|v| v.iter().any(|route| route.destination == u.position))
+        {
+            res.push(MoveDestination::Carrier(u.id));
+        }
+    });
+    MoveDestinations::new(res, modifiers)
+}
+
 /// # Errors
 ///
 /// Will return `Err` if the unit cannot move.
@@ -168,7 +225,7 @@ fn move_unit(
 /// # Panics
 ///
 /// Panics if destination tile does not exist
-pub fn possible_move_units_destinations(
+pub fn possible_move_routes(
     player: &Player,
     game: &Game,
     unit_ids: &[u32],
@@ -300,7 +357,7 @@ fn execute_move_action(game: &mut Game, player_index: usize, m: &MoveUnits) -> R
     Ok(())
 }
 
-pub(crate) type MoveDestinations = Vec<(MoveRoute, Result<(), String>)>;
+pub(crate) type MoveRoutes = Vec<(MoveRoute, Result<(), String>)>;
 
 fn move_units_destinations(
     player: &Player,
@@ -308,7 +365,7 @@ fn move_units_destinations(
     unit_ids: &[u32],
     start: Position,
     embark_carrier_id: Option<u32>,
-) -> Result<MoveDestinations, String> {
+) -> Result<MoveRoutes, String> {
     let (moved_units, movement_actions_left, current_move) = if let Movement(m) = &game.state {
         (&m.moved_units, m.movement_actions_left, &m.current_move)
     } else {
@@ -528,8 +585,7 @@ fn terrain_movement_restriction(
 
 fn has_movable_units(game: &Game, player: &Player) -> bool {
     player.units.iter().any(|unit| {
-        let result =
-            possible_move_units_destinations(player, game, &[unit.id], unit.position, None);
+        let result = possible_move_routes(player, game, &[unit.id], unit.position, None);
         result.is_ok_and(|r| !r.is_empty()) || can_embark(game, player, unit)
     })
 }
@@ -539,13 +595,6 @@ fn can_embark(game: &Game, player: &Player, unit: &Unit) -> bool {
     unit.unit_type.is_land_based()
         && player.units.iter().any(|u| {
             u.unit_type.is_ship()
-                && possible_move_units_destinations(
-                    player,
-                    game,
-                    &[unit.id],
-                    u.position,
-                    Some(u.id),
-                )
-                .is_ok()
+                && possible_move_routes(player, game, &[unit.id], u.position, Some(u.id)).is_ok()
         })
 }

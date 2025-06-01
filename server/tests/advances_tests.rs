@@ -14,7 +14,7 @@ use server::cultural_influence::InfluenceCultureAttempt;
 use server::events::EventOrigin;
 use server::game::Game;
 use server::movement::MovementAction::Move;
-use server::movement::{MoveUnits, possible_move_units_destinations};
+use server::movement::{MoveUnits, possible_move_routes};
 use server::player::CostTrigger;
 use server::playing_actions::PlayingAction::{
     Collect, Construct, Custom, EndTurn, Recruit, WonderCard,
@@ -384,7 +384,7 @@ fn test_road_coordinates() {
 
 fn get_destinations(game: &Game, units: &[u32], position: &str) -> Vec<String> {
     let player = game.player(1);
-    possible_move_units_destinations(player, game, units, Position::from_offset(position), None)
+    possible_move_routes(player, game, units, Position::from_offset(position), None)
         .unwrap()
         .into_iter()
         .map(|r| r.destination.to_string())

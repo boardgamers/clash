@@ -11,7 +11,7 @@ use crate::happiness_ui::IncreaseHappinessConfig;
 use crate::layout_ui::FONT_SIZE;
 use crate::log_ui::get_log_end;
 use crate::map_ui::ExploreResolutionConfig;
-use crate::move_ui::{MoveDestination, MoveIntent, MovePayment, MoveSelection};
+use crate::move_ui::{MoveIntent, MovePayment, MoveSelection};
 use crate::payment_ui::{Payment, new_gain};
 use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
 use crate::render_context::RenderContext;
@@ -26,7 +26,7 @@ use server::content::persistent_events::{
     PlayerRequest, UnitTypeRequest,
 };
 use server::game::{Game, GameState};
-use server::movement::CurrentMove;
+use server::movement::{CurrentMove, MoveDestination};
 use server::playing_actions::PlayingActionType;
 use server::position::Position;
 

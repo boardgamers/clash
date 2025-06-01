@@ -4,7 +4,7 @@ use crate::dialog_ui::{OkTooltip, cancel_button_pos, ok_button};
 use crate::layout_ui::{
     bottom_center_anchor, bottom_center_texture, bottom_right_texture, icon_pos,
 };
-use crate::move_ui::{MoveDestination, MoveIntent, movable_units};
+use crate::move_ui::{MoveIntent, movable_units};
 use crate::player_ui::get_combat;
 use crate::render_context::RenderContext;
 use crate::select_ui::HighlightType;
@@ -16,6 +16,7 @@ use server::action::Action;
 use server::combat_stats::CombatStats;
 use server::content::persistent_events::EventResponse;
 use server::map::{Rotation, Terrain, UnexploredBlock};
+use server::movement::MoveDestination;
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
 use server::unit::UnitType;
