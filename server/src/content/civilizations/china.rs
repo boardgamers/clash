@@ -1,15 +1,14 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Advance;
 use crate::civilization::Civilization;
-use crate::content::persistent_events::PositionRequest;
+use crate::game::{Game, GameState};
 use crate::map::Terrain;
+use crate::movement::{MoveState, possible_move_destinations};
 use crate::player::Player;
-use crate::playing_actions::Recruit;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
-use crate::special_advance::{
-    SpecialAdvance, SpecialAdvanceBuilder, SpecialAdvanceInfo, SpecialAdvanceRequirement,
-};
+use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
+use itertools::Itertools;
 
 pub(crate) fn china() -> Civilization {
     Civilization::new("China", vec![rice(), expansion()], vec![])
@@ -53,76 +52,57 @@ fn rice() -> SpecialAdvanceInfo {
 }
 
 fn expansion() -> SpecialAdvanceInfo {
-    let mut b = SpecialAdvanceInfo::builder(
+    SpecialAdvanceInfo::builder(
         SpecialAdvance::Expansion,
         SpecialAdvanceRequirement::Advance(Advance::Husbandry),
         "Expansion",
         "When you recruited at least 1 settler: Every settler in your cities gains one move",
-    );
-    for i in 0..4 {
-        b = add_settler_move(b, 10 + i * 2);
-    }
-
-    b.build()
-}
-
-fn add_settler_move(b: SpecialAdvanceBuilder, prio: i32) -> SpecialAdvanceBuilder {
-    b.add_position_request(
-        |event| &mut event.recruit,
-        prio + 1,
-        |game, player_index, r| {
-            Some(PositionRequest::new(
-                movable_settlers(game.player(player_index), r),
-                1..=1,
-                "Select a settler to move (may select the current tile)",
-            ))
-        },
-        |game, s, r| {
-            let pos = s.choice[0];
-            game.add_info_log_item(&format!(
-                "{} selected settler at {} to move",
-                s.player_name, pos
-            ));
-            r.selected_position = Some(pos);
-        },
     )
-    .add_position_request(
+    .add_simple_persistent_event_listener(
         |event| &mut event.recruit,
-        prio,
-        |game, player_index, r| {
-            r.selected_position.map(|pos| {
-                PositionRequest::new(
-                    game.player(player_index).available_moves(pos),
-                    1..=1,
-                    "Select a tile to move the settler to",
-                )
-            })
-        },
-        |game, s, r| {
-            let pos = s.choice[0];
-            if pos == r.selected_position.expect("Selected position") {
-                game.add_info_log_item(&format!(
-                    "{} selected the settler at {pos} to stay in place",
-                    s.player_name
-                ))
-            } else {
-                game.add_info_log_item(&format!(
-                    "{} selected {pos} to move the settler to",
-                    s.player_name
-                ));
-                // todo move
-                // r.moved_units // todo
+        10,
+        |game, player_index, _player_name, r| {
+            if r.units.settlers == 0 {
+                return;
             }
+
+            let p = game.player(player_index);
+            let settlers = movable_settlers(game, p);
+            if settlers.is_empty() {
+                return;
+            }
+            let moved_units = p
+                .units
+                .iter()
+                .filter(|u| !u.unit_type.is_settler())
+                .map(|u| u.id)
+                .collect_vec();
+
+            game.state = GameState::Movement(MoveState {
+                moved_units,
+                movement_actions_left: settlers.len() as u32,
+                ..MoveState::default()
+            });
+
+            game.add_info_log_item(&format!(
+                "Expansion allows to move the settlers at {}",
+                settlers.iter().map(ToString::to_string).join(", ")
+            ));
         },
     )
+    .build()
 }
 
-fn movable_settlers(player: &Player, r: &Recruit) -> Vec<Position> {
-    // todo 1) in city 2) no move restrictions
+fn movable_settlers(game: &Game, player: &Player) -> Vec<Position> {
     player
         .units
         .iter()
-        .filter(|u| u.unit_type.is_settler() && u.movement_restrictions.contains())
+        .filter(|u| {
+            player.try_get_city(u.position).is_some()
+                && !possible_move_destinations(game, player.index, &[u.id], u.position)
+                    .list
+                    .is_empty()
+        })
         .map(|u| u.position)
-        .collect()
+        .collect_vec()
 }
