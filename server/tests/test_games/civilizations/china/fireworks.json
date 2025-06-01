@@ -78,8 +78,9 @@
       "civilization": "China",
       "advances": [
         "Farming",
-        "Irrigation",
-        "Mining"
+        "Metallurgy",
+        "Mining",
+        "Tactics"
       ],
       "incident_tokens": 3,
       "wonder_cards": [
@@ -127,6 +128,13 @@
       "advances": [
         "Farming",
         "Mining"
+      ],
+      "units": [
+        {
+          "position": "C1",
+          "unit_type": "Cavalry",
+          "id": 1
+        }
       ],
       "incident_tokens": 3,
       "next_unit_id": 3

@@ -128,25 +128,34 @@ fn fireworks() -> SpecialAdvanceInfo {
                 ResourcePile::wood(1) + ResourcePile::ore(1),
             );
 
-            if !player.can_afford(&cost) {
+            let h = e.hits_mut(e.combat.opponent_role(player_index));
+            let mut with_increase = h.clone();
+            with_increase.opponent_hit_cancels += 1;
+
+            if h.hits() == with_increase.hits() {
+                game.add_info_log_item("Fireworks won't reduce the hits, no payment made.");
                 return None;
             }
 
-            (e.hits(e.combat.opponent_role(player_index)) > 0).then_some(vec![
-                PaymentRequest::optional(cost, "Ignore 1 hit"),
-            ])
+            if !player.can_afford(&cost) {
+                game.add_info_log_item("Fireworks: Not enough resources, no payment made.");
+                return None;
+            }
+
+            (e.hits(e.combat.opponent_role(player_index)) > 0)
+                .then_some(vec![PaymentRequest::optional(cost, "Ignore 1 hit")])
         },
         |game, s, e| {
             let pile = &s.choice[0];
             if pile.is_empty() {
+                game.add_info_log_item("Fireworks: No payment made, first hit not ignored.");
+            } else {
                 game.add_info_log_item(
-                    "Fireworks: No payment made, first hit not ignored.",
-                )
-            } else { 
-                game.add_info_log_item(&format!(
-                    "Fireworks: Paid {pile} to ignore the first hit.",
-                ));
-                e.hits_mut(e.combat.opponent_role(s.player_index)).opponent_hit_cancels += 1;
+                    &format!("Fireworks: Paid {pile} to ignore the first hit.",),
+                );
+                e.hits_mut(e.combat.opponent_role(s.player_index))
+                    .opponent_hit_cancels += 1;
+                e.set_final_result();
             }
         },
     )

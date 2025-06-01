@@ -1,4 +1,4 @@
-use crate::common::{JsonTest, TestAction};
+use crate::common::{JsonTest, TestAction, move_action, payment_response};
 use server::action::Action;
 use server::collect::PositionCollection;
 use server::playing_actions::{Collect, PlayingAction, PlayingActionType, Recruit};
@@ -12,33 +12,35 @@ const JSON: JsonTest = JsonTest::child("civilizations", "china");
 
 #[test]
 fn rice() {
-    JSON.test(
-        "rice",
-        vec![TestAction::undoable(
-            0,
-            Action::Playing(PlayingAction::Collect(Collect::new(
-                Position::from_offset("B3"),
-                vec![PositionCollection::new(
-                    Position::from_offset("B4"),
-                    ResourcePile::food(1),
-                )],
-                PlayingActionType::Collect,
-            ))),
-        )],
-    );
+    JSON.test("rice", vec![TestAction::undoable(
+        0,
+        Action::Playing(PlayingAction::Collect(Collect::new(
+            Position::from_offset("B3"),
+            vec![PositionCollection::new(
+                Position::from_offset("B4"),
+                ResourcePile::food(1),
+            )],
+            PlayingActionType::Collect,
+        ))),
+    )]);
 }
 
 #[test]
 fn expansion() {
-    JSON.test(
-        "expansion",
-        vec![TestAction::undoable(
-            0,
-            Action::Playing(PlayingAction::Recruit(Recruit::new(
-                &Units::new(1, 0, 0, 0, 0, None),
-                Position::from_offset("A1"),
-                ResourcePile::gold(2),
-            ))),
-        )],
-    );
+    JSON.test("expansion", vec![TestAction::undoable(
+        0,
+        Action::Playing(PlayingAction::Recruit(Recruit::new(
+            &Units::new(1, 0, 0, 0, 0, None),
+            Position::from_offset("A1"),
+            ResourcePile::gold(2),
+        ))),
+    )]);
+}
+
+#[test]
+fn fireworks() {
+    JSON.test("fireworks", vec![
+        TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("C1"))).skip_json(),
+        TestAction::not_undoable(0, payment_response(ResourcePile::gold(2))),
+    ]);
 }
