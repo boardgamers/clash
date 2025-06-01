@@ -1,9 +1,11 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Advance;
 use crate::civilization::Civilization;
+use crate::content::persistent_events::PaymentRequest;
 use crate::game::{Game, GameState};
 use crate::map::Terrain;
 use crate::movement::{MoveState, possible_move_destinations};
+use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::Player;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
@@ -11,7 +13,7 @@ use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceR
 use itertools::Itertools;
 
 pub(crate) fn china() -> Civilization {
-    Civilization::new("China", vec![rice(), expansion()], vec![])
+    Civilization::new("China", vec![rice(), expansion(), fireworks()], vec![])
 }
 
 fn rice() -> SpecialAdvanceInfo {
@@ -105,4 +107,48 @@ fn movable_settlers(game: &Game, player: &Player) -> Vec<Position> {
         })
         .map(|u| u.position)
         .collect_vec()
+}
+
+fn fireworks() -> SpecialAdvanceInfo {
+    SpecialAdvanceInfo::builder(
+        SpecialAdvance::Fireworks,
+        SpecialAdvanceRequirement::Advance(Advance::Metallurgy),
+        "Fireworks",
+        "In the first round of combat, you may pay 1 ore and 1 wood to ignore the first hit.",
+    )
+    .add_payment_request_listener(
+        |e| &mut e.combat_round_end,
+        91,
+        |game, player_index, e| {
+            let player = &game.player(player_index);
+
+            let cost = PaymentOptions::resources(
+                player,
+                PaymentReason::AdvanceAbility,
+                ResourcePile::wood(1) + ResourcePile::ore(1),
+            );
+
+            if !player.can_afford(&cost) {
+                return None;
+            }
+
+            (e.hits(e.combat.opponent_role(player_index)) > 0).then_some(vec![
+                PaymentRequest::optional(cost, "Ignore 1 hit"),
+            ])
+        },
+        |game, s, e| {
+            let pile = &s.choice[0];
+            if pile.is_empty() {
+                game.add_info_log_item(
+                    "Fireworks: No payment made, first hit not ignored.",
+                )
+            } else { 
+                game.add_info_log_item(&format!(
+                    "Fireworks: Paid {pile} to ignore the first hit.",
+                ));
+                e.hits_mut(e.combat.opponent_role(s.player_index)).opponent_hit_cancels += 1;
+            }
+        },
+    )
+    .build()
 }
