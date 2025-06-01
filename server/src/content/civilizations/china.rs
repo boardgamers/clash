@@ -128,7 +128,7 @@ fn fireworks() -> SpecialAdvanceInfo {
                 ResourcePile::wood(1) + ResourcePile::ore(1),
             );
 
-            let h = e.hits_mut(e.combat.opponent_role(player_index));
+            let h = e.combat_hits(e.combat.opponent_role(player_index));
             let mut with_increase = h.clone();
             with_increase.opponent_hit_cancels += 1;
 
@@ -142,8 +142,7 @@ fn fireworks() -> SpecialAdvanceInfo {
                 return None;
             }
 
-            (e.hits(e.combat.opponent_role(player_index)) > 0)
-                .then_some(vec![PaymentRequest::optional(cost, "Ignore 1 hit")])
+            Some(vec![PaymentRequest::optional(cost, "Ignore 1 hit")])
         },
         |game, s, e| {
             let pile = &s.choice[0];
@@ -153,9 +152,12 @@ fn fireworks() -> SpecialAdvanceInfo {
                 game.add_info_log_item(
                     &format!("Fireworks: Paid {pile} to ignore the first hit.",),
                 );
-                e.hits_mut(e.combat.opponent_role(s.player_index))
-                    .opponent_hit_cancels += 1;
-                e.set_final_result();
+                e.update_hits(
+                    e.combat.opponent_role(s.player_index),
+                    |h| {
+                        h.opponent_hit_cancels += 1;
+                    },
+                );
             }
         },
     )

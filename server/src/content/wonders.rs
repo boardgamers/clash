@@ -377,7 +377,7 @@ fn colosseum() -> WonderInfo {
                 return None;
             }
 
-            let h = e.hits_mut(e.role(player_index));
+            let h = e.combat_hits(e.role(player_index));
             let mut with_increase = h.clone();
             with_increase.combat_value += 1;
             if h.hits() == with_increase.hits() {
@@ -402,8 +402,12 @@ fn colosseum() -> WonderInfo {
                 game.add_info_log_item(&format!(
                     "{name} paid {pile} to increase the combat value by 1, scoring an extra hit",
                 ));
-                e.hits_mut(e.role(s.player_index)).combat_value += 1;
-                e.set_final_result();
+                e.update_hits(
+                    e.role(s.player_index),
+                    |h| {
+                        h.combat_value += 1;
+                    },
+                );
             }
         },
     )

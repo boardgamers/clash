@@ -138,7 +138,7 @@ impl Combat {
             self.attacker()
         }
     }
-    
+
     #[must_use]
     pub fn opponent_role(&self, player: usize) -> CombatRole {
         if player == self.attacker() {
