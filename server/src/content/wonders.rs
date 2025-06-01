@@ -1,8 +1,9 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::do_gain_action_card_from_pile;
-use crate::advance::{Advance, init_great_library};
-use crate::card::{HandCard, all_objective_hand_cards};
+use crate::advance::{init_great_library, Advance};
+use crate::card::{all_objective_hand_cards, HandCard};
 use crate::city::{City, MoodState};
+use crate::combat_listeners::CombatRoundEnd;
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::{
@@ -15,7 +16,7 @@ use crate::map::Terrain;
 use crate::map::Terrain::Fertile;
 use crate::objective_card::{discard_objective_card, gain_objective_card_from_pile};
 use crate::payment::{PaymentOptions, PaymentReason};
-use crate::player::{Player, gain_unit};
+use crate::player::{gain_unit, Player};
 use crate::position::Position;
 use crate::tactics_card::CombatRole;
 use crate::unit::UnitType;
@@ -377,10 +378,7 @@ fn colosseum() -> WonderInfo {
                 return None;
             }
 
-            let h = e.combat_hits(e.role(player_index));
-            let mut with_increase = h.clone();
-            with_increase.combat_value += 1;
-            if h.hits() == with_increase.hits() {
+            if !apply_colosseum(e, player_index, false) {
                 game.add_info_log_item(&format!(
                     "Combat value is already at maximum, cannot increase combat value for {}",
                     game.player_name(player_index)
@@ -402,14 +400,15 @@ fn colosseum() -> WonderInfo {
                 game.add_info_log_item(&format!(
                     "{name} paid {pile} to increase the combat value by 1, scoring an extra hit",
                 ));
-                e.update_hits(
-                    e.role(s.player_index),
-                    |h| {
-                        h.combat_value += 1;
-                    },
-                );
+                apply_colosseum(e, s.player_index, false);
             }
         },
     )
     .build()
+}
+
+fn apply_colosseum(e: &mut CombatRoundEnd, player: usize, do_update: bool) -> bool {
+    e.update_hits(e.role(player), do_update, |h| {
+        h.combat_value += 1;
+    })
 }

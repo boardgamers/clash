@@ -215,15 +215,6 @@ impl CombatRoundEnd {
     }
 
     #[must_use]
-    pub(crate) fn combat_hits(&self, role: CombatRole) -> &CombatHits {
-        if role.is_attacker() {
-            &self.attacker
-        } else {
-            &self.defender
-        }
-    }
-
-    #[must_use]
     pub fn losses(&self, role: CombatRole) -> u8 {
         if role.is_attacker() {
             self.defender.hits()
@@ -232,13 +223,26 @@ impl CombatRoundEnd {
         }
     }
 
-    pub(crate) fn update_hits(&mut self, role: CombatRole, update: impl Fn(&mut CombatHits)) {
-        if role.is_attacker() {
-            update(&mut self.attacker)
+    pub(crate) fn update_hits(
+        &mut self,
+        role: CombatRole,
+        do_update: bool,
+        update: impl Fn(&mut CombatHits),
+    ) -> bool {
+        let h = if role.is_attacker() {
+            &mut self.attacker
         } else {
-            update(&mut self.defender)
+            &mut self.defender
+        };
+        if do_update {
+            update(h);
+            self.set_final_result();
+            true
+        } else {
+            let hits = h.clone();
+            update(h);
+            h.hits() != hits.hits()
         }
-        self.set_final_result()
     }
 
     #[must_use]

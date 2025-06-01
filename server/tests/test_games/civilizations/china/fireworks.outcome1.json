@@ -311,7 +311,8 @@
                               },
                               "defender": {
                                 "combat_value": 6,
-                                "opponent_fighters": 1
+                                "opponent_fighters": 1,
+                                "opponent_hit_cancels": 1
                               },
                               "final_result": "Draw"
                             }

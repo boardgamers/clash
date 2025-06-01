@@ -1,6 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Advance;
 use crate::civilization::Civilization;
+use crate::combat_listeners::CombatRoundEnd;
 use crate::content::persistent_events::PaymentRequest;
 use crate::game::{Game, GameState};
 use crate::map::Terrain;
@@ -128,11 +129,7 @@ fn fireworks() -> SpecialAdvanceInfo {
                 ResourcePile::wood(1) + ResourcePile::ore(1),
             );
 
-            let h = e.combat_hits(e.combat.opponent_role(player_index));
-            let mut with_increase = h.clone();
-            with_increase.opponent_hit_cancels += 1;
-
-            if h.hits() == with_increase.hits() {
+            if !apply_fireworks(e, player_index, false) {
                 game.add_info_log_item("Fireworks won't reduce the hits, no payment made.");
                 return None;
             }
@@ -152,14 +149,15 @@ fn fireworks() -> SpecialAdvanceInfo {
                 game.add_info_log_item(
                     &format!("Fireworks: Paid {pile} to ignore the first hit.",),
                 );
-                e.update_hits(
-                    e.combat.opponent_role(s.player_index),
-                    |h| {
-                        h.opponent_hit_cancels += 1;
-                    },
-                );
+                apply_fireworks(e, s.player_index, true);
             }
         },
     )
     .build()
+}
+
+fn apply_fireworks(e: &mut CombatRoundEnd, p: usize, do_update: bool) -> bool {
+    e.update_hits(e.combat.opponent_role(p), do_update, |h| {
+        h.opponent_hit_cancels += 1
+    })
 }
