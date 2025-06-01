@@ -140,6 +140,15 @@ impl Combat {
     }
 
     #[must_use]
+    pub fn opponent_role(&self, player: usize) -> CombatRole {
+        if player == self.attacker() {
+            CombatRole::Defender
+        } else {
+            CombatRole::Attacker
+        }
+    }
+
+    #[must_use]
     pub fn players(&self) -> [usize; 2] {
         [self.attacker(), self.defender()]
     }

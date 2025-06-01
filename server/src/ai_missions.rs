@@ -571,7 +571,7 @@ impl Mission {
 
     fn next_movement(&self, game: &Game) -> Option<MovementAction> {
         //todo: settlers and scouts should avoid enemy combat troops in their path
-        let route = movement::possible_move_units_destinations(
+        let route = movement::possible_move_routes(
             &game.players[self.player_index],
             game,
             &self.units,

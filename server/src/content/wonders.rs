@@ -3,6 +3,7 @@ use crate::action_card::do_gain_action_card_from_pile;
 use crate::advance::{Advance, init_great_library};
 use crate::card::{HandCard, all_objective_hand_cards};
 use crate::city::{City, MoodState};
+use crate::combat_listeners::CombatRoundEnd;
 use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::{
@@ -377,10 +378,7 @@ fn colosseum() -> WonderInfo {
                 return None;
             }
 
-            let h = e.hits_mut(e.role(player_index));
-            let mut with_increase = h.clone();
-            with_increase.combat_value += 1;
-            if h.hits() == with_increase.hits() {
+            if !apply_colosseum(e, player_index, false) {
                 game.add_info_log_item(&format!(
                     "Combat value is already at maximum, cannot increase combat value for {}",
                     game.player_name(player_index)
@@ -402,10 +400,15 @@ fn colosseum() -> WonderInfo {
                 game.add_info_log_item(&format!(
                     "{name} paid {pile} to increase the combat value by 1, scoring an extra hit",
                 ));
-                e.hits_mut(e.role(s.player_index)).combat_value += 1;
-                e.set_final_result();
+                apply_colosseum(e, s.player_index, true);
             }
         },
     )
     .build()
+}
+
+fn apply_colosseum(e: &mut CombatRoundEnd, player: usize, do_update: bool) -> bool {
+    e.update_hits(e.role(player), do_update, |h| {
+        h.combat_value += 1;
+    })
 }

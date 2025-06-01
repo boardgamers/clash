@@ -10,12 +10,11 @@ use crate::hex_ui;
 use crate::select_ui::HighlightType;
 
 use crate::layout_ui::{draw_scaled_icon_with_tooltip, is_in_circle};
-use crate::move_ui::MoveDestination;
 use crate::render_context::RenderContext;
 use crate::tooltip::{add_tooltip_description, show_tooltip_for_circle};
 use itertools::Itertools;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
-use server::movement::MovementRestriction;
+use server::movement::{MoveDestination, MovementRestriction};
 use server::player::Player;
 use server::wonder::Wonder;
 

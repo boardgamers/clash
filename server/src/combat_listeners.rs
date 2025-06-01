@@ -180,7 +180,7 @@ impl CombatRoundEnd {
             && !self.defender.all_opponents_killed()
     }
 
-    pub(crate) fn set_final_result(&mut self) {
+    fn set_final_result(&mut self) {
         let attackers_dead = self.defender.all_opponents_killed();
         let defenders_dead = self.attacker.all_opponents_killed();
 
@@ -223,12 +223,25 @@ impl CombatRoundEnd {
         }
     }
 
-    #[must_use]
-    pub(crate) fn hits_mut(&mut self, role: CombatRole) -> &mut CombatHits {
-        if role.is_attacker() {
+    pub(crate) fn update_hits(
+        &mut self,
+        role: CombatRole,
+        do_update: bool,
+        update: impl Fn(&mut CombatHits),
+    ) -> bool {
+        let h = if role.is_attacker() {
             &mut self.attacker
         } else {
             &mut self.defender
+        };
+        if do_update {
+            update(h);
+            self.set_final_result();
+            true
+        } else {
+            let hits = h.clone();
+            update(h);
+            h.hits() != hits.hits()
         }
     }
 

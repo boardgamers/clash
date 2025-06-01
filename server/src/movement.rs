@@ -1,25 +1,25 @@
-use crate::events::EventOrigin;
 use crate::map::Map;
-use crate::map::Terrain::{Fertile, Forest, Mountain};
-use crate::payment::{PaymentOptions, PaymentReason};
+use crate::map::Terrain::{Fertile, Forest, Mountain, Unexplored};
 use crate::resource_pile::ResourcePile;
 use crate::unit::{Unit, set_unit_position};
 use crate::utils;
+use std::collections::HashSet;
 
-use crate::advance::Advance;
+use crate::combat::move_with_possible_combat;
 use crate::consts::{ARMY_MOVEMENT_REQUIRED_ADVANCE, MOVEMENT_ACTIONS, SHIP_CAPACITY, STACK_LIMIT};
-use crate::content::action_cards::negotiation::negotiations_partner;
-use crate::content::incidents::great_diplomat::{DIPLOMAT_ID, diplomatic_relations_partner};
+use crate::events::EventOrigin;
+use crate::explore::move_to_unexplored_tile;
 use crate::game::GameState::Movement;
 use crate::game::{Game, GameState};
+use crate::move_routes::{MoveRoute, move_routes};
+use crate::movement::MovementAction::{Move, Stop};
+use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::player_events::MoveInfo;
 use crate::position::Position;
-use crate::special_advance::SpecialAdvance;
 use crate::unit::{carried_units, get_current_move};
 use crate::wonder::Wonder;
 use itertools::Itertools;
-use pathfinding::prelude::astar;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
@@ -164,6 +164,60 @@ fn move_unit(
     }
 }
 
+#[derive(Clone, Debug)]
+pub enum MoveDestination {
+    Tile(Position, PaymentOptions),
+    Carrier(u32),
+}
+
+#[derive(Clone, Debug)]
+pub struct MoveDestinations {
+    pub list: Vec<MoveDestination>,
+    pub modifiers: HashSet<EventOrigin>,
+}
+
+impl MoveDestinations {
+    #[must_use]
+    pub fn new(list: Vec<MoveDestination>, modifiers: HashSet<EventOrigin>) -> Self {
+        MoveDestinations { list, modifiers }
+    }
+
+    #[must_use]
+    pub fn empty() -> Self {
+        MoveDestinations::new(Vec::new(), HashSet::new())
+    }
+}
+
+#[must_use]
+pub fn possible_move_destinations(
+    game: &Game,
+    player_index: usize,
+    units: &[u32],
+    start: Position,
+) -> MoveDestinations {
+    let player = game.player(player_index);
+    let mut modifiers = HashSet::new();
+
+    let mut res = possible_move_routes(player, game, units, start, None)
+        .unwrap_or_default()
+        .into_iter()
+        .map(|route| {
+            modifiers.extend(route.cost.modifiers.clone());
+            MoveDestination::Tile(route.destination, route.cost)
+        })
+        .collect::<Vec<_>>();
+
+    player.units.iter().for_each(|u| {
+        if u.unit_type.is_ship()
+            && possible_move_routes(player, game, units, start, Some(u.id))
+                .is_ok_and(|v| v.iter().any(|route| route.destination == u.position))
+        {
+            res.push(MoveDestination::Carrier(u.id));
+        }
+    });
+    MoveDestinations::new(res, modifiers)
+}
+
 /// # Errors
 ///
 /// Will return `Err` if the unit cannot move.
@@ -171,7 +225,7 @@ fn move_unit(
 /// # Panics
 ///
 /// Panics if destination tile does not exist
-pub fn possible_move_units_destinations(
+pub fn possible_move_routes(
     player: &Player,
     game: &Game,
     unit_ids: &[u32],
@@ -189,15 +243,129 @@ pub fn possible_move_units_destinations(
         .collect_vec())
 }
 
-pub(crate) type MoveDestinations = Vec<(MoveRoute, Result<(), String>)>;
+pub(crate) fn execute_movement_action(
+    game: &mut Game,
+    action: MovementAction,
+    player_index: usize,
+) -> Result<(), String> {
+    if let GameState::Playing = game.state {
+        if game.actions_left == 0 {
+            return Err("No actions left".to_string());
+        }
+        game.actions_left -= 1;
+        game.state = GameState::Movement(MoveState::new());
+    }
 
-pub(crate) fn move_units_destinations(
+    match action {
+        Move(m) => {
+            execute_move_action(game, player_index, &m)?;
+
+            if let Movement(state) = &game.state {
+                let all_moves_used =
+                    state.movement_actions_left == 0 && state.current_move == CurrentMove::None;
+                if all_moves_used
+                    || !has_movable_units(game, game.player(game.current_player_index))
+                {
+                    game.state = GameState::Playing;
+                }
+            }
+        }
+        Stop => {
+            game.state = GameState::Playing;
+        }
+    }
+
+    Ok(())
+}
+
+fn execute_move_action(game: &mut Game, player_index: usize, m: &MoveUnits) -> Result<(), String> {
+    let player = &game.players[player_index];
+    let starting_position =
+        player
+            .get_unit(*m.units.first().expect(
+                "instead of providing no units to move a stop movement actions should be done",
+            ))
+            .position;
+    let destinations = move_units_destinations(
+        player,
+        game,
+        &m.units,
+        starting_position,
+        m.embark_carrier_id,
+    )?;
+
+    let (dest, result) = destinations
+        .iter()
+        .find(|(route, _)| route.destination == m.destination)
+        .map_or_else(
+            || {
+                Err(format!(
+                    "destination {} not found in {:?}",
+                    m.destination, destinations
+                ))
+            },
+            |(dest, r)| Ok((dest, r.clone())),
+        )?;
+    result?;
+
+    let c = &dest.cost;
+    if c.is_free() {
+        assert_eq!(m.payment, ResourcePile::empty(), "payment should be empty");
+    } else {
+        game.players[player_index].pay_cost(c, &m.payment);
+    }
+
+    let current_move = get_current_move(
+        game,
+        &m.units,
+        starting_position,
+        m.destination,
+        m.embark_carrier_id,
+    );
+    let Movement(move_state) = &mut game.state else {
+        return Err("no move state".to_string());
+    };
+    move_state.moved_units.extend(m.units.iter());
+    move_state.moved_units = move_state.moved_units.iter().unique().copied().collect();
+
+    if matches!(current_move, CurrentMove::None) || move_state.current_move != current_move {
+        move_state.movement_actions_left -= 1;
+        move_state.current_move = current_move;
+    }
+    if !starting_position.is_neighbor(m.destination) {
+        // roads move ends the current move
+        move_state.current_move = CurrentMove::None;
+    }
+
+    let dest_terrain = game
+        .map
+        .get(m.destination)
+        .expect("destination should be a valid tile");
+
+    if dest_terrain == &Unexplored {
+        move_to_unexplored_tile(
+            game,
+            player_index,
+            &m.units,
+            starting_position,
+            m.destination,
+        );
+    } else {
+        move_with_possible_combat(game, player_index, m);
+    }
+
+    Ok(())
+}
+
+pub(crate) type MoveRoutes = Vec<(MoveRoute, Result<(), String>)>;
+
+fn move_units_destinations(
     player: &Player,
     game: &Game,
     unit_ids: &[u32],
     start: Position,
     embark_carrier_id: Option<u32>,
-) -> Result<MoveDestinations, String> {
+) -> Result<MoveRoutes, String> {
     let (moved_units, movement_actions_left, current_move) = if let Movement(m) = &game.state {
         (&m.moved_units, m.movement_actions_left, &m.current_move)
     } else {
@@ -375,26 +543,7 @@ fn check_can_move(
     Ok(())
 }
 
-#[derive(Debug, Clone)]
-pub struct MoveRoute {
-    pub destination: Position,
-    pub cost: PaymentOptions,
-    pub ignore_terrain_movement_restrictions: bool,
-}
-
-impl MoveRoute {
-    fn free(destination: Position, origins: Vec<EventOrigin>) -> Self {
-        let mut options = PaymentOptions::free();
-        options.modifiers = origins;
-        Self {
-            destination,
-            cost: options,
-            ignore_terrain_movement_restrictions: false,
-        }
-    }
-}
-
-pub(crate) fn is_valid_movement_type(
+fn is_valid_movement_type(
     game: &Game,
     units: &Vec<&Unit>,
     embark_position: Option<Position>,
@@ -418,267 +567,7 @@ pub(crate) fn is_valid_movement_type(
     Ok(())
 }
 
-#[must_use]
-pub(crate) fn move_routes(
-    starting: Position,
-    player: &Player,
-    units: &[u32],
-    game: &Game,
-    embark_carrier_id: Option<u32>,
-    stack_size: usize,
-) -> Vec<MoveRoute> {
-    let mut base: Vec<MoveRoute> = starting
-        .neighbors()
-        .iter()
-        .filter(|&n| game.map.is_inside(*n))
-        .map(|&n| MoveRoute::free(n, vec![]))
-        .collect();
-    if player.can_use_advance(Advance::Navigation) {
-        base.extend(reachable_with_navigation(player, units, &game.map));
-    }
-    if player.can_use_advance(Advance::Roads) && embark_carrier_id.is_none() {
-        base.extend(reachable_with_roads(player, units, game, stack_size));
-    }
-    add_diplomatic_relations(player, game, &mut base);
-    add_negotiations(player, game, &mut base);
-    base
-}
-
-fn add_diplomatic_relations(player: &Player, game: &Game, base: &mut Vec<MoveRoute>) {
-    if let Some(partner) = diplomatic_relations_partner(game, player.index) {
-        let partner = game.player(partner);
-        for r in base {
-            if !partner.get_units(r.destination).is_empty() {
-                r.cost.default += ResourcePile::culture_tokens(2);
-                r.cost.modifiers.push(EventOrigin::Incident(DIPLOMAT_ID));
-            }
-        }
-    }
-}
-
-fn add_negotiations(player: &Player, game: &Game, base: &mut Vec<MoveRoute>) {
-    if let Some(partner) = negotiations_partner(game, player.index) {
-        let partner = game.player(partner);
-        base.retain(|r| partner.get_units(r.destination).is_empty());
-    }
-}
-
-#[must_use]
-fn reachable_with_roads(
-    player: &Player,
-    units: &[u32],
-    game: &Game,
-    stack_size: usize,
-) -> Vec<MoveRoute> {
-    let start = units.iter().find_map(|&id| {
-        let unit = player.get_unit(id);
-        if unit.unit_type.is_land_based() {
-            Some(unit.position)
-        } else {
-            None
-        }
-    });
-
-    if let Some(start) = start {
-        let map = &game.map;
-        if map.is_sea(start) {
-            // not for disembarking
-            return vec![];
-        }
-
-        let roman_roads = player.has_special_advance(SpecialAdvance::RomanRoads);
-        let mut routes: Vec<MoveRoute> = next_road_step(player, game, start, stack_size)
-            .into_iter()
-            .flat_map(|middle| next_road_step(player, game, middle, stack_size))
-            .unique()
-            .filter_map(|destination| {
-                road_route(
-                    player,
-                    start,
-                    destination,
-                    roman_roads,
-                    vec![EventOrigin::Advance(Advance::Roads)],
-                )
-            })
-            .collect();
-
-        if roman_roads {
-            routes.extend(roman_roads_routes(player, game, start, stack_size));
-        }
-
-        return routes;
-    }
-    vec![]
-}
-
-const ROMAN_ROADS_LENGTH: u8 = 4;
-
-fn roman_roads_routes(
-    player: &Player,
-    game: &Game,
-    start: Position,
-    stack_size: usize,
-) -> Vec<MoveRoute> {
-    if game.try_get_any_city(start).is_none() {
-        return vec![];
-    }
-
-    player
-        .cities
-        .iter()
-        .filter_map(|city| {
-            let distance = city.position.distance(start) as u8;
-            if distance > ROMAN_ROADS_LENGTH {
-                return None;
-            }
-            let dst = city.position;
-
-            let len = astar(
-                &start,
-                |p| {
-                    next_road_step(player, game, *p, stack_size)
-                        .iter()
-                        .map(|&n| (n, 1))
-                        .collect_vec()
-                },
-                |p| p.distance(dst),
-                |&p| p == dst,
-            )
-            .map_or(u8::MAX, |(_path, len)| len as u8);
-            if len > ROMAN_ROADS_LENGTH {
-                return None;
-            }
-            road_route(
-                player,
-                start,
-                dst,
-                false,
-                vec![
-                    EventOrigin::Advance(Advance::Roads),
-                    EventOrigin::SpecialAdvance(SpecialAdvance::RomanRoads),
-                ],
-            )
-        })
-        .collect()
-}
-
-fn road_route(
-    player: &Player,
-    start: Position,
-    destination: Position,
-    ignore_city_to_city: bool,
-    modifiers: Vec<EventOrigin>,
-) -> Option<MoveRoute> {
-    if destination.distance(start) <= 1 {
-        // can go directly without using roads
-        return None;
-    }
-
-    // but can stop on enemy units
-
-    let from_city = player.try_get_city(start).is_some();
-    let to_city = player.try_get_city(destination).is_some();
-    if !from_city && !to_city {
-        return None;
-    }
-    if from_city && to_city && ignore_city_to_city {
-        return None;
-    }
-
-    let mut cost = PaymentOptions::resources(
-        player,
-        PaymentReason::Move,
-        ResourcePile::ore(1) + ResourcePile::food(1),
-    );
-    cost.modifiers = modifiers;
-    Some(MoveRoute {
-        destination,
-        cost,
-        ignore_terrain_movement_restrictions: true,
-    })
-}
-
-fn next_road_step(
-    player: &Player,
-    game: &Game,
-    from: Position,
-    stack_size: usize,
-) -> Vec<Position> {
-    // don't move over enemy units or cities
-    from.neighbors()
-        .into_iter()
-        .filter(|to| {
-            let on_target = player
-                .get_units(*to)
-                .iter()
-                .filter(|unit| unit.unit_type.is_army_unit())
-                .count();
-            game.map.is_land(*to)
-                && game.enemy_player(player.index, *to).is_none()
-                && on_target + stack_size <= STACK_LIMIT
-        })
-        .collect_vec()
-}
-
-#[must_use]
-fn reachable_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<MoveRoute> {
-    if !player.can_use_advance(Advance::Navigation) {
-        return vec![];
-    }
-    let ship = units.iter().find_map(|&id| {
-        let unit = player.get_unit(id);
-        if unit.unit_type.is_ship() {
-            Some(unit.position)
-        } else {
-            None
-        }
-    });
-    if let Some(ship) = ship {
-        let start = ship.neighbors().into_iter().find(|n| map.is_outside(*n));
-        if let Some(start) = start {
-            let mut perimeter = vec![ship];
-
-            add_perimeter(map, start, &mut perimeter);
-            let can_navigate =
-                |p: &Position| *p != ship && (map.is_sea(*p) || map.is_unexplored(*p));
-            let first = perimeter.iter().copied().find(can_navigate);
-            let last = perimeter.iter().copied().rfind(can_navigate);
-
-            return vec![first, last]
-                .into_iter()
-                .flatten()
-                .map(|destination| {
-                    MoveRoute::free(destination, vec![EventOrigin::Advance(Advance::Navigation)])
-                })
-                .collect();
-        }
-    }
-    vec![]
-}
-
-fn add_perimeter(map: &Map, start: Position, perimeter: &mut Vec<Position>) {
-    if perimeter.contains(&start) {
-        return;
-    }
-    perimeter.push(start);
-
-    let option = &start
-        .neighbors()
-        .into_iter()
-        .filter(|n| {
-            !perimeter.contains(n)
-                && (map.is_inside(*n) && n.neighbors().iter().any(|n| map.is_outside(*n)))
-        })
-        // take with most outside neighbors first
-        .sorted_by_key(|n| n.neighbors().iter().filter(|n| map.is_inside(**n)).count())
-        .next();
-
-    if let Some(n) = option {
-        add_perimeter(map, *n, perimeter);
-    }
-}
-
-pub(crate) fn terrain_movement_restriction(
+fn terrain_movement_restriction(
     map: &Map,
     destination: Position,
     unit: &Unit,
@@ -694,26 +583,18 @@ pub(crate) fn terrain_movement_restriction(
     }
 }
 
-pub(crate) fn has_movable_units(game: &Game, player: &Player) -> bool {
+fn has_movable_units(game: &Game, player: &Player) -> bool {
     player.units.iter().any(|unit| {
-        let result =
-            possible_move_units_destinations(player, game, &[unit.id], unit.position, None);
+        let result = possible_move_routes(player, game, &[unit.id], unit.position, None);
         result.is_ok_and(|r| !r.is_empty()) || can_embark(game, player, unit)
     })
 }
 
 #[must_use]
-pub fn can_embark(game: &Game, player: &Player, unit: &Unit) -> bool {
+fn can_embark(game: &Game, player: &Player, unit: &Unit) -> bool {
     unit.unit_type.is_land_based()
         && player.units.iter().any(|u| {
             u.unit_type.is_ship()
-                && possible_move_units_destinations(
-                    player,
-                    game,
-                    &[unit.id],
-                    u.position,
-                    Some(u.id),
-                )
-                .is_ok()
+                && possible_move_routes(player, game, &[unit.id], u.position, Some(u.id)).is_ok()
         })
 }

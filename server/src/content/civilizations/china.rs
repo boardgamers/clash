@@ -1,12 +1,20 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Advance;
 use crate::civilization::Civilization;
+use crate::combat_listeners::CombatRoundEnd;
+use crate::content::persistent_events::PaymentRequest;
+use crate::game::{Game, GameState};
 use crate::map::Terrain;
+use crate::movement::{MoveState, possible_move_destinations};
+use crate::payment::{PaymentOptions, PaymentReason};
+use crate::player::Player;
+use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
+use itertools::Itertools;
 
 pub(crate) fn china() -> Civilization {
-    Civilization::new("China", vec![rice()], vec![])
+    Civilization::new("China", vec![rice(), expansion(), fireworks()], vec![])
 }
 
 fn rice() -> SpecialAdvanceInfo {
@@ -44,4 +52,112 @@ fn rice() -> SpecialAdvanceInfo {
         },
     )
     .build()
+}
+
+fn expansion() -> SpecialAdvanceInfo {
+    SpecialAdvanceInfo::builder(
+        SpecialAdvance::Expansion,
+        SpecialAdvanceRequirement::Advance(Advance::Husbandry),
+        "Expansion",
+        "When you recruited at least 1 settler: Every settler in your cities gains one move",
+    )
+    .add_simple_persistent_event_listener(
+        |event| &mut event.recruit,
+        10,
+        |game, player_index, _player_name, r| {
+            if r.units.settlers == 0 {
+                return;
+            }
+
+            let p = game.player(player_index);
+            let settlers = movable_settlers(game, p);
+            if settlers.is_empty() {
+                return;
+            }
+            let moved_units = p
+                .units
+                .iter()
+                .filter(|u| !u.unit_type.is_settler())
+                .map(|u| u.id)
+                .collect_vec();
+
+            game.state = GameState::Movement(MoveState {
+                moved_units,
+                movement_actions_left: settlers.len() as u32,
+                ..MoveState::default()
+            });
+
+            game.add_info_log_item(&format!(
+                "Expansion allows to move the settlers at {}",
+                settlers.iter().map(ToString::to_string).join(", ")
+            ));
+        },
+    )
+    .build()
+}
+
+fn movable_settlers(game: &Game, player: &Player) -> Vec<Position> {
+    player
+        .units
+        .iter()
+        .filter(|u| {
+            player.try_get_city(u.position).is_some()
+                && !possible_move_destinations(game, player.index, &[u.id], u.position)
+                    .list
+                    .is_empty()
+        })
+        .map(|u| u.position)
+        .collect_vec()
+}
+
+fn fireworks() -> SpecialAdvanceInfo {
+    SpecialAdvanceInfo::builder(
+        SpecialAdvance::Fireworks,
+        SpecialAdvanceRequirement::Advance(Advance::Metallurgy),
+        "Fireworks",
+        "In the first round of combat, you may pay 1 ore and 1 wood to ignore the first hit.",
+    )
+    .add_payment_request_listener(
+        |e| &mut e.combat_round_end,
+        91,
+        |game, player_index, e| {
+            let player = &game.player(player_index);
+
+            let cost = PaymentOptions::resources(
+                player,
+                PaymentReason::AdvanceAbility,
+                ResourcePile::wood(1) + ResourcePile::ore(1),
+            );
+
+            if !apply_fireworks(e, player_index, false) {
+                game.add_info_log_item("Fireworks won't reduce the hits, no payment made.");
+                return None;
+            }
+
+            if !player.can_afford(&cost) {
+                game.add_info_log_item("Fireworks: Not enough resources, no payment made.");
+                return None;
+            }
+
+            Some(vec![PaymentRequest::optional(cost, "Ignore 1 hit")])
+        },
+        |game, s, e| {
+            let pile = &s.choice[0];
+            if pile.is_empty() {
+                game.add_info_log_item("Fireworks: No payment made, first hit not ignored.");
+            } else {
+                game.add_info_log_item(
+                    &format!("Fireworks: Paid {pile} to ignore the first hit.",),
+                );
+                apply_fireworks(e, s.player_index, true);
+            }
+        },
+    )
+    .build()
+}
+
+fn apply_fireworks(e: &mut CombatRoundEnd, p: usize, do_update: bool) -> bool {
+    e.update_hits(e.combat.opponent_role(p), do_update, |h| {
+        h.opponent_hit_cancels += 1;
+    })
 }
