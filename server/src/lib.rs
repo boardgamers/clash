@@ -50,6 +50,7 @@ pub mod incident;
 pub mod leader;
 pub mod log;
 pub mod map;
+mod move_routes;
 pub mod movement;
 pub mod objective_card;
 pub mod payment;
