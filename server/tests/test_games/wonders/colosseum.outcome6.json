@@ -271,7 +271,7 @@
                     {
                       "op": "replace",
                       "path": "/events/0/event_type/CombatRoundEnd/attacker/combat_value",
-                      "value": 9
+                      "value": 10
                     },
                     {
                       "op": "remove",
@@ -374,7 +374,7 @@
                           "event_type": {
                             "CombatRoundEnd": {
                               "attacker": {
-                                "combat_value": 10,
+                                "combat_value": 11,
                                 "opponent_fighters": 2
                               },
                               "combat": {

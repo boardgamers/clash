@@ -158,6 +158,6 @@ fn fireworks() -> SpecialAdvanceInfo {
 
 fn apply_fireworks(e: &mut CombatRoundEnd, p: usize, do_update: bool) -> bool {
     e.update_hits(e.combat.opponent_role(p), do_update, |h| {
-        h.opponent_hit_cancels += 1
+        h.opponent_hit_cancels += 1;
     })
 }

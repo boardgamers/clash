@@ -1,7 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::do_gain_action_card_from_pile;
-use crate::advance::{init_great_library, Advance};
-use crate::card::{all_objective_hand_cards, HandCard};
+use crate::advance::{Advance, init_great_library};
+use crate::card::{HandCard, all_objective_hand_cards};
 use crate::city::{City, MoodState};
 use crate::combat_listeners::CombatRoundEnd;
 use crate::content::builtin::Builtin;
@@ -16,7 +16,7 @@ use crate::map::Terrain;
 use crate::map::Terrain::Fertile;
 use crate::objective_card::{discard_objective_card, gain_objective_card_from_pile};
 use crate::payment::{PaymentOptions, PaymentReason};
-use crate::player::{gain_unit, Player};
+use crate::player::{Player, gain_unit};
 use crate::position::Position;
 use crate::tactics_card::CombatRole;
 use crate::unit::UnitType;
@@ -400,7 +400,7 @@ fn colosseum() -> WonderInfo {
                 game.add_info_log_item(&format!(
                     "{name} paid {pile} to increase the combat value by 1, scoring an extra hit",
                 ));
-                apply_colosseum(e, s.player_index, false);
+                apply_colosseum(e, s.player_index, true);
             }
         },
     )
