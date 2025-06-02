@@ -3,7 +3,7 @@ use crate::action::Action;
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city::MoodState;
 use crate::content::advances::{AdvanceGroup, advance_group_builder};
-use crate::content::builtin::Builtin;
+use crate::content::custom_actions::CustomActionType;
 use crate::content::custom_actions::CustomActionType::{
     CivilLiberties, FreeEconomyCollect, VotingIncreaseHappiness,
 };
@@ -30,7 +30,11 @@ fn voting() -> AdvanceBuilder {
         "Voting",
         "As a free action, you may spend 1 mood token to use 'Increase happiness'",
     )
-    .add_custom_action(VotingIncreaseHappiness)
+    .add_action_modifier(
+        VotingIncreaseHappiness,
+        |_| CustomActionType::cost(ResourcePile::mood_tokens(1)),
+        PlayingActionType::IncreaseHappiness,
+    )
 }
 
 fn separation_of_power() -> AdvanceBuilder {
@@ -52,29 +56,32 @@ fn separation_of_power() -> AdvanceBuilder {
     )
 }
 
-const CIVIL_LIBERTIES: &str = "As an action, you may gain 3 mood tokens. \
-        The cost of Draft is increased to 2 mood token";
-
 fn civil_liberties() -> AdvanceBuilder {
-    AdvanceInfo::builder(Advance::CivilLiberties, "Civil Liberties", CIVIL_LIBERTIES)
-        .add_custom_action(CivilLiberties)
-}
-
-pub(crate) fn use_civil_liberties() -> Builtin {
-    Builtin::builder("Civil Liberties", CIVIL_LIBERTIES)
-        .add_simple_persistent_event_listener(
-            |event| &mut event.custom_action,
-            0,
-            |game, player_index, _, _| {
-                gain_resources(
-                    game,
-                    player_index,
-                    ResourcePile::mood_tokens(3),
-                    |name, pile| format!("{name} used Civil Liberties to gain {pile}",),
-                );
-            },
-        )
-        .build()
+    AdvanceInfo::builder(
+        Advance::CivilLiberties,
+        "Civil Liberties",
+        "As an action, you may gain 3 mood tokens. \
+            The cost of Draft is increased to 2 mood token",
+    )
+    .add_custom_action(
+        CivilLiberties,
+        |_| CustomActionType::regular(),
+        |b| {
+            b.add_simple_persistent_event_listener(
+                |event| &mut event.custom_action,
+                0,
+                |game, player_index, _, _| {
+                    gain_resources(
+                        game,
+                        player_index,
+                        ResourcePile::mood_tokens(3),
+                        |name, pile| format!("{name} used Civil Liberties to gain {pile}",),
+                    );
+                },
+            )
+        },
+        |_, _| true,
+    )
 }
 
 fn free_economy() -> AdvanceBuilder {
@@ -84,7 +91,11 @@ fn free_economy() -> AdvanceBuilder {
         "As a free action, you may spend 1 mood token to collect \
             resources in one city. This must be your only collect action this turn",
     )
-    .add_custom_action(FreeEconomyCollect)
+    .add_action_modifier(
+        FreeEconomyCollect,
+        |a| a.free_and_once_per_turn(ResourcePile::mood_tokens(1)),
+        PlayingActionType::Collect,
+    )
     .add_transient_event_listener(
         |event| &mut event.is_playing_action_available,
         0,

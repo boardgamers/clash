@@ -296,7 +296,7 @@
                           },
                           "handler": {
                             "origin": {
-                              "Builtin": "Sports"
+                              "Ability": "Sports"
                             },
                             "priority": 0,
                             "request": {

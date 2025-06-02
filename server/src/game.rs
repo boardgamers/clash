@@ -1,12 +1,13 @@
 use crate::cache::Cache;
 use crate::combat_roll::{COMBAT_DIE_SIDES, CombatDieRoll};
 use crate::consts::ACTIONS;
+use crate::content::custom_actions::{CustomActionCommand, CustomActionExecution};
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{
     PersistentEventHandler, PersistentEventState, PersistentEventType,
     TriggerPersistentEventParams, trigger_persistent_event_ext,
 };
-use crate::events::{Event, EventOrigin};
+use crate::events::Event;
 use crate::game_data::GameData;
 use crate::log::{
     ActionLogAge, ActionLogPlayer, ActionLogRound, current_player_turn_log,
@@ -22,10 +23,7 @@ use crate::resource::check_for_waste;
 use crate::status_phase::enter_status_phase;
 use crate::utils::Rng;
 use crate::wonder::Wonder;
-use crate::{
-    city::City, content::custom_actions::CustomActionType, game_data, map::Map, player::Player,
-    position::Position,
-};
+use crate::{city::City, game_data, map::Map, player::Player, position::Position};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::vec;
@@ -495,23 +493,23 @@ impl Game {
     }
 
     #[must_use]
-    pub fn available_custom_actions(
-        &self,
-        player_index: usize,
-    ) -> Vec<(CustomActionType, EventOrigin)> {
+    pub fn available_custom_actions(&self, player_index: usize) -> Vec<CustomActionCommand> {
         self.player(self.current_player_index)
             .custom_actions
-            .clone()
-            .into_iter()
-            .filter(|(t, _)| {
-                if t.is_modifier() {
+            .values()
+            .filter(|&c| {
+                if matches!(c.execution, CustomActionExecution::Modifier(_)) {
                     // returned as part of "base_or_custom_available"
                     return false;
                 }
 
-                t.is_available(self, player_index)
+                c.action
+                    .playing_action_type()
+                    .is_available(self, player_index)
+                    .is_ok()
             })
-            .collect()
+            .cloned()
+            .collect_vec()
     }
 
     ///

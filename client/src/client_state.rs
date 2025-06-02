@@ -143,7 +143,10 @@ impl ActiveDialog {
                     let v = vec!["Click on a building to influence its culture".to_string()];
                     if let PlayingActionType::Custom(c) = &b.action_type {
                         let mut r = v.clone();
-                        r.extend(event_help(rc, &rc.shown_player.custom_action_origin(c)));
+                        r.extend(event_help(
+                            rc,
+                            &rc.shown_player.custom_action_command(*c).event_origin,
+                        ));
                     }
                     v
                 } else {

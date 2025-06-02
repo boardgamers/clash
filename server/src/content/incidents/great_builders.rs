@@ -2,7 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
 use crate::card::HandCard;
 use crate::construct::available_buildings;
-use crate::content::builtin::Builtin;
+use crate::content::ability::Ability;
 use crate::content::effects::ConstructEffect;
 use crate::content::effects::PermanentEffect::Construct;
 use crate::content::incidents::great_persons::{
@@ -58,8 +58,8 @@ pub(crate) fn can_construct_anything(game: &Game, p: &Player) -> bool {
             .any(|city| !available_buildings(game, p.index, city.position).is_empty())
 }
 
-pub(crate) fn construct_only() -> Builtin {
-    Builtin::builder("construct only", "-")
+pub(crate) fn construct_only() -> Ability {
+    Ability::builder("construct only", "-")
         .add_transient_event_listener(
             |event| &mut event.is_playing_action_available,
             2,

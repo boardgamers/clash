@@ -1,8 +1,8 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{ActionCard, ActionCardInfo, on_play_action_card};
 use crate::barbarians::get_barbarians_player;
-use crate::content::builtin::Builtin;
-use crate::content::custom_actions::influence_modifiers;
+use crate::content::ability::Ability;
+use crate::content::custom_actions::is_base_or_modifier;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{SelectedStructure, Structure, UnitTypeRequest};
 use crate::content::tactics_cards::TacticsCardFactory;
@@ -11,7 +11,6 @@ use crate::cultural_influence::{
 };
 use crate::game::Game;
 use crate::player::{Player, gain_unit, remove_unit};
-use crate::player_events::PlayingActionInfo;
 use crate::playing_actions::{ActionCost, PlayingActionType};
 use crate::unit::UnitType;
 use crate::utils::remove_element;
@@ -117,16 +116,21 @@ fn any_barbarian_city_can_be_influenced(game: &Game, p: &Player) -> bool {
     })
 }
 
-pub(crate) fn use_cultural_takeover() -> Builtin {
-    Builtin::builder("cultural_takeover", "-")
+pub(crate) fn use_cultural_takeover() -> Ability {
+    Ability::builder("cultural_takeover", "-")
         .add_transient_event_listener(
             |event| &mut event.is_playing_action_available,
             3,
             |available, game, i| {
+                let p = game.player(i.player);
                 if game
                     .permanent_effects
                     .contains(&PermanentEffect::CulturalTakeover)
-                    && !is_influence(i)
+                    && !is_base_or_modifier(
+                        &i.action_type,
+                        p,
+                        &PlayingActionType::InfluenceCultureAttempt,
+                    )
                 {
                     *available =
                         Err("Cultural Takeover: You may only influence culture.".to_string());
@@ -172,12 +176,4 @@ fn is_barbarian_takeover(game: &Game, c: &InfluenceCultureInfo) -> bool {
         && game
             .permanent_effects
             .contains(&PermanentEffect::CulturalTakeover)
-}
-
-fn is_influence(i: &PlayingActionInfo) -> bool {
-    match &i.action_type {
-        PlayingActionType::InfluenceCultureAttempt => true,
-        PlayingActionType::Custom(i) if influence_modifiers().contains(i) => true,
-        _ => false,
-    }
 }

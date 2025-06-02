@@ -447,7 +447,7 @@
                           },
                           "handler": {
                             "origin": {
-                              "Builtin": "Select Objective Cards to Complete"
+                              "Ability": "Select Objective Cards to Complete"
                             },
                             "priority": 0,
                             "request": {

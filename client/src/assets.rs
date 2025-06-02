@@ -344,6 +344,10 @@ impl Assets {
                 CustomActionType::Master,
                 load_png(include_bytes!("../assets/greek-pillar-svgrepo-com.png")),
             ),
+            (
+                CustomActionType::ImperialArmy,
+                load_png(include_bytes!("../assets/farmer-farm-svgrepo-com.png")),
+            ),
         ]
         .iter()
         .cloned()

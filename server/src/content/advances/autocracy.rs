@@ -1,10 +1,12 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
+use crate::city::MoodState;
 use crate::content::advances::{AdvanceGroup, advance_group_builder};
-use crate::content::builtin::Builtin;
 use crate::content::custom_actions::CustomActionType::{AbsolutePower, ForcedLabor};
 use crate::content::persistent_events::ResourceRewardRequest;
 use crate::payment::ResourceReward;
+use crate::player::Player;
+use crate::resource_pile::ResourcePile;
 
 pub(crate) fn autocracy() -> AdvanceGroup {
     advance_group_builder(
@@ -73,48 +75,60 @@ fn totalitarianism() -> AdvanceBuilder {
     )
 }
 
-const ABSOLUTE_POWER: &str =
-    "Once per turn, as a free action, you may spend 2 mood tokens to get an additional action";
-
 fn absolute_power() -> AdvanceBuilder {
-    AdvanceInfo::builder(Advance::AbsolutePower, "Absolute Power", ABSOLUTE_POWER)
-        .add_custom_action(AbsolutePower)
+    AdvanceInfo::builder(
+        Advance::AbsolutePower,
+        "Absolute Power",
+        "Once per turn, as a free action, you may spend 2 mood tokens to get an additional action",
+    )
+    .add_custom_action(
+        AbsolutePower,
+        |a| a.free_and_once_per_turn(ResourcePile::mood_tokens(2)),
+        |b| {
+            b.add_simple_persistent_event_listener(
+                |event| &mut event.custom_action,
+                0,
+                |game, _, player_name, _| {
+                    game.actions_left += 1;
+                    game.add_info_log_item(&format!(
+                        "{player_name} got an extra action using Absolute Power",
+                    ));
+                },
+            )
+        },
+        |_, _| true,
+    )
 }
-
-pub(crate) fn use_absolute_power() -> Builtin {
-    Builtin::builder("Absolute Power", ABSOLUTE_POWER)
-        .add_simple_persistent_event_listener(
-            |event| &mut event.custom_action,
-            0,
-            |game, _, player_name, _| {
-                game.actions_left += 1;
-                game.add_info_log_item(&format!(
-                    "{player_name} got an extra action using Absolute Power",
-                ));
-            },
-        )
-        .build()
-}
-
-const FORCED_LABOR: &str = "Once per turn, as a free action, \
-    you may spend 1 mood token to treat your Angry cities as neutral for the rest of the turn";
 
 fn forced_labor() -> AdvanceBuilder {
-    AdvanceInfo::builder(Advance::ForcedLabor, "Forced Labor", FORCED_LABOR)
-        .add_custom_action(ForcedLabor)
+    AdvanceInfo::builder(
+        Advance::ForcedLabor,
+        "Forced Labor",
+        "Once per turn, as a free action, \
+        you may spend 1 mood token to treat your Angry cities as neutral for the rest of the turn",
+    )
+    .add_custom_action(
+        ForcedLabor,
+        |a| a.free_and_once_per_turn(ResourcePile::mood_tokens(1)),
+        |b| {
+            b.add_simple_persistent_event_listener(
+                |event| &mut event.custom_action,
+                0,
+                |game, _, player_name, _| {
+                    // we check that the action was played
+                    game.add_info_log_item(&format!(
+                        "{player_name} paid 1 mood token to treat Angry cities as neutral"
+                    ));
+                },
+            )
+        },
+        |_game, player| any_angry(player),
+    )
 }
 
-pub(crate) fn use_forced_labor() -> Builtin {
-    Builtin::builder("Forced Labor", FORCED_LABOR)
-        .add_simple_persistent_event_listener(
-            |event| &mut event.custom_action,
-            0,
-            |game, _, player_name, _| {
-                // we check that the action was played
-                game.add_info_log_item(&format!(
-                    "{player_name} paid 1 mood token to treat Angry cities as neutral"
-                ));
-            },
-        )
-        .build()
+fn any_angry(player: &Player) -> bool {
+    player
+        .cities
+        .iter()
+        .any(|city| city.mood_state == MoodState::Angry)
 }

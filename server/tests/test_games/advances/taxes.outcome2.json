@@ -325,7 +325,7 @@
                     },
                     {
                       "op": "replace",
-                      "path": "/events/0/handler/origin/Builtin",
+                      "path": "/events/0/handler/origin/Ability",
                       "value": "Pay for action card"
                     },
                     {
@@ -410,7 +410,7 @@
                           },
                           "handler": {
                             "origin": {
-                              "Builtin": "Taxes"
+                              "Ability": "Taxes"
                             },
                             "priority": 0,
                             "request": {

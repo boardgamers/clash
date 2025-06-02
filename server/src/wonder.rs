@@ -4,7 +4,7 @@ use crate::card::draw_card_from_pile;
 use crate::city::{City, MoodState};
 use crate::construct::can_construct_anything;
 use crate::consts::WONDER_VICTORY_POINTS;
-use crate::content::builtin::Builtin;
+use crate::content::ability::Ability;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{PaymentRequest, PersistentEventType, PositionRequest};
 use crate::events::EventOrigin;
@@ -151,6 +151,14 @@ impl AbilityInitializerSetup for WonderBuilder {
     fn get_key(&self) -> EventOrigin {
         EventOrigin::Wonder(self.wonder)
     }
+
+    fn name(&self) -> String {
+        self.name.clone()
+    }
+
+    fn description(&self) -> String {
+        self.description.clone()
+    }
 }
 
 pub(crate) fn draw_wonder_card(game: &mut Game, player_index: usize) {
@@ -176,8 +184,8 @@ fn gain_wonder(game: &mut Game, player_index: usize, wonder: Wonder) {
     game.players[player_index].wonder_cards.push(wonder);
 }
 
-pub(crate) fn on_draw_wonder_card() -> Builtin {
-    Builtin::builder("Draw Wonder Card", "Draw a wonder card")
+pub(crate) fn on_draw_wonder_card() -> Ability {
+    Ability::builder("Draw Wonder Card", "Draw a wonder card")
         .add_bool_request(
             |e| &mut e.draw_wonder_card,
             0,
@@ -324,8 +332,8 @@ impl Default for WonderDiscount {
     }
 }
 
-pub(crate) fn build_wonder() -> Builtin {
-    Builtin::builder("Build Wonder", "Build a wonder")
+pub(crate) fn build_wonder() -> Ability {
+    Ability::builder("Build Wonder", "Build a wonder")
         .add_position_request(
             |e| &mut e.play_wonder_card,
             11,

@@ -1,5 +1,4 @@
 use crate::advance::Advance;
-use crate::content::custom_actions::collect_modifiers;
 use crate::content::persistent_events::PersistentEventType;
 use crate::events::EventOrigin;
 use crate::game::Game;
@@ -318,10 +317,5 @@ pub fn available_collect_actions_for_city(
 
 #[must_use]
 pub fn available_collect_actions(game: &Game, player: usize) -> Vec<PlayingActionType> {
-    base_or_custom_available(
-        game,
-        player,
-        PlayingActionType::Collect,
-        collect_modifiers(),
-    )
+    base_or_custom_available(game, player, &PlayingActionType::Collect)
 }

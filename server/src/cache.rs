@@ -2,16 +2,17 @@ use crate::action_card::{ActionCard, CivilCard};
 use crate::advance::{Advance, AdvanceInfo};
 use crate::city_pieces::Building;
 use crate::civilization::Civilization;
+use crate::content::ability::Ability;
 use crate::content::advances::AdvanceGroup;
-use crate::content::builtin::Builtin;
-use crate::content::custom_actions::custom_action_builtins;
+use crate::content::custom_actions::CustomActionExecution;
 use crate::content::{
-    action_cards, advances, builtin, civilizations, incidents, objective_cards, objectives, wonders,
+    ability, action_cards, advances, civilizations, incidents, objective_cards, objectives, wonders,
 };
 use crate::game::Game;
 use crate::incident::Incident;
 use crate::leader::{Leader, LeaderInfo};
 use crate::objective_card::{Objective, ObjectiveCard};
+use crate::player::Player;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo};
 use crate::status_phase::StatusPhaseState::{ChangeGovernmentType, DetermineFirstPlayer};
 use crate::status_phase::{
@@ -25,9 +26,9 @@ use std::collections::HashMap;
 
 #[derive(Clone)]
 pub struct Cache {
-    all_builtins: Vec<Builtin>,
-    builtins_by_name: HashMap<String, Builtin>,
-    status_phase_handlers: HashMap<StatusPhaseState, Builtin>,
+    all_abilities: Vec<Ability>,
+    abilities_by_name: HashMap<String, Ability>,
+    status_phase_handlers: HashMap<StatusPhaseState, Ability>,
 
     all_advance_groups: Vec<AdvanceGroup>,
     advance_groups_by_name: HashMap<String, AdvanceGroup>,
@@ -64,15 +65,10 @@ impl Cache {
     #[must_use]
     pub fn new() -> Self {
         Cache {
-            all_builtins: builtin::get_all_uncached(),
-            builtins_by_name: builtin::get_all_uncached()
+            all_abilities: ability::get_all_uncached(),
+            abilities_by_name: ability::get_all_uncached()
                 .into_iter()
-                .map(|builtin| (builtin.name.clone(), builtin))
-                .chain(
-                    custom_action_builtins()
-                        .into_values()
-                        .map(|builtin| (builtin.name.clone(), builtin)),
-                )
+                .map(|a| (a.name.clone(), a))
                 .collect(),
             status_phase_handlers: status_phase_handlers(),
 
@@ -207,29 +203,40 @@ impl Cache {
     }
 
     #[must_use]
-    pub fn get_builtins(&self) -> &Vec<Builtin> {
-        &self.all_builtins
+    pub fn get_ability(&self) -> &Vec<Ability> {
+        &self.all_abilities
     }
 
     ///
     /// # Panics
     ///
-    /// Panics if builtin does not exist
+    /// Panics if ability does not exist
     #[must_use]
-    pub fn get_builtin(&self, name: &str, game: &Game) -> &Builtin {
-        self.builtins_by_name
+    pub fn get_ability_description(&self, name: &str, game: &Game, player: &Player) -> String {
+        self.abilities_by_name
             .get(name)
-            .or_else(|| {
-                if let Some(p) = get_status_phase(game) {
-                    return Some(self.status_phase_handler(p));
-                }
-                None
-            })
-            .unwrap_or_else(|| panic!("builtin not found: {name}"))
+            .map_or_else(
+                || {
+                    for c in player.custom_actions.values() {
+                        if let CustomActionExecution::Action(e) = &c.execution {
+                            if e.execution.name == name {
+                                return Some(e.execution.description.clone());
+                            }
+                        }
+                    }
+
+                    if let Some(p) = get_status_phase(game) {
+                        return Some(self.status_phase_handler(p).description.clone());
+                    }
+                    None
+                },
+                |a| Some(a.description.clone()),
+            )
+            .unwrap_or_else(|| panic!("ability not found: {name}"))
     }
 
     #[must_use]
-    pub fn status_phase_handler(&self, p: &StatusPhaseState) -> &Builtin {
+    pub fn status_phase_handler(&self, p: &StatusPhaseState) -> &Ability {
         match p {
             DetermineFirstPlayer(_) => &self.status_phase_handlers[&DetermineFirstPlayer(0)],
             ChangeGovernmentType(_) => &self.status_phase_handlers[&ChangeGovernmentType(false)],
@@ -351,7 +358,7 @@ impl Cache {
     }
 }
 
-fn status_phase_handlers() -> HashMap<StatusPhaseState, Builtin> {
+fn status_phase_handlers() -> HashMap<StatusPhaseState, Ability> {
     use StatusPhaseState::*;
 
     HashMap::from([

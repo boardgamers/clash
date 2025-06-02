@@ -54,7 +54,7 @@
           "BoolRequest": "Do you want to retreat?"
         },
         "origin": {
-          "Builtin": "Offer Retreat"
+          "Ability": "Offer Retreat"
         }
       }
     }

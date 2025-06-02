@@ -2,7 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::combat::{Combat, CombatRetreatState, capture_position, log_round};
 use crate::combat_roll::CombatHits;
 use crate::combat_stats::CombatStats;
-use crate::content::builtin::Builtin;
+use crate::content::ability::Ability;
 use crate::content::persistent_events::{PersistentEventType, PositionRequest, UnitsRequest};
 use crate::game::Game;
 use crate::log::current_action_log_item;
@@ -512,8 +512,8 @@ fn add_tactics_listener(
     }
 }
 
-pub(crate) fn choose_fighter_casualties() -> Builtin {
-    Builtin::builder("Choose Casualties", "Choose which carried units to remove.")
+pub(crate) fn choose_fighter_casualties() -> Ability {
+    Ability::builder("Choose Casualties", "Choose which carried units to remove.")
         .add_units_request(
             |event| &mut event.combat_round_end,
             1,
@@ -569,8 +569,8 @@ pub(crate) fn choose_fighter_casualties() -> Builtin {
         .build()
 }
 
-pub(crate) fn offer_retreat() -> Builtin {
-    Builtin::builder("Offer Retreat", "Do you want to retreat?")
+pub(crate) fn offer_retreat() -> Ability {
+    Ability::builder("Offer Retreat", "Do you want to retreat?")
         .add_bool_request(
             |event| &mut event.combat_round_end,
             0,
@@ -599,8 +599,8 @@ pub(crate) fn offer_retreat() -> Builtin {
         .build()
 }
 
-pub(crate) fn place_settler() -> Builtin {
-    Builtin::builder(
+pub(crate) fn place_settler() -> Ability {
+    Ability::builder(
         "Place Settler",
         "After losing a city, place a settler in another city.",
     )

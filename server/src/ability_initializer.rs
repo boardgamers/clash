@@ -2,13 +2,19 @@ use crate::advance::Advance;
 use crate::card::{HandCard, validate_card_selection_for_origin};
 use crate::combat::{Combat, update_combat_strength};
 use crate::combat_listeners::CombatStrength;
+use crate::content::ability::{Ability, AbilityBuilder};
+use crate::content::custom_actions::{
+    CustomActionActionExecution, CustomActionCommand, CustomActionExecution, CustomActionInfo,
+};
 use crate::content::persistent_events::{
     AdvanceRequest, EventResponse, HandCardsRequest, MultiRequest, PaymentRequest,
     PersistentEventHandler, PersistentEventRequest, PlayerRequest, PositionRequest,
     ResourceRewardRequest, SelectedStructure, StructuresRequest, UnitTypeRequest, UnitsRequest,
 };
 use crate::events::{Event, EventOrigin};
+use crate::player::Player;
 use crate::player_events::{PersistentEvent, PersistentEvents, TransientEvents};
+use crate::playing_actions::PlayingActionType;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::tactics_card::CombatRole;
@@ -133,6 +139,10 @@ pub(crate) trait AbilityInitializerSetup: Sized {
     fn builder(&mut self) -> &mut AbilityInitializerBuilder;
 
     fn get_key(&self) -> EventOrigin;
+
+    fn name(&self) -> String;
+
+    fn description(&self) -> String;
 
     fn add_ability_initializer<F>(mut self, initializer: F) -> Self
     where
@@ -869,16 +879,54 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         )
     }
 
-    fn add_custom_action(self, action: CustomActionType) -> Self {
+    fn add_custom_action(
+        self,
+        action: CustomActionType,
+        info: impl Fn(CustomActionType) -> CustomActionInfo + Send + Sync + 'static,
+        ability: impl Fn(AbilityBuilder) -> AbilityBuilder + Sync + Send + 'static,
+        can_play: impl Fn(&Game, &Player) -> bool + Sync + Send + 'static,
+    ) -> Self {
+        let name = self.name();
+        let desc = self.description();
+        self.add_custom_action_execution(
+            action,
+            info,
+            CustomActionExecution::Action(CustomActionActionExecution::new(
+                ability(Ability::builder(&name, &desc)).build(),
+                Arc::new(can_play),
+                None,
+            )),
+        )
+    }
+
+    fn add_action_modifier(
+        self,
+        action: CustomActionType,
+        info: impl Fn(CustomActionType) -> CustomActionInfo + Send + Sync + 'static,
+        base_action: PlayingActionType,
+    ) -> Self {
+        self.add_custom_action_execution(action, info, CustomActionExecution::Modifier(base_action))
+    }
+
+    fn add_custom_action_execution(
+        self,
+        action: CustomActionType,
+        info: impl Fn(CustomActionType) -> CustomActionInfo + Send + Sync + 'static,
+        execution: CustomActionExecution,
+    ) -> Self {
         let deinitializer_action = action;
         let key = self.get_key().clone();
+        let exec = execution.clone();
         self.add_ability_initializer(move |game, player_index, _prio_delta| {
-            let player = &mut game.players[player_index];
-            player.custom_actions.insert(action, key.clone());
+            game.player_mut(player_index).custom_actions.insert(
+                action,
+                CustomActionCommand::new(action, exec.clone(), key.clone(), info(action)),
+            );
         })
         .add_ability_deinitializer(move |game, player_index| {
-            let player = &mut game.players[player_index];
-            player.custom_actions.remove(&deinitializer_action);
+            game.player_mut(player_index)
+                .custom_actions
+                .remove(&deinitializer_action);
         })
     }
 }

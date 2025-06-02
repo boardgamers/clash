@@ -144,14 +144,14 @@ pub(crate) fn validate_card_selection_for_origin(
         EventOrigin::CivilCard(id) if *id == 31 || *id == 32 => {
             validate_new_plans(cards, game).map(|()| Vec::new())
         }
-        EventOrigin::Builtin(b) if b == "Select Objective Cards to Complete" => {
+        EventOrigin::Ability(b) if b == "Select Objective Cards to Complete" => {
             let PersistentEventType::SelectObjectives(c) = &game.current_event().event_type else {
                 return Err("no selection handler".to_string());
             };
 
             match_objective_cards(cards, &c.objective_opportunities, game)
         }
-        EventOrigin::Builtin(b) if b == "Princeps" => {
+        EventOrigin::Ability(b) if b == "Princeps" => {
             validate_princeps_cards(cards).map(|()| Vec::new())
         }
         _ => Ok(Vec::new()),

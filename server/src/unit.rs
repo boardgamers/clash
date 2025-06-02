@@ -8,7 +8,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::city::is_valid_city_terrain;
 use crate::combat_roll::COMBAT_DIE_SIDES;
 use crate::consts::SHIP_CAPACITY;
-use crate::content::builtin::Builtin;
+use crate::content::ability::Ability;
 use crate::content::persistent_events::{KilledUnits, PersistentEventType, UnitsRequest};
 use crate::explore::is_any_ship;
 use crate::game::GameState;
@@ -613,8 +613,8 @@ fn save_carried_units(game: &mut Game, player: usize, pos: Position) {
     }
 }
 
-pub(crate) fn choose_carried_units_to_remove() -> Builtin {
-    Builtin::builder(
+pub(crate) fn choose_carried_units_to_remove() -> Ability {
+    Ability::builder(
         "Choose Casualties (carried units)",
         "Choose which carried units to remove.",
     )

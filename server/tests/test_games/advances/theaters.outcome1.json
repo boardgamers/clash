@@ -315,7 +315,7 @@
                           },
                           "handler": {
                             "origin": {
-                              "Builtin": "Theaters"
+                              "Ability": "Theaters"
                             },
                             "priority": 0,
                             "request": {

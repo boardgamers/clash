@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
-use crate::content::builtin::Builtin;
+use crate::content::ability::Ability;
 use crate::content::effects::PermanentEffect;
 use crate::content::incidents::great_persons::{
     GREAT_PERSON_DESCRIPTION, great_person_action_card,
@@ -93,8 +93,8 @@ pub(crate) fn choose_diplomat_partner(b: IncidentBuilder) -> IncidentBuilder {
     )
 }
 
-pub(crate) fn use_diplomatic_relations() -> Builtin {
-    Builtin::builder("Diplomatic Relations", "")
+pub(crate) fn use_diplomatic_relations() -> Ability {
+    Ability::builder("Diplomatic Relations", "")
         .add_simple_persistent_event_listener(
             |e| &mut e.combat_start,
             2,

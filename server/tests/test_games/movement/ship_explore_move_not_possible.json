@@ -40,7 +40,7 @@
         "priority": 0,
         "request": "ExploreResolution",
         "origin": {
-          "Builtin": "Explore Resolution"
+          "Ability": "Explore Resolution"
         }
       }
     }

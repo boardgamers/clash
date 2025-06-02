@@ -254,7 +254,7 @@
                           },
                           "handler": {
                             "origin": {
-                              "Builtin": "Choose Casualties"
+                              "Ability": "Choose Casualties"
                             },
                             "priority": 1,
                             "request": {

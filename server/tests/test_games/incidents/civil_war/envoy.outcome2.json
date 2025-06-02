@@ -310,7 +310,7 @@
                           "event_type": "DrawWonderCard",
                           "handler": {
                             "origin": {
-                              "Builtin": "Draw Wonder Card"
+                              "Ability": "Draw Wonder Card"
                             },
                             "priority": 0,
                             "request": {

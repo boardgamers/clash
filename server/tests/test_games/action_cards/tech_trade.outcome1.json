@@ -240,7 +240,7 @@
                           },
                           "handler": {
                             "origin": {
-                              "Builtin": "Pay for action card"
+                              "Ability": "Pay for action card"
                             },
                             "priority": 0,
                             "request": {

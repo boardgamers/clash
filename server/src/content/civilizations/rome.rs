@@ -1,10 +1,10 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{discard_action_card, gain_action_card_from_pile};
-use crate::advance::{Advance, gain_advance_without_payment};
+use crate::advance::{Advance, base_advance_cost, gain_advance_without_payment};
 use crate::card::{HandCard, all_action_hand_cards, all_objective_hand_cards};
-use crate::city::MoodState;
+use crate::city::{City, MoodState};
 use crate::civilization::Civilization;
-use crate::content::builtin::Builtin;
+use crate::content::ability::AbilityBuilder;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::{HandCardsRequest, PaymentRequest, PositionRequest};
 use crate::game::Game;
@@ -15,6 +15,7 @@ use crate::payment::{
     PaymentConversion, PaymentConversionType, PaymentOptions, PaymentReason, base_resources,
 };
 use crate::player::{can_add_army_unit, gain_resources, gain_unit};
+use crate::playing_actions::PlayingActionType;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
@@ -38,7 +39,12 @@ fn aqueduct() -> SpecialAdvanceInfo {
         "Ignore Famine events. \
                 Sanitation cost is reduced to 0 resources or a free action",
     )
-    .add_custom_action(CustomActionType::Aqueduct)
+    .add_custom_action(
+        CustomActionType::Aqueduct,
+        |_| CustomActionType::free_and_advance_cost_without_discounts(),
+        use_aqueduct,
+        |_game, p| !p.has_advance(Advance::Sanitation) && p.can_afford(&base_advance_cost(p)),
+    )
     .add_transient_event_listener(
         |event| &mut event.advance_cost,
         3,
@@ -54,25 +60,23 @@ fn aqueduct() -> SpecialAdvanceInfo {
     .build()
 }
 
-pub(crate) fn use_aqueduct() -> Builtin {
-    Builtin::builder("Aqueduct", "Gain Sanitation as a free action")
-        .add_simple_persistent_event_listener(
-            |event| &mut event.custom_action,
-            0,
-            |game, player, name, a| {
-                game.add_info_log_item(&format!(
-                    "{name} uses Aqueduct to gain Sanitation as a free action",
-                ));
-                gain_advance_without_payment(
-                    game,
-                    Advance::Sanitation,
-                    player,
-                    a.payment.clone(),
-                    true,
-                );
-            },
-        )
-        .build()
+fn use_aqueduct(b: AbilityBuilder) -> AbilityBuilder {
+    b.add_simple_persistent_event_listener(
+        |event| &mut event.custom_action,
+        0,
+        |game, player, name, a| {
+            game.add_info_log_item(&format!(
+                "{name} uses Aqueduct to gain Sanitation as a free action",
+            ));
+            gain_advance_without_payment(
+                game,
+                Advance::Sanitation,
+                player,
+                a.payment.clone(),
+                true,
+            );
+        },
+    )
 }
 
 fn roman_roads() -> SpecialAdvanceInfo {
@@ -174,9 +178,23 @@ fn augustus() -> LeaderInfo {
     LeaderInfo::new(
         Leader::Augustus,
         "Augustus",
-        LeaderAbility::builder("Princeps", PRINCEPS)
-            .add_custom_action(CustomActionType::Princeps)
-            .build(),
+        LeaderAbility::builder(
+            "Princeps",
+            "As an action, pay 1 culture token and \
+            activate the city where Augustus is: \
+            Draw 1 action and 1 objective card. \
+            Then discard 1 action and 1 objective card.",
+        )
+        .add_custom_action(
+            CustomActionType::Princeps,
+            |_| CustomActionType::cost(ResourcePile::culture_tokens(1)),
+            use_princeps,
+            |game, p| {
+                game.try_get_any_city(leader_position(p))
+                    .is_some_and(City::can_activate)
+            },
+        )
+        .build(),
         LeaderAbility::builder(
             "Imperator",
             "If you don't own a city in the region: \
@@ -198,64 +216,57 @@ fn augustus() -> LeaderInfo {
     )
 }
 
-const PRINCEPS: &str = "As an action, pay 1 culture token and \
-    activate the city where Augustus is: \
-    Draw 1 action and 1 objective card. \
-    Then discard 1 action and 1 objective card.";
-
-pub(crate) fn use_princeps() -> Builtin {
-    Builtin::builder("Princeps", PRINCEPS)
-        .add_hand_card_request(
-            |event| &mut event.custom_action,
-            0,
-            |game, player, _| {
-                let p = game.player_mut(player);
-                let position = leader_position(p);
-                p.get_city_mut(position).activate();
-                game.add_info_log_item(&format!(
-                    "{} activates the city {position} \
+fn use_princeps(b: AbilityBuilder) -> AbilityBuilder {
+    b.add_hand_card_request(
+        |event| &mut event.custom_action,
+        0,
+        |game, player, _| {
+            let p = game.player_mut(player);
+            let position = leader_position(p);
+            p.get_city_mut(position).activate();
+            game.add_info_log_item(&format!(
+                "{} activates the city {position} \
                         to draw 1 action and 1 objective card using Princeps",
-                    game.player_name(player)
-                ));
-                gain_action_card_from_pile(game, player);
-                gain_objective_card_from_pile(game, player);
+                game.player_name(player)
+            ));
+            gain_action_card_from_pile(game, player);
+            gain_objective_card_from_pile(game, player);
 
-                let p = game.player(player);
-                Some(HandCardsRequest::new(
-                    all_action_hand_cards(p)
-                        .into_iter()
-                        .chain(all_objective_hand_cards(p))
-                        .collect_vec(),
-                    2..=2,
-                    "Select 1 action and 1 objective card from your hand",
-                ))
-            },
-            |game, s, _| {
-                let p = s.player_index;
-                for c in &s.choice {
-                    match c {
-                        HandCard::ActionCard(card) => {
-                            game.add_info_log_item(&format!(
-                                "{} discarded action card {} for Princeps",
-                                s.player_name,
-                                game.cache.get_action_card(*card).name()
-                            ));
-                            discard_action_card(game, p, *card);
-                        }
-                        HandCard::ObjectiveCard(card) => {
-                            game.add_info_log_item(&format!(
-                                "{} discarded objective card {} for Princeps",
-                                s.player_name,
-                                game.cache.get_objective_card(*card).name()
-                            ));
-                            discard_objective_card(game, p, *card);
-                        }
-                        HandCard::Wonder(_) => panic!("Invalid hand card type"),
+            let p = game.player(player);
+            Some(HandCardsRequest::new(
+                all_action_hand_cards(p)
+                    .into_iter()
+                    .chain(all_objective_hand_cards(p))
+                    .collect_vec(),
+                2..=2,
+                "Select 1 action and 1 objective card from your hand",
+            ))
+        },
+        |game, s, _| {
+            let p = s.player_index;
+            for c in &s.choice {
+                match c {
+                    HandCard::ActionCard(card) => {
+                        game.add_info_log_item(&format!(
+                            "{} discarded action card {} for Princeps",
+                            s.player_name,
+                            game.cache.get_action_card(*card).name()
+                        ));
+                        discard_action_card(game, p, *card);
                     }
+                    HandCard::ObjectiveCard(card) => {
+                        game.add_info_log_item(&format!(
+                            "{} discarded objective card {} for Princeps",
+                            s.player_name,
+                            game.cache.get_objective_card(*card).name()
+                        ));
+                        discard_objective_card(game, p, *card);
+                    }
+                    HandCard::Wonder(_) => panic!("Invalid hand card type"),
                 }
-            },
-        )
-        .build()
+            }
+        },
+    )
 }
 
 pub(crate) fn validate_princeps_cards(cards: &[HandCard]) -> Result<(), String> {
@@ -285,7 +296,11 @@ fn caesar() -> LeaderInfo {
             "As a free action, you may use 'Increase happiness' \
                 to increase happiness in the city where Caesar is.",
         )
-        .add_custom_action(CustomActionType::StatesmanIncreaseHappiness)
+        .add_action_modifier(
+            CustomActionType::StatesmanIncreaseHappiness,
+            |_| CustomActionType::free(ResourcePile::empty()),
+            PlayingActionType::IncreaseHappiness,
+        )
         .build(),
         LeaderAbility::builder(
             "Proconsul",

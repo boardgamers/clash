@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Advance;
-use crate::content::builtin::Builtin;
+use crate::content::ability::Ability;
 use crate::content::persistent_events::{
     EventResponse, PersistentEventRequest, PersistentEventType,
 };
@@ -268,8 +268,8 @@ fn add_block_tiles_with_log(
     game.map.add_block_tiles(pos, block, rotation);
 }
 
-pub(crate) fn explore_resolution() -> Builtin {
-    Builtin::builder(
+pub(crate) fn explore_resolution() -> Ability {
+    Ability::builder(
         "Explore Resolution",
         "Select a rotation for the unexplored tiles",
     )

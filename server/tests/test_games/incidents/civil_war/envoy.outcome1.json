@@ -12,7 +12,7 @@
           "BoolRequest": "Do you want to draw the public wonder card Pyramids?"
         },
         "origin": {
-          "Builtin": "Draw Wonder Card"
+          "Ability": "Draw Wonder Card"
         }
       }
     }

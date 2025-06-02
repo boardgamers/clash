@@ -407,7 +407,7 @@
                           },
                           "handler": {
                             "origin": {
-                              "Builtin": "Build Wonder"
+                              "Ability": "Build Wonder"
                             },
                             "priority": 10,
                             "request": {

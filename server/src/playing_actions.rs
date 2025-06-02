@@ -6,10 +6,10 @@ use crate::advance::{AdvanceAction, base_advance_cost, gain_advance_without_paym
 use crate::city::found_city;
 use crate::collect::{PositionCollection, collect};
 use crate::construct::Construct;
-use crate::content::builtin::Builtin;
+use crate::content::ability::Ability;
 use crate::content::custom_actions::{
     CustomAction, CustomActionActivation, CustomActionType, can_play_custom_action,
-    collect_modifiers, execute_custom_action, happiness_modifiers, influence_modifiers,
+    execute_custom_action,
 };
 use crate::content::persistent_events::{
     PaymentRequest, PersistentEventType, TriggerPersistentEventParams, trigger_persistent_event_ext,
@@ -125,7 +125,8 @@ impl PlayingActionType {
             return Err("Game is not in playing state".to_string());
         }
 
-        self.cost(game).is_available(game, player_index)?;
+        self.cost(game, player_index)
+            .is_available(game, player_index)?;
 
         let p = game.player(player_index);
 
@@ -162,9 +163,14 @@ impl PlayingActionType {
     }
 
     #[must_use]
-    pub fn cost(&self, game: &Game) -> ActionCost {
+    pub fn cost(&self, game: &Game, player: usize) -> ActionCost {
         match self {
-            PlayingActionType::Custom(custom_action) => custom_action.info().action_type.clone(),
+            PlayingActionType::Custom(custom_action) => game
+                .player(player)
+                .custom_action_command(*custom_action)
+                .info
+                .action_type
+                .clone(),
             PlayingActionType::ActionCard(id) => game.cache.get_civil_card(*id).action_type.clone(),
             PlayingActionType::EndTurn => ActionCost::cost(ResourcePile::empty()),
             _ => ActionCost::regular(),
@@ -194,11 +200,11 @@ impl PlayingAction {
         player_index: usize,
         redo: bool,
     ) -> Result<(), String> {
-        let playing_action_type = self.playing_action_type();
+        let playing_action_type = self.playing_action_type(game.player(player_index));
         if !redo {
             playing_action_type.is_available(game, player_index)?;
         }
-        let action_cost = playing_action_type.cost(game);
+        let action_cost = playing_action_type.cost(game, player_index);
         if !action_cost.free {
             game.actions_left -= 1;
         }
@@ -211,14 +217,23 @@ impl PlayingAction {
         game: &mut Game,
         player_index: usize,
     ) -> Result<(), String> {
-        let origin_override = match self.playing_action_type() {
+        let origin_override = match self.playing_action_type(game.player(player_index)) {
             PlayingActionType::Custom(c) => {
-                if let Some(key) = c.info().once_per_turn {
+                if let Some(key) = &game
+                    .player(player_index)
+                    .custom_action_command(c)
+                    .info
+                    .once_per_turn
+                {
                     game.players[player_index]
                         .played_once_per_turn_actions
-                        .push(key);
+                        .push(*key);
                 }
-                Some(game.player(player_index).custom_action_origin(&c))
+                Some(
+                    game.player(player_index)
+                        .custom_action_command(c)
+                        .event_origin,
+                )
             }
             PlayingActionType::ActionCard(c) => Some(EventOrigin::CivilCard(c)),
             _ => None,
@@ -287,26 +302,24 @@ impl PlayingAction {
     }
 
     #[must_use]
-    pub fn playing_action_type(&self) -> PlayingActionType {
+    pub fn playing_action_type(&self, player: &Player) -> PlayingActionType {
         match self {
             PlayingAction::Advance(_) => PlayingActionType::Advance,
             PlayingAction::FoundCity { .. } => PlayingActionType::FoundCity,
             PlayingAction::Construct(_) => PlayingActionType::Construct,
-            PlayingAction::Collect(c) => assert_allowed(
-                &c.action_type,
-                &PlayingActionType::Collect,
-                &collect_modifiers(),
-            ),
+            PlayingAction::Collect(c) => {
+                assert_allowed_action_type(&c.action_type, &PlayingActionType::Collect, player)
+            }
             PlayingAction::Recruit(_) => PlayingActionType::Recruit,
-            PlayingAction::IncreaseHappiness(h) => assert_allowed(
+            PlayingAction::IncreaseHappiness(h) => assert_allowed_action_type(
                 &h.action_type,
                 &PlayingActionType::IncreaseHappiness,
-                &happiness_modifiers(),
+                player,
             ),
-            PlayingAction::InfluenceCultureAttempt(i) => assert_allowed(
+            PlayingAction::InfluenceCultureAttempt(i) => assert_allowed_action_type(
                 &i.action_type,
                 &PlayingActionType::InfluenceCultureAttempt,
-                &influence_modifiers(),
+                player,
             ),
             PlayingAction::ActionCard(a) => PlayingActionType::ActionCard(*a),
             PlayingAction::WonderCard(name) => PlayingActionType::WonderCard(*name),
@@ -316,14 +329,14 @@ impl PlayingAction {
     }
 }
 
-fn assert_allowed(
+fn assert_allowed_action_type(
     playing_action_type: &PlayingActionType,
     base_type: &PlayingActionType,
-    allowed_modifiers: &[CustomActionType],
+    player: &Player,
 ) -> PlayingActionType {
     match playing_action_type {
         PlayingActionType::Custom(c) => {
-            assert!(allowed_modifiers.contains(c));
+            assert!(player.custom_action_modifiers(base_type).contains(c));
         }
         _ => {
             assert!(base_type == playing_action_type);
@@ -415,12 +428,16 @@ impl ActionCost {
 pub(crate) fn base_or_custom_available(
     game: &Game,
     player: usize,
-    action: PlayingActionType,
-    custom: Vec<CustomActionType>,
+    base: &PlayingActionType,
 ) -> Vec<PlayingActionType> {
-    vec![action]
+    vec![base.clone()]
         .into_iter()
-        .chain(custom.into_iter().map(|c| c.playing_action_type()))
+        .chain(
+            game.player(player)
+                .custom_action_modifiers(base)
+                .iter()
+                .map(CustomActionType::playing_action_type),
+        )
         .filter_map(|a| a.is_available(game, player).map(|()| a).ok())
         .collect()
 }
@@ -466,8 +483,8 @@ impl ActionPayment {
     }
 }
 
-pub(crate) fn pay_for_action() -> Builtin {
-    Builtin::builder("Pay for action card", "")
+pub(crate) fn pay_for_action() -> Ability {
+    Ability::builder("Pay for action card", "")
         .add_payment_request_listener(
             |e| &mut e.pay_action,
             0,
@@ -479,8 +496,8 @@ pub(crate) fn pay_for_action() -> Builtin {
 
                 let payment_options = a
                     .action
-                    .playing_action_type()
-                    .cost(game)
+                    .playing_action_type(game.player(player_index))
+                    .cost(game, player_index)
                     .payment_options(game.player(player_index));
                 if payment_options.is_free() {
                     return None;

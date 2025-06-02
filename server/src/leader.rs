@@ -118,6 +118,14 @@ impl AbilityInitializerSetup for LeaderAbilityBuilder {
     fn get_key(&self) -> EventOrigin {
         EventOrigin::LeaderAbility(self.name.clone())
     }
+
+    fn name(&self) -> String {
+        self.name.clone()
+    }
+
+    fn description(&self) -> String {
+        self.description.clone()
+    }
 }
 
 #[must_use]

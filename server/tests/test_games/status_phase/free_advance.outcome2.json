@@ -23,7 +23,7 @@
           }
         },
         "origin": {
-          "Builtin": "Raze city"
+          "Ability": "Raze city"
         }
       }
     }

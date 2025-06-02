@@ -260,7 +260,7 @@
                           },
                           "handler": {
                             "origin": {
-                              "Builtin": "Offer Retreat"
+                              "Ability": "Offer Retreat"
                             },
                             "priority": 0,
                             "request": {
