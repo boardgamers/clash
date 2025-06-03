@@ -494,7 +494,7 @@ impl Game {
 
     #[must_use]
     pub fn available_custom_actions(&self, player_index: usize) -> Vec<CustomActionCommand> {
-        self.player(self.current_player_index)
+        self.player(player_index)
             .custom_actions
             .values()
             .filter(|&c| {

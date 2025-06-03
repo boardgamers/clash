@@ -203,7 +203,7 @@ impl Cache {
     }
 
     #[must_use]
-    pub fn get_ability(&self) -> &Vec<Ability> {
+    pub fn get_abilities(&self) -> &Vec<Ability> {
         &self.all_abilities
     }
 
@@ -212,25 +212,25 @@ impl Cache {
     ///
     /// Panics if ability does not exist
     #[must_use]
-    pub fn get_ability_description(&self, name: &str, game: &Game, player: &Player) -> String {
+    pub fn with_ability<T>(&self, name: &str, game: &Game, player: &Player, t: impl Fn(&Ability) -> T) -> T {
         self.abilities_by_name
             .get(name)
             .map_or_else(
                 || {
                     for c in player.custom_actions.values() {
                         if let CustomActionExecution::Action(e) = &c.execution {
-                            if e.execution.name == name {
-                                return Some(e.execution.description.clone());
+                            if e.ability.name == name {
+                                return Some(t(&e.ability));
                             }
                         }
                     }
 
                     if let Some(p) = get_status_phase(game) {
-                        return Some(self.status_phase_handler(p).description.clone());
+                        return Some(t(self.status_phase_handler(p)));
                     }
                     None
                 },
-                |a| Some(a.description.clone()),
+                |a| Some(t(a)),
             )
             .unwrap_or_else(|| panic!("ability not found: {name}"))
     }

@@ -4,6 +4,7 @@ use crate::player::Player;
 
 use super::collect::PositionCollection;
 use crate::combat_stats::CombatStats;
+use crate::content::custom_actions::{custom_action_modifier_name, custom_action_execution};
 use crate::movement::{MoveUnits, MovementAction};
 use crate::playing_actions::{Collect, IncreaseHappiness, PlayingActionType, Recruit};
 use crate::wonder::Wonder;
@@ -163,9 +164,11 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
             format_cultural_influence_attempt_log_item(game, player.index, &player_name, c)
         }
         PlayingAction::Custom(action) => {
+            let name = custom_action_execution(player, action.action)
+                .ability
+                .name;
             format!(
-                "{player_name} started {}{}",
-                action.action,
+                "{player_name} started {name}{}",
                 if let Some(p) = action.city {
                     format!(" at {p}")
                 } else {
@@ -186,13 +189,12 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
         PlayingAction::WonderCard(name) => {
             format!("{player_name} played the wonder card {}", name.name(game))
         }
-        PlayingAction::EndTurn => format!(
-            "{player_name} ended their turn{}",
-            match game.actions_left {
-                0 => String::new(),
-                actions_left => format!(" with {actions_left} actions left"),
-            }
-        ),
+        PlayingAction::EndTurn => format!("{player_name} ended their turn{}", match game
+            .actions_left
+        {
+            0 => String::new(),
+            actions_left => format!(" with {actions_left} actions left"),
+        }),
     }
 }
 
@@ -218,7 +220,7 @@ pub fn format_happiness_increase(
         })
         .collect_vec();
     let suffix = if let PlayingActionType::Custom(c) = i.action_type {
-        format!(" using {c}")
+        format!(" using {}", custom_action_modifier_name(player, c))
     } else {
         String::new()
     };
