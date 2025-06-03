@@ -628,7 +628,7 @@ impl Player {
         self.custom_actions
             .iter()
             .filter_map(move |(t, c)| {
-                if let CustomActionExecution::Modifier(b) = &c.execution {
+                if let CustomActionExecution::Modifier((b, _)) = &c.execution {
                     (b == base).then_some(*t)
                 } else {
                     None

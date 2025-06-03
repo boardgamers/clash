@@ -905,7 +905,12 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         info: impl Fn(CustomActionType) -> CustomActionInfo + Send + Sync + 'static,
         base_action: PlayingActionType,
     ) -> Self {
-        self.add_custom_action_execution(action, info, CustomActionExecution::Modifier(base_action))
+        let name = self.name();
+        self.add_custom_action_execution(
+            action,
+            info,
+            CustomActionExecution::Modifier((base_action, name.clone())),
+        )
     }
 
     fn add_custom_action_execution(

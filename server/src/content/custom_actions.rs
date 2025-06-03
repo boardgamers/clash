@@ -240,7 +240,7 @@ pub(crate) fn custom_action_execution(
 ) -> CustomActionActionExecution {
     let CustomActionExecution::Action(e) = player.custom_action_command(action_type).execution
     else {
-        panic!("Custom action {:?} is not an action", action_type);
+        panic!("Custom action {action_type:?} is not an action");
     };
     e
 }
@@ -248,12 +248,13 @@ pub(crate) fn custom_action_execution(
 pub(crate) fn custom_action_modifier_name(
     player: &Player,
     action_type: CustomActionType,
-) -> PlayingActionType {
-    let CustomActionExecution::Modifier(e) = player.custom_action_command(action_type).execution
+) -> String {
+    let CustomActionExecution::Modifier((_, name)) =
+        player.custom_action_command(action_type).execution
     else {
-        panic!("Custom action {:?} is not a modifier", action_type);
+        panic!("Custom action {action_type:?} is not a modifier");
     };
-    e
+    name
 }
 
 pub(crate) fn can_play_custom_action(
@@ -294,7 +295,8 @@ pub(crate) fn is_base_or_modifier(
 ) -> bool {
     match base_type {
         PlayingActionType::Custom(c) => {
-            if let CustomActionExecution::Modifier(t) = &p.custom_action_command(*c).execution {
+            if let CustomActionExecution::Modifier((t, _)) = &p.custom_action_command(*c).execution
+            {
                 t == action_type
             } else {
                 false

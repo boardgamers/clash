@@ -212,7 +212,13 @@ impl Cache {
     ///
     /// Panics if ability does not exist
     #[must_use]
-    pub fn with_ability<T>(&self, name: &str, game: &Game, player: &Player, t: impl Fn(&Ability) -> T) -> T {
+    pub fn with_ability<T>(
+        &self,
+        name: &str,
+        game: &Game,
+        player: &Player,
+        t: impl Fn(&Ability) -> T,
+    ) -> T {
         self.abilities_by_name
             .get(name)
             .map_or_else(

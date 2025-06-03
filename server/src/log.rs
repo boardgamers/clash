@@ -4,7 +4,7 @@ use crate::player::Player;
 
 use super::collect::PositionCollection;
 use crate::combat_stats::CombatStats;
-use crate::content::custom_actions::{custom_action_modifier_name, custom_action_execution};
+use crate::content::custom_actions::{custom_action_execution, custom_action_modifier_name};
 use crate::movement::{MoveUnits, MovementAction};
 use crate::playing_actions::{Collect, IncreaseHappiness, PlayingActionType, Recruit};
 use crate::wonder::Wonder;
@@ -164,9 +164,7 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
             format_cultural_influence_attempt_log_item(game, player.index, &player_name, c)
         }
         PlayingAction::Custom(action) => {
-            let name = custom_action_execution(player, action.action)
-                .ability
-                .name;
+            let name = custom_action_execution(player, action.action).ability.name;
             format!(
                 "{player_name} started {name}{}",
                 if let Some(p) = action.city {
@@ -189,12 +187,13 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
         PlayingAction::WonderCard(name) => {
             format!("{player_name} played the wonder card {}", name.name(game))
         }
-        PlayingAction::EndTurn => format!("{player_name} ended their turn{}", match game
-            .actions_left
-        {
-            0 => String::new(),
-            actions_left => format!(" with {actions_left} actions left"),
-        }),
+        PlayingAction::EndTurn => format!(
+            "{player_name} ended their turn{}",
+            match game.actions_left {
+                0 => String::new(),
+                actions_left => format!(" with {actions_left} actions left"),
+            }
+        ),
     }
 }
 
@@ -219,17 +218,21 @@ pub fn format_happiness_increase(
             }
         })
         .collect_vec();
-    let suffix = if let PlayingActionType::Custom(c) = i.action_type {
-        format!(" using {}", custom_action_modifier_name(player, c))
-    } else {
-        String::new()
-    };
 
     format!(
-        "{player_name} paid {} to increase happiness in {}{suffix}",
+        "{player_name} paid {} to increase happiness in {}{}",
         i.payment,
-        utils::format_and(&happiness_increases, "no city")
+        utils::format_and(&happiness_increases, "no city"),
+        modifier_suffix(player, &i.action_type)
     )
+}
+
+pub(crate) fn modifier_suffix(player: &Player, action_type: &PlayingActionType) -> String {
+    if let PlayingActionType::Custom(c) = action_type {
+        format!(" using {}", custom_action_modifier_name(player, *c))
+    } else {
+        String::new()
+    }
 }
 
 pub(crate) fn format_city_happiness_increase(
@@ -302,15 +305,12 @@ pub(crate) fn format_collect_log_item(player: &Player, player_name: &str, c: &Co
     } else {
         String::new()
     };
-    let suffix = if let PlayingActionType::Custom(_) = c.action_type {
-        " using Free Economy"
-    } else {
-        ""
-    };
-
-    let city_position = c.city_position;
-    let mood = format_mood_change(player, city_position);
-    format!("{player_name} collects {res}{total} in the city at {city_position}{mood}{suffix}")
+    format!(
+        "{player_name} collects {res}{total} in the city at {}{}{}",
+        c.city_position,
+        format_mood_change(player, c.city_position),
+        modifier_suffix(player, &c.action_type)
+    )
 }
 
 fn format_construct_log_item(
