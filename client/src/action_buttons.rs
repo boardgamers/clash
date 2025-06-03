@@ -10,7 +10,7 @@ use crate::render_context::RenderContext;
 use itertools::Itertools;
 use server::action::Action;
 use server::city::City;
-use server::content::custom_actions::{CustomAction, CustomActionCommand};
+use server::content::custom_actions::{CustomAction, CustomActionInfo};
 use server::cultural_influence::available_influence_actions;
 use server::happiness::available_happiness_actions;
 use server::playing_actions::{PlayingAction, PlayingActionType};
@@ -124,7 +124,7 @@ fn global_move(rc: &RenderContext) -> StateUpdate {
 
 fn generic_custom_action(
     rc: &RenderContext,
-    c: &CustomActionCommand,
+    c: &CustomActionInfo,
     city: Option<&City>,
 ) -> Option<StateUpdate> {
     let custom_action_type = c.action;
@@ -156,7 +156,7 @@ pub fn base_or_custom_action(
             .iter()
             .map(|action_type| match action_type {
                 PlayingActionType::Custom(c) => {
-                    let origin = &rc.shown_player.custom_action_command(*c).event_origin;
+                    let origin = &rc.shown_player.custom_action_info(*c).event_origin;
                     (
                         Some(origin.clone()),
                         execute(BaseOrCustomDialog {

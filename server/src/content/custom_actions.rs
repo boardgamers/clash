@@ -64,26 +64,26 @@ impl CustomActionCost {
 }
 
 #[derive(Clone)]
-pub struct CustomActionCommand {
+pub struct CustomActionInfo {
     pub action: CustomActionType,
     pub execution: CustomActionExecution,
     pub event_origin: EventOrigin,
-    pub info: CustomActionCost,
+    pub cost: CustomActionCost,
 }
 
-impl CustomActionCommand {
+impl CustomActionInfo {
     #[must_use]
     pub fn new(
         action: CustomActionType,
         execution: CustomActionExecution,
         event_origin: EventOrigin,
-        info: CustomActionCost,
-    ) -> CustomActionCommand {
-        CustomActionCommand {
+        cost: CustomActionCost,
+    ) -> CustomActionInfo {
+        CustomActionInfo {
             action,
             execution,
             event_origin,
-            info,
+            cost,
         }
     }
 
@@ -238,8 +238,7 @@ pub(crate) fn custom_action_execution(
     player: &Player,
     action_type: CustomActionType,
 ) -> CustomActionActionExecution {
-    let CustomActionExecution::Action(e) = player.custom_action_command(action_type).execution
-    else {
+    let CustomActionExecution::Action(e) = player.custom_action_info(action_type).execution else {
         panic!("Custom action {action_type:?} is not an action");
     };
     e
@@ -250,7 +249,7 @@ pub(crate) fn custom_action_modifier_name(
     action_type: CustomActionType,
 ) -> String {
     let CustomActionExecution::Modifier((_, name)) =
-        player.custom_action_command(action_type).execution
+        player.custom_action_info(action_type).execution
     else {
         panic!("Custom action {action_type:?} is not a modifier");
     };
@@ -266,14 +265,14 @@ pub(crate) fn can_play_custom_action(
         return Err("Custom action not available".to_string());
     }
 
-    let command = p.custom_action_command(c);
-    if let Some(key) = command.info.once_per_turn {
+    let info = p.custom_action_info(c);
+    if let Some(key) = info.cost.once_per_turn {
         if p.played_once_per_turn_actions.contains(&key) {
             return Err("Custom action already played this turn".to_string());
         }
     }
 
-    if let CustomActionExecution::Action(e) = &command.execution {
+    if let CustomActionExecution::Action(e) = &info.execution {
         if !(e.checker)(game, p) {
             return Err("Custom action cannot be played".to_string());
         }
@@ -295,8 +294,7 @@ pub(crate) fn is_base_or_modifier(
 ) -> bool {
     match base_type {
         PlayingActionType::Custom(c) => {
-            if let CustomActionExecution::Modifier((t, _)) = &p.custom_action_command(*c).execution
-            {
+            if let CustomActionExecution::Modifier((t, _)) = &p.custom_action_info(*c).execution {
                 t == action_type
             } else {
                 false

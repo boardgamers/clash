@@ -194,13 +194,12 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
         ));
     }
 
-    for command in game.available_custom_actions(p.index) {
-        let cities = if command.city_bound().is_some() {
+    for info in game.available_custom_actions(p.index) {
+        let cities = if info.city_bound().is_some() {
             p.cities
                 .iter()
                 .filter_map(|city| {
-                    command
-                        .is_city_available(game, city)
+                    info.is_city_available(game, city)
                         .then_some(Some(city.position))
                 })
                 .collect_vec()
@@ -208,7 +207,7 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
             vec![None]
         };
 
-        let a = command.action;
+        let a = info.action;
         for c in cities {
             actions.push((
                 ActionType::Playing(PlayingActionType::Custom(a)),

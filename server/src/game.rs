@@ -1,7 +1,7 @@
 use crate::cache::Cache;
 use crate::combat_roll::{COMBAT_DIE_SIDES, CombatDieRoll};
 use crate::consts::ACTIONS;
-use crate::content::custom_actions::{CustomActionCommand, CustomActionExecution};
+use crate::content::custom_actions::{CustomActionExecution, CustomActionInfo};
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{
     PersistentEventHandler, PersistentEventState, PersistentEventType,
@@ -493,7 +493,7 @@ impl Game {
     }
 
     #[must_use]
-    pub fn available_custom_actions(&self, player_index: usize) -> Vec<CustomActionCommand> {
+    pub fn available_custom_actions(&self, player_index: usize) -> Vec<CustomActionInfo> {
         self.player(player_index)
             .custom_actions
             .values()

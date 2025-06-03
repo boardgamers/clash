@@ -1,7 +1,7 @@
 use crate::advance::{Advance, base_advance_cost, player_government};
 use crate::city_pieces::DestroyedStructures;
 use crate::consts::{STACK_LIMIT, UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
-use crate::content::custom_actions::{CustomActionCommand, CustomActionExecution};
+use crate::content::custom_actions::{CustomActionExecution, CustomActionInfo};
 use crate::events::Event;
 use crate::leader::{Leader, LeaderAbility};
 use crate::payment::{PaymentOptions, PaymentReason};
@@ -64,7 +64,7 @@ pub struct Player {
     pub completed_objectives: Vec<String>,
     pub captured_leaders: Vec<Leader>,
     pub event_victory_points: f32,
-    pub custom_actions: HashMap<CustomActionType, CustomActionCommand>, // transient
+    pub custom_actions: HashMap<CustomActionType, CustomActionInfo>, // transient
     pub wonder_cards: Vec<Wonder>,
     pub action_cards: Vec<u8>,
     pub objective_cards: Vec<u8>,
@@ -605,10 +605,7 @@ impl Player {
     /// # Panics
     /// Panics if the custom action type does not exist for this player
     #[must_use]
-    pub fn custom_action_command(
-        &self,
-        custom_action_type: CustomActionType,
-    ) -> CustomActionCommand {
+    pub fn custom_action_info(&self, custom_action_type: CustomActionType) -> CustomActionInfo {
         self.custom_actions
             .get(&custom_action_type)
             .cloned()

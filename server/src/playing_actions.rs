@@ -167,8 +167,8 @@ impl PlayingActionType {
         match self {
             PlayingActionType::Custom(custom_action) => game
                 .player(player)
-                .custom_action_command(*custom_action)
-                .info
+                .custom_action_info(*custom_action)
+                .cost
                 .action_type
                 .clone(),
             PlayingActionType::ActionCard(id) => game.cache.get_civil_card(*id).action_type.clone(),
@@ -221,19 +221,15 @@ impl PlayingAction {
             PlayingActionType::Custom(c) => {
                 if let Some(key) = &game
                     .player(player_index)
-                    .custom_action_command(c)
-                    .info
+                    .custom_action_info(c)
+                    .cost
                     .once_per_turn
                 {
                     game.players[player_index]
                         .played_once_per_turn_actions
                         .push(*key);
                 }
-                Some(
-                    game.player(player_index)
-                        .custom_action_command(c)
-                        .event_origin,
-                )
+                Some(game.player(player_index).custom_action_info(c).event_origin)
             }
             PlayingActionType::ActionCard(c) => Some(EventOrigin::CivilCard(c)),
             _ => None,

@@ -4,7 +4,7 @@ use crate::combat::{Combat, update_combat_strength};
 use crate::combat_listeners::CombatStrength;
 use crate::content::ability::{Ability, AbilityBuilder};
 use crate::content::custom_actions::{
-    CustomActionActionExecution, CustomActionCommand, CustomActionExecution, CustomActionCost,
+    CustomActionActionExecution, CustomActionCost, CustomActionExecution, CustomActionInfo,
 };
 use crate::content::persistent_events::{
     AdvanceRequest, EventResponse, HandCardsRequest, MultiRequest, PaymentRequest,
@@ -925,7 +925,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self.add_ability_initializer(move |game, player_index, _prio_delta| {
             game.player_mut(player_index).custom_actions.insert(
                 action,
-                CustomActionCommand::new(action, exec.clone(), key.clone(), info(action)),
+                CustomActionInfo::new(action, exec.clone(), key.clone(), info(action)),
             );
         })
         .add_ability_deinitializer(move |game, player_index| {
