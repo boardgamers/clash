@@ -2,7 +2,6 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Advance;
 use crate::civilization::Civilization;
 use crate::combat_listeners::CombatRoundEnd;
-use crate::content::ability::Ability;
 use crate::content::persistent_events::PaymentRequest;
 use crate::game::{Game, GameState};
 use crate::map::Terrain;
@@ -185,7 +184,7 @@ fn imperial_army() -> SpecialAdvanceInfo {
     // )
     .build()
 }
-// 
+//
 // fn use_imperial_army() -> Ability {
 //     // todo
 //     Ability::builder("Imperial Army", IMPERIAL_ARMY).build()
