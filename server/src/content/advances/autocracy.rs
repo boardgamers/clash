@@ -66,7 +66,7 @@ fn totalitarianism() -> AdvanceBuilder {
                         .player(city.player_index)
                         .get_units(city.position)
                         .iter()
-                        .any(|u| u.unit_type.is_army_unit())
+                        .any(|u| u.is_army_unit())
                 {
                     info.set_no_boost();
                 }

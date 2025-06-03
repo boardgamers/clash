@@ -11,7 +11,6 @@ use crate::{
     movement::{self, MoveUnits, MovementAction},
     pirates,
     position::Position,
-    unit::UnitType,
     utils::{self, Rng},
 };
 
@@ -132,10 +131,10 @@ impl ActiveMissions {
     fn missions_for_unit(&self, game: &Game, unit: u32) -> Vec<Mission> {
         let unit = game.players[self.player_index].get_unit(unit);
         let explore_target = decide_scouting_position(game, self.player_index, unit.position, self);
-        if matches!(unit.unit_type, UnitType::Settler) {
+        if unit.is_settler() {
             return self.get_settler_missions(game, unit, explore_target);
         }
-        if matches!(unit.unit_type, UnitType::Ship) {
+        if unit.is_ship() {
             return self.get_ship_missions(game, unit.id);
         }
         self.get_combat_unit_missions(game, explore_target, unit.id)

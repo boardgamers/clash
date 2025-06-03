@@ -70,7 +70,7 @@ pub fn find_trade_routes(game: &Game, player: &Player, only_ships: bool) -> Vec<
     let all: Vec<Vec<TradeRoute>> = player
         .units
         .iter()
-        .filter(|u| !only_ships || u.unit_type.is_ship())
+        .filter(|u| !only_ships || u.is_ship())
         .map(|u| find_trade_route_for_unit(game, player, u))
         .filter(|r| !r.is_empty())
         .collect();
@@ -117,7 +117,7 @@ pub(crate) fn find_trade_route_for_unit(
         return vec![];
     }
 
-    let expected_type = unit.unit_type.is_ship() || unit.unit_type.is_settler();
+    let expected_type = unit.is_ship() || unit.is_settler();
     if !expected_type {
         return vec![];
     }

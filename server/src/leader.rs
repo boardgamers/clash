@@ -133,6 +133,6 @@ pub(crate) fn leader_position(player: &Player) -> Position {
     player
         .units
         .iter()
-        .find_map(|unit| unit.unit_type.is_leader().then_some(unit.position))
+        .find_map(|unit| unit.is_leader().then_some(unit.position))
         .expect("unit not found")
 }

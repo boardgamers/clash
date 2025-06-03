@@ -86,7 +86,7 @@ fn reachable_with_roads(
 ) -> Vec<MoveRoute> {
     let start = units.iter().find_map(|&id| {
         let unit = player.get_unit(id);
-        if unit.unit_type.is_land_based() {
+        if unit.is_land_based() {
             Some(unit.position)
         } else {
             None
@@ -225,7 +225,7 @@ fn next_road_step(
             let on_target = player
                 .get_units(*to)
                 .iter()
-                .filter(|unit| unit.unit_type.is_army_unit())
+                .filter(|unit| unit.is_army_unit())
                 .count();
             game.map.is_land(*to)
                 && game.enemy_player(player.index, *to).is_none()
@@ -241,7 +241,7 @@ fn reachable_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<M
     }
     let ship = units.iter().find_map(|&id| {
         let unit = player.get_unit(id);
-        if unit.unit_type.is_ship() {
+        if unit.is_ship() {
             Some(unit.position)
         } else {
             None

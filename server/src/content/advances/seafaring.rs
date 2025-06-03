@@ -73,7 +73,7 @@ fn cartography() -> AdvanceBuilder {
                 let mut navigation = false;
                 for id in &i.units {
                     let unit = game.player(i.player).get_unit(*id);
-                    if unit.unit_type.is_ship() {
+                    if unit.is_ship() {
                         ship = true;
                         if !unit.position.is_neighbor(i.to) {
                             navigation = true;

@@ -26,7 +26,7 @@ use crate::recruit::recruit_cost;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::{ChangeGovernment, government_advances};
-use crate::unit::{UnitType, Units};
+use crate::unit::{UnitType, Units, validate_units_selection};
 use crate::wonder::Wonder;
 use itertools::Itertools;
 use rustc_hash::FxHashMap;
@@ -542,10 +542,12 @@ fn responses(event: &PersistentEventState, player: &Player, game: &Game) -> Vec<
             .map(|c| EventResponse::SelectUnitType(*c))
             .collect(),
         PersistentEventRequest::SelectUnits(r) => {
-            select_multi(&r.request, SelectMultiStrategy::All, |_| true)
-                .into_iter()
-                .map(EventResponse::SelectUnits)
-                .collect()
+            select_multi(&r.request, SelectMultiStrategy::All, |u| {
+                validate_units_selection(u, game, player).is_ok()
+            })
+            .into_iter()
+            .map(EventResponse::SelectUnits)
+            .collect()
         }
         PersistentEventRequest::SelectStructures(r) => {
             select_multi(&r, SelectMultiStrategy::All, |s| {

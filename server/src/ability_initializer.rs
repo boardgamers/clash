@@ -18,7 +18,7 @@ use crate::playing_actions::PlayingActionType;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::tactics_card::CombatRole;
-use crate::unit::UnitType;
+use crate::unit::{UnitType, validate_units_selection_for_origin};
 use crate::{content::custom_actions::CustomActionType, game::Game, player_events::PlayerEvents};
 use std::collections::HashMap;
 use std::fmt::Debug;
@@ -684,6 +684,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone + Sync + Send,
         V: Clone + PartialEq,
     {
+        let origin = self.get_key().clone();
         self.add_multi_choice_reward_request_listener::<E, u32, UnitsRequest, V>(
             event,
             priority,
@@ -703,6 +704,12 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             },
             request,
             move |game, c, details| {
+                validate_units_selection_for_origin(
+                    &c.choice,
+                    game.player(c.player_index),
+                    &origin,
+                )
+                .expect("Invalid units selection - this should not happen");
                 units_selected(game, c, details);
             },
         )

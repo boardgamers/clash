@@ -2,15 +2,19 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Advance;
 use crate::civilization::Civilization;
 use crate::combat_listeners::CombatRoundEnd;
-use crate::content::persistent_events::PaymentRequest;
+use crate::consts::STACK_LIMIT;
+use crate::content::ability::AbilityBuilder;
+use crate::content::custom_actions::CustomActionType;
+use crate::content::persistent_events::{PaymentRequest, UnitsRequest};
 use crate::game::{Game, GameState};
 use crate::map::Terrain;
 use crate::movement::{MoveState, possible_move_destinations};
 use crate::payment::{PaymentOptions, PaymentReason};
-use crate::player::Player;
+use crate::player::{Player, can_add_army_unit};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
+use crate::unit::UnitType;
 use itertools::Itertools;
 
 pub(crate) fn china() -> Civilization {
@@ -44,7 +48,7 @@ fn rice() -> SpecialAdvanceInfo {
                             .player(i.info.player)
                             .units
                             .iter()
-                            .any(|u| u.position == pos && u.unit_type.is_settler())
+                            .any(|u| u.position == pos && u.is_settler())
                 })
                 .count()
                 .min(2);
@@ -81,7 +85,7 @@ fn expansion() -> SpecialAdvanceInfo {
             let moved_units = p
                 .units
                 .iter()
-                .filter(|u| !u.unit_type.is_settler())
+                .filter(|u| !u.is_settler())
                 .map(|u| u.id)
                 .collect_vec();
 
@@ -166,26 +170,125 @@ fn apply_fireworks(e: &mut CombatRoundEnd, p: usize, do_update: bool) -> bool {
     })
 }
 
-const IMPERIAL_ARMY: &str = "Once per turn, as an action, \
-        you may convert any number of settlers into infantry units, and vice versa.";
-
 fn imperial_army() -> SpecialAdvanceInfo {
     SpecialAdvanceInfo::builder(
         SpecialAdvance::ImperialArmy,
         SpecialAdvanceRequirement::AnyGovernment,
         "Imperial Army",
-        IMPERIAL_ARMY,
+        "Once per turn, as an action, \
+        you may convert any number of settlers into infantry units, and vice versa.",
     )
-    // .add_custom_action(
-    //     CustomActionType::ImperialArmy,
-    //     |a| a.once_per_turn(ResourcePile::empty()),
-    //     use_imperial_army(),
-    //     |_game, _p| todo!(),
-    // )
+    .add_custom_action(
+        CustomActionType::ImperialArmy,
+        |a| a.once_per_turn(ResourcePile::empty()),
+        use_imperial_army,
+        |_game, p| {
+            !p.units
+                .iter()
+                .filter(|u| {
+                    // infantry can always be converted - if the settler limit is reached,
+                    // the player has to convert a settler to infantry
+                    // we're not checking if that settler can be converted here, but later
+                    (u.is_settler() && can_add_army_unit(p, u.position)) || u.is_infantry()
+                })
+                .map(|u| u.id)
+                .collect_vec()
+                .is_empty()
+        },
+    )
     .build()
 }
-//
-// fn use_imperial_army() -> Ability {
-//     // todo
-//     Ability::builder("Imperial Army", IMPERIAL_ARMY).build()
-// }
+
+fn use_imperial_army(b: AbilityBuilder) -> AbilityBuilder {
+    b.add_units_request(
+        |event| &mut event.custom_action,
+        0,
+        |game, player_index, _| {
+            let choices = convertible_units(game.player(player_index));
+            let max = choices.len() as u8;
+            Some(UnitsRequest::new(
+                player_index,
+                choices,
+                1..=max,
+                "Select units to convert using Imperial Army",
+            ))
+        },
+        |game, s, _| {
+            let p = game.player_mut(s.player_index);
+            let mut names = vec![];
+            for id in &s.choice {
+                let unit = p.get_unit_mut(*id);
+                names.push(format!(
+                    "{} at {}",
+                    unit.unit_type.non_leader_name(),
+                    unit.position
+                ));
+                if unit.is_settler() {
+                    unit.unit_type = UnitType::Infantry;
+                } else {
+                    unit.unit_type = UnitType::Settler;
+                }
+            }
+
+            game.add_info_log_item(&format!(
+                "{} selected {} for Imperial Army",
+                s.player_name,
+                names.join(", ")
+            ));
+        },
+    )
+}
+
+fn convertible_units(p: &Player) -> Vec<u32> {
+    p.units
+        .iter()
+        .filter(|u| u.is_settler() || u.is_infantry())
+        .map(|u| u.id)
+        .collect_vec()
+}
+
+pub(crate) fn validate_imperial_army(units: &[u32], p: &Player) -> Result<(), String> {
+    let settler_to_infantry = units
+        .iter()
+        .filter(|&&u| p.get_unit(u).is_settler())
+        .collect_vec();
+    let infantry_to_settler = units
+        .iter()
+        .filter(|&&u| p.get_unit(u).is_infantry())
+        .collect_vec();
+
+    let net_to_settler = infantry_to_settler.len() - settler_to_infantry.len();
+    if p.available_units().settlers < net_to_settler as u8 {
+        return Err(format!(
+            "Cannot convert {} infantry to settlers, only {} available",
+            net_to_settler,
+            p.available_units().settlers
+        ));
+    }
+
+    let net_to_infantry = settler_to_infantry.len() - infantry_to_settler.len();
+    if p.available_units().infantry < net_to_infantry as u8 {
+        return Err(format!(
+            "Cannot convert {} settlers to infantry, only {} available",
+            net_to_infantry,
+            p.available_units().infantry
+        ));
+    }
+
+    for pos in settler_to_infantry.iter().map(|&u| p.get_unit(*u).position) {
+        let army_size = p
+            .get_units(pos)
+            .iter()
+            .filter(|u| {
+                (u.is_army_unit() && !infantry_to_settler.contains(&&u.id))
+                    || settler_to_infantry.contains(&&u.id)
+            })
+            .count();
+        if army_size > STACK_LIMIT {
+            return Err(format!(
+                "Cannot convert settlers at {pos} to infantry, stack limit exceeded"
+            ));
+        }
+    }
+    Ok(())
+}

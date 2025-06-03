@@ -695,7 +695,7 @@ pub fn gain_resources(
 pub(crate) fn can_add_army_unit(p: &Player, position: Position) -> bool {
     p.get_units(position)
         .iter()
-        .filter(|u| u.unit_type.is_army_unit())
+        .filter(|u| u.is_army_unit())
         .count()
         < STACK_LIMIT
 }

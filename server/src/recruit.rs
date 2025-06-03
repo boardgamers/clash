@@ -66,7 +66,7 @@ pub(crate) fn on_recruit(game: &mut Game, player_index: usize, r: Recruit) {
         let ships = game.players[player_index]
             .get_units(port_position)
             .iter()
-            .filter(|unit| unit.unit_type.is_ship())
+            .filter(|unit| unit.is_ship())
             .map(|unit| unit.id)
             .collect::<Vec<_>>();
         if !ships.is_empty() {
@@ -173,7 +173,7 @@ pub fn recruit_cost_without_replaced(
     if player
         .get_units(city_position)
         .iter()
-        .filter(|unit| unit.unit_type.is_army_unit())
+        .filter(|unit| unit.is_army_unit())
         .count() as u8
         + units.amount()
         - units.settlers

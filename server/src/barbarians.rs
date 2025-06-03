@@ -490,11 +490,7 @@ fn possible_barbarians_reinforcements(game: &Game) -> Vec<Position> {
 fn get_barbarian_reinforcement_choices(game: &Game, pos: Position) -> Vec<UnitType> {
     let barbarian = get_barbarians_player(game);
 
-    let possible = if barbarian
-        .get_units(pos)
-        .iter()
-        .any(|u| u.unit_type == UnitType::Infantry)
-    {
+    let possible = if barbarian.get_units(pos).iter().any(|u| u.is_infantry()) {
         barbarian_fighters()
     } else {
         vec![UnitType::Infantry]

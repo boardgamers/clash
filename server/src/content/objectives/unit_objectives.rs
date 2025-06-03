@@ -47,7 +47,7 @@ pub(crate) fn large_fleet() -> Objective {
 }
 
 fn ship_count(p: &Player) -> usize {
-    p.units.iter().filter(|u| u.unit_type.is_ship()).count()
+    p.units.iter().filter(|u| u.is_ship()).count()
 }
 
 pub(crate) fn large_army() -> Objective {
@@ -57,10 +57,7 @@ pub(crate) fn large_army() -> Objective {
     )
     .status_phase_check(|game, player| {
         leading_player(game, player, 4, |p, _| {
-            p.units
-                .iter()
-                .filter(|u| u.unit_type.is_army_unit())
-                .count()
+            p.units.iter().filter(|u| u.is_army_unit()).count()
         })
     })
     .build()
@@ -81,7 +78,7 @@ pub(crate) fn standing_army() -> Objective {
                 player
                     .get_units(c.position)
                     .iter()
-                    .any(|u| u.unit_type.is_army_unit())
+                    .any(|u| u.is_army_unit())
             })
             .count()
             >= 4
@@ -126,7 +123,7 @@ pub(crate) fn threat() -> Objective {
             .units
             .iter()
             .filter(|u| {
-                u.unit_type.is_army_unit()
+                u.is_army_unit()
                     && u.position
                         .neighbors()
                         .iter()
@@ -148,7 +145,7 @@ pub(crate) fn outpost() -> Objective {
             .units
             .iter()
             .filter_map(|u| {
-                (u.unit_type.is_army_unit()
+                (u.is_army_unit()
                     && player
                         .cities
                         .iter()
@@ -172,7 +169,7 @@ pub(crate) fn migration() -> Objective {
             .units
             .iter()
             .filter_map(|u| {
-                (u.unit_type.is_settler()
+                (u.is_settler()
                     && player
                         .cities
                         .iter()
@@ -194,12 +191,7 @@ pub(crate) fn military_might() -> Objective {
     )
     .contradicting_status_phase_objective("Standing Army")
     .status_phase_check(|_game, player| {
-        player
-            .units
-            .iter()
-            .filter(|u| u.unit_type.is_military())
-            .count()
-            >= 12
+        player.units.iter().filter(|u| u.is_military()).count() >= 12
     })
     .build()
 }

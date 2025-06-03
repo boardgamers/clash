@@ -171,7 +171,7 @@ impl Combat {
         let p = self.player(role);
         self.fighting_units(game, p)
             .iter()
-            .any(|&unit_id| game.player(p).get_unit(unit_id).unit_type.is_leader())
+            .any(|&unit_id| game.player(p).get_unit(unit_id).is_leader())
     }
 
     #[must_use]
@@ -458,7 +458,7 @@ fn move_to_enemy_player_tile(
         .player(defender)
         .get_units(destination)
         .iter()
-        .any(|unit| unit.unit_type.is_military());
+        .any(|unit| unit.is_military());
     let city = game.player(defender).try_get_city(destination);
     let has_fortress = city.is_some_and(|city| city.pieces.fortress.is_some());
 
@@ -466,7 +466,7 @@ fn move_to_enemy_player_tile(
         let mut military = false;
         for unit_id in unit_ids {
             let unit = game.player_mut(player_index).get_unit_mut(*unit_id);
-            if unit.unit_type.is_military() {
+            if unit.is_military() {
                 if unit
                     .movement_restrictions
                     .contains(&MovementRestriction::Battle)
