@@ -4,7 +4,7 @@ use crate::combat::{Combat, update_combat_strength};
 use crate::combat_listeners::CombatStrength;
 use crate::content::ability::{Ability, AbilityBuilder};
 use crate::content::custom_actions::{
-    CustomActionActionExecution, CustomActionCommand, CustomActionExecution, CustomActionInfo,
+    CustomActionActionExecution, CustomActionCommand, CustomActionExecution, CustomActionCost,
 };
 use crate::content::persistent_events::{
     AdvanceRequest, EventResponse, HandCardsRequest, MultiRequest, PaymentRequest,
@@ -882,7 +882,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
     fn add_custom_action(
         self,
         action: CustomActionType,
-        info: impl Fn(CustomActionType) -> CustomActionInfo + Send + Sync + 'static,
+        cost: impl Fn(CustomActionType) -> CustomActionCost + Send + Sync + 'static,
         ability: impl Fn(AbilityBuilder) -> AbilityBuilder + Sync + Send + 'static,
         can_play: impl Fn(&Game, &Player) -> bool + Sync + Send + 'static,
     ) -> Self {
@@ -890,7 +890,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         let desc = self.description();
         self.add_custom_action_execution(
             action,
-            info,
+            cost,
             CustomActionExecution::Action(CustomActionActionExecution::new(
                 ability(Ability::builder(&name, &desc)).build(),
                 Arc::new(can_play),
@@ -902,7 +902,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
     fn add_action_modifier(
         self,
         action: CustomActionType,
-        info: impl Fn(CustomActionType) -> CustomActionInfo + Send + Sync + 'static,
+        info: impl Fn(CustomActionType) -> CustomActionCost + Send + Sync + 'static,
         base_action: PlayingActionType,
     ) -> Self {
         let name = self.name();
@@ -916,7 +916,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
     fn add_custom_action_execution(
         self,
         action: CustomActionType,
-        info: impl Fn(CustomActionType) -> CustomActionInfo + Send + Sync + 'static,
+        info: impl Fn(CustomActionType) -> CustomActionCost + Send + Sync + 'static,
         execution: CustomActionExecution,
     ) -> Self {
         let deinitializer_action = action;

@@ -6,7 +6,7 @@ use crate::combat::update_combat_strength;
 use crate::combat_listeners::CombatStrength;
 use crate::content::ability::AbilityBuilder;
 use crate::content::advances::warfare::draft_cost;
-use crate::content::custom_actions::{CustomActionInfo, CustomActionType};
+use crate::content::custom_actions::{CustomActionCost, CustomActionType};
 use crate::content::persistent_events::{AdvanceRequest, HandCardsRequest, PositionRequest};
 use crate::game::Game;
 use crate::leader::{Leader, LeaderAbility, LeaderInfo, leader_position};
@@ -334,7 +334,7 @@ fn pericles() -> LeaderInfo {
         )
         .add_custom_action(
             CustomActionType::Master,
-            |_| CustomActionInfo::new(false, None, ActionResourceCost::Tokens(1)),
+            |_| CustomActionCost::new(false, None, ActionResourceCost::Tokens(1)),
             use_master,
             |game, p| !master_education_advances(game, p).is_empty(),
         )

@@ -44,19 +44,19 @@ impl CustomActionActivation {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct CustomActionInfo {
+pub struct CustomActionCost {
     pub action_type: ActionCost,
     pub once_per_turn: Option<CustomActionType>,
 }
 
-impl CustomActionInfo {
+impl CustomActionCost {
     #[must_use]
     pub(crate) fn new(
         free: bool,
         once_per_turn: Option<CustomActionType>,
         cost: ActionResourceCost,
-    ) -> CustomActionInfo {
-        CustomActionInfo {
+    ) -> CustomActionCost {
+        CustomActionCost {
             action_type: ActionCost::new(free, cost),
             once_per_turn,
         }
@@ -68,7 +68,7 @@ pub struct CustomActionCommand {
     pub action: CustomActionType,
     pub execution: CustomActionExecution,
     pub event_origin: EventOrigin,
-    pub info: CustomActionInfo,
+    pub info: CustomActionCost,
 }
 
 impl CustomActionCommand {
@@ -77,7 +77,7 @@ impl CustomActionCommand {
         action: CustomActionType,
         execution: CustomActionExecution,
         event_origin: EventOrigin,
-        info: CustomActionInfo,
+        info: CustomActionCost,
     ) -> CustomActionCommand {
         CustomActionCommand {
             action,
@@ -174,36 +174,36 @@ impl CustomActionType {
     }
 
     #[must_use]
-    pub(crate) fn regular() -> CustomActionInfo {
-        CustomActionInfo::new(false, None, ActionResourceCost::free())
+    pub(crate) fn regular() -> CustomActionCost {
+        CustomActionCost::new(false, None, ActionResourceCost::free())
     }
 
     #[must_use]
-    pub(crate) fn cost(cost: ResourcePile) -> CustomActionInfo {
-        CustomActionInfo::new(true, None, ActionResourceCost::resources(cost))
+    pub(crate) fn cost(cost: ResourcePile) -> CustomActionCost {
+        CustomActionCost::new(true, None, ActionResourceCost::resources(cost))
     }
 
     #[must_use]
-    pub(crate) fn once_per_turn(self, cost: ResourcePile) -> CustomActionInfo {
-        CustomActionInfo::new(false, Some(self), ActionResourceCost::resources(cost))
+    pub(crate) fn once_per_turn(self, cost: ResourcePile) -> CustomActionCost {
+        CustomActionCost::new(false, Some(self), ActionResourceCost::resources(cost))
     }
 
     #[must_use]
-    pub(crate) fn free(cost: ResourcePile) -> CustomActionInfo {
-        CustomActionInfo::new(true, None, ActionResourceCost::resources(cost))
+    pub(crate) fn free(cost: ResourcePile) -> CustomActionCost {
+        CustomActionCost::new(true, None, ActionResourceCost::resources(cost))
     }
 
     #[must_use]
-    pub(crate) fn free_and_once_per_turn(self, cost: ResourcePile) -> CustomActionInfo {
-        CustomActionInfo::new(true, Some(self), ActionResourceCost::resources(cost))
+    pub(crate) fn free_and_once_per_turn(self, cost: ResourcePile) -> CustomActionCost {
+        CustomActionCost::new(true, Some(self), ActionResourceCost::resources(cost))
     }
 
     #[must_use]
     pub(crate) fn free_and_once_per_turn_mutually_exclusive(
         cost: ResourcePile,
         mutually_exclusive: CustomActionType,
-    ) -> CustomActionInfo {
-        CustomActionInfo::new(
+    ) -> CustomActionCost {
+        CustomActionCost::new(
             true,
             Some(mutually_exclusive),
             ActionResourceCost::resources(cost),
@@ -211,8 +211,8 @@ impl CustomActionType {
     }
 
     #[must_use]
-    pub(crate) fn free_and_advance_cost_without_discounts() -> CustomActionInfo {
-        CustomActionInfo::new(true, None, ActionResourceCost::AdvanceCostWithoutDiscount)
+    pub(crate) fn free_and_advance_cost_without_discounts() -> CustomActionCost {
+        CustomActionCost::new(true, None, ActionResourceCost::AdvanceCostWithoutDiscount)
     }
 }
 
