@@ -1,5 +1,5 @@
 use crate::city::MoodState;
-use crate::content::custom_actions::{CustomActionType, happiness_modifiers};
+use crate::content::custom_actions::CustomActionType;
 use crate::game::Game;
 use crate::leader::leader_position;
 use crate::payment::{PaymentOptions, PaymentReason};
@@ -12,12 +12,7 @@ use crate::resource_pile::ResourcePile;
 
 #[must_use]
 pub fn available_happiness_actions(game: &Game, player: usize) -> Vec<PlayingActionType> {
-    base_or_custom_available(
-        game,
-        player,
-        PlayingActionType::IncreaseHappiness,
-        happiness_modifiers(),
-    )
+    base_or_custom_available(game, player, &PlayingActionType::IncreaseHappiness)
 }
 
 #[must_use]
@@ -89,7 +84,7 @@ pub fn happiness_cost(
         &[ResourceType::MoodTokens],
     );
     // either none or both can use Colosseum
-    payment_options.default += action_type.cost(game).payment_options(p).default;
+    payment_options.default += action_type.cost(game, player).payment_options(p).default;
 
     p.trigger_cost_event(|e| &e.happiness_cost, &payment_options, &(), &(), execute)
 }

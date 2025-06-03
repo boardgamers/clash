@@ -134,4 +134,12 @@ impl AbilityInitializerSetup for SpecialAdvanceBuilder {
     fn get_key(&self) -> EventOrigin {
         EventOrigin::SpecialAdvance(self.advance)
     }
+
+    fn name(&self) -> String {
+        self.name.clone()
+    }
+
+    fn description(&self) -> String {
+        self.description.clone()
+    }
 }

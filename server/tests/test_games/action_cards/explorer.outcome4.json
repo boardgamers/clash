@@ -420,7 +420,7 @@
                         },
                         "handler": {
                           "origin": {
-                            "Builtin": "Explore Resolution"
+                            "Ability": "Explore Resolution"
                           },
                           "priority": 0,
                           "request": "ExploreResolution"

@@ -2,8 +2,8 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::city::City;
 use crate::combat::move_with_possible_combat;
 use crate::consts::STACK_LIMIT;
+use crate::content::ability::Ability;
 use crate::content::advances::theocracy::cities_that_can_add_units;
-use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{
     PersistentEventType, PositionRequest, ResourceRewardRequest, UnitTypeRequest,
 };
@@ -62,8 +62,8 @@ impl BarbariansEventState {
     }
 }
 
-pub(crate) fn barbarians_bonus() -> Builtin {
-    Builtin::builder("Barbarians bonus", "-")
+pub(crate) fn barbarians_bonus() -> Ability {
+    Ability::builder("Barbarians bonus", "-")
         .add_resource_request(
             |event| &mut event.combat_end,
             105,

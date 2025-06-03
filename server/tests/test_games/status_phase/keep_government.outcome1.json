@@ -22,7 +22,7 @@
           }
         },
         "origin": {
-          "Builtin": "Determine First Player"
+          "Ability": "Determine First Player"
         }
       }
     }
@@ -256,7 +256,7 @@
                     },
                     {
                       "op": "replace",
-                      "path": "/events/0/handler/origin/Builtin",
+                      "path": "/events/0/handler/origin/Ability",
                       "value": "Change Government"
                     },
                     {

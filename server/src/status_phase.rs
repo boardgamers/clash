@@ -2,7 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::gain_action_card_from_pile;
 use crate::advance::{Advance, do_advance, gain_advance_without_payment, remove_advance};
 use crate::consts::AGES;
-use crate::content::builtin::Builtin;
+use crate::content::ability::Ability;
 use crate::content::persistent_events::{
     AdvanceRequest, EventResponse, PaymentRequest, PersistentEventRequest, PersistentEventType,
     PlayerRequest, PositionRequest, TriggerPersistentEventParams,
@@ -126,8 +126,8 @@ pub(crate) fn play_status_phase(game: &mut Game, mut phase: StatusPhaseState) {
     }
 }
 
-pub(crate) fn complete_objectives() -> Builtin {
-    Builtin::builder(
+pub(crate) fn complete_objectives() -> Ability {
+    Ability::builder(
         "Complete Objectives",
         "Select Status Phase Objectives to Complete",
     )
@@ -147,8 +147,8 @@ pub(crate) fn complete_objectives() -> Builtin {
     .build()
 }
 
-pub(crate) fn free_advance() -> Builtin {
-    Builtin::builder("Free Advance", "Advance for free")
+pub(crate) fn free_advance() -> Ability {
+    Ability::builder("Free Advance", "Advance for free")
         .add_advance_request(
             |event| &mut event.status_phase,
             0,
@@ -183,8 +183,8 @@ pub(crate) fn free_advance() -> Builtin {
         .build()
 }
 
-pub(crate) fn draw_cards() -> Builtin {
-    Builtin::builder("Draw Cards", "-")
+pub(crate) fn draw_cards() -> Ability {
+    Ability::builder("Draw Cards", "-")
         .add_simple_persistent_event_listener(
             |event| &mut event.status_phase,
             0,
@@ -196,8 +196,8 @@ pub(crate) fn draw_cards() -> Builtin {
         .build()
 }
 
-pub(crate) fn raze_city() -> Builtin {
-    Builtin::builder("Raze city", "Raze size 1 city for 1 gold")
+pub(crate) fn raze_city() -> Ability {
+    Ability::builder("Raze city", "Raze size 1 city for 1 gold")
         .add_position_request(
             |event| &mut event.status_phase,
             0,
@@ -233,9 +233,9 @@ pub(crate) fn raze_city() -> Builtin {
         .build()
 }
 
-pub(crate) fn may_change_government() -> Builtin {
+pub(crate) fn may_change_government() -> Ability {
     add_change_government(
-        Builtin::builder("Change Government", "Change your government"),
+        Ability::builder("Change Government", "Change your government"),
         |event| &mut event.status_phase,
         ChangeGovernmentOption::NotFreeAndOptional,
         |_, _, _| true,
@@ -434,8 +434,8 @@ pub(crate) fn can_change_government_for_free(player: &Player, game: &Game) -> bo
     })
 }
 
-pub(crate) fn determine_first_player() -> Builtin {
-    Builtin::builder("Determine First Player", "Determine the first player")
+pub(crate) fn determine_first_player() -> Ability {
+    Ability::builder("Determine First Player", "Determine the first player")
         .add_player_request(
             |event| &mut event.status_phase,
             0,

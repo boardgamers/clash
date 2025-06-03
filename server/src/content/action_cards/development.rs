@@ -1,10 +1,10 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
 use crate::collect::available_collect_actions_for_city;
+use crate::content::ability::Ability;
 use crate::content::action_cards::cultural_takeover::cultural_takeover;
 use crate::content::action_cards::mercenaries::mercenaries;
-use crate::content::builtin::Builtin;
-use crate::content::custom_actions::collect_modifiers;
+use crate::content::custom_actions::is_base_or_modifier;
 use crate::content::effects::{CollectEffect, ConstructEffect, PermanentEffect};
 use crate::content::incidents::great_builders::can_construct_anything;
 use crate::content::incidents::great_explorer::{action_explore_request, explore_adjacent_block};
@@ -15,7 +15,6 @@ use crate::content::tactics_cards::{
 };
 use crate::game::Game;
 use crate::player::{Player, gain_unit};
-use crate::player_events::PlayingActionInfo;
 use crate::playing_actions::{ActionCost, PlayingActionType};
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
@@ -97,17 +96,18 @@ pub(crate) fn collect_special_action(game: &Game, player: &Player) -> bool {
             .any(|c| !available_collect_actions_for_city(game, player.index, c.position).is_empty())
 }
 
-pub(crate) fn collect_only() -> Builtin {
-    Builtin::builder("collect only", "-")
+pub(crate) fn collect_only() -> Ability {
+    Ability::builder("collect only", "-")
         .add_transient_event_listener(
             |event| &mut event.is_playing_action_available,
             4,
             |available, game, i| {
+                let p = game.player(i.player);
                 if game
                     .permanent_effects
                     .iter()
                     .any(|e| matches!(e, &PermanentEffect::Collect(_)))
-                    && !is_collect(i)
+                    && !is_base_or_modifier(&i.action_type, p, &PlayingActionType::Collect)
                 {
                     *available = Err("You may only collect.".to_string());
                 }
@@ -143,14 +143,6 @@ pub(crate) fn collect_only() -> Builtin {
             },
         )
         .build()
-}
-
-fn is_collect(i: &PlayingActionInfo) -> bool {
-    match &i.action_type {
-        PlayingActionType::Collect => true,
-        PlayingActionType::Custom(c) if collect_modifiers().contains(c) => true,
-        _ => false,
-    }
 }
 
 fn explorer(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {

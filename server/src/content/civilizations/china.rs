@@ -14,7 +14,11 @@ use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceR
 use itertools::Itertools;
 
 pub(crate) fn china() -> Civilization {
-    Civilization::new("China", vec![rice(), expansion(), fireworks()], vec![])
+    Civilization::new(
+        "China",
+        vec![rice(), expansion(), fireworks(), imperial_army()],
+        vec![],
+    )
 }
 
 fn rice() -> SpecialAdvanceInfo {
@@ -161,3 +165,27 @@ fn apply_fireworks(e: &mut CombatRoundEnd, p: usize, do_update: bool) -> bool {
         h.opponent_hit_cancels += 1;
     })
 }
+
+const IMPERIAL_ARMY: &str = "Once per turn, as an action, \
+        you may convert any number of settlers into infantry units, and vice versa.";
+
+fn imperial_army() -> SpecialAdvanceInfo {
+    SpecialAdvanceInfo::builder(
+        SpecialAdvance::ImperialArmy,
+        SpecialAdvanceRequirement::AnyGovernment,
+        "Imperial Army",
+        IMPERIAL_ARMY,
+    )
+    // .add_custom_action(
+    //     CustomActionType::ImperialArmy,
+    //     |a| a.once_per_turn(ResourcePile::empty()),
+    //     use_imperial_army(),
+    //     |_game, _p| todo!(),
+    // )
+    .build()
+}
+//
+// fn use_imperial_army() -> Ability {
+//     // todo
+//     Ability::builder("Imperial Army", IMPERIAL_ARMY).build()
+// }

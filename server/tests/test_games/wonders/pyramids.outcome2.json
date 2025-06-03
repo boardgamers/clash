@@ -251,7 +251,7 @@
                     },
                     {
                       "op": "replace",
-                      "path": "/events/0/handler/origin/Builtin",
+                      "path": "/events/0/handler/origin/Ability",
                       "value": "Build Wonder"
                     },
                     {
@@ -385,7 +385,7 @@
                           },
                           "handler": {
                             "origin": {
-                              "Builtin": "Select Objective Cards to Complete"
+                              "Ability": "Select Objective Cards to Complete"
                             },
                             "priority": 0,
                             "request": {

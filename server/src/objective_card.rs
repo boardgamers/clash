@@ -3,7 +3,7 @@ use crate::ability_initializer::{
 };
 use crate::cache::Cache;
 use crate::card::{HandCard, draw_card_from_pile};
-use crate::content::builtin::Builtin;
+use crate::content::ability::Ability;
 use crate::content::effects::PermanentEffect;
 use crate::content::incidents::great_persons::find_great_seer;
 use crate::content::persistent_events::{HandCardsRequest, PersistentEventType};
@@ -129,6 +129,14 @@ impl AbilityInitializerSetup for ObjectiveBuilder {
     fn get_key(&self) -> EventOrigin {
         EventOrigin::Objective(self.name.clone())
     }
+
+    fn name(&self) -> String {
+        self.name.clone()
+    }
+
+    fn description(&self) -> String {
+        self.description.clone()
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -207,8 +215,8 @@ pub(crate) fn on_objective_cards(game: &mut Game, player_index: usize, info: Sel
     );
 }
 
-pub(crate) fn select_objectives() -> Builtin {
-    Builtin::builder(
+pub(crate) fn select_objectives() -> Ability {
+    Ability::builder(
         "Select Objective Cards to Complete",
         "Select which Objective Cards to use \
         (because the requirements are now met)",

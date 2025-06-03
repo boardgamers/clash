@@ -2,8 +2,8 @@ use crate::advance::{Advance, is_special_advance_active};
 use crate::cache::Cache;
 use crate::city::{City, CityData};
 use crate::city_pieces::{DestroyedStructures, DestroyedStructuresData};
-use crate::content::builtin;
-use crate::content::builtin::Builtin;
+use crate::content::ability;
+use crate::content::ability::Ability;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::PersistentEventState;
@@ -132,7 +132,7 @@ pub fn from_data(data: GameData, cache: Cache, context: GameContext) -> Game {
         permanent_effects: data.permanent_effects,
         events: data.events,
     };
-    let all = game.cache.get_builtins().clone();
+    let all = game.cache.get_ability().clone();
     for player in data.players {
         initialize_player(player, &mut game, &all);
     }
@@ -288,12 +288,12 @@ pub struct PlayerData {
 /// # Panics
 ///
 /// Panics if elements like wonders or advances don't exist
-fn initialize_player(data: PlayerData, game: &mut Game, all: &[Builtin]) {
+fn initialize_player(data: PlayerData, game: &mut Game, all: &[Ability]) {
     let objective_cards = data.objective_cards.clone();
     let player = player_from_data(data, game);
     let player_index = player.index;
     game.players.push(player);
-    builtin::init_player(game, player_index, all);
+    ability::init_player(game, player_index, all);
     advance::init_player(game, player_index);
 
     if let Some(leader) = game.player(player_index).active_leader() {

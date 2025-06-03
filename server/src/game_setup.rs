@@ -3,7 +3,7 @@ use crate::advance::Advance;
 use crate::cache::Cache;
 use crate::consts::{ACTIONS, JSON_SCHEMA_VERSION, NON_HUMAN_PLAYERS};
 use crate::content::civilizations::{BARBARIANS, PIRATES};
-use crate::content::{builtin, civilizations};
+use crate::content::{ability, civilizations};
 use crate::game::{Game, GameContext, GameOptions, GameState};
 use crate::map::Map;
 use crate::objective_card::gain_objective_card_from_pile;
@@ -133,7 +133,7 @@ pub fn setup_game_with_cache(setup: GameSetup, cache: Cache) -> Game {
         .map(|i| i.id)
         .collect_vec()
         .shuffled(&mut rng);
-    let all = &cache.get_builtins().clone();
+    let all = &cache.get_ability().clone();
     let mut game = Game {
         seed: setup.seed.clone(),
         context: GameContext::Play,
@@ -171,7 +171,7 @@ pub fn setup_game_with_cache(setup: GameSetup, cache: Cache) -> Game {
         permanent_effects: Vec::new(),
     };
     for i in 0..game.players.len() {
-        builtin::init_player(&mut game, i, all);
+        ability::init_player(&mut game, i, all);
     }
 
     for player_index in 0..setup.player_amount {

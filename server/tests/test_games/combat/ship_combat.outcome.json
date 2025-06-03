@@ -81,7 +81,7 @@
           }
         },
         "origin": {
-          "Builtin": "Choose Casualties (carried units)"
+          "Ability": "Choose Casualties (carried units)"
         }
       }
     }

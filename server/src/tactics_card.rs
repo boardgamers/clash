@@ -273,6 +273,14 @@ impl AbilityInitializerSetup for TacticsCardBuilder {
     fn get_key(&self) -> EventOrigin {
         EventOrigin::TacticsCard(self.id)
     }
+
+    fn name(&self) -> String {
+        self.name.clone()
+    }
+
+    fn description(&self) -> String {
+        self.description.clone()
+    }
 }
 
 pub(crate) fn play_tactics_card(b: AdvanceBuilder) -> AdvanceBuilder {

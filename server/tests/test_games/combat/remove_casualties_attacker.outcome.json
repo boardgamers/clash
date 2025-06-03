@@ -76,7 +76,7 @@
           }
         },
         "origin": {
-          "Builtin": "Choose Casualties"
+          "Ability": "Choose Casualties"
         }
       }
     }

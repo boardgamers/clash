@@ -150,6 +150,14 @@ impl AbilityInitializerSetup for ActionCardBuilder {
     fn get_key(&self) -> EventOrigin {
         EventOrigin::CivilCard(self.id)
     }
+
+    fn name(&self) -> String {
+        self.name.clone()
+    }
+
+    fn description(&self) -> String {
+        self.description.clone()
+    }
 }
 
 pub(crate) fn play_action_card(game: &mut Game, player_index: usize, id: u8) {

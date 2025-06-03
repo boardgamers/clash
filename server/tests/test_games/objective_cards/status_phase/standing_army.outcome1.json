@@ -32,7 +32,7 @@
           }
         },
         "origin": {
-          "Builtin": "Free Advance"
+          "Ability": "Free Advance"
         }
       }
     }
@@ -313,7 +313,7 @@
                         },
                         "handler": {
                           "origin": {
-                            "Builtin": "Select Objective Cards to Complete"
+                            "Ability": "Select Objective Cards to Complete"
                           },
                           "priority": 0,
                           "request": {

@@ -246,7 +246,7 @@
                           },
                           "handler": {
                             "origin": {
-                              "Builtin": "Bartering"
+                              "Ability": "Bartering"
                             },
                             "priority": 0,
                             "request": {

@@ -3,7 +3,7 @@ use crate::advance::undo_unlock_special_advance;
 use crate::advance::{find_government_special_advance, remove_advance};
 use crate::combat::{Combat, CombatModifier, CombatRetreatState};
 use crate::combat_listeners::CombatResult;
-use crate::content::builtin::Builtin;
+use crate::content::ability::Ability;
 use crate::content::effects::{Anarchy, PermanentEffect};
 use crate::content::persistent_events::{PaymentRequest, PositionRequest, UnitTypeRequest};
 use crate::game::Game;
@@ -37,8 +37,8 @@ fn trojan_horse() -> Incident {
     .build()
 }
 
-pub(crate) fn decide_trojan_horse() -> Builtin {
-    Builtin::builder("Trojan Horse", TROJAN_DESCRIPTION)
+pub(crate) fn decide_trojan_horse() -> Ability {
+    Ability::builder("Trojan Horse", TROJAN_DESCRIPTION)
         .add_payment_request_listener(
             |event| &mut event.combat_start,
             10,
@@ -102,8 +102,8 @@ fn solar_eclipse() -> Incident {
     .build()
 }
 
-pub(crate) fn solar_eclipse_end_combat() -> Builtin {
-    Builtin::builder("Solar Eclipse", "-")
+pub(crate) fn solar_eclipse_end_combat() -> Ability {
+    Ability::builder("Solar Eclipse", "-")
         .add_simple_persistent_event_listener(
             |event| &mut event.combat_round_end,
             10,
@@ -325,8 +325,8 @@ fn anarchy() -> Incident {
     .build()
 }
 
-pub(crate) fn anarchy_advance() -> Builtin {
-    Builtin::builder("Anarchy", "-")
+pub(crate) fn anarchy_advance() -> Ability {
+    Ability::builder("Anarchy", "-")
         .add_simple_persistent_event_listener(
             |event| &mut event.advance,
             10,

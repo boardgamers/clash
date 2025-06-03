@@ -1,8 +1,8 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action::Action;
 use crate::action_card::ActionCard;
+use crate::content::ability::Ability;
 use crate::content::action_cards::development::collect_special_action;
-use crate::content::builtin::Builtin;
 use crate::content::effects::{CollectEffect, PermanentEffect};
 use crate::content::incidents::great_diplomat::{DiplomaticRelations, Negotiations};
 use crate::content::persistent_events::PlayerRequest;
@@ -76,8 +76,8 @@ fn negotiations(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .build()
 }
 
-pub(crate) fn use_negotiations() -> Builtin {
-    Builtin::builder("Negotiations", "")
+pub(crate) fn use_negotiations() -> Ability {
+    Ability::builder("Negotiations", "")
         .add_simple_persistent_event_listener(
             |e| &mut e.turn_start,
             1,
@@ -193,8 +193,8 @@ fn opponents_not_affected_by_assassination(game: &Game, player_index: usize) -> 
         .collect()
 }
 
-pub(crate) fn use_assassination() -> Builtin {
-    Builtin::builder("Assassination", "")
+pub(crate) fn use_assassination() -> Ability {
+    Ability::builder("Assassination", "")
         .add_simple_persistent_event_listener(
             |e| &mut e.turn_start,
             2,

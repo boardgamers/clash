@@ -26,56 +26,64 @@ use crate::unit::choose_carried_units_to_remove;
 use crate::wonder::{build_wonder, on_draw_wonder_card};
 
 #[derive(Clone)]
-pub struct Builtin {
+pub struct Ability {
     pub name: String,
     pub description: String,
     pub listeners: AbilityListeners,
 }
 
-impl Builtin {
+impl Ability {
     #[must_use]
-    pub fn builder(name: &str, description: &str) -> BuiltinBuilder {
-        BuiltinBuilder::new(name, description)
+    pub fn builder(name: &str, description: &str) -> AbilityBuilder {
+        AbilityBuilder::new(name, description)
     }
 }
 
-pub struct BuiltinBuilder {
+pub struct AbilityBuilder {
     name: String,
-    descriptions: String,
+    description: String,
     builder: AbilityInitializerBuilder,
 }
 
-impl BuiltinBuilder {
+impl AbilityBuilder {
     fn new(name: &str, description: &str) -> Self {
         Self {
             name: name.to_string(),
-            descriptions: description.to_string(),
+            description: description.to_string(),
             builder: AbilityInitializerBuilder::new(),
         }
     }
 
     #[must_use]
-    pub fn build(self) -> Builtin {
-        Builtin {
+    pub fn build(self) -> Ability {
+        Ability {
             name: self.name,
-            description: self.descriptions,
+            description: self.description,
             listeners: self.builder.build(),
         }
     }
 }
 
-impl AbilityInitializerSetup for BuiltinBuilder {
+impl AbilityInitializerSetup for AbilityBuilder {
     fn builder(&mut self) -> &mut AbilityInitializerBuilder {
         &mut self.builder
     }
 
     fn get_key(&self) -> EventOrigin {
-        EventOrigin::Builtin(self.name.clone())
+        EventOrigin::Ability(self.name.clone())
+    }
+
+    fn name(&self) -> String {
+        self.name.clone()
+    }
+
+    fn description(&self) -> String {
+        self.description.clone()
     }
 }
 
 #[must_use]
-pub fn get_all_uncached() -> Vec<Builtin> {
+pub fn get_all_uncached() -> Vec<Ability> {
     vec![
         fishing_collect(),
         pay_for_action(),
@@ -111,7 +119,7 @@ pub fn get_all_uncached() -> Vec<Builtin> {
     ]
 }
 
-pub(crate) fn init_player(game: &mut Game, player_index: usize, all: &[Builtin]) {
+pub(crate) fn init_player(game: &mut Game, player_index: usize, all: &[Ability]) {
     for b in all {
         b.listeners.init(game, player_index);
     }

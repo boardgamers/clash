@@ -1,10 +1,12 @@
 use crate::advance::{Advance, base_advance_cost, player_government};
 use crate::city_pieces::DestroyedStructures;
 use crate::consts::{STACK_LIMIT, UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
-use crate::events::{Event, EventOrigin};
+use crate::content::custom_actions::{CustomActionCommand, CustomActionExecution};
+use crate::events::Event;
 use crate::leader::{Leader, LeaderAbility};
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player_events::{CostInfo, TransientEvents};
+use crate::playing_actions::PlayingActionType;
 use crate::special_advance::SpecialAdvance;
 use crate::unit::UnitType;
 use crate::wonder::{Wonder, wonders_built_points, wonders_owned_points};
@@ -62,7 +64,7 @@ pub struct Player {
     pub completed_objectives: Vec<String>,
     pub captured_leaders: Vec<Leader>,
     pub event_victory_points: f32,
-    pub custom_actions: HashMap<CustomActionType, EventOrigin>,
+    pub custom_actions: HashMap<CustomActionType, CustomActionCommand>, // transient
     pub wonder_cards: Vec<Wonder>,
     pub action_cards: Vec<u8>,
     pub objective_cards: Vec<u8>,
@@ -603,16 +605,36 @@ impl Player {
     /// # Panics
     /// Panics if the custom action type does not exist for this player
     #[must_use]
-    pub fn custom_action_origin(&self, custom_action_type: &CustomActionType) -> EventOrigin {
+    pub fn custom_action_command(
+        &self,
+        custom_action_type: CustomActionType,
+    ) -> CustomActionCommand {
         self.custom_actions
-            .get(custom_action_type)
+            .get(&custom_action_type)
             .cloned()
             .unwrap_or_else(|| {
                 panic!(
-                    "Custom action {} not found for player {}",
-                    custom_action_type, self.index
+                    "Custom action {custom_action_type:?} not found for player {}",
+                    self.index
                 )
             })
+    }
+
+    #[must_use]
+    pub(crate) fn custom_action_modifiers(
+        &self,
+        base: &PlayingActionType,
+    ) -> Vec<CustomActionType> {
+        self.custom_actions
+            .iter()
+            .filter_map(move |(t, c)| {
+                if let CustomActionExecution::Modifier(b) = &c.execution {
+                    (b == base).then_some(*t)
+                } else {
+                    None
+                }
+            })
+            .collect_vec()
     }
 }
 

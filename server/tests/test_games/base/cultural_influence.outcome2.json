@@ -319,7 +319,7 @@
                           },
                           "handler": {
                             "origin": {
-                              "Builtin": "Influence Culture"
+                              "Ability": "Influence Culture"
                             },
                             "priority": 0,
                             "request": {

@@ -2,9 +2,9 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{ActionCard, ActionCardBuilder, CivilCardTarget, discard_action_card};
 use crate::advance::{Advance, gain_advance_without_payment};
 use crate::card::HandCard;
+use crate::content::ability::Ability;
 use crate::content::action_cards::inspiration;
 use crate::content::advances::theocracy::cities_that_can_add_units;
-use crate::content::builtin::Builtin;
 use crate::content::persistent_events::{
     AdvanceRequest, HandCardsRequest, PaymentRequest, PlayerRequest, PositionRequest,
 };
@@ -277,9 +277,9 @@ fn teach_us(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .build()
 }
 
-pub(crate) fn use_teach_us() -> Builtin {
+pub(crate) fn use_teach_us() -> Ability {
     // this action card is special - it's played directly after a battle - like objective cards
-    Builtin::builder(
+    Ability::builder(
         "Teach us",
         "If you just captured a city: Gain 1 advance from the loser for free \
              without changing the Game Event counter.",

@@ -3,8 +3,7 @@ use crate::action::Action;
 use crate::city::City;
 use crate::city_pieces::Building;
 use crate::consts::INFLUENCE_MIN_ROLL;
-use crate::content::builtin::Builtin;
-use crate::content::custom_actions::influence_modifiers;
+use crate::content::ability::Ability;
 use crate::content::persistent_events::{
     PaymentRequest, PersistentEventType, SelectedStructure, Structure,
 };
@@ -123,8 +122,8 @@ pub(crate) fn on_cultural_influence(
     );
 }
 
-pub(crate) fn use_cultural_influence() -> Builtin {
-    Builtin::builder("Influence Culture", "")
+pub(crate) fn use_cultural_influence() -> Ability {
+    Ability::builder("Influence Culture", "")
         .add_payment_request_listener(
             |e| &mut e.influence_culture,
             2,
@@ -459,7 +458,7 @@ pub fn affordable_start_city(
         let mut action_cost = ResourcePile::empty();
         if let Some(t) = action_type {
             // either none (action cost and boost cost) or both can use Colosseum
-            action_cost = t.cost(game).payment_options(player).default;
+            action_cost = t.cost(game, player_index).payment_options(player).default;
             let c = action_cost.culture_tokens;
             if c > 0 {
                 tokens -= c;
@@ -565,10 +564,5 @@ pub(crate) fn format_cultural_influence_attempt_log_item(
 
 #[must_use]
 pub fn available_influence_actions(game: &Game, player: usize) -> Vec<PlayingActionType> {
-    base_or_custom_available(
-        game,
-        player,
-        PlayingActionType::InfluenceCultureAttempt,
-        influence_modifiers(),
-    )
+    base_or_custom_available(game, player, &PlayingActionType::InfluenceCultureAttempt)
 }

@@ -14,7 +14,7 @@ use crate::cultural_influence::{
     InfluenceCultureAttempt, available_influence_actions, available_influence_culture,
 };
 use crate::events::EventOrigin;
-use crate::game::Game;
+use crate::game::{Game, GameState};
 use crate::happiness::{available_happiness_actions, happiness_cost};
 use crate::payment::PaymentOptions;
 use crate::player::{CostTrigger, Player};
@@ -84,8 +84,10 @@ impl AiActions {
                     .map(Action::Response)
                     .collect(),
             )]
-        } else {
+        } else if game.state == GameState::Playing {
             base_actions(self, game)
+        } else {
+            vec![]
         };
         for (t, a) in &actions {
             assert!(
@@ -192,16 +194,21 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
         ));
     }
 
-    for (a, _) in game.available_custom_actions(p.index) {
-        let cities = if a.is_city_bound() {
+    for command in game.available_custom_actions(p.index) {
+        let cities = if command.city_bound().is_some() {
             p.cities
                 .iter()
-                .filter_map(|city| a.is_available_city(p, city).then_some(Some(city.position)))
+                .filter_map(|city| {
+                    command
+                        .is_city_available(game, city)
+                        .then_some(Some(city.position))
+                })
                 .collect_vec()
         } else {
             vec![None]
         };
 
+        let a = command.action;
         for c in cities {
             actions.push((
                 ActionType::Playing(PlayingActionType::Custom(a)),
@@ -595,7 +602,7 @@ fn change_government(p: &Player, game: &Game) -> Vec<EventResponse> {
 
 fn hand_card_strategy(o: &EventOrigin, r: &HandCardsRequest) -> SelectMultiStrategy {
     match o {
-        EventOrigin::Builtin(n) if n == "Select Objective Cards to Complete" => {
+        EventOrigin::Ability(n) if n == "Select Objective Cards to Complete" => {
             SelectMultiStrategy::Max
         }
         EventOrigin::CivilCard(_)
@@ -609,7 +616,7 @@ fn hand_card_strategy(o: &EventOrigin, r: &HandCardsRequest) -> SelectMultiStrat
 
 fn select_position_strategy(o: &EventOrigin, _r: &PositionRequest) -> SelectMultiStrategy {
     match o {
-        EventOrigin::Builtin(n) if n == "Raze city" => SelectMultiStrategy::Min,
+        EventOrigin::Ability(n) if n == "Raze city" => SelectMultiStrategy::Min,
         _ => SelectMultiStrategy::All,
     }
 }

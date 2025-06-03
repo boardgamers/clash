@@ -2,7 +2,7 @@ use crate::ability_initializer::{AbilityInitializerSetup, SelectedChoice};
 use crate::advance::Advance;
 use crate::city::non_angry_cites;
 use crate::city::{City, MoodState};
-use crate::content::builtin::Builtin;
+use crate::content::ability::Ability;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::UnitsRequest;
 use crate::game::Game;
@@ -85,8 +85,8 @@ pub(crate) fn additional_sanitation_damage(p: &Player) -> bool {
         || p.can_use_advance(Advance::TradeRoutes)
 }
 
-pub(crate) fn pestilence_permanent_effect() -> Builtin {
-    Builtin::builder(
+pub(crate) fn pestilence_permanent_effect() -> Ability {
+    Ability::builder(
         "Pestilence",
         "You cannot construct buildings or wonders until you research Sanitation.",
     )

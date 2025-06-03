@@ -81,7 +81,7 @@
         },
         {
           "position": "C2",
-           "unit_type": "Infantry",
+          "unit_type": "Infantry",
           "id": 2
         },
         {
@@ -323,7 +323,7 @@
                     },
                     {
                       "op": "add",
-                      "path": "/events/0/handler/origin/Builtin",
+                      "path": "/events/0/handler/origin/Ability",
                       "value": "Great Mausoleum"
                     },
                     {

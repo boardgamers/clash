@@ -284,7 +284,7 @@
                     },
                     {
                       "op": "remove",
-                      "path": "/events/0/handler/origin/Builtin"
+                      "path": "/events/0/handler/origin/Ability"
                     },
                     {
                       "op": "replace",
@@ -416,7 +416,7 @@
                           },
                           "handler": {
                             "origin": {
-                              "Builtin": "Choose Casualties"
+                              "Ability": "Choose Casualties"
                             },
                             "priority": 1,
                             "request": {

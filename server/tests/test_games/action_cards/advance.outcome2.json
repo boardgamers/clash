@@ -228,7 +228,7 @@
                     },
                     {
                       "op": "add",
-                      "path": "/events/0/handler/origin/Builtin",
+                      "path": "/events/0/handler/origin/Ability",
                       "value": "Pay for action card"
                     },
                     {

@@ -4,7 +4,7 @@ use crate::advance::{Advance, init_great_library};
 use crate::card::{HandCard, all_objective_hand_cards};
 use crate::city::{City, MoodState};
 use crate::combat_listeners::CombatRoundEnd;
-use crate::content::builtin::Builtin;
+use crate::content::ability::{Ability, AbilityBuilder};
 use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::{
     AdvanceRequest, HandCardsRequest, PaymentRequest, PositionRequest,
@@ -78,19 +78,20 @@ fn great_statue() -> WonderInfo {
         PaymentOptions::fixed_resources(ResourcePile::new(3, 4, 5, 0, 0, 0, 5)),
         Advance::Monuments,
     )
-    .add_custom_action(CustomActionType::GreatStatue)
+    .add_custom_action(
+        CustomActionType::GreatStatue,
+        |a| a.free_and_once_per_turn(ResourcePile::empty()),
+        use_great_statue,
+        |_game, p| !p.objective_cards.is_empty(),
+    )
     .add_one_time_ability_initializer(|game, player_index| {
         gain_objective_card_from_pile(game, player_index);
     })
     .build()
 }
 
-pub(crate) fn use_great_statue() -> Builtin {
-    Builtin::builder(
-        "Great Statue",
-        "Discard an objectives card from your hand: Gain 1 action.",
-    )
-    .add_hand_card_request(
+fn use_great_statue(b: AbilityBuilder) -> AbilityBuilder {
+    b.add_hand_card_request(
         |event| &mut event.custom_action,
         0,
         |game, player_index, _| {
@@ -114,7 +115,6 @@ pub(crate) fn use_great_statue() -> Builtin {
             game.actions_left += 1;
         },
     )
-    .build()
 }
 
 fn great_mausoleum() -> WonderInfo {
@@ -130,8 +130,8 @@ fn great_mausoleum() -> WonderInfo {
     .build()
 }
 
-pub(crate) fn use_great_mausoleum() -> Builtin {
-    Builtin::builder("Great Mausoleum", "")
+pub(crate) fn use_great_mausoleum() -> Ability {
+    Ability::builder("Great Mausoleum", "")
         .add_bool_request(
             |event| &mut event.choose_action_card,
             0,
@@ -210,7 +210,16 @@ fn great_lighthouse() -> WonderInfo {
     .placement_requirement(Arc::new(|pos, game| {
         game.get_any_city(pos).pieces.port.is_some()
     }))
-    .add_custom_action(CustomActionType::GreatLighthouse)
+    .add_custom_action(
+        CustomActionType::GreatLighthouse,
+        |_| CustomActionType::free(ResourcePile::empty()),
+        use_great_lighthouse,
+        |game, p| {
+            great_lighthouse_city(p).can_activate()
+                && p.available_units().ships > 0
+                && !great_lighthouse_spawns(game, p.index).is_empty()
+        },
+    )
     .build()
 }
 
@@ -231,12 +240,8 @@ pub(crate) fn great_lighthouse_spawns(game: &Game, player: usize) -> Vec<Positio
         .collect_vec()
 }
 
-pub(crate) fn use_great_lighthouse() -> Builtin {
-    Builtin::builder(
-        "Great Lighthouse",
-        "Activate the city: Place a ship on any sea space without enemy ships.",
-    )
-    .add_position_request(
+fn use_great_lighthouse(b: AbilityBuilder) -> AbilityBuilder {
+    b.add_position_request(
         |event| &mut event.custom_action,
         0,
         |game, player_index, _| {
@@ -261,55 +266,55 @@ pub(crate) fn use_great_lighthouse() -> Builtin {
                 .activate();
         },
     )
-    .build()
 }
-
-const GREAT_LIBRARY: &str = "Once per turn, as a free action, \
-        you may choose a non-government, non-civilization advance: \
-        Use the effect until the end of your turn.";
 
 fn library() -> WonderInfo {
     WonderInfo::builder(
         Wonder::GreatLibrary,
         "Great Library",
-        GREAT_LIBRARY,
+        "Once per turn, as a free action, \
+        you may choose a non-government, non-civilization advance: \
+        Use the effect until the end of your turn.",
         PaymentOptions::fixed_resources(ResourcePile::new(3, 6, 3, 0, 0, 0, 5)),
         Advance::Philosophy,
     )
-    .add_custom_action(CustomActionType::GreatLibrary)
+    .add_custom_action(
+        CustomActionType::GreatLibrary,
+        |a| a.free_and_once_per_turn(ResourcePile::empty()),
+        use_great_library,
+        |_, _| true,
+    )
     .build()
 }
 
-pub(crate) fn use_great_library() -> Builtin {
-    Builtin::builder("Great Library", GREAT_LIBRARY)
-        .add_advance_request(
-            |event| &mut event.custom_action,
-            0,
-            |game, player_index, _| {
-                let player = game.player(player_index);
-                Some(AdvanceRequest::new(
-                    game.cache
-                        .get_advances()
-                        .iter()
-                        .filter_map(|a| {
-                            (a.government.is_none() && !player.has_advance(a.advance))
-                                .then_some(a.advance)
-                        })
-                        .collect_vec(),
-                ))
-            },
-            |game, s, _| {
-                let advance = s.choice;
-                game.add_info_log_item(&format!(
-                    "{} used the Great Library to use {} for the turn",
-                    s.player_name,
-                    advance.name(game)
-                ));
-                game.player_mut(s.player_index).great_library_advance = Some(advance);
-                init_great_library(game, s.player_index);
-            },
-        )
-        .build()
+fn use_great_library(b: AbilityBuilder) -> AbilityBuilder {
+    b.add_advance_request(
+        |event| &mut event.custom_action,
+        0,
+        |game, player_index, _| {
+            let player = game.player(player_index);
+            Some(AdvanceRequest::new(
+                game.cache
+                    .get_advances()
+                    .iter()
+                    .filter_map(|a| {
+                        (a.government.is_none() && !player.has_advance(a.advance))
+                            .then_some(a.advance)
+                    })
+                    .collect_vec(),
+            ))
+        },
+        |game, s, _| {
+            let advance = s.choice;
+            game.add_info_log_item(&format!(
+                "{} used the Great Library to use {} for the turn",
+                s.player_name,
+                advance.name(game)
+            ));
+            game.player_mut(s.player_index).great_library_advance = Some(advance);
+            init_great_library(game, s.player_index);
+        },
+    )
 }
 
 fn great_gardens() -> WonderInfo {

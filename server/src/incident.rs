@@ -614,6 +614,14 @@ impl AbilityInitializerSetup for IncidentBuilder {
     fn get_key(&self) -> EventOrigin {
         EventOrigin::Incident(self.id)
     }
+
+    fn name(&self) -> String {
+        self.name.clone()
+    }
+
+    fn description(&self) -> String {
+        self.description.clone()
+    }
 }
 
 pub(crate) fn trigger_incident(game: &mut Game, player_index: usize) {

@@ -1,7 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::barbarians;
 use crate::city::MoodState;
-use crate::content::builtin::Builtin;
+use crate::content::ability::Ability;
 use crate::content::persistent_events::{
     PaymentRequest, PositionRequest, ResourceRewardRequest, UnitsRequest,
 };
@@ -16,8 +16,8 @@ use crate::tactics_card::CombatRole;
 use crate::unit::UnitType;
 use itertools::Itertools;
 
-pub(crate) fn pirates_round_bonus() -> Builtin {
-    Builtin::builder("Pirates bonus", "-")
+pub(crate) fn pirates_round_bonus() -> Ability {
+    Ability::builder("Pirates bonus", "-")
         .add_resource_request(
             |event| &mut event.combat_round_end,
             3,
@@ -44,8 +44,8 @@ pub(crate) fn pirates_round_bonus() -> Builtin {
         .build()
 }
 
-pub(crate) fn pirates_bonus() -> Builtin {
-    Builtin::builder(
+pub(crate) fn pirates_bonus() -> Ability {
+    Ability::builder(
         "Barbarians bonus",
         "Select a reward for fighting the Pirates",
     )

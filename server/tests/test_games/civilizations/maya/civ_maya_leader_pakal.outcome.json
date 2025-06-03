@@ -49,7 +49,7 @@
           }
         },
         "origin": {
-          "Builtin": "Place Settler"
+          "Ability": "Place Settler"
         }
       }
     }

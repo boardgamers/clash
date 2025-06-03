@@ -259,7 +259,7 @@
                           },
                           "handler": {
                             "origin": {
-                              "Builtin": "Build Wonder"
+                              "Ability": "Build Wonder"
                             },
                             "priority": 10,
                             "request": {
@@ -384,7 +384,7 @@
                           },
                           "handler": {
                             "origin": {
-                              "Builtin": "Great Lighthouse"
+                              "Ability": "Great Lighthouse"
                             },
                             "priority": 0,
                             "request": {

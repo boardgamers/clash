@@ -22,7 +22,7 @@
           }
         },
         "origin": {
-          "Builtin": "Determine First Player"
+          "Ability": "Determine First Player"
         }
       }
     }

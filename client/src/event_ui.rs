@@ -10,7 +10,11 @@ pub fn event_help(rc: &RenderContext, origin: &EventOrigin) -> Vec<String> {
     let d = match origin {
         EventOrigin::Advance(a) => vec![a.info(rc.game).description.clone()],
         EventOrigin::Wonder(w) => vec![rc.game.cache.get_wonder(*w).description.clone()],
-        EventOrigin::Builtin(b) => vec![cache.get_builtin(b, rc.game).description.clone()],
+        EventOrigin::Ability(b) => vec![
+            cache
+                .get_ability_description(b, rc.game, rc.shown_player)
+                .clone(),
+        ],
         EventOrigin::CivilCard(id) => vec![cache.get_civil_card(*id).description.clone()],
         EventOrigin::TacticsCard(id) => vec![cache.get_tactics_card(*id).description.clone()],
         EventOrigin::Incident(id) => cache.get_incident(*id).description(rc.game),

@@ -2,8 +2,8 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city_pieces::Building::Port;
+use crate::content::ability::Ability;
 use crate::content::advances::{AdvanceGroup, advance_group_builder};
-use crate::content::builtin::Builtin;
 use crate::game::Game;
 use crate::player::gain_resources;
 use crate::position::Position;
@@ -106,8 +106,8 @@ fn is_enemy_player_or_pirate_zone(game: &Game, player_index: usize, position: Po
     game.enemy_player(player_index, position).is_some() || game.is_pirate_zone(position)
 }
 
-pub(crate) fn fishing_collect() -> Builtin {
-    Builtin::builder("Fishing", "")
+pub(crate) fn fishing_collect() -> Ability {
+    Ability::builder("Fishing", "")
         .add_transient_event_listener(
             |event| &mut event.collect_options,
             1,
