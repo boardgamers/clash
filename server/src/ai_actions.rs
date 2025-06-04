@@ -5,7 +5,7 @@ use crate::card::validate_card_selection;
 use crate::city::{City, MoodState};
 use crate::collect::{available_collect_actions, possible_resource_collections};
 use crate::construct::{Construct, available_buildings, new_building_positions};
-use crate::content::custom_actions::CustomAction;
+use crate::content::custom_actions::{CustomAction, CustomActionType};
 use crate::content::persistent_events::{
     EventResponse, HandCardsRequest, MultiRequest, PersistentEventRequest, PersistentEventState,
     PositionRequest, SelectedStructure, is_selected_structures_valid,
@@ -195,6 +195,11 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
     }
 
     for info in game.available_custom_actions(p.index) {
+        if info.action == CustomActionType::ImperialArmy {
+            // buggy
+            continue;
+        }
+        
         let cities = if info.city_bound().is_some() {
             p.cities
                 .iter()

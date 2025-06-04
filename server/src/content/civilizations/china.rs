@@ -231,7 +231,7 @@ fn use_imperial_army(b: AbilityBuilder) -> AbilityBuilder {
             }
 
             game.add_info_log_item(&format!(
-                "{} selected {} for Imperial Army",
+                "{} converted {} using Imperial Army",
                 s.player_name,
                 names.join(", ")
             ));
@@ -257,7 +257,7 @@ pub(crate) fn validate_imperial_army(units: &[u32], p: &Player) -> Result<(), St
         .filter(|&&u| p.get_unit(u).is_infantry())
         .collect_vec();
 
-    let net_to_settler = infantry_to_settler.len() - settler_to_infantry.len();
+    let net_to_settler = infantry_to_settler.len() as i8 - settler_to_infantry.len() as i8;
     if p.available_units().settlers < net_to_settler as u8 {
         return Err(format!(
             "Cannot convert {} infantry to settlers, only {} available",
@@ -266,7 +266,7 @@ pub(crate) fn validate_imperial_army(units: &[u32], p: &Player) -> Result<(), St
         ));
     }
 
-    let net_to_infantry = settler_to_infantry.len() - infantry_to_settler.len();
+    let net_to_infantry = settler_to_infantry.len() as i8 - infantry_to_settler.len() as i8;
     if p.available_units().infantry < net_to_infantry as u8 {
         return Err(format!(
             "Cannot convert {} settlers to infantry, only {} available",
