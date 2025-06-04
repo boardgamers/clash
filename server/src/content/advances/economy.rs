@@ -7,7 +7,7 @@ use crate::city_pieces::Building::Market;
 use crate::content::ability::AbilityBuilder;
 use crate::content::advances::trade_routes::{TradeRoute, trade_route_log, trade_route_reward};
 use crate::content::advances::{AdvanceGroup, advance_group_builder};
-use crate::content::custom_actions::CustomActionType;
+use crate::content::custom_actions::{CustomActionCost, CustomActionType};
 use crate::content::custom_actions::CustomActionType::Taxes;
 use crate::content::persistent_events::{HandCardsRequest, ResourceRewardRequest};
 use crate::game::Game;
@@ -44,7 +44,7 @@ fn bartering() -> AdvanceBuilder {
     .with_advance_bonus(MoodToken)
     .add_custom_action(
         CustomActionType::Bartering,
-        |a| a.free_and_once_per_turn(ResourcePile::empty()),
+        |a| CustomActionCost::free_and_once_per_turn(a, ResourcePile::empty()),
         use_bartering,
         |_game, p| !p.action_cards.is_empty(),
     )
@@ -102,7 +102,7 @@ fn taxes() -> AdvanceBuilder {
     )
     .add_custom_action(
         Taxes,
-        |a| a.once_per_turn(ResourcePile::mood_tokens(1)),
+        |a| CustomActionCost::once_per_turn(a, ResourcePile::mood_tokens(1)),
         use_taxes,
         |_, _| true,
     )

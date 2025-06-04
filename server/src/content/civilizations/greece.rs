@@ -107,7 +107,7 @@ fn hellenistic_culture() -> SpecialAdvanceInfo {
     .add_action_modifier(
         CustomActionType::HellenisticInfluenceCultureAttempt,
         |_| {
-            CustomActionType::free_and_once_per_turn_mutually_exclusive(
+            CustomActionCost::free_and_once_per_turn_mutually_exclusive(
                 ResourcePile::mood_tokens(2),
                 CustomActionType::ArtsInfluenceCultureAttempt,
             )
@@ -199,7 +199,7 @@ fn alexander() -> LeaderInfo {
         )
         .add_custom_action(
             CustomActionType::Idol,
-            |_| CustomActionType::free(ResourcePile::culture_tokens(1)),
+            |_| CustomActionCost::free(ResourcePile::culture_tokens(1)),
             use_idol,
             |game, p| !idol_cards(game, p, &ResourcePile::culture_tokens(1)).is_empty(),
         )
@@ -334,7 +334,7 @@ fn pericles() -> LeaderInfo {
         )
         .add_custom_action(
             CustomActionType::Master,
-            |_| CustomActionCost::new(false, None, ActionResourceCost::Tokens(1)),
+            |_| CustomActionCost::new(false, None, ActionResourceCost::tokens(1)),
             use_master,
             |game, p| !master_education_advances(game, p).is_empty(),
         )

@@ -4,13 +4,15 @@ use crate::civilization::Civilization;
 use crate::combat_listeners::CombatRoundEnd;
 use crate::consts::STACK_LIMIT;
 use crate::content::ability::AbilityBuilder;
-use crate::content::custom_actions::CustomActionType;
+use crate::content::custom_actions::{CustomActionCost, CustomActionType};
 use crate::content::persistent_events::{PaymentRequest, UnitsRequest};
 use crate::game::{Game, GameState};
+use crate::leader::{Leader, LeaderAbility, LeaderInfo};
 use crate::map::Terrain;
-use crate::movement::{MoveState, possible_move_destinations};
+use crate::movement::{possible_move_destinations, MoveState};
 use crate::payment::{PaymentOptions, PaymentReason};
-use crate::player::{Player, can_add_army_unit};
+use crate::player::{can_add_army_unit, Player};
+use crate::playing_actions::ActionResourceCost;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
@@ -21,7 +23,7 @@ pub(crate) fn china() -> Civilization {
     Civilization::new(
         "China",
         vec![rice(), expansion(), fireworks(), imperial_army()],
-        vec![],
+        vec![sun_tzu()],
     )
 }
 
@@ -180,7 +182,7 @@ fn imperial_army() -> SpecialAdvanceInfo {
     )
     .add_custom_action(
         CustomActionType::ImperialArmy,
-        |a| a.once_per_turn(ResourcePile::empty()),
+        |a| CustomActionCost::once_per_turn(a, ResourcePile::empty()),
         use_imperial_army,
         |_game, p| {
             !p.units
@@ -291,4 +293,25 @@ pub(crate) fn validate_imperial_army(units: &[u32], p: &Player) -> Result<(), St
         }
     }
     Ok(())
+}
+
+fn sun_tzu() -> LeaderInfo {
+    LeaderInfo::new(
+        Leader::SunTzu,
+        "Sun Tzu",
+        LeaderAbility::builder("Art of War", "todo")
+            .add_custom_action(
+                CustomActionType::ArtOfWar,
+                |a| CustomActionCost::new(true, None, ActionResourceCost::tokens(1)),
+                use_art_of_war,
+                |game, player| todo!(),
+            )
+            .build(),
+        LeaderAbility::builder("Fast War", "todo").build(),
+    )
+}
+
+fn use_art_of_war(b: AbilityBuilder) -> AbilityBuilder {
+    // todo
+    b
 }

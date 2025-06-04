@@ -2,11 +2,11 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action::Action;
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city::MoodState;
-use crate::content::advances::{AdvanceGroup, advance_group_builder};
-use crate::content::custom_actions::CustomActionType;
+use crate::content::advances::{advance_group_builder, AdvanceGroup};
 use crate::content::custom_actions::CustomActionType::{
     CivilLiberties, FreeEconomyCollect, VotingIncreaseHappiness,
 };
+use crate::content::custom_actions::CustomActionCost;
 use crate::log::current_player_turn_log;
 use crate::player::gain_resources;
 use crate::playing_actions::{PlayingAction, PlayingActionType};
@@ -32,7 +32,7 @@ fn voting() -> AdvanceBuilder {
     )
     .add_action_modifier(
         VotingIncreaseHappiness,
-        |_| CustomActionType::cost(ResourcePile::mood_tokens(1)),
+        |_| CustomActionCost::free(ResourcePile::mood_tokens(1)),
         PlayingActionType::IncreaseHappiness,
     )
 }
@@ -65,7 +65,7 @@ fn civil_liberties() -> AdvanceBuilder {
     )
     .add_custom_action(
         CivilLiberties,
-        |_| CustomActionType::regular(),
+        |_| CustomActionCost::regular(),
         |b| {
             b.add_simple_persistent_event_listener(
                 |event| &mut event.custom_action,
@@ -93,7 +93,7 @@ fn free_economy() -> AdvanceBuilder {
     )
     .add_action_modifier(
         FreeEconomyCollect,
-        |a| a.free_and_once_per_turn(ResourcePile::mood_tokens(1)),
+        |a| CustomActionCost::free_and_once_per_turn(a, ResourcePile::mood_tokens(1)),
         PlayingActionType::Collect,
     )
     .add_transient_event_listener(

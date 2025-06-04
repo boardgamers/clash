@@ -61,6 +61,48 @@ impl CustomActionCost {
             once_per_turn,
         }
     }
+
+    #[must_use]
+    pub(crate) fn regular() -> CustomActionCost {
+        CustomActionCost::new(false, None, ActionResourceCost::free())
+    }
+
+    #[must_use]
+    pub(crate) fn cost(cost: ResourcePile) -> CustomActionCost {
+        CustomActionCost::new(false, None, ActionResourceCost::resources(cost))
+    }
+
+    #[must_use]
+    pub(crate) fn free(cost: ResourcePile) -> CustomActionCost {
+        CustomActionCost::new(true, None, ActionResourceCost::resources(cost))
+    }
+
+    #[must_use]
+    pub(crate) fn once_per_turn(c: CustomActionType, cost: ResourcePile) -> CustomActionCost {
+        CustomActionCost::new(false, Some(c), ActionResourceCost::resources(cost))
+    }
+
+    #[must_use]
+    pub(crate) fn free_and_once_per_turn(c: CustomActionType, cost: ResourcePile) -> CustomActionCost {
+        CustomActionCost::new(true, Some(c), ActionResourceCost::resources(cost))
+    }
+
+    #[must_use]
+    pub(crate) fn free_and_once_per_turn_mutually_exclusive(
+        cost: ResourcePile,
+        mutually_exclusive: CustomActionType,
+    ) -> CustomActionCost {
+        CustomActionCost::new(
+            true,
+            Some(mutually_exclusive),
+            ActionResourceCost::resources(cost),
+        )
+    }
+
+    #[must_use]
+    pub(crate) fn free_and_advance_cost_without_discounts() -> CustomActionCost {
+        CustomActionCost::new(true, None, ActionResourceCost::AdvanceCostWithoutDiscount)
+    }
 }
 
 #[derive(Clone)]
@@ -165,54 +207,13 @@ pub enum CustomActionType {
 
     // China
     ImperialArmy,
+    ArtOfWar,
 }
 
 impl CustomActionType {
     #[must_use]
     pub fn playing_action_type(&self) -> PlayingActionType {
         PlayingActionType::Custom(*self)
-    }
-
-    #[must_use]
-    pub(crate) fn regular() -> CustomActionCost {
-        CustomActionCost::new(false, None, ActionResourceCost::free())
-    }
-
-    #[must_use]
-    pub(crate) fn cost(cost: ResourcePile) -> CustomActionCost {
-        CustomActionCost::new(true, None, ActionResourceCost::resources(cost))
-    }
-
-    #[must_use]
-    pub(crate) fn once_per_turn(self, cost: ResourcePile) -> CustomActionCost {
-        CustomActionCost::new(false, Some(self), ActionResourceCost::resources(cost))
-    }
-
-    #[must_use]
-    pub(crate) fn free(cost: ResourcePile) -> CustomActionCost {
-        CustomActionCost::new(true, None, ActionResourceCost::resources(cost))
-    }
-
-    #[must_use]
-    pub(crate) fn free_and_once_per_turn(self, cost: ResourcePile) -> CustomActionCost {
-        CustomActionCost::new(true, Some(self), ActionResourceCost::resources(cost))
-    }
-
-    #[must_use]
-    pub(crate) fn free_and_once_per_turn_mutually_exclusive(
-        cost: ResourcePile,
-        mutually_exclusive: CustomActionType,
-    ) -> CustomActionCost {
-        CustomActionCost::new(
-            true,
-            Some(mutually_exclusive),
-            ActionResourceCost::resources(cost),
-        )
-    }
-
-    #[must_use]
-    pub(crate) fn free_and_advance_cost_without_discounts() -> CustomActionCost {
-        CustomActionCost::new(true, None, ActionResourceCost::AdvanceCostWithoutDiscount)
     }
 }
 

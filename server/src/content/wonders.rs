@@ -5,7 +5,7 @@ use crate::card::{HandCard, all_objective_hand_cards};
 use crate::city::{City, MoodState};
 use crate::combat_listeners::CombatRoundEnd;
 use crate::content::ability::{Ability, AbilityBuilder};
-use crate::content::custom_actions::CustomActionType;
+use crate::content::custom_actions::{CustomActionCost, CustomActionType};
 use crate::content::persistent_events::{
     AdvanceRequest, HandCardsRequest, PaymentRequest, PositionRequest,
 };
@@ -80,7 +80,7 @@ fn great_statue() -> WonderInfo {
     )
     .add_custom_action(
         CustomActionType::GreatStatue,
-        |a| a.free_and_once_per_turn(ResourcePile::empty()),
+        |a| CustomActionCost::free_and_once_per_turn(a, ResourcePile::empty()),
         use_great_statue,
         |_game, p| !p.objective_cards.is_empty(),
     )
@@ -212,7 +212,7 @@ fn great_lighthouse() -> WonderInfo {
     }))
     .add_custom_action(
         CustomActionType::GreatLighthouse,
-        |_| CustomActionType::free(ResourcePile::empty()),
+        |_| CustomActionCost::free(ResourcePile::empty()),
         use_great_lighthouse,
         |game, p| {
             great_lighthouse_city(p).can_activate()
@@ -280,7 +280,7 @@ fn library() -> WonderInfo {
     )
     .add_custom_action(
         CustomActionType::GreatLibrary,
-        |a| a.free_and_once_per_turn(ResourcePile::empty()),
+        |a| CustomActionCost::free_and_once_per_turn(a, ResourcePile::empty()),
         use_great_library,
         |_, _| true,
     )

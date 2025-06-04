@@ -34,6 +34,10 @@ pub enum Leader {
     Alexander,
     Leonidas,
     Pericles,
+    // China
+    Qin,
+    Wu,
+    SunTzu,
 }
 
 impl Leader {
