@@ -5,7 +5,10 @@ use crate::city::{City, MoodState};
 use crate::city_pieces::Building::Obelisk;
 use crate::content::ability::{Ability, AbilityBuilder};
 use crate::content::advances::{AdvanceGroup, advance_group_builder};
-use crate::content::custom_actions::{CustomActionActionExecution, CustomActionExecution, CustomActionType, any_non_happy, CustomActionCost};
+use crate::content::custom_actions::{
+    CustomActionActionExecution, CustomActionExecution, CustomActionType,
+    any_non_happy,
+};
 use crate::content::persistent_events::PaymentRequest;
 use crate::happiness::increase_happiness;
 use crate::payment::{PaymentOptions, PaymentReason};
@@ -32,7 +35,11 @@ fn arts() -> AdvanceBuilder {
     .with_unlocked_building(Obelisk)
     .add_action_modifier(
         CustomActionType::ArtsInfluenceCultureAttempt,
-        |a| CustomActionCost::free_and_once_per_turn(a, ResourcePile::culture_tokens(1)),
+        |c| {
+            c.once_per_turn()
+                .free_action()
+                .resources(ResourcePile::culture_tokens(1))
+        },
         PlayingActionType::InfluenceCultureAttempt,
     )
 }
@@ -45,7 +52,7 @@ fn sports() -> AdvanceBuilder {
         .with_advance_bonus(MoodToken)
         .add_custom_action_execution(
             CustomActionType::Sports,
-            |_| CustomActionCost::regular(),
+            |c| c.any_times().action().no_resources(),
             CustomActionExecution::Action(CustomActionActionExecution::new(
                 use_sports(),
                 Arc::new(|_game, p| can_use_sports(p)),
@@ -92,7 +99,7 @@ fn theaters() -> AdvanceBuilder {
     .with_advance_bonus(MoodToken)
     .add_custom_action(
         CustomActionType::Theaters,
-        |a| CustomActionCost::free_and_once_per_turn(a, ResourcePile::empty()),
+        |c| c.once_per_turn().free_action().no_resources(),
         use_theaters,
         |_game, p| p.resources.culture_tokens > 0 || p.resources.mood_tokens > 0,
     )

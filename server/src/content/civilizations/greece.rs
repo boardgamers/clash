@@ -6,14 +6,14 @@ use crate::combat::update_combat_strength;
 use crate::combat_listeners::CombatStrength;
 use crate::content::ability::AbilityBuilder;
 use crate::content::advances::warfare::draft_cost;
-use crate::content::custom_actions::{CustomActionCost, CustomActionType};
+use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::{AdvanceRequest, HandCardsRequest, PositionRequest};
 use crate::game::Game;
 use crate::leader::{Leader, LeaderAbility, LeaderInfo, leader_position};
 use crate::map::{block_has_player_city, get_map_setup};
 use crate::payment::PaymentConversion;
 use crate::player::{Player, gain_resources};
-use crate::playing_actions::{ActionResourceCost, PlayingAction, PlayingActionType};
+use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
 use itertools::Itertools;
@@ -106,11 +106,10 @@ fn hellenistic_culture() -> SpecialAdvanceInfo {
     )
     .add_action_modifier(
         CustomActionType::HellenisticInfluenceCultureAttempt,
-        |_| {
-            CustomActionCost::free_and_once_per_turn_mutually_exclusive(
-                ResourcePile::mood_tokens(2),
-                CustomActionType::ArtsInfluenceCultureAttempt,
-            )
+        |c| {
+            c.once_per_turn_mutually_exclusive(CustomActionType::ArtsInfluenceCultureAttempt)
+                .free_action()
+                .resources(ResourcePile::mood_tokens(2))
         },
         PlayingActionType::InfluenceCultureAttempt,
     )
@@ -199,7 +198,11 @@ fn alexander() -> LeaderInfo {
         )
         .add_custom_action(
             CustomActionType::Idol,
-            |_| CustomActionCost::free(ResourcePile::culture_tokens(1)),
+            |c| {
+                c.any_times()
+                    .free_action()
+                    .resources(ResourcePile::culture_tokens(1))
+            },
             use_idol,
             |game, p| !idol_cards(game, p, &ResourcePile::culture_tokens(1)).is_empty(),
         )
@@ -330,11 +333,11 @@ fn pericles() -> LeaderInfo {
         "Pericles",
         LeaderAbility::builder(
             "Master",
-            "Pericles is in a Happy city: Gain 1 education advance for free.",
+            "As an action: If Pericles is in a Happy city: Gain 1 education advance for free.",
         )
         .add_custom_action(
             CustomActionType::Master,
-            |_| CustomActionCost::new(false, None, ActionResourceCost::tokens(1)),
+            |c| c.any_times().action().tokens(1),
             use_master,
             |game, p| !master_education_advances(game, p).is_empty(),
         )

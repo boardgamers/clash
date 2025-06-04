@@ -199,7 +199,7 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
             // buggy
             continue;
         }
-        
+
         let cities = if info.city_bound().is_some() {
             p.cities
                 .iter()

@@ -4,15 +4,14 @@ use crate::civilization::Civilization;
 use crate::combat_listeners::CombatRoundEnd;
 use crate::consts::STACK_LIMIT;
 use crate::content::ability::AbilityBuilder;
-use crate::content::custom_actions::{CustomActionCost, CustomActionType};
+use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::{PaymentRequest, UnitsRequest};
 use crate::game::{Game, GameState};
 use crate::leader::{Leader, LeaderAbility, LeaderInfo};
 use crate::map::Terrain;
-use crate::movement::{possible_move_destinations, MoveState};
+use crate::movement::{MoveState, possible_move_destinations};
 use crate::payment::{PaymentOptions, PaymentReason};
-use crate::player::{can_add_army_unit, Player};
-use crate::playing_actions::ActionResourceCost;
+use crate::player::{Player, can_add_army_unit};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
@@ -182,7 +181,7 @@ fn imperial_army() -> SpecialAdvanceInfo {
     )
     .add_custom_action(
         CustomActionType::ImperialArmy,
-        |a| CustomActionCost::once_per_turn(a, ResourcePile::empty()),
+        |c| c.once_per_turn().action().no_resources(),
         use_imperial_army,
         |_game, p| {
             !p.units
@@ -299,10 +298,10 @@ fn sun_tzu() -> LeaderInfo {
     LeaderInfo::new(
         Leader::SunTzu,
         "Sun Tzu",
-        LeaderAbility::builder("Art of War", "todo")
+        LeaderAbility::builder("Art of War", "todo") // todo like Pericles
             .add_custom_action(
                 CustomActionType::ArtOfWar,
-                |a| CustomActionCost::new(true, None, ActionResourceCost::tokens(1)),
+                |c| c.any_times().action().tokens(1),
                 use_art_of_war,
                 |game, player| todo!(),
             )

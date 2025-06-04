@@ -2,7 +2,6 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city::MoodState;
 use crate::content::advances::{AdvanceGroup, advance_group_builder};
-use crate::content::custom_actions::CustomActionCost;
 use crate::content::custom_actions::CustomActionType::{AbsolutePower, ForcedLabor};
 use crate::content::persistent_events::ResourceRewardRequest;
 use crate::payment::ResourceReward;
@@ -84,7 +83,11 @@ fn absolute_power() -> AdvanceBuilder {
     )
     .add_custom_action(
         AbsolutePower,
-        |a| CustomActionCost::free_and_once_per_turn(a, ResourcePile::mood_tokens(2)),
+        |c| {
+            c.once_per_turn()
+                .free_action()
+                .resources(ResourcePile::mood_tokens(2))
+        },
         |b| {
             b.add_simple_persistent_event_listener(
                 |event| &mut event.custom_action,
@@ -110,7 +113,11 @@ fn forced_labor() -> AdvanceBuilder {
     )
     .add_custom_action(
         ForcedLabor,
-        |a| CustomActionCost::free_and_once_per_turn(a, ResourcePile::mood_tokens(1)),
+        |c| {
+            c.once_per_turn()
+                .free_action()
+                .resources(ResourcePile::mood_tokens(1))
+        },
         |b| {
             b.add_simple_persistent_event_listener(
                 |event| &mut event.custom_action,

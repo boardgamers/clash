@@ -5,7 +5,7 @@ use crate::card::{HandCard, all_action_hand_cards, all_objective_hand_cards};
 use crate::city::{City, MoodState};
 use crate::civilization::Civilization;
 use crate::content::ability::AbilityBuilder;
-use crate::content::custom_actions::{CustomActionCost, CustomActionType};
+use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::{HandCardsRequest, PaymentRequest, PositionRequest};
 use crate::game::Game;
 use crate::leader::{Leader, LeaderAbility, LeaderAbilityBuilder, LeaderInfo, leader_position};
@@ -41,7 +41,7 @@ fn aqueduct() -> SpecialAdvanceInfo {
     )
     .add_custom_action(
         CustomActionType::Aqueduct,
-        |_| CustomActionCost::free_and_advance_cost_without_discounts(),
+        |c| c.any_times().free_action().advance_cost_without_discounts(),
         use_aqueduct,
         |_game, p| !p.has_advance(Advance::Sanitation) && p.can_afford(&base_advance_cost(p)),
     )
@@ -187,7 +187,11 @@ fn augustus() -> LeaderInfo {
         )
         .add_custom_action(
             CustomActionType::Princeps,
-            |_| CustomActionCost::cost(ResourcePile::culture_tokens(1)),
+            |c| {
+                c.any_times()
+                    .action()
+                    .resources(ResourcePile::culture_tokens(1))
+            },
             use_princeps,
             |game, p| {
                 game.try_get_any_city(leader_position(p))
@@ -298,7 +302,7 @@ fn caesar() -> LeaderInfo {
         )
         .add_action_modifier(
             CustomActionType::StatesmanIncreaseHappiness,
-            |_| CustomActionCost::free(ResourcePile::empty()),
+            |c| c.any_times().free_action().no_resources(),
             PlayingActionType::IncreaseHappiness,
         )
         .build(),

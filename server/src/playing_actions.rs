@@ -358,7 +358,7 @@ impl ActionResourceCost {
     pub fn resources(cost: ResourcePile) -> Self {
         ActionResourceCost::Resources(cost)
     }
-    
+
     #[must_use]
     pub fn tokens(tokens: u8) -> Self {
         ActionResourceCost::Tokens(tokens)

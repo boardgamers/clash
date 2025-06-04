@@ -732,7 +732,7 @@ pub const LEADER: leader::Leader = leader::Leader::Alexander;
 
 pub const LEADER_UNIT: UnitType = Leader(LEADER);
 
- ///
+///
 /// Validates the selection of cards in the hand.
 ///
 /// # Returns
