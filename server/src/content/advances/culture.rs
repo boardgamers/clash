@@ -4,10 +4,9 @@ use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city::{City, MoodState};
 use crate::city_pieces::Building::Obelisk;
 use crate::content::ability::{Ability, AbilityBuilder};
-use crate::content::advances::{AdvanceGroup, advance_group_builder};
+use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::content::custom_actions::{
-    CustomActionActionExecution, CustomActionExecution, CustomActionType,
-    any_non_happy,
+    CustomActionActionExecution, CustomActionExecution, CustomActionType, any_non_happy,
 };
 use crate::content::persistent_events::PaymentRequest;
 use crate::happiness::increase_happiness;
@@ -20,8 +19,12 @@ use crate::wonder::{Wonder, draw_wonder_card};
 use std::sync::Arc;
 use std::vec;
 
-pub(crate) fn culture() -> AdvanceGroup {
-    advance_group_builder("Culture", vec![arts(), sports(), monuments(), theaters()])
+pub(crate) fn culture() -> AdvanceGroupInfo {
+    advance_group_builder(
+        AdvanceGroup::Culture,
+        "Culture",
+        vec![arts(), sports(), monuments(), theaters()],
+    )
 }
 
 fn arts() -> AdvanceBuilder {

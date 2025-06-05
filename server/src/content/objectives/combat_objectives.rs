@@ -1,5 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::combat_stats::Battleground;
+use crate::content::advances::AdvanceGroup;
 use crate::content::advances::trade_routes::find_trade_route_for_unit;
 use crate::game::Game;
 use crate::log::current_player_turn_log;
@@ -182,7 +183,7 @@ pub(crate) fn bold() -> Objective {
 
 fn warfare_advances(player: &Player, game: &Game) -> usize {
     game.cache
-        .get_advance_group("Warfare")
+        .get_advance_group(AdvanceGroup::Warfare)
         .advances
         .iter()
         .filter(|a| player.has_advance(a.advance))

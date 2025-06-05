@@ -6,9 +6,9 @@ use crate::card::{HandCard, all_action_hand_cards};
 use crate::city_pieces::Building::Market;
 use crate::content::ability::AbilityBuilder;
 use crate::content::advances::trade_routes::{TradeRoute, trade_route_log, trade_route_reward};
-use crate::content::advances::{AdvanceGroup, advance_group_builder};
-use crate::content::custom_actions::CustomActionType::Taxes;
+use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::content::custom_actions::CustomActionType;
+use crate::content::custom_actions::CustomActionType::Taxes;
 use crate::content::persistent_events::{HandCardsRequest, ResourceRewardRequest};
 use crate::game::Game;
 use crate::payment::ResourceReward;
@@ -18,8 +18,9 @@ use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
 
-pub(crate) fn economy() -> AdvanceGroup {
+pub(crate) fn economy() -> AdvanceGroupInfo {
     advance_group_builder(
+        AdvanceGroup::Economy,
         "Economy",
         vec![bartering(), trade_routes(), taxes(), currency()],
     )

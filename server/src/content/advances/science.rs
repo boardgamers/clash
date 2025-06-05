@@ -3,13 +3,14 @@ use crate::action_card::gain_action_card_from_pile;
 use crate::advance::Bonus::CultureToken;
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city_pieces::Building;
-use crate::content::advances::{AdvanceGroup, advance_group_builder};
+use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::content::persistent_events::ResourceRewardRequest;
 use crate::payment::ResourceReward;
 use crate::resource::ResourceType;
 
-pub(crate) fn science() -> AdvanceGroup {
+pub(crate) fn science() -> AdvanceGroupInfo {
     advance_group_builder(
+        AdvanceGroup::Science,
         "Science",
         vec![math(), astronomy(), medicine(), metallurgy()],
     )

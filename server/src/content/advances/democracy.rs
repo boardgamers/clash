@@ -2,7 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action::Action;
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city::MoodState;
-use crate::content::advances::{AdvanceGroup, advance_group_builder};
+use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::content::custom_actions::CustomActionType::{
     CivilLiberties, FreeEconomyCollect, VotingIncreaseHappiness,
 };
@@ -11,8 +11,9 @@ use crate::player::gain_resources;
 use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::resource_pile::ResourcePile;
 
-pub(crate) fn democracy() -> AdvanceGroup {
+pub(crate) fn democracy() -> AdvanceGroupInfo {
     advance_group_builder(
+        AdvanceGroup::Democracy,
         "Democracy",
         vec![
             voting(),

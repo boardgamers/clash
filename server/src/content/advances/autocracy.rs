@@ -1,15 +1,16 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city::MoodState;
-use crate::content::advances::{AdvanceGroup, advance_group_builder};
+use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::content::custom_actions::CustomActionType::{AbsolutePower, ForcedLabor};
 use crate::content::persistent_events::ResourceRewardRequest;
 use crate::payment::ResourceReward;
 use crate::player::Player;
 use crate::resource_pile::ResourcePile;
 
-pub(crate) fn autocracy() -> AdvanceGroup {
+pub(crate) fn autocracy() -> AdvanceGroupInfo {
     advance_group_builder(
+        AdvanceGroup::Autocracy,
         "Autocracy",
         vec![
             nationalism(),

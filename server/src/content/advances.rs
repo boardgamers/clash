@@ -27,6 +27,7 @@ use crate::content::advances::spirituality::spirituality;
 use crate::content::advances::theocracy::theocracy;
 use crate::content::advances::warfare::warfare;
 use itertools::Itertools;
+use std::fmt::Display;
 use std::vec;
 
 struct GovernmentInfo {
@@ -53,8 +54,44 @@ const GOVERNMENTS: [GovernmentInfo; 3] = [
     },
 ];
 
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Copy)]
+pub enum AdvanceGroup {
+    Agriculture,
+    Construction,
+    Seafaring,
+    Education,
+    Warfare,
+    Spirituality,
+    Economy,
+    Culture,
+    Science,
+    Democracy,
+    Autocracy,
+    Theocracy,
+}
+
+impl Display for AdvanceGroup {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AdvanceGroup::Agriculture => write!(f, "Agriculture"),
+            AdvanceGroup::Construction => write!(f, "Construction"),
+            AdvanceGroup::Seafaring => write!(f, "Seafaring"),
+            AdvanceGroup::Education => write!(f, "Education"),
+            AdvanceGroup::Warfare => write!(f, "Warfare"),
+            AdvanceGroup::Spirituality => write!(f, "Spirituality"),
+            AdvanceGroup::Economy => write!(f, "Economy"),
+            AdvanceGroup::Culture => write!(f, "Culture"),
+            AdvanceGroup::Science => write!(f, "Science"),
+            AdvanceGroup::Democracy => write!(f, "Democracy"),
+            AdvanceGroup::Autocracy => write!(f, "Autocracy"),
+            AdvanceGroup::Theocracy => write!(f, "Theocracy"),
+        }
+    }
+}
+
 #[derive(Clone)]
-pub struct AdvanceGroup {
+pub struct AdvanceGroupInfo {
+    pub advance_group: AdvanceGroup,
     pub name: String,
     pub advances: Vec<AdvanceInfo>,
     pub government: Option<String>,
@@ -69,7 +106,7 @@ pub(crate) fn get_all_uncached() -> Vec<AdvanceInfo> {
 }
 
 #[must_use]
-pub fn get_groups_uncached() -> Vec<AdvanceGroup> {
+pub fn get_groups_uncached() -> Vec<AdvanceGroupInfo> {
     vec![
         agriculture(),
         construction(),
@@ -87,7 +124,11 @@ pub fn get_groups_uncached() -> Vec<AdvanceGroup> {
     ]
 }
 
-pub(crate) fn advance_group_builder(name: &str, advances: Vec<AdvanceBuilder>) -> AdvanceGroup {
+pub(crate) fn advance_group_builder(
+    advance_group: AdvanceGroup,
+    name: &str,
+    advances: Vec<AdvanceBuilder>,
+) -> AdvanceGroupInfo {
     let first = advances[0].advance;
     let government = GOVERNMENTS.into_iter().find(|i| first == i.leading);
     let a: Vec<AdvanceInfo> = advances
@@ -116,7 +157,8 @@ pub(crate) fn advance_group_builder(name: &str, advances: Vec<AdvanceBuilder>) -
         })
         .map(AdvanceBuilder::build)
         .collect();
-    AdvanceGroup {
+    AdvanceGroupInfo {
+        advance_group,
         name: name.to_string(),
         advances: a,
         government: government.map(|i| i.name.to_string()),
@@ -124,7 +166,7 @@ pub(crate) fn advance_group_builder(name: &str, advances: Vec<AdvanceBuilder>) -
 }
 
 #[must_use]
-pub fn get_governments_uncached() -> Vec<AdvanceGroup> {
+pub fn get_governments_uncached() -> Vec<AdvanceGroupInfo> {
     get_groups_uncached()
         .into_iter()
         .filter(|g| g.government.is_some())

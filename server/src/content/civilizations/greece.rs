@@ -5,6 +5,7 @@ use crate::civilization::Civilization;
 use crate::combat::update_combat_strength;
 use crate::combat_listeners::CombatStrength;
 use crate::content::ability::AbilityBuilder;
+use crate::content::advances::AdvanceGroup;
 use crate::content::advances::warfare::draft_cost;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::{AdvanceRequest, HandCardsRequest, PositionRequest};
@@ -375,7 +376,7 @@ fn use_master(b: AbilityBuilder) -> AbilityBuilder {
 
 fn master_education_advances(game: &Game, player: &Player) -> Vec<Advance> {
     game.cache
-        .get_advance_group("Education")
+        .get_advance_group(AdvanceGroup::Education)
         .advances
         .iter()
         .filter_map(|a| {

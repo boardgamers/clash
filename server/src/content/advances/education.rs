@@ -3,15 +3,16 @@ use crate::action_card::gain_action_card_from_pile;
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city_pieces::Building;
-use crate::content::advances::{AdvanceGroup, advance_group_builder};
+use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::content::persistent_events::PaymentRequest;
 use crate::objective_card::draw_and_log_objective_card_from_pile;
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::gain_resources;
 use crate::resource_pile::ResourcePile;
 
-pub(crate) fn education() -> AdvanceGroup {
+pub(crate) fn education() -> AdvanceGroupInfo {
     advance_group_builder(
+        AdvanceGroup::Education,
         "Education",
         vec![
             writing(),
@@ -146,7 +147,7 @@ fn philosophy() -> AdvanceBuilder {
         |game, player_index, _, advance| {
             if game
                 .cache
-                .get_advance_group("Science")
+                .get_advance_group(AdvanceGroup::Science)
                 .advances
                 .iter()
                 .any(|a| a.advance == advance.advance)

@@ -3,7 +3,7 @@ use crate::advance::{Advance, AdvanceInfo};
 use crate::city_pieces::Building;
 use crate::civilization::Civilization;
 use crate::content::ability::Ability;
-use crate::content::advances::AdvanceGroup;
+use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo};
 use crate::content::custom_actions::CustomActionExecution;
 use crate::content::{
     ability, action_cards, advances, civilizations, incidents, objective_cards, objectives, wonders,
@@ -30,11 +30,11 @@ pub struct Cache {
     abilities_by_name: HashMap<String, Ability>,
     status_phase_handlers: HashMap<StatusPhaseState, Ability>,
 
-    all_advance_groups: Vec<AdvanceGroup>,
-    advance_groups_by_name: HashMap<String, AdvanceGroup>,
+    all_advance_groups: Vec<AdvanceGroupInfo>,
+    advance_groups_by_name: HashMap<AdvanceGroup, AdvanceGroupInfo>,
     all_advances: Vec<AdvanceInfo>,
-    all_governments: Vec<AdvanceGroup>,
-    governments_by_name: HashMap<String, AdvanceGroup>,
+    all_governments: Vec<AdvanceGroupInfo>,
+    governments_by_name: HashMap<String, AdvanceGroupInfo>,
     advances_by_building: HashMap<Building, Advance>,
 
     all_action_cards: Vec<ActionCard>,
@@ -77,7 +77,7 @@ impl Cache {
             all_advance_groups: advances::get_groups_uncached(),
             advance_groups_by_name: advances::get_groups_uncached()
                 .into_iter()
-                .map(|advance_group| (advance_group.name.clone(), advance_group))
+                .map(|advance_group| (advance_group.advance_group, advance_group))
                 .collect(),
 
             all_governments: advances::get_governments_uncached(),
@@ -163,7 +163,7 @@ impl Cache {
     }
 
     #[must_use]
-    pub fn get_advance_groups(&self) -> &Vec<AdvanceGroup> {
+    pub fn get_advance_groups(&self) -> &Vec<AdvanceGroupInfo> {
         &self.all_advance_groups
     }
 
@@ -172,14 +172,14 @@ impl Cache {
     ///
     /// Panics if advance group doesn't exist
     #[must_use]
-    pub fn get_advance_group(&self, name: &str) -> &AdvanceGroup {
+    pub fn get_advance_group(&self, name: AdvanceGroup) -> &AdvanceGroupInfo {
         self.advance_groups_by_name
-            .get(name)
-            .unwrap_or_else(|| panic!("Advance group {name} not found"))
+            .get(&name)
+            .unwrap_or_else(|| panic!("Advance group {name:?} not found"))
     }
 
     #[must_use]
-    pub fn get_governments(&self) -> &Vec<AdvanceGroup> {
+    pub fn get_governments(&self) -> &Vec<AdvanceGroupInfo> {
         &self.all_governments
     }
 
@@ -189,7 +189,7 @@ impl Cache {
     ///
     /// Panics if government doesn't exist
     #[must_use]
-    pub fn get_government(&self, government: &str) -> &AdvanceGroup {
+    pub fn get_government(&self, government: &str) -> &AdvanceGroupInfo {
         self.governments_by_name
             .get(government)
             .unwrap_or_else(move || {

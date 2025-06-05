@@ -1,15 +1,16 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city_pieces::Building::Temple;
-use crate::content::advances::{AdvanceGroup, advance_group_builder};
+use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::content::persistent_events::{AdvanceRequest, PositionRequest};
 use crate::player::{Player, can_add_army_unit, gain_resources, gain_unit};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
 
-pub(crate) fn theocracy() -> AdvanceGroup {
+pub(crate) fn theocracy() -> AdvanceGroupInfo {
     advance_group_builder(
+        AdvanceGroup::Theocracy,
         "Theocracy",
         vec![dogma(), devotion(), conversion(), fanaticism()],
     )
@@ -47,7 +48,7 @@ fn dogma() -> AdvanceBuilder {
                 let player = game.player(player_index);
                 let choices: Vec<Advance> = game
                     .cache
-                    .get_advance_group("Theocracy")
+                    .get_advance_group(AdvanceGroup::Theocracy)
                     .advances
                     .iter()
                     .filter(|a| player.can_advance_free(a.advance, game))

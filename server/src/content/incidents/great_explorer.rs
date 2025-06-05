@@ -1,6 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{ActionCard, ActionCardBuilder};
 use crate::city::{found_city, is_valid_city_terrain};
+use crate::content::advances::AdvanceGroup;
 use crate::content::incidents::great_persons::{
     great_person_action_card, great_person_description,
 };
@@ -16,7 +17,7 @@ use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
 
 pub(crate) fn great_explorer() -> ActionCard {
-    let groups = &["Seafaring"];
+    let groups = vec![AdvanceGroup::Seafaring];
     let mut builder = great_person_action_card(
         18,
         "Great Explorer",
@@ -24,7 +25,7 @@ pub(crate) fn great_explorer() -> ActionCard {
             "{} Then, you may explore a region adjacent to a region \
             where you have a city. If you do, you may found a city in the explored region,\
             without using a Settler.",
-            great_person_description(groups)
+            great_person_description(&groups)
         ),
         ActionCost::regular(),
         groups,

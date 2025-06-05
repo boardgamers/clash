@@ -2,14 +2,15 @@ use crate::ability_initializer::{AbilityInitializerSetup, once_per_turn_advance}
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city_pieces::Building::Temple;
-use crate::content::advances::{AdvanceGroup, advance_group_builder};
+use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::content::persistent_events::ResourceRewardRequest;
 use crate::payment::{PaymentConversion, ResourceReward};
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 
-pub(crate) fn spirituality() -> AdvanceGroup {
+pub(crate) fn spirituality() -> AdvanceGroupInfo {
     advance_group_builder(
+        AdvanceGroup::Spirituality,
         "Spirituality",
         vec![myths(), rituals(), priesthood(), state_religion()],
     )
@@ -89,7 +90,7 @@ fn priesthood() -> AdvanceBuilder {
         |i, &advance, game| {
             if game
                 .cache
-                .get_advance_group("Science")
+                .get_advance_group(AdvanceGroup::Science)
                 .advances
                 .iter()
                 .any(|a| a.advance == advance)

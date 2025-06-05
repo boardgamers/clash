@@ -3,6 +3,7 @@ use crate::action_card::ActionCard;
 use crate::card::HandCard;
 use crate::construct::available_buildings;
 use crate::content::ability::Ability;
+use crate::content::advances::AdvanceGroup;
 use crate::content::effects::ConstructEffect;
 use crate::content::effects::PermanentEffect::Construct;
 use crate::content::incidents::great_persons::{
@@ -19,13 +20,13 @@ use crate::wonder::{
 };
 
 pub(crate) fn great_engineer() -> ActionCard {
-    let groups = &["Construction"];
+    let groups = vec![AdvanceGroup::Construction];
     great_person_action_card(
         26,
         "Great Engineer",
         &format!(
             "{} Then, you may build a building in a city without spending an action and without activating it.",
-            great_person_description(groups)
+            great_person_description(&groups)
         ),
         ActionCost::regular(),
         groups,
@@ -105,7 +106,7 @@ pub(crate) fn construct_only() -> Ability {
 const ARCHITECT_DISCOUNT: WonderDiscount = WonderDiscount::new(true, 3);
 
 pub(crate) fn great_architect() -> ActionCard {
-    great_person_action_card::<_, String>(
+    great_person_action_card::<_>(
         55,
         "Great Architect",
         &format!(
@@ -114,7 +115,7 @@ pub(crate) fn great_architect() -> ActionCard {
                 In addition, the cost of constructing the wonder is reduced by 3 culture tokens.",
         ),
         ActionCost::free(),
-        &[],
+        vec![],
         |game, player| !playable_wonders(game, player).is_empty(),
     )
     .add_hand_card_request(
