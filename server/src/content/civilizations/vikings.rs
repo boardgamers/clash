@@ -1,10 +1,16 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Advance;
 use crate::civilization::Civilization;
+use crate::consts::STACK_LIMIT;
 use crate::content::persistent_events::UnitsRequest;
+use crate::game::Game;
 use crate::map::{Block, Terrain};
+use crate::player::Player;
+use crate::position::Position;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
-use crate::unit::{UnitType, Units, carried_units};
+use crate::unit::{Unit, UnitType, Units, carried_units};
+use itertools::Itertools;
+use std::ops::RangeInclusive;
 
 pub(crate) fn vikings() -> Civilization {
     Civilization::new(
@@ -33,12 +39,23 @@ fn ship_construction() -> SpecialAdvanceInfo {
     .add_units_request(
         |e| &mut e.ship_construction_conversion,
         0,
-        |_game, player_index, units| {
-            // todo check stack limit including carried units
+        |game, player_index, units| {
+            let p = game.player(player_index);
+            let dest = p.get_unit(units[0]).position;
+
             Some(UnitsRequest::new(
                 player_index,
                 units.clone(),
-                0..=units.len() as u8,
+                convert_to_settler_range(
+                    &units
+                        .iter()
+                        .map(|&id| game.player(player_index).get_unit(id))
+                        .collect_vec(),
+                    player_index,
+                    dest,
+                    game,
+                )
+                .expect("Ship construction should always have a valid range"),
                 "Select units to convert to settlers (instead of infantry)",
             ))
         },
@@ -79,4 +96,56 @@ fn ship_construction() -> SpecialAdvanceInfo {
         },
     )
     .build()
+}
+
+pub(crate) fn is_ship_construction_move(game: &Game, units: &Vec<&Unit>, dest: Position) -> bool {
+    let p = game.player(units[0].player_index);
+    if !p.has_special_advance(SpecialAdvance::ShipConstruction)
+        || game.enemy_player(p.index, dest).is_some()
+    {
+        return false;
+    }
+
+    if units.iter().all(|u| u.is_settler() || u.is_infantry()) {
+        return p.available_units().ships >= units.len() as u8;
+    }
+
+    if units.iter().all(|u| u.is_ship()) {
+        return convert_to_settler_range(units, p.index, dest, game).is_some();
+    }
+
+    false
+}
+
+pub(crate) fn convert_to_settler_range(
+    units: &[&Unit],
+    player: usize,
+    dest: Position,
+    game: &Game,
+) -> Option<RangeInclusive<u8>> {
+    let p = game.player(player);
+
+    let present = p.get_units(dest);
+    let carried: u8 = units
+        .iter()
+        .map(|u| {
+            carried_units(u.id, p)
+                .iter()
+                .filter(|&c| p.get_unit(*c).is_army_unit())
+                .count()
+        })
+        .sum::<usize>() as u8;
+    let standing = present.iter().filter(|u| u.is_army_unit()).count() as u8;
+    let max = units.len() as u8;
+    (0..=max)
+        .filter(|&i| can_add(p, carried + standing, i, max - i))
+        .minmax()
+        .into_option()
+        .map(|(min, max)| min..=max)
+}
+
+fn can_add(p: &Player, army_units: u8, settlers: u8, infantry: u8) -> bool {
+    p.available_units().settlers >= settlers
+        && p.available_units().infantry >= infantry
+        && army_units + infantry <= STACK_LIMIT as u8
 }

@@ -288,14 +288,3 @@ fn add_perimeter(map: &Map, start: Position, perimeter: &mut Vec<Position>) {
         add_perimeter(map, *n, perimeter);
     }
 }
-
-// fn reachable_with_ship_construction(player: &Player, units: &[u32], map: &Map) -> Vec<MoveRoute> {
-//     // todo May move settlers and infantry in water
-//     // - first convert them to ships
-//     // - then let others embark them in the same CurrentMove::Embark
-//     // todo May move settlers and infantry out of water
-//     // - add units select to decide which to convert to settlers - rest is infantry
-//     // todo converting them to ships and back (or being carried by other ships)
-//
-//     todo!()
-// }

@@ -2,7 +2,7 @@ pub(crate) mod china;
 pub(crate) mod greece;
 pub(crate) mod maya;
 pub(crate) mod rome;
-mod vikings;
+pub(crate) mod vikings;
 
 use crate::civilization::Civilization;
 

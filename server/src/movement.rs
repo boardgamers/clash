@@ -7,6 +7,7 @@ use std::collections::HashSet;
 
 use crate::combat::move_with_possible_combat;
 use crate::consts::{ARMY_MOVEMENT_REQUIRED_ADVANCE, MOVEMENT_ACTIONS, SHIP_CAPACITY, STACK_LIMIT};
+use crate::content::civilizations::vikings::is_ship_construction_move;
 use crate::content::persistent_events::PersistentEventType;
 use crate::events::EventOrigin;
 use crate::explore::move_to_unexplored_tile;
@@ -18,7 +19,6 @@ use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::player_events::MoveInfo;
 use crate::position::Position;
-use crate::special_advance::SpecialAdvance;
 use crate::unit::{carried_units, get_current_move};
 use crate::wonder::Wonder;
 use itertools::Itertools;
@@ -599,17 +599,6 @@ fn is_valid_movement_type(
         }
     }
     Ok(())
-}
-
-fn is_ship_construction_move(game: &Game, units: &Vec<&Unit>, dest: Position) -> bool {
-    // todo check stack size at destination converting as many units to settlers as possible
-    // todo also for ship limit
-    let p = game.player(units[0].player_index);
-    p.has_special_advance(SpecialAdvance::ShipConstruction)
-        && game.enemy_player(p.index, dest).is_none()
-        && units
-            .iter()
-            .all(|u| u.is_ship() || u.is_settler() || u.is_infantry())
 }
 
 fn terrain_movement_restriction(
