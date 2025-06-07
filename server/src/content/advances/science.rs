@@ -28,7 +28,7 @@ fn math() -> AdvanceBuilder {
         |i, &a, _| {
             if a == Advance::Engineering || a == Advance::Roads {
                 i.info.log.push("Math reduced the cost to 0".to_string());
-                i.set_zero();
+                i.set_zero_resources();
             }
         },
     )
@@ -57,7 +57,7 @@ fn astronomy() -> AdvanceBuilder {
         0,
         |i, &a, _| {
             if a == Advance::Navigation || a == Advance::Cartography {
-                i.set_zero();
+                i.set_zero_resources();
                 i.info
                     .log
                     .push("Astronomy reduced the cost to 0".to_string());

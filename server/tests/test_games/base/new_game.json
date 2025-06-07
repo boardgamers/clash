@@ -28,11 +28,11 @@
           "id": 0
         }
       ],
-      "civilization": "Romulans",
+      "civilization": "China",
       "available_leaders": [
-        "Sela",
-        "Narek",
-        "Tomalak"
+        "SunTzu",
+        "Qin",
+        "Wu"
       ],
       "advances": [
         "Farming",
@@ -72,11 +72,11 @@
           "id": 0
         }
       ],
-      "civilization": "Borg",
+      "civilization": "Greece",
       "available_leaders": [
-        "BorgQueen",
-        "SevenOfNine",
-        "Picard"
+        "Alexander",
+        "Leonidas",
+        "Pericles"
       ],
       "advances": [
         "Farming",
@@ -402,12 +402,12 @@
       "The game has started"
     ],
     [
-      "Player1 is playing as Romulans",
+      "Player1 is playing as China",
       "Player1 gained an action card from the pile",
       "Player1 gained an objective card from the pile"
     ],
     [
-      "Player2 is playing as Borg",
+      "Player2 is playing as Greece",
       "Player2 gained an action card from the pile",
       "Player2 gained an objective card from the pile"
     ],

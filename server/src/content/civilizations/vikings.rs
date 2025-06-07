@@ -95,6 +95,18 @@ fn ship_construction() -> SpecialAdvanceInfo {
             ));
         },
     )
+    .add_transient_event_listener(
+        |event| &mut event.advance_cost,
+        4,
+        |i, &a, _| {
+            if a == Advance::Navigation {
+                i.set_zero_resources();
+                i.info
+                    .log
+                    .push("Ship construction reduced the cost to 0".to_string());
+            }
+        },
+    )
     .build()
 }
 

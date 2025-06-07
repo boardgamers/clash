@@ -73,17 +73,17 @@
         {
           "position": "D1",
           "unit_type": "Infantry",
-          "id": 6,
           "movement_restrictions": [
             "Mountain"
-          ]
+          ],
+          "id": 6
         }
       ],
       "civilization": "Vikings",
       "advances": [
         "Farming",
-        "Mining",
         "Fishing",
+        "Mining",
         "Tactics"
       ],
       "incident_tokens": 3,

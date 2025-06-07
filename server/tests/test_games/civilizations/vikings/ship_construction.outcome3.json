@@ -76,13 +76,21 @@
         },
         {
           "position": "C2",
-          "unit_type": "Settler",
+          "unit_type": "Infantry",
           "id": 4
         },
         {
           "position": "C2",
           "unit_type": "Settler",
           "id": 5
+        },
+        {
+          "position": "D1",
+          "unit_type": "Infantry",
+          "movement_restrictions": [
+            "Mountain"
+          ],
+          "id": 6
         }
       ],
       "civilization": "Vikings",
@@ -295,13 +303,18 @@
                       "path": "/players/0/units/0/carried_units"
                     },
                     {
-                      "op": "add",
-                      "path": "/players/0/units/1",
-                      "value": {
-                        "id": 4,
-                        "position": "E2",
-                        "unit_type": "Settler"
-                      }
+                      "op": "replace",
+                      "path": "/players/0/units/1/id",
+                      "value": 4
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/1/position",
+                      "value": "E2"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/units/1/movement_restrictions"
                     },
                     {
                       "op": "add",
@@ -310,6 +323,18 @@
                         "id": 5,
                         "position": "E2",
                         "unit_type": "Settler"
+                      }
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/units/3",
+                      "value": {
+                        "id": 6,
+                        "movement_restrictions": [
+                          "Mountain"
+                        ],
+                        "position": "D1",
+                        "unit_type": "Infantry"
                       }
                     },
                     {
@@ -414,7 +439,7 @@
                       "value": [
                         {
                           "id": 4,
-                          "unit_type": "Settler"
+                          "unit_type": "Infantry"
                         },
                         {
                           "id": 5,
@@ -428,12 +453,29 @@
                       "value": "Ship"
                     },
                     {
-                      "op": "remove",
-                      "path": "/players/0/units/1"
+                      "op": "replace",
+                      "path": "/players/0/units/1/id",
+                      "value": 6
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/units/1/movement_restrictions",
+                      "value": [
+                        "Mountain"
+                      ]
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/1/position",
+                      "value": "D1"
                     },
                     {
                       "op": "remove",
-                      "path": "/players/0/units/1"
+                      "path": "/players/0/units/2"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/units/2"
                     }
                   ]
                 }
@@ -450,13 +492,13 @@
       "Player1 marched 1 settler from E2 to D2 converting 1 settler to ships"
     ],
     [
-      "Player1 embarked 2 settlers from E2 to D2"
+      "Player1 embarked 1 settler and 1 infantry from E2 to D2"
     ],
     [
       "Player1 disembarked 1 ship from D2 to C2"
     ],
     [
-      "Player1 unloaded 2 settlers from ships",
+      "Player1 unloaded 1 settler and 1 infantry from ships",
       "Player1 converted 1 ship to 1 settler"
     ]
   ],

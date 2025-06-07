@@ -349,7 +349,9 @@ impl Cache {
         self.civilizations_by_name
             .get(name)
             .cloned()
-            .expect("civilization not found")
+            .unwrap_or_else(
+                || panic!("civilization not found: {name}"),
+            )
     }
 
     ///

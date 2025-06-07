@@ -307,7 +307,7 @@ impl CostInfo {
         }
     }
 
-    pub(crate) fn set_zero(&mut self) {
+    pub(crate) fn set_zero_resources(&mut self) {
         self.cost.default = ResourcePile::empty();
     }
 
