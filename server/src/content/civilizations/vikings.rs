@@ -12,7 +12,7 @@ use crate::player::Player;
 use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
-use crate::unit::{carried_units, Unit, UnitType, Units};
+use crate::unit::{Unit, UnitType, Units, carried_units};
 use itertools::Itertools;
 use std::ops::RangeInclusive;
 
@@ -238,10 +238,12 @@ pub(crate) fn add_raid_bonus(game: &mut Game, player: usize, routes: &[TradeRout
             let position = city.position;
             let opponent = game.player_mut(city.player_index);
             let opponent_name = opponent.get_name();
-            if opponent.event_info.insert(RAID.to_string(), "true".to_string()).is_none() {
-                game.add_info_log_item(&format!(
-                    "{name} raided {opponent_name} at {position}",
-                ));
+            if opponent
+                .event_info
+                .insert(RAID.to_string(), "true".to_string())
+                .is_none()
+            {
+                game.add_info_log_item(&format!("{name} raided {opponent_name} at {position}",));
             }
         }
     }
