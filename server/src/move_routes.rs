@@ -53,6 +53,9 @@ pub(crate) fn move_routes(
     if player.can_use_advance(Advance::Roads) && embark_carrier_id.is_none() {
         base.extend(reachable_with_roads(player, units, game, stack_size));
     }
+    // if player.has_special_advance(SpecialAdvance::ShipConstruction) {
+    //     base.extend(reachable_with_ship_construction(player, units, &game.map));
+    // }
     add_diplomatic_relations(player, game, &mut base);
     add_negotiations(player, game, &mut base);
     base
@@ -236,9 +239,6 @@ fn next_road_step(
 
 #[must_use]
 fn reachable_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<MoveRoute> {
-    if !player.can_use_advance(Advance::Navigation) {
-        return vec![];
-    }
     let ship = units.iter().find_map(|&id| {
         let unit = player.get_unit(id);
         if unit.is_ship() {
@@ -291,3 +291,14 @@ fn add_perimeter(map: &Map, start: Position, perimeter: &mut Vec<Position>) {
         add_perimeter(map, *n, perimeter);
     }
 }
+
+// fn reachable_with_ship_construction(player: &Player, units: &[u32], map: &Map) -> Vec<MoveRoute> {
+//     // todo May move settlers and infantry in water
+//     // - first convert them to ships
+//     // - then let others embark them in the same CurrentMove::Embark
+//     // todo May move settlers and infantry out of water
+//     // - add units select to decide which to convert to settlers - rest is infantry
+//     // todo converting them to ships and back (or being carried by other ships)
+//     
+//     todo!()
+// }

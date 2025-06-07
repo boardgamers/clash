@@ -17,6 +17,7 @@ use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::player_events::MoveInfo;
 use crate::position::Position;
+use crate::special_advance::SpecialAdvance;
 use crate::unit::{carried_units, get_current_move};
 use crate::wonder::Wonder;
 use itertools::Itertools;
@@ -556,15 +557,26 @@ fn is_valid_movement_type(
             Err("the destination should be the carrier position".to_string())
         };
     }
-    for unit in units {
-        if unit.is_land_based() && game.map.is_sea(dest) {
-            return Err("the destination should be land".to_string());
-        }
-        if unit.is_ship() && game.map.is_land(dest) {
-            return Err("the destination should be sea".to_string());
+
+    if !is_ship_construction_move(game, units) {
+        for unit in units {
+            if unit.is_land_based() && game.map.is_sea(dest) {
+                return Err("the destination should be land".to_string());
+            }
+            if unit.is_ship() && game.map.is_land(dest) {
+                return Err("the destination should be sea".to_string());
+            }
         }
     }
     Ok(())
+}
+
+fn is_ship_construction_move(game: &Game, units: &Vec<&Unit>) -> bool {
+    let p = game.player(units[0].player_index);
+    p.has_special_advance(SpecialAdvance::ShipConstruction)
+        && units
+            .iter()
+            .all(|u| u.is_ship() || u.is_settler() || u.is_infantry())
 }
 
 fn terrain_movement_restriction(
