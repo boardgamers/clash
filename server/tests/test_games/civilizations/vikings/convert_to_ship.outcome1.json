@@ -4,7 +4,9 @@
     "Movement": {
       "movement_actions_left": 2,
       "moved_units": [
-        3
+        3,
+        4,
+        5
       ],
       "current_move": {
         "Embark": {
@@ -81,17 +83,17 @@
         {
           "position": "D2",
           "unit_type": "Ship",
-          "id": 3
-        },
-        {
-          "position": "E2",
-          "unit_type": "Settler",
-          "id": 4
-        },
-        {
-          "position": "E2",
-          "unit_type": "Settler",
-          "id": 5
+          "id": 3,
+          "carried_units": [
+            {
+              "unit_type": "Settler",
+              "id": 4
+            },
+            {
+              "unit_type": "Settler",
+              "id": 5
+            }
+          ]
         }
       ],
       "civilization": "Vikings",
@@ -284,6 +286,52 @@
                       "value": "Playing"
                     }
                   ]
+                },
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          4,
+                          5
+                        ],
+                        "destination": "D2",
+                        "embark_carrier_id": 3
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "remove",
+                      "path": "/players/0/units/2/carried_units"
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/units/3",
+                      "value": {
+                        "id": 4,
+                        "position": "E2",
+                        "unit_type": "Settler"
+                      }
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/units/4",
+                      "value": {
+                        "id": 5,
+                        "position": "E2",
+                        "unit_type": "Settler"
+                      }
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/state/Movement/moved_units/1"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/state/Movement/moved_units/1"
+                    }
+                  ]
                 }
               ]
             }
@@ -292,10 +340,13 @@
       ]
     }
   ],
-  "action_log_index": 1,
+  "action_log_index": 2,
   "log": [
     [
       "Player1 marched 1 settler from E2 to D2 converting 1 settler to ships"
+    ],
+    [
+      "Player1 embarked 2 settlers from E2 to D2"
     ]
   ],
   "undo_limit": 0,

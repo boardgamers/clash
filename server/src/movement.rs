@@ -1,7 +1,7 @@
 use crate::map::Map;
 use crate::map::Terrain::{Fertile, Forest, Mountain, Unexplored};
 use crate::resource_pile::ResourcePile;
-use crate::unit::{Unit, set_unit_position, UnitType, Units};
+use crate::unit::{Unit, UnitType, Units, set_unit_position};
 use crate::utils;
 use std::collections::HashSet;
 
@@ -142,7 +142,7 @@ pub(crate) fn move_units(
 
     let mut ask_conversion = vec![]; // from ship construction
     let mut to_ship = Units::empty();
-    
+
     for unit_id in units {
         set_unit_position(player_index, *unit_id, to, game);
         let unit = game.players[player_index].get_unit_mut(*unit_id);
@@ -165,11 +165,17 @@ pub(crate) fn move_units(
     }
 
     if !to_ship.is_empty() {
-        game.add_to_last_log_item(&format!(
-            " converting {} to ships", to_ship.to_string(None)
-        ));
+        game.add_to_last_log_item(&format!(" converting {} to ships", to_ship.to_string(None)));
+        if let Movement(move_state) = &mut game.state {
+            move_state.current_move = CurrentMove::Embark {
+                source: from,
+                destination: to,
+            };
+        } else {
+            panic!("expected movement state, but got: {:?}", game.state)
+        }
     }
-    
+
     // todo convert to settler, infantry, ship
 }
 
@@ -581,6 +587,7 @@ fn is_valid_movement_type(
 
 fn is_ship_construction_move(game: &Game, units: &Vec<&Unit>, dest: Position) -> bool {
     // todo check stack size at destination converting as many units to settlers as possible
+    // todo also for ship limit
     let p = game.player(units[0].player_index);
     p.has_special_advance(SpecialAdvance::ShipConstruction)
         && game.enemy_player(p.index, dest).is_none()
