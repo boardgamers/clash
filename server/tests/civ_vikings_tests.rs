@@ -11,7 +11,6 @@ const JSON: JsonTest = JsonTest::child("civilizations", "vikings");
 
 #[test]
 fn ship_construction() {
-    let destination = Position::from_offset("D2");
     JSON.test(
         "ship_construction",
         vec![
@@ -21,7 +20,7 @@ fn ship_construction() {
                 0,
                 Action::Movement(MovementAction::Move(MoveUnits::new(
                     vec![4, 5],
-                    destination,
+                    Position::from_offset("D2"),
                     Some(3),
                     ResourcePile::empty(),
                 ))),
@@ -31,4 +30,15 @@ fn ship_construction() {
             TestAction::undoable(0, Action::Response(EventResponse::SelectUnits(vec![3]))),
         ],
     );
+}
+
+#[test]
+fn longships() {
+    JSON.test(
+        "longships",
+        vec![
+            TestAction::not_undoable(0, move_action(vec![3, 4, 5], Position::from_offset("C3"))).skip_json(),
+            TestAction::not_undoable(0, move_action(vec![4, 5], Position::from_offset("C4"))),
+        ],
+    )
 }

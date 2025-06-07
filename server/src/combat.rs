@@ -15,6 +15,7 @@ use crate::movement::{MoveUnits, MovementRestriction, move_units, stop_current_m
 use crate::player::gain_resources;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
+use crate::special_advance::SpecialAdvance;
 use crate::tactics_card::CombatRole;
 use crate::unit::{UnitType, Units, carried_units};
 use crate::wonder::{Wonder, deinit_wonder, init_wonder};
@@ -473,21 +474,7 @@ fn move_to_enemy_player_tile(
     let has_fortress = city.is_some_and(|city| city.pieces.fortress.is_some());
 
     if game.player(player_index).is_human() {
-        let mut military = false;
-        for unit_id in unit_ids {
-            let unit = game.player_mut(player_index).get_unit_mut(*unit_id);
-            if unit.is_military() {
-                if unit
-                    .movement_restrictions
-                    .contains(&MovementRestriction::Battle)
-                {
-                    panic!("unit can't attack");
-                }
-                unit.movement_restrictions.push(MovementRestriction::Battle);
-                military = true;
-            }
-        }
-        assert!(military, "Need military units to attack");
+        apply_battle_movement_restriction(game, player_index, unit_ids);
     } else if city.is_some()
         && game
             .player(defender)
@@ -522,6 +509,39 @@ fn move_to_enemy_player_tile(
         return MoveResult::Combat;
     }
     MoveResult::Move
+}
+
+fn apply_battle_movement_restriction(game: &mut Game, player_index: usize, unit_ids: &Vec<u32>) {
+    let mut military = false;
+    let can_ignore_battle_movement_restrictions_for_ships = game
+        .player(player_index)
+        .has_special_advance(SpecialAdvance::Longships);
+    let mut used_longships = false;
+
+    for unit_id in unit_ids {
+        let unit = game.player_mut(player_index).get_unit_mut(*unit_id);
+        if unit.is_military() {
+            military = true;
+            if unit.is_ship() && can_ignore_battle_movement_restrictions_for_ships {
+                used_longships = true;
+                continue;
+            }
+
+            if unit
+                .movement_restrictions
+                .contains(&MovementRestriction::Battle)
+            {
+                panic!("unit can't attack");
+            }
+            unit.movement_restrictions.push(MovementRestriction::Battle);
+        }
+    }
+
+    if used_longships {
+        game.add_info_log_item("Longships allow to ignore battle movement restrictions");
+    }
+
+    assert!(military, "Need military units to attack");
 }
 
 pub(crate) fn move_with_possible_combat(game: &mut Game, player_index: usize, m: &MoveUnits) {

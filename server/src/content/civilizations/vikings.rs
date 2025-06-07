@@ -8,14 +8,14 @@ use crate::map::{Block, Terrain};
 use crate::player::Player;
 use crate::position::Position;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
-use crate::unit::{Unit, UnitType, Units, carried_units};
+use crate::unit::{carried_units, Unit, UnitType, Units};
 use itertools::Itertools;
 use std::ops::RangeInclusive;
 
 pub(crate) fn vikings() -> Civilization {
     Civilization::new(
         "Vikings",
-        vec![ship_construction()],
+        vec![ship_construction(), longships()],
         vec![],
         Some(Block::new([
             Terrain::Fertile,
@@ -159,4 +159,16 @@ fn can_add(p: &Player, army_units: u8, settlers: u8, infantry: u8) -> bool {
     p.available_units().settlers >= settlers
         && p.available_units().infantry >= infantry
         && army_units + infantry <= STACK_LIMIT as u8
+}
+
+fn longships() -> SpecialAdvanceInfo {
+    // todo Ships can carry up to 3 units.
+    SpecialAdvanceInfo::builder(
+        SpecialAdvance::Longships,
+        SpecialAdvanceRequirement::Advance(Advance::WarShips),
+        "Longships",
+        "Ignore battle movement restrictions for ships. \
+        Ships can carry up to 3 units.", 
+    )
+    .build()
 }
