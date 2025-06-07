@@ -15,7 +15,7 @@ use crate::cultural_influence::{
 };
 use crate::events::EventOrigin;
 use crate::game::{Game, GameState};
-use crate::happiness::{available_happiness_actions, happiness_cost};
+use crate::happiness::{available_happiness_actions, happiness_city_restriction, happiness_cost};
 use crate::payment::PaymentOptions;
 use crate::player::{CostTrigger, Player};
 use crate::playing_actions::{
@@ -156,12 +156,11 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
     // InfluenceCultureAttempt,
     for action_type in available_influence_actions(game, p.index) {
         if let Some(i) = calculate_influence(game, p, &action_type) {
-            actions.push((
-                ActionType::Playing(PlayingActionType::Collect),
-                vec![Action::Playing(PlayingAction::InfluenceCultureAttempt(
+            actions.push((ActionType::Playing(PlayingActionType::Collect), vec![
+                Action::Playing(PlayingAction::InfluenceCultureAttempt(
                     InfluenceCultureAttempt::new(i, action_type),
-                ))],
-            ));
+                )),
+            ]));
         }
     }
 
@@ -214,12 +213,9 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
 
         let a = info.action;
         for c in cities {
-            actions.push((
-                ActionType::Playing(PlayingActionType::Custom(a)),
-                vec![Action::Playing(PlayingAction::Custom(CustomAction::new(
-                    a, c,
-                )))],
-            ));
+            actions.push((ActionType::Playing(PlayingActionType::Custom(a)), vec![
+                Action::Playing(PlayingAction::Custom(CustomAction::new(a, c))),
+            ]));
         }
     }
 
@@ -457,6 +453,11 @@ fn calculate_increase_happiness(
         .filter(|city| city.mood_state != MoodState::Happy)
         .sorted_by_key(|city| -(city.size() as i8))
     {
+        if happiness_city_restriction(player, action_type).is_some_and(|r| r != c.position) {
+            // city restriction is not met
+            continue;
+        }
+
         let steps = match c.mood_state {
             MoodState::Angry => 2,
             MoodState::Neutral => 1,
