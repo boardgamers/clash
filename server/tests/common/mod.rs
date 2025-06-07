@@ -435,7 +435,7 @@ pub fn move_action(units: Vec<u32>, destination: Position) -> Action {
         destination,
         None,
         ResourcePile::empty(),
-    )))           
+    )))
 }
 
 pub fn advance_action(advance: advance::Advance, payment: ResourcePile) -> Action {

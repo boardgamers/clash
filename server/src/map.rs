@@ -92,7 +92,7 @@ impl Map {
                     .start_block
                     .as_ref()
                     .unwrap_or(&h.block);
-                map.add_block_tiles(&h.position, &home, h.position.rotation);
+                map.add_block_tiles(&h.position, home, h.position.rotation);
                 let position = home.tiles(&h.position, h.position.rotation)[0].0;
                 setup_home_city(&mut players[i], position);
             });

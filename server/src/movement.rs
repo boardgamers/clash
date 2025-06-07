@@ -7,6 +7,7 @@ use std::collections::HashSet;
 
 use crate::combat::move_with_possible_combat;
 use crate::consts::{ARMY_MOVEMENT_REQUIRED_ADVANCE, MOVEMENT_ACTIONS, SHIP_CAPACITY, STACK_LIMIT};
+use crate::content::persistent_events::PersistentEventType;
 use crate::events::EventOrigin;
 use crate::explore::move_to_unexplored_tile;
 use crate::game::GameState::Movement;
@@ -22,7 +23,6 @@ use crate::unit::{carried_units, get_current_move};
 use crate::wonder::Wonder;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use crate::content::persistent_events::PersistentEventType;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct MoveUnits {
@@ -177,12 +177,16 @@ pub(crate) fn move_units(
         }
     }
 
-    if ask_conversion.len() > 0 {
+    if !ask_conversion.is_empty() {
         on_ship_construction_conversion(game, player_index, ask_conversion);
     }
 }
 
-pub(crate) fn on_ship_construction_conversion(game: &mut Game, player_index: usize, ask_conversion: Vec<u32>) {
+pub(crate) fn on_ship_construction_conversion(
+    game: &mut Game,
+    player_index: usize,
+    ask_conversion: Vec<u32>,
+) {
     let _ = game.trigger_persistent_event(
         &[player_index],
         |events| &mut events.ship_construction_conversion,

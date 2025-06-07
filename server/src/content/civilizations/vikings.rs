@@ -37,7 +37,7 @@ fn ship_construction() -> SpecialAdvanceInfo {
             // todo check stack limit including carried units
             Some(UnitsRequest::new(
                 player_index,
-                units.to_vec(),
+                units.clone(),
                 0..=units.len() as u8,
                 "Select units to convert to settlers (instead of infantry)",
             ))

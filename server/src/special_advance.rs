@@ -28,7 +28,7 @@ pub enum SpecialAdvance {
     Expansion,
     Fireworks,
     ImperialArmy,
-    
+
     // Vikings
     ShipConstruction,
     Longships,

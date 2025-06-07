@@ -125,7 +125,7 @@ pub enum PersistentEventType {
     ChooseActionCard,
     ChooseIncident(IncidentInfo),
     CityActivationMoodDecreased(Position),
-    ShipConstructionConversion(Vec<u32>)
+    ShipConstructionConversion(Vec<u32>),
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]

@@ -13,22 +13,23 @@ const JSON: JsonTest = JsonTest::child("civilizations", "vikings");
 fn convert_to_ship() {
     let units = vec![4, 5];
     let destination = Position::from_offset("D2");
-    JSON.test("convert_to_ship", vec![
-        TestAction::undoable(0, move_action(vec![3], Position::from_offset("D2"))).skip_json(),
-        // embark in same current move
-        TestAction::undoable(
-            0,
-            Action::Movement(MovementAction::Move(MoveUnits::new(
-                units,
-                destination,
-                Some(3),
-                ResourcePile::empty(),
-            ))),
-        ).skip_json(),
-        TestAction::undoable(0, move_action(vec![3], Position::from_offset("C2"))).skip_json(),
-        TestAction::undoable(
-            0,
-            Action::Response(EventResponse::SelectUnits(vec![3])),
-        )
-    ]);
+    JSON.test(
+        "convert_to_ship",
+        vec![
+            TestAction::undoable(0, move_action(vec![3], Position::from_offset("D2"))).skip_json(),
+            // embark in same current move
+            TestAction::undoable(
+                0,
+                Action::Movement(MovementAction::Move(MoveUnits::new(
+                    units,
+                    destination,
+                    Some(3),
+                    ResourcePile::empty(),
+                ))),
+            )
+            .skip_json(),
+            TestAction::undoable(0, move_action(vec![3], Position::from_offset("C2"))).skip_json(),
+            TestAction::undoable(0, Action::Response(EventResponse::SelectUnits(vec![3]))),
+        ],
+    );
 }

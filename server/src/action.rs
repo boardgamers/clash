@@ -251,7 +251,7 @@ pub(crate) fn execute_custom_phase_action(
         StatusPhase(s) => play_status_phase(game, s),
         TurnStart => game.on_start_turn(),
         PayAction(a) => {
-            a.on_pay_action(game, player, game.current_event().origin_override.clone())?
+            a.on_pay_action(game, player, game.current_event().origin_override.clone())?;
         }
         Advance(a) => {
             on_advance(game, player, a);

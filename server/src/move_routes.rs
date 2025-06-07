@@ -296,6 +296,6 @@ fn add_perimeter(map: &Map, start: Position, perimeter: &mut Vec<Position>) {
 //     // todo May move settlers and infantry out of water
 //     // - add units select to decide which to convert to settlers - rest is infantry
 //     // todo converting them to ships and back (or being carried by other ships)
-//     
+//
 //     todo!()
 // }

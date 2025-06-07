@@ -156,11 +156,12 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
     // InfluenceCultureAttempt,
     for action_type in available_influence_actions(game, p.index) {
         if let Some(i) = calculate_influence(game, p, &action_type) {
-            actions.push((ActionType::Playing(PlayingActionType::Collect), vec![
-                Action::Playing(PlayingAction::InfluenceCultureAttempt(
+            actions.push((
+                ActionType::Playing(PlayingActionType::Collect),
+                vec![Action::Playing(PlayingAction::InfluenceCultureAttempt(
                     InfluenceCultureAttempt::new(i, action_type),
-                )),
-            ]));
+                ))],
+            ));
         }
     }
 
@@ -213,9 +214,12 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
 
         let a = info.action;
         for c in cities {
-            actions.push((ActionType::Playing(PlayingActionType::Custom(a)), vec![
-                Action::Playing(PlayingAction::Custom(CustomAction::new(a, c))),
-            ]));
+            actions.push((
+                ActionType::Playing(PlayingActionType::Custom(a)),
+                vec![Action::Playing(PlayingAction::Custom(CustomAction::new(
+                    a, c,
+                )))],
+            ));
         }
     }
 
