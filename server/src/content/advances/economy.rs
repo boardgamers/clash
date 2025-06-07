@@ -17,6 +17,8 @@ use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
+use crate::content::civilizations::vikings::add_raid_bonus;
+use crate::special_advance::SpecialAdvance;
 
 pub(crate) fn economy() -> AdvanceGroupInfo {
     advance_group_builder(
@@ -181,15 +183,20 @@ where
                 ResourceRewardRequest::new(reward, "Collect trade routes reward".to_string())
             })
         },
-        |game, p, _| {
+        |game, s, _| {
             let (_, routes) = trade_route_reward(game).expect("No trade route reward");
-            trade_route_log(
+            let p = game.player(s.player_index);
+            let log = trade_route_log(
                 game,
-                p.player_index,
+                s.player_index,
                 &routes,
-                &p.choice,
-                p.actively_selected,
-            )
+                &s.choice,
+                s.actively_selected,
+            );
+            if p.has_special_advance(SpecialAdvance::Raiding) {
+                add_raid_bonus(game, p.index, &routes);
+            }
+            log
         },
     )
 }

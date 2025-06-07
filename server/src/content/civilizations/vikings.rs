@@ -2,20 +2,24 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Advance;
 use crate::civilization::Civilization;
 use crate::consts::STACK_LIMIT;
-use crate::content::persistent_events::UnitsRequest;
+use crate::content::ability::Ability;
+use crate::content::advances::trade_routes::TradeRoute;
+use crate::content::persistent_events::{PaymentRequest, UnitsRequest};
 use crate::game::Game;
 use crate::map::{Block, Terrain};
+use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::Player;
 use crate::position::Position;
+use crate::resource::ResourceType;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
-use crate::unit::{Unit, UnitType, Units, carried_units};
+use crate::unit::{carried_units, Unit, UnitType, Units};
 use itertools::Itertools;
 use std::ops::RangeInclusive;
 
 pub(crate) fn vikings() -> Civilization {
     Civilization::new(
         "Vikings",
-        vec![ship_construction(), longships()],
+        vec![ship_construction(), longships(), raids()],
         vec![],
         Some(Block::new([
             Terrain::Fertile,
@@ -170,4 +174,75 @@ fn longships() -> SpecialAdvanceInfo {
         Ships can carry up to 3 units.",
     )
     .build()
+}
+
+const RAID: &str = "viking_raid";
+
+fn raids() -> SpecialAdvanceInfo {
+    SpecialAdvanceInfo::builder(
+        SpecialAdvance::Raiding,
+        SpecialAdvanceRequirement::Advance(Advance::TradeRoutes),
+        "Raiding",
+        "Trade routes: Ships that are adjacent to enemy cities raid: \
+        That player loses 1 resource.",
+    )
+    .build()
+}
+
+pub(crate) fn lose_raid_resource() -> Ability {
+    Ability::builder(
+        "Viking Raids",
+        "Lose 1 resource to Viking Raids (triggered by Trade Routes)",
+    )
+    .add_payment_request_listener(
+        |e| &mut e.turn_start,
+        4,
+        |game, player_index, ()| {
+            // todo add RAID to event_info
+
+            let c = PaymentOptions::sum(
+                game.player(player_index),
+                PaymentReason::SpecialAdvanceAbility,
+                1,
+                &ResourceType::resources(),
+            );
+            let p = game.player_mut(player_index);
+            if !p.can_afford(&c) {
+                return None;
+            }
+
+            p.event_info
+                .remove(RAID)
+                .is_some()
+                .then_some(vec![PaymentRequest::mandatory(
+                    c,
+                    "Pay 1 resource to Viking Raids",
+                )])
+        },
+        |game, s, ()| {
+            game.add_info_log_item(&format!(
+                "{} lost {} to Viking Raids",
+                s.player_name, s.choice[0]
+            ));
+        },
+    )
+    .build()
+}
+
+pub(crate) fn add_raid_bonus(game: &mut Game, player: usize, routes: &[TradeRoute]) {
+    let name = game.player_name(player);
+    for r in routes {
+        let u = game.player(player).get_unit(r.unit_id);
+        if u.is_ship() && u.position.distance(r.to) == 1 {
+            let city = game.get_any_city(r.to);
+            let position = city.position;
+            let opponent = game.player_mut(city.player_index);
+            let opponent_name = opponent.get_name();
+            if opponent.event_info.insert(RAID.to_string(), "true".to_string()).is_none() {
+                game.add_info_log_item(&format!(
+                    "{name} raided {opponent_name} at {position}",
+                ));
+            }
+        }
+    }
 }

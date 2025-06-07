@@ -42,6 +42,17 @@ impl ResourceType {
             ResourceType::CultureTokens,
         ]
     }
+
+    #[must_use]
+    pub fn resources() -> Vec<ResourceType> {
+        vec![
+            ResourceType::Food,
+            ResourceType::Wood,
+            ResourceType::Ore,
+            ResourceType::Ideas,
+            ResourceType::Gold,
+        ]
+    }
 }
 
 impl fmt::Display for ResourceType {

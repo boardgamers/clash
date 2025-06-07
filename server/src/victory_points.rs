@@ -28,6 +28,7 @@ pub(crate) fn add_special_victory_points(
     {
         player.special_victory_points[v].points =
             assert_positive(points + player.special_victory_points[v].points);
+        player.special_victory_points.retain(|p| p.points > 0.0);
     } else {
         player.special_victory_points.push(SpecialVictoryPoints {
             points: assert_positive(points),

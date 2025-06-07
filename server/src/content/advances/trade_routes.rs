@@ -10,7 +10,7 @@ use crate::unit::Unit;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct TradeRoute {
-    unit_id: u32,
+    pub(crate) unit_id: u32,
     from: Position,
     pub to: Position,
 }
