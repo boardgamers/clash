@@ -5,8 +5,7 @@
     {
       "id": 0,
       "resources": {
-        "food": 2,
-        "culture_tokens": 2
+        "food": 2
       },
       "resource_limit": {
         "food": 2,
@@ -23,23 +22,20 @@
       ],
       "units": [
         {
-          "position": "D1",
+          "position": "E8",
           "unit_type": {
-            "Leader": "Alexander"
+            "Leader": "SunTzu"
           },
           "id": 0
         }
       ],
-      "civilization": "Greece",
+      "civilization": "China",
       "advances": [
         "Farming",
         "Mining",
         "Tactics"
       ],
       "incident_tokens": 1,
-      "action_cards": [
-        17
-      ],
       "next_unit_id": 1
     },
     {

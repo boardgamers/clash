@@ -16,8 +16,8 @@ use crate::resource_pile::ResourcePile;
 use crate::status_phase::{
     ChangeGovernmentOption, add_change_government, can_change_government_for_free, get_status_phase,
 };
-use crate::unit::{UnitType, kill_units};
-use crate::wonder::draw_wonder_from_pile;
+use crate::unit::kill_units;
+use crate::wonder::draw_public_wonder;
 use itertools::Itertools;
 
 pub(crate) fn civil_war_incidents() -> Vec<Incident> {
@@ -95,7 +95,7 @@ fn civil_war(id: u8) -> Incident {
                 .player(s.player_index)
                 .get_units(position)
                 .iter()
-                .filter(|u| matches!(u.unit_type, UnitType::Infantry))
+                .filter(|u| u.is_infantry())
                 .sorted_by_key(|u| u.movement_restrictions.len())
                 .next_back()
                 .expect("infantry should exist")
@@ -115,9 +115,7 @@ fn non_happy_cites_with_infantry(p: &Player) -> Vec<Position> {
         .iter()
         .filter(|c| {
             !matches!(c.mood_state, MoodState::Happy)
-                && p.get_units(c.position)
-                    .iter()
-                    .any(|u| matches!(u.unit_type, UnitType::Infantry))
+                && p.get_units(c.position).iter().any(|u| u.is_infantry())
         })
         .map(|c| c.position)
         .collect_vec()
@@ -176,7 +174,7 @@ fn kill_unit_for_revolution(
                 .player(player_index)
                 .units
                 .iter()
-                .filter(|u| u.unit_type.is_army_unit())
+                .filter(|u| u.is_army_unit())
                 .map(|u| u.id)
                 .collect_vec();
             Some(UnitsRequest::new(
@@ -280,14 +278,7 @@ fn envoy() -> Incident {
             |name, pile| format!("{name} gained {pile} for Envoy event"),
         );
 
-        if let Some(wonder) = draw_wonder_from_pile(game) {
-            game.add_info_log_item(&format!(
-                "{} is now available to be taken by anyone",
-                wonder.name(game)
-            ));
-            game.permanent_effects
-                .push(PermanentEffect::PublicWonderCard(wonder));
-        }
+        draw_public_wonder(game);
     })
     .add_incident_player_request(
         IncidentTarget::ActivePlayer,

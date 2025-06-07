@@ -183,7 +183,7 @@ fn move_to_explored_tile(
 
 pub fn is_any_ship(game: &Game, player_index: usize, units: &[u32]) -> bool {
     let p = game.player(player_index);
-    units.iter().any(|&id| p.get_unit(id).unit_type.is_ship())
+    units.iter().any(|&id| p.get_unit(id).is_ship())
 }
 
 #[must_use]

@@ -3,15 +3,16 @@ use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city_pieces::Building::Port;
 use crate::content::ability::Ability;
-use crate::content::advances::{AdvanceGroup, advance_group_builder};
+use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::game::Game;
 use crate::player::gain_resources;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use std::collections::HashSet;
 
-pub(crate) fn seafaring() -> AdvanceGroup {
+pub(crate) fn seafaring() -> AdvanceGroupInfo {
     advance_group_builder(
+        AdvanceGroup::Seafaring,
         "Seafaring",
         vec![fishing(), navigation(), war_ships(), cartography()],
     )
@@ -73,7 +74,7 @@ fn cartography() -> AdvanceBuilder {
                 let mut navigation = false;
                 for id in &i.units {
                     let unit = game.player(i.player).get_unit(*id);
-                    if unit.unit_type.is_ship() {
+                    if unit.is_ship() {
                         ship = true;
                         if !unit.position.is_neighbor(i.to) {
                             navigation = true;

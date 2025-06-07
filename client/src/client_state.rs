@@ -145,7 +145,7 @@ impl ActiveDialog {
                         let mut r = v.clone();
                         r.extend(event_help(
                             rc,
-                            &rc.shown_player.custom_action_command(*c).event_origin,
+                            &rc.shown_player.custom_action_info(*c).event_origin,
                         ));
                     }
                     v

@@ -1,23 +1,33 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Advance;
 use crate::civilization::Civilization;
+use crate::combat::Combat;
 use crate::combat_listeners::CombatRoundEnd;
-use crate::content::persistent_events::PaymentRequest;
+use crate::consts::STACK_LIMIT;
+use crate::content::ability::AbilityBuilder;
+use crate::content::advances::AdvanceGroup;
+use crate::content::custom_actions::CustomActionType;
+use crate::content::persistent_events::{PaymentRequest, UnitsRequest};
 use crate::game::{Game, GameState};
+use crate::leader::{Leader, LeaderInfo};
+use crate::leader_ability::LeaderAbility;
 use crate::map::Terrain;
 use crate::movement::{MoveState, possible_move_destinations};
 use crate::payment::{PaymentOptions, PaymentReason};
-use crate::player::Player;
+use crate::player::{Player, can_add_army_unit, gain_resources};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
+use crate::tactics_card::CombatRole;
+use crate::unit::UnitType;
+use crate::wonder::Wonder;
 use itertools::Itertools;
 
 pub(crate) fn china() -> Civilization {
     Civilization::new(
         "China",
         vec![rice(), expansion(), fireworks(), imperial_army()],
-        vec![],
+        vec![sun_tzu(), qin(), wu()],
     )
 }
 
@@ -44,7 +54,7 @@ fn rice() -> SpecialAdvanceInfo {
                             .player(i.info.player)
                             .units
                             .iter()
-                            .any(|u| u.position == pos && u.unit_type.is_settler())
+                            .any(|u| u.position == pos && u.is_settler())
                 })
                 .count()
                 .min(2);
@@ -81,7 +91,7 @@ fn expansion() -> SpecialAdvanceInfo {
             let moved_units = p
                 .units
                 .iter()
-                .filter(|u| !u.unit_type.is_settler())
+                .filter(|u| !u.is_settler())
                 .map(|u| u.id)
                 .collect_vec();
 
@@ -115,77 +125,278 @@ fn movable_settlers(game: &Game, player: &Player) -> Vec<Position> {
 }
 
 fn fireworks() -> SpecialAdvanceInfo {
-    SpecialAdvanceInfo::builder(
-        SpecialAdvance::Fireworks,
-        SpecialAdvanceRequirement::Advance(Advance::Metallurgy),
-        "Fireworks",
-        "In the first round of combat, you may pay 1 ore and 1 wood to ignore the first hit.",
-    )
-    .add_payment_request_listener(
-        |e| &mut e.combat_round_end,
+    ignore_hit_ability(
+        SpecialAdvanceInfo::builder(
+            SpecialAdvance::Fireworks,
+            SpecialAdvanceRequirement::Advance(Advance::Metallurgy),
+            "Fireworks",
+            "In the first round of combat, you may pay 1 ore and 1 wood to ignore the first hit.",
+        ),
+        ResourcePile::wood(1) + ResourcePile::ore(1),
+        PaymentReason::AdvanceAbility,
         91,
-        |game, player_index, e| {
+        |c, _r, _game| c.stats.round == 1,
+    )
+    .build()
+}
+
+fn ignore_hit_ability<B: AbilityInitializerSetup>(
+    b: B,
+    pile: ResourcePile,
+    payment_reason: PaymentReason,
+    priority: i32,
+    filter: impl Fn(&Combat, CombatRole, &Game) -> bool + Send + Sync + 'static + Clone,
+) -> B {
+    let name = b.name().clone();
+    let name2 = b.name().clone();
+    b.add_payment_request_listener(
+        |e| &mut e.combat_round_end,
+        priority,
+        move |game, player_index, e| {
             let player = &game.player(player_index);
+            let combat = &e.combat;
+            if !filter(combat, combat.role(player_index), game) {
+                return None;
+            }
 
-            let cost = PaymentOptions::resources(
-                player,
-                PaymentReason::AdvanceAbility,
-                ResourcePile::wood(1) + ResourcePile::ore(1),
-            );
+            let cost = PaymentOptions::resources(player, payment_reason, pile.clone());
 
-            if !apply_fireworks(e, player_index, false) {
-                game.add_info_log_item("Fireworks won't reduce the hits, no payment made.");
+            if !apply_ignore_hit(e, player_index, false) {
+                game.add_info_log_item(&format!("{name} won't reduce the hits, no payment made."));
                 return None;
             }
 
             if !player.can_afford(&cost) {
-                game.add_info_log_item("Fireworks: Not enough resources, no payment made.");
+                game.add_info_log_item(&format!("{name} Not enough resources, no payment made."));
                 return None;
             }
 
             Some(vec![PaymentRequest::optional(cost, "Ignore 1 hit")])
         },
-        |game, s, e| {
+        move |game, s, e| {
             let pile = &s.choice[0];
             if pile.is_empty() {
-                game.add_info_log_item("Fireworks: No payment made, first hit not ignored.");
+                game.add_info_log_item(&format!(
+                    "{name2}: No payment made, first hit not ignored."
+                ));
             } else {
-                game.add_info_log_item(
-                    &format!("Fireworks: Paid {pile} to ignore the first hit.",),
-                );
-                apply_fireworks(e, s.player_index, true);
+                game.add_info_log_item(&format!("{name2}: Paid {pile} to ignore the first hit."));
+                apply_ignore_hit(e, s.player_index, true);
             }
         },
     )
-    .build()
 }
 
-fn apply_fireworks(e: &mut CombatRoundEnd, p: usize, do_update: bool) -> bool {
+fn apply_ignore_hit(e: &mut CombatRoundEnd, p: usize, do_update: bool) -> bool {
     e.update_hits(e.combat.opponent_role(p), do_update, |h| {
         h.opponent_hit_cancels += 1;
     })
 }
-
-const IMPERIAL_ARMY: &str = "Once per turn, as an action, \
-        you may convert any number of settlers into infantry units, and vice versa.";
 
 fn imperial_army() -> SpecialAdvanceInfo {
     SpecialAdvanceInfo::builder(
         SpecialAdvance::ImperialArmy,
         SpecialAdvanceRequirement::AnyGovernment,
         "Imperial Army",
-        IMPERIAL_ARMY,
+        "Once per turn, as an action, \
+        you may convert any number of settlers into infantry units, and vice versa.",
     )
-    // .add_custom_action(
-    //     CustomActionType::ImperialArmy,
-    //     |a| a.once_per_turn(ResourcePile::empty()),
-    //     use_imperial_army(),
-    //     |_game, _p| todo!(),
-    // )
+    .add_custom_action(
+        CustomActionType::ImperialArmy,
+        |c| c.once_per_turn().action().no_resources(),
+        use_imperial_army,
+        |_game, p| {
+            !p.units
+                .iter()
+                .filter(|u| {
+                    // infantry can always be converted - if the settler limit is reached,
+                    // the player has to convert a settler to infantry
+                    // we're not checking if that settler can be converted here, but later
+                    (u.is_settler() && can_add_army_unit(p, u.position)) || u.is_infantry()
+                })
+                .map(|u| u.id)
+                .collect_vec()
+                .is_empty()
+        },
+    )
     .build()
 }
-//
-// fn use_imperial_army() -> Ability {
-//     // todo
-//     Ability::builder("Imperial Army", IMPERIAL_ARMY).build()
-// }
+
+fn use_imperial_army(b: AbilityBuilder) -> AbilityBuilder {
+    b.add_units_request(
+        |event| &mut event.custom_action,
+        0,
+        |game, player_index, _| {
+            let choices = convertible_units(game.player(player_index));
+            let max = choices.len() as u8;
+            Some(UnitsRequest::new(
+                player_index,
+                choices,
+                1..=max,
+                "Select units to convert using Imperial Army",
+            ))
+        },
+        |game, s, _| {
+            let p = game.player_mut(s.player_index);
+            let mut names = vec![];
+            for id in &s.choice {
+                let unit = p.get_unit_mut(*id);
+                names.push(format!(
+                    "{} at {}",
+                    unit.unit_type.non_leader_name(),
+                    unit.position
+                ));
+                if unit.is_settler() {
+                    unit.unit_type = UnitType::Infantry;
+                } else {
+                    unit.unit_type = UnitType::Settler;
+                }
+            }
+
+            game.add_info_log_item(&format!(
+                "{} converted {} using Imperial Army",
+                s.player_name,
+                names.join(", ")
+            ));
+        },
+    )
+}
+
+fn convertible_units(p: &Player) -> Vec<u32> {
+    p.units
+        .iter()
+        .filter(|u| u.is_settler() || u.is_infantry())
+        .map(|u| u.id)
+        .collect_vec()
+}
+
+pub(crate) fn validate_imperial_army(units: &[u32], p: &Player) -> Result<(), String> {
+    let settler_to_infantry = units
+        .iter()
+        .filter(|&&u| p.get_unit(u).is_settler())
+        .collect_vec();
+    let infantry_to_settler = units
+        .iter()
+        .filter(|&&u| p.get_unit(u).is_infantry())
+        .collect_vec();
+
+    let net_to_settler = infantry_to_settler.len() as i8 - settler_to_infantry.len() as i8;
+    if p.available_units().settlers < net_to_settler as u8 {
+        return Err(format!(
+            "Cannot convert {} infantry to settlers, only {} available",
+            net_to_settler,
+            p.available_units().settlers
+        ));
+    }
+
+    let net_to_infantry = settler_to_infantry.len() as i8 - infantry_to_settler.len() as i8;
+    if p.available_units().infantry < net_to_infantry as u8 {
+        return Err(format!(
+            "Cannot convert {} settlers to infantry, only {} available",
+            net_to_infantry,
+            p.available_units().infantry
+        ));
+    }
+
+    for pos in settler_to_infantry.iter().map(|&u| p.get_unit(*u).position) {
+        let army_size = p
+            .get_units(pos)
+            .iter()
+            .filter(|u| {
+                (u.is_army_unit() && !infantry_to_settler.contains(&&u.id))
+                    || settler_to_infantry.contains(&&u.id)
+            })
+            .count();
+        if army_size > STACK_LIMIT {
+            return Err(format!(
+                "Cannot convert settlers at {pos} to infantry, stack limit exceeded"
+            ));
+        }
+    }
+    Ok(())
+}
+
+fn sun_tzu() -> LeaderInfo {
+    LeaderInfo::new(
+        Leader::SunTzu,
+        "Sun Tzu",
+        LeaderAbility::advance_gain_custom_action(
+            "The Art of War",
+            CustomActionType::ArtOfWar,
+            AdvanceGroup::Warfare,
+        ),
+        LeaderAbility::builder(
+            "Fast War",
+            "Sun Tzu survives a land battle against army units and wins after the first round: \
+            Gain 1 mood token and 1 culture token.",
+        )
+        .add_simple_persistent_event_listener(
+            |event| &mut event.combat_end,
+            23,
+            |game, player_index, _name, s| {
+                let p = s.player(player_index);
+                if s.is_winner(player_index)
+                    && s.round == 1
+                    && s.is_battle()
+                    && s.battleground.is_land()
+                    && p.survived_leader()
+                {
+                    gain_resources(
+                        game,
+                        player_index,
+                        ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1),
+                        |name, pile| format!("{name} gained {pile} from Fast War"),
+                    );
+                }
+            },
+        )
+        .build(),
+    )
+}
+
+fn qin() -> LeaderInfo {
+    LeaderInfo::new(
+        Leader::Qin,
+        "Qin Shi Huang",
+        LeaderAbility::wonder_expert(Wonder::GreatWall),
+        ignore_hit_ability(
+            LeaderAbility::builder(
+                "Tactician",
+                "Land battle with leader: You may pay 2 culture tokens to ignore a hit.",
+            ),
+            ResourcePile::culture_tokens(2),
+            PaymentReason::LeaderAbility,
+            92,
+            Combat::has_leader,
+        )
+        .build(),
+    )
+}
+
+fn wu() -> LeaderInfo {
+    LeaderInfo::new(
+        Leader::Wu,
+        "Wu Zetian",
+        LeaderAbility::advance_gain_custom_action(
+            "Agriculture Economist",
+            CustomActionType::AgricultureEconomist,
+            AdvanceGroup::Agriculture,
+        ),
+        LeaderAbility::builder(
+            "Brilliant Conqueror",
+            "Land battle with leader: \
+            If you have at least as many units as the opponent: Gain +2 combat value.",
+        )
+        .add_combat_strength_listener(105, |game, c, s, r| {
+            let p = c.player(r);
+            if c.is_land_battle_with_leader(r, game)
+                && c.fighting_units(game, p).len() >= c.fighting_units(game, c.opponent(p)).len()
+            {
+                s.extra_combat_value += 2;
+                s.roll_log
+                    .push("Wu Zetian adds +2 combat value".to_string());
+            }
+        })
+        .build(),
+    )
+}

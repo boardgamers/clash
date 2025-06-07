@@ -5,7 +5,7 @@ use crate::card::validate_card_selection;
 use crate::city::{City, MoodState};
 use crate::collect::{available_collect_actions, possible_resource_collections};
 use crate::construct::{Construct, available_buildings, new_building_positions};
-use crate::content::custom_actions::CustomAction;
+use crate::content::custom_actions::{CustomAction, CustomActionType};
 use crate::content::persistent_events::{
     EventResponse, HandCardsRequest, MultiRequest, PersistentEventRequest, PersistentEventState,
     PositionRequest, SelectedStructure, is_selected_structures_valid,
@@ -26,7 +26,7 @@ use crate::recruit::recruit_cost;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::{ChangeGovernment, government_advances};
-use crate::unit::{UnitType, Units};
+use crate::unit::{UnitType, Units, validate_units_selection};
 use crate::wonder::Wonder;
 use itertools::Itertools;
 use rustc_hash::FxHashMap;
@@ -194,13 +194,17 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
         ));
     }
 
-    for command in game.available_custom_actions(p.index) {
-        let cities = if command.city_bound().is_some() {
+    for info in game.available_custom_actions(p.index) {
+        if info.action == CustomActionType::ImperialArmy {
+            // buggy
+            continue;
+        }
+
+        let cities = if info.city_bound().is_some() {
             p.cities
                 .iter()
                 .filter_map(|city| {
-                    command
-                        .is_city_available(game, city)
+                    info.is_city_available(game, city)
                         .then_some(Some(city.position))
                 })
                 .collect_vec()
@@ -208,7 +212,7 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
             vec![None]
         };
 
-        let a = command.action;
+        let a = info.action;
         for c in cities {
             actions.push((
                 ActionType::Playing(PlayingActionType::Custom(a)),
@@ -543,10 +547,12 @@ fn responses(event: &PersistentEventState, player: &Player, game: &Game) -> Vec<
             .map(|c| EventResponse::SelectUnitType(*c))
             .collect(),
         PersistentEventRequest::SelectUnits(r) => {
-            select_multi(&r.request, SelectMultiStrategy::All, |_| true)
-                .into_iter()
-                .map(EventResponse::SelectUnits)
-                .collect()
+            select_multi(&r.request, SelectMultiStrategy::All, |u| {
+                validate_units_selection(u, game, player).is_ok()
+            })
+            .into_iter()
+            .map(EventResponse::SelectUnits)
+            .collect()
         }
         PersistentEventRequest::SelectStructures(r) => {
             select_multi(&r, SelectMultiStrategy::All, |s| {

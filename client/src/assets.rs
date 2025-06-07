@@ -342,11 +342,19 @@ impl Assets {
             ),
             (
                 CustomActionType::Master,
-                load_png(include_bytes!("../assets/greek-pillar-svgrepo-com.png")),
+                load_png(include_bytes!("../assets/graduate-cap-svgrepo-com.png")),
             ),
             (
                 CustomActionType::ImperialArmy,
                 load_png(include_bytes!("../assets/farmer-farm-svgrepo-com.png")),
+            ),
+            (
+                CustomActionType::ArtOfWar,
+                load_png(include_bytes!("../assets/graduate-cap-svgrepo-com.png")),
+            ),
+            (
+                CustomActionType::AgricultureEconomist,
+                load_png(include_bytes!("../assets/graduate-cap-svgrepo-com.png")),
             ),
         ]
         .iter()

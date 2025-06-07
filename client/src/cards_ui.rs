@@ -171,7 +171,7 @@ fn play_card(rc: &RenderContext, card: &HandCard) -> StateUpdate {
             Action::Playing(PlayingAction::ActionCard(*a)),
         ),
         HandCard::Wonder(name) => StateUpdate::execute_with_confirm(
-            vec![format!("Play Wonder Card: {}", name.name(rc.game))],
+            vec![format!("Play Wonder Card: {}", name.name())],
             Action::Playing(PlayingAction::WonderCard(*name)),
         ),
         HandCard::ObjectiveCard(_) => panic!("objective cards are not played as actions"),
@@ -227,7 +227,7 @@ fn get_card_object(
             HandCardObject::new(
                 card.clone(),
                 WONDER_CARD_COLOR,
-                &w.name,
+                &w.name(),
                 vec![
                     w.description.clone(),
                     format!("Cost: {}", w.cost.to_string()),

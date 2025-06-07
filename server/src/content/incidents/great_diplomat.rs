@@ -15,7 +15,7 @@ use serde::{Deserialize, Serialize};
 pub(crate) const DIPLOMAT_ID: u8 = 57;
 
 pub(crate) fn great_diplomat() -> ActionCard {
-    great_person_action_card::<_, String>(
+    great_person_action_card::<_>(
         DIPLOMAT_ID,
         "Great Diplomat",
         &format!(
@@ -25,7 +25,7 @@ pub(crate) fn great_diplomat() -> ActionCard {
                 You may discard the card as a regular action.",
         ),
         ActionCost::regular(),
-        &[],
+        vec![],
         |_game, _player| true,
     )
     .add_simple_persistent_event_listener(

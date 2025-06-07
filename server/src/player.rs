@@ -1,9 +1,10 @@
 use crate::advance::{Advance, base_advance_cost, player_government};
 use crate::city_pieces::DestroyedStructures;
 use crate::consts::{STACK_LIMIT, UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
-use crate::content::custom_actions::{CustomActionCommand, CustomActionExecution};
+use crate::content::custom_actions::{CustomActionExecution, CustomActionInfo};
 use crate::events::Event;
-use crate::leader::{Leader, LeaderAbility};
+use crate::leader::Leader;
+use crate::leader_ability::LeaderAbility;
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player_events::{CostInfo, TransientEvents};
 use crate::playing_actions::PlayingActionType;
@@ -64,7 +65,7 @@ pub struct Player {
     pub completed_objectives: Vec<String>,
     pub captured_leaders: Vec<Leader>,
     pub event_victory_points: f32,
-    pub custom_actions: HashMap<CustomActionType, CustomActionCommand>, // transient
+    pub custom_actions: HashMap<CustomActionType, CustomActionInfo>, // transient
     pub wonder_cards: Vec<Wonder>,
     pub action_cards: Vec<u8>,
     pub objective_cards: Vec<u8>,
@@ -87,6 +88,7 @@ impl Display for Player {
 pub enum CostTrigger {
     WithModifiers,
     NoModifiers,
+    // NoModifiersWithExtraListeners(Arc<dyn Fn(&CostInfo, &Wonder, &Game) + Send + Sync>),
 }
 
 impl Player {
@@ -425,7 +427,10 @@ impl Player {
     pub fn building_cost(&self, game: &Game, building: Building, execute: CostTrigger) -> CostInfo {
         self.trigger_cost_event(
             |e| &e.building_cost,
-            &PaymentOptions::resources(self, PaymentReason::Building, BUILDING_COST),
+            CostInfo::new(
+                self,
+                PaymentOptions::resources(self, PaymentReason::Building, BUILDING_COST),
+            ),
             &building,
             game,
             execute,
@@ -436,7 +441,7 @@ impl Player {
     pub fn advance_cost(&self, advance: Advance, game: &Game, execute: CostTrigger) -> CostInfo {
         self.trigger_cost_event(
             |e| &e.advance_cost,
-            &base_advance_cost(self),
+            CostInfo::new(self, base_advance_cost(self)),
             &advance,
             game,
             execute,
@@ -581,13 +586,12 @@ impl Player {
     pub(crate) fn trigger_cost_event<U, V>(
         &self,
         get_event: impl Fn(&TransientEvents) -> &Event<CostInfo, U, V>,
-        value: &PaymentOptions,
+        mut cost_info: CostInfo,
         info: &U,
         details: &V,
         trigger: CostTrigger,
     ) -> CostInfo {
         let event = get_event(&self.events.transient).get();
-        let mut cost_info = CostInfo::new(self, value.clone());
         match trigger {
             CostTrigger::WithModifiers => {
                 let m =
@@ -605,10 +609,7 @@ impl Player {
     /// # Panics
     /// Panics if the custom action type does not exist for this player
     #[must_use]
-    pub fn custom_action_command(
-        &self,
-        custom_action_type: CustomActionType,
-    ) -> CustomActionCommand {
+    pub fn custom_action_info(&self, custom_action_type: CustomActionType) -> CustomActionInfo {
         self.custom_actions
             .get(&custom_action_type)
             .cloned()
@@ -628,7 +629,7 @@ impl Player {
         self.custom_actions
             .iter()
             .filter_map(move |(t, c)| {
-                if let CustomActionExecution::Modifier(b) = &c.execution {
+                if let CustomActionExecution::Modifier((b, _)) = &c.execution {
                     (b == base).then_some(*t)
                 } else {
                     None
@@ -698,7 +699,7 @@ pub fn gain_resources(
 pub(crate) fn can_add_army_unit(p: &Player, position: Position) -> bool {
     p.get_units(position)
         .iter()
-        .filter(|u| u.unit_type.is_army_unit())
+        .filter(|u| u.is_army_unit())
         .count()
         < STACK_LIMIT
 }

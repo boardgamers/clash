@@ -49,6 +49,11 @@ impl CombatPlayerStats {
     pub fn fighter_losses(&self, battleground: Battleground) -> Units {
         filter_fighters(battleground, &self.losses)
     }
+
+    #[must_use]
+    pub fn survived_leader(&self) -> bool {
+        self.present.has_leader() && !self.losses.has_leader()
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Copy)]

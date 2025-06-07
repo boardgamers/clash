@@ -286,7 +286,7 @@ pub fn unit_label(unit: &Unit, army_move: bool, game: &Game) -> String {
     let name = unit.unit_type.name(game);
     let mut notes = vec![];
 
-    if unit.unit_type.is_army_unit() && !army_move {
+    if unit.is_army_unit() && !army_move {
         notes.push("research Tactics to move the unit");
     } else {
         for r in unit.movement_restrictions.iter().unique() {

@@ -48,6 +48,7 @@ pub mod game_setup;
 pub mod happiness;
 pub mod incident;
 pub mod leader;
+mod leader_ability;
 pub mod log;
 pub mod map;
 mod move_routes;

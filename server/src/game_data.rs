@@ -132,7 +132,7 @@ pub fn from_data(data: GameData, cache: Cache, context: GameContext) -> Game {
         permanent_effects: data.permanent_effects,
         events: data.events,
     };
-    let all = game.cache.get_ability().clone();
+    let all = game.cache.get_abilities().clone();
     for player in data.players {
         initialize_player(player, &mut game, &all);
     }
@@ -288,12 +288,12 @@ pub struct PlayerData {
 /// # Panics
 ///
 /// Panics if elements like wonders or advances don't exist
-fn initialize_player(data: PlayerData, game: &mut Game, all: &[Ability]) {
+fn initialize_player(data: PlayerData, game: &mut Game, builtin_abilities: &[Ability]) {
     let objective_cards = data.objective_cards.clone();
     let player = player_from_data(data, game);
     let player_index = player.index;
     game.players.push(player);
-    ability::init_player(game, player_index, all);
+    ability::init_player(game, player_index, builtin_abilities);
     advance::init_player(game, player_index);
 
     if let Some(leader) = game.player(player_index).active_leader() {

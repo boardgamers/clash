@@ -3,7 +3,9 @@
   "state": "Playing",
   "events": [
     {
-      "event_type": "DrawWonderCard",
+      "event_type": {
+        "DrawWonderCard": false
+      },
       "player": 0,
       "last_priority_used": 0,
       "handler": {

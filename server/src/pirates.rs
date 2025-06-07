@@ -172,7 +172,7 @@ fn remove_pirate_ships(builder: IncidentBuilder) -> IncidentBuilder {
             let pirate_ships = pirates
                 .units
                 .iter()
-                .filter(|u| u.unit_type == UnitType::Ship)
+                .filter(|u| u.is_ship())
                 .map(|u| u.id)
                 .collect();
             let needs_removal = 2_u8.saturating_sub(pirates.available_units().get(&UnitType::Ship));
@@ -273,7 +273,7 @@ fn cities_with_adjacent_pirates(player: &Player, game: &Game) -> Vec<Position> {
                 pirates
                     .get_units(*p)
                     .iter()
-                    .any(|u| u.unit_type == UnitType::Ship && u.position == *p)
+                    .any(|u| u.is_ship() && u.position == *p)
             })
         })
         .map(|c| c.position)

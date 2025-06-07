@@ -237,12 +237,48 @@
                       "op": "add",
                       "path": "/events/0/event_type/WonderCard",
                       "value": {
-                        "discount": {
-                          "culture_tokens": 0,
-                          "ignore_required_advances": false
+                        "cost": {
+                          "activate_city": true,
+                          "cost": {
+                            "conversions": [
+                              {
+                                "from": [
+                                  {
+                                    "food": 1
+                                  },
+                                  {
+                                    "wood": 1
+                                  },
+                                  {
+                                    "ore": 1
+                                  },
+                                  {
+                                    "ideas": 1
+                                  }
+                                ],
+                                "to": {
+                                  "gold": 1
+                                },
+                                "type": "Unlimited"
+                              }
+                            ],
+                            "default": {
+                              "culture_tokens": 5,
+                              "food": 2,
+                              "ore": 7,
+                              "wood": 3
+                            }
+                          },
+                          "ignore_action_cost": false,
+                          "ignore_required_advances": false,
+                          "info": {
+                            "info": {},
+                            "log": [],
+                            "player": 0
+                          }
                         },
-                        "name": "Pyramids",
-                        "selected_position": "A1"
+                        "selected_position": "A1",
+                        "wonder": "Pyramids"
                       }
                     },
                     {

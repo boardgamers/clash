@@ -249,12 +249,48 @@
                         {
                           "event_type": {
                             "WonderCard": {
-                              "discount": {
-                                "culture_tokens": 0,
-                                "ignore_required_advances": false
+                              "cost": {
+                                "activate_city": true,
+                                "cost": {
+                                  "conversions": [
+                                    {
+                                      "from": [
+                                        {
+                                          "food": 1
+                                        },
+                                        {
+                                          "wood": 1
+                                        },
+                                        {
+                                          "ore": 1
+                                        },
+                                        {
+                                          "ideas": 1
+                                        }
+                                      ],
+                                      "to": {
+                                        "gold": 1
+                                      },
+                                      "type": "Unlimited"
+                                    }
+                                  ],
+                                  "default": {
+                                    "culture_tokens": 5,
+                                    "food": 3,
+                                    "ore": 4,
+                                    "wood": 5
+                                  }
+                                },
+                                "ignore_action_cost": false,
+                                "ignore_required_advances": false,
+                                "info": {
+                                  "info": {},
+                                  "log": [],
+                                  "player": 0
+                                }
                               },
-                              "name": "GreatLighthouse",
-                              "selected_position": "A1"
+                              "selected_position": "A1",
+                              "wonder": "GreatLighthouse"
                             }
                           },
                           "handler": {

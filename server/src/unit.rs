@@ -9,7 +9,9 @@ use crate::city::is_valid_city_terrain;
 use crate::combat_roll::COMBAT_DIE_SIDES;
 use crate::consts::SHIP_CAPACITY;
 use crate::content::ability::Ability;
+use crate::content::civilizations::china::validate_imperial_army;
 use crate::content::persistent_events::{KilledUnits, PersistentEventType, UnitsRequest};
+use crate::events::EventOrigin;
 use crate::explore::is_any_ship;
 use crate::game::GameState;
 use crate::movement::{CurrentMove, MovementRestriction};
@@ -67,7 +69,7 @@ impl Unit {
     /// Panics if unit is at a valid position
     #[must_use]
     pub fn can_found_city(&self, game: &Game) -> bool {
-        if !self.unit_type.is_settler() {
+        if !self.is_settler() {
             return false;
         }
         if self.is_transported() {
@@ -138,6 +140,41 @@ impl Unit {
             carrier_id: Some(unit_id),
         }))
         .collect()
+    }
+
+    #[must_use]
+    pub fn is_land_based(&self) -> bool {
+        self.unit_type.is_land_based()
+    }
+
+    #[must_use]
+    pub fn is_ship(&self) -> bool {
+        self.unit_type.is_ship()
+    }
+
+    #[must_use]
+    pub fn is_army_unit(&self) -> bool {
+        self.unit_type.is_army_unit()
+    }
+
+    #[must_use]
+    pub fn is_infantry(&self) -> bool {
+        self.unit_type == Infantry
+    }
+
+    #[must_use]
+    pub fn is_settler(&self) -> bool {
+        self.unit_type.is_settler()
+    }
+
+    #[must_use]
+    pub fn is_military(&self) -> bool {
+        self.unit_type.is_military()
+    }
+
+    #[must_use]
+    pub fn is_leader(&self) -> bool {
+        self.unit_type.is_leader()
     }
 }
 
@@ -340,6 +377,11 @@ impl Units {
 
     fn leaders(&self) -> u8 {
         self.leader.map_or(0, |_| 1)
+    }
+
+    #[must_use]
+    pub fn has_leader(&self) -> bool {
+        self.leader.is_some()
     }
 
     #[must_use]
@@ -596,7 +638,7 @@ fn save_carried_units(game: &mut Game, player: usize, pos: Position) {
     game.player(player)
         .get_units(pos)
         .iter()
-        .filter(|u| u.unit_type.is_ship())
+        .filter(|u| u.is_ship())
         .map(|u| {
             let mut capacity = SHIP_CAPACITY - carried_units(u.id, game.player(player)).len() as u8;
             while capacity > 0 {
@@ -633,12 +675,8 @@ pub(crate) fn choose_carried_units_to_remove() -> Ability {
                 .filter(|u| u.carrier_id.is_some())
                 .map(|u| u.id)
                 .collect();
-            let capacity = p
-                .get_units(pos)
-                .iter()
-                .filter(|u| u.unit_type.is_ship())
-                .count()
-                * SHIP_CAPACITY as usize;
+            let capacity =
+                p.get_units(pos).iter().filter(|u| u.is_ship()).count() * SHIP_CAPACITY as usize;
             let to_kill = carried.len().saturating_sub(capacity) as u8;
 
             Some(UnitsRequest::new(
@@ -698,6 +736,34 @@ pub fn get_units_to_replace(available: &Units, new_units: &Units) -> Units {
 pub const LEADER: leader::Leader = leader::Leader::Alexander;
 
 pub const LEADER_UNIT: UnitType = Leader(LEADER);
+
+///
+/// Validates the selection of cards in the hand.
+///
+/// # Returns
+///
+/// Card names to show in the UI - if possible.
+///
+/// # Errors
+///
+/// If the selection is invalid, an error message is returned.
+pub fn validate_units_selection(units: &[u32], game: &Game, p: &Player) -> Result<(), String> {
+    let Some(h) = &game.current_event().player.handler.as_ref() else {
+        return Err("no selection handler".to_string());
+    };
+    validate_units_selection_for_origin(units, p, &h.origin)
+}
+
+pub(crate) fn validate_units_selection_for_origin(
+    units: &[u32],
+    p: &Player,
+    o: &EventOrigin,
+) -> Result<(), String> {
+    match o {
+        EventOrigin::Ability(b) if b == "Imperial Army" => validate_imperial_army(units, p),
+        _ => Ok(()),
+    }
+}
 
 #[cfg(test)]
 mod tests {

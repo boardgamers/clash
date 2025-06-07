@@ -8,7 +8,7 @@ use crate::content::persistent_events::{
     PaymentRequest, PersistentEventType, SelectedStructure, Structure,
 };
 use crate::game::Game;
-use crate::log::current_player_turn_log;
+use crate::log::{current_player_turn_log, modifier_suffix};
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player_events::ActionInfo;
 use crate::playing_actions::{PlayingAction, PlayingActionType, base_or_custom_available};
@@ -438,7 +438,8 @@ fn attempt_failed(game: &mut Game, player: usize, city_position: Position) {
 /// Returns the position of the starting city and the cost to boost the influence range.
 ///
 /// # Errors
-/// This function returns an error if no starting city is available or if the player can't afford the boost.
+/// This function returns an error if no starting city is available or
+/// if the player can't afford the boost.
 ///
 /// # Panics
 /// This function panics in an inconsistent state
@@ -528,7 +529,8 @@ pub(crate) fn format_cultural_influence_attempt_log_item(
     let info = influence_culture_boost_cost(game, player_index, s, Some(&i.action_type), false)
         .expect("this should be a valid action");
 
-    let player = if target_player_index == game.active_player() {
+    let p = game.active_player();
+    let player = if target_player_index == p {
         String::from("themselves")
     } else {
         game.player_name(target_player_index)
@@ -551,14 +553,11 @@ pub(crate) fn format_cultural_influence_attempt_log_item(
         Structure::Building(b) => b.name(),
         Structure::Wonder(_) => panic!("Wonder is not allowed here"),
     };
-    let suffix = if let PlayingActionType::Custom(_) = i.action_type {
-        " using Arts"
-    } else {
-        ""
-    };
 
     format!(
-        "{player_name} tried to influence culture the {city_piece} in the city at {target_city_position} by {player}{city}{cost}{suffix}"
+        "{player_name} tried to influence culture the {city_piece} in the city \
+        at {target_city_position} by {player}{city}{cost}{}",
+        modifier_suffix(game.player(p), &i.action_type)
     )
 }
 

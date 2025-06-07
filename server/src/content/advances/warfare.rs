@@ -7,7 +7,7 @@ use crate::combat::CombatModifier::{
 };
 use crate::combat::{Combat, CombatModifier};
 use crate::combat_listeners::CombatStrength;
-use crate::content::advances::{AdvanceGroup, advance_group_builder};
+use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::content::persistent_events::PaymentRequest;
 use crate::game::Game;
 use crate::payment::{PaymentConversion, PaymentOptions, PaymentReason};
@@ -17,8 +17,9 @@ use crate::resource_pile::ResourcePile;
 use crate::tactics_card::{CombatRole, play_tactics_card};
 use crate::unit::UnitType;
 
-pub(crate) fn warfare() -> AdvanceGroup {
+pub(crate) fn warfare() -> AdvanceGroupInfo {
     advance_group_builder(
+        AdvanceGroup::Warfare,
         "Warfare",
         vec![tactics(), siegecraft(), steel_weapons(), draft()],
     )

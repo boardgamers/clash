@@ -2,6 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
 use crate::combat::CombatModifier;
 use crate::content::ability::Ability;
+use crate::content::advances::AdvanceGroup;
 use crate::content::incidents::great_persons::{
     great_person_action_card, great_person_description,
 };
@@ -12,14 +13,14 @@ use crate::playing_actions::ActionCost;
 use std::mem;
 
 pub(crate) fn great_warlord() -> ActionCard {
-    let groups = &["Warfare"];
+    let groups = vec![AdvanceGroup::Warfare];
     great_person_action_card(
         24,
         "Great Warlord",
         &format!(
             "{} Then, gain a Move action. On the first battle you fight, \
             gain 2 combat value in every round.",
-            great_person_description(groups)
+            great_person_description(&groups)
         ),
         ActionCost::regular(),
         groups,

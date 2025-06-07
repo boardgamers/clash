@@ -1,10 +1,17 @@
-use crate::common::{JsonTest, TestAction, move_action, payment_response};
+use crate::common::{
+    JsonTest, TestAction, advance_action, custom_action, move_action, payment_response,
+};
 use server::action::Action;
+use server::advance::Advance;
 use server::collect::PositionCollection;
+use server::content::custom_actions::CustomActionType;
+use server::content::persistent_events::EventResponse;
+use server::playing_actions::PlayingAction::WonderCard;
 use server::playing_actions::{Collect, PlayingAction, PlayingActionType, Recruit};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::unit::Units;
+use server::wonder::Wonder;
 
 mod common;
 
@@ -51,6 +58,47 @@ fn fireworks() {
             TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("C1")))
                 .skip_json(),
             TestAction::undoable(0, payment_response(ResourcePile::gold(2))),
+        ],
+    );
+}
+
+#[test]
+fn imperial_army() {
+    JSON.test(
+        "imperial_army",
+        vec![
+            TestAction::undoable(0, custom_action(CustomActionType::ImperialArmy)).skip_json(),
+            TestAction::undoable(0, Action::Response(EventResponse::SelectUnits(vec![0, 4]))),
+        ],
+    );
+}
+
+#[test]
+fn fast_war() {
+    JSON.test(
+        "fast_war",
+        vec![TestAction::not_undoable(
+            0,
+            move_action(vec![0], Position::from_offset("D8")),
+        )],
+    );
+}
+
+#[test]
+fn great_wall() {
+    JSON.test(
+        "great_wall",
+        vec![
+            TestAction::undoable(
+                0,
+                advance_action(Advance::Engineering, ResourcePile::food(2)),
+            )
+            .skip_json(),
+            TestAction::undoable(0, Action::Playing(WonderCard(Wonder::GreatWall))).skip_json(),
+            TestAction::undoable(0, payment_response(ResourcePile::new(3, 2, 7, 0, 0, 0, 3)))
+                .skip_json(),
+            TestAction::not_undoable(0, Action::Playing(PlayingAction::EndTurn)).skip_json(),
+            TestAction::undoable(1, Action::Response(EventResponse::Bool(true))),
         ],
     );
 }

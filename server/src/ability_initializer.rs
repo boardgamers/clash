@@ -4,7 +4,8 @@ use crate::combat::{Combat, update_combat_strength};
 use crate::combat_listeners::CombatStrength;
 use crate::content::ability::{Ability, AbilityBuilder};
 use crate::content::custom_actions::{
-    CustomActionActionExecution, CustomActionCommand, CustomActionExecution, CustomActionInfo,
+    CustomActionActionExecution, CustomActionCost, CustomActionExecution, CustomActionInfo,
+    CustomActionOncePerTurn,
 };
 use crate::content::persistent_events::{
     AdvanceRequest, EventResponse, HandCardsRequest, MultiRequest, PaymentRequest,
@@ -18,7 +19,7 @@ use crate::playing_actions::PlayingActionType;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::tactics_card::CombatRole;
-use crate::unit::UnitType;
+use crate::unit::{UnitType, validate_units_selection_for_origin};
 use crate::{content::custom_actions::CustomActionType, game::Game, player_events::PlayerEvents};
 use std::collections::HashMap;
 use std::fmt::Debug;
@@ -684,6 +685,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone + Sync + Send,
         V: Clone + PartialEq,
     {
+        let origin = self.get_key().clone();
         self.add_multi_choice_reward_request_listener::<E, u32, UnitsRequest, V>(
             event,
             priority,
@@ -703,6 +705,12 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             },
             request,
             move |game, c, details| {
+                validate_units_selection_for_origin(
+                    &c.choice,
+                    game.player(c.player_index),
+                    &origin,
+                )
+                .expect("Invalid units selection - this should not happen");
                 units_selected(game, c, details);
             },
         )
@@ -882,7 +890,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
     fn add_custom_action(
         self,
         action: CustomActionType,
-        info: impl Fn(CustomActionType) -> CustomActionInfo + Send + Sync + 'static,
+        cost: impl Fn(CustomActionOncePerTurn) -> CustomActionCost + Send + Sync + 'static,
         ability: impl Fn(AbilityBuilder) -> AbilityBuilder + Sync + Send + 'static,
         can_play: impl Fn(&Game, &Player) -> bool + Sync + Send + 'static,
     ) -> Self {
@@ -890,7 +898,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         let desc = self.description();
         self.add_custom_action_execution(
             action,
-            info,
+            cost,
             CustomActionExecution::Action(CustomActionActionExecution::new(
                 ability(Ability::builder(&name, &desc)).build(),
                 Arc::new(can_play),
@@ -902,16 +910,21 @@ pub(crate) trait AbilityInitializerSetup: Sized {
     fn add_action_modifier(
         self,
         action: CustomActionType,
-        info: impl Fn(CustomActionType) -> CustomActionInfo + Send + Sync + 'static,
+        info: impl Fn(CustomActionOncePerTurn) -> CustomActionCost + Send + Sync + 'static,
         base_action: PlayingActionType,
     ) -> Self {
-        self.add_custom_action_execution(action, info, CustomActionExecution::Modifier(base_action))
+        let name = self.name();
+        self.add_custom_action_execution(
+            action,
+            info,
+            CustomActionExecution::Modifier((base_action, name.clone())),
+        )
     }
 
     fn add_custom_action_execution(
         self,
         action: CustomActionType,
-        info: impl Fn(CustomActionType) -> CustomActionInfo + Send + Sync + 'static,
+        info: impl Fn(CustomActionOncePerTurn) -> CustomActionCost + Send + Sync + 'static,
         execution: CustomActionExecution,
     ) -> Self {
         let deinitializer_action = action;
@@ -920,7 +933,12 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self.add_ability_initializer(move |game, player_index, _prio_delta| {
             game.player_mut(player_index).custom_actions.insert(
                 action,
-                CustomActionCommand::new(action, exec.clone(), key.clone(), info(action)),
+                CustomActionInfo::new(
+                    action,
+                    exec.clone(),
+                    key.clone(),
+                    info(CustomActionOncePerTurn::new(action)),
+                ),
             );
         })
         .add_ability_deinitializer(move |game, player_index| {

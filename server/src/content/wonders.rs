@@ -43,7 +43,6 @@ pub fn get_all_uncached() -> Vec<WonderInfo> {
 fn great_wall() -> WonderInfo {
     WonderInfo::builder(
         Wonder::GreatWall,
-        "Great Well",
         "Land combat in your happy city: Attacker gets -2 combat value in the first round. \
         You automatically win battles if Barbarians attack any of your cities.",
         PaymentOptions::fixed_resources(ResourcePile::new(3, 2, 7, 0, 0, 0, 5)),
@@ -72,7 +71,6 @@ fn great_wall() -> WonderInfo {
 fn great_statue() -> WonderInfo {
     WonderInfo::builder(
         Wonder::GreatStatue,
-        "Great Statue",
         "Draw 1 objective card. \
         Once per turn, as a free action, discard an objective card from: Gain 1 action.",
         PaymentOptions::fixed_resources(ResourcePile::new(3, 4, 5, 0, 0, 0, 5)),
@@ -80,7 +78,7 @@ fn great_statue() -> WonderInfo {
     )
     .add_custom_action(
         CustomActionType::GreatStatue,
-        |a| a.free_and_once_per_turn(ResourcePile::empty()),
+        |c| c.once_per_turn().free_action().no_resources(),
         use_great_statue,
         |_game, p| !p.objective_cards.is_empty(),
     )
@@ -120,7 +118,6 @@ fn use_great_statue(b: AbilityBuilder) -> AbilityBuilder {
 fn great_mausoleum() -> WonderInfo {
     WonderInfo::builder(
         Wonder::GreatMausoleum,
-        "Great Lighthouse",
         "Whenever you draw an action or game event card, you may instead draw the \
         top card of the action or game event discard pile. \
         You discard to the bottom of the pile.",
@@ -200,7 +197,6 @@ pub(crate) fn use_great_mausoleum() -> Ability {
 fn great_lighthouse() -> WonderInfo {
     WonderInfo::builder(
         Wonder::GreatLighthouse,
-        "Great Lighthouse",
         "Requires a port to build: \
         Activate the city: Place a ship on any sea space without enemy ships. \
         Decide the staring player of the next turn.",
@@ -212,7 +208,7 @@ fn great_lighthouse() -> WonderInfo {
     }))
     .add_custom_action(
         CustomActionType::GreatLighthouse,
-        |_| CustomActionType::free(ResourcePile::empty()),
+        |c| c.any_times().free_action().no_resources(),
         use_great_lighthouse,
         |game, p| {
             great_lighthouse_city(p).can_activate()
@@ -271,7 +267,6 @@ fn use_great_lighthouse(b: AbilityBuilder) -> AbilityBuilder {
 fn library() -> WonderInfo {
     WonderInfo::builder(
         Wonder::GreatLibrary,
-        "Great Library",
         "Once per turn, as a free action, \
         you may choose a non-government, non-civilization advance: \
         Use the effect until the end of your turn.",
@@ -280,7 +275,7 @@ fn library() -> WonderInfo {
     )
     .add_custom_action(
         CustomActionType::GreatLibrary,
-        |a| a.free_and_once_per_turn(ResourcePile::empty()),
+        |c| c.once_per_turn().free_action().no_resources(),
         use_great_library,
         |_, _| true,
     )
@@ -320,7 +315,6 @@ fn use_great_library(b: AbilityBuilder) -> AbilityBuilder {
 fn great_gardens() -> WonderInfo {
     WonderInfo::builder(
         Wonder::GreatGardens,
-        "Great Gardens",
         "The city with this wonder may Collect any type of resource from \
             Grassland spaces including ideas and gold. \
             Enemies cannot enter the city if they have entered a Grassland space this turn.",
@@ -349,7 +343,6 @@ fn great_gardens() -> WonderInfo {
 fn pyramids() -> WonderInfo {
     WonderInfo::builder(
         Wonder::Pyramids,
-        "Pyramids",
         "Counts as 5.1 victory points (instead of 4). \
             All victory points are awarded to the player who built the wonder \
             (owning does not grant any points).",
@@ -364,7 +357,6 @@ fn pyramids() -> WonderInfo {
 fn colosseum() -> WonderInfo {
     WonderInfo::builder(
         Wonder::Colosseum,
-        "Colosseum",
         "May pay culture tokens with mood tokens (or vice versa) - \
         except for the building wonders.\
         May increase the combat value in a land battle by 1 for 1 culture or mood token.",

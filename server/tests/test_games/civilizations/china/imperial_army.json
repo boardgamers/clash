@@ -5,13 +5,12 @@
     {
       "id": 0,
       "resources": {
-        "food": 2,
-        "wood": 5,
-        "ore": 5,
-        "ideas": 3,
-        "gold": 5,
-        "mood_tokens": 7,
-        "culture_tokens": 8
+        "wood": 7,
+        "ore": 7,
+        "ideas": 5,
+        "gold": 7,
+        "mood_tokens": 9,
+        "culture_tokens": 10
       },
       "resource_limit": {
         "food": 2,
@@ -26,16 +25,16 @@
             "market": 1
           },
           "mood_state": "Happy",
-          "activations": 1,
           "position": "A1"
         },
         {
           "city_pieces": {
             "academy": 1,
+            "obelisk": 0,
             "port": 1
           },
-          "mood_state": "Angry",
-          "activations": 6,
+          "mood_state": "Happy",
+          "activations": 4,
           "position": "C2",
           "port_position": "C3"
         },
@@ -50,66 +49,55 @@
           "position": "B1"
         },
         {
-          "mood_state": "Happy",
-          "activations": 4,
-          "position": "E2"
+          "mood_state": "Angry",
+          "position": "B3"
         }
       ],
       "units": [
         {
-          "position": "A1",
-          "unit_type": {
-            "Leader": "Augustus"
-          },
+          "position": "C2",
+          "unit_type": "Infantry",
           "id": 0
         },
         {
-          "position": "E2",
-          "unit_type": "Cavalry",
-          "id": 1
-        },
-        {
-          "position": "E2",
-          "unit_type": "Elephant",
-          "id": 2
-        },
-        {
-          "position": "E2",
-          "unit_type": "Settler",
-          "id": 3
-        },
-        {
-          "position": "E2",
+          "position": "B4",
           "unit_type": "Settler",
           "id": 4
         },
         {
-          "position": "E2",
+          "position": "B3",
           "unit_type": "Settler",
           "id": 5
+        },
+        {
+          "position": "B3",
+          "unit_type": "Settler",
+          "id": 6
         }
       ],
-      "civilization": "Rome",
+      "civilization": "China",
       "advances": [
         "Farming",
         "Mining",
-        "Philosophy",
-        "Tactics"
+        "Voting"
       ],
       "incident_tokens": 3,
       "wonder_cards": [
         "Pyramids"
+      ],
+      "objective_cards": [
+        38
       ],
       "next_unit_id": 10
     },
     {
       "id": 1,
       "resources": {
-        "food": 2,
-        "wood": 5,
-        "ore": 5,
-        "ideas": 5,
-        "gold": 5,
+        "food": 6,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
         "mood_tokens": 9,
         "culture_tokens": 9
       },
@@ -135,23 +123,38 @@
           "port_position": "C3"
         }
       ],
-      "civilization": "Greece",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Mining"
       ],
       "incident_tokens": 3,
-      "next_unit_id": 2
+      "next_unit_id": 3
     },
     {
       "id": 2,
-      "civilization": "Barbarians",
-      "next_unit_id": 0
-    },
-    {
-      "id": 3,
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "units": [
+        {
+          "position": "C3",
+          "unit_type": "Ship",
+          "id": 1
+        },
+        {
+          "position": "C3",
+          "unit_type": "Ship",
+          "id": 2
+        }
+      ],
       "civilization": "Pirates",
-      "next_unit_id": 0
+      "incident_tokens": 3,
+      "next_unit_id": 9
     }
   ],
   "map": {
@@ -175,10 +178,6 @@
         "Mountain"
       ],
       [
-        "A5",
-        "Fertile"
-      ],
-      [
         "B1",
         "Mountain"
       ],
@@ -192,14 +191,6 @@
       ],
       [
         "B4",
-        "Fertile"
-      ],
-      [
-        "B5",
-        "Fertile"
-      ],
-      [
-        "B6",
         "Fertile"
       ],
       [
@@ -229,10 +220,6 @@
       [
         "D2",
         "Water"
-      ],
-      [
-        "E2",
-        "Fertile"
       ]
     ]
   },
@@ -245,50 +232,21 @@
           "players": [
             {
               "index": 0,
-              "items": [
-                {
-                  "action": {
-                    "Playing": {
-                      "Custom": {
-                        "action": "Princeps"
-                      }
-                    }
-                  }
-                },
-                {
-                  "action": {
-                    "Response": {
-                      "Payment": [
-                        {
-                          "culture_tokens": 1
-                        }
-                      ]
-                    }
-                  }
-                }
-              ]
+              "items": []
             }
           ]
         }
       ]
     }
   ],
-  "action_log_index": 2,
+  "action_log_index": 0,
   "log": [
     [
-      "Player1 started Princeps"
-    ],
-    [
-      "Player1 paid 1 culture token for the action",
-      "Player1 activates the city A1 to draw 1 action and 1 objective card using Princeps",
-      "Player1 gained an action card from the pile",
-      "Player1 gained an objective card from the pile",
-      "Player1 discarded action card Advance/Peltasts for Princeps",
-      "Player1 discarded objective card Large Civilization/Draft for Princeps"
+      "Player1 ended the movement action"
     ]
   ],
-  "undo_limit": 2,
-  "actions_left": 1,
+  "undo_limit": 0,
+  "actions_left": 2,
   "round": 6,
   "age": 1,
   "messages": [
@@ -305,9 +263,5 @@
     10,
     10,
     10
-  ],
-  "rng": "234162992961072890508432380903651342097",
-  "action_cards_discarded": [
-    1
   ]
 }

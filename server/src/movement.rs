@@ -208,7 +208,7 @@ pub fn possible_move_destinations(
         .collect::<Vec<_>>();
 
     player.units.iter().for_each(|u| {
-        if u.unit_type.is_ship()
+        if u.is_ship()
             && possible_move_routes(player, game, units, start, Some(u.id))
                 .is_ok_and(|v| v.iter().any(|route| route.destination == u.position))
         {
@@ -395,7 +395,7 @@ fn move_units_destinations(
     for unit in &units {
         movement_restrictions.extend(unit.movement_restrictions.iter());
         check_can_move(player, start, embark_carrier_id, unit)?;
-        if unit.unit_type.is_army_unit() {
+        if unit.is_army_unit() {
             stack_size += 1;
         }
     }
@@ -452,7 +452,7 @@ fn move_route_result(
         && player
             .get_units(dest)
             .iter()
-            .filter(|unit| unit.unit_type.is_army_unit() && !unit.is_transported())
+            .filter(|unit| unit.is_army_unit() && !unit.is_transported())
             .count()
             + stack_size
             > STACK_LIMIT
@@ -529,15 +529,15 @@ fn check_can_move(
         return Err("the unit should be at the starting position".to_string());
     }
     if let Some(embark_carrier_id) = embark_carrier_id {
-        if !unit.unit_type.is_land_based() {
+        if !unit.is_land_based() {
             return Err("the unit should be land-based to embark".to_string());
         }
         let carrier = player.get_unit(embark_carrier_id);
-        if !carrier.unit_type.is_ship() {
+        if !carrier.is_ship() {
             return Err("the carrier should be a ship".to_string());
         }
     }
-    if unit.unit_type.is_army_unit() && !player.can_use_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE) {
+    if unit.is_army_unit() && !player.can_use_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE) {
         return Err("army movement advance missing".to_string());
     }
     Ok(())
@@ -557,10 +557,10 @@ fn is_valid_movement_type(
         };
     }
     for unit in units {
-        if unit.unit_type.is_land_based() && game.map.is_sea(dest) {
+        if unit.is_land_based() && game.map.is_sea(dest) {
             return Err("the destination should be land".to_string());
         }
-        if unit.unit_type.is_ship() && game.map.is_land(dest) {
+        if unit.is_ship() && game.map.is_land(dest) {
             return Err("the destination should be sea".to_string());
         }
     }
@@ -578,7 +578,7 @@ fn terrain_movement_restriction(
     match terrain {
         Fertile => Some(MovementRestriction::Fertile),
         Mountain => Some(MovementRestriction::Mountain),
-        Forest if unit.unit_type.is_army_unit() => Some(MovementRestriction::Forest),
+        Forest if unit.is_army_unit() => Some(MovementRestriction::Forest),
         _ => None,
     }
 }
@@ -592,9 +592,9 @@ fn has_movable_units(game: &Game, player: &Player) -> bool {
 
 #[must_use]
 fn can_embark(game: &Game, player: &Player, unit: &Unit) -> bool {
-    unit.unit_type.is_land_based()
+    unit.is_land_based()
         && player.units.iter().any(|u| {
-            u.unit_type.is_ship()
+            u.is_ship()
                 && possible_move_routes(player, game, &[unit.id], u.position, Some(u.id)).is_ok()
         })
 }

@@ -20,7 +20,7 @@ use crate::playing_actions::{ActionPayment, PlayingActionType, Recruit};
 use crate::status_phase::StatusPhaseState;
 use crate::unit::Units;
 use crate::utils;
-use crate::wonder::WonderCardInfo;
+use crate::wonder::{WonderBuildInfo, WonderCardInfo};
 use crate::{
     city::City, city_pieces::Building, player::Player, position::Position,
     resource_pile::ResourcePile,
@@ -52,6 +52,7 @@ pub(crate) struct TransientEvents {
     pub before_move: Event<Game, MoveInfo>,
 
     pub building_cost: Event<CostInfo, Building, Game>,
+    pub wonder_cost: Event<CostInfo, WonderBuildInfo, Game>,
     pub advance_cost: Event<CostInfo, Advance, Game>,
     pub happiness_cost: Event<CostInfo>,
     pub recruit_cost: Event<CostInfo, Units, Player>,
@@ -71,6 +72,7 @@ impl TransientEvents {
             before_move: Event::new("before_move"),
 
             building_cost: Event::new("building_cost"),
+            wonder_cost: Event::new("wonder_cost"),
             advance_cost: Event::new("advance_cost"),
             happiness_cost: Event::new("happiness_cost"),
             recruit_cost: Event::new("recruit_cost"),
@@ -87,7 +89,7 @@ impl TransientEvents {
 pub(crate) struct PersistentEvents {
     pub collect: PersistentEvent<CollectInfo>,
     pub construct: PersistentEvent<ConstructInfo>,
-    pub draw_wonder_card: PersistentEvent,
+    pub draw_wonder_card: PersistentEvent<bool>,
     pub advance: PersistentEvent<OnAdvanceInfo>,
     pub recruit: PersistentEvent<Recruit>,
     pub found_city: PersistentEvent<Position>,
@@ -283,10 +285,12 @@ impl IncidentInfo {
     }
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CostInfo {
     pub cost: PaymentOptions,
     pub activate_city: bool,
+    pub(crate) ignore_required_advances: bool, // only used for wonder costs
+    pub(crate) ignore_action_cost: bool,       // only used for wonder costs
     pub(crate) info: ActionInfo,
 }
 
@@ -296,6 +300,8 @@ impl CostInfo {
             cost,
             info: ActionInfo::new(player),
             activate_city: true,
+            ignore_required_advances: false,
+            ignore_action_cost: false,
         }
     }
 

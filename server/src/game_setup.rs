@@ -133,7 +133,7 @@ pub fn setup_game_with_cache(setup: GameSetup, cache: Cache) -> Game {
         .map(|i| i.id)
         .collect_vec()
         .shuffled(&mut rng);
-    let all = &cache.get_ability().clone();
+    let all = &cache.get_abilities().clone();
     let mut game = Game {
         seed: setup.seed.clone(),
         context: GameContext::Play,

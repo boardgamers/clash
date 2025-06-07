@@ -9,7 +9,7 @@ use crate::playing_actions::{ActionResourceCost, PlayingActionType};
 use crate::position::Position;
 use crate::{game::Game, playing_actions::ActionCost, resource_pile::ResourcePile};
 use serde::{Deserialize, Serialize};
-use std::fmt::{Debug, Display};
+use std::fmt::Debug;
 use std::sync::Arc;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
@@ -43,20 +43,119 @@ impl CustomActionActivation {
     }
 }
 
+pub(crate) struct CustomActionOncePerTurn {
+    action: CustomActionType,
+}
+
+impl CustomActionOncePerTurn {
+    #[must_use]
+    pub fn new(action: CustomActionType) -> Self {
+        Self { action }
+    }
+
+    #[must_use]
+    #[allow(clippy::unused_self)]
+    pub fn any_times(self) -> CustomActionActionCost {
+        CustomActionActionCost::new(None)
+    }
+
+    #[must_use]
+    pub fn once_per_turn(self) -> CustomActionActionCost {
+        CustomActionActionCost::new(Some(self.action))
+    }
+
+    #[allow(clippy::unused_self)]
+    #[must_use]
+    pub fn once_per_turn_mutually_exclusive(
+        self,
+        mutually_exclusive: CustomActionType,
+    ) -> CustomActionActionCost {
+        CustomActionActionCost::new(Some(mutually_exclusive))
+    }
+}
+
+pub(crate) struct CustomActionActionCost {
+    once_per_turn: Option<CustomActionType>,
+}
+
+impl CustomActionActionCost {
+    #[must_use]
+    fn new(once_per_turn: Option<CustomActionType>) -> Self {
+        Self { once_per_turn }
+    }
+
+    #[must_use]
+    pub fn action(self) -> CustomActionResourceCost {
+        CustomActionResourceCost::new(self.once_per_turn, false)
+    }
+
+    #[must_use]
+    pub fn free_action(self) -> CustomActionResourceCost {
+        CustomActionResourceCost::new(self.once_per_turn, true)
+    }
+}
+
+pub(crate) struct CustomActionResourceCost {
+    once_per_turn: Option<CustomActionType>,
+    free: bool,
+}
+
+impl CustomActionResourceCost {
+    #[must_use]
+    fn new(once_per_turn: Option<CustomActionType>, free: bool) -> CustomActionResourceCost {
+        CustomActionResourceCost {
+            once_per_turn,
+            free,
+        }
+    }
+
+    #[must_use]
+    pub fn no_resources(self) -> CustomActionCost {
+        CustomActionCost::new(self.free, self.once_per_turn, ActionResourceCost::free())
+    }
+
+    #[must_use]
+    pub fn resources(self, cost: ResourcePile) -> CustomActionCost {
+        CustomActionCost::new(
+            self.free,
+            self.once_per_turn,
+            ActionResourceCost::resources(cost),
+        )
+    }
+
+    #[must_use]
+    pub fn tokens(self, cost: u8) -> CustomActionCost {
+        CustomActionCost::new(
+            self.free,
+            self.once_per_turn,
+            ActionResourceCost::tokens(cost),
+        )
+    }
+
+    #[must_use]
+    pub fn advance_cost_without_discounts(self) -> CustomActionCost {
+        CustomActionCost::new(
+            self.free,
+            self.once_per_turn,
+            ActionResourceCost::AdvanceCostWithoutDiscount,
+        )
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
-pub struct CustomActionInfo {
+pub struct CustomActionCost {
     pub action_type: ActionCost,
     pub once_per_turn: Option<CustomActionType>,
 }
 
-impl CustomActionInfo {
+impl CustomActionCost {
     #[must_use]
     pub(crate) fn new(
         free: bool,
         once_per_turn: Option<CustomActionType>,
         cost: ActionResourceCost,
-    ) -> CustomActionInfo {
-        CustomActionInfo {
+    ) -> CustomActionCost {
+        CustomActionCost {
             action_type: ActionCost::new(free, cost),
             once_per_turn,
         }
@@ -64,26 +163,26 @@ impl CustomActionInfo {
 }
 
 #[derive(Clone)]
-pub struct CustomActionCommand {
+pub struct CustomActionInfo {
     pub action: CustomActionType,
     pub execution: CustomActionExecution,
     pub event_origin: EventOrigin,
-    pub info: CustomActionInfo,
+    pub cost: CustomActionCost,
 }
 
-impl CustomActionCommand {
+impl CustomActionInfo {
     #[must_use]
     pub fn new(
         action: CustomActionType,
         execution: CustomActionExecution,
         event_origin: EventOrigin,
-        info: CustomActionInfo,
-    ) -> CustomActionCommand {
-        CustomActionCommand {
+        cost: CustomActionCost,
+    ) -> CustomActionInfo {
+        CustomActionInfo {
             action,
             execution,
             event_origin,
-            info,
+            cost,
         }
     }
 
@@ -108,7 +207,7 @@ type CustomActionCityChecker = Arc<dyn Fn(&Game, &City) -> bool + Sync + Send>;
 #[derive(Clone)]
 pub struct CustomActionActionExecution {
     pub checker: CustomActionChecker,
-    pub execution: Ability,
+    pub ability: Ability,
     pub city_checker: Option<CustomActionCityChecker>,
 }
 
@@ -121,7 +220,7 @@ impl CustomActionActionExecution {
     ) -> Self {
         Self {
             checker,
-            execution,
+            ability: execution,
             city_checker,
         }
     }
@@ -129,7 +228,7 @@ impl CustomActionActionExecution {
 
 #[derive(Clone)]
 pub enum CustomActionExecution {
-    Modifier(PlayingActionType),
+    Modifier((PlayingActionType, String)),
     Action(CustomActionActionExecution),
 }
 
@@ -165,87 +264,14 @@ pub enum CustomActionType {
 
     // China
     ImperialArmy,
+    ArtOfWar,
+    AgricultureEconomist,
 }
 
 impl CustomActionType {
     #[must_use]
     pub fn playing_action_type(&self) -> PlayingActionType {
         PlayingActionType::Custom(*self)
-    }
-
-    #[must_use]
-    pub(crate) fn regular() -> CustomActionInfo {
-        CustomActionInfo::new(false, None, ActionResourceCost::free())
-    }
-
-    #[must_use]
-    pub(crate) fn cost(cost: ResourcePile) -> CustomActionInfo {
-        CustomActionInfo::new(true, None, ActionResourceCost::resources(cost))
-    }
-
-    #[must_use]
-    pub(crate) fn once_per_turn(self, cost: ResourcePile) -> CustomActionInfo {
-        CustomActionInfo::new(false, Some(self), ActionResourceCost::resources(cost))
-    }
-
-    #[must_use]
-    pub(crate) fn free(cost: ResourcePile) -> CustomActionInfo {
-        CustomActionInfo::new(true, None, ActionResourceCost::resources(cost))
-    }
-
-    #[must_use]
-    pub(crate) fn free_and_once_per_turn(self, cost: ResourcePile) -> CustomActionInfo {
-        CustomActionInfo::new(true, Some(self), ActionResourceCost::resources(cost))
-    }
-
-    #[must_use]
-    pub(crate) fn free_and_once_per_turn_mutually_exclusive(
-        cost: ResourcePile,
-        mutually_exclusive: CustomActionType,
-    ) -> CustomActionInfo {
-        CustomActionInfo::new(
-            true,
-            Some(mutually_exclusive),
-            ActionResourceCost::resources(cost),
-        )
-    }
-
-    #[must_use]
-    pub(crate) fn free_and_advance_cost_without_discounts() -> CustomActionInfo {
-        CustomActionInfo::new(true, None, ActionResourceCost::AdvanceCostWithoutDiscount)
-    }
-}
-
-impl Display for CustomActionType {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            CustomActionType::AbsolutePower => write!(f, "Absolute Power"),
-            CustomActionType::ForcedLabor => write!(f, "Forced Labor"),
-            CustomActionType::CivilLiberties => write!(f, "Civil Liberties"),
-            CustomActionType::Bartering => write!(f, "Bartering"),
-            CustomActionType::ArtsInfluenceCultureAttempt => {
-                write!(f, "Arts")
-            }
-            CustomActionType::VotingIncreaseHappiness => {
-                write!(f, "Voting")
-            }
-            CustomActionType::FreeEconomyCollect => write!(f, "Free Economy"),
-            CustomActionType::Sports => write!(f, "Sports"),
-            CustomActionType::Taxes => write!(f, "Taxes"),
-            CustomActionType::Theaters => write!(f, "Theaters"),
-            CustomActionType::GreatLibrary => write!(f, "Great Library"),
-            CustomActionType::GreatLighthouse => write!(f, "Great Lighthouse"),
-            CustomActionType::GreatStatue => write!(f, "Great Statue"),
-            CustomActionType::Aqueduct => write!(f, "Aqueduct"),
-            CustomActionType::Princeps => write!(f, "Princeps"),
-            CustomActionType::StatesmanIncreaseHappiness => write!(f, "Statesman"),
-            CustomActionType::HellenisticInfluenceCultureAttempt => {
-                write!(f, "Hellenistic Culture")
-            }
-            CustomActionType::Idol => write!(f, "Idol"),
-            CustomActionType::Master => write!(f, "Master"),
-            CustomActionType::ImperialArmy => write!(f, "Imperial Army"),
-        }
     }
 }
 
@@ -254,22 +280,39 @@ pub(crate) fn execute_custom_action(
     player_index: usize,
     a: CustomActionActivation,
 ) {
-    let CustomActionExecution::Action(e) = game
-        .player(player_index)
-        .custom_action_command(a.action.action)
-        .execution
-    else {
-        panic!("Custom action {:?} is not an action", &a.action);
-    };
     let _ = trigger_persistent_event_with_listener(
         game,
         &[player_index],
         |e| &mut e.custom_action,
-        &e.execution.listeners,
+        &custom_action_execution(game.player(player_index), a.action.action)
+            .ability
+            .listeners,
         a,
         PersistentEventType::CustomAction,
         TriggerPersistentEventParams::default(),
     );
+}
+
+pub(crate) fn custom_action_execution(
+    player: &Player,
+    action_type: CustomActionType,
+) -> CustomActionActionExecution {
+    let CustomActionExecution::Action(e) = player.custom_action_info(action_type).execution else {
+        panic!("Custom action {action_type:?} is not an action");
+    };
+    e
+}
+
+pub(crate) fn custom_action_modifier_name(
+    player: &Player,
+    action_type: CustomActionType,
+) -> String {
+    let CustomActionExecution::Modifier((_, name)) =
+        player.custom_action_info(action_type).execution
+    else {
+        panic!("Custom action {action_type:?} is not a modifier");
+    };
+    name
 }
 
 pub(crate) fn can_play_custom_action(
@@ -281,14 +324,14 @@ pub(crate) fn can_play_custom_action(
         return Err("Custom action not available".to_string());
     }
 
-    let command = p.custom_action_command(c);
-    if let Some(key) = command.info.once_per_turn {
+    let info = p.custom_action_info(c);
+    if let Some(key) = info.cost.once_per_turn {
         if p.played_once_per_turn_actions.contains(&key) {
             return Err("Custom action already played this turn".to_string());
         }
     }
 
-    if let CustomActionExecution::Action(e) = &command.execution {
+    if let CustomActionExecution::Action(e) = &info.execution {
         if !(e.checker)(game, p) {
             return Err("Custom action cannot be played".to_string());
         }
@@ -310,7 +353,7 @@ pub(crate) fn is_base_or_modifier(
 ) -> bool {
     match base_type {
         PlayingActionType::Custom(c) => {
-            if let CustomActionExecution::Modifier(t) = &p.custom_action_command(*c).execution {
+            if let CustomActionExecution::Modifier((t, _)) = &p.custom_action_info(*c).execution {
                 t == action_type
             } else {
                 false

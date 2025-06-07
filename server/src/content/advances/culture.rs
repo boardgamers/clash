@@ -4,7 +4,7 @@ use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city::{City, MoodState};
 use crate::city_pieces::Building::Obelisk;
 use crate::content::ability::{Ability, AbilityBuilder};
-use crate::content::advances::{AdvanceGroup, advance_group_builder};
+use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::content::custom_actions::{
     CustomActionActionExecution, CustomActionExecution, CustomActionType, any_non_happy,
 };
@@ -19,8 +19,12 @@ use crate::wonder::{Wonder, draw_wonder_card};
 use std::sync::Arc;
 use std::vec;
 
-pub(crate) fn culture() -> AdvanceGroup {
-    advance_group_builder("Culture", vec![arts(), sports(), monuments(), theaters()])
+pub(crate) fn culture() -> AdvanceGroupInfo {
+    advance_group_builder(
+        AdvanceGroup::Culture,
+        "Culture",
+        vec![arts(), sports(), monuments(), theaters()],
+    )
 }
 
 fn arts() -> AdvanceBuilder {
@@ -34,7 +38,11 @@ fn arts() -> AdvanceBuilder {
     .with_unlocked_building(Obelisk)
     .add_action_modifier(
         CustomActionType::ArtsInfluenceCultureAttempt,
-        |a| a.free_and_once_per_turn(ResourcePile::culture_tokens(1)),
+        |c| {
+            c.once_per_turn()
+                .free_action()
+                .resources(ResourcePile::culture_tokens(1))
+        },
         PlayingActionType::InfluenceCultureAttempt,
     )
 }
@@ -47,7 +55,7 @@ fn sports() -> AdvanceBuilder {
         .with_advance_bonus(MoodToken)
         .add_custom_action_execution(
             CustomActionType::Sports,
-            |_| CustomActionType::regular(),
+            |c| c.any_times().action().no_resources(),
             CustomActionExecution::Action(CustomActionActionExecution::new(
                 use_sports(),
                 Arc::new(|_game, p| can_use_sports(p)),
@@ -94,7 +102,7 @@ fn theaters() -> AdvanceBuilder {
     .with_advance_bonus(MoodToken)
     .add_custom_action(
         CustomActionType::Theaters,
-        |a| a.free_and_once_per_turn(ResourcePile::empty()),
+        |c| c.once_per_turn().free_action().no_resources(),
         use_theaters,
         |_game, p| p.resources.culture_tokens > 0 || p.resources.mood_tokens > 0,
     )

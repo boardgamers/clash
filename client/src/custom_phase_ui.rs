@@ -20,7 +20,7 @@ use server::game::Game;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
-use server::unit::Unit;
+use server::unit::{Unit, validate_units_selection};
 
 pub fn custom_phase_payment_dialog(
     rc: &RenderContext,
@@ -130,21 +130,27 @@ impl UnitSelection for UnitsSelection {
 }
 
 pub fn select_units_dialog(rc: &RenderContext, s: &UnitsSelection) -> StateUpdate {
+    let selected = &s.selection.selected;
     bottom_centered_text(
         rc,
         format!(
             "{}: {} units selected",
             s.selection.request.description,
-            s.selection.selected.len()
+            selected.len()
         )
         .as_str(),
     );
 
     if ok_button(
         rc,
-        multi_select_tooltip(&s.selection, s.selection.is_valid(), "units"),
+        multi_select_tooltip(
+            &s.selection,
+            s.selection.is_valid()
+                && validate_units_selection(selected, rc.game, rc.shown_player).is_ok(),
+            "units",
+        ),
     ) {
-        StateUpdate::response(EventResponse::SelectUnits(s.selection.selected.clone()))
+        StateUpdate::response(EventResponse::SelectUnits(selected.clone()))
     } else {
         StateUpdate::None
     }

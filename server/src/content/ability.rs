@@ -23,7 +23,7 @@ use crate::objective_card::select_objectives;
 use crate::pirates::{pirates_bonus, pirates_round_bonus};
 use crate::playing_actions::pay_for_action;
 use crate::unit::choose_carried_units_to_remove;
-use crate::wonder::{build_wonder, on_draw_wonder_card};
+use crate::wonder::{build_wonder_handler, draw_wonder_card_handler, use_draw_replacement_wonder};
 
 #[derive(Clone)]
 pub struct Ability {
@@ -89,8 +89,8 @@ pub fn get_all_uncached() -> Vec<Ability> {
         pay_for_action(),
         use_cultural_influence(),
         explore_resolution(),
-        on_draw_wonder_card(),
-        build_wonder(),
+        draw_wonder_card_handler(),
+        build_wonder_handler(),
         choose_carried_units_to_remove(),
         select_objectives(),
         // combat related
@@ -116,6 +116,7 @@ pub fn get_all_uncached() -> Vec<Ability> {
         use_teach_us(),
         // wonder related
         use_great_mausoleum(),
+        use_draw_replacement_wonder(),
     ]
 }
 

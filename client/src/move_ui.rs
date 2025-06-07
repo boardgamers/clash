@@ -33,8 +33,8 @@ pub struct MovePayment {
 impl MoveIntent {
     pub fn to_predicate(self) -> impl Fn(&Unit) -> bool {
         match self {
-            MoveIntent::Land => |u: &Unit| u.unit_type.is_land_based() && !u.is_transported(),
-            MoveIntent::Sea => |u: &Unit| !u.unit_type.is_land_based(),
+            MoveIntent::Land => |u: &Unit| u.is_land_based() && !u.is_transported(),
+            MoveIntent::Sea => |u: &Unit| !u.is_land_based(),
             MoveIntent::Disembark => |u: &Unit| u.is_transported(),
         }
     }
