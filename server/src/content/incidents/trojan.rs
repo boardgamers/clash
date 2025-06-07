@@ -69,7 +69,7 @@ pub(crate) fn decide_trojan_horse() -> Ability {
                     ));
                 } else {
                     let player = game.player_mut(s.player_index);
-                    player.gain_event_victory_points(1_f32, EventOrigin::Incident(42));
+                    player.gain_event_victory_points(1_f32, &EventOrigin::Incident(42));
                     game.add_info_log_item(&format!(
                         "{} activated the Trojan Horse and gained 1 victory point",
                         s.player_name
@@ -123,7 +123,7 @@ pub(crate) fn solar_eclipse_end_combat() -> Ability {
                             _ => r.combat.defender(),
                         };
                         let p = game.player_mut(p);
-                        p.gain_event_victory_points(1_f32, EventOrigin::Incident(41));
+                        p.gain_event_victory_points(1_f32, &EventOrigin::Incident(41));
                         game.add_info_log_item(&format!(
                             "{name} gained 1 victory point for the Solar Eclipse",
                         ));
@@ -162,7 +162,7 @@ fn guillotine() -> Incident {
                     s.player_name
                 ));
                 game.player_mut(s.player_index)
-                    .gain_event_victory_points(2_f32, i.origin());
+                    .gain_event_victory_points(2_f32, &i.origin());
             }
         },
     )
@@ -241,7 +241,7 @@ fn should_choose_new_leader(
                                 gained 2 victory points",
         ));
         game.player_mut(player_index)
-            .gain_event_victory_points(2_f32, origin);
+            .gain_event_victory_points(2_f32, &origin);
         None
     } else {
         Some("Do you want to choose a new leader instead of 2 victory points?".to_string())
@@ -314,7 +314,7 @@ fn anarchy() -> Incident {
 
             let p = game.player_mut(player_index);
             let lost = old - p.advances.len();
-            p.gain_event_victory_points(lost as f32, i.origin());
+            p.gain_event_victory_points(lost as f32, &i.origin());
             if lost > 0 {
                 game.add_info_log_item(&format!(
                     "{player_name} lost {lost} government advances due to Anarchy - \
@@ -356,7 +356,7 @@ pub(crate) fn anarchy_advance() -> Ability {
                         ));
                         let p = game.player_mut(player_index);
                         p.incident_tokens += 1;
-                        p.gain_event_victory_points(-1_f32, EventOrigin::Incident(44));
+                        p.gain_event_victory_points(-1_f32, &EventOrigin::Incident(44));
                         a.advances_lost -= 1;
                         if a.advances_lost > 0 {
                             game.permanent_effects.push(PermanentEffect::Anarchy(a));

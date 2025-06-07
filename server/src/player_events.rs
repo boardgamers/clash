@@ -286,7 +286,7 @@ impl IncidentInfo {
         self.barbarians.as_mut().expect("barbarians should exist")
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn origin(&self) -> EventOrigin {
         EventOrigin::Incident(self.incident_id)
     }

@@ -59,11 +59,11 @@ fn volcano() -> Incident {
             let buildings = city.pieces.buildings(None);
             let wonders = city.pieces.wonders.iter().copied().collect_vec();
             for b in buildings {
-                destroy_building(game, b, pos, i.origin());
+                destroy_building(game, b, pos, &i.origin());
             }
             for wonder in wonders {
-                destroy_wonder(game, pos, wonder, i.origin());
-                destroy_city_center(game, pos, i.origin());
+                destroy_wonder(game, pos, wonder, &i.origin());
+                destroy_city_center(game, pos, &i.origin());
             }
         },
     )
@@ -93,7 +93,7 @@ fn earthquake(id: u8, name: &str, target: IncidentTarget) -> Incident {
             (cities.len() >= 3).then_some(structures_request(cities))
         },
         move |game, s, i| {
-            apply_earthquake(game, s, i, event_origin.clone());
+            apply_earthquake(game, s, i, &event_origin);
         },
     )
     .add_decrease_mood(
@@ -111,7 +111,7 @@ fn apply_earthquake(
     game: &mut Game,
     s: &SelectedChoice<Vec<SelectedStructure>>,
     i: &mut IncidentInfo,
-    origin: EventOrigin,
+    origin: &EventOrigin,
 ) {
     assert!(
         is_selected_structures_valid(game, &s.choice),
@@ -128,9 +128,9 @@ fn apply_earthquake(
     for st in l {
         let position = st.position;
         match st.structure {
-            Structure::Building(b) => destroy_building(game, b, position, origin.clone()),
-            Structure::Wonder(name) => destroy_wonder(game, position, name, origin.clone()),
-            Structure::CityCenter => destroy_city_center(game, position, origin.clone()),
+            Structure::Building(b) => destroy_building(game, b, position, origin),
+            Structure::Wonder(name) => destroy_wonder(game, position, name, origin),
+            Structure::CityCenter => destroy_city_center(game, position, origin),
         }
     }
 
@@ -171,7 +171,7 @@ fn destroyable_structures(city: &City) -> Vec<SelectedStructure> {
     vec![s, b, w].into_iter().flatten().collect_vec()
 }
 
-fn destroy_city_center(game: &mut Game, position: Position, origin: EventOrigin) {
+fn destroy_city_center(game: &mut Game, position: Position, origin: &EventOrigin) {
     let city = game.get_any_city(position);
     let owner = city.player_index;
     let p = game.player_mut(owner);
@@ -190,7 +190,7 @@ fn destroy_city_center(game: &mut Game, position: Position, origin: EventOrigin)
     ));
 }
 
-fn destroy_building(game: &mut Game, b: Building, position: Position, origin: EventOrigin) {
+fn destroy_building(game: &mut Game, b: Building, position: Position, origin: &EventOrigin) {
     let city = game.get_any_city(position);
     let city_owner = city.player_index;
     let owner = city
@@ -209,7 +209,7 @@ fn destroy_building(game: &mut Game, b: Building, position: Position, origin: Ev
     ));
 }
 
-fn destroy_wonder(game: &mut Game, position: Position, name: Wonder, origin: EventOrigin) {
+fn destroy_wonder(game: &mut Game, position: Position, name: Wonder, origin: &EventOrigin) {
     let owner = game.get_any_city(position).player_index;
     deinit_wonder(game, owner, name);
 

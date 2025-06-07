@@ -18,27 +18,27 @@ pub struct SpecialVictoryPoints {
 pub(crate) fn add_special_victory_points(
     player: &mut Player,
     points: f32,
-    origin: EventOrigin,
+    origin: &EventOrigin,
     attribution: VictoryPointAttribution,
 ) {
     if let Some(v) = player
         .special_victory_points
         .iter()
-        .position(|p| p.origin == origin)
+        .position(|p| &p.origin == origin)
     {
         player.special_victory_points[v].points =
             assert_positive(points + player.special_victory_points[v].points);
     } else {
         player.special_victory_points.push(SpecialVictoryPoints {
             points: assert_positive(points),
-            origin,
+            origin: origin.clone(),
             attribution,
         });
     }
 }
 
 fn assert_positive(points: f32) -> f32 {
-    assert!(!(points <= 0.0), "Victory points cannot be negative: {points}");
+    assert!(points >= 0.0, "Victory points cannot be negative: {points}");
     points
 }
 

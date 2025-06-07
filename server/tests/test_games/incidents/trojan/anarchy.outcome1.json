@@ -80,6 +80,15 @@
         "Tactics"
       ],
       "incident_tokens": 3,
+      "special_victory_points": [
+        {
+          "points": 0.0,
+          "origin": {
+            "Incident": 44
+          },
+          "attribution": "Events"
+        }
+      ],
       "next_unit_id": 8
     },
     {
@@ -266,11 +275,6 @@
                       "path": "/players/0/advances/5"
                     },
                     {
-                      "op": "add",
-                      "path": "/players/0/special_victory_points",
-                      "value": 1.0
-                    },
-                    {
                       "op": "replace",
                       "path": "/players/0/resource_limit/ideas",
                       "value": 7
@@ -284,6 +288,11 @@
                       "op": "replace",
                       "path": "/players/0/resources/ideas",
                       "value": 3
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/special_victory_points/0/points",
+                      "value": 1.0
                     }
                   ]
                 }

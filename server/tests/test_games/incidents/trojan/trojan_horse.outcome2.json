@@ -109,7 +109,15 @@
         "Tactics"
       ],
       "incident_tokens": 3,
-      "special_victory_points": 1.0,
+      "special_victory_points": [
+        {
+          "points": 1.0,
+          "origin": {
+            "Incident": 42
+          },
+          "attribution": "Events"
+        }
+      ],
       "next_unit_id": 8
     },
     {

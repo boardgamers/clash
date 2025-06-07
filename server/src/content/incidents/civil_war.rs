@@ -247,7 +247,7 @@ fn uprising() -> Incident {
             let player = game.player_mut(s.player_index);
             let pile = &s.choice[0];
             let v = pile.amount() as f32 / 2_f32;
-            player.gain_event_victory_points(v, i.origin());
+            player.gain_event_victory_points(v, &i.origin());
             game.add_info_log_item(&format!(
                 "{} paid {} to gain {} victory point{}",
                 s.player_name,
