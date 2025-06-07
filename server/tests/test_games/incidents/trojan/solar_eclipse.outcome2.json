@@ -113,7 +113,7 @@
         "Tactics"
       ],
       "incident_tokens": 3,
-      "event_victory_points": 1.0,
+      "special_victory_points": 1.0,
       "next_unit_id": 8
     },
     {

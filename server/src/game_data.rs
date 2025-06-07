@@ -25,6 +25,7 @@ use num::Zero;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::mem;
+use crate::victory_points::SpecialVictoryPoints;
 
 #[derive(Serialize, Deserialize, PartialEq)]
 pub struct GameData {
@@ -260,8 +261,8 @@ pub struct PlayerData {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     captured_leaders: Vec<Leader>,
     #[serde(default)]
-    #[serde(skip_serializing_if = "f32::is_zero")]
-    event_victory_points: f32,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    special_victory_points: Vec<SpecialVictoryPoints>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     wonder_cards: Vec<Wonder>,
@@ -373,7 +374,7 @@ fn player_from_data(data: PlayerData, game: &Game) -> Player {
         incident_tokens: data.incident_tokens,
         completed_objectives: data.completed_objectives,
         captured_leaders: data.captured_leaders,
-        event_victory_points: data.event_victory_points,
+        special_victory_points: data.special_victory_points,
         custom_actions: HashMap::new(),
         wonder_cards: data.wonder_cards,
         action_cards: data.action_cards,
@@ -421,7 +422,7 @@ pub fn player_data(player: Player) -> PlayerData {
         incident_tokens: player.incident_tokens,
         completed_objectives: player.completed_objectives,
         captured_leaders: player.captured_leaders,
-        event_victory_points: player.event_victory_points,
+        special_victory_points: player.special_victory_points,
         wonder_cards: player.wonder_cards,
         action_cards: player.action_cards,
         objective_cards: player.objective_cards,
@@ -458,7 +459,7 @@ pub fn cloned_player_data(player: &Player) -> PlayerData {
         incident_tokens: player.incident_tokens,
         completed_objectives: player.completed_objectives.clone(),
         captured_leaders: player.captured_leaders.clone(),
-        event_victory_points: player.event_victory_points,
+        special_victory_points: player.special_victory_points,
         wonder_cards: player.wonder_cards.clone(),
         action_cards: player.action_cards.clone(),
         objective_cards: player.objective_cards.clone(),

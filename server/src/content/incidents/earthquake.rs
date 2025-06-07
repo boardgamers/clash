@@ -1,9 +1,10 @@
-use crate::ability_initializer::SelectedChoice;
+use crate::ability_initializer::{AbilityInitializerSetup, SelectedChoice};
 use crate::city::{City, MoodState};
 use crate::city_pieces::{Building, remove_building};
 use crate::content::persistent_events::{
     PositionRequest, SelectedStructure, Structure, StructuresRequest, is_selected_structures_valid,
 };
+use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::incident::{DecreaseMood, Incident, IncidentBaseEffect, MoodModifier};
 use crate::player_events::{IncidentInfo, IncidentTarget};
@@ -47,7 +48,7 @@ fn volcano() -> Incident {
                 "Select a city to be destroyed",
             ))
         },
-        |game, s, _| {
+        |game, s, i| {
             let pos = s.choice[0];
             let player_index = s.player_index;
             game.add_info_log_item(&format!(
@@ -57,20 +58,21 @@ fn volcano() -> Incident {
             let city = game.player(player_index).get_city(pos);
             let buildings = city.pieces.buildings(None);
             let wonders = city.pieces.wonders.iter().copied().collect_vec();
+            let origin = i.origin();
             for b in buildings {
-                destroy_building(game, b, pos);
+                destroy_building(game, b, pos, origin);
             }
             for wonder in wonders {
-                destroy_wonder(game, pos, wonder);
+                destroy_wonder(game, pos, wonder, origin);
+                destroy_city_center(game, pos, origin);
             }
-            destroy_city_center(game, pos);
         },
     )
     .build()
 }
 
 fn earthquake(id: u8, name: &str, target: IncidentTarget) -> Incident {
-    Incident::builder(
+    let b = Incident::builder(
         id,
         name,
         "If you have at least 3 cities: \
@@ -81,8 +83,9 @@ fn earthquake(id: u8, name: &str, target: IncidentTarget) -> Incident {
                       The city center and buildings are worth 2 points each \
                       (according to the last owner), wonders as usual.",
         IncidentBaseEffect::None,
-    )
-    .add_incident_structures_request(
+    );
+    let event_origin = b.get_key();
+    b.add_incident_structures_request(
         target,
         11,
         |game, player_index, _incident| {
@@ -90,8 +93,8 @@ fn earthquake(id: u8, name: &str, target: IncidentTarget) -> Incident {
             let cities = &p.cities;
             (cities.len() >= 3).then_some(structures_request(cities))
         },
-        |game, s, i| {
-            apply_earthquake(game, s, i);
+        move |game, s, i| {
+            apply_earthquake(game, s, i, event_origin);
         },
     )
     .add_decrease_mood(
@@ -109,6 +112,7 @@ fn apply_earthquake(
     game: &mut Game,
     s: &SelectedChoice<Vec<SelectedStructure>>,
     i: &mut IncidentInfo,
+    origin: EventOrigin,
 ) {
     assert!(
         is_selected_structures_valid(game, &s.choice),
@@ -125,9 +129,9 @@ fn apply_earthquake(
     for st in l {
         let position = st.position;
         match st.structure {
-            Structure::Building(b) => destroy_building(game, b, position),
-            Structure::Wonder(name) => destroy_wonder(game, position, name),
-            Structure::CityCenter => destroy_city_center(game, position),
+            Structure::Building(b) => destroy_building(game, b, position, origin),
+            Structure::Wonder(name) => destroy_wonder(game, position, name, origin),
+            Structure::CityCenter => destroy_city_center(game, position, origin),
         }
     }
 
@@ -168,7 +172,7 @@ fn destroyable_structures(city: &City) -> Vec<SelectedStructure> {
     vec![s, b, w].into_iter().flatten().collect_vec()
 }
 
-fn destroy_city_center(game: &mut Game, position: Position) {
+fn destroy_city_center(game: &mut Game, position: Position, origin: EventOrigin) {
     let city = game.get_any_city(position);
     let owner = city.player_index;
     let p = game.player_mut(owner);
@@ -178,7 +182,7 @@ fn destroy_city_center(game: &mut Game, position: Position) {
             .position(|c| c.position == position)
             .expect("city should exist"),
     );
-    p.event_victory_points += 2.0;
+    p.gain_event_victory_points(2.0, origin);
     p.destroyed_structures.cities += 1;
     game.add_info_log_item(&format!(
         "{} gained 2 points for the city center at {}",
@@ -187,7 +191,7 @@ fn destroy_city_center(game: &mut Game, position: Position) {
     ));
 }
 
-fn destroy_building(game: &mut Game, b: Building, position: Position) {
+fn destroy_building(game: &mut Game, b: Building, position: Position, origin: EventOrigin) {
     let city = game.get_any_city(position);
     let city_owner = city.player_index;
     let owner = city
@@ -195,7 +199,7 @@ fn destroy_building(game: &mut Game, b: Building, position: Position) {
         .building_owner(b)
         .expect("building should exist");
     let o = game.player_mut(owner);
-    o.event_victory_points += 2.0;
+    o.gain_event_victory_points(2.0, origin);
     o.destroyed_structures.add_building(b);
     remove_building(game.player_mut(city_owner).get_city_mut(position), b);
     game.add_info_log_item(&format!(
@@ -206,7 +210,7 @@ fn destroy_building(game: &mut Game, b: Building, position: Position) {
     ));
 }
 
-fn destroy_wonder(game: &mut Game, position: Position, name: Wonder) {
+fn destroy_wonder(game: &mut Game, position: Position, name: Wonder, origin: EventOrigin) {
     let owner = game.get_any_city(position).player_index;
     deinit_wonder(game, owner, name);
 
@@ -215,7 +219,7 @@ fn destroy_wonder(game: &mut Game, position: Position, name: Wonder) {
     p.wonders_owned.remove(name);
     let city = p.get_city_mut(position);
     city.pieces.wonders.retain(|w| *w != name);
-    p.event_victory_points += a as f32;
+    p.gain_event_victory_points(a as f32, origin);
     game.add_info_log_item(&format!(
         "{} gained {} points for the {} at {}",
         game.player_name(owner),
