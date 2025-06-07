@@ -119,7 +119,7 @@ pub enum PersistentEventType {
     StopBarbarianMovement(Vec<Position>),
     ActionCard(ActionCardInfo),
     WonderCard(WonderCardInfo),
-    DrawWonderCard,
+    DrawWonderCard(bool),
     SelectObjectives(SelectObjectivesInfo),
     CustomAction(CustomActionActivation),
     ChooseActionCard,

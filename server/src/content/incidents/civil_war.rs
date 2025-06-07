@@ -17,7 +17,7 @@ use crate::status_phase::{
     ChangeGovernmentOption, add_change_government, can_change_government_for_free, get_status_phase,
 };
 use crate::unit::kill_units;
-use crate::wonder::draw_wonder_from_pile;
+use crate::wonder::draw_public_wonder;
 use itertools::Itertools;
 
 pub(crate) fn civil_war_incidents() -> Vec<Incident> {
@@ -278,14 +278,7 @@ fn envoy() -> Incident {
             |name, pile| format!("{name} gained {pile} for Envoy event"),
         );
 
-        if let Some(wonder) = draw_wonder_from_pile(game) {
-            game.add_info_log_item(&format!(
-                "{} is now available to be taken by anyone",
-                wonder.name(game)
-            ));
-            game.permanent_effects
-                .push(PermanentEffect::PublicWonderCard(wonder));
-        }
+        draw_public_wonder(game);
     })
     .add_incident_player_request(
         IncidentTarget::ActivePlayer,

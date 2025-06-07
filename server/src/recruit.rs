@@ -155,10 +155,13 @@ pub fn recruit_cost_without_replaced(
     }
     let cost = player.trigger_cost_event(
         |e| &e.recruit_cost,
-        &PaymentOptions::resources(
+        CostInfo::new(
             player,
-            PaymentReason::Recruit,
-            units.clone().to_vec().iter().map(UnitType::cost).sum(),
+            PaymentOptions::resources(
+                player,
+                PaymentReason::Recruit,
+                units.clone().to_vec().iter().map(UnitType::cost).sum(),
+            ),
         ),
         units,
         player,

@@ -23,9 +23,7 @@ use crate::player::{Player, remove_unit};
 use crate::player_events::PlayingActionInfo;
 use crate::recruit::recruit;
 use crate::unit::Units;
-use crate::wonder::{
-    Wonder, WonderCardInfo, WonderDiscount, cities_for_wonder, on_play_wonder_card,
-};
+use crate::wonder::{Wonder, WonderCardInfo, cities_for_wonder, on_play_wonder_card, wonder_cost};
 use crate::{game::Game, position::Position, resource_pile::ResourcePile};
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
@@ -137,12 +135,12 @@ impl PlayingActionType {
             PlayingActionType::ActionCard(id) => {
                 can_play_civil_card(game, p, *id)?;
             }
-            PlayingActionType::WonderCard(name) => {
-                if !p.wonder_cards.contains(name) {
+            PlayingActionType::WonderCard(w) => {
+                if !p.wonder_cards.contains(w) {
                     return Err("Wonder card not available".to_string());
                 }
 
-                if cities_for_wonder(*name, game, p, &WonderDiscount::default()).is_empty() {
+                if cities_for_wonder(*w, game, p, wonder_cost(game, p, *w)).is_empty() {
                     return Err("no cities for wonder".to_string());
                 }
             }
@@ -173,6 +171,7 @@ impl PlayingActionType {
                 .clone(),
             PlayingActionType::ActionCard(id) => game.cache.get_civil_card(*id).action_type.clone(),
             PlayingActionType::EndTurn => ActionCost::cost(ResourcePile::empty()),
+            PlayingActionType::WonderCard(_) => ActionCost::free(), // action cost is checked later
             _ => ActionCost::regular(),
         }
     }
@@ -278,11 +277,11 @@ impl PlayingAction {
                 influence_culture_attempt(game, player_index, &c.selected_structure)?;
             }
             ActionCard(a) => play_action_card(game, player_index, a),
-            WonderCard(name) => {
+            WonderCard(w) => {
                 on_play_wonder_card(
                     game,
                     player_index,
-                    WonderCardInfo::new(name, WonderDiscount::default()),
+                    WonderCardInfo::new(w, wonder_cost(game, game.player(player_index), w)),
                 );
             }
             Custom(custom_action) => {

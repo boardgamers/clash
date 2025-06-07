@@ -220,7 +220,7 @@ fn destroy_wonder(game: &mut Game, position: Position, name: Wonder) {
         "{} gained {} points for the {} at {}",
         game.player_name(owner),
         a,
-        name.name(game),
+        name.name(),
         position
     ));
 }

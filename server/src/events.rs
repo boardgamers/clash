@@ -36,7 +36,7 @@ impl EventOrigin {
         match self {
             EventOrigin::Advance(name) => name.name(game).to_string(),
             EventOrigin::SpecialAdvance(name) => name.name(game).to_string(),
-            EventOrigin::Wonder(name) => name.name(game).to_string(),
+            EventOrigin::Wonder(name) => name.name().to_string(),
             EventOrigin::LeaderAbility(name)
             | EventOrigin::Objective(name)
             | EventOrigin::Ability(name) => name.to_string(),
@@ -160,7 +160,16 @@ where
         trigger: CostTrigger,
     ) -> Vec<EventOrigin> {
         if trigger == CostTrigger::WithModifiers {
-            self.trigger_with_exclude(value, info, details, extra_value, &[])
+            let mut modifiers = Vec::new();
+            for l in &self.listeners {
+                let previous_value = value.clone();
+                let previous_extra_value = extra_value.clone();
+                (l.callback)(value, info, details, extra_value);
+                if *value != previous_value || *extra_value != previous_extra_value {
+                    modifiers.push(l.origin.clone());
+                }
+            }
+            modifiers
         } else {
             self.trigger(value, info, details, extra_value);
             vec![]
@@ -171,30 +180,6 @@ where
         for l in &self.listeners {
             (l.callback)(value, info, details, extra_value);
         }
-    }
-
-    #[must_use]
-    fn trigger_with_exclude(
-        &self,
-        value: &mut T,
-        info: &U,
-        details: &V,
-        extra_value: &mut W,
-        exclude: &[EventOrigin],
-    ) -> Vec<EventOrigin> {
-        let mut modifiers = Vec::new();
-        for l in &self.listeners {
-            if exclude.contains(&l.origin) {
-                continue;
-            }
-            let previous_value = value.clone();
-            let previous_extra_value = extra_value.clone();
-            (l.callback)(value, info, details, extra_value);
-            if *value != previous_value || *extra_value != previous_extra_value {
-                modifiers.push(l.origin.clone());
-            }
-        }
-        modifiers
     }
 }
 

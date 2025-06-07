@@ -2,13 +2,16 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{discard_action_card, gain_action_card_from_pile};
 use crate::advance::{Advance, base_advance_cost, gain_advance_without_payment};
 use crate::card::{HandCard, all_action_hand_cards, all_objective_hand_cards};
-use crate::city::{City, MoodState};
+use crate::city::MoodState;
 use crate::civilization::Civilization;
 use crate::content::ability::AbilityBuilder;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::{HandCardsRequest, PaymentRequest, PositionRequest};
 use crate::game::Game;
-use crate::leader::{Leader, LeaderAbility, LeaderAbilityBuilder, LeaderInfo, leader_position};
+use crate::leader::{Leader, LeaderInfo, leader_position};
+use crate::leader_ability::{
+    LeaderAbility, LeaderAbilityBuilder, activate_leader_city, can_activate_leader_city,
+};
 use crate::map::{block_for_position, block_has_player_city};
 use crate::objective_card::{discard_objective_card, gain_objective_card_from_pile};
 use crate::payment::{
@@ -180,8 +183,7 @@ fn augustus() -> LeaderInfo {
         "Augustus",
         LeaderAbility::builder(
             "Princeps",
-            "As an action, pay 1 culture token and \
-            activate the city where Augustus is: \
+            "As an action, pay 1 culture token and activate the leader city: \
             Draw 1 action and 1 objective card. \
             Then discard 1 action and 1 objective card.",
         )
@@ -193,19 +195,17 @@ fn augustus() -> LeaderInfo {
                     .resources(ResourcePile::culture_tokens(1))
             },
             use_princeps,
-            |game, p| {
-                game.try_get_any_city(leader_position(p))
-                    .is_some_and(City::can_activate)
-            },
+            can_activate_leader_city,
         )
         .build(),
         LeaderAbility::builder(
             "Imperator",
-            "If you don't own a city in the region: \
+            "Land battle with leader: If you don't own a city in the region: \
             Gain 2 combat value in every combat round",
         )
         .add_combat_strength_listener(103, |game, c, s, r| {
-            if c.has_leader(r, game)
+            if c.is_land_battle(game)
+                && c.has_leader(r, game)
                 && !block_has_player_city(
                     game,
                     &block_for_position(game, c.defender_position()),
@@ -225,14 +225,11 @@ fn use_princeps(b: AbilityBuilder) -> AbilityBuilder {
         |event| &mut event.custom_action,
         0,
         |game, player, _| {
-            let p = game.player_mut(player);
-            let position = leader_position(p);
-            p.get_city_mut(position).activate();
-            game.add_info_log_item(&format!(
-                "{} activates the city {position} \
-                        to draw 1 action and 1 objective card using Princeps",
-                game.player_name(player)
-            ));
+            activate_leader_city(
+                game,
+                player,
+                "draw 1 action and 1 objective card using Princeps",
+            );
             gain_action_card_from_pile(game, player);
             gain_objective_card_from_pile(game, player);
 
@@ -298,7 +295,7 @@ fn caesar() -> LeaderInfo {
         LeaderAbility::builder(
             "Statesman",
             "As a free action, you may use 'Increase happiness' \
-                to increase happiness in the city where Caesar is.",
+                to increase happiness in the leader city.",
         )
         .add_action_modifier(
             CustomActionType::StatesmanIncreaseHappiness,
@@ -308,12 +305,16 @@ fn caesar() -> LeaderInfo {
         .build(),
         LeaderAbility::builder(
             "Proconsul",
-            "When capturing a city, you may spend 1 gold to gain 1 infantry",
+            "When capturing a city with leader, you may spend 1 gold to gain 1 infantry",
         )
         .add_payment_request_listener(
             |event| &mut event.combat_end,
             22,
             |game, player, s| {
+                if !s.player(player).survived_leader() {
+                    return None;
+                }
+
                 let p = game.player(player);
                 if p.available_units().infantry == 0 || !can_add_army_unit(p, leader_position(p)) {
                     return None;
@@ -352,8 +353,8 @@ fn sulla() -> LeaderInfo {
         add_barbarian_control(
             LeaderAbility::builder(
                 "Dictator",
-                "The city where Sulla is may not be the target of influence culture attempts.\
-            Barbarians within 2 spaces of Sulla may only move if you agree to it.",
+                "The leader city may not be the target of influence culture attempts.\
+                Barbarians within 2 spaces of Sulla may only move if you agree to it.",
             )
             .add_transient_event_listener(
                 |event| &mut event.on_influence_culture_attempt,
@@ -373,7 +374,7 @@ fn sulla() -> LeaderInfo {
         .build(),
         LeaderAbility::builder(
             "Civilizer",
-            "In every combat round against barbarians: Gain 2 combat value",
+            "Land battle with leader against barbarians: Gain 2 combat value",
         )
         .add_combat_strength_listener(104, |game, c, s, r| {
             if c.has_leader(r, game) && c.is_barbarian_battle(r, game) {

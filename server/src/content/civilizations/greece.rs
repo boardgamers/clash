@@ -1,5 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::advance::{Advance, gain_advance_without_payment};
+use crate::advance::Advance;
 use crate::card::HandCard;
 use crate::civilization::Civilization;
 use crate::combat::update_combat_strength;
@@ -8,9 +8,10 @@ use crate::content::ability::AbilityBuilder;
 use crate::content::advances::AdvanceGroup;
 use crate::content::advances::warfare::draft_cost;
 use crate::content::custom_actions::CustomActionType;
-use crate::content::persistent_events::{AdvanceRequest, HandCardsRequest, PositionRequest};
+use crate::content::persistent_events::{HandCardsRequest, PositionRequest};
 use crate::game::Game;
-use crate::leader::{Leader, LeaderAbility, LeaderInfo, leader_position};
+use crate::leader::{Leader, LeaderInfo, leader_position};
+use crate::leader_ability::{LeaderAbility, activate_leader_city, can_activate_leader_city};
 use crate::map::{block_has_player_city, get_map_setup};
 use crate::payment::PaymentConversion;
 use crate::player::{Player, gain_resources};
@@ -194,7 +195,7 @@ fn alexander() -> LeaderInfo {
         "Alexander the Great",
         LeaderAbility::builder(
             "Idol",
-            "As a free action, pay 1 culture token to \
+            "As a free action, pay 1 culture token and activate the leader city: \
             play an action card as a free action",
         )
         .add_custom_action(
@@ -205,16 +206,19 @@ fn alexander() -> LeaderInfo {
                     .resources(ResourcePile::culture_tokens(1))
             },
             use_idol,
-            |game, p| !idol_cards(game, p, &ResourcePile::culture_tokens(1)).is_empty(),
+            |game, p| {
+                can_activate_leader_city(game, p)
+                    && !idol_cards(game, p, &ResourcePile::culture_tokens(1)).is_empty()
+            },
         )
         .build(),
         LeaderAbility::builder(
             "Ruler of the World",
-            "In a land battle, gain 1 combat value for each region
+            "In a land battle with leader, gain 1 combat value for each region \
             with a city you control, except the starting region.",
         )
         .add_combat_strength_listener(100, |game, c, s, r| {
-            if !c.is_sea_battle(game) {
+            if c.has_leader(r, game) && c.is_land_battle(game) {
                 let setup = get_map_setup(game.human_players_count());
                 let player = c.player(r);
                 let extra = setup
@@ -243,6 +247,8 @@ fn use_idol(b: AbilityBuilder) -> AbilityBuilder {
         |event| &mut event.custom_action,
         0,
         |game, player, _| {
+            activate_leader_city(game, player, "use Idol.");
+
             Some(HandCardsRequest::new(
                 idol_cards(game, game.player(player), &ResourcePile::empty()),
                 1..=1,
@@ -290,7 +296,7 @@ fn leonidas() -> LeaderInfo {
         "Leonidas I",
         LeaderAbility::builder(
             "That's Sparta",
-            "Gain 1 culture token when recruiting in the city where Leonidas is present.",
+            "Gain 1 culture token when recruiting in the leader city.",
         )
         .add_simple_persistent_event_listener(
             |event| &mut event.recruit,
@@ -309,7 +315,7 @@ fn leonidas() -> LeaderInfo {
         .build(),
         LeaderAbility::builder(
             "Hero of Thermopylae",
-            "In land battle: \
+            "In land battle with leader: \
             Get +2 combat value per army unit you have less than your enemy.",
         )
         .add_combat_strength_listener(101, |game, c, s, r| {
@@ -318,7 +324,7 @@ fn leonidas() -> LeaderInfo {
             let op = c.fighting_units(game, c.opponent(p)).len();
 
             let extra = op.saturating_sub(pl) * 2;
-            if extra > 0 {
+            if c.has_leader(r, game) && extra > 0 {
                 s.extra_combat_value += extra as i8;
                 s.roll_log
                     .push(format!("Hero of Thermopylae adds {extra} combat value",));
@@ -332,57 +338,21 @@ fn pericles() -> LeaderInfo {
     LeaderInfo::new(
         Leader::Pericles,
         "Pericles",
-        LeaderAbility::builder(
+        LeaderAbility::advance_gain_custom_action(
             "Master",
-            "As an action: If Pericles is in a Happy city: Gain 1 education advance for free.",
-        )
-        .add_custom_action(
             CustomActionType::Master,
-            |c| c.any_times().action().tokens(1),
-            use_master,
-            |game, p| !master_education_advances(game, p).is_empty(),
+            AdvanceGroup::Education,
+        ),
+        LeaderAbility::builder(
+            "Admiral",
+            "In Sea battles with leader: Gain +2 combat value",
         )
-        .build(),
-        LeaderAbility::builder("Admiral", "In Sea battles: Gain +2 combat value")
-            .add_combat_strength_listener(102, |game, c, s, _r| {
-                if c.is_sea_battle(game) {
-                    s.extra_combat_value += 2;
-                    s.roll_log.push("Admiral adds +2 combat value".to_string());
-                }
-            })
-            .build(),
-    )
-}
-
-fn use_master(b: AbilityBuilder) -> AbilityBuilder {
-    b.add_advance_request(
-        |event| &mut event.custom_action,
-        0,
-        |game, player_index, _| {
-            let player = game.player(player_index);
-            Some(AdvanceRequest::new(master_education_advances(game, player)))
-        },
-        |game, s, c| {
-            let advance = s.choice;
-            game.add_info_log_item(&format!(
-                "{} decided to gain {} for free using Master",
-                s.player_name,
-                advance.name(game)
-            ));
-            gain_advance_without_payment(game, advance, s.player_index, c.payment.clone(), true);
-        },
-    )
-}
-
-fn master_education_advances(game: &Game, player: &Player) -> Vec<Advance> {
-    game.cache
-        .get_advance_group(AdvanceGroup::Education)
-        .advances
-        .iter()
-        .filter_map(|a| {
-            player
-                .can_advance_free(a.advance, game)
-                .then_some(a.advance)
+        .add_combat_strength_listener(102, |game, c, s, r| {
+            if c.has_leader(r, game) && c.is_sea_battle(game) {
+                s.extra_combat_value += 2;
+                s.roll_log.push("Admiral adds +2 combat value".to_string());
+            }
         })
-        .collect_vec()
+        .build(),
+    )
 }

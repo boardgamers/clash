@@ -5,11 +5,47 @@
     {
       "event_type": {
         "WonderCard": {
-          "name": "Pyramids",
+          "wonder": "Pyramids",
           "selected_position": "C2",
-          "discount": {
+          "cost": {
+            "cost": {
+              "default": {
+                "food": 2,
+                "wood": 3,
+                "ore": 7,
+                "culture_tokens": 5
+              },
+              "conversions": [
+                {
+                  "from": [
+                    {
+                      "food": 1
+                    },
+                    {
+                      "wood": 1
+                    },
+                    {
+                      "ore": 1
+                    },
+                    {
+                      "ideas": 1
+                    }
+                  ],
+                  "to": {
+                    "gold": 1
+                  },
+                  "type": "Unlimited"
+                }
+              ]
+            },
+            "activate_city": true,
             "ignore_required_advances": false,
-            "culture_tokens": 0
+            "ignore_action_cost": false,
+            "info": {
+              "player": 0,
+              "info": {},
+              "log": []
+            }
           }
         }
       },

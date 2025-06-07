@@ -5,11 +5,13 @@
     {
       "id": 0,
       "resources": {
-        "food": 2,
-        "culture_tokens": 2
+        "food": 5,
+        "wood": 2,
+        "ore": 7,
+        "culture_tokens": 3
       },
       "resource_limit": {
-        "food": 2,
+        "food": 5,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -19,27 +21,29 @@
         {
           "mood_state": "Happy",
           "position": "D1"
+        },
+        {
+          "mood_state": "Angry",
+          "position": "D2"
         }
       ],
       "units": [
         {
           "position": "D1",
           "unit_type": {
-            "Leader": "Alexander"
+            "Leader": "Qin"
           },
           "id": 0
         }
       ],
-      "civilization": "Greece",
+      "civilization": "China",
       "advances": [
         "Farming",
         "Mining",
+        "Siegecraft",
         "Tactics"
       ],
-      "incident_tokens": 1,
-      "action_cards": [
-        17
-      ],
+      "incident_tokens": 2,
       "next_unit_id": 1
     },
     {
@@ -74,6 +78,9 @@
         "Mining"
       ],
       "incident_tokens": 1,
+      "wonder_cards": [
+        "GreatWall"
+      ],
       "next_unit_id": 1
     }
   ],
@@ -374,7 +381,7 @@
   "action_log_index": 0,
   "log": [],
   "undo_limit": 0,
-  "actions_left": 3,
+  "actions_left": 1,
   "round": 1,
   "age": 1,
   "messages": [
@@ -587,5 +594,10 @@
   ],
   "incidents_left": [
     18
+  ],
+  "permanent_effects": [
+    {
+      "PublicWonderCard": "Pyramids"
+    }
   ]
 }

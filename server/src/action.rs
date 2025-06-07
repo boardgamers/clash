@@ -24,7 +24,7 @@ use crate::resource::check_for_waste;
 use crate::status_phase::play_status_phase;
 use crate::undo::{clean_patch, redo, to_serde_value, undo};
 use crate::unit::units_killed;
-use crate::wonder::{draw_wonder_card, on_play_wonder_card};
+use crate::wonder::{on_draw_wonder_card, on_play_wonder_card};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
@@ -222,8 +222,8 @@ pub(crate) fn execute_custom_phase_action(
     use PersistentEventType::*;
     match details {
         Collect(i) => on_collect(game, player_index, i),
-        DrawWonderCard => {
-            draw_wonder_card(game, player_index);
+        DrawWonderCard(drawn) => {
+            on_draw_wonder_card(game, player_index, drawn);
         }
         ExploreResolution(r) => {
             ask_explore_resolution(game, player_index, r);

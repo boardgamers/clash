@@ -131,6 +131,11 @@ impl Combat {
     }
 
     #[must_use]
+    pub fn is_land_battle(&self, game: &Game) -> bool {
+        game.map.is_land(self.defender_position())
+    }
+
+    #[must_use]
     pub fn opponent(&self, player: usize) -> usize {
         if player == self.attacker() {
             self.defender()

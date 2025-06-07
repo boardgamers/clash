@@ -351,7 +351,7 @@ fn can_play_tactics_card(game: &Game, player: usize, card: &ActionCard, combat: 
 
             let fighter_met = card.fighter_requirement.is_empty()
                 || card.fighter_requirement.iter().any(|r| match r {
-                    FighterRequirement::Army => !combat.is_sea_battle(game),
+                    FighterRequirement::Army => combat.is_land_battle(game),
                     FighterRequirement::Fortress => {
                         combat.defender_fortress(game) && combat.defender() == player
                     }
@@ -362,7 +362,7 @@ fn can_play_tactics_card(game: &Game, player: usize, card: &ActionCard, combat: 
                 // city is also land!
                 CombatLocation::City => combat.defender_city(game).is_some(),
                 CombatLocation::Sea => combat.is_sea_battle(game),
-                CombatLocation::Land => !combat.is_sea_battle(game),
+                CombatLocation::Land => combat.is_land_battle(game),
             });
 
             let checker_met = card

@@ -1,28 +1,33 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Advance;
 use crate::civilization::Civilization;
+use crate::combat::Combat;
 use crate::combat_listeners::CombatRoundEnd;
 use crate::consts::STACK_LIMIT;
 use crate::content::ability::AbilityBuilder;
+use crate::content::advances::AdvanceGroup;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::{PaymentRequest, UnitsRequest};
 use crate::game::{Game, GameState};
-use crate::leader::{Leader, LeaderAbility, LeaderInfo};
+use crate::leader::{Leader, LeaderInfo};
+use crate::leader_ability::LeaderAbility;
 use crate::map::Terrain;
 use crate::movement::{MoveState, possible_move_destinations};
 use crate::payment::{PaymentOptions, PaymentReason};
-use crate::player::{Player, can_add_army_unit};
+use crate::player::{Player, can_add_army_unit, gain_resources};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
+use crate::tactics_card::CombatRole;
 use crate::unit::UnitType;
+use crate::wonder::Wonder;
 use itertools::Itertools;
 
 pub(crate) fn china() -> Civilization {
     Civilization::new(
         "China",
         vec![rice(), expansion(), fireworks(), imperial_army()],
-        vec![sun_tzu()],
+        vec![sun_tzu(), qin()],
     )
 }
 
@@ -120,52 +125,69 @@ fn movable_settlers(game: &Game, player: &Player) -> Vec<Position> {
 }
 
 fn fireworks() -> SpecialAdvanceInfo {
-    SpecialAdvanceInfo::builder(
-        SpecialAdvance::Fireworks,
-        SpecialAdvanceRequirement::Advance(Advance::Metallurgy),
-        "Fireworks",
-        "In the first round of combat, you may pay 1 ore and 1 wood to ignore the first hit.",
-    )
-    .add_payment_request_listener(
-        |e| &mut e.combat_round_end,
+    ignore_hit_ability(
+        SpecialAdvanceInfo::builder(
+            SpecialAdvance::Fireworks,
+            SpecialAdvanceRequirement::Advance(Advance::Metallurgy),
+            "Fireworks",
+            "In the first round of combat, you may pay 1 ore and 1 wood to ignore the first hit.",
+        ),
+        ResourcePile::wood(1) + ResourcePile::ore(1),
+        PaymentReason::AdvanceAbility,
         91,
-        |game, player_index, e| {
+        |c, _r, _game| c.stats.round == 1,
+    )
+    .build()
+}
+
+fn ignore_hit_ability<B: AbilityInitializerSetup>(
+    b: B,
+    pile: ResourcePile,
+    payment_reason: PaymentReason,
+    priority: i32,
+    filter: impl Fn(&Combat, CombatRole, &Game) -> bool + Send + Sync + 'static + Clone,
+) -> B {
+    let name = b.name().clone();
+    let name2 = b.name().clone();
+    b.add_payment_request_listener(
+        |e| &mut e.combat_round_end,
+        priority,
+        move |game, player_index, e| {
             let player = &game.player(player_index);
+            let combat = &e.combat;
+            if !filter(combat, combat.role(player_index), game) {
+                return None;
+            }
 
-            let cost = PaymentOptions::resources(
-                player,
-                PaymentReason::AdvanceAbility,
-                ResourcePile::wood(1) + ResourcePile::ore(1),
-            );
+            let cost = PaymentOptions::resources(player, payment_reason, pile.clone());
 
-            if !apply_fireworks(e, player_index, false) {
-                game.add_info_log_item("Fireworks won't reduce the hits, no payment made.");
+            if !apply_ignore_hit(e, player_index, false) {
+                game.add_info_log_item(&format!("{name} won't reduce the hits, no payment made."));
                 return None;
             }
 
             if !player.can_afford(&cost) {
-                game.add_info_log_item("Fireworks: Not enough resources, no payment made.");
+                game.add_info_log_item(&format!("{name} Not enough resources, no payment made."));
                 return None;
             }
 
             Some(vec![PaymentRequest::optional(cost, "Ignore 1 hit")])
         },
-        |game, s, e| {
+        move |game, s, e| {
             let pile = &s.choice[0];
             if pile.is_empty() {
-                game.add_info_log_item("Fireworks: No payment made, first hit not ignored.");
+                game.add_info_log_item(&format!(
+                    "{name2}: No payment made, first hit not ignored."
+                ));
             } else {
-                game.add_info_log_item(
-                    &format!("Fireworks: Paid {pile} to ignore the first hit.",),
-                );
-                apply_fireworks(e, s.player_index, true);
+                game.add_info_log_item(&format!("{name2}: Paid {pile} to ignore the first hit."));
+                apply_ignore_hit(e, s.player_index, true);
             }
         },
     )
-    .build()
 }
 
-fn apply_fireworks(e: &mut CombatRoundEnd, p: usize, do_update: bool) -> bool {
+fn apply_ignore_hit(e: &mut CombatRoundEnd, p: usize, do_update: bool) -> bool {
     e.update_hits(e.combat.opponent_role(p), do_update, |h| {
         h.opponent_hit_cancels += 1;
     })
@@ -298,19 +320,55 @@ fn sun_tzu() -> LeaderInfo {
     LeaderInfo::new(
         Leader::SunTzu,
         "Sun Tzu",
-        LeaderAbility::builder("Art of War", "todo") // todo like Pericles
-            .add_custom_action(
-                CustomActionType::ArtOfWar,
-                |c| c.any_times().action().tokens(1),
-                use_art_of_war,
-                |game, player| todo!(),
-            )
-            .build(),
-        LeaderAbility::builder("Fast War", "todo").build(),
+        LeaderAbility::advance_gain_custom_action(
+            "The Art of War",
+            CustomActionType::ArtOfWar,
+            AdvanceGroup::Warfare,
+        ),
+        LeaderAbility::builder(
+            "Fast War",
+            "Sun Tzu survives a land battle against army units and wins after the first round: \
+            Gain 1 mood token and 1 culture token.",
+        )
+        .add_simple_persistent_event_listener(
+            |event| &mut event.combat_end,
+            23,
+            |game, player_index, _name, s| {
+                let p = s.player(player_index);
+                if s.is_winner(player_index)
+                    && s.round == 1
+                    && s.is_battle()
+                    && s.battleground.is_land()
+                    && p.survived_leader()
+                {
+                    gain_resources(
+                        game,
+                        player_index,
+                        ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1),
+                        |name, pile| format!("{name} gained {pile} from Fast War"),
+                    );
+                }
+            },
+        )
+        .build(),
     )
 }
 
-fn use_art_of_war(b: AbilityBuilder) -> AbilityBuilder {
-    // todo
-    b
+fn qin() -> LeaderInfo {
+    LeaderInfo::new(
+        Leader::Qin,
+        "Qin Shi Huang",
+        LeaderAbility::wonder_expert(Wonder::GreatWall),
+        ignore_hit_ability(
+            LeaderAbility::builder(
+                "Tactician",
+                "Land battle with leader: You may pay 2 culture tokens to ignore a hit.",
+            ),
+            ResourcePile::culture_tokens(2),
+            PaymentReason::LeaderAbility,
+            92,
+            Combat::has_leader,
+        )
+        .build(),
+    )
 }

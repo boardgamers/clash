@@ -85,7 +85,7 @@ impl PermanentEffect {
             PermanentEffect::PublicWonderCard(w) => {
                 vec![format!(
                     "Public wonder for anyone to draw: {}",
-                    cache.get_wonder(*w).name
+                    cache.get_wonder(*w).name()
                 )]
             }
             PermanentEffect::SolarEclipse => cache.get_incident(41).description(game),

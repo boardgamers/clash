@@ -9,7 +9,7 @@ use std::fmt::Display;
 use std::ops::RangeInclusive;
 
 // not used right now - but might be useful for statistics
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(Clone, PartialEq, Eq, Debug, Copy)]
 pub enum PaymentReason {
     Recruit,
     IncreaseHappiness,

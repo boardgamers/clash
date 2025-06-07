@@ -6,7 +6,9 @@
       "id": 0,
       "resources": {
         "food": 2,
-        "culture_tokens": 2
+        "gold": 2,
+        "mood_tokens": 1,
+        "culture_tokens": 1
       },
       "resource_limit": {
         "food": 2,
@@ -19,27 +21,31 @@
         {
           "mood_state": "Happy",
           "position": "D1"
+        },
+        {
+          "mood_state": "Angry",
+          "position": "D8"
         }
       ],
       "units": [
         {
-          "position": "D1",
+          "position": "D8",
           "unit_type": {
-            "Leader": "Alexander"
+            "Leader": "SunTzu"
           },
+          "movement_restrictions": [
+            "Battle"
+          ],
           "id": 0
         }
       ],
-      "civilization": "Greece",
+      "civilization": "China",
       "advances": [
         "Farming",
         "Mining",
         "Tactics"
       ],
       "incident_tokens": 1,
-      "action_cards": [
-        17
-      ],
       "next_unit_id": 1
     },
     {
@@ -55,19 +61,6 @@
         "ideas": 7,
         "gold": 7
       },
-      "cities": [
-        {
-          "mood_state": "Happy",
-          "position": "D8"
-        }
-      ],
-      "units": [
-        {
-          "position": "D8",
-          "unit_type": "Infantry",
-          "id": 0
-        }
-      ],
       "civilization": "Rome",
       "advances": [
         "Farming",
@@ -364,17 +357,68 @@
           "players": [
             {
               "index": 0,
-              "items": []
+              "items": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          0
+                        ],
+                        "destination": "D8"
+                      }
+                    }
+                  },
+                  "combat_stats": {
+                    "round": 1,
+                    "battleground": "City",
+                    "attacker": {
+                      "position": "E8",
+                      "player": 0,
+                      "present": {
+                        "leader": "SunTzu"
+                      }
+                    },
+                    "defender": {
+                      "position": "D8",
+                      "player": 1,
+                      "present": {
+                        "infantry": 1
+                      },
+                      "losses": {
+                        "infantry": 1
+                      }
+                    },
+                    "result": "AttackerWins"
+                  }
+                }
+              ]
             }
           ]
         }
       ]
     }
   ],
-  "action_log_index": 0,
-  "log": [],
-  "undo_limit": 0,
-  "actions_left": 3,
+  "action_log_index": 1,
+  "log": [
+    [
+      "Player1 marched Sun Tzu from E8 to D8"
+    ],
+    [
+      "Combat round 1",
+      "Attackers: Sun Tzu",
+      "Defenders: 1 infantry",
+      "Player1 rolled 5 (cavalry, no bonus) for combined combat value of 5 and gets 1 hits against defending units.",
+      "Player2 rolled 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units.",
+      "Player2 has to remove all of their defending units",
+      "Player2 removed 1 infantry",
+      "Attacker wins and captured Player2's city at D8",
+      "Player1 gained 2 gold for capturing a city",
+      "Player1 gained 1 mood token and 1 culture token from Fast War"
+    ]
+  ],
+  "undo_limit": 1,
+  "actions_left": 2,
   "round": 1,
   "age": 1,
   "messages": [
@@ -578,9 +622,11 @@
     10,
     6,
     2,
-    0,
-    2,
-    8
+    0
+  ],
+  "dice_roll_log": [
+    8,
+    2
   ],
   "wonders_left": [
     "Pyramids"

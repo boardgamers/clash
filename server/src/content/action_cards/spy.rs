@@ -9,7 +9,7 @@ use crate::player::Player;
 use crate::playing_actions::ActionCost;
 use crate::resource_pile::ResourcePile;
 use crate::utils::remove_element;
-use crate::wonder::{deinit_wonder, init_wonder};
+use crate::wonder::{Wonder, deinit_wonder, init_wonder};
 use itertools::Itertools;
 use std::fmt::Debug;
 
@@ -235,7 +235,7 @@ fn get_swap_secrets(other: &Player, game: &Game) -> Vec<String> {
         ),
         format!(
             "{other} has the following wonder cards: {}",
-            other.wonder_cards.iter().map(|w| w.name(game)).join(", ")
+            other.wonder_cards.iter().map(Wonder::name).join(", ")
         ),
     ]
 }

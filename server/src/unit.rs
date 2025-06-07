@@ -380,6 +380,11 @@ impl Units {
     }
 
     #[must_use]
+    pub fn has_leader(&self) -> bool {
+        self.leader.is_some()
+    }
+
+    #[must_use]
     pub fn amount(&self) -> u8 {
         self.settlers + self.infantry + self.ships + self.cavalry + self.elephants + self.leaders()
     }

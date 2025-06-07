@@ -12,12 +12,11 @@ use crate::content::incidents::great_persons::{
 use crate::content::persistent_events::HandCardsRequest;
 use crate::game::Game;
 use crate::player::Player;
+use crate::player_events::CostInfo;
 use crate::playing_actions::{ActionCost, PlayingActionType};
 use crate::resource_pile::ResourcePile;
 use crate::utils::remove_element_by;
-use crate::wonder::{
-    Wonder, WonderCardInfo, WonderDiscount, cities_for_wonder, on_play_wonder_card,
-};
+use crate::wonder::{Wonder, WonderCardInfo, cities_for_wonder, on_play_wonder_card, wonder_cost};
 
 pub(crate) fn great_engineer() -> ActionCard {
     let groups = vec![AdvanceGroup::Construction];
@@ -103,8 +102,6 @@ pub(crate) fn construct_only() -> Ability {
         .build()
 }
 
-const ARCHITECT_DISCOUNT: WonderDiscount = WonderDiscount::new(true, 3);
-
 pub(crate) fn great_architect() -> ActionCard {
     great_person_action_card::<_>(
         55,
@@ -132,13 +129,16 @@ pub(crate) fn great_architect() -> ActionCard {
             ))
         },
         |game, s, _| {
-            let HandCard::Wonder(name) = &s.choice[0] else {
+            let HandCard::Wonder(w) = &s.choice[0] else {
                 panic!("Invalid choice");
             };
             on_play_wonder_card(
                 game,
                 s.player_index,
-                WonderCardInfo::new(*name, ARCHITECT_DISCOUNT),
+                WonderCardInfo::new(
+                    *w,
+                    architect_wonder_cost(game, game.player(s.player_index), *w),
+                ),
             );
         },
     )
@@ -149,7 +149,18 @@ fn playable_wonders(game: &Game, player: &Player) -> Vec<Wonder> {
     player
         .wonder_cards
         .iter()
-        .filter(|name| !cities_for_wonder(**name, game, player, &ARCHITECT_DISCOUNT).is_empty())
+        .filter(|w| {
+            !cities_for_wonder(**w, game, player, architect_wonder_cost(game, player, **w))
+                .is_empty()
+        })
         .copied()
         .collect()
+}
+
+fn architect_wonder_cost(game: &Game, player: &Player, w: Wonder) -> CostInfo {
+    let mut info = wonder_cost(game, player, w);
+    info.cost.default.culture_tokens -= 3;
+    info.ignore_required_advances = true;
+    info.ignore_action_cost = true; // we already paid for the action with the architect card
+    info
 }

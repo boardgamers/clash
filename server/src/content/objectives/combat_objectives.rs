@@ -326,8 +326,7 @@ pub(crate) fn great_commander() -> Objective {
             let o = s.opponent(player);
             let not_more_fighters = s.player(player).fighters(b).amount() <= o.fighters(b).amount();
 
-            if s.is_winner(player) && s.player(player).present.leader.is_some() && not_more_fighters
-            {
+            if s.is_winner(player) && s.player(player).present.has_leader() && not_more_fighters {
                 objective_is_ready(game.player_mut(player), name);
             }
         },
@@ -344,7 +343,7 @@ pub(crate) fn brutus() -> Objective {
             |game, player, _, s| {
                 let l = &s.opponent(player).losses;
 
-                if l.leader.is_some()
+                if l.has_leader()
                     && l.clone()
                         .to_vec()
                         .iter()

@@ -4,7 +4,8 @@ pub(crate) mod maya;
 pub(crate) mod rome;
 
 use crate::civilization::Civilization;
-use crate::leader::{Leader, LeaderAbility, LeaderInfo};
+use crate::leader::{Leader, LeaderInfo};
+use crate::leader_ability::LeaderAbility;
 
 pub const BARBARIANS: &str = "Barbarians";
 pub const PIRATES: &str = "Pirates";

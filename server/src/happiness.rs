@@ -86,5 +86,11 @@ pub fn happiness_cost(
     // either none or both can use Colosseum
     payment_options.default += action_type.cost(game, player).payment_options(p).default;
 
-    p.trigger_cost_event(|e| &e.happiness_cost, &payment_options, &(), &(), execute)
+    p.trigger_cost_event(
+        |e| &e.happiness_cost,
+        CostInfo::new(p, payment_options),
+        &(),
+        &(),
+        execute,
+    )
 }
