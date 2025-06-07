@@ -28,6 +28,12 @@ pub enum SpecialAdvance {
     Expansion,
     Fireworks,
     ImperialArmy,
+
+    // Vikings
+    ShipConstruction,
+    Longships,
+    Raiding,
+    RuneStones,
 }
 
 #[allow(clippy::trivially_copy_pass_by_ref)]

@@ -102,7 +102,7 @@ fn priesthood() -> AdvanceBuilder {
                     &(),
                     |i| &mut i.info.info,
                     |i, (), ()| {
-                        i.set_zero();
+                        i.set_zero_resources();
                         i.info
                             .log
                             .push("Priesthood reduced the cost to 0".to_string());

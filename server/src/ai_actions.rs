@@ -15,7 +15,7 @@ use crate::cultural_influence::{
 };
 use crate::events::EventOrigin;
 use crate::game::{Game, GameState};
-use crate::happiness::{available_happiness_actions, happiness_cost};
+use crate::happiness::{available_happiness_actions, happiness_city_restriction, happiness_cost};
 use crate::payment::PaymentOptions;
 use crate::player::{CostTrigger, Player};
 use crate::playing_actions::{
@@ -457,6 +457,11 @@ fn calculate_increase_happiness(
         .filter(|city| city.mood_state != MoodState::Happy)
         .sorted_by_key(|city| -(city.size() as i8))
     {
+        if happiness_city_restriction(player, action_type).is_some_and(|r| r != c.position) {
+            // city restriction is not met
+            continue;
+        }
+
         let steps = match c.mood_state {
             MoodState::Angry => 2,
             MoodState::Neutral => 1,

@@ -31,6 +31,7 @@ pub(crate) fn rome() -> Civilization {
         "Rome",
         vec![aqueduct(), roman_roads(), captivi(), provinces()],
         vec![augustus(), caesar(), sulla()],
+        None,
     )
 }
 
@@ -53,7 +54,7 @@ fn aqueduct() -> SpecialAdvanceInfo {
         3,
         |i, &a, _| {
             if a == Advance::Sanitation {
-                i.set_zero();
+                i.set_zero_resources();
                 i.info
                     .log
                     .push("Aqueduct reduced the cost to 0".to_string());

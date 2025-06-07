@@ -430,12 +430,12 @@ pub fn load_game(path: &GamePath) -> Game {
 }
 
 pub fn move_action(units: Vec<u32>, destination: Position) -> Action {
-    Action::Movement(Move(MoveUnits {
+    Action::Movement(Move(MoveUnits::new(
         units,
         destination,
-        embark_carrier_id: None,
-        payment: ResourcePile::empty(),
-    }))
+        None,
+        ResourcePile::empty(),
+    )))
 }
 
 pub fn advance_action(advance: advance::Advance, payment: ResourcePile) -> Action {

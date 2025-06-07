@@ -25,6 +25,7 @@ pub(crate) fn greece() -> Civilization {
         "Greece",
         vec![study(), sparta(), hellenistic_culture(), city_states()],
         vec![alexander(), leonidas(), pericles()],
+        None,
     )
 }
 

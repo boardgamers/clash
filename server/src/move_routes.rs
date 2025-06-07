@@ -236,9 +236,6 @@ fn next_road_step(
 
 #[must_use]
 fn reachable_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<MoveRoute> {
-    if !player.can_use_advance(Advance::Navigation) {
-        return vec![];
-    }
     let ship = units.iter().find_map(|&id| {
         let unit = player.get_unit(id);
         if unit.is_ship() {

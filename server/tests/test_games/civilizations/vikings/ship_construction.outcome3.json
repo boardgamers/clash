@@ -1,0 +1,531 @@
+{
+  "options": {},
+  "state": {
+    "Movement": {
+      "movement_actions_left": 2,
+      "moved_units": [
+        3
+      ],
+      "current_move": {
+        "Fleet": {
+          "units": [
+            3
+          ]
+        }
+      }
+    }
+  },
+  "players": [
+    {
+      "id": 0,
+      "resources": {
+        "food": 2,
+        "wood": 5,
+        "ore": 5,
+        "ideas": 3,
+        "gold": 5,
+        "mood_tokens": 7,
+        "culture_tokens": 9
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {
+            "market": 1
+          },
+          "mood_state": "Angry",
+          "position": "A1"
+        },
+        {
+          "city_pieces": {
+            "academy": 1,
+            "port": 1
+          },
+          "mood_state": "Angry",
+          "activations": 6,
+          "position": "C2",
+          "port_position": "C3"
+        },
+        {
+          "city_pieces": {
+            "obelisk": 1,
+            "observatory": 1,
+            "fortress": 1,
+            "temple": 1
+          },
+          "mood_state": "Neutral",
+          "position": "B1"
+        },
+        {
+          "mood_state": "Happy",
+          "activations": 4,
+          "position": "E2"
+        }
+      ],
+      "units": [
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 3
+        },
+        {
+          "position": "C2",
+          "unit_type": "Infantry",
+          "id": 4
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 5
+        },
+        {
+          "position": "D1",
+          "unit_type": "Infantry",
+          "movement_restrictions": [
+            "Mountain"
+          ],
+          "id": 6
+        }
+      ],
+      "civilization": "Vikings",
+      "advances": [
+        "Farming",
+        "Fishing",
+        "Mining",
+        "Tactics"
+      ],
+      "incident_tokens": 3,
+      "wonder_cards": [
+        "Pyramids"
+      ],
+      "next_unit_id": 10
+    },
+    {
+      "id": 1,
+      "resources": {
+        "food": 2,
+        "wood": 5,
+        "ore": 5,
+        "ideas": 5,
+        "gold": 5,
+        "mood_tokens": 9,
+        "culture_tokens": 9
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "mood_state": "Angry",
+          "activations": 2,
+          "position": "C1"
+        },
+        {
+          "city_pieces": {
+            "port": 1
+          },
+          "mood_state": "Neutral",
+          "position": "B2",
+          "port_position": "C3"
+        }
+      ],
+      "civilization": "Greece",
+      "advances": [
+        "Farming",
+        "Mining"
+      ],
+      "incident_tokens": 3,
+      "next_unit_id": 2
+    },
+    {
+      "id": 2,
+      "civilization": "Barbarians",
+      "next_unit_id": 0
+    },
+    {
+      "id": 3,
+      "civilization": "Pirates",
+      "next_unit_id": 0
+    }
+  ],
+  "map": {
+    "tiles": [
+      [
+        "A1",
+        "Fertile"
+      ],
+      [
+        "A2",
+        "Water"
+      ],
+      [
+        "A3",
+        {
+          "Exhausted": "Forest"
+        }
+      ],
+      [
+        "A4",
+        "Mountain"
+      ],
+      [
+        "A5",
+        "Fertile"
+      ],
+      [
+        "B1",
+        "Mountain"
+      ],
+      [
+        "B2",
+        "Forest"
+      ],
+      [
+        "B3",
+        "Fertile"
+      ],
+      [
+        "B4",
+        "Fertile"
+      ],
+      [
+        "B5",
+        "Fertile"
+      ],
+      [
+        "B6",
+        "Fertile"
+      ],
+      [
+        "C1",
+        "Barren"
+      ],
+      [
+        "C2",
+        "Forest"
+      ],
+      [
+        "C3",
+        "Water"
+      ],
+      [
+        "C4",
+        "Water"
+      ],
+      [
+        "C5",
+        "Water"
+      ],
+      [
+        "D1",
+        "Fertile"
+      ],
+      [
+        "D2",
+        "Water"
+      ],
+      [
+        "E2",
+        "Fertile"
+      ]
+    ]
+  },
+  "starting_player_index": 0,
+  "current_player_index": 0,
+  "action_log": [
+    {
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          3
+                        ],
+                        "destination": "D2"
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 2
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/0/position",
+                      "value": "E2"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/0/unit_type",
+                      "value": "Settler"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/state",
+                      "value": "Playing"
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          4,
+                          5
+                        ],
+                        "destination": "D2",
+                        "embark_carrier_id": 3
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "remove",
+                      "path": "/players/0/units/0/carried_units"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/1/id",
+                      "value": 4
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/1/position",
+                      "value": "E2"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/units/1/movement_restrictions"
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/units/2",
+                      "value": {
+                        "id": 5,
+                        "position": "E2",
+                        "unit_type": "Settler"
+                      }
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/units/3",
+                      "value": {
+                        "id": 6,
+                        "movement_restrictions": [
+                          "Mountain"
+                        ],
+                        "position": "D1",
+                        "unit_type": "Infantry"
+                      }
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/state",
+                      "value": {
+                        "Movement": {
+                          "current_move": {
+                            "Embark": {
+                              "destination": "D2",
+                              "source": "E2"
+                            }
+                          },
+                          "moved_units": [
+                            3
+                          ],
+                          "movement_actions_left": 2
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          3
+                        ],
+                        "destination": "C2"
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 1
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/0/position",
+                      "value": "D2"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/state",
+                      "value": "Playing"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/events"
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectUnits": [
+                        3
+                      ]
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "ShipConstructionConversion": [
+                              3
+                            ]
+                          },
+                          "handler": {
+                            "origin": {
+                              "SpecialAdvance": "ShipConstruction"
+                            },
+                            "priority": 0,
+                            "request": {
+                              "SelectUnits": {
+                                "choices": [
+                                  3
+                                ],
+                                "description": "Select units to convert to settlers (instead of infantry)",
+                                "needed": {
+                                  "end": 1,
+                                  "start": 0
+                                },
+                                "player": 0
+                              }
+                            }
+                          },
+                          "last_priority_used": 0,
+                          "player": 0
+                        }
+                      ]
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/units/0/carried_units",
+                      "value": [
+                        {
+                          "id": 4,
+                          "unit_type": "Infantry"
+                        },
+                        {
+                          "id": 5,
+                          "unit_type": "Settler"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/0/unit_type",
+                      "value": "Ship"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/1/id",
+                      "value": 6
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/units/1/movement_restrictions",
+                      "value": [
+                        "Mountain"
+                      ]
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/1/position",
+                      "value": "D1"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/units/2"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/units/2"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "action_log_index": 4,
+  "log": [
+    [
+      "Player1 marched 1 settler from E2 to D2 converting 1 settler to ships"
+    ],
+    [
+      "Player1 embarked 1 settler and 1 infantry from E2 to D2"
+    ],
+    [
+      "Player1 disembarked 1 ship from D2 to C2"
+    ],
+    [
+      "Player1 unloaded 1 settler and 1 infantry from ships",
+      "Player1 converted 1 ship to 1 settler"
+    ]
+  ],
+  "undo_limit": 0,
+  "actions_left": 0,
+  "round": 6,
+  "age": 1,
+  "messages": [
+    "The game has started"
+  ],
+  "dice_roll_outcomes": [
+    1,
+    1,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10
+  ],
+  "rng": "234162992961072890508432380903651342097",
+  "action_cards_left": [
+    1
+  ],
+  "objective_cards_left": [
+    1
+  ]
+}

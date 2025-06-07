@@ -39,7 +39,7 @@ fn new_game() {
 fn basic_actions() {
     let mut game = setup_game(
         GameSetupBuilder::new(1)
-            .civilizations(vec!["Klingons".to_string(), "Romulans".to_string()])
+            .civilizations(vec!["Rome".to_string(), "Greece".to_string()])
             .skip_random_map()
             .build(),
     );
@@ -128,7 +128,7 @@ fn basic_actions() {
     );
     let player = &game.players[0];
 
-    assert_eq!(11.6, player.victory_points(&game));
+    assert_eq!(12.1, player.victory_points(&game));
     assert_eq!(ResourcePile::food(1), player.resources);
     assert_eq!(vec![Wonder::Pyramids], player.wonders_built);
     assert_eq!(1, player.get_city(city_position).pieces.wonders.len());

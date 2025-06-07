@@ -1,12 +1,14 @@
 use crate::map::Map;
 use crate::map::Terrain::{Fertile, Forest, Mountain, Unexplored};
 use crate::resource_pile::ResourcePile;
-use crate::unit::{Unit, set_unit_position};
+use crate::unit::{Unit, UnitType, Units, set_unit_position};
 use crate::utils;
 use std::collections::HashSet;
 
 use crate::combat::move_with_possible_combat;
 use crate::consts::{ARMY_MOVEMENT_REQUIRED_ADVANCE, MOVEMENT_ACTIONS, SHIP_CAPACITY, STACK_LIMIT};
+use crate::content::civilizations::vikings::is_ship_construction_move;
+use crate::content::persistent_events::PersistentEventType;
 use crate::events::EventOrigin;
 use crate::explore::move_to_unexplored_tile;
 use crate::game::GameState::Movement;
@@ -139,29 +141,58 @@ pub(crate) fn move_units(
     let info = MoveInfo::new(player_index, units.to_vec(), from, to);
     game.trigger_transient_event_with_game_value(player_index, |e| &mut e.before_move, &info, &());
 
+    let mut ask_conversion = vec![]; // from ship construction
+    let mut to_ship = Units::empty();
+
     for unit_id in units {
-        move_unit(game, player_index, *unit_id, to, embark_carrier_id);
+        set_unit_position(player_index, *unit_id, to, game);
+        let unit = game.players[player_index].get_unit_mut(*unit_id);
+        if unit.is_ship() && game.map.is_land(to) {
+            ask_conversion.push(*unit_id);
+        } else if !unit.is_ship() && game.map.is_sea(to) && embark_carrier_id.is_none() {
+            // from ship construction
+            to_ship += &unit.unit_type;
+            unit.unit_type = UnitType::Ship;
+        }
+        unit.carrier_id = embark_carrier_id;
+
+        if let Some(terrain) = terrain_movement_restriction(&game.map, to, unit) {
+            unit.movement_restrictions.push(terrain);
+        }
+
+        for id in carried_units(*unit_id, &game.players[player_index]) {
+            set_unit_position(player_index, id, to, game);
+        }
+    }
+
+    if !to_ship.is_empty() {
+        game.add_to_last_log_item(&format!(" converting {} to ships", to_ship.to_string(None)));
+        if let Movement(move_state) = &mut game.state {
+            move_state.current_move = CurrentMove::Embark {
+                source: from,
+                destination: to,
+            };
+        } else {
+            panic!("expected movement state, but got: {:?}", game.state)
+        }
+    }
+
+    if !ask_conversion.is_empty() {
+        on_ship_construction_conversion(game, player_index, ask_conversion);
     }
 }
 
-fn move_unit(
+pub(crate) fn on_ship_construction_conversion(
     game: &mut Game,
     player_index: usize,
-    unit_id: u32,
-    destination: Position,
-    embark_carrier_id: Option<u32>,
+    ask_conversion: Vec<u32>,
 ) {
-    set_unit_position(player_index, unit_id, destination, game);
-    let unit = game.players[player_index].get_unit_mut(unit_id);
-    unit.carrier_id = embark_carrier_id;
-
-    if let Some(terrain) = terrain_movement_restriction(&game.map, destination, unit) {
-        unit.movement_restrictions.push(terrain);
-    }
-
-    for id in carried_units(unit_id, &game.players[player_index]) {
-        set_unit_position(player_index, id, destination, game);
-    }
+    let _ = game.trigger_persistent_event(
+        &[player_index],
+        |events| &mut events.ship_construction_conversion,
+        ask_conversion,
+        PersistentEventType::ShipConstructionConversion,
+    );
 }
 
 #[derive(Clone, Debug)]
@@ -556,12 +587,15 @@ fn is_valid_movement_type(
             Err("the destination should be the carrier position".to_string())
         };
     }
-    for unit in units {
-        if unit.is_land_based() && game.map.is_sea(dest) {
-            return Err("the destination should be land".to_string());
-        }
-        if unit.is_ship() && game.map.is_land(dest) {
-            return Err("the destination should be sea".to_string());
+
+    if !is_ship_construction_move(game, units, dest) {
+        for unit in units {
+            if unit.is_land_based() && game.map.is_sea(dest) {
+                return Err("the destination should be land".to_string());
+            }
+            if unit.is_ship() && game.map.is_land(dest) {
+                return Err("the destination should be sea".to_string());
+            }
         }
     }
     Ok(())

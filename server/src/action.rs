@@ -15,7 +15,7 @@ use crate::game::{Game, GameContext};
 use crate::incident::{on_choose_incident, on_trigger_incident};
 use crate::log;
 use crate::log::{add_action_log_item, current_player_turn_log_mut};
-use crate::movement::{MovementAction, execute_movement_action};
+use crate::movement::{MovementAction, execute_movement_action, on_ship_construction_conversion};
 use crate::objective_card::{complete_objective_card, gain_objective_card, on_objective_cards};
 use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::position::Position;
@@ -216,22 +216,22 @@ pub(crate) fn on_action_end(game: &mut Game, player_index: usize) {
 
 pub(crate) fn execute_custom_phase_action(
     game: &mut Game,
-    player_index: usize,
+    player: usize,
     details: PersistentEventType,
 ) -> Result<(), String> {
     use PersistentEventType::*;
     match details {
-        Collect(i) => on_collect(game, player_index, i),
+        Collect(i) => on_collect(game, player, i),
         DrawWonderCard(drawn) => {
-            on_draw_wonder_card(game, player_index, drawn);
+            on_draw_wonder_card(game, player, drawn);
         }
         ExploreResolution(r) => {
-            ask_explore_resolution(game, player_index, r);
+            ask_explore_resolution(game, player, r);
         }
         InfluenceCulture(r) => {
-            on_cultural_influence(game, player_index, r);
+            on_cultural_influence(game, player, r);
         }
-        UnitsKilled(k) => units_killed(game, player_index, k),
+        UnitsKilled(k) => units_killed(game, player, k),
         CombatStart(c) => {
             start_combat(game, c);
         }
@@ -250,34 +250,33 @@ pub(crate) fn execute_custom_phase_action(
         }
         StatusPhase(s) => play_status_phase(game, s),
         TurnStart => game.on_start_turn(),
-        PayAction(a) => a.on_pay_action(
-            game,
-            player_index,
-            game.current_event().origin_override.clone(),
-        )?,
+        PayAction(a) => {
+            a.on_pay_action(game, player, game.current_event().origin_override.clone())?;
+        }
         Advance(a) => {
-            on_advance(game, player_index, a);
+            on_advance(game, player, a);
         }
         Construct(b) => {
-            on_construct(game, player_index, b);
+            on_construct(game, player, b);
         }
         Recruit(r) => {
-            on_recruit(game, player_index, r);
+            on_recruit(game, player, r);
         }
-        FoundCity(p) => on_found_city(game, player_index, p),
+        FoundCity(p) => on_found_city(game, player, p),
         Incident(i) => on_trigger_incident(game, i),
         StopBarbarianMovement(movable) => on_stop_barbarian_movement(game, movable),
-        ActionCard(a) => on_play_action_card(game, player_index, a),
-        WonderCard(w) => on_play_wonder_card(game, player_index, w),
+        ActionCard(a) => on_play_action_card(game, player, a),
+        WonderCard(w) => on_play_wonder_card(game, player, w),
         SelectObjectives(c) => {
-            on_objective_cards(game, player_index, c);
+            on_objective_cards(game, player, c);
         }
-        CustomAction(a) => execute_custom_action(game, player_index, a),
-        ChooseActionCard => on_action_end(game, player_index),
-        ChooseIncident(i) => on_choose_incident(game, player_index, i),
+        CustomAction(a) => execute_custom_action(game, player, a),
+        ChooseActionCard => on_action_end(game, player),
+        ChooseIncident(i) => on_choose_incident(game, player, i),
         CityActivationMoodDecreased(p) => {
-            on_city_activation_mood_decreased(game, player_index, p);
+            on_city_activation_mood_decreased(game, player, p);
         }
+        ShipConstructionConversion(u) => on_ship_construction_conversion(game, player, u),
     }
 
     if let Some(s) = game.events.pop() {

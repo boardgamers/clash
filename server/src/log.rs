@@ -387,7 +387,7 @@ pub(crate) fn move_action_log(game: &Game, player: &Player, m: &MoveUnits) -> St
         } else {
             ("disembarked", "")
         }
-    } else if t.is_water() {
+    } else if m.embark_carrier_id.is_some() {
         ("embarked", "")
     } else if start.is_neighbor(dest) {
         ("marched", "")
