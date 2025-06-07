@@ -37,7 +37,8 @@ fn longships() {
     JSON.test(
         "longships",
         vec![
-            TestAction::not_undoable(0, move_action(vec![3, 4, 5], Position::from_offset("C3"))).skip_json(),
+            TestAction::not_undoable(0, move_action(vec![3, 4, 5], Position::from_offset("C3")))
+                .skip_json(),
             TestAction::not_undoable(0, move_action(vec![4, 5], Position::from_offset("C4"))),
         ],
     )

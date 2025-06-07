@@ -8,7 +8,7 @@ use crate::map::{Block, Terrain};
 use crate::player::Player;
 use crate::position::Position;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
-use crate::unit::{carried_units, Unit, UnitType, Units};
+use crate::unit::{Unit, UnitType, Units, carried_units};
 use itertools::Itertools;
 use std::ops::RangeInclusive;
 
@@ -162,13 +162,12 @@ fn can_add(p: &Player, army_units: u8, settlers: u8, infantry: u8) -> bool {
 }
 
 fn longships() -> SpecialAdvanceInfo {
-    // todo Ships can carry up to 3 units.
     SpecialAdvanceInfo::builder(
         SpecialAdvance::Longships,
         SpecialAdvanceRequirement::Advance(Advance::WarShips),
         "Longships",
         "Ignore battle movement restrictions for ships. \
-        Ships can carry up to 3 units.", 
+        Ships can carry up to 3 units.",
     )
     .build()
 }
