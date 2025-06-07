@@ -352,6 +352,10 @@ impl Assets {
                 CustomActionType::ArtOfWar,
                 load_png(include_bytes!("../assets/graduate-cap-svgrepo-com.png")),
             ),
+            (
+                CustomActionType::AgricultureEconomist,
+                load_png(include_bytes!("../assets/graduate-cap-svgrepo-com.png")),
+            ),
         ]
         .iter()
         .cloned()

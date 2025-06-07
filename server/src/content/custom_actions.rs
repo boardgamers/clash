@@ -265,6 +265,7 @@ pub enum CustomActionType {
     // China
     ImperialArmy,
     ArtOfWar,
+    AgricultureEconomist,
 }
 
 impl CustomActionType {

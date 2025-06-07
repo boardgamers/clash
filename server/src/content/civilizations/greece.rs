@@ -218,7 +218,7 @@ fn alexander() -> LeaderInfo {
             with a city you control, except the starting region.",
         )
         .add_combat_strength_listener(100, |game, c, s, r| {
-            if c.has_leader(r, game) && c.is_land_battle(game) {
+            if c.is_land_battle_with_leader(r, game) {
                 let setup = get_map_setup(game.human_players_count());
                 let player = c.player(r);
                 let extra = setup

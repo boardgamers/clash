@@ -27,7 +27,7 @@ pub(crate) fn china() -> Civilization {
     Civilization::new(
         "China",
         vec![rice(), expansion(), fireworks(), imperial_army()],
-        vec![sun_tzu(), qin()],
+        vec![sun_tzu(), qin(), wu()],
     )
 }
 
@@ -369,6 +369,34 @@ fn qin() -> LeaderInfo {
             92,
             Combat::has_leader,
         )
+        .build(),
+    )
+}
+
+fn wu() -> LeaderInfo {
+    LeaderInfo::new(
+        Leader::Wu,
+        "Wu Zetian",
+        LeaderAbility::advance_gain_custom_action(
+            "Agriculture Economist",
+            CustomActionType::AgricultureEconomist,
+            AdvanceGroup::Agriculture,
+        ),
+        LeaderAbility::builder(
+            "Brilliant Conqueror",
+            "Land battle with leader: \
+            If you have at least as many units as the opponent: Gain +2 combat value.",
+        )
+        .add_combat_strength_listener(105, |game, c, s, r| {
+            let p = c.player(r);
+            if c.is_land_battle_with_leader(r, game)
+                && c.fighting_units(game, p).len() >= c.fighting_units(game, c.opponent(p)).len()
+            {
+                s.extra_combat_value += 2;
+                s.roll_log
+                    .push("Wu Zetian adds +2 combat value".to_string());
+            }
+        })
         .build(),
     )
 }

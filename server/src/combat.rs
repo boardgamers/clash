@@ -136,6 +136,11 @@ impl Combat {
     }
 
     #[must_use]
+    pub fn is_land_battle_with_leader(&self, role: CombatRole, game: &Game) -> bool {
+        self.is_land_battle(game) && self.has_leader(role, game)
+    }
+
+    #[must_use]
     pub fn opponent(&self, player: usize) -> usize {
         if player == self.attacker() {
             self.defender()

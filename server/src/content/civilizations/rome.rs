@@ -204,8 +204,7 @@ fn augustus() -> LeaderInfo {
             Gain 2 combat value in every combat round",
         )
         .add_combat_strength_listener(103, |game, c, s, r| {
-            if c.is_land_battle(game)
-                && c.has_leader(r, game)
+            if c.is_land_battle_with_leader(r, game)
                 && !block_has_player_city(
                     game,
                     &block_for_position(game, c.defender_position()),
