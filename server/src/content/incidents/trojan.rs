@@ -149,7 +149,7 @@ fn guillotine() -> Incident {
         3,
         |game, player_index, i| {
             i.is_active(IncidentTarget::ActivePlayer, player_index)
-                .then(|| should_choose_new_leader(game, player_index, i.origin()))
+                .then(|| should_choose_new_leader(game, player_index, &i.origin()))
                 .flatten()
         },
         |game, s, i| {
@@ -230,7 +230,7 @@ fn guillotine() -> Incident {
 fn should_choose_new_leader(
     game: &mut Game,
     player_index: usize,
-    origin: EventOrigin,
+    origin: &EventOrigin,
 ) -> Option<String> {
     kill_leader(game, player_index);
 
@@ -241,7 +241,7 @@ fn should_choose_new_leader(
                                 gained 2 victory points",
         ));
         game.player_mut(player_index)
-            .gain_event_victory_points(2_f32, &origin);
+            .gain_event_victory_points(2_f32, origin);
         None
     } else {
         Some("Do you want to choose a new leader instead of 2 victory points?".to_string())
