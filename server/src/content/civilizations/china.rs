@@ -28,6 +28,7 @@ pub(crate) fn china() -> Civilization {
         "China",
         vec![rice(), expansion(), fireworks(), imperial_army()],
         vec![sun_tzu(), qin(), wu()],
+        None,
     )
 }
 

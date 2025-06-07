@@ -533,6 +533,6 @@ mod tests {
 
     #[must_use]
     pub fn get_test_civilization() -> Civilization {
-        Civilization::new("test", vec![], vec![])
+        Civilization::new("test", vec![], vec![], None)
     }
 }

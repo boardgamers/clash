@@ -87,8 +87,13 @@ impl Map {
             .into_iter()
             .enumerate()
             .for_each(|(i, h)| {
-                map.add_block_tiles(&h.position, &h.block, h.position.rotation);
-                let position = h.block.tiles(&h.position, h.position.rotation)[0].0;
+                let home = players[i]
+                    .civilization
+                    .start_block
+                    .as_ref()
+                    .unwrap_or(&h.block);
+                map.add_block_tiles(&h.position, &home, h.position.rotation);
+                let position = home.tiles(&h.position, h.position.rotation)[0].0;
                 setup_home_city(&mut players[i], position);
             });
 
@@ -203,6 +208,11 @@ pub struct Block {
 }
 
 impl Block {
+    #[must_use]
+    pub fn new(terrain: [Terrain; 4]) -> Self {
+        Self { terrain }
+    }
+
     #[must_use]
     pub fn tiles(&self, pos: &BlockPosition, rotation: Rotation) -> Vec<(Position, Terrain)> {
         let center = pos.top_tile;
