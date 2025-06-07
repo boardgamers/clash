@@ -5,8 +5,6 @@ pub(crate) mod rome;
 mod vikings;
 
 use crate::civilization::Civilization;
-use crate::leader::{Leader, LeaderInfo};
-use crate::leader_ability::LeaderAbility;
 
 pub const BARBARIANS: &str = "Barbarians";
 pub const PIRATES: &str = "Pirates";

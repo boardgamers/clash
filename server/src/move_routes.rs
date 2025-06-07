@@ -53,9 +53,6 @@ pub(crate) fn move_routes(
     if player.can_use_advance(Advance::Roads) && embark_carrier_id.is_none() {
         base.extend(reachable_with_roads(player, units, game, stack_size));
     }
-    // if player.has_special_advance(SpecialAdvance::ShipConstruction) {
-    //     base.extend(reachable_with_ship_construction(player, units, &game.map));
-    // }
     add_diplomatic_relations(player, game, &mut base);
     add_negotiations(player, game, &mut base);
     base

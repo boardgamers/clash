@@ -1,7 +1,7 @@
 use crate::map::Map;
 use crate::map::Terrain::{Fertile, Forest, Mountain, Unexplored};
 use crate::resource_pile::ResourcePile;
-use crate::unit::{Unit, set_unit_position};
+use crate::unit::{Unit, set_unit_position, UnitType, Units};
 use crate::utils;
 use std::collections::HashSet;
 
@@ -140,29 +140,37 @@ pub(crate) fn move_units(
     let info = MoveInfo::new(player_index, units.to_vec(), from, to);
     game.trigger_transient_event_with_game_value(player_index, |e| &mut e.before_move, &info, &());
 
+    let mut ask_conversion = vec![]; // from ship construction
+    let mut to_ship = Units::empty();
+    
     for unit_id in units {
-        move_unit(game, player_index, *unit_id, to, embark_carrier_id);
-    }
-}
+        set_unit_position(player_index, *unit_id, to, game);
+        let unit = game.players[player_index].get_unit_mut(*unit_id);
+        if unit.is_ship() && game.map.is_land(to) {
+            ask_conversion.push(*unit_id);
+        } else if !unit.is_ship() && game.map.is_sea(to) && embark_carrier_id.is_none() {
+            // from ship construction
+            to_ship += &unit.unit_type;
+            unit.unit_type = UnitType::Ship;
+        }
+        unit.carrier_id = embark_carrier_id;
 
-fn move_unit(
-    game: &mut Game,
-    player_index: usize,
-    unit_id: u32,
-    destination: Position,
-    embark_carrier_id: Option<u32>,
-) {
-    set_unit_position(player_index, unit_id, destination, game);
-    let unit = game.players[player_index].get_unit_mut(unit_id);
-    unit.carrier_id = embark_carrier_id;
+        if let Some(terrain) = terrain_movement_restriction(&game.map, to, unit) {
+            unit.movement_restrictions.push(terrain);
+        }
 
-    if let Some(terrain) = terrain_movement_restriction(&game.map, destination, unit) {
-        unit.movement_restrictions.push(terrain);
+        for id in carried_units(*unit_id, &game.players[player_index]) {
+            set_unit_position(player_index, id, to, game);
+        }
     }
 
-    for id in carried_units(unit_id, &game.players[player_index]) {
-        set_unit_position(player_index, id, destination, game);
+    if !to_ship.is_empty() {
+        game.add_to_last_log_item(&format!(
+            " converting {} to ships", to_ship.to_string(None)
+        ));
     }
+    
+    // todo convert to settler, infantry, ship
 }
 
 #[derive(Clone, Debug)]
@@ -558,7 +566,7 @@ fn is_valid_movement_type(
         };
     }
 
-    if !is_ship_construction_move(game, units) {
+    if !is_ship_construction_move(game, units, dest) {
         for unit in units {
             if unit.is_land_based() && game.map.is_sea(dest) {
                 return Err("the destination should be land".to_string());
@@ -571,9 +579,11 @@ fn is_valid_movement_type(
     Ok(())
 }
 
-fn is_ship_construction_move(game: &Game, units: &Vec<&Unit>) -> bool {
+fn is_ship_construction_move(game: &Game, units: &Vec<&Unit>, dest: Position) -> bool {
+    // todo check stack size at destination converting as many units to settlers as possible
     let p = game.player(units[0].player_index);
     p.has_special_advance(SpecialAdvance::ShipConstruction)
+        && game.enemy_player(p.index, dest).is_none()
         && units
             .iter()
             .all(|u| u.is_ship() || u.is_settler() || u.is_infantry())
