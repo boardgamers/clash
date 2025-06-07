@@ -285,7 +285,8 @@ impl IncidentInfo {
     pub(crate) fn get_barbarian_state(&mut self) -> &mut BarbariansEventState {
         self.barbarians.as_mut().expect("barbarians should exist")
     }
-    
+
+    #[must_use] 
     pub fn origin(&self) -> EventOrigin {
         EventOrigin::Incident(self.incident_id)
     }

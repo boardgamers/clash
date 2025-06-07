@@ -194,7 +194,8 @@ fn black_death() -> Incident {
             kill_incident_units(game, s);
             let vp = s.choice.len() as f32;
             game.add_info_log_item(&format!("{} gained {} victory points", s.player_name, vp));
-            game.player_mut(s.player_index).gain_event_victory_points(vp, i.origin());
+            game.player_mut(s.player_index)
+                .gain_event_victory_points(vp, i.origin());
         },
     )
     .build()

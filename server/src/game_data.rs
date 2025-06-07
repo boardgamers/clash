@@ -17,6 +17,7 @@ use crate::player_events::PlayerEvents;
 use crate::resource_pile::ResourcePile;
 use crate::unit::{Unit, UnitData};
 use crate::utils::Rng;
+use crate::victory_points::SpecialVictoryPoints;
 use crate::wonder::{Wonder, init_wonder};
 use crate::{advance, utils};
 use enumset::EnumSet;
@@ -25,7 +26,6 @@ use num::Zero;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::mem;
-use crate::victory_points::SpecialVictoryPoints;
 
 #[derive(Serialize, Deserialize, PartialEq)]
 pub struct GameData {
@@ -459,7 +459,7 @@ pub fn cloned_player_data(player: &Player) -> PlayerData {
         incident_tokens: player.incident_tokens,
         completed_objectives: player.completed_objectives.clone(),
         captured_leaders: player.captured_leaders.clone(),
-        special_victory_points: player.special_victory_points,
+        special_victory_points: player.special_victory_points.clone(),
         wonder_cards: player.wonder_cards.clone(),
         action_cards: player.action_cards.clone(),
         objective_cards: player.objective_cards.clone(),

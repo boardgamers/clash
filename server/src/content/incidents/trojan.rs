@@ -6,6 +6,7 @@ use crate::combat_listeners::CombatResult;
 use crate::content::ability::Ability;
 use crate::content::effects::{Anarchy, PermanentEffect};
 use crate::content::persistent_events::{PaymentRequest, PositionRequest, UnitTypeRequest};
+use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect};
 use crate::leader::Leader;
@@ -17,7 +18,6 @@ use crate::resource_pile::ResourcePile;
 use crate::unit::{UnitType, kill_units};
 use crate::utils::remove_and_map_element_by;
 use itertools::Itertools;
-use crate::events::EventOrigin;
 
 pub(crate) fn trojan_incidents() -> Vec<Incident> {
     vec![trojan_horse(), solar_eclipse(), anarchy(), guillotine()]
@@ -161,7 +161,8 @@ fn guillotine() -> Incident {
                     "{} gained 2 victory points instead of choosing a new leader",
                     s.player_name
                 ));
-                game.player_mut(s.player_index).gain_event_victory_points(2_f32, i.origin());
+                game.player_mut(s.player_index)
+                    .gain_event_victory_points(2_f32, i.origin());
             }
         },
     )
@@ -226,7 +227,11 @@ fn guillotine() -> Incident {
     .build()
 }
 
-fn should_choose_new_leader(game: &mut Game, player_index: usize, origin: EventOrigin) -> Option<String> {
+fn should_choose_new_leader(
+    game: &mut Game,
+    player_index: usize,
+    origin: EventOrigin,
+) -> Option<String> {
     kill_leader(game, player_index);
 
     let p = game.player(player_index);
@@ -235,7 +240,8 @@ fn should_choose_new_leader(game: &mut Game, player_index: usize, origin: EventO
             "{p} has no leaders left to choose from after the Guillotine - \
                                 gained 2 victory points",
         ));
-        game.player_mut(player_index).gain_event_victory_points(2_f32, origin);
+        game.player_mut(player_index)
+            .gain_event_victory_points(2_f32, origin);
         None
     } else {
         Some("Do you want to choose a new leader instead of 2 victory points?".to_string())

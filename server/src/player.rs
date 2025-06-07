@@ -10,6 +10,10 @@ use crate::player_events::{CostInfo, TransientEvents};
 use crate::playing_actions::PlayingActionType;
 use crate::special_advance::SpecialAdvance;
 use crate::unit::UnitType;
+use crate::victory_points::{
+    SpecialVictoryPoints, VictoryPointAttribution, add_special_victory_points,
+    special_victory_points,
+};
 use crate::wonder::{Wonder, wonders_built_points, wonders_owned_points};
 use crate::{
     city::City,
@@ -35,7 +39,6 @@ use serde::{Deserialize, Serialize};
 use std::cmp::Ordering::{self, *};
 use std::collections::HashMap;
 use std::fmt::Display;
-use crate::victory_points::{add_special_victory_points, SpecialVictoryPoints, VictoryPointAttribution};
 
 #[derive(Serialize, Deserialize, PartialEq, Eq)]
 pub enum PlayerType {
@@ -319,14 +322,17 @@ impl Player {
             ),
             (
                 "Objectives",
-                self.completed_objectives.len() as f32 * OBJECTIVE_VICTORY_POINTS,
+                self.completed_objectives.len() as f32 * OBJECTIVE_VICTORY_POINTS
+                    + special_victory_points(self, VictoryPointAttribution::Objectives),
             ),
             (
                 "Wonders",
                 wonders_owned_points(self, game) as f32 + wonders_built_points(self, game),
             ),
-            // todo
-            ("Events", self.special_victory_points),
+            (
+                "Events",
+                special_victory_points(self, VictoryPointAttribution::Events),
+            ),
             (
                 "Captured Leaders",
                 self.captured_leaders.len() as f32 * CAPTURED_LEADER_VICTORY_POINTS,
@@ -639,20 +645,12 @@ impl Player {
             })
             .collect_vec()
     }
-    
-    pub(crate) fn gain_event_victory_points(
-        &mut self,
-        points: f32,
-        origin: EventOrigin,
-    ) {
+
+    pub(crate) fn gain_event_victory_points(&mut self, points: f32, origin: EventOrigin) {
         add_special_victory_points(self, points, origin, VictoryPointAttribution::Events);
     }
-    
-    pub(crate) fn gain_objective_victory_points(
-        &mut self,
-        points: f32,
-        origin: EventOrigin,
-    ) {
+
+    pub(crate) fn gain_objective_victory_points(&mut self, points: f32, origin: EventOrigin) {
         add_special_victory_points(self, points, origin, VictoryPointAttribution::Objectives);
     }
 }

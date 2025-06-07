@@ -58,13 +58,12 @@ fn volcano() -> Incident {
             let city = game.player(player_index).get_city(pos);
             let buildings = city.pieces.buildings(None);
             let wonders = city.pieces.wonders.iter().copied().collect_vec();
-            let origin = i.origin();
             for b in buildings {
-                destroy_building(game, b, pos, origin);
+                destroy_building(game, b, pos, i.origin());
             }
             for wonder in wonders {
-                destroy_wonder(game, pos, wonder, origin);
-                destroy_city_center(game, pos, origin);
+                destroy_wonder(game, pos, wonder, i.origin());
+                destroy_city_center(game, pos, i.origin());
             }
         },
     )
@@ -94,7 +93,7 @@ fn earthquake(id: u8, name: &str, target: IncidentTarget) -> Incident {
             (cities.len() >= 3).then_some(structures_request(cities))
         },
         move |game, s, i| {
-            apply_earthquake(game, s, i, event_origin);
+            apply_earthquake(game, s, i, event_origin.clone());
         },
     )
     .add_decrease_mood(
@@ -129,9 +128,9 @@ fn apply_earthquake(
     for st in l {
         let position = st.position;
         match st.structure {
-            Structure::Building(b) => destroy_building(game, b, position, origin),
-            Structure::Wonder(name) => destroy_wonder(game, position, name, origin),
-            Structure::CityCenter => destroy_city_center(game, position, origin),
+            Structure::Building(b) => destroy_building(game, b, position, origin.clone()),
+            Structure::Wonder(name) => destroy_wonder(game, position, name, origin.clone()),
+            Structure::CityCenter => destroy_city_center(game, position, origin.clone()),
         }
     }
 
