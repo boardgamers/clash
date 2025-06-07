@@ -27,7 +27,6 @@ pub(crate) fn vikings() -> Civilization {
 }
 
 fn ship_construction() -> SpecialAdvanceInfo {
-    // todo The cost of Navigation is reduced to 0 resources
     SpecialAdvanceInfo::builder(
         SpecialAdvance::ShipConstruction,
         SpecialAdvanceRequirement::Advance(Advance::Fishing),
