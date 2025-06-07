@@ -22,6 +22,7 @@ use crate::unit::{carried_units, get_current_move};
 use crate::wonder::Wonder;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use crate::content::persistent_events::PersistentEventType;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct MoveUnits {
@@ -176,7 +177,18 @@ pub(crate) fn move_units(
         }
     }
 
-    // todo convert to settler, infantry, ship
+    if ask_conversion.len() > 0 {
+        on_ship_construction_conversion(game, player_index, ask_conversion);
+    }
+}
+
+pub(crate) fn on_ship_construction_conversion(game: &mut Game, player_index: usize, ask_conversion: Vec<u32>) {
+    let _ = game.trigger_persistent_event(
+        &[player_index],
+        |events| &mut events.ship_construction_conversion,
+        ask_conversion,
+        PersistentEventType::ShipConstructionConversion,
+    );
 }
 
 #[derive(Clone, Debug)]

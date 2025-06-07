@@ -57,16 +57,6 @@
       "units": [
         {
           "position": "E2",
-          "unit_type": "Cavalry",
-          "id": 1
-        },
-        {
-          "position": "E2",
-          "unit_type": "Elephant",
-          "id": 2
-        },
-        {
-          "position": "E2",
           "unit_type": "Settler",
           "id": 3
         },

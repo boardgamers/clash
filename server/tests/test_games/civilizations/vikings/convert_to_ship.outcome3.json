@@ -4,14 +4,13 @@
     "Movement": {
       "movement_actions_left": 2,
       "moved_units": [
-        3,
-        4,
-        5
+        3
       ],
       "current_move": {
-        "Embark": {
-          "source": "E2",
-          "destination": "D2"
+        "Fleet": {
+          "units": [
+            3
+          ]
         }
       }
     }
@@ -71,29 +70,19 @@
       ],
       "units": [
         {
-          "position": "E2",
-          "unit_type": "Cavalry",
-          "id": 1
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 3
         },
         {
-          "position": "E2",
-          "unit_type": "Elephant",
-          "id": 2
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 4
         },
         {
-          "position": "D2",
-          "unit_type": "Ship",
-          "id": 3,
-          "carried_units": [
-            {
-              "unit_type": "Settler",
-              "id": 4
-            },
-            {
-              "unit_type": "Settler",
-              "id": 5
-            }
-          ]
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 5
         }
       ],
       "civilization": "Vikings",
@@ -272,12 +261,12 @@
                     },
                     {
                       "op": "replace",
-                      "path": "/players/0/units/2/position",
+                      "path": "/players/0/units/0/position",
                       "value": "E2"
                     },
                     {
                       "op": "replace",
-                      "path": "/players/0/units/2/unit_type",
+                      "path": "/players/0/units/0/unit_type",
                       "value": "Settler"
                     },
                     {
@@ -303,11 +292,11 @@
                   "undo": [
                     {
                       "op": "remove",
-                      "path": "/players/0/units/2/carried_units"
+                      "path": "/players/0/units/0/carried_units"
                     },
                     {
                       "op": "add",
-                      "path": "/players/0/units/3",
+                      "path": "/players/0/units/1",
                       "value": {
                         "id": 4,
                         "position": "E2",
@@ -316,7 +305,7 @@
                     },
                     {
                       "op": "add",
-                      "path": "/players/0/units/4",
+                      "path": "/players/0/units/2",
                       "value": {
                         "id": 5,
                         "position": "E2",
@@ -324,12 +313,127 @@
                       }
                     },
                     {
-                      "op": "remove",
-                      "path": "/state/Movement/moved_units/1"
+                      "op": "replace",
+                      "path": "/state",
+                      "value": {
+                        "Movement": {
+                          "current_move": {
+                            "Embark": {
+                              "destination": "D2",
+                              "source": "E2"
+                            }
+                          },
+                          "moved_units": [
+                            3
+                          ],
+                          "movement_actions_left": 2
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          3
+                        ],
+                        "destination": "C2"
+                      }
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "replace",
+                      "path": "/actions_left",
+                      "value": 1
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/0/position",
+                      "value": "D2"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/state",
+                      "value": "Playing"
                     },
                     {
                       "op": "remove",
-                      "path": "/state/Movement/moved_units/1"
+                      "path": "/events"
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectUnits": [
+                        3
+                      ]
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "ShipConstructionConversion": [
+                              3
+                            ]
+                          },
+                          "handler": {
+                            "origin": {
+                              "SpecialAdvance": "ShipConstruction"
+                            },
+                            "priority": 0,
+                            "request": {
+                              "SelectUnits": {
+                                "choices": [
+                                  3
+                                ],
+                                "description": "Select units to convert to settlers (instead of infantry)",
+                                "needed": {
+                                  "end": 1,
+                                  "start": 0
+                                },
+                                "player": 0
+                              }
+                            }
+                          },
+                          "last_priority_used": 0,
+                          "player": 0
+                        }
+                      ]
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/units/0/carried_units",
+                      "value": [
+                        {
+                          "id": 4,
+                          "unit_type": "Settler"
+                        },
+                        {
+                          "id": 5,
+                          "unit_type": "Settler"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/0/unit_type",
+                      "value": "Ship"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/units/1"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/units/1"
                     }
                   ]
                 }
@@ -340,17 +444,24 @@
       ]
     }
   ],
-  "action_log_index": 2,
+  "action_log_index": 4,
   "log": [
     [
       "Player1 marched 1 settler from E2 to D2 converting 1 settler to ships"
     ],
     [
       "Player1 embarked 2 settlers from E2 to D2"
+    ],
+    [
+      "Player1 disembarked 1 ship from D2 to C2"
+    ],
+    [
+      "Player1 unloaded 2 settlers from ships",
+      "Player1 converted 1 ship to 1 settler"
     ]
   ],
   "undo_limit": 0,
-  "actions_left": 1,
+  "actions_left": 0,
   "round": 6,
   "age": 1,
   "messages": [
