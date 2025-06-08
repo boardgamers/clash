@@ -7,35 +7,25 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Copy, Hash)]
 pub enum Leader {
-    // Test
-    Kirk,
-    Janeway,
-    Spock,
-    BorgQueen,
-    SevenOfNine,
-    Picard,
-    Khan,
-    Kahless,
-    Worf,
-    Sela,
-    Narek,
-    Tomalak,
-
-    // for Egypt later
-    Kleopatra,
-
     // Rome
     Augustus,
     Caesar,
     Sulla,
+
     // Greece
     Alexander,
     Leonidas,
     Pericles,
+
     // China
     Qin,
     Wu,
     SunTzu,
+
+    // Vikings
+    Ragnar,
+    Erik,
+    Knut,
 }
 
 impl Leader {

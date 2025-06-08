@@ -8,6 +8,7 @@ use crate::game::GameOptions;
 use crate::game_setup::{GameSetupBuilder, setup_game};
 use crate::log::{current_player_turn_log_mut, linear_action_log};
 use crate::utils::Shuffle;
+use crate::victory_points::compare_score;
 use crate::{
     action::Action,
     game::{Game, GameState::*},
@@ -82,7 +83,7 @@ pub fn rankings(game: &Game) -> Vec<u32> {
         }
         let mut rank = 1;
         for other in &game.players {
-            if other.compare_score(player, game) == Greater {
+            if compare_score(other, player, game) == Greater {
                 rank += 1;
             }
         }

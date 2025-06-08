@@ -7,6 +7,8 @@ use crate::content::ability::Ability;
 use crate::content::advances::trade_routes::TradeRoute;
 use crate::content::persistent_events::{PaymentRequest, UnitsRequest};
 use crate::game::Game;
+use crate::leader::{Leader, LeaderInfo};
+use crate::leader_ability::LeaderAbility;
 use crate::map::{Block, Terrain};
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::Player;
@@ -21,7 +23,7 @@ pub(crate) fn vikings() -> Civilization {
     Civilization::new(
         "Vikings",
         vec![ship_construction(), longships(), raids(), runes()],
-        vec![],
+        vec![knut()],
         Some(Block::new([
             Terrain::Fertile,
             Terrain::Mountain,
@@ -288,4 +290,15 @@ fn runes() -> SpecialAdvanceInfo {
         },
     )
     .build()
+}
+
+fn knut() -> LeaderInfo {
+    // todo Ruler of the North
+    // todo Danegeld
+    LeaderInfo::new(
+        Leader::Knut,
+        "Knut the Great",
+        LeaderAbility::builder("Ruler of the North", "todo").build(),
+        LeaderAbility::builder("Danegeld", "todo").build(),
+    )
 }
