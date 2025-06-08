@@ -491,10 +491,11 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player1 started Taxes"
+      "Player1 has to pay for the action: 1 mood token"
     ],
     [
-      "Player1 paid 1 mood token for the action"
+      "Player1 paid 1 mood token for the action",
+      "Player1 started Taxes"
     ],
     [
       "Player1 gained 1 food, 1 wood, 1 ore and 1 gold for using Taxes",

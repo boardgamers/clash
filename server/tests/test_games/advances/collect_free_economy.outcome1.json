@@ -350,10 +350,11 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 collects 1 ore and 1 ore for a total of 2 ore in the city at C2 using Free Economy"
+      "Player1 has to pay for the action: 1 mood token"
     ],
     [
       "Player1 paid 1 mood token for the action",
+      "Player1 collects 1 ore and 1 ore for a total of 2 ore in the city at C2 using Free Economy",
       "Metallurgy converted 1 ore to 1 gold",
       "Player1 could not store 1 ore and 1 gold"
     ]

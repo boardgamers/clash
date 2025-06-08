@@ -332,7 +332,7 @@ where
                 if let EventResponse::ChangeGovernmentType(c) = action {
                     game.add_info_log_item(&format!(
                         "{player_name} changed their government from {} to {}",
-                        game.players[game.active_player()]
+                        game.players[player_index]
                             .government(game)
                             .expect("player should have a government before changing it"),
                         c.new_government

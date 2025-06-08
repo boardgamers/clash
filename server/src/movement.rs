@@ -279,7 +279,7 @@ pub(crate) fn execute_movement_action(
     action: MovementAction,
     player_index: usize,
 ) -> Result<(), String> {
-    let player = &game.players[game.active_player()];
+    let player = &game.player(player_index);
     game.add_info_log_item(
         &(match &action {
             Move(m) if m.units.is_empty() => {

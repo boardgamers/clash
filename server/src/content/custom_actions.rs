@@ -327,12 +327,11 @@ pub(crate) fn custom_action_modifier_name(
     player: &Player,
     action_type: CustomActionType,
 ) -> String {
-    let CustomActionExecution::Modifier((_, name)) =
-        player.custom_action_info(action_type).execution
-    else {
-        panic!("Custom action {action_type:?} is not a modifier");
-    };
-    name
+    match player.custom_action_info(action_type).execution {
+        CustomActionExecution::Modifier((_, name)) => name.clone(),
+        // Sports is not a modifier, but is shown for logging purposes as a modifier
+        CustomActionExecution::Action(a) => a.ability.name.clone(),
+    }
 }
 
 pub(crate) fn can_play_custom_action(

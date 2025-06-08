@@ -110,8 +110,7 @@ pub(crate) fn execute_influence_culture_attempt(
     let target_player_index = target_city.player_index;
     let info = influence_culture_boost_cost(game, player_index, s, None, false)?;
 
-    let p = game.active_player();
-    let player = if target_player_index == p {
+    let player = if target_player_index == player_index {
         String::from("themselves")
     } else {
         game.player_name(target_player_index)
@@ -136,9 +135,10 @@ pub(crate) fn execute_influence_culture_attempt(
     };
 
     game.add_info_log_item(&format!(
-        "{p} tried to influence culture the {city_piece} in the city \
+        "{} tried to influence culture the {city_piece} in the city \
         at {target_city_position} by {player}{city}{cost}{}",
-        modifier_suffix(game.player(p), &i.action_type)
+        game.player_name(player_index),
+        modifier_suffix(game.player(player_index), &i.action_type)
     ));
 
     on_cultural_influence(game, player_index, info);
