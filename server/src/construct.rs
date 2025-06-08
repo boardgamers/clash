@@ -1,5 +1,5 @@
 use crate::advance::{Advance, gain_advance_without_payment};
-use crate::city::{City, MoodState};
+use crate::city::{activate_city, City, MoodState};
 use crate::city_pieces::Building;
 use crate::consts::MAX_CITY_PIECES;
 use crate::content::persistent_events::PersistentEventType;
@@ -159,10 +159,10 @@ pub(crate) fn construct(
     port_position: Option<Position>,
     activate: bool,
 ) {
-    let city = game.player_mut(player).get_city_mut(city_position);
     if activate {
-        city.activate();
+        activate_city(city_position, game);
     }
+    let city = game.player_mut(player).get_city_mut(city_position);
     city.pieces.set_building(building, player);
     if let Some(port_position) = port_position {
         city.port_position = Some(port_position);

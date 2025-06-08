@@ -1,7 +1,6 @@
 use crate::consts::STACK_LIMIT;
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
-use crate::log::format_mood_change;
 use crate::map::capital_position;
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::{CostTrigger, Player, gain_unit};
@@ -13,6 +12,7 @@ use crate::unit::{UnitType, Units, kill_units, set_unit_position};
 use crate::{combat, utils};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use crate::city::activate_city;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct Recruit {
@@ -52,7 +52,6 @@ pub(crate) fn execute_recruit(
     let units = &r.units;
     let payment = &r.payment;
     let replaced_units = &r.replaced_units;
-    let mood = format_mood_change(player, *city_position);
     let replace_str = match replaced_units.len() {
         0 => "",
         1 => " and replaces the unit at ",
@@ -68,7 +67,7 @@ pub(crate) fn execute_recruit(
     );
     game.add_info_log_item(&format!(
         "{player} paid {payment} to recruit {} in the city at \
-            {city_position}{mood}{replace_str}{replace_pos}",
+            {city_position}{replace_str}{replace_pos}",
         units.to_string(Some(game))
     ));
 
@@ -88,7 +87,7 @@ pub(crate) fn execute_recruit(
     let player = game.player_mut(player_index);
     let vec = r.units.clone().to_vec();
     player.units.reserve_exact(vec.len());
-    player.get_city_mut(r.city_position).activate();
+    activate_city(r.city_position, game);
     for unit_type in vec {
         let position = match &unit_type {
             UnitType::Ship => game

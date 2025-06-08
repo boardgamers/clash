@@ -119,17 +119,6 @@ pub(crate) fn modifier_suffix(player: &Player, action_type: &PlayingActionType) 
     }
 }
 
-pub(crate) fn format_mood_change(player: &Player, city_position: Position) -> String {
-    if player.get_city(city_position).is_activated() {
-        format!(
-            " making it {}",
-            player.get_city(city_position).mood_state.clone() - 1
-        )
-    } else {
-        String::new()
-    }
-}
-
 pub(crate) fn add_action_log_item(game: &mut Game, item: Action) {
     let i = game.action_log_index;
     let l = &mut current_player_turn_log_mut(game).items;

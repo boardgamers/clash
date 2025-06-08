@@ -2,7 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::do_gain_action_card_from_pile;
 use crate::advance::{Advance, init_great_library};
 use crate::card::{HandCard, all_objective_hand_cards};
-use crate::city::{City, MoodState};
+use crate::city::{activate_city, City, MoodState};
 use crate::combat_listeners::CombatRoundEnd;
 use crate::content::ability::{Ability, AbilityBuilder};
 use crate::content::custom_actions::CustomActionType;
@@ -11,7 +11,6 @@ use crate::content::persistent_events::{
 };
 use crate::game::Game;
 use crate::incident::draw_and_discard_incident_card_from_pile;
-use crate::log::format_mood_change;
 use crate::map::Terrain;
 use crate::map::Terrain::Fertile;
 use crate::objective_card::{discard_objective_card, gain_objective_card_from_pile};
@@ -253,13 +252,10 @@ fn use_great_lighthouse(b: AbilityBuilder) -> AbilityBuilder {
             gain_unit(s.player_index, *spawn, UnitType::Ship, game);
             game.add_info_log_item(&format!(
                 "{} activated the city at {city_pos} used the Great Lighthouse \
-                to place a ship on {spawn} for free{}",
+                to place a ship on {spawn} for free",
                 s.player_name,
-                format_mood_change(game.player(s.player_index), city_pos)
             ));
-            game.player_mut(s.player_index)
-                .get_city_mut(city_pos)
-                .activate();
+            activate_city(city_pos, game);
         },
     )
 }

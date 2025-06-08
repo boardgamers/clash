@@ -89,18 +89,6 @@ impl City {
         !self.angry_activation
     }
 
-    // todo pass game, log "city became x because it was activated"
-    pub fn activate(&mut self) {
-        if self.mood_state == Angry {
-            self.angry_activation = true;
-        }
-        if self.is_activated() {
-            self.decrease_mood_state();
-            self.activation_mood_decreased = true;
-        }
-        self.activations += 1;
-    }
-
     pub fn deactivate(&mut self) {
         self.activations = 0;
         self.angry_activation = false;
@@ -308,4 +296,30 @@ pub(crate) fn non_angry_cites(p: &Player) -> Vec<Position> {
         .filter(|c| !matches!(c.mood_state, MoodState::Angry))
         .map(|c| c.position)
         .collect_vec()
+}
+
+pub(crate) fn activate_city(position: Position, game: &mut Game) {
+    let city = game.get_any_city(position);
+    assert!(city.can_activate());
+
+    let player = city.player_index;
+
+    if city.is_activated() {
+        game.add_info_log_item(&format!(
+            "City at {} became {} because it was activated more than once",
+            position,
+            city.mood_state.clone() - 1
+        ));
+    }
+
+    let city = game.player_mut(player).get_city_mut(position);
+
+    if city.mood_state == Angry {
+        city.angry_activation = true;
+    }
+    if city.is_activated() {
+        city.decrease_mood_state();
+        city.activation_mood_decreased = true;
+    }
+    city.activations += 1;
 }

@@ -19,6 +19,7 @@ use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
 use itertools::Itertools;
+use crate::city::activate_city;
 
 pub(crate) fn greece() -> Civilization {
     Civilization::new(
@@ -179,8 +180,8 @@ fn city_states() -> SpecialAdvanceInfo {
                     "{} decided to decrease the mood of {} instead of {} using City States",
                     s.player_name, choice, position
                 ));
+                activate_city(choice, game);
                 let p = game.player_mut(s.player_index);
-                p.get_city_mut(choice).activate();
                 p.get_city_mut(*position).increase_mood_state();
                 p.event_info
                     .insert("city_states".to_string(), "used".to_string());

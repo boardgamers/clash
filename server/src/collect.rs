@@ -2,7 +2,7 @@ use crate::advance::Advance;
 use crate::content::persistent_events::PersistentEventType;
 use crate::events::EventOrigin;
 use crate::game::Game;
-use crate::log::{format_mood_change, modifier_suffix};
+use crate::log::{ modifier_suffix};
 use crate::map::Terrain;
 use crate::map::Terrain::{Fertile, Forest, Mountain};
 use crate::player::{CostTrigger, Player};
@@ -15,6 +15,7 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::iter;
+use crate::city::activate_city;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Hash, Debug)]
 pub struct PositionCollection {
@@ -191,10 +192,9 @@ pub(crate) fn execute_collect(
     };
     let player = &game.player(player_index);
     game.add_info_log_item(&format!(
-        "{} collects {res}{total} in the city at {}{}{}",
+        "{} collects {res}{total} in the city at {}{}",
         player,
         c.city_position,
-        format_mood_change(player, c.city_position),
         modifier_suffix(player, &c.action_type)
     ));
 
@@ -209,7 +209,7 @@ pub(crate) fn execute_collect(
     if !city.can_activate() {
         return Err("City can't be activated".to_string());
     }
-    city.activate();
+    activate_city(city.position, game);
     game.players[player_index].gain_resources(i.total.clone());
 
     let key = Advance::Husbandry.id();
