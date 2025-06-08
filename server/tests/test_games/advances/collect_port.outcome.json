@@ -324,7 +324,8 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 collects 1 mood token in the city at C2 making it Angry"
+      "Player1 collects 1 mood token in the city at C2",
+      "City at C2 became Angry because it was activated more than once"
     ]
   ],
   "undo_limit": 0,
