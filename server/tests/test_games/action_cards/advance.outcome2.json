@@ -381,10 +381,11 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player1 played the action card Advance"
+      "Player1 has to pay for the action: 1 culture token"
     ],
     [
-      "Player1 paid 1 culture token for the action"
+      "Player1 paid 1 culture token for the action",
+      "Player1 played the action card Advance"
     ],
     [
       "Player1 gained 1 mood token as advance bonus",

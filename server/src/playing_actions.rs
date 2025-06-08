@@ -97,8 +97,8 @@ impl PlayingActionType {
                 .action_type
                 .clone(),
             PlayingActionType::ActionCard(id) => game.cache.get_civil_card(*id).action_type.clone(),
-            PlayingActionType::EndTurn => ActionCost::cost(ResourcePile::empty()),
-            PlayingActionType::WonderCard(_) => ActionCost::free(), // action cost is checked later
+            // action cost of wonder is checked later
+            PlayingActionType::WonderCard(_) | PlayingActionType::EndTurn => ActionCost::free(), 
             _ => ActionCost::regular(),
         }
     }
@@ -143,7 +143,8 @@ impl PlayingAction {
         game: &mut Game,
         player_index: usize,
     ) -> Result<(), String> {
-        let origin_override = match self.playing_action_type(game.player(player_index)) {
+        let action_type = self.playing_action_type(game.player(player_index));
+        let origin_override = match action_type {
             PlayingActionType::Custom(c) => {
                 if let Some(key) = &game
                     .player(player_index)
@@ -160,6 +161,19 @@ impl PlayingAction {
             PlayingActionType::ActionCard(c) => Some(EventOrigin::CivilCard(c)),
             _ => None,
         };
+
+        let payment_options = action_type
+            .cost(game, player_index)
+            .payment_options(game.player(player_index));
+        if !payment_options.is_free() {
+            game.add_info_log_item(
+                &format!(
+                    "{} has to pay for the action: {}",
+                    game.player_name(player_index),
+                    payment_options.default
+                ),
+            );
+        }
 
         ActionPayment::new(self).on_pay_action(game, player_index, origin_override)
     }
