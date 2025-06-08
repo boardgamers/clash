@@ -22,7 +22,7 @@ pub struct VictoryPointsWithTags {
     pub points: f32,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub explorer_blocks: Vec<Position>,
+    pub explorer_tokens: Vec<Position>,
 }
 
 impl VictoryPointsWithTags {
@@ -52,7 +52,7 @@ impl Default for VictoryPointsWithTags {
     fn default() -> Self {
         Self {
             points: 0.0,
-            explorer_blocks: Vec::new(),
+            explorer_tokens: Vec::new(),
         }
     }
 }

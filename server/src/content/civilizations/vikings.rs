@@ -426,12 +426,6 @@ fn use_great_explorer(b: AbilityBuilder) -> AbilityBuilder {
         move |game, player_index, _player_name, _| {
             let player = game.player_mut(player_index);
             let position = leader_position(player);
-            // let mut points_with_tags = explore_points(player).map_or_else(
-            //     || VictoryPointsWithTags::default(),
-            //     |v| v.points.clone()
-            // );
-            // points_with_tags.points += 1.0;
-            // points_with_tags.explorer_blocks.push(position);
 
             update_special_victory_points(
                 player,
@@ -439,10 +433,15 @@ fn use_great_explorer(b: AbilityBuilder) -> AbilityBuilder {
                 VictoryPointAttribution::Objectives,
                 |mut v| {
                     v.points += 1.0;
-                    v.explorer_blocks.push(position);
+                    v.explorer_tokens.push(position);
                     v
                 },
             );
+
+            let name = player.get_name();
+            game.add_info_log_item(&format!(
+                "{name} placed an explorer token at {position}",
+            ));
         },
     )
 }
@@ -451,7 +450,7 @@ fn is_current_block_tagged(game: &Game, player: &Player, position: Position) -> 
     let block_position = block_for_position(game, position);
     explore_points(player).is_some_and(|v| {
         v.points
-            .explorer_blocks
+            .explorer_tokens
             .iter()
             .any(|p| block_for_position(game, *p) == block_position)
     })
@@ -461,5 +460,5 @@ fn explore_points(player: &Player) -> Option<&SpecialVictoryPoints> {
     player
         .special_victory_points
         .iter()
-        .find(|v| !v.points.explorer_blocks.is_empty())
+        .find(|v| !v.points.explorer_tokens.is_empty())
 }

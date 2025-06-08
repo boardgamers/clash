@@ -47,7 +47,7 @@ fn longships() {
 }
 
 #[test]
-fn test_raids() {
+fn raids() {
     JSON.test(
         "raids",
         vec![
@@ -59,7 +59,7 @@ fn test_raids() {
 }
 
 #[test]
-fn test_danegeld() {
+fn danegeld() {
     JSON.test(
         "danegeld",
         vec![
@@ -67,6 +67,20 @@ fn test_danegeld() {
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::ResourceReward(ResourcePile::food(4))),
+            ),
+        ],
+    );
+}
+
+#[test]
+fn explorer() {
+    JSON.test(
+        "explorer",
+        vec![
+            TestAction::undoable(0, custom_action(CustomActionType::LegendaryExplorer)).skip_json(),
+            TestAction::undoable(
+                0,
+                payment_response(ResourcePile::culture_tokens(1)),
             ),
         ],
     );

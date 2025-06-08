@@ -363,7 +363,7 @@ impl Assets {
             ),
             (
                 CustomActionType::LegendaryExplorer,
-                load_png(include_bytes!("../assets/viking-ship-svgrepo-com.png")),
+                load_png(include_bytes!("../assets/browser-safari-svgrepo-com.png")),
             ),
             (
                 CustomActionType::NewColonies,
