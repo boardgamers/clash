@@ -115,7 +115,7 @@ fn taxes() -> AdvanceBuilder {
     )
 }
 
-fn use_taxes(b: AbilityBuilder) -> AbilityBuilder {
+pub(crate) fn use_taxes(b: AbilityBuilder) -> AbilityBuilder {
     b.add_resource_request(
         |event| &mut event.custom_action,
         0,

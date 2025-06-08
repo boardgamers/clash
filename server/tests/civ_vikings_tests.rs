@@ -1,5 +1,6 @@
-use crate::common::{JsonTest, TestAction, move_action, payment_response};
+use crate::common::{JsonTest, TestAction, move_action, payment_response, custom_action};
 use server::action::Action;
+use server::content::custom_actions::CustomActionType;
 use server::content::persistent_events::EventResponse;
 use server::movement::{MoveUnits, MovementAction};
 use server::playing_actions::PlayingAction::EndTurn;
@@ -53,6 +54,20 @@ fn test_raids() {
             TestAction::not_undoable(0, Action::Playing(EndTurn)).skip_json(),
             TestAction::not_undoable(1, Action::Playing(EndTurn)).skip_json(),
             TestAction::undoable(0, payment_response(ResourcePile::food(1))),
+        ],
+    );
+}
+
+#[test]
+fn test_danegeld() {
+    JSON.test(
+        "danegeld",
+        vec![
+            TestAction::undoable(0, custom_action(CustomActionType::Danegeld)).skip_json(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::ResourceReward(ResourcePile::food(4))),
+            )
         ],
     );
 }

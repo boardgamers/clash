@@ -4,12 +4,14 @@ use crate::city_pieces::Building;
 use crate::civilization::Civilization;
 use crate::consts::STACK_LIMIT;
 use crate::content::ability::Ability;
+use crate::content::advances::economy::use_taxes;
 use crate::content::advances::trade_routes::TradeRoute;
+use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::{PaymentRequest, UnitsRequest};
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::leader::{Leader, LeaderInfo, leader_position};
-use crate::leader_ability::LeaderAbility;
+use crate::leader_ability::{LeaderAbility, activate_leader_city, can_activate_leader_city};
 use crate::map::{Block, Terrain, capital_position};
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::Player;
@@ -299,30 +301,35 @@ fn knut() -> LeaderInfo {
         Leader::Knut,
         "Knut the Great",
         ruler_of_the_north(),
-        LeaderAbility::builder(
-            "Danegeld",
-            "As a free action, if you have Taxes, activate the leader city, to collect taxes",
-        )
-        // .add_custom_action(
-        //     CustomActionType::Danegeld,
-        //     |c| c.any_times().free_action().no_resources(),
-        //     |b| {
-        //         b.add_simple_persistent_event_listener(
-        //             |event| &mut event.custom_action,
-        //             0,
-        //             |game, player, player_name, _| {
-        //                 // game.
-        //                 //
-        //                 // let p = game.player_mut(player);
-        //                 // let position = leader_position(p);
-        //                 // p.get_city_mut(position).activate();
-        //             },
-        //         )
-        //     },
-        //     |_, _| todo!(),
-        // )
-        .build(),
+        danegeld(),
     )
+}
+
+fn danegeld() -> LeaderAbility {
+    LeaderAbility::builder(
+        "Danegeld",
+        "If you have Taxes: As aa action, you may activate the leader city: \
+            Collect taxes",
+    )
+        .add_custom_action(
+            CustomActionType::Danegeld,
+            |c| {
+                c.any_times()
+                    .action()
+                    .no_resources()
+            },
+            |b| {
+                use_taxes(b.add_simple_persistent_event_listener(
+                    |event| &mut event.custom_action,
+                    -1,
+                    |game, player, _player_name, _| {
+                        activate_leader_city(game, player, "collect taxes");
+                    },
+                ))
+            },
+            |game, p| can_activate_leader_city(game, p) && p.can_use_advance(Advance::Taxes),
+        )
+        .build()
 }
 
 fn ruler_of_the_north() -> LeaderAbility {

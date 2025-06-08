@@ -173,11 +173,10 @@ pub(crate) fn can_activate_leader_city(game: &Game, p: &Player) -> bool {
 }
 
 pub(crate) fn activate_leader_city(game: &mut Game, player: usize, effect: &str) {
-    let p = game.player_mut(player);
-    let position = leader_position(p);
-    activate_city(position, game);
+    let position = leader_position(game.player(player));
     game.add_info_log_item(&format!(
         "{} activates the city {position} to {effect}",
         game.player_name(player)
     ));
+    activate_city(position, game);
 }
