@@ -57,7 +57,8 @@ pub(crate) fn execute_increase_happiness(
     game: &mut Game,
     player_index: usize,
     happiness_increases: &[(Position, u8)],
-    payment: Option<ResourcePile>,
+    payment: ResourcePile,
+    already_paid: bool,
     action_type: &PlayingActionType,
 ) -> Result<(), String> {
     let player = game.player(player_index);
@@ -74,7 +75,7 @@ pub(crate) fn execute_increase_happiness(
 
     game.add_info_log_item(&format!(
         "{player} paid {} to increase happiness in {}{}",
-        payment.as_ref().unwrap_or(&ResourcePile::empty()),
+        payment,
         utils::format_and(&logs, "no city"),
         modifier_suffix(player, action_type)
     ));
@@ -107,8 +108,8 @@ pub(crate) fn execute_increase_happiness(
         }
     }
 
-    if let Some(r) = payment {
-        happiness_cost(player_index, step_sum, trigger, action_type, game).pay(game, &r);
+    if !already_paid {
+        happiness_cost(player_index, step_sum, trigger, action_type, game).pay(game, &payment);
     }
     Ok(())
 }

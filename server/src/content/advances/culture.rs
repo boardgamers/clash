@@ -159,7 +159,8 @@ fn use_sports() -> Ability {
                     game,
                     s.player_index,
                     &[(position, steps)],
-                    None,
+                    pile,
+                    true,
                     &a.action.action.playing_action_type(),
                 )
                 .expect("Failed to increase happiness");

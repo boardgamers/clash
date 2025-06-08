@@ -194,7 +194,8 @@ impl PlayingAction {
                 game,
                 player_index,
                 &i.happiness_increases,
-                Some(i.payment),
+                i.payment,
+                false,
                 &i.action_type,
             )?,
             InfluenceCultureAttempt(c) => {

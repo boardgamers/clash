@@ -361,7 +361,7 @@
       "Player1 started Sports at C2"
     ],
     [
-      "Player1 paid 1 culture token for Sports to increase the happiness of C2 by 1 steps, making it Neutral"
+      "Player1 paid 1 culture token to increase happiness in the city at C2 by 1 steps, making it Neutral using Sports"
     ]
   ],
   "undo_limit": 0,
