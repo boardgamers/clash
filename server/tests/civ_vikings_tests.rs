@@ -78,10 +78,7 @@ fn explorer() {
         "explorer",
         vec![
             TestAction::undoable(0, custom_action(CustomActionType::LegendaryExplorer)).skip_json(),
-            TestAction::undoable(
-                0,
-                payment_response(ResourcePile::culture_tokens(1)),
-            ),
+            TestAction::undoable(0, payment_response(ResourcePile::culture_tokens(1))),
         ],
     );
 }

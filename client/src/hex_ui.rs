@@ -9,6 +9,7 @@ use macroquad::prelude::{
     BEIGE, DARKGRAY, DrawTextureParams, Rect, Texture2D, WHITE, draw_texture_ex,
 };
 use macroquad::shapes::draw_hexagon;
+use server::content::custom_actions::CustomActionType;
 use server::position::Position;
 
 const SIZE: f32 = 60.0;
@@ -23,12 +24,17 @@ pub fn center(pos: Position) -> Vec2 {
     to_screen(Vec2::new(p.0, p.1))
 }
 
+pub enum HexFeature {
+    Exhausted,
+    ExplorerToken,
+}
+
 pub fn draw_hex(
     p: Position,
     text_color: Color,
     overlay: Color,
     terrain: Option<&Texture2D>,
-    exhausted: bool,
+    features: &[HexFeature],
     rc: &RenderContext,
 ) {
     let c = center(p);
@@ -51,15 +57,30 @@ pub fn draw_hex(
     draw_hexagon(c.x, c.y, SIZE, 2.0, false, DARKGRAY, overlay);
     rc.state
         .draw_text_with_color(&p.to_string(), c.x - 30.0, c.y - 35.0, text_color);
-    if exhausted {
-        const SIZE: f32 = 100.;
-        draw_scaled_icon(
-            rc,
-            &rc.assets().exhausted,
-            "Exhausted",
-            vec2(c.x - SIZE / 2., c.y - SIZE / 2.),
-            SIZE,
-        );
+
+    for f in features {
+        match f {
+            HexFeature::Exhausted => {
+                const SIZE: f32 = 100.;
+                draw_scaled_icon(
+                    rc,
+                    &rc.assets().exhausted,
+                    "Exhausted",
+                    vec2(c.x - SIZE / 2., c.y - SIZE / 2.),
+                    SIZE,
+                );
+            }
+            HexFeature::ExplorerToken => {
+                const SIZE: f32 = 20.;
+                draw_scaled_icon(
+                    rc,
+                    &rc.assets().custom_actions[&CustomActionType::LegendaryExplorer],
+                    "Explorer Token",
+                    vec2(c.x - SIZE / 2., c.y - SIZE / 2.),
+                    SIZE,
+                );
+            }
+        }
     }
 }
 

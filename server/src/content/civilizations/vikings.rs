@@ -439,9 +439,7 @@ fn use_great_explorer(b: AbilityBuilder) -> AbilityBuilder {
             );
 
             let name = player.get_name();
-            game.add_info_log_item(&format!(
-                "{name} placed an explorer token at {position}",
-            ));
+            game.add_info_log_item(&format!("{name} placed an explorer token at {position}",));
         },
     )
 }
@@ -456,9 +454,17 @@ fn is_current_block_tagged(game: &Game, player: &Player, position: Position) -> 
     })
 }
 
+#[must_use]
 fn explore_points(player: &Player) -> Option<&SpecialVictoryPoints> {
     player
         .special_victory_points
         .iter()
         .find(|v| !v.points.explorer_tokens.is_empty())
+}
+
+#[must_use]
+pub fn has_explore_token(game: &Game, position: Position) -> bool {
+    game.players.iter().any(|player| {
+        explore_points(player).is_some_and(|v| v.points.explorer_tokens.contains(&position))
+    })
 }
