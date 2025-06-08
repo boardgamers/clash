@@ -1,12 +1,13 @@
-use crate::construct::Construct;
 use crate::cultural_influence::format_cultural_influence_attempt_log_item;
 use crate::player::Player;
 
-use super::collect::PositionCollection;
+use super::collect::{Collect, PositionCollection};
 use crate::combat_stats::CombatStats;
 use crate::content::custom_actions::{custom_action_execution, custom_action_modifier_name};
+use crate::happiness::IncreaseHappiness;
 use crate::movement::{MoveUnits, MovementAction};
-use crate::playing_actions::{Collect, IncreaseHappiness, PlayingActionType, Recruit};
+use crate::playing_actions::PlayingActionType;
+use crate::recruit::Recruit;
 use crate::wonder::Wonder;
 use crate::{
     action::Action, game::Game, playing_actions::PlayingAction, position::Position,
@@ -145,18 +146,6 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
     let player = &game.players[game.active_player()];
     let player_name = player.get_name();
     match action {
-        PlayingAction::Advance(a) => {
-            format!(
-                "{player} paid {} to get the {} advance",
-                a.payment,
-                a.advance.name(game)
-            )
-        }
-        PlayingAction::FoundCity { settler } => format!(
-            "{player} founded a city at {}",
-            player.get_unit(*settler).position
-        ),
-        PlayingAction::Construct(c) => format_construct_log_item(game, player, &player_name, c),
         PlayingAction::Collect(c) => format_collect_log_item(player, &player_name, c),
         PlayingAction::Recruit(r) => format_recruit_log_item(player, &player_name, r, game),
         PlayingAction::IncreaseHappiness(i) => format_happiness_increase(player, &player_name, i),
@@ -194,6 +183,9 @@ fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String
                 actions_left => format!(" with {actions_left} actions left"),
             }
         ),
+        _ => {
+            panic!("Unknown action type: {action:?}");
+        }
     }
 }
 
@@ -310,38 +302,6 @@ pub(crate) fn format_collect_log_item(player: &Player, player_name: &str, c: &Co
         c.city_position,
         format_mood_change(player, c.city_position),
         modifier_suffix(player, &c.action_type)
-    )
-}
-
-fn format_construct_log_item(
-    game: &Game,
-    player: &Player,
-    player_name: &String,
-    c: &Construct,
-) -> String {
-    let port_pos = if let Some(port_position) = c.port_position {
-        let adjacent_water_tiles = c
-            .city_position
-            .neighbors()
-            .iter()
-            .filter(|neighbor| game.map.is_sea(**neighbor))
-            .count();
-        if adjacent_water_tiles > 1 {
-            format!(" at the water tile {port_position}")
-        } else {
-            String::new()
-        }
-    } else {
-        String::new()
-    };
-
-    let city_piece = c.city_piece;
-    let payment = &c.payment;
-    let city_position = c.city_position;
-
-    let mood = format_mood_change(player, city_position);
-    format!(
-        "{player_name} paid {payment} to construct a {city_piece} in the city at {city_position}{port_pos}{mood}"
     )
 }
 

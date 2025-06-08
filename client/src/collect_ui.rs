@@ -12,11 +12,11 @@ use macroquad::prelude::WHITE;
 use macroquad::shapes::draw_circle;
 use server::action::Action;
 use server::collect::{
-    CollectInfo, PositionCollection, add_collect, get_total_collection,
+    Collect, CollectInfo, PositionCollection, add_collect, get_total_collection,
     possible_resource_collections, tiles_used,
 };
 use server::player::CostTrigger;
-use server::playing_actions::{Collect, PlayingAction};
+use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource::ResourceType;
 use server::resource_pile::ResourcePile;

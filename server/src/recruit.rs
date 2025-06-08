@@ -6,11 +6,40 @@ use crate::map::capital_position;
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::{CostTrigger, Player, gain_unit};
 use crate::player_events::CostInfo;
-use crate::playing_actions::Recruit;
 use crate::position::Position;
+use crate::resource_pile::ResourcePile;
 use crate::special_advance::SpecialAdvance;
 use crate::unit::{UnitType, Units, kill_units, set_unit_position};
 use itertools::Itertools;
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub struct Recruit {
+    pub units: Units,
+    pub city_position: Position,
+    pub payment: ResourcePile,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub replaced_units: Vec<u32>,
+}
+
+impl Recruit {
+    #[must_use]
+    pub fn new(units: &Units, city_position: Position, payment: ResourcePile) -> Self {
+        Self {
+            units: units.clone(),
+            city_position,
+            payment,
+            replaced_units: Vec::new(),
+        }
+    }
+
+    #[must_use]
+    pub fn with_replaced_units(mut self, replaced_units: &[u32]) -> Self {
+        self.replaced_units = replaced_units.to_vec();
+        self
+    }
+}
 
 pub(crate) fn recruit(game: &mut Game, player_index: usize, r: Recruit) -> Result<(), String> {
     let cost = recruit_cost(

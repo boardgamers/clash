@@ -9,6 +9,29 @@ use crate::playing_actions::{PlayingActionType, base_or_custom_available};
 use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
+pub struct IncreaseHappiness {
+    pub happiness_increases: Vec<(Position, u8)>,
+    pub payment: ResourcePile,
+    pub action_type: PlayingActionType,
+}
+
+impl IncreaseHappiness {
+    #[must_use]
+    pub fn new(
+        happiness_increases: Vec<(Position, u8)>,
+        payment: ResourcePile,
+        action_type: PlayingActionType,
+    ) -> Self {
+        Self {
+            happiness_increases,
+            payment,
+            action_type,
+        }
+    }
+}
 
 #[must_use]
 pub fn available_happiness_actions(game: &Game, player: usize) -> Vec<PlayingActionType> {

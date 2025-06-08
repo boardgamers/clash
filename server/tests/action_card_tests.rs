@@ -10,7 +10,7 @@ use server::playing_actions::PlayingAction::Construct;
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
-use server::{advance, construct, cultural_influence, playing_actions};
+use server::{advance, collect, construct, cultural_influence};
 
 mod common;
 
@@ -183,7 +183,7 @@ fn test_production_focus() {
             TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(19))).skip_json(),
             TestAction::undoable(
                 0,
-                Action::Playing(PlayingAction::Collect(playing_actions::Collect::new(
+                Action::Playing(PlayingAction::Collect(collect::Collect::new(
                     Position::from_offset("C2"),
                     vec![
                         PositionCollection::new(Position::from_offset("B1"), ResourcePile::ore(1))
@@ -299,7 +299,7 @@ fn test_overproduction() {
             TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(29))).skip_json(),
             TestAction::undoable(
                 0,
-                Action::Playing(PlayingAction::Collect(playing_actions::Collect::new(
+                Action::Playing(PlayingAction::Collect(collect::Collect::new(
                     Position::from_offset("C2"),
                     vec![
                         PositionCollection::new(Position::from_offset("B1"), ResourcePile::ore(1)),

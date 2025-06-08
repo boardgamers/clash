@@ -90,7 +90,11 @@ pub(crate) fn can_construct_anything(city: &City, player: &Player) -> Result<(),
     Ok(())
 }
 
-pub(crate) fn construct(game: &mut Game, player_index: usize, c: &Construct) -> Result<(), String> {
+pub(crate) fn execute_construct(
+    game: &mut Game,
+    player_index: usize,
+    c: &Construct,
+) -> Result<(), String> {
     let player = &game.players[player_index];
     let city = player.get_city(c.city_position);
     let cost = can_construct(
@@ -109,7 +113,34 @@ pub(crate) fn construct(game: &mut Game, player_index: usize, c: &Construct) -> 
     } else if c.port_position.is_some() {
         panic!("Illegal action");
     }
-    game.player_mut(player_index).construct(
+
+    let port_pos = if let Some(port_position) = c.port_position {
+        let adjacent_water_tiles = c
+            .city_position
+            .neighbors()
+            .iter()
+            .filter(|neighbor| game.map.is_sea(**neighbor))
+            .count();
+        if adjacent_water_tiles > 1 {
+            format!(" at the water tile {port_position}")
+        } else {
+            String::new()
+        }
+    } else {
+        String::new()
+    };
+
+    let city_piece = c.city_piece;
+    let payment = &c.payment;
+    let city_position = c.city_position;
+
+    game.add_info_log_item(&format!(
+        "{player} paid {payment} to construct a {city_piece} in the city at {city_position}{port_pos}"
+    ));
+
+    construct(
+        game,
+        player_index,
         c.city_piece,
         c.city_position,
         c.port_position,
@@ -118,6 +149,24 @@ pub(crate) fn construct(game: &mut Game, player_index: usize, c: &Construct) -> 
     cost.pay(game, &c.payment);
     on_construct(game, player_index, ConstructInfo::new(c.city_piece));
     Ok(())
+}
+
+pub(crate) fn construct(
+    game: &mut Game,
+    player: usize,
+    building: Building,
+    city_position: Position,
+    port_position: Option<Position>,
+    activate: bool,
+) {
+    let city = game.player_mut(player).get_city_mut(city_position);
+    if activate {
+        city.activate();
+    }
+    city.pieces.set_building(building, player);
+    if let Some(port_position) = port_position {
+        city.port_position = Some(port_position);
+    }
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]

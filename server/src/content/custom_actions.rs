@@ -266,11 +266,11 @@ pub enum CustomActionType {
     ImperialArmy,
     ArtOfWar,
     AgricultureEconomist,
-    
+
     // Vikings
     Danegeld,
     LegendaryExplorer,
-    NewColonies
+    NewColonies,
 }
 
 impl CustomActionType {

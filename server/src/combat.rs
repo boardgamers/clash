@@ -595,6 +595,7 @@ pub mod tests {
 
     use crate::cache::Cache;
     use crate::civilization::Civilization;
+    use crate::construct::construct;
     use crate::game::{GameContext, GameOptions, GameState};
     use crate::log::{ActionLogAge, ActionLogItem, ActionLogPlayer, ActionLogRound};
     use crate::movement::MovementAction;
@@ -668,8 +669,8 @@ pub mod tests {
         let position = Position::new(0, 0);
         game.players[old].cities.push(City::new(old, position));
         construct_wonder(&mut game, Wonder::GreatGardens, position, old);
-        game.players[old].construct(Academy, position, None, true);
-        game.players[old].construct(Obelisk, position, None, true);
+        construct(&mut game, old, Academy, position, None, true);
+        construct(&mut game, old, Obelisk, position, None, true);
 
         game.players[old].victory_points(&game).assert_eq(7.0);
 

@@ -440,24 +440,6 @@ impl Player {
                 .is_some_and(|city| city.size() == 1)
     }
 
-    pub(crate) fn construct(
-        &mut self,
-        building: Building,
-        city_position: Position,
-        port_position: Option<Position>,
-        activate: bool,
-    ) {
-        let index = self.index;
-        let city = self.get_city_mut(city_position);
-        if activate {
-            city.activate();
-        }
-        city.pieces.set_building(building, index);
-        if let Some(port_position) = port_position {
-            city.port_position = Some(port_position);
-        }
-    }
-
     #[must_use]
     pub fn try_get_unit(&self, id: u32) -> Option<&Unit> {
         self.units.iter().find(|unit| unit.id == id)

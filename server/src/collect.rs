@@ -6,7 +6,7 @@ use crate::map::Terrain;
 use crate::map::Terrain::{Fertile, Forest, Mountain};
 use crate::player::{CostTrigger, Player};
 use crate::player_events::ActionInfo;
-use crate::playing_actions::{Collect, PlayingActionType, base_or_custom_available};
+use crate::playing_actions::{PlayingActionType, base_or_custom_available};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
@@ -43,6 +43,28 @@ impl PositionCollection {
     #[must_use]
     pub fn total(&self) -> ResourcePile {
         self.pile.times(self.times)
+    }
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
+pub struct Collect {
+    pub city_position: Position,
+    pub collections: Vec<PositionCollection>,
+    pub action_type: PlayingActionType,
+}
+
+impl Collect {
+    #[must_use]
+    pub fn new(
+        city_position: Position,
+        collections: Vec<PositionCollection>,
+        action_type: PlayingActionType,
+    ) -> Self {
+        Self {
+            city_position,
+            collections,
+            action_type,
+        }
     }
 }
 

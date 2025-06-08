@@ -113,6 +113,7 @@ pub fn execute_without_undo(
         return Ok(());
     }
 
+    game.log.push(vec![]);
     add_log_item_from_action(game, &action);
     add_action_log_item(game, action.clone());
 

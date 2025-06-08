@@ -2,9 +2,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{can_play_civil_card, play_action_card};
-use crate::advance::{AdvanceAction, base_advance_cost, gain_advance_without_payment};
-use crate::city::found_city;
-use crate::collect::{PositionCollection, collect};
+use crate::advance::{AdvanceAction, base_advance_cost, execute_advance_action};
+use crate::city::execute_found_city_action;
+use crate::collect::{Collect, collect};
 use crate::construct::Construct;
 use crate::content::ability::Ability;
 use crate::content::custom_actions::{
@@ -17,86 +17,13 @@ use crate::content::persistent_events::{
 use crate::cultural_influence::{InfluenceCultureAttempt, influence_culture_attempt};
 use crate::events::EventOrigin;
 use crate::game::GameState;
-use crate::happiness::increase_happiness;
+use crate::happiness::{IncreaseHappiness, increase_happiness};
 use crate::payment::{PaymentOptions, PaymentReason};
-use crate::player::{Player, remove_unit};
+use crate::player::Player;
 use crate::player_events::PlayingActionInfo;
-use crate::recruit::recruit;
-use crate::unit::Units;
+pub(crate) use crate::recruit::{Recruit, recruit};
 use crate::wonder::{Wonder, WonderCardInfo, cities_for_wonder, on_play_wonder_card, wonder_cost};
-use crate::{game::Game, position::Position, resource_pile::ResourcePile};
-
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
-pub struct Collect {
-    pub city_position: Position,
-    pub collections: Vec<PositionCollection>,
-    pub action_type: PlayingActionType,
-}
-
-impl Collect {
-    #[must_use]
-    pub fn new(
-        city_position: Position,
-        collections: Vec<PositionCollection>,
-        action_type: PlayingActionType,
-    ) -> Self {
-        Self {
-            city_position,
-            collections,
-            action_type,
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub struct Recruit {
-    pub units: Units,
-    pub city_position: Position,
-    pub payment: ResourcePile,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub replaced_units: Vec<u32>,
-}
-
-impl Recruit {
-    #[must_use]
-    pub fn new(units: &Units, city_position: Position, payment: ResourcePile) -> Self {
-        Self {
-            units: units.clone(),
-            city_position,
-            payment,
-            replaced_units: Vec::new(),
-        }
-    }
-
-    #[must_use]
-    pub fn with_replaced_units(mut self, replaced_units: &[u32]) -> Self {
-        self.replaced_units = replaced_units.to_vec();
-        self
-    }
-}
-
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
-pub struct IncreaseHappiness {
-    pub happiness_increases: Vec<(Position, u8)>,
-    pub payment: ResourcePile,
-    pub action_type: PlayingActionType,
-}
-
-impl IncreaseHappiness {
-    #[must_use]
-    pub fn new(
-        happiness_increases: Vec<(Position, u8)>,
-        payment: ResourcePile,
-        action_type: PlayingActionType,
-    ) -> Self {
-        Self {
-            happiness_increases,
-            payment,
-            action_type,
-        }
-    }
-}
+use crate::{game::Game, resource_pile::ResourcePile};
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub enum PlayingActionType {
@@ -246,24 +173,9 @@ impl PlayingAction {
         use crate::construct;
         use PlayingAction::*;
         match self {
-            Advance(a) => {
-                let advance = a.advance;
-                if !game.player(player_index).can_advance(advance, game) {
-                    return Err("Cannot advance".to_string());
-                }
-                game.player(player_index)
-                    .advance_cost(advance, game, game.execute_cost_trigger())
-                    .pay(game, &a.payment);
-                gain_advance_without_payment(game, advance, player_index, a.payment, true);
-            }
-            FoundCity { settler } => {
-                let settler = remove_unit(player_index, settler, game);
-                if !settler.can_found_city(game) {
-                    return Err("Cannot found city".to_string());
-                }
-                found_city(game, player_index, settler.position);
-            }
-            Construct(c) => construct::construct(game, player_index, &c)?,
+            Advance(a) => execute_advance_action(game, player_index, &a)?,
+            FoundCity { settler } => execute_found_city_action(game, player_index, settler)?,
+            Construct(c) => construct::execute_construct(game, player_index, &c)?,
             Collect(c) => collect(game, player_index, &c)?,
             Recruit(r) => recruit(game, player_index, r)?,
             IncreaseHappiness(i) => increase_happiness(

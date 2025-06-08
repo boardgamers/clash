@@ -171,7 +171,7 @@ fn test_recruit_combat() {
         vec![
             TestAction::undoable(
                 0,
-                Action::Playing(Recruit(server::playing_actions::Recruit::new(
+                Action::Playing(Recruit(server::recruit::Recruit::new(
                     &Units::new(0, 0, 4, 0, 0, None),
                     Position::from_offset("C2"),
                     ResourcePile::wood(5) + ResourcePile::gold(3),

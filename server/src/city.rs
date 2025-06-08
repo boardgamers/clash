@@ -5,6 +5,7 @@ use std::ops::{Add, Sub};
 use crate::content::custom_actions::CustomActionType::ForcedLabor;
 use crate::content::persistent_events::PersistentEventType;
 use crate::map::Terrain;
+use crate::player::remove_unit;
 use crate::utils;
 use crate::wonder::deinit_wonder;
 use crate::{
@@ -88,6 +89,7 @@ impl City {
         !self.angry_activation
     }
 
+    // todo pass game, log "city became x because it was activated"
     pub fn activate(&mut self) {
         if self.mood_state == Angry {
             self.angry_activation = true;
@@ -263,6 +265,24 @@ impl Sub<u8> for MoodState {
 
 pub(crate) fn is_valid_city_terrain(t: &Terrain) -> bool {
     t.is_land() && !matches!(t, Terrain::Exhausted(_) | Terrain::Barren)
+}
+
+pub(crate) fn execute_found_city_action(
+    game: &mut Game,
+    player_index: usize,
+    settler: u32,
+) -> Result<(), String> {
+    let player = game.player(player_index);
+    game.add_info_log_item(&format!(
+        "{player} founded a city at {}",
+        player.get_unit(settler).position
+    ));
+    let settler = remove_unit(player_index, settler, game);
+    if !settler.can_found_city(game) {
+        return Err("Cannot found city".to_string());
+    }
+    found_city(game, player_index, settler.position);
+    Ok(())
 }
 
 pub(crate) fn found_city(game: &mut Game, player: usize, position: Position) {

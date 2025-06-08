@@ -138,7 +138,7 @@ fn basic_actions() {
     let tile_position = Position::new(1, 0);
     game.map.tiles.insert(tile_position, Mountain);
     game.map.tiles.insert(city_position, Fertile);
-    let collect_action = Action::Playing(Collect(playing_actions::Collect::new(
+    let collect_action = Action::Playing(Collect(collect::Collect::new(
         city_position,
         vec![PositionCollection::new(tile_position, ResourcePile::ore(1))],
         PlayingActionType::Collect,
@@ -159,7 +159,7 @@ fn basic_actions() {
     let mut game = game_api::execute(game, Action::Playing(EndTurn), 0);
     let player = &mut game.players[0];
     player.gain_resources(ResourcePile::food(1));
-    let recruit_action = Action::Playing(Recruit(playing_actions::Recruit::new(
+    let recruit_action = Action::Playing(Recruit(recruit::Recruit::new(
         &Units::new(1, 0, 0, 0, 0, None),
         city_position,
         ResourcePile::food(2),
@@ -349,7 +349,7 @@ fn test_recruit() {
         vec![TestAction::undoable(
             0,
             Action::Playing(Recruit(
-                playing_actions::Recruit::new(
+                recruit::Recruit::new(
                     &Units::new(1, 1, 0, 0, 0, None),
                     Position::from_offset("A1"),
                     ResourcePile::food(1) + ResourcePile::ore(1) + ResourcePile::gold(2),
@@ -366,7 +366,7 @@ fn test_recruit_leader() {
         "recruit_leader",
         vec![TestAction::undoable(
             0,
-            Action::Playing(Recruit(playing_actions::Recruit::new(
+            Action::Playing(Recruit(recruit::Recruit::new(
                 &Units::new(0, 0, 0, 0, 0, Some(Leader::Augustus)),
                 Position::from_offset("A1"),
                 ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1),
@@ -382,7 +382,7 @@ fn test_replace_leader() {
         vec![TestAction::undoable(
             0,
             Action::Playing(Recruit(
-                playing_actions::Recruit::new(
+                recruit::Recruit::new(
                     &Units::new(0, 0, 0, 0, 0, Some(Leader::Augustus)),
                     Position::from_offset("A1"),
                     ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1),
@@ -399,7 +399,7 @@ fn test_collect() {
         "collect",
         vec![TestAction::undoable(
             0,
-            Action::Playing(Collect(playing_actions::Collect::new(
+            Action::Playing(Collect(collect::Collect::new(
                 Position::from_offset("C2"),
                 vec![
                     PositionCollection::new(Position::from_offset("B1"), ResourcePile::ore(1)),

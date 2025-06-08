@@ -7,8 +7,9 @@ use server::city::City;
 use server::city_pieces::Building;
 use server::construct::Construct;
 use server::player_events::CostInfo;
-use server::playing_actions::{PlayingAction, Recruit};
+use server::playing_actions::PlayingAction;
 use server::position::Position;
+use server::recruit::Recruit;
 
 pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> StateUpdate {
     let city = rc.game.get_any_city(cp.city_position);
