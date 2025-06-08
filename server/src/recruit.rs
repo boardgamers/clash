@@ -1,7 +1,7 @@
-use crate::combat;
 use crate::consts::STACK_LIMIT;
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
+use crate::log::format_mood_change;
 use crate::map::capital_position;
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::{CostTrigger, Player, gain_unit};
@@ -10,6 +10,7 @@ use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::SpecialAdvance;
 use crate::unit::{UnitType, Units, kill_units, set_unit_position};
+use crate::{combat, utils};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
@@ -41,7 +42,36 @@ impl Recruit {
     }
 }
 
-pub(crate) fn recruit(game: &mut Game, player_index: usize, r: Recruit) -> Result<(), String> {
+pub(crate) fn execute_recruit(
+    game: &mut Game,
+    player_index: usize,
+    r: Recruit,
+) -> Result<(), String> {
+    let player = game.player(player_index);
+    let city_position = &r.city_position;
+    let units = &r.units;
+    let payment = &r.payment;
+    let replaced_units = &r.replaced_units;
+    let mood = format_mood_change(player, *city_position);
+    let replace_str = match replaced_units.len() {
+        0 => "",
+        1 => " and replaces the unit at ",
+        _ => " and replaces units at ",
+    };
+    let replace_pos = utils::format_and(
+        &replaced_units
+            .iter()
+            .map(|unit_id| player.get_unit(*unit_id).position.to_string())
+            .unique()
+            .collect_vec(),
+        "",
+    );
+    game.add_info_log_item(&format!(
+        "{player} paid {payment} to recruit {} in the city at \
+            {city_position}{mood}{replace_str}{replace_pos}",
+        units.to_string(Some(game))
+    ));
+
     let cost = recruit_cost(
         game,
         game.player(player_index),

@@ -22,7 +22,7 @@ use crate::player_events::{
     IncidentInfo, OnAdvanceInfo, PersistentEvent, PersistentEventInfo, PersistentEvents,
     trigger_event_with_game_value,
 };
-use crate::playing_actions::{ActionPayment, Recruit};
+use crate::playing_actions::{ActionPayment};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::{ChangeGovernment, StatusPhaseState};
@@ -31,6 +31,7 @@ use crate::wonder::{Wonder, WonderCardInfo};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::ops::RangeInclusive;
+use crate::recruit::Recruit;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum PersistentEventRequest {

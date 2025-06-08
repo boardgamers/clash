@@ -2,11 +2,11 @@ use crate::common::{JsonTest, TestAction, move_action};
 use server::action::Action;
 use server::card::{HandCard, validate_card_selection};
 use server::content::persistent_events::{EventResponse, PersistentEventRequest};
-use server::playing_actions;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::unit::Units;
+use server::recruit;
 
 mod common;
 

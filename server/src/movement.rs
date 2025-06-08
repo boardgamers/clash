@@ -279,6 +279,17 @@ pub(crate) fn execute_movement_action(
     action: MovementAction,
     player_index: usize,
 ) -> Result<(), String> {
+    let player = &game.players[game.active_player()];
+    game.add_info_log_item(
+        &(match &action {
+            Move(m) if m.units.is_empty() => {
+                format!("{player} used a movement actions but moved no units")
+            }
+            Move(m) => move_action_log(game, player, m),
+            Stop => format!("{player} ended the movement action"),
+        }),
+    );
+
     if let GameState::Playing = game.state {
         if game.actions_left == 0 {
             return Err("No actions left".to_string());
@@ -632,4 +643,40 @@ fn can_embark(game: &Game, player: &Player, unit: &Unit) -> bool {
             u.is_ship()
                 && possible_move_routes(player, game, &[unit.id], u.position, Some(u.id)).is_ok()
         })
+}
+
+pub(crate) fn move_action_log(game: &Game, player: &Player, m: &MoveUnits) -> String {
+    let units_str = m
+        .units
+        .iter()
+        .map(|unit| player.get_unit(*unit).unit_type)
+        .collect::<Units>()
+        .to_string(Some(game));
+    let start = player.get_unit(m.units[0]).position;
+    let start_is_water = game.map.is_sea(start);
+    let dest = m.destination;
+    let t = game
+        .map
+        .get(dest)
+        .expect("the destination position should be on the map");
+    let (verb, suffix) = if start_is_water {
+        if t.is_unexplored() || t.is_water() {
+            ("sailed", "")
+        } else {
+            ("disembarked", "")
+        }
+    } else if m.embark_carrier_id.is_some() {
+        ("embarked", "")
+    } else if start.is_neighbor(dest) {
+        ("marched", "")
+    } else {
+        ("marched", " on roads")
+    };
+    let payment = &m.payment;
+    let cost = if payment.is_empty() {
+        String::new()
+    } else {
+        format!(" for {payment}")
+    };
+    format!("{player} {verb} {units_str} from {start} to {dest}{suffix}{cost}",)
 }

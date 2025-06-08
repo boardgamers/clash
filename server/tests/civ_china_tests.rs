@@ -9,6 +9,7 @@ use server::content::persistent_events::EventResponse;
 use server::playing_actions::PlayingAction::WonderCard;
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
+use server::recruit::Recruit;
 use server::resource_pile::ResourcePile;
 use server::unit::Units;
 use server::wonder::Wonder;

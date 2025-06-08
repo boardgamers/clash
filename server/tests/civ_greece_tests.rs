@@ -4,7 +4,7 @@ use server::city_pieces::Building;
 use server::content::custom_actions::CustomActionType;
 use server::content::persistent_events::{EventResponse, SelectedStructure, Structure};
 use server::cultural_influence::{InfluenceCultureAttempt, affordable_start_city};
-use server::playing_actions::{PlayingAction, PlayingActionType, Recruit};
+use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::unit::Units;

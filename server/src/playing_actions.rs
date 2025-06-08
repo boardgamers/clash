@@ -4,7 +4,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{can_play_civil_card, play_action_card};
 use crate::advance::{AdvanceAction, base_advance_cost, execute_advance_action};
 use crate::city::execute_found_city_action;
-use crate::collect::{Collect, collect};
+use crate::collect::{Collect, execute_collect};
 use crate::construct::Construct;
 use crate::content::ability::Ability;
 use crate::content::custom_actions::{
@@ -14,14 +14,14 @@ use crate::content::custom_actions::{
 use crate::content::persistent_events::{
     PaymentRequest, PersistentEventType, TriggerPersistentEventParams, trigger_persistent_event_ext,
 };
-use crate::cultural_influence::{InfluenceCultureAttempt, influence_culture_attempt};
+use crate::cultural_influence::{InfluenceCultureAttempt, execute_influence_culture_attempt};
 use crate::events::EventOrigin;
 use crate::game::GameState;
-use crate::happiness::{IncreaseHappiness, increase_happiness};
+use crate::happiness::{IncreaseHappiness, execute_increase_happiness};
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::Player;
 use crate::player_events::PlayingActionInfo;
-pub(crate) use crate::recruit::{Recruit, recruit};
+use crate::recruit::{Recruit, execute_recruit};
 use crate::wonder::{Wonder, WonderCardInfo, cities_for_wonder, on_play_wonder_card, wonder_cost};
 use crate::{game::Game, resource_pile::ResourcePile};
 
@@ -176,9 +176,9 @@ impl PlayingAction {
             Advance(a) => execute_advance_action(game, player_index, &a)?,
             FoundCity { settler } => execute_found_city_action(game, player_index, settler)?,
             Construct(c) => construct::execute_construct(game, player_index, &c)?,
-            Collect(c) => collect(game, player_index, &c)?,
-            Recruit(r) => recruit(game, player_index, r)?,
-            IncreaseHappiness(i) => increase_happiness(
+            Collect(c) => execute_collect(game, player_index, &c)?,
+            Recruit(r) => execute_recruit(game, player_index, r)?,
+            IncreaseHappiness(i) => execute_increase_happiness(
                 game,
                 player_index,
                 &i.happiness_increases,
@@ -186,7 +186,7 @@ impl PlayingAction {
                 &i.action_type,
             )?,
             InfluenceCultureAttempt(c) => {
-                influence_culture_attempt(game, player_index, &c.selected_structure)?;
+                execute_influence_culture_attempt(game, player_index, &c)?;
             }
             ActionCard(a) => play_action_card(game, player_index, a),
             WonderCard(w) => {

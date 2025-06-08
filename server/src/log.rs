@@ -1,19 +1,10 @@
-use crate::cultural_influence::format_cultural_influence_attempt_log_item;
 use crate::player::Player;
 
-use super::collect::{Collect, PositionCollection};
 use crate::combat_stats::CombatStats;
-use crate::content::custom_actions::{custom_action_execution, custom_action_modifier_name};
-use crate::happiness::IncreaseHappiness;
-use crate::movement::{MoveUnits, MovementAction};
+use crate::content::custom_actions::custom_action_modifier_name;
 use crate::playing_actions::PlayingActionType;
-use crate::recruit::Recruit;
 use crate::wonder::Wonder;
-use crate::{
-    action::Action, game::Game, playing_actions::PlayingAction, position::Position,
-    resource_pile::ResourcePile, unit::Units, utils,
-};
-use itertools::Itertools;
+use crate::{action::Action, game::Game, position::Position};
 use json_patch::PatchOperation;
 use serde::{Deserialize, Serialize};
 
@@ -120,189 +111,12 @@ pub(crate) fn linear_action_log(game: &Game) -> Vec<Action> {
         .collect()
 }
 
-///
-///
-/// # Panics
-///
-/// Panics if an undo or redo action is given
-///
-/// this is called before the action is executed
-#[must_use]
-pub(crate) fn format_action_log_item(action: &Action, game: &Game) -> Vec<String> {
-    match action {
-        Action::Playing(action) => vec![format_playing_action_log_item(action, game)],
-        Action::Movement(action) => vec![format_movement_action_log_item(action, game)],
-        Action::Response(_) => {
-            // is done in the event handler itself
-            vec![]
-        }
-        Action::Undo | Action::Redo => {
-            panic!("undoing or redoing actions should not be written to the log")
-        }
-    }
-}
-
-fn format_playing_action_log_item(action: &PlayingAction, game: &Game) -> String {
-    let player = &game.players[game.active_player()];
-    let player_name = player.get_name();
-    match action {
-        PlayingAction::Collect(c) => format_collect_log_item(player, &player_name, c),
-        PlayingAction::Recruit(r) => format_recruit_log_item(player, &player_name, r, game),
-        PlayingAction::IncreaseHappiness(i) => format_happiness_increase(player, &player_name, i),
-        PlayingAction::InfluenceCultureAttempt(c) => {
-            format_cultural_influence_attempt_log_item(game, player.index, &player_name, c)
-        }
-        PlayingAction::Custom(action) => {
-            let name = custom_action_execution(player, action.action).ability.name;
-            format!(
-                "{player_name} started {name}{}",
-                if let Some(p) = action.city {
-                    format!(" at {p}")
-                } else {
-                    String::new()
-                }
-            )
-        }
-        PlayingAction::ActionCard(a) => {
-            let card = game.cache.get_civil_card(*a);
-            let action = if card.action_type.free {
-                ""
-            } else {
-                " as a regular action"
-            };
-
-            format!("{player_name} played the action card {}{action}", card.name,)
-        }
-        PlayingAction::WonderCard(name) => {
-            format!("{player_name} played the wonder card {}", name.name())
-        }
-        PlayingAction::EndTurn => format!(
-            "{player_name} ended their turn{}",
-            match game.actions_left {
-                0 => String::new(),
-                actions_left => format!(" with {actions_left} actions left"),
-            }
-        ),
-        _ => {
-            panic!("Unknown action type: {action:?}");
-        }
-    }
-}
-
-///
-/// # Panics
-///
-/// Panics if the city does not exist
-#[must_use]
-pub fn format_happiness_increase(
-    player: &Player,
-    player_name: &str,
-    i: &IncreaseHappiness,
-) -> String {
-    let happiness_increases = i
-        .happiness_increases
-        .iter()
-        .filter_map(|(position, steps)| {
-            if *steps > 0 {
-                Some(format_city_happiness_increase(player, *position, *steps))
-            } else {
-                None
-            }
-        })
-        .collect_vec();
-
-    format!(
-        "{player_name} paid {} to increase happiness in {}{}",
-        i.payment,
-        utils::format_and(&happiness_increases, "no city"),
-        modifier_suffix(player, &i.action_type)
-    )
-}
-
 pub(crate) fn modifier_suffix(player: &Player, action_type: &PlayingActionType) -> String {
     if let PlayingActionType::Custom(c) = action_type {
         format!(" using {}", custom_action_modifier_name(player, *c))
     } else {
         String::new()
     }
-}
-
-pub(crate) fn format_city_happiness_increase(
-    player: &Player,
-    position: Position,
-    steps: u8,
-) -> String {
-    format!(
-        "the city at {position} by {steps} steps, making it {}",
-        player.get_city(position).mood_state.clone() + steps
-    )
-}
-
-fn format_recruit_log_item(
-    player: &Player,
-    player_name: &String,
-    r: &Recruit,
-    game: &Game,
-) -> String {
-    let city_position = &r.city_position;
-    let units = &r.units;
-    let payment = &r.payment;
-    let replaced_units = &r.replaced_units;
-    let mood = format_mood_change(player, *city_position);
-    let replace_str = match replaced_units.len() {
-        0 => "",
-        1 => " and replaces the unit at ",
-        _ => " and replaces units at ",
-    };
-    let replace_pos = utils::format_and(
-        &replaced_units
-            .iter()
-            .map(|unit_id| player.get_unit(*unit_id).position.to_string())
-            .unique()
-            .collect_vec(),
-        "",
-    );
-    format!(
-        "{player_name} paid {payment} to recruit {} in the city at {city_position}{mood}{replace_str}{replace_pos}",
-        units.to_string(Some(game))
-    )
-}
-
-pub(crate) fn format_collect_log_item(player: &Player, player_name: &str, c: &Collect) -> String {
-    let collections = &c.collections;
-    let res = utils::format_and(
-        &collections
-            .iter()
-            .map(|c| c.total().to_string())
-            .collect_vec(),
-        "nothing",
-    );
-    let total = if collections.len() > 1
-        && collections
-            .iter()
-            .permutations(2)
-            .unique()
-            .any(|permutation| {
-                permutation[0]
-                    .pile
-                    .has_common_resource(&permutation[1].pile)
-            }) {
-        format!(
-            " for a total of {}",
-            collections
-                .iter()
-                .map(PositionCollection::total)
-                .sum::<ResourcePile>()
-        )
-    } else {
-        String::new()
-    };
-    format!(
-        "{player_name} collects {res}{total} in the city at {}{}{}",
-        c.city_position,
-        format_mood_change(player, c.city_position),
-        modifier_suffix(player, &c.action_type)
-    )
 }
 
 pub(crate) fn format_mood_change(player: &Player, city_position: Position) -> String {
@@ -314,53 +128,6 @@ pub(crate) fn format_mood_change(player: &Player, city_position: Position) -> St
     } else {
         String::new()
     }
-}
-
-fn format_movement_action_log_item(action: &MovementAction, game: &Game) -> String {
-    let player = &game.players[game.active_player()];
-    match action {
-        MovementAction::Move(m) if m.units.is_empty() => {
-            format!("{player} used a movement actions but moved no units")
-        }
-        MovementAction::Move(m) => move_action_log(game, player, m),
-        MovementAction::Stop => format!("{player} ended the movement action"),
-    }
-}
-
-pub(crate) fn move_action_log(game: &Game, player: &Player, m: &MoveUnits) -> String {
-    let units_str = m
-        .units
-        .iter()
-        .map(|unit| player.get_unit(*unit).unit_type)
-        .collect::<Units>()
-        .to_string(Some(game));
-    let start = player.get_unit(m.units[0]).position;
-    let start_is_water = game.map.is_sea(start);
-    let dest = m.destination;
-    let t = game
-        .map
-        .get(dest)
-        .expect("the destination position should be on the map");
-    let (verb, suffix) = if start_is_water {
-        if t.is_unexplored() || t.is_water() {
-            ("sailed", "")
-        } else {
-            ("disembarked", "")
-        }
-    } else if m.embark_carrier_id.is_some() {
-        ("embarked", "")
-    } else if start.is_neighbor(dest) {
-        ("marched", "")
-    } else {
-        ("marched", " on roads")
-    };
-    let payment = &m.payment;
-    let cost = if payment.is_empty() {
-        String::new()
-    } else {
-        format!(" for {payment}")
-    };
-    format!("{player} {verb} {units_str} from {start} to {dest}{suffix}{cost}",)
 }
 
 pub(crate) fn add_action_log_item(game: &mut Game, item: Action) {

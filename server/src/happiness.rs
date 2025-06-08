@@ -2,6 +2,7 @@ use crate::city::MoodState;
 use crate::content::custom_actions::CustomActionType;
 use crate::game::Game;
 use crate::leader::leader_position;
+use crate::log::modifier_suffix;
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::{CostTrigger, Player};
 use crate::player_events::CostInfo;
@@ -9,6 +10,8 @@ use crate::playing_actions::{PlayingActionType, base_or_custom_available};
 use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
+use crate::utils;
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
@@ -50,13 +53,32 @@ pub fn happiness_city_restriction(player: &Player, action: &PlayingActionType) -
     }
 }
 
-pub(crate) fn increase_happiness(
+pub(crate) fn execute_increase_happiness(
     game: &mut Game,
     player_index: usize,
     happiness_increases: &[(Position, u8)],
     payment: Option<ResourcePile>,
     action_type: &PlayingActionType,
 ) -> Result<(), String> {
+    let player = game.player(player_index);
+    let logs = happiness_increases
+        .iter()
+        .filter_map(|(position, steps)| {
+            if *steps > 0 {
+                Some(format_city_happiness_increase(player, *position, *steps))
+            } else {
+                None
+            }
+        })
+        .collect_vec();
+
+    game.add_info_log_item(&format!(
+        "{player} paid {} to increase happiness in {}{}",
+        payment.as_ref().unwrap_or(&ResourcePile::empty()),
+        utils::format_and(&logs, "no city"),
+        modifier_suffix(player, action_type)
+    ));
+
     let trigger = game.execute_cost_trigger();
     let player = &mut game.players[player_index];
     let restriction = happiness_city_restriction(player, action_type);
@@ -115,5 +137,12 @@ pub fn happiness_cost(
         &(),
         &(),
         execute,
+    )
+}
+
+fn format_city_happiness_increase(player: &Player, position: Position, steps: u8) -> String {
+    format!(
+        "the city at {position} by {steps} steps, making it {}",
+        player.get_city(position).mood_state.clone() + steps
     )
 }

@@ -25,7 +25,7 @@ use server::recruit::recruit_cost_without_replaced;
 use server::resource_pile::ResourcePile;
 use server::unit::Units;
 use server::wonder::Wonder;
-use server::{advance, collect, construct, playing_actions, recruit};
+use server::{advance, collect, construct, happiness, recruit};
 use std::vec;
 
 mod common;
@@ -220,7 +220,7 @@ fn test_increase_happiness_voting() {
         vec![TestAction::undoable(
             0,
             Action::Playing(PlayingAction::IncreaseHappiness(
-                playing_actions::IncreaseHappiness::new(
+                happiness::IncreaseHappiness::new(
                     vec![
                         (Position::from_offset("C2"), 1),
                         (Position::from_offset("B3"), 2),
@@ -240,7 +240,7 @@ fn test_increase_happiness_voting_rituals() {
         vec![TestAction::undoable(
             0,
             Action::Playing(PlayingAction::IncreaseHappiness(
-                playing_actions::IncreaseHappiness::new(
+                happiness::IncreaseHappiness::new(
                     vec![
                         (Position::from_offset("C2"), 1),
                         (Position::from_offset("B3"), 2),

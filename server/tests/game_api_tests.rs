@@ -14,13 +14,14 @@ use server::{
     advance,
     city::{City, MoodState::*},
     city_pieces::Building::*,
-    construct, cultural_influence,
+    collect, construct, cultural_influence,
     game::Game,
     game_api,
     map::Terrain::*,
     playing_actions,
     playing_actions::PlayingAction::*,
     position::Position,
+    recruit,
     resource_pile::ResourcePile,
 };
 use std::{collections::HashMap, vec};
@@ -106,7 +107,7 @@ fn basic_actions() {
     assert_eq!(0, game.active_player());
 
     let increase_happiness_action =
-        Action::Playing(IncreaseHappiness(playing_actions::IncreaseHappiness::new(
+        Action::Playing(IncreaseHappiness(happiness::IncreaseHappiness::new(
             vec![(city_position, 1)],
             ResourcePile::mood_tokens(2),
             PlayingActionType::IncreaseHappiness,
@@ -207,7 +208,7 @@ fn assert_undo(
 
 fn increase_happiness(game: Game) -> Game {
     let increase_happiness_action =
-        Action::Playing(IncreaseHappiness(playing_actions::IncreaseHappiness::new(
+        Action::Playing(IncreaseHappiness(happiness::IncreaseHappiness::new(
             vec![(Position::new(0, 0), 1)],
             ResourcePile::mood_tokens(1),
             PlayingActionType::IncreaseHappiness,
@@ -330,7 +331,7 @@ fn test_increase_happiness() {
         "increase_happiness",
         vec![TestAction::undoable(
             0,
-            Action::Playing(IncreaseHappiness(playing_actions::IncreaseHappiness::new(
+            Action::Playing(IncreaseHappiness(happiness::IncreaseHappiness::new(
                 vec![
                     (Position::from_offset("C2"), 1),
                     (Position::from_offset("B3"), 2),

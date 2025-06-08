@@ -13,7 +13,7 @@ fn all_actions() {
     use server::ai_actions::AiActions;
     use server::collect::PositionCollection;
     use server::playing_actions::{
-        Collect, IncreaseHappiness, PlayingAction, PlayingActionType, Recruit,
+            PlayingAction, PlayingActionType, 
     };
     use server::position::Position;
     use server::resource_pile::ResourcePile;
