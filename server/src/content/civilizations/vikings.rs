@@ -1,12 +1,17 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Advance;
+use crate::city_pieces::Building;
 use crate::civilization::Civilization;
 use crate::consts::STACK_LIMIT;
-use crate::content::persistent_events::UnitsRequest;
+use crate::content::ability::Ability;
+use crate::content::advances::trade_routes::TradeRoute;
+use crate::content::persistent_events::{PaymentRequest, UnitsRequest};
 use crate::game::Game;
 use crate::map::{Block, Terrain};
+use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::Player;
 use crate::position::Position;
+use crate::resource::ResourceType;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
 use crate::unit::{Unit, UnitType, Units, carried_units};
 use itertools::Itertools;
@@ -15,7 +20,7 @@ use std::ops::RangeInclusive;
 pub(crate) fn vikings() -> Civilization {
     Civilization::new(
         "Vikings",
-        vec![ship_construction()],
+        vec![ship_construction(), longships(), raids(), runes()],
         vec![],
         Some(Block::new([
             Terrain::Fertile,
@@ -159,4 +164,128 @@ fn can_add(p: &Player, army_units: u8, settlers: u8, infantry: u8) -> bool {
     p.available_units().settlers >= settlers
         && p.available_units().infantry >= infantry
         && army_units + infantry <= STACK_LIMIT as u8
+}
+
+fn longships() -> SpecialAdvanceInfo {
+    SpecialAdvanceInfo::builder(
+        SpecialAdvance::Longships,
+        SpecialAdvanceRequirement::Advance(Advance::WarShips),
+        "Longships",
+        "Ignore battle movement restrictions for ships. \
+        Ships can carry up to 3 units.",
+    )
+    .build()
+}
+
+const RAID: &str = "viking_raid";
+
+fn raids() -> SpecialAdvanceInfo {
+    SpecialAdvanceInfo::builder(
+        SpecialAdvance::Raiding,
+        SpecialAdvanceRequirement::Advance(Advance::TradeRoutes),
+        "Raiding",
+        "Trade routes: Ships that are adjacent to enemy cities raid: \
+        That player loses 1 resource.",
+    )
+    .build()
+}
+
+pub(crate) fn lose_raid_resource() -> Ability {
+    Ability::builder(
+        "Viking Raids",
+        "Lose 1 resource to Viking Raids (triggered by Trade Routes)",
+    )
+    .add_payment_request_listener(
+        |e| &mut e.turn_start,
+        4,
+        |game, player_index, ()| {
+            let c = PaymentOptions::sum(
+                game.player(player_index),
+                PaymentReason::SpecialAdvanceAbility,
+                1,
+                &ResourceType::resources(),
+            );
+            let p = game.player_mut(player_index);
+            if !p.can_afford(&c) {
+                return None;
+            }
+
+            p.event_info
+                .remove(RAID)
+                .is_some()
+                .then_some(vec![PaymentRequest::mandatory(
+                    c,
+                    "Pay 1 resource to Viking Raids",
+                )])
+        },
+        |game, s, ()| {
+            game.add_info_log_item(&format!(
+                "{} lost {} to Viking Raids",
+                s.player_name, s.choice[0]
+            ));
+        },
+    )
+    .build()
+}
+
+pub(crate) fn add_raid_bonus(game: &mut Game, player: usize, routes: &[TradeRoute]) {
+    let name = game.player_name(player);
+    for r in routes {
+        let u = game.player(player).get_unit(r.unit_id);
+        if u.is_ship() && u.position.distance(r.to) == 1 {
+            let city = game.get_any_city(r.to);
+            let position = city.position;
+            let opponent = game.player_mut(city.player_index);
+            let opponent_name = opponent.get_name();
+            if opponent
+                .event_info
+                .insert(RAID.to_string(), "true".to_string())
+                .is_none()
+            {
+                game.add_info_log_item(&format!("{name} raided {opponent_name} at {position}",));
+            }
+        }
+    }
+}
+
+fn runes() -> SpecialAdvanceInfo {
+    let b = SpecialAdvanceInfo::builder(
+        SpecialAdvance::RuneStones,
+        SpecialAdvanceRequirement::Advance(Advance::Rituals),
+        "Rune Stones",
+        "When you lost 2 or more units in a battle, you may convert 1 Obelisk \
+        to a Rune Stone, which counts as 1 objective victory point.",
+    );
+    let o = b.get_key().clone();
+    b.add_bool_request(
+        |event| &mut event.combat_end,
+        24,
+        |game, player_index, s| {
+            (s.player(player_index)
+                .fighter_losses(s.battleground)
+                .amount()
+                >= 2
+                && game
+                    .player(player_index)
+                    .is_building_available(Building::Obelisk, game))
+            .then_some("Do you want to convert an Obelisk to a Rune Stone?".to_string())
+        },
+        move |game, s, _| {
+            if s.choice {
+                let p = game.player_mut(s.player_index);
+                p.destroyed_structures.add_building(Building::Obelisk);
+                p.gain_objective_victory_points(1.0, &o);
+                game.add_info_log_item(&format!(
+                    "{} converted an Obelisk to a Rune Stone for 1 objective point",
+                    s.player_name
+                ));
+            } else {
+                game.add_info_log_item(&format!(
+                    "{} did not convert an Obelisk to a Rune Stone",
+                    s.player_name
+                ));
+            }
+        },
+    )
+    .build()
 }

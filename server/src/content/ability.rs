@@ -7,6 +7,7 @@ use crate::content::action_cards::development::collect_only;
 use crate::content::action_cards::negotiation::{use_assassination, use_negotiations};
 use crate::content::action_cards::synergies::use_teach_us;
 use crate::content::advances::seafaring::fishing_collect;
+use crate::content::civilizations::vikings::lose_raid_resource;
 use crate::content::incidents::famine::pestilence_permanent_effect;
 use crate::content::incidents::great_builders::construct_only;
 use crate::content::incidents::great_diplomat::use_diplomatic_relations;
@@ -117,6 +118,8 @@ pub fn get_all_uncached() -> Vec<Ability> {
         // wonder related
         use_great_mausoleum(),
         use_draw_replacement_wonder(),
+        // civilization related
+        lose_raid_resource(),
     ]
 }
 

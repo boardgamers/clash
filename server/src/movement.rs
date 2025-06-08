@@ -1,12 +1,12 @@
 use crate::map::Map;
 use crate::map::Terrain::{Fertile, Forest, Mountain, Unexplored};
 use crate::resource_pile::ResourcePile;
-use crate::unit::{Unit, UnitType, Units, set_unit_position};
+use crate::unit::{Unit, UnitType, Units, set_unit_position, ship_capacity};
 use crate::utils;
 use std::collections::HashSet;
 
 use crate::combat::move_with_possible_combat;
-use crate::consts::{ARMY_MOVEMENT_REQUIRED_ADVANCE, MOVEMENT_ACTIONS, SHIP_CAPACITY, STACK_LIMIT};
+use crate::consts::{ARMY_MOVEMENT_REQUIRED_ADVANCE, MOVEMENT_ACTIONS, STACK_LIMIT};
 use crate::content::civilizations::vikings::is_ship_construction_move;
 use crate::content::persistent_events::PersistentEventType;
 use crate::events::EventOrigin;
@@ -413,7 +413,8 @@ fn move_units_destinations(
     }
     if embark_carrier_id.is_some_and(|id| {
         let player_index = player.index;
-        (carried_units(id, &game.players[player_index]).len() + units.len()) as u8 > SHIP_CAPACITY
+        (carried_units(id, &game.players[player_index]).len() + units.len()) as u8
+            > ship_capacity(player)
     }) {
         return Err("carrier capacity exceeded".to_string());
     }

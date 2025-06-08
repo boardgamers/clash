@@ -7,7 +7,6 @@ use std::ops::{AddAssign, SubAssign};
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::city::is_valid_city_terrain;
 use crate::combat_roll::COMBAT_DIE_SIDES;
-use crate::consts::SHIP_CAPACITY;
 use crate::content::ability::Ability;
 use crate::content::civilizations::china::validate_imperial_army;
 use crate::content::persistent_events::{KilledUnits, PersistentEventType, UnitsRequest};
@@ -16,6 +15,7 @@ use crate::explore::is_any_ship;
 use crate::game::GameState;
 use crate::movement::{CurrentMove, MovementRestriction};
 use crate::player::{Player, remove_unit};
+use crate::special_advance::SpecialAdvance;
 use crate::{game::Game, leader, position::Position, resource_pile::ResourcePile, unit, utils};
 
 #[readonly::make]
@@ -640,7 +640,8 @@ fn save_carried_units(game: &mut Game, player: usize, pos: Position) {
         .iter()
         .filter(|u| u.is_ship())
         .map(|u| {
-            let mut capacity = SHIP_CAPACITY - carried_units(u.id, game.player(player)).len() as u8;
+            let p = game.player(player);
+            let mut capacity = ship_capacity(p) - carried_units(u.id, p).len() as u8;
             while capacity > 0 {
                 capacity -= 1;
                 if let Some(survivor) = survivors.pop() {
@@ -676,7 +677,7 @@ pub(crate) fn choose_carried_units_to_remove() -> Ability {
                 .map(|u| u.id)
                 .collect();
             let capacity =
-                p.get_units(pos).iter().filter(|u| u.is_ship()).count() * SHIP_CAPACITY as usize;
+                p.get_units(pos).iter().filter(|u| u.is_ship()).count() * ship_capacity(p) as usize;
             let to_kill = carried.len().saturating_sub(capacity) as u8;
 
             Some(UnitsRequest::new(
@@ -762,6 +763,14 @@ pub(crate) fn validate_units_selection_for_origin(
     match o {
         EventOrigin::Ability(b) if b == "Imperial Army" => validate_imperial_army(units, p),
         _ => Ok(()),
+    }
+}
+
+pub(crate) fn ship_capacity(p: &Player) -> u8 {
+    if p.has_special_advance(SpecialAdvance::Longships) {
+        3
+    } else {
+        2
     }
 }
 

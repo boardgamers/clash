@@ -9,7 +9,7 @@ use crate::construct::ConstructInfo;
 use crate::content::custom_actions::CustomActionActivation;
 use crate::content::persistent_events::KilledUnits;
 use crate::cultural_influence::{InfluenceCultureInfo, InfluenceCultureOutcome};
-use crate::events::Event;
+use crate::events::{Event, EventOrigin};
 use crate::explore::ExploreResolutionState;
 use crate::game::Game;
 use crate::incident::PassedIncident;
@@ -284,6 +284,11 @@ impl IncidentInfo {
 
     pub(crate) fn get_barbarian_state(&mut self) -> &mut BarbariansEventState {
         self.barbarians.as_mut().expect("barbarians should exist")
+    }
+
+    #[must_use]
+    pub fn origin(&self) -> EventOrigin {
+        EventOrigin::Incident(self.incident_id)
     }
 }
 

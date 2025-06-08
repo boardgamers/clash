@@ -6,6 +6,7 @@ use crate::combat_listeners::CombatResult;
 use crate::content::ability::Ability;
 use crate::content::effects::{Anarchy, PermanentEffect};
 use crate::content::persistent_events::{PaymentRequest, PositionRequest, UnitTypeRequest};
+use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect};
 use crate::leader::Leader;
@@ -68,7 +69,7 @@ pub(crate) fn decide_trojan_horse() -> Ability {
                     ));
                 } else {
                     let player = game.player_mut(s.player_index);
-                    player.event_victory_points += 1_f32;
+                    player.gain_event_victory_points(1_f32, &EventOrigin::Incident(42));
                     game.add_info_log_item(&format!(
                         "{} activated the Trojan Horse and gained 1 victory point",
                         s.player_name
@@ -122,7 +123,7 @@ pub(crate) fn solar_eclipse_end_combat() -> Ability {
                             _ => r.combat.defender(),
                         };
                         let p = game.player_mut(p);
-                        p.event_victory_points += 1_f32;
+                        p.gain_event_victory_points(1_f32, &EventOrigin::Incident(41));
                         game.add_info_log_item(&format!(
                             "{name} gained 1 victory point for the Solar Eclipse",
                         ));
@@ -148,7 +149,7 @@ fn guillotine() -> Incident {
         3,
         |game, player_index, i| {
             i.is_active(IncidentTarget::ActivePlayer, player_index)
-                .then(|| should_choose_new_leader(game, player_index))
+                .then(|| should_choose_new_leader(game, player_index, &i.origin()))
                 .flatten()
         },
         |game, s, i| {
@@ -160,7 +161,8 @@ fn guillotine() -> Incident {
                     "{} gained 2 victory points instead of choosing a new leader",
                     s.player_name
                 ));
-                game.player_mut(s.player_index).event_victory_points += 2_f32;
+                game.player_mut(s.player_index)
+                    .gain_event_victory_points(2_f32, &i.origin());
             }
         },
     )
@@ -225,7 +227,11 @@ fn guillotine() -> Incident {
     .build()
 }
 
-fn should_choose_new_leader(game: &mut Game, player_index: usize) -> Option<String> {
+fn should_choose_new_leader(
+    game: &mut Game,
+    player_index: usize,
+    origin: &EventOrigin,
+) -> Option<String> {
     kill_leader(game, player_index);
 
     let p = game.player(player_index);
@@ -234,7 +240,8 @@ fn should_choose_new_leader(game: &mut Game, player_index: usize) -> Option<Stri
             "{p} has no leaders left to choose from after the Guillotine - \
                                 gained 2 victory points",
         ));
-        game.player_mut(player_index).event_victory_points += 2_f32;
+        game.player_mut(player_index)
+            .gain_event_victory_points(2_f32, origin);
         None
     } else {
         Some("Do you want to choose a new leader instead of 2 victory points?".to_string())
@@ -286,7 +293,7 @@ fn anarchy() -> Incident {
     .add_simple_incident_listener(
         IncidentTarget::ActivePlayer,
         0,
-        |game, player_index, player_name, _| {
+        |game, player_index, player_name, i| {
             let old = game.player(player_index).advances.len();
 
             let remove = game
@@ -307,7 +314,7 @@ fn anarchy() -> Incident {
 
             let p = game.player_mut(player_index);
             let lost = old - p.advances.len();
-            p.event_victory_points += lost as f32;
+            p.gain_event_victory_points(lost as f32, &i.origin());
             if lost > 0 {
                 game.add_info_log_item(&format!(
                     "{player_name} lost {lost} government advances due to Anarchy - \
@@ -349,7 +356,7 @@ pub(crate) fn anarchy_advance() -> Ability {
                         ));
                         let p = game.player_mut(player_index);
                         p.incident_tokens += 1;
-                        p.event_victory_points -= 1_f32;
+                        p.gain_event_victory_points(-1_f32, &EventOrigin::Incident(44));
                         a.advances_lost -= 1;
                         if a.advances_lost > 0 {
                             game.permanent_effects.push(PermanentEffect::Anarchy(a));

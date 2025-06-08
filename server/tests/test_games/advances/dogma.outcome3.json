@@ -178,7 +178,15 @@
         "StateReligion"
       ],
       "incident_tokens": 3,
-      "event_victory_points": 2.0,
+      "special_victory_points": [
+        {
+          "points": 2.0,
+          "origin": {
+            "Incident": 44
+          },
+          "attribution": "Events"
+        }
+      ],
       "next_unit_id": 2,
       "event_info": {
         "StateReligion": "used"

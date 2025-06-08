@@ -24,6 +24,7 @@ pub enum PaymentReason {
     Move,
     ChangeGovernment,
     LeaderAbility,
+    SpecialAdvanceAbility,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]

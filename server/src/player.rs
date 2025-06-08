@@ -2,7 +2,7 @@ use crate::advance::{Advance, base_advance_cost, player_government};
 use crate::city_pieces::DestroyedStructures;
 use crate::consts::{STACK_LIMIT, UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::content::custom_actions::{CustomActionExecution, CustomActionInfo};
-use crate::events::Event;
+use crate::events::{Event, EventOrigin};
 use crate::leader::Leader;
 use crate::leader_ability::LeaderAbility;
 use crate::payment::{PaymentOptions, PaymentReason};
@@ -10,6 +10,10 @@ use crate::player_events::{CostInfo, TransientEvents};
 use crate::playing_actions::PlayingActionType;
 use crate::special_advance::SpecialAdvance;
 use crate::unit::UnitType;
+use crate::victory_points::{
+    SpecialVictoryPoints, VictoryPointAttribution, add_special_victory_points,
+    special_victory_points,
+};
 use crate::wonder::{Wonder, wonders_built_points, wonders_owned_points};
 use crate::{
     city::City,
@@ -64,7 +68,7 @@ pub struct Player {
     pub incident_tokens: u8,
     pub completed_objectives: Vec<String>,
     pub captured_leaders: Vec<Leader>,
-    pub event_victory_points: f32,
+    pub special_victory_points: Vec<SpecialVictoryPoints>,
     pub custom_actions: HashMap<CustomActionType, CustomActionInfo>, // transient
     pub wonder_cards: Vec<Wonder>,
     pub action_cards: Vec<u8>,
@@ -120,7 +124,7 @@ impl Player {
             incident_tokens: 0,
             completed_objectives: Vec::new(),
             captured_leaders: Vec::new(),
-            event_victory_points: 0.0,
+            special_victory_points: Vec::new(),
             custom_actions: HashMap::new(),
             wonder_cards: Vec::new(),
             action_cards: Vec::new(),
@@ -318,13 +322,17 @@ impl Player {
             ),
             (
                 "Objectives",
-                self.completed_objectives.len() as f32 * OBJECTIVE_VICTORY_POINTS,
+                self.completed_objectives.len() as f32 * OBJECTIVE_VICTORY_POINTS
+                    + special_victory_points(self, VictoryPointAttribution::Objectives),
             ),
             (
                 "Wonders",
                 wonders_owned_points(self, game) as f32 + wonders_built_points(self, game),
             ),
-            ("Events", self.event_victory_points),
+            (
+                "Events",
+                special_victory_points(self, VictoryPointAttribution::Events),
+            ),
             (
                 "Captured Leaders",
                 self.captured_leaders.len() as f32 * CAPTURED_LEADER_VICTORY_POINTS,
@@ -636,6 +644,14 @@ impl Player {
                 }
             })
             .collect_vec()
+    }
+
+    pub(crate) fn gain_event_victory_points(&mut self, points: f32, origin: &EventOrigin) {
+        add_special_victory_points(self, points, origin, VictoryPointAttribution::Events);
+    }
+
+    pub(crate) fn gain_objective_victory_points(&mut self, points: f32, origin: &EventOrigin) {
+        add_special_victory_points(self, points, origin, VictoryPointAttribution::Objectives);
     }
 }
 

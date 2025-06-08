@@ -11,7 +11,6 @@ pub const OBJECTIVE_VICTORY_POINTS: f32 = 2.0;
 pub const WONDER_VICTORY_POINTS: u8 = 4;
 pub const CAPTURED_LEADER_VICTORY_POINTS: f32 = 2.0;
 pub const STACK_LIMIT: usize = 4;
-pub const SHIP_CAPACITY: u8 = 2;
 pub const CITY_LIMIT: u8 = 7;
 pub const MOVEMENT_ACTIONS: u32 = 3;
 pub const ARMY_MOVEMENT_REQUIRED_ADVANCE: Advance = Advance::Tactics;

@@ -391,7 +391,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         + Clone
         + Sync
         + Send,
-        gain_reward_log: impl Fn(&Game, &SelectedChoice<ResourcePile>, &mut V) -> Vec<String>
+        gain_reward_log: impl Fn(&mut Game, &SelectedChoice<ResourcePile>, &mut V) -> Vec<String>
         + 'static
         + Clone
         + Sync
