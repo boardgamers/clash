@@ -6,6 +6,7 @@ use server::content::persistent_events::{EventResponse, SelectedStructure, Struc
 use server::cultural_influence::{InfluenceCultureAttempt, affordable_start_city};
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
+use server::recruit::Recruit;
 use server::resource_pile::ResourcePile;
 use server::unit::Units;
 

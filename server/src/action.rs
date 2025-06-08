@@ -6,7 +6,7 @@ use crate::collect::on_collect;
 use crate::combat::{combat_loop, start_combat};
 use crate::combat_listeners::{combat_round_end, combat_round_start, on_end_combat};
 use crate::construct::on_construct;
-use crate::content::custom_actions::execute_custom_action;
+use crate::content::custom_actions::{ on_custom_action};
 use crate::content::persistent_events::{EventResponse, PersistentEventType};
 use crate::cultural_influence::on_cultural_influence;
 use crate::explore::ask_explore_resolution;
@@ -104,6 +104,7 @@ pub fn execute_without_undo(
     action: Action,
     player_index: usize,
 ) -> Result<(), String> {
+    game.log.push(vec![]);
     if matches!(action, Action::Redo) {
         if !game.can_redo() {
             return Err("action can't be redone".to_string());
@@ -112,7 +113,6 @@ pub fn execute_without_undo(
         return Ok(());
     }
 
-    game.log.push(vec![]);
     add_action_log_item(game, action.clone());
 
     if game.context == GameContext::Replay
@@ -269,7 +269,7 @@ pub(crate) fn execute_custom_phase_action(
         SelectObjectives(c) => {
             on_objective_cards(game, player, c);
         }
-        CustomAction(a) => execute_custom_action(game, player, a),
+        CustomAction(a) => on_custom_action(game, player, a),
         ChooseActionCard => on_action_end(game, player),
         ChooseIncident(i) => on_choose_incident(game, player, i),
         CityActivationMoodDecreased(p) => {

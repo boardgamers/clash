@@ -9,21 +9,7 @@ use server::leader::Leader;
 use server::log::current_player_turn_log;
 use server::unit::Units;
 use server::wonder::Wonder;
-use server::{
-    action::Action,
-    advance,
-    city::{City, MoodState::*},
-    city_pieces::Building::*,
-    collect, construct, cultural_influence,
-    game::Game,
-    game_api,
-    map::Terrain::*,
-    playing_actions,
-    playing_actions::PlayingAction::*,
-    position::Position,
-    recruit,
-    resource_pile::ResourcePile,
-};
+use server::{action::Action, advance, city::{City, MoodState::*}, city_pieces::Building::*, collect, construct, cultural_influence, game::Game, game_api, happiness, map::Terrain::*, playing_actions, playing_actions::PlayingAction::*, position::Position, recruit, resource_pile::ResourcePile};
 use std::{collections::HashMap, vec};
 
 mod common;

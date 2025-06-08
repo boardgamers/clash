@@ -161,9 +161,21 @@ impl AbilityInitializerSetup for ActionCardBuilder {
 }
 
 pub(crate) fn play_action_card(game: &mut Game, player_index: usize, id: u8) {
+    let card = game.cache.get_civil_card(id).clone();
+    let action = if card.action_type.free {
+        ""
+    } else {
+        " as a regular action"
+    };
+
+    game.add_info_log_item(&format!(
+        "{} played the action card {}{action}",
+        game.player_name(player_index),
+        card.name
+    ));
+
     discard_action_card(game, player_index, id);
     let mut satisfying_action: Option<usize> = None;
-    let card = game.cache.get_civil_card(id);
     let civil_card_target = card.target;
     if let Some(r) = &card.combat_requirement {
         if let Some(action_log_index) = combat_requirement_met(game, player_index, id, r) {

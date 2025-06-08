@@ -203,7 +203,9 @@ impl PlayingAction {
                     CustomActionActivation::new(custom_action, action_payment),
                 );
             }
-            EndTurn => game.next_turn(),
+            EndTurn => {
+                end_turn(game, player_index);
+            }
         }
         Ok(())
     }
@@ -430,3 +432,16 @@ pub(crate) fn pay_for_action() -> Ability {
         )
         .build()
 }
+
+fn end_turn(game: &mut Game, player: usize) {
+    game.add_info_log_item(&format!(
+        "{} ended their turn{}",
+        game.player(player),
+        match game.actions_left {
+            0 => String::new(),
+            actions_left => format!(" with {actions_left} actions left"),
+        }
+    ));
+    game.next_turn();
+}
+

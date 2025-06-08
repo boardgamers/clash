@@ -1,3 +1,6 @@
+use server::collect::Collect;
+use server::happiness::IncreaseHappiness;
+use server::recruit::Recruit;
 #[cfg(not(target_arch = "wasm32"))]
 use crate::common::JsonTest;
 

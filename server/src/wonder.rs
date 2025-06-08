@@ -407,13 +407,15 @@ pub(crate) fn build_wonder_handler() -> Ability {
             |e| &mut e.play_wonder_card,
             11,
             move |game, player_index, i| {
-                let p = game.player(player_index);
-                let choices = cities_for_wonder(i.wonder, game, p, i.cost.clone());
+                game.add_info_log_item(&format!(
+                    "{} played the wonder card {}",
+                    game.player_name(player_index),
+                    i.wonder.name()
+                ));
 
-                let needed = 1..=1;
                 Some(PositionRequest::new(
-                    choices,
-                    needed,
+                    cities_for_wonder(i.wonder, game, game.player(player_index), i.cost.clone()),
+                    1..=1,
                     "Select city to build wonder",
                 ))
             },

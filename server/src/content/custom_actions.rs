@@ -285,6 +285,21 @@ pub(crate) fn execute_custom_action(
     player_index: usize,
     a: CustomActionActivation,
 ) {
+    let action = a.action.clone();
+    let p = game.player(player_index);
+    let name = custom_action_execution(p, action.action).ability.name;
+    game.add_info_log_item(&format!(
+        "{p} started {name}{}",
+        if let Some(p) = action.city {
+            format!(" at {p}")
+        } else {
+            String::new()
+        }
+    ));
+    on_custom_action(game, player_index, a);
+}
+
+pub(crate) fn on_custom_action(game: &mut Game, player_index: usize, a: CustomActionActivation) {
     let _ = trigger_persistent_event_with_listener(
         game,
         &[player_index],
