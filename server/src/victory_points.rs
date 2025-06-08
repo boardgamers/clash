@@ -5,9 +5,11 @@ use crate::consts::{
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::player::Player;
+use crate::position::Position;
 use crate::wonder::{wonders_built_points, wonders_owned_points};
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
+use std::mem;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Copy)]
 pub enum VictoryPointAttribution {
@@ -16,10 +18,67 @@ pub enum VictoryPointAttribution {
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct SpecialVictoryPoints {
+pub struct VictoryPointsWithTags {
     pub points: f32,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub explorer_blocks: Vec<Position>,
+}
+
+impl VictoryPointsWithTags {
+    fn assert_positive(&self) {
+        assert!(
+            self.points >= 0.0,
+            "Victory points cannot be negative: {self:?}"
+        );
+    }
+
+    #[must_use]
+    fn set_points(mut self, points: f32) -> Self {
+        self.points = points;
+        self.assert_positive();
+        self
+    }
+
+    #[must_use]
+    fn add_points(mut self, points: f32) -> Self {
+        self.points += points;
+        self.assert_positive();
+        self
+    }
+}
+
+impl Default for VictoryPointsWithTags {
+    fn default() -> Self {
+        Self {
+            points: 0.0,
+            explorer_blocks: Vec::new(),
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct SpecialVictoryPoints {
+    #[serde(flatten)]
+    pub points: VictoryPointsWithTags,
     pub origin: EventOrigin,
     pub attribution: VictoryPointAttribution,
+}
+
+impl SpecialVictoryPoints {
+    #[must_use]
+    pub fn new(
+        points: VictoryPointsWithTags,
+        origin: EventOrigin,
+        attribution: VictoryPointAttribution,
+    ) -> Self {
+        points.assert_positive();
+        Self {
+            points,
+            origin,
+            attribution,
+        }
+    }
 }
 
 pub(crate) fn add_special_victory_points(
@@ -28,7 +87,7 @@ pub(crate) fn add_special_victory_points(
     origin: &EventOrigin,
     attribution: VictoryPointAttribution,
 ) {
-    update_special_victory_points(player, origin, attribution, |v| assert_positive(v + points));
+    update_special_victory_points(player, origin, attribution, |v| v.add_points(points));
 }
 
 pub(crate) fn set_special_victory_points(
@@ -37,14 +96,14 @@ pub(crate) fn set_special_victory_points(
     origin: &EventOrigin,
     attribution: VictoryPointAttribution,
 ) {
-    update_special_victory_points(player, origin, attribution, |_| assert_positive(points));
+    update_special_victory_points(player, origin, attribution, |v| v.set_points(points));
 }
 
 pub(crate) fn update_special_victory_points(
     player: &mut Player,
     origin: &EventOrigin,
     attribution: VictoryPointAttribution,
-    update: impl Fn(f32) -> f32,
+    update: impl Fn(VictoryPointsWithTags) -> VictoryPointsWithTags,
 ) {
     if let Some(v) = player
         .special_victory_points
@@ -52,27 +111,26 @@ pub(crate) fn update_special_victory_points(
         .position(|p| &p.origin == origin)
     {
         player.special_victory_points[v].points =
-            assert_positive(update(player.special_victory_points[v].points));
-        player.special_victory_points.retain(|p| p.points > 0.0);
+            update(mem::take(&mut player.special_victory_points[v].points));
     } else {
-        player.special_victory_points.push(SpecialVictoryPoints {
-            points: assert_positive(update(0.0)),
-            origin: origin.clone(),
-            attribution,
-        });
+        player
+            .special_victory_points
+            .push(SpecialVictoryPoints::new(
+                update(VictoryPointsWithTags::default()),
+                origin.clone(),
+                attribution,
+            ));
     }
-}
-
-fn assert_positive(points: f32) -> f32 {
-    assert!(points >= 0.0, "Victory points cannot be negative: {points}");
-    points
+    player
+        .special_victory_points
+        .retain(|p| p.points.points > 0.0);
 }
 
 pub(crate) fn special_victory_points(p: &Player, attribution: VictoryPointAttribution) -> f32 {
     p.special_victory_points
         .iter()
         .filter(|v| v.attribution == attribution)
-        .map(|v| v.points)
+        .map(|v| v.points.points)
         .sum()
 }
 

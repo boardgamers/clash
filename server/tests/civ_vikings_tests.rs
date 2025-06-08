@@ -1,4 +1,4 @@
-use crate::common::{JsonTest, TestAction, move_action, payment_response, custom_action};
+use crate::common::{JsonTest, TestAction, custom_action, move_action, payment_response};
 use server::action::Action;
 use server::content::custom_actions::CustomActionType;
 use server::content::persistent_events::EventResponse;
@@ -67,7 +67,7 @@ fn test_danegeld() {
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::ResourceReward(ResourcePile::food(4))),
-            )
+            ),
         ],
     );
 }

@@ -3,7 +3,7 @@ use crate::advance::Advance;
 use crate::city_pieces::Building;
 use crate::civilization::Civilization;
 use crate::consts::STACK_LIMIT;
-use crate::content::ability::Ability;
+use crate::content::ability::{Ability, AbilityBuilder};
 use crate::content::advances::economy::use_taxes;
 use crate::content::advances::trade_routes::TradeRoute;
 use crate::content::custom_actions::CustomActionType;
@@ -12,14 +12,18 @@ use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::leader::{Leader, LeaderInfo, leader_position};
 use crate::leader_ability::{LeaderAbility, activate_leader_city, can_activate_leader_city};
-use crate::map::{Block, Terrain, capital_position};
+use crate::map::{Block, Terrain, block_for_position, capital_city_position};
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::Player;
 use crate::position::Position;
 use crate::resource::ResourceType;
+use crate::resource_pile::ResourcePile;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
 use crate::unit::{Unit, UnitType, Units, carried_units};
-use crate::victory_points::{VictoryPointAttribution, set_special_victory_points};
+use crate::victory_points::{
+    SpecialVictoryPoints, VictoryPointAttribution, set_special_victory_points,
+    update_special_victory_points,
+};
 use itertools::Itertools;
 use std::ops::RangeInclusive;
 
@@ -27,7 +31,7 @@ pub(crate) fn vikings() -> Civilization {
     Civilization::new(
         "Vikings",
         vec![ship_construction(), longships(), raids(), runes()],
-        vec![knut()],
+        vec![knut(), erik()],
         Some(Block::new([
             Terrain::Fertile,
             Terrain::Mountain,
@@ -311,25 +315,21 @@ fn danegeld() -> LeaderAbility {
         "If you have Taxes: As aa action, you may activate the leader city: \
             Collect taxes",
     )
-        .add_custom_action(
-            CustomActionType::Danegeld,
-            |c| {
-                c.any_times()
-                    .action()
-                    .no_resources()
-            },
-            |b| {
-                use_taxes(b.add_simple_persistent_event_listener(
-                    |event| &mut event.custom_action,
-                    -1,
-                    |game, player, _player_name, _| {
-                        activate_leader_city(game, player, "collect taxes");
-                    },
-                ))
-            },
-            |game, p| can_activate_leader_city(game, p) && p.can_use_advance(Advance::Taxes),
-        )
-        .build()
+    .add_custom_action(
+        CustomActionType::Danegeld,
+        |c| c.any_times().action().no_resources(),
+        |b| {
+            use_taxes(b.add_simple_persistent_event_listener(
+                |event| &mut event.custom_action,
+                -1,
+                |game, player, _player_name, _| {
+                    activate_leader_city(game, player, "collect taxes");
+                },
+            ))
+        },
+        |game, p| can_activate_leader_city(game, p) && p.can_use_advance(Advance::Taxes),
+    )
+    .build()
 }
 
 fn ruler_of_the_north() -> LeaderAbility {
@@ -371,7 +371,7 @@ fn set_knut_points(
     let points = if p.active_leader().is_some_and(|l| l == Leader::Knut) {
         position
             .unwrap_or_else(|| leader_position(p))
-            .distance(capital_position(game, p)) as f32
+            .distance(capital_city_position(game, p)) as f32
             / 2.0
     } else {
         0_f32
@@ -382,4 +382,84 @@ fn set_knut_points(
         origin,
         VictoryPointAttribution::Events,
     );
+}
+
+fn erik() -> LeaderInfo {
+    // todo new colonies
+    let ability = explorer();
+    LeaderInfo::new(
+        Leader::Erik,
+        "Erik the Red",
+        ability,
+        LeaderAbility::builder("", "").build(),
+    )
+}
+
+fn explorer() -> LeaderAbility {
+    LeaderAbility::builder(
+        "Legendary Explorer",
+        "As an action, if Erik is on a ship, pay 1 culture token: \
+        Place an explorer token a region that has no explorer token yet. \
+        Each token is worth 1 objective point at the end of the game.",
+    )
+    .add_custom_action(
+        CustomActionType::LegendaryExplorer,
+        |c| {
+            c.any_times()
+                .action()
+                .resources(ResourcePile::culture_tokens(1))
+        },
+        use_great_explorer,
+        |game, p| {
+            let position = leader_position(p);
+            game.map.is_sea(position) && !is_current_block_tagged(game, p, position)
+        },
+    )
+    .build()
+}
+
+fn use_great_explorer(b: AbilityBuilder) -> AbilityBuilder {
+    let origin = b.get_key().clone();
+    b.add_simple_persistent_event_listener(
+        |event| &mut event.custom_action,
+        0,
+        move |game, player_index, _player_name, _| {
+            let player = game.player_mut(player_index);
+            let position = leader_position(player);
+            // let mut points_with_tags = explore_points(player).map_or_else(
+            //     || VictoryPointsWithTags::default(),
+            //     |v| v.points.clone()
+            // );
+            // points_with_tags.points += 1.0;
+            // points_with_tags.explorer_blocks.push(position);
+
+            update_special_victory_points(
+                player,
+                &origin,
+                VictoryPointAttribution::Objectives,
+                |mut v| {
+                    v.points += 1.0;
+                    v.explorer_blocks.push(position);
+                    v
+                },
+            );
+        },
+    )
+}
+
+fn is_current_block_tagged(game: &Game, player: &Player, position: Position) -> bool {
+    let block_position = block_for_position(game, position);
+    explore_points(player).is_some_and(|v| {
+        v.points
+            .explorer_blocks
+            .iter()
+            .any(|p| block_for_position(game, *p) == block_position)
+    })
+}
+
+fn explore_points(player: &Player) -> Option<&SpecialVictoryPoints> {
+    player
+        .special_victory_points
+        .iter()
+        .find(|v| !v.points.explorer_blocks.is_empty())
 }

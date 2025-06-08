@@ -303,47 +303,51 @@ fn caesar() -> LeaderInfo {
             PlayingActionType::IncreaseHappiness,
         )
         .build(),
-        LeaderAbility::builder(
-            "Proconsul",
-            "When capturing a city with leader, you may spend 1 gold to gain 1 infantry",
-        )
-        .add_payment_request_listener(
-            |event| &mut event.combat_end,
-            22,
-            |game, player, s| {
-                if !s.player(player).survived_leader() {
-                    return None;
-                }
-
-                let p = game.player(player);
-                if p.available_units().infantry == 0 || !can_add_army_unit(p, leader_position(p)) {
-                    return None;
-                }
-                s.captured_city(player, game)
-                    .then_some(vec![PaymentRequest::optional(
-                        PaymentOptions::resources(
-                            p,
-                            PaymentReason::LeaderAbility,
-                            ResourcePile::gold(1),
-                        ),
-                        "Pay 1 gold to gain 1 infantry",
-                    )])
-            },
-            |game, c, _| {
-                if !c.choice.is_empty() {
-                    let p = c.player_index;
-                    let position = leader_position(game.player(p));
-                    gain_unit(p, position, UnitType::Infantry, game);
-                    game.add_info_log_item(&format!(
-                        "{} used Proconsul to gain 1 infantry in {position} for {}",
-                        game.player_name(p),
-                        c.choice[0]
-                    ));
-                }
-            },
-        )
-        .build(),
+        proconsul(),
     )
+}
+
+fn proconsul() -> LeaderAbility {
+    LeaderAbility::builder(
+        "Proconsul",
+        "When capturing a city with leader, you may spend 1 gold to gain 1 infantry",
+    )
+    .add_payment_request_listener(
+        |event| &mut event.combat_end,
+        22,
+        |game, player, s| {
+            if !s.player(player).survived_leader() {
+                return None;
+            }
+
+            let p = game.player(player);
+            if p.available_units().infantry == 0 || !can_add_army_unit(p, leader_position(p)) {
+                return None;
+            }
+            s.captured_city(player, game)
+                .then_some(vec![PaymentRequest::optional(
+                    PaymentOptions::resources(
+                        p,
+                        PaymentReason::LeaderAbility,
+                        ResourcePile::gold(1),
+                    ),
+                    "Pay 1 gold to gain 1 infantry",
+                )])
+        },
+        |game, c, _| {
+            if !c.choice.is_empty() {
+                let p = c.player_index;
+                let position = leader_position(game.player(p));
+                gain_unit(p, position, UnitType::Infantry, game);
+                game.add_info_log_item(&format!(
+                    "{} used Proconsul to gain 1 infantry in {position} for {}",
+                    game.player_name(p),
+                    c.choice[0]
+                ));
+            }
+        },
+    )
+    .build()
 }
 
 fn sulla() -> LeaderInfo {

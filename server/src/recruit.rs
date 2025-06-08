@@ -2,7 +2,7 @@ use crate::city::activate_city;
 use crate::consts::STACK_LIMIT;
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
-use crate::map::capital_position;
+use crate::map::capital_city_position;
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::{CostTrigger, Player, gain_unit};
 use crate::player_events::CostInfo;
@@ -255,5 +255,5 @@ pub fn recruit_cost_without_replaced(
 
 fn is_cavalry_province_city(player: &Player, city: Position, game: &Game) -> bool {
     player.has_special_advance(SpecialAdvance::Provinces)
-        && capital_position(game, player).distance(city) >= 3
+        && capital_city_position(game, player).distance(city) >= 3
 }

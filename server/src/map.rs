@@ -562,7 +562,7 @@ pub fn setup_home_city(player: &mut Player, pos: Position) {
     player.cities.push(city);
 }
 
-pub(crate) fn capital_position(game: &Game, player: &Player) -> Position {
+pub(crate) fn capital_city_position(game: &Game, player: &Player) -> Position {
     let setup = get_map_setup(human_players_including_dropped(game));
     let h = &setup.home_positions[player.index];
     h.block.tiles(&h.position, h.position.rotation)[0].0
