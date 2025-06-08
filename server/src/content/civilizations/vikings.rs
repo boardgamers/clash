@@ -199,8 +199,6 @@ pub(crate) fn lose_raid_resource() -> Ability {
         |e| &mut e.turn_start,
         4,
         |game, player_index, ()| {
-            // todo add RAID to event_info
-
             let c = PaymentOptions::sum(
                 game.player(player_index),
                 PaymentReason::SpecialAdvanceAbility,
