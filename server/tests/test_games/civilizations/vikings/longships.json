@@ -117,13 +117,6 @@
           "port_position": "C3"
         }
       ],
-      "civilization": "Greece",
-      "advances": [
-        "Farming",
-        "Mining"
-      ],
-      "incident_tokens": 3,
-      "next_unit_id": 2,
       "units": [
         {
           "position": "C3",
@@ -135,7 +128,14 @@
           "unit_type": "Ship",
           "id": 4
         }
-      ]
+      ],
+      "civilization": "Greece",
+      "advances": [
+        "Farming",
+        "Mining"
+      ],
+      "incident_tokens": 3,
+      "next_unit_id": 2
     },
     {
       "id": 2,
