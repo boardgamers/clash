@@ -98,7 +98,7 @@ impl PlayingActionType {
                 .clone(),
             PlayingActionType::ActionCard(id) => game.cache.get_civil_card(*id).action_type.clone(),
             // action cost of wonder is checked later
-            PlayingActionType::WonderCard(_) | PlayingActionType::EndTurn => ActionCost::free(), 
+            PlayingActionType::WonderCard(_) | PlayingActionType::EndTurn => ActionCost::free(),
             _ => ActionCost::regular(),
         }
     }
@@ -166,13 +166,11 @@ impl PlayingAction {
             .cost(game, player_index)
             .payment_options(game.player(player_index));
         if !payment_options.is_free() {
-            game.add_info_log_item(
-                &format!(
-                    "{} has to pay for the action: {}",
-                    game.player_name(player_index),
-                    payment_options.default
-                ),
-            );
+            game.add_info_log_item(&format!(
+                "{} has to pay for the action: {}",
+                game.player_name(player_index),
+                payment_options.default
+            ));
         }
 
         ActionPayment::new(self).on_pay_action(game, player_index, origin_override)
@@ -458,4 +456,3 @@ fn end_turn(game: &mut Game, player: usize) {
     ));
     game.next_turn();
 }
-

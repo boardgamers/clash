@@ -4,9 +4,9 @@ use server::card::{HandCard, validate_card_selection};
 use server::content::persistent_events::{EventResponse, PersistentEventRequest};
 use server::playing_actions::PlayingAction;
 use server::position::Position;
+use server::recruit;
 use server::resource_pile::ResourcePile;
 use server::unit::Units;
-use server::recruit;
 
 mod common;
 

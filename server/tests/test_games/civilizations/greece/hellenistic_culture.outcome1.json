@@ -270,10 +270,11 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 tried to influence culture the Port in the city at C2 by Player2 using Hellenistic Culture"
+      "Player1 has to pay for the action: 2 mood tokens"
     ],
     [
       "Player1 paid 2 mood tokens for the action",
+      "Player1 tried to influence culture the Port in the city at C2 by Player2 using Hellenistic Culture",
       "Cultural influence succeeded (rolled 6)"
     ]
   ],

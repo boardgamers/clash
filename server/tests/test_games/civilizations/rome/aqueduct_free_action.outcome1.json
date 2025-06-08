@@ -332,10 +332,11 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 started Aqueduct"
+      "Player1 has to pay for the action: 2 ideas"
     ],
     [
       "Player1 paid 2 food for the action",
+      "Player1 started Aqueduct",
       "Player1 uses Aqueduct to gain Sanitation as a free action",
       "Player1 gained 1 mood token as advance bonus"
     ]

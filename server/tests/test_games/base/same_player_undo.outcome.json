@@ -269,7 +269,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 paid 1 food, 1 wood and 1 ore to construct a Observatory in the city at C2 making it Neutral",
+      "Player1 paid 1 food, 1 wood and 1 ore to construct a Observatory in the city at C2",
       "Player1 gained an action card from the pile",
       "Observatory gained 1 action card"
     ]

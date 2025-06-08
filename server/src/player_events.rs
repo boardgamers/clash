@@ -17,6 +17,7 @@ use crate::map::Terrain;
 use crate::objective_card::SelectObjectivesInfo;
 use crate::payment::PaymentOptions;
 use crate::playing_actions::{ActionPayment, PlayingActionType};
+use crate::recruit::Recruit;
 use crate::status_phase::StatusPhaseState;
 use crate::unit::Units;
 use crate::utils;
@@ -29,7 +30,6 @@ use itertools::Itertools;
 use num::Zero;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
-use crate::recruit::Recruit;
 
 pub(crate) type PersistentEvent<V = ()> = Event<Game, PersistentEventInfo, (), V>;
 

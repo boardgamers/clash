@@ -596,7 +596,7 @@
       "Player1 decided to build a Temple at C1"
     ],
     [
-      "Player1 built a Temple at C1 for 2 gold",
+      "Player1 paid 2 gold to construct a Temple in the city at C1",
       "State Religion reduced the food cost to 0"
     ]
   ],

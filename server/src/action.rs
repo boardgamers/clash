@@ -6,7 +6,7 @@ use crate::collect::on_collect;
 use crate::combat::{combat_loop, start_combat};
 use crate::combat_listeners::{combat_round_end, combat_round_start, on_end_combat};
 use crate::construct::on_construct;
-use crate::content::custom_actions::{ on_custom_action};
+use crate::content::custom_actions::on_custom_action;
 use crate::content::persistent_events::{EventResponse, PersistentEventType};
 use crate::cultural_influence::on_cultural_influence;
 use crate::explore::ask_explore_resolution;
