@@ -194,7 +194,7 @@ impl PlayingAction {
                 game,
                 player_index,
                 &i.happiness_increases,
-                i.payment,
+                &i.payment,
                 false,
                 &i.action_type,
             )?,

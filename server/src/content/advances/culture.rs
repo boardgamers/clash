@@ -159,7 +159,7 @@ fn use_sports() -> Ability {
                     game,
                     s.player_index,
                     &[(position, steps)],
-                    pile,
+                    &pile,
                     true,
                     &a.action.action.playing_action_type(),
                 )

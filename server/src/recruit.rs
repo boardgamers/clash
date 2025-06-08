@@ -1,3 +1,4 @@
+use crate::city::activate_city;
 use crate::consts::STACK_LIMIT;
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
@@ -12,7 +13,6 @@ use crate::unit::{UnitType, Units, kill_units, set_unit_position};
 use crate::{combat, utils};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use crate::city::activate_city;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct Recruit {

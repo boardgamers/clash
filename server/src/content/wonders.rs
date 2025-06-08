@@ -2,7 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::do_gain_action_card_from_pile;
 use crate::advance::{Advance, init_great_library};
 use crate::card::{HandCard, all_objective_hand_cards};
-use crate::city::{activate_city, City, MoodState};
+use crate::city::{City, MoodState, activate_city};
 use crate::combat_listeners::CombatRoundEnd;
 use crate::content::ability::{Ability, AbilityBuilder};
 use crate::content::custom_actions::CustomActionType;

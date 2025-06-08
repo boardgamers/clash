@@ -4,7 +4,7 @@ use crate::combat_stats::CombatStats;
 use crate::content::custom_actions::custom_action_modifier_name;
 use crate::playing_actions::PlayingActionType;
 use crate::wonder::Wonder;
-use crate::{action::Action, game::Game, position::Position};
+use crate::{action::Action, game::Game};
 use json_patch::PatchOperation;
 use serde::{Deserialize, Serialize};
 

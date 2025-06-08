@@ -1,14 +1,14 @@
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::advance::Advance;
 use crate::card::draw_card_from_pile;
-use crate::city::{activate_city, City, MoodState};
+use crate::city::{City, MoodState, activate_city};
 use crate::construct::can_construct_anything;
 use crate::consts::WONDER_VICTORY_POINTS;
 use crate::content::ability::Ability;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{PaymentRequest, PersistentEventType, PositionRequest};
 use crate::events::EventOrigin;
-use crate::log::{current_action_log_item};
+use crate::log::current_action_log_item;
 use crate::payment::PaymentOptions;
 use crate::player::{CostTrigger, Player};
 use crate::player_events::CostInfo;

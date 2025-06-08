@@ -1,6 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Advance;
 use crate::card::HandCard;
+use crate::city::activate_city;
 use crate::civilization::Civilization;
 use crate::combat::update_combat_strength;
 use crate::combat_listeners::CombatStrength;
@@ -19,7 +20,6 @@ use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
 use itertools::Itertools;
-use crate::city::activate_city;
 
 pub(crate) fn greece() -> Civilization {
     Civilization::new(

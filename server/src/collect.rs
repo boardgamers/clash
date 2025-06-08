@@ -1,8 +1,9 @@
 use crate::advance::Advance;
+use crate::city::activate_city;
 use crate::content::persistent_events::PersistentEventType;
 use crate::events::EventOrigin;
 use crate::game::Game;
-use crate::log::{ modifier_suffix};
+use crate::log::modifier_suffix;
 use crate::map::Terrain;
 use crate::map::Terrain::{Fertile, Forest, Mountain};
 use crate::player::{CostTrigger, Player};
@@ -15,7 +16,6 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::iter;
-use crate::city::activate_city;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Hash, Debug)]
 pub struct PositionCollection {

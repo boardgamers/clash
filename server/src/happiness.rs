@@ -57,7 +57,7 @@ pub(crate) fn execute_increase_happiness(
     game: &mut Game,
     player_index: usize,
     happiness_increases: &[(Position, u8)],
-    payment: ResourcePile,
+    payment: &ResourcePile,
     already_paid: bool,
     action_type: &PlayingActionType,
 ) -> Result<(), String> {
@@ -109,7 +109,7 @@ pub(crate) fn execute_increase_happiness(
     }
 
     if !already_paid {
-        happiness_cost(player_index, step_sum, trigger, action_type, game).pay(game, &payment);
+        happiness_cost(player_index, step_sum, trigger, action_type, game).pay(game, payment);
     }
     Ok(())
 }

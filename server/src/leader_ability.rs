@@ -2,7 +2,7 @@ use crate::ability_initializer::{
     AbilityInitializerBuilder, AbilityInitializerSetup, AbilityListeners,
 };
 use crate::advance::{Advance, gain_advance_without_payment};
-use crate::city::{activate_city, City};
+use crate::city::{City, activate_city};
 use crate::content::ability::AbilityBuilder;
 use crate::content::advances::AdvanceGroup;
 use crate::content::custom_actions::CustomActionType;

@@ -1,5 +1,5 @@
 use crate::advance::{Advance, gain_advance_without_payment};
-use crate::city::{activate_city, City, MoodState};
+use crate::city::{City, MoodState, activate_city};
 use crate::city_pieces::Building;
 use crate::consts::MAX_CITY_PIECES;
 use crate::content::persistent_events::PersistentEventType;
