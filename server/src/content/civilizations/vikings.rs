@@ -1,5 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Advance;
+use crate::city_pieces::Building;
 use crate::civilization::Civilization;
 use crate::consts::STACK_LIMIT;
 use crate::content::ability::Ability;
@@ -19,7 +20,7 @@ use std::ops::RangeInclusive;
 pub(crate) fn vikings() -> Civilization {
     Civilization::new(
         "Vikings",
-        vec![ship_construction(), longships(), raids()],
+        vec![ship_construction(), longships(), raids(), runes()],
         vec![],
         Some(Block::new([
             Terrain::Fertile,
@@ -247,4 +248,46 @@ pub(crate) fn add_raid_bonus(game: &mut Game, player: usize, routes: &[TradeRout
             }
         }
     }
+}
+
+fn runes() -> SpecialAdvanceInfo {
+    let b = SpecialAdvanceInfo::builder(
+        SpecialAdvance::RuneStones,
+        SpecialAdvanceRequirement::Advance(Advance::Rituals),
+        "Rune Stones",
+        "When you lost 2 or more units in a battle, you may convert 1 Obelisk \
+        to a Rune Stone, which counts as 1 objective victory point.",
+    );
+    let o = b.get_key().clone();
+    b.add_bool_request(
+        |event| &mut event.combat_end,
+        24,
+        |game, player_index, s| {
+            (s.player(player_index)
+                .fighter_losses(s.battleground)
+                .amount()
+                >= 2
+                && game
+                    .player(player_index)
+                    .is_building_available(Building::Obelisk, game))
+            .then_some("Do you want to convert an Obelisk to a Rune Stone?".to_string())
+        },
+        move |game, s, _| {
+            if s.choice {
+                let p = game.player_mut(s.player_index);
+                p.destroyed_structures.add_building(Building::Obelisk);
+                p.gain_objective_victory_points(1.0, &o);
+                game.add_info_log_item(&format!(
+                    "{} converted an Obelisk to a Rune Stone for 1 objective point",
+                    s.player_name
+                ));
+            } else {
+                game.add_info_log_item(&format!(
+                    "{} did not convert an Obelisk to a Rune Stone",
+                    s.player_name
+                ));
+            }
+        },
+    )
+    .build()
 }

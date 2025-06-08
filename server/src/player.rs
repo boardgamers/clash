@@ -650,9 +650,9 @@ impl Player {
         add_special_victory_points(self, points, origin, VictoryPointAttribution::Events);
     }
 
-    // pub(crate) fn gain_objective_victory_points(&mut self, points: f32, origin: &EventOrigin) {
-    //     add_special_victory_points(self, points, origin, VictoryPointAttribution::Objectives);
-    // }
+    pub(crate) fn gain_objective_victory_points(&mut self, points: f32, origin: &EventOrigin) {
+        add_special_victory_points(self, points, origin, VictoryPointAttribution::Objectives);
+    }
 }
 
 pub fn gain_unit(player: usize, position: Position, unit_type: UnitType, game: &mut Game) {
