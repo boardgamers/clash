@@ -562,8 +562,8 @@ pub fn setup_home_city(player: &mut Player, pos: Position) {
     player.cities.push(city);
 }
 
-pub(crate) fn home_position(game: &Game, player: &Player) -> Position {
-    let setup = get_map_setup(game.human_players_count());
+pub(crate) fn capital_position(game: &Game, player: &Player) -> Position {
+    let setup = get_map_setup(human_players_including_dropped(game));
     let h = &setup.home_positions[player.index];
     h.block.tiles(&h.position, h.position.rotation)[0].0
 }
@@ -583,7 +583,7 @@ pub(crate) fn block_has_player_city(game: &Game, p: &BlockPosition, player: usiz
 }
 
 pub(crate) fn block_for_position(game: &Game, position: Position) -> BlockPosition {
-    let setup = get_map_setup(game.human_players_count());
+    let setup = get_map_setup(human_players_including_dropped(game));
     for p in &setup.free_positions {
         if block_tiles(p).contains(&position) {
             return p.clone();
@@ -595,4 +595,8 @@ pub(crate) fn block_for_position(game: &Game, position: Position) -> BlockPositi
         .find(|h| block_tiles(&h.position).contains(&position))
         .expect("Position not found in home positions");
     h.position.clone()
+}
+
+fn human_players_including_dropped(game: &Game) -> usize {
+    game.players.iter().filter(|p| p.is_human()).count()
 }

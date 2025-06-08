@@ -64,6 +64,13 @@
       ],
       "units": [
         {
+          "position": "A1",
+          "unit_type": {
+            "Leader": "Knut"
+          },
+          "id": 0
+        },
+        {
           "position": "C3",
           "unit_type": "Ship",
           "id": 3
@@ -87,6 +94,15 @@
         "WarShips"
       ],
       "incident_tokens": 3,
+      "special_victory_points": [
+        {
+          "points": 1.5,
+          "origin": {
+            "LeaderAbility": "Ruler of the North"
+          },
+          "attribution": "Events"
+        }
+      ],
       "wonder_cards": [
         "Pyramids"
       ],

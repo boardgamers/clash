@@ -28,17 +28,35 @@ pub(crate) fn add_special_victory_points(
     origin: &EventOrigin,
     attribution: VictoryPointAttribution,
 ) {
+    update_special_victory_points(player, origin, attribution, |v| assert_positive(v + points));
+}
+
+pub(crate) fn set_special_victory_points(
+    player: &mut Player,
+    points: f32,
+    origin: &EventOrigin,
+    attribution: VictoryPointAttribution,
+) {
+    update_special_victory_points(player, origin, attribution, |_| assert_positive(points));
+}
+
+pub(crate) fn update_special_victory_points(
+    player: &mut Player,
+    origin: &EventOrigin,
+    attribution: VictoryPointAttribution,
+    update: impl Fn(f32) -> f32,
+) {
     if let Some(v) = player
         .special_victory_points
         .iter()
         .position(|p| &p.origin == origin)
     {
         player.special_victory_points[v].points =
-            assert_positive(points + player.special_victory_points[v].points);
+            assert_positive(update(player.special_victory_points[v].points));
         player.special_victory_points.retain(|p| p.points > 0.0);
     } else {
         player.special_victory_points.push(SpecialVictoryPoints {
-            points: assert_positive(points),
+            points: assert_positive(update(0.0)),
             origin: origin.clone(),
             attribution,
         });

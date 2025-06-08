@@ -56,6 +56,13 @@
       ],
       "units": [
         {
+          "position": "A1",
+          "unit_type": {
+            "Leader": "Knut"
+          },
+          "id": 0
+        },
+        {
           "position": "D2",
           "unit_type": "Ship",
           "id": 3

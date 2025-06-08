@@ -18,10 +18,7 @@ use crate::{
     city::City,
     city_pieces::Building::{self},
     civilization::Civilization,
-    consts::{
-        BUILDING_COST, CITY_LIMIT,
-        CITY_PIECE_LIMIT, UNIT_LIMIT,
-    },
+    consts::{BUILDING_COST, CITY_LIMIT, CITY_PIECE_LIMIT, UNIT_LIMIT},
     content::custom_actions::CustomActionType,
     game::Game,
     leader::LeaderInfo,

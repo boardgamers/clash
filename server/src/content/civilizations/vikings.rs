@@ -6,16 +6,18 @@ use crate::consts::STACK_LIMIT;
 use crate::content::ability::Ability;
 use crate::content::advances::trade_routes::TradeRoute;
 use crate::content::persistent_events::{PaymentRequest, UnitsRequest};
+use crate::events::EventOrigin;
 use crate::game::Game;
-use crate::leader::{Leader, LeaderInfo};
+use crate::leader::{Leader, LeaderInfo, leader_position};
 use crate::leader_ability::LeaderAbility;
-use crate::map::{Block, Terrain};
+use crate::map::{Block, Terrain, capital_position};
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::Player;
 use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
 use crate::unit::{Unit, UnitType, Units, carried_units};
+use crate::victory_points::{VictoryPointAttribution, set_special_victory_points};
 use itertools::Itertools;
 use std::ops::RangeInclusive;
 
@@ -293,12 +295,63 @@ fn runes() -> SpecialAdvanceInfo {
 }
 
 fn knut() -> LeaderInfo {
-    // todo Ruler of the North
     // todo Danegeld
     LeaderInfo::new(
         Leader::Knut,
         "Knut the Great",
-        LeaderAbility::builder("Ruler of the North", "todo").build(),
+        ruler_of_the_north(),
         LeaderAbility::builder("Danegeld", "todo").build(),
     )
+}
+
+fn ruler_of_the_north() -> LeaderAbility {
+    let b = LeaderAbility::builder(
+        "Ruler of the North",
+        "Knut is worth half a point per distance to your capital",
+    );
+    let o = b.get_key().clone();
+    let o2 = o.clone();
+    let o3 = o.clone();
+    b.add_ability_initializer(move |game, player_index, _| {
+        set_knut_points(game, player_index, None, &o);
+    })
+    .add_ability_deinitializer(move |game, player_index| {
+        set_knut_points(game, player_index, None, &o2);
+    })
+    .add_transient_event_listener(
+        |event| &mut event.before_move,
+        1,
+        move |game, i, ()| {
+            if i.units
+                .iter()
+                .any(|&id| game.player(i.player).get_unit(id).is_leader())
+            {
+                set_knut_points(game, i.player, Some(i.to), &o3);
+            }
+        },
+    )
+    .build()
+}
+
+fn set_knut_points(
+    game: &mut Game,
+    player_index: usize,
+    position: Option<Position>,
+    origin: &EventOrigin,
+) {
+    let p = game.player(player_index);
+    let points = if p.active_leader().is_some_and(|l| l == Leader::Knut) {
+        position
+            .unwrap_or_else(|| leader_position(p))
+            .distance(capital_position(game, p)) as f32
+            / 2.0
+    } else {
+        0_f32
+    };
+    set_special_victory_points(
+        game.player_mut(player_index),
+        points,
+        origin,
+        VictoryPointAttribution::Events,
+    );
 }
