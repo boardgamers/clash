@@ -189,17 +189,10 @@ pub(crate) fn play_action_card(game: &mut Game, player_index: usize, id: u8) {
 }
 
 pub(crate) fn log_execute_action_card(game: &mut Game, player_index: usize, id: u8) {
-    let card = game.cache.get_civil_card(id).clone();
-    let action = if card.action_type.free {
-        ""
-    } else {
-        " as a regular action"
-    };
-
     game.add_info_log_item(&format!(
-        "{} played the action card {}{action}",
+        "{} played the action card {}",
         game.player_name(player_index),
-        card.name
+        game.cache.get_civil_card(id).clone().name
     ));
 }
 
