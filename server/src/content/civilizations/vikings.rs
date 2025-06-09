@@ -2,27 +2,29 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Advance;
 use crate::city_pieces::Building;
 use crate::civilization::Civilization;
+use crate::combat::move_with_possible_combat;
 use crate::consts::STACK_LIMIT;
 use crate::content::ability::{Ability, AbilityBuilder};
 use crate::content::advances::economy::use_taxes;
 use crate::content::advances::trade_routes::TradeRoute;
 use crate::content::custom_actions::CustomActionType;
-use crate::content::persistent_events::{PaymentRequest, UnitsRequest};
+use crate::content::persistent_events::{PaymentRequest, PositionRequest, UnitsRequest};
 use crate::events::EventOrigin;
 use crate::game::Game;
-use crate::leader::{Leader, LeaderInfo, leader_position};
-use crate::leader_ability::{LeaderAbility, activate_leader_city, can_activate_leader_city};
-use crate::map::{Block, Terrain, block_for_position, capital_city_position};
+use crate::leader::{leader_position, Leader, LeaderInfo};
+use crate::leader_ability::{activate_leader_city, can_activate_leader_city, LeaderAbility};
+use crate::map::{block_for_position, capital_city_position, Block, Terrain};
+use crate::movement::{move_action_log, MoveUnits};
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::Player;
 use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
-use crate::unit::{Unit, UnitType, Units, carried_units};
+use crate::unit::{carried_units, Unit, UnitType, Units};
 use crate::victory_points::{
-    SpecialVictoryPoints, VictoryPointAttribution, set_special_victory_points,
-    update_special_victory_points,
+    set_special_victory_points, update_special_victory_points, SpecialVictoryPoints,
+    VictoryPointAttribution,
 };
 use itertools::Itertools;
 use std::ops::RangeInclusive;
@@ -398,21 +400,59 @@ fn new_colonies() -> LeaderAbility {
         CustomActionType::NewColonies,
         |c| c.any_times().free_action().no_resources(),
         |b| {
-            // todo
-            // b.add_position_request(
-            //     |event| &mut event.custom_action,
-            //     0,
-            //     |builder1| {}
-            //     "Select a land position to unload Erik's ship",
-            // )
-            b
+            b.add_position_request(
+                |event| &mut event.custom_action,
+                0,
+                |game, player_index, _| {
+                    Some(PositionRequest::new(
+                        unload_positions(game, game.player(player_index)),
+                        1..=1,
+                        "Select a land position to unload Erik's ship",
+                    ))
+                },
+                |game, s, _a| {
+                    let to = s.choice[0];
+                    
+                    // game.add_info_log_item(
+                    //     &format!(
+                    //         "{} decided to unload Erik's ship at {}",
+                    //         s.player_name, dest
+                    //     ),
+                    // );
+                    let p = game.player(s.player_index);
+                    let units = p
+                        .get_units(leader_position(p))
+                        .iter()
+                        .filter(|u| !u.is_ship())
+                        .map(|u| u.id)
+                        .collect_vec();
+                    
+                    let m = MoveUnits::new(units, to, None, ResourcePile::empty());
+                    game.add_info_log_item(&move_action_log(game, p, &m));
+                    
+                    move_with_possible_combat(
+                        game,
+                        s.player_index,
+                        &m,
+                    );
+                },
+            )
         },
-        |game, p| {
-            let position = leader_position(p);
-            game.map.is_sea(position) && position.neighbors().iter().any(|&n| game.map.is_land(n))
-        },
+        |game, p| !unload_positions(game, p).is_empty(),
     )
     .build()
+}
+
+fn unload_positions(game: &Game, p: &Player) -> Vec<Position> {
+    let position = leader_position(p);
+    if !game.map.is_sea(position) {
+        return vec![];
+    }
+    position
+        .neighbors()
+        .into_iter()
+        .filter(|n| game.map.is_land(*n))
+        .collect_vec()
 }
 
 fn explorer() -> LeaderAbility {

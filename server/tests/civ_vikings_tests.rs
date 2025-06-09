@@ -82,3 +82,21 @@ fn explorer() {
         ],
     );
 }
+
+#[test]
+fn new_colonies() {
+    JSON.test(
+        "new_colonies",
+        vec![
+            TestAction::undoable(0, custom_action(CustomActionType::NewColonies)).skip_json(),
+            TestAction::not_undoable(
+                0,
+                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset("D1")])),
+            ).skip_json(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectUnits(vec![0])),
+            ),
+        ],
+    );
+}

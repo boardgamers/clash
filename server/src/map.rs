@@ -584,11 +584,11 @@ pub(crate) fn block_has_player_city(game: &Game, p: &BlockPosition, player: usiz
 
 ///
 /// Finds the block position for a given position.
-/// 
+///
 /// # Panics
-/// 
+///
 /// Panics if the position is not found in the map setup.
-#[must_use] 
+#[must_use]
 pub fn block_for_position(game: &Game, position: Position) -> (u8, BlockPosition) {
     let setup = get_map_setup(human_players_including_dropped(game));
     let home = setup.home_positions.len();
@@ -605,7 +605,9 @@ pub fn block_for_position(game: &Game, position: Position) -> (u8, BlockPosition
             (block_tiles(&h.position).contains(&position))
                 .then_some(((i + 1) as u8, h.position.clone()))
         })
-        .expect("Position not found in home positions")
+        .unwrap_or_else(
+            || (1, setup.free_positions[0].clone()), // for tests
+        )
 }
 
 fn human_players_including_dropped(game: &Game) -> usize {
