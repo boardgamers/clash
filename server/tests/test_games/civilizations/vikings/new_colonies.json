@@ -104,13 +104,6 @@
     },
     {
       "id": 1,
-      "units": [
-        {
-          "position": "D1",
-          "unit_type": "Infantry",
-          "id": 0
-        }
-      ],
       "resources": {
         "food": 2,
         "wood": 5,
@@ -140,6 +133,13 @@
           "mood_state": "Neutral",
           "position": "B2",
           "port_position": "C3"
+        }
+      ],
+      "units": [
+        {
+          "position": "D1",
+          "unit_type": "Infantry",
+          "id": 0
         }
       ],
       "civilization": "Greece",
