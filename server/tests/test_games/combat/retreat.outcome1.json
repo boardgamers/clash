@@ -242,6 +242,7 @@
                                     }
                                   },
                                   "battleground": "City",
+                                  "city_mood": "Angry",
                                   "defender": {
                                     "player": 1,
                                     "position": "C1",

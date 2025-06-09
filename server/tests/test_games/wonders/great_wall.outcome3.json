@@ -293,7 +293,8 @@
                         "cavalry": 1
                       }
                     },
-                    "result": "Draw"
+                    "result": "Draw",
+                    "city_mood": "Happy"
                   }
                 },
                 {
@@ -343,7 +344,8 @@
                     "result": "DefenderWins",
                     "claimed_action_cards": [
                       5
-                    ]
+                    ],
+                    "city_mood": "Happy"
                   }
                 },
                 {

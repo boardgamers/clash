@@ -221,7 +221,8 @@
                         "infantry": 2
                       }
                     },
-                    "result": "Draw"
+                    "result": "Draw",
+                    "city_mood": "Angry"
                   }
                 }
               ]
