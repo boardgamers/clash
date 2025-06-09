@@ -91,12 +91,12 @@ fn new_colonies() {
             TestAction::undoable(0, custom_action(CustomActionType::NewColonies)).skip_json(),
             TestAction::not_undoable(
                 0,
-                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset("D1")])),
-            ).skip_json(),
-            TestAction::undoable(
-                0,
-                Action::Response(EventResponse::SelectUnits(vec![0])),
-            ),
+                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+                    "D1",
+                )])),
+            )
+            .skip_json(),
+            TestAction::undoable(0, Action::Response(EventResponse::SelectUnits(vec![0]))),
         ],
     );
 }
@@ -105,9 +105,9 @@ fn new_colonies() {
 fn prey() {
     JSON.test(
         "prey",
-        vec![
-            TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("D1"))),
-        ],
+        vec![TestAction::not_undoable(
+            0,
+            move_action(vec![0], Position::from_offset("D1")),
+        )],
     )
 }
-

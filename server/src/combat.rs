@@ -142,6 +142,11 @@ impl Combat {
     }
 
     #[must_use]
+    pub fn is_disembarking_attacker(&self, role: CombatRole, game: &Game) -> bool {
+        role.is_attacker() && game.map.is_sea(self.stats.attacker.position)
+    }
+
+    #[must_use]
     pub fn opponent(&self, player: usize) -> usize {
         if player == self.attacker() {
             self.defender()

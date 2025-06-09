@@ -520,7 +520,6 @@ pub fn has_explore_token(game: &Game, position: Position) -> bool {
 }
 
 fn ragnar() -> LeaderInfo {
-    // todo Horror of the North
     LeaderInfo::new(
         Leader::Ragnar,
         "Ragnar Lodbrok",
@@ -539,6 +538,16 @@ fn ragnar() -> LeaderInfo {
                 },
             )
             .build(),
-        LeaderAbility::builder("Horror of the North", "").build(),
+        LeaderAbility::builder(
+            "Horror of the North",
+            "In leader battles when disembarking: Get +2 combat value",
+        )
+        .add_combat_strength_listener(106, |game, c, s, r| {
+            if c.has_leader(r, game) && c.is_disembarking_attacker(r, game) {
+                s.extra_combat_value += 2;
+                s.roll_log.push("Ragnar adds 2 combat value".to_string());
+            }
+        })
+        .build(),
     )
 }
