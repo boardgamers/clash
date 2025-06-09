@@ -318,10 +318,10 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player1 has to pay for the action: 1 culture token"
+      "Player1 has to pay 1 culture token for New Plans"
     ],
     [
-      "Player1 paid 1 culture token for the action",
+      "Player1 paid 1 culture token for New Plans",
       "Player1 played the action card New Plans as a regular action"
     ],
     [

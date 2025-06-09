@@ -9,7 +9,7 @@ use crate::construct::Construct;
 use crate::content::ability::Ability;
 use crate::content::custom_actions::{
     CustomAction, CustomActionActivation, CustomActionType, can_play_custom_action,
-    execute_custom_action,
+    custom_action_name, execute_custom_action,
 };
 use crate::content::persistent_events::{
     PaymentRequest, PersistentEventType, TriggerPersistentEventParams, trigger_persistent_event_ext,
@@ -108,6 +108,17 @@ impl PlayingActionType {
         self.cost(game, player_index)
             .payment_options(game.player(player_index))
     }
+
+    pub(crate) fn payable_action_name(&self, player: &Player, game: &Game) -> String {
+        match self {
+            PlayingActionType::Custom(c) => custom_action_name(player, *c),
+            PlayingActionType::ActionCard(id) => game.cache.get_civil_card(*id).name.clone(),
+            _ => panic!(
+                "PlayingAction::payable_action_name called on an action \
+                that is not payable up front: {self:?}",
+            ),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
@@ -171,9 +182,10 @@ impl PlayingAction {
         let payment_options = action_type.payment_options(game, player_index);
         if !payment_options.is_free() {
             game.add_info_log_item(&format!(
-                "{} has to pay for the action: {}",
+                "{} has to pay {} for {}",
                 game.player_name(player_index),
-                payment_options.default
+                payment_options.default,
+                action_type.payable_action_name(game.player(player_index), game)
             ));
         }
 
@@ -443,9 +455,11 @@ pub(crate) fn pay_for_action() -> Ability {
         },
         |game, s, a| {
             a.payment = s.choice[0].clone();
+            let p = game.player(s.player_index);
+            let action_type = a.action.playing_action_type(p).payable_action_name(p, game);
             game.add_info_log_item(&format!(
-                "{} paid {} for the action",
-                s.player_name, s.choice[0]
+                "{} paid {} for {action_type}",
+                s.player_name, s.choice[0],
             ));
         },
     )

@@ -307,7 +307,7 @@
                           },
                           "handler": {
                             "origin": {
-                              "Ability": "Pay for action card"
+                              "Ability": "Pay for action"
                             },
                             "priority": 0,
                             "request": {
@@ -375,10 +375,10 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 has to pay for the action: 1 culture token"
+      "Player1 has to pay 1 culture token for Legendary Explorer"
     ],
     [
-      "Player1 paid 1 culture token for the action",
+        "Player1 paid 1 culture token for Legendary Explorer",
       "Player1 started Legendary Explorer",
       "Player1 placed an explorer token at D2"
     ]

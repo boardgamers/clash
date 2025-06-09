@@ -335,7 +335,7 @@ pub(crate) fn custom_action_execution(
     }
 }
 
-pub(crate) fn custom_action_modifier_name(
+pub(crate) fn custom_action_name(
     player: &Player,
     action_type: CustomActionType,
 ) -> String {

@@ -268,10 +268,10 @@
   "action_log_index": 0,
   "log": [
     [
-      "Player1 has to pay for the action: 1 culture token"
+      "Player1 has to pay 1 culture token for Assassination"
     ],
     [
-      "Player1 paid 1 culture token for the action",
+      "Player1 paid 1 culture token for Assassination",
       "Player1 played the action card Assassination",
       "Player2 has been assassinated by Player1."
     ],

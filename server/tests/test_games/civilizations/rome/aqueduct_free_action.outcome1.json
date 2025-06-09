@@ -252,7 +252,7 @@
                           },
                           "handler": {
                             "origin": {
-                              "Ability": "Pay for action card"
+                              "Ability": "Pay for action"
                             },
                             "priority": 0,
                             "request": {
@@ -332,10 +332,10 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 has to pay for the action: 2 ideas"
+      "Player1 has to pay 2 ideas for Aqueduct"
     ],
     [
-      "Player1 paid 2 food for the action",
+      "Player1 paid 2 food for Aqueduct",
       "Player1 started Aqueduct",
       "Player1 uses Aqueduct to gain Sanitation as a free action",
       "Player1 gained 1 mood token as advance bonus"

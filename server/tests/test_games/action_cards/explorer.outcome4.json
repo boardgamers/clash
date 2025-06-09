@@ -548,10 +548,10 @@
   "action_log_index": 5,
   "log": [
     [
-      "Player2 has to pay for the action: 1 culture token"
+      "Player2 has to pay 1 culture token for Explorer"
     ],
     [
-      "Player2 paid 1 culture token for the action",
+      "Player2 paid 1 culture token for Explorer",
       "Player2 played the action card Explorer as a regular action"
     ],
     [

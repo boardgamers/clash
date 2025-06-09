@@ -1,7 +1,7 @@
 use crate::player::Player;
 
 use crate::combat_stats::CombatStats;
-use crate::content::custom_actions::custom_action_modifier_name;
+use crate::content::custom_actions::custom_action_name;
 use crate::playing_actions::PlayingActionType;
 use crate::wonder::Wonder;
 use crate::{action::Action, game::Game};
@@ -113,7 +113,7 @@ pub(crate) fn linear_action_log(game: &Game) -> Vec<Action> {
 
 pub(crate) fn modifier_suffix(player: &Player, action_type: &PlayingActionType) -> String {
     if let PlayingActionType::Custom(c) = action_type {
-        format!(" using {}", custom_action_modifier_name(player, *c))
+        format!(" using {}", custom_action_name(player, *c))
     } else {
         String::new()
     }
