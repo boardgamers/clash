@@ -162,7 +162,7 @@ impl AbilityInitializerSetup for ActionCardBuilder {
 
 pub(crate) fn play_action_card(game: &mut Game, player_index: usize, id: u8) {
     let card = game.cache.get_civil_card(id).clone();
-    
+
     discard_action_card(game, player_index, id);
     let mut satisfying_action: Option<usize> = None;
     let civil_card_target = card.target;

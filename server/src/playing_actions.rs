@@ -7,7 +7,10 @@ use crate::city::execute_found_city_action;
 use crate::collect::{Collect, execute_collect};
 use crate::construct::Construct;
 use crate::content::ability::Ability;
-use crate::content::custom_actions::{CustomAction, CustomActionActivation, CustomActionType, can_play_custom_action, custom_action_name, on_custom_action, log_start_custom_action};
+use crate::content::custom_actions::{
+    CustomAction, CustomActionActivation, CustomActionType, can_play_custom_action,
+    custom_action_name, log_start_custom_action, on_custom_action,
+};
 use crate::content::persistent_events::{
     PaymentRequest, PersistentEventType, TriggerPersistentEventParams, trigger_persistent_event_ext,
 };
@@ -167,7 +170,7 @@ impl PlayingAction {
             }
             _ => {}
         }
-        
+
         let action_type = self.playing_action_type(game.player(player_index));
         let origin_override = match action_type {
             PlayingActionType::Custom(c) => {

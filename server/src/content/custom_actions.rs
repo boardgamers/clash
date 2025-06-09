@@ -329,10 +329,7 @@ pub(crate) fn custom_action_execution(
     }
 }
 
-pub(crate) fn custom_action_name(
-    player: &Player,
-    action_type: CustomActionType,
-) -> String {
+pub(crate) fn custom_action_name(player: &Player, action_type: CustomActionType) -> String {
     match player.custom_action_info(action_type).execution {
         CustomActionExecution::Modifier((_, name)) => name.clone(),
         // Sports is not a modifier, but is shown for logging purposes as a modifier
