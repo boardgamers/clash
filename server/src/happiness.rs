@@ -130,7 +130,7 @@ pub fn happiness_cost(
         &[ResourceType::MoodTokens],
     );
     // either none or both can use Colosseum
-    payment_options.default += action_type.cost(game, player).payment_options(p).default;
+    payment_options.default += action_type.payment_options(game, player).default;
 
     p.trigger_cost_event(
         |e| &e.happiness_cost,

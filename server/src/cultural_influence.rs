@@ -495,7 +495,7 @@ pub fn affordable_start_city(
         let mut action_cost = ResourcePile::empty();
         if let Some(t) = action_type {
             // either none (action cost and boost cost) or both can use Colosseum
-            action_cost = t.cost(game, player_index).payment_options(player).default;
+            action_cost = t.payment_options(game, player_index).default;
             let c = action_cost.culture_tokens;
             if c > 0 {
                 tokens -= c;

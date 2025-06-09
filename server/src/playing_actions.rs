@@ -102,6 +102,12 @@ impl PlayingActionType {
             _ => ActionCost::regular(),
         }
     }
+
+    #[must_use]
+    pub fn payment_options(&self, game: &Game, player_index: usize) -> PaymentOptions {
+        self.cost(game, player_index)
+            .payment_options(game.player(player_index))
+    }
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
@@ -162,9 +168,7 @@ impl PlayingAction {
             _ => None,
         };
 
-        let payment_options = action_type
-            .cost(game, player_index)
-            .payment_options(game.player(player_index));
+        let payment_options = action_type.payment_options(game, player_index);
         if !payment_options.is_free() {
             game.add_info_log_item(&format!(
                 "{} has to pay for the action: {}",
@@ -411,39 +415,41 @@ impl ActionPayment {
 }
 
 pub(crate) fn pay_for_action() -> Ability {
-    Ability::builder("Pay for action card", "")
-        .add_payment_request_listener(
-            |e| &mut e.pay_action,
-            0,
-            |game, player_index, a| {
-                if matches!(a.action, PlayingAction::IncreaseHappiness(_)) {
-                    // handled in the happiness action
-                    return None;
-                }
+    Ability::builder(
+        "Pay for action",
+        "origin is overridden - so this text is not shown",
+    )
+    .add_payment_request_listener(
+        |e| &mut e.pay_action,
+        0,
+        |game, player_index, a| {
+            if matches!(a.action, PlayingAction::IncreaseHappiness(_)) {
+                // handled in the happiness action
+                return None;
+            }
 
-                let payment_options = a
-                    .action
-                    .playing_action_type(game.player(player_index))
-                    .cost(game, player_index)
-                    .payment_options(game.player(player_index));
-                if payment_options.is_free() {
-                    return None;
-                }
+            let payment_options = a
+                .action
+                .playing_action_type(game.player(player_index))
+                .payment_options(game, player_index);
+            if payment_options.is_free() {
+                return None;
+            }
 
-                Some(vec![PaymentRequest::mandatory(
-                    payment_options,
-                    "Pay for action",
-                )])
-            },
-            |game, s, a| {
-                a.payment = s.choice[0].clone();
-                game.add_info_log_item(&format!(
-                    "{} paid {} for the action",
-                    s.player_name, s.choice[0]
-                ));
-            },
-        )
-        .build()
+            Some(vec![PaymentRequest::mandatory(
+                payment_options,
+                "Pay for action",
+            )])
+        },
+        |game, s, a| {
+            a.payment = s.choice[0].clone();
+            game.add_info_log_item(&format!(
+                "{} paid {} for the action",
+                s.player_name, s.choice[0]
+            ));
+        },
+    )
+    .build()
 }
 
 fn end_turn(game: &mut Game, player: usize) {
