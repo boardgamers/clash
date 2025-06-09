@@ -146,7 +146,7 @@ fn provinces() -> SpecialAdvanceInfo {
         |event| &mut event.combat_end,
         21,
         |game, player, s| {
-            s.captured_city(player, game)
+            s.captured_city(player).is_some()
                 .then_some(vec![PaymentRequest::optional(
                     PaymentOptions::resources(
                         game.player(player),
@@ -324,7 +324,7 @@ fn proconsul() -> LeaderAbility {
             if p.available_units().infantry == 0 || !can_add_army_unit(p, leader_position(p)) {
                 return None;
             }
-            s.captured_city(player, game)
+            s.captured_city(player).is_some()
                 .then_some(vec![PaymentRequest::optional(
                     PaymentOptions::resources(
                         p,

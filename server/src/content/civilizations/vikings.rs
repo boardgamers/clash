@@ -1,5 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Advance;
+use crate::city::MoodState;
 use crate::city_pieces::Building;
 use crate::civilization::Civilization;
 use crate::combat::move_with_possible_combat;
@@ -11,20 +12,20 @@ use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::{PaymentRequest, PositionRequest, UnitsRequest};
 use crate::events::EventOrigin;
 use crate::game::Game;
-use crate::leader::{leader_position, Leader, LeaderInfo};
-use crate::leader_ability::{activate_leader_city, can_activate_leader_city, LeaderAbility};
-use crate::map::{block_for_position, capital_city_position, Block, Terrain};
-use crate::movement::{move_action_log, MoveUnits};
+use crate::leader::{Leader, LeaderInfo, leader_position};
+use crate::leader_ability::{LeaderAbility, activate_leader_city, can_activate_leader_city};
+use crate::map::{Block, Terrain, block_for_position, capital_city_position};
+use crate::movement::{MoveUnits, move_action_log};
 use crate::payment::{PaymentOptions, PaymentReason};
-use crate::player::Player;
+use crate::player::{Player, gain_resources};
 use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
-use crate::unit::{carried_units, Unit, UnitType, Units};
+use crate::unit::{Unit, UnitType, Units, carried_units};
 use crate::victory_points::{
-    set_special_victory_points, update_special_victory_points, SpecialVictoryPoints,
-    VictoryPointAttribution,
+    SpecialVictoryPoints, VictoryPointAttribution, set_special_victory_points,
+    update_special_victory_points,
 };
 use itertools::Itertools;
 use std::ops::RangeInclusive;
@@ -33,7 +34,7 @@ pub(crate) fn vikings() -> Civilization {
     Civilization::new(
         "Vikings",
         vec![ship_construction(), longships(), raids(), runes()],
-        vec![knut(), erik()],
+        vec![knut(), erik(), ragnar()],
         Some(Block::new([
             Terrain::Fertile,
             Terrain::Mountain,
@@ -419,15 +420,11 @@ fn new_colonies() -> LeaderAbility {
                         .filter(|u| !u.is_ship())
                         .map(|u| u.id)
                         .collect_vec();
-                    
+
                     let m = MoveUnits::new(units, to, None, ResourcePile::empty());
                     game.add_info_log_item(&move_action_log(game, p, &m));
-                    
-                    move_with_possible_combat(
-                        game,
-                        s.player_index,
-                        &m,
-                    );
+
+                    move_with_possible_combat(game, s.player_index, &m);
                 },
             )
         },
@@ -520,4 +517,28 @@ pub fn has_explore_token(game: &Game, position: Position) -> bool {
     game.players.iter().any(|player| {
         explore_points(player).is_some_and(|v| v.points.explorer_tokens.contains(&position))
     })
+}
+
+fn ragnar() -> LeaderInfo {
+    // todo Horror of the North
+    LeaderInfo::new(
+        Leader::Ragnar,
+        "Ragnar Lodbrok",
+        LeaderAbility::builder("Prey", "When you captured a non-Angry city: Gain 2 gold")
+            .add_simple_persistent_event_listener(
+                |event| &mut event.combat_end,
+                25,
+                |game, player, _name, s| {
+                    if s.captured_city(player)
+                        .is_some_and(|m| m != MoodState::Angry)
+                    {
+                        gain_resources(game, player, ResourcePile::gold(2), |name, pile| {
+                            format!("{name} gained {pile} for Prey")
+                        });
+                    }
+                },
+            )
+            .build(),
+        LeaderAbility::builder("Horror of the North", "").build(),
+    )
 }

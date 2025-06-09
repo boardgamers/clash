@@ -100,3 +100,14 @@ fn new_colonies() {
         ],
     );
 }
+
+#[test]
+fn prey() {
+    JSON.test(
+        "prey",
+        vec![
+            TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("D1"))),
+        ],
+    )
+}
+
