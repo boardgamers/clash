@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::action_card::{can_play_civil_card, play_action_card};
+use crate::action_card::{can_play_civil_card, log_execute_action_card, play_action_card};
 use crate::advance::{AdvanceAction, base_advance_cost, execute_advance_action};
 use crate::city::execute_found_city_action;
 use crate::collect::{Collect, execute_collect};
@@ -9,7 +9,7 @@ use crate::construct::Construct;
 use crate::content::ability::Ability;
 use crate::content::custom_actions::{
     CustomAction, CustomActionActivation, CustomActionType, can_play_custom_action,
-    execute_custom_action,
+    custom_action_name, log_start_custom_action, on_custom_action,
 };
 use crate::content::persistent_events::{
     PaymentRequest, PersistentEventType, TriggerPersistentEventParams, trigger_persistent_event_ext,
@@ -102,6 +102,23 @@ impl PlayingActionType {
             _ => ActionCost::regular(),
         }
     }
+
+    #[must_use]
+    pub fn payment_options(&self, game: &Game, player_index: usize) -> PaymentOptions {
+        self.cost(game, player_index)
+            .payment_options(game.player(player_index))
+    }
+
+    pub(crate) fn payable_action_name(&self, player: &Player, game: &Game) -> String {
+        match self {
+            PlayingActionType::Custom(c) => custom_action_name(player, *c),
+            PlayingActionType::ActionCard(id) => game.cache.get_civil_card(*id).name.clone(),
+            _ => panic!(
+                "PlayingAction::payable_action_name called on an action \
+                that is not payable up front: {self:?}",
+            ),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
@@ -143,6 +160,17 @@ impl PlayingAction {
         game: &mut Game,
         player_index: usize,
     ) -> Result<(), String> {
+        // log these before the payment for clarity
+        match &self {
+            PlayingAction::Custom(a) => {
+                log_start_custom_action(game, player_index, a);
+            }
+            PlayingAction::ActionCard(id) => {
+                log_execute_action_card(game, player_index, *id);
+            }
+            _ => {}
+        }
+
         let action_type = self.playing_action_type(game.player(player_index));
         let origin_override = match action_type {
             PlayingActionType::Custom(c) => {
@@ -162,14 +190,13 @@ impl PlayingAction {
             _ => None,
         };
 
-        let payment_options = action_type
-            .cost(game, player_index)
-            .payment_options(game.player(player_index));
+        let payment_options = action_type.payment_options(game, player_index);
         if !payment_options.is_free() {
             game.add_info_log_item(&format!(
-                "{} has to pay for the action: {}",
+                "{} has to pay {} for {}",
                 game.player_name(player_index),
-                payment_options.default
+                payment_options.default,
+                action_type.payable_action_name(game.player(player_index), game)
             ));
         }
 
@@ -210,7 +237,7 @@ impl PlayingAction {
                 );
             }
             Custom(custom_action) => {
-                execute_custom_action(
+                on_custom_action(
                     game,
                     player_index,
                     CustomActionActivation::new(custom_action, action_payment),
@@ -411,39 +438,43 @@ impl ActionPayment {
 }
 
 pub(crate) fn pay_for_action() -> Ability {
-    Ability::builder("Pay for action card", "")
-        .add_payment_request_listener(
-            |e| &mut e.pay_action,
-            0,
-            |game, player_index, a| {
-                if matches!(a.action, PlayingAction::IncreaseHappiness(_)) {
-                    // handled in the happiness action
-                    return None;
-                }
+    Ability::builder(
+        "Pay for action",
+        "origin is overridden - so this text is not shown",
+    )
+    .add_payment_request_listener(
+        |e| &mut e.pay_action,
+        0,
+        |game, player_index, a| {
+            if matches!(a.action, PlayingAction::IncreaseHappiness(_)) {
+                // handled in the happiness action
+                return None;
+            }
 
-                let payment_options = a
-                    .action
-                    .playing_action_type(game.player(player_index))
-                    .cost(game, player_index)
-                    .payment_options(game.player(player_index));
-                if payment_options.is_free() {
-                    return None;
-                }
+            let payment_options = a
+                .action
+                .playing_action_type(game.player(player_index))
+                .payment_options(game, player_index);
+            if payment_options.is_free() {
+                return None;
+            }
 
-                Some(vec![PaymentRequest::mandatory(
-                    payment_options,
-                    "Pay for action",
-                )])
-            },
-            |game, s, a| {
-                a.payment = s.choice[0].clone();
-                game.add_info_log_item(&format!(
-                    "{} paid {} for the action",
-                    s.player_name, s.choice[0]
-                ));
-            },
-        )
-        .build()
+            Some(vec![PaymentRequest::mandatory(
+                payment_options,
+                "Pay for action",
+            )])
+        },
+        |game, s, a| {
+            a.payment = s.choice[0].clone();
+            let p = game.player(s.player_index);
+            let action_type = a.action.playing_action_type(p).payable_action_name(p, game);
+            game.add_info_log_item(&format!(
+                "{} paid {} for {action_type}",
+                s.player_name, s.choice[0],
+            ));
+        },
+    )
+    .build()
 }
 
 fn end_turn(game: &mut Game, player: usize) {

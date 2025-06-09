@@ -1,4 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::action_card::can_play_civil_card;
 use crate::advance::Advance;
 use crate::card::HandCard;
 use crate::city::activate_city;
@@ -281,6 +282,11 @@ fn idol_cards(game: &Game, p: &Player, extra_cost: &ResourcePile) -> Vec<HandCar
             let action_cost = PlayingActionType::ActionCard(a).cost(game, p.index);
             if action_cost.free {
                 // can play directly
+                return None;
+            }
+
+            if can_play_civil_card(game, p, a).is_err() {
+                // cannot play this card
                 return None;
             }
 

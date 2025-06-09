@@ -162,17 +162,6 @@ impl AbilityInitializerSetup for ActionCardBuilder {
 
 pub(crate) fn play_action_card(game: &mut Game, player_index: usize, id: u8) {
     let card = game.cache.get_civil_card(id).clone();
-    let action = if card.action_type.free {
-        ""
-    } else {
-        " as a regular action"
-    };
-
-    game.add_info_log_item(&format!(
-        "{} played the action card {}{action}",
-        game.player_name(player_index),
-        card.name
-    ));
 
     discard_action_card(game, player_index, id);
     let mut satisfying_action: Option<usize> = None;
@@ -197,6 +186,14 @@ pub(crate) fn play_action_card(game: &mut Game, player_index: usize, id: u8) {
             (civil_card_target == CivilCardTarget::AllPlayers).then_some(player_index),
         ),
     );
+}
+
+pub(crate) fn log_execute_action_card(game: &mut Game, player_index: usize, id: u8) {
+    game.add_info_log_item(&format!(
+        "{} played the action card {}",
+        game.player_name(player_index),
+        game.cache.get_civil_card(id).clone().name
+    ));
 }
 
 pub(crate) fn on_play_action_card(game: &mut Game, player_index: usize, i: ActionCardInfo) {

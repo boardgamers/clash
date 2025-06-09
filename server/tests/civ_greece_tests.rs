@@ -122,7 +122,7 @@ fn idol() {
         vec![
             TestAction::undoable(0, custom_action(CustomActionType::Idol)).skip_json(),
             TestAction::undoable(0, payment_response(ResourcePile::culture_tokens(1))).skip_json(),
-            TestAction::undoable(0, payment_response(ResourcePile::culture_tokens(1))),
+            TestAction::not_undoable(0, payment_response(ResourcePile::culture_tokens(1))),
         ],
     )
 }

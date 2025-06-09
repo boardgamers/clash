@@ -228,7 +228,7 @@
                           },
                           "handler": {
                             "origin": {
-                              "Ability": "Pay for action card"
+                              "Ability": "Pay for action"
                             },
                             "priority": 0,
                             "request": {
@@ -312,11 +312,11 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 has to pay for the action: 1 culture token"
+      "Player1 played the action card Militia",
+      "Player1 has to pay 1 culture token for Militia"
     ],
     [
-      "Player1 paid 1 culture token for the action",
-      "Player1 played the action card Militia",
+      "Player1 paid 1 culture token for Militia",
       "Player1 selected A1 as city for Militia."
     ]
   ],

@@ -247,11 +247,11 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player1 has to pay for the action: 1 culture token"
+      "Player1 played the action card Spy",
+      "Player1 has to pay 1 culture token for Spy"
     ],
     [
-      "Player1 paid 1 culture token for the action",
-      "Player1 played the action card Spy as a regular action",
+      "Player1 paid 1 culture token for Spy",
       "Player1 decided to looked at all Wonder, Action, and Objective cards of Player2"
     ],
     [

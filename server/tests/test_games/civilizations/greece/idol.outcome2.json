@@ -1,6 +1,53 @@
 {
   "options": {},
   "state": "Playing",
+  "events": [
+    {
+      "event_type": {
+        "CustomAction": {
+          "action": "Idol",
+          "payment": {
+            "culture_tokens": 1
+          }
+        }
+      },
+      "player": 0,
+      "last_priority_used": 0
+    },
+    {
+      "event_type": {
+        "ActionCard": {
+          "id": 7,
+          "selected_player": 1
+        }
+      },
+      "player": 0,
+      "last_priority_used": 0,
+      "handler": {
+        "priority": 0,
+        "request": {
+          "SelectHandCards": {
+            "choices": [
+              {
+                "ActionCard": 2
+              },
+              {
+                "ActionCard": 3
+              }
+            ],
+            "needed": {
+              "start": 0,
+              "end": 2
+            },
+            "description": "Select a Wonder, Action, or Objective card to swap"
+          }
+        },
+        "origin": {
+          "CivilCard": 7
+        }
+      }
+    }
+  ],
   "players": [
     {
       "id": 0,
@@ -16,6 +63,9 @@
       },
       "cities": [
         {
+          "city_pieces": {
+            "academy": 0
+          },
           "mood_state": "Happy",
           "activations": 1,
           "position": "D1"
@@ -37,7 +87,15 @@
         "Tactics"
       ],
       "incident_tokens": 1,
-      "next_unit_id": 1
+      "action_cards": [
+        2
+      ],
+      "next_unit_id": 1,
+      "secrets": [
+        "Player2 has the following action cards: Inspiration/Encircled",
+        "Player2 has the following objective cards: ",
+        "Player2 has the following wonder cards: "
+      ]
     },
     {
       "id": 1,
@@ -71,6 +129,9 @@
         "Mining"
       ],
       "incident_tokens": 1,
+      "action_cards": [
+        3
+      ],
       "next_unit_id": 1
     }
   ],
@@ -369,13 +430,7 @@
                         "action": "Idol"
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "remove",
-                      "path": "/events"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -386,89 +441,7 @@
                         }
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events/0/event_type/PayAction",
-                      "value": {
-                        "action": {
-                          "Custom": {
-                            "action": "Idol"
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/0/event_type/CustomAction"
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/0/handler",
-                      "value": {
-                        "origin": {
-                          "Ability": "Pay for action card"
-                        },
-                        "priority": 0,
-                        "request": {
-                          "Payment": [
-                            {
-                              "cost": {
-                                "conversions": [
-                                  {
-                                    "from": [
-                                      {
-                                        "food": 1
-                                      },
-                                      {
-                                        "wood": 1
-                                      },
-                                      {
-                                        "ore": 1
-                                      },
-                                      {
-                                        "ideas": 1
-                                      }
-                                    ],
-                                    "to": {
-                                      "gold": 1
-                                    },
-                                    "type": "Unlimited"
-                                  }
-                                ],
-                                "default": {
-                                  "culture_tokens": 1
-                                }
-                              },
-                              "name": "Pay for action",
-                              "optional": false
-                            }
-                          ]
-                        }
-                      }
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/0/origin_override",
-                      "value": {
-                        "LeaderAbility": "Idol"
-                      }
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/1"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/cities/0/activations"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/culture_tokens",
-                      "value": 2
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -479,107 +452,7 @@
                         }
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 3
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "CustomAction": {
-                              "action": "Idol",
-                              "payment": {
-                                "culture_tokens": 1
-                              }
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 0
-                        },
-                        {
-                          "event_type": {
-                            "PayAction": {
-                              "action": {
-                                "ActionCard": 17
-                              }
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Ability": "Pay for action card"
-                            },
-                            "priority": 0,
-                            "request": {
-                              "Payment": [
-                                {
-                                  "cost": {
-                                    "conversions": [
-                                      {
-                                        "from": [
-                                          {
-                                            "food": 1
-                                          },
-                                          {
-                                            "wood": 1
-                                          },
-                                          {
-                                            "ore": 1
-                                          },
-                                          {
-                                            "ideas": 1
-                                          }
-                                        ],
-                                        "to": {
-                                          "gold": 1
-                                        },
-                                        "type": "Unlimited"
-                                      }
-                                    ],
-                                    "default": {
-                                      "culture_tokens": 1
-                                    }
-                                  },
-                                  "name": "Pay for action",
-                                  "optional": false
-                                }
-                              ]
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "origin_override": {
-                            "CivilCard": 17
-                          },
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/action_cards",
-                      "value": [
-                        17
-                      ]
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/resources/culture_tokens",
-                      "value": 1
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/action_cards_discarded"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/permanent_effects"
-                    }
-                  ]
+                  }
                 }
               ]
             }
@@ -591,23 +464,23 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player1 has to pay for the action: 1 culture token"
-    ],
-    [
-      "Player1 paid 1 culture token for the action",
       "Player1 started Idol",
-      "Player1 activates the city D1 to use Idol.",
-      "Player1 decided to play City Development as a free action using Idol",
-      "Player1 has to pay for the action: 1 culture token"
+      "Player1 has to pay 1 culture token for Idol"
     ],
     [
-      "Player1 paid 1 culture token for the action",
-      "Player1 played the action card City Development as a regular action",
-      "City Development: You may build a building in a city without spending an action and without paying for it."
+      "Player1 paid 1 culture token for Idol",
+      "Player1 activates the city D1 to use Idol.",
+      "Player1 decided to play Spy as a free action using Idol",
+      "Player1 played the action card Spy",
+      "Player1 has to pay 1 culture token for Spy"
+    ],
+    [
+      "Player1 paid 1 culture token for Spy",
+      "Player1 decided to looked at all Wonder, Action, and Objective cards of Player2"
     ]
   ],
-  "undo_limit": 0,
-  "actions_left": 4,
+  "undo_limit": 3,
+  "actions_left": 3,
   "round": 1,
   "age": 1,
   "messages": [
@@ -819,14 +692,9 @@
     "Pyramids"
   ],
   "action_cards_discarded": [
-    17
+    7
   ],
   "incidents_left": [
     18
-  ],
-  "permanent_effects": [
-    {
-      "Construct": "CityDevelopment"
-    }
   ]
 }

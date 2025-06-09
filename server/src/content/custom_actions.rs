@@ -280,12 +280,7 @@ impl CustomActionType {
     }
 }
 
-pub(crate) fn execute_custom_action(
-    game: &mut Game,
-    player_index: usize,
-    a: CustomActionActivation,
-) {
-    let action = a.action.clone();
+pub(crate) fn log_start_custom_action(game: &mut Game, player_index: usize, action: &CustomAction) {
     let p = game.player(player_index);
     let action_type = action.action;
     let name = custom_action_execution(p, action_type)
@@ -300,7 +295,6 @@ pub(crate) fn execute_custom_action(
             String::new()
         }
     ));
-    on_custom_action(game, player_index, a);
 }
 
 pub(crate) fn on_custom_action(game: &mut Game, player_index: usize, a: CustomActionActivation) {
@@ -335,10 +329,7 @@ pub(crate) fn custom_action_execution(
     }
 }
 
-pub(crate) fn custom_action_modifier_name(
-    player: &Player,
-    action_type: CustomActionType,
-) -> String {
+pub(crate) fn custom_action_name(player: &Player, action_type: CustomActionType) -> String {
     match player.custom_action_info(action_type).execution {
         CustomActionExecution::Modifier((_, name)) => name.clone(),
         // Sports is not a modifier, but is shown for logging purposes as a modifier

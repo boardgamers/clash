@@ -263,7 +263,7 @@
                           },
                           "handler": {
                             "origin": {
-                              "Ability": "Pay for action card"
+                              "Ability": "Pay for action"
                             },
                             "priority": 0,
                             "request": {
@@ -378,11 +378,11 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player1 has to pay for the action: 1 culture token"
+      "Player1 played the action card City Development",
+      "Player1 has to pay 1 culture token for City Development"
     ],
     [
-      "Player1 paid 1 culture token for the action",
-      "Player1 played the action card City Development as a regular action",
+      "Player1 paid 1 culture token for City Development",
       "City Development: You may build a building in a city without spending an action and without paying for it."
     ],
     [
