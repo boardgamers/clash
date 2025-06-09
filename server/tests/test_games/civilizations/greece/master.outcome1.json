@@ -404,11 +404,11 @@
   "action_log_index": 2,
   "log": [
     [
+      "Player1 started Master",
       "Player1 has to pay 1 mood token for Master"
     ],
     [
       "Player1 paid 1 mood token for Master",
-      "Player1 started Master",
       "Player1 decided to gain Writing for free using Master",
       "Player1 gained an action card from the pile",
       "Player1 gained an objective card from the pile",

@@ -358,11 +358,11 @@
   "action_log_index": 2,
   "log": [
     [
+      "Player1 played the action card Technology Trade",
       "Player1 has to pay 1 culture token for Technology Trade"
     ],
     [
       "Player1 paid 1 culture token for Technology Trade",
-      "Player1 played the action card Technology Trade",
       "Player1 selected Player2 as player for Technology Trade.",
       "Player1 selected Storage as advance for Technology Trade.",
       "Player1 gained 1 mood token as advance bonus",

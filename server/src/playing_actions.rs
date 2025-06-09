@@ -1,16 +1,13 @@
 use serde::{Deserialize, Serialize};
 
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::action_card::{can_play_civil_card, play_action_card};
+use crate::action_card::{can_play_civil_card, log_execute_action_card, play_action_card};
 use crate::advance::{AdvanceAction, base_advance_cost, execute_advance_action};
 use crate::city::execute_found_city_action;
 use crate::collect::{Collect, execute_collect};
 use crate::construct::Construct;
 use crate::content::ability::Ability;
-use crate::content::custom_actions::{
-    CustomAction, CustomActionActivation, CustomActionType, can_play_custom_action,
-    custom_action_name, execute_custom_action,
-};
+use crate::content::custom_actions::{CustomAction, CustomActionActivation, CustomActionType, can_play_custom_action, custom_action_name, on_custom_action, log_start_custom_action};
 use crate::content::persistent_events::{
     PaymentRequest, PersistentEventType, TriggerPersistentEventParams, trigger_persistent_event_ext,
 };
@@ -160,6 +157,17 @@ impl PlayingAction {
         game: &mut Game,
         player_index: usize,
     ) -> Result<(), String> {
+        // log these before the payment for clarity
+        match &self {
+            PlayingAction::Custom(a) => {
+                log_start_custom_action(game, player_index, a);
+            }
+            PlayingAction::ActionCard(id) => {
+                log_execute_action_card(game, player_index, *id);
+            }
+            _ => {}
+        }
+        
         let action_type = self.playing_action_type(game.player(player_index));
         let origin_override = match action_type {
             PlayingActionType::Custom(c) => {
@@ -226,7 +234,7 @@ impl PlayingAction {
                 );
             }
             Custom(custom_action) => {
-                execute_custom_action(
+                on_custom_action(
                     game,
                     player_index,
                     CustomActionActivation::new(custom_action, action_payment),

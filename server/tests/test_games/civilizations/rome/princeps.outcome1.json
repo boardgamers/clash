@@ -276,11 +276,11 @@
   "action_log_index": 2,
   "log": [
     [
+      "Player1 started Princeps",
       "Player1 has to pay 1 culture token for Princeps"
     ],
     [
       "Player1 paid 1 culture token for Princeps",
-      "Player1 started Princeps",
       "Player1 activates the city A1 to draw 1 action and 1 objective card using Princeps",
       "Player1 gained an action card from the pile",
       "Player1 gained an objective card from the pile",

@@ -301,11 +301,11 @@
   "action_log_index": 1,
   "log": [
     [
+      "Player1 played the action card Negotiations",
       "Player1 has to pay 1 culture token for Negotiations"
     ],
     [
       "Player1 paid 1 culture token for Negotiations",
-      "Player1 played the action card Negotiations",
       "Player1 and Player2 are in negotiations."
     ],
     [

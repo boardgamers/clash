@@ -344,11 +344,11 @@
   "action_log_index": 2,
   "log": [
     [
+      "Player1 started Absolute Power",
       "Player1 has to pay 2 mood tokens for Absolute Power"
     ],
     [
       "Player1 paid 2 mood tokens for Absolute Power",
-      "Player1 started Absolute Power",
       "Player1 got an extra action using Absolute Power"
     ]
   ],

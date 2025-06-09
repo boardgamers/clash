@@ -375,11 +375,11 @@
   "action_log_index": 2,
   "log": [
     [
+      "Player1 started Legendary Explorer",
       "Player1 has to pay 1 culture token for Legendary Explorer"
     ],
     [
-        "Player1 paid 1 culture token for Legendary Explorer",
-      "Player1 started Legendary Explorer",
+      "Player1 paid 1 culture token for Legendary Explorer",
       "Player1 placed an explorer token at D2"
     ]
   ],
