@@ -33,7 +33,8 @@
                 "present": {
                   "infantry": 2
                 }
-              }
+              },
+              "city_mood": "Angry"
             }
           },
           "attacker_strength": {},

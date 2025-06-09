@@ -22,6 +22,7 @@ use crate::player_events::{
 use crate::resource::check_for_waste;
 use crate::status_phase::enter_status_phase;
 use crate::utils::Rng;
+use crate::victory_points::compare_score;
 use crate::wonder::Wonder;
 use crate::{city::City, game_data, map::Map, player::Player, position::Position};
 use itertools::Itertools;
@@ -450,7 +451,7 @@ impl Game {
             .players
             .iter()
             .enumerate()
-            .max_by(|(_, player), (_, other)| player.compare_score(other, self))
+            .max_by(|(_, player), (_, other)| compare_score(player, other, self))
             .expect("there should be at least one player in the game")
             .0;
         let winner_name = self.player_name(winner_player_index);

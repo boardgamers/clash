@@ -1,6 +1,7 @@
 use crate::city_ui::{IconAction, IconActionVec, draw_city, show_city_menu};
 use crate::client_state::{ActiveDialog, MAX_OFFSET, MIN_OFFSET, State, StateUpdate, ZOOM};
 use crate::dialog_ui::{OkTooltip, cancel_button_pos, ok_button};
+use crate::hex_ui::HexFeature;
 use crate::layout_ui::{
     bottom_center_anchor, bottom_center_texture, bottom_right_texture, icon_pos,
 };
@@ -14,6 +15,7 @@ use macroquad::math::{f32, vec2};
 use macroquad::prelude::*;
 use server::action::Action;
 use server::combat_stats::CombatStats;
+use server::content::civilizations::vikings::has_explore_token;
 use server::content::persistent_events::EventResponse;
 use server::map::{Rotation, Terrain, UnexploredBlock};
 use server::movement::MoveDestination;
@@ -65,12 +67,20 @@ pub fn draw_map(rc: &RenderContext) -> StateUpdate {
             _ => (terrain, false),
         };
 
+        let mut features = vec![];
+        if exhausted {
+            features.push(HexFeature::Exhausted);
+        }
+        if has_explore_token(game, *pos) {
+            features.push(HexFeature::ExplorerToken);
+        }
+
         hex_ui::draw_hex(
             *pos,
             terrain_font_color(terrain),
             overlay_color(rc, *pos),
             rc.assets().terrain.get(base),
-            exhausted,
+            &features,
             rc,
         );
         let update = collect_ui::draw_resource_collect_tile(rc, *pos);

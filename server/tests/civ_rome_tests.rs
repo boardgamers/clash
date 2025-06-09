@@ -6,8 +6,9 @@ use server::advance::Advance;
 use server::city_pieces::Building;
 use server::construct::Construct;
 use server::content::custom_actions::CustomActionType;
+use server::happiness::IncreaseHappiness;
 use server::movement::{MoveUnits, MovementAction};
-use server::playing_actions::{IncreaseHappiness, PlayingAction, PlayingActionType};
+use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 

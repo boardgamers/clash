@@ -1,7 +1,7 @@
 use crate::content::advances::trade_routes::find_trade_routes;
 use crate::content::objectives::city_objectives::leading_player;
 use crate::content::objectives::non_combat::last_player_round;
-use crate::map::home_position;
+use crate::map::capital_city_position;
 use crate::objective_card::Objective;
 use crate::player::Player;
 use crate::unit::UnitType;
@@ -93,7 +93,7 @@ pub(crate) fn colony() -> Objective {
         Cannot be completed if you completed City Founder in the last round.",
     )
     .status_phase_check(|game, player| {
-        let home = home_position(game, player);
+        let home = capital_city_position(game, player);
         if player.cities.iter().any(|c| c.position.distance(home) >= 5) {
             let city_founder_played = last_player_round(game, player.index)
                 .iter()

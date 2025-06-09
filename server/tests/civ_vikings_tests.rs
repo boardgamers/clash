@@ -1,5 +1,6 @@
-use crate::common::{JsonTest, TestAction, move_action, payment_response};
+use crate::common::{JsonTest, TestAction, custom_action, move_action, payment_response};
 use server::action::Action;
+use server::content::custom_actions::CustomActionType;
 use server::content::persistent_events::EventResponse;
 use server::movement::{MoveUnits, MovementAction};
 use server::playing_actions::PlayingAction::EndTurn;
@@ -46,7 +47,7 @@ fn longships() {
 }
 
 #[test]
-fn test_raids() {
+fn raids() {
     JSON.test(
         "raids",
         vec![
@@ -55,4 +56,58 @@ fn test_raids() {
             TestAction::undoable(0, payment_response(ResourcePile::food(1))),
         ],
     );
+}
+
+#[test]
+fn danegeld() {
+    JSON.test(
+        "danegeld",
+        vec![
+            TestAction::undoable(0, custom_action(CustomActionType::Danegeld)).skip_json(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::ResourceReward(ResourcePile::food(4))),
+            ),
+        ],
+    );
+}
+
+#[test]
+fn explorer() {
+    JSON.test(
+        "explorer",
+        vec![
+            TestAction::undoable(0, custom_action(CustomActionType::LegendaryExplorer)).skip_json(),
+            TestAction::undoable(0, payment_response(ResourcePile::culture_tokens(1))),
+        ],
+    );
+}
+
+#[test]
+fn new_colonies() {
+    JSON.test(
+        "new_colonies",
+        vec![
+            TestAction::undoable(0, custom_action(CustomActionType::NewColonies)).skip_json(),
+            TestAction::not_undoable(
+                0,
+                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
+                    "D1",
+                )])),
+            )
+            .skip_json(),
+            TestAction::undoable(0, Action::Response(EventResponse::SelectUnits(vec![0]))),
+        ],
+    );
+}
+
+#[test]
+fn prey() {
+    JSON.test(
+        "prey",
+        vec![TestAction::undoable(
+            0,
+            move_action(vec![0], Position::from_offset("D1")),
+        )],
+    )
 }

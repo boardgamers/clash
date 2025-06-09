@@ -356,6 +356,19 @@ impl Assets {
                 CustomActionType::AgricultureEconomist,
                 load_png(include_bytes!("../assets/graduate-cap-svgrepo-com.png")),
             ),
+            // Vikings
+            (
+                CustomActionType::Danegeld,
+                load_png(include_bytes!("../assets/viking-ship-svgrepo-com.png")),
+            ),
+            (
+                CustomActionType::LegendaryExplorer,
+                load_png(include_bytes!("../assets/browser-safari-svgrepo-com.png")),
+            ),
+            (
+                CustomActionType::NewColonies,
+                load_png(include_bytes!("../assets/viking-helmet-svgrepo-com.png")),
+            ),
         ]
         .iter()
         .cloned()

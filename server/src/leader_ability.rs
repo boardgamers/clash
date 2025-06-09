@@ -2,7 +2,7 @@ use crate::ability_initializer::{
     AbilityInitializerBuilder, AbilityInitializerSetup, AbilityListeners,
 };
 use crate::advance::{Advance, gain_advance_without_payment};
-use crate::city::City;
+use crate::city::{City, activate_city};
 use crate::content::ability::AbilityBuilder;
 use crate::content::advances::AdvanceGroup;
 use crate::content::custom_actions::CustomActionType;
@@ -173,11 +173,10 @@ pub(crate) fn can_activate_leader_city(game: &Game, p: &Player) -> bool {
 }
 
 pub(crate) fn activate_leader_city(game: &mut Game, player: usize, effect: &str) {
-    let p = game.player_mut(player);
-    let position = leader_position(p);
-    p.get_city_mut(position).activate();
+    let position = leader_position(game.player(player));
     game.add_info_log_item(&format!(
         "{} activates the city {position} to {effect}",
         game.player_name(player)
     ));
+    activate_city(position, game);
 }

@@ -3,7 +3,7 @@ use crate::advance::AdvanceAction;
 use crate::ai_collect::{possible_collections, total_collect};
 use crate::card::validate_card_selection;
 use crate::city::{City, MoodState};
-use crate::collect::{available_collect_actions, possible_resource_collections};
+use crate::collect::{Collect, available_collect_actions, possible_resource_collections};
 use crate::construct::{Construct, available_buildings, new_building_positions};
 use crate::content::custom_actions::{CustomAction, CustomActionType};
 use crate::content::persistent_events::{
@@ -15,14 +15,14 @@ use crate::cultural_influence::{
 };
 use crate::events::EventOrigin;
 use crate::game::{Game, GameState};
-use crate::happiness::{available_happiness_actions, happiness_city_restriction, happiness_cost};
+use crate::happiness::{
+    IncreaseHappiness, available_happiness_actions, happiness_city_restriction, happiness_cost,
+};
 use crate::payment::PaymentOptions;
 use crate::player::{CostTrigger, Player};
-use crate::playing_actions::{
-    Collect, IncreaseHappiness, PlayingAction, PlayingActionType, Recruit,
-};
+use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::position::Position;
-use crate::recruit::recruit_cost;
+use crate::recruit::{Recruit, recruit_cost};
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::{ChangeGovernment, government_advances};

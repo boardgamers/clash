@@ -4,7 +4,7 @@ use crate::advance::gain_advance_without_payment;
 use crate::card::HandCard;
 use crate::city::MoodState;
 use crate::city_pieces::Building;
-use crate::construct::{Construct, construct};
+use crate::construct::{Construct, execute_construct};
 use crate::consts::MAX_HUMAN_PLAYERS;
 use crate::content::advances::{AdvanceGroup, economy, get_governments_uncached};
 use crate::content::effects::{GreatSeerEffect, GreatSeerObjective, PermanentEffect};
@@ -282,9 +282,8 @@ fn great_prophet() -> ActionCard {
             }
 
             let pos = a.selected_position.expect("position not found");
-            game.add_info_log_item(&format!("{name} built a Temple at {pos} for {pile}",));
 
-            let () = construct(
+            let () = execute_construct(
                 game,
                 s.player_index,
                 &Construct::new(pos, Building::Temple, pile),

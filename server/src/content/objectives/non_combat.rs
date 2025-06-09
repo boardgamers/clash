@@ -3,7 +3,7 @@ use crate::advance::Advance;
 use crate::content::advances::warfare::draft_cost;
 use crate::game::Game;
 use crate::log::{ActionLogItem, ActionLogPlayer};
-use crate::map::home_position;
+use crate::map::capital_city_position;
 use crate::objective_card::{Objective, objective_is_ready};
 use itertools::Itertools;
 
@@ -42,7 +42,7 @@ pub(crate) fn city_founder() -> Objective {
         |event| &mut event.found_city,
         0,
         |game, player, _, p| {
-            if home_position(game, game.player(player)).distance(*p) >= 5 {
+            if capital_city_position(game, game.player(player)).distance(*p) >= 5 {
                 objective_is_ready(game.player_mut(player), name);
             }
         },

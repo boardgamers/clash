@@ -1,6 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Advance;
 use crate::card::HandCard;
+use crate::city::activate_city;
 use crate::civilization::Civilization;
 use crate::combat::update_combat_strength;
 use crate::combat_listeners::CombatStrength;
@@ -179,8 +180,8 @@ fn city_states() -> SpecialAdvanceInfo {
                     "{} decided to decrease the mood of {} instead of {} using City States",
                     s.player_name, choice, position
                 ));
+                activate_city(choice, game);
                 let p = game.player_mut(s.player_index);
-                p.get_city_mut(choice).activate();
                 p.get_city_mut(*position).increase_mood_state();
                 p.event_info
                     .insert("city_states".to_string(), "used".to_string());

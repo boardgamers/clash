@@ -235,6 +235,7 @@
                                     }
                                   },
                                   "battleground": "City",
+                                  "city_mood": "Angry",
                                   "defender": {
                                     "player": 1,
                                     "position": "C1",
@@ -424,7 +425,8 @@
                         "infantry": 2
                       }
                     },
-                    "result": "AttackerWins"
+                    "result": "AttackerWins",
+                    "city_mood": "Angry"
                   }
                 }
               ]

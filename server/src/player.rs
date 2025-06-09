@@ -11,19 +11,14 @@ use crate::playing_actions::PlayingActionType;
 use crate::special_advance::SpecialAdvance;
 use crate::unit::UnitType;
 use crate::victory_points::{
-    SpecialVictoryPoints, VictoryPointAttribution, add_special_victory_points,
-    special_victory_points,
+    SpecialVictoryPoints, VictoryPointAttribution, add_special_victory_points, victory_points_parts,
 };
-use crate::wonder::{Wonder, wonders_built_points, wonders_owned_points};
+use crate::wonder::Wonder;
 use crate::{
     city::City,
     city_pieces::Building::{self},
     civilization::Civilization,
-    consts::{
-        ADVANCE_VICTORY_POINTS, BUILDING_COST, BUILDING_VICTORY_POINTS,
-        CAPTURED_LEADER_VICTORY_POINTS, CITY_LIMIT, CITY_PIECE_LIMIT, OBJECTIVE_VICTORY_POINTS,
-        UNIT_LIMIT,
-    },
+    consts::{BUILDING_COST, CITY_LIMIT, CITY_PIECE_LIMIT, UNIT_LIMIT},
     content::custom_actions::CustomActionType,
     game::Game,
     leader::LeaderInfo,
@@ -36,7 +31,6 @@ use crate::{
 use enumset::EnumSet;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use std::cmp::Ordering::{self, *};
 use std::collections::HashMap;
 use std::fmt::Display;
 
@@ -306,38 +300,10 @@ impl Player {
 
     #[must_use]
     pub fn victory_points(&self, game: &Game) -> f32 {
-        self.victory_points_parts(game).iter().map(|(_, v)| v).sum()
-    }
-
-    #[must_use]
-    pub fn victory_points_parts(&self, game: &Game) -> [(&'static str, f32); 6] {
-        [
-            (
-                "City pieces",
-                (self.cities.len() + self.owned_buildings(game)) as f32 * BUILDING_VICTORY_POINTS,
-            ),
-            (
-                "Advances",
-                (self.advances.len() + self.special_advances.len()) as f32 * ADVANCE_VICTORY_POINTS,
-            ),
-            (
-                "Objectives",
-                self.completed_objectives.len() as f32 * OBJECTIVE_VICTORY_POINTS
-                    + special_victory_points(self, VictoryPointAttribution::Objectives),
-            ),
-            (
-                "Wonders",
-                wonders_owned_points(self, game) as f32 + wonders_built_points(self, game),
-            ),
-            (
-                "Events",
-                special_victory_points(self, VictoryPointAttribution::Events),
-            ),
-            (
-                "Captured Leaders",
-                self.captured_leaders.len() as f32 * CAPTURED_LEADER_VICTORY_POINTS,
-            ),
-        ]
+        victory_points_parts(self, game)
+            .iter()
+            .map(|(_, v)| v)
+            .sum()
     }
 
     #[must_use]
@@ -401,36 +367,6 @@ impl Player {
         self.objective_cards = self.objective_cards.iter().map(|_| 0).collect();
         self.secrets = Vec::new();
     }
-
-    #[must_use]
-    pub(crate) fn compare_score(&self, other: &Self, game: &Game) -> Ordering {
-        let parts = self.victory_points_parts(game);
-        let other_parts = other.victory_points_parts(game);
-        let sum = parts.iter().map(|(_, v)| v).sum::<f32>();
-        let other_sum = other_parts.iter().map(|(_, v)| v).sum::<f32>();
-
-        match sum
-            .partial_cmp(&other_sum)
-            .expect("should be able to compare")
-        {
-            Less => return Less,
-            Equal => (),
-            Greater => return Greater,
-        }
-
-        for (part, other_part) in parts.iter().zip(other_parts.iter()) {
-            match part
-                .partial_cmp(other_part)
-                .expect("should be able to compare")
-            {
-                Less => return Less,
-                Equal => (),
-                Greater => return Greater,
-            }
-        }
-        Equal
-    }
-
     #[must_use]
     pub fn building_cost(&self, game: &Game, building: Building, execute: CostTrigger) -> CostInfo {
         self.trigger_cost_event(
@@ -502,24 +438,6 @@ impl Player {
             && self
                 .try_get_city(city_position)
                 .is_some_and(|city| city.size() == 1)
-    }
-
-    pub(crate) fn construct(
-        &mut self,
-        building: Building,
-        city_position: Position,
-        port_position: Option<Position>,
-        activate: bool,
-    ) {
-        let index = self.index;
-        let city = self.get_city_mut(city_position);
-        if activate {
-            city.activate();
-        }
-        city.pieces.set_building(building, index);
-        if let Some(port_position) = port_position {
-            city.port_position = Some(port_position);
-        }
     }
 
     #[must_use]

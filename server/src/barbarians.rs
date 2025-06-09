@@ -72,7 +72,7 @@ pub(crate) fn barbarians_bonus() -> Ability {
                     && i.opponent_player(player, game).civilization.is_barbarian()
                 {
                     let mut sum = 0;
-                    if i.captured_city(player, game) {
+                    if i.captured_city(player).is_some() {
                         sum += 1;
                     }
                     if i.opponent(player).losses.amount() > 0 {

@@ -525,7 +525,8 @@
       "Player1 ended the movement action"
     ],
     [
-      "Player1 paid 5 wood and 3 gold to recruit 4 ships in the city at C2 making it Neutral"
+      "Player1 paid 5 wood and 3 gold to recruit 4 ships in the city at C2",
+      "City at C2 became Neutral because it was activated more than once"
     ],
     [
       "Player1 selected 1 mood token for Nationalism Advance",

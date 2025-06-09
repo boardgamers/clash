@@ -9,7 +9,7 @@ use crate::content::custom_actions::{
     CustomActionActionExecution, CustomActionExecution, CustomActionType, any_non_happy,
 };
 use crate::content::persistent_events::PaymentRequest;
-use crate::happiness::increase_happiness;
+use crate::happiness::execute_increase_happiness;
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::{Player, gain_resources};
 use crate::playing_actions::PlayingActionType;
@@ -155,20 +155,15 @@ fn use_sports() -> Ability {
                 let position = a.action.city.expect("city not found");
                 let pile = s.choice[0].clone();
                 let steps = pile.amount();
-                increase_happiness(
+                execute_increase_happiness(
                     game,
                     s.player_index,
                     &[(position, steps)],
-                    None,
+                    &pile,
+                    true,
                     &a.action.action.playing_action_type(),
                 )
                 .expect("Failed to increase happiness");
-                game.add_info_log_item(&format!(
-                    "{} paid {pile} for Sports to increase the happiness of {position} \
-                        by {steps} steps, making it {}",
-                    s.player_name,
-                    game.get_any_city(position).mood_state
-                ));
             },
         )
         .build()

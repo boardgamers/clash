@@ -444,7 +444,8 @@
                       "position": "B2",
                       "player": 1
                     },
-                    "result": "AttackerWins"
+                    "result": "AttackerWins",
+                    "city_mood": "Neutral"
                   }
                 },
                 {

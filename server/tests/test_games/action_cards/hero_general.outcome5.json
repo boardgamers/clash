@@ -236,7 +236,8 @@
                     "result": "AttackerWins",
                     "claimed_action_cards": [
                       5
-                    ]
+                    ],
+                    "city_mood": "Angry"
                   }
                 },
                 {

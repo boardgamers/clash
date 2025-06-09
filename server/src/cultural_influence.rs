@@ -99,12 +99,48 @@ impl InfluenceCultureOutcome {
     }
 }
 
-pub(crate) fn influence_culture_attempt(
+pub(crate) fn execute_influence_culture_attempt(
     game: &mut Game,
     player_index: usize,
-    c: &SelectedStructure,
+    i: &InfluenceCultureAttempt,
 ) -> Result<(), String> {
-    let info = influence_culture_boost_cost(game, player_index, c, None, false)?;
+    let s = &i.selected_structure;
+    let target_city_position = s.position;
+    let target_city = game.get_any_city(target_city_position);
+    let target_player_index = target_city.player_index;
+    let info = influence_culture_boost_cost(game, player_index, s, None, false)?;
+
+    let player = if target_player_index == player_index {
+        String::from("themselves")
+    } else {
+        game.player_name(target_player_index)
+    };
+    let start = info.starting_city_position;
+    let city = if start == target_city_position {
+        String::new()
+    } else {
+        format!(" with the city at {start}")
+    };
+    let range_boost_cost = &info.range_boost_cost;
+    // this cost can't be changed by the player
+    let cost = if range_boost_cost.is_free() {
+        String::new()
+    } else {
+        format!(" and paid {} to boost the range", range_boost_cost.default)
+    };
+    let city_piece = match s.structure {
+        Structure::CityCenter => "City Center",
+        Structure::Building(b) => b.name(),
+        Structure::Wonder(_) => panic!("Wonder is not allowed here"),
+    };
+
+    game.add_info_log_item(&format!(
+        "{} tried to influence culture the {city_piece} in the city \
+        at {target_city_position} by {player}{city}{cost}{}",
+        game.player_name(player_index),
+        modifier_suffix(game.player(player_index), &i.action_type)
+    ));
+
     on_cultural_influence(game, player_index, info);
     Ok(())
 }
@@ -514,51 +550,6 @@ pub fn affordable_start_city(
             .min_by_key(|(_, boost)| *boost)
             .ok_or("No starting city available".to_string())
     }
-}
-
-pub(crate) fn format_cultural_influence_attempt_log_item(
-    game: &Game,
-    player_index: usize,
-    player_name: &str,
-    i: &InfluenceCultureAttempt,
-) -> String {
-    let s = &i.selected_structure;
-    let target_city_position = s.position;
-    let target_city = game.get_any_city(target_city_position);
-    let target_player_index = target_city.player_index;
-    let info = influence_culture_boost_cost(game, player_index, s, Some(&i.action_type), false)
-        .expect("this should be a valid action");
-
-    let p = game.active_player();
-    let player = if target_player_index == p {
-        String::from("themselves")
-    } else {
-        game.player_name(target_player_index)
-    };
-    let start = info.starting_city_position;
-    let city = if start == target_city_position {
-        String::new()
-    } else {
-        format!(" with the city at {start}")
-    };
-    let range_boost_cost = info.range_boost_cost;
-    // this cost can't be changed by the player
-    let cost = if range_boost_cost.is_free() {
-        String::new()
-    } else {
-        format!(" and paid {} to boost the range", range_boost_cost.default)
-    };
-    let city_piece = match s.structure {
-        Structure::CityCenter => "City Center",
-        Structure::Building(b) => b.name(),
-        Structure::Wonder(_) => panic!("Wonder is not allowed here"),
-    };
-
-    format!(
-        "{player_name} tried to influence culture the {city_piece} in the city \
-        at {target_city_position} by {player}{city}{cost}{}",
-        modifier_suffix(game.player(p), &i.action_type)
-    )
 }
 
 #[must_use]

@@ -484,7 +484,8 @@
       "Player1 started Great Lighthouse"
     ],
     [
-      "Player1 activated the city at A1 used the Great Lighthouse to place a ship on C3 for free making it Neutral"
+      "Player1 activated the city at A1 used the Great Lighthouse to place a ship on C3 for free",
+      "City at A1 became Neutral because it was activated more than once"
     ]
   ],
   "undo_limit": 0,

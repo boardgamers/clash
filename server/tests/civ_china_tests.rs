@@ -3,12 +3,13 @@ use crate::common::{
 };
 use server::action::Action;
 use server::advance::Advance;
-use server::collect::PositionCollection;
+use server::collect::{Collect, PositionCollection};
 use server::content::custom_actions::CustomActionType;
 use server::content::persistent_events::EventResponse;
 use server::playing_actions::PlayingAction::WonderCard;
-use server::playing_actions::{Collect, PlayingAction, PlayingActionType, Recruit};
+use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
+use server::recruit::Recruit;
 use server::resource_pile::ResourcePile;
 use server::unit::Units;
 use server::wonder::Wonder;

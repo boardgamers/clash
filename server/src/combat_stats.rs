@@ -1,3 +1,4 @@
+use crate::city::MoodState;
 use crate::combat::can_remove_after_combat;
 use crate::combat_listeners::CombatResult;
 use crate::game::Game;
@@ -94,6 +95,9 @@ pub struct CombatStats {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub selected_card: Option<u8>, // for "Teach Us Now" action
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub city_mood: Option<MoodState>, // before capture
 }
 
 impl CombatStats {
@@ -104,6 +108,7 @@ impl CombatStats {
         attacker: CombatPlayerStats,
         defender: CombatPlayerStats,
         result: Option<CombatResult>,
+        city_mood: Option<MoodState>,
     ) -> Self {
         Self {
             battleground,
@@ -114,6 +119,7 @@ impl CombatStats {
             claimed_action_cards: Vec::new(),
             selected_card: None,
             round: 1,
+            city_mood,
         }
     }
 
@@ -205,10 +211,10 @@ impl CombatStats {
     }
 
     #[must_use]
-    pub fn captured_city(&self, player: usize, game: &Game) -> bool {
-        self.is_attacker(player)
-            && self.is_winner(player)
-            && game.try_get_any_city(self.defender.position).is_some()
+    pub fn captured_city(&self, player: usize) -> Option<MoodState> {
+        (self.is_attacker(player) && self.is_winner(player))
+            .then(|| self.city_mood.clone())
+            .flatten()
     }
 }
 
@@ -252,6 +258,7 @@ pub(crate) fn new_combat_stats(
             defender_position,
         ),
         result,
+        city.map(|c| c.mood_state.clone()),
     )
 }
 

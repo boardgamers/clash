@@ -296,7 +296,7 @@
                           },
                           "handler": {
                             "origin": {
-                               "Ability": "Sports"
+                              "Ability": "Sports"
                             },
                             "priority": 0,
                             "request": {
@@ -361,7 +361,7 @@
       "Player1 started Sports at C2"
     ],
     [
-      "Player1 paid 2 culture tokens for Sports to increase the happiness of C2 by 2 steps, making it Happy"
+      "Player1 paid 2 culture tokens to increase happiness in the city at C2 by 2 steps, making it Happy using Sports"
     ]
   ],
   "undo_limit": 0,

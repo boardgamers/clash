@@ -2,9 +2,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{can_play_civil_card, play_action_card};
-use crate::advance::{AdvanceAction, base_advance_cost, gain_advance_without_payment};
-use crate::city::found_city;
-use crate::collect::{PositionCollection, collect};
+use crate::advance::{AdvanceAction, base_advance_cost, execute_advance_action};
+use crate::city::execute_found_city_action;
+use crate::collect::{Collect, execute_collect};
 use crate::construct::Construct;
 use crate::content::ability::Ability;
 use crate::content::custom_actions::{
@@ -14,89 +14,16 @@ use crate::content::custom_actions::{
 use crate::content::persistent_events::{
     PaymentRequest, PersistentEventType, TriggerPersistentEventParams, trigger_persistent_event_ext,
 };
-use crate::cultural_influence::{InfluenceCultureAttempt, influence_culture_attempt};
+use crate::cultural_influence::{InfluenceCultureAttempt, execute_influence_culture_attempt};
 use crate::events::EventOrigin;
 use crate::game::GameState;
-use crate::happiness::increase_happiness;
+use crate::happiness::{IncreaseHappiness, execute_increase_happiness};
 use crate::payment::{PaymentOptions, PaymentReason};
-use crate::player::{Player, remove_unit};
+use crate::player::Player;
 use crate::player_events::PlayingActionInfo;
-use crate::recruit::recruit;
-use crate::unit::Units;
+use crate::recruit::{Recruit, execute_recruit};
 use crate::wonder::{Wonder, WonderCardInfo, cities_for_wonder, on_play_wonder_card, wonder_cost};
-use crate::{game::Game, position::Position, resource_pile::ResourcePile};
-
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
-pub struct Collect {
-    pub city_position: Position,
-    pub collections: Vec<PositionCollection>,
-    pub action_type: PlayingActionType,
-}
-
-impl Collect {
-    #[must_use]
-    pub fn new(
-        city_position: Position,
-        collections: Vec<PositionCollection>,
-        action_type: PlayingActionType,
-    ) -> Self {
-        Self {
-            city_position,
-            collections,
-            action_type,
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub struct Recruit {
-    pub units: Units,
-    pub city_position: Position,
-    pub payment: ResourcePile,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub replaced_units: Vec<u32>,
-}
-
-impl Recruit {
-    #[must_use]
-    pub fn new(units: &Units, city_position: Position, payment: ResourcePile) -> Self {
-        Self {
-            units: units.clone(),
-            city_position,
-            payment,
-            replaced_units: Vec::new(),
-        }
-    }
-
-    #[must_use]
-    pub fn with_replaced_units(mut self, replaced_units: &[u32]) -> Self {
-        self.replaced_units = replaced_units.to_vec();
-        self
-    }
-}
-
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
-pub struct IncreaseHappiness {
-    pub happiness_increases: Vec<(Position, u8)>,
-    pub payment: ResourcePile,
-    pub action_type: PlayingActionType,
-}
-
-impl IncreaseHappiness {
-    #[must_use]
-    pub fn new(
-        happiness_increases: Vec<(Position, u8)>,
-        payment: ResourcePile,
-        action_type: PlayingActionType,
-    ) -> Self {
-        Self {
-            happiness_increases,
-            payment,
-            action_type,
-        }
-    }
-}
+use crate::{game::Game, resource_pile::ResourcePile};
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub enum PlayingActionType {
@@ -170,8 +97,8 @@ impl PlayingActionType {
                 .action_type
                 .clone(),
             PlayingActionType::ActionCard(id) => game.cache.get_civil_card(*id).action_type.clone(),
-            PlayingActionType::EndTurn => ActionCost::cost(ResourcePile::empty()),
-            PlayingActionType::WonderCard(_) => ActionCost::free(), // action cost is checked later
+            // action cost of wonder is checked later
+            PlayingActionType::WonderCard(_) | PlayingActionType::EndTurn => ActionCost::free(),
             _ => ActionCost::regular(),
         }
     }
@@ -216,7 +143,8 @@ impl PlayingAction {
         game: &mut Game,
         player_index: usize,
     ) -> Result<(), String> {
-        let origin_override = match self.playing_action_type(game.player(player_index)) {
+        let action_type = self.playing_action_type(game.player(player_index));
+        let origin_override = match action_type {
             PlayingActionType::Custom(c) => {
                 if let Some(key) = &game
                     .player(player_index)
@@ -234,6 +162,17 @@ impl PlayingAction {
             _ => None,
         };
 
+        let payment_options = action_type
+            .cost(game, player_index)
+            .payment_options(game.player(player_index));
+        if !payment_options.is_free() {
+            game.add_info_log_item(&format!(
+                "{} has to pay for the action: {}",
+                game.player_name(player_index),
+                payment_options.default
+            ));
+        }
+
         ActionPayment::new(self).on_pay_action(game, player_index, origin_override)
     }
 
@@ -246,35 +185,21 @@ impl PlayingAction {
         use crate::construct;
         use PlayingAction::*;
         match self {
-            Advance(a) => {
-                let advance = a.advance;
-                if !game.player(player_index).can_advance(advance, game) {
-                    return Err("Cannot advance".to_string());
-                }
-                game.player(player_index)
-                    .advance_cost(advance, game, game.execute_cost_trigger())
-                    .pay(game, &a.payment);
-                gain_advance_without_payment(game, advance, player_index, a.payment, true);
-            }
-            FoundCity { settler } => {
-                let settler = remove_unit(player_index, settler, game);
-                if !settler.can_found_city(game) {
-                    return Err("Cannot found city".to_string());
-                }
-                found_city(game, player_index, settler.position);
-            }
-            Construct(c) => construct::construct(game, player_index, &c)?,
-            Collect(c) => collect(game, player_index, &c)?,
-            Recruit(r) => recruit(game, player_index, r)?,
-            IncreaseHappiness(i) => increase_happiness(
+            Advance(a) => execute_advance_action(game, player_index, &a)?,
+            FoundCity { settler } => execute_found_city_action(game, player_index, settler)?,
+            Construct(c) => construct::execute_construct(game, player_index, &c)?,
+            Collect(c) => execute_collect(game, player_index, &c)?,
+            Recruit(r) => execute_recruit(game, player_index, r)?,
+            IncreaseHappiness(i) => execute_increase_happiness(
                 game,
                 player_index,
                 &i.happiness_increases,
-                Some(i.payment),
+                &i.payment,
+                false,
                 &i.action_type,
             )?,
             InfluenceCultureAttempt(c) => {
-                influence_culture_attempt(game, player_index, &c.selected_structure)?;
+                execute_influence_culture_attempt(game, player_index, &c)?;
             }
             ActionCard(a) => play_action_card(game, player_index, a),
             WonderCard(w) => {
@@ -291,7 +216,9 @@ impl PlayingAction {
                     CustomActionActivation::new(custom_action, action_payment),
                 );
             }
-            EndTurn => game.next_turn(),
+            EndTurn => {
+                end_turn(game, player_index);
+            }
         }
         Ok(())
     }
@@ -517,4 +444,16 @@ pub(crate) fn pay_for_action() -> Ability {
             },
         )
         .build()
+}
+
+fn end_turn(game: &mut Game, player: usize) {
+    game.add_info_log_item(&format!(
+        "{} ended their turn{}",
+        game.player(player),
+        match game.actions_left {
+            0 => String::new(),
+            actions_left => format!(" with {actions_left} actions left"),
+        }
+    ));
+    game.next_turn();
 }

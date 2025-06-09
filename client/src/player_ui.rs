@@ -21,12 +21,14 @@ use server::combat_stats::CombatStats;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::content::persistent_events::PersistentEventType;
 use server::game::{Game, GameState};
+use server::map::block_for_position;
 use server::movement::{CurrentMove, MovementAction};
 use server::player::Player;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource::ResourceType;
 use server::status_phase::get_status_phase;
+use server::victory_points::victory_points_parts;
 
 pub fn player_select(rc: &RenderContext) -> StateUpdate {
     let game = rc.game;
@@ -131,7 +133,7 @@ pub fn show_top_center(rc: &RenderContext) {
     );
 
     let mut tooltip = vec![];
-    for (name, points) in player.victory_points_parts(rc.game) {
+    for (name, points) in victory_points_parts(player, rc.game) {
         tooltip.push(format!("{name}: {points}"));
     }
     show_tooltip_for_circle(
@@ -261,8 +263,9 @@ pub fn show_top_left(rc: &RenderContext) {
 
 fn show_focused_tile(label: &mut impl FnMut(&str), game: &Game, position: Position) {
     label(&format!(
-        "{}/{}",
+        "{}/{}/{}",
         position,
+        block_for_position(game, position).0,
         game.map
             .get(position)
             .map_or("outside the map", terrain_name),

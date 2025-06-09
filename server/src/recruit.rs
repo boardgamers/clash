@@ -1,18 +1,76 @@
-use crate::combat;
+use crate::city::activate_city;
 use crate::consts::STACK_LIMIT;
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
-use crate::map::home_position;
+use crate::map::capital_city_position;
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::{CostTrigger, Player, gain_unit};
 use crate::player_events::CostInfo;
-use crate::playing_actions::Recruit;
 use crate::position::Position;
+use crate::resource_pile::ResourcePile;
 use crate::special_advance::SpecialAdvance;
 use crate::unit::{UnitType, Units, kill_units, set_unit_position};
+use crate::{combat, utils};
 use itertools::Itertools;
+use serde::{Deserialize, Serialize};
 
-pub(crate) fn recruit(game: &mut Game, player_index: usize, r: Recruit) -> Result<(), String> {
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub struct Recruit {
+    pub units: Units,
+    pub city_position: Position,
+    pub payment: ResourcePile,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub replaced_units: Vec<u32>,
+}
+
+impl Recruit {
+    #[must_use]
+    pub fn new(units: &Units, city_position: Position, payment: ResourcePile) -> Self {
+        Self {
+            units: units.clone(),
+            city_position,
+            payment,
+            replaced_units: Vec::new(),
+        }
+    }
+
+    #[must_use]
+    pub fn with_replaced_units(mut self, replaced_units: &[u32]) -> Self {
+        self.replaced_units = replaced_units.to_vec();
+        self
+    }
+}
+
+pub(crate) fn execute_recruit(
+    game: &mut Game,
+    player_index: usize,
+    r: Recruit,
+) -> Result<(), String> {
+    let player = game.player(player_index);
+    let city_position = &r.city_position;
+    let units = &r.units;
+    let payment = &r.payment;
+    let replaced_units = &r.replaced_units;
+    let replace_str = match replaced_units.len() {
+        0 => "",
+        1 => " and replaces the unit at ",
+        _ => " and replaces units at ",
+    };
+    let replace_pos = utils::format_and(
+        &replaced_units
+            .iter()
+            .map(|unit_id| player.get_unit(*unit_id).position.to_string())
+            .unique()
+            .collect_vec(),
+        "",
+    );
+    game.add_info_log_item(&format!(
+        "{player} paid {payment} to recruit {} in the city at \
+            {city_position}{replace_str}{replace_pos}",
+        units.to_string(Some(game))
+    ));
+
     let cost = recruit_cost(
         game,
         game.player(player_index),
@@ -29,7 +87,7 @@ pub(crate) fn recruit(game: &mut Game, player_index: usize, r: Recruit) -> Resul
     let player = game.player_mut(player_index);
     let vec = r.units.clone().to_vec();
     player.units.reserve_exact(vec.len());
-    player.get_city_mut(r.city_position).activate();
+    activate_city(r.city_position, game);
     for unit_type in vec {
         let position = match &unit_type {
             UnitType::Ship => game
@@ -197,5 +255,5 @@ pub fn recruit_cost_without_replaced(
 
 fn is_cavalry_province_city(player: &Player, city: Position, game: &Game) -> bool {
     player.has_special_advance(SpecialAdvance::Provinces)
-        && home_position(game, player).distance(city) >= 3
+        && capital_city_position(game, player).distance(city) >= 3
 }

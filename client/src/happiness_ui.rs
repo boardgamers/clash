@@ -7,9 +7,11 @@ use itertools::Itertools;
 use server::action::Action;
 use server::city::{City, MoodState};
 use server::game::Game;
-use server::happiness::{available_happiness_actions, happiness_city_restriction, happiness_cost};
+use server::happiness::{
+    IncreaseHappiness, available_happiness_actions, happiness_city_restriction, happiness_cost,
+};
 use server::player::CostTrigger;
-use server::playing_actions::{IncreaseHappiness, PlayingAction, PlayingActionType};
+use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
 
 #[derive(Clone)]

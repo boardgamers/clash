@@ -1,0 +1,290 @@
+{
+  "options": {},
+  "state": "Playing",
+  "players": [
+    {
+      "id": 0,
+      "resources": {
+        "food": 2,
+        "wood": 5,
+        "ore": 5,
+        "ideas": 3,
+        "gold": 5,
+        "mood_tokens": 7,
+        "culture_tokens": 9
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {
+            "market": 1
+          },
+          "mood_state": "Angry",
+          "position": "A1"
+        },
+        {
+          "city_pieces": {
+            "academy": 1,
+            "port": 1
+          },
+          "mood_state": "Angry",
+          "activations": 6,
+          "position": "C2",
+          "port_position": "C3"
+        },
+        {
+          "city_pieces": {
+            "obelisk": 1,
+            "observatory": 1,
+            "fortress": 1,
+            "temple": 1
+          },
+          "mood_state": "Neutral",
+          "position": "B1"
+        },
+        {
+          "mood_state": "Happy",
+          "activations": 4,
+          "position": "E2"
+        }
+      ],
+      "units": [
+        {
+          "position": "D2",
+          "unit_type": "Ship",
+          "id": 3,
+          "carried_units": [
+            {
+              "unit_type": {
+                "Leader": "Erik"
+              },
+              "id": 0
+            },
+            {
+              "unit_type": "Settler",
+              "id": 1
+            }
+          ]
+        },
+        {
+          "position": "D2",
+          "unit_type": "Ship",
+          "id": 4,
+          "carried_units": [
+            {
+              "unit_type": "Infantry",
+              "id": 2
+            }
+          ]
+        },
+        {
+          "position": "D2",
+          "unit_type": "Ship",
+          "id": 5
+        }
+      ],
+      "civilization": "Vikings",
+      "advances": [
+        "Farming",
+        "Fishing",
+        "Mining",
+        "Taxes"
+      ],
+      "incident_tokens": 3,
+      "wonder_cards": [
+        "Pyramids"
+      ],
+      "next_unit_id": 10
+    },
+    {
+      "id": 1,
+      "resources": {
+        "food": 2,
+        "wood": 5,
+        "ore": 5,
+        "ideas": 5,
+        "gold": 5,
+        "mood_tokens": 9,
+        "culture_tokens": 9
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "mood_state": "Angry",
+          "activations": 2,
+          "position": "C1"
+        },
+        {
+          "city_pieces": {
+            "port": 1
+          },
+          "mood_state": "Neutral",
+          "position": "B2",
+          "port_position": "C3"
+        }
+      ],
+      "units": [
+        {
+          "position": "D1",
+          "unit_type": "Infantry",
+          "id": 0
+        }
+      ],
+      "civilization": "Greece",
+      "advances": [
+        "Farming",
+        "Mining"
+      ],
+      "incident_tokens": 3,
+      "next_unit_id": 2
+    },
+    {
+      "id": 2,
+      "civilization": "Barbarians",
+      "next_unit_id": 0
+    },
+    {
+      "id": 3,
+      "civilization": "Pirates",
+      "next_unit_id": 0
+    }
+  ],
+  "map": {
+    "tiles": [
+      [
+        "A1",
+        "Fertile"
+      ],
+      [
+        "A2",
+        "Water"
+      ],
+      [
+        "A3",
+        {
+          "Exhausted": "Forest"
+        }
+      ],
+      [
+        "A4",
+        "Mountain"
+      ],
+      [
+        "A5",
+        "Fertile"
+      ],
+      [
+        "B1",
+        "Mountain"
+      ],
+      [
+        "B2",
+        "Forest"
+      ],
+      [
+        "B3",
+        "Fertile"
+      ],
+      [
+        "B4",
+        "Fertile"
+      ],
+      [
+        "B5",
+        "Fertile"
+      ],
+      [
+        "B6",
+        "Fertile"
+      ],
+      [
+        "C1",
+        "Barren"
+      ],
+      [
+        "C2",
+        "Forest"
+      ],
+      [
+        "C3",
+        "Water"
+      ],
+      [
+        "C4",
+        "Water"
+      ],
+      [
+        "C5",
+        "Water"
+      ],
+      [
+        "D1",
+        "Fertile"
+      ],
+      [
+        "D2",
+        "Water"
+      ],
+      [
+        "E2",
+        "Fertile"
+      ]
+    ]
+  },
+  "starting_player_index": 0,
+  "current_player_index": 0,
+  "action_log": [
+    {
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "action_log_index": 0,
+  "log": [],
+  "undo_limit": 0,
+  "actions_left": 2,
+  "round": 6,
+  "age": 1,
+  "messages": [
+    "The game has started"
+  ],
+  "dice_roll_outcomes": [
+    1,
+    1,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10
+  ],
+  "rng": "234162992961072890508432380903651342097",
+  "action_cards_left": [
+    1
+  ],
+  "objective_cards_left": [
+    1
+  ]
+}

@@ -320,7 +320,8 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 collects 1 food in the city at B3 making it Neutral",
+      "Player1 collects 1 food in the city at B3",
+      "City at B3 became Neutral because it was activated more than once",
       "Husbandry allows collecting 1 resources from 2 land spaces away",
       "Player1 could not store 1 food"
     ]

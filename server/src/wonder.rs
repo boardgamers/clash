@@ -1,14 +1,14 @@
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::advance::Advance;
 use crate::card::draw_card_from_pile;
-use crate::city::{City, MoodState};
+use crate::city::{City, MoodState, activate_city};
 use crate::construct::can_construct_anything;
 use crate::consts::WONDER_VICTORY_POINTS;
 use crate::content::ability::Ability;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{PaymentRequest, PersistentEventType, PositionRequest};
 use crate::events::EventOrigin;
-use crate::log::{current_action_log_item, format_mood_change};
+use crate::log::current_action_log_item;
 use crate::payment::PaymentOptions;
 use crate::player::{CostTrigger, Player};
 use crate::player_events::CostInfo;
@@ -407,13 +407,15 @@ pub(crate) fn build_wonder_handler() -> Ability {
             |e| &mut e.play_wonder_card,
             11,
             move |game, player_index, i| {
-                let p = game.player(player_index);
-                let choices = cities_for_wonder(i.wonder, game, p, i.cost.clone());
+                game.add_info_log_item(&format!(
+                    "{} played the wonder card {}",
+                    game.player_name(player_index),
+                    i.wonder.name()
+                ));
 
-                let needed = 1..=1;
                 Some(PositionRequest::new(
-                    choices,
-                    needed,
+                    cities_for_wonder(i.wonder, game, game.player(player_index), i.cost.clone()),
+                    1..=1,
                     "Select city to build wonder",
                 ))
             },
@@ -460,11 +462,10 @@ pub(crate) fn build_wonder_handler() -> Ability {
                 let name = i.wonder;
 
                 game.add_info_log_item(&format!(
-                    "{} built {} in city {pos} for {}{}",
+                    "{} built {} in city {pos} for {}",
                     s.player_name,
                     name.name(),
                     s.choice[0],
-                    format_mood_change(game.player(s.player_index), pos)
                 ));
                 i.cost.info.execute(game);
                 current_action_log_item(game).wonder_built = Some(name);
@@ -504,7 +505,7 @@ pub(crate) fn construct_wonder(
     player.wonders_owned.insert(name);
     let city = player.get_city_mut(city_position);
     city.pieces.wonders.push(name);
-    city.activate();
+    activate_city(city_position, game);
 }
 
 #[must_use]

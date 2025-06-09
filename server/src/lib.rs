@@ -71,5 +71,5 @@ pub mod tactics_card;
 mod undo;
 pub mod unit;
 pub mod utils;
-mod victory_points;
+pub mod victory_points;
 pub mod wonder;

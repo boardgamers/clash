@@ -1,0 +1,545 @@
+{
+  "options": {},
+  "state": "Playing",
+  "players": [
+    {
+      "id": 0,
+      "resources": {
+        "food": 2,
+        "wood": 5,
+        "ore": 5,
+        "ideas": 3,
+        "gold": 5,
+        "mood_tokens": 7,
+        "culture_tokens": 9
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {
+            "market": 1
+          },
+          "mood_state": "Angry",
+          "position": "A1"
+        },
+        {
+          "city_pieces": {
+            "academy": 1,
+            "port": 1
+          },
+          "mood_state": "Angry",
+          "activations": 6,
+          "position": "C2",
+          "port_position": "C3"
+        },
+        {
+          "city_pieces": {
+            "obelisk": 1,
+            "observatory": 1,
+            "fortress": 1,
+            "temple": 1
+          },
+          "mood_state": "Neutral",
+          "position": "B1"
+        },
+        {
+          "mood_state": "Happy",
+          "activations": 4,
+          "position": "E2"
+        }
+      ],
+      "units": [
+        {
+          "position": "D1",
+          "unit_type": "Settler",
+          "movement_restrictions": [
+            "Fertile"
+          ],
+          "id": 1
+        },
+        {
+          "position": "D1",
+          "unit_type": "Infantry",
+          "movement_restrictions": [
+            "Battle",
+            "Fertile"
+          ],
+          "id": 2
+        },
+        {
+          "position": "D2",
+          "unit_type": "Ship",
+          "id": 3
+        },
+        {
+          "position": "D2",
+          "unit_type": "Ship",
+          "id": 4
+        },
+        {
+          "position": "D2",
+          "unit_type": "Ship",
+          "id": 5
+        }
+      ],
+      "civilization": "Vikings",
+      "advances": [
+        "Farming",
+        "Fishing",
+        "Mining",
+        "Taxes"
+      ],
+      "incident_tokens": 3,
+      "wonder_cards": [
+        "Pyramids"
+      ],
+      "next_unit_id": 10
+    },
+    {
+      "id": 1,
+      "resources": {
+        "food": 2,
+        "wood": 5,
+        "ore": 5,
+        "ideas": 5,
+        "gold": 5,
+        "mood_tokens": 9,
+        "culture_tokens": 9
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "mood_state": "Angry",
+          "activations": 2,
+          "position": "C1"
+        },
+        {
+          "city_pieces": {
+            "port": 1
+          },
+          "mood_state": "Neutral",
+          "position": "B2",
+          "port_position": "C3"
+        }
+      ],
+      "civilization": "Greece",
+      "advances": [
+        "Farming",
+        "Mining"
+      ],
+      "incident_tokens": 3,
+      "captured_leaders": [
+        "Erik"
+      ],
+      "next_unit_id": 2
+    },
+    {
+      "id": 2,
+      "civilization": "Barbarians",
+      "next_unit_id": 0
+    },
+    {
+      "id": 3,
+      "civilization": "Pirates",
+      "next_unit_id": 0
+    }
+  ],
+  "map": {
+    "tiles": [
+      [
+        "A1",
+        "Fertile"
+      ],
+      [
+        "A2",
+        "Water"
+      ],
+      [
+        "A3",
+        {
+          "Exhausted": "Forest"
+        }
+      ],
+      [
+        "A4",
+        "Mountain"
+      ],
+      [
+        "A5",
+        "Fertile"
+      ],
+      [
+        "B1",
+        "Mountain"
+      ],
+      [
+        "B2",
+        "Forest"
+      ],
+      [
+        "B3",
+        "Fertile"
+      ],
+      [
+        "B4",
+        "Fertile"
+      ],
+      [
+        "B5",
+        "Fertile"
+      ],
+      [
+        "B6",
+        "Fertile"
+      ],
+      [
+        "C1",
+        "Barren"
+      ],
+      [
+        "C2",
+        "Forest"
+      ],
+      [
+        "C3",
+        "Water"
+      ],
+      [
+        "C4",
+        "Water"
+      ],
+      [
+        "C5",
+        "Water"
+      ],
+      [
+        "D1",
+        "Fertile"
+      ],
+      [
+        "D2",
+        "Water"
+      ],
+      [
+        "E2",
+        "Fertile"
+      ]
+    ]
+  },
+  "starting_player_index": 0,
+  "current_player_index": 0,
+  "action_log": [
+    {
+      "rounds": [
+        {
+          "players": [
+            {
+              "index": 0,
+              "items": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Custom": {
+                        "action": "NewColonies"
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectPositions": [
+                        "D1"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectUnits": [
+                        0
+                      ]
+                    }
+                  },
+                  "undo": [
+                    {
+                      "op": "add",
+                      "path": "/events",
+                      "value": [
+                        {
+                          "event_type": {
+                            "CustomAction": {
+                              "action": "NewColonies"
+                            }
+                          },
+                          "last_priority_used": 0,
+                          "player": 0
+                        },
+                        {
+                          "event_type": {
+                            "CombatRoundEnd": {
+                              "attacker": {
+                                "combat_value": 13,
+                                "opponent_fighters": 1
+                              },
+                              "combat": {
+                                "attackers": [
+                                  0,
+                                  1,
+                                  2
+                                ],
+                                "retreat": "CanRetreat",
+                                "stats": {
+                                  "attacker": {
+                                    "player": 0,
+                                    "position": "D2",
+                                    "present": {
+                                      "infantry": 1,
+                                      "leader": "Erik",
+                                      "settlers": 1
+                                    }
+                                  },
+                                  "battleground": "Land",
+                                  "defender": {
+                                    "player": 1,
+                                    "position": "D1",
+                                    "present": {
+                                      "infantry": 1
+                                    }
+                                  },
+                                  "disembarked": true,
+                                  "round": 1
+                                }
+                              },
+                              "defender": {
+                                "combat_value": 7,
+                                "opponent_fighters": 2
+                              },
+                              "final_result": "AttackerWins"
+                            }
+                          },
+                          "handler": {
+                            "origin": {
+                              "Ability": "Choose Casualties"
+                            },
+                            "priority": 1,
+                            "request": {
+                              "SelectUnits": {
+                                "choices": [
+                                  0,
+                                  2
+                                ],
+                                "description": "Remove 1 attacking units",
+                                "needed": {
+                                  "end": 1,
+                                  "start": 1
+                                },
+                                "player": 0
+                              }
+                            }
+                          },
+                          "last_priority_used": 1,
+                          "player": 0
+                        }
+                      ]
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/units/0/carried_units",
+                      "value": [
+                        {
+                          "id": 0,
+                          "movement_restrictions": [
+                            "Battle"
+                          ],
+                          "unit_type": {
+                            "Leader": "Erik"
+                          }
+                        },
+                        {
+                          "id": 1,
+                          "unit_type": "Settler"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/0/id",
+                      "value": 3
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/0/position",
+                      "value": "D2"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/0/unit_type",
+                      "value": "Ship"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/units/0/movement_restrictions"
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/0/units/1/carried_units",
+                      "value": [
+                        {
+                          "id": 2,
+                          "movement_restrictions": [
+                            "Battle"
+                          ],
+                          "unit_type": "Infantry"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/1/id",
+                      "value": 4
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/1/position",
+                      "value": "D2"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/1/unit_type",
+                      "value": "Ship"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/units/1/movement_restrictions"
+                    },
+                    {
+                      "op": "replace",
+                      "path": "/players/0/units/2/id",
+                      "value": 5
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/units/3"
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/0/units/3"
+                    },
+                    {
+                      "op": "add",
+                      "path": "/players/1/units",
+                      "value": [
+                        {
+                          "id": 0,
+                          "position": "D1",
+                          "unit_type": "Infantry"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "remove",
+                      "path": "/players/1/captured_leaders"
+                    }
+                  ],
+                  "combat_stats": {
+                    "round": 1,
+                    "battleground": "Land",
+                    "disembarked": true,
+                    "attacker": {
+                      "position": "D2",
+                      "player": 0,
+                      "present": {
+                        "settlers": 1,
+                        "infantry": 1,
+                        "leader": "Erik"
+                      },
+                      "losses": {
+                        "leader": "Erik"
+                      }
+                    },
+                    "defender": {
+                      "position": "D1",
+                      "player": 1,
+                      "present": {
+                        "infantry": 1
+                      },
+                      "losses": {
+                        "infantry": 1
+                      }
+                    },
+                    "result": "AttackerWins"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "action_log_index": 3,
+  "log": [
+    [
+      "Player1 started New Colonies"
+    ],
+    [
+      "Player1 disembarked 1 settler, 1 infantry and Erik the Red from D2 to D1"
+    ],
+    [
+      "Combat round 1",
+      "Attackers: 1 settler, 1 infantry and Erik the Red",
+      "Defenders: 1 infantry",
+      "Player1 rolled 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 13 and gets 1 hits against defending units.",
+      "Player2 rolled 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against attacking units.",
+      "Player1 has to remove 1 of their attacking units"
+    ],
+    [
+      "Player1 removed Erik the Red",
+      "Player2 has to remove all of their defending units",
+      "Player2 removed 1 infantry",
+      "Attacker wins"
+    ]
+  ],
+  "undo_limit": 2,
+  "actions_left": 2,
+  "round": 6,
+  "age": 1,
+  "messages": [
+    "The game has started"
+  ],
+  "dice_roll_outcomes": [
+    1,
+    1,
+    10,
+    10,
+    10,
+    10,
+    10
+  ],
+  "rng": "234162992961072890508432380903651342097",
+  "dice_roll_log": [
+    10,
+    10,
+    10
+  ],
+  "action_cards_left": [
+    1
+  ],
+  "objective_cards_left": [
+    1
+  ]
+}

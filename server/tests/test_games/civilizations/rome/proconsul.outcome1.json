@@ -392,7 +392,8 @@
                         "infantry": 1
                       }
                     },
-                    "result": "AttackerWins"
+                    "result": "AttackerWins",
+                    "city_mood": "Happy"
                   }
                 },
                 {
@@ -421,6 +422,7 @@
                                 }
                               },
                               "battleground": "City",
+                              "city_mood": "Happy",
                               "defender": {
                                 "losses": {
                                   "infantry": 1

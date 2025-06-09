@@ -365,7 +365,8 @@
                       "position": "B2",
                       "player": 1
                     },
-                    "result": "AttackerWins"
+                    "result": "AttackerWins",
+                    "city_mood": "Neutral"
                   }
                 },
                 {
@@ -394,6 +395,7 @@
                                 }
                               },
                               "battleground": "City",
+                              "city_mood": "Neutral",
                               "defender": {
                                 "player": 1,
                                 "position": "B2"

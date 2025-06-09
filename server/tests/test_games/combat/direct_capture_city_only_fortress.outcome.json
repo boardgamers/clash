@@ -230,7 +230,8 @@
                       "position": "C1",
                       "player": 1
                     },
-                    "result": "AttackerWins"
+                    "result": "AttackerWins",
+                    "city_mood": "Angry"
                   }
                 }
               ]

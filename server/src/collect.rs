@@ -1,14 +1,17 @@
 use crate::advance::Advance;
+use crate::city::activate_city;
 use crate::content::persistent_events::PersistentEventType;
 use crate::events::EventOrigin;
 use crate::game::Game;
+use crate::log::modifier_suffix;
 use crate::map::Terrain;
 use crate::map::Terrain::{Fertile, Forest, Mountain};
 use crate::player::{CostTrigger, Player};
 use crate::player_events::ActionInfo;
-use crate::playing_actions::{Collect, PlayingActionType, base_or_custom_available};
+use crate::playing_actions::{PlayingActionType, base_or_custom_available};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
+use crate::utils;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
@@ -43,6 +46,28 @@ impl PositionCollection {
     #[must_use]
     pub fn total(&self) -> ResourcePile {
         self.pile.times(self.times)
+    }
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
+pub struct Collect {
+    pub city_position: Position,
+    pub collections: Vec<PositionCollection>,
+    pub action_type: PlayingActionType,
+}
+
+impl Collect {
+    #[must_use]
+    pub fn new(
+        city_position: Position,
+        collections: Vec<PositionCollection>,
+        action_type: PlayingActionType,
+    ) -> Self {
+        Self {
+            city_position,
+            collections,
+            action_type,
+        }
     }
 }
 
@@ -132,7 +157,47 @@ pub fn tiles_used(collections: &[PositionCollection]) -> u8 {
     collections.iter().map(|c| c.times).sum()
 }
 
-pub(crate) fn collect(game: &mut Game, player_index: usize, c: &Collect) -> Result<(), String> {
+pub(crate) fn execute_collect(
+    game: &mut Game,
+    player_index: usize,
+    c: &Collect,
+) -> Result<(), String> {
+    let collections = &c.collections;
+    let res = utils::format_and(
+        &collections
+            .iter()
+            .map(|c| c.total().to_string())
+            .collect_vec(),
+        "nothing",
+    );
+    let total = if collections.len() > 1
+        && collections
+            .iter()
+            .permutations(2)
+            .unique()
+            .any(|permutation| {
+                permutation[0]
+                    .pile
+                    .has_common_resource(&permutation[1].pile)
+            }) {
+        format!(
+            " for a total of {}",
+            collections
+                .iter()
+                .map(PositionCollection::total)
+                .sum::<ResourcePile>()
+        )
+    } else {
+        String::new()
+    };
+    let player = &game.player(player_index);
+    game.add_info_log_item(&format!(
+        "{} collects {res}{total} in the city at {}{}",
+        player,
+        c.city_position,
+        modifier_suffix(player, &c.action_type)
+    ));
+
     let mut i = get_total_collection(
         game,
         player_index,
@@ -144,7 +209,7 @@ pub(crate) fn collect(game: &mut Game, player_index: usize, c: &Collect) -> Resu
     if !city.can_activate() {
         return Err("City can't be activated".to_string());
     }
-    city.activate();
+    activate_city(city.position, game);
     game.players[player_index].gain_resources(i.total.clone());
 
     let key = Advance::Husbandry.id();

@@ -241,7 +241,8 @@
                         "infantry": 1
                       }
                     },
-                    "result": "DefenderWins"
+                    "result": "DefenderWins",
+                    "city_mood": "Angry"
                   }
                 }
               ]

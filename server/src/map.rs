@@ -562,8 +562,8 @@ pub fn setup_home_city(player: &mut Player, pos: Position) {
     player.cities.push(city);
 }
 
-pub(crate) fn home_position(game: &Game, player: &Player) -> Position {
-    let setup = get_map_setup(game.human_players_count());
+pub(crate) fn capital_city_position(game: &Game, player: &Player) -> Position {
+    let setup = get_map_setup(human_players_including_dropped(game));
     let h = &setup.home_positions[player.index];
     h.block.tiles(&h.position, h.position.rotation)[0].0
 }
@@ -582,17 +582,34 @@ pub(crate) fn block_has_player_city(game: &Game, p: &BlockPosition, player: usiz
         .any(|p| game.player(player).try_get_city(*p).is_some())
 }
 
-pub(crate) fn block_for_position(game: &Game, position: Position) -> BlockPosition {
-    let setup = get_map_setup(game.human_players_count());
-    for p in &setup.free_positions {
+///
+/// Finds the block position for a given position.
+///
+/// # Panics
+///
+/// Panics if the position is not found in the map setup.
+#[must_use]
+pub fn block_for_position(game: &Game, position: Position) -> (u8, BlockPosition) {
+    let setup = get_map_setup(human_players_including_dropped(game));
+    let home = setup.home_positions.len();
+    for (i, p) in setup.free_positions.iter().enumerate() {
         if block_tiles(p).contains(&position) {
-            return p.clone();
+            return ((i + home + 1) as u8, p.clone());
         }
     }
-    let h = setup
+    setup
         .home_positions
         .iter()
-        .find(|h| block_tiles(&h.position).contains(&position))
-        .expect("Position not found in home positions");
-    h.position.clone()
+        .enumerate()
+        .find_map(|(i, h)| {
+            (block_tiles(&h.position).contains(&position))
+                .then_some(((i + 1) as u8, h.position.clone()))
+        })
+        .unwrap_or_else(
+            || (1, setup.free_positions[0].clone()), // for tests
+        )
+}
+
+fn human_players_including_dropped(game: &Game) -> usize {
+    game.players.iter().filter(|p| p.is_human()).count()
 }

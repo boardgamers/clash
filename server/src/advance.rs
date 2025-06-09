@@ -326,6 +326,29 @@ pub fn is_special_advance_active(
     }
 }
 
+pub(crate) fn execute_advance_action(
+    game: &mut Game,
+    player_index: usize,
+    a: &AdvanceAction,
+) -> Result<(), String> {
+    let advance = a.advance;
+    if !game.player(player_index).can_advance(advance, game) {
+        return Err("Cannot advance".to_string());
+    }
+    game.add_info_log_item(&format!(
+        "{} paid {} to get the {} advance",
+        game.player_name(player_index),
+        a.payment,
+        a.advance.name(game)
+    ));
+
+    game.player(player_index)
+        .advance_cost(advance, game, game.execute_cost_trigger())
+        .pay(game, &a.payment);
+    gain_advance_without_payment(game, advance, player_index, a.payment.clone(), true);
+    Ok(())
+}
+
 pub(crate) fn gain_advance_without_payment(
     game: &mut Game,
     advance: Advance,

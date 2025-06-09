@@ -367,12 +367,14 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 paid 1 culture token to recruit 1 infantry in the city at A1 making it Neutral",
+      "Player1 paid 1 culture token to recruit 1 infantry in the city at A1",
       "Draft reduced the cost of 1 Infantry to 1 mood token",
-      "Sparta allows to pay the Draft cost as culture tokes"
+      "Sparta allows to pay the Draft cost as culture tokes",
+      "City at A1 became Neutral because it was activated more than once"
     ],
     [
-      "Player1 decided to decrease the mood of B3 instead of A1 using City States"
+      "Player1 decided to decrease the mood of B3 instead of A1 using City States",
+      "City at B3 became Neutral because it was activated more than once"
     ]
   ],
   "undo_limit": 0,

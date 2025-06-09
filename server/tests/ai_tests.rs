@@ -1,5 +1,8 @@
 #[cfg(not(target_arch = "wasm32"))]
 use crate::common::JsonTest;
+use server::collect::Collect;
+use server::happiness::IncreaseHappiness;
+use server::recruit::Recruit;
 
 mod common;
 
@@ -12,9 +15,7 @@ fn all_actions() {
     use server::action::{Action, ActionType};
     use server::ai_actions::AiActions;
     use server::collect::PositionCollection;
-    use server::playing_actions::{
-        Collect, IncreaseHappiness, PlayingAction, PlayingActionType, Recruit,
-    };
+    use server::playing_actions::{PlayingAction, PlayingActionType};
     use server::position::Position;
     use server::resource_pile::ResourcePile;
     use server::unit::Units;

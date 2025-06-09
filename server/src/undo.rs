@@ -1,4 +1,4 @@
-use crate::action::{Action, add_log_item_from_action, after_action};
+use crate::action::{Action, after_action};
 use crate::game::Game;
 use crate::log::{current_player_turn_log, current_player_turn_log_mut};
 use crate::movement::execute_movement_action;
@@ -53,7 +53,6 @@ pub(crate) fn to_serde_value(game: &Game) -> Value {
 pub fn redo(game: &mut Game, player_index: usize) -> Result<(), String> {
     let copy = current_player_turn_log(game).item(game).clone();
     game.action_log_index += 1;
-    add_log_item_from_action(game, &copy.action);
 
     match copy.action.clone() {
         Action::Playing(action) => action.execute(game, player_index, true),

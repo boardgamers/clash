@@ -304,7 +304,8 @@
                         "infantry": 2
                       }
                     },
-                    "result": "AttackerWins"
+                    "result": "AttackerWins",
+                    "city_mood": "Angry"
                   }
                 }
               ]

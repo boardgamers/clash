@@ -134,8 +134,14 @@ pub fn from_data(data: GameData, cache: Cache, context: GameContext) -> Game {
         events: data.events,
     };
     let all = game.cache.get_abilities().clone();
-    for player in data.players {
-        initialize_player(player, &mut game, &all);
+    let mut objectives = vec![];
+    for player_data in data.players {
+        objectives.push(player_data.objective_cards.clone());
+        let player = player_from_data(player_data, &game);
+        game.players.push(player);
+    }
+    for (i, o) in objectives.into_iter().enumerate() {
+        initialize_player(i, &mut game, &all, o);
     }
     game
 }
@@ -289,11 +295,12 @@ pub struct PlayerData {
 /// # Panics
 ///
 /// Panics if elements like wonders or advances don't exist
-fn initialize_player(data: PlayerData, game: &mut Game, builtin_abilities: &[Ability]) {
-    let objective_cards = data.objective_cards.clone();
-    let player = player_from_data(data, game);
-    let player_index = player.index;
-    game.players.push(player);
+fn initialize_player(
+    player_index: usize,
+    game: &mut Game,
+    builtin_abilities: &[Ability],
+    objective_cards: Vec<u8>,
+) {
     ability::init_player(game, player_index, builtin_abilities);
     advance::init_player(game, player_index);
 

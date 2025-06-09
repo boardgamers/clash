@@ -266,6 +266,11 @@ pub enum CustomActionType {
     ImperialArmy,
     ArtOfWar,
     AgricultureEconomist,
+
+    // Vikings
+    Danegeld,
+    LegendaryExplorer,
+    NewColonies,
 }
 
 impl CustomActionType {
@@ -280,13 +285,37 @@ pub(crate) fn execute_custom_action(
     player_index: usize,
     a: CustomActionActivation,
 ) {
+    let action = a.action.clone();
+    let p = game.player(player_index);
+    let action_type = action.action;
+    let name = custom_action_execution(p, action_type)
+        .unwrap_or_else(|| panic!("Custom action {action_type:?} is not an action"))
+        .ability
+        .name;
+    game.add_info_log_item(&format!(
+        "{p} started {name}{}",
+        if let Some(p) = action.city {
+            format!(" at {p}")
+        } else {
+            String::new()
+        }
+    ));
+    on_custom_action(game, player_index, a);
+}
+
+pub(crate) fn on_custom_action(game: &mut Game, player_index: usize, a: CustomActionActivation) {
+    let Some(execution) = custom_action_execution(game.player(player_index), a.action.action)
+    else {
+        // may have disappeared due to a game change,
+        // such as Erik the Red unloading units and being killed
+        game.events.pop();
+        return;
+    };
     let _ = trigger_persistent_event_with_listener(
         game,
         &[player_index],
         |e| &mut e.custom_action,
-        &custom_action_execution(game.player(player_index), a.action.action)
-            .ability
-            .listeners,
+        &execution.ability.listeners,
         a,
         PersistentEventType::CustomAction,
         TriggerPersistentEventParams::default(),
@@ -296,23 +325,25 @@ pub(crate) fn execute_custom_action(
 pub(crate) fn custom_action_execution(
     player: &Player,
     action_type: CustomActionType,
-) -> CustomActionActionExecution {
-    let CustomActionExecution::Action(e) = player.custom_action_info(action_type).execution else {
-        panic!("Custom action {action_type:?} is not an action");
-    };
-    e
+) -> Option<CustomActionActionExecution> {
+    if let CustomActionExecution::Action(e) =
+        player.custom_actions.get(&action_type)?.execution.clone()
+    {
+        Some(e)
+    } else {
+        None
+    }
 }
 
 pub(crate) fn custom_action_modifier_name(
     player: &Player,
     action_type: CustomActionType,
 ) -> String {
-    let CustomActionExecution::Modifier((_, name)) =
-        player.custom_action_info(action_type).execution
-    else {
-        panic!("Custom action {action_type:?} is not a modifier");
-    };
-    name
+    match player.custom_action_info(action_type).execution {
+        CustomActionExecution::Modifier((_, name)) => name.clone(),
+        // Sports is not a modifier, but is shown for logging purposes as a modifier
+        CustomActionExecution::Action(a) => a.ability.name.clone(),
+    }
 }
 
 pub(crate) fn can_play_custom_action(

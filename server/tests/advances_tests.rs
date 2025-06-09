@@ -25,7 +25,7 @@ use server::recruit::recruit_cost_without_replaced;
 use server::resource_pile::ResourcePile;
 use server::unit::Units;
 use server::wonder::Wonder;
-use server::{advance, construct, playing_actions};
+use server::{advance, collect, construct, happiness, recruit};
 use std::vec;
 
 mod common;
@@ -44,7 +44,7 @@ fn test_sanitation_and_draft() {
         vec![
             TestAction::undoable(
                 0,
-                Action::Playing(Recruit(playing_actions::Recruit::new(
+                Action::Playing(Recruit(recruit::Recruit::new(
                     &units,
                     city_position,
                     ResourcePile::mood_tokens(1) + ResourcePile::gold(2),
@@ -220,7 +220,7 @@ fn test_increase_happiness_voting() {
         vec![TestAction::undoable(
             0,
             Action::Playing(PlayingAction::IncreaseHappiness(
-                playing_actions::IncreaseHappiness::new(
+                happiness::IncreaseHappiness::new(
                     vec![
                         (Position::from_offset("C2"), 1),
                         (Position::from_offset("B3"), 2),
@@ -240,7 +240,7 @@ fn test_increase_happiness_voting_rituals() {
         vec![TestAction::undoable(
             0,
             Action::Playing(PlayingAction::IncreaseHappiness(
-                playing_actions::IncreaseHappiness::new(
+                happiness::IncreaseHappiness::new(
                     vec![
                         (Position::from_offset("C2"), 1),
                         (Position::from_offset("B3"), 2),
@@ -273,7 +273,7 @@ fn test_forced_labor() {
             TestAction::undoable(0, payment_response(ResourcePile::mood_tokens(1))).skip_json(),
             TestAction::undoable(
                 0,
-                Action::Playing(Collect(playing_actions::Collect::new(
+                Action::Playing(Collect(collect::Collect::new(
                     Position::from_offset("A1"),
                     vec![
                         PositionCollection::new(Position::from_offset("A1"), ResourcePile::food(1)),
@@ -294,7 +294,7 @@ fn test_civil_liberties() {
             TestAction::undoable(0, custom_action(CustomActionType::CivilLiberties)),
             TestAction::undoable(
                 0,
-                Action::Playing(Recruit(playing_actions::Recruit::new(
+                Action::Playing(Recruit(recruit::Recruit::new(
                     &Units::new(0, 1, 0, 0, 0, None),
                     Position::from_offset("A1"),
                     ResourcePile::mood_tokens(2),
@@ -548,7 +548,7 @@ fn test_collect_fishing() {
         "collect_fishing",
         vec![TestAction::undoable(
             0,
-            Action::Playing(Collect(playing_actions::Collect::new(
+            Action::Playing(Collect(collect::Collect::new(
                 Position::from_offset("C2"),
                 vec![PositionCollection::new(
                     Position::from_offset("C3"),
@@ -566,7 +566,7 @@ fn test_collect_port() {
         "collect_port",
         vec![TestAction::undoable(
             0,
-            Action::Playing(Collect(playing_actions::Collect::new(
+            Action::Playing(Collect(collect::Collect::new(
                 Position::from_offset("C2"),
                 vec![PositionCollection::new(
                     Position::from_offset("C3"),
@@ -580,7 +580,7 @@ fn test_collect_port() {
 
 #[test]
 fn test_collect_husbandry() {
-    let action = Action::Playing(Collect(playing_actions::Collect::new(
+    let action = Action::Playing(Collect(collect::Collect::new(
         Position::from_offset("B3"),
         vec![PositionCollection::new(
             Position::from_offset("B5"),
@@ -604,7 +604,7 @@ fn test_collect_free_economy() {
         vec![
             TestAction::undoable(
                 0,
-                Action::Playing(Collect(playing_actions::Collect::new(
+                Action::Playing(Collect(collect::Collect::new(
                     Position::from_offset("C2"),
                     vec![
                         PositionCollection::new(Position::from_offset("B1"), ResourcePile::ore(1)),
@@ -667,7 +667,7 @@ fn test_overpay() {
         "sanitation_and_draft",
         vec![TestAction::illegal(
             0,
-            Action::Playing(Recruit(playing_actions::Recruit::new(
+            Action::Playing(Recruit(recruit::Recruit::new(
                 &Units::new(0, 1, 0, 0, 0, None),
                 Position::from_offset("A1"),
                 ResourcePile::mood_tokens(1) + ResourcePile::gold(2), //paid too much
@@ -683,7 +683,7 @@ fn test_husbandry() {
         vec![
             TestAction::undoable(
                 0,
-                Action::Playing(Collect(playing_actions::Collect::new(
+                Action::Playing(Collect(collect::Collect::new(
                     Position::from_offset("C2"),
                     vec![PositionCollection::new(
                         Position::from_offset("D1"),
@@ -700,7 +700,7 @@ fn test_husbandry() {
             // can use husbandry - because it was not used in the previous action
             TestAction::undoable(
                 0,
-                Action::Playing(Collect(playing_actions::Collect::new(
+                Action::Playing(Collect(collect::Collect::new(
                     Position::from_offset("C2"),
                     vec![PositionCollection::new(
                         Position::from_offset("E2"),

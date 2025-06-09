@@ -1,19 +1,32 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Advance;
+use crate::city::MoodState;
 use crate::city_pieces::Building;
 use crate::civilization::Civilization;
+use crate::combat::move_with_possible_combat;
 use crate::consts::STACK_LIMIT;
-use crate::content::ability::Ability;
+use crate::content::ability::{Ability, AbilityBuilder};
+use crate::content::advances::economy::use_taxes;
 use crate::content::advances::trade_routes::TradeRoute;
-use crate::content::persistent_events::{PaymentRequest, UnitsRequest};
+use crate::content::custom_actions::CustomActionType;
+use crate::content::persistent_events::{PaymentRequest, PositionRequest, UnitsRequest};
+use crate::events::EventOrigin;
 use crate::game::Game;
-use crate::map::{Block, Terrain};
+use crate::leader::{Leader, LeaderInfo, leader_position};
+use crate::leader_ability::{LeaderAbility, activate_leader_city, can_activate_leader_city};
+use crate::map::{Block, Terrain, block_for_position, capital_city_position};
+use crate::movement::{MoveUnits, move_action_log};
 use crate::payment::{PaymentOptions, PaymentReason};
-use crate::player::Player;
+use crate::player::{Player, gain_resources};
 use crate::position::Position;
 use crate::resource::ResourceType;
+use crate::resource_pile::ResourcePile;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
 use crate::unit::{Unit, UnitType, Units, carried_units};
+use crate::victory_points::{
+    SpecialVictoryPoints, VictoryPointAttribution, set_special_victory_points,
+    update_special_victory_points,
+};
 use itertools::Itertools;
 use std::ops::RangeInclusive;
 
@@ -21,7 +34,7 @@ pub(crate) fn vikings() -> Civilization {
     Civilization::new(
         "Vikings",
         vec![ship_construction(), longships(), raids(), runes()],
-        vec![],
+        vec![knut(), erik(), ragnar()],
         Some(Block::new([
             Terrain::Fertile,
             Terrain::Mountain,
@@ -288,4 +301,253 @@ fn runes() -> SpecialAdvanceInfo {
         },
     )
     .build()
+}
+
+fn knut() -> LeaderInfo {
+    LeaderInfo::new(
+        Leader::Knut,
+        "Knut the Great",
+        ruler_of_the_north(),
+        danegeld(),
+    )
+}
+
+fn danegeld() -> LeaderAbility {
+    LeaderAbility::builder(
+        "Danegeld",
+        "If you have Taxes: As aa action, you may activate the leader city: \
+            Collect taxes",
+    )
+    .add_custom_action(
+        CustomActionType::Danegeld,
+        |c| c.any_times().action().no_resources(),
+        |b| {
+            use_taxes(b.add_simple_persistent_event_listener(
+                |event| &mut event.custom_action,
+                -1,
+                |game, player, _player_name, _| {
+                    activate_leader_city(game, player, "collect taxes");
+                },
+            ))
+        },
+        |game, p| can_activate_leader_city(game, p) && p.can_use_advance(Advance::Taxes),
+    )
+    .build()
+}
+
+fn ruler_of_the_north() -> LeaderAbility {
+    let b = LeaderAbility::builder(
+        "Ruler of the North",
+        "Knut is worth half a point per distance to your capital",
+    );
+    let o = b.get_key().clone();
+    let o2 = o.clone();
+    let o3 = o.clone();
+    b.add_ability_initializer(move |game, player_index, _| {
+        set_knut_points(game, player_index, None, &o);
+    })
+    .add_ability_deinitializer(move |game, player_index| {
+        set_knut_points(game, player_index, None, &o2);
+    })
+    .add_transient_event_listener(
+        |event| &mut event.before_move,
+        1,
+        move |game, i, ()| {
+            if i.units
+                .iter()
+                .any(|&id| game.player(i.player).get_unit(id).is_leader())
+            {
+                set_knut_points(game, i.player, Some(i.to), &o3);
+            }
+        },
+    )
+    .build()
+}
+
+fn set_knut_points(
+    game: &mut Game,
+    player_index: usize,
+    position: Option<Position>,
+    origin: &EventOrigin,
+) {
+    let p = game.player(player_index);
+    let points = if p.active_leader().is_some_and(|l| l == Leader::Knut) {
+        position
+            .unwrap_or_else(|| leader_position(p))
+            .distance(capital_city_position(game, p)) as f32
+            / 2.0
+    } else {
+        0_f32
+    };
+    set_special_victory_points(
+        game.player_mut(player_index),
+        points,
+        origin,
+        VictoryPointAttribution::Events,
+    );
+}
+
+fn erik() -> LeaderInfo {
+    LeaderInfo::new(Leader::Erik, "Erik the Red", explorer(), new_colonies())
+}
+
+fn new_colonies() -> LeaderAbility {
+    LeaderAbility::builder(
+        "New Colonies",
+        "As a free action, if Erik is on a ship: \
+        Unload all units to an adjacent land space, which may start a battle",
+    )
+    .add_custom_action(
+        CustomActionType::NewColonies,
+        |c| c.any_times().free_action().no_resources(),
+        |b| {
+            b.add_position_request(
+                |event| &mut event.custom_action,
+                0,
+                |game, player_index, _| {
+                    Some(PositionRequest::new(
+                        unload_positions(game, game.player(player_index)),
+                        1..=1,
+                        "Select a land position to unload Erik's ship(s)",
+                    ))
+                },
+                |game, s, _a| {
+                    let to = s.choice[0];
+                    let p = game.player(s.player_index);
+                    let units = p
+                        .get_units(leader_position(p))
+                        .iter()
+                        .filter(|u| !u.is_ship())
+                        .map(|u| u.id)
+                        .collect_vec();
+
+                    let m = MoveUnits::new(units, to, None, ResourcePile::empty());
+                    game.add_info_log_item(&move_action_log(game, p, &m));
+
+                    move_with_possible_combat(game, s.player_index, &m);
+                },
+            )
+        },
+        |game, p| !unload_positions(game, p).is_empty(),
+    )
+    .build()
+}
+
+fn unload_positions(game: &Game, p: &Player) -> Vec<Position> {
+    let position = leader_position(p);
+    if !game.map.is_sea(position) {
+        return vec![];
+    }
+    position
+        .neighbors()
+        .into_iter()
+        .filter(|n| game.map.is_land(*n))
+        .collect_vec()
+}
+
+fn explorer() -> LeaderAbility {
+    LeaderAbility::builder(
+        "Legendary Explorer",
+        "As an action, if Erik is on a ship, pay 1 culture token: \
+        Place an explorer token a region that has no explorer token yet. \
+        Each token is worth 1 objective point at the end of the game.",
+    )
+    .add_custom_action(
+        CustomActionType::LegendaryExplorer,
+        |c| {
+            c.any_times()
+                .action()
+                .resources(ResourcePile::culture_tokens(1))
+        },
+        use_legendary_explorer,
+        |game, p| {
+            let position = leader_position(p);
+            game.map.is_sea(position) && !is_current_block_tagged(game, p, position)
+        },
+    )
+    .build()
+}
+
+fn use_legendary_explorer(b: AbilityBuilder) -> AbilityBuilder {
+    let origin = b.get_key().clone();
+    b.add_simple_persistent_event_listener(
+        |event| &mut event.custom_action,
+        0,
+        move |game, player_index, _player_name, _| {
+            let player = game.player_mut(player_index);
+            let position = leader_position(player);
+
+            update_special_victory_points(
+                player,
+                &origin,
+                VictoryPointAttribution::Objectives,
+                |mut v| {
+                    v.points += 1.0;
+                    v.explorer_tokens.push(position);
+                    v
+                },
+            );
+
+            let name = player.get_name();
+            game.add_info_log_item(&format!("{name} placed an explorer token at {position}",));
+        },
+    )
+}
+
+fn is_current_block_tagged(game: &Game, player: &Player, position: Position) -> bool {
+    let block_position = block_for_position(game, position).1;
+    explore_points(player).is_some_and(|v| {
+        v.points
+            .explorer_tokens
+            .iter()
+            .any(|p| block_for_position(game, *p).1 == block_position)
+    })
+}
+
+#[must_use]
+fn explore_points(player: &Player) -> Option<&SpecialVictoryPoints> {
+    player
+        .special_victory_points
+        .iter()
+        .find(|v| !v.points.explorer_tokens.is_empty())
+}
+
+#[must_use]
+pub fn has_explore_token(game: &Game, position: Position) -> bool {
+    game.players.iter().any(|player| {
+        explore_points(player).is_some_and(|v| v.points.explorer_tokens.contains(&position))
+    })
+}
+
+fn ragnar() -> LeaderInfo {
+    LeaderInfo::new(
+        Leader::Ragnar,
+        "Ragnar Lodbrok",
+        LeaderAbility::builder("Prey", "When you captured a non-Angry city: Gain 2 gold")
+            .add_simple_persistent_event_listener(
+                |event| &mut event.combat_end,
+                25,
+                |game, player, _name, s| {
+                    if s.captured_city(player)
+                        .is_some_and(|m| m != MoodState::Angry)
+                    {
+                        gain_resources(game, player, ResourcePile::gold(2), |name, pile| {
+                            format!("{name} gained {pile} for Prey")
+                        });
+                    }
+                },
+            )
+            .build(),
+        LeaderAbility::builder(
+            "Horror of the North",
+            "In leader battles when disembarking: Get +2 combat value",
+        )
+        .add_combat_strength_listener(106, |game, c, s, r| {
+            if c.has_leader(r, game) && c.is_disembarking_attacker(r, game) {
+                s.extra_combat_value += 2;
+                s.roll_log.push("Ragnar adds 2 combat value".to_string());
+            }
+        })
+        .build(),
+    )
 }

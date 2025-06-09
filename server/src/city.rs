@@ -5,6 +5,7 @@ use std::ops::{Add, Sub};
 use crate::content::custom_actions::CustomActionType::ForcedLabor;
 use crate::content::persistent_events::PersistentEventType;
 use crate::map::Terrain;
+use crate::player::remove_unit;
 use crate::utils;
 use crate::wonder::deinit_wonder;
 use crate::{
@@ -86,17 +87,6 @@ impl City {
     #[must_use]
     pub fn can_activate(&self) -> bool {
         !self.angry_activation
-    }
-
-    pub fn activate(&mut self) {
-        if self.mood_state == Angry {
-            self.angry_activation = true;
-        }
-        if self.is_activated() {
-            self.decrease_mood_state();
-            self.activation_mood_decreased = true;
-        }
-        self.activations += 1;
     }
 
     pub fn deactivate(&mut self) {
@@ -265,6 +255,24 @@ pub(crate) fn is_valid_city_terrain(t: &Terrain) -> bool {
     t.is_land() && !matches!(t, Terrain::Exhausted(_) | Terrain::Barren)
 }
 
+pub(crate) fn execute_found_city_action(
+    game: &mut Game,
+    player_index: usize,
+    settler: u32,
+) -> Result<(), String> {
+    let player = game.player(player_index);
+    game.add_info_log_item(&format!(
+        "{player} founded a city at {}",
+        player.get_unit(settler).position
+    ));
+    let settler = remove_unit(player_index, settler, game);
+    if !settler.can_found_city(game) {
+        return Err("Cannot found city".to_string());
+    }
+    found_city(game, player_index, settler.position);
+    Ok(())
+}
+
 pub(crate) fn found_city(game: &mut Game, player: usize, position: Position) {
     game.player_mut(player)
         .cities
@@ -288,4 +296,30 @@ pub(crate) fn non_angry_cites(p: &Player) -> Vec<Position> {
         .filter(|c| !matches!(c.mood_state, MoodState::Angry))
         .map(|c| c.position)
         .collect_vec()
+}
+
+pub(crate) fn activate_city(position: Position, game: &mut Game) {
+    let city = game.get_any_city(position);
+    assert!(city.can_activate());
+
+    let player = city.player_index;
+
+    if city.is_activated() {
+        game.add_info_log_item(&format!(
+            "City at {} became {} because it was activated more than once",
+            position,
+            city.mood_state.clone() - 1
+        ));
+    }
+
+    let city = game.player_mut(player).get_city_mut(position);
+
+    if city.mood_state == Angry {
+        city.angry_activation = true;
+    }
+    if city.is_activated() {
+        city.decrease_mood_state();
+        city.activation_mood_decreased = true;
+    }
+    city.activations += 1;
 }
