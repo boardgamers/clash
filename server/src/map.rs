@@ -582,19 +582,23 @@ pub(crate) fn block_has_player_city(game: &Game, p: &BlockPosition, player: usiz
         .any(|p| game.player(player).try_get_city(*p).is_some())
 }
 
-pub(crate) fn block_for_position(game: &Game, position: Position) -> BlockPosition {
+#[must_use] pub fn block_for_position(game: &Game, position: Position) -> (u8, BlockPosition) {
     let setup = get_map_setup(human_players_including_dropped(game));
-    for p in &setup.free_positions {
+    let home = setup.home_positions.len();
+    for (i, p) in setup.free_positions.iter().enumerate() {
         if block_tiles(p).contains(&position) {
-            return p.clone();
+            return ((i + home + 1) as u8, p.clone());
         }
     }
-    let h = setup
+    setup
         .home_positions
         .iter()
-        .find(|h| block_tiles(&h.position).contains(&position))
-        .expect("Position not found in home positions");
-    h.position.clone()
+        .enumerate()
+        .find_map(|(i, h)| {
+            (block_tiles(&h.position).contains(&position))
+                .then_some(((i + 1) as u8, h.position.clone()))
+        })
+        .expect("Position not found in home positions")
 }
 
 fn human_players_including_dropped(game: &Game) -> usize {

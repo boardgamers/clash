@@ -385,14 +385,34 @@ fn set_knut_points(
 }
 
 fn erik() -> LeaderInfo {
-    // todo new colonies
-    let ability = explorer();
-    LeaderInfo::new(
-        Leader::Erik,
-        "Erik the Red",
-        ability,
-        LeaderAbility::builder("", "").build(),
+    LeaderInfo::new(Leader::Erik, "Erik the Red", explorer(), new_colonies())
+}
+
+fn new_colonies() -> LeaderAbility {
+    LeaderAbility::builder(
+        "New Colonies",
+        "As a free action, if Erik is on a ship: \
+        Unload all units to an adjacent land space, which may start a battle",
     )
+    .add_custom_action(
+        CustomActionType::NewColonies,
+        |c| c.any_times().free_action().no_resources(),
+        |b| {
+            // todo
+            // b.add_position_request(
+            //     |event| &mut event.custom_action,
+            //     0,
+            //     |builder1| {}
+            //     "Select a land position to unload Erik's ship",
+            // )
+            b
+        },
+        |game, p| {
+            let position = leader_position(p);
+            game.map.is_sea(position) && position.neighbors().iter().any(|&n| game.map.is_land(n))
+        },
+    )
+    .build()
 }
 
 fn explorer() -> LeaderAbility {
@@ -445,12 +465,12 @@ fn use_great_explorer(b: AbilityBuilder) -> AbilityBuilder {
 }
 
 fn is_current_block_tagged(game: &Game, player: &Player, position: Position) -> bool {
-    let block_position = block_for_position(game, position);
+    let block_position = block_for_position(game, position).1;
     explore_points(player).is_some_and(|v| {
         v.points
             .explorer_tokens
             .iter()
-            .any(|p| block_for_position(game, *p) == block_position)
+            .any(|p| block_for_position(game, *p).1 == block_position)
     })
 }
 

@@ -61,7 +61,6 @@
           "id": 3,
           "carried_units": [
             {
-              "position": "E2",
               "unit_type": {
                 "Leader": "Erik"
               },

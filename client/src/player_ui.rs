@@ -21,6 +21,7 @@ use server::combat_stats::CombatStats;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::content::persistent_events::PersistentEventType;
 use server::game::{Game, GameState};
+use server::map::block_for_position;
 use server::movement::{CurrentMove, MovementAction};
 use server::player::Player;
 use server::playing_actions::PlayingAction;
@@ -262,8 +263,9 @@ pub fn show_top_left(rc: &RenderContext) {
 
 fn show_focused_tile(label: &mut impl FnMut(&str), game: &Game, position: Position) {
     label(&format!(
-        "{}/{}",
+        "{}/{}/{}",
         position,
+        block_for_position(game, position).0,
         game.map
             .get(position)
             .map_or("outside the map", terrain_name),

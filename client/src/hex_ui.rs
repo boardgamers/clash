@@ -10,6 +10,7 @@ use macroquad::prelude::{
 };
 use macroquad::shapes::draw_hexagon;
 use server::content::custom_actions::CustomActionType;
+use server::map::block_for_position;
 use server::position::Position;
 
 const SIZE: f32 = 60.0;
@@ -55,8 +56,15 @@ pub fn draw_hex(
         draw_hexagon(c.x, c.y, SIZE, 2.0, false, DARKGRAY, BEIGE);
     }
     draw_hexagon(c.x, c.y, SIZE, 2.0, false, DARKGRAY, overlay);
+    let text_y = c.y - 35.0;
     rc.state
-        .draw_text_with_color(&p.to_string(), c.x - 30.0, c.y - 35.0, text_color);
+        .draw_text_with_color(&p.to_string(), c.x - 30.0, text_y, text_color);
+    rc.state.draw_text_with_color(
+        &block_for_position(rc.game, p).0.to_string(),
+        c.x + 10.0,
+        text_y,
+        text_color,
+    );
 
     for f in features {
         match f {

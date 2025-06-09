@@ -208,7 +208,7 @@ fn augustus() -> LeaderInfo {
             if c.is_land_battle_with_leader(r, game)
                 && !block_has_player_city(
                     game,
-                    &block_for_position(game, c.defender_position()),
+                    &block_for_position(game, c.defender_position()).1,
                     c.player(r),
                 )
             {
