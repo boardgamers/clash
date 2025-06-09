@@ -407,18 +407,11 @@ fn new_colonies() -> LeaderAbility {
                     Some(PositionRequest::new(
                         unload_positions(game, game.player(player_index)),
                         1..=1,
-                        "Select a land position to unload Erik's ship",
+                        "Select a land position to unload Erik's ship(s)",
                     ))
                 },
                 |game, s, _a| {
                     let to = s.choice[0];
-                    
-                    // game.add_info_log_item(
-                    //     &format!(
-                    //         "{} decided to unload Erik's ship at {}",
-                    //         s.player_name, dest
-                    //     ),
-                    // );
                     let p = game.player(s.player_index);
                     let units = p
                         .get_units(leader_position(p))
@@ -469,7 +462,7 @@ fn explorer() -> LeaderAbility {
                 .action()
                 .resources(ResourcePile::culture_tokens(1))
         },
-        use_great_explorer,
+        use_legendary_explorer,
         |game, p| {
             let position = leader_position(p);
             game.map.is_sea(position) && !is_current_block_tagged(game, p, position)
@@ -478,7 +471,7 @@ fn explorer() -> LeaderAbility {
     .build()
 }
 
-fn use_great_explorer(b: AbilityBuilder) -> AbilityBuilder {
+fn use_legendary_explorer(b: AbilityBuilder) -> AbilityBuilder {
     let origin = b.get_key().clone();
     b.add_simple_persistent_event_listener(
         |event| &mut event.custom_action,
