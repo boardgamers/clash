@@ -20,6 +20,7 @@ use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
 use itertools::Itertools;
+use crate::action_card::can_play_civil_card;
 
 pub(crate) fn greece() -> Civilization {
     Civilization::new(
@@ -283,7 +284,12 @@ fn idol_cards(game: &Game, p: &Player, extra_cost: &ResourcePile) -> Vec<HandCar
                 // can play directly
                 return None;
             }
-
+            
+            if can_play_civil_card(game, p, a).is_err() {
+                // cannot play this card
+                return None;
+            }
+            
             let mut payment_options = action_cost.payment_options(p);
             payment_options.default += extra_cost.clone();
             p.can_afford(&payment_options)

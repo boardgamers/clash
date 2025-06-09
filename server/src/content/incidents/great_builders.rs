@@ -24,32 +24,41 @@ pub(crate) fn great_engineer() -> ActionCard {
         26,
         "Great Engineer",
         &format!(
-            "{} Then, you may build a building in a city without spending an action and without activating it.",
+            "{} Then, you may build a building in a city \
+            without spending an action and without activating it.",
             great_person_description(&groups)
         ),
         ActionCost::regular(),
         groups,
-        can_construct_anything,
+        can_construct_any_building,
     )
-        .add_bool_request(
-            |e| &mut e.play_action_card,
-            0,
-            |_, _, _| Some("Build a building in a city without spending an action and without activating it?".to_string()),
-            |game, s, _| {
-                if s.choice {
-                    game.permanent_effects.push(Construct(ConstructEffect::GreatEngineer));
-                    game.actions_left += 1; // to offset the action spent for building
-                    game.add_info_log_item("Great Engineer: You may build a building in a city without \
-                    spending an action and without activating it.");
-                } else {
-                    game.add_info_log_item("Great Engineer: You decided not to use the ability.");
-                }
-            },
-        )
-        .build()
+    .add_bool_request(
+        |e| &mut e.play_action_card,
+        0,
+        |_, _, _| {
+            Some(
+                "Build a building in a city without spending an action and without activating it?"
+                    .to_string(),
+            )
+        },
+        |game, s, _| {
+            if s.choice {
+                game.permanent_effects
+                    .push(Construct(ConstructEffect::GreatEngineer));
+                game.actions_left += 1; // to offset the action spent for building
+                game.add_info_log_item(
+                    "Great Engineer: You may build a building in a city without \
+                    spending an action and without activating it.",
+                );
+            } else {
+                game.add_info_log_item("Great Engineer: You decided not to use the ability.");
+            }
+        },
+    )
+    .build()
 }
 
-pub(crate) fn can_construct_anything(game: &Game, p: &Player) -> bool {
+pub(crate) fn can_construct_any_building(game: &Game, p: &Player) -> bool {
     PlayingActionType::Construct
         .is_available(game, p.index)
         .is_ok()
