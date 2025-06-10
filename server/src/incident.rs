@@ -14,9 +14,7 @@ use crate::content::persistent_events::{
 use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
 use crate::map::Terrain;
-use crate::payment::{
-    PaymentConversion, PaymentConversionType, PaymentOptions, PaymentReason, ResourceReward,
-};
+use crate::payment::{PaymentConversion, PaymentConversionType, PaymentOptions, PaymentReason};
 use crate::pirates::pirates_spawn_and_raid;
 use crate::player::Player;
 use crate::player_events::{IncidentInfo, IncidentPlayerInfo, IncidentTarget};
@@ -795,10 +793,8 @@ fn gold_deposits(b: IncidentBuilder) -> IncidentBuilder {
         IncidentTarget::ActivePlayer,
         BASE_EFFECT_PRIORITY,
         |game, p, _incident| {
-            p.with_origin(EventOrigin::Ability("Gold deposits".to_string())).gain_resources(
-                game,
-                ResourcePile::gold(2),
-            );
+            p.with_origin(EventOrigin::Ability("Gold deposits".to_string()))
+                .gain_resources(game, ResourcePile::gold(2));
         },
     )
 }

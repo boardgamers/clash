@@ -96,7 +96,8 @@ impl EventPlayer {
             self.origin.name(game)
         ));
     }
-    
+
+    #[must_use]
     pub fn with_origin(&self, origin: EventOrigin) -> Self {
         Self {
             index: self.index,
