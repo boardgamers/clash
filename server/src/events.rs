@@ -1,4 +1,13 @@
-#![allow(dead_code)]
+use crate::advance::Advance;
+use crate::game::Game;
+use crate::payment::PaymentOptionsBuilder;
+use crate::player::{CostTrigger, Player};
+use crate::resource_pile::ResourcePile;
+use crate::special_advance::SpecialAdvance;
+use crate::wonder::Wonder;
+use serde::{Deserialize, Serialize};
+use std::fmt::Display;
+use std::sync::Arc;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub enum EventOrigin {
@@ -47,17 +56,13 @@ impl EventOrigin {
     }
 }
 
-use crate::advance::Advance;
-use crate::game::Game;
-use crate::player::{CostTrigger, Player};
-use crate::resource_pile::ResourcePile;
-use crate::special_advance::SpecialAdvance;
-use crate::wonder::Wonder;
-use serde::{Deserialize, Serialize};
-use std::fmt::Display;
-use std::sync::Arc;
+// to check if a payment option is affordable
+#[must_use]
+pub fn check_event_origin() -> EventOrigin {
+    EventOrigin::Ability("only for checking".to_string())
+}
 
-pub struct EventPlayer {
+pub(crate) struct EventPlayer {
     pub index: usize,
     pub name: String,
     pub origin: EventOrigin,
@@ -105,6 +110,11 @@ impl EventPlayer {
             origin,
         }
     }
+
+    #[must_use]
+    pub fn payment_options(&self) -> PaymentOptionsBuilder {
+        PaymentOptionsBuilder::new(self.origin.clone())
+    }
 }
 
 impl Display for EventPlayer {
@@ -117,19 +127,17 @@ struct Listener<T, U, V, W> {
     #[allow(clippy::type_complexity)]
     callback: Arc<dyn Fn(&mut T, &U, &V, &mut W, &EventPlayer) + Sync + Send>,
     priority: i32,
-    id: usize,
     player: EventPlayer,
 }
 
 impl<T, U, V, W> Listener<T, U, V, W> {
-    fn new<F>(callback: F, priority: i32, id: usize, player: EventPlayer) -> Self
+    fn new<F>(callback: F, priority: i32, player: EventPlayer) -> Self
     where
         F: Fn(&mut T, &U, &V, &mut W, &EventPlayer) + 'static + Sync + Send,
     {
         Self {
             callback: Arc::new(callback),
             priority,
-            id,
             player,
         }
     }
@@ -138,7 +146,6 @@ impl<T, U, V, W> Listener<T, U, V, W> {
 pub struct EventMut<T, U = (), V = (), W = ()> {
     name: String, // for debugging
     listeners: Vec<Listener<T, U, V, W>>,
-    next_id: usize,
 }
 
 impl<T, U, V, W> EventMut<T, U, V, W>
@@ -150,7 +157,6 @@ where
         Self {
             name: name.to_string(),
             listeners: Vec::new(),
-            next_id: 0,
         }
     }
 
@@ -160,11 +166,9 @@ where
         new_listener: F,
         priority: i32,
         player: EventPlayer,
-    ) -> usize
-    where
+    ) where
         F: Fn(&mut T, &U, &V, &mut W, &EventPlayer) + 'static + Sync + Send,
     {
-        let id = self.next_id;
         // objectives can have the same key, but you still can only fulfill one of them at a time
         let key = &player.origin;
         if let Some(old) = self
@@ -178,12 +182,10 @@ where
             )
         }
         self.listeners
-            .push(Listener::new(new_listener, priority, id, player));
+            .push(Listener::new(new_listener, priority, player));
 
         self.listeners.sort_by_key(|l| l.priority);
         self.listeners.reverse();
-        self.next_id += 1;
-        id
     }
 
     pub(crate) fn remove_listener_mut_by_key(&mut self, key: &EventOrigin) {

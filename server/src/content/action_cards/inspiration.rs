@@ -10,7 +10,6 @@ use crate::content::tactics_cards::{
     surprise, wedge_formation,
 };
 use crate::game::Game;
-use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::Player;
 use crate::playing_actions::ActionCost;
 use crate::position::Position;
@@ -173,17 +172,14 @@ fn hero_general(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |e| &mut e.play_action_card,
         1,
         |game, p, _| {
-            let p = p.get(game);
-            if cities_where_mood_can_increase(p).is_empty() {
+            let player = p.get(game);
+            if cities_where_mood_can_increase(player).is_empty() {
                 return None;
             }
 
             Some(vec![PaymentRequest::optional(
-                PaymentOptions::resources(
-                    p,
-                    PaymentReason::ActionCard,
-                    ResourcePile::mood_tokens(1),
-                ),
+                p.payment_options()
+                    .resources(player, ResourcePile::mood_tokens(1)),
                 "Pay 1 mood token to increase the mood in a city by 1",
             )])
         },

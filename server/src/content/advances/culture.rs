@@ -3,20 +3,18 @@ use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city::{City, MoodState};
 use crate::city_pieces::Building::Obelisk;
-use crate::content::ability::{Ability, AbilityBuilder};
+use crate::content::ability::AbilityBuilder;
 use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
-use crate::content::custom_actions::{
-    CustomActionActionExecution, CustomActionExecution, CustomActionType, any_non_happy,
-};
+use crate::content::custom_actions::{CustomActionType, any_non_happy};
 use crate::content::persistent_events::PaymentRequest;
+use crate::events::{EventOrigin, check_event_origin};
 use crate::happiness::execute_increase_happiness;
-use crate::payment::{PaymentOptions, PaymentReason};
+use crate::payment::PaymentOptions;
 use crate::player::{Player, gain_resources};
 use crate::playing_actions::PlayingActionType;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use crate::wonder::{Wonder, draw_wonder_card};
-use std::sync::Arc;
 use std::vec;
 
 pub(crate) fn culture() -> AdvanceGroupInfo {
@@ -47,24 +45,25 @@ fn arts() -> AdvanceBuilder {
     )
 }
 
-const SPORTS_DESC: &str = "As an action, you may spend \
-        1 or 2 culture tokens to increase the happiness of a city by 1 or 2, respectively";
-
 fn sports() -> AdvanceBuilder {
-    AdvanceInfo::builder(Advance::Sports, "Sports", SPORTS_DESC)
-        .with_advance_bonus(MoodToken)
-        .add_custom_action_execution(
-            CustomActionType::Sports,
-            |c| c.any_times().action().no_resources(),
-            CustomActionExecution::Action(CustomActionActionExecution::new(
-                use_sports(),
-                Arc::new(|_game, p| can_use_sports(p)),
-                Some(Arc::new(|game, city| {
-                    let p = game.player(city.player_index);
-                    sports_options(p, city).is_some_and(|c| c.can_afford(&p.resources))
-                })),
-            )),
-        )
+    AdvanceInfo::builder(
+        Advance::Sports,
+        "Sports",
+        "As an action, you may spend \
+        1 or 2 culture tokens to increase the happiness of a city by 1 or 2, respectively",
+    )
+    .with_advance_bonus(MoodToken)
+    .add_custom_action_with_city_checker(
+        CustomActionType::Sports,
+        |c| c.any_times().action().no_resources(),
+        use_sports,
+        |_game, p| can_use_sports(p),
+        |game, city| {
+            let p = game.player(city.player_index);
+            sports_options(p, city, check_event_origin())
+                .is_some_and(|c| c.can_afford(&p.resources))
+        },
+    )
 }
 
 fn monuments() -> AdvanceBuilder {
@@ -109,18 +108,18 @@ fn theaters() -> AdvanceBuilder {
 }
 
 #[must_use]
-pub fn sports_options(player: &Player, city: &City) -> Option<PaymentOptions> {
+pub fn sports_options(player: &Player, city: &City, origin: EventOrigin) -> Option<PaymentOptions> {
     match city.mood_state {
         MoodState::Happy => None,
         MoodState::Neutral => Some(PaymentOptions::sum(
             player,
-            PaymentReason::CustomAction,
+            origin,
             1,
             &[ResourceType::CultureTokens],
         )),
         MoodState::Angry => Some(PaymentOptions::single_type(
             player,
-            PaymentReason::CustomAction,
+            origin,
             ResourceType::CultureTokens,
             1..=2,
         )),
@@ -137,36 +136,38 @@ fn can_use_sports(p: &Player) -> bool {
     p.wonders_owned.contains(Wonder::Colosseum) && p.resources.mood_tokens > 0
 }
 
-fn use_sports() -> Ability {
-    Ability::builder("Sports", SPORTS_DESC)
-        .add_payment_request_listener(
-            |event| &mut event.custom_action,
-            0,
-            |game, player, a| {
-                let p = player.get(game);
-                let options = sports_options(p, p.get_city(a.action.city.expect("city not found")))
-                    .expect("Invalid options for sports");
-                Some(vec![PaymentRequest::mandatory(
-                    options,
-                    "Each culture token increases the happiness by 1 step",
-                )])
-            },
-            |game, s, a| {
-                let position = a.action.city.expect("city not found");
-                let pile = s.choice[0].clone();
-                let steps = pile.amount();
-                execute_increase_happiness(
-                    game,
-                    s.player_index,
-                    &[(position, steps)],
-                    &pile,
-                    true,
-                    &a.action.action.playing_action_type(),
-                )
-                .expect("Failed to increase happiness");
-            },
-        )
-        .build()
+fn use_sports(b: AbilityBuilder) -> AbilityBuilder {
+    b.add_payment_request_listener(
+        |event| &mut event.custom_action,
+        0,
+        |game, player, a| {
+            let p = player.get(game);
+            let options = sports_options(
+                p,
+                p.get_city(a.action.city.expect("city not found")),
+                player.origin.clone(),
+            )
+            .expect("Invalid options for sports");
+            Some(vec![PaymentRequest::mandatory(
+                options,
+                "Each culture token increases the happiness by 1 step",
+            )])
+        },
+        |game, s, a| {
+            let position = a.action.city.expect("city not found");
+            let pile = s.choice[0].clone();
+            let steps = pile.amount();
+            execute_increase_happiness(
+                game,
+                s.player_index,
+                &[(position, steps)],
+                &pile,
+                true,
+                &a.action.action.playing_action_type(),
+            )
+            .expect("Failed to increase happiness");
+        },
+    )
 }
 
 fn use_theaters(b: AbilityBuilder) -> AbilityBuilder {
@@ -175,9 +176,8 @@ fn use_theaters(b: AbilityBuilder) -> AbilityBuilder {
         0,
         |game, player, _| {
             Some(vec![PaymentRequest::mandatory(
-                PaymentOptions::sum(
+                player.payment_options().sum(
                     player.get(game),
-                    PaymentReason::CustomAction,
                     1,
                     &[ResourceType::CultureTokens, ResourceType::MoodTokens],
                 ),

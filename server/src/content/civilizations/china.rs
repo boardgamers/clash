@@ -13,7 +13,6 @@ use crate::leader::{Leader, LeaderInfo};
 use crate::leader_ability::LeaderAbility;
 use crate::map::Terrain;
 use crate::movement::{MoveState, possible_move_destinations};
-use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::{Player, can_add_army_unit};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
@@ -134,7 +133,6 @@ fn fireworks() -> SpecialAdvanceInfo {
             "In the first round of combat, you may pay 1 ore and 1 wood to ignore the first hit.",
         ),
         ResourcePile::wood(1) + ResourcePile::ore(1),
-        PaymentReason::AdvanceAbility,
         91,
         |c, _r, _game| c.stats.round == 1,
     )
@@ -144,7 +142,6 @@ fn fireworks() -> SpecialAdvanceInfo {
 fn ignore_hit_ability<B: AbilityInitializerSetup>(
     b: B,
     pile: ResourcePile,
-    payment_reason: PaymentReason,
     priority: i32,
     filter: impl Fn(&Combat, CombatRole, &Game) -> bool + Send + Sync + 'static + Clone,
 ) -> B {
@@ -161,7 +158,7 @@ fn ignore_hit_ability<B: AbilityInitializerSetup>(
                 return None;
             }
 
-            let cost = PaymentOptions::resources(player, payment_reason, pile.clone());
+            let cost = p.payment_options().resources(player, pile.clone());
 
             if !apply_ignore_hit(e, player_index, false) {
                 game.add_info_log_item(&format!("{name} won't reduce the hits, no payment made."));
@@ -367,7 +364,6 @@ fn qin() -> LeaderInfo {
                 "Land battle with leader: You may pay 2 culture tokens to ignore a hit.",
             ),
             ResourcePile::culture_tokens(2),
-            PaymentReason::LeaderAbility,
             92,
             Combat::has_leader,
         )

@@ -5,7 +5,7 @@ use crate::content::incidents::great_diplomat::{DIPLOMAT_ID, diplomatic_relation
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::map::Map;
-use crate::payment::{PaymentOptions, PaymentReason};
+use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
@@ -201,7 +201,7 @@ fn road_route(
 
     let mut cost = PaymentOptions::resources(
         player,
-        PaymentReason::Move,
+        EventOrigin::Advance(Advance::Roads),
         ResourcePile::ore(1) + ResourcePile::food(1),
     );
     cost.modifiers = modifiers;

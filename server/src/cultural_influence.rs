@@ -3,14 +3,14 @@ use crate::action::Action;
 use crate::city::City;
 use crate::city_pieces::Building;
 use crate::consts::INFLUENCE_MIN_ROLL;
-use crate::content::ability::Ability;
+use crate::content::ability::{Ability, influence_event_origin};
 use crate::content::persistent_events::{
     PaymentRequest, PersistentEventType, SelectedStructure, Structure,
 };
 use crate::events::EventPlayer;
 use crate::game::Game;
 use crate::log::{current_player_turn_log, modifier_suffix};
-use crate::payment::{PaymentOptions, PaymentReason};
+use crate::payment::PaymentOptions;
 use crate::player_events::ActionInfo;
 use crate::playing_actions::{PlayingAction, PlayingActionType, base_or_custom_available};
 use crate::position::Position;
@@ -139,7 +139,7 @@ pub(crate) fn execute_influence_culture_attempt(
         "{} tried to influence culture the {city_piece} in the city \
         at {target_city_position} by {player}{city}{cost}{}",
         game.player_name(player_index),
-        modifier_suffix(game.player(player_index), &i.action_type)
+        modifier_suffix(game.player(player_index), &i.action_type, game)
     ));
 
     on_cultural_influence(game, player_index, info);
@@ -286,7 +286,7 @@ fn range_boost_paid(
 
     PaymentOptions::resources(
         game.player(player_index),
-        PaymentReason::InfluenceCulture,
+        influence_event_origin(),
         ResourcePile::culture_tokens(INFLUENCE_MIN_ROLL - roll),
     )
 }
@@ -355,7 +355,7 @@ pub fn influence_culture_boost_cost(
     let mut info = Ok(InfluenceCultureInfo::new(
         PaymentOptions::resources(
             attacker,
-            PaymentReason::InfluenceCulture,
+            influence_event_origin(),
             ResourcePile::culture_tokens(range_boost),
         ),
         ActionInfo::new(attacker),

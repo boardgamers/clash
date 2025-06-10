@@ -195,7 +195,7 @@ pub(crate) fn execute_collect(
         "{} collects {res}{total} in the city at {}{}",
         player,
         c.city_position,
-        modifier_suffix(player, &c.action_type)
+        modifier_suffix(player, &c.action_type, game)
     ));
 
     let mut i = get_total_collection(

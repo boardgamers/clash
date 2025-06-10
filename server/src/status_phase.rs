@@ -8,10 +8,11 @@ use crate::content::persistent_events::{
     PlayerRequest, PositionRequest, TriggerPersistentEventParams,
     trigger_persistent_event_with_listener,
 };
+use crate::events::EventOrigin;
 use crate::objective_card::{
     gain_objective_card_from_pile, present_objective_cards, status_phase_completable,
 };
-use crate::payment::{PaymentOptions, PaymentReason};
+use crate::payment::PaymentOptions;
 use crate::player::gain_resources;
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::wonder::Wonder;
@@ -276,6 +277,7 @@ where
     let event2 = event.clone();
     let set_paid2 = set_paid.clone();
     let is_active_player2 = is_active_player.clone();
+    let origin = a.get_key().clone();
     a.add_payment_request_listener(
         event,
         1,
@@ -295,7 +297,7 @@ where
                 return None;
             }
 
-            let o = change_government_cost(game, player_index);
+            let o = change_government_cost(game, player_index, origin.clone());
             if !game.player(player_index).can_afford(&o) {
                 return None;
             }
@@ -355,12 +357,12 @@ where
     )
 }
 
-fn change_government_cost(game: &mut Game, player_index: usize) -> PaymentOptions {
-    PaymentOptions::resources(
-        game.player(player_index),
-        PaymentReason::ChangeGovernment,
-        CHANGE_GOVERNMENT_COST,
-    )
+fn change_government_cost(
+    game: &mut Game,
+    player_index: usize,
+    origin: EventOrigin,
+) -> PaymentOptions {
+    PaymentOptions::resources(game.player(player_index), origin, CHANGE_GOVERNMENT_COST)
 }
 
 fn change_government_type(game: &mut Game, player_index: usize, new_government: &ChangeGovernment) {

@@ -7,7 +7,7 @@ use crate::content::persistent_events::{
 };
 use crate::game::Game;
 use crate::incident::{BASE_EFFECT_PRIORITY, IncidentBuilder};
-use crate::payment::{PaymentOptions, PaymentReason, ResourceReward};
+use crate::payment::ResourceReward;
 use crate::player::{Player, gain_unit, remove_unit};
 use crate::player_events::IncidentTarget;
 use crate::position::Position;
@@ -76,12 +76,8 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
                         "{player} must pay 1 resource or token to bribe the pirates",
                     ));
                     Some(vec![PaymentRequest::mandatory(
-                        PaymentOptions::sum(
-                            p.get(game),
-                            PaymentReason::Incident,
-                            1,
-                            &ResourceType::all(),
-                        ),
+                        p.payment_options()
+                            .sum(p.get(game), 1, &ResourceType::all()),
                         "Pay 1 Resource or token to bribe the pirates",
                     )])
                 } else {

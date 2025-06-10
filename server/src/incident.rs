@@ -14,7 +14,7 @@ use crate::content::persistent_events::{
 use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
 use crate::map::Terrain;
-use crate::payment::{PaymentConversion, PaymentConversionType, PaymentOptions, PaymentReason};
+use crate::payment::{PaymentConversion, PaymentConversionType};
 use crate::pirates::pirates_spawn_and_raid;
 use crate::player::Player;
 use crate::player_events::{IncidentInfo, IncidentPlayerInfo, IncidentTarget};
@@ -45,7 +45,7 @@ pub struct Incident {
 
 impl Incident {
     #[must_use]
-    pub fn builder(
+    pub(crate) fn builder(
         id: u8,
         name: &str,
         description: &str,
@@ -167,7 +167,7 @@ impl DecreaseMood {
     }
 }
 
-pub struct IncidentBuilder {
+pub(crate) struct IncidentBuilder {
     id: u8,
     pub name: String,
     description: String,
@@ -524,19 +524,17 @@ impl IncidentBuilder {
         self.add_incident_payment_request(
             target,
             10,
-            move |game, p, i| {
-                let p = game.player(p.index);
+            move |game, player, i| {
+                let p = player.get(game);
                 if p.can_use_advance(Advance::Myths) {
                     let needed = amount(game, p, i);
                     if needed == 0 {
                         return None;
                     }
-                    let mut options = PaymentOptions::sum(
-                        p,
-                        PaymentReason::Incident,
-                        needed,
-                        &[ResourceType::MoodTokens],
-                    );
+                    let mut options =
+                        player
+                            .payment_options()
+                            .sum(p, needed, &[ResourceType::MoodTokens]);
                     options.conversions.push(PaymentConversion::new(
                         vec![ResourcePile::mood_tokens(1)],
                         ResourcePile::empty(),

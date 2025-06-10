@@ -1,9 +1,10 @@
 use crate::city::MoodState;
+use crate::content::ability::happiness_event_origin;
 use crate::content::custom_actions::CustomActionType;
 use crate::game::Game;
 use crate::leader::leader_position;
 use crate::log::modifier_suffix;
-use crate::payment::{PaymentOptions, PaymentReason};
+use crate::payment::PaymentOptions;
 use crate::player::{CostTrigger, Player};
 use crate::player_events::CostInfo;
 use crate::playing_actions::{PlayingActionType, base_or_custom_available};
@@ -77,7 +78,7 @@ pub(crate) fn execute_increase_happiness(
         "{player} paid {} to increase happiness in {}{}",
         payment,
         utils::format_and(&logs, "no city"),
-        modifier_suffix(player, action_type)
+        modifier_suffix(player, action_type, game)
     ));
 
     let trigger = game.execute_cost_trigger();
@@ -125,7 +126,7 @@ pub fn happiness_cost(
     let p = game.player(player);
     let mut payment_options = PaymentOptions::sum(
         p,
-        PaymentReason::IncreaseHappiness,
+        happiness_event_origin(),
         city_size_steps,
         &[ResourceType::MoodTokens],
     );

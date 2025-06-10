@@ -16,6 +16,7 @@ use macroquad::prelude::{BEIGE, Color, GREEN, RED, YELLOW, draw_rectangle, draw_
 use server::action::Action;
 use server::card::{HandCard, HandCardType, hand_cards, validate_card_selection};
 use server::content::persistent_events::EventResponse;
+use server::events::check_event_origin;
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::wonder::Wonder;
 
@@ -262,7 +263,7 @@ fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
         }
         .to_string(),
     );
-    let cost = &action_type.payment_options(rc.shown_player);
+    let cost = &action_type.payment_options(rc.shown_player, check_event_origin());
     if !cost.is_free() {
         description.push(format!("Cost: {cost}"));
     }
