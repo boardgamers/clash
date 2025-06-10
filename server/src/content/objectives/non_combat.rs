@@ -13,8 +13,8 @@ pub(crate) fn draft() -> Objective {
         .add_simple_persistent_event_listener(
             |event| &mut event.recruit,
             2,
-            |game, player, _, r| {
-                let p = game.player_mut(player);
+            |game, player, r| {
+                let p = player.get_mut(game);
                 // Draft is just a cost conversion
                 let used_draft = r.units.infantry > 0
                     && r.payment.mood_tokens >= draft_cost(p)
@@ -41,9 +41,9 @@ pub(crate) fn city_founder() -> Objective {
     .add_simple_persistent_event_listener(
         |event| &mut event.found_city,
         0,
-        |game, player, _, p| {
-            if capital_city_position(game, game.player(player)).distance(*p) >= 5 {
-                objective_is_ready(game.player_mut(player), name);
+        |game, player, p| {
+            if capital_city_position(game, player.get(game)).distance(*p) >= 5 {
+                objective_is_ready(player.get_mut(game), name);
             }
         },
     )
@@ -77,8 +77,8 @@ pub(crate) fn magnificent_culture() -> Objective {
     .add_simple_persistent_event_listener(
         |event| &mut event.play_wonder_card,
         0,
-        |game, player, _, _| {
-            objective_is_ready(game.player_mut(player), name);
+        |game, player, _| {
+            objective_is_ready(player.get_mut(game), name);
         },
     )
     .build()

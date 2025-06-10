@@ -53,13 +53,13 @@ fn pestilence() -> Incident {
             )
         },
     )
-    .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, _, _, _| {
+    .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, _, _| {
         game.permanent_effects.push(PermanentEffect::Pestilence);
     })
     .add_simple_persistent_event_listener(
         |event| &mut event.advance,
         11,
-        |game, _player_index, _player_name, i| {
+        |game, _, i| {
             if i.advance == Advance::Sanitation
                 && game
                     .players
@@ -93,13 +93,12 @@ pub(crate) fn pestilence_permanent_effect() -> Ability {
     .add_transient_event_listener(
         |event| &mut event.is_playing_action_available,
         1,
-        |available, game, i| {
-            let player = game.player(i.player);
+        |available, game, t, p| {
             if game
                 .permanent_effects
                 .contains(&PermanentEffect::Pestilence)
-                && matches!(i.action_type, PlayingActionType::Construct)
-                && !player.can_use_advance(Advance::Sanitation)
+                && t == &PlayingActionType::Construct
+                && !p.get(game).can_use_advance(Advance::Sanitation)
             {
                 *available = Err(
                     "Cannot construct buildings or wonders until you research Sanitation."
@@ -123,10 +122,10 @@ fn epidemics() -> Incident {
     .add_incident_units_request(
         IncidentTarget::AllPlayers,
         0,
-        |game, player_index, _incident| {
-            let p = game.player(player_index);
-            let units = p.units.iter().map(|u| u.id).collect_vec();
-            let needed = if additional_sanitation_damage(p) {
+        |game, p, _incident| {
+            let player = p.get(game);
+            let units = player.units.iter().map(|u| u.id).collect_vec();
+            let needed = if additional_sanitation_damage(player) {
                 2
             } else {
                 1
@@ -135,7 +134,7 @@ fn epidemics() -> Incident {
                 None
             } else {
                 Some(UnitsRequest::new(
-                    player_index,
+                    p.index,
                     units,
                     needed..=needed,
                     "Select units to kill",
@@ -217,9 +216,9 @@ pub(crate) fn famine(
     Incident::builder(id, name, description, incident_base_effect)
         .with_protection_advance(Advance::Irrigation)
         .with_protection_special_advance(SpecialAdvance::Aqueduct)
-        .add_simple_incident_listener(target, 11, move |game, player_index, player_name, i| {
+        .add_simple_incident_listener(target, 11, move |game, player, i| {
             // we lose the food regardless of the outcome
-            let p = game.player(player_index);
+            let p = player.get(game);
             if !player_pred.clone()(p) {
                 return;
             }
@@ -232,10 +231,11 @@ pub(crate) fn famine(
                 i.player.payment = ResourcePile::food(lost);
             }
 
-            game.player_mut(player_index)
+            player
+                .get_mut(game)
                 .lose_resources(ResourcePile::food(lost));
 
-            game.add_info_log_item(&format!("{player_name} lost {lost} food to Famine",));
+            game.add_info_log_item(&format!("{player} lost {lost} food to Famine",));
         })
         .add_decrease_mood(target, MoodModifier::MakeAngry, move |p, game, i| {
             if player_pred2(p) && i.player.payment.is_empty() {

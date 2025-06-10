@@ -50,10 +50,10 @@ fn great_wall() -> WonderInfo {
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_round_start,
         8,
-        move |game, p, _name, s| {
+        move |game, p, s| {
             let c = &s.combat;
             if c.first_round()
-                && c.role(p) == CombatRole::Defender
+                && c.role(p.index) == CombatRole::Defender
                 && c.defender_city(game)
                     .is_some_and(|c| c.mood_state == MoodState::Happy)
             {
@@ -91,8 +91,8 @@ fn use_great_statue(b: AbilityBuilder) -> AbilityBuilder {
     b.add_hand_card_request(
         |event| &mut event.custom_action,
         0,
-        |game, player_index, _| {
-            let player = game.player(player_index);
+        |game, p, _| {
+            let player = p.get(game);
             Some(HandCardsRequest::new(
                 all_objective_hand_cards(player),
                 1..=1,
@@ -131,14 +131,14 @@ pub(crate) fn use_great_mausoleum() -> Ability {
         .add_bool_request(
             |event| &mut event.choose_action_card,
             0,
-            |game, player_index, ()| {
+            |game, p, ()| {
                 if let Some(card) = game.action_cards_discarded.last() {
                     Some(format!(
                         "Do you want to draw {} from the discard pile?",
                         game.cache.get_action_card(*card).name()
                     ))
                 } else {
-                    do_gain_action_card_from_pile(game, player_index);
+                    do_gain_action_card_from_pile(game, p.index);
                     None
                 }
             },
@@ -162,14 +162,14 @@ pub(crate) fn use_great_mausoleum() -> Ability {
         .add_bool_request(
             |event| &mut event.choose_incident,
             0,
-            |game, player_index, i| {
+            |game, p, i| {
                 if let Some(card) = game.incidents_discarded.last() {
                     Some(format!(
                         "Do you want to draw {} from the discard pile?",
                         game.cache.get_incident(*card).name
                     ))
                 } else {
-                    i.incident_id = draw_and_discard_incident_card_from_pile(game, player_index);
+                    i.incident_id = draw_and_discard_incident_card_from_pile(game, p.index);
                     None
                 }
             },
@@ -239,9 +239,9 @@ fn use_great_lighthouse(b: AbilityBuilder) -> AbilityBuilder {
     b.add_position_request(
         |event| &mut event.custom_action,
         0,
-        |game, player_index, _| {
+        |game, p, _| {
             Some(PositionRequest::new(
-                great_lighthouse_spawns(game, player_index),
+                great_lighthouse_spawns(game, p.index),
                 1..=1,
                 "Select a sea space to place a ship",
             ))
@@ -282,8 +282,8 @@ fn use_great_library(b: AbilityBuilder) -> AbilityBuilder {
     b.add_advance_request(
         |event| &mut event.custom_action,
         0,
-        |game, player_index, _| {
-            let player = game.player(player_index);
+        |game, p, _| {
+            let player = game.player(p.index);
             Some(AdvanceRequest::new(
                 game.cache
                     .get_advances()
@@ -320,7 +320,7 @@ fn great_gardens() -> WonderInfo {
     .add_transient_event_listener(
         |events| &mut events.terrain_collect_options,
         1,
-        |m, (), ()| {
+        |m, (), (), _| {
             m.insert(
                 Fertile,
                 HashSet::from([
@@ -362,8 +362,8 @@ fn colosseum() -> WonderInfo {
     .add_payment_request_listener(
         |e| &mut e.combat_round_end,
         90,
-        |game, player_index, e| {
-            let player = &game.player(player_index);
+        |game, p, e| {
+            let player = &game.player(p.index);
 
             let cost = PaymentOptions::tokens(player, PaymentReason::WonderAbility, 1);
 
@@ -371,10 +371,9 @@ fn colosseum() -> WonderInfo {
                 return None;
             }
 
-            if !apply_colosseum(e, player_index, false) {
+            if !apply_colosseum(e, p.index, false) {
                 game.add_info_log_item(&format!(
-                    "Combat value is already at maximum, cannot increase combat value for {}",
-                    game.player_name(player_index)
+                    "Combat value is already at maximum, cannot increase combat value for {p}",
                 ));
                 return None;
             }

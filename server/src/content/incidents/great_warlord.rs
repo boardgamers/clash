@@ -29,7 +29,7 @@ pub(crate) fn great_warlord() -> ActionCard {
     .add_simple_persistent_event_listener(
         |e| &mut e.play_action_card,
         0,
-        |game, _player_index, _player_name, _| {
+        |game, _player_index, _| {
             game.state = GameState::Movement(MoveState {
                 great_warlord_used: true,
                 ..MoveState::default()
@@ -44,7 +44,7 @@ pub(crate) fn use_great_warlord() -> Ability {
         .add_simple_persistent_event_listener(
             |event| &mut event.combat_start,
             9,
-            |game, _player_index, _name, c| {
+            |game, _player_index, c| {
                 if let Movement(m) = &mut game.state {
                     if mem::replace(&mut m.great_warlord_used, false) {
                         c.modifiers.push(CombatModifier::GreatWarlord);
@@ -55,9 +55,9 @@ pub(crate) fn use_great_warlord() -> Ability {
         .add_simple_persistent_event_listener(
             |event| &mut event.combat_round_start,
             9,
-            |_game, player_index, _name, r| {
+            |_game, p, r| {
                 if r.combat.modifiers.contains(&CombatModifier::GreatWarlord)
-                    && r.combat.attacker() == player_index
+                    && r.combat.attacker() == p.index
                 {
                     r.attacker_strength.extra_combat_value += 2;
                     r.attacker_strength

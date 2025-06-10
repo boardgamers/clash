@@ -72,12 +72,12 @@ pub(crate) fn construct_only() -> Ability {
         .add_transient_event_listener(
             |event| &mut event.is_playing_action_available,
             2,
-            |available, game, i| {
+            |available, game, t, _p| {
                 if game
                     .permanent_effects
                     .iter()
                     .any(|e| matches!(e, &Construct(_)))
-                    && !matches!(i.action_type, PlayingActionType::Construct)
+                    && t != &PlayingActionType::Construct
                 {
                     *available = Err("You may only construct buildings.".to_string());
                 }
@@ -86,7 +86,7 @@ pub(crate) fn construct_only() -> Ability {
         .add_transient_event_listener(
             |event| &mut event.building_cost,
             1,
-            |c, _, game| {
+            |c, _, game, _| {
                 if game
                     .permanent_effects
                     .contains(&Construct(ConstructEffect::GreatEngineer))
@@ -104,7 +104,7 @@ pub(crate) fn construct_only() -> Ability {
         .add_simple_persistent_event_listener(
             |event| &mut event.construct,
             2,
-            |game, _, _, _| {
+            |game, _, _| {
                 remove_element_by(&mut game.permanent_effects, |e| matches!(e, &Construct(_)));
             },
         )
@@ -129,7 +129,7 @@ pub(crate) fn great_architect() -> ActionCard {
         0,
         |game, player, _| {
             Some(HandCardsRequest::new(
-                playable_wonders(game, game.player(player))
+                playable_wonders(game, player.get(game))
                     .iter()
                     .map(|name| HandCard::Wonder(*name))
                     .collect(),

@@ -23,7 +23,10 @@ pub(crate) fn trojan_incidents() -> Vec<Incident> {
     vec![trojan_horse(), solar_eclipse(), anarchy(), guillotine()]
 }
 
-const TROJAN_DESCRIPTION: &str = "In a land battle against a defended city (Army unit or Fortress), the attacker may pay 1 wood and 1 culture token to get 1 victory point and to deny the defender tactics cards in the first round of combat.";
+const TROJAN_DESCRIPTION: &str = "In a land battle against a defended city \
+    (Army unit or Fortress), \
+    the attacker may pay 1 wood and 1 culture token to get 1 victory point and to \
+    deny the defender tactics cards in the first round of combat.";
 
 fn trojan_horse() -> Incident {
     Incident::builder(
@@ -32,7 +35,7 @@ fn trojan_horse() -> Incident {
         &format!("The following is available to all players: {TROJAN_DESCRIPTION}"),
         IncidentBaseEffect::BarbariansMove,
     )
-    .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, _, _, _| {
+    .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, _, _| {
         game.permanent_effects.push(PermanentEffect::TrojanHorse);
     })
     .build()
@@ -43,13 +46,13 @@ pub(crate) fn decide_trojan_horse() -> Ability {
         .add_payment_request_listener(
             |event| &mut event.combat_start,
             10,
-            |game, player_index, c| {
-                if is_land_battle_against_defended_city(game, player_index, c) {
+            |game, p, c| {
+                if is_land_battle_against_defended_city(game, p.index, c) {
                     game.permanent_effects.iter().find_map(|e| {
                         matches!(e, PermanentEffect::TrojanHorse).then_some(vec![
                             PaymentRequest::optional(
                                 PaymentOptions::resources(
-                                    game.player(player_index),
+                                    p.get(game),
                                     PaymentReason::AdvanceAbility,
                                     ResourcePile::wood(1) + ResourcePile::culture_tokens(1),
                                 ),
@@ -97,7 +100,7 @@ fn solar_eclipse() -> Incident {
         The winner gains 1 victory point (defender if draw).",
         IncidentBaseEffect::PiratesSpawnAndRaid,
     )
-    .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, _, _, _| {
+    .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, _, _| {
         game.permanent_effects.push(PermanentEffect::SolarEclipse);
     })
     .build()
@@ -108,7 +111,7 @@ pub(crate) fn solar_eclipse_end_combat() -> Ability {
         .add_simple_persistent_event_listener(
             |event| &mut event.combat_round_end,
             10,
-            |game, _player, name, r| {
+            |game, _, r| {
                 if let Some(p) = game
                     .permanent_effects
                     .iter()
@@ -122,10 +125,11 @@ pub(crate) fn solar_eclipse_end_combat() -> Ability {
                             Some(CombatResult::AttackerWins) => r.combat.attacker(),
                             _ => r.combat.defender(),
                         };
-                        let p = game.player_mut(p);
-                        p.gain_event_victory_points(1_f32, &EventOrigin::Incident(41));
+                        game.player_mut(p)
+                            .gain_event_victory_points(1_f32, &EventOrigin::Incident(41));
                         game.add_info_log_item(&format!(
-                            "{name} gained 1 victory point for the Solar Eclipse",
+                            "{} gained 1 victory point for the Solar Eclipse",
+                            game.player_name(p)
                         ));
                     }
                 }
@@ -147,9 +151,9 @@ fn guillotine() -> Incident {
     .add_bool_request(
         |e| &mut e.incident,
         3,
-        |game, player_index, i| {
-            i.is_active(IncidentTarget::ActivePlayer, player_index)
-                .then(|| should_choose_new_leader(game, player_index, &i.origin()))
+        |game, p, i| {
+            i.is_active(IncidentTarget::ActivePlayer, p.index)
+                .then(|| should_choose_new_leader(game, p.index, &p.origin))
                 .flatten()
         },
         |game, s, i| {
@@ -162,17 +166,17 @@ fn guillotine() -> Incident {
                     s.player_name
                 ));
                 game.player_mut(s.player_index)
-                    .gain_event_victory_points(2_f32, &i.origin());
+                    .gain_event_victory_points(2_f32, &s.origin);
             }
         },
     )
     .add_incident_position_request(
         IncidentTarget::ActivePlayer,
         2,
-        |game, player_index, i| {
-            new_leader_chosen(player_index, i).then(|| {
+        |game, p, i| {
+            new_leader_chosen(p.index, i).then(|| {
                 PositionRequest::new(
-                    new_leader_positions(game.player(player_index)),
+                    new_leader_positions(p.get(game)),
                     1..=1,
                     "Select a city to choose a new leader in",
                 )
@@ -187,7 +191,8 @@ fn guillotine() -> Incident {
     .add_unit_type_request(
         |e| &mut e.incident,
         1,
-        |game, player_index, i| {
+        |game, p, i| {
+            let player_index = p.index;
             new_leader_chosen(player_index, i).then(|| {
                 UnitTypeRequest::new(
                     game.player(player_index)
@@ -210,20 +215,16 @@ fn guillotine() -> Incident {
             gain_unit(s.player_index, pos, s.choice, game);
         },
     )
-    .add_simple_incident_listener(
-        IncidentTarget::ActivePlayer,
-        0,
-        |game, player_index, player_name, _i| {
-            let available_leaders = &game.player(player_index).available_leaders;
-            if !available_leaders.is_empty() {
-                game.add_info_log_item(&format!(
-                    "{player_name} has lost leaders due to the Guillotine: {}",
-                    available_leaders.iter().map(|l| l.name(game)).join(", ")
-                ));
-                game.player_mut(player_index).available_leaders = vec![];
-            }
-        },
-    )
+    .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, p, _i| {
+        let available_leaders = &p.get(game).available_leaders;
+        if !available_leaders.is_empty() {
+            game.add_info_log_item(&format!(
+                "{p} has lost leaders due to the Guillotine: {}",
+                available_leaders.iter().map(|l| l.name(game)).join(", ")
+            ));
+            p.get_mut(game).available_leaders = vec![];
+        }
+    })
     .build()
 }
 
@@ -290,45 +291,42 @@ fn anarchy() -> Incident {
         the end of the game is worth 1 victory point.",
         IncidentBaseEffect::None,
     )
-    .add_simple_incident_listener(
-        IncidentTarget::ActivePlayer,
-        0,
-        |game, player_index, player_name, i| {
-            let old = game.player(player_index).advances.len();
+    .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, p, _| {
+        let old = p.get(game).advances.len();
 
-            let remove = game
-                .player(player_index)
-                .advances
-                .iter()
-                .filter(|a| a.info(game).government.is_some())
-                .collect_vec();
-            for a in remove {
-                remove_advance(game, a, player_index);
+        let remove = p
+            .get(game)
+            .advances
+            .iter()
+            .filter(|a| a.info(game).government.is_some())
+            .collect_vec();
+        let player_index = p.index;
+        for a in remove {
+            remove_advance(game, a, player_index);
+        }
+
+        if game.player(player_index).government(game).is_some() {
+            if let Some(special_advance) = find_government_special_advance(game, player_index) {
+                undo_unlock_special_advance(game, special_advance, player_index);
             }
+        }
 
-            if game.player(player_index).government(game).is_some() {
-                if let Some(special_advance) = find_government_special_advance(game, player_index) {
-                    undo_unlock_special_advance(game, special_advance, player_index);
-                }
-            }
-
-            let p = game.player_mut(player_index);
-            let lost = old - p.advances.len();
-            p.gain_event_victory_points(lost as f32, &i.origin());
-            if lost > 0 {
-                game.add_info_log_item(&format!(
-                    "{player_name} lost {lost} government advances due to Anarchy - \
+        let player = game.player_mut(player_index);
+        let lost = old - player.advances.len();
+        player.gain_event_victory_points(lost as f32, &p.origin);
+        if lost > 0 {
+            game.add_info_log_item(&format!(
+                "{p} lost {lost} government advances due to Anarchy - \
                      adding {lost} victory points",
-                ));
+            ));
 
-                game.permanent_effects
-                    .push(PermanentEffect::Anarchy(Anarchy {
-                        player: player_index,
-                        advances_lost: lost,
-                    }));
-            }
-        },
-    )
+            game.permanent_effects
+                .push(PermanentEffect::Anarchy(Anarchy {
+                    player: player_index,
+                    advances_lost: lost,
+                }));
+        }
+    })
     .build()
 }
 
@@ -337,7 +335,7 @@ pub(crate) fn anarchy_advance() -> Ability {
         .add_simple_persistent_event_listener(
             |event| &mut event.advance,
             10,
-            |game, player_index, player_name, i| {
+            |game, p, i| {
                 if i.advance.info(game).government.is_none() {
                     return;
                 }
@@ -349,12 +347,12 @@ pub(crate) fn anarchy_advance() -> Ability {
                         None
                     }
                 }) {
-                    if player_index == a.player {
+                    if p.index == a.player {
                         game.add_info_log_item(&format!(
-                            "{player_name} gained a government advance, taking a game event token \
+                            "{p} gained a government advance, taking a game event token \
                             instead of triggering a game event (and losing 1 victory point)",
                         ));
-                        let p = game.player_mut(player_index);
+                        let p = p.get_mut(game);
                         p.incident_tokens += 1;
                         p.gain_event_victory_points(-1_f32, &EventOrigin::Incident(44));
                         a.advances_lost -= 1;

@@ -6,7 +6,10 @@ use crate::content::action_cards::cultural_takeover::use_cultural_takeover;
 use crate::content::action_cards::development::collect_only;
 use crate::content::action_cards::negotiation::{use_assassination, use_negotiations};
 use crate::content::action_cards::synergies::use_teach_us;
+use crate::content::advances::education::use_academy;
+use crate::content::advances::science::use_observatory;
 use crate::content::advances::seafaring::fishing_collect;
+use crate::content::advances::spirituality::use_temple;
 use crate::content::civilizations::vikings::lose_raid_resource;
 use crate::content::incidents::famine::pestilence_permanent_effect;
 use crate::content::incidents::great_builders::construct_only;
@@ -94,6 +97,10 @@ pub fn get_all_uncached() -> Vec<Ability> {
         build_wonder_handler(),
         choose_carried_units_to_remove(),
         select_objectives(),
+        // building related
+        use_academy(),
+        use_observatory(),
+        use_temple(),
         // combat related
         place_settler(),
         choose_fighter_casualties(),

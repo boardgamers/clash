@@ -40,10 +40,10 @@ pub(crate) fn great_explorer() -> ActionCard {
         .add_position_request(
             |e| &mut e.play_action_card,
             8,
-            |game, player_index, a| {
+            |game, p, a| {
                 Some(place_city_request(
                     game,
-                    player_index,
+                    p.index,
                     a.selected_positions.clone(),
                 ))
             },
@@ -69,7 +69,7 @@ pub(crate) fn great_explorer() -> ActionCard {
             |game, player, a| {
                 a.selected_position?;
                 Some(vec![PaymentRequest::mandatory(
-                    city_cost(game.player(player)),
+                    city_cost(player.get(game)),
                     "Pay to build the city",
                 )])
             },
@@ -89,7 +89,7 @@ pub(crate) fn explore_adjacent_block(builder: ActionCardBuilder) -> ActionCardBu
     builder.add_position_request(
         |e| &mut e.play_action_card,
         9,
-        |game, player_index, _| Some(action_explore_request(game, player_index)),
+        |game, p, _| Some(action_explore_request(game, p.index)),
         |game, s, a| {
             let Some(&position) = s.choice.first() else {
                 game.add_info_log_item(&format!("{} decided not to explore", s.player_name));

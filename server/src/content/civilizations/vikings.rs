@@ -17,7 +17,7 @@ use crate::leader_ability::{LeaderAbility, activate_leader_city, can_activate_le
 use crate::map::{Block, Terrain, block_for_position, capital_city_position};
 use crate::movement::{MoveUnits, move_action_log};
 use crate::payment::{PaymentOptions, PaymentReason};
-use crate::player::{Player, gain_resources};
+use crate::player::Player;
 use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
@@ -56,9 +56,9 @@ fn ship_construction() -> SpecialAdvanceInfo {
     .add_units_request(
         |e| &mut e.ship_construction_conversion,
         0,
-        |game, player_index, units| {
-            let p = game.player(player_index);
-            let dest = p.get_unit(units[0]).position;
+        |game, p, units| {
+            let player_index = p.index;
+            let dest = p.get(game).get_unit(units[0]).position;
 
             Some(UnitsRequest::new(
                 player_index,
@@ -66,7 +66,7 @@ fn ship_construction() -> SpecialAdvanceInfo {
                 convert_to_settler_range(
                     &units
                         .iter()
-                        .map(|&id| game.player(player_index).get_unit(id))
+                        .map(|&id| p.get(game).get_unit(id))
                         .collect_vec(),
                     player_index,
                     dest,
@@ -115,7 +115,7 @@ fn ship_construction() -> SpecialAdvanceInfo {
     .add_transient_event_listener(
         |event| &mut event.advance_cost,
         4,
-        |i, &a, _| {
+        |i, &a, _, _| {
             if a == Advance::Navigation {
                 i.set_zero_resources();
                 i.info
@@ -211,14 +211,14 @@ pub(crate) fn lose_raid_resource() -> Ability {
     .add_payment_request_listener(
         |e| &mut e.turn_start,
         4,
-        |game, player_index, ()| {
+        |game, p, ()| {
             let c = PaymentOptions::sum(
-                game.player(player_index),
+                p.get(game),
                 PaymentReason::SpecialAdvanceAbility,
                 1,
                 &ResourceType::resources(),
             );
-            let p = game.player_mut(player_index);
+            let p = p.get_mut(game);
             if !p.can_afford(&c) {
                 return None;
             }
@@ -262,32 +262,26 @@ pub(crate) fn add_raid_bonus(game: &mut Game, player: usize, routes: &[TradeRout
 }
 
 fn runes() -> SpecialAdvanceInfo {
-    let b = SpecialAdvanceInfo::builder(
+    SpecialAdvanceInfo::builder(
         SpecialAdvance::RuneStones,
         SpecialAdvanceRequirement::Advance(Advance::Rituals),
         "Rune Stones",
         "When you lost 2 or more units in a battle, you may convert 1 Obelisk \
         to a Rune Stone, which counts as 1 objective victory point.",
-    );
-    let o = b.get_key().clone();
-    b.add_bool_request(
+    )
+    .add_bool_request(
         |event| &mut event.combat_end,
         24,
-        |game, player_index, s| {
-            (s.player(player_index)
-                .fighter_losses(s.battleground)
-                .amount()
-                >= 2
-                && game
-                    .player(player_index)
-                    .is_building_available(Building::Obelisk, game))
+        |game, p, s| {
+            (s.player(p.index).fighter_losses(s.battleground).amount() >= 2
+                && p.get(game).is_building_available(Building::Obelisk, game))
             .then_some("Do you want to convert an Obelisk to a Rune Stone?".to_string())
         },
         move |game, s, _| {
             if s.choice {
                 let p = game.player_mut(s.player_index);
                 p.destroyed_structures.add_building(Building::Obelisk);
-                p.gain_objective_victory_points(1.0, &o);
+                p.gain_objective_victory_points(1.0, &s.origin);
                 game.add_info_log_item(&format!(
                     "{} converted an Obelisk to a Rune Stone for 1 objective point",
                     s.player_name
@@ -325,8 +319,8 @@ fn danegeld() -> LeaderAbility {
             use_taxes(b.add_simple_persistent_event_listener(
                 |event| &mut event.custom_action,
                 -1,
-                |game, player, _player_name, _| {
-                    activate_leader_city(game, player, "collect taxes");
+                |game, player, _| {
+                    activate_leader_city(game, player.index, "collect taxes");
                 },
             ))
         },
@@ -342,7 +336,6 @@ fn ruler_of_the_north() -> LeaderAbility {
     );
     let o = b.get_key().clone();
     let o2 = o.clone();
-    let o3 = o.clone();
     b.add_ability_initializer(move |game, player_index, _| {
         set_knut_points(game, player_index, None, &o);
     })
@@ -352,12 +345,12 @@ fn ruler_of_the_north() -> LeaderAbility {
     .add_transient_event_listener(
         |event| &mut event.before_move,
         1,
-        move |game, i, ()| {
+        move |game, i, (), p| {
             if i.units
                 .iter()
-                .any(|&id| game.player(i.player).get_unit(id).is_leader())
+                .any(|&id| p.get(game).get_unit(id).is_leader())
             {
-                set_knut_points(game, i.player, Some(i.to), &o3);
+                set_knut_points(game, p.index, Some(i.to), &p.origin);
             }
         },
     )
@@ -404,9 +397,9 @@ fn new_colonies() -> LeaderAbility {
             b.add_position_request(
                 |event| &mut event.custom_action,
                 0,
-                |game, player_index, _| {
+                |game, p, _| {
                     Some(PositionRequest::new(
-                        unload_positions(game, game.player(player_index)),
+                        unload_positions(game, p.get(game)),
                         1..=1,
                         "Select a land position to unload Erik's ship(s)",
                     ))
@@ -469,17 +462,16 @@ fn explorer() -> LeaderAbility {
 }
 
 fn use_legendary_explorer(b: AbilityBuilder) -> AbilityBuilder {
-    let origin = b.get_key().clone();
     b.add_simple_persistent_event_listener(
         |event| &mut event.custom_action,
         0,
-        move |game, player_index, _player_name, _| {
-            let player = game.player_mut(player_index);
+        move |game, p, _| {
+            let player = p.get_mut(game);
             let position = leader_position(player);
 
             update_special_victory_points(
                 player,
-                &origin,
+                &p.origin,
                 VictoryPointAttribution::Objectives,
                 |mut v| {
                     v.points += 1.0;
@@ -527,13 +519,11 @@ fn ragnar() -> LeaderInfo {
             .add_simple_persistent_event_listener(
                 |event| &mut event.combat_end,
                 25,
-                |game, player, _name, s| {
-                    if s.captured_city(player)
+                |game, player, s| {
+                    if s.captured_city(player.index)
                         .is_some_and(|m| m != MoodState::Angry)
                     {
-                        gain_resources(game, player, ResourcePile::gold(2), |name, pile| {
-                            format!("{name} gained {pile} for Prey")
-                        });
+                        player.gain_resources(game, ResourcePile::gold(2));
                     }
                 },
             )

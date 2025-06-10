@@ -14,7 +14,7 @@ use crate::leader_ability::LeaderAbility;
 use crate::map::Terrain;
 use crate::movement::{MoveState, possible_move_destinations};
 use crate::payment::{PaymentOptions, PaymentReason};
-use crate::player::{Player, can_add_army_unit, gain_resources};
+use crate::player::{Player, can_add_army_unit};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
@@ -43,7 +43,7 @@ fn rice() -> SpecialAdvanceInfo {
     .add_transient_event_listener(
         |event| &mut event.collect_total,
         2,
-        |i, game, collections| {
+        |i, game, collections, _| {
             let city = game.get_any_city(i.city);
             let food = collections
                 .iter()
@@ -79,12 +79,12 @@ fn expansion() -> SpecialAdvanceInfo {
     .add_simple_persistent_event_listener(
         |event| &mut event.recruit,
         10,
-        |game, player_index, _player_name, r| {
+        |game, player, r| {
             if r.units.settlers == 0 {
                 return;
             }
 
-            let p = game.player(player_index);
+            let p = player.get(game);
             let settlers = movable_settlers(game, p);
             if settlers.is_empty() {
                 return;
@@ -153,8 +153,9 @@ fn ignore_hit_ability<B: AbilityInitializerSetup>(
     b.add_payment_request_listener(
         |e| &mut e.combat_round_end,
         priority,
-        move |game, player_index, e| {
-            let player = &game.player(player_index);
+        move |game, p, e| {
+            let player_index = p.index;
+            let player = p.get(game);
             let combat = &e.combat;
             if !filter(combat, combat.role(player_index), game) {
                 return None;
@@ -227,7 +228,8 @@ fn use_imperial_army(b: AbilityBuilder) -> AbilityBuilder {
     b.add_units_request(
         |event| &mut event.custom_action,
         0,
-        |game, player_index, _| {
+        |game, p, _| {
+            let player_index = p.index;
             let choices = convertible_units(game.player(player_index));
             let max = choices.len() as u8;
             Some(UnitsRequest::new(
@@ -334,19 +336,18 @@ fn sun_tzu() -> LeaderInfo {
         .add_simple_persistent_event_listener(
             |event| &mut event.combat_end,
             23,
-            |game, player_index, _name, s| {
-                let p = s.player(player_index);
+            |game, p, s| {
+                let player_index = p.index;
+                let c = s.player(player_index);
                 if s.is_winner(player_index)
                     && s.round == 1
                     && s.is_battle()
                     && s.battleground.is_land()
-                    && p.survived_leader()
+                    && c.survived_leader()
                 {
-                    gain_resources(
+                    p.gain_resources(
                         game,
-                        player_index,
                         ResourcePile::mood_tokens(1) + ResourcePile::culture_tokens(1),
-                        |name, pile| format!("{name} gained {pile} from Fast War"),
                     );
                 }
             },

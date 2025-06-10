@@ -20,7 +20,6 @@ use crate::game::GameState;
 use crate::happiness::{IncreaseHappiness, execute_increase_happiness};
 use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::Player;
-use crate::player_events::PlayingActionInfo;
 use crate::recruit::{Recruit, execute_recruit};
 use crate::wonder::{Wonder, WonderCardInfo, cities_for_wonder, on_play_wonder_card, wonder_cost};
 use crate::{game::Game, resource_pile::ResourcePile};
@@ -74,15 +73,12 @@ impl PlayingActionType {
             _ => {}
         }
 
-        let mut possible = Ok(());
+        let mut possible: Result<(), String> = Ok(());
         p.trigger_event(
             |e| &e.is_playing_action_available,
             &mut possible,
             game,
-            &PlayingActionInfo {
-                player: player_index,
-                action_type: self.clone(),
-            },
+            self,
         );
         possible
     }
@@ -445,7 +441,7 @@ pub(crate) fn pay_for_action() -> Ability {
     .add_payment_request_listener(
         |e| &mut e.pay_action,
         0,
-        |game, player_index, a| {
+        |game, p, a| {
             if matches!(a.action, PlayingAction::IncreaseHappiness(_)) {
                 // handled in the happiness action
                 return None;
@@ -453,8 +449,8 @@ pub(crate) fn pay_for_action() -> Ability {
 
             let payment_options = a
                 .action
-                .playing_action_type(game.player(player_index))
-                .payment_options(game, player_index);
+                .playing_action_type(game.player(p.index))
+                .payment_options(game, p.index);
             if payment_options.is_free() {
                 return None;
             }

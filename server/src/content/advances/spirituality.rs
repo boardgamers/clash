@@ -2,6 +2,7 @@ use crate::ability_initializer::{AbilityInitializerSetup, once_per_turn_advance}
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city_pieces::Building::Temple;
+use crate::content::ability::Ability;
 use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::content::persistent_events::ResourceRewardRequest;
 use crate::payment::{PaymentConversion, ResourceReward};
@@ -25,25 +26,24 @@ fn myths() -> AdvanceBuilder {
     )
     .with_advance_bonus(MoodToken)
     .with_unlocked_building(Temple)
-    .add_resource_request(
-        |event| &mut event.construct,
-        1,
-        |_game, _player_index, building| {
-            if matches!(building.building, Temple) {
-                return Some(ResourceRewardRequest::new(
-                    ResourceReward::tokens(1),
-                    "Select Temple bonus".to_string(),
-                ));
-            }
-            None
-        },
-        |_game, p, _| {
-            vec![format!(
-                "{} selected {} as a reward for constructing a Temple",
-                p.player_name, p.choice
-            )]
-        },
-    )
+}
+
+pub(crate) fn use_temple() -> Ability {
+    Ability::builder("Temple", "")
+        .add_resource_request(
+            |event| &mut event.construct,
+            1,
+            |_game, _player_index, building| {
+                if building.building == Temple {
+                    return Some(ResourceRewardRequest::new(
+                        ResourceReward::tokens(1),
+                        "Select Temple bonus".to_string(),
+                    ));
+                }
+                None
+            },
+        )
+        .build()
 }
 
 fn rituals() -> AdvanceBuilder {
@@ -57,7 +57,7 @@ fn rituals() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.happiness_cost,
         0,
-        |cost, (), ()| {
+        |cost, (), (), _| {
             for r in &[
                 ResourceType::Food,
                 ResourceType::Wood,
@@ -87,7 +87,7 @@ fn priesthood() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.advance_cost,
         2,
-        |i, &advance, game| {
+        |i, &advance, game, _| {
             if game
                 .cache
                 .get_advance_group(AdvanceGroup::Science)
@@ -123,7 +123,7 @@ fn state_religion() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.building_cost,
         0,
-        |i, &b, _| {
+        |i, &b, _, _| {
             if matches!(b, Temple) {
                 once_per_turn_advance(
                     Advance::StateReligion,

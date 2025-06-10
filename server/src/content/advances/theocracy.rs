@@ -43,9 +43,9 @@ fn dogma() -> AdvanceBuilder {
     .add_advance_request(
         |event| &mut event.construct,
         0,
-        |game, player_index, building| {
+        |game, p, building| {
             if matches!(building.building, Temple) {
-                let player = game.player(player_index);
+                let player = p.get(game);
                 let choices: Vec<Advance> = game
                     .cache
                     .get_advance_group(AdvanceGroup::Theocracy)
@@ -88,7 +88,7 @@ fn devotion() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.on_influence_culture_attempt,
         4,
-        |r, city, _| {
+        |r, city, _, _| {
             if let Ok(info) = r {
                 if info.is_defender && city.pieces.temple.is_some() {
                     info.set_no_boost();
@@ -108,7 +108,7 @@ fn conversion() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.on_influence_culture_attempt,
         3,
-        |r, _, _| {
+        |r, _, _, _| {
             if let Ok(info) = r {
                 if !info.is_defender {
                     info.roll_boost += 1;
@@ -123,14 +123,9 @@ fn conversion() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.on_influence_culture_resolve,
         0,
-        |game, outcome, ()| {
+        |game, outcome, (), p| {
             if outcome.success {
-                gain_resources(
-                    game,
-                    outcome.player,
-                    ResourcePile::culture_tokens(1),
-                    |name, pile| format!("{name} gained {pile} for Conversion Advance"),
-                );
+                p.gain_resources(game, ResourcePile::culture_tokens(1));
             }
         },
     )
@@ -155,7 +150,8 @@ fn fanaticism() -> AdvanceBuilder {
     .add_position_request(
         |event| &mut event.combat_end,
         104,
-        |game, player_index, i| {
+        |game, p, i| {
+            let player_index = p.index;
             if i.is_loser(player_index)
                 && !game.player(player_index).cities.is_empty()
                 && game.player(player_index).available_units().infantry > 0

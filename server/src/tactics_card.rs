@@ -222,11 +222,11 @@ impl TacticsCardBuilder {
     {
         let target = self.target;
         let id = self.id;
-        self.add_simple_persistent_event_listener(event, priority, move |game, p, _, s| {
-            if s.is_active(p, id, target) {
-                update_combat_strength(game, p, s, {
+        self.add_simple_persistent_event_listener(event, priority, move |game, p, s| {
+            if s.is_active(p.index, id, target) {
+                update_combat_strength(game, p.index, s, {
                     let l = listener.clone();
-                    move |game, combat, s, _role| l(p, game, combat, s)
+                    move |game, combat, s, _role| l(p.index, game, combat, s)
                 });
             }
         })
@@ -242,9 +242,9 @@ impl TacticsCardBuilder {
         self.add_simple_persistent_event_listener(
             |event| &mut event.combat_round_end_tactics,
             priority,
-            move |game, p, _, s| {
-                if s.is_active(p, id, target) {
-                    listener(p, game, s);
+            move |game, p, s| {
+                if s.is_active(p.index, id, target) {
+                    listener(p.index, game, s);
                 }
             },
         )
@@ -288,21 +288,22 @@ pub(crate) fn play_tactics_card(b: AdvanceBuilder) -> AdvanceBuilder {
         |e| &mut e.combat_round_start,
         0,
         |game, player, s| {
-            if get_combat_strength(player, s).deny_tactics_card {
+            let p = player.index;
+            if get_combat_strength(p, s).deny_tactics_card {
                 return None;
             }
 
-            let cards = available_tactics_cards(game, player, &s.combat);
+            let cards = available_tactics_cards(game, p, &s.combat);
             if cards.is_empty() {
                 return None;
             }
 
             let c = &s.combat;
-            if player == c.defender()
+            if p == c.defender()
                 && c.first_round()
                 && c.modifiers.contains(&CombatModifier::TrojanHorse)
             {
-                update_combat_strength(game, player, s, |_game, _c, s, _role| {
+                update_combat_strength(game, p, s, |_game, _c, s, _role| {
                     s.roll_log
                         .push("Trojan Horse denied playing Tactics Cards".to_string());
                 });

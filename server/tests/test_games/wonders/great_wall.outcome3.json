@@ -420,12 +420,12 @@
       "Base effect: Barbarians move",
       "Barbarians move from A2 to A1: 1 infantry and 1 elephant",
       "Barbarians lost the battle due to the Great Wall",
-      "Player1 gained 1 gold for winning a combat against the Barbarians",
+      "Player1 gained 1 gold for Barbarian battle",
       "Barbarians spawned a new Infantry unit at B3",
-      "Player1 gained 1 idea and 1 culture token for Envoy event",
+      "Player1 gained 1 idea and 1 culture token for Envoy",
       "No Wonders left to draw",
       "No wonders left to draw as public wonder card",
-      "Player2 gained 1 culture token for Envoy event"
+      "Player2 gained 1 culture token for Envoy"
     ],
     [
       "Player1 played the action card Hero General",

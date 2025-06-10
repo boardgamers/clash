@@ -38,14 +38,13 @@ fn pandemics() -> Incident {
         2,
         |game, p, i| {
             game.add_info_log_item(&format!(
-                "{} has to lose a total of {} units, cards, and resources",
-                game.player_name(p),
-                pandemics_cost(game.player(p))
+                "{p} has to lose a total of {} units, cards, and resources",
+                pandemics_cost(p.get(game))
             ));
 
-            let player = game.player(p);
+            let player = p.get(game);
             Some(UnitsRequest::new(
-                p,
+                p.index,
                 player.units.iter().map(|u| u.id).collect_vec(),
                 PandemicsContributions::range(player, i, 0),
                 "Select units to lose",
@@ -60,7 +59,7 @@ fn pandemics() -> Incident {
         IncidentTarget::AllPlayers,
         1,
         |game, p, i| {
-            let player = game.player(p);
+            let player = p.get(game);
             Some(HandCardsRequest::new(
                 hand_cards(player, &[HandCardType::Action]),
                 PandemicsContributions::range(player, i, 1),
@@ -96,7 +95,7 @@ fn pandemics() -> Incident {
         IncidentTarget::AllPlayers,
         0,
         |game, p, i| {
-            let player = game.player(p);
+            let player = p.get(game);
             let needed = PandemicsContributions::range(player, i, 2)
                 .min()
                 .expect("min not found");
@@ -172,7 +171,7 @@ fn black_death() -> Incident {
         IncidentTarget::AllPlayers,
         0,
         |game, p, _i| {
-            let player = game.player(p);
+            let player = p.get(game);
             let units = player.units.iter().map(|u| u.id).collect_vec();
             if units.len() < 4 {
                 return None;
@@ -184,18 +183,18 @@ fn black_death() -> Incident {
             }
 
             Some(UnitsRequest::new(
-                p,
+                p.index,
                 units,
                 needed..=needed,
                 "Select units to lose",
             ))
         },
-        |game, s, i| {
+        |game, s, _| {
             kill_incident_units(game, s);
             let vp = s.choice.len() as f32;
             game.add_info_log_item(&format!("{} gained {} victory points", s.player_name, vp));
             game.player_mut(s.player_index)
-                .gain_event_victory_points(vp, &i.origin());
+                .gain_event_victory_points(vp, &s.origin);
         },
     )
     .build()
@@ -254,21 +253,20 @@ fn fire() -> Incident {
         IncidentTarget::ActivePlayer,
         11,
         |game, p, _i| {
-            let player = game.player(p);
+            let player = p.get(game);
             let cities = player
                 .cities
                 .iter()
                 .filter(|c| game.map.get(c.position) == Some(&Terrain::Forest))
                 .map(|c| c.position)
                 .collect_vec();
-            let name = game.player_name(p);
             if cities.is_empty() {
                 if player.resources.wood > 0 {
-                    game.add_info_log_item(&format!("{name} lost 1 wood"));
+                    game.add_info_log_item(&format!("{p} lost 1 wood"));
                     return None;
                 }
                 game.add_info_log_item(&format!(
-                    "{name} has no cities on a Forest and no wood to lose"
+                    "{p} has no cities on a Forest and no wood to lose"
                 ));
                 return None;
             }

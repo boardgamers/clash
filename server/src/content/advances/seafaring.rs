@@ -5,7 +5,6 @@ use crate::city_pieces::Building::Port;
 use crate::content::ability::Ability;
 use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::game::Game;
-use crate::player::gain_resources;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use std::collections::HashSet;
@@ -61,16 +60,16 @@ fn cartography() -> AdvanceBuilder {
         .add_transient_event_listener(
             |event| &mut event.before_move,
             0,
-            |game,  i, ()| {
+            |game,  i, (), p| {
                 // info is the action that we last used this ability for
                 let key = game.actions_left.to_string();
-                if game.player(i.player).event_info.get("Cartography").is_some_and(|info| info == &key) {
+                if p.get(game).event_info.get("Cartography").is_some_and(|info| info == &key) {
                     return;
                 }
                 let mut ship = false;
                 let mut navigation = false;
                 for id in &i.units {
-                    let unit = game.player(i.player).get_unit(*id);
+                    let unit = p.get(game).get_unit(*id);
                     if unit.is_ship() {
                         ship = true;
                         if !unit.position.is_neighbor(i.to) {
@@ -79,19 +78,15 @@ fn cartography() -> AdvanceBuilder {
                     }
                 }
                 if ship {
-                    game.player_mut(i.player).event_info.insert("Cartography".to_string(), key);
-                    gain_resources(
+                    p.get_mut(game).event_info.insert("Cartography".to_string(), key);
+                    p.gain_resources(
                         game,
-                        i.player,
                         ResourcePile::ideas(1),
-                        |name, pile| format!("{name} gained {pile} from Cartography"),
                     );
                     if navigation {
-                        gain_resources(
+                        p.gain_resources(
                             game,
-                            i.player,
                             ResourcePile::culture_tokens(1),
-                            |name, pile| format!("{name} gained {pile} from Cartography"),
                         );
                     }
                 }
@@ -109,7 +104,7 @@ pub(crate) fn fishing_collect() -> Ability {
         .add_transient_event_listener(
             |event| &mut event.collect_options,
             1,
-            |i, c, game| {
+            |i, c, game, _| {
                 let city = game.get_any_city(c.city_position);
                 let port = city.port_position;
                 let fishing = game.player(c.player_index).has_advance(Advance::Fishing);

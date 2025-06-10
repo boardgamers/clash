@@ -17,7 +17,7 @@ use crate::objective_card::{discard_objective_card, gain_objective_card_from_pil
 use crate::payment::{
     PaymentConversion, PaymentConversionType, PaymentOptions, PaymentReason, base_resources,
 };
-use crate::player::{can_add_army_unit, gain_resources, gain_unit};
+use crate::player::{can_add_army_unit, gain_unit};
 use crate::playing_actions::PlayingActionType;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
@@ -52,7 +52,7 @@ fn aqueduct() -> SpecialAdvanceInfo {
     .add_transient_event_listener(
         |event| &mut event.advance_cost,
         3,
-        |i, &a, _| {
+        |i, &a, _, _| {
             if a == Advance::Sanitation {
                 i.set_zero_resources();
                 i.info
@@ -68,14 +68,14 @@ fn use_aqueduct(b: AbilityBuilder) -> AbilityBuilder {
     b.add_simple_persistent_event_listener(
         |event| &mut event.custom_action,
         0,
-        |game, player, name, a| {
+        |game, player, a| {
             game.add_info_log_item(&format!(
-                "{name} uses Aqueduct to gain Sanitation as a free action",
+                "{player} uses Aqueduct to gain Sanitation as a free action",
             ));
             gain_advance_without_payment(
                 game,
                 Advance::Sanitation,
-                player,
+                player.index,
                 a.payment.clone(),
                 true,
             );
@@ -105,21 +105,17 @@ fn captivi() -> SpecialAdvanceInfo {
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
         20,
-        |game, player, _, s| {
+        |game, p, s| {
+            let player = p.index;
             if s.is_winner(player) && s.is_battle() {
-                gain_resources(
-                    game,
-                    player,
-                    ResourcePile::gold(1) + ResourcePile::mood_tokens(1),
-                    |name, pile| format!("{name} gained {pile} for Captivi"),
-                );
+                p.gain_resources(game, ResourcePile::gold(1) + ResourcePile::mood_tokens(1));
             }
         },
     )
     .add_transient_event_listener(
         |event| &mut event.building_cost,
         2,
-        |i, _b, _| {
+        |i, _b, _, _| {
             i.cost.conversions.push(PaymentConversion::new(
                 base_resources(),
                 ResourcePile::mood_tokens(1),
@@ -146,11 +142,11 @@ fn provinces() -> SpecialAdvanceInfo {
         |event| &mut event.combat_end,
         21,
         |game, player, s| {
-            s.captured_city(player)
+            s.captured_city(player.index)
                 .is_some()
                 .then_some(vec![PaymentRequest::optional(
                     PaymentOptions::resources(
-                        game.player(player),
+                        player.get(game),
                         PaymentReason::AdvanceAbility,
                         ResourcePile::culture_tokens(1),
                     ),
@@ -225,7 +221,8 @@ fn use_princeps(b: AbilityBuilder) -> AbilityBuilder {
     b.add_hand_card_request(
         |event| &mut event.custom_action,
         0,
-        |game, player, _| {
+        |game, p, _| {
+            let player = p.index;
             activate_leader_city(
                 game,
                 player,
@@ -316,7 +313,8 @@ fn proconsul() -> LeaderAbility {
     .add_payment_request_listener(
         |event| &mut event.combat_end,
         22,
-        |game, player, s| {
+        |game, p, s| {
+            let player = p.index;
             if !s.player(player).survived_leader() {
                 return None;
             }
@@ -365,7 +363,7 @@ fn sulla() -> LeaderInfo {
             .add_transient_event_listener(
                 |event| &mut event.on_influence_culture_attempt,
                 6,
-                |r, city, game| {
+                |r, city, game, _| {
                     if let Ok(info) = r {
                         if info.is_defender
                             && leader_position(game.player(city.player_index)) == city.position

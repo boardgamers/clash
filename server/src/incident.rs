@@ -11,12 +11,10 @@ use crate::content::persistent_events::{
     ResourceRewardRequest, SelectedStructure, StructuresRequest, TriggerPersistentEventParams,
     UnitsRequest, trigger_persistent_event_with_listener,
 };
-use crate::events::EventOrigin;
+use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
 use crate::map::Terrain;
-use crate::payment::{
-    PaymentConversion, PaymentConversionType, PaymentOptions, PaymentReason, ResourceReward,
-};
+use crate::payment::{PaymentConversion, PaymentConversionType, PaymentOptions, PaymentReason};
 use crate::pirates::pirates_spawn_and_raid;
 use crate::player::Player;
 use crate::player_events::{IncidentInfo, IncidentPlayerInfo, IncidentTarget};
@@ -246,14 +244,14 @@ impl IncidentBuilder {
         listener: F,
     ) -> Self
     where
-        F: Fn(&mut Game, usize, &str, &mut IncidentInfo) + 'static + Clone + Sync + Send,
+        F: Fn(&mut Game, &EventPlayer, &mut IncidentInfo) + 'static + Clone + Sync + Send,
     {
         self.add_simple_persistent_event_listener(
             |event| &mut event.incident,
             priority,
-            move |game, player_index, player_name, i| {
-                if i.is_active(role, player_index) {
-                    listener(game, player_index, player_name, i);
+            move |game, p, i| {
+                if i.is_active(role, p.index) {
+                    listener(game, p, i);
                 }
             },
         )
@@ -264,7 +262,7 @@ impl IncidentBuilder {
         self,
         role: IncidentTarget,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &mut IncidentInfo) -> Option<PositionRequest>
+        request: impl Fn(&mut Game, &EventPlayer, &mut IncidentInfo) -> Option<PositionRequest>
         + 'static
         + Clone
         + Sync
@@ -279,9 +277,9 @@ impl IncidentBuilder {
         self.add_position_request(
             |event| &mut event.incident,
             priority,
-            move |game, player_index, i| {
-                if f.is_active(game, i, player_index) {
-                    request(game, player_index, i)
+            move |game, p, i| {
+                if f.is_active(game, i, p.index) {
+                    request(game, p, i)
                 } else {
                     None
                 }
@@ -297,7 +295,7 @@ impl IncidentBuilder {
         self,
         role: IncidentTarget,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &mut IncidentInfo) -> Option<UnitsRequest>
+        request: impl Fn(&mut Game, &EventPlayer, &mut IncidentInfo) -> Option<UnitsRequest>
         + 'static
         + Clone
         + Sync
@@ -312,9 +310,9 @@ impl IncidentBuilder {
         self.add_units_request(
             |event| &mut event.incident,
             priority,
-            move |game, player_index, i| {
-                if f.is_active(game, i, player_index) {
-                    request(game, player_index, i)
+            move |game, p, i| {
+                if f.is_active(game, i, p.index) {
+                    request(game, p, i)
                 } else {
                     None
                 }
@@ -330,7 +328,7 @@ impl IncidentBuilder {
         self,
         role: IncidentTarget,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<StructuresRequest>
+        request: impl Fn(&mut Game, &EventPlayer, &IncidentInfo) -> Option<StructuresRequest>
         + 'static
         + Clone
         + Sync
@@ -349,9 +347,9 @@ impl IncidentBuilder {
         self.add_structures_request(
             |event| &mut event.incident,
             priority,
-            move |game, player_index, i| {
-                if f.is_active(game, i, player_index) {
-                    request(game, player_index, i)
+            move |game, p, i| {
+                if f.is_active(game, i, p.index) {
+                    request(game, p, i)
                 } else {
                     None
                 }
@@ -367,12 +365,7 @@ impl IncidentBuilder {
         self,
         role: IncidentTarget,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<ResourceRewardRequest>
-        + 'static
-        + Clone
-        + Sync
-        + Send,
-        gain_reward_log: impl Fn(&Game, &SelectedChoice<ResourcePile>) -> Vec<String>
+        request: impl Fn(&mut Game, &EventPlayer, &IncidentInfo) -> Option<ResourceRewardRequest>
         + 'static
         + Clone
         + Sync
@@ -382,14 +375,13 @@ impl IncidentBuilder {
         self.add_resource_request(
             |event| &mut event.incident,
             priority,
-            move |game, player_index, i| {
-                if f.is_active(game, i, player_index) {
-                    request(game, player_index, i)
+            move |game, p, i| {
+                if f.is_active(game, i, p.index) {
+                    request(game, p, i)
                 } else {
                     None
                 }
             },
-            move |game, s, _| gain_reward_log(game, s),
         )
     }
 
@@ -407,7 +399,7 @@ impl IncidentBuilder {
         self,
         role: IncidentTarget,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &mut IncidentInfo) -> Option<Vec<PaymentRequest>>
+        request: impl Fn(&mut Game, &EventPlayer, &mut IncidentInfo) -> Option<Vec<PaymentRequest>>
         + 'static
         + Clone
         + Sync
@@ -422,9 +414,9 @@ impl IncidentBuilder {
         self.add_payment_request_listener(
             |event| &mut event.incident,
             priority,
-            move |game, player_index, i| {
-                if f.is_active(game, i, player_index) {
-                    request(game, player_index, i)
+            move |game, p, i| {
+                if f.is_active(game, i, p.index) {
+                    request(game, p, i)
                 } else {
                     None
                 }
@@ -440,7 +432,7 @@ impl IncidentBuilder {
         self,
         role: IncidentTarget,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<HandCardsRequest>
+        request: impl Fn(&mut Game, &EventPlayer, &IncidentInfo) -> Option<HandCardsRequest>
         + 'static
         + Clone
         + Sync
@@ -455,9 +447,9 @@ impl IncidentBuilder {
         self.add_hand_card_request(
             |event| &mut event.incident,
             priority,
-            move |game, player_index, i| {
-                if f.is_active(game, i, player_index) {
-                    request(game, player_index, i)
+            move |game, p, i| {
+                if f.is_active(game, i, p.index) {
+                    request(game, p, i)
                 } else {
                     None
                 }
@@ -486,13 +478,13 @@ impl IncidentBuilder {
         self.add_player_request(
             |event| &mut event.incident,
             priority,
-            move |game, player_index, i| {
-                if f.is_active(game, i, player_index) {
+            move |game, player, i| {
+                if f.is_active(game, i, player.index) {
                     let choices = game
                         .players
                         .iter()
                         .filter(|p| {
-                            p.is_human() && p.index != player_index && player_pred(p, game, i)
+                            p.is_human() && p.index != player.index && player_pred(p, game, i)
                         })
                         .map(|p| p.index)
                         .collect_vec();
@@ -532,8 +524,8 @@ impl IncidentBuilder {
         self.add_incident_payment_request(
             target,
             10,
-            move |game, player_index, i| {
-                let p = game.player(player_index);
+            move |game, p, i| {
+                let p = game.player(p.index);
                 if p.can_use_advance(Advance::Myths) {
                     let needed = amount(game, p, i);
                     if needed == 0 {
@@ -586,7 +578,7 @@ impl IncidentBuilder {
             target,
             9,
             move |game, p, i| {
-                let d = cities(game.player(p), game, i);
+                let d = cities(p.get(game), game, i);
                 let mut needed = d.needed;
                 needed -= i.player.myths_payment;
 
@@ -765,16 +757,16 @@ fn exhausted_land(builder: IncidentBuilder) -> IncidentBuilder {
     builder.add_incident_position_request(
         IncidentTarget::ActivePlayer,
         BASE_EFFECT_PRIORITY,
-        |game, player_index, _incident| {
-            let p = game.player(player_index);
+        |game, p, _incident| {
+            let p = game.player(p.index);
             let positions = p
                 .cities
                 .iter()
                 .flat_map(|c| c.position.neighbors())
-                .filter(|p| {
-                    game.try_get_any_city(*p).is_none()
-                        && !enemy_units_present(game, *p, player_index)
-                        && game.map.get(*p).is_some_and(is_valid_city_terrain)
+                .filter(|pos| {
+                    game.try_get_any_city(*pos).is_none()
+                        && !enemy_units_present(game, *pos, p.index)
+                        && game.map.get(*pos).is_some_and(is_valid_city_terrain)
                 })
                 .collect_vec();
             let needed = 1..=1;
@@ -797,20 +789,12 @@ fn exhausted_land(builder: IncidentBuilder) -> IncidentBuilder {
 }
 
 fn gold_deposits(b: IncidentBuilder) -> IncidentBuilder {
-    b.add_incident_resource_request(
+    b.add_simple_incident_listener(
         IncidentTarget::ActivePlayer,
         BASE_EFFECT_PRIORITY,
-        |_game, _player_index, _incident| {
-            Some(ResourceRewardRequest::new(
-                ResourceReward::sum(2, &[ResourceType::Gold]),
-                "-".to_string(),
-            ))
-        },
-        |_game, s| {
-            vec![format!(
-                "{} gained {} from a Gold Mine",
-                s.player_name, s.choice
-            )]
+        |game, p, _incident| {
+            p.with_origin(EventOrigin::Ability("Gold deposits".to_string()))
+                .gain_resources(game, ResourcePile::gold(2));
         },
     )
 }
