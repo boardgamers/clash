@@ -61,8 +61,8 @@ impl LeaderAbility {
         .add_simple_persistent_event_listener(
             |e| &mut e.draw_wonder_card,
             1,
-            move |game, player, _name, drawn| {
-                if force_draw_wonder_from_anywhere(game, player, wonder) {
+            move |game, player, drawn| {
+                if force_draw_wonder_from_anywhere(game, player.index, wonder) {
                     *drawn = true;
                 }
             },
@@ -70,7 +70,7 @@ impl LeaderAbility {
         .add_transient_event_listener(
             |event| &mut event.wonder_cost,
             0,
-            move |i, w, game| {
+            move |i, w, game, _| {
                 if w.wonder == wonder {
                     i.cost.default.culture_tokens -= 2;
                     i.info.log.push(format!(
@@ -137,8 +137,8 @@ fn use_get_advance(b: AbilityBuilder, group: AdvanceGroup) -> AbilityBuilder {
     b.add_advance_request(
         |event| &mut event.custom_action,
         0,
-        move |game, player_index, _| {
-            let player = game.player(player_index);
+        move |game, p, _| {
+            let player = p.get(game);
             Some(AdvanceRequest::new(advances_in_group(game, player, group)))
         },
         move |game, s, c| {

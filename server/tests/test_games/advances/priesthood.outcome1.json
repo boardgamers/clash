@@ -437,12 +437,12 @@
       "Player2 paid nothing to get the Math advance",
       "Priesthood reduced the cost to 0",
       "Player2 gained 1 culture token as advance bonus",
-      "Player2 gained 1 idea from Philosophy"
+      "Player2 gained 1 idea for Philosophy"
     ],
     [
       "Player2 paid 2 gold to get the Astronomy advance",
       "Player2 gained 1 culture token as advance bonus",
-      "Player2 gained 1 idea from Philosophy"
+      "Player2 gained 1 idea for Philosophy"
     ]
   ],
   "undo_limit": 0,

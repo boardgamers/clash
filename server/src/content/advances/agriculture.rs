@@ -45,7 +45,7 @@ fn irrigation() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.terrain_collect_options,
         0,
-        |m, (), ()| {
+        |m, (), (), _| {
             m.insert(Barren, HashSet::from([ResourcePile::food(1)]));
         },
     )
@@ -65,7 +65,7 @@ fn husbandry() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.collect_options,
         0,
-        |i, c, game| {
+        |i, c, game, _| {
             once_per_turn_advance(
                 Advance::Husbandry,
                 i,

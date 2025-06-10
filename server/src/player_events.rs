@@ -9,7 +9,7 @@ use crate::construct::ConstructInfo;
 use crate::content::custom_actions::CustomActionActivation;
 use crate::content::persistent_events::KilledUnits;
 use crate::cultural_influence::{InfluenceCultureInfo, InfluenceCultureOutcome};
-use crate::events::{Event, EventOrigin};
+use crate::events::Event;
 use crate::explore::ExploreResolutionState;
 use crate::game::Game;
 use crate::incident::PassedIncident;
@@ -31,7 +31,7 @@ use num::Zero;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 
-pub(crate) type PersistentEvent<V = ()> = Event<Game, PersistentEventInfo, (), V>;
+pub(crate) type PersistentEvent<V = ()> = Event<Game, (), (), V>;
 
 pub(crate) struct PlayerEvents {
     pub persistent: PersistentEvents,
@@ -58,7 +58,7 @@ pub(crate) struct TransientEvents {
     pub happiness_cost: Event<CostInfo>,
     pub recruit_cost: Event<CostInfo, Units, Player>,
 
-    pub is_playing_action_available: Event<Result<(), String>, Game, PlayingActionInfo>,
+    pub is_playing_action_available: Event<Result<(), String>, Game, PlayingActionType>,
 
     pub terrain_collect_options: Event<HashMap<Terrain, HashSet<ResourcePile>>>,
     pub collect_options: Event<CollectInfo, CollectContext, Game>,
@@ -286,11 +286,6 @@ impl IncidentInfo {
     pub(crate) fn get_barbarian_state(&mut self) -> &mut BarbariansEventState {
         self.barbarians.as_mut().expect("barbarians should exist")
     }
-
-    #[must_use]
-    pub fn origin(&self) -> EventOrigin {
-        EventOrigin::Incident(self.incident_id)
-    }
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -330,13 +325,7 @@ pub struct OnAdvanceInfo {
     pub take_incident_token: bool,
 }
 
-#[derive(Clone, PartialEq)]
-pub struct PersistentEventInfo {
-    pub player: usize, // player currently handling the event
-}
-
 pub struct MoveInfo {
-    pub player: usize,
     pub units: Vec<u32>,
     #[allow(dead_code)]
     pub from: Position,
@@ -345,19 +334,9 @@ pub struct MoveInfo {
 
 impl MoveInfo {
     #[must_use]
-    pub fn new(player: usize, units: Vec<u32>, from: Position, to: Position) -> MoveInfo {
-        MoveInfo {
-            player,
-            units,
-            from,
-            to,
-        }
+    pub fn new(units: Vec<u32>, from: Position, to: Position) -> MoveInfo {
+        MoveInfo { units, from, to }
     }
-}
-
-pub struct PlayingActionInfo {
-    pub player: usize,
-    pub action_type: PlayingActionType,
 }
 
 pub(crate) fn trigger_event_with_game_value<U, V, W>(

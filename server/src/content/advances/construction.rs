@@ -43,7 +43,7 @@ fn sanitation() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.recruit_cost,
         1,
-        |cost, units, _| {
+        |cost, units, _, _| {
             if units.settlers > 0 {
                 // insert at beginning so that it's preferred over gold
                 cost.info

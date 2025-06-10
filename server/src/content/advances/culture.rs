@@ -79,7 +79,7 @@ fn monuments() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.on_influence_culture_attempt,
         1,
-        |r, city, _| {
+        |r, city, _, _| {
             if let Ok(info) = r {
                 if info.is_defender && !city.pieces.wonders.is_empty() {
                     *r = Err(
@@ -142,8 +142,8 @@ fn use_sports() -> Ability {
         .add_payment_request_listener(
             |event| &mut event.custom_action,
             0,
-            |game, player_index, a| {
-                let p = game.player(player_index);
+            |game, player, a| {
+                let p = player.get(game);
                 let options = sports_options(p, p.get_city(a.action.city.expect("city not found")))
                     .expect("Invalid options for sports");
                 Some(vec![PaymentRequest::mandatory(
@@ -176,7 +176,7 @@ fn use_theaters(b: AbilityBuilder) -> AbilityBuilder {
         |game, player, _| {
             Some(vec![PaymentRequest::mandatory(
                 PaymentOptions::sum(
-                    game.player(player),
+                    player.get(game),
                     PaymentReason::CustomAction,
                     1,
                     &[ResourceType::CultureTokens, ResourceType::MoodTokens],

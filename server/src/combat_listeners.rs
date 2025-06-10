@@ -517,7 +517,8 @@ pub(crate) fn choose_fighter_casualties() -> Ability {
         .add_units_request(
             |event| &mut event.combat_round_end,
             1,
-            move |game, player, r| {
+            move |game, p, r| {
+                let player = p.index;
                 let choices = r.combat.fighting_units(game, player).clone();
 
                 let role = r.role(player);
@@ -574,7 +575,8 @@ pub(crate) fn offer_retreat() -> Ability {
         .add_bool_request(
             |event| &mut event.combat_round_end,
             0,
-            |game, player, r| {
+            |game, p, r| {
+                let player = p.index;
                 let c = &r.combat;
                 if c.attacker() == player && r.can_retreat() {
                     let name = game.player_name(player);
@@ -607,7 +609,8 @@ pub(crate) fn place_settler() -> Ability {
     .add_position_request(
         |event| &mut event.combat_end,
         102,
-        |game, player_index, i| {
+        |game, p, i| {
+            let player_index = p.index;
             let p = game.player(player_index);
             if i.is_defender(player_index)
                 && i.is_loser(player_index)

@@ -31,8 +31,8 @@ pub(crate) fn great_diplomat() -> ActionCard {
     .add_simple_persistent_event_listener(
         |e| &mut e.play_action_card,
         0,
-        |game, _player_index, player_name, _| {
-            game.add_info_log_item(&format!("{player_name} ended diplomatic relations.",));
+        |game, p, _| {
+            game.add_info_log_item(&format!("{p} ended diplomatic relations.",));
             remove_element_by(&mut game.permanent_effects, |e| {
                 matches!(e, PermanentEffect::DiplomaticRelations(_))
             });
@@ -98,11 +98,10 @@ pub(crate) fn use_diplomatic_relations() -> Ability {
         .add_simple_persistent_event_listener(
             |e| &mut e.combat_start,
             2,
-            |game, player_index, player_name, _| {
-                if let Some(partner) = diplomatic_relations_partner(game, player_index) {
+            |game, p, _| {
+                if let Some(partner) = diplomatic_relations_partner(game, p.index) {
                     game.add_info_log_item(&format!(
-                        "{} paid 2 culture tokens to end diplomatic relations with {} using a surprise attack.",
-                        player_name,
+                        "{p} paid 2 culture tokens to end diplomatic relations with {} using a surprise attack.",
                         game.player_name(partner),
                     ));
                     remove_element_by(&mut game.permanent_effects, |e| {

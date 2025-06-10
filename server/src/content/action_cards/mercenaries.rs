@@ -37,15 +37,15 @@ pub(crate) fn mercenaries(id: u8, tactics_card: TacticsCardFactory) -> ActionCar
     .add_position_request(
         |e| &mut e.play_action_card,
         2,
-        |game, player, _| {
-            let (r, log) = barbarian_army_positions_in_range2(game, game.player(player));
+        |game, p, _| {
+            let (r, log) = barbarian_army_positions_in_range2(game, p.get(game));
             for l in log {
                 game.add_info_log_item(&l);
             }
             if r.is_empty() {
                 return None;
             }
-            let max = (r.len() as u8).min(max_mercenary_payment(game.player(player)));
+            let max = (r.len() as u8).min(max_mercenary_payment(p.get(game)));
             Some(PositionRequest::new(
                 r,
                 1..=max,
@@ -64,10 +64,10 @@ pub(crate) fn mercenaries(id: u8, tactics_card: TacticsCardFactory) -> ActionCar
     .add_payment_request_listener(
         |e| &mut e.play_action_card,
         1,
-        |game, player, a| {
+        |game, p, a| {
             Some(vec![PaymentRequest::mandatory(
                 PaymentOptions::sum(
-                    game.player(player),
+                    p.get(game),
                     PaymentReason::Incident,
                     a.selected_positions.len() as u8,
                     &[

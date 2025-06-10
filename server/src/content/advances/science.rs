@@ -3,6 +3,7 @@ use crate::action_card::gain_action_card_from_pile;
 use crate::advance::Bonus::CultureToken;
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city_pieces::Building;
+use crate::content::ability::Ability;
 use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::content::persistent_events::ResourceRewardRequest;
 use crate::payment::ResourceReward;
@@ -25,25 +26,30 @@ fn math() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.advance_cost,
         1,
-        |i, &a, _| {
+        |i, &a, _, _| {
             if a == Advance::Engineering || a == Advance::Roads {
                 i.info.log.push("Math reduced the cost to 0".to_string());
                 i.set_zero_resources();
             }
         },
     )
-    .add_simple_persistent_event_listener(
-        |event| &mut event.construct,
-        4,
-        |game, player_index, _player_name, b| {
-            if matches!(b.building, Building::Observatory) {
-                gain_action_card_from_pile(game, player_index);
-                game.add_info_log_item("Observatory gained 1 action card");
-            }
-        },
-    )
     .with_advance_bonus(CultureToken)
     .with_unlocked_building(Building::Observatory)
+}
+
+pub fn use_observatory() -> Ability {
+    Ability::builder("Observatory", "Gain 1 action card")
+        .add_simple_persistent_event_listener(
+            |event| &mut event.construct,
+            4,
+            |game, p, b| {
+                if b.building == Building::Observatory {
+                    gain_action_card_from_pile(game, p.index);
+                    game.add_info_log_item("Observatory gained 1 action card");
+                }
+            },
+        )
+        .build()
 }
 
 fn astronomy() -> AdvanceBuilder {
@@ -55,7 +61,7 @@ fn astronomy() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.advance_cost,
         0,
-        |i, &a, _| {
+        |i, &a, _, _| {
             if a == Advance::Navigation || a == Advance::Cartography {
                 i.set_zero_resources();
                 i.info
@@ -92,17 +98,6 @@ fn medicine() -> AdvanceBuilder {
                 "Select resource to gain back".to_string(),
             ))
         },
-        |_game, s, _| {
-            let verb = if s.actively_selected {
-                "selected"
-            } else {
-                "gained"
-            };
-            vec![format!(
-                "{} {verb} {} for Medicine Advance",
-                s.player_name, s.choice
-            )]
-        },
     )
 }
 
@@ -118,7 +113,7 @@ fn metallurgy() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.collect_total,
         0,
-        |i, _, _| {
+        |i, _, _, _| {
             if i.total.ore >= 2 {
                 i.total.ore -= 1;
                 i.total.gold += 1;

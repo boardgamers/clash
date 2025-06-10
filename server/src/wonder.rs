@@ -212,7 +212,7 @@ pub(crate) fn draw_wonder_card_handler() -> Ability {
         .add_bool_request(
             |e| &mut e.draw_wonder_card,
             0,
-            |game, player_index, drawn| {
+            |game, p, drawn| {
                 if *drawn {
                     return None;
                 }
@@ -224,7 +224,7 @@ pub(crate) fn draw_wonder_card_handler() -> Ability {
                         public_wonder.name()
                     ))
                 } else {
-                    gain_wonder_from_pile(game, player_index);
+                    gain_wonder_from_pile(game, p.index);
                     None
                 }
             },
@@ -406,15 +406,11 @@ pub(crate) fn build_wonder_handler() -> Ability {
         .add_position_request(
             |e| &mut e.play_wonder_card,
             11,
-            move |game, player_index, i| {
-                game.add_info_log_item(&format!(
-                    "{} played the wonder card {}",
-                    game.player_name(player_index),
-                    i.wonder.name()
-                ));
+            move |game, p, i| {
+                game.add_info_log_item(&format!("{p} played the wonder card {}", i.wonder.name()));
 
                 Some(PositionRequest::new(
-                    cities_for_wonder(i.wonder, game, game.player(player_index), i.cost.clone()),
+                    cities_for_wonder(i.wonder, game, p.get(game), i.cost.clone()),
                     1..=1,
                     "Select city to build wonder",
                 ))
@@ -433,8 +429,8 @@ pub(crate) fn build_wonder_handler() -> Ability {
         .add_payment_request_listener(
             |e| &mut e.play_wonder_card,
             10,
-            move |game, player_index, i| {
-                let p = game.player(player_index);
+            move |game, p, i| {
+                let p = p.get(game);
                 let city = p.get_city(i.selected_position.expect("city not selected"));
                 let cost = can_construct_wonder(
                     city,
@@ -570,13 +566,11 @@ pub(crate) fn use_draw_replacement_wonder() -> Ability {
     .add_simple_persistent_event_listener(
         |e| &mut e.turn_start,
         3,
-        |game, player_index, player_name, ()| {
-            let p = game.player_mut(player_index);
-            if p.event_info.remove(DRAW_REPLACEMENT_WONDER).is_some() {
-                game.add_info_log_item(&format!(
-                    "{player_name} gets to draw a replacement wonder card."
-                ));
-                draw_wonder_card(game, player_index);
+        |game, p, ()| {
+            let player = p.get_mut(game);
+            if player.event_info.remove(DRAW_REPLACEMENT_WONDER).is_some() {
+                game.add_info_log_item(&format!("{p} gets to draw a replacement wonder card."));
+                draw_wonder_card(game, p.index);
             }
         },
     )

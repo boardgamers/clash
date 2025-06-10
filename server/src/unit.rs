@@ -665,7 +665,7 @@ pub(crate) fn choose_carried_units_to_remove() -> Ability {
         |event| &mut event.units_killed,
         0,
         |game, player, k| {
-            let p = game.player(player);
+            let p = player.get(game);
             let pos = k.position;
             if game.map.is_land(pos) {
                 return None;
@@ -681,7 +681,7 @@ pub(crate) fn choose_carried_units_to_remove() -> Ability {
             let to_kill = carried.len().saturating_sub(capacity) as u8;
 
             Some(UnitsRequest::new(
-                player,
+                player.index,
                 carried,
                 to_kill..=to_kill,
                 "Choose which carried units to remove",

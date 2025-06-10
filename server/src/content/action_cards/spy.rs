@@ -27,7 +27,7 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         1,
         |game, player, _| {
             Some(PlayerRequest::new(
-                players_with_cards(game, player),
+                players_with_cards(game, player.index),
                 "Select a player to look at all Wonder, Action, and Objective cards of",
             ))
         },
@@ -47,7 +47,7 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |game, player, a| {
             game.information_revealed(); // you've seen the cards
 
-            let p = game.player(player);
+            let p = player.get(game);
             let other = game.player(a.selected_player.expect("player not found"));
 
             let all = HandCardType::get_all();
@@ -59,7 +59,7 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             }
 
             let secrets = get_swap_secrets(other, game);
-            game.player_mut(player).secrets.extend(secrets);
+            player.get_mut(game).secrets.extend(secrets);
 
             Some(HandCardsRequest::new(
                 cards,

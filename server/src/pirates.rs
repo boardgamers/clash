@@ -17,15 +17,13 @@ use crate::unit::UnitType;
 use itertools::Itertools;
 
 pub(crate) fn pirates_round_bonus() -> Ability {
-    Ability::builder("Pirates bonus", "-")
+    Ability::builder("Pirate ship destroyed", "-")
         .add_resource_request(
             |event| &mut event.combat_round_end,
             3,
-            |game, player_index, r| {
+            |game, p, r| {
                 let c = &r.combat;
-                if c.is_sea_battle(game)
-                    && c.opponent(player_index) == get_pirates_player(game).index
-                {
+                if c.is_sea_battle(game) && c.opponent(p.index) == get_pirates_player(game).index {
                     Some(ResourceRewardRequest::new(
                         ResourceReward::sum(r.hits(CombatRole::Attacker), &[ResourceType::Gold]),
                         "-".to_string(),
@@ -34,45 +32,27 @@ pub(crate) fn pirates_round_bonus() -> Ability {
                     None
                 }
             },
-            |_game, s, _| {
-                vec![format!(
-                    "{} gained {} for destroying Pirate Ships",
-                    s.player_name, s.choice
-                )]
-            },
         )
         .build()
 }
 
 pub(crate) fn pirates_bonus() -> Ability {
-    Ability::builder(
-        "Barbarians bonus",
-        "Select a reward for fighting the Pirates",
-    )
-    .add_resource_request(
-        |event| &mut event.combat_end,
-        103,
-        |game, player_index, i| {
-            if i.opponent_player(player_index, game)
-                .civilization
-                .is_pirates()
-            {
-                Some(ResourceRewardRequest::new(
-                    ResourceReward::tokens(1),
-                    "Select a reward for fighting the Pirates".to_string(),
-                ))
-            } else {
-                None
-            }
-        },
-        |_game, s, _| {
-            vec![format!(
-                "{} gained {} for fighting the Pirates",
-                s.player_name, s.choice
-            )]
-        },
-    )
-    .build()
+    Ability::builder("Pirates battle", "Select a reward for fighting the Pirates")
+        .add_resource_request(
+            |event| &mut event.combat_end,
+            103,
+            |game, p, i| {
+                if i.opponent_player(p.index, game).civilization.is_pirates() {
+                    Some(ResourceRewardRequest::new(
+                        ResourceReward::tokens(1),
+                        "Select a reward for fighting the Pirates".to_string(),
+                    ))
+                } else {
+                    None
+                }
+            },
+        )
+        .build()
 }
 
 pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBuilder {
@@ -85,8 +65,8 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
         .add_incident_payment_request(
             IncidentTarget::AllPlayers,
             BASE_EFFECT_PRIORITY + 2,
-            |game, player_index, i| {
-                let player = game.player(player_index);
+            |game, p, i| {
+                let player = p.get(game);
                 if cities_with_adjacent_pirates(player, game).is_empty() {
                     return None;
                 }
@@ -97,7 +77,7 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
                     ));
                     Some(vec![PaymentRequest::mandatory(
                         PaymentOptions::sum(
-                            game.player(player_index),
+                            p.get(game),
                             PaymentReason::Incident,
                             1,
                             &ResourceType::all(),
@@ -106,7 +86,7 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
                     )])
                 } else {
                     let state = i.get_barbarian_state();
-                    state.must_reduce_mood.push(player_index);
+                    state.must_reduce_mood.push(p.index);
                     None
                 }
             },
@@ -117,16 +97,12 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
         .add_incident_position_request(
             IncidentTarget::AllPlayers,
             BASE_EFFECT_PRIORITY + 1,
-            |game, player_index, i| {
-                if !i
-                    .get_barbarian_state()
-                    .must_reduce_mood
-                    .contains(&player_index)
-                {
+            |game, p, i| {
+                if !i.get_barbarian_state().must_reduce_mood.contains(&p.index) {
                     return None;
                 }
 
-                let player = game.player(player_index);
+                let player = p.get(game);
                 let choices = cities_with_adjacent_pirates(player, game)
                     .into_iter()
                     .filter(|&pos| !matches!(player.get_city(pos).mood_state, MoodState::Angry))
@@ -163,8 +139,8 @@ fn remove_pirate_ships(builder: IncidentBuilder) -> IncidentBuilder {
     builder.add_units_request(
         |event| &mut event.incident,
         BASE_EFFECT_PRIORITY + 5,
-        |game, player_index, i| {
-            if !i.is_active(IncidentTarget::ActivePlayer, player_index) {
+        |game, p, i| {
+            if !i.is_active(IncidentTarget::ActivePlayer, p.index) {
                 return None;
             }
 
@@ -205,9 +181,9 @@ fn place_pirate_ship(builder: IncidentBuilder, priority: i32, blockade: bool) ->
     builder.add_incident_position_request(
         IncidentTarget::ActivePlayer,
         priority,
-        move |game, player_index, _i| {
+        move |game, p, _i| {
             let pirates = get_pirates_player(game).index;
-            let player = game.player(player_index);
+            let player = p.get(game);
             let mut sea_spaces = game
                 .map
                 .tiles

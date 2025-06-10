@@ -134,14 +134,14 @@ pub(crate) fn complete_objectives() -> Ability {
     .add_simple_persistent_event_listener(
         |event| &mut event.status_phase,
         0,
-        |game, player_index, _name, _s| {
-            let player = game.player(player_index);
+        |game, p, _s| {
+            let player = game.player(p.index);
             let opportunities = player
                 .objective_cards
                 .iter()
                 .flat_map(|o| status_phase_completable(game, player, *o))
                 .collect_vec();
-            present_objective_cards(game, player_index, opportunities);
+            present_objective_cards(game, p.index, opportunities);
         },
     )
     .build()
@@ -152,15 +152,12 @@ pub(crate) fn free_advance() -> Ability {
         .add_advance_request(
             |event| &mut event.status_phase,
             0,
-            |game, player_index, _player_name| {
+            |game, p, _| {
                 let choices = game
                     .cache
                     .get_advances()
                     .iter()
-                    .filter(|advance| {
-                        game.player(player_index)
-                            .can_advance_free(advance.advance, game)
-                    })
+                    .filter(|advance| p.get(game).can_advance_free(advance.advance, game))
                     .map(|a| a.advance)
                     .collect_vec();
                 Some(AdvanceRequest::new(choices))
@@ -188,9 +185,9 @@ pub(crate) fn draw_cards() -> Ability {
         .add_simple_persistent_event_listener(
             |event| &mut event.status_phase,
             0,
-            |game, p, _name, _s| {
-                gain_action_card_from_pile(game, p);
-                gain_objective_card_from_pile(game, p);
+            |game, p, _s| {
+                gain_action_card_from_pile(game, p.index);
+                gain_objective_card_from_pile(game, p.index);
             },
         )
         .build()
@@ -201,8 +198,8 @@ pub(crate) fn raze_city() -> Ability {
         .add_position_request(
             |event| &mut event.status_phase,
             0,
-            |game, player_index, _player_name| {
-                let player = game.player(player_index);
+            |game, p, _| {
+                let player = p.get(game);
                 let cities = player
                     .cities
                     .iter()
@@ -282,7 +279,8 @@ where
     a.add_payment_request_listener(
         event,
         1,
-        move |game, player_index, v| {
+        move |game, p, v| {
+            let player_index = p.index;
             set_paid(v, false);
 
             if !is_active_player(v, player_index, game) {
@@ -321,18 +319,18 @@ where
     .add_persistent_event_listener(
         event2,
         0,
-        move |game, player_index, _, v| {
-            if !is_active_player2(v, player_index, game) {
+        move |game, p, v| {
+            if !is_active_player2(v, p.index, game) {
                 return None;
             }
             has_paid(v).then_some(PersistentEventRequest::ChangeGovernment)
         },
-        move |game, player_index, player_name, action, request, _| {
+        move |game, p, action, request, _| {
             if let PersistentEventRequest::ChangeGovernment = &request {
                 if let EventResponse::ChangeGovernmentType(c) = action {
                     game.add_info_log_item(&format!(
-                        "{player_name} changed their government from {} to {}",
-                        game.players[player_index]
+                        "{p} changed their government from {} to {}",
+                        p.get(game)
                             .government(game)
                             .expect("player should have a government before changing it"),
                         c.new_government
@@ -348,7 +346,7 @@ where
                                 .join(", ")
                         }
                     ));
-                    change_government_type(game, player_index, &c);
+                    change_government_type(game, p.index, &c);
                     return;
                 }
             }
@@ -439,9 +437,9 @@ pub(crate) fn determine_first_player() -> Ability {
         .add_player_request(
             |event| &mut event.status_phase,
             0,
-            |game, player_index, phase| {
+            |game, p, phase| {
                 if let StatusPhaseState::DetermineFirstPlayer(want) = phase {
-                    (*want == player_index).then_some(PlayerRequest::new(
+                    (*want == p.index).then_some(PlayerRequest::new(
                         game.human_players(game.starting_player_index),
                         "Determine the first player",
                     ))

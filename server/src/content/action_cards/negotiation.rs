@@ -49,11 +49,11 @@ fn negotiations(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_player_request(
         |e| &mut e.play_action_card,
         0,
-        |game, player_index, _| {
+        |game, player, _| {
             Some(PlayerRequest::new(
                 game.players
                     .iter()
-                    .filter(|p| p.index != player_index && p.is_human())
+                    .filter(|p| p.index != player.index && p.is_human())
                     .map(|p| p.index)
                     .collect(),
                 "Select a player to negotiate with",
@@ -81,8 +81,8 @@ pub(crate) fn use_negotiations() -> Ability {
         .add_simple_persistent_event_listener(
             |e| &mut e.turn_start,
             1,
-            |game, player_index, player_name, ()| {
-                if let Some(negotiations_partner) = negotiations_partner(game, player_index) {
+            |game, p, ()| {
+                if let Some(negotiations_partner) = negotiations_partner(game, p.index) {
                     let partner_name = game.player_name(negotiations_partner);
 
                     let mut delete = Vec::new();
@@ -99,14 +99,12 @@ pub(crate) fn use_negotiations() -> Ability {
                     }
                     // must be in reverse order to not mess up the indices during deletion
                     for i in delete.iter().rev() {
-                        game.add_info_log_item(&format!(
-                            "{player_name} may attack {partner_name} again.",
-                        ));
+                        game.add_info_log_item(&format!("{p} may attack {partner_name} again.",));
                         game.permanent_effects.remove(*i);
                     }
                     for _ in remain {
                         game.add_info_log_item(&format!(
-                            "{player_name} may not attack {partner_name} this turn.",
+                            "{p} may not attack {partner_name} this turn.",
                         ));
                     }
                 }
@@ -137,8 +135,8 @@ fn leadership(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_simple_persistent_event_listener(
         |e| &mut e.play_action_card,
         0,
-        |game, _player_index, player_name, _| {
-            game.add_info_log_item(&format!("{player_name} used Leadership to gain an action."));
+        |game, p, _| {
+            game.add_info_log_item(&format!("{p} used Leadership to gain an action."));
             game.actions_left += 1;
         },
     )
@@ -158,9 +156,9 @@ fn assassination(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_player_request(
         |e| &mut e.play_action_card,
         0,
-        |game, player_index, _| {
+        |game, p, _| {
             Some(PlayerRequest::new(
-                opponents_not_affected_by_assassination(game, player_index),
+                opponents_not_affected_by_assassination(game, p.index),
                 "Select a player to assassinate",
             ))
         },
@@ -198,15 +196,13 @@ pub(crate) fn use_assassination() -> Ability {
         .add_simple_persistent_event_listener(
             |e| &mut e.turn_start,
             2,
-            |game, player_index, player_name, ()| {
-                if remove_element_by(&mut game.permanent_effects, |e| {
-                    is_assassinated(e, player_index)
-                })
-                .is_some()
+            |game, p, ()| {
+                if remove_element_by(&mut game.permanent_effects, |e| is_assassinated(e, p.index))
+                    .is_some()
                 {
                     game.actions_left -= 1;
                     game.add_info_log_item(&format!(
-                        "{player_name} has lost an action due to assassination."
+                        "{p} has lost an action due to assassination."
                     ));
                 }
             },
@@ -231,12 +227,12 @@ fn overproduction(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_simple_persistent_event_listener(
         |e| &mut e.play_action_card,
         0,
-        |game, _player_index, player_name, _| {
+        |game, p, _| {
             game.permanent_effects
                 .push(PermanentEffect::Collect(CollectEffect::Overproduction));
             game.actions_left += 1; // to offset the action spent for collecting
             game.add_info_log_item(&format!(
-                "{player_name} can use Overproduction to collect from 2 additional tiles."
+                "{p} can use Overproduction to collect from 2 additional tiles."
             ));
         },
     )

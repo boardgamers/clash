@@ -3,6 +3,7 @@ use crate::action_card::gain_action_card_from_pile;
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city_pieces::Building;
+use crate::content::ability::Ability;
 use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::content::persistent_events::PaymentRequest;
 use crate::objective_card::draw_and_log_objective_card_from_pile;
@@ -38,17 +39,20 @@ fn writing() -> AdvanceBuilder {
         game.player_mut(player_index).gained_objective =
             draw_and_log_objective_card_from_pile(game, player_index);
     })
-    .add_simple_persistent_event_listener(
-        |event| &mut event.construct,
-        3,
-        |game, player_index, _player_name, b| {
-            if matches!(b.building, Building::Academy) {
-                gain_resources(game, player_index, ResourcePile::ideas(2), |name, pile| {
-                    format!("{name} gained {pile} from Academy")
-                });
-            }
-        },
-    )
+}
+
+pub(crate) fn use_academy() -> Ability {
+    Ability::builder("Academy", "")
+        .add_simple_persistent_event_listener(
+            |event| &mut event.construct,
+            3,
+            |game, p, b| {
+                if b.building == Building::Academy {
+                    p.gain_resources(game, ResourcePile::ideas(2));
+                }
+            },
+        )
+        .build()
 }
 
 fn public_education() -> AdvanceBuilder {
@@ -61,7 +65,7 @@ fn public_education() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.collect_total,
         1,
-        |i, game, _| {
+        |i, game, _, _| {
             let city = game.get_any_city(i.city);
             if city.pieces.academy.is_some() {
                 once_per_turn_advance(
@@ -93,7 +97,7 @@ fn free_education() -> AdvanceBuilder {
     .add_payment_request_listener(
         |e| &mut e.advance,
         1,
-        |game, player_index, i| {
+        |game, p, i| {
             if i.advance == Advance::FreeEducation {
                 None
             } else if i.payment.has_at_least(&ResourcePile::gold(1))
@@ -101,7 +105,7 @@ fn free_education() -> AdvanceBuilder {
             {
                 Some(vec![PaymentRequest::optional(
                     PaymentOptions::resources(
-                        game.player(player_index),
+                        p.get(game),
                         PaymentReason::AdvanceAbility,
                         ResourcePile::ideas(1),
                     ),
@@ -144,7 +148,7 @@ fn philosophy() -> AdvanceBuilder {
     .add_simple_persistent_event_listener(
         |event| &mut event.advance,
         0,
-        |game, player_index, _, advance| {
+        |game, p, advance| {
             if game
                 .cache
                 .get_advance_group(AdvanceGroup::Science)
@@ -152,9 +156,7 @@ fn philosophy() -> AdvanceBuilder {
                 .iter()
                 .any(|a| a.advance == advance.advance)
             {
-                gain_resources(game, player_index, ResourcePile::ideas(1), |name, pile| {
-                    format!("{name} gained {pile} from Philosophy")
-                });
+                p.gain_resources(game, ResourcePile::ideas(1));
             }
         },
     )

@@ -1,7 +1,7 @@
 use crate::content::persistent_events::{PositionRequest, ResourceRewardRequest};
 use crate::incident::{Incident, IncidentBaseEffect, IncidentBuilder};
 use crate::payment::ResourceReward;
-use crate::player::{gain_resources, gain_unit};
+use crate::player::gain_unit;
 use crate::player_events::IncidentTarget;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
@@ -128,37 +128,29 @@ fn fantastic_years() -> Vec<Incident> {
 }
 
 fn good_year(mut builder: IncidentBuilder, amount: u8, good_year_type: &GoodYearType) -> Incident {
-    let n = builder.name.clone();
     let role = match good_year_type {
         GoodYearType::AllPlayers => IncidentTarget::AllPlayers,
         GoodYearType::Distribute | GoodYearType::ActivePlayer => IncidentTarget::ActivePlayer,
     };
 
-    builder = builder.add_incident_resource_request(
-        role,
-        10,
-        move |_game, _player_index, _incident| {
+    builder =
+        builder.add_incident_resource_request(role, 10, move |_game, _player_index, _incident| {
             Some(ResourceRewardRequest::new(
                 ResourceReward::sum(amount, &[ResourceType::Food]),
                 "-".to_string(),
             ))
-        },
-        move |_game, s| vec![format!("{} gained {} from {}", s.player_name, s.choice, n,)],
-    );
+        });
 
     if matches!(good_year_type, GoodYearType::Distribute) {
         for i in 0..amount {
-            let n = builder.name.clone();
-
             builder = builder.add_incident_player_request(
                 IncidentTarget::ActivePlayer,
                 "Select a player to gain 1 food",
                 |p, _, _| p.resources.food < p.resource_limit.food,
                 i as i32,
-                move |game, c, _| {
-                    gain_resources(game, c.choice, ResourcePile::food(1), |name, pile| {
-                        format!("{name} gained {pile} from {n}")
-                    });
+                move |game, s, _| {
+                    s.other_player(s.choice, game)
+                        .gain_resources(game, ResourcePile::food(1));
                 },
             );
         }
@@ -207,8 +199,8 @@ fn select_settler(b: IncidentBuilder, priority: i32, target: IncidentTarget) -> 
     b.add_incident_position_request(
         target,
         priority,
-        move |game, player_index, _| {
-            let p = game.player(player_index);
+        move |game, p, _| {
+            let p = p.get(game);
             if p.available_units().settlers > 0 {
                 let choices = p.cities.iter().map(|c| c.position).collect();
                 let needed = 1..=1;
@@ -238,41 +230,31 @@ pub(crate) fn successful_year() -> Incident {
         If everyone has the same number of cities, all players gain 1 food.",
         IncidentBaseEffect::PiratesSpawnAndRaid,
     )
-    .add_incident_resource_request(
-        IncidentTarget::AllPlayers,
-        0,
-        |game, player_index, _incident| {
-            let player_to_city_num = game
-                .players
-                .iter()
-                .filter_map(|p| p.is_human().then_some(p.cities.len()))
-                .collect::<Vec<_>>();
+    .add_incident_resource_request(IncidentTarget::AllPlayers, 0, |game, p, _incident| {
+        let player_to_city_num = game
+            .players
+            .iter()
+            .filter_map(|p| p.is_human().then_some(p.cities.len()))
+            .collect::<Vec<_>>();
 
-            let min_cities = player_to_city_num.iter().min().unwrap_or(&0);
-            let max_cities = player_to_city_num.iter().max().unwrap_or(&0);
-            if min_cities == max_cities {
-                return Some(ResourceRewardRequest::new(
-                    ResourceReward::sum(1, &[ResourceType::Food]),
-                    "-".to_string(),
-                ));
-            }
+        let min_cities = player_to_city_num.iter().min().unwrap_or(&0);
+        let max_cities = player_to_city_num.iter().max().unwrap_or(&0);
+        if min_cities == max_cities {
+            return Some(ResourceRewardRequest::new(
+                ResourceReward::sum(1, &[ResourceType::Food]),
+                "-".to_string(),
+            ));
+        }
 
-            let cities = game.players[player_index].cities.len();
-            if cities == *min_cities {
-                Some(ResourceRewardRequest::new(
-                    ResourceReward::sum((max_cities - min_cities) as u8, &[ResourceType::Food]),
-                    "-".to_string(),
-                ))
-            } else {
-                None
-            }
-        },
-        |_game, s| {
-            vec![format!(
-                "{} gained {} from A successful year",
-                s.player_name, s.choice
-            )]
-        },
-    )
+        let cities = p.get(game).cities.len();
+        if cities == *min_cities {
+            Some(ResourceRewardRequest::new(
+                ResourceReward::sum((max_cities - min_cities) as u8, &[ResourceType::Food]),
+                "-".to_string(),
+            ))
+        } else {
+            None
+        }
+    })
     .build()
 }

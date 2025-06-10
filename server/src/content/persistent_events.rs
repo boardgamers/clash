@@ -19,8 +19,7 @@ use crate::objective_card::{SelectObjectivesInfo, present_instant_objective_card
 use crate::payment::{PaymentOptions, ResourceReward};
 use crate::player::Player;
 use crate::player_events::{
-    IncidentInfo, OnAdvanceInfo, PersistentEvent, PersistentEventInfo, PersistentEvents,
-    trigger_event_with_game_value,
+    IncidentInfo, OnAdvanceInfo, PersistentEvent, PersistentEvents, trigger_event_with_game_value,
 };
 use crate::playing_actions::ActionPayment;
 use crate::position::Position;
@@ -442,14 +441,11 @@ where
     let event_index = game.events.len() - 1;
 
     for player_index in remaining_persistent_event_players(players, game.current_event()) {
-        let info = PersistentEventInfo {
-            player: player_index,
-        };
         trigger_event_with_game_value(
             game,
             player_index,
             move |e| event(&mut e.persistent),
-            &info,
+            &(),
             &(),
             &mut value,
         );

@@ -16,7 +16,7 @@ use crate::leader::{Leader, LeaderInfo, leader_position};
 use crate::leader_ability::{LeaderAbility, activate_leader_city, can_activate_leader_city};
 use crate::map::{block_has_player_city, get_map_setup};
 use crate::payment::PaymentConversion;
-use crate::player::{Player, gain_resources};
+use crate::player::Player;
 use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
@@ -41,11 +41,9 @@ fn study() -> SpecialAdvanceInfo {
     .add_simple_persistent_event_listener(
         |event| &mut event.recruit,
         3,
-        |game, player_index, _player_name, r| {
+        |game, p, r| {
             if game.get_any_city(r.city_position).pieces.academy.is_some() {
-                gain_resources(game, player_index, ResourcePile::ideas(1), |name, pile| {
-                    format!("{name} gained {pile} for Study")
-                });
+                p.gain_resources(game, ResourcePile::ideas(1));
             }
         },
     )
@@ -63,7 +61,7 @@ fn sparta() -> SpecialAdvanceInfo {
     .add_transient_event_listener(
         |event| &mut event.recruit_cost,
         0,
-        |cost, units, player| {
+        |cost, units, player, _| {
             if units.infantry > 0 {
                 cost.info
                     .log
@@ -82,9 +80,10 @@ fn sparta() -> SpecialAdvanceInfo {
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_round_start_allow_tactics,
         0,
-        |game, player, _name, r| {
-            let opponent = r.combat.opponent(player);
-            if r.combat.fighting_units(game, player) < r.combat.fighting_units(game, opponent) {
+        |game, player, r| {
+            let opponent = r.combat.opponent(player.index);
+            if r.combat.fighting_units(game, player.index) < r.combat.fighting_units(game, opponent)
+            {
                 update_combat_strength(
                     game,
                     opponent,
@@ -133,7 +132,8 @@ fn city_states() -> SpecialAdvanceInfo {
     .add_position_request(
         |event| &mut event.city_activation_mood_decreased,
         0,
-        |game, player_index, position| {
+        |game, p, position| {
+            let player_index = p.index;
             if game
                 .player_mut(player_index)
                 .event_info
@@ -250,10 +250,10 @@ fn use_idol(b: AbilityBuilder) -> AbilityBuilder {
         |event| &mut event.custom_action,
         0,
         |game, player, _| {
-            activate_leader_city(game, player, "use Idol.");
+            activate_leader_city(game, player.index, "use Idol.");
 
             Some(HandCardsRequest::new(
-                idol_cards(game, game.player(player), &ResourcePile::empty()),
+                idol_cards(game, player.get(game), &ResourcePile::empty()),
                 1..=1,
                 "Select an action card to play as a free action using Idol",
             ))
@@ -309,14 +309,9 @@ fn leonidas() -> LeaderInfo {
         .add_simple_persistent_event_listener(
             |event| &mut event.recruit,
             4,
-            |game, player_index, _player_name, r| {
-                if leader_position(game.player(player_index)) == r.city_position {
-                    gain_resources(
-                        game,
-                        player_index,
-                        ResourcePile::culture_tokens(1),
-                        |name, pile| format!("{name} gained {pile} for That's Sparta"),
-                    );
+            |game, p, r| {
+                if leader_position(p.get(game)) == r.city_position {
+                    p.gain_resources(game, ResourcePile::culture_tokens(1));
                 }
             },
         )

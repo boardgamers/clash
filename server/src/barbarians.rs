@@ -63,11 +63,12 @@ impl BarbariansEventState {
 }
 
 pub(crate) fn barbarians_bonus() -> Ability {
-    Ability::builder("Barbarians bonus", "-")
+    Ability::builder("Barbarian battle", "-")
         .add_resource_request(
             |event| &mut event.combat_end,
             105,
-            |game, player, i| {
+            |game, p, i| {
+                let player = p.index;
                 if i.is_winner(player)
                     && i.opponent_player(player, game).civilization.is_barbarian()
                 {
@@ -86,12 +87,6 @@ pub(crate) fn barbarians_bonus() -> Ability {
                 } else {
                     None
                 }
-            },
-            |_game, s, _| {
-                vec![format!(
-                    "{} gained {} for winning a combat against the Barbarians",
-                    s.player_name, s.choice
-                )]
             },
         )
         .build()
@@ -160,8 +155,8 @@ where
     b.add_unit_type_request(
         event,
         prio,
-        move |game, player_index, v| {
-            if !filter(game, player_index, v) {
+        move |game, p, v| {
+            if !filter(game, p.index, v) {
                 return None;
             }
 
@@ -237,7 +232,7 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
     builder = add_barbarians_city(builder, event_name).add_simple_incident_listener(
         IncidentTarget::ActivePlayer,
         BASE_EFFECT_PRIORITY + 99,
-        |game, _, _, i| {
+        |game, _, i| {
             let movable = get_movable_units(game, i.active_player, i.get_barbarian_state());
             if movable.is_empty() {
                 return;
@@ -252,12 +247,12 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
             .add_incident_position_request(
                 IncidentTarget::ActivePlayer,
                 BASE_EFFECT_PRIORITY + (army * 2) + 2,
-                |game, player_index, i| {
+                |game, p, i| {
                     if !i.get_barbarian_state().move_units {
                         return None;
                     }
 
-                    let armies = get_movable_units(game, player_index, i.get_barbarian_state());
+                    let armies = get_movable_units(game, p.index, i.get_barbarian_state());
                     let needed = 1..=1;
                     Some(PositionRequest::new(
                         armies,
@@ -272,12 +267,12 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
             .add_incident_position_request(
                 IncidentTarget::ActivePlayer,
                 BASE_EFFECT_PRIORITY + (army * 2) + 1,
-                |game, player_index, i| {
+                |game, p, i| {
                     let state = i.barbarians.as_mut().expect("barbarians should exist");
                     if let Some(army) = state.selected_position {
                         let choices = barbarian_march_steps(
                             game,
-                            game.player(player_index),
+                            game.player(p.index),
                             army,
                             0, // stack size was already checked in last step
                         );
@@ -318,11 +313,11 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
     builder.add_simple_incident_listener(
         IncidentTarget::ActivePlayer,
         BASE_EFFECT_PRIORITY,
-        |game, player, _, i| {
+        |game, player, i| {
             let s = i.get_barbarian_state();
-            if s.move_units && get_movable_units(game, player, s).is_empty() {
+            if s.move_units && get_movable_units(game, player.index, s).is_empty() {
                 // after all moves are done
-                reinforce_after_move(game, player);
+                reinforce_after_move(game, player.index);
                 // clear movement restrictions
                 end_turn(game, get_barbarians_player(game).index);
             }
@@ -404,11 +399,11 @@ pub(crate) fn set_info(
     builder.add_simple_incident_listener(
         IncidentTarget::ActivePlayer,
         BASE_EFFECT_PRIORITY + 200,
-        move |game, player, _, i| {
+        move |game, player, i| {
             if play_base_effect(i) && i.barbarians.is_none() {
                 game.add_info_log_item(&format!("Base effect: {name}"));
                 let mut state = BarbariansEventState::new();
-                init(&mut state, game, player);
+                init(&mut state, game, player.index);
                 i.barbarians = Some(state);
             }
         },
@@ -419,12 +414,12 @@ fn add_barbarians_city(builder: IncidentBuilder, event_name: &'static str) -> In
     builder.add_incident_position_request(
         IncidentTarget::ActivePlayer,
         BASE_EFFECT_PRIORITY + 100,
-        move |game, player_index, i| {
+        move |game, p, i| {
             if i.get_barbarian_state().move_units {
                 return None;
             }
 
-            let choices = possible_barbarians_spawns(game, game.player(player_index));
+            let choices = possible_barbarians_spawns(game, game.player(p.index));
             if choices.is_empty() {
                 game.add_info_log_item("Barbarians cannot spawn a new city");
             }

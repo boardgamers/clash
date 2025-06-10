@@ -11,7 +11,7 @@ use crate::content::tactics_cards::{
 };
 use crate::game::Game;
 use crate::payment::{PaymentOptions, PaymentReason};
-use crate::player::{Player, gain_resources};
+use crate::player::Player;
 use crate::playing_actions::ActionCost;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
@@ -48,12 +48,7 @@ fn advance(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_advance_request(
         |e| &mut e.play_action_card,
         0,
-        |game, player, _| {
-            Some(AdvanceRequest::new(possible_advances(
-                game.player(player),
-                game,
-            )))
-        },
+        |game, p, _| Some(AdvanceRequest::new(possible_advances(p.get(game), game))),
         |game, sel, _| {
             let advance = sel.choice;
             gain_advance_without_payment(
@@ -95,10 +90,10 @@ fn inspiration(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_advance_request(
         |e| &mut e.play_action_card,
         0,
-        |game, player, _| {
+        |game, p, _| {
             Some(AdvanceRequest::new(possible_inspiration_advances(
                 game,
-                game.player(player),
+                p.get(game),
             )))
         },
         |game, sel, _| {
@@ -177,8 +172,8 @@ fn hero_general(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     b = b.add_payment_request_listener(
         |e| &mut e.play_action_card,
         1,
-        |game, player, _| {
-            let p = game.player(player);
+        |game, p, _| {
+            let p = p.get(game);
             if cities_where_mood_can_increase(p).is_empty() {
                 return None;
             }
@@ -212,11 +207,11 @@ fn increase_mood(b: ActionCardBuilder, priority: i32, need_payment: bool) -> Act
     b.add_position_request(
         |e| &mut e.play_action_card,
         priority,
-        move |game, player, a| {
+        move |game, p, a| {
             if need_payment && a.answer.is_none() {
                 return None;
             }
-            let choices = cities_where_mood_can_increase(game.player(player));
+            let choices = cities_where_mood_can_increase(p.get(game));
             let needed = 1..=1;
             Some(PositionRequest::new(
                 choices,
@@ -259,13 +254,8 @@ fn ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_simple_persistent_event_listener(
         |e| &mut e.play_action_card,
         0,
-        |game, player, _, _| {
-            gain_resources(
-                game,
-                player,
-                ResourcePile::ideas(academies(game.player(player))),
-                |name, pile| format!("{name} gained {pile} for Ideas"),
-            );
+        |game, p, _| {
+            p.gain_resources(game, ResourcePile::ideas(academies(p.get(game))));
         },
     )
     .build()
@@ -294,10 +284,8 @@ fn great_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_simple_persistent_event_listener(
         |e| &mut e.play_action_card,
         0,
-        |game, player, _, _| {
-            gain_resources(game, player, ResourcePile::ideas(2), |name, pile| {
-                format!("{name} gained {pile} for Great Ideas")
-            });
+        |game, player, _| {
+            player.gain_resources(game, ResourcePile::ideas(2));
         },
     )
     .build()

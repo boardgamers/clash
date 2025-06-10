@@ -7,7 +7,6 @@ use crate::content::custom_actions::CustomActionType::{
     CivilLiberties, FreeEconomyCollect, VotingIncreaseHappiness,
 };
 use crate::log::current_player_turn_log;
-use crate::player::gain_resources;
 use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::resource_pile::ResourcePile;
 
@@ -50,7 +49,7 @@ fn separation_of_power() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.on_influence_culture_attempt,
         2,
-        |r, city, _| {
+        |r, city, _, _| {
             if let Ok(info) = r {
                 if matches!(city.mood_state, MoodState::Happy) {
                     info.set_no_boost();
@@ -74,13 +73,8 @@ fn civil_liberties() -> AdvanceBuilder {
             b.add_simple_persistent_event_listener(
                 |event| &mut event.custom_action,
                 0,
-                |game, player_index, _, _| {
-                    gain_resources(
-                        game,
-                        player_index,
-                        ResourcePile::mood_tokens(3),
-                        |name, pile| format!("{name} used Civil Liberties to gain {pile}",),
-                    );
+                |game, p, _| {
+                    p.gain_resources(game, ResourcePile::mood_tokens(3));
                 },
             )
         },
@@ -107,27 +101,25 @@ fn free_economy() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.is_playing_action_available,
         0,
-        |available, game, i| {
-            let p = game.player(i.player);
-            match &i.action_type {
-                PlayingActionType::Collect
-                    if p.played_once_per_turn_actions.contains(&FreeEconomyCollect) =>
-                {
-                    *available =
-                        Err("Cannot collect when Free Economy Collect was used".to_string());
-                }
-                PlayingActionType::Custom(i)
-                    if *i == FreeEconomyCollect
-                        && current_player_turn_log(game).items.iter().any(|item| {
-                            matches!(&item.action, Action::Playing(PlayingAction::Collect(c)) if
-                                c.action_type == PlayingActionType::Collect)
-                        }) =>
-                {
-                    *available =
-                        Err("Cannot use Free Economy Collect when Collect was used".to_string());
-                }
-                _ => {}
+        |available, game, t, p| match t {
+            PlayingActionType::Collect
+                if p.get(game)
+                    .played_once_per_turn_actions
+                    .contains(&FreeEconomyCollect) =>
+            {
+                *available = Err("Cannot collect when Free Economy Collect was used".to_string());
             }
+            PlayingActionType::Custom(i)
+                if *i == FreeEconomyCollect
+                    && current_player_turn_log(game).items.iter().any(|item| {
+                        matches!(&item.action, Action::Playing(PlayingAction::Collect(c)) if
+                                c.action_type == PlayingActionType::Collect)
+                    }) =>
+            {
+                *available =
+                    Err("Cannot use Free Economy Collect when Collect was used".to_string());
+            }
+            _ => {}
         },
     )
 }

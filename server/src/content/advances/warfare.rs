@@ -49,7 +49,7 @@ fn siegecraft() -> AdvanceBuilder {
         |e| &mut e.combat_start,
         0,
         |game, player, c| {
-            let p = game.player(player);
+            let p = player.get(game);
             let extra_die = PaymentOptions::sum(
                 p,
                 PaymentReason::AdvanceAbility,
@@ -63,7 +63,7 @@ fn siegecraft() -> AdvanceBuilder {
                 &[ResourceType::Ore, ResourceType::Gold],
             );
 
-            let player = &game.players[player];
+            let player = player.get(game);
             if game
                 .try_get_any_city(c.defender_position())
                 .is_some_and(|c| c.pieces.fortress.is_some())
@@ -130,8 +130,9 @@ fn steel_weapons() -> AdvanceBuilder {
     .add_payment_request_listener(
         |e| &mut e.combat_start,
         1,
-        |game, player_index, c| {
-            let player = &game.players[player_index];
+        |game, p, c| {
+            let player_index = p.index;
+            let player = p.get(game);
 
             let cost = steel_weapons_cost(game, c, player_index);
             if cost.is_free() {
@@ -170,7 +171,7 @@ fn draft() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.recruit_cost,
         2,
-        |cost, units, player| {
+        |cost, units, player, _| {
             if units.infantry > 0 {
                 // insert at beginning so that it's preferred over gold
 

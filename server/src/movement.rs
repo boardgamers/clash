@@ -138,7 +138,7 @@ pub(crate) fn move_units(
 ) {
     let p = game.player(player_index);
     let from = p.get_unit(units[0]).position;
-    let info = MoveInfo::new(player_index, units.to_vec(), from, to);
+    let info = MoveInfo::new(units.to_vec(), from, to);
     game.trigger_transient_event_with_game_value(player_index, |e| &mut e.before_move, &info, &());
 
     let mut ask_conversion = vec![]; // from ship construction

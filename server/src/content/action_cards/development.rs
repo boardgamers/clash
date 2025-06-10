@@ -47,7 +47,7 @@ fn city_development(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_simple_persistent_event_listener(
         |e| &mut e.play_action_card,
         0,
-        |game, _player, _name, _| {
+        |game, _player, _| {
             game.permanent_effects
                 .push(PermanentEffect::Construct(ConstructEffect::CityDevelopment));
             game.actions_left += 1; // to offset the action spent for building
@@ -73,7 +73,7 @@ fn production_focus(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_simple_persistent_event_listener(
         |e| &mut e.play_action_card,
         0,
-        |game, _player, _name, _| {
+        |game, _player, _| {
             game.permanent_effects
                 .push(PermanentEffect::Collect(CollectEffect::ProductionFocus));
             game.actions_left += 1; // to offset the action spent for collecting
@@ -101,13 +101,12 @@ pub(crate) fn collect_only() -> Ability {
         .add_transient_event_listener(
             |event| &mut event.is_playing_action_available,
             4,
-            |available, game, i| {
-                let p = game.player(i.player);
+            |available, game, t, p| {
                 if game
                     .permanent_effects
                     .iter()
                     .any(|e| matches!(e, &PermanentEffect::Collect(_)))
-                    && !is_base_or_modifier(&i.action_type, p, &PlayingActionType::Collect)
+                    && !is_base_or_modifier(t, p.get(game), &PlayingActionType::Collect)
                 {
                     *available = Err("You may only collect.".to_string());
                 }
@@ -116,7 +115,7 @@ pub(crate) fn collect_only() -> Ability {
         .add_transient_event_listener(
             |event| &mut event.collect_options,
             2,
-            |c, _context, game| {
+            |c, _context, game, _| {
                 if game
                     .permanent_effects
                     .iter()
@@ -136,7 +135,7 @@ pub(crate) fn collect_only() -> Ability {
         .add_simple_persistent_event_listener(
             |event| &mut event.collect,
             2,
-            |game, _, _, _| {
+            |game, _, _| {
                 remove_element_by(&mut game.permanent_effects, |e| {
                     matches!(e, &PermanentEffect::Collect(_))
                 });
@@ -164,8 +163,8 @@ fn explorer(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         .add_position_request(
             |e| &mut e.play_action_card,
             0,
-            |game, player_index, _| {
-                let p = game.player(player_index);
+            |game, p, _| {
+                let p = p.get(game);
                 if p.available_units().settlers == 0 {
                     return None;
                 }

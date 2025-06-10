@@ -9,7 +9,7 @@ use crate::incident::{
     DecreaseMood, Incident, IncidentBaseEffect, IncidentBuilder, MoodModifier, decrease_mod_and_log,
 };
 use crate::payment::{PaymentConversion, PaymentConversionType, PaymentOptions, PaymentReason};
-use crate::player::{Player, gain_resources};
+use crate::player::Player;
 use crate::player_events::IncidentTarget;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
@@ -72,8 +72,8 @@ fn civil_war(id: u8) -> Incident {
     .add_incident_position_request(
         IncidentTarget::ActivePlayer,
         0,
-        |game, player_index, i| {
-            let p = game.player(player_index);
+        |game, p, i| {
+            let p = p.get(game);
             let suffix = if !city::non_angry_cites(p).is_empty() && i.player.payment.is_empty() {
                 " and decrease the mood"
             } else {
@@ -136,9 +136,9 @@ fn revolution() -> Incident {
         "Kill a unit to avoid losing an action",
         |game, _player| can_lose_action(game),
     );
-    b = b.add_simple_incident_listener(IncidentTarget::ActivePlayer, 2, |game, player, _, i| {
+    b = b.add_simple_incident_listener(IncidentTarget::ActivePlayer, 2, |game, player, i| {
         if can_lose_action(game) && i.player.sacrifice == 0 {
-            lose_action(game, player);
+            lose_action(game, player.index);
         }
     });
     b = kill_unit_for_revolution(
@@ -168,18 +168,18 @@ fn kill_unit_for_revolution(
     b.add_incident_units_request(
         IncidentTarget::ActivePlayer,
         priority,
-        move |game, player_index, i| {
+        move |game, p, i| {
             i.player.sacrifice = 0;
-            let units = game
-                .player(player_index)
+            let units = p
+                .get(game)
                 .units
                 .iter()
                 .filter(|u| u.is_army_unit())
                 .map(|u| u.id)
                 .collect_vec();
             Some(UnitsRequest::new(
-                player_index,
-                if pred(game, game.player(player_index)) {
+                p.index,
+                if pred(game, p.get(game)) {
                     units
                 } else {
                     vec![]
@@ -225,8 +225,8 @@ fn uprising() -> Incident {
     .add_incident_payment_request(
         IncidentTarget::ActivePlayer,
         0,
-        |game, player_index, _incident| {
-            let player = game.player(player_index);
+        |game, p, _incident| {
+            let player = p.get(game);
             let mut cost = PaymentOptions::tokens(player, PaymentReason::Incident, 4);
             cost.conversions.push(PaymentConversion::new(
                 vec![
@@ -243,11 +243,11 @@ fn uprising() -> Incident {
                     "Pay 1-4 mood or culture tokens",
                 )])
         },
-        |game, s, i| {
+        |game, s, _| {
             let player = game.player_mut(s.player_index);
             let pile = &s.choice[0];
             let v = pile.amount() as f32 / 2_f32;
-            player.gain_event_victory_points(v, &i.origin());
+            player.gain_event_victory_points(v, &s.origin);
             game.add_info_log_item(&format!(
                 "{} paid {} to gain {} victory point{}",
                 s.player_name,
@@ -270,12 +270,10 @@ fn envoy() -> Incident {
         This card can be taken by anyone instead of drawing from the wonder pile.",
         IncidentBaseEffect::BarbariansMove,
     )
-    .add_simple_incident_listener(IncidentTarget::ActivePlayer, 1, |game, player, _, _| {
-        gain_resources(
+    .add_simple_incident_listener(IncidentTarget::ActivePlayer, 1, |game, player, _| {
+        player.gain_resources(
             game,
-            player,
             ResourcePile::ideas(1) + ResourcePile::culture_tokens(1),
-            |name, pile| format!("{name} gained {pile} for Envoy event"),
         );
 
         draw_public_wonder(game);
@@ -286,12 +284,8 @@ fn envoy() -> Incident {
         |_p, _, _| true,
         0,
         |game, s, _| {
-            gain_resources(
-                game,
-                s.choice,
-                ResourcePile::culture_tokens(1),
-                |name, pile| format!("{name} gained {pile} for Envoy event"),
-            );
+            s.other_player(s.choice, game)
+                .gain_resources(game, ResourcePile::culture_tokens(1));
         },
     )
     .build()

@@ -182,9 +182,10 @@ pub(crate) fn siege(id: u8) -> TacticsCard {
     .add_payment_request_listener(
         |event| &mut event.combat_round_start_tactics,
         0,
-        move |game, player, s| {
+        move |game, p, s| {
+            let player = p.index;
             if s.is_active(player, id, TacticsCardTarget::Opponent) {
-                let p = game.player(player);
+                let p = p.get(game);
                 let cost = PaymentOptions::resources(
                     p,
                     PaymentReason::AdvanceAbility,
@@ -267,7 +268,7 @@ pub(crate) fn tactical_retreat(id: u8) -> TacticsCard {
         |event| &mut event.combat_round_start_tactics,
         0,
         move |game, p, s| {
-            (p == s.combat.defender()).then_some(PositionRequest::new(
+            (p.index == s.combat.defender()).then_some(PositionRequest::new(
                 tactical_retreat_targets(&s.combat, game),
                 1..=1,
                 "Select a position to withdraw to",
@@ -324,17 +325,17 @@ pub(crate) fn scout(id: u8) -> TacticsCard {
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_round_start_reveal_tactics,
         0,
-        move |game, p, name, s| {
-            if s.is_active(p, id, TacticsCardTarget::ActivePlayer) {
+        move |game, p, s| {
+            if s.is_active(p.index, id, TacticsCardTarget::ActivePlayer) {
                 update_combat_strength(
                     game,
-                    s.combat.opponent(p),
+                    s.combat.opponent(p.index),
                     s,
                     |game, _combat, st, _role| {
                         if let Some(tactics_card) = st.tactics_card.take() {
-                            gain_action_card(game, p, tactics_card);
+                            gain_action_card(game, p.index, tactics_card);
                             game.add_info_log_item(&format!(
-                                "{name} ignores the enemy tactics {} and takes \
+                                "{p} ignores the enemy tactics {} and takes \
                                     it to their hand using Scout",
                                 game.cache
                                     .get_action_card(tactics_card)
@@ -345,7 +346,7 @@ pub(crate) fn scout(id: u8) -> TacticsCard {
                             ));
                         } else {
                             game.add_info_log_item(&format!(
-                                "{name} cannot use Scout - opponent didn't play a tactics card",
+                                "{p} cannot use Scout - opponent didn't play a tactics card",
                             ));
                         }
                     },
@@ -369,8 +370,8 @@ pub(crate) fn martyr(id: u8) -> TacticsCard {
         0,
         move |game, p, s| {
             Some(UnitsRequest::new(
-                p,
-                s.combat.fighting_units(game, p),
+                p.index,
+                s.combat.fighting_units(game, p.index),
                 1..=1,
                 "Select a unit to sacrifice",
             ))
@@ -394,11 +395,11 @@ pub(crate) fn martyr(id: u8) -> TacticsCard {
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_round_start_reveal_tactics,
         0,
-        move |game, p, name, s| {
-            if s.is_active(p, id, TacticsCardTarget::Opponent) {
-                update_combat_strength(game, p, s, |game, _combat, st, _role| {
+        move |game, p, s| {
+            if s.is_active(p.index, id, TacticsCardTarget::Opponent) {
+                update_combat_strength(game, p.index, s, |game, _combat, st, _role| {
                     game.add_info_log_item(&format!(
-                        "{name} cannot use their tactics card using Martyr \
+                        "{p} cannot use their tactics card using Martyr \
                             (but it is still discarded)",
                     ));
                     st.tactics_card = None;
@@ -420,7 +421,7 @@ pub(crate) fn archers(id: u8) -> TacticsCard {
         |event| &mut event.combat_round_start_tactics,
         0,
         move |game, p, s| {
-            if !s.is_active(p, id, TacticsCardTarget::Opponent) {
+            if !s.is_active(p.index, id, TacticsCardTarget::Opponent) {
                 return None;
             }
 
@@ -433,8 +434,8 @@ pub(crate) fn archers(id: u8) -> TacticsCard {
             }
 
             Some(UnitsRequest::new(
-                p,
-                s.combat.fighting_units(game, p),
+                p.index,
+                s.combat.fighting_units(game, p.index),
                 1..=1,
                 "Select a unit to sacrifice for Archers",
             ))

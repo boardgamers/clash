@@ -58,9 +58,9 @@ fn use_bartering(b: AbilityBuilder) -> AbilityBuilder {
     b.add_hand_card_request(
         |event| &mut event.custom_action,
         1,
-        |game, player_index, _| {
+        |game, p, _| {
             Some(HandCardsRequest::new(
-                all_action_hand_cards(game.player(player_index)),
+                all_action_hand_cards(p.get(game)),
                 1..=1,
                 "Select an action card to discard",
             ))
@@ -85,12 +85,6 @@ fn use_bartering(b: AbilityBuilder) -> AbilityBuilder {
                 ResourceReward::sum(1, &[ResourceType::Gold, ResourceType::CultureTokens]),
                 "Select a resource to gain".to_string(),
             ))
-        },
-        |_game, s, _| {
-            vec![format!(
-                "{} gained {} for discarding an action card",
-                s.player_name, s.choice
-            )]
         },
     )
 }
@@ -119,18 +113,12 @@ pub(crate) fn use_taxes(b: AbilityBuilder) -> AbilityBuilder {
     b.add_resource_request(
         |event| &mut event.custom_action,
         0,
-        |game, player_index, _| {
-            let options = tax_options(game.player(player_index));
+        |game, p, _| {
+            let options = tax_options(p.get(game));
             Some(ResourceRewardRequest::new(
                 options,
                 "Select a resource to gain".to_string(),
             ))
-        },
-        |_game, s, _| {
-            vec![format!(
-                "{} gained {} for using Taxes",
-                s.player_name, s.choice
-            )]
         },
     )
 }
@@ -167,14 +155,11 @@ where
     S: AbilityInitializerSetup,
     V: Clone + PartialEq,
 {
-    b.add_resource_request(
+    b.add_resource_request_with_response(
         event,
         0,
-        |game, player_index, _| {
-            if !game
-                .player(player_index)
-                .can_use_advance(Advance::TradeRoutes)
-            {
+        |game, p, _| {
+            if !p.get(game).can_use_advance(Advance::TradeRoutes) {
                 return None;
             }
 
@@ -185,7 +170,6 @@ where
         },
         |game, s, _| {
             let (_, routes) = trade_route_reward(game).expect("No trade route reward");
-            let p = game.player(s.player_index);
             let log = trade_route_log(
                 game,
                 s.player_index,
@@ -193,10 +177,13 @@ where
                 &s.choice,
                 s.actively_selected,
             );
+            for l in &log {
+                game.add_info_log_item(l);
+            }
+            let p = game.player(s.player_index);
             if p.has_special_advance(SpecialAdvance::Raiding) {
                 add_raid_bonus(game, p.index, &routes);
             }
-            log
         },
     )
 }

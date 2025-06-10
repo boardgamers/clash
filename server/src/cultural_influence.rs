@@ -7,6 +7,7 @@ use crate::content::ability::Ability;
 use crate::content::persistent_events::{
     PaymentRequest, PersistentEventType, SelectedStructure, Structure,
 };
+use crate::events::EventPlayer;
 use crate::game::Game;
 use crate::log::{current_player_turn_log, modifier_suffix};
 use crate::payment::{PaymentOptions, PaymentReason};
@@ -163,10 +164,10 @@ pub(crate) fn use_cultural_influence() -> Ability {
         .add_payment_request_listener(
             |e| &mut e.influence_culture,
             2,
-            |game, player_index, info| {
+            |game, p, info| {
                 let cost = &info.range_boost_cost;
                 if cost.is_free() {
-                    info.roll_boost_cost = range_boost_paid(game, info, player_index);
+                    info.roll_boost_cost = range_boost_paid(game, info, p.index);
                     return None;
                 }
 
@@ -231,7 +232,7 @@ fn roll_boost_paid(
 
 fn roll_boost_payment(
     game: &mut Game,
-    player_index: usize,
+    p: &EventPlayer,
     info: &mut InfluenceCultureInfo,
 ) -> Option<Vec<PaymentRequest>> {
     let cost = &info.roll_boost_cost;
@@ -239,20 +240,19 @@ fn roll_boost_payment(
         return None;
     }
 
-    let name = game.player_name(player_index);
     let roll = info.roll;
-    if !game.player(player_index).can_afford(cost) {
+    if !p.get(game).can_afford(cost) {
         game.add_info_log_item(&format!(
-            "{name} rolled a {roll} and does not have enough resources to increase the roll",
+            "{p} rolled a {roll} and does not have enough resources to increase the roll",
         ));
         info.info.execute(game);
-        attempt_failed(game, player_index, info.position);
+        attempt_failed(game, p.index, info.position);
         return None;
     }
 
     info.info.execute(game);
     game.add_info_log_item(&format!(
-        "{name} rolled a {roll} and now has the option to pay {cost} to \
+        "{p} rolled a {roll} and now has the option to pay {cost} to \
                 increase the dice roll and proceed with the cultural influence",
     ));
 

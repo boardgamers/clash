@@ -1,4 +1,4 @@
-use crate::ability_initializer::{AbilityInitializerSetup, SelectedChoice};
+use crate::ability_initializer::SelectedChoice;
 use crate::city::{City, MoodState};
 use crate::city_pieces::{Building, remove_building};
 use crate::content::persistent_events::{
@@ -38,9 +38,8 @@ fn volcano() -> Incident {
     .add_incident_position_request(
         IncidentTarget::ActivePlayer,
         0,
-        |game, player_index, _incident| {
-            let p = game.player(player_index);
-            let cities = p.cities.iter().map(|c| c.position).collect_vec();
+        |game, p, _incident| {
+            let cities = p.get(game).cities.iter().map(|c| c.position).collect_vec();
             let needed = 1..=1;
             (cities.len() >= 4).then_some(PositionRequest::new(
                 cities,
@@ -48,7 +47,7 @@ fn volcano() -> Incident {
                 "Select a city to be destroyed",
             ))
         },
-        |game, s, i| {
+        |game, s, _| {
             let pos = s.choice[0];
             let player_index = s.player_index;
             game.add_info_log_item(&format!(
@@ -59,11 +58,11 @@ fn volcano() -> Incident {
             let buildings = city.pieces.buildings(None);
             let wonders = city.pieces.wonders.iter().copied().collect_vec();
             for b in buildings {
-                destroy_building(game, b, pos, &i.origin());
+                destroy_building(game, b, pos, &s.origin);
             }
             for wonder in wonders {
-                destroy_wonder(game, pos, wonder, &i.origin());
-                destroy_city_center(game, pos, &i.origin());
+                destroy_wonder(game, pos, wonder, &s.origin);
+                destroy_city_center(game, pos, &s.origin);
             }
         },
     )
@@ -71,7 +70,7 @@ fn volcano() -> Incident {
 }
 
 fn earthquake(id: u8, name: &str, target: IncidentTarget) -> Incident {
-    let b = Incident::builder(
+    Incident::builder(
         id,
         name,
         "If you have at least 3 cities: \
@@ -82,18 +81,16 @@ fn earthquake(id: u8, name: &str, target: IncidentTarget) -> Incident {
                       The city center and buildings are worth 2 points each \
                       (according to the last owner), wonders as usual.",
         IncidentBaseEffect::None,
-    );
-    let event_origin = b.get_key();
-    b.add_incident_structures_request(
+    )
+    .add_incident_structures_request(
         target,
         11,
-        |game, player_index, _incident| {
-            let p = game.player(player_index);
-            let cities = &p.cities;
+        |game, p, _incident| {
+            let cities = &p.get(game).cities;
             (cities.len() >= 3).then_some(structures_request(cities))
         },
         move |game, s, i| {
-            apply_earthquake(game, s, i, &event_origin);
+            apply_earthquake(game, s, i, &s.origin);
         },
     )
     .add_decrease_mood(

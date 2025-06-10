@@ -14,7 +14,7 @@ use crate::content::tactics_cards::{
 };
 use crate::game::Game;
 use crate::objective_card::{deinit_objective_card, gain_objective_card};
-use crate::player::{Player, gain_resources, gain_unit};
+use crate::player::{Player, gain_unit};
 use crate::playing_actions::ActionCost;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
@@ -52,10 +52,10 @@ fn new_plans(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_hand_card_request(
         |e| &mut e.play_action_card,
         0,
-        |game, player_index, _| {
+        |game, p, _| {
             game.information_revealed();
             let mut new_cards = game.objective_cards_left.iter().take(2).collect_vec();
-            new_cards.extend(&game.player(player_index).objective_cards);
+            new_cards.extend(&p.get(game).objective_cards);
             Some(HandCardsRequest::new(
                 new_cards
                     .iter()
@@ -154,7 +154,7 @@ fn synergies(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         3,
         |game, p, _| {
             Some(AdvanceRequest::new(categories_with_2_affordable_advances(
-                game.player(p),
+                p.get(game),
                 game,
             )))
         },
@@ -182,7 +182,7 @@ fn synergies(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                     .expect("Advance group not found")
                     .advances
                     .iter()
-                    .filter(|a| game.player(p).can_advance(a.advance, game))
+                    .filter(|a| p.get(game).can_advance(a.advance, game))
                     .map(|a| a.advance)
                     .collect_vec(),
             ))
@@ -206,8 +206,8 @@ fn pay_for_advance(b: ActionCardBuilder, priority: i32) -> ActionCardBuilder {
     b.add_payment_request_listener(
         |e| &mut e.play_action_card,
         priority,
-        |game, player_index, i| {
-            let p = game.player(player_index);
+        |game, player, i| {
+            let p = player.get(game);
             let advance = i.selected_advance.expect("advance not found");
             Some(vec![PaymentRequest::mandatory(
                 p.advance_cost(advance, game, game.execute_cost_trigger())
@@ -287,7 +287,8 @@ pub(crate) fn use_teach_us() -> Ability {
     .add_hand_card_request(
         |e| &mut e.combat_end,
         91,
-        |game, player, s| {
+        |game, p, s| {
+            let player = p.index;
             s.selected_card = None;
             if s.is_winner(player)
                 && s.battleground.is_city()
@@ -324,8 +325,8 @@ pub(crate) fn use_teach_us() -> Ability {
         |game, player, e| {
             e.selected_card.map(|_| {
                 AdvanceRequest::new(teachable_advances(
-                    e.opponent_player(player, game),
-                    game.player(player),
+                    e.opponent_player(player.index, game),
+                    player.get(game),
                     game,
                 ))
             })
@@ -371,8 +372,8 @@ fn militia(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_position_request(
         |e| &mut e.play_action_card,
         0,
-        |game, player_index, _| {
-            let player = game.player(player_index);
+        |game, p, _| {
+            let player = p.get(game);
             let cities = cities_that_can_add_units(player);
             Some(PositionRequest::new(
                 cities,
@@ -409,12 +410,12 @@ fn tech_trade(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_player_request(
         |e| &mut e.play_action_card,
         1,
-        |game, player_index, a| {
-            if a.active_player != Some(player_index) {
+        |game, p, a| {
+            if a.active_player != Some(p.index) {
                 // only active player can select the target player
                 return None;
             }
-            let player = game.player(player_index);
+            let player = p.get(game);
             let choices = game
                 .players
                 .iter()
@@ -439,7 +440,8 @@ fn tech_trade(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_advance_request(
         |e| &mut e.play_action_card,
         0,
-        |game, player_index, a| {
+        |game, p, a| {
+            let player_index = p.index;
             if a.active_player == Some(player_index) || a.selected_player == Some(player_index) {
                 let trade_partner = if a.active_player == Some(player_index) {
                     a.selected_player
@@ -487,8 +489,8 @@ fn new_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_advance_request(
         |e| &mut e.play_action_card,
         2,
-        |game, player_index, _| {
-            let player = game.player(player_index);
+        |game, p, _| {
+            let player = p.get(game);
             Some(AdvanceRequest::new(advances_that_can_be_gained(
                 player, game,
             )))
@@ -507,10 +509,8 @@ fn new_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         .add_simple_persistent_event_listener(
             |e| &mut e.play_action_card,
             0,
-            |game, player_index, _, _| {
-                gain_resources(game, player_index, ResourcePile::ideas(2), |name, pile| {
-                    format!("{name} gained {pile} from New Ideas.")
-                });
+            |game, p, _| {
+                p.gain_resources(game, ResourcePile::ideas(2));
             },
         )
         .build()
