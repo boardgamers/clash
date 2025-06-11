@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -224,17 +223,7 @@
                         }
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "remove",
-                      "path": "/players/0/played_once_per_turn_actions"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -245,100 +234,7 @@
                         }
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "PayAction": {
-                              "action": {
-                                "Collect": {
-                                  "action_type": {
-                                    "Custom": "FreeEconomyCollect"
-                                  },
-                                  "city_position": "C2",
-                                  "collections": [
-                                    {
-                                      "pile": {
-                                        "ore": 1
-                                      },
-                                      "position": "B1",
-                                      "times": 1
-                                    },
-                                    {
-                                      "pile": {
-                                        "ore": 1
-                                      },
-                                      "position": "B2",
-                                      "times": 1
-                                    }
-                                  ]
-                                }
-                              }
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Ability": "Pay for action"
-                            },
-                            "priority": 0,
-                            "request": {
-                              "Payment": [
-                                {
-                                  "cost": {
-                                    "conversions": [
-                                      {
-                                        "from": [
-                                          {
-                                            "food": 1
-                                          },
-                                          {
-                                            "wood": 1
-                                          },
-                                          {
-                                            "ore": 1
-                                          },
-                                          {
-                                            "ideas": 1
-                                          }
-                                        ],
-                                        "to": {
-                                          "gold": 1
-                                        },
-                                        "type": "Unlimited"
-                                      }
-                                    ],
-                                    "default": {
-                                      "mood_tokens": 1
-                                    }
-                                  },
-                                  "name": "Pay for action",
-                                  "optional": false
-                                }
-                              ]
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "origin_override": {
-                            "Advance": "FreeEconomy"
-                          },
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/cities/1/activations"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 6
-                    }
-                  ]
+                  }
                 }
               ]
             }

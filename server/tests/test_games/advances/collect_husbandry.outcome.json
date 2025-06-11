@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -287,28 +286,7 @@
                         "action_type": "Collect"
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 2
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/cities/3/activations",
-                      "value": 4
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/cities/3/mood_state",
-                      "value": "Happy"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/event_info"
-                    }
-                  ]
+                  }
                 }
               ]
             }

@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -419,90 +418,7 @@
                         }
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": "TurnStart",
-                          "handler": {
-                            "origin": {
-                              "Ability": "Viking Raids"
-                            },
-                            "priority": 4,
-                            "request": {
-                              "Payment": [
-                                {
-                                  "cost": {
-                                    "conversions": [
-                                      {
-                                        "from": [
-                                          {
-                                            "food": 1
-                                          }
-                                        ],
-                                        "to": {
-                                          "wood": 1
-                                        },
-                                        "type": "Unlimited"
-                                      },
-                                      {
-                                        "from": [
-                                          {
-                                            "wood": 1
-                                          }
-                                        ],
-                                        "to": {
-                                          "ore": 1
-                                        },
-                                        "type": "Unlimited"
-                                      },
-                                      {
-                                        "from": [
-                                          {
-                                            "ore": 1
-                                          }
-                                        ],
-                                        "to": {
-                                          "ideas": 1
-                                        },
-                                        "type": "Unlimited"
-                                      },
-                                      {
-                                        "from": [
-                                          {
-                                            "ideas": 1
-                                          }
-                                        ],
-                                        "to": {
-                                          "gold": 1
-                                        },
-                                        "type": "Unlimited"
-                                      }
-                                    ],
-                                    "default": {
-                                      "food": 1
-                                    }
-                                  },
-                                  "name": "Pay 1 resource to Viking Raids",
-                                  "optional": false
-                                }
-                              ]
-                            }
-                          },
-                          "last_priority_used": 4,
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/food",
-                      "value": 2
-                    }
-                  ]
+                  }
                 }
               ]
             }

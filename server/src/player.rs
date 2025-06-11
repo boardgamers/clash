@@ -1,11 +1,12 @@
 use crate::advance::{Advance, base_advance_cost, player_government};
 use crate::city_pieces::DestroyedStructures;
 use crate::consts::{STACK_LIMIT, UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
+use crate::content::ability::construct_event_origin;
 use crate::content::custom_actions::{CustomActionExecution, CustomActionInfo};
 use crate::events::{Event, EventOrigin};
 use crate::leader::Leader;
 use crate::leader_ability::LeaderAbility;
-use crate::payment::{PaymentOptions, PaymentReason};
+use crate::payment::PaymentOptions;
 use crate::player_events::{CostInfo, TransientEvents};
 use crate::playing_actions::PlayingActionType;
 use crate::special_advance::SpecialAdvance;
@@ -373,7 +374,7 @@ impl Player {
             |e| &e.building_cost,
             CostInfo::new(
                 self,
-                PaymentOptions::resources(self, PaymentReason::Building, BUILDING_COST),
+                PaymentOptions::resources(self, construct_event_origin(), BUILDING_COST),
             ),
             &building,
             game,
@@ -555,7 +556,7 @@ impl Player {
         self.custom_actions
             .iter()
             .filter_map(move |(t, c)| {
-                if let CustomActionExecution::Modifier((b, _)) = &c.execution {
+                if let CustomActionExecution::Modifier(b) = &c.execution {
                     (b == base).then_some(*t)
                 } else {
                     None

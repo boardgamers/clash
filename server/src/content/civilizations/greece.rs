@@ -11,6 +11,7 @@ use crate::content::advances::AdvanceGroup;
 use crate::content::advances::warfare::draft_cost;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::{HandCardsRequest, PositionRequest};
+use crate::events::check_event_origin;
 use crate::game::Game;
 use crate::leader::{Leader, LeaderInfo, leader_position};
 use crate::leader_ability::{LeaderAbility, activate_leader_city, can_activate_leader_city};
@@ -290,7 +291,7 @@ fn idol_cards(game: &Game, p: &Player, extra_cost: &ResourcePile) -> Vec<HandCar
                 return None;
             }
 
-            let mut payment_options = action_cost.payment_options(p);
+            let mut payment_options = action_cost.payment_options(p, check_event_origin());
             payment_options.default += extra_cost.clone();
             p.can_afford(&payment_options)
                 .then_some(HandCard::ActionCard(a))

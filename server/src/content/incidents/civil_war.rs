@@ -8,7 +8,7 @@ use crate::game::Game;
 use crate::incident::{
     DecreaseMood, Incident, IncidentBaseEffect, IncidentBuilder, MoodModifier, decrease_mod_and_log,
 };
-use crate::payment::{PaymentConversion, PaymentConversionType, PaymentOptions, PaymentReason};
+use crate::payment::{PaymentConversion, PaymentConversionType};
 use crate::player::Player;
 use crate::player_events::IncidentTarget;
 use crate::position::Position;
@@ -227,7 +227,7 @@ fn uprising() -> Incident {
         0,
         |game, p, _incident| {
             let player = p.get(game);
-            let mut cost = PaymentOptions::tokens(player, PaymentReason::Incident, 4);
+            let mut cost = p.payment_options().tokens(player, 4);
             cost.conversions.push(PaymentConversion::new(
                 vec![
                     ResourcePile::mood_tokens(1),

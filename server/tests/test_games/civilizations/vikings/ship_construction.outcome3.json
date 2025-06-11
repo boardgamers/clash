@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": {
     "Movement": {
       "movement_actions_left": 2,
@@ -260,29 +259,7 @@
                         "destination": "D2"
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 2
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/0/position",
-                      "value": "E2"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/0/unit_type",
-                      "value": "Settler"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/state",
-                      "value": "Playing"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -296,66 +273,7 @@
                         "embark_carrier_id": 3
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "remove",
-                      "path": "/players/0/units/0/carried_units"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/1/id",
-                      "value": 4
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/1/position",
-                      "value": "E2"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/units/1/movement_restrictions"
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/units/2",
-                      "value": {
-                        "id": 5,
-                        "position": "E2",
-                        "unit_type": "Settler"
-                      }
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/units/3",
-                      "value": {
-                        "id": 6,
-                        "movement_restrictions": [
-                          "Mountain"
-                        ],
-                        "position": "D1",
-                        "unit_type": "Infantry"
-                      }
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/state",
-                      "value": {
-                        "Movement": {
-                          "current_move": {
-                            "Embark": {
-                              "destination": "D2",
-                              "source": "E2"
-                            }
-                          },
-                          "moved_units": [
-                            3
-                          ],
-                          "movement_actions_left": 2
-                        }
-                      }
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -367,28 +285,7 @@
                         "destination": "C2"
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 1
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/0/position",
-                      "value": "D2"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/state",
-                      "value": "Playing"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -397,87 +294,7 @@
                         3
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "ShipConstructionConversion": [
-                              3
-                            ]
-                          },
-                          "handler": {
-                            "origin": {
-                              "SpecialAdvance": "ShipConstruction"
-                            },
-                            "priority": 0,
-                            "request": {
-                              "SelectUnits": {
-                                "choices": [
-                                  3
-                                ],
-                                "description": "Select units to convert to settlers (instead of infantry)",
-                                "needed": {
-                                  "end": 1,
-                                  "start": 0
-                                },
-                                "player": 0
-                              }
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/units/0/carried_units",
-                      "value": [
-                        {
-                          "id": 4,
-                          "unit_type": "Infantry"
-                        },
-                        {
-                          "id": 5,
-                          "unit_type": "Settler"
-                        }
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/0/unit_type",
-                      "value": "Ship"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/1/id",
-                      "value": 6
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/units/1/movement_restrictions",
-                      "value": [
-                        "Mountain"
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/1/position",
-                      "value": "D1"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/units/2"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/units/2"
-                    }
-                  ]
+                  }
                 }
               ]
             }

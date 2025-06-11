@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -284,41 +283,7 @@
                         }
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 1
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/cities/0/activations"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/next_unit_id",
-                      "value": 10
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/gold",
-                      "value": 5
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 11
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/units/6"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/units/6"
-                    }
-                  ]
+                  }
                 }
               ]
             }

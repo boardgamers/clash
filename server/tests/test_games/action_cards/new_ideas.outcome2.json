@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -196,79 +195,14 @@
                     "Playing": {
                       "ActionCard": 41
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 3
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/action_cards",
-                      "value": [
-                        41
-                      ]
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/action_cards_discarded"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
                     "Response": {
                       "SelectAdvance": "Storage"
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "remove",
-                      "path": "/events/0/event_type/ActionCard/selected_advance"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/handler/priority",
-                      "value": 2
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/0/handler/request/SelectAdvance",
-                      "value": {
-                        "choices": [
-                          "Storage",
-                          "Irrigation",
-                          "Husbandry",
-                          "Engineering",
-                          "Sanitation",
-                          "Roads",
-                          "Fishing",
-                          "Writing",
-                          "Siegecraft",
-                          "SteelWeapons",
-                          "Draft",
-                          "Myths",
-                          "Bartering",
-                          "Arts",
-                          "Math"
-                        ]
-                      }
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/0/handler/request/Payment"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/last_priority_used",
-                      "value": 2
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -279,96 +213,7 @@
                         }
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "ActionCard": {
-                              "id": 41,
-                              "selected_advance": "Storage"
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "CivilCard": 41
-                            },
-                            "priority": 1,
-                            "request": {
-                              "Payment": [
-                                {
-                                  "cost": {
-                                    "conversions": [
-                                      {
-                                        "from": [
-                                          {
-                                            "ideas": 1
-                                          }
-                                        ],
-                                        "to": {
-                                          "food": 1
-                                        },
-                                        "type": "Unlimited"
-                                      },
-                                      {
-                                        "from": [
-                                          {
-                                            "food": 1
-                                          }
-                                        ],
-                                        "to": {
-                                          "gold": 1
-                                        },
-                                        "type": "Unlimited"
-                                      }
-                                    ],
-                                    "default": {
-                                      "ideas": 2
-                                    }
-                                  },
-                                  "name": "Pay for Storage",
-                                  "optional": false
-                                }
-                              ]
-                            }
-                          },
-                          "last_priority_used": 1,
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/advances/2",
-                      "value": "Tactics"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/advances/3"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resource_limit/food",
-                      "value": 2
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/resources/food",
-                      "value": 2
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 7
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/resources/ideas"
-                    }
-                  ]
+                  }
                 }
               ]
             }

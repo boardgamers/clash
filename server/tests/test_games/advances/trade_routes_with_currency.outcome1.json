@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -407,58 +406,7 @@
                         "gold": 1
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": "TurnStart",
-                          "handler": {
-                            "origin": {
-                              "Advance": "TradeRoutes"
-                            },
-                            "priority": 0,
-                            "request": {
-                              "ResourceReward": {
-                                "name": "Collect trade routes reward",
-                                "reward": {
-                                  "conversions": [
-                                    {
-                                      "from": [
-                                        {
-                                          "gold": 1
-                                        }
-                                      ],
-                                      "to": {
-                                        "food": 1
-                                      },
-                                      "type": "Unlimited"
-                                    }
-                                  ],
-                                  "default": {
-                                    "gold": 2
-                                  }
-                                }
-                              }
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 1
-                        }
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/resources/food",
-                      "value": 1
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/1/resources/gold"
-                    }
-                  ]
+                  }
                 }
               ]
             }

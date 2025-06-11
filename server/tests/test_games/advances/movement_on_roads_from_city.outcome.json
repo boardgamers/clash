@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -355,37 +354,7 @@
                         }
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/players/1/resources/food",
-                      "value": 1
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/1/resources/ore",
-                      "value": 1
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/units/0/position",
-                      "value": "D8"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/1/units/0/movement_restrictions"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/state",
-                      "value": {
-                        "Movement": {
-                          "movement_actions_left": 2
-                        }
-                      }
-                    }
-                  ]
+                  }
                 }
               ]
             }

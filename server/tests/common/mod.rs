@@ -360,7 +360,19 @@ fn assert_illegal_action(game: Game, player: usize, action: Action) {
 }
 
 pub(crate) fn to_json(game: &Game) -> String {
-    serde_json::to_string_pretty(&game.cloned_data()).expect("game data should be serializable")
+    let mut data = game.cloned_data();
+    // strip data that only make the tests hard to compare
+    for a in &mut data.action_log {
+        for r in &mut a.rounds {
+            for p in &mut r.players {
+                for i in &mut p.items {
+                    i.undo.clear();
+                }
+            }
+        }
+    }
+
+    serde_json::to_string_pretty(&data).expect("game data should be serializable")
 }
 
 fn read_game_str(name: &GamePath) -> String {

@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -202,28 +201,7 @@
                         "action": "Bartering"
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/players/0/action_cards",
-                      "value": [
-                        1
-                      ]
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/played_once_per_turn_actions"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/action_cards_discarded"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -232,53 +210,7 @@
                         "gold": 1
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "CustomAction": {
-                              "action": "Bartering"
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Ability": "Bartering"
-                            },
-                            "priority": 0,
-                            "request": {
-                              "ResourceReward": {
-                                "name": "Select a resource to gain",
-                                "reward": {
-                                  "conversions": [
-                                    {
-                                      "from": [
-                                        {
-                                          "gold": 1
-                                        }
-                                      ],
-                                      "to": {
-                                        "culture_tokens": 1
-                                      },
-                                      "type": "Unlimited"
-                                    }
-                                  ],
-                                  "default": {
-                                    "gold": 1
-                                  }
-                                }
-                              }
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 0
-                        }
-                      ]
-                    }
-                  ]
+                  }
                 }
               ]
             }

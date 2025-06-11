@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -245,24 +244,7 @@
                     "Playing": {
                       "ActionCard": 5
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/players/0/action_cards",
-                      "value": [
-                        5
-                      ]
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/action_cards_discarded"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -271,43 +253,7 @@
                         "C1"
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/events/0/handler/priority",
-                      "value": 2
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/0/handler/request/SelectPositions",
-                      "value": {
-                        "choices": [
-                          "C1",
-                          "C2"
-                        ],
-                        "description": "Select a city to increase the mood by 1",
-                        "needed": {
-                          "end": 1,
-                          "start": 1
-                        }
-                      }
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/0/handler/request/Payment"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/last_priority_used",
-                      "value": 2
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/cities/2/mood_state",
-                      "value": "Angry"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -318,69 +264,7 @@
                         }
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "remove",
-                      "path": "/events/0/event_type/ActionCard/answer"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/handler/priority",
-                      "value": 1
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/0/handler/request/Payment",
-                      "value": [
-                        {
-                          "cost": {
-                            "conversions": [
-                              {
-                                "from": [
-                                  {
-                                    "food": 1
-                                  },
-                                  {
-                                    "wood": 1
-                                  },
-                                  {
-                                    "ore": 1
-                                  },
-                                  {
-                                    "ideas": 1
-                                  }
-                                ],
-                                "to": {
-                                  "gold": 1
-                                },
-                                "type": "Unlimited"
-                              }
-                            ],
-                            "default": {
-                              "mood_tokens": 1
-                            }
-                          },
-                          "name": "Pay 1 mood token to increase the mood in a city by 1",
-                          "optional": true
-                        }
-                      ]
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/0/handler/request/SelectPositions"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/last_priority_used",
-                      "value": 1
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 7
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -389,50 +273,7 @@
                         "C2"
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "ActionCard": {
-                              "answer": true,
-                              "id": 5,
-                              "satisfying_action": 1
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "CivilCard": 5
-                            },
-                            "priority": 0,
-                            "request": {
-                              "SelectPositions": {
-                                "choices": [
-                                  "C1",
-                                  "C2"
-                                ],
-                                "description": "Select a city to increase the mood by 1",
-                                "needed": {
-                                  "end": 1,
-                                  "start": 1
-                                }
-                              }
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/cities/1/mood_state",
-                      "value": "Neutral"
-                    }
-                  ]
+                  }
                 }
               ]
             }

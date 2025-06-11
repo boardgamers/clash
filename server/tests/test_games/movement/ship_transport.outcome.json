@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": {
     "Movement": {
       "movement_actions_left": 1,
@@ -265,27 +264,7 @@
                         "destination": "D2"
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/5/position",
-                      "value": "C3"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/state/Movement/movement_actions_left",
-                      "value": 2
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/state/Movement/current_move"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/state/Movement/moved_units"
-                    }
-                  ]
+                  }
                 }
               ]
             }

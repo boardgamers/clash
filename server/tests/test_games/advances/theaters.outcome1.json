@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -280,17 +279,7 @@
                         "action": "Theaters"
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "remove",
-                      "path": "/players/0/played_once_per_turn_actions"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -301,66 +290,7 @@
                         }
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "CustomAction": {
-                              "action": "Theaters"
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Ability": "Theaters"
-                            },
-                            "priority": 0,
-                            "request": {
-                              "Payment": [
-                                {
-                                  "cost": {
-                                    "conversions": [
-                                      {
-                                        "from": [
-                                          {
-                                            "culture_tokens": 1
-                                          }
-                                        ],
-                                        "to": {
-                                          "mood_tokens": 1
-                                        },
-                                        "type": "Unlimited"
-                                      }
-                                    ],
-                                    "default": {
-                                      "culture_tokens": 1
-                                    }
-                                  },
-                                  "name": "Convert 1 culture token into 1 mood token, or 1 mood token into 1 culture token",
-                                  "optional": false
-                                }
-                              ]
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/culture_tokens",
-                      "value": 10
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 10
-                    }
-                  ]
+                  }
                 }
               ]
             }

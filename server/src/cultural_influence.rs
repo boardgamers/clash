@@ -7,10 +7,11 @@ use crate::content::ability::Ability;
 use crate::content::persistent_events::{
     PaymentRequest, PersistentEventType, SelectedStructure, Structure,
 };
-use crate::events::EventPlayer;
+use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
 use crate::log::{current_player_turn_log, modifier_suffix};
-use crate::payment::{PaymentOptions, PaymentReason};
+use crate::payment::PaymentOptions;
+use crate::player::Player;
 use crate::player_events::ActionInfo;
 use crate::playing_actions::{PlayingAction, PlayingActionType, base_or_custom_available};
 use crate::position::Position;
@@ -50,6 +51,7 @@ pub struct InfluenceCultureInfo {
     pub position: Position,
     pub starting_city_position: Position,
     pub barbarian_takeover_check: bool,
+    pub origin: EventOrigin,
 }
 
 impl InfluenceCultureInfo {
@@ -61,6 +63,7 @@ impl InfluenceCultureInfo {
         structure: Structure,
         starting_city_position: Position,
         barbarian_takeover_check: bool,
+        origin: EventOrigin,
     ) -> InfluenceCultureInfo {
         InfluenceCultureInfo {
             prevent_boost: false,
@@ -74,6 +77,7 @@ impl InfluenceCultureInfo {
             position,
             starting_city_position,
             barbarian_takeover_check,
+            origin,
         }
     }
 
@@ -109,7 +113,7 @@ pub(crate) fn execute_influence_culture_attempt(
     let target_city_position = s.position;
     let target_city = game.get_any_city(target_city_position);
     let target_player_index = target_city.player_index;
-    let info = influence_culture_boost_cost(game, player_index, s, None, false)?;
+    let info = influence_culture_boost_cost(game, player_index, s, &i.action_type, false, false)?;
 
     let player = if target_player_index == player_index {
         String::from("themselves")
@@ -139,7 +143,7 @@ pub(crate) fn execute_influence_culture_attempt(
         "{} tried to influence culture the {city_piece} in the city \
         at {target_city_position} by {player}{city}{cost}{}",
         game.player_name(player_index),
-        modifier_suffix(game.player(player_index), &i.action_type)
+        modifier_suffix(game.player(player_index), &i.action_type, game)
     ));
 
     on_cultural_influence(game, player_index, info);
@@ -286,7 +290,7 @@ fn range_boost_paid(
 
     PaymentOptions::resources(
         game.player(player_index),
-        PaymentReason::InfluenceCulture,
+        info.origin.clone(),
         ResourcePile::culture_tokens(INFLUENCE_MIN_ROLL - roll),
     )
 }
@@ -318,7 +322,8 @@ pub fn influence_culture_boost_cost(
     game: &Game,
     player_index: usize,
     selected: &SelectedStructure,
-    action_type: Option<&PlayingActionType>,
+    action_type: &PlayingActionType,
+    add_action_cost: bool,
     barbarian_takeover_check: bool,
 ) -> Result<InfluenceCultureInfo, String> {
     let target_city_position = selected.position;
@@ -350,12 +355,19 @@ pub fn influence_culture_boost_cost(
 
     let target_player_index = target_city.player_index;
 
-    let (start, range_boost) = affordable_start_city(game, player_index, target_city, action_type)?;
+    let (start, range_boost) = affordable_start_city(
+        game,
+        player_index,
+        target_city,
+        action_type,
+        add_action_cost,
+    )?;
 
+    let origin = influence_event_origin(action_type, attacker);
     let mut info = Ok(InfluenceCultureInfo::new(
         PaymentOptions::resources(
             attacker,
-            PaymentReason::InfluenceCulture,
+            origin.clone(),
             ResourcePile::culture_tokens(range_boost),
         ),
         ActionInfo::new(attacker),
@@ -363,6 +375,7 @@ pub fn influence_culture_boost_cost(
         structure.clone(),
         start,
         barbarian_takeover_check,
+        origin,
     ));
     attacker.trigger_event(
         |e| &e.on_influence_culture_attempt,
@@ -409,7 +422,8 @@ pub fn available_influence_culture(
                                 game,
                                 player,
                                 &s,
-                                Some(action_type),
+                                action_type,
+                                true,
                                 false,
                             );
                             (s, result)
@@ -483,7 +497,8 @@ pub fn affordable_start_city(
     game: &Game,
     player_index: usize,
     target_city: &City,
-    action_type: Option<&PlayingActionType>, // none if action cost is already paid
+    action_type: &PlayingActionType,
+    add_action_cost: bool,
 ) -> Result<(Position, u8), String> {
     if target_city.player_index == player_index {
         Ok((target_city.position, 0))
@@ -493,9 +508,9 @@ pub fn affordable_start_city(
         let available = &player.resources;
         let mut tokens = available.culture_tokens;
         let mut action_cost = ResourcePile::empty();
-        if let Some(t) = action_type {
+        if add_action_cost {
             // either none (action cost and boost cost) or both can use Colosseum
-            action_cost = t.payment_options(game, player_index).default;
+            action_cost = action_type.payment_options(game, player_index).default;
             let c = action_cost.culture_tokens;
             if c > 0 {
                 tokens -= c;
@@ -555,4 +570,17 @@ pub fn affordable_start_city(
 #[must_use]
 pub fn available_influence_actions(game: &Game, player: usize) -> Vec<PlayingActionType> {
     base_or_custom_available(game, player, &PlayingActionType::InfluenceCultureAttempt)
+}
+
+pub(crate) fn influence_event_origin(
+    action_type: &PlayingActionType,
+    player: &Player,
+) -> EventOrigin {
+    match action_type {
+        PlayingActionType::InfluenceCultureAttempt => {
+            EventOrigin::Ability("Influence Culture Attempt".to_string())
+        }
+        PlayingActionType::Custom(c) => c.playing_action_type().event_origin(player),
+        _ => panic!("Unexpected action type for influence culture event origin: {action_type:?}"),
+    }
 }

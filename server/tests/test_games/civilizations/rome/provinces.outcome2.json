@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": {
     "Movement": {
       "movement_actions_left": 2,
@@ -271,28 +270,7 @@
                         }
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 2
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/advances/4"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/incident_tokens",
-                      "value": 3
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/resources/food",
-                      "value": 2
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -305,52 +283,6 @@
                       }
                     }
                   },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 1
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/cities/4"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/gold",
-                      "value": 5
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/0/position",
-                      "value": "C2"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/units/0/movement_restrictions"
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/1/cities/1",
-                      "value": {
-                        "city_pieces": {
-                          "port": 1
-                        },
-                        "mood_state": "Neutral",
-                        "port_position": "C3",
-                        "position": "B2"
-                      }
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/state",
-                      "value": "Playing"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events"
-                    }
-                  ],
                   "combat_stats": {
                     "round": 1,
                     "battleground": "City",
@@ -378,98 +310,7 @@
                         }
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "CombatEnd": {
-                              "attacker": {
-                                "player": 0,
-                                "position": "C2",
-                                "present": {
-                                  "infantry": 1
-                                }
-                              },
-                              "battleground": "City",
-                              "city_mood": "Neutral",
-                              "defender": {
-                                "player": 1,
-                                "position": "B2"
-                              },
-                              "result": "AttackerWins",
-                              "round": 1
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "SpecialAdvance": "Provinces"
-                            },
-                            "priority": 21,
-                            "request": {
-                              "Payment": [
-                                {
-                                  "cost": {
-                                    "conversions": [
-                                      {
-                                        "from": [
-                                          {
-                                            "food": 1
-                                          },
-                                          {
-                                            "wood": 1
-                                          },
-                                          {
-                                            "ore": 1
-                                          },
-                                          {
-                                            "ideas": 1
-                                          }
-                                        ],
-                                        "to": {
-                                          "gold": 1
-                                        },
-                                        "type": "Unlimited"
-                                      }
-                                    ],
-                                    "default": {
-                                      "culture_tokens": 1
-                                    }
-                                  },
-                                  "name": "Pay 1 culture token to make the city happy",
-                                  "optional": true
-                                }
-                              ]
-                            }
-                          },
-                          "last_priority_used": 21,
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/cities/4/mood_state",
-                      "value": "Angry"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/culture_tokens",
-                      "value": 9
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/next_unit_id",
-                      "value": 2
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/1/units"
-                    }
-                  ]
+                  }
                 }
               ]
             }

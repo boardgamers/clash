@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": {
     "Movement": {
       "movement_actions_left": 1,
@@ -277,89 +276,7 @@
                         "embark_carrier_id": 8
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/3/id",
-                      "value": 3
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/4/id",
-                      "value": 4
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/5/id",
-                      "value": 5
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/5/position",
-                      "value": "B3"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/5/unit_type",
-                      "value": "Settler"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/6/id",
-                      "value": 6
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/6/position",
-                      "value": "B3"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/6/unit_type",
-                      "value": "Settler"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/units/6/carried_units"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/7/id",
-                      "value": 7
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/units/8",
-                      "value": {
-                        "id": 8,
-                        "position": "C3",
-                        "unit_type": "Ship"
-                      }
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/units/9",
-                      "value": {
-                        "id": 9,
-                        "position": "C3",
-                        "unit_type": "Ship"
-                      }
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/state/Movement/movement_actions_left",
-                      "value": 2
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/state/Movement/current_move"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/state/Movement/moved_units"
-                    }
-                  ]
+                  }
                 }
               ]
             }

@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -269,39 +268,7 @@
                         "action_type": "IncreaseHappiness"
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 3
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/cities/1/angry_activation",
-                      "value": true
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/cities/1/mood_state",
-                      "value": "Angry"
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/cities/3/angry_activation",
-                      "value": true
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/cities/3/mood_state",
-                      "value": "Angry"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 9
-                    }
-                  ]
+                  }
                 }
               ]
             }

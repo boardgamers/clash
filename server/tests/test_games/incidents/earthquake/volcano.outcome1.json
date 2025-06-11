@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -232,96 +231,7 @@
                         "C2"
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "Incident": {
-                              "active_player": 0,
-                              "incident_id": 29
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Incident": 29
-                            },
-                            "priority": 0,
-                            "request": {
-                              "SelectPositions": {
-                                "choices": [
-                                  "B2",
-                                  "B3",
-                                  "C1",
-                                  "C2"
-                                ],
-                                "description": "Select a city to be destroyed",
-                                "needed": {
-                                  "end": 1,
-                                  "start": 1
-                                }
-                              }
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/cities/0/city_pieces",
-                      "value": {
-                        "fortress": 0,
-                        "temple": 1,
-                        "wonders": [
-                          "Pyramids"
-                        ]
-                      }
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/cities/0/position",
-                      "value": "C2"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/cities/1/position",
-                      "value": "C1"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/cities/2/position",
-                      "value": "B2"
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/cities/3",
-                      "value": {
-                        "mood_state": "Happy",
-                        "position": "B3"
-                      }
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/destroyed_structures"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/special_victory_points"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/1/destroyed_structures"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/1/special_victory_points"
-                    }
-                  ]
+                  }
                 }
               ]
             }

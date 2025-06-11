@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "events": [
     {
@@ -305,108 +304,21 @@
                         "action": "GreatLibrary"
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "remove",
-                      "path": "/players/0/played_once_per_turn_actions"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
                     "Response": {
                       "SelectAdvance": "Engineering"
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "CustomAction": {
-                              "action": "GreatLibrary"
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Ability": "Great Library"
-                            },
-                            "priority": 0,
-                            "request": {
-                              "SelectAdvance": {
-                                "choices": [
-                                  "Storage",
-                                  "Irrigation",
-                                  "Husbandry",
-                                  "Engineering",
-                                  "Sanitation",
-                                  "Roads",
-                                  "Fishing",
-                                  "Navigation",
-                                  "WarShips",
-                                  "Cartography",
-                                  "Writing",
-                                  "PublicEducation",
-                                  "FreeEducation",
-                                  "Philosophy",
-                                  "Tactics",
-                                  "Siegecraft",
-                                  "SteelWeapons",
-                                  "Draft",
-                                  "Myths",
-                                  "Priesthood",
-                                  "StateReligion",
-                                  "Bartering",
-                                  "TradeRoutes",
-                                  "Taxes",
-                                  "Currency",
-                                  "Arts",
-                                  "Sports",
-                                  "Monuments",
-                                  "Theaters",
-                                  "Math",
-                                  "Astronomy",
-                                  "Medicine",
-                                  "Metallurgy"
-                                ]
-                              }
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/great_library_advance"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
                     "Playing": {
                       "WonderCard": "Pyramids"
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 1
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events"
-                    }
-                  ]
+                  }
                 }
               ]
             }

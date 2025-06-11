@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -242,98 +241,6 @@
                       }
                     }
                   },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 2
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/cities/0/activations",
-                      "value": 1
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/cities/0/mood_state",
-                      "value": "Neutral"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/next_unit_id",
-                      "value": 10
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/objective_cards",
-                      "value": [
-                        29
-                      ]
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/resources/food",
-                      "value": 1
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/gold",
-                      "value": 7
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/ore",
-                      "value": 7
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/4/id",
-                      "value": 4
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/5/id",
-                      "value": 5
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/6/id",
-                      "value": 6
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/7/id",
-                      "value": 7
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/7/position",
-                      "value": "C2"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/7/unit_type",
-                      "value": "Settler"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/8/id",
-                      "value": 9
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/8/unit_type",
-                      "value": "Infantry"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/units/9"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/completed_objectives"
-                    }
-                  ],
                   "completed_objectives": [
                     "Terror Regime"
                   ]

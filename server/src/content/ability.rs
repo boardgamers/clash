@@ -135,3 +135,15 @@ pub(crate) fn init_player(game: &mut Game, player_index: usize, all: &[Ability])
         b.listeners.init(game, player_index);
     }
 }
+
+pub(crate) fn advance_event_origin() -> EventOrigin {
+    EventOrigin::Ability("Advance".to_string())
+}
+
+pub(crate) fn construct_event_origin() -> EventOrigin {
+    EventOrigin::Ability("Construct Building".to_string())
+}
+
+pub(crate) fn recruit_event_origin() -> EventOrigin {
+    EventOrigin::Ability("Recruit".to_string())
+}

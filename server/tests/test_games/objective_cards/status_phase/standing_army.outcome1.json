@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "events": [
     {
@@ -281,78 +280,6 @@
                       ]
                     }
                   },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/events/0/event_type/StatusPhase",
-                      "value": "CompleteObjectives"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/0/handler"
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/1",
-                      "value": {
-                        "event_type": {
-                          "SelectObjectives": {
-                            "cards": [
-                              {
-                                "ObjectiveCard": 14
-                              },
-                              {
-                                "ObjectiveCard": 26
-                              }
-                            ],
-                            "objective_opportunities": [
-                              "Military Might",
-                              "Standing Army"
-                            ]
-                          }
-                        },
-                        "handler": {
-                          "origin": {
-                            "Ability": "Select Objective Cards to Complete"
-                          },
-                          "priority": 0,
-                          "request": {
-                            "SelectHandCards": {
-                              "choices": [
-                                {
-                                  "ObjectiveCard": 14
-                                },
-                                {
-                                  "ObjectiveCard": 26
-                                }
-                              ],
-                              "description": "Select cards to complete",
-                              "needed": {
-                                "end": 2,
-                                "start": 0
-                              }
-                            }
-                          }
-                        },
-                        "last_priority_used": 0,
-                        "player": 0
-                      }
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/objective_cards/0",
-                      "value": 14
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/objective_cards/1",
-                      "value": 26
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/completed_objectives"
-                    }
-                  ],
                   "completed_objectives": [
                     "Standing Army"
                   ]

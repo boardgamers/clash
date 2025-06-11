@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -243,22 +242,7 @@
                         "action": "ImperialArmy"
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 2
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/played_once_per_turn_actions"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -268,56 +252,7 @@
                         4
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "CustomAction": {
-                              "action": "ImperialArmy"
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Ability": "Imperial Army"
-                            },
-                            "priority": 0,
-                            "request": {
-                              "SelectUnits": {
-                                "choices": [
-                                  0,
-                                  4,
-                                  5,
-                                  6
-                                ],
-                                "description": "Select units to convert using Imperial Army",
-                                "needed": {
-                                  "end": 4,
-                                  "start": 1
-                                },
-                                "player": 0
-                              }
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/0/unit_type",
-                      "value": "Infantry"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/1/unit_type",
-                      "value": "Settler"
-                    }
-                  ]
+                  }
                 }
               ]
             }

@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -218,32 +217,7 @@
                         "action_type": "Collect"
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 3
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/cities/1/activations"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/ideas",
-                      "value": 5
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/wood",
-                      "value": 6
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/event_info"
-                    }
-                  ]
+                  }
                 }
               ]
             }

@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -263,18 +262,7 @@
                         "action": "Danegeld"
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 2
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -283,74 +271,7 @@
                         "food": 4
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "CustomAction": {
-                              "action": "Danegeld"
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Ability": "Danegeld"
-                            },
-                            "priority": 0,
-                            "request": {
-                              "ResourceReward": {
-                                "name": "Select a resource to gain",
-                                "reward": {
-                                  "conversions": [
-                                    {
-                                      "from": [
-                                        {
-                                          "food": 1
-                                        }
-                                      ],
-                                      "to": {
-                                        "wood": 1
-                                      },
-                                      "type": "Unlimited"
-                                    },
-                                    {
-                                      "from": [
-                                        {
-                                          "wood": 1
-                                        }
-                                      ],
-                                      "to": {
-                                        "ore": 1
-                                      },
-                                      "type": "Unlimited"
-                                    }
-                                  ],
-                                  "default": {
-                                    "food": 4
-                                  }
-                                }
-                              }
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/cities/3/activations",
-                      "value": 4
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/cities/3/mood_state",
-                      "value": "Happy"
-                    }
-                  ]
+                  }
                 }
               ]
             }

@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "events": [
     {
@@ -294,134 +293,14 @@
                         }
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "Incident": {
-                              "active_player": 0,
-                              "barbarians": {},
-                              "incident_id": 20
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Incident": 20
-                            },
-                            "priority": 10,
-                            "request": {
-                              "Payment": [
-                                {
-                                  "cost": {
-                                    "conversions": [
-                                      {
-                                        "from": [
-                                          {
-                                            "food": 1
-                                          },
-                                          {
-                                            "wood": 1
-                                          },
-                                          {
-                                            "ore": 1
-                                          },
-                                          {
-                                            "ideas": 1
-                                          }
-                                        ],
-                                        "to": {
-                                          "gold": 1
-                                        },
-                                        "type": "Unlimited"
-                                      }
-                                    ],
-                                    "default": {
-                                      "culture_tokens": 1
-                                    }
-                                  },
-                                  "name": "Pay to gain the Action Card",
-                                  "optional": true
-                                }
-                              ]
-                            }
-                          },
-                          "last_priority_used": 10,
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/culture_tokens",
-                      "value": 7
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/action_cards"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
                     "Playing": {
                       "ActionCard": 120
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 2
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/action_cards",
-                      "value": [
-                        120
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/advances/3",
-                      "value": "StateReligion"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/advances/4",
-                      "value": "Storage"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/advances/5",
-                      "value": "Tactics"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/advances/6",
-                      "value": "Voting"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/advances/7"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 8
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/action_cards_discarded"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -430,43 +309,7 @@
                         "C1"
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "remove",
-                      "path": "/events/0/event_type/ActionCard/selected_position"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/handler/priority",
-                      "value": 1
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/0/handler/request/SelectPositions",
-                      "value": {
-                        "choices": [
-                          "B2",
-                          "B3",
-                          "C1"
-                        ],
-                        "description": "Build a Temple",
-                        "needed": {
-                          "end": 1,
-                          "start": 0
-                        }
-                      }
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/0/handler/request/Payment"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/last_priority_used",
-                      "value": 1
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -477,93 +320,7 @@
                         }
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events/0/handler",
-                      "value": {
-                        "origin": {
-                          "CivilCard": 120
-                        },
-                        "priority": 0,
-                        "request": {
-                          "Payment": [
-                            {
-                              "cost": {
-                                "conversions": [
-                                  {
-                                    "from": [
-                                      {
-                                        "food": 1
-                                      },
-                                      {
-                                        "wood": 1
-                                      },
-                                      {
-                                        "ore": 1
-                                      },
-                                      {
-                                        "ideas": 1
-                                      }
-                                    ],
-                                    "to": {
-                                      "gold": 1
-                                    },
-                                    "type": "Unlimited"
-                                  },
-                                  {
-                                    "from": [
-                                      {
-                                        "food": 1
-                                      }
-                                    ],
-                                    "to": {},
-                                    "type": {
-                                      "MayNotOverpay": 1
-                                    }
-                                  }
-                                ],
-                                "default": {
-                                  "food": 1,
-                                  "ore": 1,
-                                  "wood": 1
-                                },
-                                "modifiers": [
-                                  {
-                                    "Advance": "StateReligion"
-                                  }
-                                ]
-                              },
-                              "name": "Pay to build the Temple",
-                              "optional": true
-                            }
-                          ]
-                        }
-                      }
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/1"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/cities/1/activations"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/cities/1/city_pieces"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/gold",
-                      "value": 7
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/event_info"
-                    }
-                  ]
+                  }
                 }
               ]
             }

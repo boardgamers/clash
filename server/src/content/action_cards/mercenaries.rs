@@ -9,7 +9,6 @@ use crate::content::persistent_events::{PaymentRequest, PositionRequest};
 use crate::content::tactics_cards::TacticsCardFactory;
 use crate::game::Game;
 use crate::movement::{MoveUnits, move_action_log};
-use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::Player;
 use crate::playing_actions::ActionCost;
 use crate::position::Position;
@@ -66,9 +65,8 @@ pub(crate) fn mercenaries(id: u8, tactics_card: TacticsCardFactory) -> ActionCar
         1,
         |game, p, a| {
             Some(vec![PaymentRequest::mandatory(
-                PaymentOptions::sum(
+                p.payment_options().sum(
                     p.get(game),
-                    PaymentReason::Incident,
                     a.selected_positions.len() as u8,
                     &[
                         ResourceType::Food,

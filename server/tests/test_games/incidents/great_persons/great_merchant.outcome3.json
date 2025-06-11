@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -237,109 +236,14 @@
                         }
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "Incident": {
-                              "active_player": 0,
-                              "barbarians": {},
-                              "incident_id": 25
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Incident": 25
-                            },
-                            "priority": 10,
-                            "request": {
-                              "Payment": [
-                                {
-                                  "cost": {
-                                    "conversions": [
-                                      {
-                                        "from": [
-                                          {
-                                            "food": 1
-                                          },
-                                          {
-                                            "wood": 1
-                                          },
-                                          {
-                                            "ore": 1
-                                          },
-                                          {
-                                            "ideas": 1
-                                          }
-                                        ],
-                                        "to": {
-                                          "gold": 1
-                                        },
-                                        "type": "Unlimited"
-                                      }
-                                    ],
-                                    "default": {
-                                      "culture_tokens": 1
-                                    }
-                                  },
-                                  "name": "Pay to gain the Action Card",
-                                  "optional": true
-                                }
-                              ]
-                            }
-                          },
-                          "last_priority_used": 10,
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/culture_tokens",
-                      "value": 7
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/action_cards"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
                     "Playing": {
                       "ActionCard": 125
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 2
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/action_cards",
-                      "value": [
-                        125
-                      ]
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/advances/7"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/action_cards_discarded"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -348,53 +252,7 @@
                         "gold": 1
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "ActionCard": {
-                              "id": 125
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "CivilCard": 125
-                            },
-                            "priority": 0,
-                            "request": {
-                              "ResourceReward": {
-                                "name": "Collect trade routes reward",
-                                "reward": {
-                                  "conversions": [
-                                    {
-                                      "from": [
-                                        {
-                                          "gold": 1
-                                        }
-                                      ],
-                                      "to": {
-                                        "food": 1
-                                      },
-                                      "type": "Unlimited"
-                                    }
-                                  ],
-                                  "default": {
-                                    "gold": 1
-                                  }
-                                }
-                              }
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 0
-                        }
-                      ]
-                    }
-                  ]
+                  }
                 }
               ]
             }

@@ -14,7 +14,7 @@ use crate::incident::draw_and_discard_incident_card_from_pile;
 use crate::map::Terrain;
 use crate::map::Terrain::Fertile;
 use crate::objective_card::{discard_objective_card, gain_objective_card_from_pile};
-use crate::payment::{PaymentOptions, PaymentReason};
+use crate::payment::PaymentOptions;
 use crate::player::{Player, gain_unit};
 use crate::position::Position;
 use crate::tactics_card::CombatRole;
@@ -365,7 +365,7 @@ fn colosseum() -> WonderInfo {
         |game, p, e| {
             let player = &game.player(p.index);
 
-            let cost = PaymentOptions::tokens(player, PaymentReason::WonderAbility, 1);
+            let cost = p.payment_options().tokens(player, 1);
 
             if !player.can_afford(&cost) {
                 return None;

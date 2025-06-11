@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -259,42 +258,7 @@
                         }
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 2
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/cities/0/activations",
-                      "value": 1
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/cities/0/mood_state",
-                      "value": "Happy"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/next_unit_id",
-                      "value": 10
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/culture_tokens",
-                      "value": 9
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/units/1"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -303,59 +267,7 @@
                         "B3"
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "CityActivationMoodDecreased": "A1"
-                          },
-                          "handler": {
-                            "origin": {
-                              "SpecialAdvance": "CityStates"
-                            },
-                            "priority": 0,
-                            "request": {
-                              "SelectPositions": {
-                                "choices": [
-                                  "B3"
-                                ],
-                                "description": "Select a city to decrease its mood instead of the activated city",
-                                "needed": {
-                                  "end": 1,
-                                  "start": 0
-                                }
-                              }
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/cities/0/mood_state",
-                      "value": "Neutral"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/cities/3/activations",
-                      "value": 4
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/cities/3/mood_state",
-                      "value": "Happy"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/event_info"
-                    }
-                  ]
+                  }
                 }
               ]
             }

@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "events": [
     {
@@ -243,75 +242,7 @@
                         {}
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events/0/event_type/StatusPhase/ChangeGovernmentType",
-                      "value": false
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/0/event_type/StatusPhase/DetermineFirstPlayer"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/handler/origin/Ability",
-                      "value": "Change Government"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/handler/priority",
-                      "value": 1
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/0/handler/request/Payment",
-                      "value": [
-                        {
-                          "cost": {
-                            "conversions": [
-                              {
-                                "from": [
-                                  {
-                                    "food": 1
-                                  },
-                                  {
-                                    "wood": 1
-                                  },
-                                  {
-                                    "ore": 1
-                                  },
-                                  {
-                                    "ideas": 1
-                                  }
-                                ],
-                                "to": {
-                                  "gold": 1
-                                },
-                                "type": "Unlimited"
-                              }
-                            ],
-                            "default": {
-                              "culture_tokens": 1,
-                              "mood_tokens": 1
-                            }
-                          },
-                          "name": "Pay to change government",
-                          "optional": true
-                        }
-                      ]
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/0/handler/request/SelectPlayer"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/last_priority_used",
-                      "value": 1
-                    }
-                  ]
+                  }
                 }
               ]
             }

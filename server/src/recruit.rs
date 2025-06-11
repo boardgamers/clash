@@ -1,9 +1,10 @@
 use crate::city::activate_city;
 use crate::consts::STACK_LIMIT;
+use crate::content::ability::recruit_event_origin;
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
 use crate::map::capital_city_position;
-use crate::payment::{PaymentOptions, PaymentReason};
+use crate::payment::PaymentOptions;
 use crate::player::{CostTrigger, Player, gain_unit};
 use crate::player_events::CostInfo;
 use crate::position::Position;
@@ -217,7 +218,7 @@ pub fn recruit_cost_without_replaced(
             player,
             PaymentOptions::resources(
                 player,
-                PaymentReason::Recruit,
+                recruit_event_origin(),
                 units.clone().to_vec().iter().map(UnitType::cost).sum(),
             ),
         ),

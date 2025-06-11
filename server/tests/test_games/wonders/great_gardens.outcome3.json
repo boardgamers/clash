@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -246,32 +245,7 @@
                         "destination": "B1"
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 3
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/units/0/position",
-                      "value": "C1"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/1/units/0/movement_restrictions"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/units/1/position",
-                      "value": "C1"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/1/units/1/movement_restrictions"
-                    }
-                  ]
+                  }
                 }
               ]
             }

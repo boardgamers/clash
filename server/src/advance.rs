@@ -1,11 +1,12 @@
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::city_pieces::Building;
 use crate::consts::ADVANCE_COST;
+use crate::content::ability::advance_event_origin;
 use crate::content::persistent_events::PersistentEventType;
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::incident::trigger_incident;
-use crate::payment::{PaymentOptions, PaymentReason};
+use crate::payment::PaymentOptions;
 use crate::player::{Player, gain_resources};
 use crate::player_events::OnAdvanceInfo;
 use crate::resource::ResourceType;
@@ -466,7 +467,7 @@ pub(crate) fn init_great_library(game: &mut Game, player_index: usize) {
 pub(crate) fn base_advance_cost(player: &Player) -> PaymentOptions {
     PaymentOptions::sum(
         player,
-        PaymentReason::GainAdvance,
+        advance_event_origin(),
         ADVANCE_COST,
         &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
     )

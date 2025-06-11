@@ -8,25 +8,6 @@ use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use std::ops::RangeInclusive;
 
-// not used right now - but might be useful for statistics
-#[derive(Clone, PartialEq, Eq, Debug, Copy)]
-pub enum PaymentReason {
-    Recruit,
-    IncreaseHappiness,
-    GainAdvance,
-    Building,
-    Incident,
-    AdvanceAbility,
-    WonderAbility,
-    ActionCard,
-    CustomAction,
-    InfluenceCulture,
-    Move,
-    ChangeGovernment,
-    LeaderAbility,
-    SpecialAdvanceAbility,
-}
-
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub enum PaymentConversionType {
     Unlimited,
@@ -148,17 +129,17 @@ impl PaymentOptions {
     #[must_use]
     pub(crate) fn sum(
         player: &Player,
-        reason: PaymentReason,
+        origin: EventOrigin,
         cost: u8,
         types_by_preference: &[ResourceType],
     ) -> Self {
-        payment_options_sum(cost, types_by_preference).add_extra_options(player, reason)
+        payment_options_sum(cost, types_by_preference).add_extra_options(player, origin)
     }
 
     #[must_use]
     pub(crate) fn single_type(
         player: &Player,
-        reason: PaymentReason,
+        origin: EventOrigin,
         t: ResourceType,
         r: RangeInclusive<u8>,
     ) -> PaymentOptions {
@@ -173,10 +154,10 @@ impl PaymentOptions {
             )],
             vec![],
         )
-        .add_extra_options(player, reason)
+        .add_extra_options(player, origin)
     }
 
-    fn add_extra_options(mut self, player: &Player, _reason: PaymentReason) -> Self {
+    fn add_extra_options(mut self, player: &Player, _origin: EventOrigin) -> Self {
         if player.wonders_owned.contains(Wonder::Colosseum) {
             self.conversions.push(PaymentConversion::unlimited(
                 ResourcePile::of(ResourceType::CultureTokens, 1),
@@ -191,10 +172,10 @@ impl PaymentOptions {
     }
 
     #[must_use]
-    pub(crate) fn tokens(player: &Player, reason: PaymentReason, cost: u8) -> Self {
+    pub(crate) fn tokens(player: &Player, origin: EventOrigin, cost: u8) -> Self {
         Self::sum(
             player,
-            reason,
+            origin,
             cost,
             &[ResourceType::MoodTokens, ResourceType::CultureTokens],
         )
@@ -224,9 +205,9 @@ impl PaymentOptions {
     }
 
     #[must_use]
-    pub(crate) fn resources(player: &Player, reason: PaymentReason, cost: ResourcePile) -> Self {
+    pub(crate) fn resources(player: &Player, origin: EventOrigin, cost: ResourcePile) -> Self {
         Self::resources_with_discount(cost, PaymentConversionType::Unlimited)
-            .add_extra_options(player, reason)
+            .add_extra_options(player, origin)
     }
 
     #[must_use]
@@ -303,6 +284,47 @@ impl ResourceReward {
             cost,
             &[ResourceType::MoodTokens, ResourceType::CultureTokens],
         )
+    }
+}
+
+pub(crate) struct PaymentOptionsBuilder {
+    pub origin: EventOrigin,
+}
+
+impl PaymentOptionsBuilder {
+    #[must_use]
+    pub fn new(origin: EventOrigin) -> Self {
+        PaymentOptionsBuilder { origin }
+    }
+
+    #[must_use]
+    pub fn resources(self, player: &Player, cost: ResourcePile) -> PaymentOptions {
+        PaymentOptions::resources(player, self.origin, cost)
+    }
+
+    #[must_use]
+    pub fn tokens(self, player: &Player, cost: u8) -> PaymentOptions {
+        PaymentOptions::tokens(player, self.origin, cost)
+    }
+
+    #[must_use]
+    pub fn sum(
+        self,
+        player: &Player,
+        cost: u8,
+        types_by_preference: &[ResourceType],
+    ) -> PaymentOptions {
+        PaymentOptions::sum(player, self.origin, cost, types_by_preference)
+    }
+
+    #[must_use]
+    pub fn single_type(
+        self,
+        player: &Player,
+        t: ResourceType,
+        r: RangeInclusive<u8>,
+    ) -> PaymentOptions {
+        PaymentOptions::single_type(player, self.origin, t, r)
     }
 }
 

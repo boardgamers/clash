@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": {
     "Movement": {
       "movement_actions_left": 3,
@@ -259,37 +258,7 @@
                         }
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 2
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/cities/0/activations"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/next_unit_id",
-                      "value": 10
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/gold",
-                      "value": 7
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/units/4"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/state",
-                      "value": "Playing"
-                    }
-                  ]
+                  }
                 }
               ]
             }

@@ -214,13 +214,13 @@ pub struct CustomActionActionExecution {
 impl CustomActionActionExecution {
     #[must_use]
     pub fn new(
-        execution: Ability,
+        ability: Ability,
         checker: CustomActionChecker,
         city_checker: Option<CustomActionCityChecker>,
     ) -> Self {
         Self {
             checker,
-            ability: execution,
+            ability,
             city_checker,
         }
     }
@@ -228,7 +228,7 @@ impl CustomActionActionExecution {
 
 #[derive(Clone)]
 pub enum CustomActionExecution {
-    Modifier((PlayingActionType, String)),
+    Modifier(PlayingActionType),
     Action(CustomActionActionExecution),
 }
 
@@ -329,14 +329,6 @@ pub(crate) fn custom_action_execution(
     }
 }
 
-pub(crate) fn custom_action_name(player: &Player, action_type: CustomActionType) -> String {
-    match player.custom_action_info(action_type).execution {
-        CustomActionExecution::Modifier((_, name)) => name.clone(),
-        // Sports is not a modifier, but is shown for logging purposes as a modifier
-        CustomActionExecution::Action(a) => a.ability.name.clone(),
-    }
-}
-
 pub(crate) fn can_play_custom_action(
     game: &Game,
     p: &Player,
@@ -375,7 +367,7 @@ pub(crate) fn is_base_or_modifier(
 ) -> bool {
     match base_type {
         PlayingActionType::Custom(c) => {
-            if let CustomActionExecution::Modifier((t, _)) = &p.custom_action_info(*c).execution {
+            if let CustomActionExecution::Modifier(t) = &p.custom_action_info(*c).execution {
                 t == action_type
             } else {
                 false

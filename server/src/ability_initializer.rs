@@ -1,5 +1,6 @@
 use crate::advance::Advance;
 use crate::card::{HandCard, validate_card_selection_for_origin};
+use crate::city::City;
 use crate::combat::{Combat, update_combat_strength};
 use crate::combat_listeners::CombatStrength;
 use crate::content::ability::{Ability, AbilityBuilder};
@@ -30,7 +31,7 @@ pub(crate) type AbilityInitializer = Arc<dyn Fn(&mut Game, usize) + Sync + Send>
 
 pub(crate) type AbilityInitializerWithPrioDelta = Arc<dyn Fn(&mut Game, usize, i32) + Sync + Send>;
 
-pub struct SelectedChoice<C> {
+pub(crate) struct SelectedChoice<C> {
     pub player_index: usize,
     pub player_name: String,
     pub origin: EventOrigin,
@@ -63,10 +64,6 @@ impl<C> SelectedChoice<C> {
             game.player_name(player_index),
             self.origin.clone(),
         )
-    }
-
-    pub fn gain_resources(&self, game: &mut Game, resources: ResourcePile) {
-        self.player().gain_resources(game, resources);
     }
 }
 
@@ -908,18 +905,34 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         )
     }
 
+    fn add_custom_action_with_city_checker(
+        self,
+        action: CustomActionType,
+        cost: impl Fn(CustomActionOncePerTurn) -> CustomActionCost + Send + Sync + 'static,
+        ability: impl Fn(AbilityBuilder) -> AbilityBuilder + Sync + Send + 'static,
+        can_play: impl Fn(&Game, &Player) -> bool + Sync + Send + 'static,
+        city_checker: impl Fn(&Game, &City) -> bool + Sync + Send + 'static,
+    ) -> Self {
+        let name = self.name();
+        let desc = self.description();
+        self.add_custom_action_execution(
+            action,
+            cost,
+            CustomActionExecution::Action(CustomActionActionExecution::new(
+                ability(Ability::builder(&name, &desc)).build(),
+                Arc::new(can_play),
+                Some(Arc::new(city_checker)),
+            )),
+        )
+    }
+
     fn add_action_modifier(
         self,
         action: CustomActionType,
         info: impl Fn(CustomActionOncePerTurn) -> CustomActionCost + Send + Sync + 'static,
         base_action: PlayingActionType,
     ) -> Self {
-        let name = self.name();
-        self.add_custom_action_execution(
-            action,
-            info,
-            CustomActionExecution::Modifier((base_action, name.clone())),
-        )
+        self.add_custom_action_execution(action, info, CustomActionExecution::Modifier(base_action))
     }
 
     fn add_custom_action_execution(

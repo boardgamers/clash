@@ -14,9 +14,7 @@ use crate::leader_ability::{
 };
 use crate::map::{block_for_position, block_has_player_city};
 use crate::objective_card::{discard_objective_card, gain_objective_card_from_pile};
-use crate::payment::{
-    PaymentConversion, PaymentConversionType, PaymentOptions, PaymentReason, base_resources,
-};
+use crate::payment::{PaymentConversion, PaymentConversionType, base_resources};
 use crate::player::{can_add_army_unit, gain_unit};
 use crate::playing_actions::PlayingActionType;
 use crate::position::Position;
@@ -145,11 +143,9 @@ fn provinces() -> SpecialAdvanceInfo {
             s.captured_city(player.index)
                 .is_some()
                 .then_some(vec![PaymentRequest::optional(
-                    PaymentOptions::resources(
-                        player.get(game),
-                        PaymentReason::AdvanceAbility,
-                        ResourcePile::culture_tokens(1),
-                    ),
+                    player
+                        .payment_options()
+                        .resources(player.get(game), ResourcePile::culture_tokens(1)),
                     "Pay 1 culture token to make the city happy",
                 )])
         },
@@ -313,24 +309,19 @@ fn proconsul() -> LeaderAbility {
     .add_payment_request_listener(
         |event| &mut event.combat_end,
         22,
-        |game, p, s| {
-            let player = p.index;
-            if !s.player(player).survived_leader() {
+        |game, player, s| {
+            if !s.player(player.index).survived_leader() {
                 return None;
             }
 
-            let p = game.player(player);
+            let p = game.player(player.index);
             if p.available_units().infantry == 0 || !can_add_army_unit(p, leader_position(p)) {
                 return None;
             }
-            s.captured_city(player)
+            s.captured_city(player.index)
                 .is_some()
                 .then_some(vec![PaymentRequest::optional(
-                    PaymentOptions::resources(
-                        p,
-                        PaymentReason::LeaderAbility,
-                        ResourcePile::gold(1),
-                    ),
+                    player.payment_options().resources(p, ResourcePile::gold(1)),
                     "Pay 1 gold to gain 1 infantry",
                 )])
         },

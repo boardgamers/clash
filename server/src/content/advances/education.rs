@@ -7,7 +7,6 @@ use crate::content::ability::Ability;
 use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::content::persistent_events::PaymentRequest;
 use crate::objective_card::draw_and_log_objective_card_from_pile;
-use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::gain_resources;
 use crate::resource_pile::ResourcePile;
 
@@ -104,11 +103,8 @@ fn free_education() -> AdvanceBuilder {
                 || i.payment.has_at_least(&ResourcePile::ideas(1))
             {
                 Some(vec![PaymentRequest::optional(
-                    PaymentOptions::resources(
-                        p.get(game),
-                        PaymentReason::AdvanceAbility,
-                        ResourcePile::ideas(1),
-                    ),
+                    p.payment_options()
+                        .resources(p.get(game), ResourcePile::ideas(1)),
                     "Pay extra 1 idea for a mood token",
                 )])
             } else {

@@ -195,9 +195,9 @@ fn description(rc: &RenderContext, a: &AdvanceInfo) -> Vec<String> {
     }
     if a.advance == Advance::Bartering {
         parts.push("Can build in a city with a Market: cavalry".to_string());
-        add_unit_description(&mut parts, UnitType::Cavalry);
+        add_unit_description(rc, &mut parts, UnitType::Cavalry);
         parts.push("Can build in a city with a Market: elephant".to_string());
-        add_unit_description(&mut parts, UnitType::Elephant);
+        add_unit_description(rc, &mut parts, UnitType::Elephant);
     }
 
     if let Some(a) = find_special_advance(a.advance, rc.game, rc.shown_player.index) {

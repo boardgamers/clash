@@ -17,7 +17,7 @@ use crate::content::persistent_events::{
 };
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, IncidentBuilder};
-use crate::payment::{PaymentOptions, PaymentReason};
+use crate::payment::PaymentOptions;
 use crate::player::{Player, gain_resources};
 use crate::player_events::IncidentTarget;
 use crate::playing_actions::ActionCost;
@@ -81,18 +81,16 @@ fn incident(
         .add_incident_payment_request(
             IncidentTarget::AllPlayers,
             10,
-            move |game, p, incident| {
-                let cost = if incident.active_player == p.index {
+            move |game, player, incident| {
+                let cost = if incident.active_player == player.index {
                     1
                 } else {
                     2
                 };
-                let p = game.player(p.index);
-                let options = PaymentOptions::resources(
-                    p,
-                    PaymentReason::ActionCard,
-                    ResourcePile::culture_tokens(cost),
-                );
+                let p = game.player(player.index);
+                let options = player
+                    .payment_options()
+                    .resources(p, ResourcePile::culture_tokens(cost));
                 if p.can_afford(&options) {
                     Some(vec![PaymentRequest::optional(
                         options,
@@ -455,16 +453,14 @@ fn great_athlete() -> ActionCard {
                 p.resources.culture_tokens > 0
             };
             let options = if culture_to_mood {
-                PaymentOptions::single_type(
+                player.payment_options().single_type(
                     p,
-                    PaymentReason::ActionCard,
                     ResourceType::CultureTokens,
                     0..=p.resources.culture_tokens,
                 )
             } else {
-                PaymentOptions::single_type(
+                player.payment_options().single_type(
                     p,
-                    PaymentReason::ActionCard,
                     ResourceType::MoodTokens,
                     0..=p.resources.mood_tokens,
                 )

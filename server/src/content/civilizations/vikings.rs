@@ -16,7 +16,6 @@ use crate::leader::{Leader, LeaderInfo, leader_position};
 use crate::leader_ability::{LeaderAbility, activate_leader_city, can_activate_leader_city};
 use crate::map::{Block, Terrain, block_for_position, capital_city_position};
 use crate::movement::{MoveUnits, move_action_log};
-use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::Player;
 use crate::position::Position;
 use crate::resource::ResourceType;
@@ -212,12 +211,9 @@ pub(crate) fn lose_raid_resource() -> Ability {
         |e| &mut e.turn_start,
         4,
         |game, p, ()| {
-            let c = PaymentOptions::sum(
-                p.get(game),
-                PaymentReason::SpecialAdvanceAbility,
-                1,
-                &ResourceType::resources(),
-            );
+            let c = p
+                .payment_options()
+                .sum(p.get(game), 1, &ResourceType::resources());
             let p = p.get_mut(game);
             if !p.can_afford(&c) {
                 return None;

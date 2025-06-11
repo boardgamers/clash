@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -294,42 +293,7 @@
                         "port_position": null
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 1
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/cities/0/activations"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/cities/0/city_pieces"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/food",
-                      "value": 6
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/ideas",
-                      "value": 1
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/ore",
-                      "value": 6
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/wood",
-                      "value": 6
-                    }
-                  ]
+                  }
                 }
               ]
             }

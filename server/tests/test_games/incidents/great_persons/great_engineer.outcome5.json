@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -261,42 +260,7 @@
                     "Response": {
                       "Bool": true
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 1
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "ActionCard": {
-                              "id": 126
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "CivilCard": 126
-                            },
-                            "priority": 0,
-                            "request": {
-                              "BoolRequest": "Build a building in a city without spending an action and without activating it?"
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/permanent_effects"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -312,42 +276,7 @@
                         "port_position": null
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 2
-                    },
-                    {
-                      "op": "add",
-                      "path": "/permanent_effects",
-                      "value": [
-                        {
-                          "Construct": "GreatEngineer"
-                        }
-                      ]
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/cities/0/city_pieces/fortress"
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/resources/food",
-                      "value": 1
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/ore",
-                      "value": 6
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/wood",
-                      "value": 6
-                    }
-                  ]
+                  }
                 }
               ]
             }

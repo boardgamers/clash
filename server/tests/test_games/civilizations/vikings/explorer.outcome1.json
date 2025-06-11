@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -267,18 +266,7 @@
                         "action": "LegendaryExplorer"
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 2
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -289,81 +277,7 @@
                         }
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "PayAction": {
-                              "action": {
-                                "Custom": {
-                                  "action": "LegendaryExplorer"
-                                }
-                              }
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Ability": "Pay for action"
-                            },
-                            "priority": 0,
-                            "request": {
-                              "Payment": [
-                                {
-                                  "cost": {
-                                    "conversions": [
-                                      {
-                                        "from": [
-                                          {
-                                            "food": 1
-                                          },
-                                          {
-                                            "wood": 1
-                                          },
-                                          {
-                                            "ore": 1
-                                          },
-                                          {
-                                            "ideas": 1
-                                          }
-                                        ],
-                                        "to": {
-                                          "gold": 1
-                                        },
-                                        "type": "Unlimited"
-                                      }
-                                    ],
-                                    "default": {
-                                      "culture_tokens": 1
-                                    }
-                                  },
-                                  "name": "Pay for action",
-                                  "optional": false
-                                }
-                              ]
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "origin_override": {
-                            "LeaderAbility": "Legendary Explorer"
-                          },
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/culture_tokens",
-                      "value": 9
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/special_victory_points"
-                    }
-                  ]
+                  }
                 }
               ]
             }

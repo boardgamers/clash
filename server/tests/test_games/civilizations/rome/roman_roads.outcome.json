@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -280,78 +279,7 @@
                         }
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 2
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/food",
-                      "value": 2
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/ore",
-                      "value": 5
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/0/position",
-                      "value": "E2"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/units/0/movement_restrictions"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/1/position",
-                      "value": "E2"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/units/1/movement_restrictions"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/2/position",
-                      "value": "E2"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/units/2/movement_restrictions"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/3/position",
-                      "value": "E2"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/units/3/movement_restrictions"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/4/position",
-                      "value": "E2"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/units/4/movement_restrictions"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/5/position",
-                      "value": "E2"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/units/5/movement_restrictions"
-                    }
-                  ]
+                  }
                 }
               ]
             }

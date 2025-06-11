@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -219,28 +218,7 @@
                         "payment": {}
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 2
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/advances/3"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/incident_tokens",
-                      "value": 3
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 7
-                    }
-                  ]
+                  }
                 }
               ]
             }

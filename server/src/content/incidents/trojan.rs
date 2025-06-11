@@ -10,7 +10,6 @@ use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect};
 use crate::leader::Leader;
-use crate::payment::{PaymentOptions, PaymentReason};
 use crate::player::{Player, can_add_army_unit, gain_unit};
 use crate::player_events::{IncidentInfo, IncidentTarget};
 use crate::position::Position;
@@ -51,9 +50,8 @@ pub(crate) fn decide_trojan_horse() -> Ability {
                     game.permanent_effects.iter().find_map(|e| {
                         matches!(e, PermanentEffect::TrojanHorse).then_some(vec![
                             PaymentRequest::optional(
-                                PaymentOptions::resources(
+                                p.payment_options().resources(
                                     p.get(game),
-                                    PaymentReason::AdvanceAbility,
                                     ResourcePile::wood(1) + ResourcePile::culture_tokens(1),
                                 ),
                                 "Activate the Trojan Horse?",

@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -318,35 +317,7 @@
                         "destination": "A7"
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "remove",
-                      "path": "/players/1/resources/culture_tokens"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/1/resources/ideas"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/units/0/position",
-                      "value": "B5"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/1/event_info"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/state",
-                      "value": {
-                        "Movement": {
-                          "movement_actions_left": 2
-                        }
-                      }
-                    }
-                  ]
+                  }
                 }
               ]
             }

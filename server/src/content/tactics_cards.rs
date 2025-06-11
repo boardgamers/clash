@@ -4,7 +4,6 @@ use crate::combat::{Combat, update_combat_strength};
 use crate::combat_listeners::{CombatResult, CombatRoundStart, CombatStrength, kill_combat_units};
 use crate::content::persistent_events::{PaymentRequest, PositionRequest, UnitsRequest};
 use crate::game::Game;
-use crate::payment::{PaymentOptions, PaymentReason};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::tactics_card::{
@@ -182,22 +181,17 @@ pub(crate) fn siege(id: u8) -> TacticsCard {
     .add_payment_request_listener(
         |event| &mut event.combat_round_start_tactics,
         0,
-        move |game, p, s| {
-            let player = p.index;
-            if s.is_active(player, id, TacticsCardTarget::Opponent) {
-                let p = p.get(game);
-                let cost = PaymentOptions::resources(
-                    p,
-                    PaymentReason::AdvanceAbility,
-                    ResourcePile::food(2),
-                );
+        move |game, player, s| {
+            if s.is_active(player.index, id, TacticsCardTarget::Opponent) {
+                let p = player.get(game);
+                let cost = player.payment_options().resources(p, ResourcePile::food(2));
                 if p.can_afford(&cost) {
                     return Some(vec![PaymentRequest::optional(
                         cost,
                         "Pay 2 food to use combat abilities this round",
                     )]);
                 }
-                apply_siege(game, s, player);
+                apply_siege(game, s, player.index);
             }
             None
         },
