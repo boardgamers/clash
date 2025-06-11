@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -279,46 +278,7 @@
                         }
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 3
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/available_leaders/1",
-                      "value": "Augustus"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/cities/0/activations"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/next_unit_id",
-                      "value": 10
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/culture_tokens",
-                      "value": 9
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 9
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/units/10"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/recruited_leaders"
-                    }
-                  ]
+                  }
                 }
               ]
             }

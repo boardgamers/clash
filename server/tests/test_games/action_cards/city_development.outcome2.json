@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -220,18 +219,7 @@
                     "Playing": {
                       "ActionCard": 17
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 3
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -242,95 +230,7 @@
                         }
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 2
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "PayAction": {
-                              "action": {
-                                "ActionCard": 17
-                              }
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Ability": "Pay for action"
-                            },
-                            "priority": 0,
-                            "request": {
-                              "Payment": [
-                                {
-                                  "cost": {
-                                    "conversions": [
-                                      {
-                                        "from": [
-                                          {
-                                            "food": 1
-                                          },
-                                          {
-                                            "wood": 1
-                                          },
-                                          {
-                                            "ore": 1
-                                          },
-                                          {
-                                            "ideas": 1
-                                          }
-                                        ],
-                                        "to": {
-                                          "gold": 1
-                                        },
-                                        "type": "Unlimited"
-                                      }
-                                    ],
-                                    "default": {
-                                      "culture_tokens": 1
-                                    }
-                                  },
-                                  "name": "Pay for action",
-                                  "optional": false
-                                }
-                              ]
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "origin_override": {
-                            "CivilCard": 17
-                          },
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/action_cards",
-                      "value": [
-                        17
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/culture_tokens",
-                      "value": 7
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/action_cards_discarded"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/permanent_effects"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -342,31 +242,7 @@
                         "port_position": null
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 3
-                    },
-                    {
-                      "op": "add",
-                      "path": "/permanent_effects",
-                      "value": [
-                        {
-                          "Construct": "CityDevelopment"
-                        }
-                      ]
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/cities/0/city_pieces/fortress"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/cities/0/activations"
-                    }
-                  ]
+                  }
                 }
               ]
             }

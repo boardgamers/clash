@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": {
     "Movement": {
       "movement_actions_left": 2,
@@ -360,88 +359,7 @@
                         "culture_tokens": 1
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events/0/event_type/CombatEnd",
-                      "value": {
-                        "attacker": {
-                          "player": 0,
-                          "position": "C3",
-                          "present": {
-                            "ships": 2
-                          }
-                        },
-                        "battleground": "Sea",
-                        "defender": {
-                          "losses": {
-                            "ships": 1
-                          },
-                          "player": 2,
-                          "position": "C4",
-                          "present": {
-                            "ships": 1
-                          }
-                        },
-                        "result": "AttackerWins",
-                        "round": 1
-                      }
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/0/event_type/SelectObjectives"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/handler/origin/Ability",
-                      "value": "Pirates battle"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/handler/priority",
-                      "value": 103
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/0/handler/request/ResourceReward",
-                      "value": {
-                        "name": "Select a reward for fighting the Pirates",
-                        "reward": {
-                          "conversions": [
-                            {
-                              "from": [
-                                {
-                                  "mood_tokens": 1
-                                }
-                              ],
-                              "to": {
-                                "culture_tokens": 1
-                              },
-                              "type": "Unlimited"
-                            }
-                          ],
-                          "default": {
-                            "mood_tokens": 1
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/0/handler/request/SelectHandCards"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/last_priority_used",
-                      "value": 103
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/culture_tokens",
-                      "value": 11
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -453,61 +371,6 @@
                       ]
                     }
                   },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "SelectObjectives": {
-                              "cards": [
-                                {
-                                  "ObjectiveCard": 38
-                                }
-                              ],
-                              "objective_opportunities": [
-                                "Sea Cleansing"
-                              ]
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Ability": "Select Objective Cards to Complete"
-                            },
-                            "priority": 0,
-                            "request": {
-                              "SelectHandCards": {
-                                "choices": [
-                                  {
-                                    "ObjectiveCard": 38
-                                  }
-                                ],
-                                "description": "Select cards to complete",
-                                "needed": {
-                                  "end": 1,
-                                  "start": 0
-                                }
-                              }
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/objective_cards",
-                      "value": [
-                        38
-                      ]
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/completed_objectives"
-                    }
-                  ],
                   "completed_objectives": [
                     "Sea Cleansing"
                   ]

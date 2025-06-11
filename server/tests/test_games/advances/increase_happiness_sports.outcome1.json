@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -259,18 +258,7 @@
                         "city": "C2"
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 3
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -281,72 +269,7 @@
                         }
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "CustomAction": {
-                              "action": "Sports",
-                              "city": "C2"
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Ability": "Sports"
-                            },
-                            "priority": 0,
-                            "request": {
-                              "Payment": [
-                                {
-                                  "cost": {
-                                    "conversions": [
-                                      {
-                                        "from": [
-                                          {
-                                            "culture_tokens": 1
-                                          }
-                                        ],
-                                        "to": {},
-                                        "type": {
-                                          "MayOverpay": 1
-                                        }
-                                      }
-                                    ],
-                                    "default": {
-                                      "culture_tokens": 2
-                                    }
-                                  },
-                                  "name": "Each culture token increases the happiness by 1 step",
-                                  "optional": false
-                                }
-                              ]
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/cities/1/angry_activation",
-                      "value": true
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/cities/1/mood_state",
-                      "value": "Angry"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/culture_tokens",
-                      "value": 9
-                    }
-                  ]
+                  }
                 }
               ]
             }

@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -231,82 +230,7 @@
                         }
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "ActionCard": {
-                              "id": 31
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "CivilCard": 31
-                            },
-                            "priority": 0,
-                            "request": {
-                              "SelectHandCards": {
-                                "choices": [
-                                  {
-                                    "ObjectiveCard": 1
-                                  },
-                                  {
-                                    "ObjectiveCard": 2
-                                  },
-                                  {
-                                    "ObjectiveCard": 3
-                                  },
-                                  {
-                                    "ObjectiveCard": 4
-                                  }
-                                ],
-                                "description": "Select objective cards to draw and discard",
-                                "needed": {
-                                  "end": 2,
-                                  "start": 0
-                                }
-                              }
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/objective_cards_left/0",
-                      "value": 3
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/objective_cards_left/1",
-                      "value": 4
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/objective_cards_left/2",
-                      "value": 5
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/objective_cards_left/3",
-                      "value": 6
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/objective_cards/1",
-                      "value": 2
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/rng"
-                    }
-                  ]
+                  }
                 }
               ]
             }

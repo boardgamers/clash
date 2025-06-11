@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "events": [
     {
@@ -267,55 +266,7 @@
                         "B3"
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "remove",
-                      "path": "/events/1/event_type/Incident/barbarians/selected_position"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/1/handler/priority",
-                      "value": 200
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/1/handler/request/SelectPositions",
-                      "value": {
-                        "choices": [
-                          "A3",
-                          "B3"
-                        ],
-                        "description": "Barbarians spawn: Select a position for the new city and infantry unit",
-                        "needed": {
-                          "end": 1,
-                          "start": 1
-                        }
-                      }
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/1/handler/request/SelectUnitType"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/1/last_priority_used",
-                      "value": 200
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/2/next_unit_id",
-                      "value": 0
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/2/cities"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/2/units"
-                    }
-                  ]
+                  }
                 }
               ]
             }

@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -280,22 +279,7 @@
                         "action": "Taxes"
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 1
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/played_once_per_turn_actions"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -306,82 +290,7 @@
                         }
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events/0/event_type/PayAction",
-                      "value": {
-                        "action": {
-                          "Custom": {
-                            "action": "Taxes"
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/0/event_type/CustomAction"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/handler/origin/Ability",
-                      "value": "Pay for action"
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/0/handler/request/Payment",
-                      "value": [
-                        {
-                          "cost": {
-                            "conversions": [
-                              {
-                                "from": [
-                                  {
-                                    "food": 1
-                                  },
-                                  {
-                                    "wood": 1
-                                  },
-                                  {
-                                    "ore": 1
-                                  },
-                                  {
-                                    "ideas": 1
-                                  }
-                                ],
-                                "to": {
-                                  "gold": 1
-                                },
-                                "type": "Unlimited"
-                              }
-                            ],
-                            "default": {
-                              "mood_tokens": 1
-                            }
-                          },
-                          "name": "Pay for action",
-                          "optional": false
-                        }
-                      ]
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/0/handler/request/ResourceReward"
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/0/origin_override",
-                      "value": {
-                        "Advance": "Taxes"
-                      }
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 11
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -393,93 +302,7 @@
                         "gold": 1
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "CustomAction": {
-                              "action": "Taxes",
-                              "payment": {
-                                "mood_tokens": 1
-                              }
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Ability": "Taxes"
-                            },
-                            "priority": 0,
-                            "request": {
-                              "ResourceReward": {
-                                "name": "Select a resource to gain",
-                                "reward": {
-                                  "conversions": [
-                                    {
-                                      "from": [
-                                        {
-                                          "gold": 1
-                                        }
-                                      ],
-                                      "to": {
-                                        "food": 1
-                                      },
-                                      "type": "Unlimited"
-                                    },
-                                    {
-                                      "from": [
-                                        {
-                                          "food": 1
-                                        }
-                                      ],
-                                      "to": {
-                                        "wood": 1
-                                      },
-                                      "type": "Unlimited"
-                                    },
-                                    {
-                                      "from": [
-                                        {
-                                          "wood": 1
-                                        }
-                                      ],
-                                      "to": {
-                                        "ore": 1
-                                      },
-                                      "type": "Unlimited"
-                                    }
-                                  ],
-                                  "default": {
-                                    "gold": 4
-                                  }
-                                }
-                              }
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/gold",
-                      "value": 5
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/ore",
-                      "value": 5
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/wood",
-                      "value": 5
-                    }
-                  ]
+                  }
                 }
               ]
             }

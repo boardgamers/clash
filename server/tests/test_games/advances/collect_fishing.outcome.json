@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -292,23 +291,7 @@
                         "action_type": "Collect"
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 2
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/cities/1/activations",
-                      "value": 6
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/cities/1/angry_activation"
-                    }
-                  ]
+                  }
                 }
               ]
             }

@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "events": [
     {
@@ -265,98 +264,14 @@
                         }
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 1
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/advances/3"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/incident_tokens",
-                      "value": 1
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resource_limit/food",
-                      "value": 2
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/ideas",
-                      "value": 5
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 7
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
                     "Response": {
                       "Bool": true
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events/0/event_type/ChooseIncident",
-                      "value": {
-                        "active_player": 0,
-                        "incident_id": 0
-                      }
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/0/event_type/Incident"
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/0/handler/origin/Ability",
-                      "value": "Great Mausoleum"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/0/handler/origin/Incident"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/handler/priority",
-                      "value": 0
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/0/handler/request/BoolRequest",
-                      "value": "Do you want to draw Pestilence from the discard pile?"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/0/handler/request/SelectPositions"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/last_priority_used",
-                      "value": 0
-                    },
-                    {
-                      "op": "add",
-                      "path": "/incidents_discarded",
-                      "value": [
-                        1
-                      ]
-                    }
-                  ]
+                  }
                 }
               ]
             }

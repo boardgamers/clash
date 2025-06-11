@@ -52,6 +52,13 @@ pub struct GameOptions {
     pub undo: UndoOption,
 }
 
+impl GameOptions {
+    #[must_use]
+    pub fn is_default(&self) -> bool {
+        self == &GameOptions::default()
+    }
+}
+
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub enum GameContext {
     Play,

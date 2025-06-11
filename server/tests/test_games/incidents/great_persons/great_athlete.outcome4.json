@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -219,171 +218,21 @@
                         }
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "Incident": {
-                              "active_player": 0,
-                              "barbarians": {},
-                              "incident_id": 56
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Incident": 56
-                            },
-                            "priority": 10,
-                            "request": {
-                              "Payment": [
-                                {
-                                  "cost": {
-                                    "conversions": [
-                                      {
-                                        "from": [
-                                          {
-                                            "food": 1
-                                          },
-                                          {
-                                            "wood": 1
-                                          },
-                                          {
-                                            "ore": 1
-                                          },
-                                          {
-                                            "ideas": 1
-                                          }
-                                        ],
-                                        "to": {
-                                          "gold": 1
-                                        },
-                                        "type": "Unlimited"
-                                      }
-                                    ],
-                                    "default": {
-                                      "culture_tokens": 1
-                                    }
-                                  },
-                                  "name": "Pay to gain the Action Card",
-                                  "optional": true
-                                }
-                              ]
-                            }
-                          },
-                          "last_priority_used": 10,
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/culture_tokens",
-                      "value": 7
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/action_cards"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
                     "Playing": {
                       "ActionCard": 156
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 2
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/action_cards",
-                      "value": [
-                        156
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/advances/0",
-                      "value": "Engineering"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/advances/1",
-                      "value": "Farming"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/advances/2",
-                      "value": "Mining"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/advances/3",
-                      "value": "Storage"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/advances/4",
-                      "value": "Tactics"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/advances/5"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/culture_tokens",
-                      "value": 6
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/action_cards_discarded"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
                     "Response": {
                       "Bool": true
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "remove",
-                      "path": "/events/0/event_type/ActionCard/answer"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/handler/priority",
-                      "value": 1
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/0/handler/request/BoolRequest",
-                      "value": "Convert culture to mood tokens?"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/0/handler/request/Payment"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/last_priority_used",
-                      "value": 1
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -394,67 +243,7 @@
                         }
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "ActionCard": {
-                              "answer": true,
-                              "id": 156
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "CivilCard": 156
-                            },
-                            "priority": 0,
-                            "request": {
-                              "Payment": [
-                                {
-                                  "cost": {
-                                    "conversions": [
-                                      {
-                                        "from": [
-                                          {
-                                            "culture_tokens": 1
-                                          }
-                                        ],
-                                        "to": {},
-                                        "type": {
-                                          "MayOverpay": 7
-                                        }
-                                      }
-                                    ],
-                                    "default": {
-                                      "culture_tokens": 7
-                                    }
-                                  },
-                                  "name": "Convert resources",
-                                  "optional": true
-                                }
-                              ]
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/culture_tokens",
-                      "value": 7
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 8
-                    }
-                  ]
+                  }
                 }
               ]
             }

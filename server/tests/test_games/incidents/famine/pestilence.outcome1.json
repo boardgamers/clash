@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "events": [
     {
@@ -263,60 +262,7 @@
                         }
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "remove",
-                      "path": "/events/0/event_type/Incident/myths_payment"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/handler/priority",
-                      "value": 10
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/0/handler/request/Payment",
-                      "value": [
-                        {
-                          "cost": {
-                            "conversions": [
-                              {
-                                "from": [
-                                  {
-                                    "mood_tokens": 1
-                                  }
-                                ],
-                                "to": {},
-                                "type": {
-                                  "MayOverpay": 2
-                                }
-                              }
-                            ],
-                            "default": {
-                              "mood_tokens": 2
-                            }
-                          },
-                          "name": "You may pay 1 mood token for each city to avoid reducing the mood",
-                          "optional": false
-                        }
-                      ]
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/0/handler/request/SelectPositions"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/last_priority_used",
-                      "value": 10
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 8
-                    }
-                  ]
+                  }
                 }
               ]
             }

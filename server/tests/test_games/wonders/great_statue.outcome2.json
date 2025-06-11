@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -231,25 +230,7 @@
                         "action": "GreatStatue"
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 1
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/objective_cards",
-                      "value": [
-                        1
-                      ]
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/played_once_per_turn_actions"
-                    }
-                  ]
+                  }
                 }
               ]
             }

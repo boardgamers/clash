@@ -210,54 +210,7 @@
                         "port_position": null
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/action_cards_left",
-                      "value": [
-                        1
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 1
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/cities/1/activations",
-                      "value": 8
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/cities/1/mood_state",
-                      "value": "Happy"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/cities/1/city_pieces"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/food",
-                      "value": 2
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/ore",
-                      "value": 7
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/wood",
-                      "value": 7
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/action_cards"
-                    }
-                  ]
+                  }
                 }
               ]
             }

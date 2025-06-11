@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "events": [
     {
@@ -254,49 +253,7 @@
                         7
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/events/1/handler/priority",
-                      "value": 105
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/1/handler/request/SelectUnits",
-                      "value": {
-                        "choices": [
-                          5,
-                          6,
-                          7
-                        ],
-                        "description": "Select Pirate Ships to remove",
-                        "needed": {
-                          "end": 1,
-                          "start": 1
-                        },
-                        "player": 2
-                      }
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/1/handler/request/SelectPositions"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/1/last_priority_used",
-                      "value": 105
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/2/units/2",
-                      "value": {
-                        "id": 7,
-                        "position": "D1",
-                        "unit_type": "Ship"
-                      }
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -305,28 +262,7 @@
                         "A2"
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/events/1/handler/priority",
-                      "value": 104
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/1/last_priority_used",
-                      "value": 104
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/2/next_unit_id",
-                      "value": 9
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/2/units/2"
-                    }
-                  ]
+                  }
                 }
               ]
             }

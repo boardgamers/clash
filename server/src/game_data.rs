@@ -30,6 +30,7 @@ use std::mem;
 #[derive(Serialize, Deserialize, PartialEq)]
 pub struct GameData {
     #[serde(default)]
+    #[serde(skip_serializing_if = "GameOptions::is_default")]
     options: GameOptions,
     #[serde(default)]
     #[serde(skip_serializing_if = "u16::is_zero")]
@@ -47,7 +48,7 @@ pub struct GameData {
     current_player_index: usize,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    action_log: Vec<ActionLogAge>,
+    pub action_log: Vec<ActionLogAge>,
     action_log_index: usize,
     log: Vec<Vec<String>>,
     undo_limit: usize,

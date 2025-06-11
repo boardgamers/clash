@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -290,56 +289,7 @@
                         "payment": {}
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 2
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/3",
-                      "value": "Mining"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/4",
-                      "value": "Myths"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/5",
-                      "value": "Philosophy"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/6",
-                      "value": "Priesthood"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/1/advances/7"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/incident_tokens",
-                      "value": 3
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/resources/culture_tokens",
-                      "value": 9
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/1/resources/ideas"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/1/event_info"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -351,78 +301,7 @@
                         }
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 1
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/0",
-                      "value": "Dogma"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/1",
-                      "value": "Farming"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/2",
-                      "value": "Fishing"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/3",
-                      "value": "Math"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/4",
-                      "value": "Mining"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/5",
-                      "value": "Myths"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/6",
-                      "value": "Philosophy"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/7",
-                      "value": "Priesthood"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/1/advances/8"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/incident_tokens",
-                      "value": 2
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/resources/culture_tokens",
-                      "value": 10
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/resources/gold",
-                      "value": 5
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/resources/ideas",
-                      "value": 1
-                    }
-                  ]
+                  }
                 }
               ]
             }

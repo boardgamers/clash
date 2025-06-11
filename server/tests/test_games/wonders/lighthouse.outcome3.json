@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -215,18 +214,7 @@
                     "Playing": {
                       "WonderCard": "GreatLighthouse"
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 3
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -241,147 +229,6 @@
                       ]
                     }
                   },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "WonderCard": {
-                              "cost": {
-                                "activate_city": true,
-                                "cost": {
-                                  "conversions": [
-                                    {
-                                      "from": [
-                                        {
-                                          "food": 1
-                                        },
-                                        {
-                                          "wood": 1
-                                        },
-                                        {
-                                          "ore": 1
-                                        },
-                                        {
-                                          "ideas": 1
-                                        }
-                                      ],
-                                      "to": {
-                                        "gold": 1
-                                      },
-                                      "type": "Unlimited"
-                                    }
-                                  ],
-                                  "default": {
-                                    "culture_tokens": 5,
-                                    "food": 3,
-                                    "ore": 4,
-                                    "wood": 5
-                                  }
-                                },
-                                "ignore_action_cost": false,
-                                "ignore_required_advances": false,
-                                "info": {
-                                  "info": {},
-                                  "log": [],
-                                  "player": 0
-                                }
-                              },
-                              "selected_position": "A1",
-                              "wonder": "GreatLighthouse"
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Ability": "Build Wonder"
-                            },
-                            "priority": 10,
-                            "request": {
-                              "Payment": [
-                                {
-                                  "cost": {
-                                    "conversions": [
-                                      {
-                                        "from": [
-                                          {
-                                            "food": 1
-                                          },
-                                          {
-                                            "wood": 1
-                                          },
-                                          {
-                                            "ore": 1
-                                          },
-                                          {
-                                            "ideas": 1
-                                          }
-                                        ],
-                                        "to": {
-                                          "gold": 1
-                                        },
-                                        "type": "Unlimited"
-                                      }
-                                    ],
-                                    "default": {
-                                      "culture_tokens": 5,
-                                      "food": 3,
-                                      "ore": 4,
-                                      "wood": 5
-                                    }
-                                  },
-                                  "name": "Pay to build wonder",
-                                  "optional": false
-                                }
-                              ]
-                            }
-                          },
-                          "last_priority_used": 10,
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/cities/0/city_pieces/wonders"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/cities/0/activations"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/culture_tokens",
-                      "value": 7
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/food",
-                      "value": 7
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/ore",
-                      "value": 7
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/wood",
-                      "value": 7
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/wonder_cards",
-                      "value": [
-                        "GreatLighthouse"
-                      ]
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/wonders_built"
-                    }
-                  ],
                   "wonder_built": "GreatLighthouse"
                 },
                 {
@@ -391,13 +238,7 @@
                         "action": "GreatLighthouse"
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "remove",
-                      "path": "/events"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -406,63 +247,7 @@
                         "C3"
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "CustomAction": {
-                              "action": "GreatLighthouse"
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Ability": "Great Lighthouse"
-                            },
-                            "priority": 0,
-                            "request": {
-                              "SelectPositions": {
-                                "choices": [
-                                  "A2",
-                                  "C3",
-                                  "D2"
-                                ],
-                                "description": "Select a sea space to place a ship",
-                                "needed": {
-                                  "end": 1,
-                                  "start": 1
-                                }
-                              }
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/cities/0/activations",
-                      "value": 1
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/cities/0/mood_state",
-                      "value": "Happy"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/next_unit_id",
-                      "value": 8
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/units/8"
-                    }
-                  ]
+                  }
                 }
               ]
             }

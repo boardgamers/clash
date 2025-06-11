@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": {
     "Movement": {
       "movement_actions_left": 1,
@@ -215,65 +214,7 @@
                     "Response": {
                       "Bool": true
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "CombatRoundEnd": {
-                              "attacker": {
-                                "combat_value": 1,
-                                "opponent_fighters": 2
-                              },
-                              "combat": {
-                                "attackers": [
-                                  0
-                                ],
-                                "retreat": "CanRetreat",
-                                "stats": {
-                                  "attacker": {
-                                    "player": 0,
-                                    "position": "C2",
-                                    "present": {
-                                      "infantry": 1
-                                    }
-                                  },
-                                  "battleground": "City",
-                                  "city_mood": "Angry",
-                                  "defender": {
-                                    "player": 1,
-                                    "position": "C1",
-                                    "present": {
-                                      "infantry": 2
-                                    }
-                                  },
-                                  "round": 1
-                                }
-                              },
-                              "defender": {
-                                "combat_value": 2,
-                                "opponent_fighters": 1
-                              }
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Ability": "Offer Retreat"
-                            },
-                            "priority": 0,
-                            "request": {
-                              "BoolRequest": "Do you want to retreat?"
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 0
-                        }
-                      ]
-                    }
-                  ]
+                  }
                 }
               ]
             }

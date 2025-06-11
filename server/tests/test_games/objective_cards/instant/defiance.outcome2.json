@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": {
     "Movement": {
       "movement_actions_left": 1,
@@ -245,66 +244,6 @@
                       ]
                     }
                   },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "SelectObjectives": {
-                              "cards": [
-                                {
-                                  "ObjectiveCard": 2
-                                },
-                                {
-                                  "ObjectiveCard": 7
-                                }
-                              ],
-                              "objective_opportunities": [
-                                "Conqueror",
-                                "Defiance"
-                              ]
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Ability": "Select Objective Cards to Complete"
-                            },
-                            "priority": 0,
-                            "request": {
-                              "SelectHandCards": {
-                                "choices": [
-                                  {
-                                    "ObjectiveCard": 2
-                                  },
-                                  {
-                                    "ObjectiveCard": 7
-                                  }
-                                ],
-                                "description": "Select cards to complete",
-                                "needed": {
-                                  "end": 2,
-                                  "start": 0
-                                }
-                              }
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/objective_cards/3",
-                      "value": 7
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/completed_objectives"
-                    }
-                  ],
                   "completed_objectives": [
                     "Defiance"
                   ]

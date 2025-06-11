@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -253,85 +252,7 @@
                         }
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "Incident": {
-                              "active_player": 0,
-                              "incident_id": 39
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Incident": 39
-                            },
-                            "priority": 0,
-                            "request": {
-                              "Payment": [
-                                {
-                                  "cost": {
-                                    "conversions": [
-                                      {
-                                        "from": [
-                                          {
-                                            "mood_tokens": 1
-                                          }
-                                        ],
-                                        "to": {
-                                          "culture_tokens": 1
-                                        },
-                                        "type": "Unlimited"
-                                      },
-                                      {
-                                        "from": [
-                                          {
-                                            "mood_tokens": 1
-                                          },
-                                          {
-                                            "culture_tokens": 1
-                                          }
-                                        ],
-                                        "to": {},
-                                        "type": {
-                                          "MayOverpay": 3
-                                        }
-                                      }
-                                    ],
-                                    "default": {
-                                      "mood_tokens": 4
-                                    }
-                                  },
-                                  "name": "Pay 1-4 mood or culture tokens",
-                                  "optional": false
-                                }
-                              ]
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/culture_tokens",
-                      "value": 7
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 8
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/special_victory_points"
-                    }
-                  ]
+                  }
                 }
               ]
             }

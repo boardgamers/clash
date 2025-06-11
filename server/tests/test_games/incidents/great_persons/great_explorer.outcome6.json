@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -396,103 +395,7 @@
                     "Response": {
                       "ExploreResolution": 0
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/events/0/last_priority_used",
-                      "value": 9
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/0/handler"
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/1",
-                      "value": {
-                        "event_type": {
-                          "ExploreResolution": {
-                            "block": {
-                              "block": {
-                                "terrain": [
-                                  "Fertile",
-                                  "Fertile",
-                                  "Fertile",
-                                  "Barren"
-                                ]
-                              },
-                              "position": {
-                                "rotation": 0,
-                                "top_tile": "B6"
-                              }
-                            },
-                            "destination": null,
-                            "ship_can_teleport": false,
-                            "start": "B6",
-                            "units": []
-                          }
-                        },
-                        "handler": {
-                          "origin": {
-                            "Ability": "Explore Resolution"
-                          },
-                          "priority": 0,
-                          "request": "ExploreResolution"
-                        },
-                        "last_priority_used": 0,
-                        "player": 1
-                      }
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/tiles/2/1",
-                      "value": "Unexplored"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/tiles/7/1",
-                      "value": "Unexplored"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/tiles/8/1",
-                      "value": "Unexplored"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/tiles/14/1",
-                      "value": "Unexplored"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/unexplored_blocks/6/block/terrain/3",
-                      "value": "Barren"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/unexplored_blocks/6/position/top_tile",
-                      "value": "B6"
-                    },
-                    {
-                      "op": "add",
-                      "path": "/map/unexplored_blocks/7",
-                      "value": {
-                        "block": {
-                          "terrain": [
-                            "Fertile",
-                            "Fertile",
-                            "Fertile",
-                            "Forest"
-                          ]
-                        },
-                        "position": {
-                          "rotation": 0,
-                          "top_tile": "F6"
-                        }
-                      }
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -501,43 +404,7 @@
                         "A7"
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "remove",
-                      "path": "/events/0/event_type/ActionCard/selected_position"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/handler/priority",
-                      "value": 8
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/0/handler/request/SelectPositions",
-                      "value": {
-                        "choices": [
-                          "A7",
-                          "B6",
-                          "C7"
-                        ],
-                        "description": "Place a city for 2 food",
-                        "needed": {
-                          "end": 1,
-                          "start": 0
-                        }
-                      }
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/0/handler/request/Payment"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/last_priority_used",
-                      "value": 8
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -548,81 +415,7 @@
                         }
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "ActionCard": {
-                              "id": 118,
-                              "selected_position": "A7",
-                              "selected_positions": [
-                                "B6",
-                                "A7",
-                                "C7",
-                                "B7"
-                              ]
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "CivilCard": 118
-                            },
-                            "priority": 7,
-                            "request": {
-                              "Payment": [
-                                {
-                                  "cost": {
-                                    "conversions": [
-                                      {
-                                        "from": [
-                                          {
-                                            "food": 1
-                                          },
-                                          {
-                                            "wood": 1
-                                          },
-                                          {
-                                            "ore": 1
-                                          },
-                                          {
-                                            "ideas": 1
-                                          }
-                                        ],
-                                        "to": {
-                                          "gold": 1
-                                        },
-                                        "type": "Unlimited"
-                                      }
-                                    ],
-                                    "default": {
-                                      "food": 2
-                                    }
-                                  },
-                                  "name": "Pay to build the city",
-                                  "optional": false
-                                }
-                              ]
-                            }
-                          },
-                          "last_priority_used": 7,
-                          "player": 1
-                        }
-                      ]
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/1/cities/1"
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/1/resources/food",
-                      "value": 2
-                    }
-                  ]
+                  }
                 }
               ]
             }

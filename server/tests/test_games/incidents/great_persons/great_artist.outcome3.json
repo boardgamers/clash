@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -249,49 +248,7 @@
                     "Playing": {
                       "ActionCard": 119
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 3
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/1/action_cards",
-                      "value": [
-                        119
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/0",
-                      "value": "Farming"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/1",
-                      "value": "Mining"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/1/advances/2"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/cities/0/mood_state",
-                      "value": "Angry"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/resources/culture_tokens",
-                      "value": 5
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/action_cards_discarded"
-                    }
-                  ]
+                  }
                 }
               ]
             }

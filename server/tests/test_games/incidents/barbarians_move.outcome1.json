@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "events": [
     {
@@ -292,102 +291,7 @@
                         "A3"
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/events/0/player",
-                      "value": 0
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/0/handler"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/0/players_used"
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/1",
-                      "value": {
-                        "event_type": {
-                          "Incident": {
-                            "active_player": 0,
-                            "barbarians": {
-                              "move_units": true
-                            },
-                            "incident_id": 28
-                          }
-                        },
-                        "last_priority_used": 199,
-                        "player": 0
-                      }
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/2",
-                      "value": {
-                        "event_type": {
-                          "StopBarbarianMovement": [
-                            "A3",
-                            "B3"
-                          ]
-                        },
-                        "handler": {
-                          "origin": {
-                            "LeaderAbility": "Dictator"
-                          },
-                          "priority": 0,
-                          "request": {
-                            "SelectPositions": {
-                              "choices": [
-                                "A3"
-                              ],
-                              "description": "Select Barbarian Armies that may NOT move",
-                              "needed": {
-                                "end": 1,
-                                "start": 0
-                              }
-                            }
-                          }
-                        },
-                        "last_priority_used": 0,
-                        "player": 1,
-                        "players_used": [
-                          0
-                        ]
-                      }
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/next_unit_id",
-                      "value": 2
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/1/units/2"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/2/next_unit_id",
-                      "value": 5
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/2/units/0/position",
-                      "value": "B3"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/2/units/2/position",
-                      "value": "B3"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/2/units/4"
-                    }
-                  ]
+                  }
                 }
               ]
             }

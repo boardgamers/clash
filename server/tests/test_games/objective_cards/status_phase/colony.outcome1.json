@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Finished",
   "players": [
     {
@@ -416,85 +415,6 @@
                       ]
                     }
                   },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "StatusPhase": "CompleteObjectives"
-                          },
-                          "last_priority_used": 0,
-                          "player": 1
-                        },
-                        {
-                          "event_type": {
-                            "SelectObjectives": {
-                              "cards": [
-                                {
-                                  "ObjectiveCard": 17
-                                },
-                                {
-                                  "ObjectiveCard": 32
-                                }
-                              ],
-                              "objective_opportunities": [
-                                "Colony",
-                                "Outpost"
-                              ]
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Ability": "Select Objective Cards to Complete"
-                            },
-                            "priority": 0,
-                            "request": {
-                              "SelectHandCards": {
-                                "choices": [
-                                  {
-                                    "ObjectiveCard": 17
-                                  },
-                                  {
-                                    "ObjectiveCard": 32
-                                  }
-                                ],
-                                "description": "Select cards to complete",
-                                "needed": {
-                                  "end": 2,
-                                  "start": 0
-                                }
-                              }
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 1
-                        }
-                      ]
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/messages/1"
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/1/objective_cards",
-                      "value": [
-                        17,
-                        32
-                      ]
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/1/completed_objectives"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/state",
-                      "value": "Playing"
-                    }
-                  ],
                   "completed_objectives": [
                     "Colony",
                     "Outpost"

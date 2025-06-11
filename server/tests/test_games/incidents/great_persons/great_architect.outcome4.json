@@ -1,5 +1,4 @@
 {
-  "options": {},
   "state": "Playing",
   "players": [
     {
@@ -227,100 +226,14 @@
                         }
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "Incident": {
-                              "active_player": 0,
-                              "barbarians": {},
-                              "incident_id": 55
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Incident": 55
-                            },
-                            "priority": 10,
-                            "request": {
-                              "Payment": [
-                                {
-                                  "cost": {
-                                    "conversions": [
-                                      {
-                                        "from": [
-                                          {
-                                            "food": 1
-                                          },
-                                          {
-                                            "wood": 1
-                                          },
-                                          {
-                                            "ore": 1
-                                          },
-                                          {
-                                            "ideas": 1
-                                          }
-                                        ],
-                                        "to": {
-                                          "gold": 1
-                                        },
-                                        "type": "Unlimited"
-                                      }
-                                    ],
-                                    "default": {
-                                      "culture_tokens": 1
-                                    }
-                                  },
-                                  "name": "Pay to gain the Action Card",
-                                  "optional": true
-                                }
-                              ]
-                            }
-                          },
-                          "last_priority_used": 10,
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/culture_tokens",
-                      "value": 7
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/action_cards"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
                     "Playing": {
                       "ActionCard": 155
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/players/0/action_cards",
-                      "value": [
-                        155
-                      ]
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/action_cards_discarded"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events"
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -329,42 +242,7 @@
                         "A1"
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "remove",
-                      "path": "/events/1/event_type/WonderCard/selected_position"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/1/handler/priority",
-                      "value": 11
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/1/handler/request/SelectPositions",
-                      "value": {
-                        "choices": [
-                          "A1",
-                          "A2"
-                        ],
-                        "description": "Select city to build wonder",
-                        "needed": {
-                          "end": 1,
-                          "start": 1
-                        }
-                      }
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/1/handler/request/Payment"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/1/last_priority_used",
-                      "value": 11
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -380,161 +258,6 @@
                       ]
                     }
                   },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "ActionCard": {
-                              "id": 155
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 0
-                        },
-                        {
-                          "event_type": {
-                            "WonderCard": {
-                              "cost": {
-                                "activate_city": true,
-                                "cost": {
-                                  "conversions": [
-                                    {
-                                      "from": [
-                                        {
-                                          "food": 1
-                                        },
-                                        {
-                                          "wood": 1
-                                        },
-                                        {
-                                          "ore": 1
-                                        },
-                                        {
-                                          "ideas": 1
-                                        }
-                                      ],
-                                      "to": {
-                                        "gold": 1
-                                      },
-                                      "type": "Unlimited"
-                                    }
-                                  ],
-                                  "default": {
-                                    "culture_tokens": 2,
-                                    "food": 2,
-                                    "ore": 7,
-                                    "wood": 3
-                                  }
-                                },
-                                "ignore_action_cost": true,
-                                "ignore_required_advances": true,
-                                "info": {
-                                  "info": {},
-                                  "log": [],
-                                  "player": 0
-                                }
-                              },
-                              "selected_position": "A1",
-                              "wonder": "Pyramids"
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Ability": "Build Wonder"
-                            },
-                            "priority": 10,
-                            "request": {
-                              "Payment": [
-                                {
-                                  "cost": {
-                                    "conversions": [
-                                      {
-                                        "from": [
-                                          {
-                                            "food": 1
-                                          },
-                                          {
-                                            "wood": 1
-                                          },
-                                          {
-                                            "ore": 1
-                                          },
-                                          {
-                                            "ideas": 1
-                                          }
-                                        ],
-                                        "to": {
-                                          "gold": 1
-                                        },
-                                        "type": "Unlimited"
-                                      }
-                                    ],
-                                    "default": {
-                                      "culture_tokens": 2,
-                                      "food": 2,
-                                      "ore": 7,
-                                      "wood": 3
-                                    }
-                                  },
-                                  "name": "Pay to build wonder",
-                                  "optional": false
-                                }
-                              ]
-                            }
-                          },
-                          "last_priority_used": 10,
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/cities/0/activations"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/cities/0/city_pieces"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/culture_tokens",
-                      "value": 6
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/resources/food",
-                      "value": 2
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/gold",
-                      "value": 7
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/ore",
-                      "value": 7
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/wood",
-                      "value": 7
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/wonder_cards",
-                      "value": [
-                        "Pyramids"
-                      ]
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/wonders_built"
-                    }
-                  ],
                   "wonder_built": "Pyramids"
                 }
               ]
