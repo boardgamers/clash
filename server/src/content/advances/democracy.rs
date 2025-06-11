@@ -111,7 +111,7 @@ fn free_economy() -> AdvanceBuilder {
             }
             PlayingActionType::Custom(i)
                 if *i == FreeEconomyCollect
-                    && current_player_turn_log(game).items.iter().any(|item| {
+                    && current_player_turn_log(game).actions.iter().any(|item| {
                         matches!(&item.action, Action::Playing(PlayingAction::Collect(c)) if
                                 c.action_type == PlayingActionType::Collect)
                     }) =>

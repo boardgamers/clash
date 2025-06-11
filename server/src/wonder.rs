@@ -8,10 +8,11 @@ use crate::content::ability::Ability;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{PaymentRequest, PersistentEventType, PositionRequest};
 use crate::events::EventOrigin;
-use crate::log::current_action_log_item;
+use crate::log::current_log_action_mut;
 use crate::payment::PaymentOptions;
 use crate::player::{CostTrigger, Player};
 use crate::player_events::CostInfo;
+use crate::resource_pile::ResourcePile;
 use crate::utils::remove_element;
 use crate::{ability_initializer::AbilityInitializerSetup, game::Game, position::Position};
 use enumset::EnumSetType;
@@ -87,10 +88,15 @@ impl WonderInfo {
     pub fn builder(
         wonder: Wonder,
         description: &str,
-        cost: PaymentOptions,
+        cost: ResourcePile,
         required_advance: Advance,
     ) -> WonderBuilder {
-        WonderBuilder::new(wonder, description, cost, required_advance)
+        WonderBuilder::new(
+            wonder,
+            description,
+            PaymentOptions::fixed_resources(cost, EventOrigin::Wonder(wonder)),
+            required_advance,
+        )
     }
 
     #[must_use]
@@ -464,7 +470,7 @@ pub(crate) fn build_wonder_handler() -> Ability {
                     s.choice[0],
                 ));
                 i.cost.info.execute(game);
-                current_action_log_item(game).wonder_built = Some(name);
+                current_log_action_mut(game).wonder_built = Some(name);
                 remove_element(&mut game.player_mut(s.player_index).wonder_cards, &name);
                 construct_wonder(game, name, pos, s.player_index);
             },
@@ -495,7 +501,7 @@ pub(crate) fn construct_wonder(
     player_index: usize,
 ) {
     let listeners = game.cache.get_wonder(name).listeners.clone();
-    listeners.one_time_init(game, player_index);
+    listeners.once_init(game, player_index);
     let player = &mut game.players[player_index];
     player.wonders_built.push(name);
     player.wonders_owned.insert(name);

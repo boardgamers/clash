@@ -268,7 +268,7 @@ impl Game {
     #[must_use]
     pub fn can_redo(&self) -> bool {
         self.context != GameContext::AI
-            && self.action_log_index < current_player_turn_log(self).items.len()
+            && self.action_log_index < current_player_turn_log(self).actions.len()
     }
 
     pub(crate) fn is_pirate_zone(&self, position: Position) -> bool {
@@ -415,7 +415,7 @@ impl Game {
 
     pub fn next_turn(&mut self) {
         end_turn(self, self.current_player_index);
-        for i in &mut current_player_turn_log_mut(self).items {
+        for i in &mut current_player_turn_log_mut(self).actions {
             i.undo.clear();
         }
         check_for_waste(self);

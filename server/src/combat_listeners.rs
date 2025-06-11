@@ -5,7 +5,7 @@ use crate::combat_stats::CombatStats;
 use crate::content::ability::Ability;
 use crate::content::persistent_events::{PersistentEventType, PositionRequest, UnitsRequest};
 use crate::game::Game;
-use crate::log::current_action_log_item;
+use crate::log::current_log_action_mut;
 use crate::movement::move_units;
 use crate::player::gain_unit;
 use crate::player_events::{PersistentEvent, PersistentEvents};
@@ -357,7 +357,7 @@ fn end_combat_and_store_stats(game: &mut Game, e: CombatEnd) {
 }
 
 pub(crate) fn end_combat(game: &mut Game, s: CombatStats) {
-    current_action_log_item(game).combat_stats = Some(s.clone());
+    current_log_action_mut(game).combat_stats = Some(s.clone());
     on_end_combat(game, s);
 }
 

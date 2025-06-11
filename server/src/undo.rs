@@ -20,7 +20,7 @@ pub(crate) fn undo(mut game: Game) -> Result<Game, String> {
     game.action_log_index -= 1;
     game.log.remove(game.log.len() - 1);
 
-    let l = &mut current_player_turn_log_mut(&mut game).items;
+    let l = &mut current_player_turn_log_mut(&mut game).actions;
     let Some(i) = l.iter().rposition(|a| !a.undo.is_empty()) else {
         return Err("No undoable action".to_string());
     };
@@ -51,7 +51,7 @@ pub(crate) fn to_serde_value(game: &Game) -> Value {
 }
 
 pub fn redo(game: &mut Game, player_index: usize) -> Result<(), String> {
-    let copy = current_player_turn_log(game).item(game).clone();
+    let copy = current_player_turn_log(game).action(game).clone();
     game.action_log_index += 1;
 
     match copy.action.clone() {

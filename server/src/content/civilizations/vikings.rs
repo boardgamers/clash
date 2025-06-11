@@ -332,10 +332,10 @@ fn ruler_of_the_north() -> LeaderAbility {
     );
     let o = b.get_key().clone();
     let o2 = o.clone();
-    b.add_ability_initializer(move |game, player_index, _| {
+    b.add_initializer(move |game, player_index, _| {
         set_knut_points(game, player_index, None, &o);
     })
-    .add_ability_deinitializer(move |game, player_index| {
+    .add_deinitializer(move |game, player_index| {
         set_knut_points(game, player_index, None, &o2);
     })
     .add_transient_event_listener(

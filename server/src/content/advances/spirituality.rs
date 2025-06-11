@@ -5,7 +5,7 @@ use crate::city_pieces::Building::Temple;
 use crate::content::ability::Ability;
 use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::content::persistent_events::ResourceRewardRequest;
-use crate::payment::{PaymentConversion, ResourceReward};
+use crate::payment::PaymentConversion;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 
@@ -33,10 +33,10 @@ pub(crate) fn use_temple() -> Ability {
         .add_resource_request(
             |event| &mut event.construct,
             1,
-            |_game, _player_index, building| {
+            |_game, p, building| {
                 if building.building == Temple {
                     return Some(ResourceRewardRequest::new(
-                        ResourceReward::tokens(1),
+                        p.reward_options().tokens(1),
                         "Select Temple bonus".to_string(),
                     ));
                 }

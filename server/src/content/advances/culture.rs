@@ -10,7 +10,7 @@ use crate::content::persistent_events::PaymentRequest;
 use crate::events::{EventOrigin, check_event_origin};
 use crate::happiness::execute_increase_happiness;
 use crate::payment::PaymentOptions;
-use crate::player::{Player, gain_resources};
+use crate::player::Player;
 use crate::playing_actions::PlayingActionType;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
@@ -73,7 +73,7 @@ fn monuments() -> AdvanceBuilder {
         "Immediately draw 1 wonder card. \
         Your cities with wonders may not be the target of influence culture attempts",
     )
-    .add_one_time_ability_initializer(draw_wonder_card)
+    .add_once_initializer(draw_wonder_card)
     .with_advance_bonus(CultureToken)
     .add_transient_event_listener(
         |event| &mut event.on_influence_culture_attempt,
@@ -185,17 +185,8 @@ fn use_theaters(b: AbilityBuilder) -> AbilityBuilder {
             )])
         },
         |game, s, _| {
-            gain_resources(
-                game,
-                s.player_index,
-                theater_opposite(&s.choice[0]),
-                |name, pile| {
-                    format!(
-                        "{name} used Theaters to convert {} into {pile}",
-                        s.choice[0],
-                    )
-                },
-            );
+            s.player()
+                .gain_resources(game, theater_opposite(&s.choice[0]));
         },
     )
 }

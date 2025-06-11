@@ -37,7 +37,7 @@ fn negotiations(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         ActionCost::cost(ResourcePile::culture_tokens(1)),
         move |game, _player, _| {
             !current_player_turn_log(game)
-                .items
+                .actions
                 .iter()
                 .any(|i| match &i.action {
                     Action::Playing(PlayingAction::ActionCard(i)) if *i == id => false,

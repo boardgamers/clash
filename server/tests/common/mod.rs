@@ -365,7 +365,7 @@ pub(crate) fn to_json(game: &Game) -> String {
     for a in &mut data.action_log {
         for r in &mut a.rounds {
             for p in &mut r.players {
-                for i in &mut p.items {
+                for i in &mut p.actions {
                     i.undo.clear();
                 }
             }
@@ -396,7 +396,7 @@ fn undo_redo(
     let game = game_api::execute(game, Action::Undo, player_index);
     if compare_json {
         let mut trimmed_game = game.clone();
-        current_player_turn_log_mut(&mut trimmed_game).items.pop();
+        current_player_turn_log_mut(&mut trimmed_game).actions.pop();
         assert_eq_game_json(
             &original_game,
             &to_json(&trimmed_game),

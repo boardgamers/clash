@@ -18,7 +18,7 @@ use crate::content::persistent_events::{
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, IncidentBuilder};
 use crate::payment::PaymentOptions;
-use crate::player::{Player, gain_resources};
+use crate::player::Player;
 use crate::player_events::IncidentTarget;
 use crate::playing_actions::ActionCost;
 use crate::resource::ResourceType;
@@ -482,9 +482,7 @@ fn great_athlete() -> ActionCard {
             } else {
                 ResourcePile::culture_tokens(from.mood_tokens)
             };
-            gain_resources(game, s.player_index, to, |name, pile| {
-                format!("{name} converted {from} to {pile}")
-            });
+            s.player().gain_resources(game, to);
         },
     )
     .build()

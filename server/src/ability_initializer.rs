@@ -77,8 +77,8 @@ impl Display for SelectedChoice<usize> {
 pub struct AbilityListeners {
     initializer: AbilityInitializerWithPrioDelta,
     deinitializer: AbilityInitializer,
-    one_time_initializer: AbilityInitializer,
-    undo_deinitializer: AbilityInitializer,
+    once_initializer: AbilityInitializer,
+    once_deinitializer: AbilityInitializer,
 }
 
 impl AbilityListeners {
@@ -94,22 +94,22 @@ impl AbilityListeners {
         (self.deinitializer)(game, player_index);
     }
 
-    pub fn undo(&self, game: &mut Game, player_index: usize) {
-        self.deinit(game, player_index);
-        (self.undo_deinitializer)(game, player_index);
+    pub fn once_init(&self, game: &mut Game, player_index: usize) {
+        self.init(game, player_index);
+        (self.once_initializer)(game, player_index);
     }
 
-    pub fn one_time_init(&self, game: &mut Game, player_index: usize) {
-        self.init(game, player_index);
-        (self.one_time_initializer)(game, player_index);
+    pub fn once_deinit(&self, game: &mut Game, player_index: usize) {
+        self.deinit(game, player_index);
+        (self.once_deinitializer)(game, player_index);
     }
 }
 
 pub(crate) struct AbilityInitializerBuilder {
     initializers: Vec<AbilityInitializerWithPrioDelta>,
     deinitializers: Vec<AbilityInitializer>,
-    one_time_initializers: Vec<AbilityInitializer>,
-    undo_deinitializers: Vec<AbilityInitializer>,
+    once_initializers: Vec<AbilityInitializer>,
+    once_deinitializers: Vec<AbilityInitializer>,
 }
 
 impl AbilityInitializerBuilder {
@@ -117,45 +117,45 @@ impl AbilityInitializerBuilder {
         Self {
             initializers: Vec::new(),
             deinitializers: Vec::new(),
-            one_time_initializers: Vec::new(),
-            undo_deinitializers: Vec::new(),
+            once_initializers: Vec::new(),
+            once_deinitializers: Vec::new(),
         }
     }
 
-    pub(crate) fn add_ability_initializer<F>(&mut self, initializer: F)
+    pub(crate) fn add_initializer<F>(&mut self, initializer: F)
     where
         F: Fn(&mut Game, usize, i32) + 'static + Sync + Send,
     {
         self.initializers.push(Arc::new(initializer));
     }
 
-    pub(crate) fn add_ability_deinitializer<F>(&mut self, deinitializer: F)
+    pub(crate) fn add_deinitializer<F>(&mut self, deinitializer: F)
     where
         F: Fn(&mut Game, usize) + 'static + Sync + Send,
     {
         self.deinitializers.push(Arc::new(deinitializer));
     }
 
-    pub(crate) fn add_one_time_ability_initializer<F>(&mut self, initializer: F)
+    pub(crate) fn add_once_initializer<F>(&mut self, initializer: F)
     where
         F: Fn(&mut Game, usize) + 'static + Sync + Send,
     {
-        self.one_time_initializers.push(Arc::new(initializer));
+        self.once_initializers.push(Arc::new(initializer));
     }
 
-    pub(crate) fn add_ability_undo_deinitializer<F>(&mut self, deinitializer: F)
+    pub(crate) fn add_once_deinitializer<F>(&mut self, deinitializer: F)
     where
         F: Fn(&mut Game, usize) + 'static + Sync + Send,
     {
-        self.undo_deinitializers.push(Arc::new(deinitializer));
+        self.once_deinitializers.push(Arc::new(deinitializer));
     }
 
     pub(crate) fn build(self) -> AbilityListeners {
         AbilityListeners {
             initializer: join_ability_initializers_with_prio_delta(self.initializers),
             deinitializer: join_ability_initializers(self.deinitializers),
-            one_time_initializer: join_ability_initializers(self.one_time_initializers),
-            undo_deinitializer: join_ability_initializers(self.undo_deinitializers),
+            once_initializer: join_ability_initializers(self.once_initializers),
+            once_deinitializer: join_ability_initializers(self.once_deinitializers),
         }
     }
 }
@@ -170,35 +170,35 @@ pub(crate) trait AbilityInitializerSetup: Sized {
 
     fn description(&self) -> String;
 
-    fn add_ability_initializer<F>(mut self, initializer: F) -> Self
+    fn add_initializer<F>(mut self, initializer: F) -> Self
     where
         F: Fn(&mut Game, usize, i32) + 'static + Sync + Send,
     {
-        self.builder().add_ability_initializer(initializer);
+        self.builder().add_initializer(initializer);
         self
     }
 
-    fn add_ability_deinitializer<F>(mut self, deinitializer: F) -> Self
+    fn add_deinitializer<F>(mut self, deinitializer: F) -> Self
     where
         F: Fn(&mut Game, usize) + 'static + Sync + Send,
     {
-        self.builder().add_ability_deinitializer(deinitializer);
+        self.builder().add_deinitializer(deinitializer);
         self
     }
 
-    fn add_one_time_ability_initializer<F>(mut self, initializer: F) -> Self
+    fn add_once_initializer<F>(mut self, initializer: F) -> Self
     where
         F: Fn(&mut Game, usize) + 'static + Sync + Send,
     {
-        self.builder().add_one_time_ability_initializer(initializer);
+        self.builder().add_once_initializer(initializer);
         self
     }
 
-    fn add_ability_undo_deinitializer<F>(mut self, deinitializer: F) -> Self
+    fn add_once_deinitializer<F>(mut self, deinitializer: F) -> Self
     where
         F: Fn(&mut Game, usize) + 'static + Sync + Send,
     {
-        self.builder().add_ability_undo_deinitializer(deinitializer);
+        self.builder().add_once_deinitializer(deinitializer);
         self
     }
 
@@ -408,9 +408,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         E: Fn(&mut PersistentEvents) -> &mut PersistentEvent<V> + 'static + Clone + Sync + Send,
         V: Clone + PartialEq,
     {
-        self.add_resource_request_with_response(event, priority, request, move |game, s, _| {
-            s.player().log_gain_resources(game, &s.choice);
-        })
+        self.add_resource_request_with_response(event, priority, request, move |_game, _s, _| {})
     }
 
     fn add_resource_request_with_response<E, V>(
@@ -436,27 +434,35 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self.add_persistent_event_listener(
             event,
             priority,
-            move |game, p, details| {
-                let req = request(game, p, details);
+            move |game, player, details| {
+                let req = request(game, player, details);
                 if let Some(r) = &req {
                     if r.reward.payment_options.possible_resource_types().len() == 1 {
-                        let r = r.reward.payment_options.default_payment();
-                        response2(game, &SelectedChoice::new(p, false, r.clone()), details);
-                        p.get_mut(game).gain_resources(r);
+                        let pile = r.reward.payment_options.default_payment();
+                        response2(
+                            game,
+                            &r.reward.selected_choice(player, pile.clone(), false),
+                            details,
+                        );
+                        player.gain_resources(game, pile);
                         return None;
                     }
                 }
                 req.map(PersistentEventRequest::ResourceReward)
             },
-            move |game, p, action, request, details| {
+            move |game, player, action, request, details| {
                 if let PersistentEventRequest::ResourceReward(request) = &request {
                     if let EventResponse::ResourceReward(reward) = action {
                         assert!(
                             request.reward.payment_options.is_valid_payment(&reward),
                             "Invalid reward"
                         );
-                        response(game, &SelectedChoice::new(p, true, reward.clone()), details);
-                        p.get_mut(game).gain_resources(reward);
+                        response(
+                            game,
+                            &request.reward.selected_choice(player, reward.clone(), true),
+                            details,
+                        );
+                        player.gain_resources(game, reward);
                         return;
                     }
                 }
@@ -944,7 +950,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         let deinitializer_action = action;
         let key = self.get_key().clone();
         let exec = execution.clone();
-        self.add_ability_initializer(move |game, player_index, _prio_delta| {
+        self.add_initializer(move |game, player_index, _prio_delta| {
             game.player_mut(player_index).custom_actions.insert(
                 action,
                 CustomActionInfo::new(
@@ -955,7 +961,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                 ),
             );
         })
-        .add_ability_deinitializer(move |game, player_index| {
+        .add_deinitializer(move |game, player_index| {
             game.player_mut(player_index)
                 .custom_actions
                 .remove(&deinitializer_action);
@@ -1019,8 +1025,8 @@ where
             .remove_listener_mut_by_key(&key);
     };
     setup
-        .add_ability_initializer(initializer)
-        .add_ability_deinitializer(deinitializer)
+        .add_initializer(initializer)
+        .add_deinitializer(deinitializer)
 }
 
 #[allow(clippy::map_entry)]

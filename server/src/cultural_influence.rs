@@ -4,6 +4,7 @@ use crate::city::City;
 use crate::city_pieces::Building;
 use crate::consts::INFLUENCE_MIN_ROLL;
 use crate::content::ability::Ability;
+use crate::content::custom_actions::custom_action_modifier_event_origin;
 use crate::content::persistent_events::{
     PaymentRequest, PersistentEventType, SelectedStructure, Structure,
 };
@@ -171,7 +172,7 @@ pub(crate) fn use_cultural_influence() -> Ability {
             |game, p, info| {
                 let cost = &info.range_boost_cost;
                 if cost.is_free() {
-                    info.roll_boost_cost = range_boost_paid(game, info, p.index);
+                    info.roll_boost_cost = range_boost_cost(game, info, p.index);
                     return None;
                 }
 
@@ -181,7 +182,7 @@ pub(crate) fn use_cultural_influence() -> Ability {
                 )])
             },
             |game, s, info| {
-                info.roll_boost_cost = range_boost_paid(game, info, s.player_index);
+                info.roll_boost_cost = range_boost_cost(game, info, s.player_index);
             },
         )
         .add_payment_request_listener(
@@ -200,7 +201,7 @@ fn roll_boost_paid(
     info: &mut InfluenceCultureInfo,
 ) {
     let a = current_player_turn_log(game)
-        .items
+        .actions
         .iter()
         .rev()
         .find_map(|l| {
@@ -266,7 +267,7 @@ fn roll_boost_payment(
     )])
 }
 
-fn range_boost_paid(
+fn range_boost_cost(
     game: &mut Game,
     info: &mut InfluenceCultureInfo,
     player_index: usize,
@@ -576,11 +577,9 @@ pub(crate) fn influence_event_origin(
     action_type: &PlayingActionType,
     player: &Player,
 ) -> EventOrigin {
-    match action_type {
-        PlayingActionType::InfluenceCultureAttempt => {
-            EventOrigin::Ability("Influence Culture Attempt".to_string())
-        }
-        PlayingActionType::Custom(c) => c.playing_action_type().event_origin(player),
-        _ => panic!("Unexpected action type for influence culture event origin: {action_type:?}"),
-    }
+    custom_action_modifier_event_origin(
+        EventOrigin::Ability("Influence Culture".to_string()),
+        action_type,
+        player,
+    )
 }

@@ -42,7 +42,7 @@ pub(crate) fn warmonger() -> Objective {
         2,
         |game, player, _e| {
             let stat = current_player_turn_log(game)
-                .items
+                .actions
                 .iter()
                 .filter_map(|i| i.combat_stats.as_ref().filter(|s| s.battleground.is_land()))
                 .collect_vec();
@@ -412,7 +412,7 @@ pub(crate) fn sea_cleansing() -> Objective {
             |game, p, _e| {
                 let player = p.index;
                 let battles = current_player_turn_log(game)
-                    .items
+                    .actions
                     .iter()
                     .filter_map(|i| {
                         i.combat_stats.as_ref().filter(|s| {

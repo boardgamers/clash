@@ -13,7 +13,6 @@ use crate::objective_card::{
     gain_objective_card_from_pile, present_objective_cards, status_phase_completable,
 };
 use crate::payment::PaymentOptions;
-use crate::player::gain_resources;
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::wonder::Wonder;
 use crate::{game::Game, player::Player, resource_pile::ResourcePile, utils};
@@ -222,9 +221,7 @@ pub(crate) fn raze_city() -> Ability {
                     game.add_info_log_item(&format!("{} did not raze a city", s.player_name));
                     return;
                 }
-                gain_resources(game, s.player_index, ResourcePile::gold(1), |name, pile| {
-                    format!("{name} razed a city and gained {pile}")
-                });
+                s.player().gain_resources(game, ResourcePile::gold(1));
                 game.raze_city(s.choice[0], s.player_index);
             },
         )
@@ -496,6 +493,7 @@ fn player_that_chooses_next_first_player(players: &[&Player]) -> usize {
 #[cfg(test)]
 mod tests {
     use crate::civilization::Civilization;
+
     use crate::player::Player;
     use crate::resource_pile::ResourcePile;
 
@@ -507,11 +505,11 @@ mod tests {
         expected_player_index: usize,
     ) {
         let mut player0 = Player::new(get_test_civilization(), 0);
-        player0.gain_resources(ResourcePile::mood_tokens(player0_mood));
+        player0.resources += ResourcePile::mood_tokens(player0_mood);
         let mut player1 = Player::new(get_test_civilization(), 1);
-        player1.gain_resources(ResourcePile::mood_tokens(player1_mood));
+        player1.resources += ResourcePile::mood_tokens(player1_mood);
         let mut player2 = Player::new(get_test_civilization(), 2);
-        player2.gain_resources(ResourcePile::mood_tokens(player2_mood));
+        player2.resources += ResourcePile::mood_tokens(player2_mood);
         let players = vec![&player2, &player1, &player0];
         let got = super::player_that_chooses_next_first_player(&players);
         assert_eq!(got, expected_player_index, "{name}");

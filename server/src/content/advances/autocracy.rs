@@ -4,7 +4,6 @@ use crate::city::MoodState;
 use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::content::custom_actions::CustomActionType::{AbsolutePower, ForcedLabor};
 use crate::content::persistent_events::ResourceRewardRequest;
-use crate::payment::ResourceReward;
 use crate::player::Player;
 use crate::resource_pile::ResourcePile;
 
@@ -30,7 +29,7 @@ fn nationalism() -> AdvanceBuilder {
     .add_resource_request(
         |event| &mut event.recruit,
         1,
-        |_game, _player_index, recruit| {
+        |_game, p, recruit| {
             recruit
                 .units
                 .clone()
@@ -38,7 +37,7 @@ fn nationalism() -> AdvanceBuilder {
                 .iter()
                 .any(|u| u.is_army_unit() || u.is_ship())
                 .then_some(ResourceRewardRequest::new(
-                    ResourceReward::tokens(1),
+                    p.reward_options().tokens(1),
                     "Select token to gain".to_string(),
                 ))
         },

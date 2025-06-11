@@ -14,7 +14,6 @@ use crate::incident::draw_and_discard_incident_card_from_pile;
 use crate::map::Terrain;
 use crate::map::Terrain::Fertile;
 use crate::objective_card::{discard_objective_card, gain_objective_card_from_pile};
-use crate::payment::PaymentOptions;
 use crate::player::{Player, gain_unit};
 use crate::position::Position;
 use crate::tactics_card::CombatRole;
@@ -44,7 +43,7 @@ fn great_wall() -> WonderInfo {
         Wonder::GreatWall,
         "Land combat in your happy city: Attacker gets -2 combat value in the first round. \
         You automatically win battles if Barbarians attack any of your cities.",
-        PaymentOptions::fixed_resources(ResourcePile::new(3, 2, 7, 0, 0, 0, 5)),
+        ResourcePile::new(3, 2, 7, 0, 0, 0, 5),
         Advance::Siegecraft,
     )
     .add_simple_persistent_event_listener(
@@ -72,7 +71,7 @@ fn great_statue() -> WonderInfo {
         Wonder::GreatStatue,
         "Draw 1 objective card. \
         Once per turn, as a free action, discard an objective card from: Gain 1 action.",
-        PaymentOptions::fixed_resources(ResourcePile::new(3, 4, 5, 0, 0, 0, 5)),
+        ResourcePile::new(3, 4, 5, 0, 0, 0, 5),
         Advance::Monuments,
     )
     .add_custom_action(
@@ -81,7 +80,7 @@ fn great_statue() -> WonderInfo {
         use_great_statue,
         |_game, p| !p.objective_cards.is_empty(),
     )
-    .add_one_time_ability_initializer(|game, player_index| {
+    .add_once_initializer(|game, player_index| {
         gain_objective_card_from_pile(game, player_index);
     })
     .build()
@@ -120,7 +119,7 @@ fn great_mausoleum() -> WonderInfo {
         "Whenever you draw an action or game event card, you may instead draw the \
         top card of the action or game event discard pile. \
         You discard to the bottom of the pile.",
-        PaymentOptions::fixed_resources(ResourcePile::new(4, 4, 4, 0, 0, 0, 5)),
+        ResourcePile::new(4, 4, 4, 0, 0, 0, 5),
         Advance::Priesthood,
     )
     .build()
@@ -199,7 +198,7 @@ fn great_lighthouse() -> WonderInfo {
         "Requires a port to build: \
         Activate the city: Place a ship on any sea space without enemy ships. \
         Decide the staring player of the next turn.",
-        PaymentOptions::fixed_resources(ResourcePile::new(3, 5, 4, 0, 0, 0, 5)),
+        ResourcePile::new(3, 5, 4, 0, 0, 0, 5),
         Advance::Cartography,
     )
     .placement_requirement(Arc::new(|pos, game| {
@@ -266,7 +265,7 @@ fn library() -> WonderInfo {
         "Once per turn, as a free action, \
         you may choose a non-government, non-civilization advance: \
         Use the effect until the end of your turn.",
-        PaymentOptions::fixed_resources(ResourcePile::new(3, 6, 3, 0, 0, 0, 5)),
+        ResourcePile::new(3, 6, 3, 0, 0, 0, 5),
         Advance::Philosophy,
     )
     .add_custom_action(
@@ -314,7 +313,7 @@ fn great_gardens() -> WonderInfo {
         "The city with this wonder may Collect any type of resource from \
             Grassland spaces including ideas and gold. \
             Enemies cannot enter the city if they have entered a Grassland space this turn.",
-        PaymentOptions::fixed_resources(ResourcePile::new(5, 5, 2, 0, 0, 0, 5)),
+        ResourcePile::new(5, 5, 2, 0, 0, 0, 5),
         Advance::Irrigation,
     )
     .add_transient_event_listener(
@@ -342,7 +341,7 @@ fn pyramids() -> WonderInfo {
         "Counts as 5.1 victory points (instead of 4). \
             All victory points are awarded to the player who built the wonder \
             (owning does not grant any points).",
-        PaymentOptions::fixed_resources(ResourcePile::new(2, 3, 7, 0, 0, 0, 5)),
+        ResourcePile::new(2, 3, 7, 0, 0, 0, 5),
         Advance::Rituals,
     )
     .built_victory_points(5.1) // because it breaks the tie
@@ -356,7 +355,7 @@ fn colosseum() -> WonderInfo {
         "May pay culture tokens with mood tokens (or vice versa) - \
         except for the building wonders.\
         May increase the combat value in a land battle by 1 for 1 culture or mood token.",
-        PaymentOptions::fixed_resources(ResourcePile::new(3, 4, 5, 0, 0, 0, 5)),
+        ResourcePile::new(3, 4, 5, 0, 0, 0, 5),
         Advance::Sports,
     )
     .add_payment_request_listener(

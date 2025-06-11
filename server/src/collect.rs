@@ -1,5 +1,6 @@
 use crate::advance::Advance;
 use crate::city::activate_city;
+use crate::content::custom_actions::custom_action_modifier_event_origin;
 use crate::content::persistent_events::PersistentEventType;
 use crate::events::EventOrigin;
 use crate::game::Game;
@@ -10,6 +11,7 @@ use crate::player::{CostTrigger, Player};
 use crate::player_events::ActionInfo;
 use crate::playing_actions::{PlayingActionType, base_or_custom_available};
 use crate::position::Position;
+use crate::resource::gain_resources;
 use crate::resource_pile::ResourcePile;
 use crate::utils;
 use itertools::Itertools;
@@ -191,6 +193,7 @@ pub(crate) fn execute_collect(
         String::new()
     };
     let player = &game.player(player_index);
+    let origin = collect_event_origin(&c.action_type, player);
     game.add_info_log_item(&format!(
         "{} collects {res}{total} in the city at {}{}",
         player,
@@ -210,7 +213,7 @@ pub(crate) fn execute_collect(
         return Err("City can't be activated".to_string());
     }
     activate_city(city.position, game);
-    game.players[player_index].gain_resources(i.total.clone());
+    gain_resources(game, player_index, i.total.clone(), origin);
 
     let key = Advance::Husbandry.id();
     if i.info.info.contains_key(&key) {
@@ -383,4 +386,15 @@ pub fn available_collect_actions_for_city(
 #[must_use]
 pub fn available_collect_actions(game: &Game, player: usize) -> Vec<PlayingActionType> {
     base_or_custom_available(game, player, &PlayingActionType::Collect)
+}
+
+pub(crate) fn collect_event_origin(
+    action_type: &PlayingActionType,
+    player: &Player,
+) -> EventOrigin {
+    custom_action_modifier_event_origin(
+        EventOrigin::Ability("Collect".to_string()),
+        action_type,
+        player,
+    )
 }

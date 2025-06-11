@@ -169,7 +169,7 @@ pub(crate) fn play_action_card(game: &mut Game, player_index: usize, id: u8) {
     if let Some(r) = &card.combat_requirement {
         if let Some(action_log_index) = combat_requirement_met(game, player_index, id, r) {
             satisfying_action = Some(action_log_index);
-            current_player_turn_log_mut(game).items[action_log_index]
+            current_player_turn_log_mut(game).actions[action_log_index]
                 .combat_stats
                 .as_mut()
                 .expect("combat stats")
@@ -310,7 +310,7 @@ pub fn combat_requirement_met(
         action_card_id + 1
     };
 
-    current_player_turn_log(game).items.iter().position(|a| {
+    current_player_turn_log(game).actions.iter().position(|a| {
         if let Some(stats) = &a.combat_stats {
             if requirement(stats, game.player(player))
                 && !stats.claimed_action_cards.contains(&sister_card)

@@ -1,4 +1,7 @@
+use crate::events::EventOrigin;
 use crate::game::Game;
+use crate::log::{ActionLogItem, add_action_log_item};
+use crate::player::Player;
 use crate::resource_pile::ResourcePile;
 use serde::{Deserialize, Serialize};
 use std::{fmt, mem};
@@ -67,6 +70,30 @@ impl fmt::Display for ResourceType {
             ResourceType::CultureTokens => write!(f, "Culture Tokens"),
         }
     }
+}
+
+pub(crate) fn gain_resources(
+    game: &mut Game,
+    player: usize,
+    resources: ResourcePile,
+    origin: EventOrigin,
+) {
+    game.add_info_log_item(&format!(
+        "{} gained {} for {}",
+        game.player_name(player),
+        resources,
+        origin.name(game)
+    ));
+    let p = game.player_mut(player);
+
+    p.resources += resources.clone();
+    apply_resource_limit(p);
+    add_action_log_item(game, ActionLogItem::GainResources { resources, origin });
+}
+
+pub(crate) fn apply_resource_limit(p: &mut Player) {
+    let waste = p.resources.apply_resource_limit(&p.resource_limit);
+    p.wasted_resources += waste;
 }
 
 pub(crate) fn check_for_waste(game: &mut Game) {

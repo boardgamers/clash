@@ -9,7 +9,7 @@ use crate::content::incidents::great_persons::find_great_seer;
 use crate::content::persistent_events::{HandCardsRequest, PersistentEventType};
 use crate::events::EventOrigin;
 use crate::game::Game;
-use crate::log::current_action_log_item;
+use crate::log::current_log_action_mut;
 use crate::player::Player;
 use crate::utils::{remove_element, remove_element_by};
 use itertools::Itertools;
@@ -279,7 +279,7 @@ pub(crate) fn complete_objective_card(game: &mut Game, player: usize, id: u8, ob
     game.player_mut(player)
         .completed_objectives
         .push(objective.clone());
-    let o = &mut current_action_log_item(game).completed_objectives;
+    let o = &mut current_log_action_mut(game).completed_objectives;
     o.push(objective);
     o.dedup(); // in redo we add it again
 }

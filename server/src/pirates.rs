@@ -7,7 +7,6 @@ use crate::content::persistent_events::{
 };
 use crate::game::Game;
 use crate::incident::{BASE_EFFECT_PRIORITY, IncidentBuilder};
-use crate::payment::ResourceReward;
 use crate::player::{Player, gain_unit, remove_unit};
 use crate::player_events::IncidentTarget;
 use crate::position::Position;
@@ -25,7 +24,8 @@ pub(crate) fn pirates_round_bonus() -> Ability {
                 let c = &r.combat;
                 if c.is_sea_battle(game) && c.opponent(p.index) == get_pirates_player(game).index {
                     Some(ResourceRewardRequest::new(
-                        ResourceReward::sum(r.hits(CombatRole::Attacker), &[ResourceType::Gold]),
+                        p.reward_options()
+                            .sum(r.hits(CombatRole::Attacker), &[ResourceType::Gold]),
                         "-".to_string(),
                     ))
                 } else {
@@ -44,7 +44,7 @@ pub(crate) fn pirates_bonus() -> Ability {
             |game, p, i| {
                 if i.opponent_player(p.index, game).civilization.is_pirates() {
                     Some(ResourceRewardRequest::new(
-                        ResourceReward::tokens(1),
+                        p.reward_options().tokens(1),
                         "Select a reward for fighting the Pirates".to_string(),
                     ))
                 } else {

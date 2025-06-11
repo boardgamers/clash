@@ -217,12 +217,6 @@ impl Player {
         player_government(game, self.advances)
     }
 
-    pub fn gain_resources(&mut self, resources: ResourcePile) {
-        self.resources += resources;
-        let waste = self.resources.apply_resource_limit(&self.resource_limit);
-        self.wasted_resources += waste;
-    }
-
     #[must_use]
     pub fn can_afford(&self, cost: &PaymentOptions) -> bool {
         cost.can_afford(&self.resources)
@@ -580,7 +574,7 @@ pub fn gain_unit(player: usize, position: Position, unit_type: UnitType, game: &
         p.available_leaders.retain(|name| name != leader);
         p.recruited_leaders.push(*leader);
         Player::with_leader(*leader, game, player, |game, leader| {
-            leader.listeners.one_time_init(game, player);
+            leader.listeners.once_init(game, player);
         });
     }
     let p = game.player_mut(player);
@@ -619,16 +613,6 @@ pub fn end_turn(game: &mut Game, player: usize) {
     if let Some(a) = p.great_library_advance.take() {
         a.info(game).listeners.clone().deinit(game, player);
     }
-}
-
-pub fn gain_resources(
-    game: &mut Game,
-    player: usize,
-    resources: ResourcePile,
-    log: impl Fn(&str, &ResourcePile) -> String,
-) {
-    game.add_info_log_item(&log(&game.player_name(player), &resources));
-    game.player_mut(player).gain_resources(resources);
 }
 
 pub(crate) fn can_add_army_unit(p: &Player, position: Position) -> bool {

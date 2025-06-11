@@ -1,5 +1,5 @@
 use crate::city::MoodState;
-use crate::content::custom_actions::CustomActionType;
+use crate::content::custom_actions::{CustomActionType, custom_action_modifier_event_origin};
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::leader::leader_position;
@@ -153,11 +153,9 @@ pub(crate) fn happiness_event_origin(
     action_type: &PlayingActionType,
     player: &Player,
 ) -> EventOrigin {
-    match action_type {
-        PlayingActionType::IncreaseHappiness => {
-            EventOrigin::Ability("Increase Happiness".to_string())
-        }
-        PlayingActionType::Custom(c) => c.playing_action_type().event_origin(player),
-        _ => panic!("Unexpected action type for increase happiness event origin: {action_type:?}"),
-    }
+    custom_action_modifier_event_origin(
+        EventOrigin::Ability("Increase Happiness".to_string()),
+        action_type,
+        player,
+    )
 }
