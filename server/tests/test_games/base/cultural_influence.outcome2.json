@@ -253,6 +253,9 @@
                                 "player": 1
                               },
                               "is_defender": true,
+                              "origin": {
+                                "Ability": "Influence Culture Attempt"
+                              },
                               "position": "C2",
                               "prevent_boost": false,
                               "range_boost_cost": {
