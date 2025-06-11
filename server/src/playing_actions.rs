@@ -102,8 +102,12 @@ impl PlayingActionType {
     #[must_use]
     pub fn payment_options(&self, game: &Game, player_index: usize) -> PaymentOptions {
         let p = game.player(player_index);
-        self.cost(game, player_index)
-            .payment_options(p, self.event_origin(p))
+        let cost = self.cost(game, player_index);
+        if let ActionResourceCost::Free = cost.cost {
+            PaymentOptions::free()
+        } else {
+            cost.payment_options(p, self.event_origin(p))
+        }
     }
 
     pub(crate) fn event_origin(&self, player: &Player) -> EventOrigin {
@@ -295,6 +299,7 @@ fn assert_allowed_action_type(
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum ActionResourceCost {
+    Free,
     Resources(ResourcePile),
     Tokens(u8),
     AdvanceCostWithoutDiscount,
@@ -303,16 +308,22 @@ pub enum ActionResourceCost {
 impl ActionResourceCost {
     #[must_use]
     pub fn free() -> Self {
-        ActionResourceCost::Resources(ResourcePile::empty())
+        ActionResourceCost::Free
     }
 
     #[must_use]
     pub fn resources(cost: ResourcePile) -> Self {
+        if cost.is_empty() {
+            return ActionResourceCost::Free;
+        }
         ActionResourceCost::Resources(cost)
     }
 
     #[must_use]
     pub fn tokens(tokens: u8) -> Self {
+        if tokens == 0 {
+            return ActionResourceCost::Free;
+        }
         ActionResourceCost::Tokens(tokens)
     }
 }
@@ -339,6 +350,7 @@ impl ActionCost {
     #[must_use]
     pub fn payment_options(&self, player: &Player, origin: EventOrigin) -> PaymentOptions {
         match &self.cost {
+            ActionResourceCost::Free => PaymentOptions::free(),
             ActionResourceCost::Resources(c) => {
                 PaymentOptions::resources(player, origin, c.clone())
             }
