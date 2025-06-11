@@ -108,10 +108,7 @@ impl PlayingActionType {
 
     pub(crate) fn event_origin(&self, player: &Player) -> EventOrigin {
         match self {
-            PlayingActionType::Custom(c) => {
-                let action_type = *c;
-                player.custom_action_info(action_type).event_origin
-            }
+            PlayingActionType::Custom(c) => player.custom_action_info(*c).event_origin,
             PlayingActionType::ActionCard(id) => EventOrigin::CivilCard(*id),
             _ => panic!(
                 "PlayingAction::payable_action_name called on an action \

@@ -144,14 +144,6 @@ pub(crate) fn construct_event_origin() -> EventOrigin {
     EventOrigin::Ability("Construct Building".to_string())
 }
 
-pub(crate) fn influence_event_origin() -> EventOrigin {
-    EventOrigin::Ability("Influence Culture".to_string()) // todo can be modifier
-}
-
-pub(crate) fn happiness_event_origin() -> EventOrigin {
-    EventOrigin::Ability("Increase Happiness".to_string()) // todo can be modifier
-}
-
 pub(crate) fn recruit_event_origin() -> EventOrigin {
     EventOrigin::Ability("Recruit".to_string())
 }

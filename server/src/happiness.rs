@@ -1,6 +1,6 @@
 use crate::city::MoodState;
-use crate::content::ability::happiness_event_origin;
 use crate::content::custom_actions::CustomActionType;
+use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::leader::leader_position;
 use crate::log::modifier_suffix;
@@ -126,7 +126,7 @@ pub fn happiness_cost(
     let p = game.player(player);
     let mut payment_options = PaymentOptions::sum(
         p,
-        happiness_event_origin(),
+        happiness_event_origin(action_type, p),
         city_size_steps,
         &[ResourceType::MoodTokens],
     );
@@ -147,4 +147,17 @@ fn format_city_happiness_increase(player: &Player, position: Position, steps: u8
         "the city at {position} by {steps} steps, making it {}",
         player.get_city(position).mood_state.clone() + steps
     )
+}
+
+pub(crate) fn happiness_event_origin(
+    action_type: &PlayingActionType,
+    player: &Player,
+) -> EventOrigin {
+    match action_type {
+        PlayingActionType::IncreaseHappiness => {
+            EventOrigin::Ability("Increase Happiness".to_string())
+        }
+        PlayingActionType::Custom(c) => c.playing_action_type().event_origin(player),
+        _ => panic!("Unexpected action type for increase happiness event origin: {action_type:?}"),
+    }
 }

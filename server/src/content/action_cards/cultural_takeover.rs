@@ -108,7 +108,8 @@ fn any_barbarian_city_can_be_influenced(game: &Game, p: &Player) -> bool {
                     game,
                     p.index,
                     &SelectedStructure::new(c.position, Structure::CityCenter),
-                    Some(i),
+                    i,
+                    true,
                     true,
                 )
                 .is_ok()

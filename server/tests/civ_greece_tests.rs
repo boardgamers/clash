@@ -44,12 +44,15 @@ fn sparta_battle() {
 fn hellenistic_culture_staring_point() {
     let game = &JSON.load_game("hellenistic_culture");
 
+    let action_type =
+        &PlayingActionType::Custom(CustomActionType::HellenisticInfluenceCultureAttempt);
     assert_eq!(
         affordable_start_city(
             game,
             0,
             game.get_any_city(Position::from_offset("D1")),
-            None,
+            action_type,
+            false,
         )
         .unwrap(),
         (Position::from_offset("C2"), 0)
@@ -59,7 +62,8 @@ fn hellenistic_culture_staring_point() {
             game,
             0,
             game.get_any_city(Position::from_offset("C2")),
-            None,
+            action_type,
+            false,
         )
         .unwrap(),
         (Position::from_offset("C2"), 0)
