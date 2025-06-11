@@ -193,7 +193,7 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
                 Err(e) => format!(" ({e})"),
             };
             let mut tooltip = vec![format!("Recruit {}{}", s.unit_type.name(game), suffix)];
-            add_unit_description(&mut tooltip, s.unit_type);
+            add_unit_description(rc, &mut tooltip, s.unit_type);
             show_tooltip_for_circle(rc, &tooltip, p, radius);
         },
         || OkTooltip::Valid("Recruit units".to_string()),

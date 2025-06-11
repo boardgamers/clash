@@ -92,7 +92,7 @@ pub fn unit_request_dialog(rc: &RenderContext, r: &UnitTypeRequest) -> StateUpda
                 }
             } else {
                 let mut tooltip = vec![u.name(rc.game).to_string()];
-                add_unit_description(&mut tooltip, *u);
+                add_unit_description(rc, &mut tooltip, *u);
                 show_tooltip_for_circle(rc, &tooltip, center, 20.);
             }
         }

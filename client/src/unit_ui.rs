@@ -227,7 +227,7 @@ fn draw_unit(
             .player(player_index)
             .has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
         let mut tooltip = vec![unit_label(unit, army_move, game)];
-        add_unit_description(&mut tooltip, unit.unit_type);
+        add_unit_description(rc, &mut tooltip, unit.unit_type);
         show_tooltip_for_circle(rc, &tooltip, center, radius);
     } else {
         let highlight = selected_units
@@ -329,7 +329,13 @@ pub fn unit_selection_clicked(unit_id: u32, units: &mut Vec<u32>) {
     }
 }
 
-pub fn add_unit_description(parts: &mut Vec<String>, u: UnitType) {
+pub fn add_unit_description(rc: &RenderContext, parts: &mut Vec<String>, u: UnitType) {
     parts.push(format!("Cost: {}", u.cost()));
     add_tooltip_description(parts, &u.description());
+    if let UnitType::Leader(l) = u {
+        for a in &rc.game.cache.get_leader(&l).abilities {
+            parts.push(format!("Leader ability: {}", a.name));
+            add_tooltip_description(parts, &a.description);
+        }
+    }
 }
