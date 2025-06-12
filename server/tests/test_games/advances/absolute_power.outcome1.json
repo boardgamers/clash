@@ -227,7 +227,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -246,7 +246,19 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "mood_tokens": 2
+                        },
+                        "origin": {
+                          "Advance": "AbsolutePower"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -262,6 +274,7 @@
       "Player1 has to pay 2 mood tokens for Absolute Power"
     ],
     [
+      "Player1 paid 2 mood tokens for Absolute Power",
       "Player1 paid 2 mood tokens for Absolute Power",
       "Player1 got an extra action using Absolute Power"
     ]

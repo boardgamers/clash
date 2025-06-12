@@ -184,12 +184,7 @@ fn hero_general(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             )])
         },
         |game, s, a| {
-            let name = &s.player_name;
-            let cost = &s.choice[0];
-            if cost.is_empty() {
-                game.add_info_log_item(&format!("{name} did not pay {cost}"));
-            } else {
-                game.add_info_log_item(&format!("{name} paid {cost}"));
+            if !s.choice[0].is_empty() {
                 a.answer = Some(true);
             }
         },

@@ -210,7 +210,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -227,7 +227,19 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "origin": {
+                          "CivilCard": 23
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -238,7 +250,7 @@
             },
             {
               "index": 1,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": "EndTurn"
@@ -252,7 +264,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Movement": {
@@ -304,6 +316,7 @@
       "Player1 has to pay 1 culture token for Negotiations"
     ],
     [
+      "Player1 paid 1 culture token for Negotiations",
       "Player1 paid 1 culture token for Negotiations",
       "Player1 and Player2 are in negotiations."
     ],

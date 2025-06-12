@@ -196,7 +196,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -204,7 +204,19 @@
                         "action": "CivilLiberties"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 3
+                        },
+                        "origin": {
+                          "Ability": "Civil Liberties"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -219,7 +231,29 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "mood_tokens": 2
+                        },
+                        "origin": {
+                          "Ability": "Recruit"
+                        }
+                      }
+                    },
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "mood_tokens": 2
+                        },
+                        "origin": {
+                          "Ability": "Recruit"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -236,6 +270,7 @@
     ],
     [
       "Player1 paid 2 mood tokens to recruit 1 infantry in the city at A1",
+      "Player1 paid 2 mood tokens for Recruit",
       "Draft reduced the cost of 1 Infantry to 2 mood tokens"
     ]
   ],

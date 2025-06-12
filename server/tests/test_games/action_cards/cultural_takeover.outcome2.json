@@ -224,7 +224,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -254,7 +254,19 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "culture_tokens": 2
+                        },
+                        "origin": {
+                          "Ability": "Influence Culture"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -273,6 +285,7 @@
       "Player1 tried to influence culture the City Center in the city at B3 by Barbarians with the city at A1 and paid 2 culture tokens to boost the range"
     ],
     [
+      "Player1 paid 2 culture tokens for Influence Culture",
       "Cultural influence succeeded (rolled 6)",
       "Player1 selected unit to gain: infantry"
     ]

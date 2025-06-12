@@ -271,7 +271,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -290,7 +290,19 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "Taxes"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -302,7 +314,22 @@
                         "gold": 1
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "food": 1,
+                          "wood": 1,
+                          "ore": 1,
+                          "gold": 1
+                        },
+                        "origin": {
+                          "Ability": "Taxes"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -318,6 +345,7 @@
       "Player1 has to pay 1 mood token for Taxes"
     ],
     [
+      "Player1 paid 1 mood token for Taxes",
       "Player1 paid 1 mood token for Taxes"
     ],
     [

@@ -189,7 +189,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -213,7 +213,39 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "food": 2
+                        },
+                        "origin": {
+                          "Ability": "Advance"
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "Storage"
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "ideas": 2
+                        },
+                        "origin": {
+                          "CivilCard": 41
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -231,8 +263,9 @@
       "Player1 selected Storage as advance for New Ideas."
     ],
     [
+      "Player1 paid 2 food for Advance",
       "Player1 paid 2 food for advance Storage",
-      "Player1 gained 1 mood token as advance bonus",
+      "Player1 gained 1 mood token for Storage",
       "Player1 gained 2 ideas for New Ideas"
     ]
   ],

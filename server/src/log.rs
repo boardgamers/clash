@@ -38,6 +38,8 @@ impl ActionLogRound {
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct ActionLogPlayer {
     pub index: usize,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub actions: Vec<ActionLogAction>,
 }
 
@@ -159,6 +161,10 @@ pub(crate) fn add_log_action(game: &mut Game, item: Action) {
 }
 
 pub(crate) fn add_action_log_item(game: &mut Game, item: ActionLogItem) {
+    let p = current_player_turn_log_mut(game);
+    if p.actions.is_empty() {
+        p.actions.push(ActionLogAction::new(Action::StartTurn))
+    }
     current_log_action_mut(game).items.push(item);
 }
 
@@ -197,5 +203,5 @@ pub(crate) fn current_log_action_mut(game: &mut Game) -> &mut ActionLogAction {
     current_player_turn_log_mut(game)
         .actions
         .last_mut()
-        .expect("items empty")
+        .expect("actions empty")
 }

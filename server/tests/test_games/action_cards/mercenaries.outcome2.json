@@ -231,7 +231,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -282,7 +282,19 @@
                       }
                     },
                     "result": "AttackerWins"
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "ore": 1
+                        },
+                        "origin": {
+                          "CivilCard": 13
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -301,6 +313,7 @@
       "Player1 selected Barbarian armies to move: B3"
     ],
     [
+      "Player1 paid 1 ore for Mercenaries",
       "Player1 paid for mercenaries: 1 ore",
       "Player1 selected Barbarian army to move: B3",
       "Player1 selected destination for Barbarian army: B2",

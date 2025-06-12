@@ -44,7 +44,10 @@
                     },
                     "type": "Unlimited"
                   }
-                ]
+                ],
+                "origin": {
+                  "Advance": "FreeEducation"
+                }
               },
               "name": "Pay extra 1 idea for a mood token",
               "optional": true
@@ -323,7 +326,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -335,7 +338,30 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "food": 1,
+                          "gold": 1
+                        },
+                        "origin": {
+                          "Ability": "Advance"
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "Draft"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -348,7 +374,8 @@
   "log": [
     [
       "Player1 paid 1 food and 1 gold to get the Draft advance",
-      "Player1 gained 1 culture token as advance bonus"
+      "Player1 paid 1 food and 1 gold for Advance",
+      "Player1 gained 1 culture token for Draft"
     ]
   ],
   "undo_limit": 0,

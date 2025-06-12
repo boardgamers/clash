@@ -168,7 +168,6 @@ where
                 game,
                 s.player_index,
                 &routes,
-                &s.choice,
                 s.actively_selected,
             );
             for l in &log {

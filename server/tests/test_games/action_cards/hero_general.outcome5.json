@@ -185,7 +185,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Movement": {
@@ -237,7 +237,19 @@
                       5
                     ],
                     "city_mood": "Angry"
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "gold": 1
+                        },
+                        "origin": {
+                          "Ability": "Combat"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -264,7 +276,19 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "origin": {
+                          "CivilCard": 5
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -299,7 +323,7 @@
       "Player2 has to remove all of their defending units",
       "Player2 removed 2 infantry",
       "Attacker wins and captured Player2's city at C1",
-      "Player1 gained 1 gold for capturing a city",
+      "Player1 gained 1 gold for Combat",
       "Player1 could not store 1 gold"
     ],
     [
@@ -309,6 +333,7 @@
       "Player1 selected city C1 to increase the mood by 1"
     ],
     [
+      "Player1 paid 1 mood token for Hero General",
       "Player1 paid 1 mood token"
     ],
     [

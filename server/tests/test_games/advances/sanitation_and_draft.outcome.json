@@ -267,7 +267,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -283,7 +283,20 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "gold": 2,
+                          "mood_tokens": 1
+                        },
+                        "origin": {
+                          "Ability": "Recruit"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -296,6 +309,7 @@
   "log": [
     [
       "Player1 paid 2 gold and 1 mood token to recruit 1 settler and 1 infantry in the city at A1",
+      "Player1 paid 2 gold and 1 mood token for Recruit",
       "Draft reduced the cost of 1 Infantry to 1 mood token",
       "Sanitation reduced the cost of 1 Settler to 1 mood token"
     ]

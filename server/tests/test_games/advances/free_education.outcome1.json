@@ -265,7 +265,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -277,7 +277,30 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "food": 1,
+                          "gold": 1
+                        },
+                        "origin": {
+                          "Ability": "Advance"
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "Draft"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -288,7 +311,49 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "ideas": 1
+                        },
+                        "origin": {
+                          "Advance": "FreeEducation"
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "FreeEducation"
+                        }
+                      }
+                    },
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "ideas": 1
+                        },
+                        "origin": {
+                          "Advance": "FreeEducation"
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "FreeEducation"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -301,10 +366,12 @@
   "log": [
     [
       "Player1 paid 1 food and 1 gold to get the Draft advance",
-      "Player1 gained 1 culture token as advance bonus"
+      "Player1 paid 1 food and 1 gold for Advance",
+      "Player1 gained 1 culture token for Draft"
     ],
     [
-      "Player1 paid 1 idea for free education to gain 1 mood token"
+      "Player1 paid 1 idea for Free Education",
+      "Player1 gained 1 mood token for Free Education"
     ]
   ],
   "undo_limit": 0,

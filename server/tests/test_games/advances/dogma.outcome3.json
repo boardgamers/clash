@@ -289,7 +289,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -300,7 +300,19 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "ideas": 2
+                        },
+                        "origin": {
+                          "Ability": "Advance"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -315,7 +327,20 @@
                         "port_position": null
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "wood": 1,
+                          "ore": 1
+                        },
+                        "origin": {
+                          "Ability": "Construct Building"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -324,7 +349,19 @@
                         "culture_tokens": 1
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "origin": {
+                          "Ability": "Temple"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -344,12 +381,14 @@
   "log": [
     [
       "Player2 paid 2 ideas to get the Dogma advance",
+      "Player2 paid 2 ideas for Advance",
       "Player2 is now limited to a maximum of 2 ideas for Dogma Advance",
       "Player2 unlocked Provinces",
       "Player2 could not store 2 ideas"
     ],
     [
       "Player2 paid 1 wood and 1 ore to construct a Temple in the city at C1",
+      "Player2 paid 1 wood and 1 ore for Construct Building",
       "State Religion reduced the food cost to 0"
     ],
     [

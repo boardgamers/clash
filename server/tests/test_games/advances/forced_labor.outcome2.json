@@ -229,7 +229,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -248,7 +248,19 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "ForcedLabor"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -274,7 +286,20 @@
                         "action_type": "Collect"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "food": 1,
+                          "wood": 1
+                        },
+                        "origin": {
+                          "Ability": "Collect"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -291,10 +316,12 @@
     ],
     [
       "Player1 paid 1 mood token for Forced Labor",
+      "Player1 paid 1 mood token for Forced Labor",
       "Player1 paid 1 mood token to treat Angry cities as neutral"
     ],
     [
       "Player1 collects 1 food and 1 wood in the city at A1",
+      "Player1 gained 1 food and 1 wood for Collect",
       "Player1 could not store 1 food and 1 wood"
     ]
   ],

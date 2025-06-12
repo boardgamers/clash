@@ -209,52 +209,7 @@
         {
           "players": [
             {
-              "index": 0,
-              "items": [
-                {
-                  "action": {
-                    "Playing": {
-                      "ActionCard": 34
-                    }
-                  }
-                },
-                {
-                  "action": {
-                    "Response": {
-                      "SelectAdvance": "Cartography"
-                    }
-                  }
-                },
-                {
-                  "action": {
-                    "Response": {
-                      "Payment": [
-                        {
-                          "ideas": 2
-                        }
-                      ]
-                    }
-                  }
-                },
-                {
-                  "action": {
-                    "Response": {
-                      "SelectAdvance": "WarShips"
-                    }
-                  }
-                },
-                {
-                  "action": {
-                    "Response": {
-                      "Payment": [
-                        {
-                          "ideas": 2
-                        }
-                      ]
-                    }
-                  }
-                }
-              ]
+              "index": 0
             }
           ]
         }

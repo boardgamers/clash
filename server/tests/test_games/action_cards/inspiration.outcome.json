@@ -188,13 +188,25 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
                       "ActionCard": 3
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "Storage"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -207,7 +219,7 @@
   "log": [
     [
       "Player1 played the action card Inspiration",
-      "Player1 gained 1 mood token as advance bonus",
+      "Player1 gained 1 mood token for Storage",
       "Player1 gained Storage for free using Inspiration."
     ]
   ],

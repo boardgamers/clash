@@ -213,7 +213,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -230,7 +230,19 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "origin": {
+                          "CivilCard": 17
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -242,7 +254,17 @@
                         "port_position": null
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {},
+                        "origin": {
+                          "Ability": "Construct Building"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -259,10 +281,12 @@
     ],
     [
       "Player1 paid 1 culture token for City Development",
+      "Player1 paid 1 culture token for City Development",
       "City Development: You may build a building in a city without spending an action and without paying for it."
     ],
     [
       "Player1 paid nothing to construct a Fortress in the city at C2",
+      "Player1 paid nothing for Construct Building",
       "Captivi allows to replace resources with mood tokens"
     ]
   ],

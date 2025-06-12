@@ -188,7 +188,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -205,7 +205,19 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "origin": {
+                          "CivilCard": 37
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -221,6 +233,7 @@
       "Player1 has to pay 1 culture token for Militia"
     ],
     [
+      "Player1 paid 1 culture token for Militia",
       "Player1 paid 1 culture token for Militia",
       "Player1 selected A1 as city for Militia."
     ]

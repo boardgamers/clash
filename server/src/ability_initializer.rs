@@ -381,10 +381,10 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                     if let EventResponse::Payment(payments) = action {
                         assert_eq!(requests.len(), payments.len());
                         for (request, payment) in requests.iter().zip(payments.iter()) {
-                            let zero_payment = payment.is_empty() && request.optional;
-                            if !zero_payment {
-                                pay_cost(game, p.index, &request.cost, payment);
+                            if payment.is_empty() && !request.optional {
+                                panic!("Payment expected but not provided");
                             }
+                            pay_cost(game, p.index, &request.cost, payment);
                         }
                         gain_reward(game, &SelectedChoice::new(p, true, payments), details);
                         return;

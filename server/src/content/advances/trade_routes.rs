@@ -41,7 +41,6 @@ pub(crate) fn trade_route_log(
     game: &Game,
     player_index: usize,
     trade_routes: &[TradeRoute],
-    reward: &ResourcePile,
     selected: bool,
 ) -> Vec<String> {
     let mut log = Vec::new();
@@ -62,7 +61,6 @@ pub(crate) fn trade_route_log(
             t.to,
         ));
     }
-    log.push(format!("Total reward is {reward}"));
     log
 }
 

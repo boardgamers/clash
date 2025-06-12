@@ -280,7 +280,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -289,7 +289,37 @@
                         "payment": {}
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {},
+                        "origin": {
+                          "Ability": "Advance"
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "Math"
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "ideas": 1
+                        },
+                        "origin": {
+                          "Advance": "Philosophy"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -301,7 +331,69 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "gold": 2
+                        },
+                        "origin": {
+                          "Ability": "Advance"
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "Astronomy"
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "ideas": 1
+                        },
+                        "origin": {
+                          "Advance": "Philosophy"
+                        }
+                      }
+                    },
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "gold": 2
+                        },
+                        "origin": {
+                          "Ability": "Advance"
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "Astronomy"
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "ideas": 1
+                        },
+                        "origin": {
+                          "Advance": "Philosophy"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -314,13 +406,15 @@
   "log": [
     [
       "Player2 paid nothing to get the Math advance",
+      "Player2 paid nothing for Advance",
       "Priesthood reduced the cost to 0",
-      "Player2 gained 1 culture token as advance bonus",
+      "Player2 gained 1 culture token for Math",
       "Player2 gained 1 idea for Philosophy"
     ],
     [
       "Player2 paid 2 gold to get the Astronomy advance",
-      "Player2 gained 1 culture token as advance bonus",
+      "Player2 paid 2 gold for Advance",
+      "Player2 gained 1 culture token for Astronomy",
       "Player2 gained 1 idea for Philosophy"
     ]
   ],

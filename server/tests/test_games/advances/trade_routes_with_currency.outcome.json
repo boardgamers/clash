@@ -25,7 +25,10 @@
                   },
                   "type": "Unlimited"
                 }
-              ]
+              ],
+              "origin": {
+                "Advance": "TradeRoutes"
+              }
             },
             "name": "Collect trade routes reward"
           }
@@ -418,7 +421,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": "EndTurn"
@@ -431,8 +434,7 @@
         {
           "players": [
             {
-              "index": 1,
-              "items": []
+              "index": 1
             }
           ]
         }

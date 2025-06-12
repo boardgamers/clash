@@ -200,7 +200,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -217,7 +217,39 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "origin": {
+                          "CivilCard": 39
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "Storage"
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "Fishing"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -234,11 +266,12 @@
     ],
     [
       "Player1 paid 1 culture token for Technology Trade",
+      "Player1 paid 1 culture token for Technology Trade",
       "Player1 selected Player2 as player for Technology Trade.",
       "Player1 selected Storage as advance for Technology Trade.",
-      "Player1 gained 1 mood token as advance bonus",
+      "Player1 gained 1 mood token for Storage",
       "Player2 selected Fishing as advance for Technology Trade.",
-      "Player2 gained 1 mood token as advance bonus"
+      "Player2 gained 1 mood token for Fishing"
     ]
   ],
   "undo_limit": 0,

@@ -330,7 +330,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Movement": {
@@ -345,7 +345,20 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "food": 1,
+                          "ore": 1
+                        },
+                        "origin": {
+                          "Advance": "Roads"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -357,7 +370,8 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player2 marched 1 settler from F7 to D8 on roads for 1 food and 1 ore"
+      "Player2 marched 1 settler from F7 to D8 on roads for 1 food and 1 ore",
+      "Player2 paid 1 food and 1 ore for Roads"
     ]
   ],
   "undo_limit": 0,

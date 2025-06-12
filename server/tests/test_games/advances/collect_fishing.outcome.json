@@ -273,7 +273,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -291,7 +291,19 @@
                         "action_type": "Collect"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "food": 1
+                        },
+                        "origin": {
+                          "Ability": "Collect"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -305,6 +317,7 @@
     [
       "Player1 collects 1 food in the city at C2",
       "City at C2 became Angry because it was activated more than once",
+      "Player1 gained 1 food for Collect",
       "Player1 could not store 1 food"
     ]
   ],

@@ -187,7 +187,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -204,14 +204,38 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "origin": {
+                          "CivilCard": 2
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
                     "Response": {
                       "SelectAdvance": "Storage"
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "Storage"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -227,10 +251,11 @@
       "Player1 has to pay 1 culture token for Advance"
     ],
     [
+      "Player1 paid 1 culture token for Advance",
       "Player1 paid 1 culture token for Advance"
     ],
     [
-      "Player1 gained 1 mood token as advance bonus",
+      "Player1 gained 1 mood token for Storage",
       "Player1 gained Storage using the Advance action card."
     ]
   ],

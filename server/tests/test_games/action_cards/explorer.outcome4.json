@@ -347,7 +347,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -364,7 +364,19 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "origin": {
+                          "CivilCard": 21
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -405,6 +417,7 @@
       "Player2 has to pay 1 culture token for Explorer"
     ],
     [
+      "Player2 paid 1 culture token for Explorer",
       "Player2 paid 1 culture token for Explorer"
     ],
     [

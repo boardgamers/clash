@@ -190,13 +190,25 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
                       "ActionCard": 9
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "ideas": 1
+                        },
+                        "origin": {
+                          "CivilCard": 9
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }

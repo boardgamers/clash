@@ -190,7 +190,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -198,7 +198,19 @@
                         "action": "CivilLiberties"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 3
+                        },
+                        "origin": {
+                          "Ability": "Civil Liberties"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
