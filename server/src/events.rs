@@ -2,7 +2,7 @@ use crate::advance::Advance;
 use crate::game::Game;
 use crate::payment::{PaymentOptionsBuilder, RewardBuilder};
 use crate::player::{CostTrigger, Player};
-use crate::resource::gain_resources;
+use crate::resource::{gain_resources, lose_resources};
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::SpecialAdvance;
 use crate::wonder::Wonder;
@@ -91,6 +91,10 @@ impl EventPlayer {
 
     pub fn gain_resources(&self, game: &mut Game, resources: ResourcePile) {
         gain_resources(game, self.index, resources, self.origin.clone());
+    }
+    
+    pub fn lose_resources(&self, game: &mut Game, resources: ResourcePile) {
+        lose_resources(game, self.index, resources, self.origin.clone());
     }
 
     #[must_use]

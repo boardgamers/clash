@@ -101,7 +101,7 @@ pub enum ActionLogItem {
         resources: ResourcePile,
         origin: EventOrigin,
     },
-    PayResources {
+    LoseResources {
         resources: ResourcePile,
         origin: EventOrigin,
     },

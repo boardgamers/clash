@@ -9,7 +9,7 @@ use crate::incident::trigger_incident;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::player_events::OnAdvanceInfo;
-use crate::resource::{ResourceType, gain_resources};
+use crate::resource::{ResourceType, gain_resources, lose_resources};
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceRequirement};
 use crate::{ability_initializer::AbilityInitializerSetup, resource_pile::ResourcePile};
 use Bonus::*;
@@ -401,9 +401,8 @@ pub(crate) fn remove_advance(game: &mut Game, advance: Advance, player_index: us
         undo_unlock_special_advance(game, special_advance, player_index);
     }
 
-    let player = &mut game.players[player_index];
     if let Some(advance_bonus) = &bonus {
-        player.lose_resources(advance_bonus.resources());
+        lose_resources(game, player_index, advance_bonus.resources(), EventOrigin::Advance(advance));
     }
     game.player_mut(player_index).advances.remove(advance);
 }

@@ -109,3 +109,24 @@ pub(crate) fn check_for_waste(game: &mut Game) {
         }
     }
 }
+
+///
+///
+/// # Panics
+///
+/// Panics if player cannot afford the resources
+pub(crate) fn lose_resources(
+    game: &mut Game,
+    player: usize,
+    resources: ResourcePile,
+    origin: EventOrigin,
+) {
+    let p = game.player_mut(player);
+    assert!(
+        p.resources.has_at_least(&resources),
+        "player should be able to pay {resources} - got {}",
+        p.resources
+    );
+    p.resources -= resources.clone();
+    add_action_log_item(game, ActionLogItem::LoseResources { resources, origin });
+}

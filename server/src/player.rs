@@ -229,21 +229,7 @@ impl Player {
             "Invalid payment - got {payment} for default cost {}",
             cost.default
         );
-        self.lose_resources(payment.clone());
-    }
-
-    ///
-    ///
-    /// # Panics
-    ///
-    /// Panics if player cannot afford the resources
-    pub(crate) fn lose_resources(&mut self, resources: ResourcePile) {
-        assert!(
-            self.resources.has_at_least(&resources),
-            "player should be able to pay {resources} - got {}",
-            self.resources
-        );
-        self.resources -= resources;
+        lose_resources( payment.clone(), cost.origin);
     }
 
     #[must_use]
