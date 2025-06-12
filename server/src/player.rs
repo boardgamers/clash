@@ -222,16 +222,6 @@ impl Player {
         cost.can_afford(&self.resources)
     }
 
-    pub(crate) fn pay_cost(&mut self, cost: &PaymentOptions, payment: &ResourcePile) {
-        assert!(cost.can_afford(payment), "invalid payment - got {payment}");
-        assert!(
-            cost.is_valid_payment(payment),
-            "Invalid payment - got {payment} for default cost {}",
-            cost.default
-        );
-        lose_resources( payment.clone(), cost.origin);
-    }
-
     #[must_use]
     pub fn can_advance_ignore_contradicting(&self, advance: Advance, game: &Game) -> bool {
         if self.has_advance(advance) {

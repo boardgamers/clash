@@ -19,6 +19,7 @@ use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::player_events::MoveInfo;
 use crate::position::Position;
+use crate::resource::pay_cost;
 use crate::unit::{carried_units, get_current_move};
 use crate::wonder::Wonder;
 use itertools::Itertools;
@@ -354,7 +355,7 @@ fn execute_move_action(game: &mut Game, player_index: usize, m: &MoveUnits) -> R
     if c.is_free() {
         assert_eq!(m.payment, ResourcePile::empty(), "payment should be empty");
     } else {
-        game.players[player_index].pay_cost(c, &m.payment);
+        pay_cost(game, player_index, c, &m.payment);
     }
 
     let current_move = get_current_move(

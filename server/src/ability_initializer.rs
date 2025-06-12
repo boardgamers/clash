@@ -18,6 +18,7 @@ use crate::player::Player;
 use crate::player_events::{PersistentEvent, PersistentEvents, TransientEvents};
 use crate::playing_actions::PlayingActionType;
 use crate::position::Position;
+use crate::resource::pay_cost;
 use crate::resource_pile::ResourcePile;
 use crate::tactics_card::CombatRole;
 use crate::unit::{UnitType, validate_units_selection_for_origin};
@@ -382,7 +383,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                         for (request, payment) in requests.iter().zip(payments.iter()) {
                             let zero_payment = payment.is_empty() && request.optional;
                             if !zero_payment {
-                                p.get_mut(game).pay_cost(&request.cost, payment);
+                                pay_cost(game, p.index, &request.cost, payment);
                             }
                         }
                         gain_reward(game, &SelectedChoice::new(p, true, payments), details);

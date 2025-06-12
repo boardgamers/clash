@@ -1,6 +1,7 @@
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::log::{ActionLogItem, add_action_log_item};
+use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::resource_pile::ResourcePile;
 use serde::{Deserialize, Serialize};
@@ -110,11 +111,6 @@ pub(crate) fn check_for_waste(game: &mut Game) {
     }
 }
 
-///
-///
-/// # Panics
-///
-/// Panics if player cannot afford the resources
 pub(crate) fn lose_resources(
     game: &mut Game,
     player: usize,
@@ -129,4 +125,26 @@ pub(crate) fn lose_resources(
     );
     p.resources -= resources.clone();
     add_action_log_item(game, ActionLogItem::LoseResources { resources, origin });
+}
+
+pub(crate) fn pay_cost(
+    game: &mut Game,
+    player: usize,
+    cost: &PaymentOptions,
+    payment: &ResourcePile,
+) {
+    game.add_info_log_item(&format!(
+        "{} paid {} for {}",
+        game.player_name(player),
+        payment,
+        cost.origin.name(game)
+    ));
+
+    assert!(cost.can_afford(payment), "invalid payment - got {payment}");
+    assert!(
+        cost.is_valid_payment(payment),
+        "Invalid payment - got {payment} for default cost {}",
+        cost.default
+    );
+    lose_resources(game, player, payment.clone(), cost.origin.clone());
 }

@@ -92,7 +92,7 @@ impl EventPlayer {
     pub fn gain_resources(&self, game: &mut Game, resources: ResourcePile) {
         gain_resources(game, self.index, resources, self.origin.clone());
     }
-    
+
     pub fn lose_resources(&self, game: &mut Game, resources: ResourcePile) {
         lose_resources(game, self.index, resources, self.origin.clone());
     }

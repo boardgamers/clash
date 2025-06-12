@@ -402,7 +402,12 @@ pub(crate) fn remove_advance(game: &mut Game, advance: Advance, player_index: us
     }
 
     if let Some(advance_bonus) = &bonus {
-        lose_resources(game, player_index, advance_bonus.resources(), EventOrigin::Advance(advance));
+        lose_resources(
+            game,
+            player_index,
+            advance_bonus.resources(),
+            EventOrigin::Advance(advance),
+        );
     }
     game.player_mut(player_index).advances.remove(advance);
 }

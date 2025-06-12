@@ -18,6 +18,7 @@ use crate::objective_card::SelectObjectivesInfo;
 use crate::payment::PaymentOptions;
 use crate::playing_actions::{ActionPayment, PlayingActionType};
 use crate::recruit::Recruit;
+use crate::resource::pay_cost;
 use crate::status_phase::StatusPhaseState;
 use crate::unit::Units;
 use crate::utils;
@@ -313,7 +314,7 @@ impl CostInfo {
     }
 
     pub(crate) fn pay(&self, game: &mut Game, payment: &ResourcePile) {
-        game.players[self.info.player].pay_cost(&self.cost, payment);
+        pay_cost(game, self.info.player, &self.cost, payment);
         self.info.execute(game);
     }
 }
