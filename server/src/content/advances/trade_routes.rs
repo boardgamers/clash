@@ -6,7 +6,6 @@ use crate::payment::ResourceReward;
 use crate::player::Player;
 use crate::position::Position;
 use crate::resource::ResourceType;
-use crate::resource_pile::ResourcePile;
 use crate::unit::Unit;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

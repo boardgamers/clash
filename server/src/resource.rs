@@ -140,11 +140,10 @@ pub(crate) fn pay_cost(
         cost.origin.name(game)
     ));
 
-    assert!(cost.can_afford(payment), "invalid payment - got {payment}");
+    assert!(cost.can_afford(payment), "invalid payment for {cost:?} - got {payment}");
     assert!(
         cost.is_valid_payment(payment),
-        "Invalid payment - got {payment} for default cost {}",
-        cost.default
+        "Invalid payment - got {payment} for default cost {cost:?}",
     );
     lose_resources(game, player, payment.clone(), cost.origin.clone());
 }

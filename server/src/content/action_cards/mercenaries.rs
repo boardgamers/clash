@@ -65,26 +65,18 @@ pub(crate) fn mercenaries(id: u8, tactics_card: TacticsCardFactory) -> ActionCar
         1,
         |game, p, a| {
             Some(vec![PaymentRequest::mandatory(
-                p.payment_options().sum(
-                    p.get(game),
-                    a.selected_positions.len() as u8,
-                    &[
+                p.payment_options()
+                    .sum(p.get(game), a.selected_positions.len() as u8, &[
                         ResourceType::Food,
                         ResourceType::Wood,
                         ResourceType::Ore,
                         ResourceType::CultureTokens,
                         ResourceType::Gold,
-                    ],
-                ),
+                    ]),
                 "Pay for mercenaries",
             )])
         },
-        |game, s, _| {
-            game.add_info_log_item(&format!(
-                "{} paid for mercenaries: {}",
-                s.player_name, s.choice[0]
-            ));
-        },
+        |_game, _s, _| {},
     );
 
     // one for each possible barbarian army

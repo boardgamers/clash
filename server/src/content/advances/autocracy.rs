@@ -116,11 +116,8 @@ fn forced_labor() -> AdvanceBuilder {
             b.add_simple_persistent_event_listener(
                 |event| &mut event.custom_action,
                 0,
-                |game, p, _| {
-                    // we check that the action was played
-                    game.add_info_log_item(&format!(
-                        "{p} paid 1 mood token to treat Angry cities as neutral"
-                    ));
+                |game, _, _| {
+                    game.add_to_last_log_item(" to treat Angry cities as neutral");
                 },
             )
         },

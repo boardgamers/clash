@@ -183,7 +183,7 @@ fn hero_general(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                 "Pay 1 mood token to increase the mood in a city by 1",
             )])
         },
-        |game, s, a| {
+        |_game, s, a| {
             if !s.choice[0].is_empty() {
                 a.answer = Some(true);
             }
