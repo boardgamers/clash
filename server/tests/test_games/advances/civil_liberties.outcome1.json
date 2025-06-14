@@ -210,10 +210,10 @@
                       "GainResources": {
                         "resources": {
                           "mood_tokens": 3
-                        },
-                        "origin": {
-                          "Ability": "Civil Liberties"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Civil Liberties"
                       }
                     }
                   ]
@@ -237,21 +237,31 @@
                       "LoseResources": {
                         "resources": {
                           "mood_tokens": 2
-                        },
-                        "origin": {
-                          "Ability": "Recruit"
                         }
-                      }
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
+                      },
+                      "modifiers": [
+                        {
+                          "Advance": "Draft"
+                        }
+                      ]
                     },
                     {
                       "LoseResources": {
                         "resources": {
                           "mood_tokens": 2
-                        },
-                        "origin": {
-                          "Ability": "Recruit"
                         }
-                      }
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
+                      },
+                      "modifiers": [
+                        {
+                          "Advance": "Draft"
+                        }
+                      ]
                     }
                   ]
                 }

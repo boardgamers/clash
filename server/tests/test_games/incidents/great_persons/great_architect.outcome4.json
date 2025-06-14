@@ -221,20 +221,20 @@
                       "LoseResources": {
                         "resources": {
                           "food": 2
-                        },
-                        "origin": {
-                          "Ability": "Advance"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Storage"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Storage"
                       }
                     }
                   ]
@@ -254,10 +254,10 @@
                       "LoseResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Incident": 55
                         }
+                      },
+                      "origin": {
+                        "Incident": 55
                       }
                     }
                   ]
@@ -302,10 +302,10 @@
                           "ore": 6,
                           "gold": 1,
                           "culture_tokens": 2
-                        },
-                        "origin": {
-                          "Wonder": "Pyramids"
                         }
+                      },
+                      "origin": {
+                        "Wonder": "Pyramids"
                       }
                     }
                   ]

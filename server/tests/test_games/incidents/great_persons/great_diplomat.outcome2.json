@@ -235,20 +235,20 @@
                       "LoseResources": {
                         "resources": {
                           "food": 2
-                        },
-                        "origin": {
-                          "Ability": "Advance"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Storage"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Storage"
                       }
                     }
                   ]
@@ -268,10 +268,10 @@
                       "LoseResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Incident": 57
                         }
+                      },
+                      "origin": {
+                        "Incident": 57
                       }
                     }
                   ]
@@ -320,11 +320,16 @@
                       "LoseResources": {
                         "resources": {
                           "culture_tokens": 2
-                        },
-                        "origin": {
-                          "Ability": "Move"
                         }
-                      }
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      },
+                      "modifiers": [
+                        {
+                          "Incident": 57
+                        }
+                      ]
                     }
                   ]
                 }

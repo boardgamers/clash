@@ -257,10 +257,10 @@
                           "ore": 2,
                           "gold": 1,
                           "mood_tokens": 2
-                        },
-                        "origin": {
-                          "Ability": "Collect"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Collect"
                       }
                     }
                   ]

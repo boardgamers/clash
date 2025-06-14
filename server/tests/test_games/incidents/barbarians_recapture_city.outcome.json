@@ -241,20 +241,20 @@
                       "GainResources": {
                         "resources": {
                           "gold": 1
-                        },
-                        "origin": {
-                          "Ability": "Combat"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Combat"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "gold": 2
-                        },
-                        "origin": {
-                          "Ability": "Barbarian battle"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Barbarian battle"
                       }
                     }
                   ]

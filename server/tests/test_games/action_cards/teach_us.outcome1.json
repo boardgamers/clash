@@ -240,10 +240,10 @@
                       "GainResources": {
                         "resources": {
                           "gold": 1
-                        },
-                        "origin": {
-                          "Ability": "Combat"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Combat"
                       }
                     }
                   ]
@@ -263,10 +263,10 @@
                       "GainResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Writing"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Writing"
                       }
                     }
                   ]

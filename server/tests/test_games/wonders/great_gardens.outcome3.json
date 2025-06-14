@@ -231,10 +231,10 @@
                           "wood": 5,
                           "ore": 2,
                           "culture_tokens": 5
-                        },
-                        "origin": {
-                          "Wonder": "GreatGardens"
                         }
+                      },
+                      "origin": {
+                        "Wonder": "GreatGardens"
                       }
                     }
                   ]

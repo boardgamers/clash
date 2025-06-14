@@ -293,30 +293,35 @@
                   "items": [
                     {
                       "LoseResources": {
-                        "resources": {},
-                        "origin": {
-                          "Ability": "Advance"
+                        "resources": {}
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      },
+                      "modifiers": [
+                        {
+                          "Advance": "Priesthood"
                         }
-                      }
+                      ]
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Math"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Math"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "ideas": 1
-                        },
-                        "origin": {
-                          "Advance": "Philosophy"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Philosophy"
                       }
                     }
                   ]
@@ -337,60 +342,60 @@
                       "LoseResources": {
                         "resources": {
                           "gold": 2
-                        },
-                        "origin": {
-                          "Ability": "Advance"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Astronomy"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Astronomy"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "ideas": 1
-                        },
-                        "origin": {
-                          "Advance": "Philosophy"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Philosophy"
                       }
                     },
                     {
                       "LoseResources": {
                         "resources": {
                           "gold": 2
-                        },
-                        "origin": {
-                          "Ability": "Advance"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Astronomy"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Astronomy"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "ideas": 1
-                        },
-                        "origin": {
-                          "Advance": "Philosophy"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Philosophy"
                       }
                     }
                   ]

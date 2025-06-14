@@ -252,10 +252,10 @@
                       "LoseResources": {
                         "resources": {
                           "mood_tokens": 2
-                        },
-                        "origin": {
-                          "Advance": "AbsolutePower"
                         }
+                      },
+                      "origin": {
+                        "Advance": "AbsolutePower"
                       }
                     }
                   ]

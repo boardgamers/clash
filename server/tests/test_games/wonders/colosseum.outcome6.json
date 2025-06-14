@@ -227,10 +227,10 @@
                           "wood": 4,
                           "ore": 5,
                           "culture_tokens": 5
-                        },
-                        "origin": {
-                          "Wonder": "Colosseum"
                         }
+                      },
+                      "origin": {
+                        "Wonder": "Colosseum"
                       }
                     }
                   ]
@@ -260,10 +260,10 @@
                       "LoseResources": {
                         "resources": {
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "Ability": "Sports"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Sports"
                       }
                     }
                   ]
@@ -298,10 +298,10 @@
                       "LoseResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Wonder": "Colosseum"
                         }
+                      },
+                      "origin": {
+                        "Wonder": "Colosseum"
                       }
                     }
                   ]
@@ -347,10 +347,10 @@
                       "GainResources": {
                         "resources": {
                           "gold": 1
-                        },
-                        "origin": {
-                          "Ability": "Combat"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Combat"
                       }
                     }
                   ]

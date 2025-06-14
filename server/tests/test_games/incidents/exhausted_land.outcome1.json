@@ -250,10 +250,10 @@
                       "GainResources": {
                         "resources": {
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Storage"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Storage"
                       }
                     }
                   ]
@@ -271,20 +271,20 @@
                       "GainResources": {
                         "resources": {
                           "food": 2
-                        },
-                        "origin": {
-                          "Incident": 13
                         }
+                      },
+                      "origin": {
+                        "Incident": 13
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "food": 2
-                        },
-                        "origin": {
-                          "Incident": 13
                         }
+                      },
+                      "origin": {
+                        "Incident": 13
                       }
                     }
                   ]

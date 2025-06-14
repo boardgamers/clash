@@ -233,10 +233,10 @@
                       "GainResources": {
                         "resources": {
                           "gold": 1
-                        },
-                        "origin": {
-                          "Ability": "Combat"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Combat"
                       }
                     }
                   ]
@@ -252,10 +252,10 @@
                       "GainResources": {
                         "resources": {
                           "ideas": 2
-                        },
-                        "origin": {
-                          "CivilCard": 11
                         }
+                      },
+                      "origin": {
+                        "CivilCard": 11
                       }
                     }
                   ]

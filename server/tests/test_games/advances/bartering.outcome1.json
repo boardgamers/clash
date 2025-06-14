@@ -216,10 +216,10 @@
                       "GainResources": {
                         "resources": {
                           "gold": 1
-                        },
-                        "origin": {
-                          "Ability": "Bartering"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Bartering"
                       }
                     }
                   ]

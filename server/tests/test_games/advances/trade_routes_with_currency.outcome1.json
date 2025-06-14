@@ -413,10 +413,10 @@
                         "resources": {
                           "food": 1,
                           "gold": 1
-                        },
-                        "origin": {
-                          "Advance": "TradeRoutes"
                         }
+                      },
+                      "origin": {
+                        "Advance": "TradeRoutes"
                       }
                     },
                     {
@@ -424,10 +424,10 @@
                         "resources": {
                           "food": 1,
                           "gold": 1
-                        },
-                        "origin": {
-                          "Advance": "TradeRoutes"
                         }
+                      },
+                      "origin": {
+                        "Advance": "TradeRoutes"
                       }
                     }
                   ]

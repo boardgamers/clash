@@ -260,10 +260,10 @@
                       "LoseResources": {
                         "resources": {
                           "culture_tokens": 2
-                        },
-                        "origin": {
-                          "Ability": "Influence Culture"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Influence Culture"
                       }
                     }
                   ]

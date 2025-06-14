@@ -274,20 +274,20 @@
                       "LoseResources": {
                         "resources": {
                           "gold": 2
-                        },
-                        "origin": {
-                          "Ability": "Advance"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Storage"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Storage"
                       }
                     }
                   ]
@@ -307,10 +307,10 @@
                       "LoseResources": {
                         "resources": {
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Myths"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Myths"
                       }
                     }
                   ]

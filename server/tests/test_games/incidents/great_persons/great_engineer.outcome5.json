@@ -234,20 +234,20 @@
                       "LoseResources": {
                         "resources": {
                           "food": 2
-                        },
-                        "origin": {
-                          "Ability": "Advance"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Storage"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Storage"
                       }
                     }
                   ]
@@ -267,10 +267,10 @@
                       "LoseResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Incident": 26
                         }
+                      },
+                      "origin": {
+                        "Incident": 26
                       }
                     }
                   ]
@@ -318,11 +318,19 @@
                           "food": 1,
                           "wood": 1,
                           "ore": 1
-                        },
-                        "origin": {
-                          "Ability": "Construct Building"
                         }
-                      }
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
+                      },
+                      "modifiers": [
+                        {
+                          "SpecialAdvance": "Captivi"
+                        },
+                        {
+                          "Ability": "Construct Only"
+                        }
+                      ]
                     }
                   ]
                 }
@@ -362,7 +370,7 @@
       "Player1: Great Engineer: Great Engineer: You may build a building in a city without spending an action and without activating it."
     ],
     [
-      "Player1: Construct Building: Pay 1 food, 1 wood and 1 ore with Captivi, construct only",
+      "Player1: Construct Building: Pay 1 food, 1 wood and 1 ore with Captivi, Construct Only",
       "Captivi allows to replace resources with mood tokens",
       "Player1: Construct Building: Build a Fortress in the city C2"
     ]

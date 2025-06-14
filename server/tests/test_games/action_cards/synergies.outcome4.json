@@ -239,20 +239,20 @@
                       "LoseResources": {
                         "resources": {
                           "ideas": 2
-                        },
-                        "origin": {
-                          "Ability": "Advance"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Cartography"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Cartography"
                       }
                     }
                   ]
@@ -279,10 +279,10 @@
                       "LoseResources": {
                         "resources": {
                           "ideas": 2
-                        },
-                        "origin": {
-                          "Ability": "Advance"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
                       }
                     }
                   ]

@@ -263,10 +263,10 @@
                       "LoseResources": {
                         "resources": {
                           "mood_tokens": 2
-                        },
-                        "origin": {
-                          "SpecialAdvance": "HellenisticCulture"
                         }
+                      },
+                      "origin": {
+                        "SpecialAdvance": "HellenisticCulture"
                       }
                     }
                   ]

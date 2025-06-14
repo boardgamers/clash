@@ -232,11 +232,16 @@
                           "food": 1,
                           "wood": 1,
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "Ability": "Construct Building"
                         }
-                      }
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
+                      },
+                      "modifiers": [
+                        {
+                          "SpecialAdvance": "Captivi"
+                        }
+                      ]
                     }
                   ]
                 }

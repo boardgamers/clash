@@ -254,10 +254,10 @@
                       "GainResources": {
                         "resources": {
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Storage"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Storage"
                       }
                     }
                   ]
@@ -304,20 +304,20 @@
                       "LoseResources": {
                         "resources": {
                           "ore": 1
-                        },
-                        "origin": {
-                          "Incident": 54
                         }
+                      },
+                      "origin": {
+                        "Incident": 54
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "food": 1
-                        },
-                        "origin": {
-                          "Incident": 54
                         }
+                      },
+                      "origin": {
+                        "Incident": 54
                       }
                     }
                   ]

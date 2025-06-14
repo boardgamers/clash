@@ -243,10 +243,10 @@
                       "GainResources": {
                         "resources": {
                           "gold": 1
-                        },
-                        "origin": {
-                          "Ability": "Combat"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Combat"
                       }
                     }
                   ]
@@ -282,10 +282,10 @@
                       "LoseResources": {
                         "resources": {
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "CivilCard": 5
                         }
+                      },
+                      "origin": {
+                        "CivilCard": 5
                       }
                     }
                   ]

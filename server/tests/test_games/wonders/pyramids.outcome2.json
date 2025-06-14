@@ -230,10 +230,10 @@
                           "ore": 6,
                           "gold": 1,
                           "culture_tokens": 5
-                        },
-                        "origin": {
-                          "Wonder": "Pyramids"
                         }
+                      },
+                      "origin": {
+                        "Wonder": "Pyramids"
                       }
                     }
                   ]
@@ -267,7 +267,7 @@
     ],
     [
       "Player1: Pyramids: Pay 2 food, 3 wood, 6 ore, 1 gold and 5 culture tokens",
-       "Player1: Build Wonder: Built Pyramids in city A1 for 2 food, 3 wood, 6 ore, 1 gold and 5 culture tokens"
+      "Player1: Build Wonder: Built Pyramids in city A1 for 2 food, 3 wood, 6 ore, 1 gold and 5 culture tokens"
     ],
     [
       "Player1 completed objective Magnificent Culture"

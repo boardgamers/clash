@@ -424,10 +424,10 @@
                       "LoseResources": {
                         "resources": {
                           "food": 1
-                        },
-                        "origin": {
-                          "Ability": "Viking Raids"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Viking Raids"
                       }
                     }
                   ]

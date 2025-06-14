@@ -251,20 +251,20 @@
                       "LoseResources": {
                         "resources": {
                           "gold": 2
-                        },
-                        "origin": {
-                          "Ability": "Advance"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Storage"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Storage"
                       }
                     },
                     {
@@ -272,20 +272,20 @@
                         "resources": {
                           "ideas": 1,
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Incident": 40
                         }
+                      },
+                      "origin": {
+                        "Incident": 40
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Incident": 40
                         }
+                      },
+                      "origin": {
+                        "Incident": 40
                       }
                     }
                   ]
@@ -306,20 +306,20 @@
                       "LoseResources": {
                         "resources": {
                           "gold": 2
-                        },
-                        "origin": {
-                          "Ability": "Advance"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Monuments"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Monuments"
                       }
                     }
                   ]

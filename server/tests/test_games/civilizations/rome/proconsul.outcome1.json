@@ -399,10 +399,10 @@
                       "GainResources": {
                         "resources": {
                           "gold": 2
-                        },
-                        "origin": {
-                          "Ability": "Combat"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Combat"
                       }
                     }
                   ]
@@ -422,10 +422,10 @@
                       "LoseResources": {
                         "resources": {
                           "gold": 1
-                        },
-                        "origin": {
-                          "LeaderAbility": "Proconsul"
                         }
+                      },
+                      "origin": {
+                        "LeaderAbility": "Proconsul"
                       }
                     }
                   ]

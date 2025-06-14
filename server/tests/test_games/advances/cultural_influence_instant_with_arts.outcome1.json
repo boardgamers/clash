@@ -223,10 +223,10 @@
                       "LoseResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Arts"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Arts"
                       }
                     }
                   ]

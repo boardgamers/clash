@@ -276,10 +276,10 @@
                       "LoseResources": {
                         "resources": {
                           "mood_tokens": 6
-                        },
-                        "origin": {
-                          "Advance": "Voting"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Voting"
                       }
                     }
                   ]

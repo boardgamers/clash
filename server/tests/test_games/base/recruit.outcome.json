@@ -251,10 +251,10 @@
                           "food": 1,
                           "ore": 1,
                           "gold": 2
-                        },
-                        "origin": {
-                          "Ability": "Recruit"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
                       }
                     }
                   ]

@@ -202,10 +202,10 @@
                       "GainResources": {
                         "resources": {
                           "ideas": 1
-                        },
-                        "origin": {
-                          "CivilCard": 9
                         }
+                      },
+                      "origin": {
+                        "CivilCard": 9
                       }
                     }
                   ]

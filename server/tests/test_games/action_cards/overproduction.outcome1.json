@@ -256,10 +256,10 @@
                           "wood": 1,
                           "ore": 1,
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "Ability": "Collect"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Collect"
                       }
                     }
                   ]

@@ -222,10 +222,10 @@
                       "LoseResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "CivilCard": 31
                         }
+                      },
+                      "origin": {
+                        "CivilCard": 31
                       }
                     }
                   ]

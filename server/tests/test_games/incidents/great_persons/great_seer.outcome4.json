@@ -218,20 +218,20 @@
                       "LoseResources": {
                         "resources": {
                           "food": 2
-                        },
-                        "origin": {
-                          "Ability": "Advance"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Storage"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Storage"
                       }
                     }
                   ]
@@ -251,10 +251,10 @@
                       "LoseResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Incident": 58
                         }
+                      },
+                      "origin": {
+                        "Incident": 58
                       }
                     }
                   ]
@@ -293,20 +293,20 @@
                       "LoseResources": {
                         "resources": {
                           "food": 2
-                        },
-                        "origin": {
-                          "Ability": "Advance"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Writing"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Writing"
                       }
                     }
                   ]

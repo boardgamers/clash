@@ -258,11 +258,16 @@
                       "GainResources": {
                         "resources": {
                           "food": 2
-                        },
-                        "origin": {
-                          "Ability": "Collect"
                         }
-                      }
+                      },
+                      "origin": {
+                        "Ability": "Collect"
+                      },
+                      "modifiers": [
+                        {
+                          "Advance": "Irrigation"
+                        }
+                      ]
                     }
                   ]
                 }

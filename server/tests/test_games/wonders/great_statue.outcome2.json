@@ -230,10 +230,10 @@
                           "wood": 4,
                           "ore": 5,
                           "culture_tokens": 5
-                        },
-                        "origin": {
-                          "Wonder": "GreatStatue"
                         }
+                      },
+                      "origin": {
+                        "Wonder": "GreatStatue"
                       }
                     }
                   ]

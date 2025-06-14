@@ -238,10 +238,10 @@
                   "items": [
                     {
                       "LoseResources": {
-                        "resources": {},
-                        "origin": {
-                          "Ability": "Change Government"
-                        }
+                        "resources": {}
+                      },
+                      "origin": {
+                        "Ability": "Change Government"
                       }
                     }
                   ]

@@ -394,10 +394,10 @@
                       "GainResources": {
                         "resources": {
                           "gold": 1
-                        },
-                        "origin": {
-                          "Ability": "Barbarian battle"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Barbarian battle"
                       }
                     }
                   ]

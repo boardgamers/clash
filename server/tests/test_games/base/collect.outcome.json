@@ -225,10 +225,10 @@
                           "wood": 1,
                           "ore": 1,
                           "ideas": 1
-                        },
-                        "origin": {
-                          "Ability": "Collect"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Collect"
                       }
                     }
                   ]

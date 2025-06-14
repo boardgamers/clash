@@ -237,10 +237,10 @@
                       "GainResources": {
                         "resources": {
                           "gold": 1
-                        },
-                        "origin": {
-                          "Ability": "Raze city"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Raze city"
                       }
                     }
                   ]

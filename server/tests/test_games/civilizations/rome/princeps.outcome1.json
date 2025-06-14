@@ -269,10 +269,10 @@
                       "LoseResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "LeaderAbility": "Princeps"
                         }
+                      },
+                      "origin": {
+                        "LeaderAbility": "Princeps"
                       }
                     }
                   ]

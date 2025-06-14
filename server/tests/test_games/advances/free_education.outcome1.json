@@ -284,20 +284,20 @@
                         "resources": {
                           "food": 1,
                           "gold": 1
-                        },
-                        "origin": {
-                          "Ability": "Advance"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Draft"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Draft"
                       }
                     }
                   ]
@@ -317,40 +317,40 @@
                       "LoseResources": {
                         "resources": {
                           "ideas": 1
-                        },
-                        "origin": {
-                          "Advance": "FreeEducation"
                         }
+                      },
+                      "origin": {
+                        "Advance": "FreeEducation"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "FreeEducation"
                         }
+                      },
+                      "origin": {
+                        "Advance": "FreeEducation"
                       }
                     },
                     {
                       "LoseResources": {
                         "resources": {
                           "ideas": 1
-                        },
-                        "origin": {
-                          "Advance": "FreeEducation"
                         }
+                      },
+                      "origin": {
+                        "Advance": "FreeEducation"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "FreeEducation"
                         }
+                      },
+                      "origin": {
+                        "Advance": "FreeEducation"
                       }
                     }
                   ]

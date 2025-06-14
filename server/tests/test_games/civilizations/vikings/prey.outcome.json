@@ -304,20 +304,20 @@
                       "GainResources": {
                         "resources": {
                           "gold": 1
-                        },
-                        "origin": {
-                          "Ability": "Combat"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Combat"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "gold": 2
-                        },
-                        "origin": {
-                          "LeaderAbility": "Prey"
                         }
+                      },
+                      "origin": {
+                        "LeaderAbility": "Prey"
                       }
                     }
                   ]

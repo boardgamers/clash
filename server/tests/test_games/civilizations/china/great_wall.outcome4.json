@@ -390,10 +390,10 @@
                       "LoseResources": {
                         "resources": {
                           "food": 2
-                        },
-                        "origin": {
-                          "Ability": "Advance"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
                       }
                     }
                   ]
@@ -427,11 +427,16 @@
                           "wood": 2,
                           "ore": 7,
                           "culture_tokens": 3
-                        },
-                        "origin": {
-                          "Wonder": "GreatWall"
                         }
-                      }
+                      },
+                      "origin": {
+                        "Wonder": "GreatWall"
+                      },
+                      "modifiers": [
+                        {
+                          "LeaderAbility": "Great Wall"
+                        }
+                      ]
                     }
                   ]
                 },

@@ -283,11 +283,16 @@
                           "ore": 1,
                           "ideas": 3,
                           "gold": 1
-                        },
-                        "origin": {
-                          "Advance": "Voting"
                         }
-                      }
+                      },
+                      "origin": {
+                        "Advance": "Voting"
+                      },
+                      "modifiers": [
+                        {
+                          "Advance": "Rituals"
+                        }
+                      ]
                     }
                   ]
                 }

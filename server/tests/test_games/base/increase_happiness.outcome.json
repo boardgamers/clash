@@ -274,10 +274,10 @@
                       "LoseResources": {
                         "resources": {
                           "mood_tokens": 5
-                        },
-                        "origin": {
-                          "Ability": "Increase Happiness"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Increase Happiness"
                       }
                     }
                   ]

@@ -275,10 +275,10 @@
                       "LoseResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Ability": "Sports"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Sports"
                       }
                     }
                   ]

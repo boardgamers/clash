@@ -219,30 +219,30 @@
                       "LoseResources": {
                         "resources": {
                           "food": 2
-                        },
-                        "origin": {
-                          "Ability": "Advance"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Storage"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Storage"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "ideas": 2
-                        },
-                        "origin": {
-                          "CivilCard": 41
                         }
+                      },
+                      "origin": {
+                        "CivilCard": 41
                       }
                     }
                   ]

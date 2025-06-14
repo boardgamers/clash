@@ -323,20 +323,20 @@
                       "GainResources": {
                         "resources": {
                           "ideas": 1
-                        },
-                        "origin": {
-                          "Advance": "Cartography"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Cartography"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Cartography"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Cartography"
                       }
                     }
                   ]

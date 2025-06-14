@@ -220,38 +220,38 @@
                       "LoseResources": {
                         "resources": {
                           "gold": 2
-                        },
-                        "origin": {
-                          "Ability": "Advance"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Storage"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Storage"
                       }
                     },
                     {
                       "LoseResources": {
                         "resources": {
                           "food": 1
-                        },
-                        "origin": {
-                          "Incident": 51
                         }
+                      },
+                      "origin": {
+                        "Incident": 51
                       }
                     },
                     {
                       "LoseResources": {
-                        "resources": {},
-                        "origin": {
-                          "Incident": 51
-                        }
+                        "resources": {}
+                      },
+                      "origin": {
+                        "Incident": 51
                       }
                     }
                   ]

@@ -354,30 +354,30 @@
                       "LoseResources": {
                         "resources": {
                           "ideas": 2
-                        },
-                        "origin": {
-                          "Ability": "Advance"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Storage"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Storage"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "gold": 1
-                        },
-                        "origin": {
-                          "Ability": "Barbarian battle"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Barbarian battle"
                       }
                     },
                     {
@@ -385,20 +385,20 @@
                         "resources": {
                           "ideas": 1,
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Incident": 40
                         }
+                      },
+                      "origin": {
+                        "Incident": 40
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Incident": 40
                         }
+                      },
+                      "origin": {
+                        "Incident": 40
                       }
                     }
                   ]

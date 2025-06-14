@@ -397,20 +397,20 @@
                       "LoseResources": {
                         "resources": {
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "LeaderAbility": "Master"
                         }
+                      },
+                      "origin": {
+                        "LeaderAbility": "Master"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Writing"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Writing"
                       }
                     }
                   ]

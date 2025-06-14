@@ -222,20 +222,25 @@
                   "items": [
                     {
                       "LoseResources": {
-                        "resources": {},
-                        "origin": {
-                          "Ability": "Advance"
+                        "resources": {}
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      },
+                      "modifiers": [
+                        {
+                          "SpecialAdvance": "Aqueduct"
                         }
-                      }
+                      ]
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Sanitation"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Sanitation"
                       }
                     }
                   ]

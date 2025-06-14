@@ -285,10 +285,10 @@
                         "resources": {
                           "mood_tokens": 1,
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Ability": "Recruit"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
                       }
                     }
                   ]

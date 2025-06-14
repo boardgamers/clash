@@ -288,10 +288,10 @@
                       "LoseResources": {
                         "resources": {
                           "ore": 1
-                        },
-                        "origin": {
-                          "CivilCard": 13
                         }
+                      },
+                      "origin": {
+                        "CivilCard": 13
                       }
                     }
                   ]

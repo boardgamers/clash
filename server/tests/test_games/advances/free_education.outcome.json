@@ -345,20 +345,20 @@
                         "resources": {
                           "food": 1,
                           "gold": 1
-                        },
-                        "origin": {
-                          "Ability": "Advance"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Draft"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Draft"
                       }
                     }
                   ]

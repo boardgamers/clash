@@ -270,10 +270,10 @@
                         "resources": {
                           "wood": 5,
                           "gold": 3
-                        },
-                        "origin": {
-                          "Ability": "Recruit"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
                       }
                     }
                   ]
@@ -291,10 +291,10 @@
                       "GainResources": {
                         "resources": {
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Nationalism"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Nationalism"
                       }
                     }
                   ]
@@ -337,20 +337,20 @@
                       "GainResources": {
                         "resources": {
                           "gold": 1
-                        },
-                        "origin": {
-                          "Advance": "Medicine"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Medicine"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "gold": 2
-                        },
-                        "origin": {
-                          "Ability": "Pirate ship destroyed"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Pirate ship destroyed"
                       }
                     }
                   ]
@@ -368,10 +368,10 @@
                       "GainResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Ability": "Pirates battle"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Pirates battle"
                       }
                     }
                   ]
@@ -415,10 +415,10 @@
                       "GainResources": {
                         "resources": {
                           "gold": 1
-                        },
-                        "origin": {
-                          "Ability": "Pirate ship destroyed"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Pirate ship destroyed"
                       }
                     }
                   ]
@@ -436,10 +436,10 @@
                       "GainResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Ability": "Pirates battle"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Pirates battle"
                       }
                     }
                   ]

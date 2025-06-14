@@ -331,10 +331,10 @@
                       "GainResources": {
                         "resources": {
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Storage"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Storage"
                       }
                     }
                   ]
@@ -350,20 +350,20 @@
                       "GainResources": {
                         "resources": {
                           "ideas": 1
-                        },
-                        "origin": {
-                          "Advance": "Philosophy"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Philosophy"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Philosophy"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Philosophy"
                       }
                     }
                   ]

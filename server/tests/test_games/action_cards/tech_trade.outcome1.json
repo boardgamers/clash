@@ -223,30 +223,30 @@
                       "LoseResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "CivilCard": 39
                         }
+                      },
+                      "origin": {
+                        "CivilCard": 39
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Storage"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Storage"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Fishing"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Fishing"
                       }
                     }
                   ]

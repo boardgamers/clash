@@ -204,10 +204,10 @@
                       "GainResources": {
                         "resources": {
                           "mood_tokens": 3
-                        },
-                        "origin": {
-                          "Ability": "Civil Liberties"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Civil Liberties"
                       }
                     }
                   ]

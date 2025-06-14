@@ -300,20 +300,20 @@
                       "LoseResources": {
                         "resources": {
                           "gold": 2
-                        },
-                        "origin": {
-                          "SpecialAdvance": "Fireworks"
                         }
+                      },
+                      "origin": {
+                        "SpecialAdvance": "Fireworks"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "gold": 1
-                        },
-                        "origin": {
-                          "Ability": "Combat"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Combat"
                       }
                     }
                   ]

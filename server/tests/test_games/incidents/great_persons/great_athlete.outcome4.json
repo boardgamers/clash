@@ -213,20 +213,20 @@
                       "LoseResources": {
                         "resources": {
                           "food": 2
-                        },
-                        "origin": {
-                          "Ability": "Advance"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Storage"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Storage"
                       }
                     }
                   ]
@@ -246,10 +246,10 @@
                       "LoseResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Incident": 56
                         }
+                      },
+                      "origin": {
+                        "Incident": 56
                       }
                     }
                   ]
@@ -265,10 +265,10 @@
                       "GainResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Arts"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Arts"
                       }
                     }
                   ]
@@ -295,20 +295,20 @@
                       "LoseResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "CivilCard": 156
                         }
+                      },
+                      "origin": {
+                        "CivilCard": 156
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "CivilCard": 156
                         }
+                      },
+                      "origin": {
+                        "CivilCard": 156
                       }
                     }
                   ]

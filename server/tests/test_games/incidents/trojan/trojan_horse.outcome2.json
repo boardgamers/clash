@@ -256,20 +256,20 @@
                       "LoseResources": {
                         "resources": {
                           "gold": 2
-                        },
-                        "origin": {
-                          "Ability": "Advance"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Storage"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Storage"
                       }
                     }
                   ]
@@ -334,20 +334,20 @@
                         "resources": {
                           "gold": 1,
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Ability": "Trojan Horse"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Trojan Horse"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "gold": 1
-                        },
-                        "origin": {
-                          "Ability": "Combat"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Combat"
                       }
                     }
                   ]

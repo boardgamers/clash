@@ -268,10 +268,10 @@
                       "LoseResources": {
                         "resources": {
                           "mood_tokens": 2
-                        },
-                        "origin": {
-                          "LeaderAbility": "Statesman"
                         }
+                      },
+                      "origin": {
+                        "LeaderAbility": "Statesman"
                       }
                     }
                   ]

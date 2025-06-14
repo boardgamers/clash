@@ -406,20 +406,20 @@
                       "GainResources": {
                         "resources": {
                           "gold": 1
-                        },
-                        "origin": {
-                          "Ability": "Market"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Market"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "food": 2
-                        },
-                        "origin": {
-                          "Advance": "TradeRoutes"
                         }
+                      },
+                      "origin": {
+                        "Advance": "TradeRoutes"
                       }
                     }
                   ]

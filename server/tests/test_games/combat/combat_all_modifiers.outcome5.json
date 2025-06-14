@@ -235,10 +235,10 @@
                       "LoseResources": {
                         "resources": {
                           "ore": 1
-                        },
-                        "origin": {
-                          "Advance": "SteelWeapons"
                         }
+                      },
+                      "origin": {
+                        "Advance": "SteelWeapons"
                       }
                     }
                   ]
@@ -257,20 +257,20 @@
                   "items": [
                     {
                       "LoseResources": {
-                        "resources": {},
-                        "origin": {
-                          "Advance": "Siegecraft"
-                        }
+                        "resources": {}
+                      },
+                      "origin": {
+                        "Advance": "Siegecraft"
                       }
                     },
                     {
                       "LoseResources": {
                         "resources": {
                           "ore": 2
-                        },
-                        "origin": {
-                          "Advance": "Siegecraft"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Siegecraft"
                       }
                     }
                   ]
@@ -290,10 +290,10 @@
                       "LoseResources": {
                         "resources": {
                           "ore": 1
-                        },
-                        "origin": {
-                          "Advance": "SteelWeapons"
                         }
+                      },
+                      "origin": {
+                        "Advance": "SteelWeapons"
                       }
                     }
                   ]
@@ -350,10 +350,10 @@
                       "GainResources": {
                         "resources": {
                           "gold": 1
-                        },
-                        "origin": {
-                          "Ability": "Combat"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Combat"
                       }
                     }
                   ]

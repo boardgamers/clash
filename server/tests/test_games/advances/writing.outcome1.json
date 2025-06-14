@@ -284,20 +284,20 @@
                         "resources": {
                           "food": 1,
                           "gold": 1
-                        },
-                        "origin": {
-                          "Ability": "Advance"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Writing"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Writing"
                       }
                     }
                   ]
@@ -324,20 +324,20 @@
                           "food": 1,
                           "wood": 1,
                           "ore": 1
-                        },
-                        "origin": {
-                          "Ability": "Construct Building"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "ideas": 2
-                        },
-                        "origin": {
-                          "Ability": "Academy"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Academy"
                       }
                     }
                   ]

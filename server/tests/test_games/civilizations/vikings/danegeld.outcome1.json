@@ -277,10 +277,10 @@
                       "GainResources": {
                         "resources": {
                           "food": 4
-                        },
-                        "origin": {
-                          "Ability": "Danegeld"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Danegeld"
                       }
                     }
                   ]

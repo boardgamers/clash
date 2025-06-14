@@ -292,30 +292,35 @@
                   "items": [
                     {
                       "LoseResources": {
-                        "resources": {},
-                        "origin": {
-                          "Ability": "Advance"
+                        "resources": {}
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      },
+                      "modifiers": [
+                        {
+                          "Advance": "Priesthood"
                         }
-                      }
+                      ]
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Math"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Math"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "ideas": 1
-                        },
-                        "origin": {
-                          "Advance": "Philosophy"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Philosophy"
                       }
                     }
                   ]

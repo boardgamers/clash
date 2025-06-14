@@ -306,10 +306,10 @@
                       "LoseResources": {
                         "resources": {
                           "ideas": 2
-                        },
-                        "origin": {
-                          "Ability": "Advance"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
                       }
                     }
                   ]
@@ -334,11 +334,16 @@
                         "resources": {
                           "wood": 1,
                           "ore": 1
-                        },
-                        "origin": {
-                          "Ability": "Construct Building"
                         }
-                      }
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
+                      },
+                      "modifiers": [
+                        {
+                          "Advance": "StateReligion"
+                        }
+                      ]
                     }
                   ]
                 },
@@ -355,10 +360,10 @@
                       "GainResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Ability": "Temple"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Temple"
                       }
                     }
                   ]

@@ -231,10 +231,10 @@
                       "LoseResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Ability": "Influence Culture"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Influence Culture"
                       }
                     }
                   ]
@@ -254,20 +254,20 @@
                       "LoseResources": {
                         "resources": {
                           "culture_tokens": 3
-                        },
-                        "origin": {
-                          "Ability": "Influence Culture"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Influence Culture"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Conversion"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Conversion"
                       }
                     }
                   ]

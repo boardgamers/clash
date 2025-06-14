@@ -283,10 +283,10 @@
                       "LoseResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "LeaderAbility": "Legendary Explorer"
                         }
+                      },
+                      "origin": {
+                        "LeaderAbility": "Legendary Explorer"
                       }
                     }
                   ]

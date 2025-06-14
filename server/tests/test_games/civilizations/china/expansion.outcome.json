@@ -264,10 +264,10 @@
                       "LoseResources": {
                         "resources": {
                           "gold": 2
-                        },
-                        "origin": {
-                          "Ability": "Recruit"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
                       }
                     }
                   ]

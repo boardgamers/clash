@@ -297,10 +297,10 @@
                       "GainResources": {
                         "resources": {
                           "food": 1
-                        },
-                        "origin": {
-                          "Ability": "Collect"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Collect"
                       }
                     }
                   ]

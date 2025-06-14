@@ -291,20 +291,20 @@
                       "LoseResources": {
                         "resources": {
                           "food": 2
-                        },
-                        "origin": {
-                          "Ability": "Advance"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
                       }
                     },
                     {
                       "GainResources": {
                         "resources": {
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Storage"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Storage"
                       }
                     }
                   ]
@@ -324,10 +324,10 @@
                       "LoseResources": {
                         "resources": {
                           "culture_tokens": 1
-                        },
-                        "origin": {
-                          "Incident": 20
                         }
+                      },
+                      "origin": {
+                        "Incident": 20
                       }
                     }
                   ]
@@ -343,10 +343,10 @@
                       "GainResources": {
                         "resources": {
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "Myths"
                         }
+                      },
+                      "origin": {
+                        "Advance": "Myths"
                       }
                     }
                   ]
@@ -375,21 +375,31 @@
                       "LoseResources": {
                         "resources": {
                           "gold": 2
-                        },
-                        "origin": {
-                          "Ability": "Construct Building"
                         }
-                      }
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
+                      },
+                      "modifiers": [
+                        {
+                          "Advance": "StateReligion"
+                        }
+                      ]
                     },
                     {
                       "LoseResources": {
                         "resources": {
                           "gold": 2
-                        },
-                        "origin": {
-                          "Ability": "Construct Building"
                         }
-                      }
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
+                      },
+                      "modifiers": [
+                        {
+                          "Advance": "StateReligion"
+                        }
+                      ]
                     }
                   ]
                 }

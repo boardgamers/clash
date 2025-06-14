@@ -290,11 +290,19 @@
                         "resources": {
                           "gold": 2,
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "Ability": "Recruit"
                         }
-                      }
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
+                      },
+                      "modifiers": [
+                        {
+                          "Advance": "Draft"
+                        },
+                        {
+                          "Advance": "Sanitation"
+                        }
+                      ]
                     }
                   ]
                 }

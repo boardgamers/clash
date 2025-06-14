@@ -240,10 +240,10 @@
                       "LoseResources": {
                         "resources": {
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "FreeEconomy"
                         }
+                      },
+                      "origin": {
+                        "Advance": "FreeEconomy"
                       }
                     },
                     {
@@ -251,10 +251,10 @@
                         "resources": {
                           "ore": 1,
                           "gold": 1
-                        },
-                        "origin": {
-                          "Advance": "FreeEconomy"
                         }
+                      },
+                      "origin": {
+                        "Advance": "FreeEconomy"
                       }
                     }
                   ]

@@ -352,11 +352,16 @@
                         "resources": {
                           "food": 1,
                           "ore": 1
-                        },
-                        "origin": {
-                          "Ability": "Move"
                         }
-                      }
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      },
+                      "modifiers": [
+                        {
+                          "Advance": "Roads"
+                        }
+                      ]
                     }
                   ]
                 }

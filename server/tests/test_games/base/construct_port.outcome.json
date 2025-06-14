@@ -223,10 +223,10 @@
                           "food": 1,
                           "wood": 1,
                           "ore": 1
-                        },
-                        "origin": {
-                          "Ability": "Construct Building"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
                       }
                     }
                   ]

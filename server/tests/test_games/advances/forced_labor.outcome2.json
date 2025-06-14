@@ -254,10 +254,10 @@
                       "LoseResources": {
                         "resources": {
                           "mood_tokens": 1
-                        },
-                        "origin": {
-                          "Advance": "ForcedLabor"
                         }
+                      },
+                      "origin": {
+                        "Advance": "ForcedLabor"
                       }
                     }
                   ]
@@ -293,10 +293,10 @@
                         "resources": {
                           "food": 1,
                           "wood": 1
-                        },
-                        "origin": {
-                          "Ability": "Collect"
                         }
+                      },
+                      "origin": {
+                        "Ability": "Collect"
                       }
                     }
                   ]

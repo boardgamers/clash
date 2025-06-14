@@ -238,10 +238,10 @@
                           "wood": 5,
                           "ore": 4,
                           "culture_tokens": 5
-                        },
-                        "origin": {
-                          "Wonder": "GreatLighthouse"
                         }
+                      },
+                      "origin": {
+                        "Wonder": "GreatLighthouse"
                       }
                     }
                   ]

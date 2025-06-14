@@ -334,10 +334,10 @@
                       "LoseResources": {
                         "resources": {
                           "ideas": 2
-                        },
-                        "origin": {
-                          "Objective": "Eureka!"
                         }
+                      },
+                      "origin": {
+                        "Objective": "Eureka!"
                       }
                     }
                   ]
