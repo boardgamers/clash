@@ -196,7 +196,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -207,7 +207,29 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "food": 2
+                        },
+                        "origin": {
+                          "Ability": "Advance"
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "Storage"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -218,14 +240,38 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "origin": {
+                          "Incident": 56
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
                     "Playing": {
                       "ActionCard": 156
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "Arts"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -243,7 +289,29 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "origin": {
+                          "CivilCard": 156
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "origin": {
+                          "CivilCard": 156
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -255,8 +323,9 @@
   "action_log_index": 5,
   "log": [
     [
-      "Player1 paid 2 food to get the Storage advance",
-      "Player1 gained 1 mood token as advance bonus"
+      "Player1: Advance: Pay 2 food",
+      "Player1: Advance: Gain Storage",
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Great Athlete",
@@ -264,18 +333,20 @@
       "No valid positions for Pirate Ship"
     ],
     [
+      "Player1: Great Athlete: Pay 1 culture token",
       "Player1 gained Great Athlete for 1 culture token"
     ],
     [
       "Player1 played the action card Great Athlete",
       "Player1 gained Arts",
-      "Player1 gained 1 culture token as advance bonus"
+      "Player1: Arts: Gain 1 culture token"
     ],
     [
       "Player1 decided to convert culture to mood tokens"
     ],
     [
-      "Player1 converted 1 culture token to 1 mood token"
+      "Player1: Great Athlete: Pay 1 culture token",
+      "Player1: Great Athlete: Gain 1 mood token"
     ]
   ],
   "undo_limit": 1,

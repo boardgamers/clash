@@ -153,7 +153,7 @@ fn basic_actions() {
     assert!(
         player
             .try_get_city(city_position)
-            .expect("player should have a city at this position")
+            .expect("player should have a city this position")
             .is_activated()
     );
     assert_eq!(0, game.actions_left);

@@ -359,7 +359,7 @@ pub(crate) fn conquer_city(game: &mut Game, position: Position, attacker: usize,
         panic!("player should have this city")
     };
     game.add_to_last_log_item(&format!(
-        " and captured {}'s city at {position}",
+        " and captured {}'s city {position}",
         game.player_name(defender)
     ));
     let attacker_is_human = p.get(game).is_human();

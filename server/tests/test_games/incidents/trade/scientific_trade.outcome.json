@@ -191,7 +191,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -202,7 +202,49 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "gold": 2
+                        },
+                        "origin": {
+                          "Ability": "Advance"
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "Storage"
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "ideas": 2
+                        },
+                        "origin": {
+                          "Incident": 45
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "ideas": 1
+                        },
+                        "origin": {
+                          "Incident": 45
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -214,15 +256,16 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 paid 2 gold to get the Storage advance",
-      "Player1 gained 1 mood token as advance bonus"
+      "Player1: Advance: Pay 2 gold",
+      "Player1: Advance: Gain Storage",
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Scientific Trade",
       "Base effect: Pirates spawn",
       "No valid positions for Pirate Ship",
-      "Player1 gained 2 ideas for Scientific Trade",
-      "Player2 gained 1 idea for Scientific Trade",
+      "Player1: Scientific Trade: Gain 2 ideas",
+      "Player2: Scientific Trade: Gain 1 idea",
       "Player2 could not store 1 idea"
     ]
   ],

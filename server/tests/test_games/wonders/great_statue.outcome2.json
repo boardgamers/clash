@@ -200,7 +200,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -221,7 +221,22 @@
                       ]
                     }
                   },
-                  "wonder_built": "GreatStatue"
+                  "wonder_built": "GreatStatue",
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "food": 3,
+                          "wood": 4,
+                          "ore": 5,
+                          "culture_tokens": 5
+                        },
+                        "origin": {
+                          "Wonder": "GreatStatue"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -246,6 +261,7 @@
       "Player1 decided to build Great Statue in city A1"
     ],
     [
+      "Player1: Great Statue: Pay 3 food, 4 wood, 5 ore and 5 culture tokens",
       "Player1 built Great Statue in city A1 for 3 food, 4 wood, 5 ore and 5 culture tokens",
       "Player1 gained an objective card from the pile"
     ],

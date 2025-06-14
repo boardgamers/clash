@@ -35,7 +35,10 @@
                   },
                   "type": "Unlimited"
                 }
-              ]
+              ],
+              "origin": {
+                "Wonder": "Pyramids"
+              }
             },
             "activate_city": true,
             "ignore_required_advances": false,
@@ -83,7 +86,10 @@
                     },
                     "type": "Unlimited"
                   }
-                ]
+                ],
+                "origin": {
+                  "Wonder": "Pyramids"
+                }
               },
               "name": "Pay to build wonder",
               "optional": false
@@ -296,7 +302,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {

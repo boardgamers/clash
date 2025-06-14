@@ -198,7 +198,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -220,7 +220,23 @@
                       ]
                     }
                   },
-                  "wonder_built": "Pyramids"
+                  "wonder_built": "Pyramids",
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "food": 2,
+                          "wood": 3,
+                          "ore": 6,
+                          "gold": 1,
+                          "culture_tokens": 5
+                        },
+                        "origin": {
+                          "Wonder": "Pyramids"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -250,6 +266,7 @@
       "Player1 decided to build Pyramids in city A1"
     ],
     [
+      "Player1: Pyramids: Pay 2 food, 3 wood, 6 ore, 1 gold and 5 culture tokens",
       "Player1 built Pyramids in city A1 for 2 food, 3 wood, 6 ore, 1 gold and 5 culture tokens"
     ],
     [

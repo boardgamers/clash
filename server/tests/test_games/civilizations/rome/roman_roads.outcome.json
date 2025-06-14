@@ -259,7 +259,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Movement": {
@@ -279,7 +279,20 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "food": 1,
+                          "ore": 1
+                        },
+                        "origin": {
+                          "Advance": "Roads"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -291,7 +304,8 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 marched 3 settlers, 1 infantry, 1 cavalry and 1 elephant from E2 to A1 on roads for 1 food and 1 ore"
+      "Player1 marched 3 settlers, 1 infantry, 1 cavalry and 1 elephant from E2 to A1 on roads for 1 food and 1 ore",
+      "Player1: Roads: Pay 1 food and 1 ore"
     ]
   ],
   "undo_limit": 0,

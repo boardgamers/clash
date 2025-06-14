@@ -384,7 +384,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": "EndTurn"
@@ -398,7 +398,7 @@
           "players": [
             {
               "index": 1,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": "EndTurn"
@@ -408,7 +408,7 @@
             },
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Response": {
@@ -418,7 +418,19 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "food": 1
+                        },
+                        "origin": {
+                          "Ability": "Viking Raids"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -437,11 +449,11 @@
     ],
     [
       "It's Player2's turn",
-      "Player1 gained 1 gold for using a Market in a trade route",
+      "Player1: Market: Gain 1 gold",
       "ship at E7 traded with city at D6",
       "settler at E7 traded with city at E6",
-      "Total reward is 2 food",
       "Player2 raided Player1 at D6",
+      "Player2: Trade Routes: Gain 2 food",
       "Player2 could not store 1 food"
     ],
     [
@@ -451,6 +463,7 @@
       "It's Player1's turn"
     ],
     [
+      "Player1: Viking Raids: Pay 1 food",
       "Player1 lost 1 food to Viking Raids"
     ]
   ],

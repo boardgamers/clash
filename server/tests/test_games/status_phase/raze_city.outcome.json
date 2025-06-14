@@ -223,7 +223,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Response": {
@@ -231,7 +231,19 @@
                         "A1"
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "gold": 1
+                        },
+                        "origin": {
+                          "Ability": "Raze city"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -243,7 +255,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 razed a city and gained 1 gold"
+      "Player1: Raze city: Gain 1 gold"
     ]
   ],
   "undo_limit": 1,

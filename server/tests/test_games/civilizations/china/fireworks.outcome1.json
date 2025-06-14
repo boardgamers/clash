@@ -249,7 +249,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Movement": {
@@ -294,7 +294,29 @@
                     },
                     "result": "AttackerWins",
                     "city_mood": "Angry"
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "gold": 2
+                        },
+                        "origin": {
+                          "SpecialAdvance": "Fireworks"
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "gold": 1
+                        },
+                        "origin": {
+                          "Ability": "Combat"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -319,11 +341,12 @@
       "Player2 rolled 6 (infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units."
     ],
     [
-      "Fireworks: Paid 2 gold to ignore the first hit.",
+      "Player1: Fireworks: Pay 2 gold",
+      "Player1: Fireworks: Ignore the first hit",
       "Player2 has to remove all of their defending units",
       "Player2 removed 1 cavalry",
       "Attacker wins and captured Player2's city at C1",
-      "Player1 gained 1 gold for capturing a city",
+      "Player1: Combat: Gain 1 gold",
       "Player2 gained 1 free Settler Unit at B2 for losing a city"
     ]
   ],

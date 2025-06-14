@@ -372,7 +372,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -391,7 +391,29 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "origin": {
+                          "LeaderAbility": "Master"
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "Writing"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -407,11 +429,11 @@
       "Player1 has to pay 1 mood token for Master"
     ],
     [
-      "Player1 paid 1 mood token for Master",
+      "Player1: Master: Pay 1 mood token",
       "Player1 decided to gain Writing for free using Master",
       "Player1 gained an action card from the pile",
       "Player1 gained an objective card from the pile",
-      "Player1 gained 1 culture token as advance bonus"
+      "Player1: Writing: Gain 1 culture token"
     ]
   ],
   "undo_limit": 2,

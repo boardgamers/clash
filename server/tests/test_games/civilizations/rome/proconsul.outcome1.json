@@ -359,7 +359,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Movement": {
@@ -393,7 +393,19 @@
                     },
                     "result": "AttackerWins",
                     "city_mood": "Happy"
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "gold": 2
+                        },
+                        "origin": {
+                          "Ability": "Combat"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -404,7 +416,19 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "gold": 1
+                        },
+                        "origin": {
+                          "LeaderAbility": "Proconsul"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -427,9 +451,10 @@
       "Player2 has to remove all of their defending units",
       "Player2 removed 1 infantry",
       "Attacker wins and captured Player2's city at D8",
-      "Player1 gained 2 gold for capturing a city"
+      "Player1: Combat: Gain 2 gold"
     ],
     [
+      "Player1: Proconsul: Pay 1 gold",
       "Player1 used Proconsul to gain 1 infantry in D8 for 1 gold"
     ]
   ],

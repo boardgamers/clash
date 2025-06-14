@@ -121,7 +121,7 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
             |game, s, _| {
                 let pos = s.choice[0];
                 game.add_info_log_item(&format!(
-                    "{} reduced Mood in the city at {}",
+                    "{} reduced Mood in the city {}",
                     s.player_name, pos
                 ));
                 game.player_mut(s.player_index)

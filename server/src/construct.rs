@@ -145,7 +145,7 @@ pub(crate) fn execute_construct(
     cost.pay(game, &c.payment);
     game.log_with_origin(player_index, &construct_event_origin(),
         &format!(
-            "Build a {city_piece} in the city at {city_position}{port_pos}"
+            "Build a {city_piece} in the city {city_position}{port_pos}"
         ),
     );
 

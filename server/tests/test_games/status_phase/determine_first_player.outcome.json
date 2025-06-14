@@ -193,7 +193,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Response": {
@@ -212,8 +212,7 @@
         {
           "players": [
             {
-              "index": 1,
-              "items": []
+              "index": 1
             }
           ]
         }

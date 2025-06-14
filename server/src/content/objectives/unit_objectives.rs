@@ -89,7 +89,7 @@ pub(crate) fn standing_army() -> Objective {
 pub(crate) fn colony() -> Objective {
     Objective::builder(
         "Colony",
-        "You have at least 1 city at least 5 spaces away from your starting city position. \
+        "You have at least 1 city least 5 spaces away from your starting city position. \
         Cannot be completed if you completed City Founder in the last round.",
     )
     .status_phase_check(|game, player| {

@@ -44,7 +44,10 @@
                     },
                     "type": "Unlimited"
                   }
-                ]
+                ],
+                "origin": {
+                  "Incident": 19
+                }
               },
               "name": "Pay to gain the Action Card",
               "optional": true
@@ -268,7 +271,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -279,7 +282,29 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "food": 2
+                        },
+                        "origin": {
+                          "Ability": "Advance"
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "Storage"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -291,8 +316,9 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 paid 2 food to get the Storage advance",
-      "Player1 gained 1 mood token as advance bonus"
+      "Player1: Advance: Pay 2 food",
+      "Player1: Advance: Gain Storage",
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Great Artist",

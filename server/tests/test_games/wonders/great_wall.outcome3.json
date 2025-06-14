@@ -40,7 +40,10 @@
                     },
                     "type": "Unlimited"
                   }
-                ]
+                ],
+                "origin": {
+                  "CivilCard": 5
+                }
               },
               "name": "Pay 1 mood token to increase the mood in a city by 1",
               "optional": true
@@ -254,7 +257,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Movement": {
@@ -309,7 +312,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -345,7 +348,60 @@
                       5
                     ],
                     "city_mood": "Happy"
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "ideas": 2
+                        },
+                        "origin": {
+                          "Ability": "Advance"
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "Storage"
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "gold": 1
+                        },
+                        "origin": {
+                          "Ability": "Barbarian battle"
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "ideas": 1,
+                          "culture_tokens": 1
+                        },
+                        "origin": {
+                          "Incident": 40
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "origin": {
+                          "Incident": 40
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -389,20 +445,21 @@
       "It's Player1's turn"
     ],
     [
-      "Player1 paid 2 ideas to get the Storage advance",
-      "Player1 gained 1 mood token as advance bonus"
+      "Player1: Advance: Pay 2 ideas",
+      "Player1: Advance: Gain Storage",
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Envoy",
       "Base effect: Barbarians move",
       "Barbarians move from A2 to A1: 1 infantry and 1 elephant",
       "Barbarians lost the battle due to the Great Wall",
-      "Player1 gained 1 gold for Barbarian battle",
+      "Player1: Barbarian battle: Gain 1 gold",
       "Barbarians spawned a new Infantry unit at B3",
-      "Player1 gained 1 idea and 1 culture token for Envoy",
+      "Player1: Envoy: Gain 1 idea and 1 culture token",
       "No Wonders left to draw",
       "No wonders left to draw as public wonder card",
-      "Player2 gained 1 culture token for Envoy"
+      "Player2: Envoy: Gain 1 culture token"
     ],
     [
       "Player1 played the action card Hero General",

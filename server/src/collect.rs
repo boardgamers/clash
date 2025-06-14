@@ -4,7 +4,6 @@ use crate::content::custom_actions::custom_action_modifier_event_origin;
 use crate::content::persistent_events::PersistentEventType;
 use crate::events::EventOrigin;
 use crate::game::Game;
-use crate::log::modifier_suffix;
 use crate::map::Terrain;
 use crate::map::Terrain::{Fertile, Forest, Mountain};
 use crate::player::{CostTrigger, Player};
@@ -164,42 +163,15 @@ pub(crate) fn execute_collect(
     player_index: usize,
     c: &Collect,
 ) -> Result<(), String> {
-    let collections = &c.collections;
-    let res = utils::format_and(
-        &collections
-            .iter()
-            .map(|c| c.total().to_string())
-            .collect_vec(),
-        "nothing",
+    let origin = collect_event_origin(&c.action_type, &game.player(player_index));
+    game.log_with_origin(
+        player_index,
+        &origin,
+        &format!(
+            "Use city {}",
+            c.city_position,
+        ),
     );
-    let total = if collections.len() > 1
-        && collections
-            .iter()
-            .permutations(2)
-            .unique()
-            .any(|permutation| {
-                permutation[0]
-                    .pile
-                    .has_common_resource(&permutation[1].pile)
-            }) {
-        format!(
-            " for a total of {}",
-            collections
-                .iter()
-                .map(PositionCollection::total)
-                .sum::<ResourcePile>()
-        )
-    } else {
-        String::new()
-    };
-    let player = &game.player(player_index);
-    let origin = collect_event_origin(&c.action_type, player);
-    game.add_info_log_item(&format!(
-        "{} collects {res}{total} in the city at {}{}",
-        player,
-        c.city_position,
-        modifier_suffix(player, &c.action_type, game)
-    ));
 
     let mut i = get_total_collection(
         game,

@@ -214,7 +214,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -225,7 +225,29 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "food": 2
+                        },
+                        "origin": {
+                          "Ability": "Advance"
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "Storage"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -236,7 +258,19 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "origin": {
+                          "Incident": 25
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -252,7 +286,19 @@
                         "gold": 1
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "gold": 1
+                        },
+                        "origin": {
+                          "CivilCard": 125
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -264,8 +310,9 @@
   "action_log_index": 4,
   "log": [
     [
-      "Player1 paid 2 food to get the Storage advance",
-      "Player1 gained 1 mood token as advance bonus"
+      "Player1: Advance: Pay 2 food",
+      "Player1: Advance: Gain Storage",
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Great Merchant",
@@ -274,6 +321,7 @@
       "Barbarians cannot spawn a new city"
     ],
     [
+      "Player1: Great Merchant: Pay 1 culture token",
       "Player1 gained Great Merchant for 1 culture token"
     ],
     [
@@ -283,7 +331,7 @@
     [
       "Player1 selected trade routes",
       "settler at C2 traded with city at A3",
-      "Total reward is 1 gold",
+      "Player1: Great Merchant: Gain 1 gold",
       "Player1 could not store 1 gold"
     ]
   ],

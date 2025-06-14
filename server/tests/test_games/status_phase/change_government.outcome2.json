@@ -230,7 +230,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Response": {
@@ -248,7 +248,20 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "mood_tokens": 1,
+                          "culture_tokens": 1
+                        },
+                        "origin": {
+                          "Ability": "Change Government"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -275,7 +288,7 @@
       "Player2 did not raze a city"
     ],
     [
-      "Player1 paid 1 mood token and 1 culture token to change the government"
+      "Player1: Change Government: Pay 1 mood token and 1 culture token"
     ],
     [
       "Player1 changed their government from Democracy to Theocracy",

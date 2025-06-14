@@ -209,7 +209,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -218,7 +218,27 @@
                         "payment": {}
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {},
+                        "origin": {
+                          "Ability": "Advance"
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "Sanitation"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -230,9 +250,10 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 paid nothing to get the Sanitation advance",
+      "Player1: Advance: Pay nothing",
       "Aqueduct reduced the cost to 0",
-      "Player1 gained 1 mood token as advance bonus"
+      "Player1: Advance: Gain Sanitation",
+      "Player1: Sanitation: Gain 1 mood token"
     ]
   ],
   "undo_limit": 0,

@@ -125,14 +125,14 @@ pub(crate) fn execute_influence_culture_attempt(
     let city = if start == target_city_position {
         String::new()
     } else {
-        format!(" with the city at {start}")
+        format!(" with the city {start}")
     };
     let range_boost_cost = &info.range_boost_cost;
     // this cost can't be changed by the player
     let cost = if range_boost_cost.is_free() {
         String::new()
     } else {
-        format!(" and paid {} to boost the range", range_boost_cost.default)
+        format!(" and may pay {} to boost the range", range_boost_cost.default)
     };
     let city_piece = match s.structure {
         Structure::CityCenter => "City Center",
@@ -227,11 +227,11 @@ fn roll_boost_paid(
         return;
     }
 
-    game.add_info_log_item(&format!(
-        "{player_name} paid {payment} to increase the dice roll \
-        and proceed with the cultural influence",
-    ));
-
+    game.log_with_origin(
+        player_index,
+        &info.origin,
+        "Paying to increase the dice roll",
+    );
     influence_culture(game, player_index, info);
 }
 

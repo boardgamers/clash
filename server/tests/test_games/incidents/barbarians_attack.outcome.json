@@ -244,7 +244,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Response": {
@@ -277,7 +277,19 @@
                     },
                     "result": "AttackerWins",
                     "city_mood": "Angry"
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "Storage"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -290,7 +302,7 @@
   "log": [
     [
       "Player1 advanced Storage for free",
-      "Player1 gained 1 mood token as advance bonus"
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Population Boom",

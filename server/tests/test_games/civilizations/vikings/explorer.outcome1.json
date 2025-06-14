@@ -258,7 +258,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -277,7 +277,19 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "origin": {
+                          "LeaderAbility": "Legendary Explorer"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -293,7 +305,7 @@
       "Player1 has to pay 1 culture token for Legendary Explorer"
     ],
     [
-      "Player1 paid 1 culture token for Legendary Explorer",
+      "Player1: Legendary Explorer: Pay 1 culture token",
       "Player1 placed an explorer token at D2"
     ]
   ],

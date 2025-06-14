@@ -350,7 +350,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -361,7 +361,29 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "food": 2
+                        },
+                        "origin": {
+                          "Ability": "Advance"
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "Storage"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -372,14 +394,38 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "origin": {
+                          "Incident": 18
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
                     "Playing": {
                       "ActionCard": 118
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "Fishing"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -415,7 +461,19 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "food": 2
+                        },
+                        "origin": {
+                          "CivilCard": 118
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -427,20 +485,22 @@
   "action_log_index": 7,
   "log": [
     [
-      "Player2 paid 2 food to get the Storage advance",
-      "Player2 gained 1 mood token as advance bonus"
+      "Player2: Advance: Pay 2 food",
+      "Player2: Advance: Gain Storage",
+      "Player2: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Great Explorer",
       "Player2 exhausted the land in position E8"
     ],
     [
+      "Player2: Great Explorer: Pay 1 culture token",
       "Player2 gained Great Explorer for 1 culture token"
     ],
     [
       "Player2 played the action card Great Explorer",
       "Player2 gained Fishing",
-      "Player2 gained 1 mood token as advance bonus"
+      "Player2: Fishing: Gain 1 mood token"
     ],
     [
       "Player2 explored B6"
@@ -453,6 +513,7 @@
       "Player2 decided to build a city at A7"
     ],
     [
+      "Player2: Great Explorer: Pay 2 food",
       "Player2 built a city at A7 for 2 food"
     ]
   ],

@@ -237,13 +237,25 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Response": {
                       "SelectAdvance": "Storage"
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "Storage"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -256,7 +268,7 @@
   "log": [
     [
       "Player1 advanced Storage for free",
-      "Player1 gained 1 mood token as advance bonus"
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: An awesome year"

@@ -195,7 +195,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Movement": {
@@ -235,7 +235,29 @@
                     },
                     "result": "AttackerWins",
                     "city_mood": "Angry"
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "gold": 1
+                        },
+                        "origin": {
+                          "Ability": "Combat"
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "gold": 2
+                        },
+                        "origin": {
+                          "Ability": "Barbarian battle"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -260,8 +282,8 @@
       "Barbarians has to remove all of their defending units",
       "Barbarians removed 3 infantry",
       "Attacker wins and captured Barbarians's city at C2",
-      "Player1 gained 1 gold for capturing a city",
-      "Player1 gained 2 gold for Barbarian battle",
+      "Player1: Combat: Gain 1 gold",
+      "Player1: Barbarian battle: Gain 2 gold",
       "Player1 could not store 3 gold"
     ]
   ],

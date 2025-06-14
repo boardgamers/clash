@@ -112,7 +112,7 @@ pub(crate) fn execute_increase_happiness(
         utils::format_and(&logs, "no city"),
         modifier_suffix(game.player(player_index), action_type, game)
     ));
-    
+
     Ok(())
 }
 
@@ -145,7 +145,7 @@ pub fn happiness_cost(
 
 fn format_city_happiness_increase(player: &Player, position: Position, steps: u8) -> String {
     format!(
-        "the city at {position} by {steps} steps, making it {}",
+        "the city {position} by {steps} steps, making it {}",
         player.get_city(position).mood_state.clone() + steps
     )
 }

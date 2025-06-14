@@ -234,7 +234,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -252,7 +252,19 @@
                         "action_type": "Collect"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "food": 2
+                        },
+                        "origin": {
+                          "Ability": "Collect"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -267,7 +279,8 @@
       "Player1 ended the movement action"
     ],
     [
-      "Player1 collects 1 food in the city at B3",
+      "Player1: Collect: Use city at B3",
+      "Player1: Collect: Gain 2 food",
       "Rice Cultivation added 1 food"
     ]
   ],

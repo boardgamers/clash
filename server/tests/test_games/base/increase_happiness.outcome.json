@@ -247,7 +247,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -268,7 +268,19 @@
                         "action_type": "IncreaseHappiness"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "mood_tokens": 5
+                        },
+                        "origin": {
+                          "Ability": "Increase Happiness"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -280,7 +292,8 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 paid 5 mood tokens to increase happiness in the city at C2 by 1 steps, making it Neutral and the city at B3 by 2 steps, making it Happy"
+      "Player1: Increase Happiness: Pay 5 mood tokens",
+      "Player1: Increase Happiness: Increase happiness in the city at C2 by 1 steps, making it Neutral and the city at B3 by 2 steps, making it Happy"
     ]
   ],
   "undo_limit": 0,

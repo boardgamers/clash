@@ -52,7 +52,7 @@ pub(crate) fn great_explorer() -> ActionCard {
                 let pos = s.choice.first().copied();
                 if let Some(pos) = pos {
                     game.add_info_log_item(&format!(
-                        "{} decided to build a city at {pos}",
+                        "{} decided to build a city {pos}",
                         s.player_name
                     ));
                 } else {
@@ -77,7 +77,7 @@ pub(crate) fn great_explorer() -> ActionCard {
             |game, s, a| {
                 let pos = a.selected_position.expect("position not found");
                 game.add_info_log_item(&format!(
-                    "{} built a city at {pos} for {}",
+                    "{} built a city {pos} for {}",
                     s.player_name, s.choice[0]
                 ));
                 found_city(game, s.player_index, pos);

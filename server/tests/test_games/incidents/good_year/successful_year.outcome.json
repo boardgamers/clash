@@ -241,13 +241,35 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Response": {
                       "SelectAdvance": "Storage"
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "Storage"
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "food": 1
+                        },
+                        "origin": {
+                          "Incident": 54
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -260,13 +282,13 @@
   "log": [
     [
       "Player1 advanced Storage for free",
-      "Player1 gained 1 mood token as advance bonus"
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: A successful year",
       "Base effect: Pirates spawn",
       "No valid positions for Pirate Ship",
-      "Player2 gained 1 food for A successful year"
+      "Player2: A successful year: Gain 1 food"
     ]
   ],
   "undo_limit": 1,

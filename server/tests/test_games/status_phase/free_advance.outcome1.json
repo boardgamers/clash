@@ -315,7 +315,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": "EndTurn"
@@ -326,7 +326,19 @@
                     "Response": {
                       "SelectAdvance": "Storage"
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "Storage"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -345,7 +357,7 @@
     ],
     [
       "Player2 advanced Storage for free",
-      "Player2 gained 1 mood token as advance bonus"
+      "Player2: Storage: Gain 1 mood token"
     ]
   ],
   "undo_limit": 2,

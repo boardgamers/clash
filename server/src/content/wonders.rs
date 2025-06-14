@@ -250,7 +250,7 @@ fn use_great_lighthouse(b: AbilityBuilder) -> AbilityBuilder {
             let city_pos = great_lighthouse_city(game.player(s.player_index)).position;
             gain_unit(s.player_index, *spawn, UnitType::Ship, game);
             game.add_info_log_item(&format!(
-                "{} activated the city at {city_pos} used the Great Lighthouse \
+                "{} activated the city {city_pos} used the Great Lighthouse \
                 to place a ship on {spawn} for free",
                 s.player_name,
             ));

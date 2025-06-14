@@ -79,7 +79,7 @@ pub(crate) fn execute_recruit(
         player_index,
         &recruit_event_origin(),
         &format!(
-            "Recruit {} in the city at {city_position}{replace_str}{replace_pos}",
+            "Recruit {} in the city {city_position}{replace_str}{replace_pos}",
             units.to_string(Some(game))
         ),
     );

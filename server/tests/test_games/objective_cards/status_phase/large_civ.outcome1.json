@@ -286,7 +286,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": "EndTurn"
@@ -328,6 +328,18 @@
                     "Eureka!",
                     "Sea Blockade",
                     "Government"
+                  ],
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "ideas": 2
+                        },
+                        "origin": {
+                          "Objective": "Eureka!"
+                        }
+                      }
+                    }
                   ]
                 }
               ]

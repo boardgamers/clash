@@ -204,7 +204,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -215,7 +215,39 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "gold": 2
+                        },
+                        "origin": {
+                          "Ability": "Advance"
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "Storage"
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "gold": 2
+                        },
+                        "origin": {
+                          "Ability": "Gold deposits"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -227,12 +259,13 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 paid 2 gold to get the Storage advance",
-      "Player1 gained 1 mood token as advance bonus"
+      "Player1: Advance: Pay 2 gold",
+      "Player1: Advance: Gain Storage",
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Migration",
-      "Player1 gained 2 gold for Gold deposits",
+      "Player1: Gold deposits: Gain 2 gold",
       "Player2 was selected to gain 1 settler.",
       "Player1 decreased the mood in city C2 to Neutral",
       "Player2 gained 1 settler in A4"

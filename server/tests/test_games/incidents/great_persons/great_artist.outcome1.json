@@ -214,7 +214,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -225,7 +225,29 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "food": 2
+                        },
+                        "origin": {
+                          "Ability": "Advance"
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "Storage"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -236,7 +258,19 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "culture_tokens": 2
+                        },
+                        "origin": {
+                          "Incident": 19
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -248,8 +282,9 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 paid 2 food to get the Storage advance",
-      "Player1 gained 1 mood token as advance bonus"
+      "Player1: Advance: Pay 2 food",
+      "Player1: Advance: Gain Storage",
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Great Artist",
@@ -259,6 +294,7 @@
       "Player1 cannot afford to buy Great Artist"
     ],
     [
+      "Player2: Great Artist: Pay 2 culture tokens",
       "Player2 gained Great Artist for 2 culture tokens"
     ]
   ],

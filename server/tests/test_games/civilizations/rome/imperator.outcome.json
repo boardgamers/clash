@@ -354,7 +354,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Movement": {
@@ -388,7 +388,19 @@
                     },
                     "result": "AttackerWins",
                     "city_mood": "Happy"
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "gold": 2
+                        },
+                        "origin": {
+                          "Ability": "Combat"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -412,7 +424,7 @@
       "Player2 has to remove all of their defending units",
       "Player2 removed 1 infantry",
       "Attacker wins and captured Player2's city at D8",
-      "Player1 gained 2 gold for capturing a city"
+      "Player1: Combat: Gain 2 gold"
     ]
   ],
   "undo_limit": 1,

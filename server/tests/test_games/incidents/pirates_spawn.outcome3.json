@@ -94,7 +94,10 @@
                     },
                     "type": "Unlimited"
                   }
-                ]
+                ],
+                "origin": {
+                  "Incident": 54
+                }
               },
               "name": "Pay 1 Resource or token to bribe the pirates",
               "optional": false
@@ -309,13 +312,25 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Response": {
                       "SelectAdvance": "Storage"
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "Storage"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -355,7 +370,7 @@
   "log": [
     [
       "Player1 advanced Storage for free",
-      "Player1 gained 1 mood token as advance bonus"
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: A successful year",

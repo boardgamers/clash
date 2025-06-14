@@ -314,7 +314,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": "EndTurn"
@@ -325,14 +325,48 @@
                     "Response": {
                       "SelectAdvance": "Storage"
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "Storage"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
                     "Response": {
                       "SelectAdvance": "Philosophy"
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "ideas": 1
+                        },
+                        "origin": {
+                          "Advance": "Philosophy"
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "origin": {
+                          "Advance": "Philosophy"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -351,12 +385,12 @@
     ],
     [
       "Player2 advanced Storage for free",
-      "Player2 gained 1 mood token as advance bonus"
+      "Player2: Storage: Gain 1 mood token"
     ],
     [
       "Player1 advanced Philosophy for free",
-      "Player1 gained 1 idea from Philosophy",
-      "Player1 gained 1 mood token as advance bonus",
+      "Player1: Philosophy: Gain 1 idea",
+      "Player1: Philosophy: Gain 1 mood token",
       "Player2 gained an action card from the pile",
       "Reshuffling Objective Card pile",
       "Player2 gained an objective card from the pile",

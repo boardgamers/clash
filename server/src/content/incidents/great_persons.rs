@@ -200,7 +200,7 @@ fn great_artist() -> ActionCard {
         |game, s, _| {
             let position = s.choice[0];
             game.add_info_log_item(&format!(
-                "{} made city at {} Happy",
+                "{} made city {} Happy",
                 s.player_name, position
             ));
             game.player_mut(s.player_index)
