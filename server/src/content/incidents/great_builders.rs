@@ -69,7 +69,7 @@ pub(crate) fn can_construct_any_building(game: &Game, p: &Player) -> bool {
 }
 
 pub(crate) fn construct_only() -> Ability {
-    Ability::builder("construct only", "-")
+    Ability::builder("Construct Only", "-")
         .add_transient_event_listener(
             |event| &mut event.is_playing_action_available,
             2,

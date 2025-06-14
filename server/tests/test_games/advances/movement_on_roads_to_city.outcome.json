@@ -354,7 +354,7 @@
                           "ore": 1
                         },
                         "origin": {
-                          "Advance": "Roads"
+                          "Ability": "Move"
                         }
                       }
                     }
@@ -371,7 +371,7 @@
   "log": [
     [
       "Player2 marched 1 settler from F7 to D8 on roads for 1 food and 1 ore",
-      "Player2: Roads: Pay 1 food and 1 ore with Roads"
+      "Player2: Move: Pay 1 food and 1 ore with Roads"
     ]
   ],
   "undo_limit": 0,
