@@ -251,10 +251,10 @@
       "Player1 has to pay 1 culture token for Advance"
     ],
     [
-      "Player1 paid 1 culture token for Advance"
+      "Player1: Advance: Pay 1 culture token"
     ],
     [
-      "Player1 gained 1 mood token for Storage",
+      "Player1: Storage: Gain 1 mood token",
       "Player1 gained Storage using the Advance action card."
     ]
   ],

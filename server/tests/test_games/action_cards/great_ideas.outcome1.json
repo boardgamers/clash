@@ -271,12 +271,12 @@
   "log": [
     [
       "Player1 marched 2 settlers, 2 infantry, 1 cavalry and 1 elephant from C2 to C1 and captured Player2's city at C1",
-      "Player1 gained 1 gold for Combat",
+      "Player1: Combat: Gain 1 gold",
       "Player1 could not store 1 gold"
     ],
     [
       "Player1 played the action card Great Ideas",
-      "Player1 gained 2 ideas for Great Ideas"
+      "Player1: Great Ideas: Gain 2 ideas"
     ]
   ],
   "undo_limit": 0,

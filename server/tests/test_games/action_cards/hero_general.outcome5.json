@@ -323,7 +323,7 @@
       "Player2 has to remove all of their defending units",
       "Player2 removed 2 infantry",
       "Attacker wins and captured Player2's city at C1",
-      "Player1 gained 1 gold for Combat",
+      "Player1: Combat: Gain 1 gold",
       "Player1 could not store 1 gold"
     ],
     [
@@ -333,8 +333,7 @@
       "Player1 selected city C1 to increase the mood by 1"
     ],
     [
-      "Player1 paid 1 mood token for Hero General",
-      "Player1 paid 1 mood token"
+      "Player1: Hero General: Pay 1 mood token"
     ],
     [
       "Player1 selected city C2 to increase the mood by 1"

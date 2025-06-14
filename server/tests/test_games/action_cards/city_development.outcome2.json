@@ -280,14 +280,13 @@
       "Player1 has to pay 1 culture token for City Development"
     ],
     [
-      "Player1 paid 1 culture token for City Development",
-      "Player1 paid 1 culture token for City Development",
+      "Player1: City Development: Pay 1 culture token",
       "City Development: You may build a building in a city without spending an action and without paying for it."
     ],
     [
-      "Player1 paid nothing to construct a Fortress in the city at C2",
-      "Player1 paid nothing for Construct Building",
-      "Captivi allows to replace resources with mood tokens"
+      "Player1: Construct Building: Pay nothing",
+      "Captivi allows to replace resources with mood tokens",
+      "Player1: Construct Building: Build a Fortress in the city at C2"
     ]
   ],
   "undo_limit": 0,

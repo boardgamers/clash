@@ -263,10 +263,9 @@
       "Player1 selected Storage as advance for New Ideas."
     ],
     [
-      "Player1 paid 2 food for Advance",
-      "Player1 paid 2 food for advance Storage",
-      "Player1 gained 1 mood token for Storage",
-      "Player1 gained 2 ideas for New Ideas"
+      "Player1: Advance: Pay 2 food",
+      "Player1: Storage: Gain 1 mood token",
+      "Player1: New Ideas: Gain 2 ideas"
     ]
   ],
   "undo_limit": 0,
