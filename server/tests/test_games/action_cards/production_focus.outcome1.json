@@ -279,8 +279,8 @@
       "Production Focus: You may collect multiple times from the same tile."
     ],
     [
-      "Player1 collects 2 ore, 2 mood tokens and 1 gold in the city at C2",
-      "Player1 gained 2 ore, 1 gold and 2 mood tokens for Collect",
+      "Player1: Collect: Use city at C2",
+      "Player1: Collect: Gain 2 ore, 1 gold and 2 mood tokens",
       "Player1 could not store 1 gold"
     ]
   ],

@@ -266,12 +266,12 @@
   "log": [
     [
       "Player1 started Civil Liberties",
-      "Player1 gained 3 mood tokens for Civil Liberties"
+      "Player1: Civil Liberties: Gain 3 mood tokens"
     ],
     [
-      "Player1 paid 2 mood tokens to recruit 1 infantry in the city at A1",
-      "Player1 paid 2 mood tokens for Recruit",
-      "Draft reduced the cost of 1 Infantry to 2 mood tokens"
+      "Player1: Recruit: Pay 2 mood tokens",
+      "Draft reduced the cost of 1 Infantry to 2 mood tokens",
+      "Player1: Recruit: Recruit 1 infantry in the city at A1"
     ]
   ],
   "undo_limit": 0,

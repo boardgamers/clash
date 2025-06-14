@@ -365,13 +365,13 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 paid 1 food and 1 gold to get the Draft advance",
-      "Player1 paid 1 food and 1 gold for Advance",
-      "Player1 gained 1 culture token for Draft"
+      "Player1: Advance: Pay 1 food and 1 gold",
+      "Player1: Advance: Gain Draft",
+      "Player1: Draft: Gain 1 culture token"
     ],
     [
-      "Player1 paid 1 idea for Free Education",
-      "Player1 gained 1 mood token for Free Education"
+      "Player1: Free Education: Pay 1 idea",
+      "Player1: Free Education: Gain 1 mood token"
     ]
   ],
   "undo_limit": 0,

@@ -330,11 +330,11 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player2 paid nothing to get the Math advance",
-      "Player2 paid nothing for Advance",
+      "Player2: Advance: Pay nothing",
       "Priesthood reduced the cost to 0",
-      "Player2 gained 1 culture token for Math",
-      "Player2 gained 1 idea for Philosophy"
+      "Player2: Advance: Gain Math",
+      "Player2: Math: Gain 1 culture token",
+      "Player2: Philosophy: Gain 1 idea"
     ]
   ],
   "undo_limit": 0,

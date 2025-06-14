@@ -192,7 +192,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -217,7 +217,21 @@
                         "action_type": "Collect"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "wood": 1,
+                          "ore": 1,
+                          "ideas": 1
+                        },
+                        "origin": {
+                          "Ability": "Collect"
+                        }
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -229,7 +243,8 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 collects 1 ore and 1 wood in the city at C2",
+      "Player1: Collect: Use city at C2",
+      "Player1: Collect: Gain 1 wood, 1 ore and 1 idea",
       "Public Education gained 1 idea",
       "Player1 could not store 1 ore"
     ]

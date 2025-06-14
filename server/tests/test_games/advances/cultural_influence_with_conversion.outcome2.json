@@ -285,14 +285,14 @@
       "Player2 tried to influence culture the Temple in the city at C2 by Player1 with the city at B3 and paid 1 culture token to boost the range"
     ],
     [
-      "Player2 paid 1 culture token for Influence Culture",
+      "Player2: Influence Culture: Pay 1 culture token",
       "Player gets +1 to Influence Culture roll for Conversion Advance",
       "Player2 rolled a 2 and now has the option to pay 3 culture tokens > Gold to increase the dice roll and proceed with the cultural influence"
     ],
     [
-      "Player2 paid 3 culture tokens for Influence Culture",
+      "Player2: Influence Culture: Pay 3 culture tokens",
       "Player2 paid 3 culture tokens to increase the dice roll and proceed with the cultural influence",
-      "Player2 gained 1 culture token for Conversion"
+      "Player2: Conversion: Gain 1 culture token"
     ]
   ],
   "undo_limit": 2,

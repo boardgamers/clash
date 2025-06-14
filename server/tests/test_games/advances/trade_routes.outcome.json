@@ -384,7 +384,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": "EndTurn"
@@ -398,7 +398,33 @@
           "players": [
             {
               "index": 1,
-              "items": []
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "gold": 1
+                        },
+                        "origin": {
+                          "Ability": "Market"
+                        }
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "food": 2
+                        },
+                        "origin": {
+                          "Advance": "TradeRoutes"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
             }
           ]
         }
@@ -415,10 +441,10 @@
     ],
     [
       "It's Player2's turn",
-      "Player1 gained 1 gold for using a Market in a trade route",
+      "Player1: Market: Gain 1 gold",
       "ship at E7 traded with city at D6",
       "settler at E7 traded with city at E6",
-      "Total reward is 2 food",
+      "Player2: Trade Routes: Gain 2 food",
       "Player2 could not store 1 food"
     ]
   ],

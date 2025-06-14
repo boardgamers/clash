@@ -278,8 +278,8 @@
       "Player1 can use Overproduction to collect from 2 additional tiles."
     ],
     [
-      "Player1 collects 1 ore, 1 wood and 1 mood token in the city at C2",
-      "Player1 gained 1 wood, 1 ore and 1 mood token for Collect"
+      "Player1: Collect: Use city at C2",
+      "Player1: Collect: Gain 1 wood, 1 ore and 1 mood token"
     ]
   ],
   "undo_limit": 0,

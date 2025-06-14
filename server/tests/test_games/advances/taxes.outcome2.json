@@ -345,11 +345,10 @@
       "Player1 has to pay 1 mood token for Taxes"
     ],
     [
-      "Player1 paid 1 mood token for Taxes",
-      "Player1 paid 1 mood token for Taxes"
+      "Player1: Taxes: Pay 1 mood token"
     ],
     [
-      "Player1 gained 1 food, 1 wood, 1 ore and 1 gold for Taxes",
+      "Player1: Taxes: Gain 1 food, 1 wood, 1 ore and 1 gold",
       "Player1 could not store 1 food"
     ]
   ],

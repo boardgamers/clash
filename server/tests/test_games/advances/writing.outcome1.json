@@ -352,16 +352,16 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 paid 1 food and 1 gold to get the Writing advance",
-      "Player1 paid 1 food and 1 gold for Advance",
+      "Player1: Advance: Pay 1 food and 1 gold",
+      "Player1: Advance: Gain Writing",
       "Player1 gained an action card from the pile",
       "Player1 gained an objective card from the pile",
-      "Player1 gained 1 culture token for Writing"
+      "Player1: Writing: Gain 1 culture token"
     ],
     [
-      "Player1 paid 1 food, 1 wood and 1 ore to construct a Academy in the city at A1",
-      "Player1 paid 1 food, 1 wood and 1 ore for Construct Building",
-      "Player1 gained 2 ideas for Academy"
+      "Player1: Construct Building: Pay 1 food, 1 wood and 1 ore",
+      "Player1: Construct Building: Build a Academy in the city at A1",
+      "Player1: Academy: Gain 2 ideas"
     ]
   ],
   "undo_limit": 1,

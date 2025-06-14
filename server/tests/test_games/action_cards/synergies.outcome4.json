@@ -303,16 +303,14 @@
       "Player1 selected Cartography as first advance for Synergies."
     ],
     [
-      "Player1 paid 2 ideas for Advance",
-      "Player1 paid 2 ideas for advance Cartography",
-      "Player1 gained 1 culture token for Cartography"
+      "Player1: Advance: Pay 2 ideas",
+      "Player1: Cartography: Gain 1 culture token"
     ],
     [
       "Player1 selected WarShips as second advance for Synergies."
     ],
     [
-      "Player1 paid 2 ideas for Advance",
-      "Player1 paid 2 ideas for advance WarShips"
+      "Player1: Advance: Pay 2 ideas"
     ]
   ],
   "undo_limit": 0,

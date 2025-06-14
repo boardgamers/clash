@@ -315,13 +315,12 @@
       "Player1 has to pay 1 mood token for Forced Labor"
     ],
     [
-      "Player1 paid 1 mood token for Forced Labor",
-      "Player1 paid 1 mood token for Forced Labor",
-      "Player1 paid 1 mood token to treat Angry cities as neutral"
+      "Player1: Forced Labor: Pay 1 mood token",
+      "Player1: Forced Labor: Treating Angry cities as neutral"
     ],
     [
-      "Player1 collects 1 food and 1 wood in the city at A1",
-      "Player1 gained 1 food and 1 wood for Collect",
+      "Player1: Collect: Use city at A1",
+      "Player1: Collect: Gain 1 food and 1 wood",
       "Player1 could not store 1 food and 1 wood"
     ]
   ],

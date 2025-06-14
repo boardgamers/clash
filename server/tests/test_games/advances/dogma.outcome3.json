@@ -380,19 +380,19 @@
   "action_log_index": 4,
   "log": [
     [
-      "Player2 paid 2 ideas to get the Dogma advance",
-      "Player2 paid 2 ideas for Advance",
+      "Player2: Advance: Pay 2 ideas",
+      "Player2: Advance: Gain Dogma",
       "Player2 is now limited to a maximum of 2 ideas for Dogma Advance",
       "Player2 unlocked Provinces",
       "Player2 could not store 2 ideas"
     ],
     [
-      "Player2 paid 1 wood and 1 ore to construct a Temple in the city at C1",
-      "Player2 paid 1 wood and 1 ore for Construct Building",
-      "State Religion reduced the food cost to 0"
+      "Player2: Construct Building: Pay 1 wood and 1 ore",
+      "State Religion reduced the food cost to 0",
+      "Player2: Construct Building: Build a Temple in the city at C1"
     ],
     [
-      "Player2 gained 1 culture token for Temple"
+      "Player2: Temple: Gain 1 culture token"
     ],
     [
       "Player2 selected Fanaticism as a reward for constructing a Temple"

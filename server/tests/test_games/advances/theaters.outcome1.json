@@ -327,8 +327,8 @@
       "Player1 started Theaters"
     ],
     [
-      "Player1 paid 1 culture token for Theaters",
-      "Player1 gained 1 mood token for Theaters"
+      "Player1: Theaters: Pay 1 culture token",
+      "Player1: Theaters: Gain 1 mood token"
     ]
   ],
   "undo_limit": 0,
