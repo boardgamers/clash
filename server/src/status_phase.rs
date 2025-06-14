@@ -304,7 +304,7 @@ where
                 "Pay to change government",
             )])
         },
-        move |game, s, v| {
+        move |_game, _s, v| {
             set_paid2(v, true);
         },
     )

@@ -7,7 +7,7 @@ use crate::content::persistent_events::{
     PersistentEventHandler, PersistentEventState, PersistentEventType,
     TriggerPersistentEventParams, trigger_persistent_event_ext,
 };
-use crate::events::Event;
+use crate::events::{Event, EventOrigin};
 use crate::game_data::GameData;
 use crate::log::{
     ActionLogAge, ActionLogPlayer, ActionLogRound, current_player_turn_log,
@@ -301,6 +301,14 @@ impl Game {
     pub fn add_info_log_item(&mut self, info: &str) {
         let last_item_index = self.log.len() - 1;
         self.log[last_item_index].push(info.to_string());
+    }
+
+    pub fn log_with_origin(&mut self, player: usize, origin: &EventOrigin, message: &str) {
+        self.add_info_log_item(&format!(
+            "{}: {}: {message}",
+            self.player_name(player),
+            origin.name(self)
+        ))
     }
 
     pub fn add_to_last_log_item(&mut self, edit: &str) {

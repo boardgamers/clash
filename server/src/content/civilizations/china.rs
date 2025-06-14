@@ -146,7 +146,6 @@ fn ignore_hit_ability<B: AbilityInitializerSetup>(
     filter: impl Fn(&Combat, CombatRole, &Game) -> bool + Send + Sync + 'static + Clone,
 ) -> B {
     let name = b.name().clone();
-    let name2 = b.name().clone();
     b.add_payment_request_listener(
         |e| &mut e.combat_round_end,
         priority,

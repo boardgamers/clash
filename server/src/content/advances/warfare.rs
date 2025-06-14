@@ -128,7 +128,7 @@ fn steel_weapons() -> AdvanceBuilder {
                 None
             }
         },
-        |game, s, c| {
+        |_game, s, c| {
             if s.choice[0].is_empty() {
                 return;
             }
