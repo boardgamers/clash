@@ -340,11 +340,11 @@ pub(crate) fn execute_advance_action(
     game.player(player_index)
         .advance_cost(advance, game, game.execute_cost_trigger())
         .pay(game, &a.payment);
-    game.log_with_origin(player_index, &advance_event_origin(), 
-        &format!(
-        "Gain {}",
-        a.advance.name(game)
-    ));
+    game.log_with_origin(
+        player_index,
+        &advance_event_origin(),
+        &format!("Gain {}", a.advance.name(game)),
+    );
     gain_advance_without_payment(game, advance, player_index, a.payment.clone(), true);
     Ok(())
 }

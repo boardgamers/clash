@@ -199,10 +199,7 @@ fn great_artist() -> ActionCard {
         },
         |game, s, _| {
             let position = s.choice[0];
-            game.add_info_log_item(&format!(
-                "{} made city {} Happy",
-                s.player_name, position
-            ));
+            game.add_info_log_item(&format!("{} made city {} Happy", s.player_name, position));
             game.player_mut(s.player_index)
                 .get_city_mut(position)
                 .set_mood_state(MoodState::Happy);

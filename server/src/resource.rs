@@ -142,7 +142,7 @@ pub(crate) fn pay_cost(
             "Invalid payment - got {payment} for default cost {cost:?}",
         );
 
-        log_payment(game, player, &payment, &cost);
+         log_payment(game, player, payment, cost);
     }
 }
 

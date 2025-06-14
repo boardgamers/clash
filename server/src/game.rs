@@ -308,7 +308,7 @@ impl Game {
             "{}: {}: {message}",
             self.player_name(player),
             origin.name(self)
-        ))
+        ));
     }
 
     pub fn add_to_last_log_item(&mut self, edit: &str) {

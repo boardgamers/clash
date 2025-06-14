@@ -164,12 +164,7 @@ where
         },
         |game, s, _| {
             let (_, routes) = trade_route_reward(game, &s.player()).expect("No trade route reward");
-            let log = trade_route_log(
-                game,
-                s.player_index,
-                &routes,
-                s.actively_selected,
-            );
+            let log = trade_route_log(game, s.player_index, &routes, s.actively_selected);
             for l in &log {
                 game.add_info_log_item(l);
             }

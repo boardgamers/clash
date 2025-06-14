@@ -385,9 +385,7 @@ fn colosseum() -> WonderInfo {
         |game, s, e| {
             let pile = &s.choice[0];
             if !pile.is_empty() {
-                s.log(
-                    game, "Increase combat value by 1, scoring an extra hit",
-                );
+                s.log(game, "Increase combat value by 1, scoring an extra hit");
                 apply_colosseum(e, s.player_index, true);
             }
         },

@@ -385,7 +385,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                     if let EventResponse::Payment(payments) = action {
                         assert_eq!(requests.len(), payments.len());
                         for (request, payment) in requests.iter().zip(payments.iter()) {
-                            pay_cost(game, p.index, &request, payment);
+                            pay_cost(game, p.index, request, payment);
                         }
                         gain_reward(game, &SelectedChoice::new(p, true, payments), details);
                         return;

@@ -65,14 +65,17 @@ pub(crate) fn mercenaries(id: u8, tactics_card: TacticsCardFactory) -> ActionCar
         1,
         |game, p, a| {
             Some(vec![PaymentRequest::mandatory(
-                p.payment_options()
-                    .sum(p.get(game), a.selected_positions.len() as u8, &[
+                p.payment_options().sum(
+                    p.get(game),
+                    a.selected_positions.len() as u8,
+                    &[
                         ResourceType::Food,
                         ResourceType::Wood,
                         ResourceType::Ore,
                         ResourceType::CultureTokens,
                         ResourceType::Gold,
-                    ]),
+                    ],
+                ),
                 "Pay for mercenaries",
             )])
         },

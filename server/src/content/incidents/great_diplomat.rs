@@ -100,10 +100,13 @@ pub(crate) fn use_diplomatic_relations() -> Ability {
             2,
             |game, p, _| {
                 if let Some(partner) = diplomatic_relations_partner(game, p.index) {
-                    p.log(game, &format!(
-                        "Diplomatic relations with {} ended with a surprise attack.",
-                        game.player_name(partner),
-                    ));
+                    p.log(
+                        game,
+                        &format!(
+                            "Diplomatic relations with {} ended with a surprise attack.",
+                            game.player_name(partner),
+                        ),
+                    );
                     remove_element_by(&mut game.permanent_effects, |e| {
                         matches!(e, PermanentEffect::DiplomaticRelations(_))
                     });

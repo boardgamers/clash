@@ -248,11 +248,14 @@ fn uprising() -> Incident {
             let pile = &s.choice[0];
             let v = pile.amount() as f32 / 2_f32;
             player.gain_event_victory_points(v, &s.origin);
-            s.log(game, &format!(
-                "Gain {} victory point{}",
-                v,
-                if v == 1.0 { "" } else { "s" }
-            ));
+            s.log(
+                game,
+                &format!(
+                    "Gain {} victory point{}",
+                    v,
+                    if v == 1.0 { "" } else { "s" }
+                ),
+            );
         },
     )
     .build()

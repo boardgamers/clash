@@ -132,7 +132,10 @@ pub(crate) fn execute_influence_culture_attempt(
     let cost = if range_boost_cost.is_free() {
         String::new()
     } else {
-        format!(" and may pay {} to boost the range", range_boost_cost.default)
+        format!(
+            " and may pay {} to boost the range",
+            range_boost_cost.default
+        )
     };
     let city_piece = match s.structure {
         Structure::CityCenter => "City Center",

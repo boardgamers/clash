@@ -531,11 +531,10 @@ impl IncidentBuilder {
                     if needed == 0 {
                         return None;
                     }
-                    let mut options =
-                        player
-                            .with_origin(EventOrigin::Advance(Advance::Myths))
-                            .payment_options()
-                            .sum(p, needed, &[ResourceType::MoodTokens]);
+                    let mut options = player
+                        .with_origin(EventOrigin::Advance(Advance::Myths))
+                        .payment_options()
+                        .sum(p, needed, &[ResourceType::MoodTokens]);
                     options.conversions.push(PaymentConversion::new(
                         vec![ResourcePile::mood_tokens(1)],
                         ResourcePile::empty(),

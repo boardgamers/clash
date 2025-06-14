@@ -12,7 +12,6 @@ use crate::playing_actions::{PlayingActionType, base_or_custom_available};
 use crate::position::Position;
 use crate::resource::gain_resources;
 use crate::resource_pile::ResourcePile;
-use crate::utils;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
@@ -163,14 +162,11 @@ pub(crate) fn execute_collect(
     player_index: usize,
     c: &Collect,
 ) -> Result<(), String> {
-    let origin = collect_event_origin(&c.action_type, &game.player(player_index));
+    let origin = collect_event_origin(&c.action_type, game.player(player_index));
     game.log_with_origin(
         player_index,
         &origin,
-        &format!(
-            "Use city {}",
-            c.city_position,
-        ),
+        &format!("Use city {}", c.city_position,),
     );
 
     let mut i = get_total_collection(

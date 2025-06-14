@@ -106,12 +106,15 @@ pub(crate) fn execute_increase_happiness(
         happiness_cost(player_index, step_sum, trigger, action_type, game).pay(game, payment);
     }
     let origin = happiness_event_origin(action_type, game.player(player_index));
-    game.log_with_origin(player_index, &origin,
-                         &format!(
-        "Increase happiness in {}{}",
-        utils::format_and(&logs, "no city"),
-        modifier_suffix(game.player(player_index), action_type, game)
-    ));
+    game.log_with_origin(
+        player_index,
+        &origin,
+        &format!(
+            "Increase happiness in {}{}",
+            utils::format_and(&logs, "no city"),
+            modifier_suffix(game.player(player_index), action_type, game)
+        ),
+    );
 
     Ok(())
 }
