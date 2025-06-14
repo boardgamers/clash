@@ -173,13 +173,8 @@ fn ignore_hit_ability<B: AbilityInitializerSetup>(
             Some(vec![PaymentRequest::optional(cost, "Ignore 1 hit")])
         },
         move |game, s, e| {
-            let pile = &s.choice[0];
-            if pile.is_empty() {
-                game.add_info_log_item(&format!(
-                    "{name2}: No payment made, first hit not ignored."
-                ));
-            } else {
-                game.add_info_log_item(&format!("{name2}: Paid {pile} to ignore the first hit."));
+            if !s.choice[0].is_empty() {
+                s.log(game, "Ignore the first hit");
                 apply_ignore_hit(e, s.player_index, true);
             }
         },

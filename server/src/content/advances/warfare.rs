@@ -83,32 +83,17 @@ fn siegecraft() -> AdvanceBuilder {
             }
         },
         |game, s, c| {
-            game.add_info_log_item(&format!("{} paid for siegecraft: ", s.player_name));
-            let mut paid = false;
             let mut modifiers: Vec<CombatModifier> = Vec::new();
             let payment = &s.choice;
             if !payment[0].is_empty() {
                 modifiers.push(CancelFortressExtraDie);
-                game.add_to_last_log_item(&format!(
-                    "{} to cancel the fortress ability to add an extra die",
-                    payment[0]
-                ));
-                paid = true;
+                s.log(game, "Cancel Fortress Extra Die");
             }
             if !payment[1].is_empty() {
                 modifiers.push(CancelFortressIgnoreHit);
-                if paid {
-                    game.add_to_last_log_item(" and ");
-                }
-                game.add_to_last_log_item(&format!(
-                    "{} to cancel the fortress ability to ignore a hit",
-                    payment[1]
-                ));
-                paid = true;
+                s.log(game, "Cancel Fortress Ignore Hit");
             }
-            if !paid {
-                game.add_to_last_log_item("nothing");
-            }
+
             c.modifiers.extend(modifiers);
         },
     )
@@ -144,12 +129,7 @@ fn steel_weapons() -> AdvanceBuilder {
             }
         },
         |game, s, c| {
-            let pile = &s.choice[0];
-            game.add_info_log_item(&format!(
-                "{} paid for steel weapons: {}",
-                s.player_name, pile
-            ));
-            if pile.is_empty() {
+            if s.choice[0].is_empty() {
                 return;
             }
             add_steel_weapons(s.player_index, c);

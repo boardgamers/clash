@@ -115,6 +115,14 @@ impl EventPlayer {
     pub fn reward_options(&self) -> RewardBuilder {
         RewardBuilder::new(self.origin.clone())
     }
+
+    pub fn log(&self, game: &mut Game, message: &str) {
+        game.add_info_log_item(&format!(
+            "{}: {}: {message}",
+            self.name,
+            self.origin.name(game)
+        ));
+    }
 }
 
 impl Display for EventPlayer {

@@ -533,6 +533,7 @@ impl IncidentBuilder {
                     }
                     let mut options =
                         player
+                            .with_origin(EventOrigin::Advance(Advance::Myths))
                             .payment_options()
                             .sum(p, needed, &[ResourceType::MoodTokens]);
                     options.conversions.push(PaymentConversion::new(
@@ -558,10 +559,9 @@ impl IncidentBuilder {
             move |game, s, i| {
                 let pile = &s.choice[0];
                 i.player.myths_payment = pile.amount();
-                game.add_info_log_item(&format!(
-                    "{} paid {pile} to avoid the mood change using Myths",
-                    s.player_name
-                ));
+                s.player()
+                    .with_origin(EventOrigin::Advance(Advance::Myths))
+                    .log(game, "Avoid mood change");
             },
         )
     }

@@ -24,6 +24,7 @@ impl MoveRoute {
     fn free(destination: Position, origins: Vec<EventOrigin>) -> Self {
         let mut options = PaymentOptions::free();
         options.modifiers = origins;
+        options.origin = EventOrigin::Ability("Move".to_string());
         Self {
             destination,
             cost: options,

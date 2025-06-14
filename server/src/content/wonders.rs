@@ -384,13 +384,10 @@ fn colosseum() -> WonderInfo {
         },
         |game, s, e| {
             let pile = &s.choice[0];
-            let name = &s.player_name;
-            if pile.is_empty() {
-                game.add_info_log_item(&format!("{name} declined to pay for the combat value",));
-            } else {
-                game.add_info_log_item(&format!(
-                    "{name} paid {pile} to increase the combat value by 1, scoring an extra hit",
-                ));
+            if !pile.is_empty() {
+                s.log(
+                    game, "Increase combat value by 1, scoring an extra hit",
+                );
                 apply_colosseum(e, s.player_index, true);
             }
         },

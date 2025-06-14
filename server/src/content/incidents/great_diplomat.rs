@@ -100,8 +100,8 @@ pub(crate) fn use_diplomatic_relations() -> Ability {
             2,
             |game, p, _| {
                 if let Some(partner) = diplomatic_relations_partner(game, p.index) {
-                    game.add_info_log_item(&format!(
-                        "{p} paid 2 culture tokens to end diplomatic relations with {} using a surprise attack.",
+                    p.log(game, &format!(
+                        "Diplomatic relations with {} ended with a surprise attack.",
                         game.player_name(partner),
                     ));
                     remove_element_by(&mut game.permanent_effects, |e| {

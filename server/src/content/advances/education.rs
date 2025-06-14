@@ -114,10 +114,6 @@ fn free_education() -> AdvanceBuilder {
         |game, s, _| {
             let payment = &s.choice[0];
             if payment.is_empty() {
-                game.add_info_log_item(&format!(
-                    "{} declined to pay for free education",
-                    s.player_name
-                ));
                 return;
             }
             s.player()

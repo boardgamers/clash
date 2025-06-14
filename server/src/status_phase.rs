@@ -305,13 +305,6 @@ where
             )])
         },
         move |game, s, v| {
-            let name = &s.player_name;
-            let cost = &s.choice[0];
-            if cost.is_empty() {
-                game.add_info_log_item(&format!("{name} did not pay to change the government"));
-                return;
-            }
-            game.add_info_log_item(&format!("{name} paid {cost} to change the government"));
             set_paid2(v, true);
         },
     )

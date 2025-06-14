@@ -66,6 +66,10 @@ impl<C> SelectedChoice<C> {
             self.origin.clone(),
         )
     }
+
+    pub fn log(&self, game: &mut Game, message: &str) {
+        self.player().log(game, message);
+    }
 }
 
 impl Display for SelectedChoice<usize> {
