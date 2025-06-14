@@ -101,8 +101,7 @@ fn civil_war(id: u8) -> Incident {
                 .expect("infantry should exist")
                 .id;
             s.log(game, &format!(
-                "{} killed an Infantry in {}",
-                s.player_name, position
+                "Killed an Infantry in {position}",
             ));
             kill_units(game, &[unit], s.player_index, None);
         },

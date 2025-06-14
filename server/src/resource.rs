@@ -151,5 +151,10 @@ pub(crate) fn pay_cost(
 
 fn log_payment(game: &mut Game, player: usize, payment: &ResourcePile, cost: &PaymentOptions) {
     lose_resources(game, player, payment.clone(), cost.origin.clone());
-    game.log_with_origin(player, &cost.origin, &format!("Pay {payment}"));
+    if cost.modifiers.is_empty() {
+        game.log_with_origin(player, &cost.origin, &format!("Pay {payment}"));
+    } else {
+        let modifiers = cost.modifiers.iter().map(|m| m.to_string()).collect::<Vec<_>>().join(", ");
+        game.log_with_origin(player, &cost.origin, &format!("Pay {payment} with {modifiers}"));
+    }
 }

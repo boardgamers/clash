@@ -387,10 +387,10 @@
       "Player2: Steel Weapons: Pay 1 ore"
     ],
     [
-      "Player1: Tactics: Player1 played a Tactics Card"
+      "Player1: Tactics: Played a Tactics Card"
     ],
     [
-      "Player2: Tactics: Player2 played a Tactics Card",
+      "Player2: Tactics: Played a Tactics Card",
       "Player1 reveals Tactics Card Peltasts",
       "Player2 reveals Tactics Card Encircled",
       "Player1 rolled 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 1 (leader, no bonus) for combined combat value of 22 and gets 2 hits against defending units.",

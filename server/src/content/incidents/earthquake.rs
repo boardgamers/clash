@@ -52,7 +52,7 @@ fn volcano() -> Incident {
             let player_index = s.player_index;
             s.log(
                 game,
-                &format!("{} selected city {} to be destroyed", s.player_name, pos),
+                &format!("Selected city {pos} to be destroyed"),
             );
             let city = game.player(player_index).get_city(pos);
             let buildings = city.pieces.buildings(None);

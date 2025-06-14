@@ -310,12 +310,12 @@
       "Player1: Mercenaries: Player1 cannot move Barbarian army at A3 because Sulla is in range"
     ],
     [
-      "Player1: Mercenaries: Player1 selected Barbarian armies to move: B3"
+      "Player1: Mercenaries: Selected Barbarian armies to move: B3"
     ],
     [
       "Player1: Mercenaries: Pay 1 ore",
-      "Player1: Mercenaries: Player1 selected Barbarian army to move: B3",
-      "Player1: Mercenaries: Player1 selected destination for Barbarian army: B2",
+      "Player1: Mercenaries: Selected Barbarian army to move: B3",
+      "Player1: Mercenaries: Selected destination for Barbarian army: B2",
       "Player1: Mercenaries: Barbarians marched 2 infantry from B3 to B2"
     ],
     [

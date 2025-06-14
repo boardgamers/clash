@@ -100,8 +100,7 @@ fn ship_construction() -> SpecialAdvanceInfo {
                 s.log(
                     game,
                     &format!(
-                        "{} unloaded {} from ships",
-                        s.player_name,
+                        "Unloaded {} from ships",
                         unload_units.to_string(None)
                     ),
                 );
@@ -109,8 +108,7 @@ fn ship_construction() -> SpecialAdvanceInfo {
             s.log(
                 game,
                 &format!(
-                    "{} converted {} to {}",
-                    s.player_name,
+                    "Converted {} to {}",
                     Units::new(0, 0, all_ships.len() as u8, 0, 0, None).to_string(None),
                     units.to_string(None)
                 ),
@@ -230,13 +228,13 @@ pub(crate) fn lose_raid_resource() -> Ability {
                 .is_some()
                 .then_some(vec![PaymentRequest::mandatory(
                     c,
-                    "Pay 1 resource to Viking Raids",
+                    "Pay 1 resource",
                 )])
         },
         |game, s, ()| {
             s.log(
                 game,
-                &format!("{} lost {} to Viking Raids", s.player_name, s.choice[0]),
+                &format!("Lose {}", s.choice[0]),
             );
         },
     )
@@ -289,18 +287,12 @@ fn runes() -> SpecialAdvanceInfo {
                 p.gain_objective_victory_points(1.0, &s.origin);
                 s.log(
                     game,
-                    &format!(
-                        "{} converted an Obelisk to a Rune Stone for 1 objective point",
-                        s.player_name
-                    ),
+                    "Converted an Obelisk to a Rune Stone for 1 objective point",
                 );
             } else {
                 s.log(
                     game,
-                    &format!(
-                        "{} did not convert an Obelisk to a Rune Stone",
-                        s.player_name
-                    ),
+                    "Did not convert an Obelisk to a Rune Stone",
                 );
             }
         },

@@ -329,7 +329,7 @@
     ],
     [
       "Player2: Great Artist: Pay 2 culture tokens",
-      "Player2: Great Artist: Player2 gained Great Artist for 2 culture tokens"
+      "Player2: Great Artist: Gain Great Artist for 2 culture tokens"
     ],
     [
       "Player1 ended their turn with 2 actions left"
@@ -339,10 +339,10 @@
     ],
     [
       "Player2 played the action card Great Artist",
-      "Player2: Great Artist: Player2 gained Arts",
+      "Player2: Great Artist: Gain Arts",
       "Player2 unlocked Hellenistic Culture",
       "Player2: Arts: Gain 1 culture token",
-      "Player2: Great Artist: Player2 made city A1 Happy"
+      "Player2: Great Artist: Made city A1 Happy"
     ]
   ],
   "undo_limit": 0,

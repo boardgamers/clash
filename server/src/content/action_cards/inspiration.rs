@@ -212,8 +212,7 @@ fn increase_mood(b: ActionCardBuilder, priority: i32, need_payment: bool) -> Act
             let pos = s.choice[0];
             let player = s.player_index;
             s.log(game, &format!(
-                "{} selected city {} to increase the mood by 1",
-                s.player_name, pos
+                "Selected city {pos} to increase the mood by 1",
             ));
             game.player_mut(player)
                 .get_city_mut(pos)

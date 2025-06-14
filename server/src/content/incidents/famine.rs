@@ -150,7 +150,7 @@ fn epidemics() -> Incident {
 
 pub(crate) fn kill_incident_units(game: &mut Game, s: &SelectedChoice<Vec<u32>>) {
     if s.choice.is_empty() {
-        s.log(game, &format!("{} declined to kill units", s.player_name));
+        s.log(game, "Declined to kill units");
         return;
     }
 

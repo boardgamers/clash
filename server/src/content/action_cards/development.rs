@@ -176,15 +176,11 @@ fn explorer(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             },
             |game, s, _a| {
                 if s.choice.is_empty() {
-                    s.log(game, &format!(
-                        "{} decided not to gain a free settler",
-                        s.player_name
-                    ));
+                    s.log(game, "Decided not to gain a free settler");
                 } else {
                     let pos = s.choice[0];
                     s.log(game, &format!(
-                        "{} decided to gain a free settler at {}",
-                        s.player_name, pos
+                        "Decided to gain a free settler at {pos}",
                     ));
                     gain_unit(s.player_index, pos, UnitType::Settler, game);
                 }

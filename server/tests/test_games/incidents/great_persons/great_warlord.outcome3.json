@@ -484,15 +484,15 @@
     ],
     [
       "A new game event has been triggered: Great Warlord",
-      "Player2: Great Warlord: Player2 exhausted the land in position E8"
+      "Player2: Great Warlord: Exhausted the land in position E8"
     ],
     [
       "Player2: Great Warlord: Pay 1 culture token",
-      "Player2: Great Warlord: Player2 gained Great Warlord for 1 culture token"
+      "Player2: Great Warlord: Gain Great Warlord for 1 culture token"
     ],
     [
       "Player2 played the action card Great Warlord",
-      "Player2: Great Warlord: Player2 gained Tactics",
+      "Player2: Great Warlord: Gain Tactics",
       "Player2: Tactics: Gain 1 culture token"
     ],
     [

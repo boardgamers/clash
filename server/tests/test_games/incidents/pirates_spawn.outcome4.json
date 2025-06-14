@@ -340,7 +340,7 @@
       "Base effect: Pirates spawn"
     ],
     [
-      "Player1: A successful year: Player1 removed a Pirate Ships at D1"
+      "Player1: A successful year: Removed a Pirate Ships at D1"
     ],
     [
       "Player1: A successful year: Pirates spawned a Pirate Ship at A2"
@@ -353,7 +353,7 @@
       "Player1: A successful year: Pay 1 ore",
       "Pirates took 1 ore",
       "Player2 must reduce Mood in a city adjacent to pirates",
-      "Player2: A successful year: Player2 reduced Mood in the city C1",
+      "Player2: A successful year: Reduced Mood in the city C1",
       "Player2: A successful year: Gain 1 food"
     ]
   ],

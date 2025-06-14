@@ -256,7 +256,7 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player2: Raze city: Player2 did not raze a city"
+      "Player2: Raze city: Did not raze a city"
     ],
     [
       "Player1: Change Government: Pay nothing"

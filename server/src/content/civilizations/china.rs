@@ -247,8 +247,7 @@ fn use_imperial_army(b: AbilityBuilder) -> AbilityBuilder {
             }
 
             s.log(game, &format!(
-                "{} converted {} using Imperial Army",
-                s.player_name,
+                "Convert {} using Imperial Army",
                 names.join(", ")
             ));
         },

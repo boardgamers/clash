@@ -121,8 +121,7 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
             |game, s, _| {
                 let pos = s.choice[0];
                 s.log(game, &format!(
-                    "{} reduced Mood in the city {}",
-                    s.player_name, pos
+                    "Reduced Mood in the city {pos}",
                 ));
                 game.player_mut(s.player_index)
                     .get_city_mut(pos)
@@ -159,8 +158,7 @@ fn remove_pirate_ships(builder: IncidentBuilder) -> IncidentBuilder {
         |game, s, _| {
             let pirates = get_pirates_player(game).index;
             s.log(game, &format!(
-                "{} removed a Pirate Ships at {}",
-                s.player_name,
+                "Removed a Pirate Ships at {}",
                 s.choice
                     .iter()
                     .map(|u| game.player(pirates).get_unit(*u).position.to_string())

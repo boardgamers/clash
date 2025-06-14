@@ -36,10 +36,13 @@ fn pandemics() -> Incident {
         IncidentTarget::AllPlayers,
         2,
         |game, p, i| {
-            p.log(game, &format!(
-                "Lose a total of {} units, cards, and resources",
-                pandemics_cost(p.get(game))
-            ));
+            p.log(
+                game,
+                &format!(
+                    "Lose a total of {} units, cards, and resources",
+                    pandemics_cost(p.get(game))
+                ),
+            );
 
             let player = p.get(game);
             Some(UnitsRequest::new(
@@ -70,19 +73,17 @@ fn pandemics() -> Incident {
                 match id {
                     HandCard::ActionCard(a) => {
                         discard_action_card(game, s.player_index, *a);
-                        s.log(game, &format!(
-                            "{} discarded {}",
-                            s.player_name,
-                            game.cache.get_action_card(*a).name()
-                        ));
+                        s.log(
+                            game,
+                            &format!("Discard {}", game.cache.get_action_card(*a).name()),
+                        );
                     }
                     HandCard::ObjectiveCard(o) => {
                         discard_objective_card(game, s.player_index, *o);
-                        s.log(game, &format!(
-                            "{} discarded {}",
-                            s.player_name,
-                            game.cache.get_objective_card(*o).name()
-                        ));
+                        s.log(
+                            game,
+                            &format!("Discard {}", game.cache.get_objective_card(*o).name()),
+                        );
                     }
                     HandCard::Wonder(_) => panic!("Unexpected card type"),
                 }
@@ -110,7 +111,7 @@ fn pandemics() -> Incident {
             )])
         },
         |game, s, _| {
-            s.log(game, &format!("{} lost {}", s.player_name, s.choice[0]));
+            s.log(game, &format!("Lose {}", s.choice[0]));
         },
     )
     .build()
@@ -187,7 +188,7 @@ fn black_death() -> Incident {
         |game, s, _| {
             kill_incident_units(game, s);
             let vp = s.choice.len() as f32;
-            s.log(game, &format!("{} gained {} victory points", s.player_name, vp));
+            s.log(game, &format!("Gain {vp} victory points"));
             game.player_mut(s.player_index)
                 .gain_event_victory_points(vp, &s.origin);
         },

@@ -52,14 +52,10 @@ pub(crate) fn great_explorer() -> ActionCard {
                 let pos = s.choice.first().copied();
                 if let Some(pos) = pos {
                     s.log(game, &format!(
-                        "{} decided to build a city {pos}",
-                        s.player_name
+                        "Decided to build a city {pos}",
                     ));
                 } else {
-                    s.log(game, &format!(
-                        "{} decided not to build a city",
-                        s.player_name
-                    ));
+                    s.log(game, "decided not to build a city");
                 }
                 a.selected_position = pos;
             },
@@ -77,8 +73,8 @@ pub(crate) fn great_explorer() -> ActionCard {
             |game, s, a| {
                 let pos = a.selected_position.expect("position not found");
                 s.log(game, &format!(
-                    "{} built a city {pos} for {}",
-                    s.player_name, s.choice[0]
+                    "Built a city {pos} for {}",
+                     s.choice[0]
                 ));
                 found_city(game, s.player_index, pos);
             },
@@ -93,10 +89,10 @@ pub(crate) fn explore_adjacent_block(builder: ActionCardBuilder) -> ActionCardBu
         |game, p, _| Some(action_explore_request(game, p.index)),
         |game, s, a| {
             let Some(&position) = s.choice.first() else {
-                s.log(game, &format!("{} decided not to explore", s.player_name));
+                s.log(game, "Decided not to explore");
                 return;
             };
-            s.log(game, &format!("{} explored {}", s.player_name, position));
+            s.log(game, &format!("Explored {position}"));
             let dest = game
                 .map
                 .unexplored_blocks

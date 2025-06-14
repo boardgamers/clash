@@ -314,12 +314,11 @@ pub(crate) fn play_tactics_card(b: AdvanceBuilder) -> AdvanceBuilder {
             Some(HandCardsRequest::new(cards, 0..=1, "Play Tactics Card"))
         },
         |game, s, r| {
-            let name = &s.player_name;
             if s.choice.is_empty() {
-                s.log(game, &format!("{name} did not play a Tactics Card"));
+                s.log(game, "Did not play a Tactics Card");
             } else {
                 let player = s.player_index;
-                s.log(game, &format!("{name} played a Tactics Card"));
+                s.log(game, "Played a Tactics Card");
                 let HandCard::ActionCard(card) = s.choice[0] else {
                     panic!("Expected ActionCard, got {:?}", s.choice[0]);
                 };

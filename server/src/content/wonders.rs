@@ -103,8 +103,7 @@ fn use_great_statue(b: AbilityBuilder) -> AbilityBuilder {
                 panic!("not an objective card")
             };
             s.log(game, &format!(
-                "{} discarded {} to gain an action",
-                s.player_name,
+                "Discarded {} to gain an action",
                 game.cache.get_objective_card(card).name()
             ));
             discard_objective_card(game, s.player_index, card);
@@ -148,8 +147,7 @@ pub(crate) fn use_great_mausoleum() -> Ability {
                         .pop()
                         .expect("action card not found in discard pile");
                     s.log(game, &format!(
-                        "{} drew {} from the discard pile",
-                        s.player_name,
+                        "Draw {} from the discard pile",
                         game.cache.get_action_card(card).name()
                     ));
                     game.player_mut(s.player_index).action_cards.push(card);
@@ -179,8 +177,7 @@ pub(crate) fn use_great_mausoleum() -> Ability {
                         .pop()
                         .expect("action card not found in discard pile");
                     s.log(game, &format!(
-                        "{} drew {} from the discard pile",
-                        s.player_name,
+                        "Drew {} from the discard pile",
                         game.cache.get_incident(card).name
                     ));
                     i.incident_id = card;
@@ -250,9 +247,7 @@ fn use_great_lighthouse(b: AbilityBuilder) -> AbilityBuilder {
             let city_pos = great_lighthouse_city(game.player(s.player_index)).position;
             gain_unit(s.player_index, *spawn, UnitType::Ship, game);
             s.log(game, &format!(
-                "{} activated the city {city_pos} used the Great Lighthouse \
-                to place a ship on {spawn} for free",
-                s.player_name,
+                "Activated the city {city_pos} to place a ship on {spawn} for free",
             ));
             activate_city(city_pos, game);
         },
@@ -297,8 +292,7 @@ fn use_great_library(b: AbilityBuilder) -> AbilityBuilder {
         |game, s, _| {
             let advance = s.choice;
             s.log(game, &format!(
-                "{} used the Great Library to use {} for the turn",
-                s.player_name,
+                "Use {} for the turn",
                 advance.name(game)
             ));
             game.player_mut(s.player_index).great_library_advance = Some(advance);

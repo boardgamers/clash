@@ -241,16 +241,14 @@ fn use_princeps(b: AbilityBuilder) -> AbilityBuilder {
                 match c {
                     HandCard::ActionCard(card) => {
                         s.log(game, &format!(
-                            "{} discarded action card {} for Princeps",
-                            s.player_name,
+                            "Discard action card {}",
                             game.cache.get_action_card(*card).name()
                         ));
                         discard_action_card(game, p, *card);
                     }
                     HandCard::ObjectiveCard(card) => {
                         s.log(game, &format!(
-                            "{} discarded objective card {} for Princeps",
-                            s.player_name,
+                            "Discard objective card {}",
                             game.cache.get_objective_card(*card).name()
                         ));
                         discard_objective_card(game, p, *card);
@@ -410,8 +408,7 @@ fn add_barbarian_control(builder: LeaderAbilityBuilder) -> LeaderAbilityBuilder 
         |game, s, movable| {
             let may_not_move = &s.choice;
             s.log(game, &format!(
-                "{} selected Barbarian Armies that may NOT move: {}",
-                s.player_name,
+                "Selected Barbarian Armies that may NOT move: {}",
                 may_not_move
                     .iter()
                     .map(ToString::to_string)

@@ -53,8 +53,7 @@ pub(crate) fn mercenaries(id: u8, tactics_card: TacticsCardFactory) -> ActionCar
         },
         |game, s, a| {
             s.log(game, &format!(
-                "{} selected Barbarian armies to move: {}",
-                s.player_name,
+                "Selected Barbarian armies to move: {}",
                 s.choice.iter().map(ToString::to_string).join(", "),
             ));
             a.selected_positions.clone_from(&s.choice);
@@ -111,8 +110,7 @@ fn move_army(b: ActionCardBuilder, i: i32) -> ActionCardBuilder {
             |game, s, a| {
                 let pos = s.choice[0];
                 s.log(game, &format!(
-                    "{} selected Barbarian army to move: {}",
-                    s.player_name, pos
+                    "Selected Barbarian army to move: {pos}",
                 ));
                 remove_element(&mut a.selected_positions, &pos);
                 a.selected_position = Some(pos);
@@ -144,8 +142,7 @@ fn move_army(b: ActionCardBuilder, i: i32) -> ActionCardBuilder {
             |game, s, a| {
                 let to = s.choice[0];
                 s.log(game, &format!(
-                    "{} selected destination for Barbarian army: {}",
-                    s.player_name, to
+                    "Selected destination for Barbarian army: {to}",
                 ));
 
                 let from = a.selected_position.expect("position not found");

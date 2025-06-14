@@ -163,10 +163,7 @@ pub(crate) fn free_advance() -> Ability {
                 Some(AdvanceRequest::new(choices))
             },
             |game, c, _| {
-                c.log(game, &format!(
-                    "Advanced {} for free",
-                    c.choice.name(game)
-                ));
+                c.log(game, &format!("Advanced {} for free", c.choice.name(game)));
                 gain_advance_without_payment(
                     game,
                     c.choice,
@@ -217,11 +214,13 @@ pub(crate) fn raze_city() -> Ability {
             },
             |game, s, _| {
                 if s.choice.is_empty() {
-                    s.log(game, &format!("{} did not raze a city", s.player_name));
+                    s.log(game, "Did not raze a city");
                     return;
                 }
+                let pos = s.choice[0];
+                s.log(game, &format!("Razed city at {pos}"));
                 s.player().gain_resources(game, ResourcePile::gold(1));
-                game.raze_city(s.choice[0], s.player_index);
+                game.raze_city(pos, s.player_index);
             },
         )
         .build()
@@ -319,24 +318,30 @@ where
         move |game, p, action, request, _| {
             if let PersistentEventRequest::ChangeGovernment = &request {
                 if let EventResponse::ChangeGovernmentType(c) = action {
-                    p.log(game, &format!(
-                        "{p} changed their government from {} to {}",
-                        p.get(game)
-                            .government(game)
-                            .expect("player should have a government before changing it"),
-                        c.new_government
-                    ));
-                    p.log(game, &format!(
-                        "Additional advances: {}",
-                        if c.additional_advances.is_empty() {
-                            "none".to_string()
-                        } else {
-                            c.additional_advances
-                                .iter()
-                                .map(|a| a.name(game))
-                                .join(", ")
-                        }
-                    ));
+                    p.log(
+                        game,
+                        &format!(
+                            "{p} changed their government from {} to {}",
+                            p.get(game)
+                                .government(game)
+                                .expect("player should have a government before changing it"),
+                            c.new_government
+                        ),
+                    );
+                    p.log(
+                        game,
+                        &format!(
+                            "Additional advances: {}",
+                            if c.additional_advances.is_empty() {
+                                "none".to_string()
+                            } else {
+                                c.additional_advances
+                                    .iter()
+                                    .map(|a| a.name(game))
+                                    .join(", ")
+                            }
+                        ),
+                    );
                     change_government_type(game, p.index, &c);
                     return;
                 }
@@ -439,29 +444,32 @@ pub(crate) fn determine_first_player() -> Ability {
                 }
             },
             |game, s, _| {
-                s.log(game, &format!(
-                    "{} choose {}",
-                    game.player_name(s.player_index),
-                    if s.choice == game.starting_player_index {
-                        format!(
-                            "{} to remain the staring player",
-                            if s.choice == game.active_player() {
-                                String::new()
-                            } else {
-                                game.player_name(s.choice)
-                            }
-                        )
-                    } else {
-                        format!(
-                            "{} as the new starting player",
-                            if s.choice == game.active_player() {
-                                String::from("themselves")
-                            } else {
-                                game.player_name(s.choice)
-                            }
-                        )
-                    }
-                ));
+                s.log(
+                    game,
+                    &format!(
+                        "{} choose {}",
+                        game.player_name(s.player_index),
+                        if s.choice == game.starting_player_index {
+                            format!(
+                                "{} to remain the staring player",
+                                if s.choice == game.active_player() {
+                                    String::new()
+                                } else {
+                                    game.player_name(s.choice)
+                                }
+                            )
+                        } else {
+                            format!(
+                                "{} as the new starting player",
+                                if s.choice == game.active_player() {
+                                    String::from("themselves")
+                                } else {
+                                    game.player_name(s.choice)
+                                }
+                            )
+                        }
+                    ),
+                );
                 game.starting_player_index = s.choice;
             },
         )

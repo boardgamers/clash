@@ -305,11 +305,11 @@
       "Base effect: Barbarians spawn",
       "Barbarians cannot spawn a new city",
       "Player1: Reformation: Barbarians cannot reinforce",
-      "Player1: Reformation: Player1 selected Player3 to execute the event",
+      "Player1: Reformation: Selected Player3 to execute the event",
       "Player Player1 has passed the incident to Player3"
     ],
     [
-      "Player2: Reformation: Player2 gained a Temple from Player3 in A1"
+      "Player2: Reformation: Gained a Temple from Player3 in A1"
     ]
   ],
   "undo_limit": 2,

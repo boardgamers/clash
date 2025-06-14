@@ -172,15 +172,11 @@ fn city_states() -> SpecialAdvanceInfo {
         },
         |game, s, position| {
             if s.choice.is_empty() {
-                s.log(game, &format!(
-                    "{} decided not to decrease the mood of another city using City States",
-                    s.player_name
-                ));
+                s.log(game, "Decided not to decrease the mood of another city using City States");
             } else {
                 let choice = s.choice[0];
                 s.log(game, &format!(
-                    "{} decided to decrease the mood of {} instead of {} using City States",
-                    s.player_name, choice, position
+                    "Decided to decrease the mood of {choice} instead of {position} using City States",
                 ));
                 activate_city(choice, game);
                 let p = game.player_mut(s.player_index);
@@ -263,11 +259,13 @@ fn use_idol(b: AbilityBuilder) -> AbilityBuilder {
             let HandCard::ActionCard(id) = s.choice[0] else {
                 panic!("expected action card");
             };
-            s.log(game, &format!(
-                "{} decided to play {} as a free action using Idol",
-                s.player_name,
-                game.cache.get_civil_card(id).name
-            ));
+            s.log(
+                game,
+                &format!(
+                    "Decided to play {} as a free action using Idol",
+                    game.cache.get_civil_card(id).name
+                ),
+            );
 
             PlayingAction::ActionCard(id)
                 .execute_without_action_cost(game, s.player_index)

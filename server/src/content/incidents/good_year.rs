@@ -213,7 +213,7 @@ fn select_settler(b: IncidentBuilder, priority: i32, target: IncidentTarget) -> 
         },
         |game, s, _| {
             let pos = s.choice[0];
-            s.log(game, &format!("{} gained 1 settler in {}", s.player_name, pos));
+            s.log(game, &format!("Gained 1 settler in {pos}"));
             gain_unit(s.player_index, pos, UnitType::Settler, game);
         },
     )

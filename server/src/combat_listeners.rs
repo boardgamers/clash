@@ -631,8 +631,7 @@ pub(crate) fn place_settler() -> Ability {
         |game, s, _e| {
             let pos = s.choice[0];
             s.log(game, &format!(
-                "{} gained 1 free Settler Unit at {} for losing a city",
-                s.player_name, pos
+                "Gain 1 free Settler Unit at {pos} for losing a city",
             ));
             gain_unit(s.player_index, pos, UnitType::Settler, game);
         },

@@ -313,12 +313,12 @@
       "Player1: Pandemics: Player1 killed units: infantry at C2"
     ],
     [
-      "Player1: Pandemics: Player1 discarded Advance/Peltasts",
+      "Player1: Pandemics: Discard Advance/Peltasts",
       "Player2: Pandemics: Lose a total of 1 units, cards, and resources"
     ],
     [
       "Player2: Pandemics: Pay 1 culture token",
-      "Player2: Pandemics: Player2 lost 1 culture token"
+      "Player2: Pandemics: Lose 1 culture token"
     ]
   ],
   "undo_limit": 4,

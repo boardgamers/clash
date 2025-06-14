@@ -319,11 +319,11 @@
       "Barbarians: Choose Casualties: Remove 1 of their attacking units",
       "Barbarians removed 1 elephant",
       "Attacker wins and killed 4 settlers of Player1 and captured Player1's city C2",
-      "Player1: Place Settler: Player1 gained 1 free Settler Unit at A1 for losing a city",
+      "Player1: Place Settler: Gain 1 free Settler Unit at A1 for losing a city",
       "Barbarians spawned a new Infantry unit at C2",
-      "Player1: Population Boom: Player1 gained 1 settler in A1",
+      "Player1: Population Boom: Gained 1 settler in A1",
       "Player1: Population Boom: Player2 was selected to gain 1 settler.",
-      "Player2: Population Boom: Player2 gained 1 settler in C1"
+      "Player2: Population Boom: Gained 1 settler in C1"
     ]
   ],
   "undo_limit": 1,

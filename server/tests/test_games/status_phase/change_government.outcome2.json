@@ -285,7 +285,7 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player2: Raze city: Player2 did not raze a city"
+      "Player2: Raze city: Did not raze a city"
     ],
     [
       "Player1: Change Government: Pay 1 mood token and 1 culture token"

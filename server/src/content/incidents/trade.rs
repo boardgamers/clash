@@ -136,8 +136,7 @@ fn reformation() -> Incident {
             // pass the event to the player itself
             i.passed = Some(PassedIncident::NewPlayer(s.choice));
             s.log(game, &format!(
-                "{} selected {} to execute the event",
-                s.player_name,
+                "Selected {} to execute the event",
                 game.player_name(s.choice)
             ));
         },
@@ -184,8 +183,7 @@ fn reformation() -> Incident {
                 .set_building(Building::Temple, s.player_index);
             let donor_name = donor.get_name();
             s.log(game, &format!(
-                "{} gained a Temple from {donor_name} in {pos}",
-                s.player_name,
+                "Gained a Temple from {donor_name} in {pos}",
             ));
         },
     )

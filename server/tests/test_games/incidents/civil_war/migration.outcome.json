@@ -267,8 +267,8 @@
       "A new game event has been triggered: Migration",
       "Player1: Gold deposits: Gain 2 gold",
       "Player1: Migration: Player2 was selected to gain 1 settler.",
-      "Player1: Migration: Player1 decreased the mood in city C2 to Neutral",
-      "Player2: Migration: Player2 gained 1 settler in A4"
+      "Player1: Migration: Decreased the mood in city C2 to Neutral",
+      "Player2: Migration: Gained 1 settler in A4"
     ]
   ],
   "undo_limit": 1,

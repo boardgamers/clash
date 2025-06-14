@@ -274,7 +274,7 @@
       "A new game event has been triggered: Famine: Vermin",
       "Player1: Famine: Vermin: Lost 1 food",
       "Player2: Famine: Vermin: Lost 0 food",
-      "Player2: Famine: Vermin: Player2 made city A1 Angry"
+      "Player2: Famine: Vermin: Made city A1 Angry"
     ]
   ],
   "undo_limit": 1,

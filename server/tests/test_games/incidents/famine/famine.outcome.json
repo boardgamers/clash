@@ -265,7 +265,7 @@
       "Barbarians cannot move - will try to spawn a new city instead",
       "Barbarians cannot spawn a new city",
       "Player1: Severe famine: Lost 1 food",
-      "Player1: Severe famine: Player1 made city A1 Angry"
+      "Player1: Severe famine: Made city A1 Angry"
     ]
   ],
   "undo_limit": 1,

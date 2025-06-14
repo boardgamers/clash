@@ -66,17 +66,14 @@ pub(crate) fn decide_trojan_horse() -> Ability {
                 if s.choice[0].is_empty() {
                     s.log(
                         game,
-                        &format!("{} declined to activate the Trojan Horse", s.player_name),
+                        "Declined to activate the Trojan Horse",
                     );
                 } else {
                     let player = game.player_mut(s.player_index);
                     player.gain_event_victory_points(1_f32, &EventOrigin::Incident(42));
                     s.log(
                         game,
-                        &format!(
-                            "{} activated the Trojan Horse and gained 1 victory point",
-                            s.player_name
-                        ),
+                        "Activated the Trojan Horse and gained 1 victory point",
                     );
                     game.permanent_effects
                         .retain(|e| !matches!(e, PermanentEffect::TrojanHorse));
@@ -162,16 +159,13 @@ fn guillotine() -> Incident {
             if s.choice {
                 s.log(
                     game,
-                    &format!("{} chose to select a new leader", s.player_name),
+                    "Chose to select a new leader",
                 );
                 i.selected_player = Some(s.player_index);
             } else {
                 s.log(
                     game,
-                    &format!(
-                        "{} gained 2 victory points instead of choosing a new leader",
-                        s.player_name
-                    ),
+                    "Gained 2 victory points instead of choosing a new leader",
                 );
                 game.player_mut(s.player_index)
                     .gain_event_victory_points(2_f32, &s.origin);
@@ -194,7 +188,7 @@ fn guillotine() -> Incident {
             let pos = s.choice[0];
             s.log(
                 game,
-                &format!("{} chose a new leader in {pos}", s.player_name),
+                &format!("Chose a new leader in {pos}"),
             );
             i.selected_position = Some(pos);
         },
@@ -220,7 +214,7 @@ fn guillotine() -> Incident {
             let pos = i.selected_position.expect("position should be set");
             s.log(
                 game,
-                &format!("{} gained {} in {pos}", s.player_name, s.choice.name(game)),
+                &format!("Gain {} in {pos}", s.choice.name(game)),
             );
             gain_unit(s.player_index, pos, s.choice, game);
         },

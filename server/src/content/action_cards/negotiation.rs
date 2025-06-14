@@ -66,8 +66,7 @@ fn negotiations(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                     remaining_turns: 2,
                 }));
             s.log(game, &format!(
-                "{} and {} are in negotiations.",
-                s.player_name,
+                "Started negotiations with {}",
                 game.player_name(s.choice)
             ));
         },
@@ -166,9 +165,8 @@ fn assassination(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             game.permanent_effects
                 .push(PermanentEffect::AssassinationLoseAction(s.choice));
             s.log(game, &format!(
-                "{} has been assassinated by {}.",
+                "Assassinated {}",
                 game.player_name(s.choice),
-                s.player_name
             ));
         },
     )

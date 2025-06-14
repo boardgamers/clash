@@ -81,8 +81,7 @@ pub(crate) fn choose_diplomat_partner(b: IncidentBuilder) -> IncidentBuilder {
         1,
         |game, s, _| {
             s.log(game, &format!(
-                "{} initiated diplomatic relations with {}",
-                s.player_name,
+                "Initiated diplomatic relations with {}",
                 game.player_name(s.choice),
             ));
             game.permanent_effects

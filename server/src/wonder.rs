@@ -238,8 +238,7 @@ pub(crate) fn draw_wonder_card_handler() -> Ability {
                 if s.choice {
                     let name = *find_public_wonder(game).expect("public wonder card not found");
                     s.log(game, &format!(
-                        "{} drew the public wonder card {}",
-                        s.player_name,
+                        "Drew the public wonder card {}",
                         name.name()
                     ));
                     gain_wonder(game, s.player_index, name);
@@ -425,10 +424,8 @@ pub(crate) fn build_wonder_handler() -> Ability {
                 let position = s.choice[0];
                 i.selected_position = Some(position);
                 s.log(game, &format!(
-                    "{} decided to build {} in city {}",
-                    s.player_name,
+                    "Decided to build {} in city {position}",
                     i.wonder.name(),
-                    position
                 ));
             },
         )
@@ -464,8 +461,7 @@ pub(crate) fn build_wonder_handler() -> Ability {
                 let name = i.wonder;
 
                 s.log(game, &format!(
-                    "{} built {} in city {pos} for {}",
-                    s.player_name,
+                    "Built {} in city {pos} for {}",
                     name.name(),
                     s.choice[0],
                 ));

@@ -68,8 +68,7 @@ fn use_bartering(b: AbilityBuilder) -> AbilityBuilder {
                 panic!("Invalid type");
             };
             s.log(game, &format!(
-                "{} discarded {} for 1 gold or 1 culture token",
-                s.player_name,
+                "Discard {} for 1 gold or 1 culture token",
                 game.cache.get_action_card(card).name()
             ));
             discard_action_card(game, s.player_index, card);
