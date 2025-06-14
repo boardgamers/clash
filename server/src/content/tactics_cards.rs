@@ -200,10 +200,7 @@ pub(crate) fn siege(id: u8) -> TacticsCard {
             if pile.is_empty() {
                 apply_siege(game, r, s.player_index);
             } else {
-                game.add_info_log_item(&format!(
-                    "{} paid {pile} to use combat abilities",
-                    s.player_name
-                ));
+                s.log(game, "Can use combat abilities this round");
             }
         },
     )

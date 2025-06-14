@@ -1,3 +1,4 @@
+use crate::content::persistent_events::PaymentRequest;
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::log::{ActionLogItem, add_action_log_item};
@@ -6,7 +7,6 @@ use crate::player::Player;
 use crate::resource_pile::ResourcePile;
 use serde::{Deserialize, Serialize};
 use std::{fmt, mem};
-use crate::content::persistent_events::PaymentRequest;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone, Copy, Hash, Ord, PartialOrd)]
 pub enum ResourceType {
@@ -80,12 +80,7 @@ pub(crate) fn gain_resources(
     resources: ResourcePile,
     origin: EventOrigin,
 ) {
-    game.add_info_log_item(&format!(
-        "{} gained {} for {}",
-        game.player_name(player),
-        resources,
-        origin.name(game)
-    ));
+    game.log_with_origin(player, &origin, &format!("Gain {resources}"));
     let p = game.player_mut(player);
 
     p.resources += resources.clone();
@@ -136,24 +131,22 @@ pub(crate) fn pay_cost(
 ) {
     if request.optional && payment.is_empty() {
         log_payment(game, player, &ResourcePile::empty(), &request.cost);
-    } else { 
+    } else {
         let cost = &request.cost;
-        assert!(cost.can_afford(payment), "invalid payment for {cost:?} - got {payment}");
+        assert!(
+            cost.can_afford(payment),
+            "invalid payment for {cost:?} - got {payment}"
+        );
         assert!(
             cost.is_valid_payment(payment),
             "Invalid payment - got {payment} for default cost {cost:?}",
         );
-    
+
         log_payment(game, player, &payment, &cost);
     }
 }
 
 fn log_payment(game: &mut Game, player: usize, payment: &ResourcePile, cost: &PaymentOptions) {
     lose_resources(game, player, payment.clone(), cost.origin.clone());
-    game.add_info_log_item(&format!(
-        "{} paid {} for {}",
-        game.player_name(player),
-        payment,
-        cost.origin.name(game)
-    ));
+    game.log_with_origin(player, &cost.origin, &format!("Pay {payment}"));
 }

@@ -51,7 +51,6 @@ pub(crate) fn execute_recruit(
     let player = game.player(player_index);
     let city_position = &r.city_position;
     let units = &r.units;
-    let payment = &r.payment;
     let replaced_units = &r.replaced_units;
     let replace_str = match replaced_units.len() {
         0 => "",
@@ -66,11 +65,6 @@ pub(crate) fn execute_recruit(
             .collect_vec(),
         "",
     );
-    game.add_info_log_item(&format!(
-        "{player} paid {payment} to recruit {} in the city at \
-            {city_position}{replace_str}{replace_pos}",
-        units.to_string(Some(game))
-    ));
 
     let cost = recruit_cost(
         game,
@@ -81,6 +75,14 @@ pub(crate) fn execute_recruit(
         game.execute_cost_trigger(),
     )?;
     cost.pay(game, &r.payment);
+    game.log_with_origin(
+        player_index,
+        &recruit_event_origin(),
+        &format!(
+            "Recruit {} in the city at {city_position}{replace_str}{replace_pos}",
+            units.to_string(Some(game))
+        ),
+    );
     for unit in &r.replaced_units {
         // kill separately, because they may be on different positions
         kill_units(game, &[*unit], player_index, None);

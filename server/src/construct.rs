@@ -10,6 +10,7 @@ use crate::player_events::CostInfo;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use serde::{Deserialize, Serialize};
+use crate::content::ability::construct_event_origin;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub struct Construct {
@@ -131,12 +132,7 @@ pub(crate) fn execute_construct(
     };
 
     let city_piece = c.city_piece;
-    let payment = &c.payment;
     let city_position = c.city_position;
-
-    game.add_info_log_item(&format!(
-        "{player} paid {payment} to construct a {city_piece} in the city at {city_position}{port_pos}"
-    ));
 
     construct(
         game,
@@ -147,6 +143,12 @@ pub(crate) fn execute_construct(
         cost.activate_city,
     );
     cost.pay(game, &c.payment);
+    game.log_with_origin(player_index, &construct_event_origin(),
+        &format!(
+            "Build a {city_piece} in the city at {city_position}{port_pos}"
+        ),
+    );
+
     on_construct(game, player_index, ConstructInfo::new(c.city_piece));
     Ok(())
 }

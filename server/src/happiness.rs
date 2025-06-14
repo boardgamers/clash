@@ -74,15 +74,8 @@ pub(crate) fn execute_increase_happiness(
         })
         .collect_vec();
 
-    game.add_info_log_item(&format!(
-        "{player} paid {} to increase happiness in {}{}",
-        payment,
-        utils::format_and(&logs, "no city"),
-        modifier_suffix(player, action_type, game)
-    ));
-
     let trigger = game.execute_cost_trigger();
-    let player = &mut game.players[player_index];
+    let player = game.player_mut(player_index);
     let restriction = happiness_city_restriction(player, action_type);
     let mut angry_activations = vec![];
     let mut step_sum = 0;
@@ -112,6 +105,14 @@ pub(crate) fn execute_increase_happiness(
     if !already_paid {
         happiness_cost(player_index, step_sum, trigger, action_type, game).pay(game, payment);
     }
+    let origin = happiness_event_origin(action_type, game.player(player_index));
+    game.log_with_origin(player_index, &origin,
+                         &format!(
+        "Increase happiness in {}{}",
+        utils::format_and(&logs, "no city"),
+        modifier_suffix(game.player(player_index), action_type, game)
+    ));
+    
     Ok(())
 }
 

@@ -336,16 +336,15 @@ pub(crate) fn execute_advance_action(
     if !game.player(player_index).can_advance(advance, game) {
         return Err("Cannot advance".to_string());
     }
-    game.add_info_log_item(&format!(
-        "{} paid {} to get the {} advance",
-        game.player_name(player_index),
-        a.payment,
-        a.advance.name(game)
-    ));
 
     game.player(player_index)
         .advance_cost(advance, game, game.execute_cost_trigger())
         .pay(game, &a.payment);
+    game.log_with_origin(player_index, &advance_event_origin(), 
+        &format!(
+        "Gain {}",
+        a.advance.name(game)
+    ));
     gain_advance_without_payment(game, advance, player_index, a.payment.clone(), true);
     Ok(())
 }
