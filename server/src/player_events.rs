@@ -7,7 +7,7 @@ use crate::combat_listeners::{CombatRoundEnd, CombatRoundStart};
 use crate::combat_stats::CombatStats;
 use crate::construct::ConstructInfo;
 use crate::content::custom_actions::CustomActionActivation;
-use crate::content::persistent_events::KilledUnits;
+use crate::content::persistent_events::{KilledUnits, PaymentRequest};
 use crate::cultural_influence::{InfluenceCultureInfo, InfluenceCultureOutcome};
 use crate::events::Event;
 use crate::explore::ExploreResolutionState;
@@ -314,7 +314,12 @@ impl CostInfo {
     }
 
     pub(crate) fn pay(&self, game: &mut Game, payment: &ResourcePile) {
-        pay_cost(game, self.info.player, &self.cost, payment);
+        pay_cost(
+            game,
+            self.info.player,
+            &PaymentRequest::mandatory(self.cost.clone(), "info"),
+            payment,
+        );
         self.info.execute(game);
     }
 }
