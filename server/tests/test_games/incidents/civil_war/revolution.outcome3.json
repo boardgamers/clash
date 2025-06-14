@@ -305,18 +305,18 @@
       "Player1: Gold deposits: Gain 2 gold"
     ],
     [
-      "Player1 killed units: elephant at C2"
+      "Player1: Revolution: Player1 killed units: elephant at C2"
     ],
     [
-      "Player1 declined to kill units",
-      "Player1 lost an action for Revolution"
+      "Player1: Revolution: Player1 declined to kill units",
+      "Player1: Revolution: Lose an action for Revolution"
     ],
     [
-      "Player1 changed their government from Democracy to Theocracy",
-      "Additional advances: none",
+      "Player1: Revolution: Player1 changed their government from Democracy to Theocracy",
+      "Player1: Revolution: Additional advances: none",
       "Player1 is now limited to a maximum of 2 ideas for Dogma Advance",
       "Player1 unlocked Provinces",
-      "Player1 could not store 3 ideas"
+      "Player1: Waste: Could not store 3 ideas"
     ]
   ],
   "undo_limit": 1,

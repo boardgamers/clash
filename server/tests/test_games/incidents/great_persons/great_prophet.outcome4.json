@@ -415,21 +415,21 @@
     ],
     [
       "Player1: Great Prophet: Pay 1 culture token",
-      "Player1 gained Great Prophet for 1 culture token"
+      "Player1: Great Prophet: Player1 gained Great Prophet for 1 culture token"
     ],
     [
       "Player1 played the action card Great Prophet",
-      "Player1 gained Myths",
+      "Player1: Great Prophet: Player1 gained Myths",
       "Player1: Myths: Gain 1 mood token"
     ],
     [
-      "Player1 decided to build a Temple at C1"
+      "Player1: Great Prophet: Player1 decided to build a Temple at C1"
     ],
     [
       "Player1: Construct Building: Pay 2 gold",
       "Player1: Construct Building: Pay 2 gold",
       "State Religion reduced the food cost to 0",
-      "Player1: Construct Building: Build a Temple in the city at C1"
+      "Player1: Construct Building: Build a Temple in the city C1"
     ]
   ],
   "undo_limit": 1,

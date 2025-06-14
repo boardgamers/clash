@@ -286,8 +286,8 @@
     ],
     [
       "Player1: Recruit: Pay 2 gold",
-      "Player1: Recruit: Recruit 1 settler in the city at A1",
-      "Expansion allows to move the settlers at B3, B3, A1"
+      "Player1: Recruit: Recruit 1 settler in the city A1",
+      "Player1: Expansion: Expansion allows to move the settlers at B3, B3, A1"
     ]
   ],
   "undo_limit": 0,

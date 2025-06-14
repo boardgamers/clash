@@ -1,7 +1,7 @@
 use crate::content::persistent_events::PaymentRequest;
 use crate::events::EventOrigin;
 use crate::game::Game;
-use crate::log::{ActionLogItem, add_action_log_item};
+use crate::log::{add_action_log_item, ActionLogItem};
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::resource_pile::ResourcePile;
@@ -99,10 +99,13 @@ pub(crate) fn check_for_waste(game: &mut Game) {
         let wasted_resources =
             mem::replace(&mut game.players[p].wasted_resources, ResourcePile::empty());
         if !wasted_resources.is_empty() {
-            game.add_info_log_item(&format!(
-                "{} could not store {wasted_resources}",
-                game.player_name(p)
-            ));
+            game.log_with_origin(
+                p,
+                &EventOrigin::Ability("Waste".to_string()),
+                &format!(
+                    "Could not store {wasted_resources}",
+                ),
+            );
         }
     }
 }

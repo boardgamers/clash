@@ -50,10 +50,10 @@ fn volcano() -> Incident {
         |game, s, _| {
             let pos = s.choice[0];
             let player_index = s.player_index;
-            game.add_info_log_item(&format!(
-                "{} selected city {} to be destroyed",
-                s.player_name, pos
-            ));
+            s.log(
+                game,
+                &format!("{} selected city {} to be destroyed", s.player_name, pos),
+            );
             let city = game.player(player_index).get_city(pos);
             let buildings = city.pieces.buildings(None);
             let wonders = city.pieces.wonders.iter().copied().collect_vec();
@@ -180,11 +180,11 @@ fn destroy_city_center(game: &mut Game, position: Position, origin: &EventOrigin
     );
     p.gain_event_victory_points(2.0, origin);
     p.destroyed_structures.cities += 1;
-    game.add_info_log_item(&format!(
-        "{} gained 2 points for the city center at {}",
-        game.player_name(owner),
-        position
-    ));
+    game.log_with_origin(
+        owner,
+        origin,
+        &format!("Gain 2 points for the city center at {position}"),
+    );
 }
 
 fn destroy_building(game: &mut Game, b: Building, position: Position, origin: &EventOrigin) {
@@ -198,12 +198,11 @@ fn destroy_building(game: &mut Game, b: Building, position: Position, origin: &E
     o.gain_event_victory_points(2.0, origin);
     o.destroyed_structures.add_building(b);
     remove_building(game.player_mut(city_owner).get_city_mut(position), b);
-    game.add_info_log_item(&format!(
-        "{} gained 2 points for the {} at {}",
-        game.player_name(owner),
-        b,
-        position
-    ));
+    game.log_with_origin(
+        owner,
+        origin,
+        &format!("Gain 2 points for the {b} at {position}"),
+    );
 }
 
 fn destroy_wonder(game: &mut Game, position: Position, name: Wonder, origin: &EventOrigin) {
@@ -216,13 +215,11 @@ fn destroy_wonder(game: &mut Game, position: Position, name: Wonder, origin: &Ev
     let city = p.get_city_mut(position);
     city.pieces.wonders.retain(|w| *w != name);
     p.gain_event_victory_points(a as f32, origin);
-    game.add_info_log_item(&format!(
-        "{} gained {} points for the {} at {}",
-        game.player_name(owner),
-        a,
-        name.name(),
-        position
-    ));
+    game.log_with_origin(
+        owner,
+        origin,
+        &format!("Gain {a} points for the {} at {position}", name.name(),),
+    );
 }
 
 fn flood(id: u8, name: &str, target: IncidentTarget) -> Incident {

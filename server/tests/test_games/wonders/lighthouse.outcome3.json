@@ -275,18 +275,18 @@
   "log": [
     [
       "Player1 played the wonder card Great Lighthouse",
-      "Player1 decided to build Great Lighthouse in city A1"
+      "Player1: Build Wonder: Player1 decided to build Great Lighthouse in city A1"
     ],
     [
       "Player1: Great Lighthouse: Pay 3 food, 5 wood, 4 ore and 5 culture tokens",
-      "Player1 built Great Lighthouse in city A1 for 3 food, 5 wood, 4 ore and 5 culture tokens"
+      "Player1: Build Wonder: Player1 built Great Lighthouse in city A1 for 3 food, 5 wood, 4 ore and 5 culture tokens"
     ],
     [
       "Player1 started Great Lighthouse"
     ],
     [
-      "Player1 activated the city at A1 used the Great Lighthouse to place a ship on C3 for free",
-      "City at A1 became Neutral because it was activated more than once"
+      "Player1: Great Lighthouse: Player1 activated the city A1 used the Great Lighthouse to place a ship on C3 for free",
+      "city A1 became Neutral because it was activated more than once"
     ]
   ],
   "undo_limit": 0,

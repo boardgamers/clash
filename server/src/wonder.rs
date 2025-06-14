@@ -237,7 +237,7 @@ pub(crate) fn draw_wonder_card_handler() -> Ability {
             |game, s, _| {
                 if s.choice {
                     let name = *find_public_wonder(game).expect("public wonder card not found");
-                    game.add_info_log_item(&format!(
+                    s.log(game, &format!(
                         "{} drew the public wonder card {}",
                         s.player_name,
                         name.name()
@@ -424,7 +424,7 @@ pub(crate) fn build_wonder_handler() -> Ability {
             |game, s, i| {
                 let position = s.choice[0];
                 i.selected_position = Some(position);
-                game.add_info_log_item(&format!(
+                s.log(game, &format!(
                     "{} decided to build {} in city {}",
                     s.player_name,
                     i.wonder.name(),
@@ -463,7 +463,7 @@ pub(crate) fn build_wonder_handler() -> Ability {
                 let pos = i.selected_position.expect("city not selected");
                 let name = i.wonder;
 
-                game.add_info_log_item(&format!(
+                s.log(game, &format!(
                     "{} built {} in city {pos} for {}",
                     s.player_name,
                     name.name(),

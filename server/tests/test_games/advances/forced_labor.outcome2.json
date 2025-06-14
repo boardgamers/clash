@@ -319,9 +319,9 @@
       "Player1: Forced Labor: Treating Angry cities as neutral"
     ],
     [
-      "Player1: Collect: Use city at A1",
+      "Player1: Collect: Use city A1",
       "Player1: Collect: Gain 1 food and 1 wood",
-      "Player1 could not store 1 food and 1 wood"
+      "Player1: Waste: Could not store 1 food and 1 wood"
     ]
   ],
   "undo_limit": 0,

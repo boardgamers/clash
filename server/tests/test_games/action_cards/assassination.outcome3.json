@@ -283,14 +283,14 @@
     ],
     [
       "Player1: Assassination: Pay 1 culture token",
-      "Player2 has been assassinated by Player1."
+      "Player1: Assassination: Player2 has been assassinated by Player1."
     ],
     [
       "Player1 ended their turn with 3 actions left"
     ],
     [
       "It's Player2's turn",
-      "Player2 has lost an action due to assassination."
+      "Player2: Assassination: Lost an action due to assassination."
     ],
     [
       "Player2 ended their turn with 2 actions left"

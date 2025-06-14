@@ -490,13 +490,13 @@
     [
       "Player1: Idol: Pay 1 culture token",
       "Player1 activates the city D1 to use Idol.",
-      "Player1 decided to play Spy as a free action using Idol",
+      "Player1: Idol: Player1 decided to play Spy as a free action using Idol",
       "Player1 played the action card Spy",
       "Player1 has to pay 1 culture token for Spy"
     ],
     [
       "Player1: Spy: Pay 1 culture token",
-      "Player1 decided to looked at all Wonder, Action, and Objective cards of Player2"
+      "Player1: Spy: Player1 decided to looked at all Wonder, Action, and Objective cards of Player2"
     ]
   ],
   "undo_limit": 3,

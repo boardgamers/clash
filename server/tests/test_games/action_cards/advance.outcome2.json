@@ -255,7 +255,7 @@
     ],
     [
       "Player1: Storage: Gain 1 mood token",
-      "Player1 gained Storage using the Advance action card."
+      "Player1: Advance: Gain Storage using the Advance action card."
     ]
   ],
   "undo_limit": 0,

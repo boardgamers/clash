@@ -67,7 +67,7 @@ fn use_bartering(b: AbilityBuilder) -> AbilityBuilder {
             let HandCard::ActionCard(card) = s.choice[0] else {
                 panic!("Invalid type");
             };
-            game.add_info_log_item(&format!(
+            s.log(game, &format!(
                 "{} discarded {} for 1 gold or 1 culture token",
                 s.player_name,
                 game.cache.get_action_card(card).name()
@@ -166,7 +166,7 @@ where
             let (_, routes) = trade_route_reward(game, &s.player()).expect("No trade route reward");
             let log = trade_route_log(game, s.player_index, &routes, s.actively_selected);
             for l in &log {
-                game.add_info_log_item(l);
+                s.log(game, l);
             }
             let p = game.player(s.player_index);
             if p.has_special_advance(SpecialAdvance::Raiding) {

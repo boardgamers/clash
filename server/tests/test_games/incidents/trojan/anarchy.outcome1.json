@@ -278,15 +278,15 @@
     ],
     [
       "A new game event has been triggered: Anarchy",
-      "Player1 lost 1 government advances due to Anarchy - adding 1 victory points"
+      "Player1: Anarchy: Lose 1 government advances due to Anarchy - adding 1 victory points"
     ],
     [
       "Player1: Advance: Pay 2 gold",
       "Player1: Advance: Gain Dogma",
       "Player1 is now limited to a maximum of 2 ideas for Dogma Advance",
       "Player1 unlocked Provinces",
-      "Player1 gained a government advance, taking a game event token instead of triggering a game event (and losing 1 victory point)",
-      "Player1 could not store 1 idea"
+      "Player1: Anarchy: Gain a government advance, taking a game event token instead of triggering a game event (and losing 1 victory point)",
+      "Player1: Waste: Could not store 1 idea"
     ]
   ],
   "undo_limit": 1,

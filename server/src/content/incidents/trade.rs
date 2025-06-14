@@ -123,9 +123,7 @@ fn reformation() -> Incident {
             .count()
             > 1
         {
-            game.add_info_log_item(&format!(
-                "{p} has no temples - and must select a player to execute the event"
-            ));
+            p.log(game, "Has no temples: Select a player to execute the event");
         }
     })
     // select a player to execute the incident
@@ -137,7 +135,7 @@ fn reformation() -> Incident {
         |game, s, i| {
             // pass the event to the player itself
             i.passed = Some(PassedIncident::NewPlayer(s.choice));
-            game.add_info_log_item(&format!(
+            s.log(game, &format!(
                 "{} selected {} to execute the event",
                 s.player_name,
                 game.player_name(s.choice)
@@ -185,7 +183,7 @@ fn reformation() -> Incident {
                 .pieces
                 .set_building(Building::Temple, s.player_index);
             let donor_name = donor.get_name();
-            game.add_info_log_item(&format!(
+            s.log(game, &format!(
                 "{} gained a Temple from {donor_name} in {pos}",
                 s.player_name,
             ));

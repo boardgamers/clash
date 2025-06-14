@@ -163,9 +163,8 @@ pub(crate) fn free_advance() -> Ability {
                 Some(AdvanceRequest::new(choices))
             },
             |game, c, _| {
-                game.add_info_log_item(&format!(
-                    "{} advanced {} for free",
-                    c.player_name,
+                c.log(game, &format!(
+                    "Advanced {} for free",
                     c.choice.name(game)
                 ));
                 gain_advance_without_payment(
@@ -218,7 +217,7 @@ pub(crate) fn raze_city() -> Ability {
             },
             |game, s, _| {
                 if s.choice.is_empty() {
-                    game.add_info_log_item(&format!("{} did not raze a city", s.player_name));
+                    s.log(game, &format!("{} did not raze a city", s.player_name));
                     return;
                 }
                 s.player().gain_resources(game, ResourcePile::gold(1));
@@ -320,14 +319,14 @@ where
         move |game, p, action, request, _| {
             if let PersistentEventRequest::ChangeGovernment = &request {
                 if let EventResponse::ChangeGovernmentType(c) = action {
-                    game.add_info_log_item(&format!(
+                    p.log(game, &format!(
                         "{p} changed their government from {} to {}",
                         p.get(game)
                             .government(game)
                             .expect("player should have a government before changing it"),
                         c.new_government
                     ));
-                    game.add_info_log_item(&format!(
+                    p.log(game, &format!(
                         "Additional advances: {}",
                         if c.additional_advances.is_empty() {
                             "none".to_string()
@@ -440,7 +439,7 @@ pub(crate) fn determine_first_player() -> Ability {
                 }
             },
             |game, s, _| {
-                game.add_info_log_item(&format!(
+                s.log(game, &format!(
                     "{} choose {}",
                     game.player_name(s.player_index),
                     if s.choice == game.starting_player_index {

@@ -266,7 +266,7 @@
       "No valid positions for Pirate Ship",
       "Player1: Scientific Trade: Gain 2 ideas",
       "Player2: Scientific Trade: Gain 1 idea",
-      "Player2 could not store 1 idea"
+      "Player2: Waste: Could not store 1 idea"
     ]
   ],
   "undo_limit": 1,

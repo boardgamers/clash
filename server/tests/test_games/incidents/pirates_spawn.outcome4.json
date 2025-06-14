@@ -332,7 +332,7 @@
   "action_log_index": 5,
   "log": [
     [
-      "Player1 advanced Storage for free",
+      "Player1: Free Advance: Advanced Storage for free",
       "Player1: Storage: Gain 1 mood token"
     ],
     [
@@ -340,20 +340,20 @@
       "Base effect: Pirates spawn"
     ],
     [
-      "Player1 removed a Pirate Ships at D1"
+      "Player1: A successful year: Player1 removed a Pirate Ships at D1"
     ],
     [
-      "Pirates spawned a Pirate Ship at A2"
+      "Player1: A successful year: Pirates spawned a Pirate Ship at A2"
     ],
     [
-      "Pirates spawned a Pirate Ship at D2",
+      "Player1: A successful year: Pirates spawned a Pirate Ship at D2",
       "Player1 must pay 1 resource or token to bribe the pirates"
     ],
     [
       "Player1: A successful year: Pay 1 ore",
       "Pirates took 1 ore",
       "Player2 must reduce Mood in a city adjacent to pirates",
-      "Player2 reduced Mood in the city at C1",
+      "Player2: A successful year: Player2 reduced Mood in the city C1",
       "Player2: A successful year: Gain 1 food"
     ]
   ],

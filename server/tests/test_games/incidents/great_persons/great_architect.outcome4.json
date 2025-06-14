@@ -331,18 +331,18 @@
     ],
     [
       "Player1: Great Architect: Pay 1 culture token",
-      "Player1 gained Great Architect for 1 culture token"
+      "Player1: Great Architect: Player1 gained Great Architect for 1 culture token"
     ],
     [
       "Player1 played the action card Great Architect",
       "Player1 played the wonder card Pyramids"
     ],
     [
-      "Player1 decided to build Pyramids in city A1"
+      "Player1: Build Wonder: Player1 decided to build Pyramids in city A1"
     ],
     [
       "Player1: Pyramids: Pay 2 food, 3 wood, 6 ore, 1 gold and 2 culture tokens",
-      "Player1 built Pyramids in city A1 for 2 food, 3 wood, 6 ore, 1 gold and 2 culture tokens"
+      "Player1: Build Wonder: Player1 built Pyramids in city A1 for 2 food, 3 wood, 6 ore, 1 gold and 2 culture tokens"
     ]
   ],
   "undo_limit": 1,

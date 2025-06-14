@@ -235,11 +235,11 @@
   "log": [
     [
       "Player1 started Bartering",
-      "Player1 discarded Advance/Peltasts for 1 gold or 1 culture token"
+      "Player1: Bartering: Player1 discarded Advance/Peltasts for 1 gold or 1 culture token"
     ],
     [
       "Player1: Bartering: Gain 1 gold",
-      "Player1 could not store 1 gold"
+      "Player1: Waste: Could not store 1 gold"
     ]
   ],
   "undo_limit": 0,

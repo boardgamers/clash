@@ -315,8 +315,8 @@
       "Player1 disembarked 1 ship from D2 to C2"
     ],
     [
-      "Player1 unloaded 1 settler and 1 infantry from ships",
-      "Player1 converted 1 ship to 1 settler"
+      "Player1: Ship Construction: Player1 unloaded 1 settler and 1 infantry from ships",
+      "Player1: Ship Construction: Player1 converted 1 ship to 1 settler"
     ]
   ],
   "undo_limit": 0,

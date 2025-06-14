@@ -101,7 +101,7 @@ fn expansion() -> SpecialAdvanceInfo {
                 ..MoveState::default()
             });
 
-            game.add_info_log_item(&format!(
+            player.log(game, &format!(
                 "Expansion allows to move the settlers at {}",
                 settlers.iter().map(ToString::to_string).join(", ")
             ));
@@ -145,7 +145,6 @@ fn ignore_hit_ability<B: AbilityInitializerSetup>(
     priority: i32,
     filter: impl Fn(&Combat, CombatRole, &Game) -> bool + Send + Sync + 'static + Clone,
 ) -> B {
-    let name = b.name().clone();
     b.add_payment_request_listener(
         |e| &mut e.combat_round_end,
         priority,
@@ -160,12 +159,12 @@ fn ignore_hit_ability<B: AbilityInitializerSetup>(
             let cost = p.payment_options().resources(player, pile.clone());
 
             if !apply_ignore_hit(e, player_index, false) {
-                game.add_info_log_item(&format!("{name} won't reduce the hits, no payment made."));
+                p.log(game, "Won't reduce the hits, no payment made.");
                 return None;
             }
 
             if !player.can_afford(&cost) {
-                game.add_info_log_item(&format!("{name} Not enough resources, no payment made."));
+                p.log(game, "Not enough resources, no payment made.");
                 return None;
             }
 
@@ -247,7 +246,7 @@ fn use_imperial_army(b: AbilityBuilder) -> AbilityBuilder {
                 }
             }
 
-            game.add_info_log_item(&format!(
+            s.log(game, &format!(
                 "{} converted {} using Imperial Army",
                 s.player_name,
                 names.join(", ")

@@ -265,7 +265,7 @@
     ],
     [
       "A new game event has been triggered: Famine: Draught",
-      "Player1 lost 2 food to Famine"
+      "Player1: Famine: Draught: Lost 2 food"
     ]
   ],
   "undo_limit": 1,

@@ -366,18 +366,18 @@
   "log": [
     [
       "Player1 played the wonder card Colosseum",
-      "Player1 decided to build Colosseum in city A1"
+      "Player1: Build Wonder: Player1 decided to build Colosseum in city A1"
     ],
     [
       "Player1: Colosseum: Pay 3 food, 4 wood, 5 ore and 5 culture tokens",
-      "Player1 built Colosseum in city A1 for 3 food, 4 wood, 5 ore and 5 culture tokens"
+      "Player1: Build Wonder: Player1 built Colosseum in city A1 for 3 food, 4 wood, 5 ore and 5 culture tokens"
     ],
     [
       "Player1 started Sports at C2"
     ],
     [
       "Player1: Sports: Pay 1 mood token",
-      "Player1: Sports: Increase happiness in the city at C2 by 1 steps, making it Happy using Sports"
+      "Player1: Sports: Increase happiness in the city C2 by 1 steps, making it Happy using Sports"
     ],
     [
       "Player1 marched 2 infantry, 1 cavalry and 1 elephant from C2 to C1"
@@ -392,15 +392,15 @@
     [
       "Player1: Colosseum: Pay 1 culture token",
       "Player1: Colosseum: Increase combat value by 1, scoring an extra hit",
-      "Player1 has to remove 1 of their attacking units"
+      "Player1: Choose Casualties: Remove 1 of their attacking units"
     ],
     [
       "Player1 removed 1 infantry",
-      "Player2 has to remove all of their defending units",
+      "Player2: Choose Casualties: Remove all defending units",
       "Player2 removed 2 infantry",
-      "Attacker wins and captured Player2's city at C1",
+      "Attacker wins and captured Player2's city C1",
       "Player1: Combat: Gain 1 gold",
-      "Player1 could not store 1 gold"
+      "Player1: Waste: Could not store 1 gold"
     ]
   ],
   "undo_limit": 5,

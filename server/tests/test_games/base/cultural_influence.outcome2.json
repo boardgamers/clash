@@ -272,7 +272,7 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player2 tried to influence culture the Temple in the city at C2 by Player1 with the city at B3 and paid 1 culture token to boost the range"
+      "Player2 tried to influence culture the Temple in the city at C2 by Player1 with the city B3 and may pay 1 culture token to boost the range"
     ],
     [
       "Player2: Influence Culture: Pay 1 culture token",
@@ -280,7 +280,7 @@
     ],
     [
       "Player2: Influence Culture: Pay 4 culture tokens",
-      "Player2 paid 4 culture tokens to increase the dice roll and proceed with the cultural influence"
+      "Player2: Influence Culture: Paying to increase the dice roll"
     ]
   ],
   "undo_limit": 2,

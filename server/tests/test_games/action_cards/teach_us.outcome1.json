@@ -289,15 +289,15 @@
       "Defenders: 2 infantry",
       "Player1 rolled 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 26 and gets 2 hits against defending units.",
       "Player2 rolled 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 2 and gets 0 hits against attacking units.",
-      "Player2 has to remove all of their defending units",
+      "Player2: Choose Casualties: Remove all defending units",
       "Player2 removed 2 infantry",
-      "Attacker wins and captured Player2's city at C1",
+      "Attacker wins and captured Player2's city C1",
       "Player1: Combat: Gain 1 gold",
-      "Player1 could not store 1 gold"
+      "Player1: Waste: Could not store 1 gold"
     ],
     [
-      "Player1 selected to use Teach Us.",
-      "Player1 selected Writing as advance for Teach Us.",
+      "Player1: Teach us: Player1 selected to use Teach Us.",
+      "Player1: Teach us: Player1 selected Writing as advance for Teach Us.",
       "Player1 gained an action card from the pile",
       "Player1 gained an objective card from the pile",
       "Player1: Writing: Gain 1 culture token"

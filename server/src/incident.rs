@@ -775,7 +775,7 @@ fn exhausted_land(builder: IncidentBuilder) -> IncidentBuilder {
         },
         |game, s, _| {
             let pos = s.choice[0];
-            game.add_info_log_item(&format!(
+            s.log(game, &format!(
                 "{} exhausted the land in position {}",
                 s.player_name, pos
             ));
@@ -810,17 +810,17 @@ pub(crate) fn decrease_mod_and_log(
                     .decrease_mood_state();
                 let mood_state = &game.player(s.player_index).get_city(pos).mood_state;
                 if s.actively_selected {
-                    game.add_info_log_item(&format!(
+                    s.log(game, &format!(
                         "{name} selected to decrease the mood in city {pos} to {mood_state}",
                     ));
                 } else {
-                    game.add_info_log_item(&format!(
+                    s.log(game, &format!(
                         "{name} decreased the mood in city {pos} to {mood_state}",
                     ));
                 }
             }
             MoodModifier::MakeAngry => {
-                game.add_info_log_item(&format!("{name} made city {pos} Angry"));
+                s.log(game, &format!("{name} made city {pos} Angry"));
                 game.player_mut(s.player_index)
                     .get_city_mut(pos)
                     .set_mood_state(MoodState::Angry);

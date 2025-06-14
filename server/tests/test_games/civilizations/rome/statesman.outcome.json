@@ -287,7 +287,7 @@
   "log": [
     [
       "Player1: Statesman: Pay 2 mood tokens",
-      "Player1: Statesman: Increase happiness in the city at A1 by 1 steps, making it Neutral using Statesman"
+      "Player1: Statesman: Increase happiness in the city A1 by 1 steps, making it Neutral using Statesman"
     ]
   ],
   "undo_limit": 0,

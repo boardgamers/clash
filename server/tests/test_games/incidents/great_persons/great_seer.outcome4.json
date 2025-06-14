@@ -332,14 +332,14 @@
     ],
     [
       "Player1: Great Seer: Pay 1 culture token",
-      "Player1 gained Great Seer for 1 culture token"
+      "Player1: Great Seer: Player1 gained Great Seer for 1 culture token"
     ],
     [
       "Player1 played the action card Great Seer"
     ],
     [
-      "Player1 chose an objective card for player Player1",
-      "Player1 chose an objective card for player Player2"
+      "Player1: Great Seer: Player1 chose an objective card for player Player1",
+      "Player1: Great Seer: Player1 chose an objective card for player Player2"
     ],
     [
       "Player1: Advance: Pay 2 food",

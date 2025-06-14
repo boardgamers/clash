@@ -183,7 +183,7 @@ pub(crate) fn select_player_to_gain_settler(mut b: IncidentBuilder) -> IncidentB
         |p, _, _| p.available_units().settlers > 0 && !p.cities.is_empty(),
         12,
         |game, c, i| {
-            game.add_info_log_item(&format!(
+            c.log(game, &format!(
                 "{} was selected to gain 1 settler.",
                 game.player_name(c.choice)
             ));
@@ -213,7 +213,7 @@ fn select_settler(b: IncidentBuilder, priority: i32, target: IncidentTarget) -> 
         },
         |game, s, _| {
             let pos = s.choice[0];
-            game.add_info_log_item(&format!("{} gained 1 settler in {}", s.player_name, pos));
+            s.log(game, &format!("{} gained 1 settler in {}", s.player_name, pos));
             gain_unit(s.player_index, pos, UnitType::Settler, game);
         },
     )

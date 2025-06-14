@@ -332,11 +332,11 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 marched Ragnar Lodbrok from E2 to D1 and captured Player2's city at D1",
+      "Player1 marched Ragnar Lodbrok from E2 to D1 and captured Player2's city D1",
       "Player1: Combat: Gain 1 gold",
       "Player1: Prey: Gain 2 gold",
-      "Player2 gained 1 free Settler Unit at B2 for losing a city",
-      "Player1 could not store 1 gold"
+      "Player2: Place Settler: Player2 gained 1 free Settler Unit at B2 for losing a city",
+      "Player1: Waste: Could not store 1 gold"
     ]
   ],
   "undo_limit": 0,

@@ -243,10 +243,10 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1: Collect: Use city at C2",
+      "Player1: Collect: Use city C2",
       "Player1: Collect: Gain 1 wood, 1 ore and 1 idea",
       "Public Education gained 1 idea",
-      "Player1 could not store 1 ore"
+      "Player1: Waste: Could not store 1 ore"
     ]
   ],
   "undo_limit": 0,

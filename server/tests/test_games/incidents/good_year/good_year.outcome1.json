@@ -313,16 +313,16 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 advanced Storage for free",
+      "Player1: Free Advance: Advanced Storage for free",
       "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: A good year",
       "Base effect: Barbarians spawn",
-      "Barbarians spawned a new city and a new Infantry unit at B3"
+      "Player1: A good year: Barbarians spawned a new city and a new Infantry unit at B3"
     ],
     [
-      "Barbarians reinforced with 1 elephant at B3",
+      "Player1: A good year: Barbarians reinforced with 1 elephant at B3",
       "Player1: A good year: Gain 1 food",
       "Player2: A good year: Gain 1 food"
     ]

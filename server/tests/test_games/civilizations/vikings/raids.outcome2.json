@@ -450,11 +450,11 @@
     [
       "It's Player2's turn",
       "Player1: Market: Gain 1 gold",
-      "ship at E7 traded with city at D6",
-      "settler at E7 traded with city at E6",
-      "Player2 raided Player1 at D6",
+      "Player2: Trade Routes: ship at E7 traded with city D6",
+      "Player2: Trade Routes: settler at E7 traded with city E6",
+      "Player2: Raiding: Raided Player1 at D6",
       "Player2: Trade Routes: Gain 2 food",
-      "Player2 could not store 1 food"
+      "Player2: Waste: Could not store 1 food"
     ],
     [
       "Player2 ended their turn with 3 actions left"
@@ -464,7 +464,7 @@
     ],
     [
       "Player1: Viking Raids: Pay 1 food",
-      "Player1 lost 1 food to Viking Raids"
+      "Player1: Viking Raids: Player1 lost 1 food to Viking Raids"
     ]
   ],
   "undo_limit": 0,

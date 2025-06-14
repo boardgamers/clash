@@ -273,10 +273,10 @@
     ],
     [
       "Player1: Free Economy: Pay 1 mood token",
-      "Player1: Free Economy: Use city at C2",
+      "Player1: Free Economy: Use city C2",
       "Player1: Free Economy: Gain 1 ore and 1 gold",
       "Metallurgy converted 1 ore to 1 gold",
-      "Player1 could not store 1 ore and 1 gold"
+      "Player1: Waste: Could not store 1 ore and 1 gold"
     ]
   ],
   "undo_limit": 0,

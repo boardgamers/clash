@@ -334,15 +334,15 @@
     ],
     [
       "Player1: Great Athlete: Pay 1 culture token",
-      "Player1 gained Great Athlete for 1 culture token"
+      "Player1: Great Athlete: Player1 gained Great Athlete for 1 culture token"
     ],
     [
       "Player1 played the action card Great Athlete",
-      "Player1 gained Arts",
+      "Player1: Great Athlete: Player1 gained Arts",
       "Player1: Arts: Gain 1 culture token"
     ],
     [
-      "Player1 decided to convert culture to mood tokens"
+      "Player1: Great Athlete: Player1 decided to convert culture to mood tokens"
     ],
     [
       "Player1: Great Athlete: Pay 1 culture token",

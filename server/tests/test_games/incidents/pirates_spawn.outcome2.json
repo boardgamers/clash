@@ -286,7 +286,7 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player1 advanced Storage for free",
+      "Player1: Free Advance: Advanced Storage for free",
       "Player1: Storage: Gain 1 mood token"
     ],
     [
@@ -294,10 +294,10 @@
       "Base effect: Pirates spawn"
     ],
     [
-      "Player1 removed a Pirate Ships at D1"
+      "Player1: A successful year: Player1 removed a Pirate Ships at D1"
     ],
     [
-      "Pirates spawned a Pirate Ship at A2"
+      "Player1: A successful year: Pirates spawned a Pirate Ship at A2"
     ]
   ],
   "undo_limit": 1,

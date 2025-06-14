@@ -304,7 +304,7 @@
   "log": [
     [
       "Player1: Recruit: Pay 1 mood token and 1 culture token",
-      "Player1: Recruit: Recruit Augustus in the city at A1"
+      "Player1: Recruit: Recruit Augustus in the city A1"
     ]
   ],
   "undo_limit": 0,

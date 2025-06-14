@@ -339,11 +339,11 @@
       "Player1 started Great Library"
     ],
     [
-      "Player1 used the Great Library to use Engineering for the turn"
+      "Player1: Great Library: Player1 used the Great Library to use Engineering for the turn"
     ],
     [
       "Player1 played the wonder card Pyramids",
-      "Player1 decided to build Pyramids in city C2"
+      "Player1: Build Wonder: Player1 decided to build Pyramids in city C2"
     ]
   ],
   "undo_limit": 0,

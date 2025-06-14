@@ -252,7 +252,7 @@
     ],
     [
       "A new game event has been triggered: Anarchy",
-      "Player1 lost 1 government advances due to Anarchy - adding 1 victory points"
+      "Player1: Anarchy: Lose 1 government advances due to Anarchy - adding 1 victory points"
     ]
   ],
   "undo_limit": 1,

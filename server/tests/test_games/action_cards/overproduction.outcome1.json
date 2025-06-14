@@ -275,10 +275,10 @@
   "log": [
     [
       "Player1 played the action card Overproduction",
-      "Player1 can use Overproduction to collect from 2 additional tiles."
+      "Player1: Overproduction: Can use Overproduction to collect from 2 additional tiles."
     ],
     [
-      "Player1: Collect: Use city at C2",
+      "Player1: Collect: Use city C2",
       "Player1: Collect: Gain 1 wood, 1 ore and 1 mood token"
     ]
   ],

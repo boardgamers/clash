@@ -290,7 +290,7 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 advanced Storage for free",
+      "Player1: Free Advance: Advanced Storage for free",
       "Player1: Storage: Gain 1 mood token"
     ],
     [
@@ -298,7 +298,7 @@
       "Base effect: Barbarians spawn"
     ],
     [
-      "Barbarians spawned a new city and a new Infantry unit at B3"
+      "Player1: A good year: Barbarians spawned a new city and a new Infantry unit at B3"
     ]
   ],
   "undo_limit": 1,

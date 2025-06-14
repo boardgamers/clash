@@ -220,7 +220,7 @@
     [
       "Player1 played the action card Inspiration",
       "Player1: Storage: Gain 1 mood token",
-      "Player1 gained Storage for free using Inspiration."
+      "Player1: Inspiration: Gain Storage for free using Inspiration."
     ]
   ],
   "undo_limit": 0,

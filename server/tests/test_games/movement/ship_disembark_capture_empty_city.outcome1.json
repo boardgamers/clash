@@ -337,10 +337,10 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 disembarked 1 cavalry and 1 elephant from C3 to B2 and captured Player2's city at B2",
+      "Player1 disembarked 1 cavalry and 1 elephant from C3 to B2 and captured Player2's city B2",
       "Player1: Combat: Gain 2 gold",
-      "Player2 gained 1 free Settler Unit at C1 for losing a city",
-      "Player1 could not store 2 gold"
+      "Player2: Place Settler: Player2 gained 1 free Settler Unit at C1 for losing a city",
+      "Player1: Waste: Could not store 2 gold"
     ],
     [
       "Player1 completed objective Naval Assault"

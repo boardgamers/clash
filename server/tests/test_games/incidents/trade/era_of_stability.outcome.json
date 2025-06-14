@@ -288,7 +288,7 @@
     ],
     [
       "A new game event has been triggered: Era of Stability",
-      "Player1 exhausted the land in position B1"
+      "Player1: Era of Stability: Player1 exhausted the land in position B1"
     ]
   ],
   "undo_limit": 1,

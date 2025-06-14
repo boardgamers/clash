@@ -342,7 +342,7 @@
       "Player1 rolled 6 (infantry, no bonus), 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 18 and gets 1 hits against defending units.",
       "Player1 used the following combat modifiers: WarShips ignore the first hit in the first round of combat",
       "Player2 rolled 6 (infantry, no bonus) for combined combat value of 6 and gets 0 hits against attacking units.",
-      "Player2 has to remove all of their defending units",
+      "Player2: Choose Casualties: Remove all defending units",
       "Player2 removed 1 ship",
       "Attacker wins"
     ],
@@ -357,7 +357,7 @@
       "Player1 rolled 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 12 and gets 1 hits against defending units.",
       "Player1 used the following combat modifiers: WarShips ignore the first hit in the first round of combat",
       "Player2 rolled 6 (infantry, no bonus) for combined combat value of 6 and gets 0 hits against attacking units.",
-      "Player2 has to remove all of their defending units",
+      "Player2: Choose Casualties: Remove all defending units",
       "Player2 removed 1 ship",
       "Attacker wins"
     ]

@@ -350,18 +350,18 @@
       "A new game event has been triggered: Heavy Earthquake"
     ],
     [
-      "Player1 gained 2 points for the Fortress at C2",
-      "Player1 gained 2 points for the Great Gardens at C2",
-      "Player1 gained 2 points for the city center at B2"
+      "Player1: Heavy Earthquake: Gain 2 points for the Fortress at C2",
+      "Player1: Heavy Earthquake: Gain 2 points for the Great Gardens at C2",
+      "Player1: Heavy Earthquake: Gain 2 points for the city center at B2"
     ],
     [
       "Player1: Myths: Pay 1 mood token",
       "Player1: Myths: Avoid mood change"
     ],
     [
-      "Player1 gained 2 points for the Fortress at A1",
-      "Player2 gained 2 points for the city center at A1",
-      "Player2 gained 2 points for the city center at A3"
+      "Player1: Heavy Earthquake: Gain 2 points for the Fortress at A1",
+      "Player2: Heavy Earthquake: Gain 2 points for the city center at A1",
+      "Player2: Heavy Earthquake: Gain 2 points for the city center at A3"
     ]
   ],
   "undo_limit": 4,

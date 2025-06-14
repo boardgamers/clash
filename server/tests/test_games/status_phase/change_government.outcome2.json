@@ -285,17 +285,17 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player2 did not raze a city"
+      "Player2: Raze city: Player2 did not raze a city"
     ],
     [
       "Player1: Change Government: Pay 1 mood token and 1 culture token"
     ],
     [
-      "Player1 changed their government from Democracy to Theocracy",
-      "Additional advances: Devotion",
+      "Player1: Change Government: Player1 changed their government from Democracy to Theocracy",
+      "Player1: Change Government: Additional advances: Devotion",
       "Player1 is now limited to a maximum of 2 ideas for Dogma Advance",
       "Player1 unlocked Provinces",
-      "Player1 could not store 1 idea"
+      "Player1: Waste: Could not store 1 idea"
     ]
   ],
   "undo_limit": 3,

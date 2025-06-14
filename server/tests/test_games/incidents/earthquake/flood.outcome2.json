@@ -291,10 +291,10 @@
       "A new game event has been triggered: Heavy Flood"
     ],
     [
-      "Player1 selected to decrease the mood in city C2 to Neutral"
+      "Player1: Heavy Flood: Player1 selected to decrease the mood in city C2 to Neutral"
     ],
     [
-      "Player2 selected to decrease the mood in city A1 to Neutral"
+      "Player2: Heavy Flood: Player2 selected to decrease the mood in city A1 to Neutral"
     ]
   ],
   "undo_limit": 3,

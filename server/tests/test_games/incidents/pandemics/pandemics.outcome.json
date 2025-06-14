@@ -310,7 +310,7 @@
       "Base effect: Barbarians move",
       "Barbarians cannot move - will try to spawn a new city instead",
       "Barbarians cannot spawn a new city",
-      "Player1 has to lose a total of 2 units, cards, and resources"
+      "Player1: Pandemics: Lose a total of 2 units, cards, and resources"
     ]
   ],
   "undo_limit": 1,

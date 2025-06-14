@@ -472,12 +472,12 @@
     ],
     [
       "Player1: Recruit: Pay 5 wood and 3 gold",
-      "Player1: Recruit: Recruit 4 ships in the city at C2",
-      "City at C2 became Neutral because it was activated more than once"
+      "Player1: Recruit: Recruit 4 ships in the city C2",
+      "city C2 became Neutral because it was activated more than once"
     ],
     [
       "Player1: Nationalism: Gain 1 mood token",
-      "Player1 could not store 4 food"
+      "Player1: Waste: Could not store 4 food"
     ],
     [
       "Player1: Medicine: Gain 1 gold"
@@ -489,9 +489,9 @@
       "Player1 rolled 6 (infantry, no bonus), 6 (infantry, no bonus), 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 24 and gets 2 hits against defending units.",
       "Pirates rolled 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 12 and gets 2 hits against attacking units.",
       "Player1: Pirate ship destroyed: Gain 2 gold",
-      "Player1 has to remove 2 of their attacking units",
+      "Player1: Choose Casualties: Remove 2 of their attacking units",
       "Player1 removed 2 ships",
-      "Pirates has to remove all of their defending units",
+      "Pirates: Choose Casualties: Remove all defending units",
       "Pirates removed 2 ships",
       "Attacker wins"
     ],
@@ -508,10 +508,10 @@
       "Player1 rolled 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 12 and gets 1 hits against defending units.",
       "Pirates rolled 1 (leader, no bonus) for combined combat value of 1 and gets 0 hits against attacking units.",
       "Player1: Pirate ship destroyed: Gain 1 gold",
-      "Pirates has to remove all of their defending units",
+      "Pirates: Choose Casualties: Remove all defending units",
       "Pirates removed 1 ship",
       "Attacker wins",
-      "Player1 could not store 1 gold"
+      "Player1: Waste: Could not store 1 gold"
     ],
     [
       "Player1: Pirates battle: Gain 1 culture token"

@@ -48,18 +48,17 @@ fn advance(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |e| &mut e.play_action_card,
         0,
         |game, p, _| Some(AdvanceRequest::new(possible_advances(p.get(game), game))),
-        |game, sel, _| {
-            let advance = sel.choice;
+        |game, s, _| {
+            let advance = s.choice;
             gain_advance_without_payment(
                 game,
                 advance,
-                sel.player_index,
+                s.player_index,
                 ResourcePile::culture_tokens(1),
                 false,
             );
-            let name = &sel.player_name;
-            game.add_info_log_item(&format!(
-                "{name} gained {} using the Advance action card.",
+            s.log(game, &format!(
+                "Gain {} using the Advance action card.",
                 advance.name(game)
             ));
         },
@@ -95,18 +94,17 @@ fn inspiration(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                 p.get(game),
             )))
         },
-        |game, sel, _| {
-            let advance = sel.choice;
+        |game, s, _| {
+            let advance = s.choice;
             gain_advance_without_payment(
                 game,
                 advance,
-                sel.player_index,
+                s.player_index,
                 ResourcePile::empty(),
                 false,
             );
-            let name = &sel.player_name;
-            game.add_info_log_item(&format!(
-                "{name} gained {} for free using Inspiration.",
+            s.log(game, &format!(
+                "Gain {} for free using Inspiration.",
                 advance.name(game)
             ));
         },
@@ -213,7 +211,7 @@ fn increase_mood(b: ActionCardBuilder, priority: i32, need_payment: bool) -> Act
         |game, s, _| {
             let pos = s.choice[0];
             let player = s.player_index;
-            game.add_info_log_item(&format!(
+            s.log(game, &format!(
                 "{} selected city {} to increase the mood by 1",
                 s.player_name, pos
             ));

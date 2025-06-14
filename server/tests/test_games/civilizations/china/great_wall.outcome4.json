@@ -472,11 +472,11 @@
     ],
     [
       "Player1 played the wonder card Great Wall",
-      "Player1 decided to build Great Wall in city D1"
+      "Player1: Build Wonder: Player1 decided to build Great Wall in city D1"
     ],
     [
       "Player1: Great Wall: Pay 3 food, 2 wood, 7 ore and 3 culture tokens",
-      "Player1 built Great Wall in city D1 for 3 food, 2 wood, 7 ore and 3 culture tokens",
+      "Player1: Build Wonder: Player1 built Great Wall in city D1 for 3 food, 2 wood, 7 ore and 3 culture tokens",
       "Great Wall reduced the cost of Great Wall by 2 culture tokens",
       "Great Wall allows building Great Wall in the leader city as a free action"
     ],
@@ -491,7 +491,7 @@
       "Player2 gets to draw a replacement wonder card."
     ],
     [
-      "Player2 drew the public wonder card Pyramids"
+      "Player2: Draw Wonder Card: Player2 drew the public wonder card Pyramids"
     ]
   ],
   "undo_limit": 0,

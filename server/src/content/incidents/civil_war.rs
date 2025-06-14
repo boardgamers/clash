@@ -100,7 +100,7 @@ fn civil_war(id: u8) -> Incident {
                 .next_back()
                 .expect("infantry should exist")
                 .id;
-            game.add_info_log_item(&format!(
+            s.log(game, &format!(
                 "{} killed an Infantry in {}",
                 s.player_name, position
             ));
@@ -136,9 +136,16 @@ fn revolution() -> Incident {
         "Kill a unit to avoid losing an action",
         |game, _player| can_lose_action(game),
     );
-    b = b.add_simple_incident_listener(IncidentTarget::ActivePlayer, 2, |game, player, i| {
+    b = b.add_simple_incident_listener(IncidentTarget::ActivePlayer, 2, |game, p, i| {
         if can_lose_action(game) && i.player.sacrifice == 0 {
-            lose_action(game, player.index);
+            if get_status_phase(game).is_some() {
+                p.log(game, "Lose an action for the next turn");
+                game.permanent_effects
+                    .push(PermanentEffect::CivilWarLoseAction(p.index));
+            } else {
+                p.log(game, "Lose an action for Revolution");
+                game.actions_left -= 1;
+            }
         }
     });
     b = kill_unit_for_revolution(
@@ -199,18 +206,6 @@ fn kill_unit_for_revolution(
 
 fn can_lose_action(game: &Game) -> bool {
     get_status_phase(game).is_some() || game.actions_left > 0
-}
-
-fn lose_action(game: &mut Game, player: usize) {
-    let name = game.player_name(player);
-    if get_status_phase(game).is_some() {
-        game.add_info_log_item(&format!("{name} lost an action for the next turn"));
-        game.permanent_effects
-            .push(PermanentEffect::CivilWarLoseAction(player));
-    } else {
-        game.add_info_log_item(&format!("{name} lost an action for Revolution"));
-        game.actions_left -= 1;
-    }
 }
 
 #[allow(clippy::float_cmp)]

@@ -143,7 +143,7 @@ fn use_get_advance(b: AbilityBuilder, group: AdvanceGroup) -> AbilityBuilder {
         },
         move |game, s, c| {
             let advance = s.choice;
-            game.add_info_log_item(&format!(
+            s.log(game, &format!(
                 "{} decided to gain {} for free using {}",
                 s.player_name,
                 advance.name(game),

@@ -283,9 +283,9 @@
       "Player1: Gold deposits: Gain 2 gold"
     ],
     [
-      "Player1 decreased the mood in city B2 to Angry",
-      "Player1 decreased the mood in city C2 to Angry",
-      "Player2 decreased the mood in city A1 to Neutral",
+      "Player1: Fire: Player1 decreased the mood in city B2 to Angry",
+      "Player1: Fire: Player1 decreased the mood in city C2 to Angry",
+      "Player2: Fire: Player2 decreased the mood in city A1 to Neutral",
       "Player1 completed objective Terror Regime"
     ]
   ],

@@ -258,16 +258,16 @@
   "log": [
     [
       "Player1 played the wonder card Great Statue",
-      "Player1 decided to build Great Statue in city A1"
+      "Player1: Build Wonder: Player1 decided to build Great Statue in city A1"
     ],
     [
       "Player1: Great Statue: Pay 3 food, 4 wood, 5 ore and 5 culture tokens",
-      "Player1 built Great Statue in city A1 for 3 food, 4 wood, 5 ore and 5 culture tokens",
+      "Player1: Build Wonder: Player1 built Great Statue in city A1 for 3 food, 4 wood, 5 ore and 5 culture tokens",
       "Player1 gained an objective card from the pile"
     ],
     [
       "Player1 started Great Statue",
-      "Player1 discarded Large Civilization/Draft to gain an action"
+      "Player1: Great Statue: Player1 discarded Large Civilization/Draft to gain an action"
     ]
   ],
   "undo_limit": 2,

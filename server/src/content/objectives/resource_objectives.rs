@@ -1,6 +1,5 @@
-use crate::events::EventOrigin;
 use crate::objective_card::Objective;
-use crate::resource::{ResourceType, lose_resources};
+use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 
 pub(crate) fn optimized_storage() -> Objective {
@@ -20,7 +19,6 @@ pub(crate) fn supplies(objective: &'static str, r: ResourceType) -> Objective {
         objective,
         ResourcePile::of(r, 5),
         ResourcePile::of(r, 2),
-        EventOrigin::Objective(objective.to_string()),
     )
 }
 
@@ -48,7 +46,6 @@ pub(crate) fn pay_resources(
     objective: &'static str,
     want: ResourcePile,
     pay: ResourcePile,
-    origin: EventOrigin,
 ) -> Objective {
     let suffix = if pay.gold == 0 { " (not gold)" } else { "" };
     Objective::builder(
@@ -57,11 +54,8 @@ pub(crate) fn pay_resources(
     )
     .status_phase_check(move |_game, player| player.resources.has_at_least(&want))
     .status_phase_update(move |game, player| {
-        lose_resources(game, player, pay.clone(), origin.clone());
-        game.add_info_log_item(&format!(
-            "{} paid {pay} for {objective}",
-            game.player_name(player)
-        ));
+        player.lose_resources(game, pay.clone());
+        player.log(game, &format!("Pay {pay} for {objective}",));
     })
     .build()
 }

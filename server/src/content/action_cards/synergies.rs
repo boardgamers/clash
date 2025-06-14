@@ -68,7 +68,7 @@ fn new_plans(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |game, s, _i| {
             match s.choice.len() {
                 0 => {
-                    game.add_info_log_item(&format!(
+                    s.log(game, &format!(
                         "{} selected none of the objective cards.",
                         s.player_name
                     ));
@@ -158,11 +158,11 @@ fn synergies(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                 game,
             )))
         },
-        |game, sel, i| {
-            let advance = &sel.choice;
-            game.add_info_log_item(&format!(
+        |game, s, i| {
+            let advance = &s.choice;
+            s.log(game, &format!(
                 "{} selected {} as first advance for Synergies.",
-                sel.player_name,
+                s.player_name,
                 advance.name(game)
             ));
             i.selected_advance = Some(*advance);
@@ -187,11 +187,11 @@ fn synergies(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                     .collect_vec(),
             ))
         },
-        |game, sel, i| {
-            let advance = &sel.choice;
-            game.add_info_log_item(&format!(
+        |game, s, i| {
+            let advance = &s.choice;
+            s.log(game, &format!(
                 "{} selected {} as second advance for Synergies.",
-                sel.player_name,
+                s.player_name,
                 advance.name(game)
             ));
             i.selected_advance = Some(*advance);
@@ -309,7 +309,7 @@ pub(crate) fn use_teach_us() -> Ability {
             };
             discard_action_card(game, s.player_index, id);
 
-            game.add_info_log_item(&format!("{} selected to use Teach Us.", s.player_name));
+            s.log(game, &format!("{} selected to use Teach Us.", s.player_name));
             e.selected_card = Some(id);
         },
     )
@@ -325,17 +325,17 @@ pub(crate) fn use_teach_us() -> Ability {
                 ))
             })
         },
-        |game, sel, _| {
-            let advance = sel.choice;
-            game.add_info_log_item(&format!(
+        |game, s, _| {
+            let advance = s.choice;
+            s.log(game, &format!(
                 "{} selected {} as advance for Teach Us.",
-                sel.player_name,
+                s.player_name,
                 advance.name(game)
             ));
             gain_advance_without_payment(
                 game,
                 advance,
-                sel.player_index,
+                s.player_index,
                 ResourcePile::empty(),
                 false,
             );
@@ -378,7 +378,7 @@ fn militia(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |game, s, _| {
             let position = s.choice[0];
             let city = position;
-            game.add_info_log_item(&format!(
+            s.log(game, &format!(
                 "{} selected {} as city for Militia.",
                 s.player_name, city
             ));
@@ -423,7 +423,7 @@ fn tech_trade(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         },
         |game, s, a| {
             let p = s.choice;
-            game.add_info_log_item(&format!(
+            s.log(game, &format!(
                 "{} selected {} as player for Technology Trade.",
                 s.player_name,
                 game.player_name(p)
@@ -451,17 +451,16 @@ fn tech_trade(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             }
             None
         },
-        |game, sel, _| {
-            let advance = sel.choice;
-            game.add_info_log_item(&format!(
-                "{} selected {} as advance for Technology Trade.",
-                sel.player_name,
+        |game, s, _| {
+            let advance = s.choice;
+            s.log(game, &format!(
+                "Selected {} as advance for Technology Trade.",
                 advance.name(game)
             ));
             gain_advance_without_payment(
                 game,
                 advance,
-                sel.player_index,
+                s.player_index,
                 ResourcePile::empty(),
                 false,
             );
@@ -489,11 +488,10 @@ fn new_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                 player, game,
             )))
         },
-        |game, sel, i| {
-            let advance = &sel.choice;
-            game.add_info_log_item(&format!(
-                "{} selected {} as advance for New Ideas.",
-                sel.player_name,
+        |game, s, i| {
+            let advance = &s.choice;
+            s.log(game, &format!(
+                "Selected {} as advance for New Ideas.",
                 advance.name(game)
             ));
             i.selected_advance = Some(*advance);

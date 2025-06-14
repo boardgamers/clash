@@ -517,11 +517,10 @@ pub(crate) fn choose_fighter_casualties() -> Ability {
         .add_units_request(
             |event| &mut event.combat_round_end,
             1,
-            move |game, p, r| {
-                let player = p.index;
-                let choices = r.combat.fighting_units(game, player).clone();
+            move |game, player, r| {
+                let choices = r.combat.fighting_units(game, player.index).clone();
 
-                let role = r.role(player);
+                let role = r.role(player.index);
                 let role_str = if role.is_attacker() {
                     "attacking"
                 } else {
@@ -531,12 +530,11 @@ pub(crate) fn choose_fighter_casualties() -> Ability {
                 if casualties == 0 {
                     return None;
                 }
-                let p = game.player(player);
-                if casualties == choices.len() as u8 {
-                    game.add_info_log_item(&format!(
-                        "{p} has to remove all of their {role_str} units",
+                let p = game.player(player.index);
+                if casualties == choices.len() as u8 { player.log(game, &format!(
+                        "Remove all {role_str} units",
                     ));
-                    kill_fighters(game, player, &choices, &mut r.combat);
+                    kill_fighters(game, player.index, &choices, &mut r.combat);
                     return None;
                 }
 
@@ -546,18 +544,18 @@ pub(crate) fn choose_fighter_casualties() -> Ability {
                     .all(|u| p.get_unit(*u).unit_type == first_type)
                     || !p.is_human()
                 {
-                    game.add_info_log_item(&format!(
-                        "{p} has to remove {casualties} of their {role_str} units",
+                    player.log(game, &format!(
+                        "Remove {casualties} of their {role_str} units",
                     ));
-                    kill_fighters(game, player, &choices[..casualties as usize], &mut r.combat);
+                    kill_fighters(game, player.index, &choices[..casualties as usize], &mut r.combat);
                     return None;
                 }
 
-                game.add_info_log_item(&format!(
-                    "{p} has to remove {casualties} of their {role_str} units",
+                player.log(game, &format!(
+                    "Remove {casualties} of their {role_str} units",
                 ));
                 Some(UnitsRequest::new(
-                    player,
+                    player.index,
                     choices,
                     casualties..=casualties,
                     &format!("Remove {casualties} {role_str} units"),
@@ -580,7 +578,7 @@ pub(crate) fn offer_retreat() -> Ability {
                 let c = &r.combat;
                 if c.attacker() == player && r.can_retreat() {
                     let name = game.player_name(player);
-                    game.add_info_log_item(&format!("{name} can retreat",));
+                    p.log(game, &format!("{name} can retreat",));
                     Some("Do you want to retreat?".to_string())
                 } else {
                     None
@@ -632,7 +630,7 @@ pub(crate) fn place_settler() -> Ability {
         },
         |game, s, _e| {
             let pos = s.choice[0];
-            game.add_info_log_item(&format!(
+            s.log(game, &format!(
                 "{} gained 1 free Settler Unit at {} for losing a city",
                 s.player_name, pos
             ));

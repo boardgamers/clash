@@ -242,14 +242,14 @@
       "Defenders: 2 infantry"
     ],
     [
-      "Player1 played a Tactics Card",
+      "Player1: Tactics: Player1 played a Tactics Card",
       "Player1 reveals Tactics Card Flanking",
       "Player1 rolled 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 13 and gets 2 hits against defending units.",
       "Player1 used the following combat modifiers: Flanking added 1 extra die",
       "Player2 rolled 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against attacking units.",
-      "Player1 has to remove all of their attacking units",
+      "Player1: Choose Casualties: Remove all attacking units",
       "Player1 removed 1 infantry",
-      "Player2 has to remove all of their defending units",
+      "Player2: Choose Casualties: Remove all defending units",
       "Player2 removed 2 infantry",
       "Battle ends in a draw"
     ]

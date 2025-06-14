@@ -59,20 +59,20 @@ fn dogma() -> AdvanceBuilder {
             }
             None
         },
-        |game, c, i| {
-            let verb = if c.actively_selected {
+        |game, s, i| {
+            let verb = if s.actively_selected {
                 "selected"
             } else {
                 "got"
             };
-            game.add_info_log_item(&format!(
+            s.log(game, &format!(
                 "{} {verb} {} as a reward for constructing a Temple",
-                c.player_name,
-                c.choice.name(game)
+                s.player_name,
+                s.choice.name(game)
             ));
             // the advance may trigger the Anarchy incident, which will remove Dogma
             // this needs to happen after the Dogma listener is processed
-            i.gained_advance = Some(c.choice);
+            i.gained_advance = Some(s.choice);
         },
     )
 }
@@ -168,7 +168,7 @@ fn fanaticism() -> AdvanceBuilder {
             },
             |game, s, _| {
                 let pos = s.choice[0];
-                game.add_info_log_item(&format!(
+                s.log(game, &format!(
                     "{} gained 1 free Infantry Unit at {} for Fanaticism Advance",
                     s.player_name, pos
                 ));

@@ -120,7 +120,7 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
             },
             |game, s, _| {
                 let pos = s.choice[0];
-                game.add_info_log_item(&format!(
+                s.log(game, &format!(
                     "{} reduced Mood in the city {}",
                     s.player_name, pos
                 ));
@@ -158,7 +158,7 @@ fn remove_pirate_ships(builder: IncidentBuilder) -> IncidentBuilder {
         },
         |game, s, _| {
             let pirates = get_pirates_player(game).index;
-            game.add_info_log_item(&format!(
+            s.log(game, &format!(
                 "{} removed a Pirate Ships at {}",
                 s.player_name,
                 s.choice
@@ -220,7 +220,7 @@ fn place_pirate_ship(builder: IncidentBuilder, priority: i32, blockade: bool) ->
         |game, s, _| {
             let pirate = get_pirates_player(game).index;
             let pos = s.choice[0];
-            game.add_info_log_item(&format!("Pirates spawned a Pirate Ship at {pos}"));
+            s.log(game, &format!("Pirates spawned a Pirate Ship at {pos}"));
             gain_unit(pirate, pos, UnitType::Ship, game);
         },
     )

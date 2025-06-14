@@ -345,20 +345,20 @@
       "Defenders: 1 ship"
     ],
     [
-      "Player1 played a Tactics Card"
+      "Player1: Tactics: Player1 played a Tactics Card"
     ],
     [
-      "Player2 played a Tactics Card",
+      "Player2: Tactics: Player2 played a Tactics Card",
       "Player1 reveals Tactics Card High Morale",
       "Player2 reveals Tactics Card Martyr",
-      "Player1 cannot use their tactics card using Martyr (but it is still discarded)"
+      "Player1: Martyr: Cannot use tactics card using Martyr (but it is still discarded)"
     ],
     [
-      "Player1 sacrifices a ship using Martyr"
+      "Player1: Martyr: Player1 sacrifices a ship using Martyr"
     ],
     [
-      "Player1 killed carried units: 1 elephant",
-      "Player2 sacrifices a ship using Martyr",
+      "Player1: Choose Casualties (carried units): Player1 killed carried units: 1 elephant",
+      "Player2: Martyr: Player2 sacrifices a ship using Martyr",
       "Player1 rolled 6 (infantry, no bonus) for combined combat value of 6 and gets 0 hits against defending units.",
       "Player2 rolled no dice for combined combat value of 0 and gets 0 hits against attacking units.",
       "Attacker wins"

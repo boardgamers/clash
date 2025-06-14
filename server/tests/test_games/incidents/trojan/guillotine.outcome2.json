@@ -291,16 +291,16 @@
       "A new game event has been triggered: Guillotine",
       "Base effect: Barbarians spawn",
       "Barbarians cannot spawn a new city",
-      "Barbarians cannot reinforce",
-      "Gaius Julius Caesar was killed due to the Guillotine"
+      "Player1: Guillotine: Barbarians cannot reinforce",
+      "Player1: Guillotine: Gaius Julius Caesar was killed due to the Guillotine"
     ],
     [
-      "Player1 chose to select a new leader",
-      "Player1 chose a new leader in A1"
+      "Player1: Guillotine: Player1 chose to select a new leader",
+      "Player1: Guillotine: Player1 chose a new leader in A1"
     ],
     [
-      "Player1 gained Augustus in A1",
-      "Player1 has lost leaders due to the Guillotine: Sulla"
+      "Player1: Guillotine: Player1 gained Augustus in A1",
+      "Player1: Guillotine: Lose leaders due to the Guillotine: Sulla"
     ]
   ],
   "undo_limit": 1,

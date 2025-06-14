@@ -297,7 +297,7 @@
     ],
     [
       "Player1: Sports: Pay 2 culture tokens",
-      "Player1: Sports: Increase happiness in the city at C2 by 2 steps, making it Happy using Sports"
+      "Player1: Sports: Increase happiness in the city C2 by 2 steps, making it Happy using Sports"
     ]
   ],
   "undo_limit": 0,

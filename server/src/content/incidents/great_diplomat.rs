@@ -32,7 +32,7 @@ pub(crate) fn great_diplomat() -> ActionCard {
         |e| &mut e.play_action_card,
         0,
         |game, p, _| {
-            game.add_info_log_item(&format!("{p} ended diplomatic relations.",));
+            p.log(game, "Ended diplomatic relations.");
             remove_element_by(&mut game.permanent_effects, |e| {
                 matches!(e, PermanentEffect::DiplomaticRelations(_))
             });
@@ -80,7 +80,7 @@ pub(crate) fn choose_diplomat_partner(b: IncidentBuilder) -> IncidentBuilder {
         |_, _, _| true,
         1,
         |game, s, _| {
-            game.add_info_log_item(&format!(
+            s.log(game, &format!(
                 "{} initiated diplomatic relations with {}",
                 s.player_name,
                 game.player_name(s.choice),

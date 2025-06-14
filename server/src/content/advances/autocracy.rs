@@ -88,9 +88,7 @@ fn absolute_power() -> AdvanceBuilder {
                 0,
                 |game, p, _| {
                     game.actions_left += 1;
-                    game.add_info_log_item(&format!(
-                        "{p} got an extra action using Absolute Power",
-                    ));
+                    p.log(game, "Gain an extra action using Absolute Power");
                 },
             )
         },

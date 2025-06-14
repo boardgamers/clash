@@ -266,7 +266,7 @@
       "No valid positions for Pirate Ship",
       "Player1: Flourishing Trade: Gain 1 gold",
       "Player2: Flourishing Trade: Gain 1 gold",
-      "Player2 could not store 1 gold"
+      "Player2: Waste: Could not store 1 gold"
     ]
   ],
   "undo_limit": 1,

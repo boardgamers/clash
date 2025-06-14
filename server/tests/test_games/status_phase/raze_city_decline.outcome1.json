@@ -248,10 +248,10 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 did not raze a city"
+      "Player1: Raze city: Player1 did not raze a city"
     ],
     [
-      "Player2 did not raze a city"
+      "Player2: Raze city: Player2 did not raze a city"
     ]
   ],
   "undo_limit": 2,

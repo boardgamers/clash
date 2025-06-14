@@ -97,20 +97,20 @@ fn incident(
                         "Pay to gain the Action Card",
                     )])
                 } else {
-                    game.add_info_log_item(&format!("{p} cannot afford to buy {name}",));
+                    player.log(game, &format!("Cannot afford to buy {name}"));
                     None
                 }
             },
             move |game, s, i| {
                 let pile = &s.choice[0];
                 if pile.is_empty() {
-                    game.add_info_log_item(&format!(
+                    s.log(game, &format!(
                         "{} declined to gain the Action Card",
                         s.player_name
                     ));
                     return;
                 }
-                game.add_info_log_item(&format!("{} gained {name2} for {pile}", s.player_name));
+                s.log(game, &format!("{} gained {name2} for {pile}", s.player_name));
                 game.player_mut(s.player_index).action_cards.push(card_id);
                 i.selected_player = Some(s.player_index);
             },
@@ -161,7 +161,7 @@ where
         },
         |game, s, _| {
             let name = s.choice;
-            game.add_info_log_item(&format!("{} gained {}", s.player_name, name.name(game)));
+            s.log(game, &format!("{} gained {}", s.player_name, name.name(game)));
             gain_advance_without_payment(game, name, s.player_index, ResourcePile::empty(), false);
         },
     )
@@ -192,14 +192,14 @@ fn great_artist() -> ActionCard {
                 .map(|c| c.position)
                 .collect_vec();
             if cities.is_empty() {
-                game.add_info_log_item("No cities to make happy");
+                p.log(game, "No cities to make happy");
             }
             let needed = 1..=1;
             Some(PositionRequest::new(cities, needed, "Make a city Happy"))
         },
         |game, s, _| {
             let position = s.choice[0];
-            game.add_info_log_item(&format!("{} made city {} Happy", s.player_name, position));
+            s.log(game, &format!("{} made city {} Happy", s.player_name, position));
             game.player_mut(s.player_index)
                 .get_city_mut(position)
                 .set_mood_state(MoodState::Happy);
@@ -240,7 +240,7 @@ fn great_prophet() -> ActionCard {
                 .map(|c| c.position)
                 .collect_vec();
             if cities.is_empty() {
-                game.add_info_log_item("No cities can build a Temple");
+                p.log(game, "No cities can build a Temple");
             }
             let needed = 0..=1;
             Some(PositionRequest::new(cities, needed, "Build a Temple"))
@@ -248,12 +248,12 @@ fn great_prophet() -> ActionCard {
         |game, s, a| {
             let pos = s.choice.first().copied();
             if let Some(pos) = pos {
-                game.add_info_log_item(&format!(
+                s.log(game, &format!(
                     "{} decided to build a Temple at {pos}",
                     s.player_name
                 ));
             } else {
-                game.add_info_log_item(&format!("{} declined to build a Temple", s.player_name));
+                s.log(game, &format!("{} declined to build a Temple", s.player_name));
             }
             a.selected_position = pos;
         },
@@ -272,7 +272,7 @@ fn great_prophet() -> ActionCard {
             let pile = s.choice[0].clone();
             let name = &s.player_name;
             if pile.is_empty() {
-                game.add_info_log_item(&format!("{name} declined to build the Temple"));
+                s.log(game, &format!("{name} declined to build the Temple"));
                 return;
             }
 
@@ -427,12 +427,12 @@ fn great_athlete() -> ActionCard {
         |game, s, a| {
             a.answer = Some(s.choice);
             if s.choice {
-                game.add_info_log_item(&format!(
+                s.log(game, &format!(
                     "{} decided to convert culture to mood tokens",
                     s.player_name
                 ));
             } else {
-                game.add_info_log_item(&format!(
+                s.log(game, &format!(
                     "{} decided to convert mood to culture tokens",
                     s.player_name
                 ));
@@ -468,7 +468,7 @@ fn great_athlete() -> ActionCard {
         |game, s, _| {
             let from = &s.choice[0];
             if from.is_empty() {
-                game.add_info_log_item(&format!(
+                s.log(game, &format!(
                     "{} declined to convert culture to mood",
                     s.player_name
                 ));
@@ -535,7 +535,7 @@ fn choose_great_seer_cards(b: ActionCardBuilder, player_order: usize) -> ActionC
         move |game, s, _| {
             let players = game.human_players(s.player_index);
             let target = players[player_order];
-            game.add_info_log_item(&format!(
+            s.log(game, &format!(
                 "{} chose an objective card for player {}",
                 s.player_name,
                 game.player_name(target)

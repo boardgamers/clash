@@ -706,7 +706,7 @@ pub(crate) fn choose_carried_units_to_remove() -> Ability {
                     }
                 }
 
-                game.add_info_log_item(&format!(
+                s.log(game, &format!(
                     "{} killed carried units: {}",
                     s.player_name,
                     units.into_iter().collect::<Units>().to_string(Some(game))

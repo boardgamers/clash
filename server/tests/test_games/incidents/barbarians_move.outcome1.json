@@ -315,7 +315,7 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 advanced Storage for free",
+      "Player1: Free Advance: Advanced Storage for free",
       "Player1: Storage: Gain 1 mood token"
     ],
     [
@@ -323,11 +323,11 @@
       "Base effect: Barbarians move"
     ],
     [
-      "Player2 selected Barbarian Armies that may NOT move: A3",
-      "Barbarians move from B3 to B2: 2 infantry",
+      "Player2: Dictator: Player2 selected Barbarian Armies that may NOT move: A3",
+      "Player1: Population Boom: Barbarians move from B3 to B2: 2 infantry",
       "Barbarians spawned a new Infantry unit at B3",
-      "Player2 was selected to gain 1 settler.",
-      "Player2 gained 1 settler in C1"
+      "Player1: Population Boom: Player2 was selected to gain 1 settler.",
+      "Player2: Population Boom: Player2 gained 1 settler in C1"
     ]
   ],
   "undo_limit": 1,

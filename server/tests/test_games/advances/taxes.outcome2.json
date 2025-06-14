@@ -349,7 +349,7 @@
     ],
     [
       "Player1: Taxes: Gain 1 food, 1 wood, 1 ore and 1 gold",
-      "Player1 could not store 1 food"
+      "Player1: Waste: Could not store 1 food"
     ]
   ],
   "undo_limit": 0,

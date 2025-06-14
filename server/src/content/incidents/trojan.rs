@@ -6,7 +6,7 @@ use crate::combat_listeners::CombatResult;
 use crate::content::ability::Ability;
 use crate::content::effects::{Anarchy, PermanentEffect};
 use crate::content::persistent_events::{PaymentRequest, PositionRequest, UnitTypeRequest};
-use crate::events::EventOrigin;
+use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect};
 use crate::leader::Leader;
@@ -64,17 +64,20 @@ pub(crate) fn decide_trojan_horse() -> Ability {
             },
             |game, s, c| {
                 if s.choice[0].is_empty() {
-                    game.add_info_log_item(&format!(
-                        "{} declined to activate the Trojan Horse",
-                        s.player_name
-                    ));
+                    s.log(
+                        game,
+                        &format!("{} declined to activate the Trojan Horse", s.player_name),
+                    );
                 } else {
                     let player = game.player_mut(s.player_index);
                     player.gain_event_victory_points(1_f32, &EventOrigin::Incident(42));
-                    game.add_info_log_item(&format!(
-                        "{} activated the Trojan Horse and gained 1 victory point",
-                        s.player_name
-                    ));
+                    s.log(
+                        game,
+                        &format!(
+                            "{} activated the Trojan Horse and gained 1 victory point",
+                            s.player_name
+                        ),
+                    );
                     game.permanent_effects
                         .retain(|e| !matches!(e, PermanentEffect::TrojanHorse));
                     c.modifiers.push(CombatModifier::TrojanHorse);
@@ -109,7 +112,7 @@ pub(crate) fn solar_eclipse_end_combat() -> Ability {
         .add_simple_persistent_event_listener(
             |event| &mut event.combat_round_end,
             10,
-            |game, _, r| {
+            |game, player, r| {
                 if let Some(p) = game
                     .permanent_effects
                     .iter()
@@ -119,16 +122,17 @@ pub(crate) fn solar_eclipse_end_combat() -> Ability {
                         game.permanent_effects.remove(p);
                         r.combat.retreat = CombatRetreatState::EndAfterCurrentRound;
 
-                        let p = match &r.final_result {
+                        let winner = match &r.final_result {
                             Some(CombatResult::AttackerWins) => r.combat.attacker(),
                             _ => r.combat.defender(),
                         };
-                        game.player_mut(p)
+                        game.player_mut(winner)
                             .gain_event_victory_points(1_f32, &EventOrigin::Incident(41));
-                        game.add_info_log_item(&format!(
-                            "{} gained 1 victory point for the Solar Eclipse",
-                            game.player_name(p)
-                        ));
+                        game.log_with_origin(
+                            winner,
+                            &player.origin,
+                            "Gain 1 victory point for the Solar Eclipse",
+                        );
                     }
                 }
             },
@@ -151,18 +155,24 @@ fn guillotine() -> Incident {
         3,
         |game, p, i| {
             i.is_active(IncidentTarget::ActivePlayer, p.index)
-                .then(|| should_choose_new_leader(game, p.index, &p.origin))
+                .then(|| should_choose_new_leader(game, p))
                 .flatten()
         },
         |game, s, i| {
             if s.choice {
-                game.add_info_log_item(&format!("{} chose to select a new leader", s.player_name));
+                s.log(
+                    game,
+                    &format!("{} chose to select a new leader", s.player_name),
+                );
                 i.selected_player = Some(s.player_index);
             } else {
-                game.add_info_log_item(&format!(
-                    "{} gained 2 victory points instead of choosing a new leader",
-                    s.player_name
-                ));
+                s.log(
+                    game,
+                    &format!(
+                        "{} gained 2 victory points instead of choosing a new leader",
+                        s.player_name
+                    ),
+                );
                 game.player_mut(s.player_index)
                     .gain_event_victory_points(2_f32, &s.origin);
             }
@@ -182,7 +192,10 @@ fn guillotine() -> Incident {
         },
         |game, s, i| {
             let pos = s.choice[0];
-            game.add_info_log_item(&format!("{} chose a new leader in {pos}", s.player_name));
+            s.log(
+                game,
+                &format!("{} chose a new leader in {pos}", s.player_name),
+            );
             i.selected_position = Some(pos);
         },
     )
@@ -205,42 +218,41 @@ fn guillotine() -> Incident {
         },
         |game, s, i| {
             let pos = i.selected_position.expect("position should be set");
-            game.add_info_log_item(&format!(
-                "{} gained {} in {pos}",
-                s.player_name,
-                s.choice.name(game)
-            ));
+            s.log(
+                game,
+                &format!("{} gained {} in {pos}", s.player_name, s.choice.name(game)),
+            );
             gain_unit(s.player_index, pos, s.choice, game);
         },
     )
     .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, p, _i| {
         let available_leaders = &p.get(game).available_leaders;
         if !available_leaders.is_empty() {
-            game.add_info_log_item(&format!(
-                "{p} has lost leaders due to the Guillotine: {}",
-                available_leaders.iter().map(|l| l.name(game)).join(", ")
-            ));
+            p.log(
+                game,
+                &format!(
+                    "Lose leaders due to the Guillotine: {}",
+                    available_leaders.iter().map(|l| l.name(game)).join(", ")
+                ),
+            );
             p.get_mut(game).available_leaders = vec![];
         }
     })
     .build()
 }
 
-fn should_choose_new_leader(
-    game: &mut Game,
-    player_index: usize,
-    origin: &EventOrigin,
-) -> Option<String> {
-    kill_leader(game, player_index);
+fn should_choose_new_leader(game: &mut Game, player: &EventPlayer) -> Option<String> {
+    kill_leader(game, player);
 
-    let p = game.player(player_index);
+    let p = player.get(game);
     if p.available_leaders.is_empty() || new_leader_positions(p).is_empty() {
-        game.add_info_log_item(&format!(
-            "{p} has no leaders left to choose from after the Guillotine - \
-                                gained 2 victory points",
-        ));
-        game.player_mut(player_index)
-            .gain_event_victory_points(2_f32, origin);
+        player.log(
+            game,
+            "Has no leaders left to choose from after the Guillotine - gained 2 victory points",
+        );
+        player
+            .get_mut(game)
+            .gain_event_victory_points(2_f32, &player.origin);
         None
     } else {
         Some("Do you want to choose a new leader instead of 2 victory points?".to_string())
@@ -251,8 +263,8 @@ fn new_leader_chosen(player_index: usize, i: &mut IncidentInfo) -> bool {
     i.selected_player == Some(player_index)
 }
 
-fn kill_leader(game: &mut Game, player_index: usize) {
-    let p = game.player(player_index);
+fn kill_leader(game: &mut Game, player: &EventPlayer) {
+    let p = player.get(game);
     let leader = p.units.iter().find_map(|u| {
         if let UnitType::Leader(l) = u.unit_type {
             Some((u.id, l))
@@ -261,11 +273,11 @@ fn kill_leader(game: &mut Game, player_index: usize) {
         }
     });
     if let Some((id, leader)) = leader {
-        game.add_info_log_item(&format!(
-            "{} was killed due to the Guillotine",
-            leader.name(game)
-        ));
-        kill_units(game, &[id], player_index, None);
+        player.log(
+            game,
+            &format!("{} was killed due to the Guillotine", leader.name(game)),
+        );
+        kill_units(game, &[id], player.index, None);
     }
 }
 
@@ -313,10 +325,13 @@ fn anarchy() -> Incident {
         let lost = old - player.advances.len();
         player.gain_event_victory_points(lost as f32, &p.origin);
         if lost > 0 {
-            game.add_info_log_item(&format!(
-                "{p} lost {lost} government advances due to Anarchy - \
+            p.log(
+                game,
+                &format!(
+                    "Lose {lost} government advances due to Anarchy - \
                      adding {lost} victory points",
-            ));
+                ),
+            );
 
             game.permanent_effects
                 .push(PermanentEffect::Anarchy(Anarchy {
@@ -346,10 +361,11 @@ pub(crate) fn anarchy_advance() -> Ability {
                     }
                 }) {
                     if p.index == a.player {
-                        game.add_info_log_item(&format!(
-                            "{p} gained a government advance, taking a game event token \
+                        p.log(
+                            game,
+                            "Gain a government advance, taking a game event token \
                             instead of triggering a game event (and losing 1 victory point)",
-                        ));
+                        );
                         let p = p.get_mut(game);
                         p.incident_tokens += 1;
                         p.gain_event_victory_points(-1_f32, &EventOrigin::Incident(44));

@@ -322,17 +322,17 @@
     ],
     [
       "Player1: Great Merchant: Pay 1 culture token",
-      "Player1 gained Great Merchant for 1 culture token"
+      "Player1: Great Merchant: Player1 gained Great Merchant for 1 culture token"
     ],
     [
       "Player1 played the action card Great Merchant",
-      "Player1 gained Trade Routes"
+      "Player1: Great Merchant: Player1 gained Trade Routes"
     ],
     [
-      "Player1 selected trade routes",
-      "settler at C2 traded with city at A3",
+      "Player1: Great Merchant: Player1 selected trade routes",
+      "Player1: Great Merchant: settler at C2 traded with city A3",
       "Player1: Great Merchant: Gain 1 gold",
-      "Player1 could not store 1 gold"
+      "Player1: Waste: Could not store 1 gold"
     ]
   ],
   "undo_limit": 1,

@@ -314,8 +314,8 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1: Collect: Use city at C2",
-      "City at C2 became Angry because it was activated more than once",
+      "Player1: Collect: Use city C2",
+      "city C2 became Angry because it was activated more than once",
       "Player1: Collect: Gain 1 mood token"
     ]
   ],

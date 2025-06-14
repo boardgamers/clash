@@ -222,7 +222,7 @@
   "action_log_index": 0,
   "log": [
     [
-      "Player1 choose Player2 as the new starting player"
+      "Player1: Determine First Player: Player1 choose Player2 as the new starting player"
     ],
     [
       "Age 2 has started"

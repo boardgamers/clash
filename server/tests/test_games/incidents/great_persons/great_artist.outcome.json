@@ -325,7 +325,7 @@
       "Base effect: Barbarians move",
       "Barbarians cannot move - will try to spawn a new city instead",
       "Barbarians cannot spawn a new city",
-      "Player1 cannot afford to buy Great Artist"
+      "Player1: Great Artist: Cannot afford to buy Great Artist"
     ]
   ],
   "undo_limit": 1,

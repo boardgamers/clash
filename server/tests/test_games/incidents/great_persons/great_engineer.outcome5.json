@@ -348,23 +348,23 @@
     ],
     [
       "Player1: Great Engineer: Pay 1 culture token",
-      "Player1 gained Great Engineer for 1 culture token"
+      "Player1: Great Engineer: Player1 gained Great Engineer for 1 culture token"
     ],
     [
       "Player1 played the action card Great Engineer"
     ],
     [
-      "Player1 gained Engineering",
+      "Player1: Great Engineer: Player1 gained Engineering",
       "Player1 drew a wonder card from the pile",
       "Player1 unlocked Aqueduct"
     ],
     [
-      "Great Engineer: You may build a building in a city without spending an action and without activating it."
+      "Player1: Great Engineer: Great Engineer: You may build a building in a city without spending an action and without activating it."
     ],
     [
       "Player1: Construct Building: Pay 1 food, 1 wood and 1 ore",
       "Captivi allows to replace resources with mood tokens",
-      "Player1: Construct Building: Build a Fortress in the city at C2"
+      "Player1: Construct Building: Build a Fortress in the city C2"
     ]
   ],
   "undo_limit": 4,

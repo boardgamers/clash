@@ -273,11 +273,11 @@
       "A new game event has been triggered: Vulcan"
     ],
     [
-      "Player1 selected city C2 to be destroyed",
-      "Player1 gained 2 points for the Fortress at C2",
-      "Player2 gained 2 points for the Temple at C2",
-      "Player1 gained 0 points for the Pyramids at C2",
-      "Player1 gained 2 points for the city center at C2"
+      "Player1: Vulcan: Player1 selected city C2 to be destroyed",
+      "Player1: Vulcan: Gain 2 points for the Fortress at C2",
+      "Player2: Vulcan: Gain 2 points for the Temple at C2",
+      "Player1: Vulcan: Gain 0 points for the Pyramids at C2",
+      "Player1: Vulcan: Gain 2 points for the city center at C2"
     ]
   ],
   "undo_limit": 1,

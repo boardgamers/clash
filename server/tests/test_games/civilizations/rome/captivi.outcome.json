@@ -252,7 +252,7 @@
     [
       "Player1: Construct Building: Pay 1 food, 1 wood and 1 mood token",
       "Captivi allows to replace resources with mood tokens",
-      "Player1: Construct Building: Build a Market in the city at A1"
+      "Player1: Construct Building: Build a Market in the city A1"
     ]
   ],
   "undo_limit": 0,

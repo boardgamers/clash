@@ -67,9 +67,7 @@ fn use_aqueduct(b: AbilityBuilder) -> AbilityBuilder {
         |event| &mut event.custom_action,
         0,
         |game, player, a| {
-            game.add_info_log_item(&format!(
-                "{player} uses Aqueduct to gain Sanitation as a free action",
-            ));
+            player.log(game, "Gain Sanitation as a free action");
             gain_advance_without_payment(
                 game,
                 Advance::Sanitation,
@@ -152,9 +150,9 @@ fn provinces() -> SpecialAdvanceInfo {
         |game, c, s| {
             let pile = &c.choice[0];
             if pile.is_empty() {
-                game.add_info_log_item("Provinces made the city Neutral instead of Angry");
+                c.log(game, "Provinces made the city Neutral instead of Angry");
             } else {
-                game.add_info_log_item(&format!(
+                c.log(game, &format!(
                     "Provinces made the city Happy instead of Angry for {pile}"
                 ));
             }
@@ -242,7 +240,7 @@ fn use_princeps(b: AbilityBuilder) -> AbilityBuilder {
             for c in &s.choice {
                 match c {
                     HandCard::ActionCard(card) => {
-                        game.add_info_log_item(&format!(
+                        s.log(game, &format!(
                             "{} discarded action card {} for Princeps",
                             s.player_name,
                             game.cache.get_action_card(*card).name()
@@ -250,7 +248,7 @@ fn use_princeps(b: AbilityBuilder) -> AbilityBuilder {
                         discard_action_card(game, p, *card);
                     }
                     HandCard::ObjectiveCard(card) => {
-                        game.add_info_log_item(&format!(
+                        s.log(game, &format!(
                             "{} discarded objective card {} for Princeps",
                             s.player_name,
                             game.cache.get_objective_card(*card).name()
@@ -325,15 +323,14 @@ fn proconsul() -> LeaderAbility {
                     "Pay 1 gold to gain 1 infantry",
                 )])
         },
-        |game, c, _| {
-            if !c.choice.is_empty() {
-                let p = c.player_index;
+        |game, s, _| {
+            if !s.choice.is_empty() {
+                let p = s.player_index;
                 let position = leader_position(game.player(p));
                 gain_unit(p, position, UnitType::Infantry, game);
-                game.add_info_log_item(&format!(
-                    "{} used Proconsul to gain 1 infantry in {position} for {}",
-                    game.player_name(p),
-                    c.choice[0]
+                s.log(game, &format!(
+                    "Use Proconsul to gain 1 infantry in {position} for {}",
+                    s.choice[0]
                 ));
             }
         },
@@ -412,7 +409,7 @@ fn add_barbarian_control(builder: LeaderAbilityBuilder) -> LeaderAbilityBuilder 
         },
         |game, s, movable| {
             let may_not_move = &s.choice;
-            game.add_info_log_item(&format!(
+            s.log(game, &format!(
                 "{} selected Barbarian Armies that may NOT move: {}",
                 s.player_name,
                 may_not_move

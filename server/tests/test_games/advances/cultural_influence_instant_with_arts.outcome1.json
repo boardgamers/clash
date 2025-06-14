@@ -245,7 +245,7 @@
     ],
     [
       "Player2: Arts: Pay 1 culture token",
-      "Player2 tried to influence culture the Fortress in the city at C2 by Player1 with the city at C1 using Arts",
+      "Player2 tried to influence culture the Fortress in the city at C2 by Player1 with the city C1 using Arts",
       "Cultural influence succeeded (rolled 6)"
     ]
   ],

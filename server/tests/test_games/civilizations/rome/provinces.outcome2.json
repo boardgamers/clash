@@ -363,13 +363,13 @@
       "Player1 unlocked Provinces"
     ],
     [
-      "Player1 marched 1 infantry from C2 to B2 and captured Player2's city at B2",
+      "Player1 marched 1 infantry from C2 to B2 and captured Player2's city B2",
       "Player1: Combat: Gain 2 gold"
     ],
     [
       "Player1: Provinces: Pay 1 culture token",
-      "Provinces made the city Happy instead of Angry for 1 culture token",
-      "Player2 gained 1 free Settler Unit at C1 for losing a city"
+      "Player1: Provinces: Provinces made the city Happy instead of Angry for 1 culture token",
+      "Player2: Place Settler: Player2 gained 1 free Settler Unit at C1 for losing a city"
     ]
   ],
   "undo_limit": 0,
