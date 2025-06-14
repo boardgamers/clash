@@ -98,15 +98,30 @@ impl ActionLogAction {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
-pub enum ActionLogItem {
-    GainResources {
-        resources: ResourcePile,
-        origin: EventOrigin,
-    },
-    LoseResources {
-        resources: ResourcePile,
-        origin: EventOrigin,
-    },
+pub enum ActionLogEntry {
+    GainResources { resources: ResourcePile },
+    LoseResources { resources: ResourcePile },
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
+pub struct ActionLogItem {
+    #[serde(flatten)]
+    entry: ActionLogEntry,
+    origin: EventOrigin,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    modifiers: Vec<EventOrigin>,
+}
+
+impl ActionLogItem {
+    #[must_use]
+    pub fn new(entry: ActionLogEntry, origin: EventOrigin, modifiers: Vec<EventOrigin>) -> Self {
+        Self {
+            entry,
+            origin,
+            modifiers,
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize)]

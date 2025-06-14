@@ -406,6 +406,7 @@ pub(crate) fn remove_advance(game: &mut Game, advance: Advance, player_index: us
             player_index,
             advance_bonus.resources(),
             EventOrigin::Advance(advance),
+            vec![]
         );
     }
     game.player_mut(player_index).advances.remove(advance);

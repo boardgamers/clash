@@ -181,7 +181,7 @@ pub(crate) fn execute_collect(
         return Err("City can't be activated".to_string());
     }
     activate_city(city.position, game);
-    gain_resources_with_modifiers(game, player_index, i.total.clone(), origin, &i.modifiers);
+    gain_resources_with_modifiers(game, player_index, i.total.clone(), origin, i.modifiers.clone());
 
     let key = Advance::Husbandry.id();
     if i.info.info.contains_key(&key) {

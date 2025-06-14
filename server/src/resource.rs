@@ -1,7 +1,7 @@
 use crate::content::persistent_events::PaymentRequest;
 use crate::events::EventOrigin;
 use crate::game::Game;
-use crate::log::{ActionLogItem, add_action_log_item};
+use crate::log::{ActionLogItem, add_action_log_item, ActionLogEntry};
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::resource_pile::ResourcePile;
@@ -81,7 +81,7 @@ pub(crate) fn gain_resources(
     resources: ResourcePile,
     origin: EventOrigin,
 ) {
-    gain_resources_with_modifiers(game, player, resources, origin, &[]);
+    gain_resources_with_modifiers(game, player, resources, origin, vec![]);
 }
 
 pub(crate) fn gain_resources_with_modifiers(
@@ -89,7 +89,7 @@ pub(crate) fn gain_resources_with_modifiers(
     player: usize,
     resources: ResourcePile,
     origin: EventOrigin,
-    modifiers: &[EventOrigin],
+    modifiers: Vec<EventOrigin>,
 ) {
     if modifiers.is_empty() {
         game.log_with_origin(player, &origin, &format!("Gain {resources}"));
@@ -109,7 +109,11 @@ pub(crate) fn gain_resources_with_modifiers(
 
     p.resources += resources.clone();
     apply_resource_limit(p);
-    add_action_log_item(game, ActionLogItem::GainResources { resources, origin });
+    add_action_log_item(game, ActionLogItem::new(
+        ActionLogEntry::GainResources { resources: resources.clone() },
+        origin,
+        modifiers,
+    ));
 }
 
 pub(crate) fn apply_resource_limit(p: &mut Player) {
@@ -137,6 +141,7 @@ pub(crate) fn lose_resources(
     player: usize,
     resources: ResourcePile,
     origin: EventOrigin,
+    modifiers: Vec<EventOrigin>,
 ) {
     let p = game.player_mut(player);
     assert!(
@@ -145,7 +150,11 @@ pub(crate) fn lose_resources(
         p.resources
     );
     p.resources -= resources.clone();
-    add_action_log_item(game, ActionLogItem::LoseResources { resources, origin });
+    add_action_log_item(game, ActionLogItem::new(
+        ActionLogEntry::LoseResources { resources: resources.clone() },
+        origin.clone(),
+        modifiers,
+    ));
 }
 
 pub(crate) fn pay_cost(
@@ -172,7 +181,7 @@ pub(crate) fn pay_cost(
 }
 
 fn log_payment(game: &mut Game, player: usize, payment: &ResourcePile, cost: &PaymentOptions) {
-    lose_resources(game, player, payment.clone(), cost.origin.clone());
+    lose_resources(game, player, payment.clone(), cost.origin.clone(), cost.modifiers.clone());
     if cost.modifiers.is_empty() {
         game.log_with_origin(player, &cost.origin, &format!("Pay {payment}"));
     } else {

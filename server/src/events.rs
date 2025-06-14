@@ -94,7 +94,7 @@ impl EventPlayer {
     }
 
     pub fn lose_resources(&self, game: &mut Game, resources: ResourcePile) {
-        lose_resources(game, self.index, resources, self.origin.clone());
+        lose_resources(game, self.index, resources, self.origin.clone(), vec![]);
     }
 
     #[must_use]
