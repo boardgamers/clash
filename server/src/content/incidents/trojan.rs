@@ -64,10 +64,7 @@ pub(crate) fn decide_trojan_horse() -> Ability {
             },
             |game, s, c| {
                 if s.choice[0].is_empty() {
-                    s.log(
-                        game,
-                        "Declined to activate the Trojan Horse",
-                    );
+                    s.log(game, "Declined to activate the Trojan Horse");
                 } else {
                     let player = game.player_mut(s.player_index);
                     player.gain_event_victory_points(1_f32, &EventOrigin::Incident(42));
@@ -157,10 +154,7 @@ fn guillotine() -> Incident {
         },
         |game, s, i| {
             if s.choice {
-                s.log(
-                    game,
-                    "Chose to select a new leader",
-                );
+                s.log(game, "Chose to select a new leader");
                 i.selected_player = Some(s.player_index);
             } else {
                 s.log(
@@ -186,10 +180,7 @@ fn guillotine() -> Incident {
         },
         |game, s, i| {
             let pos = s.choice[0];
-            s.log(
-                game,
-                &format!("Chose a new leader in {pos}"),
-            );
+            s.log(game, &format!("Chose a new leader in {pos}"));
             i.selected_position = Some(pos);
         },
     )
@@ -212,10 +203,7 @@ fn guillotine() -> Incident {
         },
         |game, s, i| {
             let pos = i.selected_position.expect("position should be set");
-            s.log(
-                game,
-                &format!("Gain {} in {pos}", s.choice.name(game)),
-            );
+            s.log(game, &format!("Gain {} in {pos}", s.choice.name(game)));
             gain_unit(s.player_index, pos, s.choice, game);
         },
     )

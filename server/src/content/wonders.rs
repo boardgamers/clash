@@ -102,10 +102,13 @@ fn use_great_statue(b: AbilityBuilder) -> AbilityBuilder {
             let HandCard::ObjectiveCard(card) = s.choice[0] else {
                 panic!("not an objective card")
             };
-            s.log(game, &format!(
-                "Discarded {} to gain an action",
-                game.cache.get_objective_card(card).name()
-            ));
+            s.log(
+                game,
+                &format!(
+                    "Discarded {} to gain an action",
+                    game.cache.get_objective_card(card).name()
+                ),
+            );
             discard_objective_card(game, s.player_index, card);
             game.actions_left += 1;
         },
@@ -146,10 +149,13 @@ pub(crate) fn use_great_mausoleum() -> Ability {
                         .action_cards_discarded
                         .pop()
                         .expect("action card not found in discard pile");
-                    s.log(game, &format!(
-                        "Draw {} from the discard pile",
-                        game.cache.get_action_card(card).name()
-                    ));
+                    s.log(
+                        game,
+                        &format!(
+                            "Draw {} from the discard pile",
+                            game.cache.get_action_card(card).name()
+                        ),
+                    );
                     game.player_mut(s.player_index).action_cards.push(card);
                 } else {
                     do_gain_action_card_from_pile(game, s.player_index);
@@ -176,10 +182,13 @@ pub(crate) fn use_great_mausoleum() -> Ability {
                         .incidents_discarded
                         .pop()
                         .expect("action card not found in discard pile");
-                    s.log(game, &format!(
-                        "Drew {} from the discard pile",
-                        game.cache.get_incident(card).name
-                    ));
+                    s.log(
+                        game,
+                        &format!(
+                            "Drew {} from the discard pile",
+                            game.cache.get_incident(card).name
+                        ),
+                    );
                     i.incident_id = card;
                 } else {
                     i.incident_id = draw_and_discard_incident_card_from_pile(game, s.player_index);
@@ -246,9 +255,10 @@ fn use_great_lighthouse(b: AbilityBuilder) -> AbilityBuilder {
             let spawn = &s.choice[0];
             let city_pos = great_lighthouse_city(game.player(s.player_index)).position;
             gain_unit(s.player_index, *spawn, UnitType::Ship, game);
-            s.log(game, &format!(
-                "Activated the city {city_pos} to place a ship on {spawn} for free",
-            ));
+            s.log(
+                game,
+                &format!("Activated the city {city_pos} to place a ship on {spawn} for free",),
+            );
             activate_city(city_pos, game);
         },
     )
@@ -291,10 +301,7 @@ fn use_great_library(b: AbilityBuilder) -> AbilityBuilder {
         },
         |game, s, _| {
             let advance = s.choice;
-            s.log(game, &format!(
-                "Use {} for the turn",
-                advance.name(game)
-            ));
+            s.log(game, &format!("Use {} for the turn", advance.name(game)));
             game.player_mut(s.player_index).great_library_advance = Some(advance);
             init_great_library(game, s.player_index);
         },
@@ -365,9 +372,12 @@ fn colosseum() -> WonderInfo {
             }
 
             if !apply_colosseum(e, p.index, false) {
-                p.log(game, &format!(
-                    "Combat value is already at maximum, cannot increase combat value for {p}",
-                ));
+                p.log(
+                    game,
+                    &format!(
+                        "Combat value is already at maximum, cannot increase combat value for {p}",
+                    ),
+                );
                 return None;
             }
 

@@ -706,10 +706,13 @@ pub(crate) fn choose_carried_units_to_remove() -> Ability {
                     }
                 }
 
-                s.log(game, &format!(
-                    "Killed carried units: {}",
-                    units.into_iter().collect::<Units>().to_string(Some(game))
-                ));
+                s.log(
+                    game,
+                    &format!(
+                        "Killed carried units: {}",
+                        units.into_iter().collect::<Units>().to_string(Some(game))
+                    ),
+                );
             }
             kill_units_without_event(game, &s.choice, s.player_index, e.killer);
         },

@@ -10,7 +10,7 @@ use crate::player::{CostTrigger, Player};
 use crate::player_events::ActionInfo;
 use crate::playing_actions::{PlayingActionType, base_or_custom_available};
 use crate::position::Position;
-use crate::resource::gain_resources;
+use crate::resource::gain_resources_with_modifiers;
 use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -166,7 +166,7 @@ pub(crate) fn execute_collect(
     game.log_with_origin(
         player_index,
         &origin,
-        &format!("Use city {}", c.city_position,),
+        &format!("Use city {}", c.city_position),
     );
 
     let mut i = get_total_collection(
@@ -181,7 +181,7 @@ pub(crate) fn execute_collect(
         return Err("City can't be activated".to_string());
     }
     activate_city(city.position, game);
-    gain_resources(game, player_index, i.total.clone(), origin);
+    gain_resources_with_modifiers(game, player_index, i.total.clone(), origin, &i.modifiers);
 
     let key = Advance::Husbandry.id();
     if i.info.info.contains_key(&key) {

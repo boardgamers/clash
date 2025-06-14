@@ -80,10 +80,13 @@ pub(crate) fn choose_diplomat_partner(b: IncidentBuilder) -> IncidentBuilder {
         |_, _, _| true,
         1,
         |game, s, _| {
-            s.log(game, &format!(
-                "Initiated diplomatic relations with {}",
-                game.player_name(s.choice),
-            ));
+            s.log(
+                game,
+                &format!(
+                    "Initiated diplomatic relations with {}",
+                    game.player_name(s.choice),
+                ),
+            );
             game.permanent_effects
                 .push(PermanentEffect::DiplomaticRelations(
                     DiplomaticRelations::new(s.player_index, s.choice),

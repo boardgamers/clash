@@ -104,16 +104,10 @@ fn incident(
             move |game, s, i| {
                 let pile = &s.choice[0];
                 if pile.is_empty() {
-                    s.log(
-                        game,
-                        "Declined to gain the Action Card",
-                    );
+                    s.log(game, "Declined to gain the Action Card");
                     return;
                 }
-                s.log(
-                    game,
-                    &format!("Gain {name2} for {pile}"),
-                );
+                s.log(game, &format!("Gain {name2} for {pile}"));
                 game.player_mut(s.player_index).action_cards.push(card_id);
                 i.selected_player = Some(s.player_index);
             },
@@ -253,10 +247,7 @@ fn great_prophet() -> ActionCard {
             if let Some(pos) = pos {
                 s.log(game, &format!("Decided to build a Temple at {pos}",));
             } else {
-                s.log(
-                    game,
-                    "Declined to build a Temple",
-                );
+                s.log(game, "Declined to build a Temple");
             }
             a.selected_position = pos;
         },
@@ -274,7 +265,7 @@ fn great_prophet() -> ActionCard {
         |game, s, a| {
             let pile = s.choice[0].clone();
             if pile.is_empty() {
-                s.log(game, &format!("Declined to build the Temple"));
+                s.log(game, &"Declined to build the Temple".to_string());
                 return;
             }
 

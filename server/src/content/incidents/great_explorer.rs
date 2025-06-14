@@ -6,7 +6,7 @@ use crate::content::incidents::great_persons::{
     great_person_action_card, great_person_description,
 };
 use crate::content::persistent_events::{PaymentRequest, PositionRequest};
-use crate::events::{EventOrigin, check_event_origin, EventPlayer};
+use crate::events::{EventOrigin, EventPlayer, check_event_origin};
 use crate::explore::move_to_unexplored_block;
 use crate::game::Game;
 use crate::map::{BlockPosition, block_has_player_city, block_tiles, get_map_setup};
@@ -41,19 +41,11 @@ pub(crate) fn great_explorer() -> ActionCard {
         .add_position_request(
             |e| &mut e.play_action_card,
             8,
-            |game, p, a| {
-                Some(place_city_request(
-                    game,
-                    p,
-                    a.selected_positions.clone(),
-                ))
-            },
+            |game, p, a| Some(place_city_request(game, p, a.selected_positions.clone())),
             |game, s, a| {
                 let pos = s.choice.first().copied();
                 if let Some(pos) = pos {
-                    s.log(game, &format!(
-                        "Decided to build a city {pos}",
-                    ));
+                    s.log(game, &format!("Decided to build a city {pos}",));
                 } else {
                     s.log(game, "decided not to build a city");
                 }
@@ -72,10 +64,7 @@ pub(crate) fn great_explorer() -> ActionCard {
             },
             |game, s, a| {
                 let pos = a.selected_position.expect("position not found");
-                s.log(game, &format!(
-                    "Built a city {pos} for {}",
-                     s.choice[0]
-                ));
+                s.log(game, &format!("Built a city {pos} for {}", s.choice[0]));
                 found_city(game, s.player_index, pos);
             },
         )
@@ -111,7 +100,10 @@ fn place_city_request(
     p: &EventPlayer,
     positions: Vec<Position>,
 ) -> PositionRequest {
-    if !p.get(game).can_afford(&city_cost(p.get(game), check_event_origin())) {
+    if !p
+        .get(game)
+        .can_afford(&city_cost(p.get(game), check_event_origin()))
+    {
         p.log(game, "Player cannot afford to build a city");
     }
 

@@ -57,10 +57,10 @@ fn advance(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                 ResourcePile::culture_tokens(1),
                 false,
             );
-            s.log(game, &format!(
-                "Gain {} using the Advance action card.",
-                advance.name(game)
-            ));
+            s.log(
+                game,
+                &format!("Gain {} using the Advance action card.", advance.name(game)),
+            );
         },
     )
     .build()
@@ -103,10 +103,10 @@ fn inspiration(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                 ResourcePile::empty(),
                 false,
             );
-            s.log(game, &format!(
-                "Gain {} for free using Inspiration.",
-                advance.name(game)
-            ));
+            s.log(
+                game,
+                &format!("Gain {} for free using Inspiration.", advance.name(game)),
+            );
         },
     )
     .build()
@@ -211,9 +211,10 @@ fn increase_mood(b: ActionCardBuilder, priority: i32, need_payment: bool) -> Act
         |game, s, _| {
             let pos = s.choice[0];
             let player = s.player_index;
-            s.log(game, &format!(
-                "Selected city {pos} to increase the mood by 1",
-            ));
+            s.log(
+                game,
+                &format!("Selected city {pos} to increase the mood by 1",),
+            );
             game.player_mut(player)
                 .get_city_mut(pos)
                 .increase_mood_state();

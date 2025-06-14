@@ -51,7 +51,8 @@ fn city_development(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             game.permanent_effects
                 .push(PermanentEffect::Construct(ConstructEffect::CityDevelopment));
             game.actions_left += 1; // to offset the action spent for building
-            p.log(game,
+            p.log(
+                game,
                 "You may build a building in a city without \
                 spending an action and without paying for it.",
             );
@@ -77,7 +78,8 @@ fn production_focus(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             game.permanent_effects
                 .push(PermanentEffect::Collect(CollectEffect::ProductionFocus));
             game.actions_left += 1; // to offset the action spent for collecting
-            p.log(game,
+            p.log(
+                game,
                 "Production Focus: You may collect multiple times from the same tile.",
             );
         },
@@ -179,9 +181,7 @@ fn explorer(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                     s.log(game, "Decided not to gain a free settler");
                 } else {
                     let pos = s.choice[0];
-                    s.log(game, &format!(
-                        "Decided to gain a free settler at {pos}",
-                    ));
+                    s.log(game, &format!("Decided to gain a free settler at {pos}",));
                     gain_unit(s.player_index, pos, UnitType::Settler, game);
                 }
             },

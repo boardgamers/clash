@@ -142,10 +142,10 @@ fn use_get_advance(b: AbilityBuilder, group: AdvanceGroup) -> AbilityBuilder {
         },
         move |game, s, c| {
             let advance = s.choice;
-            s.log(game, &format!(
-                "Decided to gain {} for free",
-                advance.name(game),
-            ));
+            s.log(
+                game,
+                &format!("Decided to gain {} for free", advance.name(game),),
+            );
             gain_advance_without_payment(game, advance, s.player_index, c.payment.clone(), true);
         },
     )

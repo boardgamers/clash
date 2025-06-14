@@ -531,9 +531,8 @@ pub(crate) fn choose_fighter_casualties() -> Ability {
                     return None;
                 }
                 let p = game.player(player.index);
-                if casualties == choices.len() as u8 { player.log(game, &format!(
-                        "Remove all {role_str} units",
-                    ));
+                if casualties == choices.len() as u8 {
+                    player.log(game, &format!("Remove all {role_str} units",));
                     kill_fighters(game, player.index, &choices, &mut r.combat);
                     return None;
                 }
@@ -544,16 +543,23 @@ pub(crate) fn choose_fighter_casualties() -> Ability {
                     .all(|u| p.get_unit(*u).unit_type == first_type)
                     || !p.is_human()
                 {
-                    player.log(game, &format!(
-                        "Remove {casualties} of their {role_str} units",
-                    ));
-                    kill_fighters(game, player.index, &choices[..casualties as usize], &mut r.combat);
+                    player.log(
+                        game,
+                        &format!("Remove {casualties} of their {role_str} units",),
+                    );
+                    kill_fighters(
+                        game,
+                        player.index,
+                        &choices[..casualties as usize],
+                        &mut r.combat,
+                    );
                     return None;
                 }
 
-                player.log(game, &format!(
-                    "Remove {casualties} of their {role_str} units",
-                ));
+                player.log(
+                    game,
+                    &format!("Remove {casualties} of their {role_str} units",),
+                );
                 Some(UnitsRequest::new(
                     player.index,
                     choices,
@@ -630,9 +636,10 @@ pub(crate) fn place_settler() -> Ability {
         },
         |game, s, _e| {
             let pos = s.choice[0];
-            s.log(game, &format!(
-                "Gain 1 free Settler Unit at {pos} for losing a city",
-            ));
+            s.log(
+                game,
+                &format!("Gain 1 free Settler Unit at {pos} for losing a city",),
+            );
             gain_unit(s.player_index, pos, UnitType::Settler, game);
         },
     )

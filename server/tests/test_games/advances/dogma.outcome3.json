@@ -387,7 +387,7 @@
       "Player2: Waste: Could not store 2 ideas"
     ],
     [
-      "Player2: Construct Building: Pay 1 wood and 1 ore",
+      "Player2: Construct Building: Pay 1 wood and 1 ore with State Religion",
       "State Religion reduced the food cost to 0",
       "Player2: Construct Building: Build a Temple in the city C1"
     ],

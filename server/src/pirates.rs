@@ -120,9 +120,7 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
             },
             |game, s, _| {
                 let pos = s.choice[0];
-                s.log(game, &format!(
-                    "Reduced Mood in the city {pos}",
-                ));
+                s.log(game, &format!("Reduced Mood in the city {pos}",));
                 game.player_mut(s.player_index)
                     .get_city_mut(pos)
                     .decrease_mood_state();
@@ -157,13 +155,16 @@ fn remove_pirate_ships(builder: IncidentBuilder) -> IncidentBuilder {
         },
         |game, s, _| {
             let pirates = get_pirates_player(game).index;
-            s.log(game, &format!(
-                "Removed a Pirate Ships at {}",
-                s.choice
-                    .iter()
-                    .map(|u| game.player(pirates).get_unit(*u).position.to_string())
-                    .join(", ")
-            ));
+            s.log(
+                game,
+                &format!(
+                    "Removed a Pirate Ships at {}",
+                    s.choice
+                        .iter()
+                        .map(|u| game.player(pirates).get_unit(*u).position.to_string())
+                        .join(", ")
+                ),
+            );
             for unit in &s.choice {
                 remove_unit(pirates, *unit, game);
             }

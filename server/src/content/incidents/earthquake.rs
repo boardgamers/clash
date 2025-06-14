@@ -50,10 +50,7 @@ fn volcano() -> Incident {
         |game, s, _| {
             let pos = s.choice[0];
             let player_index = s.player_index;
-            s.log(
-                game,
-                &format!("Selected city {pos} to be destroyed"),
-            );
+            s.log(game, &format!("Selected city {pos} to be destroyed"));
             let city = game.player(player_index).get_city(pos);
             let buildings = city.pieces.buildings(None);
             let wonders = city.pieces.wonders.iter().copied().collect_vec();

@@ -101,10 +101,13 @@ fn expansion() -> SpecialAdvanceInfo {
                 ..MoveState::default()
             });
 
-            player.log(game, &format!(
-                "Expansion allows to move the settlers at {}",
-                settlers.iter().map(ToString::to_string).join(", ")
-            ));
+            player.log(
+                game,
+                &format!(
+                    "Expansion allows to move the settlers at {}",
+                    settlers.iter().map(ToString::to_string).join(", ")
+                ),
+            );
         },
     )
     .build()
@@ -246,10 +249,10 @@ fn use_imperial_army(b: AbilityBuilder) -> AbilityBuilder {
                 }
             }
 
-            s.log(game, &format!(
-                "Convert {} using Imperial Army",
-                names.join(", ")
-            ));
+            s.log(
+                game,
+                &format!("Convert {} using Imperial Army", names.join(", ")),
+            );
         },
     )
 }

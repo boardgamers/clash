@@ -46,7 +46,8 @@ pub(crate) fn great_engineer() -> ActionCard {
                 game.permanent_effects
                     .push(Construct(ConstructEffect::GreatEngineer));
                 game.actions_left += 1; // to offset the action spent for building
-                s.log(game,
+                s.log(
+                    game,
                     "Great Engineer: You may build a building in a city without \
                     spending an action and without activating it.",
                 );

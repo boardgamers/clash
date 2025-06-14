@@ -155,16 +155,19 @@ pub(crate) fn kill_incident_units(game: &mut Game, s: &SelectedChoice<Vec<u32>>)
     }
 
     let p = game.player(s.player_index);
-    s.log(game, &format!(
-        "{p} killed units: {}",
-        s.choice
-            .iter()
-            .map(|u| {
-                let unit = p.get_unit(*u);
-                format!("{} at {}", unit.unit_type.name(game), unit.position)
-            })
-            .join(", ")
-    ));
+    s.log(
+        game,
+        &format!(
+            "{p} killed units: {}",
+            s.choice
+                .iter()
+                .map(|u| {
+                    let unit = p.get_unit(*u);
+                    format!("{} at {}", unit.unit_type.name(game), unit.position)
+                })
+                .join(", ")
+        ),
+    );
     kill_units(game, &s.choice, s.player_index, None);
 }
 

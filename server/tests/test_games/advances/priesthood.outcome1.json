@@ -405,7 +405,7 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player2: Advance: Pay nothing",
+      "Player2: Advance: Pay nothing with Priesthood",
       "Priesthood reduced the cost to 0",
       "Player2: Advance: Gain Math",
       "Player2: Math: Gain 1 culture token",

@@ -99,10 +99,7 @@ fn ship_construction() -> SpecialAdvanceInfo {
             if !unload_units.is_empty() {
                 s.log(
                     game,
-                    &format!(
-                        "Unloaded {} from ships",
-                        unload_units.to_string(None)
-                    ),
+                    &format!("Unloaded {} from ships", unload_units.to_string(None)),
                 );
             }
             s.log(
@@ -226,16 +223,10 @@ pub(crate) fn lose_raid_resource() -> Ability {
             p.event_info
                 .remove(RAID)
                 .is_some()
-                .then_some(vec![PaymentRequest::mandatory(
-                    c,
-                    "Pay 1 resource",
-                )])
+                .then_some(vec![PaymentRequest::mandatory(c, "Pay 1 resource")])
         },
         |game, s, ()| {
-            s.log(
-                game,
-                &format!("Lose {}", s.choice[0]),
-            );
+            s.log(game, &format!("Lose {}", s.choice[0]));
         },
     )
     .build()
@@ -290,10 +281,7 @@ fn runes() -> SpecialAdvanceInfo {
                     "Converted an Obelisk to a Rune Stone for 1 objective point",
                 );
             } else {
-                s.log(
-                    game,
-                    "Did not convert an Obelisk to a Rune Stone",
-                );
+                s.log(game, "Did not convert an Obelisk to a Rune Stone");
             }
         },
     )
@@ -483,10 +471,7 @@ fn use_legendary_explorer(b: AbilityBuilder) -> AbilityBuilder {
                 },
             );
 
-            p.log(
-                game,
-                &format!("Place an explorer token at {position}"),
-            );
+            p.log(game, &format!("Place an explorer token at {position}"));
         },
     )
 }

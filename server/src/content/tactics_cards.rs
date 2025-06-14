@@ -338,7 +338,7 @@ pub(crate) fn scout(id: u8) -> TacticsCard {
                         } else {
                             p.log(
                                 game,
-                                &format!("Cannot use - opponent didn't play a tactics card",),
+                                "Cannot use - opponent didn't play a tactics card",
                             );
                         }
                     },
@@ -424,10 +424,7 @@ pub(crate) fn archers(id: u8) -> TacticsCard {
             if roll >= 5 {
                 p.log(game, &format!("Rolled a {roll} and scored a hit"));
             } else {
-                p.log(
-                    game,
-                    &format!("Rolled a {roll} and did not score a hit"),
-                );
+                p.log(game, &format!("Rolled a {roll} and did not score a hit"));
                 return None;
             }
 

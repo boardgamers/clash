@@ -183,10 +183,13 @@ pub(crate) fn select_player_to_gain_settler(mut b: IncidentBuilder) -> IncidentB
         |p, _, _| p.available_units().settlers > 0 && !p.cities.is_empty(),
         12,
         |game, c, i| {
-            c.log(game, &format!(
-                "{} was selected to gain 1 settler.",
-                game.player_name(c.choice)
-            ));
+            c.log(
+                game,
+                &format!(
+                    "{} was selected to gain 1 settler.",
+                    game.player_name(c.choice)
+                ),
+            );
             i.selected_player = Some(c.choice);
         },
     );

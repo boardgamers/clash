@@ -250,7 +250,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1: Construct Building: Pay 1 food, 1 wood and 1 mood token",
+      "Player1: Construct Building: Pay 1 food, 1 wood and 1 mood token with Captivi",
       "Captivi allows to replace resources with mood tokens",
       "Player1: Construct Building: Build a Market in the city A1"
     ]

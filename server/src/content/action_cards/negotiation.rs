@@ -65,10 +65,10 @@ fn negotiations(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                     relations: DiplomaticRelations::new(s.player_index, s.choice),
                     remaining_turns: 2,
                 }));
-            s.log(game, &format!(
-                "Started negotiations with {}",
-                game.player_name(s.choice)
-            ));
+            s.log(
+                game,
+                &format!("Started negotiations with {}", game.player_name(s.choice)),
+            );
         },
     )
     .tactics_card(tactics_card)
@@ -102,9 +102,7 @@ pub(crate) fn use_negotiations() -> Ability {
                         game.permanent_effects.remove(*i);
                     }
                     for _ in remain {
-                        p.log(game, &format!(
-                            "May not attack {partner_name} this turn.",
-                        ));
+                        p.log(game, &format!("May not attack {partner_name} this turn.",));
                     }
                 }
             },
@@ -135,7 +133,7 @@ fn leadership(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |e| &mut e.play_action_card,
         0,
         |game, p, _| {
-            p.log(game, &format!("Used Leadership to gain an action."));
+            p.log(game, "Used Leadership to gain an action.");
             game.actions_left += 1;
         },
     )
@@ -164,10 +162,10 @@ fn assassination(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |game, s, _| {
             game.permanent_effects
                 .push(PermanentEffect::AssassinationLoseAction(s.choice));
-            s.log(game, &format!(
-                "Assassinated {}",
-                game.player_name(s.choice),
-            ));
+            s.log(
+                game,
+                &format!("Assassinated {}", game.player_name(s.choice),),
+            );
         },
     )
     .build()
@@ -227,7 +225,10 @@ fn overproduction(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             game.permanent_effects
                 .push(PermanentEffect::Collect(CollectEffect::Overproduction));
             game.actions_left += 1; // to offset the action spent for collecting
-            p.log(game, "Can use Overproduction to collect from 2 additional tiles.");
+            p.log(
+                game,
+                "Can use Overproduction to collect from 2 additional tiles.",
+            );
         },
     )
     .build()

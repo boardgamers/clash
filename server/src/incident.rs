@@ -775,9 +775,7 @@ fn exhausted_land(builder: IncidentBuilder) -> IncidentBuilder {
         },
         |game, s, _| {
             let pos = s.choice[0];
-            s.log(game, &format!(
-                "Exhausted the land in position {pos}",
-            ));
+            s.log(game, &format!("Exhausted the land in position {pos}",));
             let t = game.map.tiles.get_mut(&pos).expect("tile should exist");
             *t = Terrain::Exhausted(Box::new(t.clone()));
         },
@@ -808,13 +806,15 @@ pub(crate) fn decrease_mod_and_log(
                     .decrease_mood_state();
                 let mood_state = &game.player(s.player_index).get_city(pos).mood_state;
                 if s.actively_selected {
-                    s.log(game, &format!(
-                        "Selected to decrease the mood in city {pos} to {mood_state}",
-                    ));
+                    s.log(
+                        game,
+                        &format!("Selected to decrease the mood in city {pos} to {mood_state}",),
+                    );
                 } else {
-                    s.log(game, &format!(
-                        "Decreased the mood in city {pos} to {mood_state}",
-                    ));
+                    s.log(
+                        game,
+                        &format!("Decreased the mood in city {pos} to {mood_state}",),
+                    );
                 }
             }
             MoodModifier::MakeAngry => {

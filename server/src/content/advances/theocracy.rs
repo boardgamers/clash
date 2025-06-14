@@ -60,10 +60,13 @@ fn dogma() -> AdvanceBuilder {
             None
         },
         |game, s, i| {
-            s.log(game, &format!(
-                "Gain {} as a reward for constructing a Temple",
-                s.choice.name(game)
-            ));
+            s.log(
+                game,
+                &format!(
+                    "Gain {} as a reward for constructing a Temple",
+                    s.choice.name(game)
+                ),
+            );
             // the advance may trigger the Anarchy incident, which will remove Dogma
             // this needs to happen after the Dogma listener is processed
             i.gained_advance = Some(s.choice);

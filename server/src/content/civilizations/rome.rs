@@ -152,9 +152,10 @@ fn provinces() -> SpecialAdvanceInfo {
             if pile.is_empty() {
                 c.log(game, "Provinces made the city Neutral instead of Angry");
             } else {
-                c.log(game, &format!(
-                    "Provinces made the city Happy instead of Angry for {pile}"
-                ));
+                c.log(
+                    game,
+                    &format!("Provinces made the city Happy instead of Angry for {pile}"),
+                );
             }
 
             game.player_mut(s.attacker.player)
@@ -240,17 +241,23 @@ fn use_princeps(b: AbilityBuilder) -> AbilityBuilder {
             for c in &s.choice {
                 match c {
                     HandCard::ActionCard(card) => {
-                        s.log(game, &format!(
-                            "Discard action card {}",
-                            game.cache.get_action_card(*card).name()
-                        ));
+                        s.log(
+                            game,
+                            &format!(
+                                "Discard action card {}",
+                                game.cache.get_action_card(*card).name()
+                            ),
+                        );
                         discard_action_card(game, p, *card);
                     }
                     HandCard::ObjectiveCard(card) => {
-                        s.log(game, &format!(
-                            "Discard objective card {}",
-                            game.cache.get_objective_card(*card).name()
-                        ));
+                        s.log(
+                            game,
+                            &format!(
+                                "Discard objective card {}",
+                                game.cache.get_objective_card(*card).name()
+                            ),
+                        );
                         discard_objective_card(game, p, *card);
                     }
                     HandCard::Wonder(_) => panic!("Invalid hand card type"),
@@ -326,10 +333,13 @@ fn proconsul() -> LeaderAbility {
                 let p = s.player_index;
                 let position = leader_position(game.player(p));
                 gain_unit(p, position, UnitType::Infantry, game);
-                s.log(game, &format!(
-                    "Use Proconsul to gain 1 infantry in {position} for {}",
-                    s.choice[0]
-                ));
+                s.log(
+                    game,
+                    &format!(
+                        "Use Proconsul to gain 1 infantry in {position} for {}",
+                        s.choice[0]
+                    ),
+                );
             }
         },
     )
@@ -407,14 +417,17 @@ fn add_barbarian_control(builder: LeaderAbilityBuilder) -> LeaderAbilityBuilder 
         },
         |game, s, movable| {
             let may_not_move = &s.choice;
-            s.log(game, &format!(
-                "Selected Barbarian Armies that may NOT move: {}",
-                may_not_move
-                    .iter()
-                    .map(ToString::to_string)
-                    .collect_vec()
-                    .join(", ")
-            ));
+            s.log(
+                game,
+                &format!(
+                    "Selected Barbarian Armies that may NOT move: {}",
+                    may_not_move
+                        .iter()
+                        .map(ToString::to_string)
+                        .collect_vec()
+                        .join(", ")
+                ),
+            );
             for pos in may_not_move {
                 remove_element(movable, pos);
             }

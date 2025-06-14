@@ -15,11 +15,7 @@ pub(crate) fn optimized_storage() -> Objective {
 }
 
 pub(crate) fn supplies(objective: &'static str, r: ResourceType) -> Objective {
-    pay_resources(
-        objective,
-        ResourcePile::of(r, 5),
-        ResourcePile::of(r, 2),
-    )
+    pay_resources(objective, ResourcePile::of(r, 5), ResourcePile::of(r, 2))
 }
 
 pub(crate) fn eureka() -> Objective {

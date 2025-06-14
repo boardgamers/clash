@@ -237,10 +237,10 @@ pub(crate) fn draw_wonder_card_handler() -> Ability {
             |game, s, _| {
                 if s.choice {
                     let name = *find_public_wonder(game).expect("public wonder card not found");
-                    s.log(game, &format!(
-                        "Drew the public wonder card {}",
-                        name.name()
-                    ));
+                    s.log(
+                        game,
+                        &format!("Drew the public wonder card {}", name.name()),
+                    );
                     gain_wonder(game, s.player_index, name);
                     remove_public_wonder(game);
                 } else {
@@ -423,10 +423,10 @@ pub(crate) fn build_wonder_handler() -> Ability {
             |game, s, i| {
                 let position = s.choice[0];
                 i.selected_position = Some(position);
-                s.log(game, &format!(
-                    "Decided to build {} in city {position}",
-                    i.wonder.name(),
-                ));
+                s.log(
+                    game,
+                    &format!("Decided to build {} in city {position}", i.wonder.name(),),
+                );
             },
         )
         .add_payment_request_listener(
@@ -460,11 +460,10 @@ pub(crate) fn build_wonder_handler() -> Ability {
                 let pos = i.selected_position.expect("city not selected");
                 let name = i.wonder;
 
-                s.log(game, &format!(
-                    "Built {} in city {pos} for {}",
-                    name.name(),
-                    s.choice[0],
-                ));
+                s.log(
+                    game,
+                    &format!("Built {} in city {pos} for {}", name.name(), s.choice[0],),
+                );
                 i.cost.info.execute(game);
                 current_log_action_mut(game).wonder_built = Some(name);
                 remove_element(&mut game.player_mut(s.player_index).wonder_cards, &name);

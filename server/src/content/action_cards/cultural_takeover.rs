@@ -65,10 +65,10 @@ pub(crate) fn cultural_takeover(id: u8, tactics_card: TacticsCardFactory) -> Act
             None
         },
         |game, s, a| {
-            s.log(game, &format!(
-                "Selected unit to gain: {}",
-                s.choice.non_leader_name(),
-            ));
+            s.log(
+                game,
+                &format!("Selected unit to gain: {}", s.choice.non_leader_name(),),
+            );
             gain_unit(
                 s.player_index,
                 a.selected_position.expect("unit position"),
@@ -85,9 +85,7 @@ pub(crate) fn cultural_takeover(id: u8, tactics_card: TacticsCardFactory) -> Act
                 // skip this the second time where we only select a unit type to add
                 game.permanent_effects
                     .push(PermanentEffect::CulturalTakeover);
-                p.log(game,
-                    "You may influence Barbarian cities of size 1.",
-                );
+                p.log(game, "You may influence Barbarian cities of size 1.");
             }
         },
     )

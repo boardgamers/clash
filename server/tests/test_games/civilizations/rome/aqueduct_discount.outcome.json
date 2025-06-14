@@ -250,7 +250,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1: Advance: Pay nothing",
+      "Player1: Advance: Pay nothing with Aqueduct",
       "Aqueduct reduced the cost to 0",
       "Player1: Advance: Gain Sanitation",
       "Player1: Sanitation: Gain 1 mood token"

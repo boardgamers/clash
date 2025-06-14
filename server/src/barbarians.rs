@@ -170,10 +170,13 @@ where
         move |game, s, v| {
             let position = get_barbarian_city2(v).expect("barbarians should exist");
             let units = Units::from_iter(vec![s.choice]);
-            s.log(game, &format!(
-                "Barbarians reinforced with {} at {position}",
-                units.to_string(None)
-            ));
+            s.log(
+                game,
+                &format!(
+                    "Barbarians reinforced with {} at {position}",
+                    units.to_string(None)
+                ),
+            );
             gain_unit(get_barbarians_player(game).index, position, s.choice, game);
         },
     )
@@ -297,10 +300,13 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
                     let units: Vec<u32> = ids.iter().map(|u| u.id).collect();
                     state.moved_units.extend(units.iter());
                     let unit_types = ids.iter().map(|u| u.unit_type).collect::<Units>();
-                    s.log(game, &format!(
-                        "Barbarians move from {from} to {to}: {}",
-                        unit_types.to_string(None)
-                    ));
+                    s.log(
+                        game,
+                        &format!(
+                            "Barbarians move from {from} to {to}: {}",
+                            unit_types.to_string(None)
+                        ),
+                    );
                     move_with_possible_combat(
                         game,
                         get_barbarians_player(game).index,
@@ -431,9 +437,10 @@ fn add_barbarians_city(builder: IncidentBuilder, event_name: &'static str) -> In
         },
         move |game, s, _| {
             let pos = s.choice[0];
-            s.log(game, &format!(
-                "Barbarians spawned a new city and a new Infantry unit at {pos}"
-            ));
+            s.log(
+                game,
+                &format!("Barbarians spawned a new city and a new Infantry unit at {pos}"),
+            );
             let b = get_barbarians_player(game).index;
             let p = game.player_mut(b);
             p.cities.push(City::new(b, pos));
