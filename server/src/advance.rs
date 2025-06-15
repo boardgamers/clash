@@ -7,9 +7,9 @@ use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::incident::trigger_incident;
 use crate::payment::PaymentOptions;
-use crate::player::{Player, gain_resources};
+use crate::player::Player;
 use crate::player_events::OnAdvanceInfo;
-use crate::resource::ResourceType;
+use crate::resource::{ResourceType, gain_resources, lose_resources};
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceRequirement};
 use crate::{ability_initializer::AbilityInitializerSetup, resource_pile::ResourcePile};
 use Bonus::*;
@@ -255,7 +255,7 @@ impl Bonus {
 pub fn do_advance(game: &mut Game, advance: Advance, player_index: usize) {
     let info = advance.info(game).clone();
     let bonus = info.bonus.clone();
-    info.listeners.one_time_init(game, player_index);
+    info.listeners.once_init(game, player_index);
 
     if let Some(special_advance) = find_special_advance(advance, game, player_index) {
         unlock_special_advance(game, special_advance, player_index);
@@ -266,7 +266,7 @@ pub fn do_advance(game: &mut Game, advance: Advance, player_index: usize) {
             game,
             player_index,
             advance_bonus.resources(),
-            |name, pile| format!("{name} gained {pile} as advance bonus"),
+            EventOrigin::Advance(advance),
         );
     }
     let player = &mut game.players[player_index];
@@ -336,16 +336,15 @@ pub(crate) fn execute_advance_action(
     if !game.player(player_index).can_advance(advance, game) {
         return Err("Cannot advance".to_string());
     }
-    game.add_info_log_item(&format!(
-        "{} paid {} to get the {} advance",
-        game.player_name(player_index),
-        a.payment,
-        a.advance.name(game)
-    ));
 
     game.player(player_index)
         .advance_cost(advance, game, game.execute_cost_trigger())
         .pay(game, &a.payment);
+    game.log_with_origin(
+        player_index,
+        &advance_event_origin(),
+        &format!("Gain {}", a.advance.name(game)),
+    );
     gain_advance_without_payment(game, advance, player_index, a.payment.clone(), true);
     Ok(())
 }
@@ -393,7 +392,7 @@ pub(crate) fn on_advance(game: &mut Game, player_index: usize, info: OnAdvanceIn
 pub(crate) fn remove_advance(game: &mut Game, advance: Advance, player_index: usize) {
     let info = advance.info(game);
     let bonus = info.bonus.clone();
-    info.listeners.clone().undo(game, player_index);
+    info.listeners.clone().once_deinit(game, player_index);
 
     if let Some(special_advance) =
         find_non_government_special_advance(advance, game.player(player_index))
@@ -401,9 +400,14 @@ pub(crate) fn remove_advance(game: &mut Game, advance: Advance, player_index: us
         undo_unlock_special_advance(game, special_advance, player_index);
     }
 
-    let player = &mut game.players[player_index];
     if let Some(advance_bonus) = &bonus {
-        player.lose_resources(advance_bonus.resources());
+        lose_resources(
+            game,
+            player_index,
+            advance_bonus.resources(),
+            EventOrigin::Advance(advance),
+            vec![],
+        );
     }
     game.player_mut(player_index).advances.remove(advance);
 }
@@ -418,7 +422,7 @@ fn unlock_special_advance(game: &mut Game, special_advance: SpecialAdvance, play
         .info(game)
         .listeners
         .clone()
-        .one_time_init(game, player_index);
+        .once_init(game, player_index);
     game.players[player_index]
         .special_advances
         .insert(special_advance);
@@ -433,7 +437,7 @@ pub(crate) fn undo_unlock_special_advance(
         .info(game)
         .listeners
         .clone()
-        .undo(game, player_index);
+        .once_deinit(game, player_index);
     game.players[player_index]
         .special_advances
         .remove(special_advance);

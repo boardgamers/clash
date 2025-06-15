@@ -33,11 +33,13 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         },
         |game, s, a| {
             let p = s.choice;
-            game.add_info_log_item(&format!(
-                "{} decided to looked at all Wonder, Action, and Objective cards of {}",
-                s.player_name,
-                game.player_name(p)
-            ));
+            s.log(
+                game,
+                &format!(
+                    "Decided to looked at all Wonder, Action, and Objective cards of {}",
+                    game.player_name(p)
+                ),
+            );
             a.selected_player = Some(p);
         },
     )

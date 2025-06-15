@@ -190,7 +190,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -198,7 +198,19 @@
                         "action": "CivilLiberties"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 3
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Civil Liberties"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -211,7 +223,7 @@
   "log": [
     [
       "Player1 started Civil Liberties",
-      "Player1 gained 3 mood tokens for Civil Liberties"
+      "Player1: Civil Liberties: Gain 3 mood tokens"
     ]
   ],
   "undo_limit": 0,

@@ -286,7 +286,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": "EndTurn"
@@ -328,6 +328,18 @@
                     "Eureka!",
                     "Sea Blockade",
                     "Government"
+                  ],
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "ideas": 2
+                        }
+                      },
+                      "origin": {
+                        "Objective": "Eureka!"
+                      }
+                    }
                   ]
                 }
               ]
@@ -351,7 +363,7 @@
       "Player1 completed objective Religious Fervor",
       "Player1 completed objective City Planner",
       "Player1 completed objective Eureka!",
-      "Player1 paid 2 ideas for Eureka!",
+      "Player1: Eureka!: Pay 2 ideas for Eureka!",
       "Player1 completed objective Sea Blockade",
       "Player1 completed objective Government"
     ]

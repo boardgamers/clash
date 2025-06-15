@@ -48,20 +48,19 @@ fn advance(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |e| &mut e.play_action_card,
         0,
         |game, p, _| Some(AdvanceRequest::new(possible_advances(p.get(game), game))),
-        |game, sel, _| {
-            let advance = sel.choice;
+        |game, s, _| {
+            let advance = s.choice;
             gain_advance_without_payment(
                 game,
                 advance,
-                sel.player_index,
+                s.player_index,
                 ResourcePile::culture_tokens(1),
                 false,
             );
-            let name = &sel.player_name;
-            game.add_info_log_item(&format!(
-                "{name} gained {} using the Advance action card.",
-                advance.name(game)
-            ));
+            s.log(
+                game,
+                &format!("Gain {} using the Advance action card.", advance.name(game)),
+            );
         },
     )
     .build()
@@ -95,20 +94,19 @@ fn inspiration(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                 p.get(game),
             )))
         },
-        |game, sel, _| {
-            let advance = sel.choice;
+        |game, s, _| {
+            let advance = s.choice;
             gain_advance_without_payment(
                 game,
                 advance,
-                sel.player_index,
+                s.player_index,
                 ResourcePile::empty(),
                 false,
             );
-            let name = &sel.player_name;
-            game.add_info_log_item(&format!(
-                "{name} gained {} for free using Inspiration.",
-                advance.name(game)
-            ));
+            s.log(
+                game,
+                &format!("Gain {} for free using Inspiration.", advance.name(game)),
+            );
         },
     )
     .build()
@@ -183,13 +181,8 @@ fn hero_general(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                 "Pay 1 mood token to increase the mood in a city by 1",
             )])
         },
-        |game, s, a| {
-            let name = &s.player_name;
-            let cost = &s.choice[0];
-            if cost.is_empty() {
-                game.add_info_log_item(&format!("{name} did not pay {cost}"));
-            } else {
-                game.add_info_log_item(&format!("{name} paid {cost}"));
+        |_game, s, a| {
+            if !s.choice[0].is_empty() {
                 a.answer = Some(true);
             }
         },
@@ -218,10 +211,10 @@ fn increase_mood(b: ActionCardBuilder, priority: i32, need_payment: bool) -> Act
         |game, s, _| {
             let pos = s.choice[0];
             let player = s.player_index;
-            game.add_info_log_item(&format!(
-                "{} selected city {} to increase the mood by 1",
-                s.player_name, pos
-            ));
+            s.log(
+                game,
+                &format!("Selected city {pos} to increase the mood by 1",),
+            );
             game.player_mut(player)
                 .get_city_mut(pos)
                 .increase_mood_state();

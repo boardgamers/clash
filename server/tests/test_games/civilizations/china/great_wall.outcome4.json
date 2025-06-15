@@ -373,7 +373,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -384,7 +384,19 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "food": 2
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -406,7 +418,27 @@
                       ]
                     }
                   },
-                  "wonder_built": "GreatWall"
+                  "wonder_built": "GreatWall",
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "food": 3,
+                          "wood": 2,
+                          "ore": 7,
+                          "culture_tokens": 3
+                        }
+                      },
+                      "origin": {
+                        "Wonder": "GreatWall"
+                      },
+                      "modifiers": [
+                        {
+                          "LeaderAbility": "Great Wall"
+                        }
+                      ]
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -421,7 +453,7 @@
           "players": [
             {
               "index": 1,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Response": {
@@ -439,15 +471,17 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 paid 2 food to get the Engineering advance",
+      "Player1: Advance: Pay 2 food",
+      "Player1: Advance: Gain Engineering",
       "Player1 gained wonder card Great Wall from Player2 using Great Wall"
     ],
     [
       "Player1 played the wonder card Great Wall",
-      "Player1 decided to build Great Wall in city D1"
+      "Player1: Build Wonder: Decided to build Great Wall in city D1"
     ],
     [
-      "Player1 built Great Wall in city D1 for 3 food, 2 wood, 7 ore and 3 culture tokens",
+      "Player1: Great Wall: Pay 3 food, 2 wood, 7 ore and 3 culture tokens with Great Wall",
+      "Player1: Build Wonder: Built Great Wall in city D1 for 3 food, 2 wood, 7 ore and 3 culture tokens",
       "Great Wall reduced the cost of Great Wall by 2 culture tokens",
       "Great Wall allows building Great Wall in the leader city as a free action"
     ],
@@ -462,7 +496,7 @@
       "Player2 gets to draw a replacement wonder card."
     ],
     [
-      "Player2 drew the public wonder card Pyramids"
+      "Player2: Draw Wonder Card: Drew the public wonder card Pyramids"
     ]
   ],
   "undo_limit": 0,

@@ -234,7 +234,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -270,7 +270,7 @@
       "Player1 started Imperial Army"
     ],
     [
-      "Player1 converted infantry at C2, settler at B4 using Imperial Army"
+      "Player1: Imperial Army: Convert infantry at C2, settler at B4 using Imperial Army"
     ]
   ],
   "undo_limit": 0,

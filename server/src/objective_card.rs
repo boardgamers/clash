@@ -7,9 +7,9 @@ use crate::content::ability::Ability;
 use crate::content::effects::PermanentEffect;
 use crate::content::incidents::great_persons::find_great_seer;
 use crate::content::persistent_events::{HandCardsRequest, PersistentEventType};
-use crate::events::EventOrigin;
+use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
-use crate::log::current_action_log_item;
+use crate::log::current_log_action_mut;
 use crate::player::Player;
 use crate::utils::{remove_element, remove_element_by};
 use itertools::Itertools;
@@ -18,7 +18,7 @@ use std::sync::Arc;
 
 type StatusPhaseCheck = Arc<dyn Fn(&Game, &Player) -> bool + Sync + Send>;
 
-type StatusPhaseUpdate = Arc<dyn Fn(&mut Game, usize) + Sync + Send>;
+type StatusPhaseUpdate = Arc<dyn Fn(&mut Game, &EventPlayer) + Sync + Send>;
 
 #[derive(Clone)]
 pub struct Objective {
@@ -85,7 +85,7 @@ impl ObjectiveBuilder {
     }
 
     #[must_use]
-    pub fn status_phase_check<F>(mut self, f: F) -> Self
+    pub(crate) fn status_phase_check<F>(mut self, f: F) -> Self
     where
         F: Fn(&Game, &Player) -> bool + 'static + Sync + Send,
     {
@@ -94,22 +94,22 @@ impl ObjectiveBuilder {
     }
 
     #[must_use]
-    pub fn status_phase_update<F>(mut self, f: F) -> Self
+    pub(crate) fn status_phase_update<F>(mut self, f: F) -> Self
     where
-        F: Fn(&mut Game, usize) + 'static + Sync + Send,
+        F: Fn(&mut Game, &EventPlayer) + 'static + Sync + Send,
     {
         self.status_phase_update = Some(Arc::new(f));
         self
     }
 
     #[must_use]
-    pub fn contradicting_status_phase_objective(mut self, name: &str) -> Self {
+    pub(crate) fn contradicting_status_phase_objective(mut self, name: &str) -> Self {
         self.contradicting_status_phase_objective = Some(name.to_string());
         self
     }
 
     #[must_use]
-    pub fn build(self) -> Objective {
+    pub(crate) fn build(self) -> Objective {
         Objective {
             name: self.name,
             description: self.description,
@@ -272,14 +272,21 @@ pub(crate) fn complete_objective_card(game: &mut Game, player: usize, id: u8, ob
         .find(|o| o.name == objective)
         .and_then(|o| o.status_phase_update.clone())
     {
-        s(game, player);
+        s(
+            game,
+            &EventPlayer::new(
+                player,
+                game.player_name(player),
+                EventOrigin::Objective(objective.clone()),
+            ),
+        );
     }
 
     discard_objective_card(game, player, id);
     game.player_mut(player)
         .completed_objectives
         .push(objective.clone());
-    let o = &mut current_action_log_item(game).completed_objectives;
+    let o = &mut current_log_action_mut(game).completed_objectives;
     o.push(objective);
     o.dedup(); // in redo we add it again
 }

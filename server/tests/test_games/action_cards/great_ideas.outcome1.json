@@ -188,7 +188,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Movement": {
@@ -227,14 +227,38 @@
                       11
                     ],
                     "city_mood": "Angry"
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "gold": 1
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
                     "Playing": {
                       "ActionCard": 11
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "ideas": 2
+                        }
+                      },
+                      "origin": {
+                        "CivilCard": 11
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -246,13 +270,13 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 marched 2 settlers, 2 infantry, 1 cavalry and 1 elephant from C2 to C1 and captured Player2's city at C1",
-      "Player1 gained 1 gold for capturing a city",
-      "Player1 could not store 1 gold"
+      "Player1 marched 2 settlers, 2 infantry, 1 cavalry and 1 elephant from C2 to C1 and captured Player2's city C1",
+      "Player1: Combat: Gain 1 gold",
+      "Player1: Waste: Could not store 1 gold"
     ],
     [
       "Player1 played the action card Great Ideas",
-      "Player1 gained 2 ideas for Great Ideas"
+      "Player1: Great Ideas: Gain 2 ideas"
     ]
   ],
   "undo_limit": 0,

@@ -200,7 +200,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -217,7 +217,39 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "CivilCard": 39
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Fishing"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -233,12 +265,12 @@
       "Player1 has to pay 1 culture token for Technology Trade"
     ],
     [
-      "Player1 paid 1 culture token for Technology Trade",
-      "Player1 selected Player2 as player for Technology Trade.",
-      "Player1 selected Storage as advance for Technology Trade.",
-      "Player1 gained 1 mood token as advance bonus",
-      "Player2 selected Fishing as advance for Technology Trade.",
-      "Player2 gained 1 mood token as advance bonus"
+      "Player1: Technology Trade: Pay 1 culture token",
+      "Player1: Technology Trade: Selected Player2 as trade partner",
+      "Player1: Technology Trade: Selected Storage as advance for Technology Trade.",
+      "Player1: Storage: Gain 1 mood token",
+      "Player2: Technology Trade: Selected Fishing as advance for Technology Trade.",
+      "Player2: Fishing: Gain 1 mood token"
     ]
   ],
   "undo_limit": 0,

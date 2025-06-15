@@ -171,8 +171,8 @@ fn setup_local_game() -> Game {
 
     let player_index1 = 0;
     let player_index2 = 1;
-    game.players[player_index1].gain_resources(ResourcePile::new(0, 5, 5, 5, 5, 9, 9));
-    game.players[player_index2].gain_resources(ResourcePile::new(0, 5, 5, 5, 5, 9, 9));
+    game.players[player_index1].resources += ResourcePile::new(0, 5, 5, 5, 5, 9, 9);
+    game.players[player_index2].resources += ResourcePile::new(0, 5, 5, 5, 5, 9, 9);
     add_city(&mut game, player_index1, "A1");
     add_city(&mut game, player_index1, "C2");
     add_city(&mut game, player_index1, "B1");
@@ -315,7 +315,7 @@ fn setup_local_game() -> Game {
     do_advance(&mut game, Advance::Voting, player_index1);
     do_advance(&mut game, Advance::FreeEconomy, player_index1);
     do_advance(&mut game, Advance::Storage, player_index1);
-    game.players[player_index1].gain_resources(ResourcePile::food(5));
+    game.players[player_index1].resources += ResourcePile::food(5);
 
     game
 }

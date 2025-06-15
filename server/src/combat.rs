@@ -9,10 +9,11 @@ use crate::combat_listeners::{
 use crate::combat_roll::{CombatHits, CombatRoundStats};
 use crate::combat_stats;
 use crate::combat_stats::{CombatStats, active_defenders, new_combat_stats};
+use crate::content::ability::combat_event_origin;
 use crate::content::persistent_events::PersistentEventType;
+use crate::events::EventPlayer;
 use crate::game::Game;
 use crate::movement::{MoveUnits, MovementRestriction, move_units, stop_current_move};
-use crate::player::gain_resources;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::SpecialAdvance;
@@ -352,64 +353,41 @@ pub fn can_remove_after_combat(on_water: bool, unit_type: &UnitType) -> bool {
     }
 }
 
-pub(crate) fn conquer_city(
-    game: &mut Game,
-    position: Position,
-    new_player_index: usize,
-    old_player_index: usize,
-) {
-    let Some(mut city) = game.players[old_player_index].take_city(position) else {
+pub(crate) fn conquer_city(game: &mut Game, position: Position, attacker: usize, defender: usize) {
+    let p = EventPlayer::new(attacker, game.player_name(attacker), combat_event_origin());
+    let Some(mut city) = game.players[defender].take_city(position) else {
         panic!("player should have this city")
     };
     game.add_to_last_log_item(&format!(
-        " and captured {}'s city at {position}",
-        game.player_name(old_player_index)
+        " and captured {}'s city {position}",
+        game.player_name(defender)
     ));
-    let attacker_is_human = game.player(new_player_index).is_human();
-    let size = city.mood_modified_size(&game.players[new_player_index]);
+    let attacker_is_human = p.get(game).is_human();
+    let size = city.mood_modified_size(&game.players[attacker]);
     if attacker_is_human {
-        gain_resources(
-            game,
-            new_player_index,
-            ResourcePile::gold(size as u8),
-            |name, pile| format!("{name} gained {pile} for capturing a city",),
-        );
+        p.gain_resources(game, ResourcePile::gold(size as u8));
     }
-    let take_over = game.player(new_player_index).is_city_available();
+    let take_over = game.player(attacker).is_city_available();
 
     if take_over {
-        city.player_index = new_player_index;
+        city.player_index = attacker;
         city.set_mood_state(Angry);
         if attacker_is_human {
-            take_over_city(game, &mut city, old_player_index, new_player_index);
+            take_over_city(game, &mut city, &p, defender);
         }
-        game.players[new_player_index].cities.push(city);
+        game.players[attacker].cities.push(city);
     } else {
-        gain_resources(
-            game,
-            new_player_index,
-            ResourcePile::gold(city.size() as u8),
-            |name, pile| format!("{name} gained {pile} for razing the city",),
-        );
-        city.raze(game, old_player_index);
+        p.gain_resources(game, ResourcePile::gold(city.size() as u8));
+        city.raze(game, defender);
     }
 }
 
-fn take_over_city(
-    game: &mut Game,
-    city: &mut City,
-    old_player_index: usize,
-    new_player_index: usize,
-) {
+fn take_over_city(game: &mut Game, city: &mut City, attacker: &EventPlayer, defender: usize) {
     for wonder in city.pieces.wonders.clone() {
-        deinit_wonder(game, old_player_index, wonder);
-        init_wonder(game, new_player_index, wonder);
-        game.player_mut(old_player_index)
-            .wonders_owned
-            .remove(wonder);
-        game.player_mut(new_player_index)
-            .wonders_owned
-            .insert(wonder);
+        deinit_wonder(game, defender, wonder);
+        init_wonder(game, attacker.index, wonder);
+        game.player_mut(defender).wonders_owned.remove(wonder);
+        attacker.get_mut(game).wonders_owned.insert(wonder);
     }
 
     for (building, owner) in city.pieces.building_owners() {
@@ -419,19 +397,14 @@ fn take_over_city(
         let Some(owner) = owner else {
             continue;
         };
-        if owner != old_player_index {
+        if owner != defender {
             continue;
         }
-        if game.players[new_player_index].is_building_available(building, game) {
-            city.pieces.set_building(building, new_player_index);
+        if attacker.get(game).is_building_available(building, game) {
+            city.pieces.set_building(building, attacker.index);
         } else {
             remove_building(city, building);
-            gain_resources(
-                game,
-                new_player_index,
-                ResourcePile::gold(1),
-                |name, pile| format!("{name} gained {pile} for razing a {building}",),
-            );
+            attacker.gain_resources(game, ResourcePile::gold(1));
         }
     }
 }
@@ -602,7 +575,7 @@ pub mod tests {
     use crate::civilization::Civilization;
     use crate::construct::construct;
     use crate::game::{GameContext, GameOptions, GameState};
-    use crate::log::{ActionLogAge, ActionLogItem, ActionLogPlayer, ActionLogRound};
+    use crate::log::{ActionLogAction, ActionLogAge, ActionLogPlayer, ActionLogRound};
     use crate::movement::MovementAction;
     use crate::utils::tests::FloatEq;
     use crate::wonder::{Wonder, construct_wonder, wonders_owned_points};
@@ -620,8 +593,8 @@ pub mod tests {
         let mut age = ActionLogAge::new();
         let mut round = ActionLogRound::new();
         let mut log = ActionLogPlayer::new(0);
-        log.items
-            .push(ActionLogItem::new(Action::Movement(MovementAction::Stop)));
+        log.actions
+            .push(ActionLogAction::new(Action::Movement(MovementAction::Stop)));
         round.players.push(log);
         age.rounds.push(round);
         Game {

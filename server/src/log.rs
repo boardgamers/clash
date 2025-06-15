@@ -1,7 +1,9 @@
 use crate::player::Player;
 
 use crate::combat_stats::CombatStats;
+use crate::events::EventOrigin;
 use crate::playing_actions::PlayingActionType;
+use crate::resource_pile::ResourcePile;
 use crate::wonder::Wonder;
 use crate::{action::Action, game::Game};
 use json_patch::PatchOperation;
@@ -36,31 +38,33 @@ impl ActionLogRound {
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct ActionLogPlayer {
     pub index: usize,
-    pub items: Vec<ActionLogItem>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub actions: Vec<ActionLogAction>,
 }
 
 impl ActionLogPlayer {
     #[must_use]
     pub(crate) fn new(player: usize) -> Self {
         Self {
-            items: Vec::new(),
+            actions: Vec::new(),
             index: player,
         }
     }
 
-    pub(crate) fn item(&self, game: &Game) -> &ActionLogItem {
-        &self.items[game.action_log_index]
+    pub(crate) fn action(&self, game: &Game) -> &ActionLogAction {
+        &self.actions[game.action_log_index]
     }
 
     pub(crate) fn clear_undo(&mut self) {
-        for item in &mut self.items {
+        for item in &mut self.actions {
             item.undo.clear();
         }
     }
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
-pub struct ActionLogItem {
+pub struct ActionLogAction {
     pub action: Action,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
@@ -74,9 +78,12 @@ pub struct ActionLogItem {
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub completed_objectives: Vec<String>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub items: Vec<ActionLogItem>,
 }
 
-impl ActionLogItem {
+impl ActionLogAction {
     #[must_use]
     pub fn new(action: Action) -> Self {
         Self {
@@ -85,6 +92,34 @@ impl ActionLogItem {
             combat_stats: None,
             completed_objectives: Vec::new(),
             wonder_built: None,
+            items: Vec::new(),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
+pub enum ActionLogEntry {
+    GainResources { resources: ResourcePile },
+    LoseResources { resources: ResourcePile },
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
+pub struct ActionLogItem {
+    #[serde(flatten)]
+    entry: ActionLogEntry,
+    origin: EventOrigin,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    modifiers: Vec<EventOrigin>,
+}
+
+impl ActionLogItem {
+    #[must_use]
+    pub fn new(entry: ActionLogEntry, origin: EventOrigin, modifiers: Vec<EventOrigin>) -> Self {
+        Self {
+            entry,
+            origin,
+            modifiers,
         }
     }
 }
@@ -104,7 +139,7 @@ pub(crate) fn linear_action_log(game: &Game) -> Vec<Action> {
                 round
                     .players
                     .iter()
-                    .flat_map(|player| player.items.iter().map(|item| item.action.clone()))
+                    .flat_map(|player| player.actions.iter().map(|item| item.action.clone()))
             })
         })
         .collect()
@@ -129,15 +164,23 @@ pub(crate) fn modifier_suffix(
     }
 }
 
-pub(crate) fn add_action_log_item(game: &mut Game, item: Action) {
+pub(crate) fn add_log_action(game: &mut Game, item: Action) {
     let i = game.action_log_index;
-    let l = &mut current_player_turn_log_mut(game).items;
+    let l = &mut current_player_turn_log_mut(game).actions;
     if i < l.len() {
         // remove items from undo
         l.drain(i..);
     }
-    l.push(ActionLogItem::new(item));
+    l.push(ActionLogAction::new(item));
     game.action_log_index += 1;
+}
+
+pub(crate) fn add_action_log_item(game: &mut Game, item: ActionLogItem) {
+    let p = current_player_turn_log_mut(game);
+    if p.actions.is_empty() {
+        p.actions.push(ActionLogAction::new(Action::StartTurn));
+    }
+    current_log_action_mut(game).items.push(item);
 }
 
 ///
@@ -171,9 +214,9 @@ pub fn current_player_turn_log_mut(game: &mut Game) -> &mut ActionLogPlayer {
         .expect("player log should exist")
 }
 
-pub(crate) fn current_action_log_item(game: &mut Game) -> &mut ActionLogItem {
+pub(crate) fn current_log_action_mut(game: &mut Game) -> &mut ActionLogAction {
     current_player_turn_log_mut(game)
-        .items
+        .actions
         .last_mut()
-        .expect("items empty")
+        .expect("actions empty")
 }

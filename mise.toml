@@ -40,8 +40,10 @@ run = [
     "cargo build",
     "cargo fmt --check",
     "cargo clippy",
-    "cargo nextest run"
+    "cargo nextest run",
+    "git diff --exit-code || exit 1", # Check if there are any uncommitted changes updating JSON files
 ]
+env = { UPDATE_EXPECTED = "true", RUSTFLAGS = '' }
 
 [tasks.profile]
 description = "Run AI client with profiling"
@@ -65,8 +67,8 @@ description = "Test publish client (the real one is done in GitHub Actions)"
 run = "./scripts/publish-client.sh test"
 
 [tools]
-"cargo:cargo-nextest" = "latest"
-"cargo:wasm-bindgen-cli" = "latest"
-"cargo:wasm-pack" = "latest"
-rust = { version = "latest", targets = "wasm32-unknown-unknown", components = "clippy,rustfmt" }
+"cargo:cargo-nextest" = "0.9.98"
+"cargo:wasm-bindgen-cli" = "0.2.100"
+"cargo:wasm-pack" = "0.13.1"
+rust = { version = "1.87.0", targets = "wasm32-unknown-unknown", components = "clippy,rustfmt" }
 

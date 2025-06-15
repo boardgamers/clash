@@ -1,11 +1,11 @@
 use crate::advance::Advance;
 use crate::city::{City, MoodState};
+use crate::events::EventPlayer;
 use crate::game::Game;
 use crate::payment::ResourceReward;
 use crate::player::Player;
 use crate::position::Position;
 use crate::resource::ResourceType;
-use crate::resource_pile::ResourcePile;
 use crate::unit::Unit;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -16,31 +16,30 @@ pub struct TradeRoute {
 }
 
 #[must_use]
-pub fn trade_route_reward(game: &Game) -> Option<(ResourceReward, Vec<TradeRoute>)> {
-    let p = game.current_player_index;
-    let trade_routes = find_trade_routes(game, &game.players[p], false);
+pub(crate) fn trade_route_reward(
+    game: &Game,
+    p: &EventPlayer,
+) -> Option<(ResourceReward, Vec<TradeRoute>)> {
+    let trade_routes = find_trade_routes(game, p.get(game), false);
     if trade_routes.is_empty() {
         return None;
     }
 
-    Some((
-        if game.players[p].can_use_advance(Advance::Currency) {
-            ResourceReward::sum(
-                trade_routes.len() as u8,
-                &[ResourceType::Gold, ResourceType::Food],
-            )
+    let reward = p.reward_options().sum(
+        trade_routes.len() as u8,
+        if p.get(game).can_use_advance(Advance::Currency) {
+            &[ResourceType::Gold, ResourceType::Food]
         } else {
-            ResourceReward::sum(trade_routes.len() as u8, &[ResourceType::Food])
+            &[ResourceType::Food]
         },
-        trade_routes,
-    ))
+    );
+    Some((reward, trade_routes))
 }
 
 pub(crate) fn trade_route_log(
     game: &Game,
     player_index: usize,
     trade_routes: &[TradeRoute],
-    reward: &ResourcePile,
     selected: bool,
 ) -> Vec<String> {
     let mut log = Vec::new();
@@ -52,7 +51,7 @@ pub(crate) fn trade_route_log(
     }
     for t in trade_routes {
         log.push(format!(
-            "{} at {} traded with city at {}",
+            "{} at {} traded with city {}",
             game.players[player_index]
                 .get_unit(t.unit_id)
                 .unit_type
@@ -61,7 +60,6 @@ pub(crate) fn trade_route_log(
             t.to,
         ));
     }
-    log.push(format!("Total reward is {reward}"));
     log
 }
 

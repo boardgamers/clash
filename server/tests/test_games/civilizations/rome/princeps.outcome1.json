@@ -244,7 +244,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -263,7 +263,19 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "LeaderAbility": "Princeps"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -279,12 +291,12 @@
       "Player1 has to pay 1 culture token for Princeps"
     ],
     [
-      "Player1 paid 1 culture token for Princeps",
+      "Player1: Princeps: Pay 1 culture token",
       "Player1 activates the city A1 to draw 1 action and 1 objective card using Princeps",
       "Player1 gained an action card from the pile",
       "Player1 gained an objective card from the pile",
-      "Player1 discarded action card Advance/Peltasts for Princeps",
-      "Player1 discarded objective card Large Civilization/Draft for Princeps"
+      "Player1: Princeps: Discard action card Advance/Peltasts",
+      "Player1: Princeps: Discard objective card Large Civilization/Draft"
     ]
   ],
   "undo_limit": 2,

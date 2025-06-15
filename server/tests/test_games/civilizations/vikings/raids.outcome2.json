@@ -384,7 +384,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": "EndTurn"
@@ -398,7 +398,7 @@
           "players": [
             {
               "index": 1,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": "EndTurn"
@@ -408,7 +408,7 @@
             },
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Response": {
@@ -418,7 +418,19 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "food": 1
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Viking Raids"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -437,12 +449,12 @@
     ],
     [
       "It's Player2's turn",
-      "Player1 gained 1 gold for using a Market in a trade route",
-      "ship at E7 traded with city at D6",
-      "settler at E7 traded with city at E6",
-      "Total reward is 2 food",
-      "Player2 raided Player1 at D6",
-      "Player2 could not store 1 food"
+      "Player1: Market: Gain 1 gold",
+      "Player2: Trade Routes: ship at E7 traded with city D6",
+      "Player2: Trade Routes: settler at E7 traded with city E6",
+      "Player2: Raiding: Raided Player1 at D6",
+      "Player2: Trade Routes: Gain 2 food",
+      "Player2: Waste: Could not store 1 food"
     ],
     [
       "Player2 ended their turn with 3 actions left"
@@ -451,7 +463,8 @@
       "It's Player1's turn"
     ],
     [
-      "Player1 lost 1 food to Viking Raids"
+      "Player1: Viking Raids: Pay 1 food",
+      "Player1: Viking Raids: Lose 1 food"
     ]
   ],
   "undo_limit": 0,

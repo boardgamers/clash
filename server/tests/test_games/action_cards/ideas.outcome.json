@@ -190,13 +190,25 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
                       "ActionCard": 9
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "ideas": 1
+                        }
+                      },
+                      "origin": {
+                        "CivilCard": 9
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -209,7 +221,7 @@
   "log": [
     [
       "Player1 played the action card Ideas",
-      "Player1 gained 1 idea for Ideas"
+      "Player1: Ideas: Gain 1 idea"
     ]
   ],
   "undo_limit": 0,

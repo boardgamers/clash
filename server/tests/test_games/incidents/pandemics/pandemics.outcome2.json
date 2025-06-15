@@ -90,7 +90,10 @@
                     },
                     "type": "Unlimited"
                   }
-                ]
+                ],
+                "origin": {
+                  "Incident": 49
+                }
               },
               "name": "Select resources to lose",
               "optional": false
@@ -313,7 +316,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -324,7 +327,29 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "gold": 2
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -356,22 +381,23 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player1 paid 2 gold to get the Storage advance",
-      "Player1 gained 1 mood token as advance bonus"
+      "Player1: Advance: Pay 2 gold",
+      "Player1: Advance: Gain Storage",
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Pandemics",
       "Base effect: Barbarians move",
       "Barbarians cannot move - will try to spawn a new city instead",
       "Barbarians cannot spawn a new city",
-      "Player1 has to lose a total of 2 units, cards, and resources"
+      "Player1: Pandemics: Lose a total of 2 units, cards, and resources"
     ],
     [
-      "Player1 killed units: infantry at C2"
+      "Player1: Pandemics: Player1 killed units: infantry at C2"
     ],
     [
-      "Player1 discarded Advance/Peltasts",
-      "Player2 has to lose a total of 1 units, cards, and resources"
+      "Player1: Pandemics: Discard Advance/Peltasts",
+      "Player2: Pandemics: Lose a total of 1 units, cards, and resources"
     ]
   ],
   "undo_limit": 3,

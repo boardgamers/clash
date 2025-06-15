@@ -211,7 +211,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -225,7 +225,24 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
+                      },
+                      "modifiers": [
+                        {
+                          "Advance": "Draft"
+                        }
+                      ]
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -240,7 +257,24 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
+                      },
+                      "modifiers": [
+                        {
+                          "Advance": "Draft"
+                        }
+                      ]
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -266,13 +300,15 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player1 paid 1 mood token to recruit 1 infantry in the city at A1",
-      "Draft reduced the cost of 1 Infantry to 1 mood token"
+      "Player1: Recruit: Pay 1 mood token with Draft",
+      "Draft reduced the cost of 1 Infantry to 1 mood token",
+      "Player1: Recruit: Recruit 1 infantry in the city A1"
     ],
     [
-      "Player1 paid 1 mood token to recruit 1 infantry in the city at A1",
+      "Player1: Recruit: Pay 1 mood token with Draft",
       "Draft reduced the cost of 1 Infantry to 1 mood token",
-      "City at A1 became Neutral because it was activated more than once"
+      "Player1: Recruit: Recruit 1 infantry in the city A1",
+      "city A1 became Neutral because it was activated more than once"
     ],
     [
       "Player1 completed objective Draft"

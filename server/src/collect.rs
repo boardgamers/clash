@@ -1,17 +1,17 @@
 use crate::advance::Advance;
 use crate::city::activate_city;
+use crate::content::custom_actions::custom_action_modifier_event_origin;
 use crate::content::persistent_events::PersistentEventType;
 use crate::events::EventOrigin;
 use crate::game::Game;
-use crate::log::modifier_suffix;
 use crate::map::Terrain;
 use crate::map::Terrain::{Fertile, Forest, Mountain};
 use crate::player::{CostTrigger, Player};
 use crate::player_events::ActionInfo;
 use crate::playing_actions::{PlayingActionType, base_or_custom_available};
 use crate::position::Position;
+use crate::resource::gain_resources_with_modifiers;
 use crate::resource_pile::ResourcePile;
-use crate::utils;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
@@ -162,41 +162,12 @@ pub(crate) fn execute_collect(
     player_index: usize,
     c: &Collect,
 ) -> Result<(), String> {
-    let collections = &c.collections;
-    let res = utils::format_and(
-        &collections
-            .iter()
-            .map(|c| c.total().to_string())
-            .collect_vec(),
-        "nothing",
+    let origin = collect_event_origin(&c.action_type, game.player(player_index));
+    game.log_with_origin(
+        player_index,
+        &origin,
+        &format!("Use city {}", c.city_position),
     );
-    let total = if collections.len() > 1
-        && collections
-            .iter()
-            .permutations(2)
-            .unique()
-            .any(|permutation| {
-                permutation[0]
-                    .pile
-                    .has_common_resource(&permutation[1].pile)
-            }) {
-        format!(
-            " for a total of {}",
-            collections
-                .iter()
-                .map(PositionCollection::total)
-                .sum::<ResourcePile>()
-        )
-    } else {
-        String::new()
-    };
-    let player = &game.player(player_index);
-    game.add_info_log_item(&format!(
-        "{} collects {res}{total} in the city at {}{}",
-        player,
-        c.city_position,
-        modifier_suffix(player, &c.action_type, game)
-    ));
 
     let mut i = get_total_collection(
         game,
@@ -210,7 +181,13 @@ pub(crate) fn execute_collect(
         return Err("City can't be activated".to_string());
     }
     activate_city(city.position, game);
-    game.players[player_index].gain_resources(i.total.clone());
+    gain_resources_with_modifiers(
+        game,
+        player_index,
+        i.total.clone(),
+        origin,
+        i.modifiers.clone(),
+    );
 
     let key = Advance::Husbandry.id();
     if i.info.info.contains_key(&key) {
@@ -383,4 +360,15 @@ pub fn available_collect_actions_for_city(
 #[must_use]
 pub fn available_collect_actions(game: &Game, player: usize) -> Vec<PlayingActionType> {
     base_or_custom_available(game, player, &PlayingActionType::Collect)
+}
+
+pub(crate) fn collect_event_origin(
+    action_type: &PlayingActionType,
+    player: &Player,
+) -> EventOrigin {
+    custom_action_modifier_event_origin(
+        EventOrigin::Ability("Collect".to_string()),
+        action_type,
+        player,
+    )
 }

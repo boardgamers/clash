@@ -473,16 +473,7 @@ pub(crate) fn pay_for_action() -> Ability {
                 "Pay for action",
             )])
         },
-        |game, s, a| {
-            a.payment = s.choice[0].clone();
-            let p = game.player(s.player_index);
-            game.add_info_log_item(&format!(
-                "{} paid {} for {}",
-                s.player_name,
-                s.choice[0],
-                a.action.playing_action_type(p).event_origin(p).name(game)
-            ));
-        },
+        |_game, _s, _a| {},
     )
     .build()
 }

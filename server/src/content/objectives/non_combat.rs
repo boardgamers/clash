@@ -2,7 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Advance;
 use crate::content::advances::warfare::draft_cost;
 use crate::game::Game;
-use crate::log::{ActionLogItem, ActionLogPlayer};
+use crate::log::{ActionLogAction, ActionLogPlayer};
 use crate::map::capital_city_position;
 use crate::objective_card::{Objective, objective_is_ready};
 use itertools::Itertools;
@@ -66,7 +66,7 @@ pub(crate) fn magnificent_culture() -> Objective {
         let wonders = last_round(game)
             .iter()
             .filter_map(|p| {
-                p.items
+                p.actions
                     .iter()
                     .find_map(|i| i.wonder_built.as_ref().map(|n| (n, p.index)))
             })
@@ -84,11 +84,11 @@ pub(crate) fn magnificent_culture() -> Objective {
     .build()
 }
 
-pub(crate) fn last_player_round(game: &Game, player: usize) -> Vec<&ActionLogItem> {
+pub(crate) fn last_player_round(game: &Game, player: usize) -> Vec<&ActionLogAction> {
     last_round(game)
         .iter()
         .filter(|p| p.index == player)
-        .flat_map(|p| p.items.iter())
+        .flat_map(|p| p.actions.iter())
         .collect()
 }
 

@@ -270,7 +270,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Movement": {
@@ -298,7 +298,29 @@
                     },
                     "result": "AttackerWins",
                     "city_mood": "Neutral"
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "gold": 1
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "gold": 2
+                        }
+                      },
+                      "origin": {
+                        "LeaderAbility": "Prey"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -310,11 +332,11 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 marched Ragnar Lodbrok from E2 to D1 and captured Player2's city at D1",
-      "Player1 gained 1 gold for capturing a city",
-      "Player1 gained 2 gold for Prey",
-      "Player2 gained 1 free Settler Unit at B2 for losing a city",
-      "Player1 could not store 1 gold"
+      "Player1 marched Ragnar Lodbrok from E2 to D1 and captured Player2's city D1",
+      "Player1: Combat: Gain 1 gold",
+      "Player1: Prey: Gain 2 gold",
+      "Player2: Place Settler: Gain 1 free Settler Unit at B2 for losing a city",
+      "Player1: Waste: Could not store 1 gold"
     ]
   ],
   "undo_limit": 0,

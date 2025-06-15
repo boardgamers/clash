@@ -14,7 +14,6 @@ use crate::incident::draw_and_discard_incident_card_from_pile;
 use crate::map::Terrain;
 use crate::map::Terrain::Fertile;
 use crate::objective_card::{discard_objective_card, gain_objective_card_from_pile};
-use crate::payment::PaymentOptions;
 use crate::player::{Player, gain_unit};
 use crate::position::Position;
 use crate::tactics_card::CombatRole;
@@ -44,7 +43,7 @@ fn great_wall() -> WonderInfo {
         Wonder::GreatWall,
         "Land combat in your happy city: Attacker gets -2 combat value in the first round. \
         You automatically win battles if Barbarians attack any of your cities.",
-        PaymentOptions::fixed_resources(ResourcePile::new(3, 2, 7, 0, 0, 0, 5)),
+        ResourcePile::new(3, 2, 7, 0, 0, 0, 5),
         Advance::Siegecraft,
     )
     .add_simple_persistent_event_listener(
@@ -72,7 +71,7 @@ fn great_statue() -> WonderInfo {
         Wonder::GreatStatue,
         "Draw 1 objective card. \
         Once per turn, as a free action, discard an objective card from: Gain 1 action.",
-        PaymentOptions::fixed_resources(ResourcePile::new(3, 4, 5, 0, 0, 0, 5)),
+        ResourcePile::new(3, 4, 5, 0, 0, 0, 5),
         Advance::Monuments,
     )
     .add_custom_action(
@@ -81,7 +80,7 @@ fn great_statue() -> WonderInfo {
         use_great_statue,
         |_game, p| !p.objective_cards.is_empty(),
     )
-    .add_one_time_ability_initializer(|game, player_index| {
+    .add_once_initializer(|game, player_index| {
         gain_objective_card_from_pile(game, player_index);
     })
     .build()
@@ -103,11 +102,13 @@ fn use_great_statue(b: AbilityBuilder) -> AbilityBuilder {
             let HandCard::ObjectiveCard(card) = s.choice[0] else {
                 panic!("not an objective card")
             };
-            game.add_info_log_item(&format!(
-                "{} discarded {} to gain an action",
-                s.player_name,
-                game.cache.get_objective_card(card).name()
-            ));
+            s.log(
+                game,
+                &format!(
+                    "Discarded {} to gain an action",
+                    game.cache.get_objective_card(card).name()
+                ),
+            );
             discard_objective_card(game, s.player_index, card);
             game.actions_left += 1;
         },
@@ -120,7 +121,7 @@ fn great_mausoleum() -> WonderInfo {
         "Whenever you draw an action or game event card, you may instead draw the \
         top card of the action or game event discard pile. \
         You discard to the bottom of the pile.",
-        PaymentOptions::fixed_resources(ResourcePile::new(4, 4, 4, 0, 0, 0, 5)),
+        ResourcePile::new(4, 4, 4, 0, 0, 0, 5),
         Advance::Priesthood,
     )
     .build()
@@ -148,11 +149,13 @@ pub(crate) fn use_great_mausoleum() -> Ability {
                         .action_cards_discarded
                         .pop()
                         .expect("action card not found in discard pile");
-                    game.add_info_log_item(&format!(
-                        "{} drew {} from the discard pile",
-                        s.player_name,
-                        game.cache.get_action_card(card).name()
-                    ));
+                    s.log(
+                        game,
+                        &format!(
+                            "Draw {} from the discard pile",
+                            game.cache.get_action_card(card).name()
+                        ),
+                    );
                     game.player_mut(s.player_index).action_cards.push(card);
                 } else {
                     do_gain_action_card_from_pile(game, s.player_index);
@@ -179,11 +182,13 @@ pub(crate) fn use_great_mausoleum() -> Ability {
                         .incidents_discarded
                         .pop()
                         .expect("action card not found in discard pile");
-                    game.add_info_log_item(&format!(
-                        "{} drew {} from the discard pile",
-                        s.player_name,
-                        game.cache.get_incident(card).name
-                    ));
+                    s.log(
+                        game,
+                        &format!(
+                            "Drew {} from the discard pile",
+                            game.cache.get_incident(card).name
+                        ),
+                    );
                     i.incident_id = card;
                 } else {
                     i.incident_id = draw_and_discard_incident_card_from_pile(game, s.player_index);
@@ -199,7 +204,7 @@ fn great_lighthouse() -> WonderInfo {
         "Requires a port to build: \
         Activate the city: Place a ship on any sea space without enemy ships. \
         Decide the staring player of the next turn.",
-        PaymentOptions::fixed_resources(ResourcePile::new(3, 5, 4, 0, 0, 0, 5)),
+        ResourcePile::new(3, 5, 4, 0, 0, 0, 5),
         Advance::Cartography,
     )
     .placement_requirement(Arc::new(|pos, game| {
@@ -250,11 +255,10 @@ fn use_great_lighthouse(b: AbilityBuilder) -> AbilityBuilder {
             let spawn = &s.choice[0];
             let city_pos = great_lighthouse_city(game.player(s.player_index)).position;
             gain_unit(s.player_index, *spawn, UnitType::Ship, game);
-            game.add_info_log_item(&format!(
-                "{} activated the city at {city_pos} used the Great Lighthouse \
-                to place a ship on {spawn} for free",
-                s.player_name,
-            ));
+            s.log(
+                game,
+                &format!("Activated the city {city_pos} to place a ship on {spawn} for free",),
+            );
             activate_city(city_pos, game);
         },
     )
@@ -266,7 +270,7 @@ fn library() -> WonderInfo {
         "Once per turn, as a free action, \
         you may choose a non-government, non-civilization advance: \
         Use the effect until the end of your turn.",
-        PaymentOptions::fixed_resources(ResourcePile::new(3, 6, 3, 0, 0, 0, 5)),
+        ResourcePile::new(3, 6, 3, 0, 0, 0, 5),
         Advance::Philosophy,
     )
     .add_custom_action(
@@ -297,11 +301,7 @@ fn use_great_library(b: AbilityBuilder) -> AbilityBuilder {
         },
         |game, s, _| {
             let advance = s.choice;
-            game.add_info_log_item(&format!(
-                "{} used the Great Library to use {} for the turn",
-                s.player_name,
-                advance.name(game)
-            ));
+            s.log(game, &format!("Use {} for the turn", advance.name(game)));
             game.player_mut(s.player_index).great_library_advance = Some(advance);
             init_great_library(game, s.player_index);
         },
@@ -314,7 +314,7 @@ fn great_gardens() -> WonderInfo {
         "The city with this wonder may Collect any type of resource from \
             Grassland spaces including ideas and gold. \
             Enemies cannot enter the city if they have entered a Grassland space this turn.",
-        PaymentOptions::fixed_resources(ResourcePile::new(5, 5, 2, 0, 0, 0, 5)),
+        ResourcePile::new(5, 5, 2, 0, 0, 0, 5),
         Advance::Irrigation,
     )
     .add_transient_event_listener(
@@ -342,7 +342,7 @@ fn pyramids() -> WonderInfo {
         "Counts as 5.1 victory points (instead of 4). \
             All victory points are awarded to the player who built the wonder \
             (owning does not grant any points).",
-        PaymentOptions::fixed_resources(ResourcePile::new(2, 3, 7, 0, 0, 0, 5)),
+        ResourcePile::new(2, 3, 7, 0, 0, 0, 5),
         Advance::Rituals,
     )
     .built_victory_points(5.1) // because it breaks the tie
@@ -356,7 +356,7 @@ fn colosseum() -> WonderInfo {
         "May pay culture tokens with mood tokens (or vice versa) - \
         except for the building wonders.\
         May increase the combat value in a land battle by 1 for 1 culture or mood token.",
-        PaymentOptions::fixed_resources(ResourcePile::new(3, 4, 5, 0, 0, 0, 5)),
+        ResourcePile::new(3, 4, 5, 0, 0, 0, 5),
         Advance::Sports,
     )
     .add_payment_request_listener(
@@ -372,9 +372,12 @@ fn colosseum() -> WonderInfo {
             }
 
             if !apply_colosseum(e, p.index, false) {
-                game.add_info_log_item(&format!(
-                    "Combat value is already at maximum, cannot increase combat value for {p}",
-                ));
+                p.log(
+                    game,
+                    &format!(
+                        "Combat value is already at maximum, cannot increase combat value for {p}",
+                    ),
+                );
                 return None;
             }
 
@@ -385,13 +388,8 @@ fn colosseum() -> WonderInfo {
         },
         |game, s, e| {
             let pile = &s.choice[0];
-            let name = &s.player_name;
-            if pile.is_empty() {
-                game.add_info_log_item(&format!("{name} declined to pay for the combat value",));
-            } else {
-                game.add_info_log_item(&format!(
-                    "{name} paid {pile} to increase the combat value by 1, scoring an extra hit",
-                ));
+            if !pile.is_empty() {
+                s.log(game, "Increase combat value by 1, scoring an extra hit");
                 apply_colosseum(e, s.player_index, true);
             }
         },

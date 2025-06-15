@@ -215,7 +215,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -232,7 +232,19 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "CivilCard": 27
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -243,7 +255,7 @@
             },
             {
               "index": 1,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": "EndTurn"
@@ -256,8 +268,7 @@
         {
           "players": [
             {
-              "index": 0,
-              "items": []
+              "index": 0
             }
           ]
         }
@@ -271,15 +282,15 @@
       "Player1 has to pay 1 culture token for Assassination"
     ],
     [
-      "Player1 paid 1 culture token for Assassination",
-      "Player2 has been assassinated by Player1."
+      "Player1: Assassination: Pay 1 culture token",
+      "Player1: Assassination: Assassinated Player2"
     ],
     [
       "Player1 ended their turn with 3 actions left"
     ],
     [
       "It's Player2's turn",
-      "Player2 has lost an action due to assassination."
+      "Player2: Assassination: Lost an action due to assassination."
     ],
     [
       "Player2 ended their turn with 2 actions left"

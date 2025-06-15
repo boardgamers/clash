@@ -8,10 +8,11 @@ use crate::content::ability::Ability;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{PaymentRequest, PersistentEventType, PositionRequest};
 use crate::events::EventOrigin;
-use crate::log::current_action_log_item;
+use crate::log::current_log_action_mut;
 use crate::payment::PaymentOptions;
 use crate::player::{CostTrigger, Player};
 use crate::player_events::CostInfo;
+use crate::resource_pile::ResourcePile;
 use crate::utils::remove_element;
 use crate::{ability_initializer::AbilityInitializerSetup, game::Game, position::Position};
 use enumset::EnumSetType;
@@ -87,10 +88,15 @@ impl WonderInfo {
     pub fn builder(
         wonder: Wonder,
         description: &str,
-        cost: PaymentOptions,
+        cost: ResourcePile,
         required_advance: Advance,
     ) -> WonderBuilder {
-        WonderBuilder::new(wonder, description, cost, required_advance)
+        WonderBuilder::new(
+            wonder,
+            description,
+            PaymentOptions::fixed_resources(cost, EventOrigin::Wonder(wonder)),
+            required_advance,
+        )
     }
 
     #[must_use]
@@ -231,11 +237,10 @@ pub(crate) fn draw_wonder_card_handler() -> Ability {
             |game, s, _| {
                 if s.choice {
                     let name = *find_public_wonder(game).expect("public wonder card not found");
-                    game.add_info_log_item(&format!(
-                        "{} drew the public wonder card {}",
-                        s.player_name,
-                        name.name()
-                    ));
+                    s.log(
+                        game,
+                        &format!("Drew the public wonder card {}", name.name()),
+                    );
                     gain_wonder(game, s.player_index, name);
                     remove_public_wonder(game);
                 } else {
@@ -418,12 +423,10 @@ pub(crate) fn build_wonder_handler() -> Ability {
             |game, s, i| {
                 let position = s.choice[0];
                 i.selected_position = Some(position);
-                game.add_info_log_item(&format!(
-                    "{} decided to build {} in city {}",
-                    s.player_name,
-                    i.wonder.name(),
-                    position
-                ));
+                s.log(
+                    game,
+                    &format!("Decided to build {} in city {position}", i.wonder.name(),),
+                );
             },
         )
         .add_payment_request_listener(
@@ -457,14 +460,12 @@ pub(crate) fn build_wonder_handler() -> Ability {
                 let pos = i.selected_position.expect("city not selected");
                 let name = i.wonder;
 
-                game.add_info_log_item(&format!(
-                    "{} built {} in city {pos} for {}",
-                    s.player_name,
-                    name.name(),
-                    s.choice[0],
-                ));
+                s.log(
+                    game,
+                    &format!("Built {} in city {pos} for {}", name.name(), s.choice[0],),
+                );
                 i.cost.info.execute(game);
-                current_action_log_item(game).wonder_built = Some(name);
+                current_log_action_mut(game).wonder_built = Some(name);
                 remove_element(&mut game.player_mut(s.player_index).wonder_cards, &name);
                 construct_wonder(game, name, pos, s.player_index);
             },
@@ -495,7 +496,7 @@ pub(crate) fn construct_wonder(
     player_index: usize,
 ) {
     let listeners = game.cache.get_wonder(name).listeners.clone();
-    listeners.one_time_init(game, player_index);
+    listeners.once_init(game, player_index);
     let player = &mut game.players[player_index];
     player.wonders_built.push(name);
     player.wonders_owned.insert(name);

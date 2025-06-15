@@ -1,5 +1,5 @@
 use crate::city::MoodState;
-use crate::content::custom_actions::CustomActionType;
+use crate::content::custom_actions::{CustomActionType, custom_action_modifier_event_origin};
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::leader::leader_position;
@@ -74,15 +74,8 @@ pub(crate) fn execute_increase_happiness(
         })
         .collect_vec();
 
-    game.add_info_log_item(&format!(
-        "{player} paid {} to increase happiness in {}{}",
-        payment,
-        utils::format_and(&logs, "no city"),
-        modifier_suffix(player, action_type, game)
-    ));
-
     let trigger = game.execute_cost_trigger();
-    let player = &mut game.players[player_index];
+    let player = game.player_mut(player_index);
     let restriction = happiness_city_restriction(player, action_type);
     let mut angry_activations = vec![];
     let mut step_sum = 0;
@@ -112,6 +105,17 @@ pub(crate) fn execute_increase_happiness(
     if !already_paid {
         happiness_cost(player_index, step_sum, trigger, action_type, game).pay(game, payment);
     }
+    let origin = happiness_event_origin(action_type, game.player(player_index));
+    game.log_with_origin(
+        player_index,
+        &origin,
+        &format!(
+            "Increase happiness in {}{}",
+            utils::format_and(&logs, "no city"),
+            modifier_suffix(game.player(player_index), action_type, game)
+        ),
+    );
+
     Ok(())
 }
 
@@ -144,7 +148,7 @@ pub fn happiness_cost(
 
 fn format_city_happiness_increase(player: &Player, position: Position, steps: u8) -> String {
     format!(
-        "the city at {position} by {steps} steps, making it {}",
+        "the city {position} by {steps} steps, making it {}",
         player.get_city(position).mood_state.clone() + steps
     )
 }
@@ -153,11 +157,9 @@ pub(crate) fn happiness_event_origin(
     action_type: &PlayingActionType,
     player: &Player,
 ) -> EventOrigin {
-    match action_type {
-        PlayingActionType::IncreaseHappiness => {
-            EventOrigin::Ability("Increase Happiness".to_string())
-        }
-        PlayingActionType::Custom(c) => c.playing_action_type().event_origin(player),
-        _ => panic!("Unexpected action type for increase happiness event origin: {action_type:?}"),
-    }
+    custom_action_modifier_event_origin(
+        EventOrigin::Ability("Increase Happiness".to_string()),
+        action_type,
+        player,
+    )
 }

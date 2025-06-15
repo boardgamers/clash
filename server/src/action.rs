@@ -13,7 +13,7 @@ use crate::explore::ask_explore_resolution;
 use crate::game::GameState::{Finished, Movement, Playing};
 use crate::game::{Game, GameContext};
 use crate::incident::{on_choose_incident, on_trigger_incident};
-use crate::log::{add_action_log_item, current_player_turn_log_mut};
+use crate::log::{add_log_action, current_player_turn_log_mut};
 use crate::movement::{MovementAction, execute_movement_action, on_ship_construction_conversion};
 use crate::objective_card::{complete_objective_card, gain_objective_card, on_objective_cards};
 use crate::playing_actions::{PlayingAction, PlayingActionType};
@@ -33,6 +33,7 @@ pub enum Action {
     Response(EventResponse),
     Undo,
     Redo,
+    StartTurn, // created for trade routes
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -90,7 +91,7 @@ pub fn try_execute_action(
         game.player_changed();
     } else if add_undo && game.can_undo() {
         let i = game.action_log_index - 1;
-        current_player_turn_log_mut(&mut game).items[i].undo = clean_patch(patch.0);
+        current_player_turn_log_mut(&mut game).actions[i].undo = clean_patch(patch.0);
     }
     Ok(game)
 }
@@ -113,7 +114,7 @@ pub fn execute_without_undo(
         return Ok(());
     }
 
-    add_action_log_item(game, action.clone());
+    add_log_action(game, action.clone());
 
     if game.context == GameContext::Replay
         && !game.events.is_empty()
@@ -160,7 +161,7 @@ pub(crate) fn after_action(game: &mut Game, player_index: usize) {
         .filter(|c| c.mood_state == MoodState::Angry)
         .count()
         >= 4
-        && !current_player_turn_log_mut(game).items.is_empty()
+        && !current_player_turn_log_mut(game).actions.is_empty()
     {
         //endless loop if this is not selected automatically
         let card = game

@@ -254,13 +254,25 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Response": {
                       "SelectAdvance": "Storage"
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -276,7 +288,29 @@
                     "Response": {
                       "SelectUnitType": "Elephant"
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "food": 1
+                        }
+                      },
+                      "origin": {
+                        "Incident": 9
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "food": 1
+                        }
+                      },
+                      "origin": {
+                        "Incident": 9
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -288,21 +322,21 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player1 advanced Storage for free",
-      "Player1 gained 1 mood token as advance bonus"
+      "Player1: Free Advance: Advanced Storage for free",
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: A good year",
       "Base effect: Barbarians spawn"
     ],
     [
-      "Barbarians spawned a new city and a new Infantry unit at B3"
+      "Player1: A good year: Barbarians spawned a new city and a new Infantry unit at B3"
     ],
     [
-      "Barbarians reinforced with 1 elephant at B3",
-      "Player1 gained 1 food for A good year",
-      "Player2 gained 1 food for A good year",
-      "Player2 could not store 1 food"
+      "Player1: A good year: Barbarians reinforced with 1 elephant at B3",
+      "Player1: A good year: Gain 1 food",
+      "Player2: A good year: Gain 1 food",
+      "Player2: Waste: Could not store 1 food"
     ]
   ],
   "undo_limit": 3,

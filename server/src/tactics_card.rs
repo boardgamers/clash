@@ -8,7 +8,7 @@ use crate::card::HandCard;
 use crate::combat::{Combat, CombatModifier, get_combat_strength, update_combat_strength};
 use crate::combat_listeners::{CombatRoundEnd, CombatRoundStart, CombatStrength};
 use crate::content::persistent_events::HandCardsRequest;
-use crate::events::EventOrigin;
+use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use action_card::discard_action_card;
@@ -235,7 +235,7 @@ impl TacticsCardBuilder {
     pub(crate) fn add_resolve_listener(
         self,
         priority: i32,
-        listener: impl Fn(usize, &mut Game, &mut CombatRoundEnd) + Clone + 'static + Sync + Send,
+        listener: impl Fn(&EventPlayer, &mut Game, &mut CombatRoundEnd) + Clone + 'static + Sync + Send,
     ) -> Self {
         let target = self.target;
         let id = self.id;
@@ -244,7 +244,7 @@ impl TacticsCardBuilder {
             priority,
             move |game, p, s| {
                 if s.is_active(p.index, id, target) {
-                    listener(p.index, game, s);
+                    listener(p, game, s);
                 }
             },
         )
@@ -313,17 +313,16 @@ pub(crate) fn play_tactics_card(b: AdvanceBuilder) -> AdvanceBuilder {
 
             Some(HandCardsRequest::new(cards, 0..=1, "Play Tactics Card"))
         },
-        |game, sel, s| {
-            let name = &sel.player_name;
-            if sel.choice.is_empty() {
-                game.add_info_log_item(&format!("{name} did not play a Tactics Card"));
+        |game, s, r| {
+            if s.choice.is_empty() {
+                s.log(game, "Did not play a Tactics Card");
             } else {
-                let player = sel.player_index;
-                game.add_info_log_item(&format!("{name} played a Tactics Card"));
-                let HandCard::ActionCard(card) = sel.choice[0] else {
-                    panic!("Expected ActionCard, got {:?}", sel.choice[0]);
+                let player = s.player_index;
+                s.log(game, "Played a Tactics Card");
+                let HandCard::ActionCard(card) = s.choice[0] else {
+                    panic!("Expected ActionCard, got {:?}", s.choice[0]);
                 };
-                update_combat_strength(game, player, s, move |_game, _c, s, _role| {
+                update_combat_strength(game, player, r, move |_game, _c, s, _role| {
                     s.tactics_card = Some(card);
                 });
                 discard_action_card(game, player, card);

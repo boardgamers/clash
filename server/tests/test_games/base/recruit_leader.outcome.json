@@ -263,7 +263,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -278,7 +278,20 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "mood_tokens": 1,
+                          "culture_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -290,7 +303,8 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 paid 1 mood token and 1 culture token to recruit Augustus in the city at A1"
+      "Player1: Recruit: Pay 1 mood token and 1 culture token",
+      "Player1: Recruit: Recruit Augustus in the city A1"
     ]
   ],
   "undo_limit": 0,

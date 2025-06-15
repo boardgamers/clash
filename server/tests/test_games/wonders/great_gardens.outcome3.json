@@ -201,7 +201,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -222,7 +222,22 @@
                       ]
                     }
                   },
-                  "wonder_built": "GreatGardens"
+                  "wonder_built": "GreatGardens",
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "food": 5,
+                          "wood": 5,
+                          "ore": 2,
+                          "culture_tokens": 5
+                        }
+                      },
+                      "origin": {
+                        "Wonder": "GreatGardens"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -233,7 +248,7 @@
             },
             {
               "index": 1,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Movement": {
@@ -258,10 +273,11 @@
   "log": [
     [
       "Player1 played the wonder card Great Gardens",
-      "Player1 decided to build Great Gardens in city A1"
+      "Player1: Build Wonder: Decided to build Great Gardens in city A1"
     ],
     [
-      "Player1 built Great Gardens in city A1 for 5 food, 5 wood, 2 ore and 5 culture tokens"
+      "Player1: Great Gardens: Pay 5 food, 5 wood, 2 ore and 5 culture tokens",
+      "Player1: Build Wonder: Built Great Gardens in city A1 for 5 food, 5 wood, 2 ore and 5 culture tokens"
     ],
     [
       "Player1 ended their turn with 1 actions left"

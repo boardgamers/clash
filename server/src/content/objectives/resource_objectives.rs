@@ -50,11 +50,8 @@ pub(crate) fn pay_resources(
     )
     .status_phase_check(move |_game, player| player.resources.has_at_least(&want))
     .status_phase_update(move |game, player| {
-        game.player_mut(player).lose_resources(pay.clone());
-        game.add_info_log_item(&format!(
-            "{} paid {pay} for {objective}",
-            game.player_name(player)
-        ));
+        player.lose_resources(game, pay.clone());
+        player.log(game, &format!("Pay {pay} for {objective}",));
     })
     .build()
 }

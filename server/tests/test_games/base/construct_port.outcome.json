@@ -200,7 +200,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -215,7 +215,21 @@
                         "port_position": "A2"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "food": 1,
+                          "wood": 1,
+                          "ore": 1
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -227,7 +241,8 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 paid 1 food, 1 wood and 1 ore to construct a Port in the city at A1"
+      "Player1: Construct Building: Pay 1 food, 1 wood and 1 ore",
+      "Player1: Construct Building: Build a Port in the city A1"
     ]
   ],
   "undo_limit": 0,

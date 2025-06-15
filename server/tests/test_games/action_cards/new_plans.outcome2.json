@@ -199,7 +199,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -216,7 +216,19 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "CivilCard": 31
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -246,7 +258,7 @@
       "Player1 has to pay 1 culture token for New Plans"
     ],
     [
-      "Player1 paid 1 culture token for New Plans"
+      "Player1: New Plans: Pay 1 culture token"
     ],
     [
       "Player1 discarded an objective card to draw a new one."

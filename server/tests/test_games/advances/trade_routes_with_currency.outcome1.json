@@ -383,7 +383,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": "EndTurn"
@@ -397,7 +397,7 @@
           "players": [
             {
               "index": 1,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Response": {
@@ -406,7 +406,31 @@
                         "gold": 1
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "food": 1,
+                          "gold": 1
+                        }
+                      },
+                      "origin": {
+                        "Advance": "TradeRoutes"
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "food": 1,
+                          "gold": 1
+                        }
+                      },
+                      "origin": {
+                        "Advance": "TradeRoutes"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -427,10 +451,10 @@
       "It's Player2's turn"
     ],
     [
-      "Player2 selected trade routes",
-      "ship at E7 traded with city at C6",
-      "settler at E7 traded with city at E6",
-      "Total reward is 1 food and 1 gold"
+      "Player2: Trade Routes: Player2 selected trade routes",
+      "Player2: Trade Routes: ship at E7 traded with city C6",
+      "Player2: Trade Routes: settler at E7 traded with city E6",
+      "Player2: Trade Routes: Gain 1 food and 1 gold"
     ]
   ],
   "undo_limit": 0,

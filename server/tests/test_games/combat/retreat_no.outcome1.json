@@ -183,7 +183,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Movement": {
@@ -247,7 +247,7 @@
       "Defenders: 2 infantry",
       "Player1 rolled 1 (leader, no bonus) for combined combat value of 1 and gets 0 hits against defending units.",
       "Player2 rolled 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 2 and gets 0 hits against attacking units.",
-      "Player1 can retreat"
+      "Player1: Offer Retreat: Player1 can retreat"
     ],
     [
       "Player1 does not retreat"
@@ -258,9 +258,9 @@
       "Defenders: 2 infantry",
       "Player1 rolled 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units.",
       "Player2 rolled 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against attacking units.",
-      "Player1 has to remove all of their attacking units",
+      "Player1: Choose Casualties: Remove all attacking units",
       "Player1 removed 1 infantry",
-      "Player2 has to remove 1 of their defending units",
+      "Player2: Choose Casualties: Remove 1 of their defending units",
       "Player2 removed 1 infantry",
       "Defender wins"
     ]

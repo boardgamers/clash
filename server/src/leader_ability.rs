@@ -133,7 +133,6 @@ impl AbilityInitializerSetup for LeaderAbilityBuilder {
 }
 
 fn use_get_advance(b: AbilityBuilder, group: AdvanceGroup) -> AbilityBuilder {
-    let name = b.name();
     b.add_advance_request(
         |event| &mut event.custom_action,
         0,
@@ -143,12 +142,10 @@ fn use_get_advance(b: AbilityBuilder, group: AdvanceGroup) -> AbilityBuilder {
         },
         move |game, s, c| {
             let advance = s.choice;
-            game.add_info_log_item(&format!(
-                "{} decided to gain {} for free using {}",
-                s.player_name,
-                advance.name(game),
-                name,
-            ));
+            s.log(
+                game,
+                &format!("Decided to gain {} for free", advance.name(game),),
+            );
             gain_advance_without_payment(game, advance, s.player_index, c.payment.clone(), true);
         },
     )

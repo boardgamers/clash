@@ -289,7 +289,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -300,7 +300,19 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "ideas": 2
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -315,7 +327,25 @@
                         "port_position": null
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "wood": 1,
+                          "ore": 1
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
+                      },
+                      "modifiers": [
+                        {
+                          "Advance": "StateReligion"
+                        }
+                      ]
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -324,7 +354,19 @@
                         "culture_tokens": 1
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Temple"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -343,24 +385,26 @@
   "action_log_index": 4,
   "log": [
     [
-      "Player2 paid 2 ideas to get the Dogma advance",
+      "Player2: Advance: Pay 2 ideas",
+      "Player2: Advance: Gain Dogma",
       "Player2 is now limited to a maximum of 2 ideas for Dogma Advance",
       "Player2 unlocked Provinces",
-      "Player2 could not store 2 ideas"
+      "Player2: Waste: Could not store 2 ideas"
     ],
     [
-      "Player2 paid 1 wood and 1 ore to construct a Temple in the city at C1",
-      "State Religion reduced the food cost to 0"
+      "Player2: Construct Building: Pay 1 wood and 1 ore with State Religion",
+      "State Religion reduced the food cost to 0",
+      "Player2: Construct Building: Build a Temple in the city C1"
     ],
     [
-      "Player2 gained 1 culture token for Temple"
+      "Player2: Temple: Gain 1 culture token"
     ],
     [
-      "Player2 selected Fanaticism as a reward for constructing a Temple"
+      "Player2: Dogma: Gain Fanaticism as a reward for constructing a Temple"
     ],
     [
       "A new game event has been triggered: Anarchy",
-      "Player2 lost 2 government advances due to Anarchy - adding 2 victory points"
+      "Player2: Anarchy: Lose 2 government advances due to Anarchy - adding 2 victory points"
     ]
   ],
   "undo_limit": 4,

@@ -357,7 +357,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -368,7 +368,29 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "food": 2
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -379,14 +401,38 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Incident": 24
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
                     "Playing": {
                       "ActionCard": 124
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Tactics"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -432,20 +478,22 @@
   "action_log_index": 4,
   "log": [
     [
-      "Player2 paid 2 food to get the Storage advance",
-      "Player2 gained 1 mood token as advance bonus"
+      "Player2: Advance: Pay 2 food",
+      "Player2: Advance: Gain Storage",
+      "Player2: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Great Warlord",
-      "Player2 exhausted the land in position E8"
+      "Player2: Great Warlord: Exhausted the land in position E8"
     ],
     [
-      "Player2 gained Great Warlord for 1 culture token"
+      "Player2: Great Warlord: Pay 1 culture token",
+      "Player2: Great Warlord: Gain Great Warlord for 1 culture token"
     ],
     [
       "Player2 played the action card Great Warlord",
-      "Player2 gained Tactics",
-      "Player2 gained 1 culture token as advance bonus"
+      "Player2: Great Warlord: Gain Tactics",
+      "Player2: Tactics: Gain 1 culture token"
     ],
     [
       "Player2 marched 1 infantry from D7 to C8"
@@ -457,7 +505,7 @@
       "Player2 rolled 5 (cavalry, no bonus) for combined combat value of 7 and gets 1 hits against defending units.",
       "Player2 used the following combat modifiers: Player gets +2 combat value for Great Warlord",
       "Player1 rolled 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units.",
-      "Player1 has to remove all of their defending units",
+      "Player1: Choose Casualties: Remove all defending units",
       "Player1 removed 1 infantry",
       "Attacker wins"
     ]

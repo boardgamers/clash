@@ -196,7 +196,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -204,7 +204,19 @@
                         "action": "CivilLiberties"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 3
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Civil Liberties"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -219,7 +231,39 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "mood_tokens": 2
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
+                      },
+                      "modifiers": [
+                        {
+                          "Advance": "Draft"
+                        }
+                      ]
+                    },
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "mood_tokens": 2
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
+                      },
+                      "modifiers": [
+                        {
+                          "Advance": "Draft"
+                        }
+                      ]
+                    }
+                  ]
                 }
               ]
             }
@@ -232,11 +276,12 @@
   "log": [
     [
       "Player1 started Civil Liberties",
-      "Player1 gained 3 mood tokens for Civil Liberties"
+      "Player1: Civil Liberties: Gain 3 mood tokens"
     ],
     [
-      "Player1 paid 2 mood tokens to recruit 1 infantry in the city at A1",
-      "Draft reduced the cost of 1 Infantry to 2 mood tokens"
+      "Player1: Recruit: Pay 2 mood tokens with Draft",
+      "Draft reduced the cost of 1 Infantry to 2 mood tokens",
+      "Player1: Recruit: Recruit 1 infantry in the city A1"
     ]
   ],
   "undo_limit": 0,

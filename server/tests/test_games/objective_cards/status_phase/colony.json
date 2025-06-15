@@ -391,12 +391,10 @@
         {
           "players": [
             {
-              "index": 1,
-              "items": []
+              "index": 1
             },
             {
-              "index": 1,
-              "items": []
+              "index": 1
             }
           ]
         }

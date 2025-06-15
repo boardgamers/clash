@@ -531,10 +531,10 @@ impl IncidentBuilder {
                     if needed == 0 {
                         return None;
                     }
-                    let mut options =
-                        player
-                            .payment_options()
-                            .sum(p, needed, &[ResourceType::MoodTokens]);
+                    let mut options = player
+                        .with_origin(EventOrigin::Advance(Advance::Myths))
+                        .payment_options()
+                        .sum(p, needed, &[ResourceType::MoodTokens]);
                     options.conversions.push(PaymentConversion::new(
                         vec![ResourcePile::mood_tokens(1)],
                         ResourcePile::empty(),
@@ -558,10 +558,9 @@ impl IncidentBuilder {
             move |game, s, i| {
                 let pile = &s.choice[0];
                 i.player.myths_payment = pile.amount();
-                game.add_info_log_item(&format!(
-                    "{} paid {pile} to avoid the mood change using Myths",
-                    s.player_name
-                ));
+                s.player()
+                    .with_origin(EventOrigin::Advance(Advance::Myths))
+                    .log(game, "Avoid mood change");
             },
         )
     }
@@ -776,10 +775,7 @@ fn exhausted_land(builder: IncidentBuilder) -> IncidentBuilder {
         },
         |game, s, _| {
             let pos = s.choice[0];
-            game.add_info_log_item(&format!(
-                "{} exhausted the land in position {}",
-                s.player_name, pos
-            ));
+            s.log(game, &format!("Exhausted the land in position {pos}",));
             let t = game.map.tiles.get_mut(&pos).expect("tile should exist");
             *t = Terrain::Exhausted(Box::new(t.clone()));
         },
@@ -803,7 +799,6 @@ pub(crate) fn decrease_mod_and_log(
     mood_modifier: MoodModifier,
 ) {
     for &pos in &s.choice {
-        let name = &s.player_name;
         match mood_modifier {
             MoodModifier::Decrease => {
                 game.player_mut(s.player_index)
@@ -811,17 +806,19 @@ pub(crate) fn decrease_mod_and_log(
                     .decrease_mood_state();
                 let mood_state = &game.player(s.player_index).get_city(pos).mood_state;
                 if s.actively_selected {
-                    game.add_info_log_item(&format!(
-                        "{name} selected to decrease the mood in city {pos} to {mood_state}",
-                    ));
+                    s.log(
+                        game,
+                        &format!("Selected to decrease the mood in city {pos} to {mood_state}",),
+                    );
                 } else {
-                    game.add_info_log_item(&format!(
-                        "{name} decreased the mood in city {pos} to {mood_state}",
-                    ));
+                    s.log(
+                        game,
+                        &format!("Decreased the mood in city {pos} to {mood_state}",),
+                    );
                 }
             }
             MoodModifier::MakeAngry => {
-                game.add_info_log_item(&format!("{name} made city {pos} Angry"));
+                s.log(game, &format!("Made city {pos} Angry"));
                 game.player_mut(s.player_index)
                     .get_city_mut(pos)
                     .set_mood_state(MoodState::Angry);

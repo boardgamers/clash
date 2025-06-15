@@ -35,7 +35,10 @@
                   },
                   "type": "Unlimited"
                 }
-              ]
+              ],
+              "origin": {
+                "Wonder": "Pyramids"
+              }
             },
             "activate_city": true,
             "ignore_required_advances": false,
@@ -83,7 +86,10 @@
                     },
                     "type": "Unlimited"
                   }
-                ]
+                ],
+                "origin": {
+                  "Wonder": "Pyramids"
+                }
               },
               "name": "Pay to build wonder",
               "optional": false
@@ -296,7 +302,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -333,11 +339,11 @@
       "Player1 started Great Library"
     ],
     [
-      "Player1 used the Great Library to use Engineering for the turn"
+      "Player1: Great Library: Use Engineering for the turn"
     ],
     [
       "Player1 played the wonder card Pyramids",
-      "Player1 decided to build Pyramids in city C2"
+      "Player1: Build Wonder: Decided to build Pyramids in city C2"
     ]
   ],
   "undo_limit": 0,

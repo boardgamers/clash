@@ -249,7 +249,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -269,7 +269,19 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Sports"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -284,7 +296,8 @@
       "Player1 started Sports at C2"
     ],
     [
-      "Player1 paid 1 culture token to increase happiness in the city at C2 by 1 steps, making it Neutral using Sports"
+      "Player1: Sports: Pay 1 culture token",
+      "Player1: Sports: Increase happiness in the city C2 by 1 steps, making it Neutral using Sports"
     ]
   ],
   "undo_limit": 0,

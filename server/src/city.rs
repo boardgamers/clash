@@ -262,7 +262,7 @@ pub(crate) fn execute_found_city_action(
 ) -> Result<(), String> {
     let player = game.player(player_index);
     game.add_info_log_item(&format!(
-        "{player} founded a city at {}",
+        "{player} founded a city {}",
         player.get_unit(settler).position
     ));
     let settler = remove_unit(player_index, settler, game);
@@ -306,7 +306,7 @@ pub(crate) fn activate_city(position: Position, game: &mut Game) {
 
     if city.is_activated() {
         game.add_info_log_item(&format!(
-            "City at {} became {} because it was activated more than once",
+            "city {} became {} because it was activated more than once",
             position,
             city.mood_state.clone() - 1
         ));

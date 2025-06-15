@@ -59,7 +59,7 @@ fn pestilence() -> Incident {
     .add_simple_persistent_event_listener(
         |event| &mut event.advance,
         11,
-        |game, _, i| {
+        |game, p, i| {
             if i.advance == Advance::Sanitation
                 && game
                     .players
@@ -68,7 +68,7 @@ fn pestilence() -> Incident {
             {
                 game.permanent_effects
                     .retain(|e| e != &PermanentEffect::Pestilence);
-                game.add_info_log_item("Pestilence removed");
+                p.log(game, "Pestilence removed");
             }
         },
     )
@@ -150,21 +150,24 @@ fn epidemics() -> Incident {
 
 pub(crate) fn kill_incident_units(game: &mut Game, s: &SelectedChoice<Vec<u32>>) {
     if s.choice.is_empty() {
-        game.add_info_log_item(&format!("{} declined to kill units", s.player_name));
+        s.log(game, "Declined to kill units");
         return;
     }
 
     let p = game.player(s.player_index);
-    game.add_info_log_item(&format!(
-        "{p} killed units: {}",
-        s.choice
-            .iter()
-            .map(|u| {
-                let unit = p.get_unit(*u);
-                format!("{} at {}", unit.unit_type.name(game), unit.position)
-            })
-            .join(", ")
-    ));
+    s.log(
+        game,
+        &format!(
+            "{p} killed units: {}",
+            s.choice
+                .iter()
+                .map(|u| {
+                    let unit = p.get_unit(*u);
+                    format!("{} at {}", unit.unit_type.name(game), unit.position)
+                })
+                .join(", ")
+        ),
+    );
     kill_units(game, &s.choice, s.player_index, None);
 }
 
@@ -230,12 +233,9 @@ pub(crate) fn famine(
                 // only avoid anger if full amount is paid
                 i.player.payment = ResourcePile::food(lost);
             }
+            player.lose_resources(game, ResourcePile::food(lost));
 
-            player
-                .get_mut(game)
-                .lose_resources(ResourcePile::food(lost));
-
-            game.add_info_log_item(&format!("{player} lost {lost} food to Famine",));
+            player.log(game, &format!("Lost {lost} food",));
         })
         .add_decrease_mood(target, MoodModifier::MakeAngry, move |p, game, i| {
             if player_pred2(p) && i.player.payment.is_empty() {

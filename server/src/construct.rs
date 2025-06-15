@@ -2,6 +2,7 @@ use crate::advance::{Advance, gain_advance_without_payment};
 use crate::city::{City, MoodState, activate_city};
 use crate::city_pieces::Building;
 use crate::consts::MAX_CITY_PIECES;
+use crate::content::ability::construct_event_origin;
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
 use crate::map::Terrain;
@@ -131,12 +132,7 @@ pub(crate) fn execute_construct(
     };
 
     let city_piece = c.city_piece;
-    let payment = &c.payment;
     let city_position = c.city_position;
-
-    game.add_info_log_item(&format!(
-        "{player} paid {payment} to construct a {city_piece} in the city at {city_position}{port_pos}"
-    ));
 
     construct(
         game,
@@ -147,6 +143,12 @@ pub(crate) fn execute_construct(
         cost.activate_city,
     );
     cost.pay(game, &c.payment);
+    game.log_with_origin(
+        player_index,
+        &construct_event_origin(),
+        &format!("Build a {city_piece} in the city {city_position}{port_pos}"),
+    );
+
     on_construct(game, player_index, ConstructInfo::new(c.city_piece));
     Ok(())
 }

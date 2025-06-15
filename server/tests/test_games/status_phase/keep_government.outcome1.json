@@ -4,24 +4,16 @@
     {
       "event_type": {
         "StatusPhase": {
-          "DetermineFirstPlayer": 0
+          "ChangeGovernmentType": true
         }
       },
       "player": 0,
       "last_priority_used": 0,
       "handler": {
         "priority": 0,
-        "request": {
-          "SelectPlayer": {
-            "choices": [
-              0,
-              1
-            ],
-            "description": "Determine the first player"
-          }
-        },
+        "request": "ChangeGovernment",
         "origin": {
-          "Ability": "Determine First Player"
+          "Ability": "Change Government"
         }
       }
     }
@@ -227,7 +219,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Response": {
@@ -242,7 +234,17 @@
                         {}
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {}
+                      },
+                      "origin": {
+                        "Ability": "Change Government"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -254,10 +256,10 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player2 did not raze a city"
+      "Player2: Raze city: Did not raze a city"
     ],
     [
-      "Player1 did not pay to change the government"
+      "Player1: Change Government: Pay nothing"
     ]
   ],
   "undo_limit": 1,

@@ -220,7 +220,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -243,6 +243,20 @@
                   },
                   "completed_objectives": [
                     "Terror Regime"
+                  ],
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "food": 1,
+                          "ore": 1,
+                          "gold": 2
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
+                      }
+                    }
                   ]
                 }
               ]
@@ -255,8 +269,9 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 paid 1 food, 1 ore and 2 gold to recruit 1 settler and 1 infantry in the city at A1 and replaces the unit at C2",
-      "City at A1 became Angry because it was activated more than once",
+      "Player1: Recruit: Pay 1 food, 1 ore and 2 gold",
+      "Player1: Recruit: Recruit 1 settler and 1 infantry in the city A1 and replaces the unit at C2",
+      "city A1 became Angry because it was activated more than once",
       "Player1 completed objective Terror Regime"
     ]
   ],

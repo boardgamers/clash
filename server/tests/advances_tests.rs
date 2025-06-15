@@ -359,7 +359,7 @@ fn test_road_coordinates() {
     let game = &JSON.load_game("roads_unit_test");
     // city units at D8 are 0, 1, 2
 
-    // 3 and 4 are on mountain C8 and can move to the city at D8 (ignoring movement restrictions),
+    // 3 and 4 are on mountain C8 and can move to the city D8 (ignoring movement restrictions),
     // but not both, since the city already has 3 army units
     assert!(get_destinations(game, &[4], "C8").contains(&"D8".to_string()));
     assert!(!get_destinations(game, &[3, 4], "C8").contains(&"D8".to_string()));

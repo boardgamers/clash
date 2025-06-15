@@ -8,7 +8,7 @@ use std::collections::HashSet;
 use crate::combat::move_with_possible_combat;
 use crate::consts::{ARMY_MOVEMENT_REQUIRED_ADVANCE, MOVEMENT_ACTIONS, STACK_LIMIT};
 use crate::content::civilizations::vikings::is_ship_construction_move;
-use crate::content::persistent_events::PersistentEventType;
+use crate::content::persistent_events::{PaymentRequest, PersistentEventType};
 use crate::events::EventOrigin;
 use crate::explore::move_to_unexplored_tile;
 use crate::game::GameState::Movement;
@@ -19,6 +19,7 @@ use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::player_events::MoveInfo;
 use crate::position::Position;
+use crate::resource::pay_cost;
 use crate::unit::{carried_units, get_current_move};
 use crate::wonder::Wonder;
 use itertools::Itertools;
@@ -354,7 +355,12 @@ fn execute_move_action(game: &mut Game, player_index: usize, m: &MoveUnits) -> R
     if c.is_free() {
         assert_eq!(m.payment, ResourcePile::empty(), "payment should be empty");
     } else {
-        game.players[player_index].pay_cost(c, &m.payment);
+        pay_cost(
+            game,
+            player_index,
+            &PaymentRequest::mandatory(dest.cost.clone(), "move units"),
+            &m.payment,
+        );
     }
 
     let current_move = get_current_move(

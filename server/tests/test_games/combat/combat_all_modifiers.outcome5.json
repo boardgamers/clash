@@ -202,7 +202,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Movement": {
@@ -229,7 +229,19 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "ore": 1
+                        }
+                      },
+                      "origin": {
+                        "Advance": "SteelWeapons"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -241,7 +253,27 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {}
+                      },
+                      "origin": {
+                        "Advance": "Siegecraft"
+                      }
+                    },
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "ore": 2
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Siegecraft"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -252,7 +284,19 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "ore": 1
+                        }
+                      },
+                      "origin": {
+                        "Advance": "SteelWeapons"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -300,7 +344,19 @@
                     },
                     "result": "AttackerWins",
                     "city_mood": "Angry"
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "gold": 1
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -320,31 +376,33 @@
       "Defenders: 2 infantry"
     ],
     [
-      "Player1 paid for steel weapons: 1 ore"
+      "Player1: Steel Weapons: Pay 1 ore"
     ],
     [
-      "Player1 paid for siegecraft: 2 ore to cancel the fortress ability to ignore a hit"
+      "Player1: Siegecraft: Pay nothing",
+      "Player1: Siegecraft: Pay 2 ore",
+      "Player1: Siegecraft: Cancel Fortress Ignore Hit"
     ],
     [
-      "Player2 paid for steel weapons: 1 ore"
+      "Player2: Steel Weapons: Pay 1 ore"
     ],
     [
-      "Player1 played a Tactics Card"
+      "Player1: Tactics: Played a Tactics Card"
     ],
     [
-      "Player2 played a Tactics Card",
+      "Player2: Tactics: Played a Tactics Card",
       "Player1 reveals Tactics Card Peltasts",
       "Player2 reveals Tactics Card Encircled",
       "Player1 rolled 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 1 (leader, no bonus) for combined combat value of 22 and gets 2 hits against defending units.",
       "Player1 used the following combat modifiers: steel weapons added 1 combat value, Peltasts rolled a 6 and ignored a hit",
       "Player2 rolled 1 (leader, no bonus), 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 4 and gets 0 hits against attacking units.",
       "Player2 used the following combat modifiers: fortress added one extra die, steel weapons added 1 combat value",
-      "Encircled cannot do damage - opponent has fewer losses",
-      "Player2 has to remove all of their defending units",
+      "Player2: Encircled: Cannot do damage - opponent has fewer losses",
+      "Player2: Choose Casualties: Remove all defending units",
       "Player2 removed 2 infantry",
-      "Attacker wins and captured Player2's city at C1",
-      "Player1 gained 1 gold for capturing a city",
-      "Player1 could not store 1 gold"
+      "Attacker wins and captured Player2's city C1",
+      "Player1: Combat: Gain 1 gold",
+      "Player1: Waste: Could not store 1 gold"
     ]
   ],
   "undo_limit": 6,

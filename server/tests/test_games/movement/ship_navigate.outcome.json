@@ -306,7 +306,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Movement": {
@@ -317,7 +317,29 @@
                         "destination": "A7"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "ideas": 1
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Cartography"
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Cartography"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -330,8 +352,8 @@
   "log": [
     [
       "Player2 sailed 1 ship from B5 to A7",
-      "Player2 gained 1 idea for Cartography",
-      "Player2 gained 1 culture token for Cartography"
+      "Player2: Cartography: Gain 1 idea",
+      "Player2: Cartography: Gain 1 culture token"
     ]
   ],
   "undo_limit": 0,

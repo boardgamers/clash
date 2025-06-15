@@ -1,7 +1,8 @@
 use crate::advance::Advance;
 use crate::game::Game;
-use crate::payment::PaymentOptionsBuilder;
+use crate::payment::{PaymentOptionsBuilder, RewardBuilder};
 use crate::player::{CostTrigger, Player};
+use crate::resource::{gain_resources, lose_resources};
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::SpecialAdvance;
 use crate::wonder::Wonder;
@@ -89,17 +90,11 @@ impl EventPlayer {
     }
 
     pub fn gain_resources(&self, game: &mut Game, resources: ResourcePile) {
-        self.log_gain_resources(game, &resources);
-        self.get_mut(game).gain_resources(resources);
+        gain_resources(game, self.index, resources, self.origin.clone());
     }
 
-    pub fn log_gain_resources(&self, game: &mut Game, resources: &ResourcePile) {
-        game.add_info_log_item(&format!(
-            "{} gained {} for {}",
-            self.name,
-            resources,
-            self.origin.name(game)
-        ));
+    pub fn lose_resources(&self, game: &mut Game, resources: ResourcePile) {
+        lose_resources(game, self.index, resources, self.origin.clone(), vec![]);
     }
 
     #[must_use]
@@ -114,6 +109,15 @@ impl EventPlayer {
     #[must_use]
     pub fn payment_options(&self) -> PaymentOptionsBuilder {
         PaymentOptionsBuilder::new(self.origin.clone())
+    }
+
+    #[must_use]
+    pub fn reward_options(&self) -> RewardBuilder {
+        RewardBuilder::new(self.origin.clone())
+    }
+
+    pub fn log(&self, game: &mut Game, message: &str) {
+        game.log_with_origin(self.index, &self.origin, message);
     }
 }
 

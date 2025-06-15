@@ -4,7 +4,6 @@ use crate::city::MoodState;
 use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::content::custom_actions::CustomActionType::{AbsolutePower, ForcedLabor};
 use crate::content::persistent_events::ResourceRewardRequest;
-use crate::payment::ResourceReward;
 use crate::player::Player;
 use crate::resource_pile::ResourcePile;
 
@@ -30,7 +29,7 @@ fn nationalism() -> AdvanceBuilder {
     .add_resource_request(
         |event| &mut event.recruit,
         1,
-        |_game, _player_index, recruit| {
+        |_game, p, recruit| {
             recruit
                 .units
                 .clone()
@@ -38,7 +37,7 @@ fn nationalism() -> AdvanceBuilder {
                 .iter()
                 .any(|u| u.is_army_unit() || u.is_ship())
                 .then_some(ResourceRewardRequest::new(
-                    ResourceReward::tokens(1),
+                    p.reward_options().tokens(1),
                     "Select token to gain".to_string(),
                 ))
         },
@@ -89,9 +88,7 @@ fn absolute_power() -> AdvanceBuilder {
                 0,
                 |game, p, _| {
                     game.actions_left += 1;
-                    game.add_info_log_item(&format!(
-                        "{p} got an extra action using Absolute Power",
-                    ));
+                    p.log(game, "Gain an extra action using Absolute Power");
                 },
             )
         },
@@ -118,10 +115,7 @@ fn forced_labor() -> AdvanceBuilder {
                 |event| &mut event.custom_action,
                 0,
                 |game, p, _| {
-                    // we check that the action was played
-                    game.add_info_log_item(&format!(
-                        "{p} paid 1 mood token to treat Angry cities as neutral"
-                    ));
+                    p.log(game, "Treating Angry cities as neutral");
                 },
             )
         },

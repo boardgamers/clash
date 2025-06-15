@@ -210,7 +210,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -249,7 +249,21 @@
                         "action_type": "Collect"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "ore": 2,
+                          "gold": 1,
+                          "mood_tokens": 2
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Collect"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -262,11 +276,12 @@
   "log": [
     [
       "Player1 played the action card Production Focus",
-      "Production Focus: You may collect multiple times from the same tile."
+      "Player1: Production Focus: Production Focus: You may collect multiple times from the same tile."
     ],
     [
-      "Player1 collects 2 ore, 2 mood tokens and 1 gold in the city at C2",
-      "Player1 could not store 1 gold"
+      "Player1: Collect: Use city C2",
+      "Player1: Collect: Gain 2 ore, 1 gold and 2 mood tokens",
+      "Player1: Waste: Could not store 1 gold"
     ]
   ],
   "undo_limit": 0,

@@ -13,7 +13,6 @@ use crate::objective_card::{
     gain_objective_card_from_pile, present_objective_cards, status_phase_completable,
 };
 use crate::payment::PaymentOptions;
-use crate::player::gain_resources;
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::wonder::Wonder;
 use crate::{game::Game, player::Player, resource_pile::ResourcePile, utils};
@@ -164,11 +163,7 @@ pub(crate) fn free_advance() -> Ability {
                 Some(AdvanceRequest::new(choices))
             },
             |game, c, _| {
-                game.add_info_log_item(&format!(
-                    "{} advanced {} for free",
-                    c.player_name,
-                    c.choice.name(game)
-                ));
+                c.log(game, &format!("Advanced {} for free", c.choice.name(game)));
                 gain_advance_without_payment(
                     game,
                     c.choice,
@@ -219,13 +214,13 @@ pub(crate) fn raze_city() -> Ability {
             },
             |game, s, _| {
                 if s.choice.is_empty() {
-                    game.add_info_log_item(&format!("{} did not raze a city", s.player_name));
+                    s.log(game, "Did not raze a city");
                     return;
                 }
-                gain_resources(game, s.player_index, ResourcePile::gold(1), |name, pile| {
-                    format!("{name} razed a city and gained {pile}")
-                });
-                game.raze_city(s.choice[0], s.player_index);
+                let pos = s.choice[0];
+                s.log(game, &format!("Razed city at {pos}"));
+                s.player().gain_resources(game, ResourcePile::gold(1));
+                game.raze_city(pos, s.player_index);
             },
         )
         .build()
@@ -307,14 +302,7 @@ where
                 "Pay to change government",
             )])
         },
-        move |game, s, v| {
-            let name = &s.player_name;
-            let cost = &s.choice[0];
-            if cost.is_empty() {
-                game.add_info_log_item(&format!("{name} did not pay to change the government"));
-                return;
-            }
-            game.add_info_log_item(&format!("{name} paid {cost} to change the government"));
+        move |_game, _s, v| {
             set_paid2(v, true);
         },
     )
@@ -330,24 +318,30 @@ where
         move |game, p, action, request, _| {
             if let PersistentEventRequest::ChangeGovernment = &request {
                 if let EventResponse::ChangeGovernmentType(c) = action {
-                    game.add_info_log_item(&format!(
-                        "{p} changed their government from {} to {}",
-                        p.get(game)
-                            .government(game)
-                            .expect("player should have a government before changing it"),
-                        c.new_government
-                    ));
-                    game.add_info_log_item(&format!(
-                        "Additional advances: {}",
-                        if c.additional_advances.is_empty() {
-                            "none".to_string()
-                        } else {
-                            c.additional_advances
-                                .iter()
-                                .map(|a| a.name(game))
-                                .join(", ")
-                        }
-                    ));
+                    p.log(
+                        game,
+                        &format!(
+                            "{p} changed their government from {} to {}",
+                            p.get(game)
+                                .government(game)
+                                .expect("player should have a government before changing it"),
+                            c.new_government
+                        ),
+                    );
+                    p.log(
+                        game,
+                        &format!(
+                            "Additional advances: {}",
+                            if c.additional_advances.is_empty() {
+                                "none".to_string()
+                            } else {
+                                c.additional_advances
+                                    .iter()
+                                    .map(|a| a.name(game))
+                                    .join(", ")
+                            }
+                        ),
+                    );
                     change_government_type(game, p.index, &c);
                     return;
                 }
@@ -450,29 +444,32 @@ pub(crate) fn determine_first_player() -> Ability {
                 }
             },
             |game, s, _| {
-                game.add_info_log_item(&format!(
-                    "{} choose {}",
-                    game.player_name(s.player_index),
-                    if s.choice == game.starting_player_index {
-                        format!(
-                            "{} to remain the staring player",
-                            if s.choice == game.active_player() {
-                                String::new()
-                            } else {
-                                game.player_name(s.choice)
-                            }
-                        )
-                    } else {
-                        format!(
-                            "{} as the new starting player",
-                            if s.choice == game.active_player() {
-                                String::from("themselves")
-                            } else {
-                                game.player_name(s.choice)
-                            }
-                        )
-                    }
-                ));
+                s.log(
+                    game,
+                    &format!(
+                        "{} choose {}",
+                        game.player_name(s.player_index),
+                        if s.choice == game.starting_player_index {
+                            format!(
+                                "{} to remain the staring player",
+                                if s.choice == game.active_player() {
+                                    String::new()
+                                } else {
+                                    game.player_name(s.choice)
+                                }
+                            )
+                        } else {
+                            format!(
+                                "{} as the new starting player",
+                                if s.choice == game.active_player() {
+                                    String::from("themselves")
+                                } else {
+                                    game.player_name(s.choice)
+                                }
+                            )
+                        }
+                    ),
+                );
                 game.starting_player_index = s.choice;
             },
         )
@@ -496,6 +493,7 @@ fn player_that_chooses_next_first_player(players: &[&Player]) -> usize {
 #[cfg(test)]
 mod tests {
     use crate::civilization::Civilization;
+
     use crate::player::Player;
     use crate::resource_pile::ResourcePile;
 
@@ -507,11 +505,11 @@ mod tests {
         expected_player_index: usize,
     ) {
         let mut player0 = Player::new(get_test_civilization(), 0);
-        player0.gain_resources(ResourcePile::mood_tokens(player0_mood));
+        player0.resources += ResourcePile::mood_tokens(player0_mood);
         let mut player1 = Player::new(get_test_civilization(), 1);
-        player1.gain_resources(ResourcePile::mood_tokens(player1_mood));
+        player1.resources += ResourcePile::mood_tokens(player1_mood);
         let mut player2 = Player::new(get_test_civilization(), 2);
-        player2.gain_resources(ResourcePile::mood_tokens(player2_mood));
+        player2.resources += ResourcePile::mood_tokens(player2_mood);
         let players = vec![&player2, &player1, &player0];
         let got = super::player_that_chooses_next_first_player(&players);
         assert_eq!(got, expected_player_index, "{name}");

@@ -7,7 +7,6 @@ use crate::content::persistent_events::{
 };
 use crate::game::Game;
 use crate::incident::{BASE_EFFECT_PRIORITY, IncidentBuilder};
-use crate::payment::ResourceReward;
 use crate::player::{Player, gain_unit, remove_unit};
 use crate::player_events::IncidentTarget;
 use crate::position::Position;
@@ -25,7 +24,8 @@ pub(crate) fn pirates_round_bonus() -> Ability {
                 let c = &r.combat;
                 if c.is_sea_battle(game) && c.opponent(p.index) == get_pirates_player(game).index {
                     Some(ResourceRewardRequest::new(
-                        ResourceReward::sum(r.hits(CombatRole::Attacker), &[ResourceType::Gold]),
+                        p.reward_options()
+                            .sum(r.hits(CombatRole::Attacker), &[ResourceType::Gold]),
                         "-".to_string(),
                     ))
                 } else {
@@ -44,7 +44,7 @@ pub(crate) fn pirates_bonus() -> Ability {
             |game, p, i| {
                 if i.opponent_player(p.index, game).civilization.is_pirates() {
                     Some(ResourceRewardRequest::new(
-                        ResourceReward::tokens(1),
+                        p.reward_options().tokens(1),
                         "Select a reward for fighting the Pirates".to_string(),
                     ))
                 } else {
@@ -120,10 +120,7 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
             },
             |game, s, _| {
                 let pos = s.choice[0];
-                game.add_info_log_item(&format!(
-                    "{} reduced Mood in the city at {}",
-                    s.player_name, pos
-                ));
+                s.log(game, &format!("Reduced Mood in the city {pos}",));
                 game.player_mut(s.player_index)
                     .get_city_mut(pos)
                     .decrease_mood_state();
@@ -158,14 +155,16 @@ fn remove_pirate_ships(builder: IncidentBuilder) -> IncidentBuilder {
         },
         |game, s, _| {
             let pirates = get_pirates_player(game).index;
-            game.add_info_log_item(&format!(
-                "{} removed a Pirate Ships at {}",
-                s.player_name,
-                s.choice
-                    .iter()
-                    .map(|u| game.player(pirates).get_unit(*u).position.to_string())
-                    .join(", ")
-            ));
+            s.log(
+                game,
+                &format!(
+                    "Removed a Pirate Ships at {}",
+                    s.choice
+                        .iter()
+                        .map(|u| game.player(pirates).get_unit(*u).position.to_string())
+                        .join(", ")
+                ),
+            );
             for unit in &s.choice {
                 remove_unit(pirates, *unit, game);
             }
@@ -220,7 +219,7 @@ fn place_pirate_ship(builder: IncidentBuilder, priority: i32, blockade: bool) ->
         |game, s, _| {
             let pirate = get_pirates_player(game).index;
             let pos = s.choice[0];
-            game.add_info_log_item(&format!("Pirates spawned a Pirate Ship at {pos}"));
+            s.log(game, &format!("Pirates spawned a Pirate Ship at {pos}"));
             gain_unit(pirate, pos, UnitType::Ship, game);
         },
     )

@@ -6,7 +6,6 @@ use crate::city_pieces::Building;
 use crate::content::ability::Ability;
 use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::content::persistent_events::ResourceRewardRequest;
-use crate::payment::ResourceReward;
 use crate::resource::ResourceType;
 
 pub(crate) fn science() -> AdvanceGroupInfo {
@@ -45,7 +44,7 @@ pub fn use_observatory() -> Ability {
             |game, p, b| {
                 if b.building == Building::Observatory {
                     gain_action_card_from_pile(game, p.index);
-                    game.add_info_log_item("Observatory gained 1 action card");
+                    p.log(game, "Observatory gained 1 action card");
                 }
             },
         )
@@ -83,7 +82,7 @@ fn medicine() -> AdvanceBuilder {
     .add_resource_request(
         |event| &mut event.recruit,
         0,
-        |_game, _player_index, recruit| {
+        |_game, p, recruit| {
             let types: Vec<ResourceType> = ResourceType::all()
                 .into_iter()
                 .filter(|r| recruit.payment.get(r) > 0 && r.is_resource())
@@ -94,7 +93,7 @@ fn medicine() -> AdvanceBuilder {
             }
 
             Some(ResourceRewardRequest::new(
-                ResourceReward::sum(1, &types),
+                p.reward_options().sum(1, &types),
                 "Select resource to gain back".to_string(),
             ))
         },

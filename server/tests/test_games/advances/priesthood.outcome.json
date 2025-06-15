@@ -279,7 +279,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -288,7 +288,42 @@
                         "payment": {}
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {}
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      },
+                      "modifiers": [
+                        {
+                          "Advance": "Priesthood"
+                        }
+                      ]
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Math"
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "ideas": 1
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Philosophy"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -300,10 +335,11 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player2 paid nothing to get the Math advance",
+      "Player2: Advance: Pay nothing with Priesthood",
       "Priesthood reduced the cost to 0",
-      "Player2 gained 1 culture token as advance bonus",
-      "Player2 gained 1 idea for Philosophy"
+      "Player2: Advance: Gain Math",
+      "Player2: Math: Gain 1 culture token",
+      "Player2: Philosophy: Gain 1 idea"
     ]
   ],
   "undo_limit": 0,

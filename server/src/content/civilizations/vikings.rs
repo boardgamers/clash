@@ -97,18 +97,19 @@ fn ship_construction() -> SpecialAdvanceInfo {
                 unload_units += &unit.unit_type;
             }
             if !unload_units.is_empty() {
-                game.add_info_log_item(&format!(
-                    "{} unloaded {} from ships",
-                    s.player_name,
-                    unload_units.to_string(None)
-                ));
+                s.log(
+                    game,
+                    &format!("Unloaded {} from ships", unload_units.to_string(None)),
+                );
             }
-            game.add_info_log_item(&format!(
-                "{} converted {} to {}",
-                s.player_name,
-                Units::new(0, 0, all_ships.len() as u8, 0, 0, None).to_string(None),
-                units.to_string(None)
-            ));
+            s.log(
+                game,
+                &format!(
+                    "Converted {} to {}",
+                    Units::new(0, 0, all_ships.len() as u8, 0, 0, None).to_string(None),
+                    units.to_string(None)
+                ),
+            );
         },
     )
     .add_transient_event_listener(
@@ -222,23 +223,16 @@ pub(crate) fn lose_raid_resource() -> Ability {
             p.event_info
                 .remove(RAID)
                 .is_some()
-                .then_some(vec![PaymentRequest::mandatory(
-                    c,
-                    "Pay 1 resource to Viking Raids",
-                )])
+                .then_some(vec![PaymentRequest::mandatory(c, "Pay 1 resource")])
         },
         |game, s, ()| {
-            game.add_info_log_item(&format!(
-                "{} lost {} to Viking Raids",
-                s.player_name, s.choice[0]
-            ));
+            s.log(game, &format!("Lose {}", s.choice[0]));
         },
     )
     .build()
 }
 
 pub(crate) fn add_raid_bonus(game: &mut Game, player: usize, routes: &[TradeRoute]) {
-    let name = game.player_name(player);
     for r in routes {
         let u = game.player(player).get_unit(r.unit_id);
         if u.is_ship() && u.position.distance(r.to) == 1 {
@@ -251,7 +245,11 @@ pub(crate) fn add_raid_bonus(game: &mut Game, player: usize, routes: &[TradeRout
                 .insert(RAID.to_string(), "true".to_string())
                 .is_none()
             {
-                game.add_info_log_item(&format!("{name} raided {opponent_name} at {position}",));
+                game.log_with_origin(
+                    player,
+                    &EventOrigin::SpecialAdvance(SpecialAdvance::Raiding),
+                    &format!("Raided {opponent_name} at {position}"),
+                );
             }
         }
     }
@@ -278,15 +276,12 @@ fn runes() -> SpecialAdvanceInfo {
                 let p = game.player_mut(s.player_index);
                 p.destroyed_structures.add_building(Building::Obelisk);
                 p.gain_objective_victory_points(1.0, &s.origin);
-                game.add_info_log_item(&format!(
-                    "{} converted an Obelisk to a Rune Stone for 1 objective point",
-                    s.player_name
-                ));
+                s.log(
+                    game,
+                    "Converted an Obelisk to a Rune Stone for 1 objective point",
+                );
             } else {
-                game.add_info_log_item(&format!(
-                    "{} did not convert an Obelisk to a Rune Stone",
-                    s.player_name
-                ));
+                s.log(game, "Did not convert an Obelisk to a Rune Stone");
             }
         },
     )
@@ -332,10 +327,10 @@ fn ruler_of_the_north() -> LeaderAbility {
     );
     let o = b.get_key().clone();
     let o2 = o.clone();
-    b.add_ability_initializer(move |game, player_index, _| {
+    b.add_initializer(move |game, player_index, _| {
         set_knut_points(game, player_index, None, &o);
     })
-    .add_ability_deinitializer(move |game, player_index| {
+    .add_deinitializer(move |game, player_index| {
         set_knut_points(game, player_index, None, &o2);
     })
     .add_transient_event_listener(
@@ -411,7 +406,7 @@ fn new_colonies() -> LeaderAbility {
                         .collect_vec();
 
                     let m = MoveUnits::new(units, to, None, ResourcePile::empty());
-                    game.add_info_log_item(&move_action_log(game, p, &m));
+                    s.log(game, &move_action_log(game, p, &m));
 
                     move_with_possible_combat(game, s.player_index, &m);
                 },
@@ -476,8 +471,7 @@ fn use_legendary_explorer(b: AbilityBuilder) -> AbilityBuilder {
                 },
             );
 
-            let name = player.get_name();
-            game.add_info_log_item(&format!("{name} placed an explorer token at {position}",));
+            p.log(game, &format!("Place an explorer token at {position}"));
         },
     )
 }

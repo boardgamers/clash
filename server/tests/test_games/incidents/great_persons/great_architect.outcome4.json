@@ -204,7 +204,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -215,7 +215,29 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "food": 2
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -226,7 +248,19 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Incident": 55
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -258,7 +292,23 @@
                       ]
                     }
                   },
-                  "wonder_built": "Pyramids"
+                  "wonder_built": "Pyramids",
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "food": 2,
+                          "wood": 3,
+                          "ore": 6,
+                          "gold": 1,
+                          "culture_tokens": 2
+                        }
+                      },
+                      "origin": {
+                        "Wonder": "Pyramids"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -270,8 +320,9 @@
   "action_log_index": 5,
   "log": [
     [
-      "Player1 paid 2 food to get the Storage advance",
-      "Player1 gained 1 mood token as advance bonus"
+      "Player1: Advance: Pay 2 food",
+      "Player1: Advance: Gain Storage",
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Great Architect",
@@ -279,17 +330,19 @@
       "No valid positions for Pirate Ship"
     ],
     [
-      "Player1 gained Great Architect for 1 culture token"
+      "Player1: Great Architect: Pay 1 culture token",
+      "Player1: Great Architect: Gain Great Architect for 1 culture token"
     ],
     [
       "Player1 played the action card Great Architect",
       "Player1 played the wonder card Pyramids"
     ],
     [
-      "Player1 decided to build Pyramids in city A1"
+      "Player1: Build Wonder: Decided to build Pyramids in city A1"
     ],
     [
-      "Player1 built Pyramids in city A1 for 2 food, 3 wood, 6 ore, 1 gold and 2 culture tokens"
+      "Player1: Pyramids: Pay 2 food, 3 wood, 6 ore, 1 gold and 2 culture tokens",
+      "Player1: Build Wonder: Built Pyramids in city A1 for 2 food, 3 wood, 6 ore, 1 gold and 2 culture tokens"
     ]
   ],
   "undo_limit": 1,

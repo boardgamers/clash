@@ -271,7 +271,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -290,7 +290,29 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Theaters"
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Theaters"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -305,7 +327,8 @@
       "Player1 started Theaters"
     ],
     [
-      "Player1 used Theaters to convert 1 culture token into 1 mood token"
+      "Player1: Theaters: Pay 1 culture token",
+      "Player1: Theaters: Gain 1 mood token"
     ]
   ],
   "undo_limit": 0,

@@ -254,7 +254,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -271,7 +271,19 @@
                         "food": 4
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "food": 4
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Danegeld"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -286,10 +298,10 @@
       "Player1 started Danegeld"
     ],
     [
-      "Player1 gained 4 food for Danegeld",
+      "Player1: Danegeld: Gain 4 food",
       "Player1 activates the city E2 to collect taxes",
-      "City at E2 became Neutral because it was activated more than once",
-      "Player1 could not store 4 food"
+      "city E2 became Neutral because it was activated more than once",
+      "Player1: Waste: Could not store 4 food"
     ]
   ],
   "undo_limit": 0,

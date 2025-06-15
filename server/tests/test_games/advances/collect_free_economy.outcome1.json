@@ -196,7 +196,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -234,7 +234,30 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Advance": "FreeEconomy"
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "ore": 1,
+                          "gold": 1
+                        }
+                      },
+                      "origin": {
+                        "Advance": "FreeEconomy"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -249,10 +272,11 @@
       "Player1 has to pay 1 mood token for Free Economy"
     ],
     [
-      "Player1 paid 1 mood token for Free Economy",
-      "Player1 collects 1 ore and 1 ore for a total of 2 ore in the city at C2 using Free Economy",
+      "Player1: Free Economy: Pay 1 mood token",
+      "Player1: Free Economy: Use city C2",
+      "Player1: Free Economy: Gain 1 ore and 1 gold",
       "Metallurgy converted 1 ore to 1 gold",
-      "Player1 could not store 1 ore and 1 gold"
+      "Player1: Waste: Could not store 1 ore and 1 gold"
     ]
   ],
   "undo_limit": 0,

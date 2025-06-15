@@ -208,7 +208,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -227,7 +227,29 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "food": 2
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Sanitation"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -243,9 +265,9 @@
       "Player1 has to pay 2 ideas for Aqueduct"
     ],
     [
-      "Player1 paid 2 food for Aqueduct",
-      "Player1 uses Aqueduct to gain Sanitation as a free action",
-      "Player1 gained 1 mood token as advance bonus"
+      "Player1: Advance: Pay 2 food",
+      "Player1: Aqueduct: Gain Sanitation as a free action",
+      "Player1: Sanitation: Gain 1 mood token"
     ]
   ],
   "undo_limit": 0,

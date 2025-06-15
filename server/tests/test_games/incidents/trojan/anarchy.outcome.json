@@ -201,7 +201,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -212,7 +212,29 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "gold": 2
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -224,12 +246,13 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 paid 2 gold to get the Storage advance",
-      "Player1 gained 1 mood token as advance bonus"
+      "Player1: Advance: Pay 2 gold",
+      "Player1: Advance: Gain Storage",
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Anarchy",
-      "Player1 lost 1 government advances due to Anarchy - adding 1 victory points"
+      "Player1: Anarchy: Lose 1 government advances due to Anarchy - adding 1 victory points"
     ]
   ],
   "undo_limit": 1,

@@ -209,7 +209,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -248,7 +248,21 @@
                         "action_type": "Collect"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "wood": 1,
+                          "ore": 1,
+                          "mood_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Collect"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -261,10 +275,11 @@
   "log": [
     [
       "Player1 played the action card Overproduction",
-      "Player1 can use Overproduction to collect from 2 additional tiles."
+      "Player1: Overproduction: Can use Overproduction to collect from 2 additional tiles."
     ],
     [
-      "Player1 collects 1 ore, 1 wood and 1 mood token in the city at C2"
+      "Player1: Collect: Use city C2",
+      "Player1: Collect: Gain 1 wood, 1 ore and 1 mood token"
     ]
   ],
   "undo_limit": 0,

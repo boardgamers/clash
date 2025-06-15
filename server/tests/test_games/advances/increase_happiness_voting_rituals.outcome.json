@@ -248,7 +248,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -274,7 +274,27 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "food": 1,
+                          "ore": 1,
+                          "ideas": 3,
+                          "gold": 1
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Voting"
+                      },
+                      "modifiers": [
+                        {
+                          "Advance": "Rituals"
+                        }
+                      ]
+                    }
+                  ]
                 }
               ]
             }
@@ -287,8 +307,9 @@
   "log": [
     [
       "Player1 has to pay 1 mood token for Voting",
-      "Player1 paid 1 food, 1 ore, 3 ideas and 1 gold to increase happiness in the city at C2 by 1 steps, making it Neutral and the city at B3 by 2 steps, making it Happy using Voting",
-      "Rituals allows spending any resource as a substitute for mood tokens"
+      "Player1: Voting: Pay 1 food, 1 ore, 3 ideas and 1 gold with Rituals",
+      "Rituals allows spending any resource as a substitute for mood tokens",
+      "Player1: Voting: Increase happiness in the city C2 by 1 steps, making it Neutral and the city B3 by 2 steps, making it Happy using Voting"
     ]
   ],
   "undo_limit": 0,

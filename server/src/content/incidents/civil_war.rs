@@ -100,10 +100,7 @@ fn civil_war(id: u8) -> Incident {
                 .next_back()
                 .expect("infantry should exist")
                 .id;
-            game.add_info_log_item(&format!(
-                "{} killed an Infantry in {}",
-                s.player_name, position
-            ));
+            s.log(game, &format!("Killed an Infantry in {position}",));
             kill_units(game, &[unit], s.player_index, None);
         },
     )
@@ -136,9 +133,16 @@ fn revolution() -> Incident {
         "Kill a unit to avoid losing an action",
         |game, _player| can_lose_action(game),
     );
-    b = b.add_simple_incident_listener(IncidentTarget::ActivePlayer, 2, |game, player, i| {
+    b = b.add_simple_incident_listener(IncidentTarget::ActivePlayer, 2, |game, p, i| {
         if can_lose_action(game) && i.player.sacrifice == 0 {
-            lose_action(game, player.index);
+            if get_status_phase(game).is_some() {
+                p.log(game, "Lose an action for the next turn");
+                game.permanent_effects
+                    .push(PermanentEffect::CivilWarLoseAction(p.index));
+            } else {
+                p.log(game, "Lose an action for Revolution");
+                game.actions_left -= 1;
+            }
         }
     });
     b = kill_unit_for_revolution(
@@ -201,18 +205,6 @@ fn can_lose_action(game: &Game) -> bool {
     get_status_phase(game).is_some() || game.actions_left > 0
 }
 
-fn lose_action(game: &mut Game, player: usize) {
-    let name = game.player_name(player);
-    if get_status_phase(game).is_some() {
-        game.add_info_log_item(&format!("{name} lost an action for the next turn"));
-        game.permanent_effects
-            .push(PermanentEffect::CivilWarLoseAction(player));
-    } else {
-        game.add_info_log_item(&format!("{name} lost an action for Revolution"));
-        game.actions_left -= 1;
-    }
-}
-
 #[allow(clippy::float_cmp)]
 fn uprising() -> Incident {
     Incident::builder(
@@ -248,13 +240,14 @@ fn uprising() -> Incident {
             let pile = &s.choice[0];
             let v = pile.amount() as f32 / 2_f32;
             player.gain_event_victory_points(v, &s.origin);
-            game.add_info_log_item(&format!(
-                "{} paid {} to gain {} victory point{}",
-                s.player_name,
-                pile,
-                v,
-                if v == 1.0 { "" } else { "s" }
-            ));
+            s.log(
+                game,
+                &format!(
+                    "Gain {} victory point{}",
+                    v,
+                    if v == 1.0 { "" } else { "s" }
+                ),
+            );
         },
     )
     .build()

@@ -209,7 +209,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -233,7 +233,29 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "ideas": 2
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Cartography"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -251,7 +273,19 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "ideas": 2
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -266,17 +300,17 @@
       "Player1 played the action card Synergies"
     ],
     [
-      "Player1 selected Cartography as first advance for Synergies."
+      "Player1: Synergies: Selected Cartography as first advance"
     ],
     [
-      "Player1 paid 2 ideas for advance Cartography",
-      "Player1 gained 1 culture token as advance bonus"
+      "Player1: Advance: Pay 2 ideas",
+      "Player1: Cartography: Gain 1 culture token"
     ],
     [
-      "Player1 selected WarShips as second advance for Synergies."
+      "Player1: Synergies: Selected WarShips as second advance"
     ],
     [
-      "Player1 paid 2 ideas for advance WarShips"
+      "Player1: Advance: Pay 2 ideas"
     ]
   ],
   "undo_limit": 0,

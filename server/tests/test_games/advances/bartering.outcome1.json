@@ -193,7 +193,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -210,7 +210,19 @@
                         "gold": 1
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "gold": 1
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Bartering"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -223,11 +235,11 @@
   "log": [
     [
       "Player1 started Bartering",
-      "Player1 discarded Advance/Peltasts for 1 gold or 1 culture token"
+      "Player1: Bartering: Discard Advance/Peltasts for 1 gold or 1 culture token"
     ],
     [
-      "Player1 gained 1 gold for Bartering",
-      "Player1 could not store 1 gold"
+      "Player1: Bartering: Gain 1 gold",
+      "Player1: Waste: Could not store 1 gold"
     ]
   ],
   "undo_limit": 0,

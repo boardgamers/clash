@@ -77,7 +77,7 @@ fn basic_actions() {
     assert_eq!(ResourcePile::culture_tokens(1), player.resources);
     assert_eq!(1, game.actions_left);
 
-    game.players[0].gain_resources(ResourcePile::new(2, 4, 4, 0, 2, 2, 3));
+    game.players[0].resources += ResourcePile::new(2, 4, 4, 0, 2, 2, 3);
     let city_position = Position::new(0, 0);
     game.players[0].cities.push(City::new(0, city_position));
     game.players[0].advances.insert(advance::Advance::Rituals);
@@ -153,13 +153,13 @@ fn basic_actions() {
     assert!(
         player
             .try_get_city(city_position)
-            .expect("player should have a city at this position")
+            .expect("player should have a city this position")
             .is_activated()
     );
     assert_eq!(0, game.actions_left);
     let mut game = game_api::execute(game, Action::Playing(EndTurn), 0);
     let player = &mut game.players[0];
-    player.gain_resources(ResourcePile::food(1));
+    player.resources += ResourcePile::food(1);
     let recruit_action = Action::Playing(Recruit(recruit::Recruit::new(
         &Units::new(1, 0, 0, 0, 0, None),
         city_position,
@@ -199,7 +199,7 @@ fn assert_undo(
     assert_eq!(can_redo, game.can_redo(), "can_redo");
     assert_eq!(
         action_log_len,
-        current_player_turn_log(game).items.len(),
+        current_player_turn_log(game).actions.len(),
         "action_log_len"
     );
     assert_eq!(action_log_index, game.action_log_index, "action_log_index");
@@ -222,7 +222,7 @@ fn undo() {
     game.players[0]
         .cities
         .push(City::new(0, Position::new(0, 0)));
-    game.players[0].gain_resources(ResourcePile::mood_tokens(2));
+    game.players[0].resources += ResourcePile::mood_tokens(2);
     game.players[0].cities[0].decrease_mood_state();
 
     assert_undo(&game, false, false, 0, 0, 0);

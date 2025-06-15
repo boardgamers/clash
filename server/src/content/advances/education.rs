@@ -7,7 +7,7 @@ use crate::content::ability::Ability;
 use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::content::persistent_events::PaymentRequest;
 use crate::objective_card::draw_and_log_objective_card_from_pile;
-use crate::player::gain_resources;
+use crate::resource::gain_resources;
 use crate::resource_pile::ResourcePile;
 
 pub(crate) fn education() -> AdvanceGroupInfo {
@@ -31,7 +31,7 @@ fn writing() -> AdvanceBuilder {
     )
     .with_advance_bonus(CultureToken)
     .with_unlocked_building(Building::Academy)
-    .add_one_time_ability_initializer(|game, player_index| {
+    .add_once_initializer(|game, player_index| {
         gain_action_card_from_pile(game, player_index);
         // can't gain objective card directly, because the "combat_end" listener might
         // currently being processed ("teach us now")
@@ -114,32 +114,23 @@ fn free_education() -> AdvanceBuilder {
         |game, s, _| {
             let payment = &s.choice[0];
             if payment.is_empty() {
-                game.add_info_log_item(&format!(
-                    "{} declined to pay for free education",
-                    s.player_name
-                ));
                 return;
             }
-            gain_resources(
-                game,
-                s.player_index,
-                ResourcePile::mood_tokens(1),
-                |name, pile| format!("{name} paid {payment} for free education to gain {pile}",),
-            );
+            s.player()
+                .gain_resources(game, ResourcePile::mood_tokens(1));
         },
     )
 }
 
 fn philosophy() -> AdvanceBuilder {
-    AdvanceInfo::builder(
+    let b = AdvanceInfo::builder(
         Advance::Philosophy,
         "Philosophy",
         "Immediately gain 1 idea after getting a Science advance",
-    )
-    .add_one_time_ability_initializer(|game, player_index| {
-        gain_resources(game, player_index, ResourcePile::ideas(1), |name, pile| {
-            format!("{name} gained {pile} from Philosophy")
-        });
+    );
+    let origin = b.get_key().clone();
+    b.add_once_initializer(move |game, player_index| {
+        gain_resources(game, player_index, ResourcePile::ideas(1), origin.clone());
     })
     .add_simple_persistent_event_listener(
         |event| &mut event.advance,

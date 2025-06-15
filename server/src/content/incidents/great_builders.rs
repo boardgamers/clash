@@ -46,12 +46,13 @@ pub(crate) fn great_engineer() -> ActionCard {
                 game.permanent_effects
                     .push(Construct(ConstructEffect::GreatEngineer));
                 game.actions_left += 1; // to offset the action spent for building
-                game.add_info_log_item(
+                s.log(
+                    game,
                     "Great Engineer: You may build a building in a city without \
                     spending an action and without activating it.",
                 );
             } else {
-                game.add_info_log_item("Great Engineer: You decided not to use the ability.");
+                s.log(game, "Great Engineer: You decided not to use the ability.");
             }
         },
     )
@@ -68,7 +69,7 @@ pub(crate) fn can_construct_any_building(game: &Game, p: &Player) -> bool {
 }
 
 pub(crate) fn construct_only() -> Ability {
-    Ability::builder("construct only", "-")
+    Ability::builder("Construct Only", "-")
         .add_transient_event_listener(
             |event| &mut event.is_playing_action_available,
             2,

@@ -36,10 +36,13 @@ fn pandemics() -> Incident {
         IncidentTarget::AllPlayers,
         2,
         |game, p, i| {
-            game.add_info_log_item(&format!(
-                "{p} has to lose a total of {} units, cards, and resources",
-                pandemics_cost(p.get(game))
-            ));
+            p.log(
+                game,
+                &format!(
+                    "Lose a total of {} units, cards, and resources",
+                    pandemics_cost(p.get(game))
+                ),
+            );
 
             let player = p.get(game);
             Some(UnitsRequest::new(
@@ -70,19 +73,17 @@ fn pandemics() -> Incident {
                 match id {
                     HandCard::ActionCard(a) => {
                         discard_action_card(game, s.player_index, *a);
-                        game.add_info_log_item(&format!(
-                            "{} discarded {}",
-                            s.player_name,
-                            game.cache.get_action_card(*a).name()
-                        ));
+                        s.log(
+                            game,
+                            &format!("Discard {}", game.cache.get_action_card(*a).name()),
+                        );
                     }
                     HandCard::ObjectiveCard(o) => {
                         discard_objective_card(game, s.player_index, *o);
-                        game.add_info_log_item(&format!(
-                            "{} discarded {}",
-                            s.player_name,
-                            game.cache.get_objective_card(*o).name()
-                        ));
+                        s.log(
+                            game,
+                            &format!("Discard {}", game.cache.get_objective_card(*o).name()),
+                        );
                     }
                     HandCard::Wonder(_) => panic!("Unexpected card type"),
                 }
@@ -110,7 +111,7 @@ fn pandemics() -> Incident {
             )])
         },
         |game, s, _| {
-            game.add_info_log_item(&format!("{} lost {}", s.player_name, s.choice[0]));
+            s.log(game, &format!("Lose {}", s.choice[0]));
         },
     )
     .build()
@@ -187,7 +188,7 @@ fn black_death() -> Incident {
         |game, s, _| {
             kill_incident_units(game, s);
             let vp = s.choice.len() as f32;
-            game.add_info_log_item(&format!("{} gained {} victory points", s.player_name, vp));
+            s.log(game, &format!("Gain {vp} victory points"));
             game.player_mut(s.player_index)
                 .gain_event_victory_points(vp, &s.origin);
         },
@@ -257,12 +258,10 @@ fn fire() -> Incident {
                 .collect_vec();
             if cities.is_empty() {
                 if player.resources.wood > 0 {
-                    game.add_info_log_item(&format!("{p} lost 1 wood"));
+                    p.log(game, "Lose 1 wood");
                     return None;
                 }
-                game.add_info_log_item(&format!(
-                    "{p} has no cities on a Forest and no wood to lose"
-                ));
+                p.log(game, "No cities on a Forest and no wood to lose");
                 return None;
             }
             let needed = 1..=1;

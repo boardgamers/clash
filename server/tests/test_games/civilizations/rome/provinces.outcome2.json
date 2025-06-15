@@ -259,7 +259,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -270,7 +270,19 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "food": 2
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -299,7 +311,19 @@
                     },
                     "result": "AttackerWins",
                     "city_mood": "Neutral"
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "gold": 2
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -310,7 +334,19 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "SpecialAdvance": "Provinces"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -322,16 +358,18 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player1 paid 2 food to get the Voting advance",
+      "Player1: Advance: Pay 2 food",
+      "Player1: Advance: Gain Voting",
       "Player1 unlocked Provinces"
     ],
     [
-      "Player1 marched 1 infantry from C2 to B2 and captured Player2's city at B2",
-      "Player1 gained 2 gold for capturing a city"
+      "Player1 marched 1 infantry from C2 to B2 and captured Player2's city B2",
+      "Player1: Combat: Gain 2 gold"
     ],
     [
-      "Provinces made the city Happy instead of Angry for 1 culture token",
-      "Player2 gained 1 free Settler Unit at C1 for losing a city"
+      "Player1: Provinces: Pay 1 culture token",
+      "Player1: Provinces: Provinces made the city Happy instead of Angry for 1 culture token",
+      "Player2: Place Settler: Gain 1 free Settler Unit at C1 for losing a city"
     ]
   ],
   "undo_limit": 0,

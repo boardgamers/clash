@@ -376,3 +376,15 @@ pub(crate) fn is_base_or_modifier(
         action_type => action_type == base_type,
     }
 }
+
+pub(crate) fn custom_action_modifier_event_origin(
+    base_action_origin: EventOrigin,
+    action_type: &PlayingActionType,
+    player: &Player,
+) -> EventOrigin {
+    if let PlayingActionType::Custom(c) = action_type {
+        c.playing_action_type().event_origin(player)
+    } else {
+        base_action_origin
+    }
+}

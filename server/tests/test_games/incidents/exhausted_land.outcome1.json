@@ -238,13 +238,25 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Response": {
                       "SelectAdvance": "Storage"
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -253,7 +265,29 @@
                         "B2"
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "food": 2
+                        }
+                      },
+                      "origin": {
+                        "Incident": 13
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "food": 2
+                        }
+                      },
+                      "origin": {
+                        "Incident": 13
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -265,17 +299,17 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 advanced Storage for free",
-      "Player1 gained 1 mood token as advance bonus"
+      "Player1: Free Advance: Advanced Storage for free",
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: An awesome year"
     ],
     [
-      "Player1 exhausted the land in position B2",
-      "Player1 gained 2 food for An awesome year",
-      "Player2 gained 2 food for An awesome year",
-      "Player2 could not store 1 food"
+      "Player1: An awesome year: Exhausted the land in position B2",
+      "Player1: An awesome year: Gain 2 food",
+      "Player2: An awesome year: Gain 2 food",
+      "Player2: Waste: Could not store 1 food"
     ]
   ],
   "undo_limit": 2,

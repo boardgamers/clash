@@ -1,6 +1,5 @@
 use crate::content::persistent_events::{PositionRequest, ResourceRewardRequest};
 use crate::incident::{Incident, IncidentBaseEffect, IncidentBuilder};
-use crate::payment::ResourceReward;
 use crate::player::gain_unit;
 use crate::player_events::IncidentTarget;
 use crate::resource::ResourceType;
@@ -133,13 +132,12 @@ fn good_year(mut builder: IncidentBuilder, amount: u8, good_year_type: &GoodYear
         GoodYearType::Distribute | GoodYearType::ActivePlayer => IncidentTarget::ActivePlayer,
     };
 
-    builder =
-        builder.add_incident_resource_request(role, 10, move |_game, _player_index, _incident| {
-            Some(ResourceRewardRequest::new(
-                ResourceReward::sum(amount, &[ResourceType::Food]),
-                "-".to_string(),
-            ))
-        });
+    builder = builder.add_incident_resource_request(role, 10, move |_game, p, _incident| {
+        Some(ResourceRewardRequest::new(
+            p.reward_options().sum(amount, &[ResourceType::Food]),
+            "-".to_string(),
+        ))
+    });
 
     if matches!(good_year_type, GoodYearType::Distribute) {
         for i in 0..amount {
@@ -185,10 +183,13 @@ pub(crate) fn select_player_to_gain_settler(mut b: IncidentBuilder) -> IncidentB
         |p, _, _| p.available_units().settlers > 0 && !p.cities.is_empty(),
         12,
         |game, c, i| {
-            game.add_info_log_item(&format!(
-                "{} was selected to gain 1 settler.",
-                game.player_name(c.choice)
-            ));
+            c.log(
+                game,
+                &format!(
+                    "{} was selected to gain 1 settler.",
+                    game.player_name(c.choice)
+                ),
+            );
             i.selected_player = Some(c.choice);
         },
     );
@@ -215,7 +216,7 @@ fn select_settler(b: IncidentBuilder, priority: i32, target: IncidentTarget) -> 
         },
         |game, s, _| {
             let pos = s.choice[0];
-            game.add_info_log_item(&format!("{} gained 1 settler in {}", s.player_name, pos));
+            s.log(game, &format!("Gained 1 settler in {pos}"));
             gain_unit(s.player_index, pos, UnitType::Settler, game);
         },
     )
@@ -241,7 +242,7 @@ pub(crate) fn successful_year() -> Incident {
         let max_cities = player_to_city_num.iter().max().unwrap_or(&0);
         if min_cities == max_cities {
             return Some(ResourceRewardRequest::new(
-                ResourceReward::sum(1, &[ResourceType::Food]),
+                p.reward_options().sum(1, &[ResourceType::Food]),
                 "-".to_string(),
             ));
         }
@@ -249,7 +250,8 @@ pub(crate) fn successful_year() -> Incident {
         let cities = p.get(game).cities.len();
         if cities == *min_cities {
             Some(ResourceRewardRequest::new(
-                ResourceReward::sum((max_cities - min_cities) as u8, &[ResourceType::Food]),
+                p.reward_options()
+                    .sum((max_cities - min_cities) as u8, &[ResourceType::Food]),
                 "-".to_string(),
             ))
         } else {

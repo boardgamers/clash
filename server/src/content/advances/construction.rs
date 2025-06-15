@@ -29,7 +29,7 @@ fn engineering() -> AdvanceBuilder {
         "Engineering",
         "Immediately draw 1 wonder card. May Construct wonders in happy cities",
     )
-    .add_one_time_ability_initializer(draw_wonder_card)
+    .add_once_initializer(draw_wonder_card)
 }
 
 fn sanitation() -> AdvanceBuilder {

@@ -4,6 +4,7 @@ use crate::city::City;
 use crate::city_pieces::Building;
 use crate::consts::INFLUENCE_MIN_ROLL;
 use crate::content::ability::Ability;
+use crate::content::custom_actions::custom_action_modifier_event_origin;
 use crate::content::persistent_events::{
     PaymentRequest, PersistentEventType, SelectedStructure, Structure,
 };
@@ -124,14 +125,17 @@ pub(crate) fn execute_influence_culture_attempt(
     let city = if start == target_city_position {
         String::new()
     } else {
-        format!(" with the city at {start}")
+        format!(" with the city {start}")
     };
     let range_boost_cost = &info.range_boost_cost;
     // this cost can't be changed by the player
     let cost = if range_boost_cost.is_free() {
         String::new()
     } else {
-        format!(" and paid {} to boost the range", range_boost_cost.default)
+        format!(
+            " and may pay {} to boost the range",
+            range_boost_cost.default
+        )
     };
     let city_piece = match s.structure {
         Structure::CityCenter => "City Center",
@@ -171,7 +175,7 @@ pub(crate) fn use_cultural_influence() -> Ability {
             |game, p, info| {
                 let cost = &info.range_boost_cost;
                 if cost.is_free() {
-                    info.roll_boost_cost = range_boost_paid(game, info, p.index);
+                    info.roll_boost_cost = range_boost_cost(game, info, p.index);
                     return None;
                 }
 
@@ -181,7 +185,7 @@ pub(crate) fn use_cultural_influence() -> Ability {
                 )])
             },
             |game, s, info| {
-                info.roll_boost_cost = range_boost_paid(game, info, s.player_index);
+                info.roll_boost_cost = range_boost_cost(game, info, s.player_index);
             },
         )
         .add_payment_request_listener(
@@ -200,7 +204,7 @@ fn roll_boost_paid(
     info: &mut InfluenceCultureInfo,
 ) {
     let a = current_player_turn_log(game)
-        .items
+        .actions
         .iter()
         .rev()
         .find_map(|l| {
@@ -226,11 +230,11 @@ fn roll_boost_paid(
         return;
     }
 
-    game.add_info_log_item(&format!(
-        "{player_name} paid {payment} to increase the dice roll \
-        and proceed with the cultural influence",
-    ));
-
+    game.log_with_origin(
+        player_index,
+        &info.origin,
+        "Paying to increase the dice roll",
+    );
     influence_culture(game, player_index, info);
 }
 
@@ -266,7 +270,7 @@ fn roll_boost_payment(
     )])
 }
 
-fn range_boost_paid(
+fn range_boost_cost(
     game: &mut Game,
     info: &mut InfluenceCultureInfo,
     player_index: usize,
@@ -576,11 +580,9 @@ pub(crate) fn influence_event_origin(
     action_type: &PlayingActionType,
     player: &Player,
 ) -> EventOrigin {
-    match action_type {
-        PlayingActionType::InfluenceCultureAttempt => {
-            EventOrigin::Ability("Influence Culture Attempt".to_string())
-        }
-        PlayingActionType::Custom(c) => c.playing_action_type().event_origin(player),
-        _ => panic!("Unexpected action type for influence culture event origin: {action_type:?}"),
-    }
+    custom_action_modifier_event_origin(
+        EventOrigin::Ability("Influence Culture".to_string()),
+        action_type,
+        player,
+    )
 }

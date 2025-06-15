@@ -222,7 +222,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -233,7 +233,29 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "gold": 2
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -284,7 +306,19 @@
                     },
                     "result": "AttackerWins",
                     "city_mood": "Angry"
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "gold": 1
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -296,8 +330,9 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player1 paid 2 gold to get the Storage advance",
-      "Player1 gained 1 mood token as advance bonus"
+      "Player1: Advance: Pay 2 gold",
+      "Player1: Advance: Gain Storage",
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Solar Eclipse",
@@ -313,12 +348,12 @@
       "Defenders: 2 infantry"
     ],
     [
-      "Player2 played a Tactics Card",
+      "Player2: Tactics: Played a Tactics Card",
       "Player2 reveals Tactics Card Tactical Retreat",
-      "Player2 withdraws to B1",
-      "Player1 gained 1 victory point for the Solar Eclipse",
-      "Attacker wins and captured Player2's city at C1",
-      "Player1 gained 1 gold for capturing a city"
+      "Player2: Tactical Retreat: Player2 withdraws to B1",
+      "Player1: Solar Eclipse: Gain 1 victory point for the Solar Eclipse",
+      "Attacker wins and captured Player2's city C1",
+      "Player1: Combat: Gain 1 gold"
     ]
   ],
   "undo_limit": 3,

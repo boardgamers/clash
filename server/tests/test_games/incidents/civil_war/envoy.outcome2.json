@@ -219,7 +219,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -230,7 +230,50 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "gold": 2
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "ideas": 1,
+                          "culture_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Incident": 40
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Incident": 40
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -242,7 +285,29 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "gold": 2
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Monuments"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -261,24 +326,26 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player1 paid 2 gold to get the Storage advance",
-      "Player1 gained 1 mood token as advance bonus"
+      "Player1: Advance: Pay 2 gold",
+      "Player1: Advance: Gain Storage",
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Envoy",
       "Base effect: Barbarians move",
       "Barbarians cannot move - will try to spawn a new city instead",
       "Barbarians cannot spawn a new city",
-      "Player1 gained 1 idea and 1 culture token for Envoy",
+      "Player1: Envoy: Gain 1 idea and 1 culture token",
       "Pyramids is now available to be taken by anyone",
-      "Player2 gained 1 culture token for Envoy"
+      "Player2: Envoy: Gain 1 culture token"
     ],
     [
-      "Player1 paid 2 gold to get the Monuments advance",
-      "Player1 gained 1 culture token as advance bonus"
+      "Player1: Advance: Pay 2 gold",
+      "Player1: Advance: Gain Monuments",
+      "Player1: Monuments: Gain 1 culture token"
     ],
     [
-      "Player1 drew the public wonder card Pyramids"
+      "Player1: Draw Wonder Card: Drew the public wonder card Pyramids"
     ]
   ],
   "undo_limit": 1,

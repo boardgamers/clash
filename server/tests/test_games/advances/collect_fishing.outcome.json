@@ -273,7 +273,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -291,7 +291,19 @@
                         "action_type": "Collect"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "food": 1
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Collect"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -303,9 +315,10 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 collects 1 food in the city at C2",
-      "City at C2 became Angry because it was activated more than once",
-      "Player1 could not store 1 food"
+      "Player1: Collect: Use city C2",
+      "city C2 became Angry because it was activated more than once",
+      "Player1: Collect: Gain 1 food",
+      "Player1: Waste: Could not store 1 food"
     ]
   ],
   "undo_limit": 0,

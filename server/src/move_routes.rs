@@ -21,9 +21,15 @@ pub struct MoveRoute {
 }
 
 impl MoveRoute {
-    fn free(destination: Position, origins: Vec<EventOrigin>) -> Self {
-        let mut options = PaymentOptions::free();
-        options.modifiers = origins;
+    fn new(
+        destination: Position,
+        player: &Player,
+        cost: ResourcePile,
+        modifiers: Vec<EventOrigin>,
+    ) -> Self {
+        let mut options =
+            PaymentOptions::resources(player, EventOrigin::Ability("Move".to_string()), cost);
+        options.modifiers = modifiers;
         Self {
             destination,
             cost: options,
@@ -45,7 +51,7 @@ pub(crate) fn move_routes(
         .neighbors()
         .iter()
         .filter(|&n| game.map.is_inside(*n))
-        .map(|&n| MoveRoute::free(n, vec![]))
+        .map(|&n| MoveRoute::new(n, player, ResourcePile::empty(), vec![]))
         .collect();
     if player.can_use_advance(Advance::Navigation) {
         base.extend(reachable_with_navigation(player, units, &game.map));
@@ -167,10 +173,7 @@ fn roman_roads_routes(
                 start,
                 dst,
                 false,
-                vec![
-                    EventOrigin::Advance(Advance::Roads),
-                    EventOrigin::SpecialAdvance(SpecialAdvance::RomanRoads),
-                ],
+                vec![EventOrigin::SpecialAdvance(SpecialAdvance::RomanRoads)],
             )
         })
         .collect()
@@ -199,17 +202,14 @@ fn road_route(
         return None;
     }
 
-    let mut cost = PaymentOptions::resources(
-        player,
-        EventOrigin::Advance(Advance::Roads),
-        ResourcePile::ore(1) + ResourcePile::food(1),
-    );
-    cost.modifiers = modifiers;
-    Some(MoveRoute {
+    let mut route = MoveRoute::new(
         destination,
-        cost,
-        ignore_terrain_movement_restrictions: true,
-    })
+        player,
+        ResourcePile::ore(1) + ResourcePile::food(1),
+        modifiers,
+    );
+    route.ignore_terrain_movement_restrictions = true;
+    Some(route)
 }
 
 fn next_road_step(
@@ -259,7 +259,12 @@ fn reachable_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<M
                 .into_iter()
                 .flatten()
                 .map(|destination| {
-                    MoveRoute::free(destination, vec![EventOrigin::Advance(Advance::Navigation)])
+                    MoveRoute::new(
+                        destination,
+                        player,
+                        ResourcePile::empty(),
+                        vec![EventOrigin::Advance(Advance::Navigation)],
+                    )
                 })
                 .collect();
         }

@@ -347,7 +347,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -364,7 +364,19 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "CivilCard": 21
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -405,17 +417,17 @@
       "Player2 has to pay 1 culture token for Explorer"
     ],
     [
-      "Player2 paid 1 culture token for Explorer"
+      "Player2: Explorer: Pay 1 culture token"
     ],
     [
-      "Player2 explored B6"
+      "Player2: Explorer: Explored B6"
     ],
     [
       "Player2 chose the orientation of the newly explored tiles",
       "Explored tiles A7=Fertile, B6=Fertile, B7=Barren, C7=Fertile"
     ],
     [
-      "Player2 decided to gain a free settler at D8"
+      "Player2: Explorer: Decided to gain a free settler at D8"
     ]
   ],
   "undo_limit": 3,

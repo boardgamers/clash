@@ -3,7 +3,6 @@ use crate::city_pieces::Building;
 use crate::content::persistent_events::{PositionRequest, ResourceRewardRequest};
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, PassedIncident};
-use crate::payment::ResourceReward;
 use crate::player::Player;
 use crate::player_events::IncidentTarget;
 use crate::resource_pile::ResourcePile;
@@ -98,7 +97,7 @@ fn era_of_stability() -> Incident {
             tokens = tokens.max(1);
         }
         Some(ResourceRewardRequest::new(
-            ResourceReward::tokens(tokens as u8),
+            p.reward_options().tokens(tokens as u8),
             "Select token to gain".to_string(),
         ))
     })
@@ -124,9 +123,7 @@ fn reformation() -> Incident {
             .count()
             > 1
         {
-            game.add_info_log_item(&format!(
-                "{p} has no temples - and must select a player to execute the event"
-            ));
+            p.log(game, "Has no temples: Select a player to execute the event");
         }
     })
     // select a player to execute the incident
@@ -138,11 +135,13 @@ fn reformation() -> Incident {
         |game, s, i| {
             // pass the event to the player itself
             i.passed = Some(PassedIncident::NewPlayer(s.choice));
-            game.add_info_log_item(&format!(
-                "{} selected {} to execute the event",
-                s.player_name,
-                game.player_name(s.choice)
-            ));
+            s.log(
+                game,
+                &format!(
+                    "Selected {} to execute the event",
+                    game.player_name(s.choice)
+                ),
+            );
         },
     )
     // select a player to gain a temple
@@ -186,10 +185,10 @@ fn reformation() -> Incident {
                 .pieces
                 .set_building(Building::Temple, s.player_index);
             let donor_name = donor.get_name();
-            game.add_info_log_item(&format!(
-                "{} gained a Temple from {donor_name} in {pos}",
-                s.player_name,
-            ));
+            s.log(
+                game,
+                &format!("Gained a Temple from {donor_name} in {pos}",),
+            );
         },
     )
     .build()

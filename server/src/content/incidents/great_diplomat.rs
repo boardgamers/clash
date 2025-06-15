@@ -32,7 +32,7 @@ pub(crate) fn great_diplomat() -> ActionCard {
         |e| &mut e.play_action_card,
         0,
         |game, p, _| {
-            game.add_info_log_item(&format!("{p} ended diplomatic relations.",));
+            p.log(game, "Ended diplomatic relations.");
             remove_element_by(&mut game.permanent_effects, |e| {
                 matches!(e, PermanentEffect::DiplomaticRelations(_))
             });
@@ -80,11 +80,13 @@ pub(crate) fn choose_diplomat_partner(b: IncidentBuilder) -> IncidentBuilder {
         |_, _, _| true,
         1,
         |game, s, _| {
-            game.add_info_log_item(&format!(
-                "{} initiated diplomatic relations with {}",
-                s.player_name,
-                game.player_name(s.choice),
-            ));
+            s.log(
+                game,
+                &format!(
+                    "Initiated diplomatic relations with {}",
+                    game.player_name(s.choice),
+                ),
+            );
             game.permanent_effects
                 .push(PermanentEffect::DiplomaticRelations(
                     DiplomaticRelations::new(s.player_index, s.choice),
@@ -100,10 +102,13 @@ pub(crate) fn use_diplomatic_relations() -> Ability {
             2,
             |game, p, _| {
                 if let Some(partner) = diplomatic_relations_partner(game, p.index) {
-                    game.add_info_log_item(&format!(
-                        "{p} paid 2 culture tokens to end diplomatic relations with {} using a surprise attack.",
-                        game.player_name(partner),
-                    ));
+                    p.log(
+                        game,
+                        &format!(
+                            "Diplomatic relations with {} ended with a surprise attack.",
+                            game.player_name(partner),
+                        ),
+                    );
                     remove_element_by(&mut game.permanent_effects, |e| {
                         matches!(e, PermanentEffect::DiplomaticRelations(_))
                     });

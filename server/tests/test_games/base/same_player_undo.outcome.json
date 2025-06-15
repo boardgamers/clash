@@ -195,7 +195,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -210,7 +210,21 @@
                         "port_position": null
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "food": 1,
+                          "wood": 1,
+                          "ore": 1
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -222,10 +236,11 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 paid 1 food, 1 wood and 1 ore to construct a Observatory in the city at C2",
-      "City at C2 became Neutral because it was activated more than once",
+      "city C2 became Neutral because it was activated more than once",
+      "Player1: Construct Building: Pay 1 food, 1 wood and 1 ore",
+      "Player1: Construct Building: Build a Observatory in the city C2",
       "Player1 gained an action card from the pile",
-      "Observatory gained 1 action card"
+      "Player1: Observatory: Observatory gained 1 action card"
     ]
   ],
   "undo_limit": 0,

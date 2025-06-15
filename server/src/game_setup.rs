@@ -219,7 +219,7 @@ fn init_human_players(setup: &GameSetup, rng: &mut Rng, cache: &Cache) -> Vec<Pl
         };
         let mut player = Player::new(civilization, player_index);
         player.resource_limit = ResourcePile::new(2, 7, 7, 7, 7, 0, 0);
-        player.gain_resources(ResourcePile::food(2));
+        player.resources += ResourcePile::food(2);
         player.advances.insert(Advance::Farming);
         player.advances.insert(Advance::Mining);
         player.incident_tokens = 3;

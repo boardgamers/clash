@@ -244,7 +244,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -258,7 +258,27 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
+                      },
+                      "modifiers": [
+                        {
+                          "Advance": "Draft"
+                        },
+                        {
+                          "SpecialAdvance": "Sparta"
+                        }
+                      ]
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -279,14 +299,15 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 paid 1 culture token to recruit 1 infantry in the city at A1",
+      "Player1: Recruit: Pay 1 culture token with Draft, Sparta",
       "Draft reduced the cost of 1 Infantry to 1 mood token",
       "Sparta allows to pay the Draft cost as culture tokes",
-      "City at A1 became Neutral because it was activated more than once"
+      "Player1: Recruit: Recruit 1 infantry in the city A1",
+      "city A1 became Neutral because it was activated more than once"
     ],
     [
-      "Player1 decided to decrease the mood of B3 instead of A1 using City States",
-      "City at B3 became Neutral because it was activated more than once"
+      "Player1: City States: Decided to decrease the mood of B3 instead of A1 using City States",
+      "city B3 became Neutral because it was activated more than once"
     ]
   ],
   "undo_limit": 0,

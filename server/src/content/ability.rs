@@ -1,6 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::barbarians::barbarians_bonus;
+use crate::city_pieces::Building;
 use crate::combat_listeners::{choose_fighter_casualties, offer_retreat, place_settler};
 use crate::content::action_cards::cultural_takeover::use_cultural_takeover;
 use crate::content::action_cards::development::collect_only;
@@ -146,4 +147,12 @@ pub(crate) fn construct_event_origin() -> EventOrigin {
 
 pub(crate) fn recruit_event_origin() -> EventOrigin {
     EventOrigin::Ability("Recruit".to_string())
+}
+
+pub(crate) fn combat_event_origin() -> EventOrigin {
+    EventOrigin::Ability("Combat".to_string())
+}
+
+pub(crate) fn building_event_origin(b: Building) -> EventOrigin {
+    EventOrigin::Ability(b.name().to_string())
 }

@@ -201,7 +201,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -212,7 +212,29 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "food": 2
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -223,7 +245,19 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Incident": 58
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -253,7 +287,29 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "food": 2
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Writing"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -265,8 +321,9 @@
   "action_log_index": 5,
   "log": [
     [
-      "Player1 paid 2 food to get the Storage advance",
-      "Player1 gained 1 mood token as advance bonus"
+      "Player1: Advance: Pay 2 food",
+      "Player1: Advance: Gain Storage",
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Great Seer",
@@ -274,20 +331,22 @@
       "No valid positions for Pirate Ship"
     ],
     [
-      "Player1 gained Great Seer for 1 culture token"
+      "Player1: Great Seer: Pay 1 culture token",
+      "Player1: Great Seer: Gain Great Seer for 1 culture token"
     ],
     [
       "Player1 played the action card Great Seer"
     ],
     [
-      "Player1 chose an objective card for player Player1",
-      "Player1 chose an objective card for player Player2"
+      "Player1: Great Seer: Chose an objective card for player Player1",
+      "Player1: Great Seer: Chose an objective card for player Player2"
     ],
     [
-      "Player1 paid 2 food to get the Writing advance",
+      "Player1: Advance: Pay 2 food",
+      "Player1: Advance: Gain Writing",
       "Player1 gained an action card from the pile",
       "Player1 gained the Great Seer objective card from the pile",
-      "Player1 gained 1 culture token as advance bonus"
+      "Player1: Writing: Gain 1 culture token"
     ]
   ],
   "undo_limit": 5,

@@ -199,7 +199,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -233,7 +233,7 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 founded a city at B6"
+      "Player1 founded a city B6"
     ],
     [
       "Player1 completed objective City Founder"

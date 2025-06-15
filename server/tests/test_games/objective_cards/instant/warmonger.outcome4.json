@@ -182,7 +182,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Movement": {
@@ -307,9 +307,9 @@
       "Player1 rolled 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 13 and gets 1 hits against defending units.",
       "Player2 rolled 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 13 and gets 2 hits against attacking units.",
       "Player2 used the following combat modifiers: fortress added one extra die, fortress cancelled one hit",
-      "Player1 has to remove all of their attacking units",
+      "Player1: Choose Casualties: Remove all attacking units",
       "Player1 removed 1 infantry and 1 cavalry",
-      "Player2 has to remove all of their defending units",
+      "Player2: Choose Casualties: Remove all defending units",
       "Player2 removed 1 infantry",
       "Player2 wins the battle because he has a defending fortress"
     ],
@@ -322,7 +322,7 @@
       "Defenders: 1 infantry",
       "Player1 rolled 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 2 and gets 0 hits against defending units.",
       "Player2 rolled 1 (leader, no bonus) for combined combat value of 1 and gets 0 hits against attacking units.",
-      "Player1 can retreat"
+      "Player1: Offer Retreat: Player1 can retreat"
     ],
     [
       "Player1 does not retreat"
@@ -333,7 +333,7 @@
       "Defenders: 1 infantry",
       "Player1 rolled 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 2 and gets 0 hits against defending units.",
       "Player2 rolled 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units.",
-      "Player1 can retreat"
+      "Player1: Offer Retreat: Player1 can retreat"
     ],
     [
       "Player1 does not retreat"
@@ -344,7 +344,7 @@
       "Defenders: 1 infantry",
       "Player1 rolled 6 (infantry, +1 combat value), 1 (leader, no bonus) for combined combat value of 8 and gets 1 hits against defending units.",
       "Player2 rolled 3 (elephant, no bonus) for combined combat value of 3 and gets 0 hits against attacking units.",
-      "Player2 has to remove all of their defending units",
+      "Player2: Choose Casualties: Remove all defending units",
       "Player2 removed 1 infantry",
       "Attacker wins"
     ],

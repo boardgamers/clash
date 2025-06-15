@@ -183,7 +183,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Movement": {
@@ -251,14 +251,14 @@
       "Defenders: 2 infantry"
     ],
     [
-      "Player1 played a Tactics Card",
+      "Player1: Tactics: Played a Tactics Card",
       "Player1 reveals Tactics Card Wedge Formation",
       "Player1 rolled 6 (infantry, +1 combat value) for combined combat value of 9 and gets 1 hits against defending units.",
       "Player1 used the following combat modifiers: Wedge Formation added 2 combat value",
       "Player2 rolled 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against attacking units.",
-      "Player1 has to remove all of their attacking units",
+      "Player1: Choose Casualties: Remove all attacking units",
       "Player1 removed 1 infantry",
-      "Player2 has to remove 1 of their defending units",
+      "Player2: Choose Casualties: Remove 1 of their defending units",
       "Player2 removed 1 infantry",
       "Defender wins"
     ]

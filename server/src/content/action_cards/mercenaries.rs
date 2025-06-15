@@ -39,7 +39,7 @@ pub(crate) fn mercenaries(id: u8, tactics_card: TacticsCardFactory) -> ActionCar
         |game, p, _| {
             let (r, log) = barbarian_army_positions_in_range2(game, p.get(game));
             for l in log {
-                game.add_info_log_item(&l);
+                p.log(game, &l);
             }
             if r.is_empty() {
                 return None;
@@ -52,11 +52,13 @@ pub(crate) fn mercenaries(id: u8, tactics_card: TacticsCardFactory) -> ActionCar
             ))
         },
         |game, s, a| {
-            game.add_info_log_item(&format!(
-                "{} selected Barbarian armies to move: {}",
-                s.player_name,
-                s.choice.iter().map(ToString::to_string).join(", "),
-            ));
+            s.log(
+                game,
+                &format!(
+                    "Selected Barbarian armies to move: {}",
+                    s.choice.iter().map(ToString::to_string).join(", "),
+                ),
+            );
             a.selected_positions.clone_from(&s.choice);
         },
     )
@@ -79,12 +81,7 @@ pub(crate) fn mercenaries(id: u8, tactics_card: TacticsCardFactory) -> ActionCar
                 "Pay for mercenaries",
             )])
         },
-        |game, s, _| {
-            game.add_info_log_item(&format!(
-                "{} paid for mercenaries: {}",
-                s.player_name, s.choice[0]
-            ));
-        },
+        |_game, _s, _| {},
     );
 
     // one for each possible barbarian army
@@ -115,10 +112,7 @@ fn move_army(b: ActionCardBuilder, i: i32) -> ActionCardBuilder {
             },
             |game, s, a| {
                 let pos = s.choice[0];
-                game.add_info_log_item(&format!(
-                    "{} selected Barbarian army to move: {}",
-                    s.player_name, pos
-                ));
+                s.log(game, &format!("Selected Barbarian army to move: {pos}",));
                 remove_element(&mut a.selected_positions, &pos);
                 a.selected_position = Some(pos);
             },
@@ -148,10 +142,10 @@ fn move_army(b: ActionCardBuilder, i: i32) -> ActionCardBuilder {
             },
             |game, s, a| {
                 let to = s.choice[0];
-                game.add_info_log_item(&format!(
-                    "{} selected destination for Barbarian army: {}",
-                    s.player_name, to
-                ));
+                s.log(
+                    game,
+                    &format!("Selected destination for Barbarian army: {to}",),
+                );
 
                 let from = a.selected_position.expect("position not found");
                 let b = get_barbarians_player(game);
@@ -160,7 +154,7 @@ fn move_army(b: ActionCardBuilder, i: i32) -> ActionCardBuilder {
                 let units = b.get_units(from).iter().map(|u| u.id).collect_vec();
 
                 let m = MoveUnits::new(units, to, None, ResourcePile::empty());
-                game.add_info_log_item(&move_action_log(game, b, &m));
+                s.log(game, &move_action_log(game, b, &m));
 
                 move_with_possible_combat(game, barbarian, &m);
             },

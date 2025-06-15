@@ -203,7 +203,7 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -214,7 +214,47 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "gold": 2
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "food": 1
+                        }
+                      },
+                      "origin": {
+                        "Incident": 51
+                      }
+                    },
+                    {
+                      "LoseResources": {
+                        "resources": {}
+                      },
+                      "origin": {
+                        "Incident": 51
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -226,14 +266,15 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 paid 2 gold to get the Storage advance",
-      "Player1 gained 1 mood token as advance bonus"
+      "Player1: Advance: Pay 2 gold",
+      "Player1: Advance: Gain Storage",
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Famine: Vermin",
-      "Player1 lost 1 food to Famine",
-      "Player2 lost 0 food to Famine",
-      "Player2 made city A1 Angry"
+      "Player1: Famine: Vermin: Lost 1 food",
+      "Player2: Famine: Vermin: Lost 0 food",
+      "Player2: Famine: Vermin: Made city A1 Angry"
     ]
   ],
   "undo_limit": 1,

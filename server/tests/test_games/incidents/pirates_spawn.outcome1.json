@@ -233,13 +233,25 @@
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Response": {
                       "SelectAdvance": "Storage"
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -260,15 +272,15 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 advanced Storage for free",
-      "Player1 gained 1 mood token as advance bonus"
+      "Player1: Free Advance: Advanced Storage for free",
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: A successful year",
       "Base effect: Pirates spawn"
     ],
     [
-      "Player1 removed a Pirate Ships at D1"
+      "Player1: A successful year: Removed a Pirate Ships at D1"
     ]
   ],
   "undo_limit": 1,
