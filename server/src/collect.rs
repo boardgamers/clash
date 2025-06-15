@@ -180,7 +180,7 @@ pub(crate) fn execute_collect(
     if !city.can_activate() {
         return Err("City can't be activated".to_string());
     }
-    activate_city(city.position, game);
+    activate_city(city.position, game, &origin);
     gain_resources_with_modifiers(
         game,
         player_index,

@@ -174,6 +174,17 @@ fn test_famine() {
 }
 
 #[test]
+fn test_famine_protected() {
+    FAMINE.test(
+        "famine_protected",
+        vec![TestAction::not_undoable(
+            0,
+            advance_action(Advance::Storage, ResourcePile::gold(2)),
+        )],
+    );
+}
+
+#[test]
 fn test_epidemics() {
     FAMINE.test(
         "epidemics",

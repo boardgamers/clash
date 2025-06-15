@@ -273,10 +273,11 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "food": 2
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -314,10 +315,20 @@
                   },
                   "items": [
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "gold": 2
-                        }
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "MoodChange": {
+                        "city": "B2",
+                        "mood": "Angry"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -337,10 +348,20 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "culture_tokens": 1
-                        }
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "SpecialAdvance": "Provinces"
+                      }
+                    },
+                    {
+                      "MoodChange": {
+                        "city": "B2",
+                        "mood": "Happy"
                       },
                       "origin": {
                         "SpecialAdvance": "Provinces"
@@ -364,11 +385,12 @@
     ],
     [
       "Player1 marched 1 infantry from C2 to B2 and captured Player2's city B2",
-      "Player1: Combat: Gain 2 gold"
+      "Player1: Combat: Gain 2 gold",
+      "Player1: Combat: City B2 became Angry"
     ],
     [
       "Player1: Provinces: Pay 1 culture token",
-      "Player1: Provinces: Provinces made the city Happy instead of Angry for 1 culture token",
+      "Player1: Provinces: City B2 became Happy",
       "Player2: Place Settler: Gain 1 free Settler Unit at C1 for losing a city"
     ]
   ],

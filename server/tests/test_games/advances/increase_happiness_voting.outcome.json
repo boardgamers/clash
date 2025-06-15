@@ -273,10 +273,29 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "MoodChange": {
+                        "city": "C2",
+                        "mood": "Neutral"
+                      },
+                      "origin": {
+                        "Advance": "Voting"
+                      }
+                    },
+                    {
+                      "MoodChange": {
+                        "city": "B3",
+                        "mood": "Happy"
+                      },
+                      "origin": {
+                        "Advance": "Voting"
+                      }
+                    },
+                    {
+                      "Resources": {
                         "resources": {
                           "mood_tokens": 6
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Advance": "Voting"
@@ -295,8 +314,9 @@
   "log": [
     [
       "Player1 has to pay 1 mood token for Voting",
-      "Player1: Voting: Pay 6 mood tokens",
-      "Player1: Voting: Increase happiness in the city C2 by 1 steps, making it Neutral and the city B3 by 2 steps, making it Happy using Voting"
+      "Player1: Voting: City C2 became Neutral",
+      "Player1: Voting: City B3 became Happy",
+      "Player1: Voting: Pay 6 mood tokens"
     ]
   ],
   "undo_limit": 0,

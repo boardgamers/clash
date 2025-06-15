@@ -1,42 +1,5 @@
 {
   "state": "Playing",
-  "events": [
-    {
-      "event_type": {
-        "StatusPhase": "FreeAdvance"
-      },
-      "players_used": [
-        0
-      ],
-      "player": 1,
-      "last_priority_used": 0,
-      "handler": {
-        "priority": 0,
-        "request": {
-          "SelectAdvance": {
-            "choices": [
-              "Storage",
-              "Irrigation",
-              "Husbandry",
-              "Engineering",
-              "Sanitation",
-              "Roads",
-              "Fishing",
-              "Writing",
-              "Tactics",
-              "Myths",
-              "Bartering",
-              "Arts",
-              "Math"
-            ]
-          }
-        },
-        "origin": {
-          "Ability": "Free Advance"
-        }
-      }
-    }
-  ],
   "players": [
     {
       "id": 0,
@@ -46,11 +9,11 @@
         "ore": 6,
         "ideas": 5,
         "gold": 7,
-        "mood_tokens": 8,
+        "mood_tokens": 7,
         "culture_tokens": 7
       },
       "resource_limit": {
-        "food": 7,
+        "food": 2,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -64,9 +27,6 @@
           "position": "A1"
         },
         {
-          "city_pieces": {
-            "fortress": 1
-          },
           "mood_state": "Angry",
           "position": "C2"
         }
@@ -116,11 +76,11 @@
       "civilization": "Rome",
       "advances": [
         "Farming",
+        "Irrigation",
         "Mining",
-        "Storage",
         "Tactics"
       ],
-      "incident_tokens": 3,
+      "incident_tokens": 1,
       "next_unit_id": 8
     },
     {
@@ -145,8 +105,12 @@
       },
       "cities": [
         {
-          "mood_state": "Angry",
+          "mood_state": "Happy",
           "position": "C1"
+        },
+        {
+          "mood_state": "Happy",
+          "position": "B3"
         }
       ],
       "units": [
@@ -164,7 +128,8 @@
       "civilization": "Greece",
       "advances": [
         "Farming",
-        "Mining"
+        "Mining",
+        "Myths"
       ],
       "incident_tokens": 3,
       "next_unit_id": 2
@@ -181,11 +146,6 @@
       "civilization": "Barbarians",
       "incident_tokens": 3,
       "next_unit_id": 0
-    },
-    {
-      "id": 3,
-      "civilization": "Pirates",
-      "next_unit_id": 0
     }
   ],
   "map": {
@@ -196,7 +156,7 @@
       ],
       [
         "A2",
-        "Mountain"
+        "Water"
       ],
       [
         "A3",
@@ -224,11 +184,11 @@
       ],
       [
         "C3",
-        "Mountain"
+        "Water"
       ],
       [
         "D2",
-        "Mountain"
+        "Water"
       ]
     ]
   },
@@ -240,60 +200,16 @@
         {
           "players": [
             {
-              "index": 0,
-              "actions": [
-                {
-                  "action": {
-                    "Response": {
-                      "SelectAdvance": "Storage"
-                    }
-                  },
-                  "items": [
-                    {
-                      "Resources": {
-                        "resources": {
-                          "mood_tokens": 1
-                        },
-                        "balance": "Gain"
-                      },
-                      "origin": {
-                        "Advance": "Storage"
-                      }
-                    },
-                    {
-                      "Resources": {
-                        "resources": {
-                          "food": 1
-                        },
-                        "balance": "Gain"
-                      },
-                      "origin": {
-                        "Incident": 54
-                      }
-                    }
-                  ]
-                }
-              ]
+              "index": 0
             }
           ]
         }
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player1: Free Advance: Advanced Storage for free",
-      "Player1: Storage: Gain 1 mood token"
-    ],
-    [
-      "A new game event has been triggered: A successful year",
-      "Base effect: Pirates spawn",
-      "No valid positions for Pirate Ship",
-      "Player2: A successful year: Gain 1 food"
-    ]
-  ],
-  "undo_limit": 1,
+  "action_log_index": 0,
+  "log": [],
+  "undo_limit": 0,
   "actions_left": 3,
   "round": 1,
   "age": 1,
@@ -317,7 +233,7 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "incidents_discarded": [
-    54
+  "incidents_left": [
+    7
   ]
 }

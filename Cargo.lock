@@ -1668,17 +1668,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "readonly"
-version = "0.2.13"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f2a62d85ed81ca5305dc544bd42c8804c5060b78ffa5ad3c64b0fb6a8c13d062"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.101",
-]
-
-[[package]]
 name = "redox_syscall"
 version = "0.5.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1928,7 +1917,6 @@ dependencies = [
  "pathfinding",
  "pyroscope",
  "pyroscope_pprofrs",
- "readonly",
  "rustc-hash",
  "serde",
  "serde-wasm-bindgen",

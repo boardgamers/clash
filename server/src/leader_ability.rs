@@ -7,7 +7,7 @@ use crate::content::ability::AbilityBuilder;
 use crate::content::advances::AdvanceGroup;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::AdvanceRequest;
-use crate::events::EventOrigin;
+use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
 use crate::leader::leader_position;
 use crate::player::Player;
@@ -35,7 +35,10 @@ impl LeaderAbility {
     ) -> LeaderAbility {
         LeaderAbilityBuilder::new(
             name.to_string(),
-            format!("As an action: If the leader city is happy: Gain 1 {group} advance for free.",),
+            format!(
+                "If the leader city is happy: As an action, pay 1 mood or culture token: \
+                Gain 1 {group} advance for free.",
+            ),
         )
         .add_custom_action(
             action,
@@ -169,11 +172,6 @@ pub(crate) fn can_activate_leader_city(game: &Game, p: &Player) -> bool {
         .is_some_and(City::can_activate)
 }
 
-pub(crate) fn activate_leader_city(game: &mut Game, player: usize, effect: &str) {
-    let position = leader_position(game.player(player));
-    game.add_info_log_item(&format!(
-        "{} activates the city {position} to {effect}",
-        game.player_name(player)
-    ));
-    activate_city(position, game);
+pub(crate) fn activate_leader_city(game: &mut Game, player: &EventPlayer) {
+    activate_city(leader_position(player.get(game)), game, &player.origin);
 }

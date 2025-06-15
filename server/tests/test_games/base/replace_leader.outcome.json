@@ -281,11 +281,21 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "mood_tokens": 1,
                           "culture_tokens": 1
-                        }
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
+                      }
+                    },
+                    {
+                      "MoodChange": {
+                        "city": "A1",
+                        "mood": "Neutral"
                       },
                       "origin": {
                         "Ability": "Recruit"
@@ -305,7 +315,7 @@
     [
       "Player1: Recruit: Pay 1 mood token and 1 culture token",
       "Player1: Recruit: Recruit Augustus in the city A1 and replaces the unit at A1",
-      "city A1 became Neutral because it was activated more than once"
+      "Player1: Recruit: City A1 became Neutral"
     ]
   ],
   "undo_limit": 0,

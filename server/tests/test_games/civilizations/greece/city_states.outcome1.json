@@ -261,10 +261,11 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "culture_tokens": 1
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Ability": "Recruit"
@@ -277,6 +278,15 @@
                           "SpecialAdvance": "Sparta"
                         }
                       ]
+                    },
+                    {
+                      "MoodChange": {
+                        "city": "A1",
+                        "mood": "Neutral"
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
+                      }
                     }
                   ]
                 },
@@ -287,7 +297,27 @@
                         "B3"
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "MoodChange": {
+                        "city": "A1",
+                        "mood": "Happy"
+                      },
+                      "origin": {
+                        "SpecialAdvance": "CityStates"
+                      }
+                    },
+                    {
+                      "MoodChange": {
+                        "city": "B3",
+                        "mood": "Neutral"
+                      },
+                      "origin": {
+                        "SpecialAdvance": "CityStates"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -303,11 +333,11 @@
       "Draft reduced the cost of 1 Infantry to 1 mood token",
       "Sparta allows to pay the Draft cost as culture tokes",
       "Player1: Recruit: Recruit 1 infantry in the city A1",
-      "city A1 became Neutral because it was activated more than once"
+      "Player1: Recruit: City A1 became Neutral"
     ],
     [
-      "Player1: City States: Decided to decrease the mood of B3 instead of A1 using City States",
-      "city B3 became Neutral because it was activated more than once"
+      "Player1: City States: City A1 became Happy",
+      "Player1: City States: City B3 became Neutral"
     ]
   ],
   "undo_limit": 0,

@@ -199,10 +199,11 @@
                   },
                   "items": [
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "ideas": 1
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "CivilCard": 9

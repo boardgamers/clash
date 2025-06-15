@@ -4,7 +4,7 @@ use crate::action_card::ActionCard;
 use crate::advance::Advance;
 use crate::barbarians::{barbarians_move, barbarians_spawn};
 use crate::card::{HandCard, discard_card, draw_card_from_pile};
-use crate::city::{MoodState, is_valid_city_terrain};
+use crate::city::{MoodState, decrease_city_mood, is_valid_city_terrain, set_city_mood};
 use crate::content::incidents::great_persons::GREAT_PERSON_OFFSET;
 use crate::content::persistent_events::{
     HandCardsRequest, PaymentRequest, PersistentEventType, PlayerRequest, PositionRequest,
@@ -246,11 +246,12 @@ impl IncidentBuilder {
     where
         F: Fn(&mut Game, &EventPlayer, &mut IncidentInfo) + 'static + Clone + Sync + Send,
     {
+        let f = self.new_filter(role, priority);
         self.add_simple_persistent_event_listener(
             |event| &mut event.incident,
             priority,
             move |game, p, i| {
-                if i.is_active(role, p.index) {
+                if f.is_active(game, i, p.index) {
                     listener(game, p, i);
                 }
             },
@@ -729,7 +730,7 @@ pub fn is_active(
     role: IncidentTarget,
     player: usize,
 ) -> bool {
-    if !i.is_active(role, player) {
+    if !i.is_active_ignoring_protection(role, player) {
         return false;
     }
     if priority >= BASE_EFFECT_PRIORITY {
@@ -800,29 +801,8 @@ pub(crate) fn decrease_mod_and_log(
 ) {
     for &pos in &s.choice {
         match mood_modifier {
-            MoodModifier::Decrease => {
-                game.player_mut(s.player_index)
-                    .get_city_mut(pos)
-                    .decrease_mood_state();
-                let mood_state = &game.player(s.player_index).get_city(pos).mood_state;
-                if s.actively_selected {
-                    s.log(
-                        game,
-                        &format!("Selected to decrease the mood in city {pos} to {mood_state}",),
-                    );
-                } else {
-                    s.log(
-                        game,
-                        &format!("Decreased the mood in city {pos} to {mood_state}",),
-                    );
-                }
-            }
-            MoodModifier::MakeAngry => {
-                s.log(game, &format!("Made city {pos} Angry"));
-                game.player_mut(s.player_index)
-                    .get_city_mut(pos)
-                    .set_mood_state(MoodState::Angry);
-            }
+            MoodModifier::Decrease => decrease_city_mood(game, pos, &s.origin),
+            MoodModifier::MakeAngry => set_city_mood(game, pos, &s.origin, MoodState::Angry),
         }
     }
 }

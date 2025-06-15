@@ -304,7 +304,7 @@
   "age": 6,
   "messages": [
     "The game has started",
-    "The game has ended"
+    "The game has ended. Player2 has won"
   ],
   "dice_roll_outcomes": [
     1,

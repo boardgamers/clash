@@ -10,7 +10,7 @@ use crate::content::persistent_events::{
 };
 use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
-use crate::log::{current_player_turn_log, modifier_suffix};
+use crate::log::current_player_turn_log;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::player_events::ActionInfo;
@@ -143,12 +143,14 @@ pub(crate) fn execute_influence_culture_attempt(
         Structure::Wonder(_) => panic!("Wonder is not allowed here"),
     };
 
-    game.add_info_log_item(&format!(
-        "{} tried to influence culture the {city_piece} in the city \
-        at {target_city_position} by {player}{city}{cost}{}",
-        game.player_name(player_index),
-        modifier_suffix(game.player(player_index), &i.action_type, game)
-    ));
+    game.log_with_origin(
+        player_index,
+        &info.origin,
+        &format!(
+            "Tried to influence the {city_piece} in the city \
+            at {target_city_position} by {player}{city}{cost}",
+        ),
+    );
 
     on_cultural_influence(game, player_index, info);
     Ok(())

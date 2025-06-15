@@ -2,7 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{discard_action_card, gain_action_card_from_pile};
 use crate::advance::{Advance, base_advance_cost, gain_advance_without_payment};
 use crate::card::{HandCard, all_action_hand_cards, all_objective_hand_cards};
-use crate::city::MoodState;
+use crate::city::{MoodState, set_city_mood};
 use crate::civilization::Civilization;
 use crate::content::ability::AbilityBuilder;
 use crate::content::custom_actions::CustomActionType;
@@ -148,23 +148,16 @@ fn provinces() -> SpecialAdvanceInfo {
                 )])
         },
         |game, c, s| {
-            let pile = &c.choice[0];
-            if pile.is_empty() {
-                c.log(game, "Provinces made the city Neutral instead of Angry");
-            } else {
-                c.log(
-                    game,
-                    &format!("Provinces made the city Happy instead of Angry for {pile}"),
-                );
-            }
-
-            game.player_mut(s.attacker.player)
-                .get_city_mut(s.defender.position)
-                .set_mood_state(if pile.is_empty() {
+            set_city_mood(
+                game,
+                s.defender.position,
+                &c.origin,
+                if c.choice[0].is_empty() {
                     MoodState::Neutral
                 } else {
                     MoodState::Happy
-                });
+                },
+            );
         },
     )
     .build()
@@ -192,7 +185,7 @@ fn augustus() -> LeaderInfo {
         )
         .build(),
         LeaderAbility::builder(
-            "Imperator",
+            "Emperor",
             "Land battle with leader: If you don't own a city in the region: \
             Gain 2 combat value in every combat round",
         )
@@ -205,7 +198,7 @@ fn augustus() -> LeaderInfo {
                 )
             {
                 s.extra_combat_value += 2;
-                s.roll_log.push("Imperator adds 2 combat value".to_string());
+                s.roll_log.push("Emperor adds 2 combat value".to_string());
             }
         })
         .build(),
@@ -218,11 +211,7 @@ fn use_princeps(b: AbilityBuilder) -> AbilityBuilder {
         0,
         |game, p, _| {
             let player = p.index;
-            activate_leader_city(
-                game,
-                player,
-                "draw 1 action and 1 objective card using Princeps",
-            );
+            activate_leader_city(game, p);
             gain_action_card_from_pile(game, player);
             gain_objective_card_from_pile(game, player);
 

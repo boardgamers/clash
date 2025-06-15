@@ -166,6 +166,14 @@ impl Game {
     }
 
     #[must_use]
+    pub(crate) fn get_any_city_mut(&mut self, position: Position) -> &mut City {
+        self.players
+            .iter_mut()
+            .find_map(|player| player.try_get_city_mut(position))
+            .expect("city not found")
+    }
+
+    #[must_use]
     pub fn try_get_any_city(&self, position: Position) -> Option<&City> {
         self.players
             .iter()
@@ -456,7 +464,9 @@ impl Game {
         self.age += 1;
         self.round = 0;
         self.current_player_index = self.starting_player_index;
-        self.add_info_log_group(format!("Age {} has started", self.age));
+        let m = format!("Age {} has started", self.age);
+        self.add_message(&m);
+        self.add_info_log_group(m);
         self.action_log.push(ActionLogAge::new());
         self.next_round();
     }
@@ -470,8 +480,9 @@ impl Game {
             .expect("there should be at least one player in the game")
             .0;
         let winner_name = self.player_name(winner_player_index);
-        self.add_info_log_group(format!("The game has ended. {winner_name} has won"));
-        self.add_message("The game has ended");
+        let m = format!("The game has ended. {winner_name} has won");
+        self.add_message(&m);
+        self.add_info_log_group(m);
         self.state = GameState::Finished;
     }
 

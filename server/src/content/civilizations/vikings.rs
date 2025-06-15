@@ -311,7 +311,7 @@ fn danegeld() -> LeaderAbility {
                 |event| &mut event.custom_action,
                 -1,
                 |game, player, _| {
-                    activate_leader_city(game, player.index, "collect taxes");
+                    activate_leader_city(game, player);
                 },
             ))
         },

@@ -491,18 +491,18 @@ pub(crate) fn cities_for_wonder(
 
 pub(crate) fn construct_wonder(
     game: &mut Game,
-    name: Wonder,
+    wonder: Wonder,
     city_position: Position,
     player_index: usize,
 ) {
-    let listeners = game.cache.get_wonder(name).listeners.clone();
+    let listeners = game.cache.get_wonder(wonder).listeners.clone();
     listeners.once_init(game, player_index);
     let player = &mut game.players[player_index];
-    player.wonders_built.push(name);
-    player.wonders_owned.insert(name);
+    player.wonders_built.push(wonder);
+    player.wonders_owned.insert(wonder);
     let city = player.get_city_mut(city_position);
-    city.pieces.wonders.push(name);
-    activate_city(city_position, game);
+    city.pieces.wonders.push(wonder);
+    activate_city(city_position, game, &EventOrigin::Wonder(wonder));
 }
 
 #[must_use]

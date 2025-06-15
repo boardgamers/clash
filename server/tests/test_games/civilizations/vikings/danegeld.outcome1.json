@@ -274,10 +274,20 @@
                   },
                   "items": [
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "food": 4
-                        }
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Danegeld"
+                      }
+                    },
+                    {
+                      "MoodChange": {
+                        "city": "E2",
+                        "mood": "Neutral"
                       },
                       "origin": {
                         "Ability": "Danegeld"
@@ -299,8 +309,7 @@
     ],
     [
       "Player1: Danegeld: Gain 4 food",
-      "Player1 activates the city E2 to collect taxes",
-      "city E2 became Neutral because it was activated more than once",
+      "Player1: Danegeld: City E2 became Neutral",
       "Player1: Waste: Could not store 4 food"
     ]
   ],

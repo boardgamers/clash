@@ -237,7 +237,7 @@ pub fn possible_move_destinations(
             modifiers.extend(route.cost.modifiers.clone());
             MoveDestination::Tile(route.destination, route.cost)
         })
-        .collect::<Vec<_>>();
+        .collect_vec();
 
     player.units.iter().for_each(|u| {
         if u.is_ship()
@@ -296,21 +296,15 @@ pub(crate) fn execute_movement_action(
             return Err("No actions left".to_string());
         }
         game.actions_left -= 1;
-        game.state = GameState::Movement(MoveState::new());
+        game.state = Movement(MoveState::new());
     }
 
     match action {
         Move(m) => {
             execute_move_action(game, player_index, &m)?;
 
-            if let Movement(state) = &game.state {
-                let all_moves_used =
-                    state.movement_actions_left == 0 && state.current_move == CurrentMove::None;
-                if all_moves_used
-                    || !has_movable_units(game, game.player(game.current_player_index))
-                {
-                    game.state = GameState::Playing;
-                }
+            if !has_any_moves_left(game) {
+                game.state = GameState::Playing;
             }
         }
         Stop => {
@@ -319,6 +313,28 @@ pub(crate) fn execute_movement_action(
     }
 
     Ok(())
+}
+
+fn has_any_moves_left(game: &mut Game) -> bool {
+    if let Movement(state) = &game.state {
+        let p = game.player(game.current_player_index);
+
+        if let CurrentMove::Fleet { units } = &state.current_move {
+            if !possible_move_destinations(game, p.index, units, p.get_unit(units[0]).position)
+                .list
+                .is_empty()
+            {
+                return true;
+            }
+        }
+
+        p.units.iter().any(|unit| {
+            let result = possible_move_routes(p, game, &[unit.id], unit.position, None);
+            result.is_ok_and(|r| !r.is_empty()) || can_embark(game, p, unit)
+        })
+    } else {
+        false
+    }
 }
 
 fn execute_move_action(game: &mut Game, player_index: usize, m: &MoveUnits) -> Result<(), String> {
@@ -633,13 +649,6 @@ fn terrain_movement_restriction(
         Forest if unit.is_army_unit() => Some(MovementRestriction::Forest),
         _ => None,
     }
-}
-
-fn has_movable_units(game: &Game, player: &Player) -> bool {
-    player.units.iter().any(|unit| {
-        let result = possible_move_routes(player, game, &[unit.id], unit.position, None);
-        result.is_ok_and(|r| !r.is_empty()) || can_embark(game, player, unit)
-    })
 }
 
 #[must_use]

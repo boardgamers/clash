@@ -130,18 +130,17 @@ fn generic_custom_action(
     let custom_action_type = c.action;
 
     if let Some(city) = city {
-        if c.is_city_available(rc.game, city) {
-            return Some(StateUpdate::execute(Action::Playing(
+        c.is_city_available(rc.game, city)
+            .then_some(StateUpdate::execute(Action::Playing(
                 PlayingAction::Custom(CustomAction::new(custom_action_type, Some(city.position))),
-            )));
-        }
+            )))
+    } else {
+        c.city_bound()
+            .is_none()
+            .then_some(StateUpdate::execute(Action::Playing(
+                PlayingAction::Custom(CustomAction::new(custom_action_type, None)),
+            )))
     }
-
-    c.city_bound()
-        .is_none()
-        .then_some(StateUpdate::execute(Action::Playing(
-            PlayingAction::Custom(CustomAction::new(custom_action_type, None)),
-        )))
 }
 
 pub fn base_or_custom_action(

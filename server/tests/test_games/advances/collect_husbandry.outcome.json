@@ -289,10 +289,20 @@
                   },
                   "items": [
                     {
-                      "GainResources": {
+                      "MoodChange": {
+                        "city": "B3",
+                        "mood": "Neutral"
+                      },
+                      "origin": {
+                        "Ability": "Collect"
+                      }
+                    },
+                    {
+                      "Resources": {
                         "resources": {
                           "food": 1
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Ability": "Collect"
@@ -311,7 +321,7 @@
   "log": [
     [
       "Player1: Collect: Use city B3",
-      "city B3 became Neutral because it was activated more than once",
+      "Player1: Collect: City B3 became Neutral",
       "Player1: Collect: Gain 1 food",
       "Husbandry allows collecting 1 resources from 2 land spaces away",
       "Player1: Waste: Could not store 1 food"

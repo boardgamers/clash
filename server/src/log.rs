@@ -1,8 +1,7 @@
-use crate::player::Player;
-
+use crate::city::MoodState;
 use crate::combat_stats::CombatStats;
 use crate::events::EventOrigin;
-use crate::playing_actions::PlayingActionType;
+use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::wonder::Wonder;
 use crate::{action::Action, game::Game};
@@ -98,9 +97,21 @@ impl ActionLogAction {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
+pub enum ActionLogBalance {
+    Gain,
+    Loss,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum ActionLogEntry {
-    GainResources { resources: ResourcePile },
-    LoseResources { resources: ResourcePile },
+    Resources {
+        resources: ResourcePile,
+        balance: ActionLogBalance,
+    },
+    MoodChange {
+        city: Position,
+        mood: MoodState,
+    },
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
@@ -143,25 +154,6 @@ pub(crate) fn linear_action_log(game: &Game) -> Vec<Action> {
             })
         })
         .collect()
-}
-
-pub(crate) fn modifier_suffix(
-    player: &Player,
-    action_type: &PlayingActionType,
-    game: &Game,
-) -> String {
-    if let PlayingActionType::Custom(c) = action_type {
-        let action_type1 = *c;
-        format!(
-            " using {}",
-            player
-                .custom_action_info(action_type1)
-                .event_origin
-                .name(game)
-        )
-    } else {
-        String::new()
-    }
 }
 
 pub(crate) fn add_log_action(game: &mut Game, item: Action) {

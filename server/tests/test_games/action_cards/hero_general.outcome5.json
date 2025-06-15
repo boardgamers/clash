@@ -240,10 +240,11 @@
                   },
                   "items": [
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "gold": 1
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -265,7 +266,18 @@
                         "C1"
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "MoodChange": {
+                        "city": "C1",
+                        "mood": "Neutral"
+                      },
+                      "origin": {
+                        "CivilCard": 5
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -279,10 +291,11 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "mood_tokens": 1
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "CivilCard": 5
@@ -297,7 +310,18 @@
                         "C2"
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "MoodChange": {
+                        "city": "C2",
+                        "mood": "Happy"
+                      },
+                      "origin": {
+                        "CivilCard": 5
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -330,13 +354,13 @@
       "Player1 played the action card Hero General"
     ],
     [
-      "Player1: Hero General: Selected city C1 to increase the mood by 1"
+      "Player1: Hero General: City C1 became Neutral"
     ],
     [
       "Player1: Hero General: Pay 1 mood token"
     ],
     [
-      "Player1: Hero General: Selected city C2 to increase the mood by 1"
+      "Player1: Hero General: City C2 became Happy"
     ]
   ],
   "undo_limit": 2,

@@ -266,10 +266,11 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "culture_tokens": 1
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "LeaderAbility": "Princeps"
@@ -292,7 +293,6 @@
     ],
     [
       "Player1: Princeps: Pay 1 culture token",
-      "Player1 activates the city A1 to draw 1 action and 1 objective card using Princeps",
       "Player1 gained an action card from the pile",
       "Player1 gained an objective card from the pile",
       "Player1: Princeps: Discard action card Advance/Peltasts",

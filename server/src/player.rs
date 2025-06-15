@@ -363,14 +363,6 @@ impl Player {
         )
     }
 
-    ///
-    /// # Panics
-    /// Panics if city does not exist
-    #[must_use]
-    pub fn get_city(&self, position: Position) -> &City {
-        self.try_get_city(position).expect("city should exist")
-    }
-
     #[must_use]
     pub fn try_get_city(&self, position: Position) -> Option<&City> {
         let position = self
@@ -384,13 +376,25 @@ impl Player {
     /// # Panics
     /// Panics if city does not exist
     #[must_use]
-    pub fn get_city_mut(&mut self, position: Position) -> &mut City {
+    pub fn get_city(&self, position: Position) -> &City {
+        self.try_get_city(position).expect("city should exist")
+    }
+
+    #[must_use]
+    pub fn try_get_city_mut(&mut self, position: Position) -> Option<&mut City> {
         let position = self
             .cities
             .iter()
-            .position(|city| city.position == position)
-            .expect("city should exist");
-        &mut self.cities[position]
+            .position(|city| city.position == position)?;
+        Some(&mut self.cities[position])
+    }
+
+    ///
+    /// # Panics
+    /// Panics if city does not exist
+    #[must_use]
+    pub fn get_city_mut(&mut self, position: Position) -> &mut City {
+        self.try_get_city_mut(position).expect("city should exist")
     }
 
     pub fn take_city(&mut self, position: Position) -> Option<City> {

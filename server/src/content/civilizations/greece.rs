@@ -2,7 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::can_play_civil_card;
 use crate::advance::Advance;
 use crate::card::HandCard;
-use crate::city::activate_city;
+use crate::city::{activate_city, increase_mood_state};
 use crate::civilization::Civilization;
 use crate::combat::update_combat_strength;
 use crate::combat_listeners::CombatStrength;
@@ -171,17 +171,11 @@ fn city_states() -> SpecialAdvanceInfo {
             ))
         },
         |game, s, position| {
-            if s.choice.is_empty() {
-                s.log(game, "Decided not to decrease the mood of another city using City States");
-            } else {
-                let choice = s.choice[0];
-                s.log(game, &format!(
-                    "Decided to decrease the mood of {choice} instead of {position} using City States",
-                ));
-                activate_city(choice, game);
-                let p = game.player_mut(s.player_index);
-                p.get_city_mut(*position).increase_mood_state();
-                p.event_info
+            if !s.choice.is_empty() {
+                increase_mood_state(game, *position, 1, &s.origin);
+                activate_city(s.choice[0], game, &s.origin);
+                game.player_mut(s.player_index)
+                    .event_info
                     .insert("city_states".to_string(), "used".to_string());
             }
         },
@@ -247,7 +241,7 @@ fn use_idol(b: AbilityBuilder) -> AbilityBuilder {
         |event| &mut event.custom_action,
         0,
         |game, player, _| {
-            activate_leader_city(game, player.index, "use Idol.");
+            activate_leader_city(game, player);
 
             Some(HandCardsRequest::new(
                 idol_cards(game, player.get(game), &ResourcePile::empty()),

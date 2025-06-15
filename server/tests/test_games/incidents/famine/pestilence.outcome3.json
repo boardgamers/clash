@@ -221,20 +221,22 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "gold": 2
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Ability": "Advance"
                       }
                     },
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "mood_tokens": 1
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Advance": "Storage"
@@ -254,10 +256,11 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "mood_tokens": 1
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Advance": "Myths"
@@ -272,7 +275,18 @@
                         "A1"
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "MoodChange": {
+                        "city": "A1",
+                        "mood": "Neutral"
+                      },
+                      "origin": {
+                        "Incident": 1
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -286,10 +300,11 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "mood_tokens": 1
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Advance": "Myths"
@@ -319,7 +334,7 @@
       "Player1: Myths: Avoid mood change"
     ],
     [
-      "Player1: Pestilence: Selected to decrease the mood in city A1 to Neutral"
+      "Player1: Pestilence: City A1 became Neutral"
     ],
     [
       "Player2: Myths: Pay 1 mood token",

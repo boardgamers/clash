@@ -217,38 +217,51 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "gold": 2
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Ability": "Advance"
                       }
                     },
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "mood_tokens": 1
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Advance": "Storage"
                       }
                     },
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "food": 1
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Incident": 51
                       }
                     },
                     {
-                      "LoseResources": {
-                        "resources": {}
+                      "Resources": {
+                        "resources": {},
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Incident": 51
+                      }
+                    },
+                    {
+                      "MoodChange": {
+                        "city": "A1",
+                        "mood": "Angry"
                       },
                       "origin": {
                         "Incident": 51
@@ -274,7 +287,7 @@
       "A new game event has been triggered: Famine: Vermin",
       "Player1: Famine: Vermin: Lost 1 food",
       "Player2: Famine: Vermin: Lost 0 food",
-      "Player2: Famine: Vermin: Made city A1 Angry"
+      "Player2: Famine: Vermin: City A1 became Angry"
     ]
   ],
   "undo_limit": 1,

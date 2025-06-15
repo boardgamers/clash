@@ -225,13 +225,14 @@
                   "wonder_built": "GreatGardens",
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "food": 5,
                           "wood": 5,
                           "ore": 2,
                           "culture_tokens": 5
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Wonder": "GreatGardens"

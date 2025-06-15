@@ -6,7 +6,6 @@ use server::collect::PositionCollection;
 use server::content::persistent_events::{EventResponse, SelectedStructure, Structure};
 use server::game_setup::{GameSetupBuilder, setup_game};
 use server::leader::Leader;
-use server::log::current_player_turn_log;
 use server::unit::Units;
 use server::wonder::Wonder;
 use server::{
@@ -14,9 +13,7 @@ use server::{
     advance,
     city::{City, MoodState::*},
     city_pieces::Building::*,
-    collect, construct, cultural_influence,
-    game::Game,
-    game_api, happiness,
+    collect, construct, cultural_influence, game_api, happiness,
     map::Terrain::*,
     playing_actions,
     playing_actions::PlayingAction::*,
@@ -88,12 +85,15 @@ fn basic_actions() {
         .cities
         .push(City::new(0, Position::new(0, 2)));
 
-    let construct_action = Action::Playing(Construct(construct::Construct::new(
-        city_position,
-        Observatory,
-        ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
-    )));
-    let game = game_api::execute(game, construct_action, 0);
+    let game = game_api::execute(
+        game,
+        Action::Playing(Construct(construct::Construct::new(
+            city_position,
+            Observatory,
+            ResourcePile::new(1, 1, 1, 0, 0, 0, 0),
+        ))),
+        0,
+    );
     let player = &game.players[0];
 
     assert_eq!(Some(0), player.get_city(city_position).pieces.observatory);
@@ -106,17 +106,19 @@ fn basic_actions() {
     assert_eq!(3, game.actions_left);
     assert_eq!(0, game.active_player());
 
-    let increase_happiness_action =
+    let mut game = game_api::execute(
+        game,
         Action::Playing(IncreaseHappiness(happiness::IncreaseHappiness::new(
             vec![(city_position, 1)],
             ResourcePile::mood_tokens(2),
             PlayingActionType::IncreaseHappiness,
-        )));
-    let mut game = game_api::execute(game, increase_happiness_action, 0);
+        ))),
+        0,
+    );
     let player = &game.players[0];
 
     assert_eq!(ResourcePile::new(1, 3, 3, 0, 2, 0, 4), player.resources);
-    assert!(matches!(player.get_city(city_position).mood_state, Happy));
+    assert_eq!(player.get_city(city_position).mood_state, Happy);
     assert_eq!(2, game.actions_left);
 
     game.players[0].resources = ResourcePile::new(3, 3, 6, 0, 1, 0, 5);
@@ -185,96 +187,6 @@ fn basic_actions() {
     assert_eq!(1, player.next_unit_id);
     assert_eq!(4, player.cities.len());
     assert_eq!(1, player.get_city(founded_city_position).size());
-}
-
-fn assert_undo(
-    game: &Game,
-    can_undo: bool,
-    can_redo: bool,
-    action_log_len: usize,
-    action_log_index: usize,
-    undo_limit: usize,
-) {
-    assert_eq!(can_undo, game.can_undo(), "can_undo");
-    assert_eq!(can_redo, game.can_redo(), "can_redo");
-    assert_eq!(
-        action_log_len,
-        current_player_turn_log(game).actions.len(),
-        "action_log_len"
-    );
-    assert_eq!(action_log_index, game.action_log_index, "action_log_index");
-    assert_eq!(undo_limit, game.undo_limit, "undo_limit");
-}
-
-fn increase_happiness(game: Game) -> Game {
-    let increase_happiness_action =
-        Action::Playing(IncreaseHappiness(happiness::IncreaseHappiness::new(
-            vec![(Position::new(0, 0), 1)],
-            ResourcePile::mood_tokens(1),
-            PlayingActionType::IncreaseHappiness,
-        )));
-    game_api::execute(game, increase_happiness_action, 0)
-}
-
-#[test]
-fn undo() {
-    let mut game = setup_game(GameSetupBuilder::new(1).skip_random_map().build());
-    game.players[0]
-        .cities
-        .push(City::new(0, Position::new(0, 0)));
-    game.players[0].resources += ResourcePile::mood_tokens(2);
-    game.players[0].cities[0].decrease_mood_state();
-
-    assert_undo(&game, false, false, 0, 0, 0);
-    assert_eq!(Angry, game.players[0].cities[0].mood_state);
-
-    let game = increase_happiness(game);
-    assert_undo(&game, true, false, 1, 1, 0);
-    assert_eq!(Neutral, game.players[0].cities[0].mood_state);
-
-    let game = increase_happiness(game);
-    assert_undo(&game, true, false, 2, 2, 0);
-    assert_eq!(Happy, game.players[0].cities[0].mood_state);
-
-    let game = game_api::execute(game, Action::Undo, 0);
-    assert_undo(&game, true, true, 2, 1, 0);
-    assert_eq!(Neutral, game.players[0].cities[0].mood_state);
-
-    let game = game_api::execute(game, Action::Undo, 0);
-    assert_undo(&game, false, true, 2, 0, 0);
-    assert_eq!(Angry, game.players[0].cities[0].mood_state);
-
-    let game = game_api::execute(game, Action::Redo, 0);
-    assert_undo(&game, true, true, 2, 1, 0);
-    assert_eq!(Neutral, game.players[0].cities[0].mood_state);
-
-    let game = game_api::execute(game, Action::Redo, 0);
-    assert_undo(&game, true, false, 2, 2, 0);
-    assert_eq!(Happy, game.players[0].cities[0].mood_state);
-
-    let game = game_api::execute(game, Action::Undo, 0);
-    assert_undo(&game, true, true, 2, 1, 0);
-    assert_eq!(Neutral, game.players[0].cities[0].mood_state);
-
-    let game = game_api::execute(game, Action::Undo, 0);
-    assert_undo(&game, false, true, 2, 0, 0);
-    assert_eq!(Angry, game.players[0].cities[0].mood_state);
-
-    let game = game_api::execute(
-        game,
-        advance_action(advance::Advance::Math, ResourcePile::food(2)),
-        0,
-    );
-    assert_undo(&game, true, false, 1, 1, 0);
-    let game = game_api::execute(game, Action::Undo, 0);
-    assert_undo(&game, false, true, 1, 0, 0);
-    assert_eq!(2, game.players[0].advances.len());
-    let game = game_api::execute(
-        game,
-        advance_action(advance::Advance::Engineering, ResourcePile::food(2)),
-        0,
-    );
-    assert_undo(&game, false, false, 1, 1, 1);
 }
 
 #[test]

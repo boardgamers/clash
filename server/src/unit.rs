@@ -18,11 +18,9 @@ use crate::player::{Player, remove_unit};
 use crate::special_advance::SpecialAdvance;
 use crate::{game::Game, leader, position::Position, resource_pile::ResourcePile, unit, utils};
 
-#[readonly::make]
 #[derive(Clone)]
 pub struct Unit {
     pub player_index: usize,
-    #[readonly]
     pub position: Position,
     pub unit_type: UnitType,
     pub movement_restrictions: Vec<MovementRestriction>,
@@ -371,7 +369,7 @@ impl Units {
             Ship => self.ships,
             Cavalry => self.cavalry,
             Elephant => self.elephants,
-            Leader(_) => self.leaders(),
+            Leader(l) => u8::from(self.leader.is_some_and(|leader| leader == l)),
         }
     }
 

@@ -268,20 +268,22 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "gold": 2
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Ability": "Advance"
                       }
                     },
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "mood_tokens": 1
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Advance": "Storage"
@@ -296,7 +298,18 @@
                         "C2"
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "MoodChange": {
+                        "city": "C2",
+                        "mood": "Neutral"
+                      },
+                      "origin": {
+                        "Incident": 33
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -316,7 +329,7 @@
       "A new game event has been triggered: Heavy Flood"
     ],
     [
-      "Player1: Heavy Flood: Selected to decrease the mood in city C2 to Neutral"
+      "Player1: Heavy Flood: City C2 became Neutral"
     ]
   ],
   "undo_limit": 2,

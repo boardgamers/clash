@@ -1,42 +1,5 @@
 {
   "state": "Playing",
-  "events": [
-    {
-      "event_type": {
-        "StatusPhase": "FreeAdvance"
-      },
-      "players_used": [
-        0
-      ],
-      "player": 1,
-      "last_priority_used": 0,
-      "handler": {
-        "priority": 0,
-        "request": {
-          "SelectAdvance": {
-            "choices": [
-              "Storage",
-              "Irrigation",
-              "Husbandry",
-              "Engineering",
-              "Sanitation",
-              "Roads",
-              "Fishing",
-              "Writing",
-              "Tactics",
-              "Myths",
-              "Bartering",
-              "Arts",
-              "Math"
-            ]
-          }
-        },
-        "origin": {
-          "Ability": "Free Advance"
-        }
-      }
-    }
-  ],
   "players": [
     {
       "id": 0,
@@ -45,7 +8,7 @@
         "wood": 6,
         "ore": 6,
         "ideas": 5,
-        "gold": 7,
+        "gold": 5,
         "mood_tokens": 8,
         "culture_tokens": 7
       },
@@ -64,9 +27,6 @@
           "position": "A1"
         },
         {
-          "city_pieces": {
-            "fortress": 1
-          },
           "mood_state": "Angry",
           "position": "C2"
         }
@@ -116,6 +76,7 @@
       "civilization": "Rome",
       "advances": [
         "Farming",
+        "Irrigation",
         "Mining",
         "Storage",
         "Tactics"
@@ -145,8 +106,12 @@
       },
       "cities": [
         {
-          "mood_state": "Angry",
+          "mood_state": "Happy",
           "position": "C1"
+        },
+        {
+          "mood_state": "Happy",
+          "position": "B3"
         }
       ],
       "units": [
@@ -164,7 +129,8 @@
       "civilization": "Greece",
       "advances": [
         "Farming",
-        "Mining"
+        "Mining",
+        "Myths"
       ],
       "incident_tokens": 3,
       "next_unit_id": 2
@@ -181,11 +147,6 @@
       "civilization": "Barbarians",
       "incident_tokens": 3,
       "next_unit_id": 0
-    },
-    {
-      "id": 3,
-      "civilization": "Pirates",
-      "next_unit_id": 0
     }
   ],
   "map": {
@@ -196,7 +157,7 @@
       ],
       [
         "A2",
-        "Mountain"
+        "Water"
       ],
       [
         "A3",
@@ -224,11 +185,11 @@
       ],
       [
         "C3",
-        "Mountain"
+        "Water"
       ],
       [
         "D2",
-        "Mountain"
+        "Water"
       ]
     ]
   },
@@ -244,11 +205,27 @@
               "actions": [
                 {
                   "action": {
-                    "Response": {
-                      "SelectAdvance": "Storage"
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Storage",
+                        "payment": {
+                          "gold": 2
+                        }
+                      }
                     }
                   },
                   "items": [
+                    {
+                      "Resources": {
+                        "resources": {
+                          "gold": 2
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
                     {
                       "Resources": {
                         "resources": {
@@ -258,17 +235,6 @@
                       },
                       "origin": {
                         "Advance": "Storage"
-                      }
-                    },
-                    {
-                      "Resources": {
-                        "resources": {
-                          "food": 1
-                        },
-                        "balance": "Gain"
-                      },
-                      "origin": {
-                        "Incident": 54
                       }
                     }
                   ]
@@ -283,18 +249,19 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1: Free Advance: Advanced Storage for free",
+      "Player1: Advance: Pay 2 gold",
+      "Player1: Advance: Gain Storage",
       "Player1: Storage: Gain 1 mood token"
     ],
     [
-      "A new game event has been triggered: A successful year",
-      "Base effect: Pirates spawn",
-      "No valid positions for Pirate Ship",
-      "Player2: A successful year: Gain 1 food"
+      "A new game event has been triggered: Severe famine",
+      "Base effect: Barbarians move",
+      "Barbarians cannot move - will try to spawn a new city instead",
+      "Barbarians cannot spawn a new city"
     ]
   ],
   "undo_limit": 1,
-  "actions_left": 3,
+  "actions_left": 2,
   "round": 1,
   "age": 1,
   "messages": [
@@ -318,6 +285,6 @@
     "Pyramids"
   ],
   "incidents_discarded": [
-    54
+    7
   ]
 }

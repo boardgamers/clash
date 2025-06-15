@@ -232,13 +232,14 @@
                   "wonder_built": "GreatLighthouse",
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "food": 3,
                           "wood": 5,
                           "ore": 4,
                           "culture_tokens": 5
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Wonder": "GreatLighthouse"
@@ -262,7 +263,18 @@
                         "C3"
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "MoodChange": {
+                        "city": "A1",
+                        "mood": "Neutral"
+                      },
+                      "origin": {
+                        "Ability": "Great Lighthouse"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -286,7 +298,7 @@
     ],
     [
       "Player1: Great Lighthouse: Activated the city A1 to place a ship on C3 for free",
-      "city A1 became Neutral because it was activated more than once"
+      "Player1: Great Lighthouse: City A1 became Neutral"
     ]
   ],
   "undo_limit": 0,

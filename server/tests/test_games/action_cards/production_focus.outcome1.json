@@ -252,12 +252,13 @@
                   },
                   "items": [
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "ore": 2,
                           "gold": 1,
                           "mood_tokens": 2
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Ability": "Collect"

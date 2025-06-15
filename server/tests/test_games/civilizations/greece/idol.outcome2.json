@@ -440,10 +440,11 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "culture_tokens": 1
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "LeaderAbility": "Idol"
@@ -463,10 +464,11 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "culture_tokens": 1
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "CivilCard": 7
@@ -489,7 +491,6 @@
     ],
     [
       "Player1: Idol: Pay 1 culture token",
-      "Player1 activates the city D1 to use Idol.",
       "Player1: Idol: Decided to play Spy as a free action using Idol",
       "Player1 played the action card Spy",
       "Player1 has to pay 1 culture token for Spy"

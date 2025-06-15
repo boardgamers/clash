@@ -1,7 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{ActionCard, ActionCardBuilder};
 use crate::advance::{Advance, gain_advance_without_payment};
-use crate::city::MoodState;
+use crate::city::{MoodState, increase_mood_state};
 use crate::content::action_cards::spy::spy;
 use crate::content::action_cards::synergies::teachable_advances;
 use crate::content::persistent_events::{AdvanceRequest, PaymentRequest, PositionRequest};
@@ -209,15 +209,7 @@ fn increase_mood(b: ActionCardBuilder, priority: i32, need_payment: bool) -> Act
             ))
         },
         |game, s, _| {
-            let pos = s.choice[0];
-            let player = s.player_index;
-            s.log(
-                game,
-                &format!("Selected city {pos} to increase the mood by 1",),
-            );
-            game.player_mut(player)
-                .get_city_mut(pos)
-                .increase_mood_state();
+            increase_mood_state(game, s.choice[0], 1, &s.origin);
         },
     )
 }
