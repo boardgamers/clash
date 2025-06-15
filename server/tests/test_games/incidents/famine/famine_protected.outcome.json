@@ -8,12 +8,12 @@
         "wood": 6,
         "ore": 6,
         "ideas": 5,
-        "gold": 7,
-        "mood_tokens": 7,
+        "gold": 5,
+        "mood_tokens": 8,
         "culture_tokens": 7
       },
       "resource_limit": {
-        "food": 2,
+        "food": 7,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -78,9 +78,10 @@
         "Farming",
         "Irrigation",
         "Mining",
+        "Storage",
         "Tactics"
       ],
-      "incident_tokens": 1,
+      "incident_tokens": 3,
       "next_unit_id": 8
     },
     {
@@ -200,17 +201,65 @@
         {
           "players": [
             {
-              "index": 0
+              "index": 0,
+              "actions": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Advance": {
+                        "advance": "Storage",
+                        "payment": {
+                          "gold": 2
+                        }
+                      }
+                    }
+                  },
+                  "items": [
+                    {
+                      "LoseResources": {
+                        "resources": {
+                          "gold": 2
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "GainResources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    }
+                  ]
+                }
+              ]
             }
           ]
         }
       ]
     }
   ],
-  "action_log_index": 0,
-  "log": [],
-  "undo_limit": 0,
-  "actions_left": 3,
+  "action_log_index": 1,
+  "log": [
+    [
+      "Player1: Advance: Pay 2 gold",
+      "Player1: Advance: Gain Storage",
+      "Player1: Storage: Gain 1 mood token"
+    ],
+    [
+      "A new game event has been triggered: Severe famine",
+      "Base effect: Barbarians move",
+      "Barbarians cannot move - will try to spawn a new city instead",
+      "Barbarians cannot spawn a new city"
+    ]
+  ],
+  "undo_limit": 1,
+  "actions_left": 2,
   "round": 1,
   "age": 1,
   "messages": [
@@ -233,7 +282,7 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "incidents_left": [
+  "incidents_discarded": [
     7
   ]
 }

@@ -192,7 +192,7 @@ fn augustus() -> LeaderInfo {
         )
         .build(),
         LeaderAbility::builder(
-            "Imperator",
+            "Emperor",
             "Land battle with leader: If you don't own a city in the region: \
             Gain 2 combat value in every combat round",
         )
@@ -205,7 +205,7 @@ fn augustus() -> LeaderInfo {
                 )
             {
                 s.extra_combat_value += 2;
-                s.roll_log.push("Imperator adds 2 combat value".to_string());
+                s.roll_log.push("Emperor adds 2 combat value".to_string());
             }
         })
         .build(),
