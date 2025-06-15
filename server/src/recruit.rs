@@ -5,12 +5,12 @@ use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
 use crate::map::capital_city_position;
 use crate::payment::PaymentOptions;
-use crate::player::{CostTrigger, Player, gain_unit};
+use crate::player::{gain_unit, CostTrigger, Player};
 use crate::player_events::CostInfo;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::SpecialAdvance;
-use crate::unit::{UnitType, Units, kill_units, set_unit_position};
+use crate::unit::{kill_units, set_unit_position, UnitType, Units};
 use crate::{combat, utils};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -83,14 +83,15 @@ pub(crate) fn execute_recruit(
             units.to_string(Some(game))
         ),
     );
+    let origin = cost.origin();
     for unit in &r.replaced_units {
         // kill separately, because they may be on different positions
-        kill_units(game, &[*unit], player_index, None);
+        kill_units(game, &[*unit], player_index, None, &origin);
     }
     let player = game.player_mut(player_index);
     let vec = r.units.clone().to_vec();
     player.units.reserve_exact(vec.len());
-    activate_city(r.city_position, game, &cost.cost.origin);
+    activate_city(r.city_position, game, &origin);
     for unit_type in vec {
         let position = match &unit_type {
             UnitType::Ship => game

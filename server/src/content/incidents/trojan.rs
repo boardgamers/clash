@@ -10,11 +10,11 @@ use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect};
 use crate::leader::Leader;
-use crate::player::{Player, can_add_army_unit, gain_unit};
+use crate::player::{can_add_army_unit, gain_unit, Player};
 use crate::player_events::{IncidentInfo, IncidentTarget};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
-use crate::unit::{UnitType, kill_units};
+use crate::unit::{kill_units, UnitType};
 use crate::utils::remove_and_map_element_by;
 use itertools::Itertools;
 
@@ -249,17 +249,13 @@ fn kill_leader(game: &mut Game, player: &EventPlayer) {
     let p = player.get(game);
     let leader = p.units.iter().find_map(|u| {
         if let UnitType::Leader(l) = u.unit_type {
-            Some((u.id, l))
+            Some(u.id)
         } else {
             None
         }
     });
-    if let Some((id, leader)) = leader {
-        player.log(
-            game,
-            &format!("{} was killed due to the Guillotine", leader.name(game)),
-        );
-        kill_units(game, &[id], player.index, None);
+    if let Some(id) = leader {
+        kill_units(game, &[id], player.index, None, &player.origin);
     }
 }
 

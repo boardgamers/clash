@@ -548,7 +548,7 @@ impl Player {
     }
 }
 
-pub fn gain_unit(player: usize, position: Position, unit_type: UnitType, game: &mut Game) {
+pub fn gain_unit(player: usize, position: Position, unit_type: UnitType, game: &mut Game, origin: &EventOrigin) {
     if let UnitType::Leader(leader) = &unit_type {
         let p = game.player_mut(player);
         p.available_leaders.retain(|name| name != leader);

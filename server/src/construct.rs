@@ -142,7 +142,7 @@ pub(crate) fn execute_construct(
         c.city_position,
         c.port_position,
         cost.activate_city,
-        &cost.cost.origin,
+        cost.origin(),
     );
     cost.pay(game, &c.payment);
     game.log_with_origin(

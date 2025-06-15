@@ -1,7 +1,7 @@
 use crate::content::persistent_events::PaymentRequest;
 use crate::events::EventOrigin;
 use crate::game::Game;
-use crate::log::{ActionLogBalance, ActionLogEntry, ActionLogItem, add_action_log_item};
+use crate::log::{add_action_log_item, ActionLogBalance, ActionLogEntry};
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::resource_pile::ResourcePile;
@@ -111,14 +111,12 @@ pub(crate) fn gain_resources_with_modifiers(
     apply_resource_limit(p);
     add_action_log_item(
         game,
-        ActionLogItem::new(
-            ActionLogEntry::Resources {
-                resources,
-                balance: ActionLogBalance::Gain,
-            },
-            origin,
-            modifiers,
-        ),
+        ActionLogEntry::Resources {
+            resources,
+            balance: ActionLogBalance::Gain,
+        },
+        origin,
+        modifiers,
     );
 }
 
@@ -158,14 +156,12 @@ pub(crate) fn lose_resources(
     p.resources -= resources.clone();
     add_action_log_item(
         game,
-        ActionLogItem::new(
-            ActionLogEntry::Resources {
-                resources,
-                balance: ActionLogBalance::Loss,
-            },
-            origin,
-            modifiers,
-        ),
+        ActionLogEntry::Resources {
+            resources,
+            balance: ActionLogBalance::Loss,
+        },
+        origin,
+        modifiers,
     );
 }
 

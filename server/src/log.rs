@@ -3,6 +3,7 @@ use crate::combat_stats::CombatStats;
 use crate::events::EventOrigin;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
+use crate::unit::Units;
 use crate::wonder::Wonder;
 use crate::{action::Action, game::Game};
 use json_patch::PatchOperation;
@@ -108,6 +109,10 @@ pub enum ActionLogEntry {
         resources: ResourcePile,
         balance: ActionLogBalance,
     },
+    Units {
+        units: Units,
+        balance: ActionLogBalance,
+    },
     MoodChange {
         city: Position,
         mood: MoodState,
@@ -167,12 +172,21 @@ pub(crate) fn add_log_action(game: &mut Game, item: Action) {
     game.action_log_index += 1;
 }
 
-pub(crate) fn add_action_log_item(game: &mut Game, item: ActionLogItem) {
+pub(crate) fn add_action_log_item(
+    game: &mut Game,
+    entry: ActionLogEntry,
+    origin: EventOrigin,
+    modifiers: Vec<EventOrigin>,
+) {
     let p = current_player_turn_log_mut(game);
     if p.actions.is_empty() {
         p.actions.push(ActionLogAction::new(Action::StartTurn));
     }
-    current_log_action_mut(game).items.push(item);
+    current_log_action_mut(game).items.push(ActionLogItem::new(
+        entry,
+        origin,
+        modifiers,
+    ));
 }
 
 ///

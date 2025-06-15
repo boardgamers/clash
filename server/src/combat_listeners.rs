@@ -1,8 +1,8 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::combat::{Combat, CombatRetreatState, capture_position, log_round};
+use crate::combat::{capture_position, log_round, Combat, CombatRetreatState};
 use crate::combat_roll::CombatHits;
 use crate::combat_stats::CombatStats;
-use crate::content::ability::Ability;
+use crate::content::ability::{combat_event_origin, Ability};
 use crate::content::persistent_events::{PersistentEventType, PositionRequest, UnitsRequest};
 use crate::game::Game;
 use crate::log::current_log_action_mut;
@@ -11,7 +11,7 @@ use crate::player::gain_unit;
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::position::Position;
 use crate::tactics_card::{CombatRole, TacticsCard, TacticsCardTarget};
-use crate::unit::{UnitType, Units, kill_units};
+use crate::unit::{kill_units, UnitType, Units};
 use crate::utils;
 use itertools::Itertools;
 use num::Zero;
@@ -533,7 +533,9 @@ pub(crate) fn choose_fighter_casualties() -> Ability {
                 let p = game.player(player.index);
                 if casualties == choices.len() as u8 {
                     player.log(game, &format!("Remove all {role_str} units",));
-                    kill_fighters(game, player.index, &choices, &mut r.combat);
+                    let player1 = player.index;
+                    let c = &mut r.combat;
+                    kill_combat_units(game, c, player1, &choices);
                     return None;
                 }
 
@@ -547,12 +549,10 @@ pub(crate) fn choose_fighter_casualties() -> Ability {
                         game,
                         &format!("Remove {casualties} of their {role_str} units",),
                     );
-                    kill_fighters(
-                        game,
-                        player.index,
-                        &choices[..casualties as usize],
-                        &mut r.combat,
-                    );
+                    let player1 = player.index;
+                    let killed_unit_ids = &choices[..casualties as usize];
+                    let c = &mut r.combat;
+                    kill_combat_units(game, c, player1, killed_unit_ids);
                     return None;
                 }
 
@@ -568,7 +568,10 @@ pub(crate) fn choose_fighter_casualties() -> Ability {
                 ))
             },
             move |game, s, e| {
-                kill_fighters(game, s.player_index, &s.choice, &mut e.combat);
+                let player = s.player_index;
+                let killed_unit_ids = &s.choice;
+                let c = &mut e.combat;
+                kill_combat_units(game, c, player, killed_unit_ids);
             },
         )
         .build()
@@ -646,20 +649,6 @@ pub(crate) fn place_settler() -> Ability {
     .build()
 }
 
-fn kill_fighters(game: &mut Game, player: usize, killed_unit_ids: &[u32], c: &mut Combat) {
-    let p = game.player(player);
-    game.add_info_log_item(&format!(
-        "{p} removed {}",
-        killed_unit_ids
-            .iter()
-            .map(|id| p.get_unit(*id).unit_type)
-            .collect::<Units>()
-            .to_string(Some(game))
-    ));
-
-    kill_combat_units(game, c, player, killed_unit_ids);
-}
-
 pub(crate) fn kill_combat_units(
     game: &mut Game,
     c: &mut Combat,
@@ -696,5 +685,6 @@ pub(crate) fn kill_units_with_stats(
         killed_unit_ids,
         player,
         Some(stats.opponent(player).player),
+        &combat_event_origin(),
     );
 }
