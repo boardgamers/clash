@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use std::ops::RangeInclusive;
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash, Copy)]
 pub enum PaymentConversionType {
     Unlimited,
     MayOverpay(u8),
@@ -179,47 +179,35 @@ impl PaymentOptions {
 
     #[must_use]
     pub(crate) fn tokens(player: &Player, origin: EventOrigin, cost: u8) -> Self {
-        Self::sum(
-            player,
-            origin,
-            cost,
-            &[ResourceType::MoodTokens, ResourceType::CultureTokens],
-        )
+        Self::sum(player, origin, cost, &[
+            ResourceType::MoodTokens,
+            ResourceType::CultureTokens,
+        ])
     }
 
     #[must_use]
-    pub(self) fn resources_with_discount(
-        cost: ResourcePile,
-        discount_type: PaymentConversionType,
-        origin: EventOrigin,
-    ) -> Self {
-        let base = base_resources();
-
-        let mut conversions = vec![PaymentConversion::new(
-            base.clone(),
-            ResourcePile::gold(1),
-            PaymentConversionType::Unlimited,
-        )];
-        if !matches!(discount_type, PaymentConversionType::Unlimited) {
-            conversions.push(PaymentConversion::new(
-                base.clone(),
-                ResourcePile::empty(),
-                discount_type,
-            ));
-        }
+    pub(self) fn resources_with_gold_conversion(cost: ResourcePile, origin: EventOrigin) -> Self {
+        let conversions = if cost.food > 0 || cost.wood > 0 || cost.ore > 0 || cost.ideas > 0 {
+            vec![PaymentConversion::new(
+                base_resources(),
+                ResourcePile::gold(1),
+                PaymentConversionType::Unlimited,
+            )]
+        } else {
+            vec![]
+        };
 
         PaymentOptions::new(cost, conversions, vec![], origin)
     }
 
     #[must_use]
     pub(crate) fn resources(player: &Player, origin: EventOrigin, cost: ResourcePile) -> Self {
-        Self::resources_with_discount(cost, PaymentConversionType::Unlimited, origin.clone())
-            .add_extra_options(player, origin)
+        Self::resources_with_gold_conversion(cost, origin.clone()).add_extra_options(player, origin)
     }
 
     #[must_use]
     pub(crate) fn fixed_resources(cost: ResourcePile, origin: EventOrigin) -> Self {
-        Self::resources_with_discount(cost, PaymentConversionType::Unlimited, origin)
+        Self::resources_with_gold_conversion(cost, origin)
     }
 
     #[must_use]
@@ -485,9 +473,28 @@ mod tests {
         invalid: Vec<ResourcePile>,
     }
 
+    #[must_use]
+    fn resources_with_discount(
+        cost: ResourcePile,
+        discount_type: PaymentConversionType,
+        origin: EventOrigin,
+    ) -> PaymentOptions {
+        assert_ne!(discount_type, PaymentConversionType::Unlimited);
+
+        let mut payment_options = PaymentOptions::resources_with_gold_conversion(cost, origin);
+
+        payment_options.conversions.push(PaymentConversion::new(
+            base_resources(),
+            ResourcePile::empty(),
+            discount_type,
+        ));
+
+        payment_options
+    }
+
     fn assert_can_afford(name: &str, cost: &ResourcePile, discount: u8) {
         let player_has = ResourcePile::new(1, 2, 3, 4, 5, 6, 7);
-        let can_afford = PaymentOptions::resources_with_discount(
+        let can_afford = resources_with_discount(
             cost.clone(),
             PaymentConversionType::MayNotOverpay(discount),
             check_event_origin(),
@@ -498,7 +505,7 @@ mod tests {
 
     fn assert_cannot_afford(name: &str, cost: &ResourcePile, discount: u8) {
         let player_has = ResourcePile::new(1, 2, 3, 4, 5, 6, 7);
-        let can_afford = PaymentOptions::resources_with_discount(
+        let can_afford = resources_with_discount(
             cost.clone(),
             PaymentConversionType::MayNotOverpay(discount),
             check_event_origin(),
