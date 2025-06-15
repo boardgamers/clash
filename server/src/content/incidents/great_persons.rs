@@ -265,7 +265,7 @@ fn great_prophet() -> ActionCard {
         |game, s, a| {
             let pile = s.choice[0].clone();
             if pile.is_empty() {
-                s.log(game, &"Declined to build the Temple".to_string());
+                s.log(game, "Declined to build the Temple");
                 return;
             }
 

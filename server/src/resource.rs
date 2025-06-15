@@ -1,7 +1,7 @@
 use crate::content::persistent_events::PaymentRequest;
 use crate::events::EventOrigin;
 use crate::game::Game;
-use crate::log::{ActionLogItem, add_action_log_item, ActionLogEntry};
+use crate::log::{ActionLogEntry, ActionLogItem, add_action_log_item};
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::resource_pile::ResourcePile;
@@ -109,11 +109,14 @@ pub(crate) fn gain_resources_with_modifiers(
 
     p.resources += resources.clone();
     apply_resource_limit(p);
-    add_action_log_item(game, ActionLogItem::new(
-        ActionLogEntry::GainResources { resources: resources.clone() },
-        origin,
-        modifiers,
-    ));
+    add_action_log_item(
+        game,
+        ActionLogItem::new(
+            ActionLogEntry::GainResources { resources },
+            origin,
+            modifiers,
+        ),
+    );
 }
 
 pub(crate) fn apply_resource_limit(p: &mut Player) {
@@ -150,11 +153,14 @@ pub(crate) fn lose_resources(
         p.resources
     );
     p.resources -= resources.clone();
-    add_action_log_item(game, ActionLogItem::new(
-        ActionLogEntry::LoseResources { resources: resources.clone() },
-        origin.clone(),
-        modifiers,
-    ));
+    add_action_log_item(
+        game,
+        ActionLogItem::new(
+            ActionLogEntry::LoseResources { resources },
+            origin,
+            modifiers,
+        ),
+    );
 }
 
 pub(crate) fn pay_cost(
@@ -181,7 +187,13 @@ pub(crate) fn pay_cost(
 }
 
 fn log_payment(game: &mut Game, player: usize, payment: &ResourcePile, cost: &PaymentOptions) {
-    lose_resources(game, player, payment.clone(), cost.origin.clone(), cost.modifiers.clone());
+    lose_resources(
+        game,
+        player,
+        payment.clone(),
+        cost.origin.clone(),
+        cost.modifiers.clone(),
+    );
     if cost.modifiers.is_empty() {
         game.log_with_origin(player, &cost.origin, &format!("Pay {payment}"));
     } else {

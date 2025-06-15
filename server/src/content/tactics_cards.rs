@@ -336,10 +336,7 @@ pub(crate) fn scout(id: u8) -> TacticsCard {
                                 ),
                             );
                         } else {
-                            p.log(
-                                game,
-                                "Cannot use - opponent didn't play a tactics card",
-                            );
+                            p.log(game, "Cannot use - opponent didn't play a tactics card");
                         }
                     },
                 );
