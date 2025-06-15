@@ -228,11 +228,6 @@
           "position": "E6",
           "unit_type": "Infantry",
           "id": 8
-        },
-        {
-          "position": "D5",
-          "unit_type": "Infantry",
-          "id": 11
         }
       ],
       "civilization": "China",
@@ -4074,7 +4069,7 @@
                         "leader": "Wu"
                       },
                       "losses": {
-                        "infantry": 2,
+                        "infantry": 3,
                         "leader": "Wu"
                       }
                     },
@@ -4970,8 +4965,8 @@
       "Spock: Choose Casualties: Remove all attacking units",
       "Spock removed 3 infantry",
       "AlphaZero: Fireworks: Not enough resources, no payment made.",
-      "AlphaZero: Choose Casualties: Remove 2 of their defending units",
-      "AlphaZero removed 2 infantry",
+      "AlphaZero: Choose Casualties: Remove all defending units",
+      "AlphaZero removed 3 infantry",
       "Battle ends in a draw"
     ]
   ],

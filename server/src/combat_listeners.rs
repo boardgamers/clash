@@ -239,9 +239,9 @@ impl CombatRoundEnd {
             self.set_final_result();
             true
         } else {
-            let hits = h.clone();
-            update(h);
-            h.hits() != hits.hits()
+            let mut copy = h.clone();
+            update(&mut copy);
+            h.hits() != copy.hits()
         }
     }
 
