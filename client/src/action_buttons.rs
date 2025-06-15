@@ -33,23 +33,17 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
     }
 
     if rc.can_play_action(&PlayingActionType::MoveUnits)
-        && bottom_left_texture(
-            rc,
-            &assets.move_units,
-            icon_pos(0, -3),
-            &["Move units".to_string()],
-        )
+        && bottom_left_texture(rc, &assets.move_units, icon_pos(0, -3), &[
+            "Move units".to_string()
+        ])
     {
         return global_move(rc);
     }
 
     if rc.can_play_action(&PlayingActionType::Advance)
-        && bottom_left_texture(
-            rc,
-            &assets.advances,
-            icon_pos(1, -3),
-            &["Research advances".to_string()],
-        )
+        && bottom_left_texture(rc, &assets.advances, icon_pos(1, -3), &[
+            "Research advances".to_string(),
+        ])
     {
         return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
     }
@@ -130,18 +124,17 @@ fn generic_custom_action(
     let custom_action_type = c.action;
 
     if let Some(city) = city {
-        if c.is_city_available(rc.game, city) {
-            return Some(StateUpdate::execute(Action::Playing(
+        c.is_city_available(rc.game, city)
+            .then_some(StateUpdate::execute(Action::Playing(
                 PlayingAction::Custom(CustomAction::new(custom_action_type, Some(city.position))),
-            )));
-        }
+            )))
+    } else {
+        c.city_bound()
+            .is_none()
+            .then_some(StateUpdate::execute(Action::Playing(
+                PlayingAction::Custom(CustomAction::new(custom_action_type, None)),
+            )))
     }
-
-    c.city_bound()
-        .is_none()
-        .then_some(StateUpdate::execute(Action::Playing(
-            PlayingAction::Custom(CustomAction::new(custom_action_type, None)),
-        )))
 }
 
 pub fn base_or_custom_action(
