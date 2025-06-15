@@ -35,7 +35,10 @@ impl LeaderAbility {
     ) -> LeaderAbility {
         LeaderAbilityBuilder::new(
             name.to_string(),
-            format!("As an action: If the leader city is happy: Gain 1 {group} advance for free.",),
+            format!(
+                "If the leader city is happy: As an action, pay 1 mood or culture token: \
+                Gain 1 {group} advance for free.",
+            ),
         )
         .add_custom_action(
             action,
