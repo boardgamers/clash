@@ -198,6 +198,18 @@ fn test_martyr() {
 }
 
 #[test]
+fn test_martyr2() {
+    JSON.test(
+        "martyr2",
+        vec![
+            TestAction::not_undoable(0, Action::Response(EventResponse::SelectUnits(vec![10])))
+                .skip_json(),
+            TestAction::not_undoable(1, Action::Response(EventResponse::SelectUnits(vec![12]))),
+        ],
+    );
+}
+
+#[test]
 fn test_archers() {
     JSON.test(
         "archers",
