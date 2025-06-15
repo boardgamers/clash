@@ -221,30 +221,33 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "gold": 2
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Ability": "Advance"
                       }
                     },
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "mood_tokens": 1
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Advance": "Storage"
                       }
                     },
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "gold": 2
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Ability": "Gold deposits"
@@ -262,6 +265,44 @@
                   },
                   "completed_objectives": [
                     "Terror Regime"
+                  ],
+                  "items": [
+                    {
+                      "MoodChange": {
+                        "city": "C2",
+                        "mood": "Angry"
+                      },
+                      "origin": {
+                        "Incident": 53
+                      }
+                    },
+                    {
+                      "MoodChange": {
+                        "city": "A1",
+                        "mood": "Neutral"
+                      },
+                      "origin": {
+                        "Incident": 53
+                      }
+                    },
+                    {
+                      "MoodChange": {
+                        "city": "C2",
+                        "mood": "Angry"
+                      },
+                      "origin": {
+                        "Incident": 53
+                      }
+                    },
+                    {
+                      "MoodChange": {
+                        "city": "A1",
+                        "mood": "Neutral"
+                      },
+                      "origin": {
+                        "Incident": 53
+                      }
+                    }
                   ]
                 }
               ]
@@ -283,9 +324,8 @@
       "Player1: Gold deposits: Gain 2 gold"
     ],
     [
-      "Player1: Fire: Decreased the mood in city B2 to Angry",
-      "Player1: Fire: Decreased the mood in city C2 to Angry",
-      "Player2: Fire: Decreased the mood in city A1 to Neutral",
+      "Player1: Fire: City C2 became Angry",
+      "Player2: Fire: City A1 became Neutral",
       "Player1 completed objective Terror Regime"
     ]
   ],

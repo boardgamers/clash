@@ -99,13 +99,19 @@ impl ActionLogAction {
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum ActionLogBalance {
     Gain,
-    Loss
+    Loss,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum ActionLogEntry {
-    Resources { resources: ResourcePile, balance: ActionLogBalance },
-    MoodChange { city: Position, mood: MoodState }
+    Resources {
+        resources: ResourcePile,
+        balance: ActionLogBalance,
+    },
+    MoodChange {
+        city: Position,
+        mood: MoodState,
+    },
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]

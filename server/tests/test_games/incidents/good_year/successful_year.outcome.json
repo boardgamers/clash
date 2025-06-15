@@ -250,20 +250,22 @@
                   },
                   "items": [
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "mood_tokens": 1
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Advance": "Storage"
                       }
                     },
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "food": 1
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Incident": 54

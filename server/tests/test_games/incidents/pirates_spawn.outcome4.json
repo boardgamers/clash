@@ -251,10 +251,11 @@
                   },
                   "items": [
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "mood_tokens": 1
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Advance": "Storage"
@@ -301,20 +302,31 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "ore": 1
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Incident": 54
                       }
                     },
                     {
-                      "GainResources": {
+                      "MoodChange": {
+                        "city": "C1",
+                        "mood": "Angry"
+                      },
+                      "origin": {
+                        "Incident": 54
+                      }
+                    },
+                    {
+                      "Resources": {
                         "resources": {
                           "food": 1
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Incident": 54
@@ -353,7 +365,7 @@
       "Player1: A successful year: Pay 1 ore",
       "Pirates took 1 ore",
       "Player2 must reduce Mood in a city adjacent to pirates",
-      "Player2: A successful year: Reduced Mood in the city C1",
+      "Player2: A successful year: City C1 became Angry",
       "Player2: A successful year: Gain 1 food"
     ]
   ],

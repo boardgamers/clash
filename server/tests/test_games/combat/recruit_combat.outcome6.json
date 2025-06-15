@@ -266,11 +266,21 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "wood": 5,
                           "gold": 3
-                        }
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
+                      }
+                    },
+                    {
+                      "MoodChange": {
+                        "city": "C2",
+                        "mood": "Neutral"
                       },
                       "origin": {
                         "Ability": "Recruit"
@@ -288,10 +298,11 @@
                   },
                   "items": [
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "mood_tokens": 1
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Advance": "Nationalism"
@@ -334,20 +345,22 @@
                   },
                   "items": [
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "gold": 1
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Advance": "Medicine"
                       }
                     },
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "gold": 2
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Ability": "Pirate ship destroyed"
@@ -365,10 +378,11 @@
                   },
                   "items": [
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "culture_tokens": 1
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Ability": "Pirates battle"
@@ -412,10 +426,11 @@
                   },
                   "items": [
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "gold": 1
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Ability": "Pirate ship destroyed"
@@ -433,10 +448,11 @@
                   },
                   "items": [
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "culture_tokens": 1
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Ability": "Pirates battle"
@@ -473,7 +489,7 @@
     [
       "Player1: Recruit: Pay 5 wood and 3 gold",
       "Player1: Recruit: Recruit 4 ships in the city C2",
-      "city C2 became Neutral because it was activated more than once"
+      "Player1: Recruit: City C2 became Neutral"
     ],
     [
       "Player1: Nationalism: Gain 1 mood token",

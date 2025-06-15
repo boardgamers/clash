@@ -221,13 +221,14 @@
                   "wonder_built": "Colosseum",
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "food": 3,
                           "wood": 4,
                           "ore": 5,
                           "culture_tokens": 5
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Wonder": "Colosseum"
@@ -257,13 +258,23 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "mood_tokens": 1
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Ability": "Sports"
+                      }
+                    },
+                    {
+                      "MoodChange": {
+                        "city": "C2",
+                        "mood": "Happy"
+                      },
+                      "origin": {
+                        "Advance": "Sports"
                       }
                     }
                   ]
@@ -295,10 +306,11 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "culture_tokens": 1
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Wonder": "Colosseum"
@@ -344,10 +356,11 @@
                   },
                   "items": [
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "gold": 1
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -377,7 +390,7 @@
     ],
     [
       "Player1: Sports: Pay 1 mood token",
-      "Player1: Sports: Increase happiness in the city C2 by 1 steps, making it Happy using Sports"
+      "Player1: Sports: City C2 became Happy"
     ],
     [
       "Player1 marched 2 infantry, 1 cavalry and 1 elephant from C2 to C1"

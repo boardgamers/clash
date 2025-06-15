@@ -271,10 +271,29 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "MoodChange": {
+                        "city": "C2",
+                        "mood": "Neutral"
+                      },
+                      "origin": {
+                        "Ability": "Increase Happiness"
+                      }
+                    },
+                    {
+                      "MoodChange": {
+                        "city": "B3",
+                        "mood": "Happy"
+                      },
+                      "origin": {
+                        "Ability": "Increase Happiness"
+                      }
+                    },
+                    {
+                      "Resources": {
                         "resources": {
                           "mood_tokens": 5
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Ability": "Increase Happiness"
@@ -292,8 +311,9 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1: Increase Happiness: Pay 5 mood tokens",
-      "Player1: Increase Happiness: Increase happiness in the city C2 by 1 steps, making it Neutral and the city B3 by 2 steps, making it Happy"
+      "Player1: Increase Happiness: City C2 became Neutral",
+      "Player1: Increase Happiness: City B3 became Happy",
+      "Player1: Increase Happiness: Pay 5 mood tokens"
     ]
   ],
   "undo_limit": 0,

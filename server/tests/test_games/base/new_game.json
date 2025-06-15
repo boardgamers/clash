@@ -423,7 +423,9 @@
   "actions_left": 3,
   "round": 1,
   "age": 1,
-  "messages": [],
+  "messages": [
+    "Age 1 has started"
+  ],
   "rng": "108765015509370288601255407935512047263",
   "wonders_left": [
     "GreatLibrary",

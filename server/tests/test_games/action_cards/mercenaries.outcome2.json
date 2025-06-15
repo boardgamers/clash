@@ -285,10 +285,11 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "ore": 1
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "CivilCard": 13

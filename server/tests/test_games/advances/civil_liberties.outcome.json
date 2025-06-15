@@ -201,10 +201,11 @@
                   },
                   "items": [
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "mood_tokens": 3
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Ability": "Civil Liberties"

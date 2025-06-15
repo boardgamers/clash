@@ -293,10 +293,11 @@
                   },
                   "items": [
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "mood_tokens": 1
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Ability": "Collect"
@@ -315,7 +316,6 @@
   "log": [
     [
       "Player1: Collect: Use city C2",
-      "city C2 became Angry because it was activated more than once",
       "Player1: Collect: Gain 1 mood token"
     ]
   ],

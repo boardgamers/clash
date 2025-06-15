@@ -223,10 +223,11 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "culture_tokens": 1
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "CivilCard": 7

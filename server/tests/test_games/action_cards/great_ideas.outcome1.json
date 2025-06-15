@@ -230,10 +230,11 @@
                   },
                   "items": [
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "gold": 1
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -249,10 +250,11 @@
                   },
                   "items": [
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "ideas": 2
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "CivilCard": 11

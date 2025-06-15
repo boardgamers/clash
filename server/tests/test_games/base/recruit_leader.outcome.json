@@ -281,11 +281,12 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "mood_tokens": 1,
                           "culture_tokens": 1
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Ability": "Recruit"

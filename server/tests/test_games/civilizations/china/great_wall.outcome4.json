@@ -387,10 +387,11 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "food": 2
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -421,13 +422,14 @@
                   "wonder_built": "GreatWall",
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "food": 3,
                           "wood": 2,
                           "ore": 7,
                           "culture_tokens": 3
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Wonder": "GreatWall"

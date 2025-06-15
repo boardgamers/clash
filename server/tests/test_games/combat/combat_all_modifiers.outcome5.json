@@ -232,10 +232,11 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "ore": 1
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Advance": "SteelWeapons"
@@ -256,18 +257,20 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
-                        "resources": {}
+                      "Resources": {
+                        "resources": {},
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Advance": "Siegecraft"
                       }
                     },
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "ore": 2
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Advance": "Siegecraft"
@@ -287,10 +290,11 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "ore": 1
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Advance": "SteelWeapons"
@@ -347,10 +351,11 @@
                   },
                   "items": [
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "gold": 1
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Ability": "Combat"

@@ -223,14 +223,15 @@
                   "wonder_built": "Pyramids",
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "food": 2,
                           "wood": 3,
                           "ore": 6,
                           "gold": 1,
                           "culture_tokens": 5
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Wonder": "Pyramids"

@@ -237,8 +237,9 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
-                        "resources": {}
+                      "Resources": {
+                        "resources": {},
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Ability": "Change Government"

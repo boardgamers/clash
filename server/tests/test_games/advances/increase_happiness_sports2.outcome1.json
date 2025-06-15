@@ -272,13 +272,23 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "culture_tokens": 2
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Ability": "Sports"
+                      }
+                    },
+                    {
+                      "MoodChange": {
+                        "city": "C2",
+                        "mood": "Happy"
+                      },
+                      "origin": {
+                        "Advance": "Sports"
                       }
                     }
                   ]
@@ -297,7 +307,7 @@
     ],
     [
       "Player1: Sports: Pay 2 culture tokens",
-      "Player1: Sports: Increase happiness in the city C2 by 2 steps, making it Happy using Sports"
+      "Player1: Sports: City C2 became Happy"
     ]
   ],
   "undo_limit": 0,

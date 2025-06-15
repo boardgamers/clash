@@ -260,10 +260,11 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "mood_tokens": 2
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "SpecialAdvance": "HellenisticCulture"
@@ -285,7 +286,7 @@
     ],
     [
       "Player1: Hellenistic Culture: Pay 2 mood tokens",
-      "Player1 tried to influence culture the Port in the city at C2 by Player2 using Hellenistic Culture",
+      "Player1: Hellenistic Culture: Tried to influence the Port in the city at C2 by Player2",
       "Cultural influence succeeded (rolled 6)"
     ]
   ],

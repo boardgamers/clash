@@ -265,10 +265,20 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "MoodChange": {
+                        "city": "A1",
+                        "mood": "Neutral"
+                      },
+                      "origin": {
+                        "LeaderAbility": "Statesman"
+                      }
+                    },
+                    {
+                      "Resources": {
                         "resources": {
                           "mood_tokens": 2
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "LeaderAbility": "Statesman"
@@ -286,8 +296,8 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1: Statesman: Pay 2 mood tokens",
-      "Player1: Statesman: Increase happiness in the city A1 by 1 steps, making it Neutral using Statesman"
+      "Player1: Statesman: City A1 became Neutral",
+      "Player1: Statesman: Pay 2 mood tokens"
     ]
   ],
   "undo_limit": 0,

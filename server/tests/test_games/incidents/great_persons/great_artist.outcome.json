@@ -23,28 +23,6 @@
                 "default": {
                   "culture_tokens": 2
                 },
-                "conversions": [
-                  {
-                    "from": [
-                      {
-                        "food": 1
-                      },
-                      {
-                        "wood": 1
-                      },
-                      {
-                        "ore": 1
-                      },
-                      {
-                        "ideas": 1
-                      }
-                    ],
-                    "to": {
-                      "gold": 1
-                    },
-                    "type": "Unlimited"
-                  }
-                ],
                 "origin": {
                   "Incident": 19
                 }
@@ -285,20 +263,22 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "food": 2
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Ability": "Advance"
                       }
                     },
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "mood_tokens": 1
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Advance": "Storage"

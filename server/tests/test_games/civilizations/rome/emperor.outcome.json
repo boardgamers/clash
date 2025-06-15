@@ -391,10 +391,20 @@
                   },
                   "items": [
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "gold": 2
-                        }
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "MoodChange": {
+                        "city": "D8",
+                        "mood": "Angry"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -424,7 +434,8 @@
       "Player2: Choose Casualties: Remove all defending units",
       "Player2 removed 1 infantry",
       "Attacker wins and captured Player2's city D8",
-      "Player1: Combat: Gain 2 gold"
+      "Player1: Combat: Gain 2 gold",
+      "Player1: Combat: City D8 became Angry"
     ]
   ],
   "undo_limit": 1,

@@ -174,9 +174,10 @@ fn city_states() -> SpecialAdvanceInfo {
             if !s.choice.is_empty() {
                 increase_mood_state(game, *position, 1, &s.origin);
                 activate_city(s.choice[0], game, &s.origin);
-                game.player_mut(s.player_index).event_info
+                game.player_mut(s.player_index)
+                    .event_info
                     .insert("city_states".to_string(), "used".to_string());
-            } 
+            }
         },
     )
     .build()

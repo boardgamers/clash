@@ -1,7 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{ActionCard, ActionCardBuilder};
 use crate::advance::{Advance, gain_advance_without_payment};
-use crate::city::{increase_mood_state, MoodState};
+use crate::city::{MoodState, increase_mood_state};
 use crate::content::action_cards::spy::spy;
 use crate::content::action_cards::synergies::teachable_advances;
 use crate::content::persistent_events::{AdvanceRequest, PaymentRequest, PositionRequest};

@@ -243,20 +243,22 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "gold": 2
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Ability": "Advance"
                       }
                     },
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "mood_tokens": 1
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Advance": "Storage"
@@ -277,22 +279,24 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "mood_tokens": 1,
                           "culture_tokens": 1
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Incident": 39
                       }
                     },
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "mood_tokens": 1,
                           "culture_tokens": 1
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Incident": 39

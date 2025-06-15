@@ -257,10 +257,11 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "culture_tokens": 2
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Ability": "Influence Culture"
@@ -282,7 +283,7 @@
       "Player1: Cultural Takeover: You may influence Barbarian cities of size 1."
     ],
     [
-      "Player1 tried to influence culture the City Center in the city at B3 by Barbarians with the city A1 and may pay 2 culture tokens to boost the range"
+      "Player1: Influence Culture: Tried to influence the City Center in the city at B3 by Barbarians with the city A1 and may pay 2 culture tokens to boost the range"
     ],
     [
       "Player1: Influence Culture: Pay 2 culture tokens",

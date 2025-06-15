@@ -331,10 +331,11 @@
                   ],
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "ideas": 2
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Objective": "Eureka!"

@@ -224,13 +224,14 @@
                   "wonder_built": "GreatStatue",
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "food": 3,
                           "wood": 4,
                           "ore": 5,
                           "culture_tokens": 5
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Wonder": "GreatStatue"

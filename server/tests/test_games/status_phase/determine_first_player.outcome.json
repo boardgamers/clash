@@ -239,7 +239,8 @@
   "round": 1,
   "age": 2,
   "messages": [
-    "The game has started"
+    "The game has started",
+    "Age 2 has started"
   ],
   "dice_roll_outcomes": [
     1,

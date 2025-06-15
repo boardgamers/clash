@@ -272,13 +272,23 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "culture_tokens": 1
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Ability": "Sports"
+                      }
+                    },
+                    {
+                      "MoodChange": {
+                        "city": "C2",
+                        "mood": "Neutral"
+                      },
+                      "origin": {
+                        "Advance": "Sports"
                       }
                     }
                   ]
@@ -297,7 +307,7 @@
     ],
     [
       "Player1: Sports: Pay 1 culture token",
-      "Player1: Sports: Increase happiness in the city C2 by 1 steps, making it Neutral using Sports"
+      "Player1: Sports: City C2 became Neutral"
     ]
   ],
   "undo_limit": 0,

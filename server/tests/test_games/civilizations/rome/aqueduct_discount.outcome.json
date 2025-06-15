@@ -221,8 +221,9 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
-                        "resources": {}
+                      "Resources": {
+                        "resources": {},
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Ability": "Advance"
@@ -234,10 +235,11 @@
                       ]
                     },
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "mood_tokens": 1
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Advance": "Sanitation"

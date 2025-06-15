@@ -218,33 +218,45 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "gold": 2
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Ability": "Advance"
                       }
                     },
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "mood_tokens": 1
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Advance": "Storage"
                       }
                     },
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "gold": 2
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Ability": "Gold deposits"
+                      }
+                    },
+                    {
+                      "MoodChange": {
+                        "city": "C2",
+                        "mood": "Neutral"
+                      },
+                      "origin": {
+                        "Incident": 34
                       }
                     }
                   ]
@@ -267,7 +279,7 @@
       "A new game event has been triggered: Migration",
       "Player1: Gold deposits: Gain 2 gold",
       "Player1: Migration: Player2 was selected to gain 1 settler.",
-      "Player1: Migration: Decreased the mood in city C2 to Neutral",
+      "Player1: Migration: City C2 became Neutral",
       "Player2: Migration: Gained 1 settler in A4"
     ]
   ],

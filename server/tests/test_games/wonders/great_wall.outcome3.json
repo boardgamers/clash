@@ -19,28 +19,6 @@
                 "default": {
                   "mood_tokens": 1
                 },
-                "conversions": [
-                  {
-                    "from": [
-                      {
-                        "food": 1
-                      },
-                      {
-                        "wood": 1
-                      },
-                      {
-                        "ore": 1
-                      },
-                      {
-                        "ideas": 1
-                      }
-                    ],
-                    "to": {
-                      "gold": 1
-                    },
-                    "type": "Unlimited"
-                  }
-                ],
                 "origin": {
                   "CivilCard": 5
                 }
@@ -351,51 +329,56 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "ideas": 2
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Ability": "Advance"
                       }
                     },
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "mood_tokens": 1
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Advance": "Storage"
                       }
                     },
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "gold": 1
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Ability": "Barbarian battle"
                       }
                     },
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "ideas": 1,
                           "culture_tokens": 1
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Incident": 40
                       }
                     },
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "culture_tokens": 1
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Incident": 40
@@ -408,7 +391,18 @@
                     "Playing": {
                       "ActionCard": 5
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "MoodChange": {
+                        "city": "C2",
+                        "mood": "Neutral"
+                      },
+                      "origin": {
+                        "CivilCard": 5
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -463,7 +457,7 @@
     ],
     [
       "Player1 played the action card Hero General",
-      "Player1: Hero General: Selected city C2 to increase the mood by 1"
+      "Player1: Hero General: City C2 became Neutral"
     ]
   ],
   "undo_limit": 1,

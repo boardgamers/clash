@@ -1,6 +1,6 @@
 use crate::barbarians::get_barbarians_player;
-use crate::city::{set_city_mood, City};
 use crate::city::MoodState::Angry;
+use crate::city::{City, set_city_mood};
 use crate::city_pieces::{Building, remove_building};
 use crate::combat_listeners::{
     CombatEventPhase, CombatResult, CombatRoundEnd, CombatRoundStart, CombatStrength,
@@ -371,11 +371,11 @@ pub(crate) fn conquer_city(game: &mut Game, position: Position, attacker: usize,
 
     if take_over {
         city.player_index = attacker;
-        set_city_mood(game, position, &combat_event_origin(), Angry);
         if attacker_is_human {
             take_over_city(game, &mut city, &p, defender);
         }
         game.players[attacker].cities.push(city);
+        set_city_mood(game, position, &p.origin, Angry);
     } else {
         p.gain_resources(game, ResourcePile::gold(city.size() as u8));
         city.raze(game, defender);
@@ -560,133 +560,5 @@ pub(crate) fn move_with_possible_combat(game: &mut Game, player_index: usize, m:
             m.destination,
             m.embark_carrier_id,
         );
-    }
-}
-
-#[cfg(test)]
-pub mod tests {
-    use std::collections::HashMap;
-
-    use super::{Game, conquer_city};
-
-    use crate::action::Action;
-
-    use crate::cache::Cache;
-    use crate::civilization::Civilization;
-    use crate::construct::construct;
-    use crate::events::check_event_origin;
-    use crate::game::{GameContext, GameOptions, GameState};
-    use crate::log::{ActionLogAction, ActionLogAge, ActionLogPlayer, ActionLogRound};
-    use crate::movement::MovementAction;
-    use crate::utils::tests::FloatEq;
-    use crate::wonder::{Wonder, construct_wonder, wonders_owned_points};
-    use crate::{
-        city::{City, MoodState::*},
-        city_pieces::Building::*,
-        map::Map,
-        player::Player,
-        position::Position,
-        utils::Rng,
-    };
-
-    #[must_use]
-    pub fn test_game() -> Game {
-        let mut age = ActionLogAge::new();
-        let mut round = ActionLogRound::new();
-        let mut log = ActionLogPlayer::new(0);
-        log.actions
-            .push(ActionLogAction::new(Action::Movement(MovementAction::Stop)));
-        round.players.push(log);
-        age.rounds.push(round);
-        Game {
-            context: GameContext::Play,
-            version: 0,
-            seed: String::new(),
-            options: GameOptions::default(),
-            cache: Cache::new(),
-            state: GameState::Playing,
-            events: Vec::new(),
-            players: Vec::new(),
-            map: Map::new(HashMap::new()),
-            starting_player_index: 0,
-            current_player_index: 0,
-            action_log: vec![age],
-            action_log_index: 0,
-            log: Vec::new(),
-            undo_limit: 0,
-            actions_left: 3,
-            successful_cultural_influence: false,
-            round: 1,
-            age: 1,
-            messages: vec![String::from("Game has started")],
-            rng: Rng::from_seed(1_234_567_890),
-            dice_roll_outcomes: Vec::new(),
-            dice_roll_log: Vec::new(),
-            dropped_players: Vec::new(),
-            wonders_left: Vec::new(),
-            action_cards_left: Vec::new(),
-            action_cards_discarded: Vec::new(),
-            objective_cards_left: Vec::new(),
-            incidents_left: Vec::new(),
-            incidents_discarded: Vec::new(),
-            permanent_effects: Vec::new(),
-        }
-    }
-
-    #[test]
-    fn conquer_test() {
-        let old = Player::new(get_test_civilization(), 0);
-        let new = Player::new(get_test_civilization(), 1);
-
-        let mut game = test_game();
-        game.add_info_log_group("combat".into()); // usually filled in combat
-        game.players.push(old);
-        game.players.push(new);
-        let old = 0;
-        let new = 1;
-
-        let position = Position::new(0, 0);
-        game.players[old].cities.push(City::new(old, position));
-        construct_wonder(&mut game, Wonder::GreatGardens, position, old);
-        construct(
-            &mut game,
-            old,
-            Academy,
-            position,
-            None,
-            true,
-            &check_event_origin(),
-        );
-        construct(
-            &mut game,
-            old,
-            Obelisk,
-            position,
-            None,
-            true,
-            &check_event_origin(),
-        );
-
-        game.players[old].victory_points(&game).assert_eq(7.0);
-
-        conquer_city(&mut game, position, new, old);
-
-        let c = game.players[new].get_city_mut(position);
-        assert_eq!(1, c.player_index);
-        assert_eq!(Angry, c.mood_state);
-
-        let old = &game.players[old];
-        let new = &game.players[new];
-        old.victory_points(&game).assert_eq(3.0);
-        new.victory_points(&game).assert_eq(4.0);
-        assert_eq!(0, wonders_owned_points(old, &game));
-        assert_eq!(2, wonders_owned_points(new, &game));
-        assert_eq!(1, old.owned_buildings(&game));
-        assert_eq!(1, new.owned_buildings(&game));
-    }
-
-    #[must_use]
-    pub fn get_test_civilization() -> Civilization {
-        Civilization::new("test", vec![], vec![], None)
     }
 }

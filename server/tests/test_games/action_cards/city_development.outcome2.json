@@ -233,10 +233,11 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "culture_tokens": 1
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "CivilCard": 17
@@ -257,8 +258,9 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
-                        "resources": {}
+                      "Resources": {
+                        "resources": {},
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Ability": "Construct Building"

@@ -218,20 +218,22 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "food": 2
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Ability": "Advance"
                       }
                     },
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "mood_tokens": 1
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Advance": "Storage"
@@ -251,10 +253,11 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "culture_tokens": 1
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Incident": 55
@@ -295,14 +298,15 @@
                   "wonder_built": "Pyramids",
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "food": 2,
                           "wood": 3,
                           "ore": 6,
                           "gold": 1,
                           "culture_tokens": 2
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Wonder": "Pyramids"

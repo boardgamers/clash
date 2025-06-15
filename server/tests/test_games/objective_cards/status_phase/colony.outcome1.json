@@ -473,7 +473,7 @@
   "age": 6,
   "messages": [
     "The game has started",
-    "The game has ended"
+    "The game has ended. Player2 has won"
   ],
   "rng": "184103094459271804140360825922843067546",
   "wonders_left": [

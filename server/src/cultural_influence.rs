@@ -10,7 +10,7 @@ use crate::content::persistent_events::{
 };
 use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
-use crate::log::{current_player_turn_log, };
+use crate::log::current_player_turn_log;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::player_events::ActionInfo;

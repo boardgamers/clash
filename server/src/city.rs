@@ -286,8 +286,9 @@ pub(crate) fn activate_city(position: Position, game: &mut Game, origin: &EventO
     if city.mood_state == Angry {
         city.angry_activation = true;
     }
+    let was_activated = city.is_activated();
     city.activations += 1;
-    if city.is_activated() {
+    if was_activated {
         city.activation_mood_decreased = true;
         decrease_city_mood(game, position, origin);
     }

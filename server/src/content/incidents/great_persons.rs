@@ -2,7 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{ActionCard, ActionCardBuilder, gain_action_card_from_pile};
 use crate::advance::gain_advance_without_payment;
 use crate::card::HandCard;
-use crate::city::{set_city_mood, MoodState};
+use crate::city::{MoodState, set_city_mood};
 use crate::city_pieces::Building;
 use crate::construct::{Construct, execute_construct};
 use crate::consts::MAX_HUMAN_PLAYERS;
@@ -195,12 +195,7 @@ fn great_artist() -> ActionCard {
             Some(PositionRequest::new(cities, needed, "Make a city Happy"))
         },
         |game, s, _| {
-            set_city_mood(
-                game,
-                s.choice[0],
-                &s.origin,
-                MoodState::Happy,
-            );
+            set_city_mood(game, s.choice[0], &s.origin, MoodState::Happy);
         },
     )
     .build()

@@ -223,20 +223,22 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "food": 2
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Ability": "Advance"
                       }
                     },
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "mood_tokens": 1
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Advance": "Storage"
@@ -256,10 +258,11 @@
                   },
                   "items": [
                     {
-                      "LoseResources": {
+                      "Resources": {
                         "resources": {
                           "culture_tokens": 2
-                        }
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Incident": 19
@@ -285,23 +288,43 @@
                   },
                   "items": [
                     {
-                      "GainResources": {
+                      "Resources": {
                         "resources": {
                           "culture_tokens": 1
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Advance": "Arts"
                       }
                     },
                     {
-                      "GainResources": {
+                      "MoodChange": {
+                        "city": "A1",
+                        "mood": "Happy"
+                      },
+                      "origin": {
+                        "CivilCard": 119
+                      }
+                    },
+                    {
+                      "Resources": {
                         "resources": {
                           "culture_tokens": 1
-                        }
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Advance": "Arts"
+                      }
+                    },
+                    {
+                      "MoodChange": {
+                        "city": "A1",
+                        "mood": "Happy"
+                      },
+                      "origin": {
+                        "CivilCard": 119
                       }
                     }
                   ]
@@ -342,7 +365,7 @@
       "Player2: Great Artist: Gain Arts",
       "Player2 unlocked Hellenistic Culture",
       "Player2: Arts: Gain 1 culture token",
-      "Player2: Great Artist: Made city A1 Happy"
+      "Player2: Great Artist: City A1 became Happy"
     ]
   ],
   "undo_limit": 0,
