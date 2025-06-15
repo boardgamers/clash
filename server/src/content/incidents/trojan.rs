@@ -148,7 +148,7 @@ fn guillotine() -> Incident {
         |e| &mut e.incident,
         3,
         |game, p, i| {
-            i.is_active(IncidentTarget::ActivePlayer, p.index)
+            i.is_active_ignoring_protection(IncidentTarget::ActivePlayer, p.index)
                 .then(|| should_choose_new_leader(game, p))
                 .flatten()
         },

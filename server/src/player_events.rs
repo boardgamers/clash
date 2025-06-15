@@ -271,7 +271,7 @@ impl IncidentInfo {
     }
 
     #[must_use]
-    pub fn is_active(&self, role: IncidentTarget, player: usize) -> bool {
+    pub fn is_active_ignoring_protection(&self, role: IncidentTarget, player: usize) -> bool {
         if self.consumed || matches!(self.passed, Some(PassedIncident::NewPlayer(_))) {
             // wait until the new player is playing the advance
             return false;

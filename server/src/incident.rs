@@ -246,11 +246,12 @@ impl IncidentBuilder {
     where
         F: Fn(&mut Game, &EventPlayer, &mut IncidentInfo) + 'static + Clone + Sync + Send,
     {
+        let f = self.new_filter(role, priority);
         self.add_simple_persistent_event_listener(
             |event| &mut event.incident,
             priority,
             move |game, p, i| {
-                if i.is_active(role, p.index) {
+                if f.is_active(game, i, p.index) {
                     listener(game, p, i);
                 }
             },
@@ -729,7 +730,7 @@ pub fn is_active(
     role: IncidentTarget,
     player: usize,
 ) -> bool {
-    if !i.is_active(role, player) {
+    if !i.is_active_ignoring_protection(role, player) {
         return false;
     }
     if priority >= BASE_EFFECT_PRIORITY {
