@@ -4,6 +4,7 @@ use crate::city_pieces::Building;
 use crate::consts::MAX_CITY_PIECES;
 use crate::content::ability::construct_event_origin;
 use crate::content::persistent_events::PersistentEventType;
+use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::map::Terrain;
 use crate::player::{CostTrigger, Player};
@@ -141,6 +142,7 @@ pub(crate) fn execute_construct(
         c.city_position,
         c.port_position,
         cost.activate_city,
+        &cost.cost.origin,
     );
     cost.pay(game, &c.payment);
     game.log_with_origin(
@@ -160,9 +162,10 @@ pub(crate) fn construct(
     city_position: Position,
     port_position: Option<Position>,
     activate: bool,
+    origin: &EventOrigin,
 ) {
     if activate {
-        activate_city(city_position, game);
+        activate_city(city_position, game, origin);
     }
     let city = game.player_mut(player).get_city_mut(city_position);
     city.pieces.set_building(building, player);

@@ -4,6 +4,8 @@ use std::ops::{Add, Sub};
 
 use crate::content::custom_actions::CustomActionType::ForcedLabor;
 use crate::content::persistent_events::PersistentEventType;
+use crate::events::EventOrigin;
+use crate::log::{ActionLogEntry, ActionLogItem, add_action_log_item};
 use crate::map::Terrain;
 use crate::player::remove_unit;
 use crate::utils;
@@ -18,10 +20,8 @@ use MoodState::*;
 use itertools::Itertools;
 use num::Zero;
 
-#[readonly::make]
 pub struct City {
     pub pieces: CityPieces,
-    #[readonly]
     pub mood_state: MoodState,
     pub activations: u32,
     pub activation_mood_decreased: bool, // transient
@@ -133,25 +133,6 @@ impl City {
                 }
             }
         }
-    }
-
-    pub fn increase_mood_state(&mut self) {
-        self.mood_state = match self.mood_state {
-            Happy | Neutral => Happy,
-            Angry => Neutral,
-        };
-        self.angry_activation = false;
-    }
-
-    pub fn decrease_mood_state(&mut self) {
-        self.mood_state = match self.mood_state {
-            Happy => Neutral,
-            Neutral | Angry => Angry,
-        };
-    }
-
-    pub fn set_mood_state(&mut self, mood_state: MoodState) {
-        self.mood_state = mood_state;
     }
 
     #[must_use]
@@ -298,28 +279,75 @@ pub(crate) fn non_angry_cites(p: &Player) -> Vec<Position> {
         .collect_vec()
 }
 
-pub(crate) fn activate_city(position: Position, game: &mut Game) {
-    let city = game.get_any_city(position);
+pub(crate) fn activate_city(position: Position, game: &mut Game, origin: &EventOrigin) {
+    let city = game.get_any_city_mut(position);
     assert!(city.can_activate());
-
-    let player = city.player_index;
-
-    if city.is_activated() {
-        game.add_info_log_item(&format!(
-            "city {} became {} because it was activated more than once",
-            position,
-            city.mood_state.clone() - 1
-        ));
-    }
-
-    let city = game.player_mut(player).get_city_mut(position);
 
     if city.mood_state == Angry {
         city.angry_activation = true;
     }
-    if city.is_activated() {
-        city.decrease_mood_state();
-        city.activation_mood_decreased = true;
-    }
     city.activations += 1;
+    if city.is_activated() {
+        city.activation_mood_decreased = true;
+        decrease_city_mood(game, position, origin);
+    }
+}
+
+pub(crate) fn decrease_city_mood(game: &mut Game, position: Position, origin: &EventOrigin) {
+    set_city_mood(
+        game,
+        position,
+        origin,
+        match game.get_any_city(position).mood_state {
+            Happy => Neutral,
+            Neutral | Angry => Angry,
+        },
+    );
+}
+
+pub fn increase_mood_state(game: &mut Game, position: Position, steps: u8, origin: &EventOrigin) {
+    let city = game.get_any_city_mut(position);
+    city.angry_activation = false;
+
+    let mut state = city.mood_state.clone();
+    for _ in 0..steps {
+        state = match state {
+            Happy | Neutral => Happy,
+            Angry => Neutral,
+        }
+    }
+
+    set_city_mood(game, position, origin, state);
+}
+
+pub(crate) fn set_city_mood(
+    game: &mut Game,
+    position: Position,
+    origin: &EventOrigin,
+    new_state: MoodState,
+) {
+    let city = game.get_any_city_mut(position);
+    let player = city.player_index;
+    let old_state = city.mood_state.clone();
+    if old_state == new_state {
+        return;
+    }
+    city.mood_state = new_state.clone();
+
+    game.log_with_origin(
+        player,
+        origin,
+        &format!("City {position} became {new_state}"),
+    );
+    add_action_log_item(
+        game,
+        ActionLogItem::new(
+            ActionLogEntry::MoodChange {
+                city: position,
+                mood: new_state,
+            },
+            origin.clone(),
+            vec![],
+        ),
+    );
 }

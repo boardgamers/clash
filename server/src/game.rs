@@ -166,6 +166,14 @@ impl Game {
     }
 
     #[must_use]
+    pub(crate) fn get_any_city_mut(&mut self, position: Position) -> &mut City {
+        self.players
+            .iter_mut()
+            .find_map(|player| player.try_get_city_mut(position))
+            .expect("city not found")
+    }
+
+    #[must_use]
     pub fn try_get_any_city(&self, position: Position) -> Option<&City> {
         self.players
             .iter()

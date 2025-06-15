@@ -1,18 +1,15 @@
-use crate::city::MoodState;
-use crate::content::custom_actions::{CustomActionType, custom_action_modifier_event_origin};
+use crate::city::{increase_mood_state, MoodState};
+use crate::content::custom_actions::{custom_action_modifier_event_origin, CustomActionType};
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::leader::leader_position;
-use crate::log::modifier_suffix;
 use crate::payment::PaymentOptions;
 use crate::player::{CostTrigger, Player};
 use crate::player_events::CostInfo;
-use crate::playing_actions::{PlayingActionType, base_or_custom_available};
+use crate::playing_actions::{base_or_custom_available, PlayingActionType};
 use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
-use crate::utils;
-use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
@@ -62,23 +59,12 @@ pub(crate) fn execute_increase_happiness(
     already_paid: bool,
     action_type: &PlayingActionType,
 ) -> Result<(), String> {
-    let player = game.player(player_index);
-    let logs = happiness_increases
-        .iter()
-        .filter_map(|(position, steps)| {
-            if *steps > 0 {
-                Some(format_city_happiness_increase(player, *position, *steps))
-            } else {
-                None
-            }
-        })
-        .collect_vec();
-
     let trigger = game.execute_cost_trigger();
-    let player = game.player_mut(player_index);
-    let restriction = happiness_city_restriction(player, action_type);
+    let restriction = happiness_city_restriction(game.player(player_index), action_type);
     let mut angry_activations = vec![];
     let mut step_sum = 0;
+    let origin = happiness_event_origin(action_type, game.player(player_index));
+
     for &(city_position, steps) in happiness_increases {
         if steps == 0 {
             continue;
@@ -90,31 +76,18 @@ pub(crate) fn execute_increase_happiness(
             ));
         }
 
-        let city = player.get_city(city_position);
+        let city = game.player(player_index).get_city(city_position);
         step_sum += steps * city.size() as u8;
 
         if city.mood_state == MoodState::Angry {
             angry_activations.push(city_position);
         }
-        let city = player.get_city_mut(city_position);
-        for _ in 0..steps {
-            city.increase_mood_state();
-        }
+        increase_mood_state(game, city_position, steps, &origin);
     }
 
     if !already_paid {
         happiness_cost(player_index, step_sum, trigger, action_type, game).pay(game, payment);
     }
-    let origin = happiness_event_origin(action_type, game.player(player_index));
-    game.log_with_origin(
-        player_index,
-        &origin,
-        &format!(
-            "Increase happiness in {}{}",
-            utils::format_and(&logs, "no city"),
-            modifier_suffix(game.player(player_index), action_type, game)
-        ),
-    );
 
     Ok(())
 }
@@ -143,13 +116,6 @@ pub fn happiness_cost(
         &(),
         &(),
         execute,
-    )
-}
-
-fn format_city_happiness_increase(player: &Player, position: Position, steps: u8) -> String {
-    format!(
-        "the city {position} by {steps} steps, making it {}",
-        player.get_city(position).mood_state.clone() + steps
     )
 }
 

@@ -1,5 +1,5 @@
 use crate::barbarians::get_barbarians_player;
-use crate::city::City;
+use crate::city::{set_city_mood, City};
 use crate::city::MoodState::Angry;
 use crate::city_pieces::{Building, remove_building};
 use crate::combat_listeners::{
@@ -371,7 +371,7 @@ pub(crate) fn conquer_city(game: &mut Game, position: Position, attacker: usize,
 
     if take_over {
         city.player_index = attacker;
-        city.set_mood_state(Angry);
+        set_city_mood(game, position, &combat_event_origin(), Angry);
         if attacker_is_human {
             take_over_city(game, &mut city, &p, defender);
         }
@@ -574,6 +574,7 @@ pub mod tests {
     use crate::cache::Cache;
     use crate::civilization::Civilization;
     use crate::construct::construct;
+    use crate::events::check_event_origin;
     use crate::game::{GameContext, GameOptions, GameState};
     use crate::log::{ActionLogAction, ActionLogAge, ActionLogPlayer, ActionLogRound};
     use crate::movement::MovementAction;
@@ -647,8 +648,24 @@ pub mod tests {
         let position = Position::new(0, 0);
         game.players[old].cities.push(City::new(old, position));
         construct_wonder(&mut game, Wonder::GreatGardens, position, old);
-        construct(&mut game, old, Academy, position, None, true);
-        construct(&mut game, old, Obelisk, position, None, true);
+        construct(
+            &mut game,
+            old,
+            Academy,
+            position,
+            None,
+            true,
+            &check_event_origin(),
+        );
+        construct(
+            &mut game,
+            old,
+            Obelisk,
+            position,
+            None,
+            true,
+            &check_event_origin(),
+        );
 
         game.players[old].victory_points(&game).assert_eq(7.0);
 

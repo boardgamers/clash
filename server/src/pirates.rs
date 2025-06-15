@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::barbarians;
-use crate::city::MoodState;
+use crate::city::{MoodState, decrease_city_mood};
 use crate::content::ability::Ability;
 use crate::content::persistent_events::{
     PaymentRequest, PositionRequest, ResourceRewardRequest, UnitsRequest,
@@ -119,11 +119,7 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
                 ))
             },
             |game, s, _| {
-                let pos = s.choice[0];
-                s.log(game, &format!("Reduced Mood in the city {pos}",));
-                game.player_mut(s.player_index)
-                    .get_city_mut(pos)
-                    .decrease_mood_state();
+                decrease_city_mood(game, s.choice[0], &s.origin);
             },
         )
 }

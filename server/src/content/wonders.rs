@@ -259,7 +259,7 @@ fn use_great_lighthouse(b: AbilityBuilder) -> AbilityBuilder {
                 game,
                 &format!("Activated the city {city_pos} to place a ship on {spawn} for free",),
             );
-            activate_city(city_pos, game);
+            activate_city(city_pos, game, &s.origin);
         },
     )
 }

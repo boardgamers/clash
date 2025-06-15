@@ -216,9 +216,6 @@ fn setup_local_game() -> Game {
     add_unit(&mut game, "C1", player_index2, UnitType::Infantry);
 
     game.players[player_index1]
-        .get_city_mut(Position::from_offset("A1"))
-        .increase_mood_state();
-    game.players[player_index1]
         .get_city_mut(Position::from_offset("C2"))
         .pieces
         .academy = Some(1);
@@ -229,18 +226,10 @@ fn setup_local_game() -> Game {
     game.players[player_index1]
         .get_city_mut(Position::from_offset("C2"))
         .port_position = Some(Position::from_offset("C3"));
-    // game.players[player_index1]
-    //     .get_city_mut(Position::from_offset("C2"))
-    //     .unwrap()
-    //     .pieces
-    //     .wonders = vec![game.wonders_left.pop().unwrap()];
 
     game.players[player_index1]
         .wonder_cards
         .push(remove_element(&mut game.wonders_left, &Wonder::GreatGardens).unwrap());
-    game.players[player_index1]
-        .get_city_mut(Position::from_offset("C2"))
-        .increase_mood_state();
 
     game.players[player_index2]
         .get_city_mut(Position::from_offset("B2"))

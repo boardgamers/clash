@@ -90,7 +90,7 @@ pub(crate) fn execute_recruit(
     let player = game.player_mut(player_index);
     let vec = r.units.clone().to_vec();
     player.units.reserve_exact(vec.len());
-    activate_city(r.city_position, game);
+    activate_city(r.city_position, game, &cost.cost.origin);
     for unit_type in vec {
         let position = match &unit_type {
             UnitType::Ship => game
