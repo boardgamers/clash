@@ -33,17 +33,23 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
     }
 
     if rc.can_play_action(&PlayingActionType::MoveUnits)
-        && bottom_left_texture(rc, &assets.move_units, icon_pos(0, -3), &[
-            "Move units".to_string()
-        ])
+        && bottom_left_texture(
+            rc,
+            &assets.move_units,
+            icon_pos(0, -3),
+            &["Move units".to_string()],
+        )
     {
         return global_move(rc);
     }
 
     if rc.can_play_action(&PlayingActionType::Advance)
-        && bottom_left_texture(rc, &assets.advances, icon_pos(1, -3), &[
-            "Research advances".to_string(),
-        ])
+        && bottom_left_texture(
+            rc,
+            &assets.advances,
+            icon_pos(1, -3),
+            &["Research advances".to_string()],
+        )
     {
         return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
     }

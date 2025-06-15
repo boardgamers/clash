@@ -371,9 +371,7 @@ impl Units {
             Ship => self.ships,
             Cavalry => self.cavalry,
             Elephant => self.elephants,
-            Leader(l) => {
-                u8::from(self.leader.is_some_and(|leader| leader == l))
-            }
+            Leader(l) => u8::from(self.leader.is_some_and(|leader| leader == l)),
         }
     }
 
@@ -787,14 +785,17 @@ mod tests {
     #[test]
     fn into_iter() {
         let units = Units::new(0, 1, 0, 2, 1, Some(leader::Leader::Sulla));
-        assert_eq!(units.into_iter().collect::<Vec<_>>(), vec![
-            (Settler, 0),
-            (Infantry, 1),
-            (Ship, 0),
-            (Cavalry, 2),
-            (Elephant, 1),
-            (Leader(leader::Leader::Sulla), 1),
-        ]);
+        assert_eq!(
+            units.into_iter().collect::<Vec<_>>(),
+            vec![
+                (Settler, 0),
+                (Infantry, 1),
+                (Ship, 0),
+                (Cavalry, 2),
+                (Elephant, 1),
+                (Leader(leader::Leader::Sulla), 1),
+            ]
+        );
     }
 
     #[test]

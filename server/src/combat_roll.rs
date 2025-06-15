@@ -238,7 +238,10 @@ fn dice_roll_with_leader_reroll(
 ) -> CombatDieRoll {
     let side = roll_die(game, roll_log);
 
-    if deny_combat_abilities || side.bonus != LEADER_UNIT || unit_types.get_amount(&LEADER_UNIT) == 0 {
+    if deny_combat_abilities
+        || side.bonus != LEADER_UNIT
+        || unit_types.get_amount(&LEADER_UNIT) == 0
+    {
         return side;
     }
 
