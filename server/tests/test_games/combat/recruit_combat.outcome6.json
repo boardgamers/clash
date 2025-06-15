@@ -365,6 +365,28 @@
                       "origin": {
                         "Ability": "Pirate ship destroyed"
                       }
+                    },
+                    {
+                      "Units": {
+                        "units": {
+                          "ships": 2
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "Units": {
+                        "units": {
+                          "ships": 2
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
                     }
                   ]
                 },
@@ -434,6 +456,17 @@
                       },
                       "origin": {
                         "Ability": "Pirate ship destroyed"
+                      }
+                    },
+                    {
+                      "Units": {
+                        "units": {
+                          "ships": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
                       }
                     }
                   ]
@@ -506,9 +539,9 @@
       "Pirates rolled 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 12 and gets 2 hits against attacking units.",
       "Player1: Pirate ship destroyed: Gain 2 gold",
       "Player1: Choose Casualties: Remove 2 of their attacking units",
-      "Player1 removed 2 ships",
+      "Player1: Combat: Lost 2 ships at C2",
       "Pirates: Choose Casualties: Remove all defending units",
-      "Pirates removed 2 ships",
+      "Pirates: Combat: Lost 2 ships at C3",
       "Attacker wins"
     ],
     [
@@ -525,7 +558,7 @@
       "Pirates rolled 1 (leader, no bonus) for combined combat value of 1 and gets 0 hits against attacking units.",
       "Player1: Pirate ship destroyed: Gain 1 gold",
       "Pirates: Choose Casualties: Remove all defending units",
-      "Pirates removed 1 ship",
+      "Pirates: Combat: Lost 1 ship at C4",
       "Attacker wins",
       "Player1: Waste: Could not store 1 gold"
     ],

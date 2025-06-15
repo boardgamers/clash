@@ -333,7 +333,20 @@
                         "destination": "D2"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "Units": {
+                        "units": {
+                          "ships": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -356,7 +369,7 @@
       "Player2 rolled 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 12 and gets 1 hits against attacking units.",
       "Player2 used the following combat modifiers: WarShips ignore the first hit in the first round of combat",
       "Player1: Choose Casualties: Remove 1 of their attacking units",
-      "Player1 removed 1 ship",
+      "Player1: Combat: Lost 1 ship at C3",
       "Player1: Offer Retreat: Player1 can retreat"
     ]
   ],

@@ -300,7 +300,31 @@
                       }
                     },
                     "result": "AttackerWins"
-                  }
+                  },
+                  "items": [
+                    {
+                      "Units": {
+                        "units": {
+                          "leader": "Erik"
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -326,9 +350,9 @@
       "Player1: Choose Casualties: Remove 1 of their attacking units"
     ],
     [
-      "Player1 removed Erik the Red",
+      "Player1: Combat: Lost Erik the Red at D2",
       "Player2: Choose Casualties: Remove all defending units",
-      "Player2 removed 1 infantry",
+      "Player2: Combat: Lost 1 infantry at D1",
       "Attacker wins"
     ]
   ],

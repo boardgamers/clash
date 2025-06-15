@@ -291,7 +291,20 @@
                         7
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "Units": {
+                        "units": {
+                          "ships": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -325,7 +338,31 @@
                       }
                     },
                     "result": "AttackerWins"
-                  }
+                  },
+                  "items": [
+                    {
+                      "Units": {
+                        "units": {
+                          "elephants": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Choose Casualties (carried units)"
+                      }
+                    },
+                    {
+                      "Units": {
+                        "units": {
+                          "ships": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -354,11 +391,14 @@
       "Player1: Martyr: Cannot use tactics card using Martyr (but it is still discarded)"
     ],
     [
-      "Player1: Martyr: Player1 sacrifices a ship using Martyr"
+      "Player1: Martyr: Player1 sacrifices a ship using Martyr",
+      "Player1: Combat: Lost 1 ship at C3"
     ],
     [
       "Player1: Choose Casualties (carried units): Killed carried units: 1 elephant",
+      "Player1: Choose Casualties (carried units): Lost 1 elephant at C3",
       "Player2: Martyr: Player2 sacrifices a ship using Martyr",
+      "Player2: Combat: Lost 1 ship at D2",
       "Player1 rolled 6 (infantry, no bonus) for combined combat value of 6 and gets 0 hits against defending units.",
       "Player2 rolled no dice for combined combat value of 0 and gets 0 hits against attacking units.",
       "Attacker wins"

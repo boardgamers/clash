@@ -241,6 +241,17 @@
                   },
                   "items": [
                     {
+                      "Units": {
+                        "units": {
+                          "leader": "Caesar"
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
                       "Resources": {
                         "resources": {
                           "gold": 1
@@ -273,7 +284,7 @@
       "Player1 used the following combat modifiers: steel weapons added 2 combat value",
       "Player2 rolled 1 (leader, re-roll), 6 (infantry, no bonus) for combined combat value of 6 and gets 0 hits against attacking units.",
       "Player2: Choose Casualties: Remove all defending units",
-      "Player2 removed Gaius Julius Caesar",
+      "Player2: Combat: Lost Gaius Julius Caesar at C1",
       "Attacker wins and captured Player2's city C1",
       "Player1: Combat: Gain 1 gold",
       "Player1: Waste: Could not store 1 gold"

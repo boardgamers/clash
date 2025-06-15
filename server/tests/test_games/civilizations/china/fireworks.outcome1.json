@@ -308,6 +308,17 @@
                       }
                     },
                     {
+                      "Units": {
+                        "units": {
+                          "cavalry": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
                       "Resources": {
                         "resources": {
                           "gold": 1
@@ -346,7 +357,7 @@
       "Player1: Fireworks: Pay 2 gold",
       "Player1: Fireworks: Ignore the first hit",
       "Player2: Choose Casualties: Remove all defending units",
-      "Player2 removed 1 cavalry",
+      "Player2: Combat: Lost 1 cavalry at C1",
       "Attacker wins and captured Player2's city C1",
       "Player1: Combat: Gain 1 gold",
       "Player2: Place Settler: Gain 1 free Settler Unit at B2 for losing a city"

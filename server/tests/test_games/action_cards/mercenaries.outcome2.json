@@ -294,6 +294,28 @@
                       "origin": {
                         "CivilCard": 13
                       }
+                    },
+                    {
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
                     }
                   ]
                 }
@@ -326,9 +348,9 @@
       "Barbarians rolled 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against defending units.",
       "Player1 rolled 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against attacking units.",
       "Barbarians: Choose Casualties: Remove 1 of their attacking units",
-      "Barbarians removed 1 infantry",
+      "Barbarians: Combat: Lost 1 infantry at B3",
       "Player1: Choose Casualties: Remove all defending units",
-      "Player1 removed 1 infantry",
+      "Player1: Combat: Lost 1 infantry at B2",
       "Attacker wins",
       "Player1: Mercenaries: Barbarians reinforced with 1 infantry at B3"
     ]

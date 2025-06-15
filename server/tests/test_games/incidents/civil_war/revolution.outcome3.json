@@ -270,7 +270,20 @@
                         3
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "Units": {
+                        "units": {
+                          "elephants": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Incident": 38
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -308,7 +321,7 @@
       "Player1: Gold deposits: Gain 2 gold"
     ],
     [
-      "Player1: Revolution: Player1 killed units: elephant at C2"
+      "Player1: Revolution: Lost 1 elephant at C2"
     ],
     [
       "Player1: Revolution: Declined to kill units",

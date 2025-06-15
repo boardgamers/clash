@@ -351,6 +351,17 @@
                   },
                   "items": [
                     {
+                      "Units": {
+                        "units": {
+                          "infantry": 2
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
                       "Resources": {
                         "resources": {
                           "gold": 1
@@ -404,7 +415,7 @@
       "Player2 used the following combat modifiers: fortress added one extra die, steel weapons added 1 combat value",
       "Player2: Encircled: Cannot do damage - opponent has fewer losses",
       "Player2: Choose Casualties: Remove all defending units",
-      "Player2 removed 2 infantry",
+      "Player2: Combat: Lost 2 infantry at C1",
       "Attacker wins and captured Player2's city C1",
       "Player1: Combat: Gain 1 gold",
       "Player1: Waste: Could not store 1 gold"

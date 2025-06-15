@@ -263,7 +263,31 @@
                         0
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Incident": 50
+                      }
+                    },
+                    {
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Incident": 50
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -283,7 +307,7 @@
       "A new game event has been triggered: Black Death"
     ],
     [
-      "Player1: Black Death: Player1 killed units: infantry at C2",
+      "Player1: Black Death: Lost 1 infantry at C2",
       "Player1: Black Death: Gain 1 victory points"
     ]
   ],

@@ -258,6 +258,17 @@
                       "origin": {
                         "Incident": 36
                       }
+                    },
+                    {
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Incident": 36
+                      }
                     }
                   ]
                 }
@@ -278,7 +289,7 @@
     [
       "A new game event has been triggered: Civil War",
       "Player1: Civil War: City C2 became Angry",
-      "Player1: Civil War: Killed an Infantry in C2"
+      "Player1: Civil War: Lost 1 infantry at C2"
     ]
   ],
   "undo_limit": 1,

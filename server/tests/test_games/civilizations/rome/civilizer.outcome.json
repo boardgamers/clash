@@ -391,6 +391,17 @@
                   },
                   "items": [
                     {
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
                       "Resources": {
                         "resources": {
                           "gold": 1
@@ -423,7 +434,7 @@
       "Player1 used the following combat modifiers: Sulla adds 2 combat value",
       "Barbarians rolled 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units.",
       "Barbarians: Choose Casualties: Remove all defending units",
-      "Barbarians removed 1 infantry",
+      "Barbarians: Combat: Lost 1 infantry at D8",
       "Attacker wins",
       "Player1: Barbarian battle: Gain 1 gold"
     ]

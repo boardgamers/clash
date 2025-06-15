@@ -257,7 +257,31 @@
                     },
                     "result": "DefenderWins",
                     "city_mood": "Angry"
-                  }
+                  },
+                  "items": [
+                    {
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -279,9 +303,9 @@
       "Player2 rolled 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against attacking units.",
       "Player2 used the following combat modifiers: Sparta denies playing tactics cards",
       "Player1: Choose Casualties: Remove all attacking units",
-      "Player1 removed 1 infantry",
+      "Player1: Combat: Lost 1 infantry at C2",
       "Player2: Choose Casualties: Remove 1 of their defending units",
-      "Player2 removed 1 infantry",
+      "Player2: Combat: Lost 1 infantry at C1",
       "Defender wins"
     ]
   ],

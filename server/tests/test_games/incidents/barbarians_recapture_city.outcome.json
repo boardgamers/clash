@@ -238,6 +238,28 @@
                   },
                   "items": [
                     {
+                      "Units": {
+                        "units": {
+                          "elephants": 2
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "Units": {
+                        "units": {
+                          "infantry": 3
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
                       "Resources": {
                         "resources": {
                           "gold": 1
@@ -280,9 +302,9 @@
       "Player1 rolled 6 (infantry, no bonus), 6 (infantry, no bonus), 6 (infantry, no bonus), 1 (leader, no bonus) for combined combat value of 19 and gets 3 hits against defending units.",
       "Barbarians rolled 1 (leader, no bonus), 2 (cavalry, no bonus), 6 (infantry, +1 combat value) for combined combat value of 10 and gets 2 hits against attacking units.",
       "Player1: Choose Casualties: Remove 2 of their attacking units",
-      "Player1 removed 2 elephants",
+      "Player1: Combat: Lost 2 elephants at B1",
       "Barbarians: Choose Casualties: Remove all defending units",
-      "Barbarians removed 3 infantry",
+      "Barbarians: Combat: Lost 3 infantry at C2",
       "Attacker wins and captured Barbarians's city C2",
       "Player1: Combat: Gain 1 gold",
       "Player1: Barbarian battle: Gain 2 gold",

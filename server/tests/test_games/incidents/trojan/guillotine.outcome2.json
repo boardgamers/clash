@@ -256,6 +256,17 @@
                       "origin": {
                         "Advance": "Storage"
                       }
+                    },
+                    {
+                      "Units": {
+                        "units": {
+                          "leader": "Caesar"
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Incident": 43
+                      }
                     }
                   ]
                 },
@@ -294,7 +305,7 @@
       "Base effect: Barbarians spawn",
       "Barbarians cannot spawn a new city",
       "Player1: Guillotine: Barbarians cannot reinforce",
-      "Player1: Guillotine: Gaius Julius Caesar was killed due to the Guillotine"
+      "Player1: Guillotine: Lost Gaius Julius Caesar at A1"
     ],
     [
       "Player1: Guillotine: Chose to select a new leader",

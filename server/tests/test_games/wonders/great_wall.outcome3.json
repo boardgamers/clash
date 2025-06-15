@@ -275,7 +275,32 @@
                     },
                     "result": "Draw",
                     "city_mood": "Happy"
-                  }
+                  },
+                  "items": [
+                    {
+                      "Units": {
+                        "units": {
+                          "infantry": 2
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "Units": {
+                        "units": {
+                          "infantry": 1,
+                          "cavalry": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -348,6 +373,18 @@
                       },
                       "origin": {
                         "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "Units": {
+                        "units": {
+                          "infantry": 1,
+                          "elephants": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
                       }
                     },
                     {
@@ -424,9 +461,9 @@
       "Player1 rolled 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 11 and gets 2 hits against attacking units.",
       "Player1 used the following combat modifiers: Great Wall gives -2 combat value in the first round",
       "Player2: Choose Casualties: Remove all attacking units",
-      "Player2 removed 2 infantry",
+      "Player2: Combat: Lost 2 infantry at B1",
       "Player1: Choose Casualties: Remove all defending units",
-      "Player1 removed 1 infantry and 1 cavalry",
+      "Player1: Combat: Lost 1 infantry and 1 cavalry at A1",
       "Battle ends in a draw"
     ],
     [
@@ -448,6 +485,7 @@
       "Base effect: Barbarians move",
       "Player1: Envoy: Barbarians move from A2 to A1: 1 infantry and 1 elephant",
       "Barbarians lost the battle due to the Great Wall",
+      "Barbarians: Combat: Lost 1 infantry and 1 elephant at A2",
       "Player1: Barbarian battle: Gain 1 gold",
       "Barbarians spawned a new Infantry unit at B3",
       "Player1: Envoy: Gain 1 idea and 1 culture token",

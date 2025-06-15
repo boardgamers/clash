@@ -222,7 +222,31 @@
                     },
                     "result": "Draw",
                     "city_mood": "Angry"
-                  }
+                  },
+                  "items": [
+                    {
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "Units": {
+                        "units": {
+                          "infantry": 2
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -248,9 +272,9 @@
       "Player1 used the following combat modifiers: Flanking added 1 extra die",
       "Player2 rolled 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against attacking units.",
       "Player1: Choose Casualties: Remove all attacking units",
-      "Player1 removed 1 infantry",
+      "Player1: Combat: Lost 1 infantry at C2",
       "Player2: Choose Casualties: Remove all defending units",
-      "Player2 removed 2 infantry",
+      "Player2: Combat: Lost 2 infantry at C1",
       "Battle ends in a draw"
     ]
   ],

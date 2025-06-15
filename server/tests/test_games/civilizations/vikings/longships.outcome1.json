@@ -285,7 +285,20 @@
                       }
                     },
                     "result": "AttackerWins"
-                  }
+                  },
+                  "items": [
+                    {
+                      "Units": {
+                        "units": {
+                          "ships": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -320,7 +333,20 @@
                       }
                     },
                     "result": "AttackerWins"
-                  }
+                  },
+                  "items": [
+                    {
+                      "Units": {
+                        "units": {
+                          "ships": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -343,7 +369,7 @@
       "Player1 used the following combat modifiers: WarShips ignore the first hit in the first round of combat",
       "Player2 rolled 6 (infantry, no bonus) for combined combat value of 6 and gets 0 hits against attacking units.",
       "Player2: Choose Casualties: Remove all defending units",
-      "Player2 removed 1 ship",
+      "Player2: Combat: Lost 1 ship at C3",
       "Attacker wins"
     ],
     [
@@ -358,7 +384,7 @@
       "Player1 used the following combat modifiers: WarShips ignore the first hit in the first round of combat",
       "Player2 rolled 6 (infantry, no bonus) for combined combat value of 6 and gets 0 hits against attacking units.",
       "Player2: Choose Casualties: Remove all defending units",
-      "Player2 removed 1 ship",
+      "Player2: Combat: Lost 1 ship at C4",
       "Attacker wins"
     ]
   ],

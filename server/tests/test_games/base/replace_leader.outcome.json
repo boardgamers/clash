@@ -293,6 +293,17 @@
                       }
                     },
                     {
+                      "Units": {
+                        "units": {
+                          "leader": "Sulla"
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
+                      }
+                    },
+                    {
                       "MoodChange": {
                         "city": "A1",
                         "mood": "Neutral"
@@ -315,6 +326,7 @@
     [
       "Player1: Recruit: Pay 1 mood token and 1 culture token",
       "Player1: Recruit: Recruit Augustus in the city A1 and replaces the unit at A1",
+      "Player1: Recruit: Lost Sulla at A1",
       "Player1: Recruit: City A1 became Neutral"
     ]
   ],

@@ -222,7 +222,32 @@
                     },
                     "result": "DefenderWins",
                     "city_mood": "Angry"
-                  }
+                  },
+                  "items": [
+                    {
+                      "Units": {
+                        "units": {
+                          "infantry": 1,
+                          "cavalry": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -272,7 +297,20 @@
                       }
                     },
                     "result": "AttackerWins"
-                  }
+                  },
+                  "items": [
+                    {
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -308,9 +346,9 @@
       "Player2 rolled 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 13 and gets 2 hits against attacking units.",
       "Player2 used the following combat modifiers: fortress added one extra die, fortress cancelled one hit",
       "Player1: Choose Casualties: Remove all attacking units",
-      "Player1 removed 1 infantry and 1 cavalry",
+      "Player1: Combat: Lost 1 infantry and 1 cavalry at C2",
       "Player2: Choose Casualties: Remove all defending units",
-      "Player2 removed 1 infantry",
+      "Player2: Combat: Lost 1 infantry at C1",
       "Player2 wins the battle because he has a defending fortress"
     ],
     [
@@ -345,7 +383,7 @@
       "Player1 rolled 6 (infantry, +1 combat value), 1 (leader, no bonus) for combined combat value of 8 and gets 1 hits against defending units.",
       "Player2 rolled 3 (elephant, no bonus) for combined combat value of 3 and gets 0 hits against attacking units.",
       "Player2: Choose Casualties: Remove all defending units",
-      "Player2 removed 1 infantry",
+      "Player2: Combat: Lost 1 infantry at B1",
       "Attacker wins"
     ],
     [
