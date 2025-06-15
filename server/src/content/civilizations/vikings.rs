@@ -261,7 +261,7 @@ fn runes() -> SpecialAdvanceInfo {
         SpecialAdvanceRequirement::Advance(Advance::Rituals),
         "Rune Stones",
         "When you lost 2 or more units in a battle, you may convert 1 Obelisk \
-        to a Rune Stone, which counts as 1 objective victory point.",
+        from your supply to a Rune Stone, which counts as 1 objective victory point.",
     )
     .add_bool_request(
         |event| &mut event.combat_end,
