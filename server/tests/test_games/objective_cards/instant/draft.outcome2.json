@@ -206,8 +206,10 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -228,6 +230,7 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "mood_tokens": 1
@@ -242,6 +245,18 @@
                           "Advance": "Draft"
                         }
                       ]
+                    },
+                    {
+                      "player": 0,
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
+                      }
                     }
                   ]
                 },
@@ -261,6 +276,7 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "mood_tokens": 1
@@ -277,9 +293,22 @@
                       ]
                     },
                     {
+                      "player": 0,
                       "MoodChange": {
                         "city": "A1",
                         "mood": "Neutral"
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Ability": "Recruit"
@@ -313,13 +342,15 @@
     [
       "Player1: Recruit: Pay 1 mood token with Draft",
       "Draft reduced the cost of 1 Infantry to 1 mood token",
-      "Player1: Recruit: Recruit 1 infantry in the city A1"
+      "Player1: Recruit: Recruit 1 infantry in the city A1",
+      "Player1: Recruit: Gain 1 infantry at A1"
     ],
     [
       "Player1: Recruit: Pay 1 mood token with Draft",
       "Draft reduced the cost of 1 Infantry to 1 mood token",
       "Player1: Recruit: Recruit 1 infantry in the city A1",
-      "Player1: Recruit: City A1 became Neutral"
+      "Player1: Recruit: City A1 became Neutral",
+      "Player1: Recruit: Gain 1 infantry at A1"
     ],
     [
       "Player1 completed objective Draft"

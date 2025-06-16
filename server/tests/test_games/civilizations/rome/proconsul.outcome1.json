@@ -354,8 +354,10 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -396,6 +398,7 @@
                   },
                   "items": [
                     {
+                      "player": 1,
                       "Units": {
                         "units": {
                           "infantry": 1
@@ -407,6 +410,7 @@
                       }
                     },
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 2
@@ -418,6 +422,7 @@
                       }
                     },
                     {
+                      "player": 0,
                       "MoodChange": {
                         "city": "D8",
                         "mood": "Angry"
@@ -440,11 +445,24 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 1
                         },
                         "balance": "Loss"
+                      },
+                      "origin": {
+                        "LeaderAbility": "Proconsul"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "LeaderAbility": "Proconsul"
@@ -478,7 +496,7 @@
     ],
     [
       "Player1: Proconsul: Pay 1 gold",
-      "Player1: Proconsul: Use Proconsul to gain 1 infantry in D8 for 1 gold"
+      "Player1: Proconsul: Gain 1 infantry at D8"
     ]
   ],
   "undo_limit": 1,

@@ -226,8 +226,10 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -285,6 +287,7 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "ore": 1
@@ -296,6 +299,7 @@
                       }
                     },
                     {
+                      "player": 2,
                       "Units": {
                         "units": {
                           "infantry": 1
@@ -307,6 +311,7 @@
                       }
                     },
                     {
+                      "player": 0,
                       "Units": {
                         "units": {
                           "infantry": 1
@@ -315,6 +320,18 @@
                       },
                       "origin": {
                         "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 2,
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "CivilCard": 13
                       }
                     }
                   ]
@@ -352,7 +369,7 @@
       "Player1: Choose Casualties: Remove all defending units",
       "Player1: Combat: Lost 1 infantry at B2",
       "Attacker wins",
-      "Player1: Mercenaries: Barbarians reinforced with 1 infantry at B3"
+      "Barbarians: Mercenaries: Gain 1 infantry at B3"
     ]
   ],
   "undo_limit": 3,

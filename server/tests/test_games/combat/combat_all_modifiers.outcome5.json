@@ -197,8 +197,10 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -232,6 +234,7 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "ore": 1
@@ -257,6 +260,7 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {},
                         "balance": "Loss"
@@ -266,6 +270,7 @@
                       }
                     },
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "ore": 2
@@ -290,6 +295,7 @@
                   },
                   "items": [
                     {
+                      "player": 1,
                       "Resources": {
                         "resources": {
                           "ore": 1
@@ -351,6 +357,7 @@
                   },
                   "items": [
                     {
+                      "player": 1,
                       "Units": {
                         "units": {
                           "infantry": 2
@@ -362,6 +369,7 @@
                       }
                     },
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 1

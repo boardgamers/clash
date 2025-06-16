@@ -497,8 +497,10 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -616,6 +618,7 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "Units": {
                         "units": {
                           "leader": "Alexander"
@@ -669,6 +672,7 @@
                   },
                   "items": [
                     {
+                      "player": 1,
                       "Units": {
                         "units": {
                           "leader": "Wu"
@@ -680,6 +684,7 @@
                       }
                     },
                     {
+                      "player": 0,
                       "Units": {
                         "units": {
                           "infantry": 3
@@ -691,6 +696,7 @@
                       }
                     },
                     {
+                      "player": 1,
                       "Units": {
                         "units": {
                           "infantry": 3

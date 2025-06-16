@@ -177,8 +177,10 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -225,6 +227,7 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "Units": {
                         "units": {
                           "infantry": 1,
@@ -237,6 +240,7 @@
                       }
                     },
                     {
+                      "player": 1,
                       "Units": {
                         "units": {
                           "infantry": 1
@@ -300,6 +304,7 @@
                   },
                   "items": [
                     {
+                      "player": 1,
                       "Units": {
                         "units": {
                           "infantry": 1

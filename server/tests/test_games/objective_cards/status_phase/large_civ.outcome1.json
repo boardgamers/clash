@@ -281,8 +281,10 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -331,6 +333,7 @@
                   ],
                   "items": [
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "ideas": 2

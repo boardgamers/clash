@@ -75,14 +75,6 @@ pub(crate) fn execute_recruit(
         game.execute_cost_trigger(),
     )?;
     cost.pay(game, &r.payment);
-    game.log_with_origin(
-        player_index,
-        &recruit_event_origin(),
-        &format!(
-            "Recruit {} in the city {city_position}{replace_str}{replace_pos}",
-            units.to_string(Some(game))
-        ),
-    );
     let origin = cost.origin();
     for unit in &r.replaced_units {
         // kill separately, because they may be on different positions

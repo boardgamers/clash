@@ -271,8 +271,10 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -285,6 +287,7 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "mood_tokens": 1
@@ -304,7 +307,33 @@
                         "A3"
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 2,
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Incident": 28
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Units": {
+                        "units": {
+                          "settlers": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Incident": 28
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -326,9 +355,9 @@
     [
       "Player2: Dictator: Selected Barbarian Armies that may NOT move: A3",
       "Player1: Population Boom: Barbarians move from B3 to B2: 2 infantry",
-      "Barbarians spawned a new Infantry unit at B3",
+      "Barbarians: Population Boom: Gain 1 infantry at B3",
       "Player1: Population Boom: Player2 was selected to gain 1 settler.",
-      "Player2: Population Boom: Gained 1 settler in C1"
+      "Player2: Population Boom: Gain 1 settler at C1"
     ]
   ],
   "undo_limit": 1,

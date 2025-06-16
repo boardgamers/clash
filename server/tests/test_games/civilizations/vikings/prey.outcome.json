@@ -265,8 +265,10 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -301,6 +303,7 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 1
@@ -312,6 +315,7 @@
                       }
                     },
                     {
+                      "player": 0,
                       "MoodChange": {
                         "city": "D1",
                         "mood": "Angry"
@@ -321,6 +325,7 @@
                       }
                     },
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 2
@@ -329,6 +334,18 @@
                       },
                       "origin": {
                         "LeaderAbility": "Prey"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Units": {
+                        "units": {
+                          "settlers": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Place Settler"
                       }
                     }
                   ]
@@ -348,6 +365,7 @@
       "Player1: Combat: City D1 became Angry",
       "Player1: Prey: Gain 2 gold",
       "Player2: Place Settler: Gain 1 free Settler Unit at B2 for losing a city",
+      "Player2: Place Settler: Gain 1 settler at B2",
       "Player1: Waste: Could not store 1 gold"
     ]
   ],

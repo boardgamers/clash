@@ -199,8 +199,10 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -218,6 +220,7 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 2
@@ -229,6 +232,7 @@
                       }
                     },
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "mood_tokens": 1
@@ -240,6 +244,7 @@
                       }
                     },
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 2
@@ -251,9 +256,22 @@
                       }
                     },
                     {
+                      "player": 0,
                       "MoodChange": {
                         "city": "C2",
                         "mood": "Neutral"
+                      },
+                      "origin": {
+                        "Incident": 34
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Units": {
+                        "units": {
+                          "settlers": 1
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Incident": 34
@@ -280,7 +298,7 @@
       "Player1: Gold deposits: Gain 2 gold",
       "Player1: Migration: Player2 was selected to gain 1 settler.",
       "Player1: Migration: City C2 became Neutral",
-      "Player2: Migration: Gained 1 settler in A4"
+      "Player2: Migration: Gain 1 settler at A4"
     ]
   ],
   "undo_limit": 1,

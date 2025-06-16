@@ -230,8 +230,10 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -278,6 +280,7 @@
                   },
                   "items": [
                     {
+                      "player": 1,
                       "Units": {
                         "units": {
                           "infantry": 2
@@ -289,6 +292,7 @@
                       }
                     },
                     {
+                      "player": 0,
                       "Units": {
                         "units": {
                           "infantry": 1,
@@ -312,6 +316,7 @@
           ]
         },
         {
+          "round": 2,
           "players": [
             {
               "index": 0,
@@ -354,6 +359,7 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "ideas": 2
@@ -365,6 +371,7 @@
                       }
                     },
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "mood_tokens": 1
@@ -376,6 +383,7 @@
                       }
                     },
                     {
+                      "player": 2,
                       "Units": {
                         "units": {
                           "infantry": 1,
@@ -388,6 +396,7 @@
                       }
                     },
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 1
@@ -399,6 +408,19 @@
                       }
                     },
                     {
+                      "player": 2,
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Incident": 40
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "ideas": 1,
@@ -411,6 +433,7 @@
                       }
                     },
                     {
+                      "player": 1,
                       "Resources": {
                         "resources": {
                           "culture_tokens": 1
@@ -431,6 +454,7 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "MoodChange": {
                         "city": "C2",
                         "mood": "Neutral"
@@ -487,7 +511,7 @@
       "Barbarians lost the battle due to the Great Wall",
       "Barbarians: Combat: Lost 1 infantry and 1 elephant at A2",
       "Player1: Barbarian battle: Gain 1 gold",
-      "Barbarians spawned a new Infantry unit at B3",
+      "Barbarians: Envoy: Gain 1 infantry at B3",
       "Player1: Envoy: Gain 1 idea and 1 culture token",
       "No Wonders left to draw",
       "No wonders left to draw as public wonder card",

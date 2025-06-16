@@ -255,8 +255,10 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -281,6 +283,7 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "mood_tokens": 1,
@@ -293,6 +296,7 @@
                       }
                     },
                     {
+                      "player": 0,
                       "Units": {
                         "units": {
                           "leader": "Sulla"
@@ -304,9 +308,22 @@
                       }
                     },
                     {
+                      "player": 0,
                       "MoodChange": {
                         "city": "A1",
                         "mood": "Neutral"
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Units": {
+                        "units": {
+                          "leader": "Augustus"
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Ability": "Recruit"
@@ -327,7 +344,8 @@
       "Player1: Recruit: Pay 1 mood token and 1 culture token",
       "Player1: Recruit: Recruit Augustus in the city A1 and replaces the unit at A1",
       "Player1: Recruit: Lost Sulla at A1",
-      "Player1: Recruit: City A1 became Neutral"
+      "Player1: Recruit: City A1 became Neutral",
+      "Player1: Recruit: Gain Augustus at A1"
     ]
   ],
   "undo_limit": 0,

@@ -383,11 +383,62 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0
+            }
+          ]
+        },
+        {
+          "round": 0,
+          "players": [
+            {
+              "index": 0,
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "items": [
+                    {
+                      "player": 0,
+                      "Units": {
+                        "units": {
+                          "settlers": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Setup"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "index": 1,
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "items": [
+                    {
+                      "player": 1,
+                      "Units": {
+                        "units": {
+                          "settlers": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Setup"
+                      }
+                    }
+                  ]
+                }
+              ]
             }
           ]
         }
@@ -400,16 +451,6 @@
       "The game has started"
     ],
     [
-      "Player1 is playing as China",
-      "Player1 gained an action card from the pile",
-      "Player1 gained an objective card from the pile"
-    ],
-    [
-      "Player2 is playing as Greece",
-      "Player2 gained an action card from the pile",
-      "Player2 gained an objective card from the pile"
-    ],
-    [
       "Age 1 has started"
     ],
     [
@@ -417,6 +458,18 @@
     ],
     [
       "It's Player1's turn"
+    ],
+    [
+      "Player1 is playing as China",
+      "Player1 gained an action card from the pile",
+      "Player1 gained an objective card from the pile",
+      "Player1: Setup: Gain 1 settler at D2"
+    ],
+    [
+      "Player2 is playing as Greece",
+      "Player2 gained an action card from the pile",
+      "Player2 gained an objective card from the pile",
+      "Player2: Setup: Gain 1 settler at D7"
     ]
   ],
   "undo_limit": 0,

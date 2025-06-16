@@ -243,8 +243,10 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -266,6 +268,7 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "wood": 5,
@@ -278,9 +281,22 @@
                       }
                     },
                     {
+                      "player": 0,
                       "MoodChange": {
                         "city": "C2",
                         "mood": "Neutral"
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Units": {
+                        "units": {
+                          "ships": 4
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Ability": "Recruit"
@@ -298,6 +314,7 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "mood_tokens": 1
@@ -345,6 +362,7 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 1
@@ -356,6 +374,7 @@
                       }
                     },
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 2
@@ -367,6 +386,7 @@
                       }
                     },
                     {
+                      "player": 0,
                       "Units": {
                         "units": {
                           "ships": 2
@@ -378,6 +398,7 @@
                       }
                     },
                     {
+                      "player": 2,
                       "Units": {
                         "units": {
                           "ships": 2
@@ -400,6 +421,7 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "culture_tokens": 1
@@ -448,6 +470,7 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 1
@@ -459,6 +482,7 @@
                       }
                     },
                     {
+                      "player": 2,
                       "Units": {
                         "units": {
                           "ships": 1
@@ -481,6 +505,7 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "culture_tokens": 1
@@ -522,7 +547,8 @@
     [
       "Player1: Recruit: Pay 5 wood and 3 gold",
       "Player1: Recruit: Recruit 4 ships in the city C2",
-      "Player1: Recruit: City C2 became Neutral"
+      "Player1: Recruit: City C2 became Neutral",
+      "Player1: Recruit: Gain 4 ships at C3"
     ],
     [
       "Player1: Nationalism: Gain 1 mood token",

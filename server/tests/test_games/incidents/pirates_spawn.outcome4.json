@@ -237,8 +237,10 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -251,6 +253,7 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "mood_tokens": 1
@@ -279,7 +282,21 @@
                         "A2"
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 2,
+                      "Units": {
+                        "units": {
+                          "ships": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Incident": 54
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -288,7 +305,21 @@
                         "D2"
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 2,
+                      "Units": {
+                        "units": {
+                          "ships": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Incident": 54
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -302,6 +333,7 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "ore": 1
@@ -313,6 +345,7 @@
                       }
                     },
                     {
+                      "player": 1,
                       "MoodChange": {
                         "city": "C1",
                         "mood": "Angry"
@@ -322,6 +355,7 @@
                       }
                     },
                     {
+                      "player": 1,
                       "Resources": {
                         "resources": {
                           "food": 1
@@ -355,10 +389,10 @@
       "Player1: A successful year: Removed a Pirate Ships at D1"
     ],
     [
-      "Player1: A successful year: Pirates spawned a Pirate Ship at A2"
+      "Pirates: A successful year: Gain 1 ship at A2"
     ],
     [
-      "Player1: A successful year: Pirates spawned a Pirate Ship at D2",
+      "Pirates: A successful year: Gain 1 ship at D2",
       "Player1 must pay 1 resource or token to bribe the pirates"
     ],
     [
