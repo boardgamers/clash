@@ -82,7 +82,7 @@ impl GameSetupBuilder {
 ///
 /// Panics only if there is an internal bug
 #[must_use]
-pub fn setup_game(setup: GameSetup) -> Game {
+pub fn setup_game(setup: &GameSetup) -> Game {
     setup_game_with_cache(setup, Cache::new())
 }
 
@@ -92,10 +92,10 @@ pub fn setup_game(setup: GameSetup) -> Game {
 ///
 /// Panics only if there is an internal bug
 #[must_use]
-pub fn setup_game_with_cache(setup: GameSetup, cache: Cache) -> Game {
+pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
     let mut rng = init_rng(setup.seed.clone());
 
-    let mut players = init_human_players(&setup, &mut rng, &cache);
+    let mut players = init_human_players(setup, &mut rng, &cache);
 
     let starting_player = rng.range(0, players.len());
 
@@ -176,7 +176,7 @@ pub fn setup_game_with_cache(setup: GameSetup, cache: Cache) -> Game {
         ability::init_player(&mut game, i, all);
     }
 
-    execute_setup_round(&setup, &mut game);
+    execute_setup_round(setup, &mut game);
     game
 }
 

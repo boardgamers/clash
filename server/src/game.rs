@@ -10,8 +10,8 @@ use crate::content::persistent_events::{
 use crate::events::{Event, EventOrigin};
 use crate::game_data::GameData;
 use crate::log::{
-    ActionLogAge, add_player_log, add_round_log,
-    current_player_turn_log, current_player_turn_log_mut,
+    ActionLogAge, add_player_log, add_round_log, current_player_turn_log,
+    current_player_turn_log_mut,
 };
 use crate::movement::MoveState;
 use crate::pirates::get_pirates_player;

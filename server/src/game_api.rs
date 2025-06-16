@@ -21,7 +21,7 @@ use std::cmp::Ordering::*;
 #[must_use]
 pub fn init(player_amount: usize, seed: String, options: GameOptions) -> Game {
     setup_game(
-        GameSetupBuilder::new(player_amount)
+        &GameSetupBuilder::new(player_amount)
             .seed(seed)
             .options(options)
             .build(),

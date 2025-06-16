@@ -11,7 +11,7 @@ use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::SpecialAdvance;
 use crate::unit::{UnitType, Units, kill_units, set_unit_position};
-use crate::{combat, utils};
+use crate::combat;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
@@ -48,24 +48,6 @@ pub(crate) fn execute_recruit(
     player_index: usize,
     r: Recruit,
 ) -> Result<(), String> {
-    let player = game.player(player_index);
-    let city_position = &r.city_position;
-    let units = &r.units;
-    let replaced_units = &r.replaced_units;
-    let replace_str = match replaced_units.len() {
-        0 => "",
-        1 => " and replaces the unit at ",
-        _ => " and replaces units at ",
-    };
-    let replace_pos = utils::format_and(
-        &replaced_units
-            .iter()
-            .map(|unit_id| player.get_unit(*unit_id).position.to_string())
-            .unique()
-            .collect_vec(),
-        "",
-    );
-
     let cost = recruit_cost(
         game,
         game.player(player_index),

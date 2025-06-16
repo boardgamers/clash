@@ -65,7 +65,7 @@ pub fn replay(mut data: ReplayGameData, to: Option<usize>) -> Game {
     let log = linear_action_log(mem::take(&mut data.action_log));
     let to = to.unwrap_or(log.len() - 1);
     let mut game = setup_game(
-        GameSetupBuilder::new(data.players.len() - NON_HUMAN_PLAYERS)
+        &GameSetupBuilder::new(data.players.len() - NON_HUMAN_PLAYERS)
             .seed(data.seed)
             .options(data.options)
             .civilizations(

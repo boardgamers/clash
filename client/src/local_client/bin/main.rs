@@ -60,7 +60,7 @@ async fn main() {
             "a".repeat(32)
         };
         setup_game(
-            GameSetupBuilder::new(players)
+            &GameSetupBuilder::new(players)
                 .seed(seed)
                 .options(GameOptions {
                     undo: UndoOption::SamePlayer,
@@ -163,7 +163,7 @@ fn ai_autoplay(mut game: Game, f: &mut Features, state: &mut State) -> Game {
 
 #[must_use]
 fn setup_local_game() -> Game {
-    let mut game = setup_game(GameSetupBuilder::new(2).skip_random_map().build());
+    let mut game = setup_game(&GameSetupBuilder::new(2).skip_random_map().build());
     game.round = 1;
     game.dice_roll_outcomes = vec![1, 1, 10, 10, 10, 10, 10, 10, 10, 10];
     let add_unit = |game: &mut Game, pos: &str, player_index: usize, unit_type: UnitType| {

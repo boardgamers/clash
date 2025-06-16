@@ -638,7 +638,13 @@ pub(crate) fn place_settler() -> Ability {
             }
         },
         |game, s, _e| {
-            gain_unit(game, s.player_index, s.choice[0], UnitType::Settler, &s.origin);
+            gain_unit(
+                game,
+                s.player_index,
+                s.choice[0],
+                UnitType::Settler,
+                &s.origin,
+            );
         },
     )
     .build()
