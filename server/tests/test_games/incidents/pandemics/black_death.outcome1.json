@@ -214,8 +214,10 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -233,6 +235,7 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 2
@@ -244,6 +247,7 @@
                       }
                     },
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "mood_tokens": 1
@@ -263,7 +267,33 @@
                         0
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Incident": 50
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Incident": 50
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -283,7 +313,7 @@
       "A new game event has been triggered: Black Death"
     ],
     [
-      "Player1: Black Death: Player1 killed units: infantry at C2",
+      "Player1: Black Death: Lost 1 infantry at C2",
       "Player1: Black Death: Gain 1 victory points"
     ]
   ],

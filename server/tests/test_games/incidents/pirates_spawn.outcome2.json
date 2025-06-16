@@ -233,8 +233,10 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -247,6 +249,7 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "mood_tokens": 1
@@ -275,7 +278,21 @@
                         "A2"
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 2,
+                      "Units": {
+                        "units": {
+                          "ships": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Incident": 54
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -298,7 +315,7 @@
       "Player1: A successful year: Removed a Pirate Ships at D1"
     ],
     [
-      "Player1: A successful year: Pirates spawned a Pirate Ship at A2"
+      "Pirates: A successful year: Gain 1 ship at A2"
     ]
   ],
   "undo_limit": 1,

@@ -311,8 +311,10 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -330,6 +332,7 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 2
@@ -341,6 +344,7 @@
                       }
                     },
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "mood_tokens": 1
@@ -360,7 +364,21 @@
                         0
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Incident": 49
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -395,7 +413,7 @@
       "Player1: Pandemics: Lose a total of 2 units, cards, and resources"
     ],
     [
-      "Player1: Pandemics: Player1 killed units: infantry at C2"
+      "Player1: Pandemics: Lost 1 infantry at C2"
     ],
     [
       "Player1: Pandemics: Discard Advance/Peltasts",

@@ -5,7 +5,7 @@ use std::ops::{Add, Sub};
 use crate::content::custom_actions::CustomActionType::ForcedLabor;
 use crate::content::persistent_events::PersistentEventType;
 use crate::events::EventOrigin;
-use crate::log::{ActionLogEntry, ActionLogItem, add_action_log_item};
+use crate::log::{ActionLogEntry, add_action_log_item};
 use crate::map::Terrain;
 use crate::player::remove_unit;
 use crate::utils;
@@ -342,13 +342,12 @@ pub(crate) fn set_city_mood(
     );
     add_action_log_item(
         game,
-        ActionLogItem::new(
-            ActionLogEntry::MoodChange {
-                city: position,
-                mood: new_state,
-            },
-            origin.clone(),
-            vec![],
-        ),
+        player,
+        ActionLogEntry::MoodChange {
+            city: position,
+            mood: new_state,
+        },
+        origin.clone(),
+        vec![],
     );
 }

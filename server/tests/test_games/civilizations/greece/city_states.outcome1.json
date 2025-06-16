@@ -239,8 +239,10 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -261,6 +263,7 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "culture_tokens": 1
@@ -280,9 +283,22 @@
                       ]
                     },
                     {
+                      "player": 0,
                       "MoodChange": {
                         "city": "A1",
                         "mood": "Neutral"
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Ability": "Recruit"
@@ -300,6 +316,7 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "MoodChange": {
                         "city": "A1",
                         "mood": "Happy"
@@ -309,6 +326,7 @@
                       }
                     },
                     {
+                      "player": 0,
                       "MoodChange": {
                         "city": "B3",
                         "mood": "Neutral"
@@ -332,8 +350,8 @@
       "Player1: Recruit: Pay 1 culture token with Draft, Sparta",
       "Draft reduced the cost of 1 Infantry to 1 mood token",
       "Sparta allows to pay the Draft cost as culture tokes",
-      "Player1: Recruit: Recruit 1 infantry in the city A1",
-      "Player1: Recruit: City A1 became Neutral"
+      "Player1: Recruit: City A1 became Neutral",
+      "Player1: Recruit: Gain 1 infantry at A1"
     ],
     [
       "Player1: City States: City A1 became Happy",

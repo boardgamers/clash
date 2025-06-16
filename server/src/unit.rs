@@ -13,6 +13,7 @@ use crate::content::persistent_events::{KilledUnits, PersistentEventType, UnitsR
 use crate::events::EventOrigin;
 use crate::explore::is_any_ship;
 use crate::game::GameState;
+use crate::log::{ActionLogBalance, ActionLogEntry, add_action_log_item};
 use crate::movement::{CurrentMove, MovementRestriction};
 use crate::player::{Player, remove_unit};
 use crate::special_advance::SpecialAdvance;
@@ -564,23 +565,51 @@ pub(crate) fn kill_units(
     unit_ids: &[u32],
     player_index: usize,
     killer: Option<usize>,
+    origin: &EventOrigin,
 ) {
     let pos = game
         .player(player_index)
         .get_unit(*unit_ids.first().expect("no units"))
         .position;
-    kill_units_without_event(game, unit_ids, player_index, killer);
-    units_killed(game, player_index, KilledUnits::new(pos, killer));
+    let killed_units = KilledUnits::new(pos, killer);
+    kill_units_without_event(game, unit_ids, player_index, &killed_units, origin);
+    units_killed(game, player_index, killed_units);
 }
 
 pub(crate) fn kill_units_without_event(
     game: &mut Game,
     unit_ids: &[u32],
-    player_index: usize,
-    killer: Option<usize>,
+    player: usize,
+    killed_units: &KilledUnits,
+    origin: &EventOrigin,
 ) {
+    let p = game.player(player);
+    let units = unit_ids
+        .iter()
+        .map(|id| p.get_unit(*id).unit_type)
+        .collect::<Units>();
+    game.log_with_origin(
+        player,
+        origin,
+        &format!(
+            "Lost {} at {}",
+            units.to_string(Some(game)),
+            killed_units.position
+        ),
+    );
+    add_action_log_item(
+        game,
+        player,
+        ActionLogEntry::Units {
+            balance: ActionLogBalance::Loss,
+            units,
+        },
+        origin.clone(),
+        vec![],
+    );
+
     for unit in unit_ids {
-        kill_unit(game, *unit, player_index, killer);
+        kill_unit(game, *unit, player, killed_units.killer);
     }
 }
 
@@ -712,7 +741,7 @@ pub(crate) fn choose_carried_units_to_remove() -> Ability {
                     ),
                 );
             }
-            kill_units_without_event(game, &s.choice, s.player_index, e.killer);
+            kill_units_without_event(game, &s.choice, s.player_index, e, &s.origin);
         },
     )
     .build()

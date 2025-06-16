@@ -210,8 +210,10 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -229,6 +231,7 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 2
@@ -240,6 +243,7 @@
                       }
                     },
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "mood_tokens": 1
@@ -251,9 +255,22 @@
                       }
                     },
                     {
+                      "player": 0,
                       "MoodChange": {
                         "city": "C2",
                         "mood": "Angry"
+                      },
+                      "origin": {
+                        "Incident": 36
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Loss"
                       },
                       "origin": {
                         "Incident": 36
@@ -278,7 +295,7 @@
     [
       "A new game event has been triggered: Civil War",
       "Player1: Civil War: City C2 became Angry",
-      "Player1: Civil War: Killed an Infantry in C2"
+      "Player1: Civil War: Lost 1 infantry at C2"
     ]
   ],
   "undo_limit": 1,

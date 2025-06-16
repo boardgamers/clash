@@ -367,11 +367,13 @@ fn militia(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             ))
         },
         |game, s, _| {
-            let position = s.choice[0];
-            let city = position;
-            s.log(game, &format!("Selected city {city}",));
-
-            gain_unit(s.player_index, position, UnitType::Infantry, game);
+            gain_unit(
+                game,
+                s.player_index,
+                s.choice[0],
+                UnitType::Infantry,
+                &s.origin,
+            );
         },
     )
     .build()

@@ -65,15 +65,12 @@ pub(crate) fn cultural_takeover(id: u8, tactics_card: TacticsCardFactory) -> Act
             None
         },
         |game, s, a| {
-            s.log(
-                game,
-                &format!("Selected unit to gain: {}", s.choice.non_leader_name(),),
-            );
             gain_unit(
+                game,
                 s.player_index,
                 a.selected_position.expect("unit position"),
                 s.choice,
-                game,
+                &s.origin,
             );
         },
     )

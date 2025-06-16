@@ -208,8 +208,10 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -258,6 +260,19 @@
                   },
                   "items": [
                     {
+                      "player": 1,
+                      "Units": {
+                        "units": {
+                          "infantry": 2
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 1
@@ -266,6 +281,30 @@
                       },
                       "origin": {
                         "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Advance": "Fanaticism"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Units": {
+                        "units": {
+                          "settlers": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Place Settler"
                       }
                     }
                   ]
@@ -290,11 +329,11 @@
       "Player2 rolled 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 4 and gets 0 hits against attacking units.",
       "Player2 used the following combat modifiers: Player gets +2 combat value for Fanaticism Advance",
       "Player2: Choose Casualties: Remove all defending units",
-      "Player2 removed 2 infantry",
+      "Player2: Combat: Lost 2 infantry at C1",
       "Attacker wins and captured Player2's city C1",
       "Player1: Combat: Gain 1 gold",
-      "Player2: Fanaticism: Gain 1 free Infantry Unit at C2 for Fanaticism Advance",
-      "Player2: Place Settler: Gain 1 free Settler Unit at C2 for losing a city",
+      "Player2: Fanaticism: Gain 1 infantry at C2",
+      "Player2: Place Settler: Gain 1 settler at C2",
       "Player1: Waste: Could not store 1 gold"
     ]
   ],

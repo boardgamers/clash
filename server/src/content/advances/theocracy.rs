@@ -164,11 +164,7 @@ fn fanaticism() -> AdvanceBuilder {
                 }
             },
             |game, s, _| {
-                let pos = s.choice[0];
-                s.log(game, &format!(
-                    "Gain 1 free Infantry Unit at {pos} for Fanaticism Advance",
-                ));
-                gain_unit(s.player_index, pos, UnitType::Infantry, game);
+                gain_unit(game, s.player_index, s.choice[0], UnitType::Infantry, &s.origin);
             },
         )
 }

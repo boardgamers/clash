@@ -1,17 +1,17 @@
 use crate::city::activate_city;
+use crate::combat;
 use crate::consts::STACK_LIMIT;
 use crate::content::ability::recruit_event_origin;
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
 use crate::map::capital_city_position;
 use crate::payment::PaymentOptions;
-use crate::player::{CostTrigger, Player, gain_unit};
+use crate::player::{CostTrigger, Player, gain_units};
 use crate::player_events::CostInfo;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::SpecialAdvance;
 use crate::unit::{UnitType, Units, kill_units, set_unit_position};
-use crate::{combat, utils};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
@@ -48,24 +48,6 @@ pub(crate) fn execute_recruit(
     player_index: usize,
     r: Recruit,
 ) -> Result<(), String> {
-    let player = game.player(player_index);
-    let city_position = &r.city_position;
-    let units = &r.units;
-    let replaced_units = &r.replaced_units;
-    let replace_str = match replaced_units.len() {
-        0 => "",
-        1 => " and replaces the unit at ",
-        _ => " and replaces units at ",
-    };
-    let replace_pos = utils::format_and(
-        &replaced_units
-            .iter()
-            .map(|unit_id| player.get_unit(*unit_id).position.to_string())
-            .unique()
-            .collect_vec(),
-        "",
-    );
-
     let cost = recruit_cost(
         game,
         game.player(player_index),
@@ -75,33 +57,37 @@ pub(crate) fn execute_recruit(
         game.execute_cost_trigger(),
     )?;
     cost.pay(game, &r.payment);
-    game.log_with_origin(
-        player_index,
-        &recruit_event_origin(),
-        &format!(
-            "Recruit {} in the city {city_position}{replace_str}{replace_pos}",
-            units.to_string(Some(game))
-        ),
-    );
+    let origin = cost.origin();
     for unit in &r.replaced_units {
         // kill separately, because they may be on different positions
-        kill_units(game, &[*unit], player_index, None);
+        kill_units(game, &[*unit], player_index, None, origin);
     }
     let player = game.player_mut(player_index);
-    let vec = r.units.clone().to_vec();
-    player.units.reserve_exact(vec.len());
-    activate_city(r.city_position, game, &cost.cost.origin);
-    for unit_type in vec {
-        let position = match &unit_type {
-            UnitType::Ship => game
-                .player(player_index)
-                .get_city(r.city_position)
-                .port_position
-                .expect("there should be a port in the city"),
-            _ => r.city_position,
-        };
-        gain_unit(player_index, position, unit_type, game);
+    let types = r.units.clone().to_vec();
+    player.units.reserve_exact(types.len());
+    activate_city(r.city_position, game, origin);
+    let mut land = Units::empty();
+    let mut ship = Units::empty();
+
+    for unit_type in types {
+        if unit_type.is_ship() {
+            ship += &unit_type;
+        } else {
+            land += &unit_type;
+        }
     }
+    if !land.is_empty() {
+        gain_units(game, player_index, r.city_position, land, origin);
+    }
+    if !ship.is_empty() {
+        let position = game
+            .player(player_index)
+            .get_city(r.city_position)
+            .port_position
+            .expect("Cannot recruit ships without port");
+        gain_units(game, player_index, position, ship, origin);
+    }
+
     on_recruit(game, player_index, r);
     Ok(())
 }

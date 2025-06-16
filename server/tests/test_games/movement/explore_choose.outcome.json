@@ -386,9 +386,9 @@
   "starting_player_index": 1,
   "current_player_index": 1,
   "action_log": [
-    {
+    { "age": 1,
       "rounds": [
-        {
+        { "round": 1,
           "players": [
             {
               "index": 0,

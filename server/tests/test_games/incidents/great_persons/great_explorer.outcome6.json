@@ -345,8 +345,10 @@
   "current_player_index": 1,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -364,6 +366,7 @@
                   },
                   "items": [
                     {
+                      "player": 1,
                       "Resources": {
                         "resources": {
                           "food": 2
@@ -375,6 +378,7 @@
                       }
                     },
                     {
+                      "player": 1,
                       "Resources": {
                         "resources": {
                           "mood_tokens": 1
@@ -399,6 +403,7 @@
                   },
                   "items": [
                     {
+                      "player": 1,
                       "Resources": {
                         "resources": {
                           "culture_tokens": 1
@@ -419,6 +424,7 @@
                   },
                   "items": [
                     {
+                      "player": 1,
                       "Resources": {
                         "resources": {
                           "mood_tokens": 1
@@ -468,6 +474,7 @@
                   },
                   "items": [
                     {
+                      "player": 1,
                       "Resources": {
                         "resources": {
                           "food": 2

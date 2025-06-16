@@ -203,8 +203,10 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -232,6 +234,7 @@
                   "wonder_built": "GreatLighthouse",
                   "items": [
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "food": 3,
@@ -266,6 +269,19 @@
                   },
                   "items": [
                     {
+                      "player": 0,
+                      "Units": {
+                        "units": {
+                          "ships": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Great Lighthouse"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "MoodChange": {
                         "city": "A1",
                         "mood": "Neutral"
@@ -297,7 +313,7 @@
       "Player1 started Great Lighthouse"
     ],
     [
-      "Player1: Great Lighthouse: Activated the city A1 to place a ship on C3 for free",
+      "Player1: Great Lighthouse: Gain 1 ship at C3",
       "Player1: Great Lighthouse: City A1 became Neutral"
     ]
   ],

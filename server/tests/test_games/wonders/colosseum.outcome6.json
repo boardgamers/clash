@@ -192,8 +192,10 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -221,6 +223,7 @@
                   "wonder_built": "Colosseum",
                   "items": [
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "food": 3,
@@ -258,6 +261,7 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "mood_tokens": 1
@@ -269,6 +273,7 @@
                       }
                     },
                     {
+                      "player": 0,
                       "MoodChange": {
                         "city": "C2",
                         "mood": "Happy"
@@ -306,6 +311,7 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "culture_tokens": 1
@@ -356,6 +362,31 @@
                   },
                   "items": [
                     {
+                      "player": 0,
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Units": {
+                        "units": {
+                          "infantry": 2
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 1
@@ -408,9 +439,9 @@
       "Player1: Choose Casualties: Remove 1 of their attacking units"
     ],
     [
-      "Player1 removed 1 infantry",
+      "Player1: Combat: Lost 1 infantry at C2",
       "Player2: Choose Casualties: Remove all defending units",
-      "Player2 removed 2 infantry",
+      "Player2: Combat: Lost 2 infantry at C1",
       "Attacker wins and captured Player2's city C1",
       "Player1: Combat: Gain 1 gold",
       "Player1: Waste: Could not store 1 gold"

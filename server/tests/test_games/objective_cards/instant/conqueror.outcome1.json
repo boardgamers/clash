@@ -198,8 +198,10 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -245,6 +247,19 @@
                   },
                   "items": [
                     {
+                      "player": 1,
+                      "Units": {
+                        "units": {
+                          "infantry": 3
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 1
@@ -299,7 +314,7 @@
       "Player2 rolled 1 (leader, no bonus), 1 (leader, no bonus), 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 4 and gets 0 hits against attacking units.",
       "Player2 used the following combat modifiers: fortress added one extra die, fortress cancelled one hit",
       "Player2: Choose Casualties: Remove all defending units",
-      "Player2 removed 3 infantry",
+      "Player2: Combat: Lost 3 infantry at C1",
       "Attacker wins and captured Player2's city C1",
       "Player1: Combat: Gain 1 gold",
       "Player1: Waste: Could not store 1 gold"

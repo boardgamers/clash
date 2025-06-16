@@ -6,6 +6,7 @@ use crate::content::custom_actions::{CustomActionExecution, CustomActionInfo};
 use crate::events::{Event, EventOrigin};
 use crate::leader::Leader;
 use crate::leader_ability::LeaderAbility;
+use crate::log::{ActionLogBalance, ActionLogEntry, add_action_log_item};
 use crate::payment::PaymentOptions;
 use crate::player_events::{CostInfo, TransientEvents};
 use crate::playing_actions::PlayingActionType;
@@ -548,24 +549,61 @@ impl Player {
     }
 }
 
-pub fn gain_unit(player: usize, position: Position, unit_type: UnitType, game: &mut Game) {
-    if let UnitType::Leader(leader) = &unit_type {
-        let p = game.player_mut(player);
-        p.available_leaders.retain(|name| name != leader);
-        p.recruited_leaders.push(*leader);
-        Player::with_leader(*leader, game, player, |game, leader| {
-            leader.listeners.once_init(game, player);
-        });
-    }
-    let p = game.player_mut(player);
-    let unit = Unit::new(player, position, unit_type, p.next_unit_id);
-    p.units.push(unit);
-    p.next_unit_id += 1;
-    if game.player(player).civilization.is_pirates() {
-        for n in position.neighbors() {
-            if game.map.is_sea(n) {}
+pub fn gain_unit(
+    game: &mut Game,
+    player: usize,
+    position: Position,
+    unit_type: UnitType,
+    origin: &EventOrigin,
+) {
+    gain_units(
+        game,
+        player,
+        position,
+        Units::from_iter(vec![unit_type]),
+        origin,
+    );
+}
+
+pub fn gain_units(
+    game: &mut Game,
+    player: usize,
+    position: Position,
+    units: Units,
+    origin: &EventOrigin,
+) {
+    for (unit_type, amout) in units.clone() {
+        for _ in 0..amout {
+            if let UnitType::Leader(leader) = &unit_type {
+                let p = game.player_mut(player);
+                p.available_leaders.retain(|name| name != leader);
+                p.recruited_leaders.push(*leader);
+                Player::with_leader(*leader, game, player, |game, leader| {
+                    leader.listeners.once_init(game, player);
+                });
+            }
+            let p = game.player_mut(player);
+            p.units
+                .push(Unit::new(player, position, unit_type, p.next_unit_id));
+            p.next_unit_id += 1;
         }
     }
+
+    game.log_with_origin(
+        player,
+        origin,
+        &format!("Gain {} at {}", units.to_string(Some(game)), position),
+    );
+    add_action_log_item(
+        game,
+        player,
+        ActionLogEntry::Units {
+            balance: ActionLogBalance::Gain,
+            units,
+        },
+        origin.clone(),
+        vec![],
+    );
 }
 
 pub(crate) fn remove_unit(player: usize, id: u32, game: &mut Game) -> Unit {

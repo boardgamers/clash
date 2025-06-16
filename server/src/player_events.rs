@@ -9,7 +9,7 @@ use crate::construct::ConstructInfo;
 use crate::content::custom_actions::CustomActionActivation;
 use crate::content::persistent_events::{KilledUnits, PaymentRequest};
 use crate::cultural_influence::{InfluenceCultureInfo, InfluenceCultureOutcome};
-use crate::events::Event;
+use crate::events::{Event, EventOrigin};
 use crate::explore::ExploreResolutionState;
 use crate::game::Game;
 use crate::incident::PassedIncident;
@@ -321,6 +321,10 @@ impl CostInfo {
             payment,
         );
         self.info.execute(game);
+    }
+
+    pub(crate) fn origin(&self) -> &EventOrigin {
+        &self.cost.origin
     }
 }
 

@@ -8,6 +8,7 @@ use macroquad::window::screen_height;
 use server::action::execute_action;
 use server::advance::{Advance, do_advance};
 use server::city::City;
+use server::events::check_event_origin;
 use server::game::{Game, GameContext, GameOptions, UndoOption};
 use server::game_data::GameData;
 use server::game_setup::{GameSetupBuilder, setup_game};
@@ -59,7 +60,7 @@ async fn main() {
             "a".repeat(32)
         };
         setup_game(
-            GameSetupBuilder::new(players)
+            &GameSetupBuilder::new(players)
                 .seed(seed)
                 .options(GameOptions {
                     undo: UndoOption::SamePlayer,
@@ -162,11 +163,17 @@ fn ai_autoplay(mut game: Game, f: &mut Features, state: &mut State) -> Game {
 
 #[must_use]
 fn setup_local_game() -> Game {
-    let mut game = setup_game(GameSetupBuilder::new(2).skip_random_map().build());
+    let mut game = setup_game(&GameSetupBuilder::new(2).skip_random_map().build());
     game.round = 1;
     game.dice_roll_outcomes = vec![1, 1, 10, 10, 10, 10, 10, 10, 10, 10];
     let add_unit = |game: &mut Game, pos: &str, player_index: usize, unit_type: UnitType| {
-        gain_unit(player_index, Position::from_offset(pos), unit_type, game);
+        gain_unit(
+            game,
+            player_index,
+            Position::from_offset(pos),
+            unit_type,
+            &check_event_origin(),
+        );
     };
 
     let player_index1 = 0;

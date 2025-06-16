@@ -171,8 +171,10 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -233,7 +235,45 @@
                     },
                     "result": "Draw",
                     "city_mood": "Angry"
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 1,
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -259,12 +299,13 @@
     ],
     [
       "Player2: Archers: Player2 sacrifices an infantry for Archers",
+      "Player2: Combat: Lost 1 infantry at C1",
       "Player1 rolled 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units.",
       "Player2 rolled 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against attacking units.",
       "Player1: Choose Casualties: Remove all attacking units",
-      "Player1 removed 1 infantry",
+      "Player1: Combat: Lost 1 infantry at C2",
       "Player2: Choose Casualties: Remove all defending units",
-      "Player2 removed 1 infantry",
+      "Player2: Combat: Lost 1 infantry at C1",
       "Battle ends in a draw"
     ]
   ],

@@ -186,8 +186,10 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -205,6 +207,7 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 2
@@ -216,6 +219,7 @@
                       }
                     },
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "mood_tokens": 1
@@ -235,7 +239,33 @@
                         7
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Units": {
+                        "units": {
+                          "settlers": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Incident": 2
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Units": {
+                        "units": {
+                          "settlers": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Incident": 2
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -255,7 +285,7 @@
       "A new game event has been triggered: Epidemics"
     ],
     [
-      "Player1: Epidemics: Player1 killed units: settler at C2"
+      "Player1: Epidemics: Lost 1 settler at C2"
     ]
   ],
   "undo_limit": 1,

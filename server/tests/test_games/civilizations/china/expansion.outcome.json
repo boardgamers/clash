@@ -239,8 +239,10 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -261,11 +263,24 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 2
                         },
                         "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Units": {
+                        "units": {
+                          "settlers": 1
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Ability": "Recruit"
@@ -287,7 +302,7 @@
     ],
     [
       "Player1: Recruit: Pay 2 gold",
-      "Player1: Recruit: Recruit 1 settler in the city A1",
+      "Player1: Recruit: Gain 1 settler at A1",
       "Player1: Expansion: Expansion allows to move the settlers at B3, B3, A1"
     ]
   ],

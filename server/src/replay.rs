@@ -38,11 +38,11 @@ pub struct ReplayActionLogRound {
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct ReplayActionLogPlayer {
     pub index: usize,
-    pub items: Vec<ReplayActionLogItem>,
+    pub actions: Vec<ReplayActionLogAction>,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
-pub struct ReplayActionLogItem {
+pub struct ReplayActionLogAction {
     pub action: Action,
 }
 
@@ -65,7 +65,7 @@ pub fn replay(mut data: ReplayGameData, to: Option<usize>) -> Game {
     let log = linear_action_log(mem::take(&mut data.action_log));
     let to = to.unwrap_or(log.len() - 1);
     let mut game = setup_game(
-        GameSetupBuilder::new(data.players.len() - NON_HUMAN_PLAYERS)
+        &GameSetupBuilder::new(data.players.len() - NON_HUMAN_PLAYERS)
             .seed(data.seed)
             .options(data.options)
             .civilizations(
@@ -108,7 +108,7 @@ pub(crate) fn linear_action_log(log: Vec<ReplayActionLogAge>) -> Vec<(String, Ac
                 .enumerate()
                 .flat_map(move |(round_num, round)| {
                     round.players.into_iter().flat_map(move |player| {
-                        player.items.into_iter().map(move |item| {
+                        player.actions.into_iter().map(move |item| {
                             (format!("{age_num}{round_num}{}", player.index), item.action)
                         })
                     })

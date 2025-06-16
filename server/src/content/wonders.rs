@@ -252,14 +252,12 @@ fn use_great_lighthouse(b: AbilityBuilder) -> AbilityBuilder {
             ))
         },
         |game, s, _| {
-            let spawn = &s.choice[0];
-            let city_pos = great_lighthouse_city(game.player(s.player_index)).position;
-            gain_unit(s.player_index, *spawn, UnitType::Ship, game);
-            s.log(
+            gain_unit(game, s.player_index, s.choice[0], UnitType::Ship, &s.origin);
+            activate_city(
+                great_lighthouse_city(game.player(s.player_index)).position,
                 game,
-                &format!("Activated the city {city_pos} to place a ship on {spawn} for free",),
+                &s.origin,
             );
-            activate_city(city_pos, game, &s.origin);
         },
     )
 }

@@ -203,8 +203,7 @@ fn guillotine() -> Incident {
         },
         |game, s, i| {
             let pos = i.selected_position.expect("position should be set");
-            s.log(game, &format!("Gain {} in {pos}", s.choice.name(game)));
-            gain_unit(s.player_index, pos, s.choice, game);
+            gain_unit(game, s.player_index, pos, s.choice, &s.origin);
         },
     )
     .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, p, _i| {
@@ -248,18 +247,14 @@ fn new_leader_chosen(player_index: usize, i: &mut IncidentInfo) -> bool {
 fn kill_leader(game: &mut Game, player: &EventPlayer) {
     let p = player.get(game);
     let leader = p.units.iter().find_map(|u| {
-        if let UnitType::Leader(l) = u.unit_type {
-            Some((u.id, l))
+        if let UnitType::Leader(_) = u.unit_type {
+            Some(u.id)
         } else {
             None
         }
     });
-    if let Some((id, leader)) = leader {
-        player.log(
-            game,
-            &format!("{} was killed due to the Guillotine", leader.name(game)),
-        );
-        kill_units(game, &[id], player.index, None);
+    if let Some(id) = leader {
+        kill_units(game, &[id], player.index, None, &player.origin);
     }
 }
 

@@ -320,14 +320,12 @@ fn proconsul() -> LeaderAbility {
         |game, s, _| {
             if !s.choice.is_empty() {
                 let p = s.player_index;
-                let position = leader_position(game.player(p));
-                gain_unit(p, position, UnitType::Infantry, game);
-                s.log(
+                gain_unit(
                     game,
-                    &format!(
-                        "Use Proconsul to gain 1 infantry in {position} for {}",
-                        s.choice[0]
-                    ),
+                    p,
+                    leader_position(game.player(p)),
+                    UnitType::Infantry,
+                    &s.origin,
                 );
             }
         },

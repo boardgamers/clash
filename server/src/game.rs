@@ -10,7 +10,7 @@ use crate::content::persistent_events::{
 use crate::events::{Event, EventOrigin};
 use crate::game_data::GameData;
 use crate::log::{
-    ActionLogAge, ActionLogPlayer, ActionLogRound, current_player_turn_log,
+    ActionLogAge, add_player_log, add_round_log, current_player_turn_log,
     current_player_turn_log_mut,
 };
 use crate::movement::MoveState;
@@ -327,28 +327,17 @@ impl Game {
     }
 
     pub(crate) fn start_turn(&mut self) {
-        self.action_log
-            .last_mut()
-            .expect("action log should exist")
-            .rounds
-            .last_mut()
-            .expect("round should exist")
-            .players
-            .push(ActionLogPlayer::new(self.current_player_index));
+        let player = self.current_player_index;
+        add_player_log(self, player);
         self.action_log_index = 0;
         self.undo_limit = 0;
 
-        self.add_info_log_group(format!(
-            "It's {}'s turn",
-            self.player_name(self.current_player_index)
-        ));
+        self.add_info_log_group(format!("It's {}'s turn", self.player_name(player)));
         self.actions_left = ACTIONS;
         let lost_action = self
             .permanent_effects
             .iter()
-            .position(
-                |e| matches!(e, PermanentEffect::CivilWarLoseAction(p) if *p == self.current_player_index),
-            )
+            .position(|e| matches!(e, PermanentEffect::CivilWarLoseAction(p) if *p == player))
             .map(|i| self.permanent_effects.remove(i));
         if lost_action.is_some() {
             self.add_info_log_item("Remove 1 action for Revolution");
@@ -452,11 +441,7 @@ impl Game {
             return;
         }
         self.add_info_log_group(format!("Round {}/3", self.round));
-        self.action_log
-            .last_mut()
-            .expect("action log should exist")
-            .rounds
-            .push(ActionLogRound::new());
+        add_round_log(self, self.round);
         self.start_turn();
     }
 
@@ -467,7 +452,7 @@ impl Game {
         let m = format!("Age {} has started", self.age);
         self.add_message(&m);
         self.add_info_log_group(m);
-        self.action_log.push(ActionLogAge::new());
+        self.action_log.push(ActionLogAge::new(self.age));
         self.next_round();
     }
 

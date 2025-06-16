@@ -246,8 +246,10 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -263,7 +265,21 @@
                         "destination": "D2"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Units": {
+                        "units": {
+                          "ships": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -298,7 +314,33 @@
                       }
                     },
                     "result": "AttackerWins"
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Units": {
+                        "units": {
+                          "cavalry": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Choose Casualties (carried units)"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Units": {
+                        "units": {
+                          "ships": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -319,12 +361,13 @@
       "Player1 rolled 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 12 and gets 1 hits against defending units.",
       "Player2 rolled 6 (infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units.",
       "Player1: Choose Casualties: Remove 1 of their attacking units",
-      "Player1 removed 1 ship"
+      "Player1: Combat: Lost 1 ship at C3"
     ],
     [
       "Player1: Choose Casualties (carried units): Killed carried units: 1 cavalry",
+      "Player1: Choose Casualties (carried units): Lost 1 cavalry at C3",
       "Player2: Choose Casualties: Remove all defending units",
-      "Player2 removed 1 ship",
+      "Player2: Combat: Lost 1 ship at D2",
       "Attacker wins"
     ]
   ],

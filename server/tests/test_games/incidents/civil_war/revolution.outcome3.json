@@ -210,8 +210,10 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -229,6 +231,7 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 2
@@ -240,6 +243,7 @@
                       }
                     },
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "mood_tokens": 1
@@ -251,6 +255,7 @@
                       }
                     },
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 2
@@ -270,7 +275,21 @@
                         3
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Units": {
+                        "units": {
+                          "elephants": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Incident": 38
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -308,7 +327,7 @@
       "Player1: Gold deposits: Gain 2 gold"
     ],
     [
-      "Player1: Revolution: Player1 killed units: elephant at C2"
+      "Player1: Revolution: Lost 1 elephant at C2"
     ],
     [
       "Player1: Revolution: Declined to kill units",

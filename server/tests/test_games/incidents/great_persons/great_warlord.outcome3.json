@@ -352,8 +352,10 @@
   "current_player_index": 1,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -371,6 +373,7 @@
                   },
                   "items": [
                     {
+                      "player": 1,
                       "Resources": {
                         "resources": {
                           "food": 2
@@ -382,6 +385,7 @@
                       }
                     },
                     {
+                      "player": 1,
                       "Resources": {
                         "resources": {
                           "mood_tokens": 1
@@ -406,6 +410,7 @@
                   },
                   "items": [
                     {
+                      "player": 1,
                       "Resources": {
                         "resources": {
                           "culture_tokens": 1
@@ -426,6 +431,7 @@
                   },
                   "items": [
                     {
+                      "player": 1,
                       "Resources": {
                         "resources": {
                           "culture_tokens": 1
@@ -470,7 +476,21 @@
                       }
                     },
                     "result": "AttackerWins"
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -510,7 +530,7 @@
       "Player2 used the following combat modifiers: Player gets +2 combat value for Great Warlord",
       "Player1 rolled 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units.",
       "Player1: Choose Casualties: Remove all defending units",
-      "Player1 removed 1 infantry",
+      "Player1: Combat: Lost 1 infantry at C8",
       "Attacker wins"
     ]
   ],

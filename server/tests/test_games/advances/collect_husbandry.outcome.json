@@ -263,8 +263,10 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -289,6 +291,7 @@
                   },
                   "items": [
                     {
+                      "player": 0,
                       "MoodChange": {
                         "city": "B3",
                         "mood": "Neutral"
@@ -298,6 +301,7 @@
                       }
                     },
                     {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "food": 1

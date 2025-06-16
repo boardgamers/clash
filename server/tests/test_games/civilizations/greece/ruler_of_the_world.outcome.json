@@ -353,8 +353,10 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -395,6 +397,19 @@
                   },
                   "items": [
                     {
+                      "player": 1,
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 2
@@ -406,6 +421,7 @@
                       }
                     },
                     {
+                      "player": 0,
                       "MoodChange": {
                         "city": "D8",
                         "mood": "Angry"
@@ -436,7 +452,7 @@
       "Player1 used the following combat modifiers: Ruler of the World adds 1 combat value",
       "Player2 rolled 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units.",
       "Player2: Choose Casualties: Remove all defending units",
-      "Player2 removed 1 infantry",
+      "Player2: Combat: Lost 1 infantry at D8",
       "Attacker wins and captured Player2's city D8",
       "Player1: Combat: Gain 2 gold",
       "Player1: Combat: City D8 became Angry"

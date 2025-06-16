@@ -29,14 +29,14 @@ const JSON: JsonTest = JsonTest::new("base");
 
 #[test]
 fn new_game() {
-    let game = setup_game(GameSetupBuilder::new(2).build());
+    let game = setup_game(&GameSetupBuilder::new(2).build());
     JSON.compare_game("new_game", &game);
 }
 
 #[test]
 fn basic_actions() {
     let mut game = setup_game(
-        GameSetupBuilder::new(1)
+        &GameSetupBuilder::new(1)
             .civilizations(vec!["Rome".to_string(), "Greece".to_string()])
             .skip_random_map()
             .build(),

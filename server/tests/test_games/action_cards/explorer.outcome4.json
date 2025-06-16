@@ -342,8 +342,10 @@
   "current_player_index": 1,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -367,6 +369,7 @@
                   },
                   "items": [
                     {
+                      "player": 1,
                       "Resources": {
                         "resources": {
                           "culture_tokens": 1
@@ -402,7 +405,21 @@
                         "D8"
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 1,
+                      "Units": {
+                        "units": {
+                          "settlers": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "CivilCard": 21
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -428,7 +445,7 @@
       "Explored tiles A7=Fertile, B6=Fertile, B7=Barren, C7=Fertile"
     ],
     [
-      "Player2: Explorer: Decided to gain a free settler at D8"
+      "Player2: Explorer: Gain 1 settler at D8"
     ]
   ],
   "undo_limit": 3,

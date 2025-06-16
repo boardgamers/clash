@@ -4,7 +4,9 @@ use crate::cache::Cache;
 use crate::consts::{ACTIONS, JSON_SCHEMA_VERSION, NON_HUMAN_PLAYERS};
 use crate::content::civilizations::{BARBARIANS, PIRATES};
 use crate::content::{ability, civilizations};
+use crate::events::EventOrigin;
 use crate::game::{Game, GameContext, GameOptions, GameState};
+use crate::log::{add_player_log, add_round_log};
 use crate::map::Map;
 use crate::objective_card::gain_objective_card_from_pile;
 use crate::player::{Player, gain_unit};
@@ -80,7 +82,7 @@ impl GameSetupBuilder {
 ///
 /// Panics only if there is an internal bug
 #[must_use]
-pub fn setup_game(setup: GameSetup) -> Game {
+pub fn setup_game(setup: &GameSetup) -> Game {
     setup_game_with_cache(setup, Cache::new())
 }
 
@@ -90,10 +92,10 @@ pub fn setup_game(setup: GameSetup) -> Game {
 ///
 /// Panics only if there is an internal bug
 #[must_use]
-pub fn setup_game_with_cache(setup: GameSetup, cache: Cache) -> Game {
+pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
     let mut rng = init_rng(setup.seed.clone());
 
-    let mut players = init_human_players(&setup, &mut rng, &cache);
+    let mut players = init_human_players(setup, &mut rng, &cache);
 
     let starting_player = rng.range(0, players.len());
 
@@ -138,7 +140,7 @@ pub fn setup_game_with_cache(setup: GameSetup, cache: Cache) -> Game {
         seed: setup.seed.clone(),
         context: GameContext::Play,
         version: JSON_SCHEMA_VERSION,
-        options: setup.options,
+        options: setup.options.clone(),
         cache,
         state: GameState::Playing,
         events: Vec::new(),
@@ -174,19 +176,36 @@ pub fn setup_game_with_cache(setup: GameSetup, cache: Cache) -> Game {
         ability::init_player(&mut game, i, all);
     }
 
+    execute_setup_round(setup, &mut game);
+    game
+}
+
+fn execute_setup_round(setup: &GameSetup, game: &mut Game) {
+    game.next_age();
+    add_round_log(game, 0);
+
     for player_index in 0..setup.player_amount {
+        add_player_log(game, player_index);
+
         let p = game.player(player_index);
         game.add_info_log_group(format!("{p} is playing as {}", p.civilization.name));
-        gain_action_card_from_pile(&mut game, player_index);
-        gain_objective_card_from_pile(&mut game, player_index);
-        let p = game.player(player_index);
+        gain_action_card_from_pile(game, player_index);
+        gain_objective_card_from_pile(game, player_index);
         if setup.random_map {
-            gain_unit(p.index, p.cities[0].position, UnitType::Settler, &mut game);
+            let home = game.player(player_index).cities[0].position;
+            gain_unit(
+                game,
+                player_index,
+                home,
+                UnitType::Settler,
+                &setup_event_origin(),
+            );
         }
     }
+}
 
-    game.next_age();
-    game
+fn setup_event_origin() -> EventOrigin {
+    EventOrigin::Ability("Setup".to_string())
 }
 
 fn init_rng(seed: String) -> Rng {

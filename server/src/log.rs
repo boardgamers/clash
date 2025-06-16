@@ -3,6 +3,7 @@ use crate::combat_stats::CombatStats;
 use crate::events::EventOrigin;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
+use crate::unit::Units;
 use crate::wonder::Wonder;
 use crate::{action::Action, game::Game};
 use json_patch::PatchOperation;
@@ -10,25 +11,31 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct ActionLogAge {
+    pub age: u32,
     pub rounds: Vec<ActionLogRound>,
 }
 
 impl ActionLogAge {
     #[must_use]
-    pub(crate) fn new() -> Self {
-        Self { rounds: Vec::new() }
+    pub(crate) fn new(age: u32) -> Self {
+        Self {
+            age,
+            rounds: Vec::new(),
+        }
     }
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct ActionLogRound {
+    pub round: u32,
     pub players: Vec<ActionLogPlayer>,
 }
 
 impl ActionLogRound {
     #[must_use]
-    pub(crate) fn new() -> Self {
+    pub(crate) fn new(round: u32) -> Self {
         Self {
+            round,
             players: Vec::new(),
         }
     }
@@ -108,6 +115,10 @@ pub enum ActionLogEntry {
         resources: ResourcePile,
         balance: ActionLogBalance,
     },
+    Units {
+        units: Units,
+        balance: ActionLogBalance,
+    },
     MoodChange {
         city: Position,
         mood: MoodState,
@@ -116,6 +127,7 @@ pub enum ActionLogEntry {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct ActionLogItem {
+    player: usize,
     #[serde(flatten)]
     entry: ActionLogEntry,
     origin: EventOrigin,
@@ -126,8 +138,14 @@ pub struct ActionLogItem {
 
 impl ActionLogItem {
     #[must_use]
-    pub fn new(entry: ActionLogEntry, origin: EventOrigin, modifiers: Vec<EventOrigin>) -> Self {
+    pub fn new(
+        player: usize,
+        entry: ActionLogEntry,
+        origin: EventOrigin,
+        modifiers: Vec<EventOrigin>,
+    ) -> Self {
         Self {
+            player,
             entry,
             origin,
             modifiers,
@@ -167,12 +185,20 @@ pub(crate) fn add_log_action(game: &mut Game, item: Action) {
     game.action_log_index += 1;
 }
 
-pub(crate) fn add_action_log_item(game: &mut Game, item: ActionLogItem) {
+pub(crate) fn add_action_log_item(
+    game: &mut Game,
+    player: usize,
+    entry: ActionLogEntry,
+    origin: EventOrigin,
+    modifiers: Vec<EventOrigin>,
+) {
     let p = current_player_turn_log_mut(game);
     if p.actions.is_empty() {
         p.actions.push(ActionLogAction::new(Action::StartTurn));
     }
-    current_log_action_mut(game).items.push(item);
+    current_log_action_mut(game)
+        .items
+        .push(ActionLogItem::new(player, entry, origin, modifiers));
 }
 
 ///
@@ -211,4 +237,23 @@ pub(crate) fn current_log_action_mut(game: &mut Game) -> &mut ActionLogAction {
         .actions
         .last_mut()
         .expect("actions empty")
+}
+
+pub(crate) fn add_round_log(game: &mut Game, round: u32) {
+    game.action_log
+        .last_mut()
+        .expect("action log should exist")
+        .rounds
+        .push(ActionLogRound::new(round));
+}
+
+pub(crate) fn add_player_log(game: &mut Game, player: usize) {
+    game.action_log
+        .last_mut()
+        .expect("action log should exist")
+        .rounds
+        .last_mut()
+        .expect("round should exist")
+        .players
+        .push(ActionLogPlayer::new(player));
 }
