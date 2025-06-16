@@ -1,4 +1,5 @@
 use crate::city::activate_city;
+use crate::combat;
 use crate::consts::STACK_LIMIT;
 use crate::content::ability::recruit_event_origin;
 use crate::content::persistent_events::PersistentEventType;
@@ -11,7 +12,6 @@ use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::SpecialAdvance;
 use crate::unit::{UnitType, Units, kill_units, set_unit_position};
-use crate::combat;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
