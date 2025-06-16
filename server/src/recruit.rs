@@ -5,12 +5,12 @@ use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
 use crate::map::capital_city_position;
 use crate::payment::PaymentOptions;
-use crate::player::{gain_unit, CostTrigger, Player};
+use crate::player::{CostTrigger, Player, gain_units};
 use crate::player_events::CostInfo;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::SpecialAdvance;
-use crate::unit::{kill_units, set_unit_position, UnitType, Units};
+use crate::unit::{UnitType, Units, kill_units, set_unit_position};
 use crate::{combat, utils};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -86,23 +86,34 @@ pub(crate) fn execute_recruit(
     let origin = cost.origin();
     for unit in &r.replaced_units {
         // kill separately, because they may be on different positions
-        kill_units(game, &[*unit], player_index, None, &origin);
+        kill_units(game, &[*unit], player_index, None, origin);
     }
     let player = game.player_mut(player_index);
-    let vec = r.units.clone().to_vec();
-    player.units.reserve_exact(vec.len());
-    activate_city(r.city_position, game, &origin);
-    for unit_type in vec {
-        let position = match &unit_type {
-            UnitType::Ship => game
-                .player(player_index)
-                .get_city(r.city_position)
-                .port_position
-                .expect("there should be a port in the city"),
-            _ => r.city_position,
-        };
-        gain_unit(player_index, position, unit_type, game);
+    let types = r.units.clone().to_vec();
+    player.units.reserve_exact(types.len());
+    activate_city(r.city_position, game, origin);
+    let mut land = Units::empty();
+    let mut ship = Units::empty();
+
+    for unit_type in types {
+        if unit_type.is_ship() {
+            ship += &unit_type;
+        } else {
+            land += &unit_type;
+        }
     }
+    if !land.is_empty() {
+        gain_units(game, player_index, r.city_position, land, origin);
+    }
+    if !ship.is_empty() {
+        let position = game
+            .player(player_index)
+            .get_city(r.city_position)
+            .port_position
+            .expect("Cannot recruit ships without port");
+        gain_units(game, player_index, position, ship, origin);
+    }
+
     on_recruit(game, player_index, r);
     Ok(())
 }

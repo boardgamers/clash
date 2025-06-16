@@ -1,8 +1,8 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::combat::{capture_position, log_round, Combat, CombatRetreatState};
+use crate::combat::{Combat, CombatRetreatState, capture_position, log_round};
 use crate::combat_roll::CombatHits;
 use crate::combat_stats::CombatStats;
-use crate::content::ability::{combat_event_origin, Ability};
+use crate::content::ability::{Ability, combat_event_origin};
 use crate::content::persistent_events::{PersistentEventType, PositionRequest, UnitsRequest};
 use crate::game::Game;
 use crate::log::current_log_action_mut;
@@ -11,7 +11,7 @@ use crate::player::gain_unit;
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::position::Position;
 use crate::tactics_card::{CombatRole, TacticsCard, TacticsCardTarget};
-use crate::unit::{kill_units, UnitType, Units};
+use crate::unit::{UnitType, kill_units};
 use crate::utils;
 use itertools::Itertools;
 use num::Zero;
@@ -643,7 +643,7 @@ pub(crate) fn place_settler() -> Ability {
                 game,
                 &format!("Gain 1 free Settler Unit at {pos} for losing a city",),
             );
-            gain_unit(s.player_index, pos, UnitType::Settler, game);
+            gain_unit(game, s.player_index, pos, UnitType::Settler, &s.origin);
         },
     )
     .build()

@@ -7,6 +7,7 @@ use crate::content::advances::theocracy::cities_that_can_add_units;
 use crate::content::persistent_events::{
     PersistentEventType, PositionRequest, ResourceRewardRequest, UnitTypeRequest,
 };
+use crate::events::EventPlayer;
 use crate::game::Game;
 use crate::incident::{BASE_EFFECT_PRIORITY, IncidentBuilder, IncidentFilter, play_base_effect};
 use crate::map::Terrain;
@@ -169,15 +170,13 @@ where
         },
         move |game, s, v| {
             let position = get_barbarian_city2(v).expect("barbarians should exist");
-            let units = Units::from_iter(vec![s.choice]);
-            s.log(
+            gain_unit(
                 game,
-                &format!(
-                    "Barbarians reinforced with {} at {position}",
-                    units.to_string(None)
-                ),
+                get_barbarians_player(game).index,
+                position,
+                s.choice,
+                &s.origin,
             );
-            gain_unit(get_barbarians_player(game).index, position, s.choice, game);
         },
     )
 }
@@ -322,7 +321,7 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
             let s = i.get_barbarian_state();
             if s.move_units && get_movable_units(game, player.index, s).is_empty() {
                 // after all moves are done
-                reinforce_after_move(game, player.index);
+                reinforce_after_move(game, player);
                 // clear movement restrictions
                 end_turn(game, get_barbarians_player(game).index);
             }
@@ -330,12 +329,12 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
     )
 }
 
-fn reinforce_after_move(game: &mut Game, player_index: usize) {
-    let player = game.player(player_index);
+fn reinforce_after_move(game: &mut Game, player: &EventPlayer) {
+    let p = game.player(player.index);
     let barbarian = get_barbarians_player(game).index;
-    let available = player.available_units().get(&UnitType::Infantry) as usize;
+    let available = p.available_units().get(&UnitType::Infantry) as usize;
 
-    let cities: Vec<Position> = player
+    let cities: Vec<Position> = p
         .cities
         .iter()
         .flat_map(|c| cities_in_range(game, |p| p.index == barbarian, c.position, 2))
@@ -344,8 +343,7 @@ fn reinforce_after_move(game: &mut Game, player_index: usize) {
         .take(available)
         .collect();
     for pos in cities {
-        gain_unit(barbarian, pos, UnitType::Infantry, game);
-        game.add_info_log_item(&format!("Barbarians spawned a new Infantry unit at {pos}",));
+        gain_unit(game, barbarian, pos, UnitType::Infantry, &player.origin);
     }
 }
 
@@ -437,14 +435,9 @@ fn add_barbarians_city(builder: IncidentBuilder, event_name: &'static str) -> In
         },
         move |game, s, _| {
             let pos = s.choice[0];
-            s.log(
-                game,
-                &format!("Barbarians spawned a new city and a new Infantry unit at {pos}"),
-            );
             let b = get_barbarians_player(game).index;
-            let p = game.player_mut(b);
-            p.cities.push(City::new(b, pos));
-            gain_unit(b, pos, UnitType::Infantry, game);
+            game.player_mut(b).cities.push(City::new(b, pos));
+            gain_unit(game, b, pos, UnitType::Infantry, &s.origin);
         },
     )
 }

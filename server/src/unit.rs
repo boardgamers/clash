@@ -579,14 +579,17 @@ pub(crate) fn kill_units(
 pub(crate) fn kill_units_without_event(
     game: &mut Game,
     unit_ids: &[u32],
-    player_index: usize,
+    player: usize,
     killed_units: &KilledUnits,
     origin: &EventOrigin,
 ) {
-    let p = game.player(player_index);
-    let units = unit_ids.iter().map(|id| p.get_unit(*id).unit_type).collect::<Units>();
+    let p = game.player(player);
+    let units = unit_ids
+        .iter()
+        .map(|id| p.get_unit(*id).unit_type)
+        .collect::<Units>();
     game.log_with_origin(
-        player_index,
+        player,
         origin,
         &format!(
             "Lost {} at {}",
@@ -596,6 +599,7 @@ pub(crate) fn kill_units_without_event(
     );
     add_action_log_item(
         game,
+        player,
         ActionLogEntry::Units {
             balance: ActionLogBalance::Loss,
             units,
@@ -605,7 +609,7 @@ pub(crate) fn kill_units_without_event(
     );
 
     for unit in unit_ids {
-        kill_unit(game, *unit, player_index, killed_units.killer);
+        kill_unit(game, *unit, player, killed_units.killer);
     }
 }
 
@@ -808,14 +812,17 @@ mod tests {
     #[test]
     fn into_iter() {
         let units = Units::new(0, 1, 0, 2, 1, Some(leader::Leader::Sulla));
-        assert_eq!(units.into_iter().collect::<Vec<_>>(), vec![
-            (Settler, 0),
-            (Infantry, 1),
-            (Ship, 0),
-            (Cavalry, 2),
-            (Elephant, 1),
-            (Leader(leader::Leader::Sulla), 1),
-        ]);
+        assert_eq!(
+            units.into_iter().collect::<Vec<_>>(),
+            vec![
+                (Settler, 0),
+                (Infantry, 1),
+                (Ship, 0),
+                (Cavalry, 2),
+                (Elephant, 1),
+                (Leader(leader::Leader::Sulla), 1),
+            ]
+        );
     }
 
     #[test]

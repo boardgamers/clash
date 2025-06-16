@@ -10,11 +10,11 @@ use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect};
 use crate::leader::Leader;
-use crate::player::{can_add_army_unit, gain_unit, Player};
+use crate::player::{Player, can_add_army_unit, gain_unit};
 use crate::player_events::{IncidentInfo, IncidentTarget};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
-use crate::unit::{kill_units, UnitType};
+use crate::unit::{UnitType, kill_units};
 use crate::utils::remove_and_map_element_by;
 use itertools::Itertools;
 
@@ -203,8 +203,7 @@ fn guillotine() -> Incident {
         },
         |game, s, i| {
             let pos = i.selected_position.expect("position should be set");
-            s.log(game, &format!("Gain {} in {pos}", s.choice.name(game)));
-            gain_unit(s.player_index, pos, s.choice, game);
+            gain_unit(game, s.player_index, pos, s.choice, &s.origin);
         },
     )
     .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, p, _i| {
@@ -248,7 +247,7 @@ fn new_leader_chosen(player_index: usize, i: &mut IncidentInfo) -> bool {
 fn kill_leader(game: &mut Game, player: &EventPlayer) {
     let p = player.get(game);
     let leader = p.units.iter().find_map(|u| {
-        if let UnitType::Leader(l) = u.unit_type {
+        if let UnitType::Leader(_) = u.unit_type {
             Some(u.id)
         } else {
             None

@@ -213,10 +213,13 @@ fn place_pirate_ship(builder: IncidentBuilder, priority: i32, blockade: bool) ->
             ))
         },
         |game, s, _| {
-            let pirate = get_pirates_player(game).index;
-            let pos = s.choice[0];
-            s.log(game, &format!("Pirates spawned a Pirate Ship at {pos}"));
-            gain_unit(pirate, pos, UnitType::Ship, game);
+            gain_unit(
+                game,
+                get_pirates_player(game).index,
+                s.choice[0],
+                UnitType::Ship,
+                &s.origin,
+            );
         },
     )
 }

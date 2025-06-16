@@ -8,6 +8,7 @@ use macroquad::window::screen_height;
 use server::action::execute_action;
 use server::advance::{Advance, do_advance};
 use server::city::City;
+use server::events::check_event_origin;
 use server::game::{Game, GameContext, GameOptions, UndoOption};
 use server::game_data::GameData;
 use server::game_setup::{GameSetupBuilder, setup_game};
@@ -166,7 +167,13 @@ fn setup_local_game() -> Game {
     game.round = 1;
     game.dice_roll_outcomes = vec![1, 1, 10, 10, 10, 10, 10, 10, 10, 10];
     let add_unit = |game: &mut Game, pos: &str, player_index: usize, unit_type: UnitType| {
-        gain_unit(player_index, Position::from_offset(pos), unit_type, game);
+        gain_unit(
+            game,
+            player_index,
+            Position::from_offset(pos),
+            unit_type,
+            &check_event_origin(),
+        );
     };
 
     let player_index1 = 0;

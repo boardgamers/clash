@@ -6,7 +6,7 @@ use crate::content::incidents::good_year::select_player_to_gain_settler;
 use crate::content::persistent_events::{PaymentRequest, PositionRequest, UnitsRequest};
 use crate::game::Game;
 use crate::incident::{
-    decrease_mod_and_log, DecreaseMood, Incident, IncidentBaseEffect, IncidentBuilder, MoodModifier,
+    DecreaseMood, Incident, IncidentBaseEffect, IncidentBuilder, MoodModifier, decrease_mod_and_log,
 };
 use crate::payment::{PaymentConversion, PaymentConversionType};
 use crate::player::Player;
@@ -14,7 +14,7 @@ use crate::player_events::IncidentTarget;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::{
-    add_change_government, can_change_government_for_free, get_status_phase, ChangeGovernmentOption,
+    ChangeGovernmentOption, add_change_government, can_change_government_for_free, get_status_phase,
 };
 use crate::unit::kill_units;
 use crate::wonder::draw_public_wonder;

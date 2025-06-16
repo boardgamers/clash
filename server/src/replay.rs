@@ -38,11 +38,11 @@ pub struct ReplayActionLogRound {
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct ReplayActionLogPlayer {
     pub index: usize,
-    pub items: Vec<ReplayActionLogItem>,
+    pub actions: Vec<ReplayActionLogAction>,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
-pub struct ReplayActionLogItem {
+pub struct ReplayActionLogAction {
     pub action: Action,
 }
 
@@ -108,7 +108,7 @@ pub(crate) fn linear_action_log(log: Vec<ReplayActionLogAge>) -> Vec<(String, Ac
                 .enumerate()
                 .flat_map(move |(round_num, round)| {
                     round.players.into_iter().flat_map(move |player| {
-                        player.items.into_iter().map(move |item| {
+                        player.actions.into_iter().map(move |item| {
                             (format!("{age_num}{round_num}{}", player.index), item.action)
                         })
                     })
