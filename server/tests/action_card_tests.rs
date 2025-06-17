@@ -393,8 +393,7 @@ fn test_tech_trade() {
     JSON.test(
         "tech_trade",
         vec![
-            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(39))).skip_json(),
-            TestAction::undoable(0, payment_response(ResourcePile::culture_tokens(1))),
+            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(39))),
         ],
     );
 }

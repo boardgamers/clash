@@ -10,7 +10,7 @@
         "ideas": 3,
         "gold": 7,
         "mood_tokens": 8,
-        "culture_tokens": 6
+        "culture_tokens": 7
       },
       "resource_limit": {
         "food": 7,
@@ -208,29 +208,21 @@
                     "Playing": {
                       "ActionCard": 39
                     }
-                  }
-                },
-                {
-                  "action": {
-                    "Response": {
-                      "Payment": [
-                        {
-                          "culture_tokens": 1
-                        }
-                      ]
-                    }
                   },
                   "items": [
                     {
                       "player": 0,
-                      "Resources": {
-                        "resources": {
-                          "culture_tokens": 1
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 39
                         },
-                        "balance": "Loss"
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "DiscardPile"
                       },
                       "origin": {
-                        "CivilCard": 39
+                        "Ability": "Action Card"
                       }
                     },
                     {
@@ -266,14 +258,11 @@
       ]
     }
   ],
-  "action_log_index": 2,
+  "action_log_index": 1,
   "log": [
     [
       "Player1 played the action card Technology Trade",
-      "Player1 has to pay 1 culture token for Technology Trade"
-    ],
-    [
-      "Player1: Technology Trade: Pay 1 culture token",
+      "Player1: Action Card: Discard Technology Trade/Surprise",
       "Player1: Technology Trade: Selected Player2 as trade partner",
       "Player1: Technology Trade: Selected Storage as advance for Technology Trade.",
       "Player1: Storage: Gain 1 mood token",
