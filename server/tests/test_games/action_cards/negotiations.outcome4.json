@@ -218,7 +218,24 @@
                     "Playing": {
                       "ActionCard": 23
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 23
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToDiscard"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -241,21 +258,6 @@
                       },
                       "origin": {
                         "CivilCard": 23
-                      }
-                    },
-                    {
-                      "player": 0,
-                      "HandCard": {
-                        "card": {
-                          "ActionCard": 23
-                        },
-                        "from": {
-                          "Hand": 0
-                        },
-                        "to": "DiscardPile"
-                      },
-                      "origin": {
-                        "Ability": "Action Card"
                       }
                     }
                   ]
@@ -358,12 +360,11 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 played the action card Negotiations",
+      "Player1: Action Card: Play Negotiations/Scout",
       "Player1 has to pay 1 culture token for Negotiations"
     ],
     [
       "Player1: Negotiations: Pay 1 culture token",
-      "Player1: Action Card: Discard Negotiations/Scout",
       "Player1: Negotiations: Started negotiations with Player2"
     ],
     [

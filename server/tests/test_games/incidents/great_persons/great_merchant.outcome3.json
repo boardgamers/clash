@@ -311,7 +311,7 @@
                         "from": {
                           "Hand": 0
                         },
-                        "to": "DiscardPile"
+                        "to": "PlayToDiscard"
                       },
                       "origin": {
                         "Ability": "Action Card"
@@ -364,11 +364,10 @@
     ],
     [
       "Player1: Great Merchant: Pay 1 culture token",
-      "Player1: Great Merchant: Gain Great Merchant/- from the current event"
+      "Player1: Great Merchant: Gain Great Merchant from the current event"
     ],
     [
-      "Player1 played the action card Great Merchant",
-      "Player1: Action Card: Discard Great Merchant/-",
+      "Player1: Action Card: Play Great Merchant",
       "Player1: Great Merchant: Gain Trade Routes"
     ],
     [

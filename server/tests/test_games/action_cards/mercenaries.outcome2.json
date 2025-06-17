@@ -250,7 +250,7 @@
                         "from": {
                           "Hand": 0
                         },
-                        "to": "DiscardPile"
+                        "to": "PlayToDiscard"
                       },
                       "origin": {
                         "Ability": "Action Card"
@@ -363,8 +363,7 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player1 played the action card Mercenaries",
-      "Player1: Action Card: Discard Mercenaries/For the People",
+      "Player1: Action Card: Play Mercenaries/For the People",
       "Player1: Mercenaries: Player1 cannot move Barbarian army at A3 because Sulla is in range"
     ],
     [

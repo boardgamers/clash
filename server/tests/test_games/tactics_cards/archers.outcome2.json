@@ -211,7 +211,7 @@
                         "from": {
                           "Hand": 0
                         },
-                        "to": "DiscardPile"
+                        "to": "PlayToDiscardFaceDown"
                       },
                       "origin": {
                         "Advance": "Tactics"
@@ -310,8 +310,7 @@
       "Defenders: 2 infantry"
     ],
     [
-      "Player1: Tactics: Played a Tactics Card",
-      "Player1: Tactics: Discard Leadership/Archers",
+      "Player1: Tactics: Play an action card face down",
       "Player1 reveals Tactics Card Archers",
       "Player2: Archers: Rolled a 6 and scored a hit"
     ],

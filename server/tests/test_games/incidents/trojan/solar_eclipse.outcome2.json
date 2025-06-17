@@ -323,7 +323,7 @@
                         "from": {
                           "Hand": 1
                         },
-                        "to": "DiscardPile"
+                        "to": "PlayToDiscardFaceDown"
                       },
                       "origin": {
                         "Advance": "Tactics"
@@ -371,8 +371,7 @@
       "Defenders: 2 infantry"
     ],
     [
-      "Player2: Tactics: Played a Tactics Card",
-      "Player2: Tactics: Discard City Development/Tactical Retreat",
+      "Player2: Tactics: Play an action card face down",
       "Player2 reveals Tactics Card Tactical Retreat",
       "Player2: Tactical Retreat: Player2 withdraws to B1",
       "Player1: Solar Eclipse: Gain 1 victory point for the Solar Eclipse",

@@ -293,7 +293,7 @@
                         "from": {
                           "Hand": 0
                         },
-                        "to": "DiscardPile"
+                        "to": "PlayToDiscard"
                       },
                       "origin": {
                         "Ability": "Action Card"
@@ -378,11 +378,10 @@
     ],
     [
       "Player1: Great Athlete: Pay 1 culture token",
-      "Player1: Great Athlete: Gain Great Athlete/- from the current event"
+      "Player1: Great Athlete: Gain Great Athlete from the current event"
     ],
     [
-      "Player1 played the action card Great Athlete",
-      "Player1: Action Card: Discard Great Athlete/-",
+      "Player1: Action Card: Play Great Athlete",
       "Player1: Great Athlete: Gain Arts",
       "Player1: Arts: Gain 1 culture token"
     ],

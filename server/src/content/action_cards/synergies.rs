@@ -1,7 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{ActionCard, ActionCardBuilder, CivilCardTarget, discard_action_card};
 use crate::advance::{Advance, gain_advance_without_payment};
-use crate::card::HandCard;
+use crate::card::{HandCard, HandCardLocation};
 use crate::content::ability::Ability;
 use crate::content::action_cards::inspiration;
 use crate::content::advances::theocracy::cities_that_can_add_units;
@@ -304,7 +304,7 @@ pub(crate) fn use_teach_us() -> Ability {
             let HandCard::ActionCard(id) = s.choice[0] else {
                 panic!("Teach Us card not found");
             };
-            discard_action_card(game, s.player_index, id, &s.origin);
+            discard_action_card(game, s.player_index, id, &s.origin, HandCardLocation::PlayToDiscard);
             e.selected_card = Some(id);
         },
     )

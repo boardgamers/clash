@@ -227,7 +227,7 @@
                         "from": {
                           "Hand": 0
                         },
-                        "to": "DiscardPile"
+                        "to": "PlayToDiscard"
                       },
                       "origin": {
                         "Ability": "Action Card"
@@ -321,8 +321,7 @@
   "action_log_index": 5,
   "log": [
     [
-      "Player1 played the action card Synergies",
-      "Player1: Action Card: Discard Synergies/Archers"
+      "Player1: Action Card: Play Synergies/Archers"
     ],
     [
       "Player1: Synergies: Selected Fishing as first advance"

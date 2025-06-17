@@ -314,7 +314,7 @@
                         "from": {
                           "Hand": 0
                         },
-                        "to": "DiscardPile"
+                        "to": "PlayToDiscard"
                       },
                       "origin": {
                         "Ability": "Action Card"
@@ -398,11 +398,10 @@
     ],
     [
       "Player1: Great Engineer: Pay 1 culture token",
-      "Player1: Great Engineer: Gain Great Engineer/- from the current event"
+      "Player1: Great Engineer: Gain Great Engineer from the current event"
     ],
     [
-      "Player1 played the action card Great Engineer",
-      "Player1: Action Card: Discard Great Engineer/-"
+      "Player1: Action Card: Play Great Engineer"
     ],
     [
       "Player1: Great Engineer: Gain Engineering",

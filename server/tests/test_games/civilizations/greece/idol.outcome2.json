@@ -452,6 +452,21 @@
                       "origin": {
                         "LeaderAbility": "Idol"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 7
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToDiscard"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
                     }
                   ]
                 },
@@ -477,21 +492,6 @@
                       "origin": {
                         "CivilCard": 7
                       }
-                    },
-                    {
-                      "player": 0,
-                      "HandCard": {
-                        "card": {
-                          "ActionCard": 7
-                        },
-                        "from": {
-                          "Hand": 0
-                        },
-                        "to": "DiscardPile"
-                      },
-                      "origin": {
-                        "Ability": "Action Card"
-                      }
                     }
                   ]
                 }
@@ -511,12 +511,11 @@
     [
       "Player1: Idol: Pay 1 culture token",
       "Player1: Idol: Decided to play Spy as a free action",
-      "Player1 played the action card Spy",
+      "Player1: Action Card: Play Spy/Heavy Resistance",
       "Player1 has to pay 1 culture token for Spy"
     ],
     [
       "Player1: Spy: Pay 1 culture token",
-      "Player1: Action Card: Discard Spy/Heavy Resistance",
       "Player1: Spy: Decided to looked at all Wonder, Action, and Objective cards of Player2"
     ]
   ],

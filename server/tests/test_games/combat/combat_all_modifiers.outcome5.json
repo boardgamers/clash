@@ -328,7 +328,7 @@
                         "from": {
                           "Hand": 0
                         },
-                        "to": "DiscardPile"
+                        "to": "PlayToDiscardFaceDown"
                       },
                       "origin": {
                         "Advance": "Tactics"
@@ -382,7 +382,7 @@
                         "from": {
                           "Hand": 1
                         },
-                        "to": "DiscardPile"
+                        "to": "PlayToDiscardFaceDown"
                       },
                       "origin": {
                         "Advance": "Tactics"
@@ -443,12 +443,10 @@
       "Player2: Steel Weapons: Pay 1 ore"
     ],
     [
-      "Player1: Tactics: Played a Tactics Card",
-      "Player1: Tactics: Discard Quick Advance/Peltasts"
+      "Player1: Tactics: Play an action card face down"
     ],
     [
-      "Player2: Tactics: Played a Tactics Card",
-      "Player2: Tactics: Discard Quick Advance/Encircled",
+      "Player2: Tactics: Play an action card face down",
       "Player1 reveals Tactics Card Peltasts",
       "Player2 reveals Tactics Card Encircled",
       "Player1 rolled 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 1 (leader, no bonus) for combined combat value of 22 and gets 2 hits against defending units.",

@@ -1,6 +1,6 @@
 use crate::action_card::discard_action_card;
 use crate::advance::Advance;
-use crate::card::{HandCard, HandCardType, hand_cards};
+use crate::card::{HandCard, HandCardType, hand_cards, HandCardLocation};
 use crate::city::City;
 use crate::content::incidents::famine::{
     additional_sanitation_damage, famine, kill_incident_units,
@@ -72,7 +72,7 @@ fn pandemics() -> Incident {
             for id in &s.choice {
                 match id {
                     HandCard::ActionCard(a) => {
-                        discard_action_card(game, s.player_index, *a, &s.origin);
+                        discard_action_card(game, s.player_index, *a, &s.origin, HandCardLocation::DiscardPile);
                     }
                     HandCard::ObjectiveCard(o) => {
                         discard_objective_card(game, s.player_index, *o);

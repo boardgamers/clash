@@ -261,7 +261,7 @@
                         "from": {
                           "Hand": 0
                         },
-                        "to": "DiscardPile"
+                        "to": "PlayToDiscard"
                       },
                       "origin": {
                         "Ability": "Action Card"
@@ -296,8 +296,7 @@
       "Player1: Waste: Could not store 1 gold"
     ],
     [
-      "Player1 played the action card Great Ideas",
-      "Player1: Action Card: Discard Great Ideas/Siege",
+      "Player1: Action Card: Play Great Ideas/Siege",
       "Player1: Great Ideas: Gain 2 ideas"
     ]
   ],

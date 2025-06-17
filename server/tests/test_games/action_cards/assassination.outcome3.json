@@ -223,7 +223,24 @@
                     "Playing": {
                       "ActionCard": 27
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 27
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToDiscard"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -246,21 +263,6 @@
                       },
                       "origin": {
                         "CivilCard": 27
-                      }
-                    },
-                    {
-                      "player": 0,
-                      "HandCard": {
-                        "card": {
-                          "ActionCard": 27
-                        },
-                        "from": {
-                          "Hand": 0
-                        },
-                        "to": "DiscardPile"
-                      },
-                      "origin": {
-                        "Ability": "Action Card"
                       }
                     }
                   ]
@@ -298,12 +300,11 @@
   "action_log_index": 0,
   "log": [
     [
-      "Player1 played the action card Assassination",
+      "Player1: Action Card: Play Assassination/High Ground",
       "Player1 has to pay 1 culture token for Assassination"
     ],
     [
       "Player1: Assassination: Pay 1 culture token",
-      "Player1: Action Card: Discard Assassination/High Ground",
       "Player1: Assassination: Assassinated Player2"
     ],
     [

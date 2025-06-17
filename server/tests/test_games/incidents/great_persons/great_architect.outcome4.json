@@ -301,7 +301,7 @@
                         "from": {
                           "Hand": 0
                         },
-                        "to": "DiscardPile"
+                        "to": "PlayToDiscard"
                       },
                       "origin": {
                         "Ability": "Action Card"
@@ -373,11 +373,10 @@
     ],
     [
       "Player1: Great Architect: Pay 1 culture token",
-      "Player1: Great Architect: Gain Great Architect/- from the current event"
+      "Player1: Great Architect: Gain Great Architect from the current event"
     ],
     [
-      "Player1 played the action card Great Architect",
-      "Player1: Action Card: Discard Great Architect/-",
+      "Player1: Action Card: Play Great Architect",
       "Player1 played the wonder card Pyramids"
     ],
     [

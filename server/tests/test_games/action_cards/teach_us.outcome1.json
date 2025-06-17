@@ -284,7 +284,7 @@
                         "from": {
                           "Hand": 0
                         },
-                        "to": "DiscardPile"
+                        "to": "PlayToDiscard"
                       },
                       "origin": {
                         "Ability": "Teach us"
@@ -344,7 +344,7 @@
       "Player1: Waste: Could not store 1 gold"
     ],
     [
-      "Player1: Teach us: Discard Teach Us/Defensive Formation",
+      "Player1: Teach us: Play Teach Us/Defensive Formation",
       "Player1: Teach us: Selected Writing as advance",
       "Player1: Writing: Draw an action card",
       "Player1 gained an objective card from the pile",

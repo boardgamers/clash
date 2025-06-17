@@ -85,13 +85,11 @@ impl ActionCard {
 
     #[must_use]
     pub fn name(&self) -> String {
-        format!(
-            "{}/{}",
-            self.civil_card.name,
-            self.tactics_card
-                .as_ref()
-                .map_or("-".to_string(), |c| c.name.clone())
-        )
+        if let Some(tactics_card) = &self.tactics_card {
+            format!("{}/{}", self.civil_card.name, tactics_card.name)
+        } else {
+            self.civil_card.name.clone()
+        }
     }
 }
 
@@ -165,12 +163,6 @@ impl AbilityInitializerSetup for ActionCardBuilder {
 pub(crate) fn play_action_card(game: &mut Game, player_index: usize, id: u8) {
     let card = game.cache.get_civil_card(id).clone();
 
-    discard_action_card(
-        game,
-        player_index,
-        id,
-        &EventOrigin::Ability("Action Card".to_string()),
-    );
     let mut satisfying_action: Option<usize> = None;
     let civil_card_target = card.target;
     if let Some(r) = &card.combat_requirement {
@@ -193,14 +185,6 @@ pub(crate) fn play_action_card(game: &mut Game, player_index: usize, id: u8) {
             (civil_card_target == CivilCardTarget::AllPlayers).then_some(player_index),
         ),
     );
-}
-
-pub(crate) fn log_execute_action_card(game: &mut Game, player_index: usize, id: u8) {
-    game.add_info_log_item(&format!(
-        "{} played the action card {}",
-        game.player_name(player_index),
-        game.cache.get_civil_card(id).clone().name
-    ));
 }
 
 pub(crate) fn on_play_action_card(game: &mut Game, player_index: usize, i: ActionCardInfo) {
@@ -265,7 +249,7 @@ pub(crate) fn gain_action_card(
     );
 }
 
-pub(crate) fn discard_action_card(game: &mut Game, player: usize, card: u8, origin: &EventOrigin) {
+pub(crate) fn discard_action_card(game: &mut Game, player: usize, card: u8, origin: &EventOrigin, to: HandCardLocation) {
     let card = remove_element_by(&mut game.player_mut(player).action_cards, |&id| id == card)
         .unwrap_or_else(|| panic!("action card not found {card}"));
     discard_card(|g| &mut g.action_cards_discarded, card, player, game);
@@ -273,7 +257,7 @@ pub(crate) fn discard_action_card(game: &mut Game, player: usize, card: u8, orig
         game,
         &HandCard::ActionCard(card),
         HandCardLocation::Hand(player),
-        HandCardLocation::DiscardPile,
+        to,
         origin,
     );
 }

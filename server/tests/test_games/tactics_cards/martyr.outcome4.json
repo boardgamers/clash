@@ -284,7 +284,7 @@
                         "from": {
                           "Hand": 0
                         },
-                        "to": "DiscardPile"
+                        "to": "PlayToDiscardFaceDown"
                       },
                       "origin": {
                         "Advance": "Tactics"
@@ -312,7 +312,7 @@
                         "from": {
                           "Hand": 1
                         },
-                        "to": "DiscardPile"
+                        "to": "PlayToDiscardFaceDown"
                       },
                       "origin": {
                         "Advance": "Tactics"
@@ -421,12 +421,10 @@
       "Defenders: 1 ship"
     ],
     [
-      "Player1: Tactics: Played a Tactics Card",
-      "Player1: Tactics: Discard Hero General/High Morale"
+      "Player1: Tactics: Play an action card face down"
     ],
     [
-      "Player2: Tactics: Played a Tactics Card",
-      "Player2: Tactics: Discard Negotiations/Martyr",
+      "Player2: Tactics: Play an action card face down",
       "Player1 reveals Tactics Card High Morale",
       "Player2 reveals Tactics Card Martyr",
       "Player1: Martyr: Cannot use tactics card (but it is still discarded)"

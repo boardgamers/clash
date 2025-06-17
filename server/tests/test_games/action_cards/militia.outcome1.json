@@ -196,7 +196,24 @@
                     "Playing": {
                       "ActionCard": 37
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 37
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToDiscard"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -223,21 +240,6 @@
                     },
                     {
                       "player": 0,
-                      "HandCard": {
-                        "card": {
-                          "ActionCard": 37
-                        },
-                        "from": {
-                          "Hand": 0
-                        },
-                        "to": "DiscardPile"
-                      },
-                      "origin": {
-                        "Ability": "Action Card"
-                      }
-                    },
-                    {
-                      "player": 0,
                       "Units": {
                         "units": {
                           "infantry": 1
@@ -260,12 +262,11 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 played the action card Militia",
+      "Player1: Action Card: Play Militia/Wedge Formation",
       "Player1 has to pay 1 culture token for Militia"
     ],
     [
       "Player1: Militia: Pay 1 culture token",
-      "Player1: Action Card: Discard Militia/Wedge Formation",
       "Player1: Militia: Gain 1 infantry at A1"
     ]
   ],

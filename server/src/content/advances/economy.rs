@@ -2,7 +2,7 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::discard_action_card;
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
-use crate::card::{HandCard, all_action_hand_cards};
+use crate::card::{HandCard, all_action_hand_cards, HandCardLocation};
 use crate::city_pieces::Building::Market;
 use crate::content::ability::{AbilityBuilder, building_event_origin};
 use crate::content::advances::trade_routes::{TradeRoute, trade_route_log, trade_route_reward};
@@ -67,7 +67,7 @@ fn use_bartering(b: AbilityBuilder) -> AbilityBuilder {
             let HandCard::ActionCard(card) = s.choice[0] else {
                 panic!("Invalid type");
             };
-            discard_action_card(game, s.player_index, card, &s.origin);
+            discard_action_card(game, s.player_index, card, &s.origin, HandCardLocation::DiscardPile);
         },
     )
     .add_resource_request(

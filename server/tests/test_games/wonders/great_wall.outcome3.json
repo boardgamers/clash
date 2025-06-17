@@ -462,7 +462,7 @@
                         "from": {
                           "Hand": 0
                         },
-                        "to": "DiscardPile"
+                        "to": "PlayToDiscard"
                       },
                       "origin": {
                         "Ability": "Action Card"
@@ -533,8 +533,7 @@
       "Player2: Envoy: Gain 1 culture token"
     ],
     [
-      "Player1 played the action card Hero General",
-      "Player1: Action Card: Discard Hero General/Wedge Formation",
+      "Player1: Action Card: Play Hero General/Wedge Formation",
       "Player1: Hero General: City C2 became Neutral"
     ]
   ],

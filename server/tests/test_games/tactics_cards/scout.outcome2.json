@@ -221,7 +221,7 @@
                         "from": {
                           "Hand": 0
                         },
-                        "to": "DiscardPile"
+                        "to": "PlayToDiscardFaceDown"
                       },
                       "origin": {
                         "Advance": "Tactics"
@@ -275,7 +275,7 @@
                         "from": {
                           "Hand": 1
                         },
-                        "to": "DiscardPile"
+                        "to": "PlayToDiscardFaceDown"
                       },
                       "origin": {
                         "Advance": "Tactics"
@@ -340,12 +340,10 @@
       "Defenders: 2 infantry"
     ],
     [
-      "Player1: Tactics: Played a Tactics Card",
-      "Player1: Tactics: Discard Quick Advance/Peltasts"
+      "Player1: Tactics: Play an action card face down"
     ],
     [
-      "Player2: Tactics: Played a Tactics Card",
-      "Player2: Tactics: Discard Negotiations/Scout",
+      "Player2: Tactics: Play an action card face down",
       "Player1 reveals Tactics Card Peltasts",
       "Player2 reveals Tactics Card Scout",
       "Player2: Scout: Ignore the enemy tactics",

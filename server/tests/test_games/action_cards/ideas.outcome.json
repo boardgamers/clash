@@ -209,7 +209,7 @@
                         "from": {
                           "Hand": 0
                         },
-                        "to": "DiscardPile"
+                        "to": "PlayToDiscard"
                       },
                       "origin": {
                         "Ability": "Action Card"
@@ -239,8 +239,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 played the action card Ideas",
-      "Player1: Action Card: Discard Ideas/High Ground",
+      "Player1: Action Card: Play Ideas/High Ground",
       "Player1: Ideas: Gain 1 idea"
     ]
   ],

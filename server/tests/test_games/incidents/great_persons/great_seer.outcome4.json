@@ -298,7 +298,7 @@
                         "from": {
                           "Hand": 0
                         },
-                        "to": "DiscardPile"
+                        "to": "PlayToDiscard"
                       },
                       "origin": {
                         "Ability": "Action Card"
@@ -391,11 +391,10 @@
     ],
     [
       "Player1: Great Seer: Pay 1 culture token",
-      "Player1: Great Seer: Gain Great Seer/- from the current event"
+      "Player1: Great Seer: Gain Great Seer from the current event"
     ],
     [
-      "Player1 played the action card Great Seer",
-      "Player1: Action Card: Discard Great Seer/-"
+      "Player1: Action Card: Play Great Seer"
     ],
     [
       "Player1: Great Seer: Chose an objective card for player Player1",

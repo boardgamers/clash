@@ -229,7 +229,7 @@
                         "from": {
                           "Hand": 0
                         },
-                        "to": "DiscardPile"
+                        "to": "PlayToDiscard"
                       },
                       "origin": {
                         "Ability": "Action Card"
@@ -296,8 +296,7 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 played the action card Production Focus",
-      "Player1: Action Card: Discard Production Focus/Tactical Retreat",
+      "Player1: Action Card: Play Production Focus/Tactical Retreat",
       "Player1: Production Focus: Production Focus: You may collect multiple times from the same tile."
     ],
     [

@@ -251,7 +251,7 @@
                         "from": {
                           "Hand": 0
                         },
-                        "to": "DiscardPile"
+                        "to": "PlayToDiscard"
                       },
                       "origin": {
                         "Ability": "Action Card"
@@ -362,8 +362,7 @@
   "action_log_index": 5,
   "log": [
     [
-      "Player1 played the action card Elder Statesman",
-      "Player1: Action Card: Discard Elder Statesman/-"
+      "Player1: Action Card: Play Elder Statesman"
     ],
     [
       "Player1: Great Mausoleum: Draw Inspiration/Peltasts from the discard pile",

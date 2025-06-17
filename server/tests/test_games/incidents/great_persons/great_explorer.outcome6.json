@@ -447,7 +447,7 @@
                         "from": {
                           "Hand": 1
                         },
-                        "to": "DiscardPile"
+                        "to": "PlayToDiscard"
                       },
                       "origin": {
                         "Ability": "Action Card"
@@ -537,11 +537,10 @@
     ],
     [
       "Player2: Great Explorer: Pay 1 culture token",
-      "Player2: Great Explorer: Gain Great Explorer/- from the current event"
+      "Player2: Great Explorer: Gain Great Explorer from the current event"
     ],
     [
-      "Player2 played the action card Great Explorer",
-      "Player2: Action Card: Discard Great Explorer/-",
+      "Player2: Action Card: Play Great Explorer",
       "Player2: Great Explorer: Gain Fishing",
       "Player2: Fishing: Gain 1 mood token"
     ],

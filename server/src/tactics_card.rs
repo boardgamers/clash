@@ -4,7 +4,7 @@ use crate::ability_initializer::{
 use crate::action_card;
 use crate::action_card::ActionCard;
 use crate::advance::AdvanceBuilder;
-use crate::card::HandCard;
+use crate::card::{HandCard, HandCardLocation};
 use crate::combat::{Combat, CombatModifier, get_combat_strength, update_combat_strength};
 use crate::combat_listeners::{CombatRoundEnd, CombatRoundStart, CombatStrength};
 use crate::content::persistent_events::HandCardsRequest;
@@ -318,14 +318,13 @@ pub(crate) fn play_tactics_card(b: AdvanceBuilder) -> AdvanceBuilder {
                 s.log(game, "Did not play a Tactics Card");
             } else {
                 let player = s.player_index;
-                s.log(game, "Played a Tactics Card");
                 let HandCard::ActionCard(card) = s.choice[0] else {
                     panic!("Expected ActionCard, got {:?}", s.choice[0]);
                 };
                 update_combat_strength(game, player, r, move |_game, _c, s, _role| {
                     s.tactics_card = Some(card);
                 });
-                discard_action_card(game, player, card, &s.origin);
+                discard_action_card(game, player, card, &s.origin, HandCardLocation::PlayToDiscardFaceDown);
             }
         },
     )
