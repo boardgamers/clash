@@ -11,7 +11,7 @@ use crate::cultural_influence::{
 };
 use crate::game::Game;
 use crate::player::{Player, gain_unit, remove_unit};
-use crate::playing_actions::{ActionCost, PlayingActionType};
+use crate::playing_actions::PlayingActionType;
 use crate::unit::UnitType;
 use crate::utils::remove_element;
 use itertools::Itertools;
@@ -24,7 +24,7 @@ pub(crate) fn cultural_takeover(id: u8, tactics_card: TacticsCardFactory) -> Act
         If successful, replace the Barbarian city with a city of your color. \
         Replace one of the Barbarian units with a Settler or Infantry of your color. \
         Remove the other Barbarian units.",
-        ActionCost::free(),
+        |c| c.free_action().no_resources(),
         |game, p, _| any_barbarian_city_can_be_influenced(game, p),
     )
     .add_unit_type_request(

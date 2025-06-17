@@ -1,3 +1,4 @@
+use crate::action_cost::{ActionCostOncePerTurn, ActionCostOncePerTurnBuilder};
 use crate::advance::Advance;
 use crate::card::{HandCard, validate_card_selection_for_origin};
 use crate::city::City;
@@ -5,8 +6,7 @@ use crate::combat::{Combat, update_combat_strength};
 use crate::combat_listeners::CombatStrength;
 use crate::content::ability::{Ability, AbilityBuilder};
 use crate::content::custom_actions::{
-    CustomActionActionExecution, CustomActionCost, CustomActionExecution, CustomActionInfo,
-    CustomActionOncePerTurn,
+    CustomActionActionExecution, CustomActionExecution, CustomActionInfo,
 };
 use crate::content::persistent_events::{
     AdvanceRequest, EventResponse, HandCardsRequest, MultiRequest, PaymentRequest,
@@ -896,7 +896,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
     fn add_custom_action(
         self,
         action: CustomActionType,
-        cost: impl Fn(CustomActionOncePerTurn) -> CustomActionCost + Send + Sync + 'static,
+        cost: impl Fn(ActionCostOncePerTurnBuilder) -> ActionCostOncePerTurn + Send + Sync + 'static,
         ability: impl Fn(AbilityBuilder) -> AbilityBuilder + Sync + Send + 'static,
         can_play: impl Fn(&Game, &Player) -> bool + Sync + Send + 'static,
     ) -> Self {
@@ -916,7 +916,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
     fn add_custom_action_with_city_checker(
         self,
         action: CustomActionType,
-        cost: impl Fn(CustomActionOncePerTurn) -> CustomActionCost + Send + Sync + 'static,
+        cost: impl Fn(ActionCostOncePerTurnBuilder) -> ActionCostOncePerTurn + Send + Sync + 'static,
         ability: impl Fn(AbilityBuilder) -> AbilityBuilder + Sync + Send + 'static,
         can_play: impl Fn(&Game, &Player) -> bool + Sync + Send + 'static,
         city_checker: impl Fn(&Game, &City) -> bool + Sync + Send + 'static,
@@ -937,7 +937,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
     fn add_action_modifier(
         self,
         action: CustomActionType,
-        info: impl Fn(CustomActionOncePerTurn) -> CustomActionCost + Send + Sync + 'static,
+        info: impl Fn(ActionCostOncePerTurnBuilder) -> ActionCostOncePerTurn + Send + Sync + 'static,
         base_action: PlayingActionType,
     ) -> Self {
         self.add_custom_action_execution(action, info, CustomActionExecution::Modifier(base_action))
@@ -946,7 +946,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
     fn add_custom_action_execution(
         self,
         action: CustomActionType,
-        info: impl Fn(CustomActionOncePerTurn) -> CustomActionCost + Send + Sync + 'static,
+        cost: impl Fn(ActionCostOncePerTurnBuilder) -> ActionCostOncePerTurn + Send + Sync + 'static,
         execution: CustomActionExecution,
     ) -> Self {
         let deinitializer_action = action;
@@ -959,7 +959,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                     action,
                     exec.clone(),
                     key.clone(),
-                    info(CustomActionOncePerTurn::new(action)),
+                    cost(ActionCostOncePerTurnBuilder::new(action)),
                 ),
             );
         })

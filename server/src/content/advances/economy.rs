@@ -67,14 +67,7 @@ fn use_bartering(b: AbilityBuilder) -> AbilityBuilder {
             let HandCard::ActionCard(card) = s.choice[0] else {
                 panic!("Invalid type");
             };
-            s.log(
-                game,
-                &format!(
-                    "Discard {} for 1 gold or 1 culture token",
-                    game.cache.get_action_card(card).name()
-                ),
-            );
-            discard_action_card(game, s.player_index, card);
+            discard_action_card(game, s.player_index, card, &s.origin);
         },
     )
     .add_resource_request(

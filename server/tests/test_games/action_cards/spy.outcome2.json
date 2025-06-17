@@ -85,7 +85,7 @@
       ],
       "next_unit_id": 8,
       "secrets": [
-        "Player2 has the following action cards: Advance/Encircled, Inspiration/Encircled, Inspiration/Peltasts",
+        "Player2 has the following action cards: Quick Advance/Encircled, Inspiration/Encircled, Inspiration/Peltasts",
         "Player2 has the following objective cards: ",
         "Player2 has the following wonder cards: Pyramids"
       ]
@@ -235,6 +235,21 @@
                       "origin": {
                         "CivilCard": 7
                       }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 7
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
                     }
                   ]
                 },
@@ -250,7 +265,43 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 1,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 1
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": {
+                          "Hand": 1
+                        }
+                      },
+                      "origin": {
+                        "CivilCard": 7
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 2
+                        },
+                        "from": {
+                          "Hand": 1
+                        },
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "CivilCard": 7
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -267,9 +318,12 @@
     ],
     [
       "Player1: Spy: Pay 1 culture token",
+      "Player1: Action Card: Discard Spy/Heavy Resistance",
       "Player1: Spy: Decided to looked at all Wonder, Action, and Objective cards of Player2"
     ],
     [
+      "Player2: Spy: Gain an action card from Player1",
+      "Player1: Spy: Gain an action card from Player2",
       "Player1 decided to swap an action card with Player2"
     ]
   ],

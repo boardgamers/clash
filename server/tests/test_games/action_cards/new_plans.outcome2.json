@@ -231,6 +231,21 @@
                       "origin": {
                         "CivilCard": 31
                       }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 31
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
                     }
                   ]
                 },
@@ -262,7 +277,8 @@
       "Player1 has to pay 1 culture token for New Plans"
     ],
     [
-      "Player1: New Plans: Pay 1 culture token"
+      "Player1: New Plans: Pay 1 culture token",
+      "Player1: Action Card: Discard New Plans/Flanking"
     ],
     [
       "Player1 discarded an objective card to draw a new one."

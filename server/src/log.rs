@@ -1,3 +1,4 @@
+use crate::card::{HandCard, HandCardLocation};
 use crate::city::MoodState;
 use crate::combat_stats::CombatStats;
 use crate::events::EventOrigin;
@@ -119,17 +120,44 @@ pub enum ActionLogEntry {
         units: Units,
         balance: ActionLogBalance,
     },
+    HandCard {
+        card: HandCard,
+        from: HandCardLocation,
+        to: HandCardLocation,
+    },
     MoodChange {
         city: Position,
         mood: MoodState,
     },
 }
 
+impl ActionLogEntry {
+    #[must_use]
+    pub fn resources(resources: ResourcePile, balance: ActionLogBalance) -> Self {
+        Self::Resources { resources, balance }
+    }
+
+    #[must_use]
+    pub fn units(units: Units, balance: ActionLogBalance) -> Self {
+        Self::Units { units, balance }
+    }
+
+    #[must_use]
+    pub fn hand_card(card: HandCard, from: HandCardLocation, to: HandCardLocation) -> Self {
+        Self::HandCard { card, from, to }
+    }
+
+    #[must_use]
+    pub fn mood_change(city: Position, mood: MoodState) -> Self {
+        Self::MoodChange { city, mood }
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct ActionLogItem {
-    player: usize,
+    pub player: usize,
     #[serde(flatten)]
-    entry: ActionLogEntry,
+    pub entry: ActionLogEntry,
     origin: EventOrigin,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]

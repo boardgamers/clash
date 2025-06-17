@@ -1,7 +1,8 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{ActionCard, ActionCardBuilder, gain_action_card_from_pile};
+use crate::action_cost::{ActionCostBuilder, ActionCostOncePerTurn};
 use crate::advance::gain_advance_without_payment;
-use crate::card::HandCard;
+use crate::card::{HandCard, HandCardLocation, log_card_transfer};
 use crate::city::{MoodState, set_city_mood};
 use crate::city_pieces::Building;
 use crate::construct::{Construct, execute_construct};
@@ -20,7 +21,6 @@ use crate::incident::{Incident, IncidentBaseEffect, IncidentBuilder};
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::player_events::IncidentTarget;
-use crate::playing_actions::ActionCost;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use crate::utils::{format_list, remove_element};
@@ -74,7 +74,6 @@ fn incident(
     let id = card_id - GREAT_PERSON_OFFSET;
     let civil_card = &action_card.civil_card;
     let name = civil_card.name.clone();
-    let name2 = name.clone();
 
     let b = Incident::builder(id, &name, &civil_card.description.clone(), base)
         .with_action_card(action_card)
@@ -107,8 +106,14 @@ fn incident(
                     s.log(game, "Declined to gain the Action Card");
                     return;
                 }
-                s.log(game, &format!("Gain {name2} for {pile}"));
                 game.player_mut(s.player_index).action_cards.push(card_id);
+                log_card_transfer(
+                    game,
+                    &HandCard::ActionCard(card_id),
+                    HandCardLocation::Incident,
+                    HandCardLocation::Hand(s.player_index),
+                    &s.origin,
+                );
                 i.selected_player = Some(s.player_index);
             },
         )
@@ -129,7 +134,7 @@ pub(crate) fn great_person_action_card<F>(
     incident_id: u8,
     name: &str,
     description: &str,
-    action_type: ActionCost,
+    cost: impl Fn(ActionCostBuilder) -> ActionCostOncePerTurn + Send + Sync + 'static,
     free_advance_groups: Vec<AdvanceGroup>,
     can_play: F,
 ) -> ActionCardBuilder
@@ -140,7 +145,7 @@ where
         incident_id + GREAT_PERSON_OFFSET,
         name,
         description,
-        action_type,
+        cost,
         move |game, player, _| can_play(game, player),
     )
     .add_advance_request(
@@ -173,7 +178,7 @@ fn great_artist() -> ActionCard {
             "{} Then, you make one of your cities Happy.",
             great_person_description(&groups)
         ),
-        ActionCost::regular(),
+        |c| c.action().no_resources(),
         groups,
         |_game, _player| true,
     )
@@ -210,7 +215,7 @@ fn great_prophet() -> ActionCard {
             "{} Then, you build a Temple without activating the city.",
             great_person_description(&groups)
         ),
-        ActionCost::regular(),
+        |c| c.action().no_resources(),
         groups,
         |_game, _player| true,
     )
@@ -305,7 +310,7 @@ fn great_philosopher() -> ActionCard {
         21,
         "Great Philosopher",
         &format!("{} Then, gain 2 ideas.", great_person_description(&groups)),
-        ActionCost::regular(),
+        |c| c.action().no_resources(),
         groups,
         |_game, _player| true,
     )
@@ -328,7 +333,7 @@ fn great_scientist() -> ActionCard {
             "{} Then, gain 1 idea and 1 Action Card.",
             great_person_description(&groups)
         ),
-        ActionCost::regular(),
+        |c| c.action().no_resources(),
         groups,
         |_game, _player| true,
     )
@@ -337,7 +342,7 @@ fn great_scientist() -> ActionCard {
         0,
         |game, p, _| {
             p.gain_resources(game, ResourcePile::ideas(1));
-            gain_action_card_from_pile(game, p.index);
+            gain_action_card_from_pile(game, p.index, &p.origin);
         },
     )
     .build()
@@ -355,7 +360,7 @@ fn elder_statesman() -> ActionCard {
             "{} Then, draw 2 Action Cards.",
             great_person_description(&groups)
         ),
-        ActionCost::regular(),
+        |c| c.action().no_resources(),
         groups,
         |_game, _player| true,
     )
@@ -363,8 +368,8 @@ fn elder_statesman() -> ActionCard {
         |e| &mut e.play_action_card,
         0,
         |game, p, _| {
-            gain_action_card_from_pile(game, p.index);
-            gain_action_card_from_pile(game, p.index);
+            gain_action_card_from_pile(game, p.index, &p.origin);
+            gain_action_card_from_pile(game, p.index, &p.origin);
         },
     )
     .build()
@@ -380,7 +385,7 @@ fn great_merchant() -> ActionCard {
                 "{} Then, if you have the Trade Routes advance, gain the Trade Routes income.",
                 great_person_description(&groups)
             ),
-            ActionCost::regular(),
+            |c| c.action().no_resources(),
             groups,
             |_game, _player| true,
         ),
@@ -398,7 +403,7 @@ fn great_athlete() -> ActionCard {
             "{} Then, you may convert any amount of culture tokens to mood tokens or vice versa.",
             great_person_description(&groups)
         ),
-        ActionCost::regular(),
+        |c| c.action().no_resources(),
         groups,
         |_game, player| player.resources.culture_tokens > 0 || player.resources.mood_tokens > 0,
     )
@@ -475,7 +480,7 @@ fn great_seer() -> ActionCard {
             The next time the player draws an objective card from the pile, \
             they draw the designated card instead.",
         ),
-        ActionCost::free(),
+        |c| c.action().no_resources(),
         vec![],
         |_game, _player| true,
     );

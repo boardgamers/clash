@@ -343,7 +343,7 @@ fn test_synergies() {
             TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(34))).skip_json(),
             TestAction::undoable(
                 0,
-                Action::Response(EventResponse::SelectAdvance(advance::Advance::Cartography)),
+                Action::Response(EventResponse::SelectAdvance(advance::Advance::Fishing)),
             )
             .skip_json(),
             TestAction::undoable(0, payment_response(ResourcePile::ideas(2))).skip_json(),

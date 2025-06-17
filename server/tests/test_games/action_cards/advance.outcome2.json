@@ -219,6 +219,21 @@
                       "origin": {
                         "CivilCard": 2
                       }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 2
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
                     }
                   ]
                 },
@@ -253,15 +268,16 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player1 played the action card Advance",
-      "Player1 has to pay 1 culture token for Advance"
+      "Player1 played the action card Quick Advance",
+      "Player1 has to pay 1 culture token for Quick Advance"
     ],
     [
-      "Player1: Advance: Pay 1 culture token"
+      "Player1: Quick Advance: Pay 1 culture token",
+      "Player1: Action Card: Discard Quick Advance/Encircled"
     ],
     [
       "Player1: Storage: Gain 1 mood token",
-      "Player1: Advance: Gain Storage using the Advance action card."
+      "Player1: Quick Advance: Gain Storage"
     ]
   ],
   "undo_limit": 0,

@@ -245,6 +245,21 @@
                       "origin": {
                         "CivilCard": 17
                       }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 17
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
                     }
                   ]
                 },
@@ -295,6 +310,7 @@
     ],
     [
       "Player1: City Development: Pay 1 culture token",
+      "Player1: Action Card: Discard City Development/Tactical Retreat",
       "Player1: City Development: You may build a building in a city without spending an action and without paying for it."
     ],
     [

@@ -229,7 +229,7 @@ fn use_imperial_army(b: AbilityBuilder) -> AbilityBuilder {
                 player_index,
                 choices,
                 1..=max,
-                "Select units to convert using Imperial Army",
+                "Select units to convert",
             ))
         },
         |game, s, _| {
@@ -249,10 +249,7 @@ fn use_imperial_army(b: AbilityBuilder) -> AbilityBuilder {
                 }
             }
 
-            s.log(
-                game,
-                &format!("Convert {} using Imperial Army", names.join(", ")),
-            );
+            s.log(game, &format!("Convert {}", names.join(", ")));
         },
     )
 }

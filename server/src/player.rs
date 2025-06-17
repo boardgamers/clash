@@ -597,10 +597,7 @@ pub fn gain_units(
     add_action_log_item(
         game,
         player,
-        ActionLogEntry::Units {
-            balance: ActionLogBalance::Gain,
-            units,
-        },
+        ActionLogEntry::units(units, ActionLogBalance::Gain),
         origin.clone(),
         vec![],
     );

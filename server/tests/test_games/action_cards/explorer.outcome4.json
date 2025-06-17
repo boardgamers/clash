@@ -379,6 +379,21 @@
                       "origin": {
                         "CivilCard": 21
                       }
+                    },
+                    {
+                      "player": 1,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 21
+                        },
+                        "from": {
+                          "Hand": 1
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
                     }
                   ]
                 },
@@ -435,7 +450,8 @@
       "Player2 has to pay 1 culture token for Explorer"
     ],
     [
-      "Player2: Explorer: Pay 1 culture token"
+      "Player2: Explorer: Pay 1 culture token",
+      "Player2: Action Card: Discard Explorer/Encircled"
     ],
     [
       "Player2: Explorer: Explored B6"

@@ -217,7 +217,24 @@
                     "Playing": {
                       "ActionCard": 29
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 29
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -279,6 +296,7 @@
   "log": [
     [
       "Player1 played the action card Overproduction",
+      "Player1: Action Card: Discard Overproduction/Defensive Formation",
       "Player1: Overproduction: Can use Overproduction to collect from 2 additional tiles."
     ],
     [

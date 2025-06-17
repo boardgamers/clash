@@ -272,7 +272,24 @@
                     "Playing": {
                       "ActionCard": 5
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 5
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -369,7 +386,8 @@
       "Player1: Waste: Could not store 1 gold"
     ],
     [
-      "Player1 played the action card Hero General"
+      "Player1 played the action card Hero General",
+      "Player1: Action Card: Discard Hero General/Wedge Formation"
     ],
     [
       "Player1: Hero General: City C1 became Neutral"

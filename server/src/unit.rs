@@ -600,10 +600,7 @@ pub(crate) fn kill_units_without_event(
     add_action_log_item(
         game,
         player,
-        ActionLogEntry::Units {
-            balance: ActionLogBalance::Loss,
-            units,
-        },
+        ActionLogEntry::units(units, ActionLogBalance::Loss),
         origin.clone(),
         vec![],
     );

@@ -343,10 +343,7 @@ pub(crate) fn set_city_mood(
     add_action_log_item(
         game,
         player,
-        ActionLogEntry::MoodChange {
-            city: position,
-            mood: new_state,
-        },
+        ActionLogEntry::mood_change(position, new_state),
         origin.clone(),
         vec![],
     );

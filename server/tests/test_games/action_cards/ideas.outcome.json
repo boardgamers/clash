@@ -202,6 +202,21 @@
                   "items": [
                     {
                       "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 9
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "ideas": 1
@@ -225,6 +240,7 @@
   "log": [
     [
       "Player1 played the action card Ideas",
+      "Player1: Action Card: Discard Ideas/High Ground",
       "Player1: Ideas: Gain 1 idea"
     ]
   ],

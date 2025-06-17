@@ -15,7 +15,6 @@ use crate::content::tactics_cards::{
 use crate::game::Game;
 use crate::objective_card::{deinit_objective_card, gain_objective_card};
 use crate::player::{Player, gain_unit};
-use crate::playing_actions::ActionCost;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
 use crate::utils::{Shuffle, remove_element, remove_element_by};
@@ -46,7 +45,7 @@ fn new_plans(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Draw 2 objective cards. \
         You may discard an objective card from your hand to keep 1 of them. \
         Reshuffle the discarded and not taken cards into the deck.",
-        ActionCost::regular_with_cost(ResourcePile::culture_tokens(1)),
+        |c| c.action().culture_tokens(1),
         move |_game, p, _| !p.objective_cards.is_empty(),
     )
     .add_hand_card_request(
@@ -142,7 +141,7 @@ fn synergies(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Synergies",
         "Gain 2 advances from the same category without changing the Game Event counter. \
         Pay the price as usual.",
-        ActionCost::regular(),
+        |c| c.action().no_resources(),
         move |game, p, _| !categories_with_2_affordable_advances(p, game).is_empty(),
     )
     .tactics_card(tactics_card)
@@ -258,7 +257,7 @@ fn teach_us(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Teach Us",
         "If you just captured a city: Gain 1 advance from the loser for free \
          without changing the Game Event counter.",
-        ActionCost::free(),
+        |c| c.free_action().no_resources(),
         // is played by "use_teach_us"
         |_game, _player, _a| false,
     )
@@ -302,9 +301,7 @@ pub(crate) fn use_teach_us() -> Ability {
             let HandCard::ActionCard(id) = s.choice[0] else {
                 panic!("Teach Us card not found");
             };
-            discard_action_card(game, s.player_index, id);
-
-            s.log(game, "Activate");
+            discard_action_card(game, s.player_index, id, &s.origin);
             e.selected_card = Some(id);
         },
     )
@@ -348,7 +345,7 @@ fn militia(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         id,
         "Militia",
         "Gain 1 infantry in one of your cities.",
-        ActionCost::cost(ResourcePile::culture_tokens(1)),
+        |c| c.free_action().culture_tokens(1),
         |_game, player, _a| {
             player.available_units().infantry > 0 && !cities_that_can_add_units(player).is_empty()
         },
@@ -386,7 +383,7 @@ fn tech_trade(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Gain 1 advance for free (without changing the Game Event counter) \
                 that a player owns who has a unit or city within range 2 of your units or cities. \
                 Then that player gains 1 advance from you for free the same way.",
-        ActionCost::cost(ResourcePile::culture_tokens(1)),
+        |c| c.free_action().no_resources(),
         |game, player, _a| !possible_inspiration_advances(game, player).is_empty(),
     )
     .tactics_card(tactics_card)
@@ -467,7 +464,7 @@ fn new_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "New Ideas",
         "Gain 1 advance for the regular price (without changing the Game Event counter), \
         then gain 2 ideas.",
-        ActionCost::regular(),
+        |c| c.action().no_resources(),
         |game, player, _a| !advances_that_can_be_gained(player, game).is_empty(),
     )
     .tactics_card(tactics_card)

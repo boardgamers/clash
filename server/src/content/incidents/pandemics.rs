@@ -72,11 +72,7 @@ fn pandemics() -> Incident {
             for id in &s.choice {
                 match id {
                     HandCard::ActionCard(a) => {
-                        discard_action_card(game, s.player_index, *a);
-                        s.log(
-                            game,
-                            &format!("Discard {}", game.cache.get_action_card(*a).name()),
-                        );
+                        discard_action_card(game, s.player_index, *a, &s.origin);
                     }
                     HandCard::ObjectiveCard(o) => {
                         discard_objective_card(game, s.player_index, *o);

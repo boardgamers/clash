@@ -1,7 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::do_gain_action_card_from_pile;
 use crate::advance::{Advance, init_great_library};
-use crate::card::{HandCard, all_objective_hand_cards};
+use crate::card::{HandCard, HandCardLocation, all_objective_hand_cards, log_card_transfer};
 use crate::city::{City, MoodState, activate_city};
 use crate::combat_listeners::CombatRoundEnd;
 use crate::content::ability::{Ability, AbilityBuilder};
@@ -139,7 +139,7 @@ pub(crate) fn use_great_mausoleum() -> Ability {
                         game.cache.get_action_card(*card).name()
                     ))
                 } else {
-                    do_gain_action_card_from_pile(game, p.index);
+                    do_gain_action_card_from_pile(game, p.index, &p.origin);
                     None
                 }
             },
@@ -157,8 +157,15 @@ pub(crate) fn use_great_mausoleum() -> Ability {
                         ),
                     );
                     game.player_mut(s.player_index).action_cards.push(card);
+                    log_card_transfer(
+                        game,
+                        &HandCard::ActionCard(card),
+                        HandCardLocation::DiscardPile,
+                        HandCardLocation::Hand(s.player_index),
+                        &s.origin,
+                    );
                 } else {
-                    do_gain_action_card_from_pile(game, s.player_index);
+                    do_gain_action_card_from_pile(game, s.player_index, &s.origin);
                 }
             },
         )

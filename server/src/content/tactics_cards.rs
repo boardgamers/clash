@@ -1,5 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{gain_action_card, gain_action_card_from_pile};
+use crate::card::HandCardLocation;
 use crate::combat::{Combat, update_combat_strength};
 use crate::combat_listeners::{CombatResult, CombatRoundStart, CombatStrength, kill_combat_units};
 use crate::content::persistent_events::{PaymentRequest, PositionRequest, UnitsRequest};
@@ -156,7 +157,7 @@ pub(crate) fn surprise(id: u8) -> TacticsCard {
     .add_resolve_listener(1, |p, game, e| {
         if e.hits(e.role(p.index)) > 0 {
             p.log(game, "Draw 1 action card for Surprise tactics");
-            gain_action_card_from_pile(game, p.index);
+            gain_action_card_from_pile(game, p.index, &p.origin);
         }
     })
     .build()
@@ -321,19 +322,13 @@ pub(crate) fn scout(id: u8) -> TacticsCard {
                     s,
                     |game, _combat, st, _role| {
                         if let Some(tactics_card) = st.tactics_card.take() {
-                            gain_action_card(game, p.index, tactics_card);
-                            p.log(
+                            p.log(game, "Ignore the enemy tactics");
+                            gain_action_card(
                                 game,
-                                &format!(
-                                    "Ignore the enemy tactics {} and takes \
-                                    it to their hand using Scout",
-                                    game.cache
-                                        .get_action_card(tactics_card)
-                                        .tactics_card
-                                        .as_ref()
-                                        .expect("tactics card not found")
-                                        .name
-                                ),
+                                p.index,
+                                tactics_card,
+                                HandCardLocation::DiscardPile,
+                                &p.origin,
                             );
                         } else {
                             p.log(game, "Cannot use - opponent didn't play a tactics card");
@@ -370,7 +365,7 @@ pub(crate) fn martyr(id: u8) -> TacticsCard {
             s.log(
                 game,
                 &format!(
-                    "{} sacrifices {} using Martyr",
+                    "{} sacrifices {}",
                     game.player_name(s.player_index),
                     a_or_an(
                         &game
@@ -390,10 +385,7 @@ pub(crate) fn martyr(id: u8) -> TacticsCard {
         move |game, p, s| {
             if s.is_active(p.index, id, TacticsCardTarget::Opponent) {
                 update_combat_strength(game, p.index, s, |game, _combat, st, _role| {
-                    p.log(
-                        game,
-                        "Cannot use tactics card using Martyr (but it is still discarded)",
-                    );
+                    p.log(game, "Cannot use tactics card (but it is still discarded)");
                     st.tactics_card = None;
                 });
             }

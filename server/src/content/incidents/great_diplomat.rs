@@ -8,7 +8,6 @@ use crate::content::incidents::great_persons::{
 use crate::game::Game;
 use crate::incident::IncidentBuilder;
 use crate::player_events::IncidentTarget;
-use crate::playing_actions::ActionCost;
 use crate::utils::remove_element_by;
 use serde::{Deserialize, Serialize};
 
@@ -24,7 +23,8 @@ pub(crate) fn great_diplomat() -> ActionCard {
                 Discard this card if either player attacks the other. \
                 You may discard the card as a regular action.",
         ),
-        ActionCost::regular(),
+        // action for ending diplomatic relations
+        |c| c.action().no_resources(),
         vec![],
         |_game, _player| true,
     )

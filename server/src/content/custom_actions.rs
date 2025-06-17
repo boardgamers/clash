@@ -1,3 +1,4 @@
+use crate::action_cost::ActionCostOncePerTurn;
 use crate::city::{City, MoodState};
 use crate::content::ability::Ability;
 use crate::content::persistent_events::{
@@ -5,9 +6,9 @@ use crate::content::persistent_events::{
 };
 use crate::events::EventOrigin;
 use crate::player::Player;
-use crate::playing_actions::{ActionResourceCost, PlayingActionType};
+use crate::playing_actions::PlayingActionType;
 use crate::position::Position;
-use crate::{game::Game, playing_actions::ActionCost, resource_pile::ResourcePile};
+use crate::{game::Game, resource_pile::ResourcePile};
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 use std::sync::Arc;
@@ -43,131 +44,12 @@ impl CustomActionActivation {
     }
 }
 
-pub(crate) struct CustomActionOncePerTurn {
-    action: CustomActionType,
-}
-
-impl CustomActionOncePerTurn {
-    #[must_use]
-    pub fn new(action: CustomActionType) -> Self {
-        Self { action }
-    }
-
-    #[must_use]
-    #[allow(clippy::unused_self)]
-    pub fn any_times(self) -> CustomActionActionCost {
-        CustomActionActionCost::new(None)
-    }
-
-    #[must_use]
-    pub fn once_per_turn(self) -> CustomActionActionCost {
-        CustomActionActionCost::new(Some(self.action))
-    }
-
-    #[allow(clippy::unused_self)]
-    #[must_use]
-    pub fn once_per_turn_mutually_exclusive(
-        self,
-        mutually_exclusive: CustomActionType,
-    ) -> CustomActionActionCost {
-        CustomActionActionCost::new(Some(mutually_exclusive))
-    }
-}
-
-pub(crate) struct CustomActionActionCost {
-    once_per_turn: Option<CustomActionType>,
-}
-
-impl CustomActionActionCost {
-    #[must_use]
-    fn new(once_per_turn: Option<CustomActionType>) -> Self {
-        Self { once_per_turn }
-    }
-
-    #[must_use]
-    pub fn action(self) -> CustomActionResourceCost {
-        CustomActionResourceCost::new(self.once_per_turn, false)
-    }
-
-    #[must_use]
-    pub fn free_action(self) -> CustomActionResourceCost {
-        CustomActionResourceCost::new(self.once_per_turn, true)
-    }
-}
-
-pub(crate) struct CustomActionResourceCost {
-    once_per_turn: Option<CustomActionType>,
-    free: bool,
-}
-
-impl CustomActionResourceCost {
-    #[must_use]
-    fn new(once_per_turn: Option<CustomActionType>, free: bool) -> CustomActionResourceCost {
-        CustomActionResourceCost {
-            once_per_turn,
-            free,
-        }
-    }
-
-    #[must_use]
-    pub fn no_resources(self) -> CustomActionCost {
-        CustomActionCost::new(self.free, self.once_per_turn, ActionResourceCost::free())
-    }
-
-    #[must_use]
-    pub fn resources(self, cost: ResourcePile) -> CustomActionCost {
-        CustomActionCost::new(
-            self.free,
-            self.once_per_turn,
-            ActionResourceCost::resources(cost),
-        )
-    }
-
-    #[must_use]
-    pub fn tokens(self, cost: u8) -> CustomActionCost {
-        CustomActionCost::new(
-            self.free,
-            self.once_per_turn,
-            ActionResourceCost::tokens(cost),
-        )
-    }
-
-    #[must_use]
-    pub fn advance_cost_without_discounts(self) -> CustomActionCost {
-        CustomActionCost::new(
-            self.free,
-            self.once_per_turn,
-            ActionResourceCost::AdvanceCostWithoutDiscount,
-        )
-    }
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub struct CustomActionCost {
-    pub action_type: ActionCost,
-    pub once_per_turn: Option<CustomActionType>,
-}
-
-impl CustomActionCost {
-    #[must_use]
-    pub(crate) fn new(
-        free: bool,
-        once_per_turn: Option<CustomActionType>,
-        cost: ActionResourceCost,
-    ) -> CustomActionCost {
-        CustomActionCost {
-            action_type: ActionCost::new(free, cost),
-            once_per_turn,
-        }
-    }
-}
-
 #[derive(Clone)]
 pub struct CustomActionInfo {
     pub action: CustomActionType,
     pub execution: CustomActionExecution,
     pub event_origin: EventOrigin,
-    pub cost: CustomActionCost,
+    pub cost: ActionCostOncePerTurn,
 }
 
 impl CustomActionInfo {
@@ -176,7 +58,7 @@ impl CustomActionInfo {
         action: CustomActionType,
         execution: CustomActionExecution,
         event_origin: EventOrigin,
-        cost: CustomActionCost,
+        cost: ActionCostOncePerTurn,
     ) -> CustomActionInfo {
         CustomActionInfo {
             action,

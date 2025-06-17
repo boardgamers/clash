@@ -246,7 +246,7 @@ fn use_idol(b: AbilityBuilder) -> AbilityBuilder {
             Some(HandCardsRequest::new(
                 idol_cards(game, player.get(game), &ResourcePile::empty()),
                 1..=1,
-                "Select an action card to play as a free action using Idol",
+                "Select an action card to play as a free action",
             ))
         },
         |game, s, _| {
@@ -256,7 +256,7 @@ fn use_idol(b: AbilityBuilder) -> AbilityBuilder {
             s.log(
                 game,
                 &format!(
-                    "Decided to play {} as a free action using Idol",
+                    "Decided to play {} as a free action",
                     game.cache.get_civil_card(id).name
                 ),
             );

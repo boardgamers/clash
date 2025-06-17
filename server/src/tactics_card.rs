@@ -325,7 +325,7 @@ pub(crate) fn play_tactics_card(b: AdvanceBuilder) -> AdvanceBuilder {
                 update_combat_strength(game, player, r, move |_game, _c, s, _role| {
                     s.tactics_card = Some(card);
                 });
-                discard_action_card(game, player, card);
+                discard_action_card(game, player, card, &s.origin);
             }
         },
     )

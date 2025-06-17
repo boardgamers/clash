@@ -212,7 +212,7 @@ fn use_princeps(b: AbilityBuilder) -> AbilityBuilder {
         |game, p, _| {
             let player = p.index;
             activate_leader_city(game, p);
-            gain_action_card_from_pile(game, player);
+            gain_action_card_from_pile(game, player, &p.origin);
             gain_objective_card_from_pile(game, player);
 
             let p = game.player(player);
@@ -230,14 +230,7 @@ fn use_princeps(b: AbilityBuilder) -> AbilityBuilder {
             for c in &s.choice {
                 match c {
                     HandCard::ActionCard(card) => {
-                        s.log(
-                            game,
-                            &format!(
-                                "Discard action card {}",
-                                game.cache.get_action_card(*card).name()
-                            ),
-                        );
-                        discard_action_card(game, p, *card);
+                        discard_action_card(game, p, *card, &s.origin);
                     }
                     HandCard::ObjectiveCard(card) => {
                         s.log(

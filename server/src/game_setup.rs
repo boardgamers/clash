@@ -189,17 +189,12 @@ fn execute_setup_round(setup: &GameSetup, game: &mut Game) {
 
         let p = game.player(player_index);
         game.add_info_log_group(format!("{p} is playing as {}", p.civilization.name));
-        gain_action_card_from_pile(game, player_index);
+        let origin = setup_event_origin();
+        gain_action_card_from_pile(game, player_index, &origin);
         gain_objective_card_from_pile(game, player_index);
         if setup.random_map {
             let home = game.player(player_index).cities[0].position;
-            gain_unit(
-                game,
-                player_index,
-                home,
-                UnitType::Settler,
-                &setup_event_origin(),
-            );
+            gain_unit(game, player_index, home, UnitType::Settler, &origin);
         }
     }
 }

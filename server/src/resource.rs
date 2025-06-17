@@ -112,10 +112,7 @@ pub(crate) fn gain_resources_with_modifiers(
     add_action_log_item(
         game,
         player,
-        ActionLogEntry::Resources {
-            resources,
-            balance: ActionLogBalance::Gain,
-        },
+        ActionLogEntry::resources(resources, ActionLogBalance::Gain),
         origin,
         modifiers,
     );
@@ -158,10 +155,7 @@ pub(crate) fn lose_resources(
     add_action_log_item(
         game,
         player,
-        ActionLogEntry::Resources {
-            resources,
-            balance: ActionLogBalance::Loss,
-        },
+        ActionLogEntry::resources(resources, ActionLogBalance::Loss),
         origin,
         modifiers,
     );

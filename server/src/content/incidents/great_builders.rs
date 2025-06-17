@@ -13,7 +13,7 @@ use crate::content::persistent_events::HandCardsRequest;
 use crate::game::Game;
 use crate::player::Player;
 use crate::player_events::CostInfo;
-use crate::playing_actions::{ActionCost, PlayingActionType};
+use crate::playing_actions::PlayingActionType;
 use crate::resource_pile::ResourcePile;
 use crate::utils::remove_element_by;
 use crate::wonder::{Wonder, WonderCardInfo, cities_for_wonder, on_play_wonder_card, wonder_cost};
@@ -28,7 +28,7 @@ pub(crate) fn great_engineer() -> ActionCard {
             without spending an action and without activating it.",
             great_person_description(&groups)
         ),
-        ActionCost::regular(),
+        |c| c.action().no_resources(),
         groups,
         can_construct_any_building,
     )
@@ -121,7 +121,7 @@ pub(crate) fn great_architect() -> ActionCard {
                 the requirement advances (but not Engineering). \
                 In addition, the cost of constructing the wonder is reduced by 3 culture tokens.",
         ),
-        ActionCost::free(),
+        |c| c.free_action().no_resources(),
         vec![],
         |game, player| !playable_wonders(game, player).is_empty(),
     )

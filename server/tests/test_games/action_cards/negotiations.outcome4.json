@@ -242,6 +242,21 @@
                       "origin": {
                         "CivilCard": 23
                       }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 23
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
                     }
                   ]
                 },
@@ -348,6 +363,7 @@
     ],
     [
       "Player1: Negotiations: Pay 1 culture token",
+      "Player1: Action Card: Discard Negotiations/Scout",
       "Player1: Negotiations: Started negotiations with Player2"
     ],
     [

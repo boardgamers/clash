@@ -232,7 +232,24 @@
                     "Playing": {
                       "ActionCard": 15
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 15
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -295,6 +312,7 @@
   "log": [
     [
       "Player1 played the action card Cultural Takeover",
+      "Player1: Action Card: Discard Cultural Takeover/Heavy Resistance",
       "Player1: Cultural Takeover: You may influence Barbarian cities of size 1."
     ],
     [
