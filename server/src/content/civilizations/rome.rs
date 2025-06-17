@@ -1,7 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{discard_action_card, gain_action_card_from_pile};
 use crate::advance::{Advance, base_advance_cost, gain_advance_without_payment};
-use crate::card::{HandCard, all_action_hand_cards, all_objective_hand_cards, HandCardLocation};
+use crate::card::{HandCard, HandCardLocation, all_action_hand_cards, all_objective_hand_cards};
 use crate::city::{MoodState, set_city_mood};
 use crate::civilization::Civilization;
 use crate::content::ability::AbilityBuilder;
@@ -230,7 +230,13 @@ fn use_princeps(b: AbilityBuilder) -> AbilityBuilder {
             for c in &s.choice {
                 match c {
                     HandCard::ActionCard(card) => {
-                        discard_action_card(game, p, *card, &s.origin, HandCardLocation::DiscardPile);
+                        discard_action_card(
+                            game,
+                            p,
+                            *card,
+                            &s.origin,
+                            HandCardLocation::DiscardPile,
+                        );
                     }
                     HandCard::ObjectiveCard(card) => {
                         s.log(

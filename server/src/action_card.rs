@@ -249,7 +249,13 @@ pub(crate) fn gain_action_card(
     );
 }
 
-pub(crate) fn discard_action_card(game: &mut Game, player: usize, card: u8, origin: &EventOrigin, to: HandCardLocation) {
+pub(crate) fn discard_action_card(
+    game: &mut Game,
+    player: usize,
+    card: u8,
+    origin: &EventOrigin,
+    to: HandCardLocation,
+) {
     let card = remove_element_by(&mut game.player_mut(player).action_cards, |&id| id == card)
         .unwrap_or_else(|| panic!("action card not found {card}"));
     discard_card(|g| &mut g.action_cards_discarded, card, player, game);
