@@ -239,6 +239,36 @@
                   },
                   "items": [
                     {
+                      "player": 1,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 10
+                        },
+                        "from": {
+                          "Hand": 1
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "Advance": "Tactics"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 1
+                        },
+                        "from": "DrawPile",
+                        "to": {
+                          "Hand": 1
+                        }
+                      },
+                      "origin": {
+                        "TacticsCard": 10
+                      }
+                    },
+                    {
                       "player": 0,
                       "Units": {
                         "units": {
@@ -283,12 +313,13 @@
     ],
     [
       "Player2: Tactics: Played a Tactics Card",
+      "Player2: Tactics: Discard Ideas/Surprise",
       "Player2 reveals Tactics Card Surprise",
       "Player1 rolled 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units.",
       "Player2 rolled 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 15 and gets 1 hits against attacking units.",
       "Player2 used the following combat modifiers: Surprise added 1 to combat value",
       "Player2: Surprise: Draw 1 action card for Surprise tactics",
-      "Player2 gained an action card from the pile",
+      "Player2: Surprise: Draw an action card",
       "Player1: Choose Casualties: Remove all attacking units",
       "Player1: Combat: Lost 1 infantry at C2",
       "Player2: Choose Casualties: Remove 1 of their defending units",

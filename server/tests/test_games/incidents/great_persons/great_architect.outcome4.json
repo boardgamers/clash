@@ -267,6 +267,21 @@
                       "origin": {
                         "Incident": 55
                       }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 155
+                        },
+                        "from": "Incident",
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "Incident": 55
+                      }
                     }
                   ]
                 },
@@ -275,7 +290,24 @@
                     "Playing": {
                       "ActionCard": 155
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 155
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -341,10 +373,11 @@
     ],
     [
       "Player1: Great Architect: Pay 1 culture token",
-      "Player1: Great Architect: Gain Great Architect for 1 culture token"
+      "Player1: Great Architect: Gain Great Architect/- from the current event"
     ],
     [
       "Player1 played the action card Great Architect",
+      "Player1: Action Card: Discard Great Architect/-",
       "Player1 played the wonder card Pyramids"
     ],
     [

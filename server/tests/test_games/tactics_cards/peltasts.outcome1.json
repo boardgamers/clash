@@ -237,6 +237,21 @@
                   "items": [
                     {
                       "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 1
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "Advance": "Tactics"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Units": {
                         "units": {
                           "infantry": 1
@@ -280,6 +295,7 @@
     ],
     [
       "Player1: Tactics: Played a Tactics Card",
+      "Player1: Tactics: Discard Quick Advance/Peltasts",
       "Player1 reveals Tactics Card Peltasts",
       "Player1 rolled 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units.",
       "Player1 used the following combat modifiers: Peltasts rolled a 6 and ignored a hit",

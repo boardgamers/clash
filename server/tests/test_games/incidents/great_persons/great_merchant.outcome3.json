@@ -277,6 +277,21 @@
                       "origin": {
                         "Incident": 25
                       }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 125
+                        },
+                        "from": "Incident",
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "Incident": 25
+                      }
                     }
                   ]
                 },
@@ -285,7 +300,24 @@
                     "Playing": {
                       "ActionCard": 125
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 125
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -332,10 +364,11 @@
     ],
     [
       "Player1: Great Merchant: Pay 1 culture token",
-      "Player1: Great Merchant: Gain Great Merchant for 1 culture token"
+      "Player1: Great Merchant: Gain Great Merchant/- from the current event"
     ],
     [
       "Player1 played the action card Great Merchant",
+      "Player1: Action Card: Discard Great Merchant/-",
       "Player1: Great Merchant: Gain Trade Routes"
     ],
     [

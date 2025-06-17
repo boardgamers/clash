@@ -389,7 +389,24 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 1
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "Incident": 49
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -416,7 +433,7 @@
       "Player1: Pandemics: Lost 1 infantry at C2"
     ],
     [
-      "Player1: Pandemics: Discard Advance/Peltasts",
+      "Player1: Pandemics: Discard Quick Advance/Peltasts",
       "Player2: Pandemics: Lose a total of 1 units, cards, and resources"
     ]
   ],

@@ -240,21 +240,72 @@
                     "Playing": {
                       "ActionCard": 123
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 123
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
                     "Response": {
                       "Bool": true
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 4
+                        },
+                        "from": "DiscardPile",
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Great Mausoleum"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
                     "Response": {
                       "Bool": false
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 11
+                        },
+                        "from": "DrawPile",
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Great Mausoleum"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -311,13 +362,15 @@
   "action_log_index": 5,
   "log": [
     [
-      "Player1 played the action card Elder Statesman"
+      "Player1 played the action card Elder Statesman",
+      "Player1: Action Card: Discard Elder Statesman/-"
     ],
     [
-      "Player1: Great Mausoleum: Draw Inspiration/Peltasts from the discard pile"
+      "Player1: Great Mausoleum: Draw Inspiration/Peltasts from the discard pile",
+      "Player1: Great Mausoleum: Gain Inspiration/Peltasts from discard pile"
     ],
     [
-      "Player1 gained an action card from the pile"
+      "Player1: Great Mausoleum: Draw an action card"
     ],
     [
       "Player1: Advance: Pay 2 ideas",

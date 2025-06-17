@@ -296,6 +296,21 @@
                     },
                     {
                       "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 1
+                        },
+                        "from": "DrawPile",
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Writing"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "culture_tokens": 1
@@ -364,7 +379,7 @@
     [
       "Player1: Advance: Pay 1 food and 1 gold",
       "Player1: Advance: Gain Writing",
-      "Player1 gained an action card from the pile",
+      "Player1: Writing: Draw an action card",
       "Player1 gained an objective card from the pile",
       "Player1: Writing: Gain 1 culture token"
     ],

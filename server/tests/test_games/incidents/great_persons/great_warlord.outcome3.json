@@ -420,6 +420,21 @@
                       "origin": {
                         "Incident": 24
                       }
+                    },
+                    {
+                      "player": 1,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 124
+                        },
+                        "from": "Incident",
+                        "to": {
+                          "Hand": 1
+                        }
+                      },
+                      "origin": {
+                        "Incident": 24
+                      }
                     }
                   ]
                 },
@@ -430,6 +445,21 @@
                     }
                   },
                   "items": [
+                    {
+                      "player": 1,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 124
+                        },
+                        "from": {
+                          "Hand": 1
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
+                    },
                     {
                       "player": 1,
                       "Resources": {
@@ -512,10 +542,11 @@
     ],
     [
       "Player2: Great Warlord: Pay 1 culture token",
-      "Player2: Great Warlord: Gain Great Warlord for 1 culture token"
+      "Player2: Great Warlord: Gain Great Warlord/- from the current event"
     ],
     [
       "Player2 played the action card Great Warlord",
+      "Player2: Action Card: Discard Great Warlord/-",
       "Player2: Great Warlord: Gain Tactics",
       "Player2: Tactics: Gain 1 culture token"
     ],

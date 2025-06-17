@@ -228,6 +228,21 @@
                   "items": [
                     {
                       "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 42
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "Advance": "Tactics"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Units": {
                         "units": {
                           "infantry": 1
@@ -271,6 +286,7 @@
     ],
     [
       "Player1: Tactics: Played a Tactics Card",
+      "Player1: Tactics: Discard New Ideas/Flanking",
       "Player1 reveals Tactics Card Flanking",
       "Player1 rolled 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 13 and gets 2 hits against defending units.",
       "Player1 used the following combat modifiers: Flanking added 1 extra die",

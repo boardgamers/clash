@@ -235,6 +235,21 @@
                   "items": [
                     {
                       "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 11
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "Advance": "Tactics"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Units": {
                         "units": {
                           "infantry": 1
@@ -278,6 +293,7 @@
     ],
     [
       "Player1: Tactics: Played a Tactics Card",
+      "Player1: Tactics: Discard Great Ideas/Siege",
       "Player1 reveals Tactics Card Siege",
       "Player1 rolled 6 (infantry, +1 combat value) for combined combat value of 8 and gets 1 hits against defending units.",
       "Player1 used the following combat modifiers: Siege added 1 to combat value",

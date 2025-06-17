@@ -200,7 +200,24 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 26
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "Advance": "Tactics"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -294,6 +311,7 @@
     ],
     [
       "Player1: Tactics: Played a Tactics Card",
+      "Player1: Tactics: Discard Leadership/Archers",
       "Player1 reveals Tactics Card Archers",
       "Player2: Archers: Rolled a 6 and scored a hit"
     ],

@@ -317,7 +317,24 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 1
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "Advance": "Tactics"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -356,6 +373,21 @@
                     "city_mood": "Angry"
                   },
                   "items": [
+                    {
+                      "player": 1,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 2
+                        },
+                        "from": {
+                          "Hand": 1
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "Advance": "Tactics"
+                      }
+                    },
                     {
                       "player": 1,
                       "Units": {
@@ -411,10 +443,12 @@
       "Player2: Steel Weapons: Pay 1 ore"
     ],
     [
-      "Player1: Tactics: Played a Tactics Card"
+      "Player1: Tactics: Played a Tactics Card",
+      "Player1: Tactics: Discard Quick Advance/Peltasts"
     ],
     [
       "Player2: Tactics: Played a Tactics Card",
+      "Player2: Tactics: Discard Quick Advance/Encircled",
       "Player1 reveals Tactics Card Peltasts",
       "Player2 reveals Tactics Card Encircled",
       "Player1 rolled 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 1 (leader, no bonus) for combined combat value of 22 and gets 2 hits against defending units.",

@@ -207,7 +207,24 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 1
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "Advance": "Tactics"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -246,6 +263,21 @@
                     "city_mood": "Angry"
                   },
                   "items": [
+                    {
+                      "player": 1,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 9
+                        },
+                        "from": {
+                          "Hand": 1
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "Advance": "Tactics"
+                      }
+                    },
                     {
                       "player": 0,
                       "Units": {
@@ -290,10 +322,12 @@
       "Defenders: 2 infantry"
     ],
     [
-      "Player1: Tactics: Played a Tactics Card"
+      "Player1: Tactics: Played a Tactics Card",
+      "Player1: Tactics: Discard Quick Advance/Peltasts"
     ],
     [
       "Player2: Tactics: Played a Tactics Card",
+      "Player2: Tactics: Discard Ideas/High Ground",
       "Player1 reveals Tactics Card Peltasts",
       "Player2 reveals Tactics Card High Ground",
       "Player1 rolled 6 (infantry, no bonus) for combined combat value of 6 and gets 1 hits against defending units.",

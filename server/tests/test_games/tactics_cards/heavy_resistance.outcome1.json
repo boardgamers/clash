@@ -236,6 +236,21 @@
                   },
                   "items": [
                     {
+                      "player": 1,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 7
+                        },
+                        "from": {
+                          "Hand": 1
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "Advance": "Tactics"
+                      }
+                    },
+                    {
                       "player": 0,
                       "Units": {
                         "units": {
@@ -280,6 +295,7 @@
     ],
     [
       "Player2: Tactics: Played a Tactics Card",
+      "Player2: Tactics: Discard Spy/Heavy Resistance",
       "Player2 reveals Tactics Card Heavy Resistance",
       "Player1 rolled 6 (infantry, +1 combat value) for combined combat value of 6 and gets 1 hits against defending units.",
       "Player1 used the following combat modifiers: Heavy resistance added -1 to combat value for each unit",

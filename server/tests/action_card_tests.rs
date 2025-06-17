@@ -392,9 +392,10 @@ fn test_militia() {
 fn test_tech_trade() {
     JSON.test(
         "tech_trade",
-        vec![
-            TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(39))),
-        ],
+        vec![TestAction::undoable(
+            0,
+            Action::Playing(PlayingAction::ActionCard(39)),
+        )],
     );
 }
 

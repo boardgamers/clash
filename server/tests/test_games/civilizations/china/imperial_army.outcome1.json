@@ -228,9 +228,11 @@
   "starting_player_index": 0,
   "current_player_index": 0,
   "action_log": [
-    { "age": 1,
+    {
+      "age": 1,
       "rounds": [
-        { "round": 1,
+        {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -270,7 +272,7 @@
       "Player1 started Imperial Army"
     ],
     [
-      "Player1: Imperial Army: Convert infantry at C2, settler at B4 using Imperial Army"
+      "Player1: Imperial Army: Convert infantry at C2, settler at B4"
     ]
   ],
   "undo_limit": 0,

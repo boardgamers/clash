@@ -272,6 +272,21 @@
                       "origin": {
                         "Incident": 19
                       }
+                    },
+                    {
+                      "player": 1,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 119
+                        },
+                        "from": "Incident",
+                        "to": {
+                          "Hand": 1
+                        }
+                      },
+                      "origin": {
+                        "Incident": 19
+                      }
                     }
                   ]
                 },
@@ -294,6 +309,21 @@
                   "items": [
                     {
                       "player": 1,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 119
+                        },
+                        "from": {
+                          "Hand": 1
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
+                    },
+                    {
+                      "player": 1,
                       "Resources": {
                         "resources": {
                           "culture_tokens": 1
@@ -312,6 +342,21 @@
                       },
                       "origin": {
                         "CivilCard": 119
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 119
+                        },
+                        "from": {
+                          "Hand": 1
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
                       }
                     },
                     {
@@ -361,7 +406,7 @@
     ],
     [
       "Player2: Great Artist: Pay 2 culture tokens",
-      "Player2: Great Artist: Gain Great Artist for 2 culture tokens"
+      "Player2: Great Artist: Gain Great Artist/- from the current event"
     ],
     [
       "Player1 ended their turn with 2 actions left"
@@ -371,6 +416,7 @@
     ],
     [
       "Player2 played the action card Great Artist",
+      "Player2: Action Card: Discard Great Artist/-",
       "Player2: Great Artist: Gain Arts",
       "Player2 unlocked Hellenistic Culture",
       "Player2: Arts: Gain 1 culture token",

@@ -315,6 +315,21 @@
                   },
                   "items": [
                     {
+                      "player": 1,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 17
+                        },
+                        "from": {
+                          "Hand": 1
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "Advance": "Tactics"
+                      }
+                    },
+                    {
                       "player": 0,
                       "Resources": {
                         "resources": {
@@ -357,6 +372,7 @@
     ],
     [
       "Player2: Tactics: Played a Tactics Card",
+      "Player2: Tactics: Discard City Development/Tactical Retreat",
       "Player2 reveals Tactics Card Tactical Retreat",
       "Player2: Tactical Retreat: Player2 withdraws to B1",
       "Player1: Solar Eclipse: Gain 1 victory point for the Solar Eclipse",
