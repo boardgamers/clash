@@ -243,7 +243,10 @@ fn categories_with_2_affordable_advances(p: &Player, game: &Game) -> Vec<Advance
                         .default;
                     p.can_afford(&cost)
                         && p.can_advance_free(a.advance, game)
-                        && p.can_advance_free(b.advance, game)
+                        // don't check requirements for second advance, 
+                        // because it can only be to have the leading advance of the group
+                        // which is already checked
+                        && !p.has_advance(b.advance)
                 })
                 .map(|pair| pair[0].advance)
                 .collect_vec()
