@@ -413,6 +413,21 @@
                       "origin": {
                         "Incident": 18
                       }
+                    },
+                    {
+                      "player": 1,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 118
+                        },
+                        "from": "Incident",
+                        "to": {
+                          "Hand": 1
+                        }
+                      },
+                      "origin": {
+                        "Incident": 18
+                      }
                     }
                   ]
                 },
@@ -423,6 +438,21 @@
                     }
                   },
                   "items": [
+                    {
+                      "player": 1,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 118
+                        },
+                        "from": {
+                          "Hand": 1
+                        },
+                        "to": "PlayToDiscard"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
+                    },
                     {
                       "player": 1,
                       "Resources": {
@@ -507,10 +537,10 @@
     ],
     [
       "Player2: Great Explorer: Pay 1 culture token",
-      "Player2: Great Explorer: Gain Great Explorer for 1 culture token"
+      "Player2: Great Explorer: Gain Great Explorer from the current event"
     ],
     [
-      "Player2 played the action card Great Explorer",
+      "Player2: Action Card: Play Great Explorer",
       "Player2: Great Explorer: Gain Fishing",
       "Player2: Fishing: Gain 1 mood token"
     ],

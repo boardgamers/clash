@@ -203,7 +203,24 @@
                         "action": "Bartering"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 1
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "Ability": "Bartering"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -239,7 +256,7 @@
   "log": [
     [
       "Player1 started Bartering",
-      "Player1: Bartering: Discard Advance/Peltasts for 1 gold or 1 culture token"
+      "Player1: Bartering: Discard Quick Advance/Peltasts"
     ],
     [
       "Player1: Bartering: Gain 1 gold",

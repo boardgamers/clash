@@ -218,7 +218,24 @@
                     "Playing": {
                       "ActionCard": 23
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 23
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToDiscard"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -343,7 +360,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 played the action card Negotiations",
+      "Player1: Action Card: Play Negotiations/Scout",
       "Player1 has to pay 1 culture token for Negotiations"
     ],
     [

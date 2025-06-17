@@ -9,8 +9,8 @@
         "ore": 5,
         "ideas": 1,
         "gold": 7,
-        "mood_tokens": 8,
-        "culture_tokens": 8
+        "mood_tokens": 9,
+        "culture_tokens": 7
       },
       "resource_limit": {
         "food": 7,
@@ -59,7 +59,6 @@
       ],
       "civilization": "Rome",
       "advances": [
-        "Cartography",
         "Farming",
         "Fishing",
         "Mining",
@@ -217,12 +216,29 @@
                     "Playing": {
                       "ActionCard": 34
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 34
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToDiscard"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
                     "Response": {
-                      "SelectAdvance": "Cartography"
+                      "SelectAdvance": "Fishing"
                     }
                   }
                 },
@@ -253,12 +269,12 @@
                       "player": 0,
                       "Resources": {
                         "resources": {
-                          "culture_tokens": 1
+                          "mood_tokens": 1
                         },
                         "balance": "Gain"
                       },
                       "origin": {
-                        "Advance": "Cartography"
+                        "Advance": "Fishing"
                       }
                     }
                   ]
@@ -305,14 +321,14 @@
   "action_log_index": 5,
   "log": [
     [
-      "Player1 played the action card Synergies"
+      "Player1: Action Card: Play Synergies/Archers"
     ],
     [
-      "Player1: Synergies: Selected Cartography as first advance"
+      "Player1: Synergies: Selected Fishing as first advance"
     ],
     [
       "Player1: Advance: Pay 2 ideas",
-      "Player1: Cartography: Gain 1 culture token"
+      "Player1: Fishing: Gain 1 mood token"
     ],
     [
       "Player1: Synergies: Selected WarShips as second advance"

@@ -4,12 +4,14 @@ use crate::content::civilizations::rome::validate_princeps_cards;
 use crate::content::persistent_events::PersistentEventType;
 use crate::events::EventOrigin;
 use crate::game::Game;
+use crate::log::{ActionLogEntry, add_action_log_item};
 use crate::objective_card::match_objective_cards;
 use crate::player::Player;
 use crate::utils::Shuffle;
 use crate::wonder::Wonder;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use std::fmt::Display;
 
 #[derive(Clone, Copy)]
 pub enum HandCardType {
@@ -29,11 +31,75 @@ impl HandCardType {
     }
 }
 
+impl Display for HandCardType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            HandCardType::Action => write!(f, "an action card"),
+            HandCardType::Objective => write!(f, "an objective card"),
+            HandCardType::Wonder => write!(f, "a wonder card"),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Ord, Debug, PartialOrd)]
 pub enum HandCard {
     ActionCard(u8),
     ObjectiveCard(u8),
     Wonder(Wonder),
+}
+
+impl HandCard {
+    #[must_use]
+    pub fn card_type(&self) -> HandCardType {
+        match self {
+            HandCard::ActionCard(_) => HandCardType::Action,
+            HandCard::ObjectiveCard(_) => HandCardType::Objective,
+            HandCard::Wonder(_) => HandCardType::Wonder,
+        }
+    }
+
+    #[must_use]
+    pub fn name(&self, game: &Game) -> String {
+        match self {
+            HandCard::ActionCard(id) => game.cache.get_action_card(*id).name(),
+            HandCard::ObjectiveCard(id) => game.cache.get_objective_card(*id).name(),
+            HandCard::Wonder(wonder) => wonder.name(),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Ord, Debug, PartialOrd)]
+pub enum HandCardLocation {
+    DrawPile,
+    Hand(usize),
+    DiscardPile,
+    // converted from incident to hand
+    Incident,
+    PlayToDiscard,
+    // the tactics card counts as being discarded even though it is discarded at the end of combat
+    PlayToDiscardFaceDown,
+    PlayToKeep,
+    Public,
+}
+
+impl HandCardLocation {
+    #[must_use]
+    pub fn player(&self) -> Option<usize> {
+        match self {
+            HandCardLocation::Hand(p) => Some(*p),
+            _ => None,
+        }
+    }
+
+    #[must_use]
+    pub fn is_public(&self) -> bool {
+        !matches!(
+            self,
+            HandCardLocation::DrawPile
+                | HandCardLocation::Hand(_)
+                | HandCardLocation::PlayToDiscardFaceDown
+        )
+    }
 }
 
 pub(crate) fn draw_card_from_pile<T>(
@@ -171,4 +237,68 @@ pub(crate) fn all_objective_hand_cards(player: &Player) -> Vec<HandCard> {
         .iter()
         .map(|&a| HandCard::ObjectiveCard(a))
         .collect_vec()
+}
+
+pub(crate) fn log_card_transfer(
+    game: &mut Game,
+    card: &HandCard,
+    from: HandCardLocation,
+    to: HandCardLocation,
+    origin: &EventOrigin,
+) {
+    let (player_index, message) = if let HandCardLocation::Hand(p) = to {
+        (
+            p,
+            match from {
+                HandCardLocation::DrawPile => &format!("Draw {}", card.card_type()),
+                HandCardLocation::Hand(from) => {
+                    &format!("Gain {} from {}", card.card_type(), game.player_name(from))
+                }
+                HandCardLocation::DiscardPile => {
+                    &format!("Gain {} from discard pile", card.name(game))
+                }
+                HandCardLocation::Public => {
+                    &format!("Gain {} from the public area", card.name(game))
+                }
+                HandCardLocation::Incident => {
+                    &format!("Gain {} from the current event", card.name(game))
+                }
+                _ => {
+                    panic!(
+                        "Cannot transfer card from played to hand: {card:?} from {from:?} to {to:?}"
+                    )
+                }
+            },
+        )
+    } else {
+        let HandCardLocation::Hand(p) = from else {
+            panic!("Invalid card transfer from {from:?} to {to:?}");
+        };
+        (
+            p,
+            match to {
+                HandCardLocation::Hand(_) => panic!("handled above"),
+                HandCardLocation::DiscardPile => &format!("Discard {}", card.name(game)),
+                HandCardLocation::PlayToDiscard | HandCardLocation::PlayToKeep => {
+                    &format!("Play {}", card.name(game))
+                }
+                HandCardLocation::PlayToDiscardFaceDown => {
+                    &format!("Play {} face down", card.card_type())
+                }
+                HandCardLocation::Public => &format!("Place {} in public area", card.name(game)),
+                _ => panic!(
+                    "Cannot transfer card from hand to draw pile: {card:?} from {from:?} to {to:?}"
+                ),
+            },
+        )
+    };
+
+    game.log_with_origin(player_index, origin, message);
+    add_action_log_item(
+        game,
+        player_index,
+        ActionLogEntry::hand_card(card.clone(), from, to),
+        origin.clone(),
+        vec![],
+    );
 }

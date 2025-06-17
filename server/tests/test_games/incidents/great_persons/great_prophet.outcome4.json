@@ -337,6 +337,21 @@
                       "origin": {
                         "Incident": 20
                       }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 120
+                        },
+                        "from": "Incident",
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "Incident": 20
+                      }
                     }
                   ]
                 },
@@ -347,6 +362,21 @@
                     }
                   },
                   "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 120
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToDiscard"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
+                    },
                     {
                       "player": 0,
                       "Resources": {
@@ -439,10 +469,10 @@
     ],
     [
       "Player1: Great Prophet: Pay 1 culture token",
-      "Player1: Great Prophet: Gain Great Prophet for 1 culture token"
+      "Player1: Great Prophet: Gain Great Prophet from the current event"
     ],
     [
-      "Player1 played the action card Great Prophet",
+      "Player1: Action Card: Play Great Prophet",
       "Player1: Great Prophet: Gain Myths",
       "Player1: Myths: Gain 1 mood token"
     ],

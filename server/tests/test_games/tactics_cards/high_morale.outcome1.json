@@ -237,6 +237,21 @@
                   "items": [
                     {
                       "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 6
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToDiscardFaceDown"
+                      },
+                      "origin": {
+                        "Advance": "Tactics"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Units": {
                         "units": {
                           "infantry": 1
@@ -279,7 +294,7 @@
       "Defenders: 2 infantry"
     ],
     [
-      "Player1: Tactics: Played a Tactics Card",
+      "Player1: Tactics: Play an action card face down",
       "Player1 reveals Tactics Card High Morale",
       "Player1 rolled 6 (infantry, +1 combat value) for combined combat value of 9 and gets 1 hits against defending units.",
       "Player1 used the following combat modifiers: High Morale added 2 combat value",

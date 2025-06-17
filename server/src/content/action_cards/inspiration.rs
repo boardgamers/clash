@@ -11,7 +11,6 @@ use crate::content::tactics_cards::{
 };
 use crate::game::Game;
 use crate::player::Player;
-use crate::playing_actions::ActionCost;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
@@ -38,9 +37,9 @@ pub(crate) fn inspiration_action_cards() -> Vec<ActionCard> {
 fn advance(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     ActionCard::builder(
         id,
-        "Advance",
+        "Quick Advance",
         "Pay 1 culture token: Gain 1 advance without changing the Game Event counter.",
-        ActionCost::cost(ResourcePile::culture_tokens(1)),
+        |c| c.free_action().culture_tokens(1),
         |game, player, _| !possible_advances(player, game).is_empty(),
     )
     .tactics_card(tactics_card)
@@ -57,10 +56,7 @@ fn advance(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                 ResourcePile::culture_tokens(1),
                 false,
             );
-            s.log(
-                game,
-                &format!("Gain {} using the Advance action card.", advance.name(game)),
-            );
+            s.log(game, &format!("Gain {}", advance.name(game)));
         },
     )
     .build()
@@ -81,7 +77,7 @@ fn inspiration(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Inspiration",
         "Gain 1 advance for free (without changing the Game Event counter) \
         that a player owns who has a unit or city within range 2 of your units or cities.",
-        ActionCost::free(),
+        |c| c.free_action().no_resources(),
         |game, player, _| !possible_inspiration_advances(game, player).is_empty(),
     )
     .tactics_card(tactics_card)
@@ -157,7 +153,7 @@ fn hero_general(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Hero General",
         "If you won a land battle this turn: Increase the mood in a city by 1. \
         You may pay 1 mood token to increase the mood in a city by 1.",
-        ActionCost::free(),
+        |c| c.free_action().no_resources(),
         |_game, player, _| !cities_where_mood_can_increase(player).is_empty(),
     )
     .combat_requirement(Arc::new(|s, p| {
@@ -228,7 +224,7 @@ fn ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         id,
         "Ideas",
         "Gain 1 idea per Academy you own.",
-        ActionCost::free(),
+        |c| c.free_action().no_resources(),
         |_game, player, _| academies(player) > 0,
     )
     .tactics_card(tactics_card)
@@ -255,7 +251,7 @@ fn great_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         id,
         "Great Ideas",
         "You captured a city or won a land battle this turn: Gain 2 ideas.",
-        ActionCost::free(),
+        |c| c.free_action().no_resources(),
         |_game, player, _| player.resources.ideas < player.resource_limit.ideas,
     )
     .combat_requirement(Arc::new(|s, p| {

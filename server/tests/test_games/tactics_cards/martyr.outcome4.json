@@ -273,7 +273,24 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 6
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToDiscardFaceDown"
+                      },
+                      "origin": {
+                        "Advance": "Tactics"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -284,7 +301,24 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 1,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 24
+                        },
+                        "from": {
+                          "Hand": 1
+                        },
+                        "to": "PlayToDiscardFaceDown"
+                      },
+                      "origin": {
+                        "Advance": "Tactics"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -387,22 +421,22 @@
       "Defenders: 1 ship"
     ],
     [
-      "Player1: Tactics: Played a Tactics Card"
+      "Player1: Tactics: Play an action card face down"
     ],
     [
-      "Player2: Tactics: Played a Tactics Card",
+      "Player2: Tactics: Play an action card face down",
       "Player1 reveals Tactics Card High Morale",
       "Player2 reveals Tactics Card Martyr",
-      "Player1: Martyr: Cannot use tactics card using Martyr (but it is still discarded)"
+      "Player1: Martyr: Cannot use tactics card (but it is still discarded)"
     ],
     [
-      "Player1: Martyr: Player1 sacrifices a ship using Martyr",
+      "Player1: Martyr: Player1 sacrifices a ship",
       "Player1: Combat: Lost 1 ship at C3"
     ],
     [
       "Player1: Choose Casualties (carried units): Killed carried units: 1 elephant",
       "Player1: Choose Casualties (carried units): Lost 1 elephant at C3",
-      "Player2: Martyr: Player2 sacrifices a ship using Martyr",
+      "Player2: Martyr: Player2 sacrifices a ship",
       "Player2: Combat: Lost 1 ship at D2",
       "Player1 rolled 6 (infantry, no bonus) for combined combat value of 6 and gets 0 hits against defending units.",
       "Player2 rolled no dice for combined combat value of 0 and gets 0 hits against attacking units.",

@@ -274,6 +274,21 @@
                       "origin": {
                         "Incident": 19
                       }
+                    },
+                    {
+                      "player": 1,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 119
+                        },
+                        "from": "Incident",
+                        "to": {
+                          "Hand": 1
+                        }
+                      },
+                      "origin": {
+                        "Incident": 19
+                      }
                     }
                   ]
                 },
@@ -308,7 +323,7 @@
     ],
     [
       "Player2: Great Artist: Pay 2 culture tokens",
-      "Player2: Great Artist: Gain Great Artist for 2 culture tokens"
+      "Player2: Great Artist: Gain Great Artist from the current event"
     ],
     [
       "Player1 ended their turn with 2 actions left"

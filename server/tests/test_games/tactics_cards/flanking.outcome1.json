@@ -228,6 +228,21 @@
                   "items": [
                     {
                       "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 42
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToDiscardFaceDown"
+                      },
+                      "origin": {
+                        "Advance": "Tactics"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Units": {
                         "units": {
                           "infantry": 1
@@ -270,7 +285,7 @@
       "Defenders: 2 infantry"
     ],
     [
-      "Player1: Tactics: Played a Tactics Card",
+      "Player1: Tactics: Play an action card face down",
       "Player1 reveals Tactics Card Flanking",
       "Player1 rolled 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 13 and gets 2 hits against defending units.",
       "Player1 used the following combat modifiers: Flanking added 1 extra die",

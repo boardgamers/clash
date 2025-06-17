@@ -254,6 +254,21 @@
                   "items": [
                     {
                       "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 11
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToDiscard"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "ideas": 2
@@ -281,7 +296,7 @@
       "Player1: Waste: Could not store 1 gold"
     ],
     [
-      "Player1 played the action card Great Ideas",
+      "Player1: Action Card: Play Great Ideas/Siege",
       "Player1: Great Ideas: Gain 2 ideas"
     ]
   ],

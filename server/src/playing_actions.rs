@@ -1,8 +1,11 @@
+use crate::action_cost::ActionResourceCost;
 use serde::{Deserialize, Serialize};
 
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::action_card::{can_play_civil_card, log_execute_action_card, play_action_card};
-use crate::advance::{AdvanceAction, base_advance_cost, execute_advance_action};
+use crate::action_card::{can_play_civil_card, discard_action_card, play_action_card};
+use crate::action_cost::ActionCost;
+use crate::advance::{AdvanceAction, execute_advance_action};
+use crate::card::HandCardLocation;
 use crate::city::execute_found_city_action;
 use crate::collect::{Collect, execute_collect};
 use crate::construct::Construct;
@@ -15,7 +18,7 @@ use crate::content::persistent_events::{
     PaymentRequest, PersistentEventType, TriggerPersistentEventParams, trigger_persistent_event_ext,
 };
 use crate::cultural_influence::{InfluenceCultureAttempt, execute_influence_culture_attempt};
-use crate::events::{EventOrigin, check_event_origin};
+use crate::events::EventOrigin;
 use crate::game::GameState;
 use crate::happiness::{IncreaseHappiness, execute_increase_happiness};
 use crate::payment::PaymentOptions;
@@ -90,12 +93,14 @@ impl PlayingActionType {
                 .player(player)
                 .custom_action_info(*custom_action)
                 .cost
-                .action_type
+                .cost
                 .clone(),
             PlayingActionType::ActionCard(id) => game.cache.get_civil_card(*id).action_type.clone(),
             // action cost of wonder is checked later
-            PlayingActionType::WonderCard(_) | PlayingActionType::EndTurn => ActionCost::free(),
-            _ => ActionCost::regular(),
+            PlayingActionType::WonderCard(_) | PlayingActionType::EndTurn => {
+                ActionCost::new(true, ActionResourceCost::free())
+            }
+            _ => ActionCost::new(false, ActionResourceCost::free()),
         }
     }
 
@@ -167,7 +172,13 @@ impl PlayingAction {
                 log_start_custom_action(game, player_index, a);
             }
             PlayingAction::ActionCard(id) => {
-                log_execute_action_card(game, player_index, *id);
+                discard_action_card(
+                    game,
+                    player_index,
+                    *id,
+                    &EventOrigin::Ability("Action Card".to_string()),
+                    HandCardLocation::PlayToDiscard,
+                );
             }
             _ => {}
         }
@@ -295,96 +306,6 @@ fn assert_allowed_action_type(
         }
     }
     playing_action_type.clone()
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub enum ActionResourceCost {
-    Free,
-    Resources(ResourcePile),
-    Tokens(u8),
-    AdvanceCostWithoutDiscount,
-}
-
-impl ActionResourceCost {
-    #[must_use]
-    pub fn free() -> Self {
-        ActionResourceCost::Free
-    }
-
-    #[must_use]
-    pub fn resources(cost: ResourcePile) -> Self {
-        if cost.is_empty() {
-            return ActionResourceCost::Free;
-        }
-        ActionResourceCost::Resources(cost)
-    }
-
-    #[must_use]
-    pub fn tokens(tokens: u8) -> Self {
-        if tokens == 0 {
-            return ActionResourceCost::Free;
-        }
-        ActionResourceCost::Tokens(tokens)
-    }
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub struct ActionCost {
-    pub free: bool,
-    pub cost: ActionResourceCost,
-}
-
-impl ActionCost {
-    pub(crate) fn is_available(&self, game: &Game, player_index: usize) -> Result<(), String> {
-        let p = game.player(player_index);
-        if !p.can_afford(&self.payment_options(p, check_event_origin())) {
-            return Err("Not enough resources for action type".to_string());
-        }
-
-        if !(self.free || game.actions_left > 0) {
-            return Err("No actions left".to_string());
-        }
-        Ok(())
-    }
-
-    #[must_use]
-    pub fn payment_options(&self, player: &Player, origin: EventOrigin) -> PaymentOptions {
-        match &self.cost {
-            ActionResourceCost::Free => PaymentOptions::free(),
-            ActionResourceCost::Resources(c) => {
-                PaymentOptions::resources(player, origin, c.clone())
-            }
-            ActionResourceCost::Tokens(tokens) => PaymentOptions::tokens(player, origin, *tokens),
-            ActionResourceCost::AdvanceCostWithoutDiscount => base_advance_cost(player),
-        }
-    }
-}
-
-impl ActionCost {
-    #[must_use]
-    pub fn cost(cost: ResourcePile) -> Self {
-        Self::new(true, ActionResourceCost::resources(cost))
-    }
-
-    #[must_use]
-    pub fn regular() -> Self {
-        Self::new(false, ActionResourceCost::free())
-    }
-
-    #[must_use]
-    pub fn regular_with_cost(cost: ResourcePile) -> Self {
-        Self::new(false, ActionResourceCost::resources(cost))
-    }
-
-    #[must_use]
-    pub fn free() -> Self {
-        Self::new(true, ActionResourceCost::free())
-    }
-
-    #[must_use]
-    pub fn new(free: bool, cost: ActionResourceCost) -> Self {
-        Self { free, cost }
-    }
 }
 
 #[must_use]

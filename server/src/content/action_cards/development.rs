@@ -15,8 +15,7 @@ use crate::content::tactics_cards::{
 };
 use crate::game::Game;
 use crate::player::{Player, gain_unit};
-use crate::playing_actions::{ActionCost, PlayingActionType};
-use crate::resource_pile::ResourcePile;
+use crate::playing_actions::PlayingActionType;
 use crate::unit::UnitType;
 use crate::utils::remove_element_by;
 
@@ -40,7 +39,7 @@ fn city_development(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         id,
         "City Development",
         "Construct a building without paying resources.",
-        ActionCost::regular_with_cost(ResourcePile::culture_tokens(1)),
+        |c| c.action().culture_tokens(1),
         |game, player, _| can_construct_any_building(game, player),
     )
     .tactics_card(tactics_card)
@@ -67,7 +66,7 @@ fn production_focus(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Production Focus",
         "For the next collect action, you may collect multiple times from the same tile. \
         The total amount of resources does not change.",
-        ActionCost::regular(),
+        |c| c.action().no_resources(),
         |game, player, _| collect_special_action(game, player),
     )
     .tactics_card(tactics_card)
@@ -152,7 +151,7 @@ fn explorer(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Explorer",
         "Explore a tile adjacent to a one of your cities - \
         AND/OR gain a free settler in one of your cities.",
-        ActionCost::regular_with_cost(ResourcePile::culture_tokens(1)),
+        |c| c.action().culture_tokens(1),
         |game, player, _| {
             !action_explore_request(game, player.index)
                 .choices

@@ -1,14 +1,16 @@
 use super::player::Player;
 use crate::action::execute_action;
+use crate::card::{HandCard, HandCardLocation};
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{
     EventResponse, PersistentEventRequest, PersistentEventType,
 };
 use crate::game::GameOptions;
 use crate::game_setup::{GameSetupBuilder, setup_game};
-use crate::log::{current_player_turn_log_mut, linear_action_log};
+use crate::log::{ActionLogAction, ActionLogEntry, linear_action_log};
 use crate::utils::Shuffle;
 use crate::victory_points::compare_score;
+use crate::wonder::Wonder;
 use crate::{
     action::Action,
     game::{Game, GameState::*},
@@ -130,6 +132,58 @@ pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
         }
     }
     game.map.strip_secret();
+    strip_events(&mut game, player_index);
+    strip_log(&mut game, player_index);
+
+    game
+}
+
+fn strip_log(game: &mut Game, player_index: Option<usize>) {
+    for age in &mut game.action_log {
+        for round in &mut age.rounds {
+            for player in &mut round.players {
+                for action in &mut player.actions {
+                    strip_action(action, player_index);
+                }
+            }
+        }
+    }
+}
+
+fn strip_action(action: &mut ActionLogAction, player_index: Option<usize>) {
+    // undo has secret information, like gained action cards
+    action.undo.clear();
+
+    if let Action::Response(EventResponse::SelectHandCards(c)) = &mut action.action {
+        // player shouldn't see other player's hand cards
+        c.clear();
+    }
+
+    for item in &mut action.items {
+        if let ActionLogEntry::HandCard { card, from, to } = &mut item.entry {
+            if is_visible_card_info(player_index, from, to) {
+                match &card {
+                    HandCard::ActionCard(_) => *card = HandCard::ActionCard(0),
+                    HandCard::ObjectiveCard(_) => *card = HandCard::ObjectiveCard(0),
+                    HandCard::Wonder(_) => *card = HandCard::Wonder(Wonder::Hidden),
+                }
+            }
+        }
+    }
+}
+
+fn is_visible_card_info(
+    player_index: Option<usize>,
+    from: &HandCardLocation,
+    to: &HandCardLocation,
+) -> bool {
+    from.player() == player_index
+        || to.player() == player_index
+        || from.is_public()
+        || to.is_public()
+}
+
+fn strip_events(game: &mut Game, player_index: Option<usize>) {
     for s in &mut game.events {
         match &mut s.event_type {
             PersistentEventType::CombatRoundStart(r) => {
@@ -158,17 +212,4 @@ pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
             }
         }
     }
-    let player_log = current_player_turn_log_mut(&mut game);
-    if player_index != Some(player_log.index) {
-        for l in &mut player_log.actions {
-            // undo has secret information, like gained action cards
-            l.undo.clear();
-            if let Action::Response(EventResponse::SelectHandCards(c)) = &mut l.action {
-                // player shouldn't see other player's hand cards
-                c.clear();
-            }
-        }
-    }
-
-    game
 }

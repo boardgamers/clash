@@ -452,6 +452,21 @@
                       "origin": {
                         "LeaderAbility": "Idol"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 7
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToDiscard"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
                     }
                   ]
                 },
@@ -495,8 +510,8 @@
     ],
     [
       "Player1: Idol: Pay 1 culture token",
-      "Player1: Idol: Decided to play Spy as a free action using Idol",
-      "Player1 played the action card Spy",
+      "Player1: Idol: Decided to play Spy as a free action",
+      "Player1: Action Card: Play Spy/Heavy Resistance",
       "Player1 has to pay 1 culture token for Spy"
     ],
     [

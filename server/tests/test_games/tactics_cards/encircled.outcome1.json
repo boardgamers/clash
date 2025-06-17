@@ -230,6 +230,21 @@
                   "items": [
                     {
                       "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 2
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToDiscardFaceDown"
+                      },
+                      "origin": {
+                        "Advance": "Tactics"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Units": {
                         "units": {
                           "infantry": 1
@@ -272,7 +287,7 @@
       "Defenders: 2 infantry"
     ],
     [
-      "Player1: Tactics: Played a Tactics Card",
+      "Player1: Tactics: Play an action card face down",
       "Player1 reveals Tactics Card Encircled",
       "Player1 rolled 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units.",
       "Player2 rolled 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against attacking units.",

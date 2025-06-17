@@ -12,7 +12,6 @@ use crate::game::Game;
 use crate::map::{BlockPosition, block_has_player_city, block_tiles, get_map_setup};
 use crate::payment::PaymentOptions;
 use crate::player::Player;
-use crate::playing_actions::ActionCost;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
@@ -28,7 +27,7 @@ pub(crate) fn great_explorer() -> ActionCard {
             without using a Settler.",
             great_person_description(&groups)
         ),
-        ActionCost::regular(),
+        |c| c.action().no_resources(),
         groups,
         |game, player| {
             !action_explore_request(game, player.index)

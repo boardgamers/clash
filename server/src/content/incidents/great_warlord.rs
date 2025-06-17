@@ -9,7 +9,6 @@ use crate::content::incidents::great_persons::{
 use crate::game::GameState;
 use crate::game::GameState::Movement;
 use crate::movement::MoveState;
-use crate::playing_actions::ActionCost;
 use std::mem;
 
 pub(crate) fn great_warlord() -> ActionCard {
@@ -22,7 +21,7 @@ pub(crate) fn great_warlord() -> ActionCard {
             gain 2 combat value in every round.",
             great_person_description(&groups)
         ),
-        ActionCost::regular(),
+        |c| c.action().no_resources(),
         groups,
         |_game, _player| true,
     )

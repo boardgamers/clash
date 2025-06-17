@@ -24,20 +24,21 @@ pub(crate) fn education() -> AdvanceGroupInfo {
 }
 
 fn writing() -> AdvanceBuilder {
-    AdvanceInfo::builder(
+    let b = AdvanceInfo::builder(
         Advance::Writing,
         "Writing",
         "Gain 1 action and 1 objective card",
-    )
-    .with_advance_bonus(CultureToken)
-    .with_unlocked_building(Building::Academy)
-    .add_once_initializer(|game, player_index| {
-        gain_action_card_from_pile(game, player_index);
-        // can't gain objective card directly, because the "combat_end" listener might
-        // currently being processed ("teach us now")
-        game.player_mut(player_index).gained_objective =
-            draw_and_log_objective_card_from_pile(game, player_index);
-    })
+    );
+    let origin = b.get_key().clone();
+    b.with_advance_bonus(CultureToken)
+        .with_unlocked_building(Building::Academy)
+        .add_once_initializer(move |game, player_index| {
+            gain_action_card_from_pile(game, player_index, &origin);
+            // can't gain objective card directly, because the "combat_end" listener might
+            // currently being processed ("teach us now")
+            game.player_mut(player_index).gained_objective =
+                draw_and_log_objective_card_from_pile(game, player_index);
+        })
 }
 
 pub(crate) fn use_academy() -> Ability {

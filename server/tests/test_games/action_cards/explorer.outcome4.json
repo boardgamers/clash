@@ -355,7 +355,24 @@
                     "Playing": {
                       "ActionCard": 21
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 1,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 21
+                        },
+                        "from": {
+                          "Hand": 1
+                        },
+                        "to": "PlayToDiscard"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -431,7 +448,7 @@
   "action_log_index": 5,
   "log": [
     [
-      "Player2 played the action card Explorer",
+      "Player2: Action Card: Play Explorer/Encircled",
       "Player2 has to pay 1 culture token for Explorer"
     ],
     [

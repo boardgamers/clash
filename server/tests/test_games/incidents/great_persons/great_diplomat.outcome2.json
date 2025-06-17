@@ -281,6 +281,21 @@
                       "origin": {
                         "Incident": 57
                       }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 157
+                        },
+                        "from": "Incident",
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "Incident": 57
+                      }
                     }
                   ]
                 },
@@ -389,7 +404,7 @@
     ],
     [
       "Player1: Great Diplomat: Pay 1 culture token",
-      "Player1: Great Diplomat: Gain Great Diplomat for 1 culture token",
+      "Player1: Great Diplomat: Gain Great Diplomat from the current event",
       "Player1: Great Diplomat: Initiated diplomatic relations with Player2"
     ],
     [

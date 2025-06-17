@@ -196,7 +196,24 @@
                     "Playing": {
                       "ActionCard": 37
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 37
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToDiscard"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -245,7 +262,7 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 played the action card Militia",
+      "Player1: Action Card: Play Militia/Wedge Formation",
       "Player1 has to pay 1 culture token for Militia"
     ],
     [

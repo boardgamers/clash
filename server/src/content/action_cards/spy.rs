@@ -1,13 +1,12 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
-use crate::card::{HandCard, HandCardType, hand_cards};
+use crate::card::{HandCard, HandCardLocation, HandCardType, hand_cards, log_card_transfer};
 use crate::content::persistent_events::{HandCardsRequest, PersistentEventType, PlayerRequest};
 use crate::content::tactics_cards::TacticsCardFactory;
+use crate::events::{EventOrigin, check_event_origin};
 use crate::game::Game;
 use crate::objective_card::{deinit_objective_card, init_objective_card};
 use crate::player::Player;
-use crate::playing_actions::ActionCost;
-use crate::resource_pile::ResourcePile;
 use crate::utils::remove_element;
 use crate::wonder::{Wonder, deinit_wonder, init_wonder};
 use itertools::Itertools;
@@ -19,7 +18,7 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Spy",
         "Look at all Wonder, Action, and Objective cards of another player. \
         You may swap one card of the same type.",
-        ActionCost::regular_with_cost(ResourcePile::culture_tokens(1)),
+        |c| c.action().culture_tokens(1),
         |game, player, _| !players_with_cards(game, player.index).is_empty(),
     )
     .add_player_request(
@@ -79,6 +78,7 @@ pub(crate) fn spy(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                 &s.choice,
                 s.player_index,
                 a.selected_player.expect("player not found"),
+                &s.origin,
             )
             .map_err(|e| panic!("Failed to swap cards: {e}"));
         },
@@ -100,6 +100,7 @@ fn swap_cards(
     swap: &[HandCard],
     player: usize,
     other: usize,
+    origin: &EventOrigin,
 ) -> Result<(), String> {
     if swap.is_empty() {
         game.add_info_log_item(&format!(
@@ -132,6 +133,8 @@ fn swap_cards(
                 |p| &mut p.action_cards,
                 |_, _, _| {}, // action cards are not initialized
                 |_, _, _| {},
+                HandCard::ActionCard,
+                origin,
             );
             "action"
         }
@@ -148,6 +151,8 @@ fn swap_cards(
                 |p| &mut p.wonder_cards,
                 init_wonder,
                 deinit_wonder,
+                HandCard::Wonder,
+                origin,
             );
             "wonder"
         }
@@ -164,6 +169,8 @@ fn swap_cards(
                 |p| &mut p.objective_cards,
                 init_objective_card,
                 deinit_objective_card,
+                HandCard::ObjectiveCard,
+                origin,
             );
             "objective"
         }
@@ -177,6 +184,7 @@ fn swap_cards(
     Ok(())
 }
 
+#[allow(clippy::too_many_arguments)]
 fn swap_card<T: PartialEq + Ord + Debug + Copy>(
     game: &mut Game,
     player: usize,
@@ -186,6 +194,8 @@ fn swap_card<T: PartialEq + Ord + Debug + Copy>(
     get_list: impl Fn(&mut Player) -> &mut Vec<T>,
     init: impl Fn(&mut Game, usize, T),
     deinit: impl Fn(&mut Game, usize, T),
+    to_hand_card: impl Fn(T) -> HandCard + Copy,
+    origin: &EventOrigin,
 ) {
     let card = remove_element(get_list(game.player_mut(player)), &id)
         .unwrap_or_else(|| panic!("card not found {id:?}"));
@@ -203,6 +213,20 @@ fn swap_card<T: PartialEq + Ord + Debug + Copy>(
     deinit(game, other, other_id);
     init(game, other, id);
     init(game, player, other_id);
+    log_card_transfer(
+        game,
+        &to_hand_card(id),
+        HandCardLocation::Hand(player),
+        HandCardLocation::Hand(other),
+        origin,
+    );
+    log_card_transfer(
+        game,
+        &to_hand_card(other_id),
+        HandCardLocation::Hand(other),
+        HandCardLocation::Hand(player),
+        origin,
+    );
 }
 
 fn get_swap_card(swap: &[HandCard], p: &Player) -> Result<HandCard, String> {
@@ -254,5 +278,6 @@ pub(crate) fn validate_spy_cards(cards: &[HandCard], game: &Game) -> Result<(), 
         cards,
         s.player.index,
         c.selected_player.expect("no player found"),
+        &check_event_origin(),
     )
 }

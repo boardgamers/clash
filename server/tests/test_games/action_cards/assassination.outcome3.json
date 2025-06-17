@@ -223,7 +223,24 @@
                     "Playing": {
                       "ActionCard": 27
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 27
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToDiscard"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -283,7 +300,7 @@
   "action_log_index": 0,
   "log": [
     [
-      "Player1 played the action card Assassination",
+      "Player1: Action Card: Play Assassination/High Ground",
       "Player1 has to pay 1 culture token for Assassination"
     ],
     [

@@ -1,8 +1,11 @@
 use crate::ability_initializer::{
     AbilityInitializerBuilder, AbilityInitializerSetup, AbilityListeners,
 };
+use crate::action_cost::{ActionCost, ActionCostBuilder, ActionCostOncePerTurn};
 use crate::advance::Advance;
-use crate::card::{discard_card, draw_card_from_pile};
+use crate::card::{
+    HandCard, HandCardLocation, discard_card, draw_card_from_pile, log_card_transfer,
+};
 use crate::combat_stats::CombatStats;
 use crate::content::persistent_events::{
     PersistentEventType, TriggerPersistentEventParams, trigger_persistent_event_with_listener,
@@ -12,7 +15,6 @@ use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::log::{current_player_turn_log, current_player_turn_log_mut};
 use crate::player::Player;
-use crate::playing_actions::ActionCost;
 use crate::position::Position;
 use crate::tactics_card::TacticsCard;
 use crate::utils::remove_element_by;
@@ -58,11 +60,11 @@ impl ActionCard {
     }
 
     #[must_use]
-    pub fn builder<F>(
+    pub(crate) fn builder<F>(
         id: u8,
         name: &str,
         description: &str,
-        action_type: ActionCost,
+        cost: impl Fn(ActionCostBuilder) -> ActionCostOncePerTurn + Send + Sync + 'static,
         can_play: F,
     ) -> ActionCardBuilder
     where
@@ -76,20 +78,18 @@ impl ActionCard {
             combat_requirement: None,
             builder: AbilityInitializerBuilder::new(),
             tactics_card: None,
-            action_type,
+            action_cost: cost(ActionCostBuilder::new(None)).cost,
             target: CivilCardTarget::ActivePlayer,
         }
     }
 
     #[must_use]
     pub fn name(&self) -> String {
-        format!(
-            "{}/{}",
-            self.civil_card.name,
-            self.tactics_card
-                .as_ref()
-                .map_or("-".to_string(), |c| c.name.clone())
-        )
+        if let Some(tactics_card) = &self.tactics_card {
+            format!("{}/{}", self.civil_card.name, tactics_card.name)
+        } else {
+            self.civil_card.name.clone()
+        }
     }
 }
 
@@ -97,7 +97,7 @@ pub struct ActionCardBuilder {
     id: u8,
     name: String,
     description: String,
-    action_type: ActionCost,
+    action_cost: ActionCost,
     can_play: CanPlayCard,
     combat_requirement: Option<CombatRequirement>,
     tactics_card: Option<TacticsCard>,
@@ -134,7 +134,7 @@ impl ActionCardBuilder {
                 can_play: self.can_play,
                 combat_requirement: self.combat_requirement,
                 listeners: self.builder.build(),
-                action_type: self.action_type,
+                action_type: self.action_cost,
                 target: self.target,
             },
             self.tactics_card,
@@ -163,7 +163,6 @@ impl AbilityInitializerSetup for ActionCardBuilder {
 pub(crate) fn play_action_card(game: &mut Game, player_index: usize, id: u8) {
     let card = game.cache.get_civil_card(id).clone();
 
-    discard_action_card(game, player_index, id);
     let mut satisfying_action: Option<usize> = None;
     let civil_card_target = card.target;
     if let Some(r) = &card.combat_requirement {
@@ -188,14 +187,6 @@ pub(crate) fn play_action_card(game: &mut Game, player_index: usize, id: u8) {
     );
 }
 
-pub(crate) fn log_execute_action_card(game: &mut Game, player_index: usize, id: u8) {
-    game.add_info_log_item(&format!(
-        "{} played the action card {}",
-        game.player_name(player_index),
-        game.cache.get_civil_card(id).clone().name
-    ));
-}
-
 pub(crate) fn on_play_action_card(game: &mut Game, player_index: usize, i: ActionCardInfo) {
     let players = match &game.cache.get_civil_card(i.id).target {
         CivilCardTarget::ActivePlayer => vec![player_index],
@@ -213,7 +204,7 @@ pub(crate) fn on_play_action_card(game: &mut Game, player_index: usize, i: Actio
     );
 }
 
-pub(crate) fn gain_action_card_from_pile(game: &mut Game, player: usize) {
+pub(crate) fn gain_action_card_from_pile(game: &mut Game, player: usize, origin: &EventOrigin) {
     if game
         .player(player)
         .wonders_owned
@@ -221,17 +212,13 @@ pub(crate) fn gain_action_card_from_pile(game: &mut Game, player: usize) {
     {
         game.player_mut(player).great_mausoleum_action_cards += 1;
     } else {
-        do_gain_action_card_from_pile(game, player);
+        do_gain_action_card_from_pile(game, player, origin);
     }
 }
 
-pub(crate) fn do_gain_action_card_from_pile(game: &mut Game, player: usize) {
+pub(crate) fn do_gain_action_card_from_pile(game: &mut Game, player: usize, origin: &EventOrigin) {
     if let Some(c) = draw_action_card_from_pile(game) {
-        gain_action_card(game, player, c);
-        game.add_info_log_item(&format!(
-            "{} gained an action card from the pile",
-            game.player_name(player)
-        ));
+        gain_action_card(game, player, c, HandCardLocation::DrawPile, origin);
     }
 }
 
@@ -245,14 +232,40 @@ fn draw_action_card_from_pile(game: &mut Game) -> Option<u8> {
     )
 }
 
-pub(crate) fn gain_action_card(game: &mut Game, player_index: usize, action_card: u8) {
-    game.players[player_index].action_cards.push(action_card);
+pub(crate) fn gain_action_card(
+    game: &mut Game,
+    player_index: usize,
+    action_card: u8,
+    from: HandCardLocation,
+    origin: &EventOrigin,
+) {
+    game.player_mut(player_index).action_cards.push(action_card);
+    log_card_transfer(
+        game,
+        &HandCard::ActionCard(action_card),
+        from,
+        HandCardLocation::Hand(player_index),
+        origin,
+    );
 }
 
-pub(crate) fn discard_action_card(game: &mut Game, player: usize, card: u8) {
+pub(crate) fn discard_action_card(
+    game: &mut Game,
+    player: usize,
+    card: u8,
+    origin: &EventOrigin,
+    to: HandCardLocation,
+) {
     let card = remove_element_by(&mut game.player_mut(player).action_cards, |&id| id == card)
         .unwrap_or_else(|| panic!("action card not found {card}"));
     discard_card(|g| &mut g.action_cards_discarded, card, player, game);
+    log_card_transfer(
+        game,
+        &HandCard::ActionCard(card),
+        HandCardLocation::Hand(player),
+        to,
+        origin,
+    );
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]

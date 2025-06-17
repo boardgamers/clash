@@ -1586,11 +1586,11 @@
       "AlphaZero: Martyr: Cannot use tactics card using Martyr (but it is still discarded)"
     ],
     [
-      "Spock: Martyr: Spock sacrifices an Alexander the Great using Martyr",
+      "Spock: Martyr: Spock sacrifices an Alexander the Great",
       "Spock: Combat: Lost Alexander the Great at D4"
     ],
     [
-      "AlphaZero: Martyr: AlphaZero sacrifices a Wu Zetian using Martyr",
+      "AlphaZero: Martyr: AlphaZero sacrifices a Wu Zetian",
       "AlphaZero: Combat: Lost Wu Zetian at D5",
       "Spock rolled 2 (elephant, no bonus), 5 (infantry, +1 combat value), 5 (infantry, +1 combat value) for combined combat value of 16 and gets 3 hits against defending units.",
       "Spock used the following combat modifiers: Ruler of the World adds 2 combat value",

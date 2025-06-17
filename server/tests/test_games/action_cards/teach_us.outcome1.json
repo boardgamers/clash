@@ -277,6 +277,36 @@
                   "items": [
                     {
                       "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 35
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToDiscard"
+                      },
+                      "origin": {
+                        "Ability": "Teach us"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 1
+                        },
+                        "from": "DrawPile",
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Writing"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "culture_tokens": 1
@@ -314,9 +344,9 @@
       "Player1: Waste: Could not store 1 gold"
     ],
     [
-      "Player1: Teach us: Activate",
+      "Player1: Teach us: Play Teach Us/Defensive Formation",
       "Player1: Teach us: Selected Writing as advance",
-      "Player1 gained an action card from the pile",
+      "Player1: Writing: Draw an action card",
       "Player1 gained an objective card from the pile",
       "Player1: Writing: Gain 1 culture token"
     ]

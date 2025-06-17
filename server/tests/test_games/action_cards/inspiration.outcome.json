@@ -200,6 +200,21 @@
                   "items": [
                     {
                       "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 3
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToDiscard"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "mood_tokens": 1
@@ -222,7 +237,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 played the action card Inspiration",
+      "Player1: Action Card: Play Inspiration/Encircled",
       "Player1: Storage: Gain 1 mood token",
       "Player1: Inspiration: Gain Storage for free using Inspiration."
     ]

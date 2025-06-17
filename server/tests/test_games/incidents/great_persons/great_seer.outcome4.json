@@ -264,6 +264,21 @@
                       "origin": {
                         "Incident": 58
                       }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 158
+                        },
+                        "from": "Incident",
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "Incident": 58
+                      }
                     }
                   ]
                 },
@@ -272,7 +287,24 @@
                     "Playing": {
                       "ActionCard": 158
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 158
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToDiscard"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -311,6 +343,21 @@
                     },
                     {
                       "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 1
+                        },
+                        "from": "DrawPile",
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Writing"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "culture_tokens": 1
@@ -344,10 +391,10 @@
     ],
     [
       "Player1: Great Seer: Pay 1 culture token",
-      "Player1: Great Seer: Gain Great Seer for 1 culture token"
+      "Player1: Great Seer: Gain Great Seer from the current event"
     ],
     [
-      "Player1 played the action card Great Seer"
+      "Player1: Action Card: Play Great Seer"
     ],
     [
       "Player1: Great Seer: Chose an objective card for player Player1",
@@ -356,13 +403,13 @@
     [
       "Player1: Advance: Pay 2 food",
       "Player1: Advance: Gain Writing",
-      "Player1 gained an action card from the pile",
+      "Player1: Writing: Draw an action card",
       "Player1 gained the Great Seer objective card from the pile",
       "Player1: Writing: Gain 1 culture token"
     ]
   ],
   "undo_limit": 5,
-  "actions_left": 1,
+  "actions_left": 0,
   "round": 2,
   "age": 1,
   "messages": [
