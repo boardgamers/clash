@@ -332,7 +332,6 @@
                       ]
                     }
                   },
-                  "wonder_built": "Pyramids",
                   "items": [
                     {
                       "player": 0,
@@ -348,6 +347,21 @@
                       },
                       "origin": {
                         "Wonder": "Pyramids"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "Wonder": "Pyramids"
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToKeep"
+                      },
+                      "origin": {
+                        "CivilCard": 155
                       }
                     }
                   ]
@@ -384,7 +398,7 @@
     ],
     [
       "Player1: Pyramids: Pay 2 food, 3 wood, 6 ore, 1 gold and 2 culture tokens",
-      "Player1: Build Wonder: Built Pyramids in city A1 for 2 food, 3 wood, 6 ore, 1 gold and 2 culture tokens"
+      "Player1: Great Architect: Play Pyramids"
     ]
   ],
   "undo_limit": 1,

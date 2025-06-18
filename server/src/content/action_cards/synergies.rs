@@ -1,7 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{ActionCard, ActionCardBuilder, CivilCardTarget, discard_action_card};
 use crate::advance::{Advance, gain_advance_without_payment};
-use crate::card::{HandCard, HandCardLocation};
+use crate::card::{HandCard, HandCardLocation, log_card_transfer};
 use crate::content::ability::Ability;
 use crate::content::action_cards::inspiration;
 use crate::content::advances::theocracy::cities_that_can_add_units;
@@ -12,8 +12,9 @@ use crate::content::tactics_cards::{
     TacticsCardFactory, archers, defensive_formation, flanking, high_ground, high_morale, surprise,
     wedge_formation,
 };
+use crate::events::EventPlayer;
 use crate::game::Game;
-use crate::objective_card::{deinit_objective_card, gain_objective_card};
+use crate::objective_card::{deinit_objective_card, gain_objective_card, log_gain_objective_card};
 use crate::player::{Player, gain_unit};
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
@@ -39,6 +40,7 @@ pub(crate) fn synergies_action_cards() -> Vec<ActionCard> {
 }
 
 fn new_plans(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
+    // todo great seer can be one of the cards
     ActionCard::builder(
         id,
         "New Plans",
@@ -70,7 +72,7 @@ fn new_plans(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                     s.log(game, "Selected none of the objective cards.");
                 }
                 2 => {
-                    swap_objective_card(game, s.player_index, &s.choice);
+                    swap_objective_card(game, &s.player(), &s.choice);
                 }
                 _ => panic!("illegal selection"),
             }
@@ -81,11 +83,7 @@ fn new_plans(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .build()
 }
 
-fn swap_objective_card(game: &mut Game, player: usize, hand_cards: &[HandCard]) {
-    let p = game.player(player);
-    game.add_info_log_item(&format!(
-        "{p} discarded an objective card to draw a new one.",
-    ));
+fn swap_objective_card(game: &mut Game, player: &EventPlayer, hand_cards: &[HandCard]) {
     let mut ids = hand_cards
         .iter()
         .map(|c| {
@@ -95,16 +93,30 @@ fn swap_objective_card(game: &mut Game, player: usize, hand_cards: &[HandCard]) 
             id
         })
         .collect_vec();
-    let p = game.player_mut(player);
+    let p = player.get_mut(game);
     let discarded = remove_element_by(&mut p.objective_cards, |c| ids.contains(&c))
         .expect("discarded objective card");
-    deinit_objective_card(game, player, discarded);
+    log_card_transfer(
+        game,
+        &HandCard::ObjectiveCard(discarded),
+        HandCardLocation::Hand(player.index),
+        HandCardLocation::DiscardPile,
+        &player.origin,
+    );
+    deinit_objective_card(game, player.index, discarded);
     game.objective_cards_left.push(discarded);
 
     remove_element(&mut ids, &&discarded).expect("discarded objective card");
     let gained = ids[0];
     remove_element(&mut game.objective_cards_left, gained).expect("gained objective card");
-    gain_objective_card(game, player, *gained);
+    gain_objective_card(game, player.index, *gained);
+    log_gain_objective_card(
+        game,
+        player.index,
+        *gained,
+        HandCardLocation::DrawPile,
+        &player.origin,
+    );
 }
 
 pub(crate) fn validate_new_plans(cards: &[HandCard], game: &Game) -> Result<(), String> {
@@ -243,7 +255,7 @@ fn categories_with_2_affordable_advances(p: &Player, game: &Game) -> Vec<Advance
                         .default;
                     p.can_afford(&cost)
                         && p.can_advance_free(a.advance, game)
-                        // don't check requirements for second advance, 
+                        // don't check requirements for second advance,
                         // because it can only be to have the leading advance of the group
                         // which is already checked
                         && !p.has_advance(b.advance)

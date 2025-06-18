@@ -80,8 +80,8 @@ fn great_statue() -> WonderInfo {
         use_great_statue,
         |_game, p| !p.objective_cards.is_empty(),
     )
-    .add_once_initializer(|game, player_index| {
-        gain_objective_card_from_pile(game, player_index);
+    .add_once_initializer(move |game, player| {
+        gain_objective_card_from_pile(game, player.index, &player.origin);
     })
     .build()
 }
@@ -102,14 +102,14 @@ fn use_great_statue(b: AbilityBuilder) -> AbilityBuilder {
             let HandCard::ObjectiveCard(card) = s.choice[0] else {
                 panic!("not an objective card")
             };
-            s.log(
+            discard_objective_card(
                 game,
-                &format!(
-                    "Discarded {} to gain an action",
-                    game.cache.get_objective_card(card).name()
-                ),
+                s.player_index,
+                card,
+                &s.origin,
+                HandCardLocation::DiscardPile,
             );
-            discard_objective_card(game, s.player_index, card);
+            s.log(game, "Gain 1 action");
             game.actions_left += 1;
         },
     )
@@ -259,12 +259,12 @@ fn use_great_lighthouse(b: AbilityBuilder) -> AbilityBuilder {
             ))
         },
         |game, s, _| {
-            gain_unit(game, s.player_index, s.choice[0], UnitType::Ship, &s.origin);
             activate_city(
                 great_lighthouse_city(game.player(s.player_index)).position,
                 game,
                 &s.origin,
             );
+            gain_unit(game, s.player_index, s.choice[0], UnitType::Ship, &s.origin);
         },
     )
 }

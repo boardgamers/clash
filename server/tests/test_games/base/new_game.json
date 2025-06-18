@@ -419,6 +419,21 @@
                     },
                     {
                       "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 18
+                        },
+                        "from": "DrawPile",
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Setup"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Units": {
                         "units": {
                           "settlers": 1
@@ -444,6 +459,21 @@
                       "HandCard": {
                         "card": {
                           "ActionCard": 22
+                        },
+                        "from": "DrawPile",
+                        "to": {
+                          "Hand": 1
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Setup"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 16
                         },
                         "from": "DrawPile",
                         "to": {
@@ -492,13 +522,13 @@
     [
       "Player1 is playing as China",
       "Player1: Setup: Draw an action card",
-      "Player1 gained an objective card from the pile",
+      "Player1: Setup: Draw an objective card",
       "Player1: Setup: Gain 1 settler at D2"
     ],
     [
       "Player2 is playing as Greece",
       "Player2: Setup: Draw an action card",
-      "Player2 gained an objective card from the pile",
+      "Player2: Setup: Draw an objective card",
       "Player2: Setup: Gain 1 settler at D7"
     ]
   ],

@@ -91,7 +91,10 @@
       ],
       "incident_tokens": 2,
       "completed_objectives": [
-        "Magnificent Culture"
+        {
+          "card": 32,
+          "name": "Magnificent Culture"
+        }
       ],
       "next_unit_id": 8
     },
@@ -222,7 +225,6 @@
                       ]
                     }
                   },
-                  "wonder_built": "Pyramids",
                   "items": [
                     {
                       "player": 0,
@@ -239,6 +241,21 @@
                       "origin": {
                         "Wonder": "Pyramids"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "Wonder": "Pyramids"
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToKeep"
+                      },
+                      "origin": {
+                        "Ability": "Build Wonder"
+                      }
                     }
                   ]
                 },
@@ -252,8 +269,24 @@
                       ]
                     }
                   },
-                  "completed_objectives": [
-                    "Magnificent Culture"
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 32
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": {
+                          "CompleteObjective": "Magnificent Culture"
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Complete Objectives"
+                      }
+                    }
                   ]
                 }
               ]
@@ -271,10 +304,10 @@
     ],
     [
       "Player1: Pyramids: Pay 2 food, 3 wood, 6 ore, 1 gold and 5 culture tokens",
-      "Player1: Build Wonder: Built Pyramids in city A1 for 2 food, 3 wood, 6 ore, 1 gold and 5 culture tokens"
+      "Player1: Build Wonder: Play Pyramids"
     ],
     [
-      "Player1 completed objective Magnificent Culture"
+      "Player1: Complete Objectives: Complete Magnificent Culture using Magnificent Culture/Outpost"
     ]
   ],
   "undo_limit": 0,

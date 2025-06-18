@@ -11,7 +11,7 @@ use crate::game::{Game, GameContext, GameOptions, GameState};
 use crate::leader::Leader;
 use crate::log::ActionLogAge;
 use crate::map::{Map, MapData};
-use crate::objective_card::init_objective_card;
+use crate::objective_card::{CompletedObjective, init_objective_card};
 use crate::player::Player;
 use crate::player_events::PlayerEvents;
 use crate::resource_pile::ResourcePile;
@@ -263,7 +263,7 @@ pub struct PlayerData {
     incident_tokens: u8,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    completed_objectives: Vec<String>,
+    completed_objectives: Vec<CompletedObjective>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     captured_leaders: Vec<Leader>,

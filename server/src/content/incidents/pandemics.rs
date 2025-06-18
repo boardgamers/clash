@@ -81,10 +81,12 @@ fn pandemics() -> Incident {
                         );
                     }
                     HandCard::ObjectiveCard(o) => {
-                        discard_objective_card(game, s.player_index, *o);
-                        s.log(
+                        discard_objective_card(
                             game,
-                            &format!("Discard {}", game.cache.get_objective_card(*o).name()),
+                            s.player_index,
+                            *o,
+                            &s.origin,
+                            HandCardLocation::DiscardPile,
                         );
                     }
                     HandCard::Wonder(_) => panic!("Unexpected card type"),

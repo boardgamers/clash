@@ -63,6 +63,7 @@ pub fn check_event_origin() -> EventOrigin {
     EventOrigin::Ability("only for checking".to_string())
 }
 
+#[derive(Clone, PartialEq, Eq, Debug)]
 pub(crate) struct EventPlayer {
     pub index: usize,
     pub name: String,

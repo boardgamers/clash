@@ -80,7 +80,10 @@
       ],
       "incident_tokens": 3,
       "completed_objectives": [
-        "City Founder"
+        {
+          "card": 27,
+          "name": "City Founder"
+        }
       ],
       "next_unit_id": 8
     },
@@ -193,9 +196,11 @@
   "starting_player_index": 0,
   "current_player_index": 0,
   "action_log": [
-    { "age": 1,
+    {
+      "age": 1,
       "rounds": [
-        { "round": 1,
+        {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -219,8 +224,24 @@
                       ]
                     }
                   },
-                  "completed_objectives": [
-                    "City Founder"
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 27
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": {
+                          "CompleteObjective": "City Founder"
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Complete Objectives"
+                      }
+                    }
                   ]
                 }
               ]
@@ -236,7 +257,7 @@
       "Player1 founded a city B6"
     ],
     [
-      "Player1 completed objective City Founder"
+      "Player1: Complete Objectives: Complete City Founder using City Founder/Resistance"
     ]
   ],
   "undo_limit": 0,

@@ -399,6 +399,23 @@
                       "origin": {
                         "Ability": "Advance"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "Wonder": "GreatWall"
+                        },
+                        "from": {
+                          "RevealedHand": 1
+                        },
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "LeaderAbility": "Great Wall"
+                      }
                     }
                   ]
                 },
@@ -422,7 +439,6 @@
                       ]
                     }
                   },
-                  "wonder_built": "GreatWall",
                   "items": [
                     {
                       "player": 0,
@@ -443,6 +459,21 @@
                           "LeaderAbility": "Great Wall"
                         }
                       ]
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "Wonder": "GreatWall"
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToKeep"
+                      },
+                      "origin": {
+                        "Ability": "Build Wonder"
+                      }
                     }
                   ]
                 },
@@ -466,7 +497,24 @@
                     "Response": {
                       "Bool": true
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 1,
+                      "HandCard": {
+                        "card": {
+                          "Wonder": "Pyramids"
+                        },
+                        "from": "Public",
+                        "to": {
+                          "Hand": 1
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Draw Wonder Card"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -480,7 +528,7 @@
     [
       "Player1: Advance: Pay 2 food",
       "Player1: Advance: Gain Engineering",
-      "Player1 gained wonder card Great Wall from Player2 using Great Wall"
+      "Player1: Great Wall: Gain Great Wall from Player2"
     ],
     [
       "Player1 played the wonder card Great Wall",
@@ -488,9 +536,9 @@
     ],
     [
       "Player1: Great Wall: Pay 3 food, 2 wood, 7 ore and 3 culture tokens with Great Wall",
-      "Player1: Build Wonder: Built Great Wall in city D1 for 3 food, 2 wood, 7 ore and 3 culture tokens",
       "Great Wall reduced the cost of Great Wall by 2 culture tokens",
-      "Great Wall allows building Great Wall in the leader city as a free action"
+      "Great Wall allows building Great Wall in the leader city as a free action",
+      "Player1: Build Wonder: Play Great Wall"
     ],
     [
       "Player1 ended their turn"
@@ -503,7 +551,7 @@
       "Player2 gets to draw a replacement wonder card."
     ],
     [
-      "Player2: Draw Wonder Card: Drew the public wonder card Pyramids"
+      "Player2: Draw Wonder Card: Gain Pyramids from the public area"
     ]
   ],
   "undo_limit": 0,

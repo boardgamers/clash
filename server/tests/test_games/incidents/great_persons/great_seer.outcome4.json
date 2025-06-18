@@ -315,7 +315,39 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 21
+                        },
+                        "from": "DrawPile",
+                        "to": {
+                          "GreatSeer": 0
+                        }
+                      },
+                      "origin": {
+                        "CivilCard": 158
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 22
+                        },
+                        "from": "DrawPile",
+                        "to": {
+                          "GreatSeer": 1
+                        }
+                      },
+                      "origin": {
+                        "CivilCard": 158
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -348,6 +380,23 @@
                           "ActionCard": 1
                         },
                         "from": "DrawPile",
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Writing"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 21
+                        },
+                        "from": {
+                          "GreatSeer": 0
+                        },
                         "to": {
                           "Hand": 0
                         }
@@ -397,14 +446,14 @@
       "Player1: Action Card: Play Great Seer"
     ],
     [
-      "Player1: Great Seer: Chose an objective card for player Player1",
-      "Player1: Great Seer: Chose an objective card for player Player2"
+      "Player1: Great Seer: Placed a card from the draw pile in the Great Seer",
+      "Player2: Great Seer: Placed a card from the draw pile in the Great Seer"
     ],
     [
       "Player1: Advance: Pay 2 food",
       "Player1: Advance: Gain Writing",
       "Player1: Writing: Draw an action card",
-      "Player1 gained the Great Seer objective card from the pile",
+      "Player1: Writing: Gain an objective card from Great Seer",
       "Player1: Writing: Gain 1 culture token"
     ]
   ],

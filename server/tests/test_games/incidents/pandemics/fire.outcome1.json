@@ -95,7 +95,10 @@
       ],
       "incident_tokens": 3,
       "completed_objectives": [
-        "Terror Regime"
+        {
+          "card": 29,
+          "name": "Terror Regime"
+        }
       ],
       "next_unit_id": 8
     },
@@ -268,9 +271,6 @@
                       ]
                     }
                   },
-                  "completed_objectives": [
-                    "Terror Regime"
-                  ],
                   "items": [
                     {
                       "player": 0,
@@ -294,6 +294,23 @@
                     },
                     {
                       "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 29
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": {
+                          "CompleteObjective": "Terror Regime"
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Complete Objectives"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "MoodChange": {
                         "city": "C2",
                         "mood": "Angry"
@@ -310,6 +327,23 @@
                       },
                       "origin": {
                         "Incident": 53
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 29
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": {
+                          "CompleteObjective": "Terror Regime"
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Complete Objectives"
                       }
                     }
                   ]
@@ -335,7 +369,7 @@
     [
       "Player1: Fire: City C2 became Angry",
       "Player2: Fire: City A1 became Neutral",
-      "Player1 completed objective Terror Regime"
+      "Player1: Complete Objectives: Complete Terror Regime using Shipping Routes/Terror Regime"
     ]
   ],
   "undo_limit": 1,

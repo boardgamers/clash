@@ -328,7 +328,39 @@
                     "Response": {
                       "Bool": true
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "Wonder": "Pyramids"
+                        },
+                        "from": "Public",
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Draw Wonder Card"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "Wonder": "Pyramids"
+                        },
+                        "from": "Public",
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Draw Wonder Card"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -359,7 +391,7 @@
       "Player1: Monuments: Gain 1 culture token"
     ],
     [
-      "Player1: Draw Wonder Card: Drew the public wonder card Pyramids"
+      "Player1: Draw Wonder Card: Gain Pyramids from the public area"
     ]
   ],
   "undo_limit": 1,

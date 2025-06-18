@@ -164,6 +164,7 @@ fn use_sports(b: AbilityBuilder) -> AbilityBuilder {
                 &pile,
                 true,
                 &a.action.action.playing_action_type(),
+                &s.origin,
             )
             .expect("Failed to increase happiness");
         },

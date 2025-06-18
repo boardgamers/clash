@@ -22,7 +22,7 @@ use crate::resource::pay_cost;
 use crate::status_phase::StatusPhaseState;
 use crate::unit::Units;
 use crate::utils;
-use crate::wonder::{WonderBuildInfo, WonderCardInfo};
+use crate::wonder::{DrawWonderCard, WonderBuildInfo, WonderCardInfo};
 use crate::{
     city::City, city_pieces::Building, player::Player, position::Position,
     resource_pile::ResourcePile,
@@ -91,7 +91,7 @@ impl TransientEvents {
 pub(crate) struct PersistentEvents {
     pub collect: PersistentEvent<CollectInfo>,
     pub construct: PersistentEvent<ConstructInfo>,
-    pub draw_wonder_card: PersistentEvent<bool>,
+    pub draw_wonder_card: PersistentEvent<DrawWonderCard>,
     pub advance: PersistentEvent<OnAdvanceInfo>,
     pub recruit: PersistentEvent<Recruit>,
     pub found_city: PersistentEvent<Position>,

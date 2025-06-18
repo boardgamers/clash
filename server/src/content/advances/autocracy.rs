@@ -88,7 +88,7 @@ fn absolute_power() -> AdvanceBuilder {
                 0,
                 |game, p, _| {
                     game.actions_left += 1;
-                    p.log(game, "Gain an extra action");
+                    p.log(game, "Gain 1 action");
                 },
             )
         },

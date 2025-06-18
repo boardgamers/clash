@@ -183,7 +183,7 @@ pub(crate) fn draw_cards() -> Ability {
             0,
             |game, p, _s| {
                 gain_action_card_from_pile(game, p.index, &p.origin);
-                gain_objective_card_from_pile(game, p.index);
+                gain_objective_card_from_pile(game, p.index, &p.origin);
             },
         )
         .build()
@@ -272,7 +272,6 @@ where
     let event2 = event.clone();
     let set_paid2 = set_paid.clone();
     let is_active_player2 = is_active_player.clone();
-    let origin = a.get_key().clone();
     a.add_payment_request_listener(
         event,
         1,
@@ -292,7 +291,7 @@ where
                 return None;
             }
 
-            let o = change_government_cost(game, player_index, origin.clone());
+            let o = change_government_cost(game, player_index, p.origin.clone());
             if !game.player(player_index).can_afford(&o) {
                 return None;
             }

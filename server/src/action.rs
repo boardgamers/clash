@@ -171,7 +171,7 @@ pub(crate) fn after_action(game: &mut Game, player_index: usize) {
             .find(|o| **o == 29);
         if let Some(o) = card {
             // actually did an action
-            complete_objective_card(game, player_index, *o, "Terror Regime".to_string());
+            complete_objective_card(game, player_index, *o, "Terror Regime");
         }
     }
 
@@ -222,8 +222,8 @@ pub(crate) fn execute_custom_phase_action(
     use PersistentEventType::*;
     match details {
         Collect(i) => on_collect(game, player, i),
-        DrawWonderCard(drawn) => {
-            on_draw_wonder_card(game, player, drawn);
+        DrawWonderCard(draw) => {
+            on_draw_wonder_card(game, player, draw);
         }
         ExploreResolution(r) => {
             ask_explore_resolution(game, player, r);

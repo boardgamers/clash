@@ -177,33 +177,61 @@ pub(crate) trait AbilityInitializerSetup: Sized {
 
     fn add_initializer<F>(mut self, initializer: F) -> Self
     where
-        F: Fn(&mut Game, usize, i32) + 'static + Sync + Send,
+        F: Fn(&mut Game, &EventPlayer, i32) + 'static + Sync + Send,
     {
-        self.builder().add_initializer(initializer);
+        let key = self.get_key().clone();
+        self.builder()
+            .add_initializer(move |game, player_index, prio_delta| {
+                initializer(
+                    game,
+                    &EventPlayer::new(player_index, game.player_name(player_index), key.clone()),
+                    prio_delta,
+                );
+            });
         self
     }
 
     fn add_deinitializer<F>(mut self, deinitializer: F) -> Self
     where
-        F: Fn(&mut Game, usize) + 'static + Sync + Send,
+        F: Fn(&mut Game, &EventPlayer) + 'static + Sync + Send,
     {
-        self.builder().add_deinitializer(deinitializer);
+        let key = self.get_key().clone();
+        self.builder().add_deinitializer(move |game, player_index| {
+            deinitializer(
+                game,
+                &EventPlayer::new(player_index, game.player_name(player_index), key.clone()),
+            );
+        });
         self
     }
 
     fn add_once_initializer<F>(mut self, initializer: F) -> Self
     where
-        F: Fn(&mut Game, usize) + 'static + Sync + Send,
+        F: Fn(&mut Game, &EventPlayer) + 'static + Sync + Send,
     {
-        self.builder().add_once_initializer(initializer);
+        let key = self.get_key().clone();
+        self.builder()
+            .add_once_initializer(move |game, player_index| {
+                initializer(
+                    game,
+                    &EventPlayer::new(player_index, game.player_name(player_index), key.clone()),
+                );
+            });
         self
     }
 
     fn add_once_deinitializer<F>(mut self, deinitializer: F) -> Self
     where
-        F: Fn(&mut Game, usize) + 'static + Sync + Send,
+        F: Fn(&mut Game, &EventPlayer) + 'static + Sync + Send,
     {
-        self.builder().add_once_deinitializer(deinitializer);
+        let key = self.get_key().clone();
+        self.builder()
+            .add_once_deinitializer(move |game, player_index| {
+                deinitializer(
+                    game,
+                    &EventPlayer::new(player_index, game.player_name(player_index), key.clone()),
+                );
+            });
         self
     }
 
@@ -950,21 +978,21 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         execution: CustomActionExecution,
     ) -> Self {
         let deinitializer_action = action;
-        let key = self.get_key().clone();
         let exec = execution.clone();
-        self.add_initializer(move |game, player_index, _prio_delta| {
-            game.player_mut(player_index).custom_actions.insert(
+        self.add_initializer(move |game, player, _prio_delta| {
+            player.get_mut(game).custom_actions.insert(
                 action,
                 CustomActionInfo::new(
                     action,
                     exec.clone(),
-                    key.clone(),
+                    player.origin.clone(),
                     cost(ActionCostOncePerTurnBuilder::new(action)),
                 ),
             );
         })
-        .add_deinitializer(move |game, player_index| {
-            game.player_mut(player_index)
+        .add_deinitializer(move |game, player| {
+            player
+                .get_mut(game)
                 .custom_actions
                 .remove(&deinitializer_action);
         })
@@ -1004,27 +1032,20 @@ where
     E: Fn(&mut PlayerEvents) -> &mut Event<T, U, V, W> + 'static + Clone + Sync + Send,
     F: Fn(&mut T, &U, &V, &mut W, &EventPlayer) + 'static + Clone + Sync + Send,
 {
-    let key = setup.get_key().clone();
     let deinitialize_event = event.clone();
-    let initializer = move |game: &mut Game, player_index: usize, prio_delta: i32| {
-        let player_name = game.player_name(player_index);
-        let e = event(&mut game.players[player_index].events);
+    let initializer = move |game: &mut Game, p: &EventPlayer, prio_delta: i32| {
+        let e = event(&mut p.get_mut(game).events);
         e.inner
             .as_mut()
-            .unwrap_or_else(|| panic!("event {} should be set: {key:?}", e.name))
-            .add_listener_mut(
-                listener.clone(),
-                priority + prio_delta,
-                EventPlayer::new(player_index, player_name, key.clone()),
-            );
+            .unwrap_or_else(|| panic!("event {} should be set: {:?}", e.name, p.origin))
+            .add_listener_mut(listener.clone(), priority + prio_delta, p.clone());
     };
-    let key = setup.get_key().clone();
-    let deinitializer = move |game: &mut Game, player_index: usize| {
-        let e = deinitialize_event(&mut game.players[player_index].events);
+    let deinitializer = move |game: &mut Game, p: &EventPlayer| {
+        let e = deinitialize_event(&mut p.get_mut(game).events);
         e.inner
             .as_mut()
-            .unwrap_or_else(|| panic!("event {} should be set: {key:?}", e.name))
-            .remove_listener_mut_by_key(&key);
+            .unwrap_or_else(|| panic!("event {} should be set: {:?}", e.name, p.origin))
+            .remove_listener_mut_by_key(&p.origin);
     };
     setup
         .add_initializer(initializer)

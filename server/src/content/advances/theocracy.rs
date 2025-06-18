@@ -26,17 +26,14 @@ fn dogma() -> AdvanceBuilder {
         You are now limited to a maximum of 2 ideas (discard if necessary). \
         Note: Dogma Advance does not apply when you conquer a city with a Temple.",
     )
-    .add_once_initializer(move |game, player_index| {
-        let p = game.player_mut(player_index);
+    .add_once_initializer(move |game, player| {
+        player.log(game, "Ideas limit reduced to 2");
+        let p = player.get_mut(game);
         p.resource_limit.ideas = 2;
         apply_resource_limit(p);
-        game.add_info_log_item(&format!(
-            "{} is now limited to a maximum of 2 ideas for Dogma Advance",
-            game.player_name(player_index)
-        ));
     })
-    .add_once_deinitializer(|game, player_index| {
-        game.players[player_index].resource_limit.ideas = 7;
+    .add_once_deinitializer(|game, player| {
+        player.get_mut(game).resource_limit.ideas = 7;
     })
     .add_advance_request(
         |event| &mut event.construct,

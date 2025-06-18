@@ -213,7 +213,7 @@ fn use_princeps(b: AbilityBuilder) -> AbilityBuilder {
             let player = p.index;
             activate_leader_city(game, p);
             gain_action_card_from_pile(game, player, &p.origin);
-            gain_objective_card_from_pile(game, player);
+            gain_objective_card_from_pile(game, player, &p.origin);
 
             let p = game.player(player);
             Some(HandCardsRequest::new(
@@ -239,14 +239,13 @@ fn use_princeps(b: AbilityBuilder) -> AbilityBuilder {
                         );
                     }
                     HandCard::ObjectiveCard(card) => {
-                        s.log(
+                        discard_objective_card(
                             game,
-                            &format!(
-                                "Discard objective card {}",
-                                game.cache.get_objective_card(*card).name()
-                            ),
+                            p,
+                            *card,
+                            &s.origin,
+                            HandCardLocation::DiscardPile,
                         );
-                        discard_objective_card(game, p, *card);
                     }
                     HandCard::Wonder(_) => panic!("Invalid hand card type"),
                 }

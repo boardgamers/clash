@@ -263,7 +263,39 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 2
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "CivilCard": 31
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 3
+                        },
+                        "from": "DrawPile",
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "CivilCard": 31
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -282,7 +314,8 @@
       "Player1: New Plans: Pay 1 culture token"
     ],
     [
-      "Player1 discarded an objective card to draw a new one."
+      "Player1: New Plans: Discard Scientific Lead/Conqueror",
+      "Player1: New Plans: Draw an objective card"
     ]
   ],
   "undo_limit": 2,

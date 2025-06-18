@@ -520,14 +520,6 @@ fn choose_great_seer_cards(b: ActionCardBuilder, player_order: usize) -> ActionC
         move |game, s, _| {
             let players = game.human_players(s.player_index);
             let target = players[player_order];
-            s.log(
-                game,
-                &format!(
-                    "Chose an objective card for player {}",
-                    game.player_name(target)
-                ),
-            );
-
             let HandCard::ObjectiveCard(card) = &s.choice[0] else {
                 panic!("Expected an objective card");
             };
@@ -536,6 +528,13 @@ fn choose_great_seer_cards(b: ActionCardBuilder, player_order: usize) -> ActionC
                 player: target,
                 objective_card: *card,
             };
+            log_card_transfer(
+                game,
+                &HandCard::ObjectiveCard(*card),
+                HandCardLocation::DrawPile,
+                HandCardLocation::GreatSeer(target),
+                &s.origin,
+            );
 
             if let Some(effect) = find_great_seer(game) {
                 effect.assigned_objectives.push(objective);

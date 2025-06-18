@@ -3,7 +3,12 @@
   "events": [
     {
       "event_type": {
-        "DrawWonderCard": false
+        "DrawWonderCard": {
+          "origin": {
+            "Advance": "Monuments"
+          },
+          "drawn": false
+        }
       },
       "player": 0,
       "last_priority_used": 0,

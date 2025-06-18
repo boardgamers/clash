@@ -97,7 +97,10 @@
       ],
       "incident_tokens": 2,
       "completed_objectives": [
-        "Defiance"
+        {
+          "card": 7,
+          "name": "Defiance"
+        }
       ],
       "objective_cards": [
         2,
@@ -284,8 +287,24 @@
                       ]
                     }
                   },
-                  "completed_objectives": [
-                    "Defiance"
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 7
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": {
+                          "CompleteObjective": "Defiance"
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Complete Objectives"
+                      }
+                    }
                   ]
                 }
               ]
@@ -326,7 +345,7 @@
       "Player1: Waste: Could not store 1 gold"
     ],
     [
-      "Player1 completed objective Defiance"
+      "Player1: Complete Objectives: Complete Defiance using Eureka!/Defiance"
     ]
   ],
   "undo_limit": 2,

@@ -27,7 +27,7 @@ use crate::recruit::Recruit;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::{ChangeGovernment, StatusPhaseState};
 use crate::unit::UnitType;
-use crate::wonder::{Wonder, WonderCardInfo};
+use crate::wonder::{DrawWonderCard, Wonder, WonderCardInfo};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::ops::RangeInclusive;
@@ -119,7 +119,7 @@ pub enum PersistentEventType {
     StopBarbarianMovement(Vec<Position>),
     ActionCard(ActionCardInfo),
     WonderCard(WonderCardInfo),
-    DrawWonderCard(bool),
+    DrawWonderCard(DrawWonderCard),
     SelectObjectives(SelectObjectivesInfo),
     CustomAction(CustomActionActivation),
     ChooseActionCard,

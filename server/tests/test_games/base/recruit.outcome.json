@@ -114,7 +114,10 @@
       ],
       "incident_tokens": 2,
       "completed_objectives": [
-        "Terror Regime"
+        {
+          "card": 29,
+          "name": "Terror Regime"
+        }
       ],
       "next_unit_id": 12
     },
@@ -243,9 +246,6 @@
                       }
                     }
                   },
-                  "completed_objectives": [
-                    "Terror Regime"
-                  ],
                   "items": [
                     {
                       "player": 0,
@@ -295,6 +295,23 @@
                       "origin": {
                         "Ability": "Recruit"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 29
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": {
+                          "CompleteObjective": "Terror Regime"
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Complete Objectives"
+                      }
                     }
                   ]
                 }
@@ -312,7 +329,7 @@
       "Player1: Recruit: Lost 1 settler at C2",
       "Player1: Recruit: City A1 became Angry",
       "Player1: Recruit: Gain 1 settler and 1 infantry at A1",
-      "Player1 completed objective Terror Regime"
+      "Player1: Complete Objectives: Complete Terror Regime using Shipping Routes/Terror Regime"
     ]
   ],
   "undo_limit": 0,

@@ -135,7 +135,10 @@
       ],
       "incident_tokens": 3,
       "completed_objectives": [
-        "Naval Assault"
+        {
+          "card": 10,
+          "name": "Naval Assault"
+        }
       ],
       "wonder_cards": [
         "Pyramids"
@@ -349,8 +352,24 @@
                       ]
                     }
                   },
-                  "completed_objectives": [
-                    "Naval Assault"
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 10
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": {
+                          "CompleteObjective": "Naval Assault"
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Complete Objectives"
+                      }
+                    }
                   ]
                 }
               ]
@@ -370,7 +389,7 @@
       "Player1: Waste: Could not store 2 gold"
     ],
     [
-      "Player1 completed objective Naval Assault"
+      "Player1: Complete Objectives: Complete Naval Assault using Optimized Storage/Naval Assault"
     ]
   ],
   "undo_limit": 0,

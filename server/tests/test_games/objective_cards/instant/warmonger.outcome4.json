@@ -80,7 +80,10 @@
       ],
       "incident_tokens": 2,
       "completed_objectives": [
-        "Warmonger"
+        {
+          "card": 3,
+          "name": "Warmonger"
+        }
       ],
       "objective_cards": [
         4
@@ -327,8 +330,24 @@
                       ]
                     }
                   },
-                  "completed_objectives": [
-                    "Warmonger"
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 3
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": {
+                          "CompleteObjective": "Warmonger"
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Complete Objectives"
+                      }
+                    }
                   ]
                 }
               ]
@@ -392,7 +411,7 @@
       "Attacker wins"
     ],
     [
-      "Player1 completed objective Warmonger"
+      "Player1: Complete Objectives: Complete Warmonger using Coastal Culture/Warmonger"
     ]
   ],
   "undo_limit": 4,

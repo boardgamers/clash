@@ -20,7 +20,7 @@ use crate::content::persistent_events::{
 use crate::cultural_influence::{InfluenceCultureAttempt, execute_influence_culture_attempt};
 use crate::events::EventOrigin;
 use crate::game::GameState;
-use crate::happiness::{IncreaseHappiness, execute_increase_happiness};
+use crate::happiness::{IncreaseHappiness, execute_increase_happiness, happiness_event_origin};
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::recruit::{Recruit, execute_recruit};
@@ -238,6 +238,7 @@ impl PlayingAction {
                 &i.payment,
                 false,
                 &i.action_type,
+                &happiness_event_origin(&i.action_type, game.player(player_index)),
             )?,
             InfluenceCultureAttempt(c) => {
                 execute_influence_culture_attempt(game, player_index, &c)?;
@@ -247,7 +248,11 @@ impl PlayingAction {
                 on_play_wonder_card(
                     game,
                     player_index,
-                    WonderCardInfo::new(w, wonder_cost(game, game.player(player_index), w)),
+                    WonderCardInfo::new(
+                        w,
+                        wonder_cost(game, game.player(player_index), w),
+                        EventOrigin::Ability("Build Wonder".to_string()),
+                    ),
                 );
             }
             Custom(custom_action) => {

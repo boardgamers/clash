@@ -51,7 +51,10 @@
       ],
       "incident_tokens": 2,
       "completed_objectives": [
-        "Scavenger"
+        {
+          "card": 21,
+          "name": "Scavenger"
+        }
       ],
       "next_unit_id": 1
     },
@@ -456,8 +459,24 @@
                       ]
                     }
                   },
-                  "completed_objectives": [
-                    "Scavenger"
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 21
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": {
+                          "CompleteObjective": "Scavenger"
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Complete Objectives"
+                      }
+                    }
                   ]
                 }
               ]
@@ -485,7 +504,7 @@
       "Attacker wins"
     ],
     [
-      "Player1 completed objective Scavenger"
+      "Player1: Complete Objectives: Complete Scavenger using Trade Focus/Scavenger"
     ]
   ],
   "undo_limit": 1,

@@ -132,7 +132,7 @@ fn leadership(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |e| &mut e.play_action_card,
         0,
         |game, p, _| {
-            p.log(game, "Used Leadership to gain an action.");
+            p.log(game, "Gain 1 action");
             game.actions_left += 1;
         },
     )

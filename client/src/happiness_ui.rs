@@ -6,6 +6,7 @@ use crate::render_context::RenderContext;
 use itertools::Itertools;
 use server::action::Action;
 use server::city::{City, MoodState};
+use server::events::check_event_origin;
 use server::game::Game;
 use server::happiness::{
     IncreaseHappiness, available_happiness_actions, happiness_city_restriction, happiness_cost,
@@ -48,6 +49,7 @@ impl IncreaseHappinessConfig {
             CostTrigger::WithModifiers,
             &custom.action_type,
             rc.game,
+            &check_event_origin(),
         )
         .cost;
         p.can_afford(&c).then_some(rc.new_payment(
@@ -167,6 +169,7 @@ pub fn can_afford_increase_happiness(
             CostTrigger::WithModifiers,
             action_type,
             rc.game,
+            &check_event_origin(),
         )
         .cost,
     )

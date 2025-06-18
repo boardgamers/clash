@@ -224,7 +224,6 @@
                       ]
                     }
                   },
-                  "wonder_built": "GreatGardens",
                   "items": [
                     {
                       "player": 0,
@@ -239,6 +238,21 @@
                       },
                       "origin": {
                         "Wonder": "GreatGardens"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "Wonder": "GreatGardens"
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToKeep"
+                      },
+                      "origin": {
+                        "Ability": "Build Wonder"
                       }
                     }
                   ]
@@ -281,7 +295,7 @@
     ],
     [
       "Player1: Great Gardens: Pay 5 food, 5 wood, 2 ore and 5 culture tokens",
-      "Player1: Build Wonder: Built Great Gardens in city A1 for 5 food, 5 wood, 2 ore and 5 culture tokens"
+      "Player1: Build Wonder: Play Great Gardens"
     ],
     [
       "Player1 ended their turn with 1 actions left"
