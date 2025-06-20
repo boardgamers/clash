@@ -48,15 +48,13 @@ fn advance(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         0,
         |game, p, _| Some(AdvanceRequest::new(possible_advances(p.get(game), game))),
         |game, s, _| {
-            let advance = s.choice;
             gain_advance_without_payment(
                 game,
-                advance,
-                s.player_index,
-                ResourcePile::culture_tokens(1),
+                s.choice,
+                &s.player(),
+                ResourcePile::empty(), // only used for free education, where gold or ideas count
                 false,
             );
-            s.log(game, &format!("Gain {}", advance.name(game)));
         },
     )
     .build()
@@ -91,18 +89,7 @@ fn inspiration(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             )))
         },
         |game, s, _| {
-            let advance = s.choice;
-            gain_advance_without_payment(
-                game,
-                advance,
-                s.player_index,
-                ResourcePile::empty(),
-                false,
-            );
-            s.log(
-                game,
-                &format!("Gain {} for free using Inspiration.", advance.name(game)),
-            );
+            gain_advance_without_payment(game, s.choice, &s.player(), ResourcePile::empty(), false);
         },
     )
     .build()
