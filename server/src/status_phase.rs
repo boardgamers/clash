@@ -8,7 +8,7 @@ use crate::content::persistent_events::{
     PlayerRequest, PositionRequest, TriggerPersistentEventParams,
     trigger_persistent_event_with_listener,
 };
-use crate::events::EventOrigin;
+use crate::events::{EventOrigin, EventPlayer};
 use crate::objective_card::{
     gain_objective_card_from_pile, present_objective_cards, status_phase_completable,
 };
@@ -163,11 +163,10 @@ pub(crate) fn free_advance() -> Ability {
                 Some(AdvanceRequest::new(choices))
             },
             |game, c, _| {
-                c.log(game, &format!("Advanced {} for free", c.choice.name(game)));
                 gain_advance_without_payment(
                     game,
                     c.choice,
-                    c.player_index,
+                    &c.player(),
                     ResourcePile::empty(),
                     true,
                 );
@@ -341,7 +340,7 @@ where
                             }
                         ),
                     );
-                    change_government_type(game, p.index, &c);
+                    change_government_type(game, p, &c);
                     return;
                 }
             }
@@ -358,16 +357,21 @@ fn change_government_cost(
     PaymentOptions::resources(game.player(player_index), origin, CHANGE_GOVERNMENT_COST)
 }
 
-fn change_government_type(game: &mut Game, player_index: usize, new_government: &ChangeGovernment) {
+fn change_government_type(
+    game: &mut Game,
+    player: &EventPlayer,
+    new_government: &ChangeGovernment,
+) {
     let government = &new_government.new_government;
     let a = game.cache.get_government(government);
     assert!(
-        game.player(player_index)
+        player
+            .get(game)
             .can_advance_ignore_contradicting(a.advances[0].advance, game),
         "Cannot advance in change government"
     );
 
-    let player_government_advances = government_advances(game.player(player_index), game);
+    let player_government_advances = government_advances(player.get(game), game);
 
     assert_eq!(
         player_government_advances.len() - 1,
@@ -376,13 +380,14 @@ fn change_government_type(game: &mut Game, player_index: usize, new_government: 
     );
 
     for a in player_government_advances {
-        remove_advance(game, a, player_index);
+        remove_advance(game, a, player);
     }
 
     do_advance(
         game,
         game.cache.get_government(government).advances[0].advance,
-        player_index,
+        player,
+        false,
     );
     for name in &new_government.additional_advances {
         let (pos, advance) = game
@@ -401,7 +406,7 @@ fn change_government_type(game: &mut Game, player_index: usize, new_government: 
             pos > 0,
             "Additional advances should not include the leading government advance"
         );
-        do_advance(game, advance.advance, player_index);
+        do_advance(game, advance.advance, player, false);
     }
 }
 

@@ -162,9 +162,7 @@ where
             Some(AdvanceRequest::new(choices))
         },
         |game, s, _| {
-            let name = s.choice;
-            s.log(game, &format!("Gain {}", name.name(game)));
-            gain_advance_without_payment(game, name, s.player_index, ResourcePile::empty(), false);
+            gain_advance_without_payment(game, s.choice, &s.player(), ResourcePile::empty(), false);
         },
     )
 }

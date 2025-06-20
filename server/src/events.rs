@@ -81,6 +81,15 @@ impl EventPlayer {
     }
 
     #[must_use]
+    pub fn from_player(player: usize, game: &Game, origin: EventOrigin) -> Self {
+        Self {
+            index: player,
+            name: game.player_name(player),
+            origin,
+        }
+    }
+
+    #[must_use]
     pub fn get<'a>(&self, game: &'a Game) -> &'a Player {
         game.player(self.index)
     }

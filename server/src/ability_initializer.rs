@@ -60,11 +60,7 @@ impl<C> SelectedChoice<C> {
     }
 
     pub fn other_player(&self, player_index: usize, game: &Game) -> EventPlayer {
-        EventPlayer::new(
-            player_index,
-            game.player_name(player_index),
-            self.origin.clone(),
-        )
+        EventPlayer::from_player(player_index, game, self.origin.clone())
     }
 
     pub fn log(&self, game: &mut Game, message: &str) {
@@ -184,7 +180,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             .add_initializer(move |game, player_index, prio_delta| {
                 initializer(
                     game,
-                    &EventPlayer::new(player_index, game.player_name(player_index), key.clone()),
+                    &EventPlayer::from_player(player_index, game, key.clone()),
                     prio_delta,
                 );
             });
@@ -199,7 +195,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
         self.builder().add_deinitializer(move |game, player_index| {
             deinitializer(
                 game,
-                &EventPlayer::new(player_index, game.player_name(player_index), key.clone()),
+                &EventPlayer::from_player(player_index, game, key.clone()),
             );
         });
         self
@@ -214,7 +210,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             .add_once_initializer(move |game, player_index| {
                 initializer(
                     game,
-                    &EventPlayer::new(player_index, game.player_name(player_index), key.clone()),
+                    &EventPlayer::from_player(player_index, game, key.clone()),
                 );
             });
         self
@@ -229,7 +225,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             .add_once_deinitializer(move |game, player_index| {
                 deinitializer(
                     game,
-                    &EventPlayer::new(player_index, game.player_name(player_index), key.clone()),
+                    &EventPlayer::from_player(player_index, game, key.clone()),
                 );
             });
         self

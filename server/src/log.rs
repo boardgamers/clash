@@ -1,3 +1,4 @@
+use crate::advance::Advance;
 use crate::card::{HandCard, HandCardLocation};
 use crate::city::MoodState;
 use crate::combat_stats::CombatStats;
@@ -105,6 +106,11 @@ pub enum ActionLogBalance {
 pub enum ActionLogEntry {
     Resources {
         resources: ResourcePile,
+        balance: ActionLogBalance,
+    },
+    Advance {
+        advance: Advance,
+        take_incident_token: bool,
         balance: ActionLogBalance,
     },
     Units {

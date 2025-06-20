@@ -354,7 +354,7 @@ pub fn can_remove_after_combat(on_water: bool, unit_type: &UnitType) -> bool {
 }
 
 pub(crate) fn conquer_city(game: &mut Game, position: Position, attacker: usize, defender: usize) {
-    let p = EventPlayer::new(attacker, game.player_name(attacker), combat_event_origin());
+    let p = EventPlayer::from_player(attacker, game, combat_event_origin());
     let Some(mut city) = game.players[defender].take_city(position) else {
         panic!("player should have this city")
     };

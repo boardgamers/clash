@@ -66,15 +66,8 @@ fn use_aqueduct(b: AbilityBuilder) -> AbilityBuilder {
     b.add_simple_persistent_event_listener(
         |event| &mut event.custom_action,
         0,
-        |game, player, a| {
-            player.log(game, "Gain Sanitation as a free action");
-            gain_advance_without_payment(
-                game,
-                Advance::Sanitation,
-                player.index,
-                a.payment.clone(),
-                true,
-            );
+        |game, p, a| {
+            gain_advance_without_payment(game, Advance::Sanitation, p, a.payment.clone(), true);
         },
     )
 }

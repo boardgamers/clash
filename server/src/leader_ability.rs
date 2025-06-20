@@ -144,12 +144,7 @@ fn use_get_advance(b: AbilityBuilder, group: AdvanceGroup) -> AbilityBuilder {
             Some(AdvanceRequest::new(advances_in_group(game, player, group)))
         },
         move |game, s, c| {
-            let advance = s.choice;
-            s.log(
-                game,
-                &format!("Decided to gain {} for free", advance.name(game),),
-            );
-            gain_advance_without_payment(game, advance, s.player_index, c.payment.clone(), true);
+            gain_advance_without_payment(game, s.choice, &s.player(), c.payment.clone(), true);
         },
     )
 }

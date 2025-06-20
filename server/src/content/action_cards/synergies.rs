@@ -223,7 +223,7 @@ fn pay_for_advance(b: ActionCardBuilder, priority: i32) -> ActionCardBuilder {
         },
         |game, s, i| {
             let advance = i.selected_advance.expect("advance not found");
-            gain_advance_without_payment(game, advance, s.player_index, s.choice[0].clone(), false);
+            gain_advance_without_payment(game, advance, &s.player(), s.choice[0].clone(), false);
         },
     )
 }
@@ -339,15 +339,7 @@ pub(crate) fn use_teach_us() -> Ability {
             })
         },
         |game, s, _| {
-            let advance = s.choice;
-            s.log(game, &format!("Selected {} as advance", advance.name(game)));
-            gain_advance_without_payment(
-                game,
-                advance,
-                s.player_index,
-                ResourcePile::empty(),
-                false,
-            );
+            gain_advance_without_payment(game, s.choice, &s.player(), ResourcePile::empty(), false);
         },
     )
     .build()
@@ -459,21 +451,7 @@ fn tech_trade(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             None
         },
         |game, s, _| {
-            let advance = s.choice;
-            s.log(
-                game,
-                &format!(
-                    "Selected {} as advance for Technology Trade.",
-                    advance.name(game)
-                ),
-            );
-            gain_advance_without_payment(
-                game,
-                advance,
-                s.player_index,
-                ResourcePile::empty(),
-                false,
-            );
+            gain_advance_without_payment(game, s.choice, &s.player(), ResourcePile::empty(), false);
         },
     )
     .build()

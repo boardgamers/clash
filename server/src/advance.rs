@@ -3,9 +3,10 @@ use crate::city_pieces::Building;
 use crate::consts::ADVANCE_COST;
 use crate::content::ability::advance_event_origin;
 use crate::content::persistent_events::PersistentEventType;
-use crate::events::EventOrigin;
+use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
 use crate::incident::trigger_incident;
+use crate::log::{ActionLogBalance, ActionLogEntry, add_action_log_item};
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::player_events::OnAdvanceInfo;
@@ -237,24 +238,20 @@ pub enum Bonus {
     CultureToken,
 }
 
-impl Bonus {
-    #[must_use]
-    pub fn resources(&self) -> ResourcePile {
-        match self {
-            MoodToken => ResourcePile::mood_tokens(1),
-            CultureToken => ResourcePile::culture_tokens(1),
-        }
-    }
-}
-
 ///
 ///
 /// # Panics
 ///
 /// Panics if advance does not exist
-pub fn do_advance(game: &mut Game, advance: Advance, player_index: usize) {
+pub(crate) fn do_advance(
+    game: &mut Game,
+    advance: Advance,
+    player: &EventPlayer,
+    take_incident_token: bool,
+) {
     let info = advance.info(game).clone();
     let bonus = info.bonus.clone();
+    let player_index = player.index;
     info.listeners.once_init(game, player_index);
 
     if let Some(special_advance) = find_special_advance(advance, game, player_index) {
@@ -269,8 +266,49 @@ pub fn do_advance(game: &mut Game, advance: Advance, player_index: usize) {
             EventOrigin::Advance(advance),
         );
     }
-    let player = &mut game.players[player_index];
-    player.advances.insert(advance);
+    let p = player.get_mut(game);
+    p.advances.insert(advance);
+    let t = p.incident_tokens;
+
+    game.log_with_origin(
+        player_index,
+        &player.origin,
+        &format!(
+            "Gain {} {}",
+            advance.name(game),
+            if take_incident_token {
+                (if t > 1 {
+                    format!("and take an event token ({} left)", t - 1)
+                } else {
+                    "and take an event token (triggering an incident)".to_string()
+                })
+                .to_string()
+            } else {
+                "without taking an event token".to_string()
+            }
+        ),
+    );
+    add_action_log_item(
+        game,
+        player_index,
+        ActionLogEntry::Advance {
+            advance,
+            balance: ActionLogBalance::Gain,
+            take_incident_token,
+        },
+        player.origin.clone(),
+        vec![],
+    );
+}
+
+impl Bonus {
+    #[must_use]
+    pub fn resources(&self) -> ResourcePile {
+        match self {
+            MoodToken => ResourcePile::mood_tokens(1),
+            CultureToken => ResourcePile::culture_tokens(1),
+        }
+    }
 }
 
 #[must_use]
@@ -340,26 +378,27 @@ pub(crate) fn execute_advance_action(
     game.player(player_index)
         .advance_cost(advance, game, game.execute_cost_trigger())
         .pay(game, &a.payment);
-    game.log_with_origin(
-        player_index,
-        &advance_event_origin(),
-        &format!("Gain {}", a.advance.name(game)),
+    gain_advance_without_payment(
+        game,
+        advance,
+        &EventPlayer::from_player(player_index, game, advance_event_origin()),
+        a.payment.clone(),
+        true,
     );
-    gain_advance_without_payment(game, advance, player_index, a.payment.clone(), true);
     Ok(())
 }
 
 pub(crate) fn gain_advance_without_payment(
     game: &mut Game,
     advance: Advance,
-    player_index: usize,
+    player: &EventPlayer,
     payment: ResourcePile,
     take_incident_token: bool,
 ) {
-    do_advance(game, advance, player_index);
+    do_advance(game, advance, player, take_incident_token);
     on_advance(
         game,
-        player_index,
+        player.index,
         OnAdvanceInfo {
             advance,
             payment,
@@ -389,9 +428,10 @@ pub(crate) fn on_advance(game: &mut Game, player_index: usize, info: OnAdvanceIn
     }
 }
 
-pub(crate) fn remove_advance(game: &mut Game, advance: Advance, player_index: usize) {
+pub(crate) fn remove_advance(game: &mut Game, advance: Advance, player: &EventPlayer) {
     let info = advance.info(game);
     let bonus = info.bonus.clone();
+    let player_index = player.index;
     info.listeners.clone().once_deinit(game, player_index);
 
     if let Some(special_advance) =
@@ -410,6 +450,17 @@ pub(crate) fn remove_advance(game: &mut Game, advance: Advance, player_index: us
         );
     }
     game.player_mut(player_index).advances.remove(advance);
+    add_action_log_item(
+        game,
+        player_index,
+        ActionLogEntry::Advance {
+            advance,
+            balance: ActionLogBalance::Loss,
+            take_incident_token: false,
+        },
+        player.origin.clone(),
+        vec![],
+    );
 }
 
 fn unlock_special_advance(game: &mut Game, special_advance: SpecialAdvance, player_index: usize) {
