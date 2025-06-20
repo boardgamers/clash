@@ -5,7 +5,6 @@ use crate::events::EventOrigin;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::unit::Units;
-use crate::wonder::Wonder;
 use crate::{action::Action, game::Game};
 use json_patch::PatchOperation;
 use serde::{Deserialize, Serialize};

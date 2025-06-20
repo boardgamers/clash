@@ -8,7 +8,6 @@ use crate::content::ability::Ability;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{PaymentRequest, PersistentEventType, PositionRequest};
 use crate::events::{EventOrigin, EventPlayer};
-use crate::log::current_log_action_mut;
 use crate::payment::PaymentOptions;
 use crate::player::{CostTrigger, Player};
 use crate::player_events::CostInfo;
