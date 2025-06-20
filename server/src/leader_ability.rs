@@ -64,9 +64,9 @@ impl LeaderAbility {
         .add_simple_persistent_event_listener(
             |e| &mut e.draw_wonder_card,
             1,
-            move |game, player, drawn| {
-                if force_draw_wonder_from_anywhere(game, player.index, wonder) {
-                    *drawn = true;
+            move |game, player, draw| {
+                if force_draw_wonder_from_anywhere(game, player, wonder) {
+                    draw.drawn = true;
                 }
             },
         )

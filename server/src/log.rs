@@ -5,7 +5,6 @@ use crate::events::EventOrigin;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::unit::Units;
-use crate::wonder::Wonder;
 use crate::{action::Action, game::Game};
 use json_patch::PatchOperation;
 use serde::{Deserialize, Serialize};
@@ -80,12 +79,6 @@ pub struct ActionLogAction {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub combat_stats: Option<CombatStats>,
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub wonder_built: Option<Wonder>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub completed_objectives: Vec<String>,
-    #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub items: Vec<ActionLogItem>,
 }
@@ -97,8 +90,6 @@ impl ActionLogAction {
             action,
             undo: Vec::new(),
             combat_stats: None,
-            completed_objectives: Vec::new(),
-            wonder_built: None,
             items: Vec::new(),
         }
     }

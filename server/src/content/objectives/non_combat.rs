@@ -1,8 +1,9 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Advance;
+use crate::card::{HandCard, HandCardLocation};
 use crate::content::advances::warfare::draft_cost;
 use crate::game::Game;
-use crate::log::{ActionLogAction, ActionLogPlayer};
+use crate::log::{ActionLogAction, ActionLogEntry, ActionLogPlayer};
 use crate::map::capital_city_position;
 use crate::objective_card::{Objective, objective_is_ready};
 use itertools::Itertools;
@@ -63,16 +64,17 @@ pub(crate) fn magnificent_culture() -> Objective {
         you built have built the only wonder in the last round.",
     )
     .status_phase_check(|game, player| {
-        let wonders = last_round(game)
-            .iter()
-            .filter_map(|p| {
-                p.actions
-                    .iter()
-                    .find_map(|i| i.wonder_built.as_ref().map(|n| (n, p.index)))
+        last_round(game).iter().any(|p| {
+            p.actions.iter().any(|a| {
+                a.items.iter().any(|i| {
+                    matches!(&i.entry, ActionLogEntry::HandCard {
+                        card: HandCard::Wonder(_),
+                        from: HandCardLocation::Hand(p) ,
+                        to: HandCardLocation::PlayToKeep,
+                    } if *p == player.index)
+                })
             })
-            .collect_vec();
-
-        wonders.len() == 1 && wonders[0].1 == player.index
+        })
     })
     .add_simple_persistent_event_listener(
         |event| &mut event.play_wonder_card,

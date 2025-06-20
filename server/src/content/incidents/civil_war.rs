@@ -33,20 +33,19 @@ pub(crate) fn civil_war_incidents() -> Vec<Incident> {
 }
 
 fn migration(id: u8) -> Incident {
-    let b = Incident::builder(
+    select_player_to_gain_settler(Incident::builder(
         id,
         "Migration",
         "Select a player to gain 1 settler in one of their cities. \
         Decrease the mood in one of your cities.",
         IncidentBaseEffect::GoldDeposits,
-    );
-    select_player_to_gain_settler(b)
-        .add_decrease_mood(
-            IncidentTarget::ActivePlayer,
-            MoodModifier::Decrease,
-            |p, _game, _| DecreaseMood::new(city::non_angry_cites(p), 1),
-        )
-        .build()
+    ))
+    .add_decrease_mood(
+        IncidentTarget::ActivePlayer,
+        MoodModifier::Decrease,
+        |p, _game, _| DecreaseMood::new(city::non_angry_cites(p), 1),
+    )
+    .build()
 }
 
 fn civil_war(id: u8) -> Incident {

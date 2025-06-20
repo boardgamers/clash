@@ -146,7 +146,10 @@
       ],
       "incident_tokens": 2,
       "completed_objectives": [
-        "Standing Army"
+        {
+          "card": 14,
+          "name": "Standing Army"
+        }
       ],
       "objective_cards": [
         26
@@ -258,9 +261,11 @@
   "starting_player_index": 0,
   "current_player_index": 0,
   "action_log": [
-    { "age": 1,
+    {
+      "age": 1,
       "rounds": [
-        { "round": 1,
+        {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -280,8 +285,24 @@
                       ]
                     }
                   },
-                  "completed_objectives": [
-                    "Standing Army"
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 14
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": {
+                          "CompleteObjective": "Standing Army"
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Complete Objectives"
+                      }
+                    }
                   ]
                 }
               ]
@@ -300,7 +321,7 @@
       "The game has entered the 1st status phase"
     ],
     [
-      "Player1 completed objective Standing Army"
+      "Player1: Complete Objectives: Complete Standing Army using Food Supplies/Standing Army"
     ]
   ],
   "undo_limit": 1,

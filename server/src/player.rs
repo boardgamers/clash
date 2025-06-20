@@ -7,6 +7,7 @@ use crate::events::{Event, EventOrigin};
 use crate::leader::Leader;
 use crate::leader_ability::LeaderAbility;
 use crate::log::{ActionLogBalance, ActionLogEntry, add_action_log_item};
+use crate::objective_card::CompletedObjective;
 use crate::payment::PaymentOptions;
 use crate::player_events::{CostInfo, TransientEvents};
 use crate::playing_actions::PlayingActionType;
@@ -62,7 +63,7 @@ pub struct Player {
     pub wonders_built: Vec<Wonder>,
     pub wonders_owned: EnumSet<Wonder>, // transient
     pub incident_tokens: u8,
-    pub completed_objectives: Vec<String>,
+    pub completed_objectives: Vec<CompletedObjective>,
     pub captured_leaders: Vec<Leader>,
     pub special_victory_points: Vec<SpecialVictoryPoints>,
     pub custom_actions: HashMap<CustomActionType, CustomActionInfo>, // transient

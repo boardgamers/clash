@@ -24,21 +24,20 @@ pub(crate) fn education() -> AdvanceGroupInfo {
 }
 
 fn writing() -> AdvanceBuilder {
-    let b = AdvanceInfo::builder(
+    AdvanceInfo::builder(
         Advance::Writing,
         "Writing",
         "Gain 1 action and 1 objective card",
-    );
-    let origin = b.get_key().clone();
-    b.with_advance_bonus(CultureToken)
-        .with_unlocked_building(Building::Academy)
-        .add_once_initializer(move |game, player_index| {
-            gain_action_card_from_pile(game, player_index, &origin);
-            // can't gain objective card directly, because the "combat_end" listener might
-            // currently being processed ("teach us now")
-            game.player_mut(player_index).gained_objective =
-                draw_and_log_objective_card_from_pile(game, player_index);
-        })
+    )
+    .with_advance_bonus(CultureToken)
+    .with_unlocked_building(Building::Academy)
+    .add_once_initializer(move |game, player| {
+        gain_action_card_from_pile(game, player.index, &player.origin);
+        // can't gain objective card directly, because the "combat_end" listener might
+        // currently being processed ("teach us now")
+        player.get_mut(game).gained_objective =
+            draw_and_log_objective_card_from_pile(game, player.index, &player.origin);
+    })
 }
 
 pub(crate) fn use_academy() -> Ability {
@@ -124,14 +123,18 @@ fn free_education() -> AdvanceBuilder {
 }
 
 fn philosophy() -> AdvanceBuilder {
-    let b = AdvanceInfo::builder(
+    AdvanceInfo::builder(
         Advance::Philosophy,
         "Philosophy",
         "Immediately gain 1 idea after getting a Science advance",
-    );
-    let origin = b.get_key().clone();
-    b.add_once_initializer(move |game, player_index| {
-        gain_resources(game, player_index, ResourcePile::ideas(1), origin.clone());
+    )
+    .add_once_initializer(move |game, player| {
+        gain_resources(
+            game,
+            player.index,
+            ResourcePile::ideas(1),
+            player.origin.clone(),
+        );
     })
     .add_simple_persistent_event_listener(
         |event| &mut event.advance,

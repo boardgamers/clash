@@ -318,8 +318,8 @@
                     {
                       "player": 0,
                       "MoodChange": {
-                        "city": "A1",
-                        "mood": "Happy"
+                        "city": "B3",
+                        "mood": "Neutral"
                       },
                       "origin": {
                         "SpecialAdvance": "CityStates"
@@ -328,8 +328,8 @@
                     {
                       "player": 0,
                       "MoodChange": {
-                        "city": "B3",
-                        "mood": "Neutral"
+                        "city": "A1",
+                        "mood": "Happy"
                       },
                       "origin": {
                         "SpecialAdvance": "CityStates"
@@ -354,8 +354,8 @@
       "Player1: Recruit: Gain 1 infantry at A1"
     ],
     [
-      "Player1: City States: City A1 became Happy",
-      "Player1: City States: City B3 became Neutral"
+      "Player1: City States: City B3 became Neutral",
+      "Player1: City States: City A1 became Happy"
     ]
   ],
   "undo_limit": 0,

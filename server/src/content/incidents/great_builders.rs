@@ -148,6 +148,7 @@ pub(crate) fn great_architect() -> ActionCard {
                 WonderCardInfo::new(
                     *w,
                     architect_wonder_cost(game, game.player(s.player_index), *w),
+                    s.origin.clone(),
                 ),
             );
         },

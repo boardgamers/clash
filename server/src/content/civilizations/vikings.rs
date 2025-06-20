@@ -10,7 +10,7 @@ use crate::content::advances::economy::use_taxes;
 use crate::content::advances::trade_routes::TradeRoute;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::{PaymentRequest, PositionRequest, UnitsRequest};
-use crate::events::EventOrigin;
+use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
 use crate::leader::{Leader, LeaderInfo, leader_position};
 use crate::leader_ability::{LeaderAbility, activate_leader_city, can_activate_leader_city};
@@ -321,17 +321,15 @@ fn danegeld() -> LeaderAbility {
 }
 
 fn ruler_of_the_north() -> LeaderAbility {
-    let b = LeaderAbility::builder(
+    LeaderAbility::builder(
         "Ruler of the North",
         "Knut is worth half a point per distance to your capital",
-    );
-    let o = b.get_key().clone();
-    let o2 = o.clone();
-    b.add_initializer(move |game, player_index, _| {
-        set_knut_points(game, player_index, None, &o);
+    )
+    .add_initializer(move |game, p, _| {
+        set_knut_points(game, p, None);
     })
-    .add_deinitializer(move |game, player_index| {
-        set_knut_points(game, player_index, None, &o2);
+    .add_deinitializer(move |game, p| {
+        set_knut_points(game, p, None);
     })
     .add_transient_event_listener(
         |event| &mut event.before_move,
@@ -341,20 +339,15 @@ fn ruler_of_the_north() -> LeaderAbility {
                 .iter()
                 .any(|&id| p.get(game).get_unit(id).is_leader())
             {
-                set_knut_points(game, p.index, Some(i.to), &p.origin);
+                set_knut_points(game, p, Some(i.to));
             }
         },
     )
     .build()
 }
 
-fn set_knut_points(
-    game: &mut Game,
-    player_index: usize,
-    position: Option<Position>,
-    origin: &EventOrigin,
-) {
-    let p = game.player(player_index);
+fn set_knut_points(game: &mut Game, player: &EventPlayer, position: Option<Position>) {
+    let p = player.get(game);
     let points = if p.active_leader().is_some_and(|l| l == Leader::Knut) {
         position
             .unwrap_or_else(|| leader_position(p))
@@ -364,9 +357,9 @@ fn set_knut_points(
         0_f32
     };
     set_special_victory_points(
-        game.player_mut(player_index),
+        player.get_mut(game),
         points,
-        origin,
+        &player.origin,
         VictoryPointAttribution::Events,
     );
 }

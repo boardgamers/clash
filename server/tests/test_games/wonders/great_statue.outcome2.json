@@ -223,7 +223,6 @@
                       ]
                     }
                   },
-                  "wonder_built": "GreatStatue",
                   "items": [
                     {
                       "player": 0,
@@ -239,6 +238,36 @@
                       "origin": {
                         "Wonder": "GreatStatue"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "Wonder": "GreatStatue"
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToKeep"
+                      },
+                      "origin": {
+                        "Ability": "Build Wonder"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 1
+                        },
+                        "from": "DrawPile",
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "Wonder": "GreatStatue"
+                      }
                     }
                   ]
                 },
@@ -249,7 +278,24 @@
                         "action": "GreatStatue"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 1
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "Ability": "Great Statue"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -266,12 +312,13 @@
     ],
     [
       "Player1: Great Statue: Pay 3 food, 4 wood, 5 ore and 5 culture tokens",
-      "Player1: Build Wonder: Built Great Statue in city A1 for 3 food, 4 wood, 5 ore and 5 culture tokens",
-      "Player1 gained an objective card from the pile"
+      "Player1: Build Wonder: Play Great Statue",
+      "Player1: Great Statue: Draw an objective card"
     ],
     [
       "Player1 started Great Statue",
-      "Player1: Great Statue: Discarded Large Civilization/Draft to gain an action"
+      "Player1: Great Statue: Discard Large Civilization/Draft",
+      "Player1: Great Statue: Gain 1 action"
     ]
   ],
   "undo_limit": 2,

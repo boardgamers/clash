@@ -298,7 +298,37 @@
                       "player": 0,
                       "HandCard": {
                         "card": {
+                          "ObjectiveCard": 1
+                        },
+                        "from": "DrawPile",
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Princeps"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
                           "ActionCard": 1
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "DiscardPile"
+                      },
+                      "origin": {
+                        "Ability": "Princeps"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 1
                         },
                         "from": {
                           "Hand": 0
@@ -327,9 +357,9 @@
     [
       "Player1: Princeps: Pay 1 culture token",
       "Player1: Princeps: Draw an action card",
-      "Player1 gained an objective card from the pile",
+      "Player1: Princeps: Draw an objective card",
       "Player1: Princeps: Discard Quick Advance/Peltasts",
-      "Player1: Princeps: Discard objective card Large Civilization/Draft"
+      "Player1: Princeps: Discard Large Civilization/Draft"
     ]
   ],
   "undo_limit": 2,

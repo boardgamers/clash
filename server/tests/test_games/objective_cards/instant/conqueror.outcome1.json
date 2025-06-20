@@ -112,9 +112,18 @@
       ],
       "incident_tokens": 2,
       "completed_objectives": [
-        "Conqueror",
-        "General",
-        "Great Battle"
+        {
+          "card": 2,
+          "name": "Conqueror"
+        },
+        {
+          "card": 5,
+          "name": "General"
+        },
+        {
+          "card": 6,
+          "name": "Great Battle"
+        }
       ],
       "next_unit_id": 8
     },
@@ -288,10 +297,58 @@
                       ]
                     }
                   },
-                  "completed_objectives": [
-                    "Conqueror",
-                    "General",
-                    "Great Battle"
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 2
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": {
+                          "CompleteObjective": "Conqueror"
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Complete Objectives"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 5
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": {
+                          "CompleteObjective": "General"
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Complete Objectives"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 6
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": {
+                          "CompleteObjective": "Great Battle"
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Complete Objectives"
+                      }
+                    }
                   ]
                 }
               ]
@@ -320,9 +377,9 @@
       "Player1: Waste: Could not store 1 gold"
     ],
     [
-      "Player1 completed objective Conqueror",
-      "Player1 completed objective General",
-      "Player1 completed objective Great Battle"
+      "Player1: Complete Objectives: Complete Conqueror using Scientific Lead/Conqueror",
+      "Player1: Complete Objectives: Complete General using Religious Fervor/General",
+      "Player1: Complete Objectives: Complete Great Battle using City Planner/Great Battle"
     ]
   ],
   "undo_limit": 1,

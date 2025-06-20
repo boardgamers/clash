@@ -13,7 +13,7 @@ use crate::content::persistent_events::{
 use crate::cultural_influence::{
     InfluenceCultureAttempt, available_influence_actions, available_influence_culture,
 };
-use crate::events::EventOrigin;
+use crate::events::{EventOrigin, check_event_origin};
 use crate::game::{Game, GameState};
 use crate::happiness::{
     IncreaseHappiness, available_happiness_actions, happiness_city_restriction, happiness_cost,
@@ -475,6 +475,7 @@ fn calculate_increase_happiness(
             CostTrigger::NoModifiers,
             action_type,
             game,
+            &check_event_origin(),
         );
         if !info.cost.can_afford(&player.resources) {
             break;

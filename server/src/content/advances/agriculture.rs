@@ -30,8 +30,8 @@ fn storage() -> AdvanceBuilder {
         "Storage",
         "Your maximum food limit is increased from 2 to 7",
     )
-    .add_once_initializer(|game, player_index| {
-        game.players[player_index].resource_limit.food = 7;
+    .add_once_initializer(|game, p| {
+        p.get_mut(game).resource_limit.food = 7;
     })
     .with_advance_bonus(MoodToken)
 }

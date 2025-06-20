@@ -1,6 +1,8 @@
+use crate::card::HandCardLocation;
 use crate::content::advances::trade_routes::find_trade_routes;
 use crate::content::objectives::city_objectives::leading_player;
 use crate::content::objectives::non_combat::last_player_round;
+use crate::log::ActionLogEntry;
 use crate::map::capital_city_position;
 use crate::objective_card::Objective;
 use crate::player::Player;
@@ -95,10 +97,19 @@ pub(crate) fn colony() -> Objective {
     .status_phase_check(|game, player| {
         let home = capital_city_position(game, player);
         if player.cities.iter().any(|c| c.position.distance(home) >= 5) {
-            let city_founder_played = last_player_round(game, player.index)
-                .iter()
-                .any(|i| i.completed_objectives.contains(&"City Founder".to_string()));
-
+            let city_founder_played = last_player_round(game, player.index).iter().any(|a| {
+                a.items.iter().any(|i| {
+                    if let ActionLogEntry::HandCard {
+                        to: HandCardLocation::CompleteObjective(o),
+                        ..
+                    } = &i.entry
+                    {
+                        o == "City Founder"
+                    } else {
+                        false
+                    }
+                })
+            });
             return !city_founder_played;
         }
         false

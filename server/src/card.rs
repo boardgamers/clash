@@ -72,6 +72,7 @@ impl HandCard {
 pub enum HandCardLocation {
     DrawPile,
     Hand(usize),
+    RevealedHand(usize),
     DiscardPile,
     // converted from incident to hand
     Incident,
@@ -79,7 +80,9 @@ pub enum HandCardLocation {
     // the tactics card counts as being discarded even though it is discarded at the end of combat
     PlayToDiscardFaceDown,
     PlayToKeep,
+    CompleteObjective(String),
     Public,
+    GreatSeer(usize),
 }
 
 impl HandCardLocation {
@@ -98,6 +101,7 @@ impl HandCardLocation {
             HandCardLocation::DrawPile
                 | HandCardLocation::Hand(_)
                 | HandCardLocation::PlayToDiscardFaceDown
+                | HandCardLocation::GreatSeer(_)
         )
     }
 }
@@ -246,23 +250,19 @@ pub(crate) fn log_card_transfer(
     to: HandCardLocation,
     origin: &EventOrigin,
 ) {
-    let (player_index, message) = if let HandCardLocation::Hand(p) = to {
+    let (player_index, message): (usize, &str) = if let HandCardLocation::Hand(p) = to {
+        let name = card_name(card, &from, game);
         (
             p,
             match from {
-                HandCardLocation::DrawPile => &format!("Draw {}", card.card_type()),
-                HandCardLocation::Hand(from) => {
-                    &format!("Gain {} from {}", card.card_type(), game.player_name(from))
+                HandCardLocation::DrawPile => &format!("Draw {name}"),
+                HandCardLocation::Hand(from) | HandCardLocation::RevealedHand(from) => {
+                    &format!("Gain {name} from {}", game.player_name(from))
                 }
-                HandCardLocation::DiscardPile => {
-                    &format!("Gain {} from discard pile", card.name(game))
-                }
-                HandCardLocation::Public => {
-                    &format!("Gain {} from the public area", card.name(game))
-                }
-                HandCardLocation::Incident => {
-                    &format!("Gain {} from the current event", card.name(game))
-                }
+                HandCardLocation::DiscardPile => &format!("Gain {name} from discard pile"),
+                HandCardLocation::Public => &format!("Gain {name} from the public area"),
+                HandCardLocation::GreatSeer(_) => &format!("Gain {name} from Great Seer"),
+                HandCardLocation::Incident => &format!("Gain {name} from the current event"),
                 _ => {
                     panic!(
                         "Cannot transfer card from played to hand: {card:?} from {from:?} to {to:?}"
@@ -270,27 +270,28 @@ pub(crate) fn log_card_transfer(
                 }
             },
         )
-    } else {
-        let HandCardLocation::Hand(p) = from else {
-            panic!("Invalid card transfer from {from:?} to {to:?}");
-        };
+    } else if let HandCardLocation::Hand(p) = from {
+        let name = card_name(card, &to, game);
         (
             p,
             match to {
-                HandCardLocation::Hand(_) => panic!("handled above"),
-                HandCardLocation::DiscardPile => &format!("Discard {}", card.name(game)),
+                HandCardLocation::DiscardPile => &format!("Discard {name}"),
                 HandCardLocation::PlayToDiscard | HandCardLocation::PlayToKeep => {
-                    &format!("Play {}", card.name(game))
+                    &format!("Play {name}")
                 }
-                HandCardLocation::PlayToDiscardFaceDown => {
-                    &format!("Play {} face down", card.card_type())
-                }
-                HandCardLocation::Public => &format!("Place {} in public area", card.name(game)),
+                HandCardLocation::CompleteObjective(ref o) => &format!("Complete {o} using {name}"),
+                HandCardLocation::PlayToDiscardFaceDown => &format!("Play {name} face down"),
+                HandCardLocation::Public => &format!("Place {name} in public area"),
                 _ => panic!(
                     "Cannot transfer card from hand to draw pile: {card:?} from {from:?} to {to:?}"
                 ),
             },
         )
+    } else if let HandCardLocation::GreatSeer(p) = to {
+        assert_eq!(from, HandCardLocation::DrawPile);
+        (p, "Placed a card from the draw pile in the Great Seer")
+    } else {
+        panic!("Invalid card transfer from {from:?} to {to:?}");
     };
 
     game.log_with_origin(player_index, origin, message);
@@ -301,4 +302,12 @@ pub(crate) fn log_card_transfer(
         origin.clone(),
         vec![],
     );
+}
+
+fn card_name(card: &HandCard, l: &HandCardLocation, game: &mut Game) -> String {
+    if l.is_public() {
+        card.name(game)
+    } else {
+        card.card_type().to_string()
+    }
 }

@@ -327,7 +327,24 @@
                     "Response": {
                       "SelectAdvance": "Engineering"
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "Wonder": "Pyramids"
+                        },
+                        "from": "DrawPile",
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Engineering"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -405,7 +422,7 @@
     ],
     [
       "Player1: Great Engineer: Gain Engineering",
-      "Player1 drew a wonder card from the pile",
+      "Player1: Engineering: Draw a wonder card",
       "Player1 unlocked Aqueduct"
     ],
     [

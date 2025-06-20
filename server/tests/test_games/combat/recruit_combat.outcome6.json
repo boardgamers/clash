@@ -111,7 +111,10 @@
       ],
       "incident_tokens": 3,
       "completed_objectives": [
-        "Sea Cleansing"
+        {
+          "card": 38,
+          "name": "Sea Cleansing"
+        }
       ],
       "wonder_cards": [
         "Pyramids"
@@ -528,8 +531,24 @@
                       ]
                     }
                   },
-                  "completed_objectives": [
-                    "Sea Cleansing"
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 38
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": {
+                          "CompleteObjective": "Sea Cleansing"
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Complete Objectives"
+                      }
+                    }
                   ]
                 }
               ]
@@ -591,7 +610,7 @@
       "Player1: Pirates battle: Gain 1 culture token"
     ],
     [
-      "Player1 completed objective Sea Cleansing"
+      "Player1: Complete Objectives: Complete Sea Cleansing using High Culture/Sea Cleansing"
     ]
   ],
   "undo_limit": 5,
