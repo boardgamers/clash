@@ -96,16 +96,17 @@ pub(crate) fn execute_construct(
     game: &mut Game,
     player_index: usize,
     c: &Construct,
+    cost_modifier: impl Fn(CostInfo) -> CostInfo + Copy + Send + Sync,
 ) -> Result<(), String> {
     let player = &game.players[player_index];
     let city = player.get_city(c.city_position);
-    let cost = can_construct(
+    let cost = cost_modifier(can_construct(
         city,
         c.city_piece,
         player,
         game,
         game.execute_cost_trigger(),
-    )?;
+    )?);
     if matches!(c.city_piece, Building::Port) {
         let port_position = c.port_position.as_ref().expect("Illegal action");
         assert!(
