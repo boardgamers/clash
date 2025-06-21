@@ -1,4 +1,4 @@
-use crate::ability_initializer::AbilityInitializerSetup;
+use crate::ability_initializer::{AbilityInitializerSetup, SelectedChoice};
 use crate::action_card::{ActionCard, ActionCardBuilder, CivilCardTarget, discard_action_card};
 use crate::advance::{Advance, gain_advance_without_payment};
 use crate::card::{HandCard, HandCardLocation, log_card_transfer};
@@ -14,7 +14,10 @@ use crate::content::tactics_cards::{
 };
 use crate::events::EventPlayer;
 use crate::game::Game;
-use crate::objective_card::{deinit_objective_card, gain_objective_card, log_gain_objective_card};
+use crate::objective_card::{
+    deinit_objective_card, discard_objective_card, draw_objective_card_from_pile,
+    gain_objective_card, log_gain_objective_card,
+};
 use crate::player::{Player, gain_unit};
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
@@ -41,6 +44,10 @@ pub(crate) fn synergies_action_cards() -> Vec<ActionCard> {
 
 fn new_plans(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     // todo great seer can be one of the cards
+    // 1. draw 2 objective cards
+    // 2. select 1 to keep
+    // 3. put the other one back into the deck
+    // 4. reshuffle the deck
     ActionCard::builder(
         id,
         "New Plans",
@@ -54,69 +61,63 @@ fn new_plans(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |e| &mut e.play_action_card,
         0,
         |game, p, _| {
-            game.information_revealed();
-            let mut new_cards = game.objective_cards_left.iter().take(2).collect_vec();
-            new_cards.extend(&p.get(game).objective_cards);
+            let card1 = draw_objective_card_from_pile(game, p);
+            let card2 = draw_objective_card_from_pile(game, p);
+            let cards = vec![card1, card2]
+                .into_iter()
+                .flatten()
+                .chain(p.get(game).objective_cards.clone())
+                .map(HandCard::ObjectiveCard)
+                .collect_vec();
+
+            let needed = 0..=cards.len() as u8;
             Some(HandCardsRequest::new(
-                new_cards
-                    .iter()
-                    .map(|c| HandCard::ObjectiveCard(**c))
-                    .collect_vec(),
-                0..=2,
+                cards,
+                needed,
                 "Select objective cards to draw and discard",
             ))
         },
         |game, s, _i| {
-            match s.choice.len() {
-                0 => {
-                    s.log(game, "Selected none of the objective cards.");
+            for c in &s.choices {
+                if should_discard(game, s, c) {
+                    discard_objective_card(
+                        game,
+                        s.player_index,
+                        objective_card_id(c),
+                        &s.origin,
+                        HandCardLocation::DrawPile,
+                    );
+                    game.objective_cards_left.shuffle(&mut game.rng);
+                } else {
+                    gain_objective_card(game, s.player_index, objective_card_id(c));
                 }
-                2 => {
-                    swap_objective_card(game, &s.player(), &s.choice);
-                }
-                _ => panic!("illegal selection"),
             }
-            game.objective_cards_left.shuffle(&mut game.rng);
         },
     )
     .tactics_card(tactics_card)
     .build()
 }
 
-fn swap_objective_card(game: &mut Game, player: &EventPlayer, hand_cards: &[HandCard]) {
-    let mut ids = hand_cards
-        .iter()
-        .map(|c| {
-            let HandCard::ObjectiveCard(id) = c else {
-                panic!("not an objective card")
-            };
-            id
-        })
-        .collect_vec();
-    let p = player.get_mut(game);
-    let discarded = remove_element_by(&mut p.objective_cards, |c| ids.contains(&c))
-        .expect("discarded objective card");
-    log_card_transfer(
-        game,
-        &HandCard::ObjectiveCard(discarded),
-        HandCardLocation::Hand(player.index),
-        HandCardLocation::DiscardPile,
-        &player.origin,
-    );
-    deinit_objective_card(game, player.index, discarded);
-    game.objective_cards_left.push(discarded);
+fn should_discard(game: &mut Game, s: &SelectedChoice<Vec<HandCard>>, c: &HandCard) -> bool {
+    let hand_card = game
+        .player(s.player_index)
+        .objective_cards
+        .contains(&objective_card_id(c));
 
-    remove_element(&mut ids, &&discarded).expect("discarded objective card");
-    let gained = ids[0];
-    remove_element(&mut game.objective_cards_left, gained).expect("gained objective card");
-    gain_objective_card(game, player.index, *gained);
-    log_gain_objective_card(
-        game,
-        player.index,
-        *gained,
-        HandCardLocation::DrawPile,
-        &player.origin,
-    );
+    if hand_card {
+        // discard the selected card if it is in hand
+        s.choice.contains(c)
+    } else {
+        // discard drawn card if not selected
+        !s.choice.contains(c)
+    }
+}
+
+fn objective_card_id(card: &HandCard) -> u8 {
+    let HandCard::ObjectiveCard(id) = card else {
+        panic!("not an objective card");
+    };
+    *id
 }
 
 pub(crate) fn validate_new_plans(cards: &[HandCard], game: &Game) -> Result<(), String> {

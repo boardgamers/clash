@@ -37,16 +37,18 @@ pub(crate) struct SelectedChoice<C> {
     pub player_name: String,
     pub origin: EventOrigin,
     pub actively_selected: bool,
+    pub choices: C,
     pub choice: C,
 }
 
 impl<C> SelectedChoice<C> {
-    pub fn new(p: &EventPlayer, actively_selected: bool, choice: C) -> Self {
+    pub fn new(p: &EventPlayer, actively_selected: bool, choices: C, choice: C) -> Self {
         Self {
             player_index: p.index,
             player_name: p.name.clone(),
             origin: p.origin.clone(),
             actively_selected,
+            choices,
             choice,
         }
     }
@@ -521,7 +523,8 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             move |game, p, action, request, details| {
                 if let PersistentEventRequest::BoolRequest(_) = &request {
                     if let EventResponse::Bool(reward) = action {
-                        gain_reward(game, &SelectedChoice::new(p, true, reward), details);
+                        // choices is not used for boolean requests, so we can use a dummy value
+                        gain_reward(game, &SelectedChoice::new(p, true, true, reward), details);
                         return;
                     }
                 }
@@ -833,7 +836,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                     if choices.len() == 1 {
                         g(
                             game,
-                            &SelectedChoice::new(p, false, choices[0].clone()),
+                            &SelectedChoice::new(p, false, choices.clone(), choices[0].clone()),
                             details,
                         );
                         return None;
@@ -890,7 +893,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                     {
                         g(
                             game,
-                            &SelectedChoice::new(p, false, m.choices.clone()),
+                            &SelectedChoice::new(p, false, m.choices.clone(), m.choices.clone()),
                             details,
                         );
                         return None;
@@ -912,7 +915,7 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                     needed.start(),
                     needed.end(),
                 );
-                gain_reward(game, &SelectedChoice::new(p, true, selected), details);
+                gain_reward(game, &SelectedChoice::new(p, true, choices, selected), details);
             },
         )
     }

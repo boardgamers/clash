@@ -276,6 +276,7 @@ pub(crate) fn log_card_transfer(
             p,
             match to {
                 HandCardLocation::DiscardPile => &format!("Discard {name}"),
+                HandCardLocation::DrawPile => &format!("Shuffle {name} back into the draw pile"),
                 HandCardLocation::PlayToDiscard | HandCardLocation::PlayToKeep => {
                     &format!("Play {name}")
                 }

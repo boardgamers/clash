@@ -139,7 +139,7 @@ pub(crate) fn use_great_mausoleum() -> Ability {
                         game.cache.get_action_card(*card).name()
                     ))
                 } else {
-                    do_gain_action_card_from_pile(game, p.index, &p.origin);
+                    do_gain_action_card_from_pile(game, p);
                     None
                 }
             },

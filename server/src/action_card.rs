@@ -11,7 +11,7 @@ use crate::content::persistent_events::{
     PersistentEventType, TriggerPersistentEventParams, trigger_persistent_event_with_listener,
 };
 use crate::content::tactics_cards::TacticsCardFactory;
-use crate::events::EventOrigin;
+use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
 use crate::log::{current_player_turn_log, current_player_turn_log_mut};
 use crate::player::Player;
@@ -204,7 +204,7 @@ pub(crate) fn on_play_action_card(game: &mut Game, player_index: usize, i: Actio
     );
 }
 
-pub(crate) fn gain_action_card_from_pile(game: &mut Game, player: usize, origin: &EventOrigin) {
+pub(crate) fn gain_action_card_from_pile(game: &mut Game, player: &EventPlayer) {
     if game
         .player(player)
         .wonders_owned
@@ -212,13 +212,13 @@ pub(crate) fn gain_action_card_from_pile(game: &mut Game, player: usize, origin:
     {
         game.player_mut(player).great_mausoleum_action_cards += 1;
     } else {
-        do_gain_action_card_from_pile(game, player, origin);
+        do_gain_action_card_from_pile(game, player);
     }
 }
 
-pub(crate) fn do_gain_action_card_from_pile(game: &mut Game, player: usize, origin: &EventOrigin) {
+pub(crate) fn do_gain_action_card_from_pile(game: &mut Game, player: &EventPlayer) {
     if let Some(c) = draw_action_card_from_pile(game) {
-        gain_action_card(game, player, c, HandCardLocation::DrawPile, origin);
+        gain_action_card(game, player, c, HandCardLocation::DrawPile);
     }
 }
 
@@ -234,18 +234,17 @@ fn draw_action_card_from_pile(game: &mut Game) -> Option<u8> {
 
 pub(crate) fn gain_action_card(
     game: &mut Game,
-    player_index: usize,
+    player: &EventPlayer,
     action_card: u8,
     from: HandCardLocation,
-    origin: &EventOrigin,
 ) {
-    game.player_mut(player_index).action_cards.push(action_card);
+    player.get_mut(game).action_cards.push(action_card);
     log_card_transfer(
         game,
         &HandCard::ActionCard(action_card),
         from,
-        HandCardLocation::Hand(player_index),
-        origin,
+        HandCardLocation::Hand(player.index),
+        &player.origin,
     );
 }
 

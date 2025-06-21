@@ -325,10 +325,9 @@ pub(crate) fn scout(id: u8) -> TacticsCard {
                             p.log(game, "Ignore the enemy tactics");
                             gain_action_card(
                                 game,
-                                p.index,
+                                p,
                                 tactics_card,
                                 HandCardLocation::DiscardPile,
-                                &p.origin,
                             );
                         } else {
                             p.log(game, "Cannot use - opponent didn't play a tactics card");
