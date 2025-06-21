@@ -341,6 +341,32 @@
                       }
                     },
                     {
+                      "player": 1,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Port"
+                        },
+                        "balance": "Loss",
+                        "position": "B2"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Port"
+                        },
+                        "balance": "Gain",
+                        "position": "B2"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
                       "player": 0,
                       "MoodChange": {
                         "city": "B2",
@@ -408,6 +434,8 @@
       "Player2: Combat: Lose city B2",
       "Player1: Combat: Gain 2 gold",
       "Player1: Combat: Gain city B2",
+      "Player2: Combat: Lose Port at B2",
+      "Player1: Combat: Gain Port at B2 at the water tile C3",
       "Player1: Combat: City B2 became Angry",
       "Player2: Place Settler: Gain 1 settler at C1",
       "Player1: Waste: Could not store 2 gold"

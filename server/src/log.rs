@@ -105,6 +105,9 @@ pub enum ActionLogBalance {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum ActionLogEntry {
+    Action {
+        balance: ActionLogBalance,
+    },
     Resources {
         resources: ResourcePile,
         balance: ActionLogBalance,
@@ -171,6 +174,11 @@ impl ActionLogEntry {
     #[must_use]
     pub fn mood_change(city: Position, mood: MoodState) -> Self {
         Self::MoodChange { city, mood }
+    }
+    
+    #[must_use]
+    pub fn action(balance: ActionLogBalance) -> Self {
+        Self::Action { balance }
     }
 }
 

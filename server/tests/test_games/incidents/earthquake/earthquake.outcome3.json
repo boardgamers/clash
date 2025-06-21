@@ -302,7 +302,22 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Fortress"
+                        },
+                        "balance": "Loss",
+                        "position": "C2"
+                      },
+                      "origin": {
+                        "Incident": 31
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -349,7 +364,22 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 1,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Fortress"
+                        },
+                        "balance": "Loss",
+                        "position": "A1"
+                      },
+                      "origin": {
+                        "Incident": 31
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -369,7 +399,9 @@
       "A new game event has been triggered: Heavy Earthquake"
     ],
     [
+      "Player1: Heavy Earthquake: Lose Fortress at C2",
       "Player1: Heavy Earthquake: Gain 2 points for the Fortress at C2",
+      "Player1: Heavy Earthquake: Lose Great Gardens at C2",
       "Player1: Heavy Earthquake: Gain 2 points for the Great Gardens at C2",
       "Player1: Heavy Earthquake: Gain 2 points for the city center at B2"
     ],
@@ -378,6 +410,7 @@
       "Player1: Myths: Avoid mood change"
     ],
     [
+      "Player2: Heavy Earthquake: Lose Fortress at A1",
       "Player1: Heavy Earthquake: Gain 2 points for the Fortress at A1",
       "Player2: Heavy Earthquake: Gain 2 points for the city center at A1",
       "Player2: Heavy Earthquake: Gain 2 points for the city center at A3"

@@ -409,7 +409,8 @@
     ],
     [
       "Player1: Pyramids: Pay 2 food, 3 wood, 6 ore, 1 gold and 2 culture tokens",
-      "Player1: Great Architect: Play Pyramids"
+      "Player1: Great Architect: Play Pyramids",
+      "Player1: Great Architect: Gain Pyramids at A1"
     ]
   ],
   "undo_limit": 1,

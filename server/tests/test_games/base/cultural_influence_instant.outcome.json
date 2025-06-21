@@ -180,9 +180,11 @@
   "starting_player_index": 0,
   "current_player_index": 1,
   "action_log": [
-    { "age": 1,
+    {
+      "age": 1,
       "rounds": [
-        { "round": 1,
+        {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -200,7 +202,35 @@
                         "action_type": "InfluenceCultureAttempt"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Fortress"
+                        },
+                        "balance": "Loss",
+                        "position": "C2"
+                      },
+                      "origin": {
+                        "Ability": "Influence Culture"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Fortress"
+                        },
+                        "balance": "Gain",
+                        "position": "C2"
+                      },
+                      "origin": {
+                        "Ability": "Influence Culture"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -213,7 +243,9 @@
   "log": [
     [
       "Player2: Influence Culture: Tried to influence the Fortress in the city at C2 by Player1 with the city C1",
-      "Cultural influence succeeded (rolled 6)"
+      "Cultural influence succeeded (rolled 6)",
+      "Player1: Influence Culture: Lose Fortress at C2",
+      "Player2: Influence Culture: Gain Fortress at C2"
     ]
   ],
   "undo_limit": 1,

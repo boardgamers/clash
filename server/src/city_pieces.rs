@@ -149,7 +149,7 @@ pub(crate) fn lose_building(
     city: Position,
 ) {
     log_lose_building(game, player, building, city);
-    let pieces = &mut player.get_mut(game).get_city_mut(city).pieces;
+    let pieces = &mut game.get_any_city_mut(city).pieces;
     match building {
         Academy => pieces.academy = None,
         Market => pieces.market = None,
@@ -386,9 +386,7 @@ pub(crate) fn log_gain_building(
     let port_pos = if building == Port {
         format!(
             " at the water tile {}",
-            player
-                .get(game)
-                .get_city(position)
+            game.get_any_city(position)
                 .port_position
                 .expect("Port must have a port position",)
         )

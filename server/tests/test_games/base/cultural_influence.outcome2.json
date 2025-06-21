@@ -265,6 +265,32 @@
                       "origin": {
                         "Ability": "Influence Culture"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Temple"
+                        },
+                        "balance": "Loss",
+                        "position": "C2"
+                      },
+                      "origin": {
+                        "Ability": "Influence Culture"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Temple"
+                        },
+                        "balance": "Gain",
+                        "position": "C2"
+                      },
+                      "origin": {
+                        "Ability": "Influence Culture"
+                      }
                     }
                   ]
                 }
@@ -286,7 +312,9 @@
     ],
     [
       "Player2: Influence Culture: Pay 4 culture tokens",
-      "Player2: Influence Culture: Paying to increase the dice roll"
+      "Player2: Influence Culture: Paying to increase the dice roll",
+      "Player1: Influence Culture: Lose Temple at C2",
+      "Player2: Influence Culture: Gain Temple at C2"
     ]
   ],
   "undo_limit": 2,

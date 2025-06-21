@@ -301,7 +301,35 @@
                     "Response": {
                       "SelectPlayer": 1
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 2,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Temple"
+                        },
+                        "balance": "Loss",
+                        "position": "A1"
+                      },
+                      "origin": {
+                        "Incident": 48
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Temple"
+                        },
+                        "balance": "Gain",
+                        "position": "A1"
+                      },
+                      "origin": {
+                        "Incident": 48
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -326,7 +354,8 @@
       "Player Player1 has passed the incident to Player3"
     ],
     [
-      "Player2: Reformation: Gained a Temple from Player3 in A1"
+      "Player3: Reformation: Lose Temple at A1",
+      "Player2: Reformation: Gain Temple at A1"
     ]
   ],
   "undo_limit": 2,
