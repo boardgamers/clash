@@ -223,9 +223,14 @@ fn great_prophet() -> ActionCard {
         |game, p, _| {
             let player = p.get(game);
             if !player.is_building_available(Building::Temple, game) {
+                p.log(
+                    game,
+                    "Cannot build a Temple: it is not available or already built",
+                );
                 return None;
             }
             if !player.can_afford(&temple_cost(game, player)) {
+                p.log(game, "Cannot build a Temple: not enough resources");
                 return None;
             }
 

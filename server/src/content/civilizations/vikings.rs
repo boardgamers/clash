@@ -300,8 +300,8 @@ fn knut() -> LeaderInfo {
 fn danegeld() -> LeaderAbility {
     LeaderAbility::builder(
         "Danegeld",
-        "If you have Taxes: As aa action, you may activate the leader city: \
-            Collect taxes",
+        "If you have Taxes: Once per turn, as an action, you may activate the leader city: \
+        Collect taxes (cannot be used in the same turn as the regular Tax action)",
     )
     .add_custom_action(
         CustomActionType::Danegeld,
