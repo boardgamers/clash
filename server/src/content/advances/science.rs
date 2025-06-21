@@ -43,7 +43,7 @@ pub fn use_observatory() -> Ability {
             4,
             |game, p, b| {
                 if b.building == Building::Observatory {
-                    gain_action_card_from_pile(game, p.index, &p.origin);
+                    gain_action_card_from_pile(game, p);
                     p.log(game, "Observatory gained 1 action card");
                 }
             },

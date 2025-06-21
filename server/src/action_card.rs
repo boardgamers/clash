@@ -205,12 +205,12 @@ pub(crate) fn on_play_action_card(game: &mut Game, player_index: usize, i: Actio
 }
 
 pub(crate) fn gain_action_card_from_pile(game: &mut Game, player: &EventPlayer) {
-    if game
-        .player(player)
+    if player
+        .get(game)
         .wonders_owned
         .contains(Wonder::GreatMausoleum)
     {
-        game.player_mut(player).great_mausoleum_action_cards += 1;
+        player.get_mut(game).great_mausoleum_action_cards += 1;
     } else {
         do_gain_action_card_from_pile(game, player);
     }

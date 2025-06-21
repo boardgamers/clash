@@ -1,7 +1,7 @@
-use crate::ability_initializer::{AbilityInitializerSetup, SelectedChoice};
+use crate::ability_initializer::{AbilityInitializerSetup, SelectedMultiChoice};
 use crate::action_card::{ActionCard, ActionCardBuilder, CivilCardTarget, discard_action_card};
 use crate::advance::{Advance, gain_advance_without_payment};
-use crate::card::{HandCard, HandCardLocation, log_card_transfer};
+use crate::card::{HandCard, HandCardLocation};
 use crate::content::ability::Ability;
 use crate::content::action_cards::inspiration;
 use crate::content::advances::theocracy::cities_that_can_add_units;
@@ -12,16 +12,15 @@ use crate::content::tactics_cards::{
     TacticsCardFactory, archers, defensive_formation, flanking, high_ground, high_morale, surprise,
     wedge_formation,
 };
-use crate::events::EventPlayer;
 use crate::game::Game;
 use crate::objective_card::{
-    deinit_objective_card, discard_objective_card, draw_objective_card_from_pile,
-    gain_objective_card, log_gain_objective_card,
+    discard_objective_card, draw_objective_card_from_pile,
+    gain_objective_card,
 };
 use crate::player::{Player, gain_unit};
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
-use crate::utils::{Shuffle, remove_element, remove_element_by};
+use crate::utils::Shuffle;
 use inspiration::possible_inspiration_advances;
 use itertools::Itertools;
 
@@ -98,7 +97,7 @@ fn new_plans(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .build()
 }
 
-fn should_discard(game: &mut Game, s: &SelectedChoice<Vec<HandCard>>, c: &HandCard) -> bool {
+fn should_discard(game: &mut Game, s: &SelectedMultiChoice<Vec<HandCard>>, c: &HandCard) -> bool {
     let hand_card = game
         .player(s.player_index)
         .objective_cards

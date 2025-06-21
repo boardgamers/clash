@@ -203,12 +203,11 @@ fn use_princeps(b: AbilityBuilder) -> AbilityBuilder {
         |event| &mut event.custom_action,
         0,
         |game, p, _| {
-            let player = p.index;
             activate_leader_city(game, p);
-            gain_action_card_from_pile(game, player, &p.origin);
-            gain_objective_card_from_pile(game, player, &p.origin);
+            gain_action_card_from_pile(game, p);
+            gain_objective_card_from_pile(game, p);
 
-            let p = game.player(player);
+            let p = p.get(game);
             Some(HandCardsRequest::new(
                 all_action_hand_cards(p)
                     .into_iter()

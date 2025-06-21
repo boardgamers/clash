@@ -345,7 +345,7 @@ fn great_scientist() -> ActionCard {
         0,
         |game, p, _| {
             p.gain_resources(game, ResourcePile::ideas(1));
-            gain_action_card_from_pile(game, p.index, &p.origin);
+            gain_action_card_from_pile(game, p);
         },
     )
     .build()
@@ -371,8 +371,8 @@ fn elder_statesman() -> ActionCard {
         |e| &mut e.play_action_card,
         0,
         |game, p, _| {
-            gain_action_card_from_pile(game, p.index, &p.origin);
-            gain_action_card_from_pile(game, p.index, &p.origin);
+            gain_action_card_from_pile(game, p);
+            gain_action_card_from_pile(game, p);
         },
     )
     .build()

@@ -181,8 +181,8 @@ pub(crate) fn draw_cards() -> Ability {
             |event| &mut event.status_phase,
             0,
             |game, p, _s| {
-                gain_action_card_from_pile(game, p.index, &p.origin);
-                gain_objective_card_from_pile(game, p.index, &p.origin);
+                gain_action_card_from_pile(game, p);
+                gain_objective_card_from_pile(game, p);
             },
         )
         .build()

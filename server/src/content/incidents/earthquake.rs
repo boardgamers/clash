@@ -1,4 +1,4 @@
-use crate::ability_initializer::SelectedChoice;
+use crate::ability_initializer::SelectedMultiChoice;
 use crate::city::{City, MoodState};
 use crate::city_pieces::{Building, remove_building};
 use crate::content::persistent_events::{
@@ -103,7 +103,7 @@ fn earthquake(id: u8, name: &str, target: IncidentTarget) -> Incident {
 
 fn apply_earthquake(
     game: &mut Game,
-    s: &SelectedChoice<Vec<SelectedStructure>>,
+    s: &SelectedMultiChoice<Vec<SelectedStructure>>,
     i: &mut IncidentInfo,
     origin: &EventOrigin,
 ) {

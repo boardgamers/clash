@@ -1,4 +1,4 @@
-use crate::ability_initializer::{AbilityInitializerSetup, SelectedChoice};
+use crate::ability_initializer::{AbilityInitializerSetup, SelectedMultiChoice};
 use crate::advance::Advance;
 use crate::city::non_angry_cites;
 use crate::city::{City, MoodState};
@@ -148,7 +148,7 @@ fn epidemics() -> Incident {
     .build()
 }
 
-pub(crate) fn kill_incident_units(game: &mut Game, s: &SelectedChoice<Vec<u32>>) {
+pub(crate) fn kill_incident_units(game: &mut Game, s: &SelectedMultiChoice<Vec<u32>>) {
     if s.choice.is_empty() {
         s.log(game, "Declined to kill units");
         return;

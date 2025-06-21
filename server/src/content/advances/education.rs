@@ -32,11 +32,10 @@ fn writing() -> AdvanceBuilder {
     .with_advance_bonus(CultureToken)
     .with_unlocked_building(Building::Academy)
     .add_once_initializer(move |game, player| {
-        gain_action_card_from_pile(game, player.index, &player.origin);
+        gain_action_card_from_pile(game, player);
         // can't gain objective card directly, because the "combat_end" listener might
         // currently being processed ("teach us now")
-        player.get_mut(game).gained_objective =
-            draw_objective_card_from_pile(game, player);
+        player.get_mut(game).gained_objective = draw_objective_card_from_pile(game, player);
     })
 }
 

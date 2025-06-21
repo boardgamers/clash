@@ -1,4 +1,4 @@
-use crate::ability_initializer::SelectedChoice;
+use crate::ability_initializer::SelectedWithoutChoices;
 use crate::events::{EventOrigin, EventPlayer, check_event_origin};
 use crate::player::Player;
 use crate::resource::ResourceType;
@@ -289,10 +289,11 @@ impl ResourceReward {
         player: &EventPlayer,
         r: ResourcePile,
         actively_selected: bool,
-    ) -> SelectedChoice<ResourcePile> {
-        SelectedChoice::new(
+    ) -> SelectedWithoutChoices<ResourcePile> {
+        SelectedWithoutChoices::new(
             &player.with_origin(self.payment_options.origin.clone()),
             actively_selected,
+            (),
             r,
         )
     }
