@@ -291,11 +291,7 @@ pub(crate) fn do_advance(
     add_action_log_item(
         game,
         player_index,
-        ActionLogEntry::Advance {
-            advance,
-            balance: ActionLogBalance::Gain,
-            take_incident_token,
-        },
+        ActionLogEntry::advance(advance, ActionLogBalance::Gain, take_incident_token),
         player.origin.clone(),
         vec![],
     );
@@ -453,11 +449,7 @@ pub(crate) fn remove_advance(game: &mut Game, advance: Advance, player: &EventPl
     add_action_log_item(
         game,
         player_index,
-        ActionLogEntry::Advance {
-            advance,
-            balance: ActionLogBalance::Loss,
-            take_incident_token: false,
-        },
+        ActionLogEntry::advance(advance, ActionLogBalance::Loss, false),
         player.origin.clone(),
         vec![],
     );

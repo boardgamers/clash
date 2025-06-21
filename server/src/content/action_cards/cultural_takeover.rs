@@ -4,7 +4,7 @@ use crate::barbarians::get_barbarians_player;
 use crate::content::ability::Ability;
 use crate::content::custom_actions::is_base_or_modifier;
 use crate::content::effects::PermanentEffect;
-use crate::content::persistent_events::{SelectedStructure, Structure, UnitTypeRequest};
+use crate::content::persistent_events::{SelectedStructure, UnitTypeRequest};
 use crate::content::tactics_cards::TacticsCardFactory;
 use crate::cultural_influence::{
     InfluenceCultureInfo, available_influence_actions, influence_culture_boost_cost,
@@ -12,6 +12,7 @@ use crate::cultural_influence::{
 use crate::game::Game;
 use crate::player::{Player, gain_unit, remove_unit};
 use crate::playing_actions::PlayingActionType;
+use crate::structure::Structure;
 use crate::unit::UnitType;
 use crate::utils::remove_element;
 use itertools::Itertools;

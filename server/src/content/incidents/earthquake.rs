@@ -2,13 +2,14 @@ use crate::ability_initializer::SelectedMultiChoice;
 use crate::city::{City, MoodState};
 use crate::city_pieces::{Building, remove_building};
 use crate::content::persistent_events::{
-    PositionRequest, SelectedStructure, Structure, StructuresRequest, is_selected_structures_valid,
+    PositionRequest, SelectedStructure, StructuresRequest, is_selected_structures_valid,
 };
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::incident::{DecreaseMood, Incident, IncidentBaseEffect, MoodModifier};
 use crate::player_events::{IncidentInfo, IncidentTarget};
 use crate::position::Position;
+use crate::structure::Structure;
 use crate::wonder::{Wonder, deinit_wonder};
 use itertools::Itertools;
 

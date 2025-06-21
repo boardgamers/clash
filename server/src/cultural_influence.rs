@@ -5,9 +5,7 @@ use crate::city_pieces::Building;
 use crate::consts::INFLUENCE_MIN_ROLL;
 use crate::content::ability::Ability;
 use crate::content::custom_actions::custom_action_modifier_event_origin;
-use crate::content::persistent_events::{
-    PaymentRequest, PersistentEventType, SelectedStructure, Structure,
-};
+use crate::content::persistent_events::{PaymentRequest, PersistentEventType, SelectedStructure};
 use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
 use crate::log::current_player_turn_log;
@@ -18,6 +16,7 @@ use crate::playing_actions::{PlayingAction, PlayingActionType, base_or_custom_av
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::SpecialAdvance;
+use crate::structure::Structure;
 use crate::wonder::Wonder;
 use itertools::Itertools;
 use pathfinding::prelude::astar;

@@ -3,7 +3,6 @@ use crate::action::execute_custom_phase_action;
 use crate::action_card::ActionCardInfo;
 use crate::advance::Advance;
 use crate::card::HandCard;
-use crate::city_pieces::Building;
 use crate::collect::CollectInfo;
 use crate::combat::Combat;
 use crate::combat_listeners::{CombatRoundEnd, CombatRoundStart};
@@ -17,7 +16,6 @@ use crate::game::Game;
 use crate::map::Rotation;
 use crate::objective_card::{SelectObjectivesInfo, present_instant_objective_cards};
 use crate::payment::{PaymentOptions, ResourceReward};
-use crate::player::Player;
 use crate::player_events::{
     IncidentInfo, OnAdvanceInfo, PersistentEvent, PersistentEvents, trigger_event_with_game_value,
 };
@@ -26,8 +24,9 @@ use crate::position::Position;
 use crate::recruit::Recruit;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::{ChangeGovernment, StatusPhaseState};
+use crate::structure::Structure;
 use crate::unit::UnitType;
-use crate::wonder::{DrawWonderCard, Wonder, WonderCardInfo};
+use crate::wonder::{DrawWonderCard, WonderCardInfo};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::ops::RangeInclusive;
@@ -307,24 +306,6 @@ impl UnitsRequest {
         Self {
             player,
             request: MultiRequest::new(choices, needed, description),
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, PartialOrd, Ord)]
-pub enum Structure {
-    CityCenter,
-    Building(Building),
-    Wonder(Wonder),
-}
-
-impl Structure {
-    #[must_use]
-    pub fn is_available(&self, player: &Player, game: &Game) -> bool {
-        match self {
-            Structure::CityCenter => player.is_city_available(),
-            Structure::Building(b) => player.is_building_available(*b, game),
-            Structure::Wonder(_) => false,
         }
     }
 }

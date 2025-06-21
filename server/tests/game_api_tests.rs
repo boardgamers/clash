@@ -3,9 +3,10 @@ use itertools::Itertools;
 use playing_actions::PlayingActionType;
 use server::card::HandCard;
 use server::collect::PositionCollection;
-use server::content::persistent_events::{EventResponse, SelectedStructure, Structure};
+use server::content::persistent_events::{EventResponse, SelectedStructure};
 use server::game_setup::{GameSetupBuilder, setup_game};
 use server::leader::Leader;
+use server::structure::Structure;
 use server::unit::Units;
 use server::wonder::Wonder;
 use server::{

@@ -5,6 +5,7 @@ use crate::combat_stats::CombatStats;
 use crate::events::EventOrigin;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
+use crate::structure::Structure;
 use crate::unit::Units;
 use crate::{action::Action, game::Game};
 use json_patch::PatchOperation;
@@ -117,6 +118,11 @@ pub enum ActionLogEntry {
         units: Units,
         balance: ActionLogBalance,
     },
+    Structure {
+        structure: Structure,
+        balance: ActionLogBalance,
+        position: Position,
+    },
     HandCard {
         card: HandCard,
         from: HandCardLocation,
@@ -137,6 +143,24 @@ impl ActionLogEntry {
     #[must_use]
     pub fn units(units: Units, balance: ActionLogBalance) -> Self {
         Self::Units { units, balance }
+    }
+
+    #[must_use]
+    pub fn advance(advance: Advance, balance: ActionLogBalance, take_incident_token: bool) -> Self {
+        Self::Advance {
+            advance,
+            take_incident_token,
+            balance,
+        }
+    }
+
+    #[must_use]
+    pub fn structure(structure: Structure, balance: ActionLogBalance, position: Position) -> Self {
+        Self::Structure {
+            structure,
+            balance,
+            position,
+        }
     }
 
     #[must_use]

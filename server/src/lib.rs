@@ -68,6 +68,7 @@ pub mod resource;
 pub mod resource_pile;
 mod special_advance;
 pub mod status_phase;
+pub mod structure;
 pub mod tactics_card;
 mod undo;
 pub mod unit;

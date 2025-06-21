@@ -4,12 +4,13 @@ use server::action::Action;
 use server::card::HandCard;
 use server::city_pieces::Building::Fortress;
 use server::collect::PositionCollection;
-use server::content::persistent_events::{EventResponse, SelectedStructure, Structure};
+use server::content::persistent_events::{EventResponse, SelectedStructure};
 use server::movement::possible_move_routes;
 use server::playing_actions::PlayingAction::Construct;
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
+use server::structure::Structure;
 use server::{advance, collect, construct, cultural_influence};
 
 mod common;

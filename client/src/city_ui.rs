@@ -22,11 +22,11 @@ use server::city_pieces::Building;
 use server::collect::{available_collect_actions_for_city, possible_resource_collections};
 use server::construct::{can_construct, new_building_positions};
 use server::consts::BUILDING_COST;
-use server::content::persistent_events::Structure;
 use server::game::Game;
 use server::player::CostTrigger;
 use server::playing_actions::PlayingActionType;
 use server::resource::ResourceType;
+use server::structure::Structure;
 use server::unit::{UnitType, Units};
 use std::ops::Add;
 
