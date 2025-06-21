@@ -237,6 +237,19 @@
                     },
                     {
                       "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Observatory"
+                        },
+                        "balance": "Gain",
+                        "position": "C2"
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "HandCard": {
                         "card": {
                           "ActionCard": 1
@@ -264,7 +277,7 @@
     [
       "Player1: Construct Building: City C2 became Neutral",
       "Player1: Construct Building: Pay 1 food, 1 wood and 1 ore",
-      "Player1: Construct Building: Build a Observatory in the city C2",
+      "Player1: Construct Building: Gain Observatory at C2",
       "Player1: Observatory: Draw an action card",
       "Player1: Observatory: Observatory gained 1 action card"
     ]

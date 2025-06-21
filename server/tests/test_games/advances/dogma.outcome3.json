@@ -361,6 +361,19 @@
                           "Advance": "StateReligion"
                         }
                       ]
+                    },
+                    {
+                      "player": 1,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Temple"
+                        },
+                        "balance": "Gain",
+                        "position": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
+                      }
                     }
                   ]
                 },
@@ -448,7 +461,7 @@
     [
       "Player2: Construct Building: Pay 1 wood and 1 ore with State Religion",
       "State Religion reduced the food cost to 0",
-      "Player2: Construct Building: Build a Temple in the city C1"
+      "Player2: Construct Building: Gain Temple at C1"
     ],
     [
       "Player2: Temple: Gain 1 culture token"

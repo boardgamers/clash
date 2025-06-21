@@ -2,6 +2,11 @@ use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 
 use crate::city::City;
+use crate::events::EventPlayer;
+use crate::game::Game;
+use crate::log::{ActionLogBalance, ActionLogEntry, add_action_log_item};
+use crate::position::Position;
+use crate::structure::Structure;
 use crate::wonder::Wonder;
 use Building::*;
 use num::Zero;
@@ -349,4 +354,54 @@ impl Display for Building {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.name())
     }
+}
+
+pub(crate) fn log_gain_building(
+    game: &mut Game,
+    player: &EventPlayer,
+    building: Building,
+    position: Position,
+) {
+    let port_pos = if building == Port {
+        format!(
+            " at the water tile {}",
+            player.get(game).get_city(position).port_position.expect(
+                "Port must have a port position",
+            )
+        )
+    } else {
+        String::new()
+    };
+
+    player.log(
+        game,
+        &format!("Gain {} at {position}{port_pos}", building.name()),
+    );
+    log_building_action(game, player, building, position, ActionLogBalance::Gain);
+}
+
+pub(crate) fn log_lose_building(
+    game: &mut Game,
+    player: &EventPlayer,
+    building: Building,
+    position: Position,
+) {
+    player.log(game, &format!("Lose {} at {}", building.name(), position));
+    log_building_action(game, player, building, position, ActionLogBalance::Loss);
+}
+
+fn log_building_action(
+    game: &mut Game,
+    player: &EventPlayer,
+    building: Building,
+    position: Position,
+    balance: ActionLogBalance,
+) {
+    add_action_log_item(
+        game,
+        player.index,
+        ActionLogEntry::structure(Structure::Building(building), balance, position),
+        player.origin.clone(),
+        vec![],
+    );
 }

@@ -1,6 +1,6 @@
 use crate::advance::{Advance, gain_advance_without_payment};
 use crate::city::{City, MoodState, activate_city};
-use crate::city_pieces::Building;
+use crate::city_pieces::{log_gain_building, Building};
 use crate::consts::MAX_CITY_PIECES;
 use crate::content::ability::construct_event_origin;
 use crate::content::persistent_events::PersistentEventType;
@@ -117,25 +117,6 @@ pub(crate) fn execute_construct(
         panic!("Illegal action");
     }
 
-    let port_pos = if let Some(port_position) = c.port_position {
-        let adjacent_water_tiles = c
-            .city_position
-            .neighbors()
-            .iter()
-            .filter(|neighbor| game.map.is_sea(**neighbor))
-            .count();
-        if adjacent_water_tiles > 1 {
-            format!(" at the water tile {port_position}")
-        } else {
-            String::new()
-        }
-    } else {
-        String::new()
-    };
-
-    let city_piece = c.city_piece;
-    let city_position = c.city_position;
-
     construct(
         game,
         player_index,
@@ -146,10 +127,11 @@ pub(crate) fn execute_construct(
         cost.origin(),
     );
     cost.pay(game, &c.payment);
-    game.log_with_origin(
-        player_index,
-        &construct_event_origin(),
-        &format!("Build a {city_piece} in the city {city_position}{port_pos}"),
+    log_gain_building(
+        game,
+        &EventPlayer::from_player(player_index, game, cost.origin().clone()),
+        c.city_piece,
+        c.city_position,
     );
 
     on_construct(game, player_index, ConstructInfo::new(c.city_piece));

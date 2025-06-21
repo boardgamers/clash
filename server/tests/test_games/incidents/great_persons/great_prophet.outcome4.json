@@ -465,6 +465,19 @@
                           "Advance": "StateReligion"
                         }
                       ]
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Temple"
+                        },
+                        "balance": "Gain",
+                        "position": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
+                      }
                     }
                   ]
                 }
@@ -504,7 +517,7 @@
       "Player1: Construct Building: Pay 2 gold with State Religion",
       "Player1: Construct Building: Pay 2 gold with State Religion",
       "State Religion reduced the food cost to 0",
-      "Player1: Construct Building: Build a Temple in the city C1"
+      "Player1: Construct Building: Gain Temple at C1"
     ]
   ],
   "undo_limit": 1,

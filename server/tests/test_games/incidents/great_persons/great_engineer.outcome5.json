@@ -412,6 +412,19 @@
                           "Ability": "Construct Only"
                         }
                       ]
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Fortress"
+                        },
+                        "balance": "Gain",
+                        "position": "C2"
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
+                      }
                     }
                   ]
                 }
@@ -453,7 +466,7 @@
     [
       "Player1: Construct Building: Pay 1 food, 1 wood and 1 ore with Captivi, Construct Only",
       "Captivi allows to replace resources with mood tokens",
-      "Player1: Construct Building: Build a Fortress in the city C2"
+      "Player1: Construct Building: Gain Fortress at C2"
     ]
   ],
   "undo_limit": 4,

@@ -381,6 +381,19 @@
                     },
                     {
                       "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Academy"
+                        },
+                        "balance": "Gain",
+                        "position": "A1"
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "ideas": 2
@@ -411,7 +424,7 @@
     ],
     [
       "Player1: Construct Building: Pay 1 food, 1 wood and 1 ore",
-      "Player1: Construct Building: Build a Academy in the city A1",
+      "Player1: Construct Building: Gain Academy at A1",
       "Player1: Academy: Gain 2 ideas"
     ]
   ],
