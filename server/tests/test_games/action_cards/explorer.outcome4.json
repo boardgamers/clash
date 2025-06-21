@@ -359,6 +359,15 @@
                   "items": [
                     {
                       "player": 1,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "CivilCard": 21
+                      }
+                    },
+                    {
+                      "player": 1,
                       "HandCard": {
                         "card": {
                           "ActionCard": 21
@@ -448,6 +457,7 @@
   "action_log_index": 5,
   "log": [
     [
+      "Player2: Explorer: Pay 1 action",
       "Player2: Action Card: Play Explorer/Encircled",
       "Player2 has to pay 1 culture token for Explorer"
     ],

@@ -338,6 +338,18 @@ pub(crate) fn gain_action(game: &mut Game, player: &EventPlayer) {
 }
 
 pub(crate) fn lose_action(game: &mut Game, player: &EventPlayer) {
+    player.log(game, "Lose 1 action");
+    game.actions_left -= 1;
+    add_action_log_item(
+        game,
+        player.index,
+        ActionLogEntry::action(ActionLogBalance::Loss),
+        player.origin.clone(),
+        vec![],
+    );
+}
+
+pub(crate) fn pay_action(game: &mut Game, player: &EventPlayer) {
     player.log(game, "Pay 1 action");
     game.actions_left -= 1;
     add_action_log_item(

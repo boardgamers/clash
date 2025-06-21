@@ -215,6 +215,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "CivilCard": 7
+                      }
+                    },
+                    {
+                      "player": 0,
                       "HandCard": {
                         "card": {
                           "ActionCard": 7
@@ -315,6 +324,7 @@
   "action_log_index": 3,
   "log": [
     [
+      "Player1: Spy: Pay 1 action",
       "Player1: Action Card: Play Spy/Heavy Resistance",
       "Player1 has to pay 1 culture token for Spy"
     ],

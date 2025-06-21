@@ -44,7 +44,7 @@ impl GreatSeerEffect {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub enum PermanentEffect {
     Pestilence,
-    CivilWarLoseAction(usize),
+    RevolutionLoseAction(usize),
     PublicWonderCard(Wonder),
     TrojanHorse,
     SolarEclipse,
@@ -76,7 +76,7 @@ impl PermanentEffect {
                 }
                 CollectEffect::Overproduction => cache.get_incident(29).description(game),
             },
-            PermanentEffect::CivilWarLoseAction(p) => {
+            PermanentEffect::RevolutionLoseAction(p) => {
                 vec![format!(
                     "{} loses an action due to Civil War",
                     game.player_name(*p)

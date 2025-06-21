@@ -1,4 +1,5 @@
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
+use crate::action::pay_action;
 use crate::advance::Advance;
 use crate::card::{HandCard, HandCardLocation, draw_card_from_pile, log_card_transfer};
 use crate::city::{City, MoodState, activate_city};
@@ -450,8 +451,8 @@ pub(crate) fn build_wonder_handler() -> Ability {
         .add_payment_request_listener(
             |e| &mut e.play_wonder_card,
             10,
-            move |game, p, i| {
-                let p = p.get(game);
+            move |game, player, i| {
+                let p = player.get(game);
                 let city = p.get_city(i.selected_position.expect("city not selected"));
                 let cost = can_construct_wonder(
                     city,
@@ -466,7 +467,7 @@ pub(crate) fn build_wonder_handler() -> Ability {
                 i.cost = cost.clone();
 
                 if !cost.ignore_action_cost {
-                    game.actions_left -= 1;
+                    pay_action(game, player);
                 }
 
                 Some(vec![PaymentRequest::mandatory(

@@ -2,6 +2,7 @@ use crate::action_cost::ActionResourceCost;
 use serde::{Deserialize, Serialize};
 
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::action::pay_action;
 use crate::action_card::{can_play_civil_card, discard_action_card, play_action_card};
 use crate::action_cost::ActionCost;
 use crate::advance::{AdvanceAction, execute_advance_action};
@@ -9,7 +10,9 @@ use crate::card::HandCardLocation;
 use crate::city::execute_found_city_action;
 use crate::collect::{Collect, execute_collect};
 use crate::construct::Construct;
-use crate::content::ability::Ability;
+use crate::content::ability::{
+    Ability, advance_event_origin, combat_event_origin, recruit_event_origin,
+};
 use crate::content::custom_actions::{
     CustomAction, CustomActionActivation, CustomActionType, can_play_custom_action,
     log_start_custom_action, on_custom_action,
@@ -18,7 +21,7 @@ use crate::content::persistent_events::{
     PaymentRequest, PersistentEventType, TriggerPersistentEventParams, trigger_persistent_event_ext,
 };
 use crate::cultural_influence::{InfluenceCultureAttempt, execute_influence_culture_attempt};
-use crate::events::EventOrigin;
+use crate::events::{EventOrigin, EventPlayer};
 use crate::game::GameState;
 use crate::happiness::{IncreaseHappiness, execute_increase_happiness, happiness_event_origin};
 use crate::payment::PaymentOptions;
@@ -149,13 +152,17 @@ impl PlayingAction {
         player_index: usize,
         redo: bool,
     ) -> Result<(), String> {
-        let playing_action_type = self.playing_action_type(game.player(player_index));
+        let p = game.player(player_index);
+        let playing_action_type = self.playing_action_type(p);
         if !redo {
             playing_action_type.is_available(game, player_index)?;
         }
         let action_cost = playing_action_type.cost(game, player_index);
         if !action_cost.free {
-            game.actions_left -= 1;
+            pay_action(
+                game,
+                &EventPlayer::from_player(player_index, game, self.origin(p)),
+            );
         }
 
         self.execute_without_action_cost(game, player_index)
@@ -293,6 +300,25 @@ impl PlayingAction {
             PlayingAction::WonderCard(name) => PlayingActionType::WonderCard(*name),
             PlayingAction::Custom(c) => PlayingActionType::Custom(c.action),
             PlayingAction::EndTurn => PlayingActionType::EndTurn,
+        }
+    }
+
+    #[must_use]
+    pub(crate) fn origin(&self, player: &Player) -> EventOrigin {
+        match self {
+            PlayingAction::Advance(_) => advance_event_origin(),
+            PlayingAction::FoundCity { .. } => EventOrigin::Ability("Found City".to_string()),
+            PlayingAction::Construct(_) => combat_event_origin(),
+            PlayingAction::Collect(c) => c.action_type.event_origin(player),
+            PlayingAction::Recruit(_) => recruit_event_origin(),
+            PlayingAction::IncreaseHappiness(h) => h.action_type.event_origin(player),
+            PlayingAction::InfluenceCultureAttempt(i) => i.action_type.event_origin(player),
+            PlayingAction::ActionCard(a) => EventOrigin::CivilCard(*a),
+            PlayingAction::WonderCard(w) => EventOrigin::Wonder(*w),
+            PlayingAction::Custom(c) => player.custom_action_info(c.action).event_origin,
+            PlayingAction::EndTurn => panic!(
+                "PlayingAction::origin called on an action that does not have an origin: EndTurn",
+            ),
         }
     }
 }

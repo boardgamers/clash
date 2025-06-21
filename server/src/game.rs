@@ -1,3 +1,4 @@
+use crate::action::lose_action;
 use crate::cache::Cache;
 use crate::combat_roll::{COMBAT_DIE_SIDES, CombatDieRoll};
 use crate::consts::ACTIONS;
@@ -7,7 +8,7 @@ use crate::content::persistent_events::{
     PersistentEventHandler, PersistentEventState, PersistentEventType,
     TriggerPersistentEventParams, trigger_persistent_event_ext,
 };
-use crate::events::{Event, EventOrigin};
+use crate::events::{Event, EventOrigin, EventPlayer};
 use crate::game_data::GameData;
 use crate::log::{
     ActionLogAge, add_player_log, add_round_log, current_player_turn_log,
@@ -337,11 +338,17 @@ impl Game {
         let lost_action = self
             .permanent_effects
             .iter()
-            .position(|e| matches!(e, PermanentEffect::CivilWarLoseAction(p) if *p == player))
+            .position(|e| matches!(e, PermanentEffect::RevolutionLoseAction(p) if *p == player))
             .map(|i| self.permanent_effects.remove(i));
         if lost_action.is_some() {
-            self.add_info_log_item("Remove 1 action for Revolution");
-            self.actions_left -= 1;
+            lose_action(
+                self,
+                &EventPlayer::from_player(
+                    player,
+                    self,
+                    EventOrigin::Ability("Revolution".to_string()),
+                ),
+            );
         }
         self.successful_cultural_influence = false;
 

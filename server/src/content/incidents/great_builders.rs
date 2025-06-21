@@ -1,4 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::action::gain_action;
 use crate::action_card::ActionCard;
 use crate::card::HandCard;
 use crate::construct::{ConstructDiscount, available_buildings};
@@ -45,12 +46,12 @@ pub(crate) fn great_engineer() -> ActionCard {
             if s.choice {
                 game.permanent_effects
                     .push(Construct(ConstructEffect::GreatEngineer));
-                game.actions_left += 1; // to offset the action spent for building
                 s.log(
                     game,
                     "Great Engineer: You may build a building in a city without \
                     spending an action and without activating it.",
                 );
+                gain_action(game, &s.player()); // to offset the action spent for building
             } else {
                 s.log(game, "Great Engineer: You decided not to use the ability.");
             }

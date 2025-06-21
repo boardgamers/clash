@@ -118,7 +118,14 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
     Building::all()
         .into_iter()
         .flat_map(|b| {
-            let can = can_construct(city, b, rc.shown_player, game, CostTrigger::WithModifiers, &[]);
+            let can = can_construct(
+                city,
+                b,
+                rc.shown_player,
+                game,
+                CostTrigger::WithModifiers,
+                &[],
+            );
 
             new_building_positions(game, b, city)
                 .into_iter()

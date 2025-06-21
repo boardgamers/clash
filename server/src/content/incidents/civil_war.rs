@@ -1,3 +1,4 @@
+use crate::action::lose_action;
 use crate::city;
 use crate::city::MoodState;
 use crate::content::effects::PermanentEffect;
@@ -136,10 +137,9 @@ fn revolution() -> Incident {
             if get_status_phase(game).is_some() {
                 p.log(game, "Lose an action for the next turn");
                 game.permanent_effects
-                    .push(PermanentEffect::CivilWarLoseAction(p.index));
+                    .push(PermanentEffect::RevolutionLoseAction(p.index));
             } else {
-                p.log(game, "Lose an action for Revolution");
-                game.actions_left -= 1;
+                lose_action(game, p);
             }
         }
     });

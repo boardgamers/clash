@@ -326,6 +326,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Units": {
                         "units": {
                           "infantry": 1
@@ -385,7 +394,8 @@
       "Player1: Negotiations: May attack Player2 again."
     ],
     [
-      "Player1 marched 1 infantry from C2 to B1"
+      "Player1 marched 1 infantry from C2 to B1",
+      "Player1: Move: Pay 1 action"
     ],
     [
       "Combat round 1",

@@ -1,4 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::action::gain_action;
 use crate::action_card::ActionCard;
 use crate::collect::available_collect_actions_for_city;
 use crate::construct::ConstructDiscount;
@@ -50,7 +51,7 @@ fn city_development(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |game, p, _| {
             game.permanent_effects
                 .push(PermanentEffect::Construct(ConstructEffect::CityDevelopment));
-            game.actions_left += 1; // to offset the action spent for building
+            gain_action(game, p); // to offset the action spent for building
             p.log(
                 game,
                 "You may build a building in a city without \
@@ -77,7 +78,7 @@ fn production_focus(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |game, p, _| {
             game.permanent_effects
                 .push(PermanentEffect::Collect(CollectEffect::ProductionFocus));
-            game.actions_left += 1; // to offset the action spent for collecting
+            gain_action(game, p); // to offset the action spent for collecting
             p.log(
                 game,
                 "Production Focus: You may collect multiple times from the same tile.",

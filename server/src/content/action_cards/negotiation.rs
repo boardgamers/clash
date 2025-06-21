@@ -1,5 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::action::Action;
+use crate::action::{Action, gain_action, lose_action};
 use crate::action_card::ActionCard;
 use crate::content::ability::Ability;
 use crate::content::action_cards::development::collect_special_action;
@@ -132,8 +132,7 @@ fn leadership(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |e| &mut e.play_action_card,
         0,
         |game, p, _| {
-            p.log(game, "Gain 1 action");
-            game.actions_left += 1;
+            gain_action(game, p);
         },
     )
     .build()
@@ -195,8 +194,7 @@ pub(crate) fn use_assassination() -> Ability {
                 if remove_element_by(&mut game.permanent_effects, |e| is_assassinated(e, p.index))
                     .is_some()
                 {
-                    game.actions_left -= 1;
-                    p.log(game, "Lost an action due to assassination.");
+                    lose_action(game, p);
                 }
             },
         )
@@ -223,7 +221,7 @@ fn overproduction(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |game, p, _| {
             game.permanent_effects
                 .push(PermanentEffect::Collect(CollectEffect::Overproduction));
-            game.actions_left += 1; // to offset the action spent for collecting
+            gain_action(game, p); // to offset the action spent for collecting
             p.log(
                 game,
                 "Can use Overproduction to collect from 2 additional tiles.",

@@ -5,11 +5,12 @@ use crate::unit::{Unit, UnitType, Units, set_unit_position, ship_capacity};
 use crate::utils;
 use std::collections::HashSet;
 
+use crate::action::pay_action;
 use crate::combat::move_with_possible_combat;
 use crate::consts::{ARMY_MOVEMENT_REQUIRED_ADVANCE, MOVEMENT_ACTIONS, STACK_LIMIT};
 use crate::content::civilizations::vikings::is_ship_construction_move;
 use crate::content::persistent_events::{PaymentRequest, PersistentEventType};
-use crate::events::EventOrigin;
+use crate::events::{EventOrigin, EventPlayer};
 use crate::explore::move_to_unexplored_tile;
 use crate::game::GameState::Movement;
 use crate::game::{Game, GameState};
@@ -295,7 +296,10 @@ pub(crate) fn execute_movement_action(
         if game.actions_left == 0 {
             return Err("No actions left".to_string());
         }
-        game.actions_left -= 1;
+        pay_action(
+            game,
+            &EventPlayer::from_player(player_index, game, move_event_origin()),
+        );
         game.state = Movement(MoveState::new());
     }
 
@@ -694,4 +698,8 @@ pub(crate) fn move_action_log(game: &Game, player: &Player, m: &MoveUnits) -> St
         format!(" for {payment}")
     };
     format!("{player} {verb} {units_str} from {start} to {dest}{suffix}{cost}",)
+}
+
+pub(crate) fn move_event_origin() -> EventOrigin {
+    EventOrigin::Ability("Move".to_string())
 }

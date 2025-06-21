@@ -211,6 +211,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "CivilCard": 31
+                      }
+                    },
+                    {
+                      "player": 0,
                       "HandCard": {
                         "card": {
                           "ActionCard": 31
@@ -337,6 +346,7 @@
   "action_log_index": 3,
   "log": [
     [
+      "Player1: New Plans: Pay 1 action",
       "Player1: Action Card: Play New Plans/Flanking",
       "Player1 has to pay 1 culture token for New Plans"
     ],

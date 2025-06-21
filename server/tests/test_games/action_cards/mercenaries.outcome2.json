@@ -243,6 +243,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "CivilCard": 13
+                      }
+                    },
+                    {
+                      "player": 0,
                       "HandCard": {
                         "card": {
                           "ActionCard": 13
@@ -363,6 +372,7 @@
   "action_log_index": 3,
   "log": [
     [
+      "Player1: Mercenaries: Pay 1 action",
       "Player1: Action Card: Play Mercenaries/For the People",
       "Player1: Mercenaries: Player1 cannot move Barbarian army at A3 because Sulla is in range"
     ],
