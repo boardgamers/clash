@@ -276,11 +276,7 @@ pub(crate) fn complete_objective_card(game: &mut Game, player: usize, id: u8, ob
     {
         s(
             game,
-            &EventPlayer::new(
-                player,
-                game.player_name(player),
-                EventOrigin::Objective(objective.to_string()),
-            ),
+            &EventPlayer::from_player(player, game, EventOrigin::Objective(objective.to_string())),
         );
     }
 
@@ -420,34 +416,29 @@ fn filter_duplicated_objectives(
         .collect_vec()
 }
 
-pub(crate) fn gain_objective_card_from_pile(game: &mut Game, player: usize, origin: &EventOrigin) {
-    if let Some(c) = draw_and_log_objective_card_from_pile(game, player, origin) {
-        gain_objective_card(game, player, c);
+pub(crate) fn gain_objective_card_from_pile(game: &mut Game, player: &EventPlayer) {
+    if let Some(c) = draw_objective_card_from_pile(game, player) {
+        gain_objective_card(game, player.index, c);
     }
 }
 
 pub(crate) fn log_gain_objective_card(
     game: &mut Game,
-    player_index: usize,
+    player: &EventPlayer,
     objective_card: u8,
     from: HandCardLocation,
-    origin: &EventOrigin,
 ) {
     log_card_transfer(
         game,
         &HandCard::ObjectiveCard(objective_card),
         from,
-        HandCardLocation::Hand(player_index),
-        origin,
+        HandCardLocation::Hand(player.index),
+        &player.origin,
     );
 }
 
-pub(crate) fn draw_and_log_objective_card_from_pile(
-    game: &mut Game,
-    player: usize,
-    origin: &EventOrigin,
-) -> Option<u8> {
-    draw_great_seer_card(game, player, origin).or_else(|| {
+pub(crate) fn draw_objective_card_from_pile(game: &mut Game, player: &EventPlayer) -> Option<u8> {
+    draw_great_seer_card(game, player).or_else(|| {
         let card = draw_card_from_pile(
             game,
             "Objective Card",
@@ -462,18 +453,18 @@ pub(crate) fn draw_and_log_objective_card_from_pile(
             },
         );
         if let Some(card) = card {
-            log_gain_objective_card(game, player, card, HandCardLocation::DrawPile, origin);
+            log_gain_objective_card(game, player, card, HandCardLocation::DrawPile);
         }
         card
     })
 }
 
-fn draw_great_seer_card(game: &mut Game, player: usize, origin: &EventOrigin) -> Option<u8> {
+fn draw_great_seer_card(game: &mut Game, player: &EventPlayer) -> Option<u8> {
     let mut remove_great_seer = false;
     let mut result = None;
     if let Some(great_seer) = find_great_seer(game) {
         if let Some(o) = great_seer.assigned_objectives.iter().find_map(|o| {
-            if o.player == player {
+            if o.player == player.index {
                 Some(o.clone())
             } else {
                 None
@@ -487,8 +478,7 @@ fn draw_great_seer_card(game: &mut Game, player: usize, origin: &EventOrigin) ->
                 game,
                 player,
                 o.objective_card,
-                HandCardLocation::GreatSeer(player),
-                origin,
+                HandCardLocation::GreatSeer(player.index),
             );
         }
     }

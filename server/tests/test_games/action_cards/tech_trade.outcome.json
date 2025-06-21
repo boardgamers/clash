@@ -238,6 +238,17 @@
                       }
                     },
                     {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Storage",
+                        "take_incident_token": false,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "CivilCard": 39
+                      }
+                    },
+                    {
                       "player": 1,
                       "Resources": {
                         "resources": {
@@ -247,6 +258,17 @@
                       },
                       "origin": {
                         "Advance": "Fishing"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Advance": {
+                        "advance": "Fishing",
+                        "take_incident_token": false,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "CivilCard": 39
                       }
                     }
                   ]
@@ -263,10 +285,10 @@
     [
       "Player1: Action Card: Play Technology Trade/Surprise",
       "Player1: Technology Trade: Selected Player2 as trade partner",
-      "Player1: Technology Trade: Selected Storage as advance for Technology Trade.",
       "Player1: Storage: Gain 1 mood token",
-      "Player2: Technology Trade: Selected Fishing as advance for Technology Trade.",
-      "Player2: Fishing: Gain 1 mood token"
+      "Player1: Technology Trade: Gain Storage without taking an event token",
+      "Player2: Fishing: Gain 1 mood token",
+      "Player2: Technology Trade: Gain Fishing without taking an event token"
     ]
   ],
   "undo_limit": 0,

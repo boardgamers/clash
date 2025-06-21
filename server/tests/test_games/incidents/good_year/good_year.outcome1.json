@@ -277,6 +277,17 @@
                       }
                     },
                     {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Storage",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Free Advance"
+                      }
+                    },
+                    {
                       "player": 2,
                       "Units": {
                         "units": {
@@ -345,8 +356,8 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1: Free Advance: Advanced Storage for free",
-      "Player1: Storage: Gain 1 mood token"
+      "Player1: Storage: Gain 1 mood token",
+      "Player1: Free Advance: Gain Storage and take an event token (triggering an incident)"
     ],
     [
       "A new game event has been triggered: A good year",

@@ -1,5 +1,8 @@
-use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
-use crate::ability_initializer::{AbilityInitializerSetup, SelectedChoice};
+use crate::ability_initializer::AbilityInitializerSetup;
+use crate::ability_initializer::{
+    AbilityInitializerBuilder, AbilityListeners, SelectedMultiChoice, SelectedSingleChoice,
+    SelectedWithoutChoices,
+};
 use crate::action_card::ActionCard;
 use crate::advance::Advance;
 use crate::barbarians::{barbarians_move, barbarians_spawn};
@@ -268,7 +271,7 @@ impl IncidentBuilder {
         + Clone
         + Sync
         + Send,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<Position>>, &mut IncidentInfo)
+        gain_reward: impl Fn(&mut Game, &SelectedMultiChoice<Vec<Position>>, &mut IncidentInfo)
         + 'static
         + Clone
         + Sync
@@ -301,7 +304,7 @@ impl IncidentBuilder {
         + Clone
         + Sync
         + Send,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<u32>>, &mut IncidentInfo)
+        gain_reward: impl Fn(&mut Game, &SelectedMultiChoice<Vec<u32>>, &mut IncidentInfo)
         + 'static
         + Clone
         + Sync
@@ -336,7 +339,7 @@ impl IncidentBuilder {
         + Send,
         structures_selected: impl Fn(
             &mut Game,
-            &SelectedChoice<Vec<SelectedStructure>>,
+            &SelectedMultiChoice<Vec<SelectedStructure>>,
             &mut IncidentInfo,
         )
         + 'static
@@ -405,7 +408,7 @@ impl IncidentBuilder {
         + Clone
         + Sync
         + Send,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<ResourcePile>>, &mut IncidentInfo)
+        gain_reward: impl Fn(&mut Game, &SelectedWithoutChoices<Vec<ResourcePile>>, &mut IncidentInfo)
         + 'static
         + Clone
         + Sync
@@ -438,7 +441,7 @@ impl IncidentBuilder {
         + Clone
         + Sync
         + Send,
-        cards_selected: impl Fn(&mut Game, &SelectedChoice<Vec<HandCard>>, &mut IncidentInfo)
+        cards_selected: impl Fn(&mut Game, &SelectedMultiChoice<Vec<HandCard>>, &mut IncidentInfo)
         + 'static
         + Clone
         + Sync
@@ -468,7 +471,7 @@ impl IncidentBuilder {
         description: &str,
         player_pred: impl Fn(&Player, &Game, &IncidentInfo) -> bool + 'static + Clone + Sync + Send,
         priority: i32,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<usize>, &mut IncidentInfo)
+        gain_reward: impl Fn(&mut Game, &SelectedSingleChoice<usize>, &mut IncidentInfo)
         + 'static
         + Clone
         + Sync
@@ -796,7 +799,7 @@ fn gold_deposits(b: IncidentBuilder) -> IncidentBuilder {
 
 pub(crate) fn decrease_mod_and_log(
     game: &mut Game,
-    s: &SelectedChoice<Vec<Position>>,
+    s: &SelectedMultiChoice<Vec<Position>>,
     mood_modifier: MoodModifier,
 ) {
     for &pos in &s.choice {

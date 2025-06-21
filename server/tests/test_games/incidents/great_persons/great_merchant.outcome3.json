@@ -252,6 +252,17 @@
                       "origin": {
                         "Advance": "Storage"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Storage",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
                     }
                   ]
                 },
@@ -316,6 +327,17 @@
                       "origin": {
                         "Ability": "Action Card"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "TradeRoutes",
+                        "take_incident_token": false,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "CivilCard": 125
+                      }
                     }
                   ]
                 },
@@ -353,8 +375,8 @@
   "log": [
     [
       "Player1: Advance: Pay 2 food",
-      "Player1: Advance: Gain Storage",
-      "Player1: Storage: Gain 1 mood token"
+      "Player1: Storage: Gain 1 mood token",
+      "Player1: Advance: Gain Storage and take an event token (triggering an incident)"
     ],
     [
       "A new game event has been triggered: Great Merchant",
@@ -368,7 +390,7 @@
     ],
     [
       "Player1: Action Card: Play Great Merchant",
-      "Player1: Great Merchant: Gain Trade Routes"
+      "Player1: Great Merchant: Gain Trade Routes without taking an event token"
     ],
     [
       "Player1: Great Merchant: Player1 selected trade routes",

@@ -157,7 +157,7 @@ pub(crate) fn surprise(id: u8) -> TacticsCard {
     .add_resolve_listener(1, |p, game, e| {
         if e.hits(e.role(p.index)) > 0 {
             p.log(game, "Draw 1 action card for Surprise tactics");
-            gain_action_card_from_pile(game, p.index, &p.origin);
+            gain_action_card_from_pile(game, p);
         }
     })
     .build()
@@ -323,13 +323,7 @@ pub(crate) fn scout(id: u8) -> TacticsCard {
                     |game, _combat, st, _role| {
                         if let Some(tactics_card) = st.tactics_card.take() {
                             p.log(game, "Ignore the enemy tactics");
-                            gain_action_card(
-                                game,
-                                p.index,
-                                tactics_card,
-                                HandCardLocation::DiscardPile,
-                                &p.origin,
-                            );
+                            gain_action_card(game, p, tactics_card, HandCardLocation::DiscardPile);
                         } else {
                             p.log(game, "Cannot use - opponent didn't play a tactics card");
                         }

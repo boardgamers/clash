@@ -4,7 +4,7 @@ use crate::city_pieces::Building;
 use crate::consts::MAX_CITY_PIECES;
 use crate::content::ability::construct_event_origin;
 use crate::content::persistent_events::PersistentEventType;
-use crate::events::EventOrigin;
+use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
 use crate::map::Terrain;
 use crate::player::{CostTrigger, Player};
@@ -175,11 +175,24 @@ pub(crate) fn construct(
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
+pub struct ConstructAdvanceBonus {
+    pub advance: Advance,
+    pub origin: EventOrigin,
+}
+
+impl ConstructAdvanceBonus {
+    #[must_use]
+    pub fn new(advance: Advance, origin: EventOrigin) -> Self {
+        Self { advance, origin }
+    }
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub struct ConstructInfo {
     pub building: Building,
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub gained_advance: Option<Advance>,
+    pub gained_advance: Option<ConstructAdvanceBonus>,
 }
 
 impl ConstructInfo {
@@ -199,8 +212,14 @@ pub(crate) fn on_construct(game: &mut Game, player_index: usize, info: Construct
         info,
         PersistentEventType::Construct,
     ) {
-        if let Some(advance) = i.gained_advance {
-            gain_advance_without_payment(game, advance, player_index, ResourcePile::empty(), true);
+        if let Some(b) = i.gained_advance {
+            gain_advance_without_payment(
+                game,
+                b.advance,
+                &EventPlayer::from_player(player_index, game, b.origin),
+                ResourcePile::empty(),
+                true,
+            );
         }
     }
 }

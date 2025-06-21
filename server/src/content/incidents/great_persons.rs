@@ -162,9 +162,7 @@ where
             Some(AdvanceRequest::new(choices))
         },
         |game, s, _| {
-            let name = s.choice;
-            s.log(game, &format!("Gain {}", name.name(game)));
-            gain_advance_without_payment(game, name, s.player_index, ResourcePile::empty(), false);
+            gain_advance_without_payment(game, s.choice, &s.player(), ResourcePile::empty(), false);
         },
     )
 }
@@ -225,9 +223,14 @@ fn great_prophet() -> ActionCard {
         |game, p, _| {
             let player = p.get(game);
             if !player.is_building_available(Building::Temple, game) {
+                p.log(
+                    game,
+                    "Cannot build a Temple: it is not available or already built",
+                );
                 return None;
             }
             if !player.can_afford(&temple_cost(game, player)) {
+                p.log(game, "Cannot build a Temple: not enough resources");
                 return None;
             }
 
@@ -342,7 +345,7 @@ fn great_scientist() -> ActionCard {
         0,
         |game, p, _| {
             p.gain_resources(game, ResourcePile::ideas(1));
-            gain_action_card_from_pile(game, p.index, &p.origin);
+            gain_action_card_from_pile(game, p);
         },
     )
     .build()
@@ -368,8 +371,8 @@ fn elder_statesman() -> ActionCard {
         |e| &mut e.play_action_card,
         0,
         |game, p, _| {
-            gain_action_card_from_pile(game, p.index, &p.origin);
-            gain_action_card_from_pile(game, p.index, &p.origin);
+            gain_action_card_from_pile(game, p);
+            gain_action_card_from_pile(game, p);
         },
     )
     .build()

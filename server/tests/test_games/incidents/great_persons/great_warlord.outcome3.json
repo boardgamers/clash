@@ -395,6 +395,17 @@
                       "origin": {
                         "Advance": "Storage"
                       }
+                    },
+                    {
+                      "player": 1,
+                      "Advance": {
+                        "advance": "Storage",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
                     }
                   ]
                 },
@@ -471,6 +482,17 @@
                       "origin": {
                         "Advance": "Tactics"
                       }
+                    },
+                    {
+                      "player": 1,
+                      "Advance": {
+                        "advance": "Tactics",
+                        "take_incident_token": false,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "CivilCard": 124
+                      }
                     }
                   ]
                 },
@@ -533,8 +555,8 @@
   "log": [
     [
       "Player2: Advance: Pay 2 food",
-      "Player2: Advance: Gain Storage",
-      "Player2: Storage: Gain 1 mood token"
+      "Player2: Storage: Gain 1 mood token",
+      "Player2: Advance: Gain Storage and take an event token (triggering an incident)"
     ],
     [
       "A new game event has been triggered: Great Warlord",
@@ -546,8 +568,8 @@
     ],
     [
       "Player2: Action Card: Play Great Warlord",
-      "Player2: Great Warlord: Gain Tactics",
-      "Player2: Tactics: Gain 1 culture token"
+      "Player2: Tactics: Gain 1 culture token",
+      "Player2: Great Warlord: Gain Tactics without taking an event token"
     ],
     [
       "Player2 marched 1 infantry from D7 to C8"

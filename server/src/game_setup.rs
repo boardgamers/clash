@@ -1,10 +1,10 @@
 use crate::action_card::gain_action_card_from_pile;
-use crate::advance::Advance;
+use crate::advance::{Advance, do_advance};
 use crate::cache::Cache;
 use crate::consts::{ACTIONS, JSON_SCHEMA_VERSION, NON_HUMAN_PLAYERS};
 use crate::content::civilizations::{BARBARIANS, PIRATES};
 use crate::content::{ability, civilizations};
-use crate::events::EventOrigin;
+use crate::events::{EventOrigin, EventPlayer};
 use crate::game::{Game, GameContext, GameOptions, GameState};
 use crate::log::{add_player_log, add_round_log};
 use crate::map::Map;
@@ -95,7 +95,7 @@ pub fn setup_game(setup: &GameSetup) -> Game {
 pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
     let mut rng = init_rng(setup.seed.clone());
 
-    let mut players = init_human_players(setup, &mut rng, &cache);
+    let mut players = create_human_players(setup, &mut rng, &cache);
 
     let starting_player = rng.range(0, players.len());
 
@@ -187,11 +187,19 @@ fn execute_setup_round(setup: &GameSetup, game: &mut Game) {
     for player_index in 0..setup.player_amount {
         add_player_log(game, player_index);
 
-        let p = game.player(player_index);
-        game.add_info_log_group(format!("{p} is playing as {}", p.civilization.name));
         let origin = setup_event_origin();
-        gain_action_card_from_pile(game, player_index, &origin);
-        gain_objective_card_from_pile(game, player_index, &origin);
+        let player = EventPlayer::from_player(player_index, game, origin.clone());
+        player.log(
+            game,
+            &format!("Play as {}", game.player(player_index).civilization.name),
+        );
+
+        player.gain_resources(game, ResourcePile::food(2));
+        do_advance(game, Advance::Farming, &player, false);
+        do_advance(game, Advance::Mining, &player, false);
+
+        gain_action_card_from_pile(game, &player);
+        gain_objective_card_from_pile(game, &player);
         if setup.random_map {
             let home = game.player(player_index).cities[0].position;
             gain_unit(game, player_index, home, UnitType::Settler, &origin);
@@ -221,7 +229,7 @@ fn init_rng(seed: String) -> Rng {
     Rng::from_seed(seed)
 }
 
-fn init_human_players(setup: &GameSetup, rng: &mut Rng, cache: &Cache) -> Vec<Player> {
+fn create_human_players(setup: &GameSetup, rng: &mut Rng, cache: &Cache) -> Vec<Player> {
     let mut players = Vec::new();
     let mut civilizations = civilizations::get_all_uncached();
     for player_index in 0..setup.player_amount {
@@ -233,9 +241,6 @@ fn init_human_players(setup: &GameSetup, rng: &mut Rng, cache: &Cache) -> Vec<Pl
         };
         let mut player = Player::new(civilization, player_index);
         player.resource_limit = ResourcePile::new(2, 7, 7, 7, 7, 0, 0);
-        player.resources += ResourcePile::food(2);
-        player.advances.insert(Advance::Farming);
-        player.advances.insert(Advance::Mining);
         player.incident_tokens = 3;
         players.push(player);
     }

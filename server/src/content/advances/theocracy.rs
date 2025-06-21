@@ -1,6 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city_pieces::Building::Temple;
+use crate::construct::ConstructAdvanceBonus;
 use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::content::persistent_events::{AdvanceRequest, PositionRequest};
 use crate::player::{Player, can_add_army_unit, gain_unit};
@@ -56,17 +57,10 @@ fn dogma() -> AdvanceBuilder {
             }
             None
         },
-        |game, s, i| {
-            s.log(
-                game,
-                &format!(
-                    "Gain {} as a reward for constructing a Temple",
-                    s.choice.name(game)
-                ),
-            );
+        |_game, s, i| {
             // the advance may trigger the Anarchy incident, which will remove Dogma
             // this needs to happen after the Dogma listener is processed
-            i.gained_advance = Some(s.choice);
+            i.gained_advance = Some(ConstructAdvanceBonus::new(s.choice, s.origin.clone()));
         },
     )
 }

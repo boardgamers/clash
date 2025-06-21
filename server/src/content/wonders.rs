@@ -81,7 +81,7 @@ fn great_statue() -> WonderInfo {
         |_game, p| !p.objective_cards.is_empty(),
     )
     .add_once_initializer(move |game, player| {
-        gain_objective_card_from_pile(game, player.index, &player.origin);
+        gain_objective_card_from_pile(game, player);
     })
     .build()
 }
@@ -139,7 +139,7 @@ pub(crate) fn use_great_mausoleum() -> Ability {
                         game.cache.get_action_card(*card).name()
                     ))
                 } else {
-                    do_gain_action_card_from_pile(game, p.index, &p.origin);
+                    do_gain_action_card_from_pile(game, p);
                     None
                 }
             },
@@ -165,7 +165,7 @@ pub(crate) fn use_great_mausoleum() -> Ability {
                         &s.origin,
                     );
                 } else {
-                    do_gain_action_card_from_pile(game, s.player_index, &s.origin);
+                    do_gain_action_card_from_pile(game, &s.player());
                 }
             },
         )

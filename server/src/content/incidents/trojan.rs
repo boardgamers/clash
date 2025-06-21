@@ -289,7 +289,7 @@ fn anarchy() -> Incident {
             .collect_vec();
         let player_index = p.index;
         for a in remove {
-            remove_advance(game, a, player_index);
+            remove_advance(game, a, p);
         }
 
         if game.player(player_index).government(game).is_some() {

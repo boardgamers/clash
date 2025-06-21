@@ -416,6 +416,17 @@
                       "origin": {
                         "LeaderAbility": "Great Wall"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Engineering",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
                     }
                   ]
                 },
@@ -527,8 +538,8 @@
   "log": [
     [
       "Player1: Advance: Pay 2 food",
-      "Player1: Advance: Gain Engineering",
-      "Player1: Great Wall: Gain Great Wall from Player2"
+      "Player1: Great Wall: Gain Great Wall from Player2",
+      "Player1: Advance: Gain Engineering and take an event token (1 left)"
     ],
     [
       "Player1 played the wonder card Great Wall",

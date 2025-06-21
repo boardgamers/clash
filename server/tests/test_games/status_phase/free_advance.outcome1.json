@@ -341,6 +341,17 @@
                       "origin": {
                         "Advance": "Storage"
                       }
+                    },
+                    {
+                      "player": 1,
+                      "Advance": {
+                        "advance": "Storage",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Free Advance"
+                      }
                     }
                   ]
                 }
@@ -360,8 +371,8 @@
       "The game has entered the 2nd status phase"
     ],
     [
-      "Player2: Free Advance: Advanced Storage for free",
-      "Player2: Storage: Gain 1 mood token"
+      "Player2: Storage: Gain 1 mood token",
+      "Player2: Free Advance: Gain Storage and take an event token (2 left)"
     ]
   ],
   "undo_limit": 2,

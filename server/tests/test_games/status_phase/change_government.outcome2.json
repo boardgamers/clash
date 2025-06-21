@@ -277,7 +277,53 @@
                         ]
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Voting",
+                        "take_incident_token": false,
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Change Government"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "FreeEconomy",
+                        "take_incident_token": false,
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Change Government"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Dogma",
+                        "take_incident_token": false,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Change Government"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Devotion",
+                        "take_incident_token": false,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Change Government"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -299,6 +345,8 @@
       "Player1: Change Government: Additional advances: Devotion",
       "Player1: Dogma: Ideas limit reduced to 2",
       "Player1 unlocked Provinces",
+      "Player1: Change Government: Gain Dogma without taking an event token",
+      "Player1: Change Government: Gain Devotion without taking an event token",
       "Player1: Waste: Could not store 1 idea"
     ]
   ],

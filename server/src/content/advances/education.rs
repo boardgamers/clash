@@ -6,7 +6,7 @@ use crate::city_pieces::Building;
 use crate::content::ability::Ability;
 use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::content::persistent_events::PaymentRequest;
-use crate::objective_card::draw_and_log_objective_card_from_pile;
+use crate::objective_card::draw_objective_card_from_pile;
 use crate::resource::gain_resources;
 use crate::resource_pile::ResourcePile;
 
@@ -32,11 +32,10 @@ fn writing() -> AdvanceBuilder {
     .with_advance_bonus(CultureToken)
     .with_unlocked_building(Building::Academy)
     .add_once_initializer(move |game, player| {
-        gain_action_card_from_pile(game, player.index, &player.origin);
+        gain_action_card_from_pile(game, player);
         // can't gain objective card directly, because the "combat_end" listener might
         // currently being processed ("teach us now")
-        player.get_mut(game).gained_objective =
-            draw_and_log_objective_card_from_pile(game, player.index, &player.origin);
+        player.get_mut(game).gained_objective = draw_objective_card_from_pile(game, player);
     })
 }
 
