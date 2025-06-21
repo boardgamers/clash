@@ -1,5 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::barbarians;
+use crate::barbarians::get_barbarians_event_player;
 use crate::city::{MoodState, decrease_city_mood};
 use crate::content::ability::Ability;
 use crate::content::persistent_events::{
@@ -215,10 +216,9 @@ fn place_pirate_ship(builder: IncidentBuilder, priority: i32, blockade: bool) ->
         |game, s, _| {
             gain_unit(
                 game,
-                get_pirates_player(game).index,
+                &get_barbarians_event_player(game, &s.origin),
                 s.choice[0],
                 UnitType::Ship,
-                &s.origin,
             );
         },
     )

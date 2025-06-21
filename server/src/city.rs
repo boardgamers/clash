@@ -4,10 +4,12 @@ use std::ops::{Add, Sub};
 
 use crate::content::custom_actions::CustomActionType::ForcedLabor;
 use crate::content::persistent_events::PersistentEventType;
-use crate::events::EventOrigin;
-use crate::log::{ActionLogEntry, add_action_log_item};
+use crate::events::{EventOrigin, EventPlayer};
+use crate::log::{ActionLogBalance, ActionLogEntry, add_action_log_item};
 use crate::map::Terrain;
 use crate::player::remove_unit;
+use crate::structure::{Structure, log_gain_structure, log_lose_structure};
+use crate::unit::{UnitType, Units};
 use crate::utils;
 use crate::wonder::deinit_wonder;
 use crate::{
@@ -99,14 +101,9 @@ impl City {
         self.activations > 0
     }
 
-    ///
-    ///
-    /// # Panics
-    ///
-    /// Panics if the city does not have a builder
-    pub fn raze(self, game: &mut Game, player_index: usize) {
+    pub(crate) fn raze(self, game: &mut Game, player: &EventPlayer) {
         for wonder in &self.pieces.wonders {
-            deinit_wonder(game, player_index, *wonder);
+            deinit_wonder(game, player.index, *wonder);
         }
         for wonder in self.pieces.wonders {
             for p in &mut game.players {
@@ -241,24 +238,35 @@ pub(crate) fn execute_found_city_action(
     player_index: usize,
     settler: u32,
 ) -> Result<(), String> {
-    let player = game.player(player_index);
-    game.add_info_log_item(&format!(
-        "{player} founded a city {}",
-        player.get_unit(settler).position
-    ));
     let settler = remove_unit(player_index, settler, game);
+    let mut u = Units::empty();
+    u += &UnitType::Settler;
+    let origin = EventOrigin::Ability("Found city".to_string());
+    add_action_log_item(
+        game,
+        player_index,
+        ActionLogEntry::units(u, ActionLogBalance::Loss),
+        origin.clone(),
+        vec![],
+    );
     if !settler.can_found_city(game) {
         return Err("Cannot found city".to_string());
     }
-    found_city(game, player_index, settler.position);
+    found_city(
+        game,
+        &EventPlayer::from_player(player_index, game, origin),
+        settler.position,
+    );
     Ok(())
 }
 
-pub(crate) fn found_city(game: &mut Game, player: usize, position: Position) {
-    game.player_mut(player)
+pub(crate) fn found_city(game: &mut Game, player: &EventPlayer, position: Position) {
+    player
+        .get_mut(game)
         .cities
-        .push(City::new(player, position));
-    on_found_city(game, player, position);
+        .push(City::new(player.index, position));
+    log_gain_structure(game, player, Structure::CityCenter, position);
+    on_found_city(game, player.index, position);
 }
 
 pub(crate) fn on_found_city(game: &mut Game, player_index: usize, position: Position) {
@@ -347,4 +355,18 @@ pub(crate) fn set_city_mood(
         origin.clone(),
         vec![],
     );
+}
+
+pub(crate) fn gain_city(game: &mut Game, player: &EventPlayer, mut city: City) {
+    city.player_index = player.index;
+    log_gain_structure(game, player, Structure::CityCenter, city.position);
+    player.get_mut(game).cities.push(city);
+}
+
+pub(crate) fn lose_city(game: &mut Game, player: &EventPlayer, position: Position) -> City {
+    let Some(city) = player.get_mut(game).take_city(position) else {
+        panic!("player should have this city")
+    };
+    log_lose_structure(game, player, Structure::CityCenter, city.position);
+    city
 }

@@ -264,7 +264,7 @@ fn use_great_lighthouse(b: AbilityBuilder) -> AbilityBuilder {
                 game,
                 &s.origin,
             );
-            gain_unit(game, s.player_index, s.choice[0], UnitType::Ship, &s.origin);
+            gain_unit(game, &s.player(), s.choice[0], UnitType::Ship);
         },
     )
 }

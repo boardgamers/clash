@@ -523,18 +523,6 @@ impl Game {
             .cloned()
             .collect_vec()
     }
-
-    ///
-    ///
-    /// # Panics
-    ///
-    /// Panics if the city does not exist
-    pub fn raze_city(&mut self, position: Position, player_index: usize) {
-        let city = self.players[player_index]
-            .take_city(position)
-            .expect("player should have this city");
-        city.raze(self, player_index);
-    }
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]

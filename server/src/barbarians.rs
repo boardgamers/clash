@@ -1,5 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::city::City;
+use crate::city::{City, gain_city};
 use crate::combat::move_with_possible_combat;
 use crate::consts::STACK_LIMIT;
 use crate::content::ability::Ability;
@@ -7,7 +7,7 @@ use crate::content::advances::theocracy::cities_that_can_add_units;
 use crate::content::persistent_events::{
     PersistentEventType, PositionRequest, ResourceRewardRequest, UnitTypeRequest,
 };
-use crate::events::EventPlayer;
+use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
 use crate::incident::{BASE_EFFECT_PRIORITY, IncidentBuilder, IncidentFilter, play_base_effect};
 use crate::map::Terrain;
@@ -172,10 +172,9 @@ where
             let position = get_barbarian_city2(v).expect("barbarians should exist");
             gain_unit(
                 game,
-                get_barbarians_player(game).index,
+                &get_barbarians_event_player(game, &s.origin),
                 position,
                 s.choice,
-                &s.origin,
             );
         },
     )
@@ -331,19 +330,19 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
 
 fn reinforce_after_move(game: &mut Game, player: &EventPlayer) {
     let p = game.player(player.index);
-    let barbarian = get_barbarians_player(game).index;
+    let barbarian = &get_barbarians_event_player(game, &player.origin);
     let available = p.available_units().get(&UnitType::Infantry) as usize;
 
     let cities: Vec<Position> = p
         .cities
         .iter()
-        .flat_map(|c| cities_in_range(game, |p| p.index == barbarian, c.position, 2))
+        .flat_map(|c| cities_in_range(game, |p| p.index == barbarian.index, c.position, 2))
         .unique()
         .filter(|&p| get_barbarians_player(game).get_units(p).len() < STACK_LIMIT)
         .take(available)
         .collect();
     for pos in cities {
-        gain_unit(game, barbarian, pos, UnitType::Infantry, &player.origin);
+        gain_unit(game, barbarian, pos, UnitType::Infantry);
     }
 }
 
@@ -435,9 +434,9 @@ fn add_barbarians_city(builder: IncidentBuilder, event_name: &'static str) -> In
         },
         move |game, s, _| {
             let pos = s.choice[0];
-            let b = get_barbarians_player(game).index;
-            game.player_mut(b).cities.push(City::new(b, pos));
-            gain_unit(game, b, pos, UnitType::Infantry, &s.origin);
+            let player = &get_barbarians_event_player(game, &s.origin);
+            gain_city(game, player, City::new(player.index, pos));
+            gain_unit(game, player, pos, UnitType::Infantry);
         },
     )
 }
@@ -554,6 +553,12 @@ fn cities_in_range(
                 .map(|c| c.position)
         })
         .collect()
+}
+
+#[must_use]
+pub(crate) fn get_barbarians_event_player(game: &Game, origin: &EventOrigin) -> EventPlayer {
+    let player = get_barbarians_player(game);
+    EventPlayer::new(player.index, player.get_name(), origin.clone())
 }
 
 #[must_use]

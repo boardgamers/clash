@@ -312,10 +312,9 @@ fn proconsul() -> LeaderAbility {
                 let p = s.player_index;
                 gain_unit(
                     game,
-                    p,
+                    &s.player(),
                     leader_position(game.player(p)),
                     UnitType::Infantry,
-                    &s.origin,
                 );
             }
         },

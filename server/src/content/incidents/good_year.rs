@@ -215,13 +215,7 @@ fn select_settler(b: IncidentBuilder, priority: i32, target: IncidentTarget) -> 
             }
         },
         |game, s, _| {
-            gain_unit(
-                game,
-                s.player_index,
-                s.choice[0],
-                UnitType::Settler,
-                &s.origin,
-            );
+            gain_unit(game, &s.player(), s.choice[0], UnitType::Settler);
         },
     )
 }

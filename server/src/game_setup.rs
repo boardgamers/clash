@@ -1,6 +1,7 @@
 use crate::action_card::gain_action_card_from_pile;
 use crate::advance::{Advance, do_advance};
 use crate::cache::Cache;
+use crate::city;
 use crate::city::{City, MoodState, set_city_mood};
 use crate::consts::{ACTIONS, JSON_SCHEMA_VERSION, NON_HUMAN_PLAYERS};
 use crate::content::civilizations::{BARBARIANS, PIRATES};
@@ -12,9 +13,9 @@ use crate::map::{Map, MapSetup, get_map_setup};
 use crate::objective_card::gain_objective_card_from_pile;
 use crate::player::{Player, gain_unit};
 use crate::resource_pile::ResourcePile;
-use crate::structure::{Structure, log_gain_structure};
 use crate::unit::UnitType;
 use crate::utils::{Rng, Shuffle};
+use city::gain_city;
 use itertools::Itertools;
 use std::collections::HashMap;
 
@@ -180,11 +181,11 @@ pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
         ability::init_player(&mut game, i, all);
     }
 
-    execute_setup_round(setup, &mut game, &map_setup);
+    execute_setup_round(setup, &mut game, map_setup.as_ref());
     game
 }
 
-fn execute_setup_round(setup: &GameSetup, game: &mut Game, map_setup: &Option<MapSetup>) {
+fn execute_setup_round(setup: &GameSetup, game: &mut Game, map_setup: Option<&MapSetup>) {
     game.next_age();
     add_round_log(game, 0);
 
@@ -192,18 +193,18 @@ fn execute_setup_round(setup: &GameSetup, game: &mut Game, map_setup: &Option<Ma
         add_player_log(game, player_index);
 
         let origin = setup_event_origin();
-        let player = EventPlayer::from_player(player_index, game, origin.clone());
+        let player = &EventPlayer::from_player(player_index, game, origin.clone());
         player.log(
             game,
             &format!("Play as {}", player.get(game).civilization.name),
         );
 
         player.gain_resources(game, ResourcePile::food(2));
-        do_advance(game, Advance::Farming, &player, false);
-        do_advance(game, Advance::Mining, &player, false);
+        do_advance(game, Advance::Farming, player, false);
+        do_advance(game, Advance::Mining, player, false);
 
-        gain_action_card_from_pile(game, &player);
-        gain_objective_card_from_pile(game, &player);
+        gain_action_card_from_pile(game, player);
+        gain_objective_card_from_pile(game, player);
         if let Some(m) = &map_setup {
             let h = &m.home_positions[player_index];
             let home = player
@@ -216,13 +217,9 @@ fn execute_setup_round(setup: &GameSetup, game: &mut Game, map_setup: &Option<Ma
             let position = home.tiles(&h.position, h.position.rotation)[0].0;
             game.map
                 .add_block_tiles(&h.position, &home, h.position.rotation);
-            player
-                .get_mut(game)
-                .cities
-                .push(City::new(player_index, position));
-            log_gain_structure(game, &player, Structure::CityCenter, position);
+            gain_city(game, player, City::new(player_index, position));
             set_city_mood(game, position, &origin, MoodState::Happy);
-            gain_unit(game, player_index, position, UnitType::Settler, &origin);
+            gain_unit(game, player, position, UnitType::Settler);
         }
     }
 }

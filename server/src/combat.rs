@@ -1,6 +1,6 @@
 use crate::barbarians::get_barbarians_player;
 use crate::city::MoodState::Angry;
-use crate::city::{City, set_city_mood};
+use crate::city::{City, gain_city, lose_city, set_city_mood};
 use crate::city_pieces::{Building, remove_building};
 use crate::combat_listeners::{
     CombatEventPhase, CombatResult, CombatRoundEnd, CombatRoundStart, CombatStrength,
@@ -353,40 +353,42 @@ pub fn can_remove_after_combat(on_water: bool, unit_type: &UnitType) -> bool {
     }
 }
 
-pub(crate) fn conquer_city(game: &mut Game, position: Position, attacker: usize, defender: usize) {
-    let p = EventPlayer::from_player(attacker, game, combat_event_origin());
-    let Some(mut city) = game.players[defender].take_city(position) else {
-        panic!("player should have this city")
-    };
-    game.add_to_last_log_item(&format!(
-        " and captured {}'s city {position}",
-        game.player_name(defender)
-    ));
-    let attacker_is_human = p.get(game).is_human();
-    let size = city.mood_modified_size(&game.players[attacker]);
+pub(crate) fn conquer_city(
+    game: &mut Game,
+    position: Position,
+    attacker: &EventPlayer,
+    defender: &EventPlayer,
+) {
+    let mut city = lose_city(game, defender, position);
+    let attacker_is_human = attacker.get(game).is_human();
+    let size = city.mood_modified_size(attacker.get(game));
     if attacker_is_human {
-        p.gain_resources(game, ResourcePile::gold(size as u8));
+        attacker.gain_resources(game, ResourcePile::gold(size as u8));
     }
-    let take_over = game.player(attacker).is_city_available();
+    let take_over = attacker.get(game).is_city_available();
 
     if take_over {
-        city.player_index = attacker;
         if attacker_is_human {
-            take_over_city(game, &mut city, &p, defender);
+            take_over_city(game, &mut city, attacker, defender);
         }
-        game.players[attacker].cities.push(city);
-        set_city_mood(game, position, &p.origin, Angry);
+        gain_city(game, attacker, city);
+        set_city_mood(game, position, &attacker.origin, Angry);
     } else {
-        p.gain_resources(game, ResourcePile::gold(city.size() as u8));
+        attacker.gain_resources(game, ResourcePile::gold(city.size() as u8));
         city.raze(game, defender);
     }
 }
 
-fn take_over_city(game: &mut Game, city: &mut City, attacker: &EventPlayer, defender: usize) {
+fn take_over_city(
+    game: &mut Game,
+    city: &mut City,
+    attacker: &EventPlayer,
+    defender: &EventPlayer,
+) {
     for wonder in city.pieces.wonders.clone() {
-        deinit_wonder(game, defender, wonder);
+        deinit_wonder(game, defender.index, wonder);
         init_wonder(game, attacker.index, wonder);
-        game.player_mut(defender).wonders_owned.remove(wonder);
+        game.player_mut(defender.index).wonders_owned.remove(wonder);
         attacker.get_mut(game).wonders_owned.insert(wonder);
     }
 
@@ -397,7 +399,7 @@ fn take_over_city(game: &mut Game, city: &mut City, attacker: &EventPlayer, defe
         let Some(owner) = owner else {
             continue;
         };
-        if owner != defender {
+        if owner != defender.index {
             continue;
         }
         if attacker.get(game).is_building_available(building, game) {
@@ -426,7 +428,9 @@ pub(crate) fn capture_position(game: &mut Game, stats: &mut CombatStats) {
     }
     kill_units_with_stats(stats, game, old_player, &captured_settlers);
     if game.player(old_player).try_get_city(position).is_some() {
-        conquer_city(game, position, stats.attacker.player, old_player);
+        let a = &EventPlayer::from_player(stats.attacker.player, game, combat_event_origin());
+        let d = &EventPlayer::from_player(old_player, game, combat_event_origin());
+        conquer_city(game, position, a, d);
     }
 }
 

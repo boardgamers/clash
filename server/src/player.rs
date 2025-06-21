@@ -3,7 +3,7 @@ use crate::city_pieces::DestroyedStructures;
 use crate::consts::{STACK_LIMIT, UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::content::ability::construct_event_origin;
 use crate::content::custom_actions::{CustomActionExecution, CustomActionInfo};
-use crate::events::{Event, EventOrigin};
+use crate::events::{Event, EventOrigin, EventPlayer};
 use crate::leader::Leader;
 use crate::leader_ability::LeaderAbility;
 use crate::log::{ActionLogBalance, ActionLogEntry, add_action_log_item};
@@ -550,19 +550,18 @@ impl Player {
     }
 }
 
-pub fn gain_unit(
+pub(crate) fn gain_unit(
     game: &mut Game,
-    player: usize,
+    player: &EventPlayer,
     position: Position,
     unit_type: UnitType,
-    origin: &EventOrigin,
 ) {
     gain_units(
         game,
-        player,
+        player.index,
         position,
         Units::from_iter(vec![unit_type]),
-        origin,
+        &player.origin,
     );
 }
 

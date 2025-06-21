@@ -203,7 +203,7 @@ fn guillotine() -> Incident {
         },
         |game, s, i| {
             let pos = i.selected_position.expect("position should be set");
-            gain_unit(game, s.player_index, pos, s.choice, &s.origin);
+            gain_unit(game, &s.player(), pos, s.choice);
         },
     )
     .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, p, _i| {

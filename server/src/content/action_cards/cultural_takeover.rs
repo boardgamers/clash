@@ -68,10 +68,9 @@ pub(crate) fn cultural_takeover(id: u8, tactics_card: TacticsCardFactory) -> Act
         |game, s, a| {
             gain_unit(
                 game,
-                s.player_index,
+                &s.player(),
                 a.selected_position.expect("unit position"),
                 s.choice,
-                &s.origin,
             );
         },
     )

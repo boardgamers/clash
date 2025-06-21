@@ -177,13 +177,7 @@ fn explorer(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             },
             |game, s, _a| {
                 if !s.choice.is_empty() {
-                    gain_unit(
-                        game,
-                        s.player_index,
-                        s.choice[0],
-                        UnitType::Settler,
-                        &s.origin,
-                    );
+                    gain_unit(game, &s.player(), s.choice[0], UnitType::Settler);
                 }
             },
         )

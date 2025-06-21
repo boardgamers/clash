@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action::Action;
-use crate::city::City;
+use crate::city::{City, gain_city, lose_city};
 use crate::city_pieces::Building;
 use crate::consts::INFLUENCE_MIN_ROLL;
 use crate::content::ability::Ability;
@@ -457,12 +457,16 @@ fn influence_culture(game: &mut Game, influencer_index: usize, info: &InfluenceC
     let city_owner = game.get_any_city(city_position).player_index;
     match info.structure {
         Structure::CityCenter => {
-            let mut city = game
-                .player_mut(city_owner)
-                .take_city(city_position)
-                .expect("city should be taken");
-            city.player_index = influencer_index;
-            game.player_mut(influencer_index).cities.push(city);
+            let city = lose_city(
+                game,
+                &EventPlayer::from_player(city_owner, game, info.origin.clone()),
+                city_position,
+            );
+            gain_city(
+                game,
+                &EventPlayer::from_player(influencer_index, game, info.origin.clone()),
+                city,
+            );
         }
         Structure::Building(b) => game
             .player_mut(city_owner)

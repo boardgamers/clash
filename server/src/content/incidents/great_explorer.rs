@@ -62,9 +62,11 @@ pub(crate) fn great_explorer() -> ActionCard {
                 )])
             },
             |game, s, a| {
-                let pos = a.selected_position.expect("position not found");
-                s.log(game, &format!("Built a city {pos} for {}", s.choice[0]));
-                found_city(game, s.player_index, pos);
+                found_city(
+                    game,
+                    &s.player(),
+                    a.selected_position.expect("position not found"),
+                );
             },
         )
         .build()

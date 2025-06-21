@@ -155,7 +155,7 @@ fn fanaticism() -> AdvanceBuilder {
                 }
             },
             |game, s, _| {
-                gain_unit(game, s.player_index, s.choice[0], UnitType::Infantry, &s.origin);
+                gain_unit(game, &s.player(), s.choice[0], UnitType::Infantry);
             },
         )
 }
