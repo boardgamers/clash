@@ -1,8 +1,8 @@
+use crate::ability_initializer::AbilityInitializerSetup;
 use crate::ability_initializer::{
     AbilityInitializerBuilder, AbilityListeners, SelectedMultiChoice, SelectedSingleChoice,
     SelectedWithoutChoices,
 };
-use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
 use crate::advance::Advance;
 use crate::barbarians::{barbarians_move, barbarians_spawn};

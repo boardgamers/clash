@@ -71,6 +71,7 @@ impl HandCard {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Ord, Debug, PartialOrd)]
 pub enum HandCardLocation {
     DrawPile,
+    DrawPilePeeked(usize),
     Hand(usize),
     RevealedHand(usize),
     DiscardPile,
@@ -99,6 +100,7 @@ impl HandCardLocation {
         !matches!(
             self,
             HandCardLocation::DrawPile
+            | HandCardLocation::DrawPilePeeked(_)
                 | HandCardLocation::Hand(_)
                 | HandCardLocation::PlayToDiscardFaceDown
                 | HandCardLocation::GreatSeer(_)
@@ -291,6 +293,9 @@ pub(crate) fn log_card_transfer(
     } else if let HandCardLocation::GreatSeer(p) = to {
         assert_eq!(from, HandCardLocation::DrawPile);
         (p, "Placed a card from the draw pile in the Great Seer")
+    } else if let HandCardLocation::DrawPilePeeked(p) = from {
+        assert_eq!(to, HandCardLocation::DrawPile);
+        (p, "Reshuffled a card from the draw pile back into the draw pile")
     } else {
         panic!("Invalid card transfer from {from:?} to {to:?}");
     };

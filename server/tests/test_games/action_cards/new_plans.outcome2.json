@@ -248,6 +248,36 @@
                       "origin": {
                         "CivilCard": 31
                       }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 3
+                        },
+                        "from": "DrawPile",
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "CivilCard": 31
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 4
+                        },
+                        "from": "DrawPile",
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "CivilCard": 31
+                      }
                     }
                   ]
                 },
@@ -274,7 +304,7 @@
                         "from": {
                           "Hand": 0
                         },
-                        "to": "DiscardPile"
+                        "to": "DrawPile"
                       },
                       "origin": {
                         "CivilCard": 31
@@ -284,12 +314,12 @@
                       "player": 0,
                       "HandCard": {
                         "card": {
-                          "ObjectiveCard": 3
+                          "ObjectiveCard": 4
                         },
-                        "from": "DrawPile",
-                        "to": {
-                          "Hand": 0
-                        }
+                        "from": {
+                          "DrawPilePeeked": 0
+                        },
+                        "to": "DrawPile"
                       },
                       "origin": {
                         "CivilCard": 31
@@ -311,11 +341,13 @@
       "Player1 has to pay 1 culture token for New Plans"
     ],
     [
-      "Player1: New Plans: Pay 1 culture token"
+      "Player1: New Plans: Pay 1 culture token",
+      "Player1: New Plans: Draw an objective card",
+      "Player1: New Plans: Draw an objective card"
     ],
     [
-      "Player1: New Plans: Discard Scientific Lead/Conqueror",
-      "Player1: New Plans: Draw an objective card"
+      "Player1: New Plans: Shuffle an objective card back into the draw pile",
+      "Player1: New Plans: Reshuffled a card from the draw pile back into the draw pile"
     ]
   ],
   "undo_limit": 2,
@@ -336,14 +368,14 @@
     11,
     11
   ],
-  "rng": "295838188732677981854465749010340725692",
+  "rng": "113402092382880364615326415411897944451",
   "action_cards_discarded": [
     31
   ],
   "objective_cards_left": [
-    6,
-    5,
+    2,
     4,
-    2
+    6,
+    5
   ]
 }

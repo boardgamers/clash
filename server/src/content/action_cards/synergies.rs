@@ -1,7 +1,7 @@
 use crate::ability_initializer::{AbilityInitializerSetup, SelectedMultiChoice};
 use crate::action_card::{ActionCard, ActionCardBuilder, CivilCardTarget, discard_action_card};
 use crate::advance::{Advance, gain_advance_without_payment};
-use crate::card::{HandCard, HandCardLocation};
+use crate::card::{log_card_transfer, HandCard, HandCardLocation};
 use crate::content::ability::Ability;
 use crate::content::action_cards::inspiration;
 use crate::content::advances::theocracy::cities_that_can_add_units;
@@ -14,8 +14,7 @@ use crate::content::tactics_cards::{
 };
 use crate::game::Game;
 use crate::objective_card::{
-    discard_objective_card, draw_objective_card_from_pile,
-    gain_objective_card,
+    discard_objective_card, draw_objective_card_from_pile, gain_objective_card,
 };
 use crate::player::{Player, gain_unit};
 use crate::resource_pile::ResourcePile;
@@ -23,6 +22,7 @@ use crate::unit::UnitType;
 use crate::utils::Shuffle;
 use inspiration::possible_inspiration_advances;
 use itertools::Itertools;
+use std::vec;
 
 pub(crate) fn synergies_action_cards() -> Vec<ActionCard> {
     vec![
@@ -42,11 +42,6 @@ pub(crate) fn synergies_action_cards() -> Vec<ActionCard> {
 }
 
 fn new_plans(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
-    // todo great seer can be one of the cards
-    // 1. draw 2 objective cards
-    // 2. select 1 to keep
-    // 3. put the other one back into the deck
-    // 4. reshuffle the deck
     ActionCard::builder(
         id,
         "New Plans",
@@ -78,17 +73,37 @@ fn new_plans(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         },
         |game, s, _i| {
             for c in &s.choices {
-                if should_discard(game, s, c) {
-                    discard_objective_card(
-                        game,
-                        s.player_index,
-                        objective_card_id(c),
-                        &s.origin,
-                        HandCardLocation::DrawPile,
-                    );
-                    game.objective_cards_left.shuffle(&mut game.rng);
-                } else {
-                    gain_objective_card(game, s.player_index, objective_card_id(c));
+                let id = objective_card_id(c);
+                let hand_card = game
+                    .player(s.player_index)
+                    .objective_cards
+                    .contains(&objective_card_id(c));
+                for a in new_card_actions(s, c, hand_card) {
+                    match a {
+                        NewPlanAction::Gain => gain_objective_card(game, s.player_index, id),
+                        NewPlanAction::DiscardToDrawPile => {
+                            discard_objective_card(
+                                game,
+                                s.player_index,
+                                id,
+                                &s.origin,
+                                HandCardLocation::DrawPile,
+                            );
+                            game.objective_cards_left.push(id);
+                            game.objective_cards_left.shuffle(&mut game.rng);
+                        },
+                        NewPlanAction::BackToDrawPile => {
+                            log_card_transfer(
+                                game,
+                                &HandCard::ObjectiveCard(id),
+                                HandCardLocation::DrawPilePeeked(s.player_index),
+                                HandCardLocation::DrawPile,
+                                &s.origin,
+                            );     
+                            game.objective_cards_left.push(id);
+                            game.objective_cards_left.shuffle(&mut game.rng);
+                        }
+                    }
                 }
             }
         },
@@ -97,18 +112,31 @@ fn new_plans(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .build()
 }
 
-fn should_discard(game: &mut Game, s: &SelectedMultiChoice<Vec<HandCard>>, c: &HandCard) -> bool {
-    let hand_card = game
-        .player(s.player_index)
-        .objective_cards
-        .contains(&objective_card_id(c));
+enum NewPlanAction {
+    DiscardToDrawPile,
+    BackToDrawPile,
+    Gain,
+}
 
+fn new_card_actions(
+    s: &SelectedMultiChoice<Vec<HandCard>>,
+    c: &HandCard,
+    hand_card: bool,
+) -> Vec<NewPlanAction> {
     if hand_card {
         // discard the selected card if it is in hand
-        s.choice.contains(c)
+        if s.choice.contains(c) {
+            vec![NewPlanAction::DiscardToDrawPile]
+        } else {
+            vec![]
+        }
     } else {
         // discard drawn card if not selected
-        !s.choice.contains(c)
+        if s.choice.contains(c) {
+            vec![NewPlanAction::Gain]
+        } else {
+            vec![NewPlanAction::BackToDrawPile] 
+        }
     }
 }
 
