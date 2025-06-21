@@ -1,7 +1,7 @@
 use crate::ability_initializer::{AbilityInitializerSetup, SelectedMultiChoice};
 use crate::action_card::{ActionCard, ActionCardBuilder, CivilCardTarget, discard_action_card};
 use crate::advance::{Advance, gain_advance_without_payment};
-use crate::card::{log_card_transfer, HandCard, HandCardLocation};
+use crate::card::{HandCard, HandCardLocation, log_card_transfer};
 use crate::content::ability::Ability;
 use crate::content::action_cards::inspiration;
 use crate::content::advances::theocracy::cities_that_can_add_units;
@@ -91,7 +91,7 @@ fn new_plans(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                             );
                             game.objective_cards_left.push(id);
                             game.objective_cards_left.shuffle(&mut game.rng);
-                        },
+                        }
                         NewPlanAction::BackToDrawPile => {
                             log_card_transfer(
                                 game,
@@ -99,7 +99,7 @@ fn new_plans(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                                 HandCardLocation::DrawPilePeeked(s.player_index),
                                 HandCardLocation::DrawPile,
                                 &s.origin,
-                            );     
+                            );
                             game.objective_cards_left.push(id);
                             game.objective_cards_left.shuffle(&mut game.rng);
                         }
@@ -135,7 +135,7 @@ fn new_card_actions(
         if s.choice.contains(c) {
             vec![NewPlanAction::Gain]
         } else {
-            vec![NewPlanAction::BackToDrawPile] 
+            vec![NewPlanAction::BackToDrawPile]
         }
     }
 }
