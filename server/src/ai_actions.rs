@@ -692,7 +692,7 @@ pub(crate) fn get_construct_actions(
     p: &Player,
     city: &City,
 ) -> Vec<Action> {
-    available_buildings(game, p.index, city.position)
+    available_buildings(game, p.index, city.position, &[])
         .iter()
         .flat_map(|(building, cost)| {
             new_building_positions(game, *building, city)

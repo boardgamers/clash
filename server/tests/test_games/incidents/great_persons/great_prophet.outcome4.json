@@ -59,7 +59,7 @@
       "resources": {
         "wood": 6,
         "ore": 6,
-        "gold": 3,
+        "gold": 5,
         "mood_tokens": 9,
         "culture_tokens": 6
       },
@@ -149,10 +149,7 @@
         "Voting"
       ],
       "incident_tokens": 3,
-      "next_unit_id": 8,
-      "event_info": {
-        "StateReligion": "used"
-      }
+      "next_unit_id": 8
     },
     {
       "id": 1,
@@ -451,23 +448,6 @@
                     },
                     {
                       "player": 0,
-                      "Resources": {
-                        "resources": {
-                          "gold": 2
-                        },
-                        "balance": "Loss"
-                      },
-                      "origin": {
-                        "Ability": "Construct Building"
-                      },
-                      "modifiers": [
-                        {
-                          "Advance": "StateReligion"
-                        }
-                      ]
-                    },
-                    {
-                      "player": 0,
                       "Structure": {
                         "structure": {
                           "Building": "Temple"
@@ -476,7 +456,7 @@
                         "position": "C1"
                       },
                       "origin": {
-                        "Ability": "Construct Building"
+                        "CivilCard": 120
                       }
                     }
                   ]
@@ -515,9 +495,7 @@
     ],
     [
       "Player1: Construct Building: Pay 2 gold with State Religion",
-      "Player1: Construct Building: Pay 2 gold with State Religion",
-      "State Religion reduced the food cost to 0",
-      "Player1: Construct Building: Gain Temple at C1"
+      "Player1: Great Prophet: Gain Temple at C1"
     ]
   ],
   "undo_limit": 1,

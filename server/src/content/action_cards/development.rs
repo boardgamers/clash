@@ -1,6 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
 use crate::collect::available_collect_actions_for_city;
+use crate::construct::ConstructDiscount;
 use crate::content::ability::Ability;
 use crate::content::action_cards::cultural_takeover::cultural_takeover;
 use crate::content::action_cards::mercenaries::mercenaries;
@@ -38,9 +39,9 @@ fn city_development(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     ActionCard::builder(
         id,
         "City Development",
-        "Construct a building without paying resources.",
+        "Construct a building without paying resources and without an action.",
         |c| c.action().culture_tokens(1),
-        |game, player, _| can_construct_any_building(game, player),
+        |game, p, _| can_construct_any_building(game, p, &[ConstructDiscount::NoResourceCost]),
     )
     .tactics_card(tactics_card)
     .add_simple_persistent_event_listener(
@@ -53,7 +54,7 @@ fn city_development(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             p.log(
                 game,
                 "You may build a building in a city without \
-                spending an action and without paying for it.",
+                spending an action and without paying resources.",
             );
         },
     )

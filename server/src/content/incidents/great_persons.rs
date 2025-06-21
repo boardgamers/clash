@@ -1,13 +1,13 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::action_card::{ActionCard, ActionCardBuilder, gain_action_card_from_pile};
+use crate::action_card::{gain_action_card_from_pile, ActionCard, ActionCardBuilder};
 use crate::action_cost::{ActionCostBuilder, ActionCostOncePerTurn};
 use crate::advance::gain_advance_without_payment;
-use crate::card::{HandCard, HandCardLocation, log_card_transfer};
-use crate::city::{MoodState, set_city_mood};
+use crate::card::{log_card_transfer, HandCard, HandCardLocation};
+use crate::city::{set_city_mood, MoodState};
 use crate::city_pieces::Building;
-use crate::construct::{Construct, execute_construct};
+use crate::construct::{do_construct, Construct};
 use crate::consts::MAX_HUMAN_PLAYERS;
-use crate::content::advances::{AdvanceGroup, economy, get_governments_uncached};
+use crate::content::advances::{economy, get_governments_uncached, AdvanceGroup};
 use crate::content::effects::{GreatSeerEffect, GreatSeerObjective, PermanentEffect};
 use crate::content::incidents::great_builders::{great_architect, great_engineer};
 use crate::content::incidents::great_diplomat::{choose_diplomat_partner, great_diplomat};
@@ -275,16 +275,13 @@ fn great_prophet() -> ActionCard {
 
             let pos = a.selected_position.expect("position not found");
 
-            let () = execute_construct(
+            do_construct(
                 game,
                 s.player_index,
                 &Construct::new(pos, Building::Temple, pile),
-                |mut c| {
-                    c.activate_city = false;
-                    c
-                },
-            )
-            .expect("Cannot build Temple");
+                false,
+                &s.origin,
+            );
         },
     )
     .build()

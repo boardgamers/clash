@@ -25,6 +25,7 @@
             "temple": 1
           },
           "mood_state": "Neutral",
+          "angry_activation": true,
           "position": "C2"
         },
         {
