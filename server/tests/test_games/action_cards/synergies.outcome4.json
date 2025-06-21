@@ -276,6 +276,17 @@
                       "origin": {
                         "Advance": "Fishing"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Fishing",
+                        "take_incident_token": false,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "CivilCard": 34
+                      }
                     }
                   ]
                 },
@@ -308,6 +319,17 @@
                       "origin": {
                         "Ability": "Advance"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "WarShips",
+                        "take_incident_token": false,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "CivilCard": 34
+                      }
                     }
                   ]
                 }
@@ -328,13 +350,15 @@
     ],
     [
       "Player1: Advance: Pay 2 ideas",
-      "Player1: Fishing: Gain 1 mood token"
+      "Player1: Fishing: Gain 1 mood token",
+      "Player1: Synergies: Gain Fishing without taking an event token"
     ],
     [
       "Player1: Synergies: Selected WarShips as second advance"
     ],
     [
-      "Player1: Advance: Pay 2 ideas"
+      "Player1: Advance: Pay 2 ideas",
+      "Player1: Synergies: Gain WarShips without taking an event token"
     ]
   ],
   "undo_limit": 0,

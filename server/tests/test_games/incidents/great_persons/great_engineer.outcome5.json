@@ -255,6 +255,17 @@
                       "origin": {
                         "Advance": "Storage"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Storage",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
                     }
                   ]
                 },
@@ -343,6 +354,17 @@
                       "origin": {
                         "Advance": "Engineering"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Engineering",
+                        "take_incident_token": false,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "CivilCard": 126
+                      }
                     }
                   ]
                 },
@@ -404,8 +426,8 @@
   "log": [
     [
       "Player1: Advance: Pay 2 food",
-      "Player1: Advance: Gain Storage",
-      "Player1: Storage: Gain 1 mood token"
+      "Player1: Storage: Gain 1 mood token",
+      "Player1: Advance: Gain Storage and take an event token (triggering an incident)"
     ],
     [
       "A new game event has been triggered: Great Engineer",
@@ -421,9 +443,9 @@
       "Player1: Action Card: Play Great Engineer"
     ],
     [
-      "Player1: Great Engineer: Gain Engineering",
       "Player1: Engineering: Draw a wonder card",
-      "Player1 unlocked Aqueduct"
+      "Player1 unlocked Aqueduct",
+      "Player1: Great Engineer: Gain Engineering without taking an event token"
     ],
     [
       "Player1: Great Engineer: Great Engineer: You may build a building in a city without spending an action and without activating it."

@@ -247,6 +247,17 @@
                       "origin": {
                         "Advance": "Storage"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Storage",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
                     }
                   ]
                 },
@@ -336,6 +347,17 @@
                     },
                     {
                       "player": 1,
+                      "Advance": {
+                        "advance": "Arts",
+                        "take_incident_token": false,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "CivilCard": 119
+                      }
+                    },
+                    {
+                      "player": 1,
                       "MoodChange": {
                         "city": "A1",
                         "mood": "Happy"
@@ -373,6 +395,17 @@
                     },
                     {
                       "player": 1,
+                      "Advance": {
+                        "advance": "Arts",
+                        "take_incident_token": false,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "CivilCard": 119
+                      }
+                    },
+                    {
+                      "player": 1,
                       "MoodChange": {
                         "city": "A1",
                         "mood": "Happy"
@@ -394,8 +427,8 @@
   "log": [
     [
       "Player1: Advance: Pay 2 food",
-      "Player1: Advance: Gain Storage",
-      "Player1: Storage: Gain 1 mood token"
+      "Player1: Storage: Gain 1 mood token",
+      "Player1: Advance: Gain Storage and take an event token (triggering an incident)"
     ],
     [
       "A new game event has been triggered: Great Artist",
@@ -416,9 +449,9 @@
     ],
     [
       "Player2: Action Card: Play Great Artist",
-      "Player2: Great Artist: Gain Arts",
       "Player2 unlocked Hellenistic Culture",
       "Player2: Arts: Gain 1 culture token",
+      "Player2: Great Artist: Gain Arts without taking an event token",
       "Player2: Great Artist: City A1 became Happy"
     ]
   ],

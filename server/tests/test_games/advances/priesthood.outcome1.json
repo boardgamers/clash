@@ -322,6 +322,17 @@
                     },
                     {
                       "player": 1,
+                      "Advance": {
+                        "advance": "Math",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 1,
                       "Resources": {
                         "resources": {
                           "ideas": 1
@@ -372,6 +383,17 @@
                     },
                     {
                       "player": 1,
+                      "Advance": {
+                        "advance": "Astronomy",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 1,
                       "Resources": {
                         "resources": {
                           "ideas": 1
@@ -408,6 +430,17 @@
                     },
                     {
                       "player": 1,
+                      "Advance": {
+                        "advance": "Astronomy",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 1,
                       "Resources": {
                         "resources": {
                           "ideas": 1
@@ -432,14 +465,14 @@
     [
       "Player2: Advance: Pay nothing with Priesthood",
       "Priesthood reduced the cost to 0",
-      "Player2: Advance: Gain Math",
       "Player2: Math: Gain 1 culture token",
+      "Player2: Advance: Gain Math and take an event token (2 left)",
       "Player2: Philosophy: Gain 1 idea"
     ],
     [
       "Player2: Advance: Pay 2 gold",
-      "Player2: Advance: Gain Astronomy",
       "Player2: Astronomy: Gain 1 culture token",
+      "Player2: Advance: Gain Astronomy and take an event token (1 left)",
       "Player2: Philosophy: Gain 1 idea"
     ]
   ],

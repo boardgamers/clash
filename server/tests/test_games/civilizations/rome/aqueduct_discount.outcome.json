@@ -248,6 +248,17 @@
                       "origin": {
                         "Advance": "Sanitation"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Sanitation",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
                     }
                   ]
                 }
@@ -263,8 +274,8 @@
     [
       "Player1: Advance: Pay nothing with Aqueduct",
       "Aqueduct reduced the cost to 0",
-      "Player1: Advance: Gain Sanitation",
-      "Player1: Sanitation: Gain 1 mood token"
+      "Player1: Sanitation: Gain 1 mood token",
+      "Player1: Advance: Gain Sanitation and take an event token (2 left)"
     ]
   ],
   "undo_limit": 0,

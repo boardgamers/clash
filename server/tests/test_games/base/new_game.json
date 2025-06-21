@@ -404,6 +404,40 @@
                   "items": [
                     {
                       "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "food": 2
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Setup"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Farming",
+                        "take_incident_token": false,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Setup"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Mining",
+                        "take_incident_token": false,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Setup"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "HandCard": {
                         "card": {
                           "ActionCard": 27
@@ -454,6 +488,40 @@
                 {
                   "action": "StartTurn",
                   "items": [
+                    {
+                      "player": 1,
+                      "Resources": {
+                        "resources": {
+                          "food": 2
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Setup"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Advance": {
+                        "advance": "Farming",
+                        "take_incident_token": false,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Setup"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Advance": {
+                        "advance": "Mining",
+                        "take_incident_token": false,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Setup"
+                      }
+                    },
                     {
                       "player": 1,
                       "HandCard": {
@@ -517,16 +585,18 @@
       "Round 1/3"
     ],
     [
-      "It's Player1's turn"
-    ],
-    [
-      "Player1 is playing as China",
+      "It's Player1's turn",
+      "Player1: Setup: Play as China",
+      "Player1: Setup: Gain 2 food",
+      "Player1: Setup: Gain Farming without taking an event token",
+      "Player1: Setup: Gain Mining without taking an event token",
       "Player1: Setup: Draw an action card",
       "Player1: Setup: Draw an objective card",
-      "Player1: Setup: Gain 1 settler at D2"
-    ],
-    [
-      "Player2 is playing as Greece",
+      "Player1: Setup: Gain 1 settler at D2",
+      "Player2: Setup: Play as Greece",
+      "Player2: Setup: Gain 2 food",
+      "Player2: Setup: Gain Farming without taking an event token",
+      "Player2: Setup: Gain Mining without taking an event token",
       "Player2: Setup: Draw an action card",
       "Player2: Setup: Draw an objective card",
       "Player2: Setup: Gain 1 settler at D7"

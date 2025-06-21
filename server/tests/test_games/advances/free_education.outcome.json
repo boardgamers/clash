@@ -366,6 +366,17 @@
                       "origin": {
                         "Advance": "Draft"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Draft",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
                     }
                   ]
                 }
@@ -380,8 +391,8 @@
   "log": [
     [
       "Player1: Advance: Pay 1 food and 1 gold",
-      "Player1: Advance: Gain Draft",
-      "Player1: Draft: Gain 1 culture token"
+      "Player1: Draft: Gain 1 culture token",
+      "Player1: Advance: Gain Draft and take an event token (1 left)"
     ]
   ],
   "undo_limit": 0,

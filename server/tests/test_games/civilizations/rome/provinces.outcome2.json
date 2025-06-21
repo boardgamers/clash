@@ -285,6 +285,17 @@
                       "origin": {
                         "Ability": "Advance"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Voting",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
                     }
                   ]
                 },
@@ -399,8 +410,8 @@
   "log": [
     [
       "Player1: Advance: Pay 2 food",
-      "Player1: Advance: Gain Voting",
-      "Player1 unlocked Provinces"
+      "Player1 unlocked Provinces",
+      "Player1: Advance: Gain Voting and take an event token (2 left)"
     ],
     [
       "Player1 marched 1 infantry from C2 to B2 and captured Player2's city B2",

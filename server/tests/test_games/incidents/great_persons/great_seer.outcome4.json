@@ -239,6 +239,17 @@
                       "origin": {
                         "Advance": "Storage"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Storage",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
                     }
                   ]
                 },
@@ -416,6 +427,17 @@
                       "origin": {
                         "Advance": "Writing"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Writing",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
                     }
                   ]
                 }
@@ -430,8 +452,8 @@
   "log": [
     [
       "Player1: Advance: Pay 2 food",
-      "Player1: Advance: Gain Storage",
-      "Player1: Storage: Gain 1 mood token"
+      "Player1: Storage: Gain 1 mood token",
+      "Player1: Advance: Gain Storage and take an event token (triggering an incident)"
     ],
     [
       "A new game event has been triggered: Great Seer",
@@ -451,10 +473,10 @@
     ],
     [
       "Player1: Advance: Pay 2 food",
-      "Player1: Advance: Gain Writing",
       "Player1: Writing: Draw an action card",
       "Player1: Writing: Gain an objective card from Great Seer",
-      "Player1: Writing: Gain 1 culture token"
+      "Player1: Writing: Gain 1 culture token",
+      "Player1: Advance: Gain Writing and take an event token (2 left)"
     ]
   ],
   "undo_limit": 5,

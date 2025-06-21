@@ -97,7 +97,10 @@
       "wonder_cards": [
         "Pyramids"
       ],
-      "next_unit_id": 10
+      "next_unit_id": 10,
+      "played_once_per_turn_actions": [
+        "Taxes"
+      ]
     },
     {
       "id": 1,

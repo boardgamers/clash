@@ -254,6 +254,17 @@
                       "origin": {
                         "Advance": "Sanitation"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Sanitation",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Aqueduct"
+                      }
                     }
                   ]
                 }
@@ -272,8 +283,8 @@
     ],
     [
       "Player1: Advance: Pay 2 food",
-      "Player1: Aqueduct: Gain Sanitation as a free action",
-      "Player1: Sanitation: Gain 1 mood token"
+      "Player1: Sanitation: Gain 1 mood token",
+      "Player1: Aqueduct: Gain Sanitation and take an event token (2 left)"
     ]
   ],
   "undo_limit": 0,

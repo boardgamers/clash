@@ -315,6 +315,17 @@
                       "origin": {
                         "Ability": "Advance"
                       }
+                    },
+                    {
+                      "player": 1,
+                      "Advance": {
+                        "advance": "Dogma",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
                     }
                   ]
                 },
@@ -381,7 +392,42 @@
                     "Response": {
                       "SelectAdvance": "Fanaticism"
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 1,
+                      "Advance": {
+                        "advance": "Fanaticism",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Advance": "Dogma"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Advance": {
+                        "advance": "Dogma",
+                        "take_incident_token": false,
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Incident": 44
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Advance": {
+                        "advance": "Fanaticism",
+                        "take_incident_token": false,
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Incident": 44
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -394,9 +440,9 @@
   "log": [
     [
       "Player2: Advance: Pay 2 ideas",
-      "Player2: Advance: Gain Dogma",
       "Player2: Dogma: Ideas limit reduced to 2",
       "Player2 unlocked Provinces",
+      "Player2: Advance: Gain Dogma and take an event token (1 left)",
       "Player2: Waste: Could not store 2 ideas"
     ],
     [
@@ -408,7 +454,7 @@
       "Player2: Temple: Gain 1 culture token"
     ],
     [
-      "Player2: Dogma: Gain Fanaticism as a reward for constructing a Temple"
+      "Player2: Dogma: Gain Fanaticism and take an event token (triggering an incident)"
     ],
     [
       "A new game event has been triggered: Anarchy",

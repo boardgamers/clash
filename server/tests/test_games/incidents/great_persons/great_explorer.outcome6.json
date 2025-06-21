@@ -388,6 +388,17 @@
                       "origin": {
                         "Advance": "Storage"
                       }
+                    },
+                    {
+                      "player": 1,
+                      "Advance": {
+                        "advance": "Storage",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
                     }
                   ]
                 },
@@ -464,6 +475,17 @@
                       "origin": {
                         "Advance": "Fishing"
                       }
+                    },
+                    {
+                      "player": 1,
+                      "Advance": {
+                        "advance": "Fishing",
+                        "take_incident_token": false,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "CivilCard": 118
+                      }
                     }
                   ]
                 },
@@ -528,8 +550,8 @@
   "log": [
     [
       "Player2: Advance: Pay 2 food",
-      "Player2: Advance: Gain Storage",
-      "Player2: Storage: Gain 1 mood token"
+      "Player2: Storage: Gain 1 mood token",
+      "Player2: Advance: Gain Storage and take an event token (triggering an incident)"
     ],
     [
       "A new game event has been triggered: Great Explorer",
@@ -541,8 +563,8 @@
     ],
     [
       "Player2: Action Card: Play Great Explorer",
-      "Player2: Great Explorer: Gain Fishing",
-      "Player2: Fishing: Gain 1 mood token"
+      "Player2: Fishing: Gain 1 mood token",
+      "Player2: Great Explorer: Gain Fishing without taking an event token"
     ],
     [
       "Player2: Great Explorer: Explored B6"

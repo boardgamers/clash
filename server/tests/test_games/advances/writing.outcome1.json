@@ -335,6 +335,17 @@
                       "origin": {
                         "Advance": "Writing"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Writing",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
                     }
                   ]
                 },
@@ -393,10 +404,10 @@
   "log": [
     [
       "Player1: Advance: Pay 1 food and 1 gold",
-      "Player1: Advance: Gain Writing",
       "Player1: Writing: Draw an action card",
       "Player1: Writing: Draw an objective card",
-      "Player1: Writing: Gain 1 culture token"
+      "Player1: Writing: Gain 1 culture token",
+      "Player1: Advance: Gain Writing and take an event token (1 left)"
     ],
     [
       "Player1: Construct Building: Pay 1 food, 1 wood and 1 ore",

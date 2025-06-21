@@ -224,6 +224,17 @@
                       "origin": {
                         "Advance": "Storage"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Storage",
+                        "take_incident_token": false,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "CivilCard": 3
+                      }
                     }
                   ]
                 }
@@ -239,7 +250,7 @@
     [
       "Player1: Action Card: Play Inspiration/Encircled",
       "Player1: Storage: Gain 1 mood token",
-      "Player1: Inspiration: Gain Storage for free using Inspiration."
+      "Player1: Inspiration: Gain Storage without taking an event token"
     ]
   ],
   "undo_limit": 0,
