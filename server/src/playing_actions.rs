@@ -228,7 +228,7 @@ impl PlayingAction {
         match self {
             Advance(a) => execute_advance_action(game, player_index, &a)?,
             FoundCity { settler } => execute_found_city_action(game, player_index, settler)?,
-            Construct(c) => construct::execute_construct(game, player_index, &c)?,
+            Construct(c) => construct::execute_construct(game, player_index, &c, |c| c)?,
             Collect(c) => execute_collect(game, player_index, &c)?,
             Recruit(r) => execute_recruit(game, player_index, r)?,
             IncreaseHappiness(i) => execute_increase_happiness(

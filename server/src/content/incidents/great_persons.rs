@@ -279,6 +279,10 @@ fn great_prophet() -> ActionCard {
                 game,
                 s.player_index,
                 &Construct::new(pos, Building::Temple, pile),
+                |mut c| {
+                    c.activate_city = false;
+                    c
+                },
             )
             .expect("Cannot build Temple");
         },
