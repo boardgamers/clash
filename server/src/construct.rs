@@ -64,7 +64,11 @@ pub fn can_construct(
     }
 
     let cost_info = player.building_cost(game, building, trigger);
-    can_construct_anything(city, player, discounts)?;
+    can_construct_anything(
+        city,
+        player,
+        !discounts.contains(&ConstructDiscount::NoCityActivation) && cost_info.activate_city,
+    )?;
     if city.mood_state == MoodState::Angry {
         return Err("City is angry".to_string());
     }
@@ -74,15 +78,21 @@ pub fn can_construct(
     if !player.is_building_available(building, game) {
         return Err("All non-destroyed buildings are built".to_string());
     }
-    if !discounts.contains(&ConstructDiscount::NoResourceCost) && !player.can_afford(&cost_info.cost) {
+    if !discounts.contains(&ConstructDiscount::NoResourceCost)
+        && !player.can_afford(&cost_info.cost)
+    {
         // construct cost event listener?
         return Err("Not enough resources".to_string());
     }
     Ok(cost_info)
 }
 
-pub(crate) fn can_construct_anything(city: &City, player: &Player, discounts: &[ConstructDiscount]) -> Result<(), String> {
-    if !discounts.contains(&ConstructDiscount::NoCityActivation) && !city.can_activate() {
+pub(crate) fn can_construct_anything(
+    city: &City,
+    player: &Player,
+    city_activation: bool,
+) -> Result<(), String> {
+    if city_activation && !city.can_activate() {
         return Err("Can't activate".to_string());
     }
     if city.player_index != player.index {
@@ -111,7 +121,7 @@ pub(crate) fn execute_construct(
         player,
         game,
         game.execute_cost_trigger(),
-        &[]
+        &[],
     )?;
     if matches!(c.city_piece, Building::Port) {
         let port_position = c.port_position.as_ref().expect("Illegal action");
@@ -128,7 +138,13 @@ pub(crate) fn execute_construct(
     Ok(())
 }
 
-pub(crate) fn do_construct(game: &mut Game, player_index: usize, c: &Construct, activate: bool, origin: &EventOrigin) {
+pub(crate) fn do_construct(
+    game: &mut Game,
+    player_index: usize,
+    c: &Construct,
+    activate: bool,
+    origin: &EventOrigin,
+) {
     construct(
         game,
         player_index,
@@ -222,7 +238,7 @@ pub fn available_buildings(
     game: &Game,
     player: usize,
     city: Position,
-    discounts: &[ConstructDiscount]
+    discounts: &[ConstructDiscount],
 ) -> Vec<(Building, CostInfo)> {
     let player = game.player(player);
     let city = player.get_city(city);

@@ -367,7 +367,7 @@ pub(crate) fn can_construct_wonder(
     cost: CostInfo,
     trigger: CostTrigger,
 ) -> Result<CostInfo, String> {
-    can_construct_anything(city, player, &[])?;
+    can_construct_anything(city, player, true)?;
 
     if !player.wonder_cards.contains(&wonder) {
         return Err("Wonder card not owned".to_string());
