@@ -305,7 +305,11 @@ fn danegeld() -> LeaderAbility {
     )
     .add_custom_action(
         CustomActionType::Danegeld,
-        |c| c.any_times().action().no_resources(),
+        |c| {
+            c.once_per_turn_mutually_exclusive(CustomActionType::Taxes)
+                .action()
+                .no_resources()
+        },
         |b| {
             use_taxes(b.add_simple_persistent_event_listener(
                 |event| &mut event.custom_action,
