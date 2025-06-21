@@ -9,11 +9,15 @@ use crate::construct::on_construct;
 use crate::content::custom_actions::on_custom_action;
 use crate::content::persistent_events::{EventResponse, PersistentEventType};
 use crate::cultural_influence::on_cultural_influence;
+use crate::events::EventPlayer;
 use crate::explore::ask_explore_resolution;
 use crate::game::GameState::{Finished, Movement, Playing};
 use crate::game::{Game, GameContext};
 use crate::incident::{on_choose_incident, on_trigger_incident};
-use crate::log::{add_log_action, current_player_turn_log_mut};
+use crate::log::{
+    ActionLogBalance, ActionLogEntry, add_action_log_item, add_log_action,
+    current_player_turn_log_mut,
+};
 use crate::movement::{MovementAction, execute_movement_action, on_ship_construction_conversion};
 use crate::objective_card::{complete_objective_card, gain_objective_card, on_objective_cards};
 use crate::playing_actions::{PlayingAction, PlayingActionType};
@@ -319,4 +323,28 @@ fn execute_regular_action(
         ),
         Finished => Err("actions can't be executed when the game is finished".to_string()),
     }
+}
+
+pub(crate) fn gain_action(game: &mut Game, player: &EventPlayer) {
+    player.log(game, "Gain 1 action");
+    game.actions_left += 1;
+    add_action_log_item(
+        game,
+        player.index,
+        ActionLogEntry::action(ActionLogBalance::Gain),
+        player.origin.clone(),
+        vec![],
+    );
+}
+
+pub(crate) fn lose_action(game: &mut Game, player: &EventPlayer) {
+    player.log(game, "Pay 1 action");
+    game.actions_left -= 1;
+    add_action_log_item(
+        game,
+        player.index,
+        ActionLogEntry::action(ActionLogBalance::Loss),
+        player.origin.clone(),
+        vec![],
+    );
 }

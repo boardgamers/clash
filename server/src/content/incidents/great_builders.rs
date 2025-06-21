@@ -1,7 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
 use crate::card::HandCard;
-use crate::construct::{available_buildings, ConstructDiscount};
+use crate::construct::{ConstructDiscount, available_buildings};
 use crate::content::ability::Ability;
 use crate::content::advances::AdvanceGroup;
 use crate::content::effects::ConstructEffect;
@@ -30,9 +30,7 @@ pub(crate) fn great_engineer() -> ActionCard {
         ),
         |c| c.action().no_resources(),
         groups,
-        |game, p| can_construct_any_building(game, p, &[
-            ConstructDiscount::NoCityActivation
-        ]),
+        |game, p| can_construct_any_building(game, p, &[ConstructDiscount::NoCityActivation]),
     )
     .add_bool_request(
         |e| &mut e.play_action_card,
@@ -61,7 +59,11 @@ pub(crate) fn great_engineer() -> ActionCard {
     .build()
 }
 
-pub(crate) fn can_construct_any_building(game: &Game, p: &Player, discounts: &[ConstructDiscount]) -> bool {
+pub(crate) fn can_construct_any_building(
+    game: &Game,
+    p: &Player,
+    discounts: &[ConstructDiscount],
+) -> bool {
     PlayingActionType::Construct
         .is_available(game, p.index)
         .is_ok()

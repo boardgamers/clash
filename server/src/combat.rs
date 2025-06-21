@@ -19,7 +19,7 @@ use crate::resource_pile::ResourcePile;
 use crate::special_advance::SpecialAdvance;
 use crate::tactics_card::CombatRole;
 use crate::unit::{UnitType, Units, carried_units};
-use crate::wonder::{Wonder, init_wonder, lose_wonder, gain_wonder};
+use crate::wonder::{Wonder, gain_wonder, init_wonder, lose_wonder};
 use combat_stats::active_attackers;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};

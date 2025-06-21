@@ -175,7 +175,7 @@ impl ActionLogEntry {
     pub fn mood_change(city: Position, mood: MoodState) -> Self {
         Self::MoodChange { city, mood }
     }
-    
+
     #[must_use]
     pub fn action(balance: ActionLogBalance) -> Self {
         Self::Action { balance }

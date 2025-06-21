@@ -186,10 +186,14 @@ impl AbilityInitializerSetup for WonderBuilder {
 }
 
 pub(crate) fn draw_wonder_card(game: &mut Game, player: &EventPlayer) {
-    on_draw_wonder_card(game, player.index, DrawWonderCard {
-        origin: player.origin.clone(),
-        drawn: false,
-    });
+    on_draw_wonder_card(
+        game,
+        player.index,
+        DrawWonderCard {
+            origin: player.origin.clone(),
+            drawn: false,
+        },
+    );
 }
 
 pub(crate) fn on_draw_wonder_card(game: &mut Game, player_index: usize, draw: DrawWonderCard) {
