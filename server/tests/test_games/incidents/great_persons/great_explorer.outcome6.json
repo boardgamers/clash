@@ -536,6 +536,17 @@
                       "origin": {
                         "CivilCard": 118
                       }
+                    },
+                    {
+                      "player": 1,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Gain",
+                        "position": "A7"
+                      },
+                      "origin": {
+                        "CivilCard": 118
+                      }
                     }
                   ]
                 }
@@ -578,7 +589,7 @@
     ],
     [
       "Player2: Great Explorer: Pay 2 food",
-      "Player2: Great Explorer: Built a city A7 for 2 food"
+      "Player2: Great Explorer: Gain city A7"
     ]
   ],
   "undo_limit": 4,

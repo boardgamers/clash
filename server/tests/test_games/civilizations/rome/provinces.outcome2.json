@@ -329,12 +329,34 @@
                   },
                   "items": [
                     {
+                      "player": 1,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Loss",
+                        "position": "B2"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
                       "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 2
                         },
                         "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Gain",
+                        "position": "B2"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -414,8 +436,10 @@
       "Player1: Advance: Gain Voting and take an event token (2 left)"
     ],
     [
-      "Player1 marched 1 infantry from C2 to B2 and captured Player2's city B2",
+      "Player1 marched 1 infantry from C2 to B2",
+      "Player2: Combat: Lose city B2",
       "Player1: Combat: Gain 2 gold",
+      "Player1: Combat: Gain city B2",
       "Player1: Combat: City B2 became Angry"
     ],
     [

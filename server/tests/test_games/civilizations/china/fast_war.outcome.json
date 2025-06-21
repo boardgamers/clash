@@ -407,12 +407,34 @@
                       }
                     },
                     {
+                      "player": 1,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Loss",
+                        "position": "D8"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
                       "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 2
                         },
                         "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Gain",
+                        "position": "D8"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -463,8 +485,10 @@
       "Player2 rolled 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units.",
       "Player2: Choose Casualties: Remove all defending units",
       "Player2: Combat: Lost 1 infantry at D8",
-      "Attacker wins and captured Player2's city D8",
+      "Attacker wins",
+      "Player2: Combat: Lose city D8",
       "Player1: Combat: Gain 2 gold",
+      "Player1: Combat: Gain city D8",
       "Player1: Combat: City D8 became Angry",
       "Player1: Fast War: Gain 1 mood token and 1 culture token"
     ]

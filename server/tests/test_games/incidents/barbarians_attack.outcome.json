@@ -330,6 +330,28 @@
                     },
                     {
                       "player": 0,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Loss",
+                        "position": "C2"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 2,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Gain",
+                        "position": "C2"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Units": {
                         "units": {
                           "settlers": 1
@@ -406,7 +428,9 @@
       "Barbarians: Choose Casualties: Remove 1 of their attacking units",
       "Barbarians: Combat: Lost 1 elephant at B2",
       "Attacker wins and killed 4 settlers of Player1",
-      "Player1: Combat: Lost 4 settlers at C2 and captured Player1's city C2",
+      "Player1: Combat: Lost 4 settlers at C2",
+      "Player1: Combat: Lose city C2",
+      "Barbarians: Combat: Gain city C2",
       "Player1: Place Settler: Gain 1 settler at A1",
       "Barbarians: Population Boom: Gain 1 infantry at C2",
       "Player1: Population Boom: Gain 1 settler at A1",

@@ -264,12 +264,34 @@
                       }
                     },
                     {
+                      "player": 2,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Loss",
+                        "position": "C2"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
                       "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 1
                         },
                         "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Gain",
+                        "position": "C2"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -311,8 +333,10 @@
       "Player1: Combat: Lost 2 elephants at B1",
       "Barbarians: Choose Casualties: Remove all defending units",
       "Barbarians: Combat: Lost 3 infantry at C2",
-      "Attacker wins and captured Barbarians's city C2",
+      "Attacker wins",
+      "Barbarians: Combat: Lose city C2",
       "Player1: Combat: Gain 1 gold",
+      "Player1: Combat: Gain city C2",
       "Player1: Barbarian battle: Gain 2 gold",
       "Player1: Waste: Could not store 3 gold"
     ]

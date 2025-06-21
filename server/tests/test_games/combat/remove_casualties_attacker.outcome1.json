@@ -261,12 +261,34 @@
                       }
                     },
                     {
+                      "player": 1,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Loss",
+                        "position": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
                       "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 1
                         },
                         "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Gain",
+                        "position": "C1"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -298,12 +320,34 @@
                       }
                     },
                     {
+                      "player": 1,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Loss",
+                        "position": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
                       "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 1
                         },
                         "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Gain",
+                        "position": "C1"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -335,8 +379,10 @@
       "Player1: Combat: Lost 1 infantry and 1 cavalry at C2",
       "Player2: Choose Casualties: Remove all defending units",
       "Player2: Combat: Lost 2 infantry at C1",
-      "Attacker wins and captured Player2's city C1",
+      "Attacker wins",
+      "Player2: Combat: Lose city C1",
       "Player1: Combat: Gain 1 gold",
+      "Player1: Combat: Gain city C1",
       "Player1: Waste: Could not store 1 gold"
     ]
   ],

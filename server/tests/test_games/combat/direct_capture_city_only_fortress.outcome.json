@@ -236,12 +236,34 @@
                   },
                   "items": [
                     {
+                      "player": 1,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Loss",
+                        "position": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
                       "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 1
                         },
                         "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Gain",
+                        "position": "C1"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -268,8 +290,10 @@
       "Player1 rolled 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 26 and gets 0 hits against defending units.",
       "Player2 rolled 1 (leader, no bonus) for combined combat value of 1 and gets 0 hits against attacking units.",
       "Player2 used the following combat modifiers: fortress added one extra die, fortress cancelled one hit",
-      "Attacker wins and captured Player2's city C1",
+      "Attacker wins",
+      "Player2: Combat: Lose city C1",
       "Player1: Combat: Gain 1 gold",
+      "Player1: Combat: Gain city C1",
       "Player1: Waste: Could not store 1 gold"
     ]
   ],

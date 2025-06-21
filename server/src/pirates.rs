@@ -1,6 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::barbarians;
-use crate::barbarians::get_barbarians_event_player;
 use crate::city::{MoodState, decrease_city_mood};
 use crate::content::ability::Ability;
 use crate::content::persistent_events::{
@@ -15,6 +14,7 @@ use crate::resource::ResourceType;
 use crate::tactics_card::CombatRole;
 use crate::unit::UnitType;
 use itertools::Itertools;
+use crate::events::{EventOrigin, EventPlayer};
 
 pub(crate) fn pirates_round_bonus() -> Ability {
     Ability::builder("Pirate ship destroyed", "-")
@@ -216,7 +216,7 @@ fn place_pirate_ship(builder: IncidentBuilder, priority: i32, blockade: bool) ->
         |game, s, _| {
             gain_unit(
                 game,
-                &get_barbarians_event_player(game, &s.origin),
+                &get_pirates_event_player(game, &s.origin),
                 s.choice[0],
                 UnitType::Ship,
             );
@@ -248,6 +248,12 @@ fn cities_with_adjacent_pirates(player: &Player, game: &Game) -> Vec<Position> {
         })
         .map(|c| c.position)
         .collect()
+}
+
+#[must_use]
+pub(crate) fn get_pirates_event_player(game: &Game, origin: &EventOrigin) -> EventPlayer {
+    let player = get_pirates_player(game);
+    EventPlayer::new(player.index, player.get_name(), origin.clone())
 }
 
 #[must_use]

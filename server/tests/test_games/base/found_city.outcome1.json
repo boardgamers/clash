@@ -212,7 +212,32 @@
                         "settler": 4
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Units": {
+                        "units": {
+                          "settlers": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Found city"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Gain",
+                        "position": "B6"
+                      },
+                      "origin": {
+                        "Ability": "Found city"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -254,7 +279,7 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 founded a city B6"
+      "Player1: Found city: Gain city B6"
     ],
     [
       "Player1: Complete Objectives: Complete City Founder using City Founder/Resistance"

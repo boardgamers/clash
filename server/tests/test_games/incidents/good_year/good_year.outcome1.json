@@ -289,6 +289,17 @@
                     },
                     {
                       "player": 2,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Gain",
+                        "position": "B3"
+                      },
+                      "origin": {
+                        "Incident": 11
+                      }
+                    },
+                    {
+                      "player": 2,
                       "Units": {
                         "units": {
                           "infantry": 1
@@ -362,6 +373,7 @@
     [
       "A new game event has been triggered: A good year",
       "Base effect: Barbarians spawn",
+      "Barbarians: A good year: Gain city B3",
       "Barbarians: A good year: Gain 1 infantry at B3"
     ],
     [

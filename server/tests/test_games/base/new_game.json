@@ -468,6 +468,27 @@
                     },
                     {
                       "player": 0,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Gain",
+                        "position": "D2"
+                      },
+                      "origin": {
+                        "Ability": "Setup"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "MoodChange": {
+                        "city": "D2",
+                        "mood": "Happy"
+                      },
+                      "origin": {
+                        "Ability": "Setup"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Units": {
                         "units": {
                           "settlers": 1
@@ -554,6 +575,27 @@
                     },
                     {
                       "player": 1,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Gain",
+                        "position": "D7"
+                      },
+                      "origin": {
+                        "Ability": "Setup"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "MoodChange": {
+                        "city": "D7",
+                        "mood": "Happy"
+                      },
+                      "origin": {
+                        "Ability": "Setup"
+                      }
+                    },
+                    {
+                      "player": 1,
                       "Units": {
                         "units": {
                           "settlers": 1
@@ -592,6 +634,8 @@
       "Player1: Setup: Gain Mining without taking an event token",
       "Player1: Setup: Draw an action card",
       "Player1: Setup: Draw an objective card",
+      "Player1: Setup: Gain city D2",
+      "Player1: Setup: City D2 became Happy",
       "Player1: Setup: Gain 1 settler at D2",
       "Player2: Setup: Play as Greece",
       "Player2: Setup: Gain 2 food",
@@ -599,6 +643,8 @@
       "Player2: Setup: Gain Mining without taking an event token",
       "Player2: Setup: Draw an action card",
       "Player2: Setup: Draw an objective card",
+      "Player2: Setup: Gain city D7",
+      "Player2: Setup: City D7 became Happy",
       "Player2: Setup: Gain 1 settler at D7"
     ]
   ],

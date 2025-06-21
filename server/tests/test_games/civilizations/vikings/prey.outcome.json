@@ -303,12 +303,34 @@
                   },
                   "items": [
                     {
+                      "player": 1,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Loss",
+                        "position": "D1"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
                       "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 1
                         },
                         "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Gain",
+                        "position": "D1"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -360,8 +382,10 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 marched Ragnar Lodbrok from E2 to D1 and captured Player2's city D1",
+      "Player1 marched Ragnar Lodbrok from E2 to D1",
+      "Player2: Combat: Lose city D1",
       "Player1: Combat: Gain 1 gold",
+      "Player1: Combat: Gain city D1",
       "Player1: Combat: City D1 became Angry",
       "Player1: Prey: Gain 2 gold",
       "Player2: Place Settler: Gain 1 settler at B2",
