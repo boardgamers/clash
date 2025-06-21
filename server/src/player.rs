@@ -29,7 +29,6 @@ use crate::{
     position::Position,
     resource_pile::ResourcePile,
     unit::{Unit, Units},
-    utils,
 };
 use enumset::EnumSet;
 use itertools::Itertools;
@@ -329,17 +328,13 @@ impl Player {
         }
     }
 
-    pub fn remove_wonder(&mut self, wonder: Wonder) {
-        utils::remove_element(&mut self.wonders_built, &wonder);
-        self.wonders_owned.remove(wonder);
-    }
-
     pub fn strip_secret(&mut self) {
         self.wonder_cards = self.wonder_cards.iter().map(|_| Wonder::Hidden).collect();
         self.action_cards = self.action_cards.iter().map(|_| 0).collect();
         self.objective_cards = self.objective_cards.iter().map(|_| 0).collect();
         self.secrets = Vec::new();
     }
+
     #[must_use]
     pub fn building_cost(&self, game: &Game, building: Building, execute: CostTrigger) -> CostInfo {
         self.trigger_cost_event(
@@ -579,7 +574,7 @@ pub fn gain_units(
                 p.available_leaders.retain(|name| name != leader);
                 p.recruited_leaders.push(*leader);
                 Player::with_leader(*leader, game, player, |game, leader| {
-                    leader.listeners.once_init(game, player);
+                    leader.listeners.init_first(game, player);
                 });
             }
             let p = game.player_mut(player);

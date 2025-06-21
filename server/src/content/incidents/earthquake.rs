@@ -1,16 +1,16 @@
 use crate::ability_initializer::SelectedMultiChoice;
 use crate::city::{City, MoodState};
-use crate::city_pieces::{Building, remove_building};
+use crate::city_pieces::{Building, lose_building};
 use crate::content::persistent_events::{
     PositionRequest, SelectedStructure, StructuresRequest, is_selected_structures_valid,
 };
-use crate::events::EventOrigin;
+use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
 use crate::incident::{DecreaseMood, Incident, IncidentBaseEffect, MoodModifier};
 use crate::player_events::{IncidentInfo, IncidentTarget};
 use crate::position::Position;
 use crate::structure::Structure;
-use crate::wonder::{Wonder, deinit_wonder};
+use crate::wonder::{Wonder, destroy_wonder};
 use itertools::Itertools;
 
 pub(crate) fn earthquake_incidents() -> Vec<Incident> {
@@ -59,7 +59,7 @@ fn volcano() -> Incident {
                 destroy_building(game, b, pos, &s.origin);
             }
             for wonder in wonders {
-                destroy_wonder(game, pos, wonder, &s.origin);
+                destroy_wonder_for_points(game, pos, wonder, &s.origin);
                 destroy_city_center(game, pos, &s.origin);
             }
         },
@@ -124,7 +124,7 @@ fn apply_earthquake(
         let position = st.position;
         match st.structure {
             Structure::Building(b) => destroy_building(game, b, position, origin),
-            Structure::Wonder(name) => destroy_wonder(game, position, name, origin),
+            Structure::Wonder(name) => destroy_wonder_for_points(game, position, name, origin),
             Structure::CityCenter => destroy_city_center(game, position, origin),
         }
     }
@@ -195,7 +195,8 @@ fn destroy_building(game: &mut Game, b: Building, position: Position, origin: &E
     let o = game.player_mut(owner);
     o.gain_event_victory_points(2.0, origin);
     o.destroyed_structures.add_building(b);
-    remove_building(game.player_mut(city_owner).get_city_mut(position), b);
+    let player = EventPlayer::from_player(city_owner, game, origin.clone());
+    lose_building(game, &player, b, position);
     game.log_with_origin(
         owner,
         origin,
@@ -203,20 +204,24 @@ fn destroy_building(game: &mut Game, b: Building, position: Position, origin: &E
     );
 }
 
-fn destroy_wonder(game: &mut Game, position: Position, name: Wonder, origin: &EventOrigin) {
-    let owner = game.get_any_city(position).player_index;
-    deinit_wonder(game, owner, name);
+fn destroy_wonder_for_points(
+    game: &mut Game,
+    position: Position,
+    wonder: Wonder,
+    origin: &EventOrigin,
+) {
+    let p = &EventPlayer::from_player(
+        game.get_any_city(position).player_index,
+        game,
+        origin.clone(),
+    );
+    destroy_wonder(game, p, wonder, position);
 
-    let a = name.info(game).owned_victory_points;
-    let p = game.player_mut(owner);
-    p.wonders_owned.remove(name);
-    let city = p.get_city_mut(position);
-    city.pieces.wonders.retain(|w| *w != name);
-    p.gain_event_victory_points(a as f32, origin);
-    game.log_with_origin(
-        owner,
-        origin,
-        &format!("Gain {a} points for the {} at {position}", name.name(),),
+    let a = wonder.info(game).owned_victory_points;
+    p.get_mut(game).gain_event_victory_points(a as f32, origin);
+    p.log(
+        game,
+        &format!("Gain {a} points for the {} at {position}", wonder.name()),
     );
 }
 

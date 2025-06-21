@@ -1,7 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action::Action;
 use crate::city::{City, gain_city, lose_city};
-use crate::city_pieces::Building;
+use crate::city_pieces::{Building, gain_building};
 use crate::consts::INFLUENCE_MIN_ROLL;
 use crate::content::ability::Ability;
 use crate::content::custom_actions::custom_action_modifier_event_origin;
@@ -455,6 +455,7 @@ fn structures(city: &City) -> Vec<SelectedStructure> {
 fn influence_culture(game: &mut Game, influencer_index: usize, info: &InfluenceCultureInfo) {
     let city_position = info.position;
     let city_owner = game.get_any_city(city_position).player_index;
+    let new = &EventPlayer::from_player(influencer_index, game, info.origin.clone());
     match info.structure {
         Structure::CityCenter => {
             let city = lose_city(
@@ -462,17 +463,9 @@ fn influence_culture(game: &mut Game, influencer_index: usize, info: &InfluenceC
                 &EventPlayer::from_player(city_owner, game, info.origin.clone()),
                 city_position,
             );
-            gain_city(
-                game,
-                &EventPlayer::from_player(influencer_index, game, info.origin.clone()),
-                city,
-            );
+            gain_city(game, new, city);
         }
-        Structure::Building(b) => game
-            .player_mut(city_owner)
-            .get_city_mut(city_position)
-            .pieces
-            .set_building(b, influencer_index),
+        Structure::Building(b) => gain_building(game, new, b, city_position),
         Structure::Wonder(_) => panic!("Wonder is not allowed here"),
     }
     game.successful_cultural_influence = true;

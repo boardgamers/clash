@@ -11,7 +11,7 @@ use crate::player::remove_unit;
 use crate::structure::{Structure, log_gain_structure, log_lose_structure};
 use crate::unit::{UnitType, Units};
 use crate::utils;
-use crate::wonder::deinit_wonder;
+use crate::wonder::destroy_wonder;
 use crate::{
     city_pieces::{CityPieces, CityPiecesData},
     game::Game,
@@ -99,17 +99,6 @@ impl City {
     #[must_use]
     pub fn is_activated(&self) -> bool {
         self.activations > 0
-    }
-
-    pub(crate) fn raze(self, game: &mut Game, player: &EventPlayer) {
-        for wonder in &self.pieces.wonders {
-            deinit_wonder(game, player.index, *wonder);
-        }
-        for wonder in self.pieces.wonders {
-            for p in &mut game.players {
-                p.remove_wonder(wonder);
-            }
-        }
     }
 
     #[must_use]
@@ -369,4 +358,11 @@ pub(crate) fn lose_city(game: &mut Game, player: &EventPlayer, position: Positio
     };
     log_lose_structure(game, player, Structure::CityCenter, city.position);
     city
+}
+
+pub(crate) fn raze_city(game: &mut Game, player: &EventPlayer, position: Position) {
+    let city = lose_city(game, player, position);
+    for wonder in &city.pieces.wonders {
+        destroy_wonder(game, player, *wonder, position);
+    }
 }

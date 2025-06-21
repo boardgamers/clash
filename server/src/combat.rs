@@ -1,7 +1,7 @@
 use crate::barbarians::get_barbarians_player;
 use crate::city::MoodState::Angry;
-use crate::city::{City, gain_city, lose_city, set_city_mood};
-use crate::city_pieces::{Building, remove_building};
+use crate::city::{City, gain_city, lose_city, raze_city, set_city_mood};
+use crate::city_pieces::{Building, gain_building, lose_building};
 use crate::combat_listeners::{
     CombatEventPhase, CombatResult, CombatRoundEnd, CombatRoundStart, CombatStrength,
     combat_round_end, combat_round_start, end_combat, kill_units_with_stats,
@@ -19,7 +19,7 @@ use crate::resource_pile::ResourcePile;
 use crate::special_advance::SpecialAdvance;
 use crate::tactics_card::CombatRole;
 use crate::unit::{UnitType, Units, carried_units};
-use crate::wonder::{Wonder, deinit_wonder, init_wonder};
+use crate::wonder::{Wonder, init_wonder, lose_wonder, gain_wonder};
 use combat_stats::active_attackers;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -359,40 +359,43 @@ pub(crate) fn conquer_city(
     attacker: &EventPlayer,
     defender: &EventPlayer,
 ) {
-    let mut city = lose_city(game, defender, position);
+    let city = lose_city(game, defender, position);
     let attacker_is_human = attacker.get(game).is_human();
     let size = city.mood_modified_size(attacker.get(game));
     if attacker_is_human {
         attacker.gain_resources(game, ResourcePile::gold(size as u8));
     }
-    let take_over = attacker.get(game).is_city_available();
 
-    if take_over {
-        if attacker_is_human {
-            take_over_city(game, &mut city, attacker, defender);
-        }
+    if attacker.get(game).is_city_available() {
         gain_city(game, attacker, city);
+        if attacker_is_human {
+            take_over_city(game, position, attacker, defender);
+        }
         set_city_mood(game, position, &attacker.origin, Angry);
     } else {
+        raze_city(game, defender, position);
         attacker.gain_resources(game, ResourcePile::gold(city.size() as u8));
-        city.raze(game, defender);
     }
 }
 
 fn take_over_city(
     game: &mut Game,
-    city: &mut City,
+    position: Position,
     attacker: &EventPlayer,
     defender: &EventPlayer,
 ) {
-    for wonder in city.pieces.wonders.clone() {
-        deinit_wonder(game, defender.index, wonder);
+    let pieces = game
+        .player(attacker.index)
+        .get_city(position)
+        .pieces
+        .clone();
+    for wonder in pieces.wonders.clone() {
+        lose_wonder(game, defender, wonder, position);
+        gain_wonder(game, attacker, wonder, position);
         init_wonder(game, attacker.index, wonder);
-        game.player_mut(defender.index).wonders_owned.remove(wonder);
-        attacker.get_mut(game).wonders_owned.insert(wonder);
     }
 
-    for (building, owner) in city.pieces.building_owners() {
+    for (building, owner) in pieces.building_owners() {
         if matches!(building, Building::Obelisk) {
             continue;
         }
@@ -403,9 +406,9 @@ fn take_over_city(
             continue;
         }
         if attacker.get(game).is_building_available(building, game) {
-            city.pieces.set_building(building, attacker.index);
+            gain_building(game, attacker, building, position);
         } else {
-            remove_building(city, building);
+            lose_building(game, defender, building, position);
             attacker.gain_resources(game, ResourcePile::gold(1));
         }
     }

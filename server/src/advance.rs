@@ -252,7 +252,7 @@ pub(crate) fn do_advance(
     let info = advance.info(game).clone();
     let bonus = info.bonus.clone();
     let player_index = player.index;
-    info.listeners.once_init(game, player_index);
+    info.listeners.init_first(game, player_index);
 
     if let Some(special_advance) = find_special_advance(advance, game, player_index) {
         unlock_special_advance(game, special_advance, player_index);
@@ -428,7 +428,7 @@ pub(crate) fn remove_advance(game: &mut Game, advance: Advance, player: &EventPl
     let info = advance.info(game);
     let bonus = info.bonus.clone();
     let player_index = player.index;
-    info.listeners.clone().once_deinit(game, player_index);
+    info.listeners.clone().deinit_first(game, player_index);
 
     if let Some(special_advance) =
         find_non_government_special_advance(advance, game.player(player_index))
@@ -465,7 +465,7 @@ fn unlock_special_advance(game: &mut Game, special_advance: SpecialAdvance, play
         .info(game)
         .listeners
         .clone()
-        .once_init(game, player_index);
+        .init_first(game, player_index);
     game.players[player_index]
         .special_advances
         .insert(special_advance);
@@ -480,7 +480,7 @@ pub(crate) fn undo_unlock_special_advance(
         .info(game)
         .listeners
         .clone()
-        .once_deinit(game, player_index);
+        .deinit_first(game, player_index);
     game.players[player_index]
         .special_advances
         .remove(special_advance);

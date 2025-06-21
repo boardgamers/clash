@@ -1,8 +1,7 @@
 use crate::advance::{Advance, gain_advance_without_payment};
 use crate::city::{City, MoodState, activate_city};
-use crate::city_pieces::{log_gain_building, Building};
+use crate::city_pieces::{Building, gain_building};
 use crate::consts::MAX_CITY_PIECES;
-use crate::content::ability::construct_event_origin;
 use crate::content::persistent_events::PersistentEventType;
 use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
@@ -117,6 +116,7 @@ pub(crate) fn execute_construct(
         panic!("Illegal action");
     }
 
+    cost.pay(game, &c.payment);
     construct(
         game,
         player_index,
@@ -125,13 +125,6 @@ pub(crate) fn execute_construct(
         c.port_position,
         cost.activate_city,
         cost.origin(),
-    );
-    cost.pay(game, &c.payment);
-    log_gain_building(
-        game,
-        &EventPlayer::from_player(player_index, game, cost.origin().clone()),
-        c.city_piece,
-        c.city_position,
     );
 
     on_construct(game, player_index, ConstructInfo::new(c.city_piece));
@@ -150,11 +143,17 @@ pub(crate) fn construct(
     if activate {
         activate_city(city_position, game, origin);
     }
-    let city = game.player_mut(player).get_city_mut(city_position);
-    city.pieces.set_building(building, player);
     if let Some(port_position) = port_position {
-        city.port_position = Some(port_position);
+        game.player_mut(player)
+            .get_city_mut(city_position)
+            .port_position = Some(port_position);
     }
+    gain_building(
+        game,
+        &EventPlayer::from_player(player, game, origin.clone()),
+        building,
+        city_position,
+    );
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]

@@ -8,7 +8,7 @@ use crate::game::Game;
 use crate::objective_card::{deinit_objective_card, init_objective_card};
 use crate::player::Player;
 use crate::utils::remove_element;
-use crate::wonder::{Wonder, deinit_wonder, init_wonder};
+use crate::wonder::Wonder;
 use itertools::Itertools;
 use std::fmt::Debug;
 
@@ -149,8 +149,8 @@ fn swap_cards(
                 name,
                 other_name,
                 |p| &mut p.wonder_cards,
-                init_wonder,
-                deinit_wonder,
+                |_, _, _| {}, // wonder cards on the hand are not initialized
+                |_, _, _| {},
                 HandCard::Wonder,
                 origin,
             );

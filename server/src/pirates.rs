@@ -5,6 +5,7 @@ use crate::content::ability::Ability;
 use crate::content::persistent_events::{
     PaymentRequest, PositionRequest, ResourceRewardRequest, UnitsRequest,
 };
+use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
 use crate::incident::{BASE_EFFECT_PRIORITY, IncidentBuilder};
 use crate::player::{Player, gain_unit, remove_unit};
@@ -14,7 +15,6 @@ use crate::resource::ResourceType;
 use crate::tactics_card::CombatRole;
 use crate::unit::UnitType;
 use itertools::Itertools;
-use crate::events::{EventOrigin, EventPlayer};
 
 pub(crate) fn pirates_round_bonus() -> Ability {
     Ability::builder("Pirate ship destroyed", "-")

@@ -1,7 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::gain_action_card_from_pile;
 use crate::advance::{Advance, do_advance, gain_advance_without_payment, remove_advance};
-use crate::city::lose_city;
+use crate::city::raze_city;
 use crate::consts::AGES;
 use crate::content::ability::Ability;
 use crate::content::persistent_events::{
@@ -218,7 +218,7 @@ pub(crate) fn use_raze_city() -> Ability {
                     return;
                 }
                 let player = &s.player();
-                lose_city(game, player, s.choice[0]).raze(game, player);
+                raze_city(game, player, s.choice[0]);
                 player.gain_resources(game, ResourcePile::gold(1));
             },
         )

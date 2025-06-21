@@ -186,14 +186,10 @@ impl AbilityInitializerSetup for WonderBuilder {
 }
 
 pub(crate) fn draw_wonder_card(game: &mut Game, player: &EventPlayer) {
-    on_draw_wonder_card(
-        game,
-        player.index,
-        DrawWonderCard {
-            origin: player.origin.clone(),
-            drawn: false,
-        },
-    );
+    on_draw_wonder_card(game, player.index, DrawWonderCard {
+        origin: player.origin.clone(),
+        drawn: false,
+    });
 }
 
 pub(crate) fn on_draw_wonder_card(game: &mut Game, player_index: usize, draw: DrawWonderCard) {
@@ -215,7 +211,7 @@ pub(crate) fn draw_wonder_from_pile(game: &mut Game) -> Option<Wonder> {
     )
 }
 
-fn gain_wonder(game: &mut Game, player: &EventPlayer, wonder: Wonder, from: HandCardLocation) {
+fn gain_wonder_card(game: &mut Game, player: &EventPlayer, wonder: Wonder, from: HandCardLocation) {
     player.get_mut(game).wonder_cards.push(wonder);
     log_card_transfer(
         game,
@@ -256,7 +252,7 @@ pub(crate) fn draw_wonder_card_handler() -> Ability {
             |game, s, draw| {
                 if s.choice {
                     let name = *find_public_wonder(game).expect("public wonder card not found");
-                    gain_wonder(game, &s.player(), name, HandCardLocation::Public);
+                    gain_wonder_card(game, &s.player(), name, HandCardLocation::Public);
                     remove_public_wonder(game);
                 } else {
                     gain_wonder_from_pile(game, &s.player().with_origin(draw.origin.clone()));
@@ -309,7 +305,7 @@ fn gain_specific_wonder(
     wonder: Wonder,
     from: HandCardLocation,
 ) {
-    gain_wonder(game, player, wonder, from);
+    gain_wonder_card(game, player, wonder, from);
 }
 
 fn player_with_wonder_card(game: &Game, wonder: Wonder) -> Option<usize> {
@@ -320,7 +316,7 @@ fn player_with_wonder_card(game: &Game, wonder: Wonder) -> Option<usize> {
 
 fn gain_wonder_from_pile(game: &mut Game, player: &EventPlayer) {
     if let Some(w) = draw_wonder_from_pile(game) {
-        gain_wonder(game, player, w, HandCardLocation::DrawPile);
+        gain_wonder_card(game, player, w, HandCardLocation::DrawPile);
     }
 }
 
@@ -480,7 +476,7 @@ pub(crate) fn build_wonder_handler() -> Ability {
 
                 i.cost.info.execute(game);
                 remove_element(&mut game.player_mut(s.player_index).wonder_cards, &name);
-                construct_wonder(game, name, pos, &s.player().with_origin(i.origin.clone()));
+                construct_wonder(game, &s.player().with_origin(i.origin.clone()), name, pos);
             },
         )
         .build()
@@ -504,26 +500,73 @@ pub(crate) fn cities_for_wonder(
 
 fn construct_wonder(
     game: &mut Game,
+    player: &EventPlayer,
     wonder: Wonder,
     city_position: Position,
-    player: &EventPlayer,
 ) {
-    let player_index = player.index;
-    let p = &mut game.players[player_index];
-    p.wonders_built.push(wonder);
-    p.wonders_owned.insert(wonder);
-    let city = p.get_city_mut(city_position);
-    city.pieces.wonders.push(wonder);
+    player.get_mut(game).wonders_built.push(wonder);
     activate_city(city_position, game, &EventOrigin::Wonder(wonder));
     log_card_transfer(
         game,
         &HandCard::Wonder(wonder),
-        HandCardLocation::Hand(player_index),
+        HandCardLocation::Hand(player.index),
         HandCardLocation::PlayToKeep,
         &player.origin,
     );
-    let listeners = game.cache.get_wonder(wonder).listeners.clone();
-    listeners.once_init(game, player_index);
+    gain_wonder(game, player, wonder, city_position);
+    game.cache
+        .get_wonder(wonder)
+        .listeners
+        .clone()
+        .init_first(game, player.index);
+}
+
+pub(crate) fn gain_wonder(
+    game: &mut Game,
+    player: &EventPlayer,
+    wonder: Wonder,
+    city_position: Position,
+) {
+    player.log(game, &format!("Gain {} at {city_position}", wonder.name()));
+    let p = player.get_mut(game);
+    p.get_city_mut(city_position).pieces.wonders.push(wonder);
+    p.wonders_owned.insert(wonder);
+}
+
+pub(crate) fn destroy_wonder(
+    game: &mut Game,
+    player: &EventPlayer,
+    wonder: Wonder,
+    position: Position,
+) {
+    lose_wonder(game, player, wonder, position);
+    for p in &mut game.players {
+        remove_element(&mut p.wonders_built, &wonder);
+    }
+}
+
+pub(crate) fn lose_wonder(
+    game: &mut Game,
+    player: &EventPlayer,
+    wonder: Wonder,
+    city_position: Position,
+) {
+    assert!(
+        player.get(game).wonders_owned.contains(wonder),
+        "Player does not own the wonder to lose it"
+    );
+
+    player.log(game, &format!("Lose {} at {city_position}", wonder.name()));
+
+    let p = game.player_mut(player.index);
+    p.wonders_owned.remove(wonder);
+
+    p.get_city_mut(city_position)
+        .pieces
+        .wonders
+        .retain(|w| *w != wonder);
+
+    deinit_wonder(game, player.index, wonder);
 }
 
 #[must_use]

@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 
-use crate::city::City;
 use crate::events::EventPlayer;
 use crate::game::Game;
 use crate::log::{ActionLogBalance, ActionLogEntry, add_action_log_item};
@@ -11,7 +10,7 @@ use crate::wonder::Wonder;
 use Building::*;
 use num::Zero;
 
-#[derive(Default)]
+#[derive(Default, Clone, Debug)]
 pub struct CityPieces {
     pub academy: Option<usize>,
     pub market: Option<usize>,
@@ -143,8 +142,14 @@ impl CityPieces {
     }
 }
 
-pub fn remove_building(city: &mut City, building: Building) {
-    let pieces = &mut city.pieces;
+pub(crate) fn lose_building(
+    game: &mut Game,
+    player: &EventPlayer,
+    building: Building,
+    city: Position,
+) {
+    log_lose_building(game, player, building, city);
+    let pieces = &mut player.get_mut(game).get_city_mut(city).pieces;
     match building {
         Academy => pieces.academy = None,
         Market => pieces.market = None,
@@ -356,6 +361,22 @@ impl Display for Building {
     }
 }
 
+pub(crate) fn gain_building(
+    game: &mut Game,
+    player: &EventPlayer,
+    building: Building,
+    position: Position,
+) {
+    if let Some(old) = game.get_any_city(position).pieces.building_owner(building) {
+        let old = EventPlayer::from_player(old, game, player.origin.clone());
+        lose_building(game, &old, building, position);
+    }
+    game.get_any_city_mut(position)
+        .pieces
+        .set_building(building, player.index);
+    log_gain_building(game, player, building, position);
+}
+
 pub(crate) fn log_gain_building(
     game: &mut Game,
     player: &EventPlayer,
@@ -365,9 +386,11 @@ pub(crate) fn log_gain_building(
     let port_pos = if building == Port {
         format!(
             " at the water tile {}",
-            player.get(game).get_city(position).port_position.expect(
-                "Port must have a port position",
-            )
+            player
+                .get(game)
+                .get_city(position)
+                .port_position
+                .expect("Port must have a port position",)
         )
     } else {
         String::new()

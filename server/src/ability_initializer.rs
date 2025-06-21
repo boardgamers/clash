@@ -95,12 +95,12 @@ impl AbilityListeners {
         (self.deinitializer)(game, player_index);
     }
 
-    pub fn once_init(&self, game: &mut Game, player_index: usize) {
+    pub fn init_first(&self, game: &mut Game, player_index: usize) {
         self.init(game, player_index);
         (self.once_initializer)(game, player_index);
     }
 
-    pub fn once_deinit(&self, game: &mut Game, player_index: usize) {
+    pub fn deinit_first(&self, game: &mut Game, player_index: usize) {
         self.deinit(game, player_index);
         (self.once_deinitializer)(game, player_index);
     }
