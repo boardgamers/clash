@@ -38,6 +38,8 @@ pub struct ReplayActionLogRound {
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct ReplayActionLogPlayer {
     pub index: usize,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub actions: Vec<ReplayActionLogAction>,
 }
 
@@ -88,6 +90,11 @@ pub fn replay(mut data: ReplayGameData, to: Option<usize>) -> Game {
         if i > to {
             break;
         }
+        if a == Action::StartTurn {
+            continue;
+        }
+        println!("Executing action {i} {id}: {a:?}");
+
         let player_index = game.active_player();
         match try_execute_action(game, a.clone(), player_index) {
             Ok(g) => game = g,
