@@ -302,8 +302,8 @@
     ],
     [
       "Combat round 1",
-      "Attackers: 1 infantry",
-      "Defenders: 2 infantry"
+      "Player1: Combat: Attacking with 1 infantry",
+      "Player2: Combat: Defending with 2 infantry"
     ],
     [
       "Player1: Tactics: Play an action card face down",

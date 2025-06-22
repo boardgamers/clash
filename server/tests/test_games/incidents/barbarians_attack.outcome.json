@@ -415,13 +415,13 @@
     ],
     [
       "A new game event has been triggered: Population Boom",
-      "Base effect: Barbarians move",
+      "Player1: Population Boom: Base effect: Barbarians move",
       "Player1: Population Boom: Barbarians move from B2 to C2: 2 infantry and 1 elephant"
     ],
     [
       "Combat round 1",
-      "Attackers: 2 infantry and 1 elephant",
-      "Defenders: 4 settlers",
+      "Barbarians: Combat: Attacking with 2 infantry and 1 elephant",
+      "Player1: Combat: Defending with 4 settlers",
       "Barbarians rolled 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 20 and gets 0 hits against defending units.",
       "Player1 rolled 6 (infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units.",
       "Player1 used the following combat modifiers: fortress added one extra die, fortress cancelled one hit",

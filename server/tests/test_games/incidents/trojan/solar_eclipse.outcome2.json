@@ -439,7 +439,7 @@
     ],
     [
       "A new game event has been triggered: Solar Eclipse",
-      "Base effect: Pirates spawn",
+      "Player1: Solar Eclipse: Base effect: Pirates spawn",
       "No valid positions for Pirate Ship"
     ],
     [
@@ -448,8 +448,8 @@
     ],
     [
       "Combat round 1",
-      "Attackers: 2 settlers, 2 infantry, 1 cavalry and 1 elephant",
-      "Defenders: 2 infantry"
+      "Player1: Combat: Attacking with 2 settlers, 2 infantry, 1 cavalry and 1 elephant",
+      "Player2: Combat: Defending with 2 infantry"
     ],
     [
       "Player2: Tactics: Play an action card face down",

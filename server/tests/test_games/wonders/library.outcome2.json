@@ -352,7 +352,7 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player1 started Great Library"
+      "Player1: Great Library: Start action"
     ],
     [
       "Player1: Great Library: Use Engineering for the turn"

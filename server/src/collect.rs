@@ -163,7 +163,7 @@ pub(crate) fn execute_collect(
     c: &Collect,
 ) -> Result<(), String> {
     let origin = collect_event_origin(&c.action_type, game.player(player_index));
-    game.log_with_origin(
+    game.log(
         player_index,
         &origin,
         &format!("Use city {}", c.city_position),

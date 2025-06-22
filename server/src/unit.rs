@@ -588,7 +588,7 @@ pub(crate) fn kill_units_without_event(
         .iter()
         .map(|id| p.get_unit(*id).unit_type)
         .collect::<Units>();
-    game.log_with_origin(
+    game.log(
         player,
         origin,
         &format!(

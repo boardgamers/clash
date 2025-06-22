@@ -330,7 +330,7 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 started Theaters"
+      "Player1: Theaters: Start action"
     ],
     [
       "Player1: Theaters: Pay 1 culture token",

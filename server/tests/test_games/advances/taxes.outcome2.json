@@ -359,7 +359,7 @@
   "log": [
     [
       "Player1: Taxes: Pay 1 action",
-      "Player1 started Taxes",
+      "Player1: Taxes: Start action",
       "Player1 has to pay 1 mood token for Taxes"
     ],
     [

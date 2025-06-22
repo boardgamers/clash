@@ -223,8 +223,8 @@ pub(crate) fn on_stop_barbarian_movement(game: &mut Game, movable: Vec<Position>
 pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
     let event_name = "Barbarians move";
     builder = set_info(builder, event_name, |state, game, human| {
-        if get_movable_units(game, human, state).is_empty() {
-            game.add_info_log_item("Barbarians cannot move - will try to spawn a new city instead");
+        if get_movable_units(game, human.index, state).is_empty() {
+            human.log(game,"Barbarians cannot move - will try to spawn a new city instead");
         } else {
             state.move_units = true;
         }
@@ -395,7 +395,7 @@ fn barbarian_march_steps(
 pub(crate) fn set_info(
     builder: IncidentBuilder,
     event_name: &str,
-    init: impl Fn(&mut BarbariansEventState, &mut Game, usize) + 'static + Clone + Sync + Send,
+    init: impl Fn(&mut BarbariansEventState, &mut Game, &EventPlayer) + 'static + Clone + Sync + Send,
 ) -> IncidentBuilder {
     let name = event_name.to_string();
     builder.add_simple_incident_listener(
@@ -403,9 +403,9 @@ pub(crate) fn set_info(
         BASE_EFFECT_PRIORITY + 200,
         move |game, player, i| {
             if play_base_effect(i) && i.barbarians.is_none() {
-                game.add_info_log_item(&format!("Base effect: {name}"));
+                player.log(game, &format!("Base effect: {name}"));
                 let mut state = BarbariansEventState::new();
-                init(&mut state, game, player.index);
+                init(&mut state, game, player);
                 i.barbarians = Some(state);
             }
         },
@@ -423,7 +423,7 @@ fn add_barbarians_city(builder: IncidentBuilder, event_name: &'static str) -> In
 
             let choices = possible_barbarians_spawns(game, game.player(p.index));
             if choices.is_empty() {
-                game.add_info_log_item("Barbarians cannot spawn a new city");
+                p.log(game,"Barbarians cannot spawn a new city");
             }
             let needed = 1..=1;
             Some(PositionRequest::new(

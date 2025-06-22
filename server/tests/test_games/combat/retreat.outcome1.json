@@ -190,9 +190,11 @@
   "starting_player_index": 0,
   "current_player_index": 0,
   "action_log": [
-    { "age": 1,
+    {
+      "age": 1,
       "rounds": [
-        { "round": 1,
+        {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -230,8 +232,8 @@
     ],
     [
       "Combat round 1",
-      "Attackers: 1 infantry",
-      "Defenders: 2 infantry",
+      "Player1: Combat: Attacking with 1 infantry",
+      "Player2: Combat: Defending with 2 infantry",
       "Player1 rolled 1 (leader, no bonus) for combined combat value of 1 and gets 0 hits against defending units.",
       "Player2 rolled 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 2 and gets 0 hits against attacking units.",
       "Player1: Offer Retreat: Player1 can retreat"

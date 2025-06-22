@@ -494,9 +494,9 @@
     ],
     [
       "A new game event has been triggered: Trojan Horse",
-      "Base effect: Barbarians move",
-      "Barbarians cannot move - will try to spawn a new city instead",
-      "Barbarians cannot spawn a new city"
+      "Player1: Trojan Horse: Base effect: Barbarians move",
+      "Player1: Trojan Horse: Barbarians cannot move - will try to spawn a new city instead",
+      "Player1: Trojan Horse: Barbarians cannot spawn a new city"
     ],
     [
       "Player1 marched 2 settlers, 2 infantry, 1 cavalry and 1 elephant from C2 to C1",
@@ -504,8 +504,8 @@
     ],
     [
       "Combat round 1",
-      "Attackers: 2 settlers, 2 infantry, 1 cavalry and 1 elephant",
-      "Defenders: 2 infantry"
+      "Player1: Combat: Attacking with 2 settlers, 2 infantry, 1 cavalry and 1 elephant",
+      "Player2: Combat: Defending with 2 infantry"
     ],
     [
       "Player1: Trojan Horse: Pay 1 gold and 1 culture token",

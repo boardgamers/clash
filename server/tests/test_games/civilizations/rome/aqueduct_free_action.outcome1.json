@@ -278,7 +278,7 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 started Aqueduct",
+      "Player1: Aqueduct: Start action",
       "Player1 has to pay 2 ideas for Aqueduct"
     ],
     [

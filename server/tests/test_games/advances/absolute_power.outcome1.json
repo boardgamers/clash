@@ -283,7 +283,7 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 started Absolute Power",
+      "Player1: Absolute Power: Start action",
       "Player1 has to pay 2 mood tokens for Absolute Power"
     ],
     [

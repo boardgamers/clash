@@ -524,8 +524,8 @@
     ],
     [
       "Combat round 1",
-      "Attackers: 2 infantry",
-      "Defenders: 1 infantry and 1 cavalry",
+      "Player2: Combat: Attacking with 2 infantry",
+      "Player1: Combat: Defending with 1 infantry and 1 cavalry",
       "Player2 rolled 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 2 hits against defending units.",
       "Player1 rolled 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 11 and gets 2 hits against attacking units.",
       "Player1 used the following combat modifiers: Great Wall gives -2 combat value in the first round",
@@ -552,9 +552,9 @@
     ],
     [
       "A new game event has been triggered: Envoy",
-      "Base effect: Barbarians move",
+      "Player1: Envoy: Base effect: Barbarians move",
       "Player1: Envoy: Barbarians move from A2 to A1: 1 infantry and 1 elephant",
-      "Barbarians lost the battle due to the Great Wall",
+      "Player1: Great Wall: Automatic win against Barbarians",
       "Barbarians: Combat: Lost 1 infantry and 1 elephant at A2",
       "Player1: Barbarian battle: Gain 1 gold",
       "Barbarians: Envoy: Gain 1 infantry at B3",

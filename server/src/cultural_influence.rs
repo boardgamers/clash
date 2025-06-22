@@ -142,7 +142,7 @@ pub(crate) fn execute_influence_culture_attempt(
         Structure::Wonder(_) => panic!("Wonder is not allowed here"),
     };
 
-    game.log_with_origin(
+    game.log(
         player_index,
         &info.origin,
         &format!(
@@ -231,7 +231,7 @@ fn roll_boost_paid(
         return;
     }
 
-    game.log_with_origin(
+    game.log(
         player_index,
         &info.origin,
         "Paying to increase the dice roll",

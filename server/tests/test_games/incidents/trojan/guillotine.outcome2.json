@@ -342,8 +342,8 @@
     ],
     [
       "A new game event has been triggered: Guillotine",
-      "Base effect: Barbarians spawn",
-      "Barbarians cannot spawn a new city",
+      "Player1: Guillotine: Base effect: Barbarians spawn",
+      "Player1: Guillotine: Barbarians cannot spawn a new city",
       "Player1: Guillotine: Barbarians cannot reinforce",
       "Player1: Guillotine: Lost Gaius Julius Caesar at A1"
     ],

@@ -337,9 +337,9 @@
     ],
     [
       "A new game event has been triggered: Great Artist",
-      "Base effect: Barbarians move",
-      "Barbarians cannot move - will try to spawn a new city instead",
-      "Barbarians cannot spawn a new city",
+      "Player1: Great Artist: Base effect: Barbarians move",
+      "Player1: Great Artist: Barbarians cannot move - will try to spawn a new city instead",
+      "Player1: Great Artist: Barbarians cannot spawn a new city",
       "Player1: Great Artist: Cannot afford to buy Great Artist"
     ],
     [

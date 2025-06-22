@@ -335,7 +335,7 @@
     [
       "Player2: Spy: Gain an action card from Player1",
       "Player1: Spy: Gain an action card from Player2",
-      "Player1 decided to swap an action card with Player2"
+      "Player1: Spy: Decided to swap an action card with Player2"
     ]
   ],
   "undo_limit": 3,

@@ -245,7 +245,7 @@ pub(crate) fn add_raid_bonus(game: &mut Game, player: usize, routes: &[TradeRout
                 .insert(RAID.to_string(), "true".to_string())
                 .is_none()
             {
-                game.log_with_origin(
+                game.log(
                     player,
                     &EventOrigin::SpecialAdvance(SpecialAdvance::Raiding),
                     &format!("Raided {opponent_name} at {position}"),

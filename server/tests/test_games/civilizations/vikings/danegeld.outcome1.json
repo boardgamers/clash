@@ -324,7 +324,7 @@
   "log": [
     [
       "Player1: Danegeld: Pay 1 action",
-      "Player1 started Danegeld"
+      "Player1: Danegeld: Start action"
     ],
     [
       "Player1: Danegeld: Gain 4 food",

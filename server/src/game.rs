@@ -312,7 +312,7 @@ impl Game {
         self.log[last_item_index].push(info.to_string());
     }
 
-    pub fn log_with_origin(&mut self, player: usize, origin: &EventOrigin, message: &str) {
+    pub fn log(&mut self, player: usize, origin: &EventOrigin, message: &str) {
         self.add_info_log_item(&format!(
             "{}: {}: {message}",
             self.player_name(player),

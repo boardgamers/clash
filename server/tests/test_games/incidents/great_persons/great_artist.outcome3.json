@@ -460,9 +460,9 @@
     ],
     [
       "A new game event has been triggered: Great Artist",
-      "Base effect: Barbarians move",
-      "Barbarians cannot move - will try to spawn a new city instead",
-      "Barbarians cannot spawn a new city",
+      "Player1: Great Artist: Base effect: Barbarians move",
+      "Player1: Great Artist: Barbarians cannot move - will try to spawn a new city instead",
+      "Player1: Great Artist: Barbarians cannot spawn a new city",
       "Player1: Great Artist: Cannot afford to buy Great Artist"
     ],
     [
@@ -478,7 +478,7 @@
     [
       "Player2: Great Artist: Pay 1 action",
       "Player2: Action Card: Play Great Artist",
-      "Player2 unlocked Hellenistic Culture",
+      "Player2: Great Artist: Unlock Hellenistic Culture",
       "Player2: Arts: Gain 1 culture token",
       "Player2: Great Artist: Gain Arts without taking an event token",
       "Player2: Great Artist: City A1 became Happy"

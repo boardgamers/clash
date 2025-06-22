@@ -11,7 +11,7 @@ use crate::combat_stats;
 use crate::combat_stats::{CombatStats, active_defenders, new_combat_stats};
 use crate::content::ability::combat_event_origin;
 use crate::content::persistent_events::PersistentEventType;
-use crate::events::EventPlayer;
+use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
 use crate::movement::{MoveUnits, MovementRestriction, move_units, stop_current_move};
 use crate::position::Position;
@@ -220,34 +220,43 @@ pub fn initiate_combat(
 
 pub(crate) fn log_round(game: &mut Game, c: &Combat) {
     game.add_info_log_group(format!("Combat round {}", c.stats.round));
-    game.add_info_log_item(&format!(
-        "Attackers: {}",
-        c.attackers
-            .iter()
-            .flat_map(|u| {
-                let p = game.player(c.attacker());
-                let u = p.get_unit(*u);
-                vec![u.unit_type]
-                    .into_iter()
-                    .chain(
-                        carried_units(u.id, p)
-                            .iter()
-                            .map(|u| p.get_unit(*u).unit_type),
-                    )
-                    .collect_vec()
-            })
-            .collect::<Units>()
-            .to_string(Some(game))
-    ));
-    game.add_info_log_item(&format!(
-        "Defenders: {}",
-        game.player(c.defender())
-            .get_units(c.defender_position())
-            .iter()
-            .map(|u| u.unit_type)
-            .collect::<Units>()
-            .to_string(Some(game))
-    ));
+    let origin = &combat_event_origin();
+    game.log(
+        c.attacker(),
+        origin,
+        &format!(
+            "Attacking with {}",
+            c.attackers
+                .iter()
+                .flat_map(|u| {
+                    let p = game.player(c.attacker());
+                    let u = p.get_unit(*u);
+                    vec![u.unit_type]
+                        .into_iter()
+                        .chain(
+                            carried_units(u.id, p)
+                                .iter()
+                                .map(|u| p.get_unit(*u).unit_type),
+                        )
+                        .collect_vec()
+                })
+                .collect::<Units>()
+                .to_string(Some(game))
+        ),
+    );
+    game.log(
+        c.defender(),
+        origin,
+        &format!(
+            "Defending with {}",
+            game.player(c.defender())
+                .get_units(c.defender_position())
+                .iter()
+                .map(|u| u.unit_type)
+                .collect::<Units>()
+                .to_string(Some(game))
+        ),
+    );
 }
 
 pub(crate) fn start_combat(game: &mut Game, combat: Combat) {
@@ -374,7 +383,9 @@ pub(crate) fn conquer_city(
         set_city_mood(game, position, &attacker.origin, Angry);
     } else {
         raze_city(game, defender, position);
-        attacker.gain_resources(game, ResourcePile::gold(city.size() as u8));
+        if attacker_is_human {
+            attacker.gain_resources(game, ResourcePile::gold(city.size() as u8));
+        }
     }
 }
 
@@ -466,8 +477,10 @@ fn move_to_enemy_player_tile(
             .wonders_owned
             .contains(Wonder::GreatWall)
     {
-        // automatic loss
-        game.add_info_log_item("Barbarians lost the battle due to the Great Wall");
+        game.log(
+            defender,
+            &EventOrigin::Wonder(Wonder::GreatWall),
+            "Automatic win against Barbarians");
 
         let mut s = new_combat_stats(
             game,
@@ -523,7 +536,12 @@ fn apply_battle_movement_restriction(game: &mut Game, player_index: usize, unit_
     }
 
     if used_longships {
-        game.add_info_log_item("Longships allow to ignore battle movement restrictions");
+        EventPlayer::from_player(
+            player_index,
+            game,
+            EventOrigin::SpecialAdvance(SpecialAdvance::Longships),
+        )
+        .log(game, "Ignore battle movement restrictions");
     }
 
     assert!(military, "Need military units to attack");

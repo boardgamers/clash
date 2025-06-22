@@ -394,16 +394,6 @@ impl Player {
         self.try_get_city_mut(position).expect("city should exist")
     }
 
-    pub fn take_city(&mut self, position: Position) -> Option<City> {
-        Some(
-            self.cities.remove(
-                self.cities
-                    .iter()
-                    .position(|city| city.position == position)?,
-            ),
-        )
-    }
-
     #[must_use]
     pub fn can_raze_city(&self, city_position: Position) -> bool {
         self.cities.len() > 1
@@ -584,7 +574,7 @@ pub fn gain_units(
         }
     }
 
-    game.log_with_origin(
+    game.log(
         player,
         origin,
         &format!("Gain {} at {}", units.to_string(Some(game)), position),

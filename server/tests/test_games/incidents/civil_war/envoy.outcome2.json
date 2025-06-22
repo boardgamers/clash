@@ -419,9 +419,9 @@
     ],
     [
       "A new game event has been triggered: Envoy",
-      "Base effect: Barbarians move",
-      "Barbarians cannot move - will try to spawn a new city instead",
-      "Barbarians cannot spawn a new city",
+      "Player1: Envoy: Base effect: Barbarians move",
+      "Player1: Envoy: Barbarians cannot move - will try to spawn a new city instead",
+      "Player1: Envoy: Barbarians cannot spawn a new city",
       "Player1: Envoy: Gain 1 idea and 1 culture token",
       "Pyramids is now available to be taken by anyone",
       "Player2: Envoy: Gain 1 culture token"

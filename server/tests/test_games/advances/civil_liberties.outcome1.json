@@ -335,7 +335,7 @@
   "log": [
     [
       "Player1: Civil Liberties: Pay 1 action",
-      "Player1 started Civil Liberties",
+      "Player1: Civil Liberties: Start action",
       "Player1: Civil Liberties: Gain 3 mood tokens"
     ],
     [

@@ -596,8 +596,8 @@
     ],
     [
       "Combat round 1",
-      "Attackers: 1 infantry",
-      "Defenders: 1 infantry",
+      "Player2: Combat: Attacking with 1 infantry",
+      "Player1: Combat: Defending with 1 infantry",
       "Player2 rolled 5 (cavalry, no bonus) for combined combat value of 7 and gets 1 hits against defending units.",
       "Player2 used the following combat modifiers: Player gets +2 combat value for Great Warlord",
       "Player1 rolled 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units.",

@@ -326,7 +326,7 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player1 started Forced Labor",
+      "Player1: Forced Labor: Start action",
       "Player1 has to pay 1 mood token for Forced Labor"
     ],
     [

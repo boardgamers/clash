@@ -399,9 +399,9 @@
     ],
     [
       "A new game event has been triggered: Great Merchant",
-      "Base effect: Barbarians move",
-      "Barbarians cannot move - will try to spawn a new city instead",
-      "Barbarians cannot spawn a new city"
+      "Player1: Great Merchant: Base effect: Barbarians move",
+      "Player1: Great Merchant: Barbarians cannot move - will try to spawn a new city instead",
+      "Player1: Great Merchant: Barbarians cannot spawn a new city"
     ],
     [
       "Player1: Great Merchant: Pay 1 culture token",

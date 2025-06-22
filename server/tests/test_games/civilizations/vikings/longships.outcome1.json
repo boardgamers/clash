@@ -382,12 +382,12 @@
     [
       "Player1 sailed 3 ships from D2 to C3",
       "Player1: Move: Pay 1 action",
-      "Longships allow to ignore battle movement restrictions"
+      "Player1: Longships: Ignore battle movement restrictions"
     ],
     [
       "Combat round 1",
-      "Attackers: 3 ships",
-      "Defenders: 1 ship",
+      "Player1: Combat: Attacking with 3 ships",
+      "Player2: Combat: Defending with 1 ship",
       "Player1 rolled 6 (infantry, no bonus), 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 18 and gets 1 hits against defending units.",
       "Player1 used the following combat modifiers: WarShips ignore the first hit in the first round of combat",
       "Player2 rolled 6 (infantry, no bonus) for combined combat value of 6 and gets 0 hits against attacking units.",
@@ -398,12 +398,12 @@
     [
       "Player1 sailed 2 ships from C3 to C4",
       "Player1: Move: Pay 1 action",
-      "Longships allow to ignore battle movement restrictions"
+      "Player1: Longships: Ignore battle movement restrictions"
     ],
     [
       "Combat round 1",
-      "Attackers: 2 ships",
-      "Defenders: 1 ship",
+      "Player1: Combat: Attacking with 2 ships",
+      "Player2: Combat: Defending with 1 ship",
       "Player1 rolled 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 12 and gets 1 hits against defending units.",
       "Player1 used the following combat modifiers: WarShips ignore the first hit in the first round of combat",
       "Player2 rolled 6 (infantry, no bonus) for combined combat value of 6 and gets 0 hits against attacking units.",

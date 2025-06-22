@@ -334,9 +334,9 @@
     ],
     [
       "A new game event has been triggered: Pandemics",
-      "Base effect: Barbarians move",
-      "Barbarians cannot move - will try to spawn a new city instead",
-      "Barbarians cannot spawn a new city",
+      "Player1: Pandemics: Base effect: Barbarians move",
+      "Player1: Pandemics: Barbarians cannot move - will try to spawn a new city instead",
+      "Player1: Pandemics: Barbarians cannot spawn a new city",
       "Player1: Pandemics: Lose a total of 2 units, cards, and resources"
     ]
   ],

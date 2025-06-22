@@ -505,7 +505,7 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player1 started Idol",
+      "Player1: Idol: Start action",
       "Player1 has to pay 1 culture token for Idol"
     ],
     [

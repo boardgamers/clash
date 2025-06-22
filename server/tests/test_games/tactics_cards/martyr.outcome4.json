@@ -417,8 +417,8 @@
     ],
     [
       "Combat round 1",
-      "Attackers: 1 settler, 2 ships, 1 cavalry and 1 elephant",
-      "Defenders: 1 ship"
+      "Player1: Combat: Attacking with 1 settler, 2 ships, 1 cavalry and 1 elephant",
+      "Player2: Combat: Defending with 1 ship"
     ],
     [
       "Player1: Tactics: Play an action card face down"

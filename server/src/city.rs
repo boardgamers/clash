@@ -332,7 +332,7 @@ pub(crate) fn set_city_mood(
     }
     city.mood_state = new_state.clone();
 
-    game.log_with_origin(
+    game.log(
         player,
         origin,
         &format!("City {position} became {new_state}"),
@@ -353,8 +353,15 @@ pub(crate) fn gain_city(game: &mut Game, player: &EventPlayer, mut city: City) {
 }
 
 pub(crate) fn lose_city(game: &mut Game, player: &EventPlayer, position: Position) -> City {
-    let Some(city) = player.get_mut(game).take_city(position) else {
-        panic!("player should have this city")
+    let p = player.get_mut(game);
+    let city = if let Some(pos) = p.cities.iter().position(|city| city.position == position) {
+        p.cities.remove(pos)
+    } else {
+        let any_city = game.try_get_any_city(position).map(|c| c.player_index);
+        panic!(
+            "{} should have this city {position} but does not - found owner: {:?}",
+            player.index, any_city
+        );
     };
     log_lose_structure(game, player, Structure::CityCenter, city.position);
     city

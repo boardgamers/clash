@@ -66,7 +66,7 @@ impl<A, C> SelectedChoice<A, C> {
     }
 
     pub fn log(&self, game: &mut Game, message: &str) {
-        game.log_with_origin(self.player_index, &self.origin, message);
+        game.log(self.player_index, &self.origin, message);
     }
 }
 

@@ -6,16 +6,16 @@ use crate::content::persistent_events::PersistentEventType;
 use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
 use crate::incident::trigger_incident;
-use crate::log::{ActionLogBalance, ActionLogEntry, add_action_log_item};
+use crate::log::{add_action_log_item, ActionLogBalance, ActionLogEntry};
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::player_events::OnAdvanceInfo;
-use crate::resource::{ResourceType, gain_resources, lose_resources};
+use crate::resource::{gain_resources, lose_resources, ResourceType};
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceRequirement};
 use crate::{ability_initializer::AbilityInitializerSetup, resource_pile::ResourcePile};
-use Bonus::*;
 use enumset::{EnumSet, EnumSetType};
 use serde::{Deserialize, Serialize};
+use Bonus::*;
 
 // id / 4 = advance group
 #[derive(EnumSetType, Serialize, Deserialize, Debug, Ord, PartialOrd, Hash)]
@@ -255,7 +255,7 @@ pub(crate) fn do_advance(
     info.listeners.init_first(game, player_index);
 
     if let Some(special_advance) = find_special_advance(advance, game, player_index) {
-        unlock_special_advance(game, special_advance, player_index);
+        unlock_special_advance(game, special_advance, player);
     }
 
     if let Some(advance_bonus) = &bonus {
@@ -270,9 +270,8 @@ pub(crate) fn do_advance(
     p.advances.insert(advance);
     let t = p.incident_tokens;
 
-    game.log_with_origin(
-        player_index,
-        &player.origin,
+    player.log(
+        game,
         &format!(
             "Gain {} {}",
             advance.name(game),
@@ -392,15 +391,11 @@ pub(crate) fn gain_advance_without_payment(
     take_incident_token: bool,
 ) {
     do_advance(game, advance, player, take_incident_token);
-    on_advance(
-        game,
-        player.index,
-        OnAdvanceInfo {
-            advance,
-            payment,
-            take_incident_token,
-        },
-    );
+    on_advance(game, player.index, OnAdvanceInfo {
+        advance,
+        payment,
+        take_incident_token,
+    });
 }
 
 pub(crate) fn on_advance(game: &mut Game, player_index: usize, info: OnAdvanceInfo) {
@@ -455,18 +450,15 @@ pub(crate) fn remove_advance(game: &mut Game, advance: Advance, player: &EventPl
     );
 }
 
-fn unlock_special_advance(game: &mut Game, special_advance: SpecialAdvance, player_index: usize) {
-    game.add_info_log_item(&format!(
-        "{} unlocked {}",
-        game.player_name(player_index),
-        special_advance.info(game).name
-    ));
+fn unlock_special_advance(game: &mut Game, special_advance: SpecialAdvance, player: &EventPlayer) {
+    player.log(game, &format!("Unlock {}", special_advance.info(game).name));
     special_advance
         .info(game)
         .listeners
         .clone()
-        .init_first(game, player_index);
-    game.players[player_index]
+        .init_first(game, player.index);
+    player
+        .get_mut(game)
         .special_advances
         .insert(special_advance);
 }
@@ -512,12 +504,11 @@ pub(crate) fn init_great_library(game: &mut Game, player_index: usize) {
 }
 
 pub(crate) fn base_advance_cost(player: &Player) -> PaymentOptions {
-    PaymentOptions::sum(
-        player,
-        advance_event_origin(),
-        ADVANCE_COST,
-        &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
-    )
+    PaymentOptions::sum(player, advance_event_origin(), ADVANCE_COST, &[
+        ResourceType::Ideas,
+        ResourceType::Food,
+        ResourceType::Gold,
+    ])
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]

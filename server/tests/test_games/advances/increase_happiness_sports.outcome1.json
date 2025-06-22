@@ -319,7 +319,7 @@
   "log": [
     [
       "Player1: Sports: Pay 1 action",
-      "Player1 started Sports at C2"
+      "Player1: Sports: Start action in city C2"
     ],
     [
       "Player1: Sports: Pay 1 culture token",

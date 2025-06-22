@@ -127,7 +127,7 @@ impl EventPlayer {
     }
 
     pub fn log(&self, game: &mut Game, message: &str) {
-        game.log_with_origin(self.index, &self.origin, message);
+        game.log(self.index, &self.origin, message);
     }
 }
 

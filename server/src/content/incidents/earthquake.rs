@@ -178,7 +178,7 @@ fn destroy_city_center(game: &mut Game, position: Position, origin: &EventOrigin
     );
     p.gain_event_victory_points(2.0, origin);
     p.destroyed_structures.cities += 1;
-    game.log_with_origin(
+    game.log(
         owner,
         origin,
         &format!("Gain 2 points for the city center at {position}"),
@@ -197,7 +197,7 @@ fn destroy_building(game: &mut Game, b: Building, position: Position, origin: &E
     o.destroyed_structures.add_building(b);
     let player = EventPlayer::from_player(city_owner, game, origin.clone());
     lose_building(game, &player, b, position);
-    game.log_with_origin(
+    game.log(
         owner,
         origin,
         &format!("Gain 2 points for the {b} at {position}"),

@@ -122,7 +122,7 @@ pub(crate) fn solar_eclipse_end_combat() -> Ability {
                         };
                         game.player_mut(winner)
                             .gain_event_victory_points(1_f32, &EventOrigin::Incident(41));
-                        game.log_with_origin(
+                        game.log(
                             winner,
                             &player.origin,
                             "Gain 1 victory point for the Solar Eclipse",

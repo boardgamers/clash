@@ -115,11 +115,11 @@ impl PlayingActionType {
         if let ActionResourceCost::Free = cost.cost {
             PaymentOptions::free()
         } else {
-            cost.payment_options(p, self.event_origin(p))
+            cost.payment_options(p, self.origin(p))
         }
     }
 
-    pub(crate) fn event_origin(&self, player: &Player) -> EventOrigin {
+    pub(crate) fn origin(&self, player: &Player) -> EventOrigin {
         match self {
             PlayingActionType::Advance => advance_event_origin(),
             PlayingActionType::FoundCity => EventOrigin::Ability("Found City".to_string()),
@@ -170,7 +170,7 @@ impl PlayingAction {
         if !action_cost.free {
             pay_action(
                 game,
-                &EventPlayer::from_player(player_index, game, playing_action_type.event_origin(p)),
+                &EventPlayer::from_player(player_index, game, playing_action_type.origin(p)),
             );
         }
 
@@ -225,7 +225,7 @@ impl PlayingAction {
                 game.player_name(player_index),
                 payment_options.default,
                 action_type
-                    .event_origin(game.player(player_index))
+                    .origin(game.player(player_index))
                     .name(game)
             ));
         }

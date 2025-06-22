@@ -428,8 +428,8 @@
     ],
     [
       "A new game event has been triggered: Great Diplomat",
-      "Base effect: Barbarians spawn",
-      "Barbarians cannot spawn a new city",
+      "Player1: Great Diplomat: Base effect: Barbarians spawn",
+      "Player1: Great Diplomat: Barbarians cannot spawn a new city",
       "Player1: Great Diplomat: Barbarians cannot reinforce"
     ],
     [
@@ -444,8 +444,8 @@
     ],
     [
       "Combat round 1",
-      "Attackers: 1 infantry",
-      "Defenders: 1 infantry",
+      "Player1: Combat: Attacking with 1 infantry",
+      "Player2: Combat: Defending with 1 infantry",
       "Player1: Diplomatic Relations: Diplomatic relations with Player2 ended with a surprise attack.",
       "Player1 rolled 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units.",
       "Player2 rolled 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against attacking units.",

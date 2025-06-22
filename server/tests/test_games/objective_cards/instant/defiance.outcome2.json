@@ -343,8 +343,8 @@
     ],
     [
       "Combat round 1",
-      "Attackers: 1 infantry",
-      "Defenders: 2 infantry",
+      "Player1: Combat: Attacking with 1 infantry",
+      "Player2: Combat: Defending with 2 infantry",
       "Player1 rolled 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units.",
       "Player2 rolled 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 2 and gets 0 hits against attacking units.",
       "Player1: Offer Retreat: Player1 can retreat"
@@ -356,8 +356,8 @@
     ],
     [
       "Combat round 2",
-      "Attackers: 1 infantry",
-      "Defenders: 1 infantry",
+      "Player1: Combat: Attacking with 1 infantry",
+      "Player2: Combat: Defending with 1 infantry",
       "Player1 rolled 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units.",
       "Player2 rolled 1 (leader, no bonus) for combined combat value of 1 and gets 0 hits against attacking units.",
       "Player2: Choose Casualties: Remove all defending units",

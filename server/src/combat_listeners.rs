@@ -503,7 +503,7 @@ fn add_tactics_listener(
             }
         }
         if reveal_card {
-            game.add_info_log_item(&format!(
+            game.log(&format!(
                 "{} reveals Tactics Card {}",
                 game.player_name(combat.player(role)),
                 card.name
