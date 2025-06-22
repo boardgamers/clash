@@ -271,7 +271,7 @@ pub(crate) fn validate_imperial_army(units: &[u32], p: &Player) -> Result<(), St
         .collect_vec();
 
     let net_to_settler = infantry_to_settler.len() as i8 - settler_to_infantry.len() as i8;
-    if p.available_units().settlers < net_to_settler as u8 {
+    if (p.available_units().settlers as i8) < net_to_settler {
         return Err(format!(
             "Cannot convert {} infantry to settlers, only {} available",
             net_to_settler,
@@ -280,7 +280,7 @@ pub(crate) fn validate_imperial_army(units: &[u32], p: &Player) -> Result<(), St
     }
 
     let net_to_infantry = settler_to_infantry.len() as i8 - infantry_to_settler.len() as i8;
-    if p.available_units().infantry < net_to_infantry as u8 {
+    if (p.available_units().infantry as i8) < net_to_infantry {
         return Err(format!(
             "Cannot convert {} settlers to infantry, only {} available",
             net_to_infantry,
