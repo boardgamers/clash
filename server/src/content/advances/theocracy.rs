@@ -98,7 +98,8 @@ fn conversion() -> AdvanceBuilder {
             if let Ok(info) = r {
                 if !info.is_defender {
                     info.roll_boost += 1;
-                    info.info.add_log(p, 
+                    info.info.add_log(
+                        p,
                         "Gain +1 to Influence Culture roll for Conversion Advance",
                     );
                 }

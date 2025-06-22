@@ -78,10 +78,10 @@ impl LeaderAbility {
                     i.cost.default.culture_tokens -= 2;
                     i.info.add_log(
                         p,
-                        &format!("Reduce the cost of {} by 2 culture tokens", wonder),
+                        &format!("Reduce the cost of {wonder} by 2 culture tokens"),
                     );
                 }
-                
+
                 if w.city_position == leader_position(game.player(w.player)) {
                     i.ignore_action_cost = true;
                     i.info.add_log(

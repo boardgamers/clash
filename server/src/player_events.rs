@@ -189,7 +189,7 @@ impl ActionInfo {
             player.event_info.insert(k, v);
         }
     }
-    
+
     pub(crate) fn add_log(&mut self, p: &EventPlayer, message: &str) {
         self.log.push((p.origin.clone(), message.to_string()));
     }
@@ -322,7 +322,7 @@ impl CostInfo {
 
     pub(crate) fn set_zero_resources(&mut self, p: &EventPlayer) {
         self.cost.default = ResourcePile::empty();
-        self.info.add_log(p, "Reduce the cost to 0")
+        self.info.add_log(p, "Reduce the cost to 0");
     }
 
     pub(crate) fn pay(&self, game: &mut Game, payment: &ResourcePile) {

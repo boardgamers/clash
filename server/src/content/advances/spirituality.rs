@@ -10,12 +10,11 @@ use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 
 pub(crate) fn spirituality() -> AdvanceGroupInfo {
-    advance_group_builder(AdvanceGroup::Spirituality, "Spirituality", vec![
-        myths(),
-        rituals(),
-        priesthood(),
-        state_religion(),
-    ])
+    advance_group_builder(
+        AdvanceGroup::Spirituality,
+        "Spirituality",
+        vec![myths(), rituals(), priesthood(), state_religion()],
+    )
 }
 
 fn myths() -> AdvanceBuilder {

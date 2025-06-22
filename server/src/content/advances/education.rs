@@ -11,12 +11,16 @@ use crate::resource::gain_resources;
 use crate::resource_pile::ResourcePile;
 
 pub(crate) fn education() -> AdvanceGroupInfo {
-    advance_group_builder(AdvanceGroup::Education, "Education", vec![
-        writing(),
-        public_education(),
-        free_education(),
-        philosophy(),
-    ])
+    advance_group_builder(
+        AdvanceGroup::Education,
+        "Education",
+        vec![
+            writing(),
+            public_education(),
+            free_education(),
+            philosophy(),
+        ],
+    )
 }
 
 fn writing() -> AdvanceBuilder {

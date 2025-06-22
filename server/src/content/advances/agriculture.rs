@@ -3,11 +3,11 @@ use crate::advance::Bonus::MoodToken;
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::collect::{CollectContext, CollectInfo};
 use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
+use crate::events::EventPlayer;
 use crate::game::Game;
 use crate::map::Terrain::Barren;
 use crate::resource_pile::ResourcePile;
 use std::collections::HashSet;
-use crate::events::EventPlayer;
 
 pub(crate) fn agriculture() -> AdvanceGroupInfo {
     advance_group_builder(
@@ -67,14 +67,7 @@ fn husbandry() -> AdvanceBuilder {
         |event| &mut event.collect_options,
         0,
         |i, c, game, p| {
-            once_per_turn_ability(
-                p,
-                i,
-                c,
-                game,
-                |i| &mut i.info.info,
-                husbandry_collect,
-            );
+            once_per_turn_ability(p, i, c, game, |i| &mut i.info.info, husbandry_collect);
         },
     )
 }
@@ -88,9 +81,10 @@ fn husbandry_collect(i: &mut CollectInfo, c: &CollectContext, game: &Game, p: &E
     };
     i.max_range2_tiles = allowed;
 
-    i.info.add_log(p, &format!(
-        "Can collect {allowed} resources from 2 land spaces away"
-    ));
+    i.info.add_log(
+        p,
+        &format!("Can collect {allowed} resources from 2 land spaces away"),
+    );
 
     game.map
         .tiles

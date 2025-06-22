@@ -228,10 +228,7 @@ impl PlayingAction {
             game.log(
                 player_index,
                 &payment_options.origin,
-                &format!(
-                    "Pay {}",
-                    payment_options.default,
-                ),
+                &format!("Pay {}", payment_options.default,),
             );
         }
 

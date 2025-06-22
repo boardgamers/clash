@@ -8,12 +8,11 @@ use crate::unit::UnitType;
 use crate::wonder::draw_wonder_card;
 
 pub(crate) fn construction() -> AdvanceGroupInfo {
-    advance_group_builder(AdvanceGroup::Construction, "Construction", vec![
-        mining(),
-        engineering(),
-        sanitation(),
-        roads(),
-    ])
+    advance_group_builder(
+        AdvanceGroup::Construction,
+        "Construction",
+        vec![mining(), engineering(), sanitation(), roads()],
+    )
 }
 
 fn mining() -> AdvanceBuilder {
