@@ -73,9 +73,7 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
                 }
 
                 if player.resources.amount() > 0 {
-                    game.add_info_log_item(&format!(
-                        "{player} must pay 1 resource or token to bribe the pirates",
-                    ));
+                    p.log(game, "Must pay 1 resource or token to bribe the pirates");
                     Some(vec![PaymentRequest::mandatory(
                         p.payment_options()
                             .sum(p.get(game), 1, &ResourceType::all()),
@@ -87,8 +85,8 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
                     None
                 }
             },
-            |c, s, _| {
-                c.add_info_log_item(&format!("Pirates took {}", s.choice[0]));
+            |game, s, _| {
+                s.log(game, &format!("Pirates took {}", s.choice[0]));
             },
         )
         .add_incident_position_request(
@@ -108,10 +106,7 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
                     return None;
                 }
 
-                game.add_info_log_item(&format!(
-                    "{player} must reduce Mood in a city adjacent to pirates",
-                ));
-
+                p.log(game, "Must reduce Mood in a city adjacent to pirates");
                 let needed = 1..=1;
                 Some(PositionRequest::new(
                     choices,
@@ -203,7 +198,7 @@ fn place_pirate_ship(builder: IncidentBuilder, priority: i32, blockade: bool) ->
 
             if sea_spaces.is_empty() && blockade {
                 // don't log this twice (blockade is only for first call)
-                game.add_info_log_item("No valid positions for Pirate Ship");
+                p.log(game, "No valid positions for Pirate Ship");
             }
 
             let needed = 1..=1;

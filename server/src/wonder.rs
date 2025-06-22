@@ -278,7 +278,7 @@ pub(crate) fn force_draw_wonder_from_anywhere(
     } else if find_public_wonder(game).is_some_and(|w| w == &wonder) {
         gain_specific_wonder(game, player, wonder, HandCardLocation::Public);
         remove_public_wonder(game);
-        draw_public_wonder(game);
+        draw_public_wonder(game, player);
         true
     } else if let Some(last_player) = player_with_wonder_card(game, wonder) {
         gain_specific_wonder(
@@ -431,7 +431,7 @@ pub(crate) fn build_wonder_handler() -> Ability {
             |e| &mut e.play_wonder_card,
             11,
             move |game, p, i| {
-                game.add_info_log_item(&format!("{p} played the wonder card {}", i.wonder.name()));
+                p.log(game, &format!("Play the wonder card {}", i.wonder.name()));
 
                 Some(PositionRequest::new(
                     cities_for_wonder(i.wonder, game, p.get(game), i.cost.clone()),
@@ -607,16 +607,16 @@ fn remove_public_wonder(game: &mut Game) {
         .retain(|e| !matches!(e, PermanentEffect::PublicWonderCard(_)));
 }
 
-pub(crate) fn draw_public_wonder(game: &mut Game) {
+pub(crate) fn draw_public_wonder(game: &mut Game, player: &EventPlayer) {
     if let Some(wonder) = draw_wonder_from_pile(game) {
-        game.add_info_log_item(&format!(
-            "{} is now available to be taken by anyone",
-            wonder.name()
-        ));
+        player.log(
+            game,
+            &format!("{} is now available to be taken by anyone", wonder.name()),
+        );
         game.permanent_effects
             .push(PermanentEffect::PublicWonderCard(wonder));
     } else {
-        game.add_info_log_item("No wonders left to draw as public wonder card");
+        player.log(game, "No wonders left to draw as public wonder card");
     }
 }
 
@@ -639,7 +639,7 @@ pub(crate) fn use_draw_replacement_wonder() -> Ability {
         |game, p, ()| {
             let player = p.get_mut(game);
             if player.event_info.remove(DRAW_REPLACEMENT_WONDER).is_some() {
-                game.add_info_log_item(&format!("{p} gets to draw a replacement wonder card."));
+                p.log(game, "Draw a replacement wonder card");
                 draw_wonder_card(game, p);
             }
         },

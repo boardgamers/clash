@@ -480,7 +480,8 @@ fn move_to_enemy_player_tile(
         game.log(
             defender,
             &EventOrigin::Wonder(Wonder::GreatWall),
-            "Automatic win against Barbarians");
+            "Automatic win against Barbarians",
+        );
 
         let mut s = new_combat_stats(
             game,

@@ -125,11 +125,7 @@ pub(crate) fn happiness_event_origin(
     action_type: &PlayingActionType,
     player: &Player,
 ) -> EventOrigin {
-    custom_action_modifier_event_origin(
-        happiness_base_event_origin(),
-        action_type,
-        player,
-    )
+    custom_action_modifier_event_origin(happiness_base_event_origin(), action_type, player)
 }
 
 pub(crate) fn happiness_base_event_origin() -> EventOrigin {

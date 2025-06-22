@@ -1,4 +1,4 @@
-use crate::ability_initializer::AbilityInitializerSetup;
+use crate::ability_initializer::{AbilityInitializerSetup, SelectedMultiChoice};
 use crate::city::{City, gain_city};
 use crate::combat::move_with_possible_combat;
 use crate::consts::STACK_LIMIT;
@@ -13,7 +13,7 @@ use crate::incident::{BASE_EFFECT_PRIORITY, IncidentBuilder, IncidentFilter, pla
 use crate::map::Terrain;
 use crate::movement::MoveUnits;
 use crate::player::{Player, end_turn, gain_unit};
-use crate::player_events::{IncidentTarget, PersistentEvent, PersistentEvents};
+use crate::player_events::{IncidentInfo, IncidentTarget, PersistentEvent, PersistentEvents};
 use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
@@ -224,7 +224,10 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
     let event_name = "Barbarians move";
     builder = set_info(builder, event_name, |state, game, human| {
         if get_movable_units(game, human.index, state).is_empty() {
-            human.log(game,"Barbarians cannot move - will try to spawn a new city instead");
+            human.log(
+                game,
+                "Barbarians cannot move - will try to spawn a new city instead",
+            );
         } else {
             state.move_units = true;
         }
@@ -287,30 +290,7 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
                         None
                     }
                 },
-                |game, s, i| {
-                    let state = i.barbarians.as_mut().expect("barbarians should exist");
-                    let from = state
-                        .selected_position
-                        .take()
-                        .expect("selected position should exist");
-                    let to = s.choice[0];
-                    let ids = get_barbarians_player(game).get_units(from);
-                    let units: Vec<u32> = ids.iter().map(|u| u.id).collect();
-                    state.moved_units.extend(units.iter());
-                    let unit_types = ids.iter().map(|u| u.unit_type).collect::<Units>();
-                    s.log(
-                        game,
-                        &format!(
-                            "Barbarians move from {from} to {to}: {}",
-                            unit_types.to_string(None)
-                        ),
-                    );
-                    move_with_possible_combat(
-                        game,
-                        get_barbarians_player(game).index,
-                        &MoveUnits::new(units, to, None, ResourcePile::empty()),
-                    );
-                },
+                execute_barbarian_move,
             );
     }
     builder.add_simple_incident_listener(
@@ -326,6 +306,35 @@ pub(crate) fn barbarians_move(mut builder: IncidentBuilder) -> IncidentBuilder {
             }
         },
     )
+}
+
+fn execute_barbarian_move(
+    game: &mut Game,
+    s: &SelectedMultiChoice<Vec<Position>>,
+    i: &mut IncidentInfo,
+) {
+    let state = i.barbarians.as_mut().expect("barbarians should exist");
+    let from = state
+        .selected_position
+        .take()
+        .expect("selected position should exist");
+    let to = s.choice[0];
+    let ids = get_barbarians_player(game).get_units(from);
+    let units: Vec<u32> = ids.iter().map(|u| u.id).collect();
+    state.moved_units.extend(units.iter());
+    let unit_types = ids.iter().map(|u| u.unit_type).collect::<Units>();
+    s.log(
+        game,
+        &format!(
+            "Barbarians move from {from} to {to}: {}",
+            unit_types.to_string(None)
+        ),
+    );
+    move_with_possible_combat(
+        game,
+        get_barbarians_player(game).index,
+        &MoveUnits::new(units, to, None, ResourcePile::empty()),
+    );
 }
 
 fn reinforce_after_move(game: &mut Game, player: &EventPlayer) {
@@ -423,7 +432,7 @@ fn add_barbarians_city(builder: IncidentBuilder, event_name: &'static str) -> In
 
             let choices = possible_barbarians_spawns(game, game.player(p.index));
             if choices.is_empty() {
-                p.log(game,"Barbarians cannot spawn a new city");
+                p.log(game, "Barbarians cannot spawn a new city");
             }
             let needed = 1..=1;
             Some(PositionRequest::new(

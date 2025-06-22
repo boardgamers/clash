@@ -267,7 +267,7 @@ fn envoy() -> Incident {
             ResourcePile::ideas(1) + ResourcePile::culture_tokens(1),
         );
 
-        draw_public_wonder(game);
+        draw_public_wonder(game, player);
     })
     .add_incident_player_request(
         IncidentTarget::ActivePlayer,

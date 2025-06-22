@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
-use crate::card::{hand_cards, log_card_transfer, HandCard, HandCardLocation, HandCardType};
+use crate::card::{HandCard, HandCardLocation, HandCardType, hand_cards, log_card_transfer};
 use crate::content::persistent_events::{HandCardsRequest, PersistentEventType, PlayerRequest};
 use crate::content::tactics_cards::TacticsCardFactory;
 use crate::events::{EventOrigin, EventPlayer};
@@ -167,10 +167,13 @@ fn swap_spy_cards(
             "objective"
         }
     };
-    player.log(game,&format!(
-        "Decided to swap an {t} card with {}",
-        game.player_name(other)
-    ));
+    player.log(
+        game,
+        &format!(
+            "Decided to swap an {t} card with {}",
+            game.player_name(other)
+        ),
+    );
 
     Ok(())
 }

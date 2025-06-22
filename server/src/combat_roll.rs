@@ -1,5 +1,7 @@
 use crate::combat::Combat;
 use crate::combat_listeners::CombatStrength;
+use crate::content::ability::combat_event_origin;
+use crate::events::EventPlayer;
 use crate::game::Game;
 use crate::unit::UnitType::{Cavalry, Elephant, Infantry};
 use crate::unit::{LEADER_UNIT, UnitType, Units};
@@ -108,28 +110,33 @@ impl CombatRoundStats {
         &mut self,
         opponent: &CombatRoundStats,
         game: &mut Game,
-        a_t: Option<u8>,
+        tactics_card: Option<u8>,
     ) -> CombatHits {
         let combat_hits = CombatHits::new(
-            a_t,
+            tactics_card,
             opponent.hit_cancels,
             opponent.fighters,
             self.combat_value,
         );
         let hits = combat_hits.hits();
 
-        let name = game.player_name(self.player);
-        game.add_info_log_item(&format!(
-            "{name} rolled {} for combined combat value of {} and gets {} hits \
-            against {} units.",
-            self.log_str, self.combat_value, hits, self.opponent_str,
-        ));
+        let p = EventPlayer::from_player(self.player, game, combat_event_origin());
+        p.log(
+            game,
+            &format!(
+                "Roll {} for combined combat value of {} and gets {} hits against {} units.",
+                self.log_str, self.combat_value, hits, self.opponent_str,
+            ),
+        );
 
         if !self.strength.roll_log.is_empty() {
-            game.add_info_log_item(&format!(
-                "{name} used the following combat modifiers: {}",
-                self.strength.roll_log.join(", ")
-            ));
+            p.log(
+                game,
+                &format!(
+                    "Combat modifiers: {}",
+                    roll_log_str(&self.strength.roll_log)
+                ),
+            );
         }
         combat_hits
     }

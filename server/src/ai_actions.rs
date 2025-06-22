@@ -334,6 +334,7 @@ fn collect_actions(p: &Player, game: &Game) -> Vec<Action> {
                 game,
                 city.position,
                 p.index,
+                &check_event_origin(),
                 CostTrigger::NoModifiers,
             );
 

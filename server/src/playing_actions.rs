@@ -8,7 +8,7 @@ use crate::action_cost::ActionCost;
 use crate::advance::{AdvanceAction, execute_advance_action};
 use crate::card::HandCardLocation;
 use crate::city::execute_found_city_action;
-use crate::collect::{Collect, execute_collect, base_collect_event_origin};
+use crate::collect::{Collect, base_collect_event_origin, execute_collect};
 use crate::construct::Construct;
 use crate::content::ability::{
     Ability, advance_event_origin, combat_event_origin, recruit_event_origin,
@@ -20,16 +20,21 @@ use crate::content::custom_actions::{
 use crate::content::persistent_events::{
     PaymentRequest, PersistentEventType, TriggerPersistentEventParams, trigger_persistent_event_ext,
 };
-use crate::cultural_influence::{InfluenceCultureAttempt, execute_influence_culture_attempt, influence_base_origin};
+use crate::cultural_influence::{
+    InfluenceCultureAttempt, execute_influence_culture_attempt, influence_base_origin,
+};
 use crate::events::{EventOrigin, EventPlayer};
 use crate::game::GameState;
-use crate::happiness::{IncreaseHappiness, execute_increase_happiness, happiness_event_origin, happiness_base_event_origin};
+use crate::happiness::{
+    IncreaseHappiness, execute_increase_happiness, happiness_base_event_origin,
+    happiness_event_origin,
+};
+use crate::movement::move_event_origin;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::recruit::{Recruit, execute_recruit};
 use crate::wonder::{Wonder, WonderCardInfo, cities_for_wonder, on_play_wonder_card, wonder_cost};
 use crate::{game::Game, resource_pile::ResourcePile};
-use crate::movement::move_event_origin;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub enum PlayingActionType {
@@ -220,14 +225,15 @@ impl PlayingAction {
 
         let payment_options = action_type.payment_options(game, player_index);
         if !payment_options.is_free() {
-            game.add_info_log_item(&format!(
-                "{} has to pay {} for {}",
-                game.player_name(player_index),
-                payment_options.default,
-                action_type
-                    .origin(game.player(player_index))
-                    .name(game)
-            ));
+            game.log(
+                player_index,
+                &payment_options.origin,
+                &format!(
+                    "Pay {} for {}",
+                    payment_options.default,
+                    action_type.origin(game.player(player_index)).name(game)
+                ),
+            );
         }
 
         ActionPayment::new(self).on_pay_action(game, player_index, origin_override)
@@ -393,41 +399,38 @@ pub(crate) fn pay_for_action() -> Ability {
         "Pay for action",
         "origin is overridden - so this text is not shown",
     )
-        .add_payment_request_listener(
-            |e| &mut e.pay_action,
-            0,
-            |game, p, a| {
-                if matches!(a.action, PlayingAction::IncreaseHappiness(_)) {
-                    // handled in the happiness action
-                    return None;
-                }
+    .add_payment_request_listener(
+        |e| &mut e.pay_action,
+        0,
+        |game, p, a| {
+            if matches!(a.action, PlayingAction::IncreaseHappiness(_)) {
+                // handled in the happiness action
+                return None;
+            }
 
-                let payment_options = a
-                    .action
-                    .playing_action_type(game.player(p.index))
-                    .payment_options(game, p.index);
-                if payment_options.is_free() {
-                    return None;
-                }
+            let payment_options = a
+                .action
+                .playing_action_type(game.player(p.index))
+                .payment_options(game, p.index);
+            if payment_options.is_free() {
+                return None;
+            }
 
-                Some(vec![PaymentRequest::mandatory(
-                    payment_options,
-                    "Pay for action",
-                )])
-            },
-            |_game, _s, _a| {},
-        )
-        .build()
+            Some(vec![PaymentRequest::mandatory(
+                payment_options,
+                "Pay for action",
+            )])
+        },
+        |_game, _s, _a| {},
+    )
+    .build()
 }
 
 fn end_turn(game: &mut Game, player: usize) {
-    game.add_info_log_item(&format!(
-        "{} ended their turn{}",
-        game.player(player),
-        match game.actions_left {
-            0 => String::new(),
-            actions_left => format!(" with {actions_left} actions left"),
-        }
-    ));
+    game.log(
+        player,
+        &EventOrigin::Ability("End Turn".to_string()),
+        &format!("{} actions left", game.actions_left),
+    );
     game.next_turn();
 }

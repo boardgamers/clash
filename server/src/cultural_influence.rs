@@ -51,7 +51,6 @@ pub struct InfluenceCultureInfo {
     pub position: Position,
     pub starting_city_position: Position,
     pub barbarian_takeover_check: bool,
-    pub origin: EventOrigin,
 }
 
 impl InfluenceCultureInfo {
@@ -63,7 +62,6 @@ impl InfluenceCultureInfo {
         structure: Structure,
         starting_city_position: Position,
         barbarian_takeover_check: bool,
-        origin: EventOrigin,
     ) -> InfluenceCultureInfo {
         InfluenceCultureInfo {
             prevent_boost: false,
@@ -77,12 +75,16 @@ impl InfluenceCultureInfo {
             position,
             starting_city_position,
             barbarian_takeover_check,
-            origin,
         }
     }
 
     pub fn set_no_boost(&mut self) {
         self.prevent_boost = true;
+    }
+
+    #[must_use]
+    pub(crate) fn player(&self, player: usize, game: &Game) -> EventPlayer {
+        EventPlayer::from_player(player, game, self.info.origin.clone())
     }
 }
 
@@ -142,9 +144,8 @@ pub(crate) fn execute_influence_culture_attempt(
         Structure::Wonder(_) => panic!("Wonder is not allowed here"),
     };
 
-    game.log(
-        player_index,
-        &info.origin,
+    info.player(player_index, game).log(
+        game,
         &format!(
             "Tried to influence the {city_piece} in the city \
             at {target_city_position} by {player}{city}{cost}",
@@ -221,21 +222,14 @@ fn roll_boost_paid(
         )
         .clone();
 
-    let player_name = game.player_name(player_index);
+    let player = info.player(player_index, game);
     if payment.is_empty() {
-        game.add_info_log_item(&format!(
-            "{player_name} declined to pay to increase the dice roll \
-            and failed the cultural influence",
-        ));
+        player.log(game, "Declined to pay to increase the dice roll");
         attempt_failed(game, player_index, a.selected_structure.position);
         return;
     }
 
-    game.log(
-        player_index,
-        &info.origin,
-        "Paying to increase the dice roll",
-    );
+    player.log(game, "Paying to increase the dice roll");
     influence_culture(game, player_index, info);
 }
 
@@ -251,19 +245,23 @@ fn roll_boost_payment(
 
     let roll = info.roll;
     if !p.get(game).can_afford(cost) {
-        game.add_info_log_item(&format!(
-            "{p} rolled a {roll} and does not have enough resources to increase the roll",
-        ));
+        p.log(
+            game,
+            &format!("Rolled a {roll} and does not have enough resources to increase the roll"),
+        );
         info.info.execute(game);
         attempt_failed(game, p.index, info.position);
         return None;
     }
 
     info.info.execute(game);
-    game.add_info_log_item(&format!(
-        "{p} rolled a {roll} and now has the option to pay {cost} to \
-                increase the dice roll and proceed with the cultural influence",
-    ));
+    p.log(
+        game,
+        &format!(
+            "Rolled a {roll} and now has the option to pay {cost} to \
+            increase the dice roll and proceed with the cultural influence",
+        ),
+    );
 
     Some(vec![PaymentRequest::optional(
         cost.clone(),
@@ -276,18 +274,23 @@ fn range_boost_cost(
     info: &mut InfluenceCultureInfo,
     player_index: usize,
 ) -> PaymentOptions {
+    let p = info.player(player_index, game);
+
     let roll = game.next_dice_roll().value + info.roll_boost;
     info.roll = roll;
     let success = roll >= INFLUENCE_MIN_ROLL;
     if success {
-        game.add_info_log_item(&format!("Cultural influence succeeded (rolled {roll})"));
+        p.log(
+            game,
+            &format!("Cultural influence succeeded (rolled {roll})"),
+        );
         info.info.execute(game);
         influence_culture(game, player_index, info);
         return PaymentOptions::free();
     }
 
     if (info.starting_city_position == info.position) || info.prevent_boost {
-        game.add_info_log_item(&format!("Cultural influence failed (rolled {roll})"));
+        p.log(game, &format!("Cultural influence failed (rolled {roll})"));
         info.info.execute(game);
         attempt_failed(game, player_index, info.position);
         return PaymentOptions::free();
@@ -295,7 +298,7 @@ fn range_boost_cost(
 
     PaymentOptions::resources(
         game.player(player_index),
-        info.origin.clone(),
+        p.origin.clone(),
         ResourcePile::culture_tokens(INFLUENCE_MIN_ROLL - roll),
     )
 }
@@ -375,12 +378,11 @@ pub fn influence_culture_boost_cost(
             origin.clone(),
             ResourcePile::culture_tokens(range_boost),
         ),
-        ActionInfo::new(attacker),
+        ActionInfo::new(attacker, origin),
         target_city_position,
         structure.clone(),
         start,
         barbarian_takeover_check,
-        origin,
     ));
     attacker.trigger_event(
         |e| &e.on_influence_culture_attempt,
@@ -455,14 +457,10 @@ fn structures(city: &City) -> Vec<SelectedStructure> {
 fn influence_culture(game: &mut Game, influencer_index: usize, info: &InfluenceCultureInfo) {
     let city_position = info.position;
     let city_owner = game.get_any_city(city_position).player_index;
-    let new = &EventPlayer::from_player(influencer_index, game, info.origin.clone());
+    let new = &info.player(influencer_index, game);
     match info.structure {
         Structure::CityCenter => {
-            let city = lose_city(
-                game,
-                &EventPlayer::from_player(city_owner, game, info.origin.clone()),
-                city_position,
-            );
+            let city = lose_city(game, &info.player(city_owner, game), city_position);
             gain_city(game, new, city);
         }
         Structure::Building(b) => gain_building(game, new, b, city_position),

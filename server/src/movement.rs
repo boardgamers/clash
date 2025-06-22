@@ -281,31 +281,27 @@ pub(crate) fn execute_movement_action(
     action: MovementAction,
     player_index: usize,
 ) -> Result<(), String> {
-    let player = &game.player(player_index);
-    game.add_info_log_item(
-        &(match &action {
-            Move(m) if m.units.is_empty() => {
-                format!("{player} used a movement actions but moved no units")
-            }
-            Move(m) => move_action_log(game, player, m),
-            Stop => format!("{player} ended the movement action"),
-        }),
-    );
+    let player = EventPlayer::from_player(player_index, game, move_event_origin());
+    match &action {
+        Move(m) if m.units.is_empty() => {
+            player.log(game, "Used a movement actions but moved no units");
+        }
+        Move(m) => player.log(game, &move_action_log(game, player.get(game), m)),
+        Stop => player.log(game, "End the movement action"),
+    }
 
+    let p = &EventPlayer::from_player(player_index, game, move_event_origin());
     if let GameState::Playing = game.state {
         if game.actions_left == 0 {
             return Err("No actions left".to_string());
         }
-        pay_action(
-            game,
-            &EventPlayer::from_player(player_index, game, move_event_origin()),
-        );
+        pay_action(game, p);
         game.state = Movement(MoveState::new());
     }
 
     match action {
         Move(m) => {
-            execute_move_action(game, player_index, &m)?;
+            execute_move_action(game, p, &m)?;
 
             if !has_any_moves_left(game) {
                 game.state = GameState::Playing;
@@ -341,21 +337,15 @@ fn has_any_moves_left(game: &mut Game) -> bool {
     }
 }
 
-fn execute_move_action(game: &mut Game, player_index: usize, m: &MoveUnits) -> Result<(), String> {
-    let player = &game.players[player_index];
+fn execute_move_action(game: &mut Game, player: &EventPlayer, m: &MoveUnits) -> Result<(), String> {
+    let p = player.get(game);
     let starting_position =
-        player
-            .get_unit(*m.units.first().expect(
-                "instead of providing no units to move a stop movement actions should be done",
-            ))
-            .position;
-    let destinations = move_units_destinations(
-        player,
-        game,
-        &m.units,
-        starting_position,
-        m.embark_carrier_id,
-    )?;
+        p.get_unit(*m.units.first().expect(
+            "instead of providing no units to move a stop movement actions should be done",
+        ))
+        .position;
+    let destinations =
+        move_units_destinations(p, game, &m.units, starting_position, m.embark_carrier_id)?;
 
     let (dest, result) = destinations
         .iter()
@@ -377,7 +367,7 @@ fn execute_move_action(game: &mut Game, player_index: usize, m: &MoveUnits) -> R
     } else {
         pay_cost(
             game,
-            player_index,
+            p.index,
             &PaymentRequest::mandatory(dest.cost.clone(), "move units"),
             &m.payment,
         );
@@ -411,15 +401,9 @@ fn execute_move_action(game: &mut Game, player_index: usize, m: &MoveUnits) -> R
         .expect("destination should be a valid tile");
 
     if dest_terrain == &Unexplored {
-        move_to_unexplored_tile(
-            game,
-            player_index,
-            &m.units,
-            starting_position,
-            m.destination,
-        );
+        move_to_unexplored_tile(game, player, &m.units, starting_position, m.destination);
     } else {
-        move_with_possible_combat(game, player_index, m);
+        move_with_possible_combat(game, player.index, m);
     }
 
     Ok(())
@@ -697,7 +681,7 @@ pub(crate) fn move_action_log(game: &Game, player: &Player, m: &MoveUnits) -> St
     } else {
         format!(" for {payment}")
     };
-    format!("{player} {verb} {units_str} from {start} to {dest}{suffix}{cost}",)
+    format!("{verb} {units_str} from {start} to {dest}{suffix}{cost}",)
 }
 
 pub(crate) fn move_event_origin() -> EventOrigin {

@@ -164,14 +164,15 @@ impl CustomActionType {
 
 pub(crate) fn log_start_custom_action(game: &mut Game, player_index: usize, action: &CustomAction) {
     let p = game.player(player_index);
-    let player = EventPlayer::from_player(player_index, game, action.action.playing_action_type().origin(p));
+    let player = EventPlayer::from_player(
+        player_index,
+        game,
+        action.action.playing_action_type().origin(p),
+    );
     if let Some(city) = action.city {
-        player.log(
-            game,
-            &format!("Start action in city {city}"),
-        )
+        player.log(game, &format!("Start action in city {city}"));
     } else {
-        player.log(game, "Start action")
+        player.log(game, "Start action");
     }
 }
 

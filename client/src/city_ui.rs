@@ -22,6 +22,7 @@ use server::city_pieces::Building;
 use server::collect::{available_collect_actions_for_city, possible_resource_collections};
 use server::construct::{can_construct, new_building_positions};
 use server::consts::BUILDING_COST;
+use server::events::check_event_origin;
 use server::game::Game;
 use server::player::CostTrigger;
 use server::playing_actions::PlayingActionType;
@@ -206,6 +207,7 @@ fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option
                     rc.game,
                     city.position,
                     city.player_index,
+                    &check_event_origin(),
                     CostTrigger::WithModifiers,
                 );
                 ActiveDialog::CollectResources(CollectResources::new(

@@ -6,16 +6,16 @@ use crate::content::persistent_events::PersistentEventType;
 use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
 use crate::incident::trigger_incident;
-use crate::log::{add_action_log_item, ActionLogBalance, ActionLogEntry};
+use crate::log::{ActionLogBalance, ActionLogEntry, add_action_log_item};
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::player_events::OnAdvanceInfo;
-use crate::resource::{gain_resources, lose_resources, ResourceType};
+use crate::resource::{ResourceType, gain_resources, lose_resources};
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceRequirement};
 use crate::{ability_initializer::AbilityInitializerSetup, resource_pile::ResourcePile};
+use Bonus::*;
 use enumset::{EnumSet, EnumSetType};
 use serde::{Deserialize, Serialize};
-use Bonus::*;
 
 // id / 4 = advance group
 #[derive(EnumSetType, Serialize, Deserialize, Debug, Ord, PartialOrd, Hash)]
@@ -391,11 +391,15 @@ pub(crate) fn gain_advance_without_payment(
     take_incident_token: bool,
 ) {
     do_advance(game, advance, player, take_incident_token);
-    on_advance(game, player.index, OnAdvanceInfo {
-        advance,
-        payment,
-        take_incident_token,
-    });
+    on_advance(
+        game,
+        player.index,
+        OnAdvanceInfo {
+            advance,
+            payment,
+            take_incident_token,
+        },
+    );
 }
 
 pub(crate) fn on_advance(game: &mut Game, player_index: usize, info: OnAdvanceInfo) {
@@ -504,11 +508,12 @@ pub(crate) fn init_great_library(game: &mut Game, player_index: usize) {
 }
 
 pub(crate) fn base_advance_cost(player: &Player) -> PaymentOptions {
-    PaymentOptions::sum(player, advance_event_origin(), ADVANCE_COST, &[
-        ResourceType::Ideas,
-        ResourceType::Food,
-        ResourceType::Gold,
-    ])
+    PaymentOptions::sum(
+        player,
+        advance_event_origin(),
+        ADVANCE_COST,
+        &[ResourceType::Ideas, ResourceType::Food, ResourceType::Gold],
+    )
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]

@@ -31,6 +31,7 @@ pub(crate) fn log_gain_structure(
     structure: Structure,
     position: Position,
 ) {
+    // todo only city
     player.log(game, &format!("Gain city {position}"));
     log_structure(game, player, structure, ActionLogBalance::Gain, position);
 }
@@ -41,6 +42,7 @@ pub(crate) fn log_lose_structure(
     structure: Structure,
     position: Position,
 ) {
+    // todo only city
     player.log(game, &format!("Lose city {position}"));
     log_structure(game, player, structure, ActionLogBalance::Loss, position);
 }

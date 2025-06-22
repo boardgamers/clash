@@ -711,11 +711,11 @@ pub(crate) fn play_base_effect(i: &IncidentInfo) -> bool {
 
 fn passed_to_player(game: &mut Game, i: &mut IncidentInfo) -> bool {
     if let Some(PassedIncident::NewPlayer(p)) = i.passed {
-        game.add_info_log_item(&format!(
-            "Player {} has passed the incident to {}",
-            game.player_name(i.active_player),
-            game.player_name(p)
-        ));
+        game.log(
+            i.active_player,
+            &i.origin(),
+            &format!("Pass the event to {}", game.player_name(p)),
+        );
         i.passed = Some(PassedIncident::AlreadyPassed);
         i.active_player = p;
         return true;

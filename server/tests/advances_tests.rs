@@ -11,7 +11,7 @@ use server::content::advances::trade_routes::find_trade_routes;
 use server::content::custom_actions::{CustomAction, CustomActionType};
 use server::content::persistent_events::{EventResponse, SelectedStructure};
 use server::cultural_influence::InfluenceCultureAttempt;
-use server::events::EventOrigin;
+use server::events::{EventOrigin, check_event_origin};
 use server::game::Game;
 use server::movement::MovementAction::Move;
 use server::movement::{MoveUnits, possible_move_routes};
@@ -724,6 +724,7 @@ fn has_husbandry_field(game: &Game) -> bool {
         game,
         Position::from_offset("C2"),
         0,
+        &check_event_origin(),
         CostTrigger::NoModifiers,
     );
     info.choices.contains_key(&Position::from_offset("E2"))

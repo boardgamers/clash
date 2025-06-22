@@ -165,14 +165,16 @@ impl PersistentEvents {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub(crate) struct ActionInfo {
     pub(crate) player: usize,
+    pub(crate) origin: EventOrigin,
     pub(crate) info: HashMap<String, String>,
     pub(crate) log: Vec<String>,
 }
 
 impl ActionInfo {
-    pub(crate) fn new(player: &Player) -> ActionInfo {
+    pub(crate) fn new(player: &Player, origin: EventOrigin) -> ActionInfo {
         ActionInfo {
             player: player.index,
+            origin,
             info: player.event_info.clone(),
             log: Vec::new(),
         }
@@ -180,7 +182,7 @@ impl ActionInfo {
 
     pub(crate) fn execute(&self, game: &mut Game) {
         for l in self.log.iter().unique() {
-            game.add_info_log_item(l);
+            game.log(self.player, &self.origin, l);
         }
         let player = game.player_mut(self.player);
         for (k, v) in self.info.clone() {
@@ -287,6 +289,10 @@ impl IncidentInfo {
     pub(crate) fn get_barbarian_state(&mut self) -> &mut BarbariansEventState {
         self.barbarians.as_mut().expect("barbarians should exist")
     }
+
+    pub(crate) fn origin(&self) -> EventOrigin {
+        EventOrigin::Incident(self.incident_id)
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -300,9 +306,10 @@ pub struct CostInfo {
 
 impl CostInfo {
     pub(crate) fn new(player: &Player, cost: PaymentOptions) -> CostInfo {
+        let info = ActionInfo::new(player, cost.origin.clone());
         CostInfo {
             cost,
-            info: ActionInfo::new(player),
+            info,
             activate_city: true,
             ignore_required_advances: false,
             ignore_action_cost: false,

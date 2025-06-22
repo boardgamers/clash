@@ -91,7 +91,7 @@ pub(crate) fn explore_adjacent_block(builder: ActionCardBuilder) -> ActionCardBu
                 .cloned()
                 .expect("Block not found");
             a.selected_positions = block_tiles(&dest.position);
-            move_to_unexplored_block(game, s.player_index, &dest, &[], position, None);
+            move_to_unexplored_block(game, &s.player(), &dest, &[], position, None);
         },
     )
 }
