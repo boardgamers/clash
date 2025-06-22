@@ -9,10 +9,12 @@ use crate::content::ability::Ability;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{PaymentRequest, PersistentEventType, PositionRequest};
 use crate::events::{EventOrigin, EventPlayer};
+use crate::log::ActionLogBalance;
 use crate::payment::PaymentOptions;
 use crate::player::{CostTrigger, Player};
 use crate::player_events::CostInfo;
 use crate::resource_pile::ResourcePile;
+use crate::structure::{Structure, log_structure};
 use crate::utils::remove_element;
 use crate::{ability_initializer::AbilityInitializerSetup, game::Game, position::Position};
 use enumset::EnumSetType;
@@ -20,8 +22,6 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use std::sync::Arc;
-use crate::log::ActionLogBalance;
-use crate::structure::{log_structure, Structure};
 
 const DRAW_REPLACEMENT_WONDER: &str = "draw_replacement_wonder";
 

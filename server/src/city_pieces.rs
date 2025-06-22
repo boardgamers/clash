@@ -3,9 +3,9 @@ use std::fmt::Display;
 
 use crate::events::EventPlayer;
 use crate::game::Game;
-use crate::log::{ActionLogBalance, ActionLogEntry, add_action_log_item};
+use crate::log::ActionLogBalance;
 use crate::position::Position;
-use crate::structure::{log_structure, Structure};
+use crate::structure::{Structure, log_structure};
 use crate::wonder::Wonder;
 use Building::*;
 use num::Zero;
