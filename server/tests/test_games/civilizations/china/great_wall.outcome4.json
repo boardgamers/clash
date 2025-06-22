@@ -390,6 +390,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "food": 2
@@ -537,6 +546,7 @@
   "action_log_index": 1,
   "log": [
     [
+      "Player1: Advance: Pay 1 action",
       "Player1: Advance: Pay 2 food",
       "Player1: Great Wall: Gain Great Wall from Player2",
       "Player1: Advance: Gain Engineering and take an event token (1 left)"

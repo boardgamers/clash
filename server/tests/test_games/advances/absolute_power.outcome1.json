@@ -261,6 +261,15 @@
                       "origin": {
                         "Advance": "AbsolutePower"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Absolute Power"
+                      }
                     }
                   ]
                 }

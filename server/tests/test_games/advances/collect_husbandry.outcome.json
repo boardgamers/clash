@@ -292,6 +292,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Collect"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "MoodChange": {
                         "city": "B3",
                         "mood": "Neutral"
@@ -324,6 +333,7 @@
   "action_log_index": 1,
   "log": [
     [
+      "Player1: Collect: Pay 1 action",
       "Player1: Collect: Use city B3",
       "Player1: Collect: City B3 became Neutral",
       "Player1: Collect: Gain 1 food",

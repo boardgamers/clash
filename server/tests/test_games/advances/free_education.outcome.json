@@ -344,6 +344,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "food": 1,
@@ -390,6 +399,7 @@
   "action_log_index": 1,
   "log": [
     [
+      "Player1: Advance: Pay 1 action",
       "Player1: Advance: Pay 1 food and 1 gold",
       "Player1: Draft: Gain 1 culture token",
       "Player1: Advance: Gain Draft and take an event token (1 left)"

@@ -294,6 +294,15 @@
                   "items": [
                     {
                       "player": 1,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 1,
                       "Resources": {
                         "resources": {},
                         "balance": "Loss"
@@ -354,6 +363,7 @@
   "action_log_index": 1,
   "log": [
     [
+      "Player2: Advance: Pay 1 action",
       "Player2: Advance: Pay nothing with Priesthood",
       "Priesthood reduced the cost to 0",
       "Player2: Math: Gain 1 culture token",

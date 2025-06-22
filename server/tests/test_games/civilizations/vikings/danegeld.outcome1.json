@@ -267,7 +267,18 @@
                         "action": "Danegeld"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "LeaderAbility": "Danegeld"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -312,6 +323,7 @@
   "action_log_index": 2,
   "log": [
     [
+      "Player1: Danegeld: Pay 1 action",
       "Player1 started Danegeld"
     ],
     [

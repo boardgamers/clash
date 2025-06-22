@@ -216,6 +216,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "food": 1,
@@ -278,6 +287,7 @@
   "action_log_index": 1,
   "log": [
     [
+      "Player1: Combat: Pay 1 action",
       "Player1: Construct Building: Pay 1 food, 1 wood and 1 ore",
       "Player1: Construct Building: City C2 became Neutral",
       "Player1: Construct Building: Gain Observatory at C2",

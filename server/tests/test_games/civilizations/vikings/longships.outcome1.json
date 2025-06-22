@@ -290,6 +290,15 @@
                   },
                   "items": [
                     {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
                       "player": 1,
                       "Units": {
                         "units": {
@@ -339,6 +348,15 @@
                   },
                   "items": [
                     {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
                       "player": 1,
                       "Units": {
                         "units": {
@@ -363,6 +381,7 @@
   "log": [
     [
       "Player1 sailed 3 ships from D2 to C3",
+      "Player1: Move: Pay 1 action",
       "Longships allow to ignore battle movement restrictions"
     ],
     [
@@ -378,6 +397,7 @@
     ],
     [
       "Player1 sailed 2 ships from C3 to C4",
+      "Player1: Move: Pay 1 action",
       "Longships allow to ignore battle movement restrictions"
     ],
     [

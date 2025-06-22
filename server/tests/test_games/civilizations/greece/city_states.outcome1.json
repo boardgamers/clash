@@ -264,6 +264,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "culture_tokens": 1
@@ -347,6 +356,7 @@
   "action_log_index": 2,
   "log": [
     [
+      "Player1: Recruit: Pay 1 action",
       "Player1: Recruit: Pay 1 culture token with Draft, Sparta",
       "Draft reduced the cost of 1 Infantry to 1 mood token",
       "Sparta allows to pay the Draft cost as culture tokes",

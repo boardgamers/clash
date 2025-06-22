@@ -276,6 +276,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "food": 2
@@ -328,6 +337,15 @@
                     "city_mood": "Neutral"
                   },
                   "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
                     {
                       "player": 1,
                       "Structure": {
@@ -457,12 +475,14 @@
   "action_log_index": 3,
   "log": [
     [
+      "Player1: Advance: Pay 1 action",
       "Player1: Advance: Pay 2 food",
       "Player1 unlocked Provinces",
       "Player1: Advance: Gain Voting and take an event token (2 left)"
     ],
     [
       "Player1 marched 1 infantry from C2 to B2",
+      "Player1: Move: Pay 1 action",
       "Player2: Combat: Lose city B2",
       "Player1: Combat: Gain 2 gold",
       "Player1: Combat: Gain city B2",

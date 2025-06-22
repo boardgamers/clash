@@ -284,6 +284,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "mood_tokens": 1,
@@ -341,6 +350,7 @@
   "action_log_index": 1,
   "log": [
     [
+      "Player1: Recruit: Pay 1 action",
       "Player1: Recruit: Pay 1 mood token and 1 culture token",
       "Player1: Recruit: Lost Sulla at A1",
       "Player1: Recruit: City A1 became Neutral",

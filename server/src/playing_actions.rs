@@ -8,7 +8,7 @@ use crate::action_cost::ActionCost;
 use crate::advance::{AdvanceAction, execute_advance_action};
 use crate::card::HandCardLocation;
 use crate::city::execute_found_city_action;
-use crate::collect::{Collect, execute_collect};
+use crate::collect::{Collect, execute_collect, base_collect_event_origin};
 use crate::construct::Construct;
 use crate::content::ability::{
     Ability, advance_event_origin, combat_event_origin, recruit_event_origin,
@@ -20,15 +20,16 @@ use crate::content::custom_actions::{
 use crate::content::persistent_events::{
     PaymentRequest, PersistentEventType, TriggerPersistentEventParams, trigger_persistent_event_ext,
 };
-use crate::cultural_influence::{InfluenceCultureAttempt, execute_influence_culture_attempt};
+use crate::cultural_influence::{InfluenceCultureAttempt, execute_influence_culture_attempt, influence_base_origin};
 use crate::events::{EventOrigin, EventPlayer};
 use crate::game::GameState;
-use crate::happiness::{IncreaseHappiness, execute_increase_happiness, happiness_event_origin};
+use crate::happiness::{IncreaseHappiness, execute_increase_happiness, happiness_event_origin, happiness_base_event_origin};
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::recruit::{Recruit, execute_recruit};
 use crate::wonder::{Wonder, WonderCardInfo, cities_for_wonder, on_play_wonder_card, wonder_cost};
 use crate::{game::Game, resource_pile::ResourcePile};
+use crate::movement::move_event_origin;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub enum PlayingActionType {
@@ -120,11 +121,19 @@ impl PlayingActionType {
 
     pub(crate) fn event_origin(&self, player: &Player) -> EventOrigin {
         match self {
+            PlayingActionType::Advance => advance_event_origin(),
+            PlayingActionType::FoundCity => EventOrigin::Ability("Found City".to_string()),
+            PlayingActionType::Construct => combat_event_origin(),
+            PlayingActionType::Collect => base_collect_event_origin(),
+            PlayingActionType::Recruit => recruit_event_origin(),
+            PlayingActionType::IncreaseHappiness => happiness_base_event_origin(),
+            PlayingActionType::InfluenceCultureAttempt => influence_base_origin(),
+            PlayingActionType::ActionCard(a) => EventOrigin::CivilCard(*a),
+            PlayingActionType::WonderCard(w) => EventOrigin::Wonder(*w),
             PlayingActionType::Custom(c) => player.custom_action_info(*c).event_origin,
-            PlayingActionType::ActionCard(id) => EventOrigin::CivilCard(*id),
-            _ => panic!(
-                "PlayingAction::payable_action_name called on an action \
-                that is not payable up front: {self:?}",
+            PlayingActionType::MoveUnits => move_event_origin(),
+            PlayingActionType::EndTurn => panic!(
+                "PlayingAction::origin called on an action that does not have an origin: EndTurn",
             ),
         }
     }
@@ -161,7 +170,7 @@ impl PlayingAction {
         if !action_cost.free {
             pay_action(
                 game,
-                &EventPlayer::from_player(player_index, game, self.origin(p)),
+                &EventPlayer::from_player(player_index, game, playing_action_type.event_origin(p)),
             );
         }
 
@@ -302,25 +311,6 @@ impl PlayingAction {
             PlayingAction::EndTurn => PlayingActionType::EndTurn,
         }
     }
-
-    #[must_use]
-    pub(crate) fn origin(&self, player: &Player) -> EventOrigin {
-        match self {
-            PlayingAction::Advance(_) => advance_event_origin(),
-            PlayingAction::FoundCity { .. } => EventOrigin::Ability("Found City".to_string()),
-            PlayingAction::Construct(_) => combat_event_origin(),
-            PlayingAction::Collect(c) => c.action_type.event_origin(player),
-            PlayingAction::Recruit(_) => recruit_event_origin(),
-            PlayingAction::IncreaseHappiness(h) => h.action_type.event_origin(player),
-            PlayingAction::InfluenceCultureAttempt(i) => i.action_type.event_origin(player),
-            PlayingAction::ActionCard(a) => EventOrigin::CivilCard(*a),
-            PlayingAction::WonderCard(w) => EventOrigin::Wonder(*w),
-            PlayingAction::Custom(c) => player.custom_action_info(c.action).event_origin,
-            PlayingAction::EndTurn => panic!(
-                "PlayingAction::origin called on an action that does not have an origin: EndTurn",
-            ),
-        }
-    }
 }
 
 fn assert_allowed_action_type(
@@ -403,31 +393,31 @@ pub(crate) fn pay_for_action() -> Ability {
         "Pay for action",
         "origin is overridden - so this text is not shown",
     )
-    .add_payment_request_listener(
-        |e| &mut e.pay_action,
-        0,
-        |game, p, a| {
-            if matches!(a.action, PlayingAction::IncreaseHappiness(_)) {
-                // handled in the happiness action
-                return None;
-            }
+        .add_payment_request_listener(
+            |e| &mut e.pay_action,
+            0,
+            |game, p, a| {
+                if matches!(a.action, PlayingAction::IncreaseHappiness(_)) {
+                    // handled in the happiness action
+                    return None;
+                }
 
-            let payment_options = a
-                .action
-                .playing_action_type(game.player(p.index))
-                .payment_options(game, p.index);
-            if payment_options.is_free() {
-                return None;
-            }
+                let payment_options = a
+                    .action
+                    .playing_action_type(game.player(p.index))
+                    .payment_options(game, p.index);
+                if payment_options.is_free() {
+                    return None;
+                }
 
-            Some(vec![PaymentRequest::mandatory(
-                payment_options,
-                "Pay for action",
-            )])
-        },
-        |_game, _s, _a| {},
-    )
-    .build()
+                Some(vec![PaymentRequest::mandatory(
+                    payment_options,
+                    "Pay for action",
+                )])
+            },
+            |_game, _s, _a| {},
+        )
+        .build()
 }
 
 fn end_turn(game: &mut Game, player: usize) {

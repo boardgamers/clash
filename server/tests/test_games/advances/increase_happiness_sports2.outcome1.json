@@ -260,7 +260,18 @@
                         "city": "C2"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Advance": "Sports"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -307,6 +318,7 @@
   "action_log_index": 2,
   "log": [
     [
+      "Player1: Sports: Pay 1 action",
       "Player1 started Sports at C2"
     ],
     [

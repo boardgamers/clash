@@ -382,7 +382,18 @@
                         "action": "Master"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "LeaderAbility": "Master"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -472,6 +483,7 @@
   "action_log_index": 2,
   "log": [
     [
+      "Player1: Master: Pay 1 action",
       "Player1 started Master",
       "Player1 has to pay 1 mood token for Master"
     ],

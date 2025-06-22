@@ -249,6 +249,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "food": 1,
@@ -325,6 +334,7 @@
   "action_log_index": 1,
   "log": [
     [
+      "Player1: Recruit: Pay 1 action",
       "Player1: Recruit: Pay 1 food, 1 ore and 2 gold",
       "Player1: Recruit: Lost 1 settler at C2",
       "Player1: Recruit: City A1 became Angry",

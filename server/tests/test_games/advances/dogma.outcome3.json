@@ -306,6 +306,15 @@
                   "items": [
                     {
                       "player": 1,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 1,
                       "Resources": {
                         "resources": {
                           "ideas": 2
@@ -344,6 +353,15 @@
                     }
                   },
                   "items": [
+                    {
+                      "player": 1,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
                     {
                       "player": 1,
                       "Resources": {
@@ -452,6 +470,7 @@
   "action_log_index": 4,
   "log": [
     [
+      "Player2: Advance: Pay 1 action",
       "Player2: Advance: Pay 2 ideas",
       "Player2: Dogma: Ideas limit reduced to 2",
       "Player2 unlocked Provinces",
@@ -459,6 +478,7 @@
       "Player2: Waste: Could not store 2 ideas"
     ],
     [
+      "Player2: Combat: Pay 1 action",
       "Player2: Construct Building: Pay 1 wood and 1 ore with State Religion",
       "State Religion reduced the food cost to 0",
       "Player2: Construct Building: Gain Temple at C1"

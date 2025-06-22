@@ -367,6 +367,15 @@
                   "items": [
                     {
                       "player": 1,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 1,
                       "Resources": {
                         "resources": {
                           "food": 2
@@ -449,6 +458,15 @@
                     }
                   },
                   "items": [
+                    {
+                      "player": 1,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "CivilCard": 118
+                      }
+                    },
                     {
                       "player": 1,
                       "HandCard": {
@@ -560,6 +578,7 @@
   "action_log_index": 7,
   "log": [
     [
+      "Player2: Advance: Pay 1 action",
       "Player2: Advance: Pay 2 food",
       "Player2: Storage: Gain 1 mood token",
       "Player2: Advance: Gain Storage and take an event token (triggering an incident)"
@@ -573,6 +592,7 @@
       "Player2: Great Explorer: Gain Great Explorer from the current event"
     ],
     [
+      "Player2: Great Explorer: Pay 1 action",
       "Player2: Action Card: Play Great Explorer",
       "Player2: Fishing: Gain 1 mood token",
       "Player2: Great Explorer: Gain Fishing without taking an event token"

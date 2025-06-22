@@ -578,9 +578,9 @@ pub(crate) fn influence_event_origin(
     action_type: &PlayingActionType,
     player: &Player,
 ) -> EventOrigin {
-    custom_action_modifier_event_origin(
-        EventOrigin::Ability("Influence Culture".to_string()),
-        action_type,
-        player,
-    )
+    custom_action_modifier_event_origin(influence_base_origin(), action_type, player)
+}
+
+pub(crate) fn influence_base_origin() -> EventOrigin {
+    EventOrigin::Ability("Influence Culture".to_string())
 }

@@ -268,7 +268,18 @@
                         "action": "LegendaryExplorer"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "LeaderAbility": "Legendary Explorer"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -305,6 +316,7 @@
   "action_log_index": 2,
   "log": [
     [
+      "Player1: Legendary Explorer: Pay 1 action",
       "Player1 started Legendary Explorer",
       "Player1 has to pay 1 culture token for Legendary Explorer"
     ],

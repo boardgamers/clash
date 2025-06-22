@@ -295,6 +295,15 @@
                   "items": [
                     {
                       "player": 1,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 1,
                       "Resources": {
                         "resources": {},
                         "balance": "Loss"
@@ -359,6 +368,15 @@
                   "items": [
                     {
                       "player": 1,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 1,
                       "Resources": {
                         "resources": {
                           "gold": 2
@@ -402,6 +420,15 @@
                       },
                       "origin": {
                         "Advance": "Philosophy"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
                       }
                     },
                     {
@@ -463,6 +490,7 @@
   "action_log_index": 2,
   "log": [
     [
+      "Player2: Advance: Pay 1 action",
       "Player2: Advance: Pay nothing with Priesthood",
       "Priesthood reduced the cost to 0",
       "Player2: Math: Gain 1 culture token",
@@ -470,6 +498,7 @@
       "Player2: Philosophy: Gain 1 idea"
     ],
     [
+      "Player2: Advance: Pay 1 action",
       "Player2: Advance: Pay 2 gold",
       "Player2: Astronomy: Gain 1 culture token",
       "Player2: Advance: Gain Astronomy and take an event token (1 left)",

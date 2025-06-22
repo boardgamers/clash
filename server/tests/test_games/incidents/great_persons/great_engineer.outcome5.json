@@ -235,6 +235,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "food": 2
@@ -319,6 +328,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "CivilCard": 126
+                      }
+                    },
+                    {
+                      "player": 0,
                       "HandCard": {
                         "card": {
                           "ActionCard": 126
@@ -374,7 +392,18 @@
                     "Response": {
                       "Bool": true
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "CivilCard": 126
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -392,6 +421,15 @@
                     }
                   },
                   "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
                     {
                       "player": 0,
                       "Resources": {
@@ -439,6 +477,7 @@
   "action_log_index": 6,
   "log": [
     [
+      "Player1: Advance: Pay 1 action",
       "Player1: Advance: Pay 2 food",
       "Player1: Storage: Gain 1 mood token",
       "Player1: Advance: Gain Storage and take an event token (triggering an incident)"
@@ -454,6 +493,7 @@
       "Player1: Great Engineer: Gain Great Engineer from the current event"
     ],
     [
+      "Player1: Great Engineer: Pay 1 action",
       "Player1: Action Card: Play Great Engineer"
     ],
     [
@@ -462,9 +502,11 @@
       "Player1: Great Engineer: Gain Engineering without taking an event token"
     ],
     [
-      "Player1: Great Engineer: Great Engineer: You may build a building in a city without spending an action and without activating it."
+      "Player1: Great Engineer: Great Engineer: You may build a building in a city without spending an action and without activating it.",
+      "Player1: Great Engineer: Gain 1 action"
     ],
     [
+      "Player1: Combat: Pay 1 action",
       "Player1: Construct Building: Pay 1 food, 1 wood and 1 ore with Captivi, Construct Only",
       "Captivi allows to replace resources with mood tokens",
       "Player1: Construct Building: Gain Fortress at C2"

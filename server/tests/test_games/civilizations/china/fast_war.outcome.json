@@ -395,6 +395,15 @@
                   },
                   "items": [
                     {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
                       "player": 1,
                       "Units": {
                         "units": {
@@ -475,7 +484,8 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 marched Sun Tzu from E8 to D8"
+      "Player1 marched Sun Tzu from E8 to D8",
+      "Player1: Move: Pay 1 action"
     ],
     [
       "Combat round 1",

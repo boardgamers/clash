@@ -263,6 +263,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Units": {
                         "units": {
                           "infantry": 1
@@ -297,7 +306,8 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 marched 1 infantry from C2 to C1"
+      "Player1 marched 1 infantry from C2 to C1",
+      "Player1: Move: Pay 1 action"
     ],
     [
       "Combat round 1",

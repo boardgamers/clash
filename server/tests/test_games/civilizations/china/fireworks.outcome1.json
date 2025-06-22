@@ -262,7 +262,18 @@
                         "destination": "C1"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -383,7 +394,8 @@
       "Player1 ended the movement action"
     ],
     [
-      "Player1 marched 1 infantry from C2 to C1"
+      "Player1 marched 1 infantry from C2 to C1",
+      "Player1: Move: Pay 1 action"
     ],
     [
       "Combat round 1",

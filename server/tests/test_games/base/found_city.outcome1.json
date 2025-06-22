@@ -216,6 +216,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Found City"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Units": {
                         "units": {
                           "settlers": 1
@@ -279,6 +288,7 @@
   "action_log_index": 2,
   "log": [
     [
+      "Player1: Found City: Pay 1 action",
       "Player1: Found city: Gain city B6"
     ],
     [

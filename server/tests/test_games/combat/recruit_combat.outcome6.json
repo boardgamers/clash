@@ -272,6 +272,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "wood": 5,
@@ -474,6 +483,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 1
@@ -564,6 +582,7 @@
       "Player1 ended the movement action"
     ],
     [
+      "Player1: Recruit: Pay 1 action",
       "Player1: Recruit: Pay 5 wood and 3 gold",
       "Player1: Recruit: City C2 became Neutral",
       "Player1: Recruit: Gain 4 ships at C3"
@@ -592,7 +611,8 @@
       "Player1: Pirates battle: Gain 1 culture token"
     ],
     [
-      "Player1 sailed 2 ships from C3 to C4"
+      "Player1 sailed 2 ships from C3 to C4",
+      "Player1: Move: Pay 1 action"
     ],
     [
       "Combat round 1",

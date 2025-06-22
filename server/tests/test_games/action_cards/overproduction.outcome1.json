@@ -221,6 +221,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "CivilCard": 29
+                      }
+                    },
+                    {
+                      "player": 0,
                       "HandCard": {
                         "card": {
                           "ActionCard": 29
@@ -232,6 +241,15 @@
                       },
                       "origin": {
                         "Ability": "Action Card"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "CivilCard": 29
                       }
                     }
                   ]
@@ -271,6 +289,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Collect"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "wood": 1,
@@ -295,10 +322,13 @@
   "action_log_index": 2,
   "log": [
     [
+      "Player1: Overproduction: Pay 1 action",
       "Player1: Action Card: Play Overproduction/Defensive Formation",
+      "Player1: Overproduction: Gain 1 action",
       "Player1: Overproduction: Can use Overproduction to collect from 2 additional tiles."
     ],
     [
+      "Player1: Collect: Pay 1 action",
       "Player1: Collect: Use city C2",
       "Player1: Collect: Gain 1 wood, 1 ore and 1 mood token"
     ]

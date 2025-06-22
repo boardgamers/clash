@@ -244,7 +244,18 @@
                         "action": "ImperialArmy"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "SpecialAdvance": "ImperialArmy"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -269,6 +280,7 @@
       "Player1 ended the movement action"
     ],
     [
+      "Player1: Imperial Army: Pay 1 action",
       "Player1 started Imperial Army"
     ],
     [

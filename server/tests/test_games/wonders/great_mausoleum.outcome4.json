@@ -244,6 +244,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "CivilCard": 123
+                      }
+                    },
+                    {
+                      "player": 0,
                       "HandCard": {
                         "card": {
                           "ActionCard": 123
@@ -321,6 +330,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "ideas": 2
@@ -373,6 +391,7 @@
   "action_log_index": 5,
   "log": [
     [
+      "Player1: Elder Statesman: Pay 1 action",
       "Player1: Action Card: Play Elder Statesman"
     ],
     [
@@ -383,6 +402,7 @@
       "Player1: Great Mausoleum: Draw an action card"
     ],
     [
+      "Player1: Advance: Pay 1 action",
       "Player1: Advance: Pay 2 ideas",
       "Player1: Storage: Gain 1 mood token",
       "Player1: Advance: Gain Storage and take an event token (triggering an incident)"

@@ -425,6 +425,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Units": {
                         "units": {
                           "ships": 1
@@ -489,7 +498,8 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 sailed 2 ships from F6 to E7"
+      "Player1 sailed 2 ships from F6 to E7",
+      "Player1: Move: Pay 1 action"
     ],
     [
       "Combat round 1",

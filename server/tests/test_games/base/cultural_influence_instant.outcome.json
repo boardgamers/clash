@@ -205,6 +205,15 @@
                   },
                   "items": [
                     {
+                      "player": 1,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Influence Culture"
+                      }
+                    },
+                    {
                       "player": 0,
                       "Structure": {
                         "structure": {
@@ -242,6 +251,7 @@
   "action_log_index": 1,
   "log": [
     [
+      "Player2: Influence Culture: Pay 1 action",
       "Player2: Influence Culture: Tried to influence the Fortress in the city at C2 by Player1 with the city C1",
       "Cultural influence succeeded (rolled 6)",
       "Player1: Influence Culture: Lose Fortress at C2",

@@ -287,6 +287,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "food": 2
@@ -369,6 +378,15 @@
                     }
                   },
                   "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "CivilCard": 120
+                      }
+                    },
                     {
                       "player": 0,
                       "HandCard": {
@@ -471,6 +489,7 @@
   "action_log_index": 5,
   "log": [
     [
+      "Player1: Advance: Pay 1 action",
       "Player1: Advance: Pay 2 food",
       "Player1: Storage: Gain 1 mood token",
       "Player1: Advance: Gain Storage and take an event token (triggering an incident)"
@@ -486,6 +505,7 @@
       "Player1: Great Prophet: Gain Great Prophet from the current event"
     ],
     [
+      "Player1: Great Prophet: Pay 1 action",
       "Player1: Action Card: Play Great Prophet",
       "Player1: Myths: Gain 1 mood token",
       "Player1: Great Prophet: Gain Myths without taking an event token"

@@ -374,6 +374,15 @@
                   "items": [
                     {
                       "player": 1,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 1,
                       "Resources": {
                         "resources": {
                           "food": 2
@@ -456,6 +465,15 @@
                     }
                   },
                   "items": [
+                    {
+                      "player": 1,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "CivilCard": 124
+                      }
+                    },
                     {
                       "player": 1,
                       "HandCard": {
@@ -554,6 +572,7 @@
   "action_log_index": 4,
   "log": [
     [
+      "Player2: Advance: Pay 1 action",
       "Player2: Advance: Pay 2 food",
       "Player2: Storage: Gain 1 mood token",
       "Player2: Advance: Gain Storage and take an event token (triggering an incident)"
@@ -567,6 +586,7 @@
       "Player2: Great Warlord: Gain Great Warlord from the current event"
     ],
     [
+      "Player2: Great Warlord: Pay 1 action",
       "Player2: Action Card: Play Great Warlord",
       "Player2: Tactics: Gain 1 culture token",
       "Player2: Great Warlord: Gain Tactics without taking an event token"

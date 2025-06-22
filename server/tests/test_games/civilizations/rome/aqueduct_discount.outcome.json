@@ -224,6 +224,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {},
                         "balance": "Loss"
@@ -272,6 +281,7 @@
   "action_log_index": 1,
   "log": [
     [
+      "Player1: Advance: Pay 1 action",
       "Player1: Advance: Pay nothing with Aqueduct",
       "Aqueduct reduced the cost to 0",
       "Player1: Sanitation: Gain 1 mood token",

@@ -398,6 +398,15 @@
                   },
                   "items": [
                     {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
                       "player": 1,
                       "Units": {
                         "units": {
@@ -502,7 +511,8 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 marched Gaius Julius Caesar from E8 to D8"
+      "Player1 marched Gaius Julius Caesar from E8 to D8",
+      "Player1: Move: Pay 1 action"
     ],
     [
       "Combat round 1",

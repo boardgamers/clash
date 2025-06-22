@@ -232,6 +232,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 2
@@ -307,7 +316,18 @@
                     "Response": {
                       "SelectUnits": []
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Incident": 38
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -353,6 +373,7 @@
   "action_log_index": 4,
   "log": [
     [
+      "Player1: Advance: Pay 1 action",
       "Player1: Advance: Pay 2 gold",
       "Player1: Storage: Gain 1 mood token",
       "Player1: Advance: Gain Storage and take an event token (triggering an incident)"
@@ -366,7 +387,7 @@
     ],
     [
       "Player1: Revolution: Declined to kill units",
-      "Player1: Revolution: Lose an action for Revolution"
+      "Player1: Revolution: Lose 1 action"
     ],
     [
       "Player1: Revolution: Player1 changed their government from Democracy to Theocracy",

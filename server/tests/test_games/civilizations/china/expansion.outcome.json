@@ -264,6 +264,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 2
@@ -301,6 +310,7 @@
       "Player1 ended the movement action"
     ],
     [
+      "Player1: Recruit: Pay 1 action",
       "Player1: Recruit: Pay 2 gold",
       "Player1: Recruit: Gain 1 settler at A1",
       "Player1: Expansion: Expansion allows to move the settlers at B3, B3, A1"

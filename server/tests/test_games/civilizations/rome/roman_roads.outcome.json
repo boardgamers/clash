@@ -285,6 +285,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "food": 1,
@@ -314,6 +323,7 @@
   "log": [
     [
       "Player1 marched 3 settlers, 1 infantry, 1 cavalry and 1 elephant from E2 to A1 on roads for 1 food and 1 ore",
+      "Player1: Move: Pay 1 action",
       "Player1: Move: Pay 1 food and 1 ore with Roman Roads"
     ]
   ],

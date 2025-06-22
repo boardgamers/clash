@@ -367,8 +367,12 @@ pub(crate) fn collect_event_origin(
     player: &Player,
 ) -> EventOrigin {
     custom_action_modifier_event_origin(
-        EventOrigin::Ability("Collect".to_string()),
+        base_collect_event_origin(),
         action_type,
         player,
     )
+}
+
+pub(crate) fn base_collect_event_origin() -> EventOrigin {
+    EventOrigin::Ability("Collect".to_string())
 }

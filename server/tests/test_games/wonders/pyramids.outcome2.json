@@ -209,7 +209,18 @@
                     "Playing": {
                       "WonderCard": "Pyramids"
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Build Wonder"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -300,7 +311,8 @@
   "log": [
     [
       "Player1 played the wonder card Pyramids",
-      "Player1: Build Wonder: Decided to build Pyramids in city A1"
+      "Player1: Build Wonder: Decided to build Pyramids in city A1",
+      "Player1: Build Wonder: Pay 1 action"
     ],
     [
       "Player1: Pyramids: Pay 2 food, 3 wood, 6 ore, 1 gold and 5 culture tokens",

@@ -297,6 +297,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Collect"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "food": 1
@@ -319,6 +328,7 @@
   "action_log_index": 1,
   "log": [
     [
+      "Player1: Collect: Pay 1 action",
       "Player1: Collect: Use city C2",
       "Player1: Collect: Gain 1 food",
       "Player1: Waste: Could not store 1 food"

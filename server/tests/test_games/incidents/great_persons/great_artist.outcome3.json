@@ -226,6 +226,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "food": 2
@@ -320,6 +329,15 @@
                   "items": [
                     {
                       "player": 1,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "CivilCard": 119
+                      }
+                    },
+                    {
+                      "player": 1,
                       "HandCard": {
                         "card": {
                           "ActionCard": 119
@@ -361,6 +379,15 @@
                       "MoodChange": {
                         "city": "A1",
                         "mood": "Happy"
+                      },
+                      "origin": {
+                        "CivilCard": 119
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Action": {
+                        "balance": "Loss"
                       },
                       "origin": {
                         "CivilCard": 119
@@ -426,6 +453,7 @@
   "action_log_index": 1,
   "log": [
     [
+      "Player1: Advance: Pay 1 action",
       "Player1: Advance: Pay 2 food",
       "Player1: Storage: Gain 1 mood token",
       "Player1: Advance: Gain Storage and take an event token (triggering an incident)"
@@ -448,6 +476,7 @@
       "It's Player2's turn"
     ],
     [
+      "Player2: Great Artist: Pay 1 action",
       "Player2: Action Card: Play Great Artist",
       "Player2 unlocked Hellenistic Culture",
       "Player2: Arts: Gain 1 culture token",

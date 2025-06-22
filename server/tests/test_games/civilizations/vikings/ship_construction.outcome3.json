@@ -242,9 +242,11 @@
   "starting_player_index": 0,
   "current_player_index": 0,
   "action_log": [
-    { "age": 1,
+    {
+      "age": 1,
       "rounds": [
-        { "round": 1,
+        {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -259,7 +261,18 @@
                         "destination": "D2"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -285,7 +298,18 @@
                         "destination": "C2"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -306,13 +330,15 @@
   "action_log_index": 4,
   "log": [
     [
-      "Player1 marched 1 settler from E2 to D2 converting 1 settler to ships"
+      "Player1 marched 1 settler from E2 to D2",
+      "Player1: Move: Pay 1 action converting 1 settler to ships"
     ],
     [
       "Player1 embarked 1 settler and 1 infantry from E2 to D2"
     ],
     [
-      "Player1 disembarked 1 ship from D2 to C2"
+      "Player1 disembarked 1 ship from D2 to C2",
+      "Player1: Move: Pay 1 action"
     ],
     [
       "Player1: Ship Construction: Unloaded 1 settler and 1 infantry from ships",
