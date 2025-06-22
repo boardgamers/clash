@@ -2,14 +2,17 @@ use crate::action_cost::ActionResourceCost;
 use serde::{Deserialize, Serialize};
 
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::action::pay_action;
 use crate::action_card::{can_play_civil_card, discard_action_card, play_action_card};
 use crate::action_cost::ActionCost;
 use crate::advance::{AdvanceAction, execute_advance_action};
 use crate::card::HandCardLocation;
 use crate::city::execute_found_city_action;
-use crate::collect::{Collect, execute_collect};
+use crate::collect::{Collect, base_collect_event_origin, execute_collect};
 use crate::construct::Construct;
-use crate::content::ability::Ability;
+use crate::content::ability::{
+    Ability, advance_event_origin, combat_event_origin, recruit_event_origin,
+};
 use crate::content::custom_actions::{
     CustomAction, CustomActionActivation, CustomActionType, can_play_custom_action,
     log_start_custom_action, on_custom_action,
@@ -17,10 +20,16 @@ use crate::content::custom_actions::{
 use crate::content::persistent_events::{
     PaymentRequest, PersistentEventType, TriggerPersistentEventParams, trigger_persistent_event_ext,
 };
-use crate::cultural_influence::{InfluenceCultureAttempt, execute_influence_culture_attempt};
-use crate::events::EventOrigin;
+use crate::cultural_influence::{
+    InfluenceCultureAttempt, execute_influence_culture_attempt, influence_base_origin,
+};
+use crate::events::{EventOrigin, EventPlayer};
 use crate::game::GameState;
-use crate::happiness::{IncreaseHappiness, execute_increase_happiness, happiness_event_origin};
+use crate::happiness::{
+    IncreaseHappiness, execute_increase_happiness, happiness_base_event_origin,
+    happiness_event_origin,
+};
+use crate::movement::move_event_origin;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::recruit::{Recruit, execute_recruit};
@@ -111,17 +120,25 @@ impl PlayingActionType {
         if let ActionResourceCost::Free = cost.cost {
             PaymentOptions::free()
         } else {
-            cost.payment_options(p, self.event_origin(p))
+            cost.payment_options(p, self.origin(p))
         }
     }
 
-    pub(crate) fn event_origin(&self, player: &Player) -> EventOrigin {
+    pub(crate) fn origin(&self, player: &Player) -> EventOrigin {
         match self {
+            PlayingActionType::Advance => advance_event_origin(),
+            PlayingActionType::FoundCity => EventOrigin::Ability("Found City".to_string()),
+            PlayingActionType::Construct => combat_event_origin(),
+            PlayingActionType::Collect => base_collect_event_origin(),
+            PlayingActionType::Recruit => recruit_event_origin(),
+            PlayingActionType::IncreaseHappiness => happiness_base_event_origin(),
+            PlayingActionType::InfluenceCultureAttempt => influence_base_origin(),
+            PlayingActionType::ActionCard(a) => EventOrigin::CivilCard(*a),
+            PlayingActionType::WonderCard(w) => EventOrigin::Wonder(*w),
             PlayingActionType::Custom(c) => player.custom_action_info(*c).event_origin,
-            PlayingActionType::ActionCard(id) => EventOrigin::CivilCard(*id),
-            _ => panic!(
-                "PlayingAction::payable_action_name called on an action \
-                that is not payable up front: {self:?}",
+            PlayingActionType::MoveUnits => move_event_origin(),
+            PlayingActionType::EndTurn => panic!(
+                "PlayingAction::origin called on an action that does not have an origin: EndTurn",
             ),
         }
     }
@@ -149,13 +166,17 @@ impl PlayingAction {
         player_index: usize,
         redo: bool,
     ) -> Result<(), String> {
-        let playing_action_type = self.playing_action_type(game.player(player_index));
+        let p = game.player(player_index);
+        let playing_action_type = self.playing_action_type(p);
         if !redo {
             playing_action_type.is_available(game, player_index)?;
         }
         let action_cost = playing_action_type.cost(game, player_index);
         if !action_cost.free {
-            game.actions_left -= 1;
+            pay_action(
+                game,
+                &EventPlayer::from_player(player_index, game, playing_action_type.origin(p)),
+            );
         }
 
         self.execute_without_action_cost(game, player_index)
@@ -204,14 +225,11 @@ impl PlayingAction {
 
         let payment_options = action_type.payment_options(game, player_index);
         if !payment_options.is_free() {
-            game.add_info_log_item(&format!(
-                "{} has to pay {} for {}",
-                game.player_name(player_index),
-                payment_options.default,
-                action_type
-                    .event_origin(game.player(player_index))
-                    .name(game)
-            ));
+            game.log(
+                player_index,
+                &payment_options.origin,
+                &format!("Pay {}", payment_options.default,),
+            );
         }
 
         ActionPayment::new(self).on_pay_action(game, player_index, origin_override)
@@ -228,7 +246,7 @@ impl PlayingAction {
         match self {
             Advance(a) => execute_advance_action(game, player_index, &a)?,
             FoundCity { settler } => execute_found_city_action(game, player_index, settler)?,
-            Construct(c) => construct::execute_construct(game, player_index, &c, |c| c)?,
+            Construct(c) => construct::execute_construct(game, player_index, &c)?,
             Collect(c) => execute_collect(game, player_index, &c)?,
             Recruit(r) => execute_recruit(game, player_index, r)?,
             IncreaseHappiness(i) => execute_increase_happiness(
@@ -405,13 +423,10 @@ pub(crate) fn pay_for_action() -> Ability {
 }
 
 fn end_turn(game: &mut Game, player: usize) {
-    game.add_info_log_item(&format!(
-        "{} ended their turn{}",
-        game.player(player),
-        match game.actions_left {
-            0 => String::new(),
-            actions_left => format!(" with {actions_left} actions left"),
-        }
-    ));
+    game.log(
+        player,
+        &EventOrigin::Ability("End Turn".to_string()),
+        &format!("{} actions left", game.actions_left),
+    );
     game.next_turn();
 }

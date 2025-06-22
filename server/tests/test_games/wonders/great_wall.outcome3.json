@@ -281,6 +281,15 @@
                   "items": [
                     {
                       "player": 1,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 1,
                       "Units": {
                         "units": {
                           "infantry": 2
@@ -358,6 +367,15 @@
                     "city_mood": "Happy"
                   },
                   "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
                     {
                       "player": 0,
                       "Resources": {
@@ -501,23 +519,18 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player2 marched 2 infantry from B1 to A1"
+      "Player2: Move: marched 2 infantry from B1 to A1, Pay 1 action"
     ],
     [
       "Combat round 1",
-      "Attackers: 2 infantry",
-      "Defenders: 1 infantry and 1 cavalry",
-      "Player2 rolled 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 2 hits against defending units.",
-      "Player1 rolled 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 11 and gets 2 hits against attacking units.",
-      "Player1 used the following combat modifiers: Great Wall gives -2 combat value in the first round",
+      "Player2: Combat: Attacking with 2 infantry, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 2 hits against defending units, Lost 2 infantry at B1",
+      "Player1: Combat: Defending with 1 infantry and 1 cavalry, Roll 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 11 and gets 2 hits against attacking units, Combat modifiers: Great Wall gives -2 combat value in the first round, Lost 1 infantry and 1 cavalry at A1",
       "Player2: Choose Casualties: Remove all attacking units",
-      "Player2: Combat: Lost 2 infantry at B1",
       "Player1: Choose Casualties: Remove all defending units",
-      "Player1: Combat: Lost 1 infantry and 1 cavalry at A1",
       "Battle ends in a draw"
     ],
     [
-      "Player2 ended their turn with 1 actions left"
+      "Player2: End Turn: 1 actions left"
     ],
     [
       "Round 2/3"
@@ -526,21 +539,17 @@
       "It's Player1's turn"
     ],
     [
-      "Player1: Advance: Pay 2 ideas",
-      "Player1: Storage: Gain 1 mood token",
-      "Player1: Advance: Gain Storage and take an event token (triggering an incident)"
+      "Player1: Advance: Pay 1 action, Pay 2 ideas, Gain Storage and take an event token (triggering an incident)",
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Envoy",
-      "Base effect: Barbarians move",
-      "Player1: Envoy: Barbarians move from A2 to A1: 1 infantry and 1 elephant",
-      "Barbarians lost the battle due to the Great Wall",
+      "Player1: Envoy: Base effect: Barbarians move, Barbarians move from A2 to A1: 1 infantry and 1 elephant, Gain 1 idea and 1 culture token, No wonders left to draw as public wonder card",
+      "Player1: Great Wall: Automatic win against Barbarians",
       "Barbarians: Combat: Lost 1 infantry and 1 elephant at A2",
       "Player1: Barbarian battle: Gain 1 gold",
       "Barbarians: Envoy: Gain 1 infantry at B3",
-      "Player1: Envoy: Gain 1 idea and 1 culture token",
       "No Wonders left to draw",
-      "No wonders left to draw as public wonder card",
       "Player2: Envoy: Gain 1 culture token"
     ],
     [

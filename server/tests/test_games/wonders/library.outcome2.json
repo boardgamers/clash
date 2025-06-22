@@ -45,6 +45,9 @@
             "ignore_action_cost": false,
             "info": {
               "player": 0,
+              "origin": {
+                "Wonder": "Pyramids"
+              },
               "info": {},
               "log": []
             }
@@ -329,7 +332,18 @@
                     "Playing": {
                       "WonderCard": "Pyramids"
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Build Wonder"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -341,14 +355,13 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player1 started Great Library"
+      "Player1: Great Library: Start action"
     ],
     [
       "Player1: Great Library: Use Engineering for the turn"
     ],
     [
-      "Player1 played the wonder card Pyramids",
-      "Player1: Build Wonder: Decided to build Pyramids in city C2"
+      "Player1: Build Wonder: Play the wonder card Pyramids, Decided to build Pyramids in city C2, Pay 1 action"
     ]
   ],
   "undo_limit": 0,

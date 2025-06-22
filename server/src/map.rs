@@ -1,5 +1,3 @@
-use crate::city::{City, MoodState};
-use crate::consts::NON_HUMAN_PLAYERS;
 use crate::game::Game;
 use crate::player::Player;
 use crate::position::Position;
@@ -62,9 +60,7 @@ impl Map {
     }
 
     #[must_use]
-    pub fn random_map(players: &mut [Player], rng: &mut Rng) -> Self {
-        let setup = get_map_setup(players.len() - NON_HUMAN_PLAYERS);
-
+    pub fn random_map(rng: &mut Rng, setup: &MapSetup) -> Self {
         let blocks = &mut BLOCKS.to_vec().shuffled(rng);
         let unexplored_blocks = setup
             .free_positions
@@ -81,22 +77,6 @@ impl Map {
             map.add_block_tiles(&b.position, &UNEXPLORED_BLOCK, b.position.rotation);
         }
         map.add_unexplored_blocks(unexplored_blocks);
-
-        setup
-            .home_positions
-            .into_iter()
-            .enumerate()
-            .for_each(|(i, h)| {
-                let home = players[i]
-                    .civilization
-                    .start_block
-                    .as_ref()
-                    .unwrap_or(&h.block);
-                map.add_block_tiles(&h.position, home, h.position.rotation);
-                let position = home.tiles(&h.position, h.position.rotation)[0].0;
-                setup_home_city(&mut players[i], position);
-            });
-
         map
     }
 
@@ -554,12 +534,6 @@ pub(crate) fn get_map_setup(player_count: usize) -> MapSetup {
         .into_iter()
         .find(|s| s.home_positions.len() == player_count)
         .expect("No setup for this player count")
-}
-
-pub fn setup_home_city(player: &mut Player, pos: Position) {
-    let mut city = City::new(player.index, pos);
-    city.mood_state = MoodState::Happy;
-    player.cities.push(city);
 }
 
 pub(crate) fn capital_city_position(game: &Game, player: &Player) -> Position {

@@ -250,9 +250,11 @@
   "starting_player_index": 0,
   "current_player_index": 0,
   "action_log": [
-    { "age": 1,
+    {
+      "age": 1,
       "rounds": [
-        { "round": 1,
+        {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -267,7 +269,18 @@
                         "destination": "C1"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -279,12 +292,12 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 marched 1 infantry from C2 to C1"
+      "Player1: Move: marched 1 infantry from C2 to C1, Pay 1 action"
     ],
     [
       "Combat round 1",
-      "Attackers: 1 infantry",
-      "Defenders: 2 infantry"
+      "Player1: Combat: Attacking with 1 infantry",
+      "Player2: Combat: Defending with 2 infantry"
     ]
   ],
   "undo_limit": 0,

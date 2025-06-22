@@ -281,7 +281,18 @@
                         "action": "Taxes"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Advance": "Taxes"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -347,8 +358,7 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player1 started Taxes",
-      "Player1 has to pay 1 mood token for Taxes"
+      "Player1: Taxes: Pay 1 action, Start action, Pay 1 mood token"
     ],
     [
       "Player1: Taxes: Pay 1 mood token"

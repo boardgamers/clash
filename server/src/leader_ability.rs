@@ -73,18 +73,21 @@ impl LeaderAbility {
         .add_transient_event_listener(
             |event| &mut event.wonder_cost,
             0,
-            move |i, w, game, _| {
+            move |i, w, game, p| {
                 if w.wonder == wonder {
                     i.cost.default.culture_tokens -= 2;
-                    i.info.log.push(format!(
-                        "{wonder} reduced the cost of {wonder} by 2 culture tokens",
-                    ));
+                    i.info.add_log(
+                        p,
+                        &format!("Reduce the cost of {wonder} by 2 culture tokens"),
+                    );
                 }
+
                 if w.city_position == leader_position(game.player(w.player)) {
                     i.ignore_action_cost = true;
-                    i.info.log.push(format!(
-                        "{wonder} allows building {wonder} in the leader city as a free action",
-                    ));
+                    i.info.add_log(
+                        p,
+                        &format!("{wonder} can be built in the leader city as a free action"),
+                    );
                 }
             },
         )

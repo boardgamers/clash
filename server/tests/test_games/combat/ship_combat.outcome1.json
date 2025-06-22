@@ -352,20 +352,16 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 sailed 2 ships from C3 to D2"
+      "Player1: Move: sailed 2 ships from C3 to D2"
     ],
     [
       "Combat round 1",
-      "Attackers: 1 settler, 2 ships, 1 cavalry and 1 elephant",
-      "Defenders: 1 ship",
-      "Player1 rolled 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 12 and gets 1 hits against defending units.",
-      "Player2 rolled 6 (infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units.",
-      "Player1: Choose Casualties: Remove 1 of their attacking units",
-      "Player1: Combat: Lost 1 ship at C3"
+      "Player1: Combat: Attacking with 1 settler, 2 ships, 1 cavalry and 1 elephant, Roll 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 12 and gets 1 hits against defending units, Lost 1 ship at C3",
+      "Player2: Combat: Defending with 1 ship, Roll 6 (infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units",
+      "Player1: Choose Casualties: Remove 1 of their attacking units"
     ],
     [
-      "Player1: Choose Casualties (carried units): Killed carried units: 1 cavalry",
-      "Player1: Choose Casualties (carried units): Lost 1 cavalry at C3",
+      "Player1: Choose Casualties (carried units): Killed carried units: 1 cavalry, Lost 1 cavalry at C3",
       "Player2: Choose Casualties: Remove all defending units",
       "Player2: Combat: Lost 1 ship at D2",
       "Attacker wins"

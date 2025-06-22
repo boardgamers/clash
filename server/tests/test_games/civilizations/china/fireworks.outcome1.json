@@ -262,7 +262,18 @@
                         "destination": "C1"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -323,12 +334,34 @@
                       }
                     },
                     {
+                      "player": 1,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Loss",
+                        "position": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
                       "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 1
                         },
                         "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Gain",
+                        "position": "C1"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -361,22 +394,19 @@
       "Player1 ended the movement action"
     ],
     [
-      "Player1 marched 1 infantry from C2 to C1"
+      "Player1: Move: marched 1 infantry from C2 to C1, Pay 1 action"
     ],
     [
       "Combat round 1",
-      "Attackers: 1 infantry",
-      "Defenders: 1 cavalry",
-      "Player1 rolled 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units.",
-      "Player2 rolled 6 (infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units."
+      "Player1: Combat: Attacking with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units",
+      "Player2: Combat: Defending with 1 cavalry, Roll 6 (infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units"
     ],
     [
-      "Player1: Fireworks: Pay 2 gold",
-      "Player1: Fireworks: Ignore the first hit",
+      "Player1: Fireworks: Pay 2 gold, Ignore the first hit",
       "Player2: Choose Casualties: Remove all defending units",
-      "Player2: Combat: Lost 1 cavalry at C1",
-      "Attacker wins and captured Player2's city C1",
-      "Player1: Combat: Gain 1 gold",
+      "Player2: Combat: Lost 1 cavalry at C1, Lose city C1",
+      "Attacker wins",
+      "Player1: Combat: Gain 1 gold, Gain city C1",
       "Player2: Place Settler: Gain 1 settler at B2"
     ]
   ],

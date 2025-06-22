@@ -122,7 +122,7 @@ pub(crate) fn solar_eclipse_end_combat() -> Ability {
                         };
                         game.player_mut(winner)
                             .gain_event_victory_points(1_f32, &EventOrigin::Incident(41));
-                        game.log_with_origin(
+                        game.log(
                             winner,
                             &player.origin,
                             "Gain 1 victory point for the Solar Eclipse",
@@ -203,7 +203,7 @@ fn guillotine() -> Incident {
         },
         |game, s, i| {
             let pos = i.selected_position.expect("position should be set");
-            gain_unit(game, s.player_index, pos, s.choice, &s.origin);
+            gain_unit(game, &s.player(), pos, s.choice);
         },
     )
     .add_simple_incident_listener(IncidentTarget::ActivePlayer, 0, |game, p, _i| {

@@ -88,9 +88,6 @@
         "Storage",
         "Tactics"
       ],
-      "wonders_built": [
-        "Pyramids"
-      ],
       "incident_tokens": 3,
       "special_victory_points": [
         {
@@ -228,6 +225,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 2
@@ -270,7 +276,87 @@
                         "C2"
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Fortress"
+                        },
+                        "balance": "Loss",
+                        "position": "C2"
+                      },
+                      "origin": {
+                        "Incident": 29
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Temple"
+                        },
+                        "balance": "Loss",
+                        "position": "C2"
+                      },
+                      "origin": {
+                        "Incident": 29
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Wonder": "Pyramids"
+                        },
+                        "balance": "Loss",
+                        "position": "C2"
+                      },
+                      "origin": {
+                        "Incident": 29
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Fortress"
+                        },
+                        "balance": "Loss",
+                        "position": "C2"
+                      },
+                      "origin": {
+                        "Incident": 29
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Temple"
+                        },
+                        "balance": "Loss",
+                        "position": "C2"
+                      },
+                      "origin": {
+                        "Incident": 29
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Wonder": "Pyramids"
+                        },
+                        "balance": "Loss",
+                        "position": "C2"
+                      },
+                      "origin": {
+                        "Incident": 29
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -282,19 +368,15 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1: Advance: Pay 2 gold",
-      "Player1: Storage: Gain 1 mood token",
-      "Player1: Advance: Gain Storage and take an event token (triggering an incident)"
+      "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Vulcan"
     ],
     [
-      "Player1: Vulcan: Selected city C2 to be destroyed",
-      "Player1: Vulcan: Gain 2 points for the Fortress at C2",
-      "Player2: Vulcan: Gain 2 points for the Temple at C2",
-      "Player1: Vulcan: Gain 0 points for the Pyramids at C2",
-      "Player1: Vulcan: Gain 2 points for the city center at C2"
+      "Player1: Vulcan: Selected city C2 to be destroyed, Lose Fortress at C2, Gain 2 points for the Fortress at C2, Lose Temple at C2, Lose Pyramids at C2, Gain 0 points for the Pyramids at C2, Gain 2 points for the city center at C2",
+      "Player2: Vulcan: Gain 2 points for the Temple at C2"
     ]
   ],
   "undo_limit": 1,

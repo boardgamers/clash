@@ -252,10 +252,10 @@ pub(crate) fn do_advance(
     let info = advance.info(game).clone();
     let bonus = info.bonus.clone();
     let player_index = player.index;
-    info.listeners.once_init(game, player_index);
+    info.listeners.init_first(game, player_index);
 
     if let Some(special_advance) = find_special_advance(advance, game, player_index) {
-        unlock_special_advance(game, special_advance, player_index);
+        unlock_special_advance(game, special_advance, player);
     }
 
     if let Some(advance_bonus) = &bonus {
@@ -270,9 +270,8 @@ pub(crate) fn do_advance(
     p.advances.insert(advance);
     let t = p.incident_tokens;
 
-    game.log_with_origin(
-        player_index,
-        &player.origin,
+    player.log(
+        game,
         &format!(
             "Gain {} {}",
             advance.name(game),
@@ -291,11 +290,7 @@ pub(crate) fn do_advance(
     add_action_log_item(
         game,
         player_index,
-        ActionLogEntry::Advance {
-            advance,
-            balance: ActionLogBalance::Gain,
-            take_incident_token,
-        },
+        ActionLogEntry::advance(advance, ActionLogBalance::Gain, take_incident_token),
         player.origin.clone(),
         vec![],
     );
@@ -432,7 +427,7 @@ pub(crate) fn remove_advance(game: &mut Game, advance: Advance, player: &EventPl
     let info = advance.info(game);
     let bonus = info.bonus.clone();
     let player_index = player.index;
-    info.listeners.clone().once_deinit(game, player_index);
+    info.listeners.clone().deinit_first(game, player_index);
 
     if let Some(special_advance) =
         find_non_government_special_advance(advance, game.player(player_index))
@@ -453,28 +448,21 @@ pub(crate) fn remove_advance(game: &mut Game, advance: Advance, player: &EventPl
     add_action_log_item(
         game,
         player_index,
-        ActionLogEntry::Advance {
-            advance,
-            balance: ActionLogBalance::Loss,
-            take_incident_token: false,
-        },
+        ActionLogEntry::advance(advance, ActionLogBalance::Loss, false),
         player.origin.clone(),
         vec![],
     );
 }
 
-fn unlock_special_advance(game: &mut Game, special_advance: SpecialAdvance, player_index: usize) {
-    game.add_info_log_item(&format!(
-        "{} unlocked {}",
-        game.player_name(player_index),
-        special_advance.info(game).name
-    ));
+fn unlock_special_advance(game: &mut Game, special_advance: SpecialAdvance, player: &EventPlayer) {
+    player.log(game, &format!("Unlock {}", special_advance.info(game).name));
     special_advance
         .info(game)
         .listeners
         .clone()
-        .once_init(game, player_index);
-    game.players[player_index]
+        .init_first(game, player.index);
+    player
+        .get_mut(game)
         .special_advances
         .insert(special_advance);
 }
@@ -488,7 +476,7 @@ pub(crate) fn undo_unlock_special_advance(
         .info(game)
         .listeners
         .clone()
-        .once_deinit(game, player_index);
+        .deinit_first(game, player_index);
     game.players[player_index]
         .special_advances
         .remove(special_advance);

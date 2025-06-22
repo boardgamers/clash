@@ -300,8 +300,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1: Statesman: City A1 became Neutral",
-      "Player1: Statesman: Pay 2 mood tokens"
+      "Player1: Statesman: City A1 became Neutral, Pay 2 mood tokens"
     ]
   ],
   "undo_limit": 0,

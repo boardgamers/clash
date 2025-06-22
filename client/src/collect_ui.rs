@@ -15,6 +15,7 @@ use server::collect::{
     Collect, CollectInfo, PositionCollection, add_collect, get_total_collection,
     possible_resource_collections, tiles_used,
 };
+use server::events::check_event_origin;
 use server::player::CostTrigger;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
@@ -81,6 +82,7 @@ pub fn collect_dialog(rc: &RenderContext, collect: &CollectResources) -> StateUp
     let result = get_total_collection(
         game,
         collect.player_index,
+        &check_event_origin(),
         collect.city_position,
         &collect.collections,
         CostTrigger::WithModifiers,
@@ -126,6 +128,7 @@ fn click_collect_option(
         rc.game,
         col.info.city,
         col.player_index,
+        &check_event_origin(),
         CostTrigger::WithModifiers,
     );
     let mut new = col.clone();

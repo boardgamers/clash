@@ -216,7 +216,18 @@
                     "Playing": {
                       "WonderCard": "GreatLighthouse"
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Build Wonder"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -257,6 +268,19 @@
                           "Hand": 0
                         },
                         "to": "PlayToKeep"
+                      },
+                      "origin": {
+                        "Ability": "Build Wonder"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Wonder": "GreatLighthouse"
+                        },
+                        "balance": "Gain",
+                        "position": "A1"
                       },
                       "origin": {
                         "Ability": "Build Wonder"
@@ -316,19 +340,17 @@
   "action_log_index": 4,
   "log": [
     [
-      "Player1 played the wonder card Great Lighthouse",
-      "Player1: Build Wonder: Decided to build Great Lighthouse in city A1"
+      "Player1: Build Wonder: Play the wonder card Great Lighthouse, Decided to build Great Lighthouse in city A1, Pay 1 action"
     ],
     [
       "Player1: Great Lighthouse: Pay 3 food, 5 wood, 4 ore and 5 culture tokens",
-      "Player1: Build Wonder: Play Great Lighthouse"
+      "Player1: Build Wonder: Play Great Lighthouse, Gain Great Lighthouse at A1"
     ],
     [
-      "Player1 started Great Lighthouse"
+      "Player1: Great Lighthouse: Start action"
     ],
     [
-      "Player1: Great Lighthouse: City A1 became Neutral",
-      "Player1: Great Lighthouse: Gain 1 ship at C3"
+      "Player1: Great Lighthouse: City A1 became Neutral, Gain 1 ship at C3"
     ]
   ],
   "undo_limit": 0,

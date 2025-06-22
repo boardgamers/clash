@@ -4,12 +4,14 @@ use std::ops::{Add, Sub};
 
 use crate::content::custom_actions::CustomActionType::ForcedLabor;
 use crate::content::persistent_events::PersistentEventType;
-use crate::events::EventOrigin;
-use crate::log::{ActionLogEntry, add_action_log_item};
+use crate::events::{EventOrigin, EventPlayer};
+use crate::log::{ActionLogBalance, ActionLogEntry, add_action_log_item};
 use crate::map::Terrain;
 use crate::player::remove_unit;
+use crate::structure::{Structure, log_gain_city, log_lose_city};
+use crate::unit::{UnitType, Units};
 use crate::utils;
-use crate::wonder::deinit_wonder;
+use crate::wonder::destroy_wonder;
 use crate::{
     city_pieces::{CityPieces, CityPiecesData},
     game::Game,
@@ -97,22 +99,6 @@ impl City {
     #[must_use]
     pub fn is_activated(&self) -> bool {
         self.activations > 0
-    }
-
-    ///
-    ///
-    /// # Panics
-    ///
-    /// Panics if the city does not have a builder
-    pub fn raze(self, game: &mut Game, player_index: usize) {
-        for wonder in &self.pieces.wonders {
-            deinit_wonder(game, player_index, *wonder);
-        }
-        for wonder in self.pieces.wonders {
-            for p in &mut game.players {
-                p.remove_wonder(wonder);
-            }
-        }
     }
 
     #[must_use]
@@ -241,24 +227,35 @@ pub(crate) fn execute_found_city_action(
     player_index: usize,
     settler: u32,
 ) -> Result<(), String> {
-    let player = game.player(player_index);
-    game.add_info_log_item(&format!(
-        "{player} founded a city {}",
-        player.get_unit(settler).position
-    ));
     let settler = remove_unit(player_index, settler, game);
+    let mut u = Units::empty();
+    u += &UnitType::Settler;
+    let origin = EventOrigin::Ability("Found city".to_string());
+    add_action_log_item(
+        game,
+        player_index,
+        ActionLogEntry::units(u, ActionLogBalance::Loss),
+        origin.clone(),
+        vec![],
+    );
     if !settler.can_found_city(game) {
         return Err("Cannot found city".to_string());
     }
-    found_city(game, player_index, settler.position);
+    found_city(
+        game,
+        &EventPlayer::from_player(player_index, game, origin),
+        settler.position,
+    );
     Ok(())
 }
 
-pub(crate) fn found_city(game: &mut Game, player: usize, position: Position) {
-    game.player_mut(player)
+pub(crate) fn found_city(game: &mut Game, player: &EventPlayer, position: Position) {
+    player
+        .get_mut(game)
         .cities
-        .push(City::new(player, position));
-    on_found_city(game, player, position);
+        .push(City::new(player.index, position));
+    log_gain_city(game, player, Structure::CityCenter, position);
+    on_found_city(game, player.index, position);
 }
 
 pub(crate) fn on_found_city(game: &mut Game, player_index: usize, position: Position) {
@@ -335,7 +332,7 @@ pub(crate) fn set_city_mood(
     }
     city.mood_state = new_state.clone();
 
-    game.log_with_origin(
+    game.log(
         player,
         origin,
         &format!("City {position} became {new_state}"),
@@ -347,4 +344,32 @@ pub(crate) fn set_city_mood(
         origin.clone(),
         vec![],
     );
+}
+
+pub(crate) fn gain_city(game: &mut Game, player: &EventPlayer, mut city: City) {
+    city.player_index = player.index;
+    log_gain_city(game, player, Structure::CityCenter, city.position);
+    player.get_mut(game).cities.push(city);
+}
+
+pub(crate) fn lose_city(game: &mut Game, player: &EventPlayer, position: Position) -> City {
+    let p = player.get_mut(game);
+    let city = if let Some(pos) = p.cities.iter().position(|city| city.position == position) {
+        p.cities.remove(pos)
+    } else {
+        let any_city = game.try_get_any_city(position).map(|c| c.player_index);
+        panic!(
+            "{} should have this city {position} but does not - found owner: {:?}",
+            player.index, any_city
+        );
+    };
+    log_lose_city(game, player, Structure::CityCenter, city.position);
+    city
+}
+
+pub(crate) fn raze_city(game: &mut Game, player: &EventPlayer, position: Position) {
+    let city = lose_city(game, player, position);
+    for wonder in &city.pieces.wonders {
+        destroy_wonder(game, player, *wonder, position);
+    }
 }

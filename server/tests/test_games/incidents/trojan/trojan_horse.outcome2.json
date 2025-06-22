@@ -256,6 +256,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 2
@@ -306,7 +315,18 @@
                         "destination": "C1"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -372,12 +392,60 @@
                       }
                     },
                     {
+                      "player": 1,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Loss",
+                        "position": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
                       "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 1
                         },
                         "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Gain",
+                        "position": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Temple"
+                        },
+                        "balance": "Loss",
+                        "position": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Temple"
+                        },
+                        "balance": "Gain",
+                        "position": "C1"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -419,34 +487,27 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player1: Advance: Pay 2 gold",
-      "Player1: Storage: Gain 1 mood token",
-      "Player1: Advance: Gain Storage and take an event token (triggering an incident)"
+      "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Trojan Horse",
-      "Base effect: Barbarians move",
-      "Barbarians cannot move - will try to spawn a new city instead",
-      "Barbarians cannot spawn a new city"
+      "Player1: Trojan Horse: Base effect: Barbarians move, Barbarians cannot move - will try to spawn a new city instead, Barbarians cannot spawn a new city"
     ],
     [
-      "Player1 marched 2 settlers, 2 infantry, 1 cavalry and 1 elephant from C2 to C1"
+      "Player1: Move: marched 2 settlers, 2 infantry, 1 cavalry and 1 elephant from C2 to C1, Pay 1 action"
     ],
     [
       "Combat round 1",
-      "Attackers: 2 settlers, 2 infantry, 1 cavalry and 1 elephant",
-      "Defenders: 2 infantry"
+      "Player1: Combat: Attacking with 2 settlers, 2 infantry, 1 cavalry and 1 elephant",
+      "Player2: Combat: Defending with 2 infantry"
     ],
     [
-      "Player1: Trojan Horse: Pay 1 gold and 1 culture token",
-      "Player1: Trojan Horse: Activated the Trojan Horse and gained 1 victory point",
-      "Player1 rolled 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 26 and gets 2 hits against defending units.",
-      "Player2 rolled 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 4 and gets 0 hits against attacking units.",
-      "Player2 used the following combat modifiers: Player gets +2 combat value for Fanaticism Advance, Trojan Horse denied playing Tactics Cards",
+      "Player1: Trojan Horse: Pay 1 gold and 1 culture token, Activated the Trojan Horse and gained 1 victory point",
+      "Player1: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 26 and gets 2 hits against defending units, Gain 1 gold, Gain city C1, Gain Temple at C1",
+      "Player2: Combat: Roll 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 4 and gets 0 hits against attacking units, Combat modifiers: Player gets +2 combat value for Fanaticism Advance, Trojan Horse denied playing Tactics Cards, Lost 2 infantry at C1, Lose city C1, Lose Temple at C1",
       "Player2: Choose Casualties: Remove all defending units",
-      "Player2: Combat: Lost 2 infantry at C1",
-      "Attacker wins and captured Player2's city C1",
-      "Player1: Combat: Gain 1 gold",
+      "Attacker wins",
       "Player2: Fanaticism: Gain 1 infantry at C2",
       "Player2: Place Settler: Gain 1 settler at C2"
     ]

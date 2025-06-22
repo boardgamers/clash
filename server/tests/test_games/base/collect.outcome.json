@@ -223,6 +223,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Collect"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "wood": 1,
@@ -247,9 +256,8 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1: Collect: Use city C2",
-      "Player1: Collect: Gain 1 wood, 1 ore and 1 idea",
-      "Public Education gained 1 idea",
+      "Player1: Collect: Pay 1 action, Use city C2, Gain 1 wood, 1 ore and 1 idea",
+      "Player1: Public Education: Gain 1 idea",
       "Player1: Waste: Could not store 1 ore"
     ]
   ],

@@ -12,14 +12,15 @@ use itertools::Itertools;
 use macroquad::math::vec2;
 use server::action::Action;
 use server::content::persistent_events::{
-    AdvanceRequest, EventResponse, MultiRequest, PlayerRequest, SelectedStructure, Structure,
-    UnitTypeRequest, UnitsRequest, is_selected_structures_valid,
+    AdvanceRequest, EventResponse, MultiRequest, PlayerRequest, SelectedStructure, UnitTypeRequest,
+    UnitsRequest, is_selected_structures_valid,
 };
 use server::cultural_influence::InfluenceCultureAttempt;
 use server::game::Game;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
+use server::structure::Structure;
 use server::unit::{Unit, validate_units_selection};
 
 pub fn custom_phase_payment_dialog(

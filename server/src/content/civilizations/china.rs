@@ -42,7 +42,7 @@ fn rice() -> SpecialAdvanceInfo {
     .add_transient_event_listener(
         |event| &mut event.collect_total,
         2,
-        |i, game, collections, _| {
+        |i, game, collections, p| {
             let city = game.get_any_city(i.city);
             let food = collections
                 .iter()
@@ -59,10 +59,8 @@ fn rice() -> SpecialAdvanceInfo {
                 .count()
                 .min(2);
             i.total += ResourcePile::food(food as u8);
-            i.info.log.push(format!(
-                "Rice Cultivation added {}",
-                ResourcePile::food(food as u8)
-            ));
+            i.info
+                .add_log(p, &format!("Add {}", ResourcePile::food(food as u8)));
         },
     )
     .build()

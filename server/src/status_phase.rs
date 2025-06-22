@@ -1,6 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::gain_action_card_from_pile;
 use crate::advance::{Advance, do_advance, gain_advance_without_payment, remove_advance};
+use crate::city::raze_city;
 use crate::consts::AGES;
 use crate::content::ability::Ability;
 use crate::content::persistent_events::{
@@ -188,7 +189,7 @@ pub(crate) fn draw_cards() -> Ability {
         .build()
 }
 
-pub(crate) fn raze_city() -> Ability {
+pub(crate) fn use_raze_city() -> Ability {
     Ability::builder("Raze city", "Raze size 1 city for 1 gold")
         .add_position_request(
             |event| &mut event.status_phase,
@@ -216,10 +217,9 @@ pub(crate) fn raze_city() -> Ability {
                     s.log(game, "Did not raze a city");
                     return;
                 }
-                let pos = s.choice[0];
-                s.log(game, &format!("Razed city at {pos}"));
-                s.player().gain_resources(game, ResourcePile::gold(1));
-                game.raze_city(pos, s.player_index);
+                let player = &s.player();
+                raze_city(game, player, s.choice[0]);
+                player.gain_resources(game, ResourcePile::gold(1));
             },
         )
         .build()

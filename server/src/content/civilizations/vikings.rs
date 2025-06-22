@@ -115,12 +115,9 @@ fn ship_construction() -> SpecialAdvanceInfo {
     .add_transient_event_listener(
         |event| &mut event.advance_cost,
         4,
-        |i, &a, _, _| {
+        |i, &a, _, p| {
             if a == Advance::Navigation {
-                i.set_zero_resources();
-                i.info
-                    .log
-                    .push("Ship construction reduced the cost to 0".to_string());
+                i.set_zero_resources(p);
             }
         },
     )
@@ -245,7 +242,7 @@ pub(crate) fn add_raid_bonus(game: &mut Game, player: usize, routes: &[TradeRout
                 .insert(RAID.to_string(), "true".to_string())
                 .is_none()
             {
-                game.log_with_origin(
+                game.log(
                     player,
                     &EventOrigin::SpecialAdvance(SpecialAdvance::Raiding),
                     &format!("Raided {opponent_name} at {position}"),

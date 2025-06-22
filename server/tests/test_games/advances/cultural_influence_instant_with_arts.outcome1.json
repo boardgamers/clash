@@ -232,6 +232,32 @@
                       "origin": {
                         "Advance": "Arts"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Fortress"
+                        },
+                        "balance": "Loss",
+                        "position": "C2"
+                      },
+                      "origin": {
+                        "Advance": "Arts"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Fortress"
+                        },
+                        "balance": "Gain",
+                        "position": "C2"
+                      },
+                      "origin": {
+                        "Advance": "Arts"
+                      }
                     }
                   ]
                 }
@@ -245,12 +271,11 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player2 has to pay 1 culture token for Arts"
+      "Player2: Arts: Pay 1 culture token"
     ],
     [
-      "Player2: Arts: Pay 1 culture token",
-      "Player2: Arts: Tried to influence the Fortress in the city at C2 by Player1 with the city C1",
-      "Cultural influence succeeded (rolled 6)"
+      "Player2: Arts: Pay 1 culture token, Tried to influence the Fortress in the city at C2 by Player1 with the city C1, Cultural influence succeeded (rolled 6), Gain Fortress at C2",
+      "Player1: Arts: Lose Fortress at C2"
     ]
   ],
   "undo_limit": 2,

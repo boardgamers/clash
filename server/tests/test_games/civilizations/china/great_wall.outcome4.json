@@ -390,6 +390,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "food": 2
@@ -485,6 +494,19 @@
                       "origin": {
                         "Ability": "Build Wonder"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Wonder": "GreatWall"
+                        },
+                        "balance": "Gain",
+                        "position": "D1"
+                      },
+                      "origin": {
+                        "Ability": "Build Wonder"
+                      }
                     }
                   ]
                 },
@@ -537,29 +559,25 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1: Advance: Pay 2 food",
-      "Player1: Great Wall: Gain Great Wall from Player2",
-      "Player1: Advance: Gain Engineering and take an event token (1 left)"
+      "Player1: Advance: Pay 1 action, Pay 2 food, Gain Engineering and take an event token (1 left)",
+      "Player1: Great Wall: Gain Great Wall from Player2"
     ],
     [
-      "Player1 played the wonder card Great Wall",
-      "Player1: Build Wonder: Decided to build Great Wall in city D1"
+      "Player1: Build Wonder: Play the wonder card Great Wall, Decided to build Great Wall in city D1"
     ],
     [
-      "Player1: Great Wall: Pay 3 food, 2 wood, 7 ore and 3 culture tokens with Great Wall",
-      "Great Wall reduced the cost of Great Wall by 2 culture tokens",
-      "Great Wall allows building Great Wall in the leader city as a free action",
-      "Player1: Build Wonder: Play Great Wall"
+      "Player1: Great Wall: Pay 3 food, 2 wood, 7 ore and 3 culture tokens with Great Wall, Reduce the cost of Great Wall by 2 culture tokens, Great Wall can be built in the leader city as a free action",
+      "Player1: Build Wonder: Play Great Wall, Gain Great Wall at D1"
     ],
     [
-      "Player1 ended their turn"
+      "Player1: End Turn: 0 actions left"
     ],
     [
       "Round 2/3"
     ],
     [
       "It's Player2's turn",
-      "Player2 gets to draw a replacement wonder card."
+      "Player2: Wonder replacement: Draw a replacement wonder card"
     ],
     [
       "Player2: Draw Wonder Card: Gain Pyramids from the public area"

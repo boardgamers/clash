@@ -4,6 +4,7 @@ use crate::content::ability::Ability;
 use crate::content::persistent_events::{
     EventResponse, PersistentEventRequest, PersistentEventType,
 };
+use crate::events::EventPlayer;
 use crate::game::Game;
 use crate::map::{Block, BlockPosition, Map, Rotation, UnexploredBlock};
 use crate::movement::{move_units, stop_current_move};
@@ -22,7 +23,7 @@ pub struct ExploreResolutionState {
 
 pub(crate) fn move_to_unexplored_tile(
     game: &mut Game,
-    player_index: usize,
+    player: &EventPlayer,
     units: &[u32],
     start: Position,
     destination: Position,
@@ -32,7 +33,7 @@ pub(crate) fn move_to_unexplored_tile(
     for b in &game.map.unexplored_blocks.clone() {
         for (position, _tile) in b.block.tiles(&b.position, b.position.rotation) {
             if position == destination {
-                move_to_unexplored_block(game, player_index, b, units, start, Some(destination));
+                move_to_unexplored_block(game, player, b, units, start, Some(destination));
                 return;
             }
         }
@@ -42,7 +43,7 @@ pub(crate) fn move_to_unexplored_tile(
 
 pub(crate) fn move_to_unexplored_block(
     game: &mut Game,
-    player_index: usize,
+    player: &EventPlayer,
     move_to: &UnexploredBlock,
     units: &[u32],
     start: Position,
@@ -56,16 +57,16 @@ pub(crate) fn move_to_unexplored_block(
     let block = &move_to.block;
     let tiles = block.tiles(&move_to.position, base);
 
-    let ship_explore = is_any_ship(game, player_index, units);
+    let ship_explore = is_any_ship(game, player.index, units);
 
     let instant_explore = |game: &mut Game, rotation: Rotation, ship_can_teleport| {
-        add_block_tiles_with_log(game, &move_to.position, &move_to.block, rotation);
+        add_block_tiles_with_log(game, player, &move_to.position, &move_to.block, rotation);
         if let Some(destination) = destination {
             move_to_explored_tile(
                 game,
                 move_to,
                 rotation,
-                player_index,
+                player,
                 units,
                 destination,
                 ship_can_teleport,
@@ -136,7 +137,7 @@ pub(crate) fn move_to_unexplored_block(
         destination,
         ship_can_teleport,
     };
-    ask_explore_resolution(game, player_index, resolution_state);
+    ask_explore_resolution(game, player.index, resolution_state);
 }
 
 pub(crate) fn ask_explore_resolution(
@@ -156,29 +157,29 @@ fn move_to_explored_tile(
     game: &mut Game,
     block: &UnexploredBlock,
     rotation: Rotation,
-    player_index: usize,
+    player: &EventPlayer,
     units: &[u32],
     destination: Position,
     ship_can_teleport: bool,
 ) {
-    if is_any_ship(game, player_index, units) && game.map.is_land(destination) {
-        let player = game.player(player_index);
-        let used_navigation = player.can_use_advance(Advance::Navigation)
-            && !player.get_unit(units[0]).position.is_neighbor(destination);
+    if is_any_ship(game, player.index, units) && game.map.is_land(destination) {
+        let p = player.get(game);
+        let used_navigation = p.can_use_advance(Advance::Navigation)
+            && !p.get_unit(units[0]).position.is_neighbor(destination);
 
         if ship_can_teleport || used_navigation {
             for (p, t) in block.block.tiles(&block.position, rotation) {
                 if t.is_water() {
-                    game.add_info_log_item(&format!("Teleported ship from {destination} to {p}"));
-                    move_units(game, player_index, units, p, None);
+                    player.log(game, &format!("Teleported ship from {destination} to {p}"));
+                    move_units(game, player.index, units, p, None);
                     return;
                 }
             }
         }
-        game.add_info_log_item("Ship can't move to the explored tile");
+        player.log(game, "Ship can't move to the explored tile");
         return;
     }
-    move_units(game, player_index, units, destination, None);
+    move_units(game, player.index, units, destination, None);
 }
 
 pub fn is_any_ship(game: &Game, player_index: usize, units: &[u32]) -> bool {
@@ -248,6 +249,7 @@ fn water_has_neighbors(
 
 fn add_block_tiles_with_log(
     game: &mut Game,
+    p: &EventPlayer,
     pos: &BlockPosition,
     block: &Block,
     rotation: Rotation,
@@ -264,7 +266,7 @@ fn add_block_tiles_with_log(
         .sorted()
         .join(", ");
 
-    game.add_info_log_item(&format!("Explored tiles {s}"));
+    p.log(game, &format!("Explored tiles {s}"));
     game.map.add_block_tiles(pos, block, rotation);
 }
 
@@ -282,9 +284,7 @@ pub(crate) fn explore_resolution() -> Ability {
                 panic!("Invalid action");
             };
 
-            game.add_info_log_item(&format!(
-                "{p} chose the orientation of the newly explored tiles"
-            ));
+            p.log(game, &format!("Chose rotation {rotation}"));
             let unexplored_block = &r.block;
             let rotate_by = rotation - unexplored_block.position.rotation;
             let valid_rotation = rotate_by == 0 || rotate_by == 3;
@@ -292,6 +292,7 @@ pub(crate) fn explore_resolution() -> Ability {
 
             add_block_tiles_with_log(
                 game,
+                p,
                 &unexplored_block.position,
                 &unexplored_block.block,
                 rotation,
@@ -301,7 +302,7 @@ pub(crate) fn explore_resolution() -> Ability {
                     game,
                     unexplored_block,
                     rotation,
-                    game.current_player_index,
+                    p,
                     &r.units,
                     destination,
                     r.ship_can_teleport,

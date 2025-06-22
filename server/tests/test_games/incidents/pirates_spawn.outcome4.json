@@ -394,7 +394,7 @@
     ],
     [
       "A new game event has been triggered: A successful year",
-      "Base effect: Pirates spawn"
+      "Player1: A successful year: Base effect: Pirates spawn"
     ],
     [
       "Player1: A successful year: Removed a Pirate Ships at D1"
@@ -404,14 +404,11 @@
     ],
     [
       "Pirates: A successful year: Gain 1 ship at D2",
-      "Player1 must pay 1 resource or token to bribe the pirates"
+      "Player1: A successful year: Must pay 1 resource or token to bribe the pirates"
     ],
     [
-      "Player1: A successful year: Pay 1 ore",
-      "Pirates took 1 ore",
-      "Player2 must reduce Mood in a city adjacent to pirates",
-      "Player2: A successful year: City C1 became Angry",
-      "Player2: A successful year: Gain 1 food"
+      "Player1: A successful year: Pay 1 ore, Pirates took 1 ore",
+      "Player2: A successful year: Must reduce Mood in a city adjacent to pirates, City C1 became Angry, Gain 1 food"
     ]
   ],
   "undo_limit": 5,

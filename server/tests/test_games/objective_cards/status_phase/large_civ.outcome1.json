@@ -487,20 +487,14 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player2 ended their turn with 2 actions left"
+      "Player2: End Turn: 2 actions left"
     ],
     [
       "The game has entered the 1st status phase"
     ],
     [
-      "Player1: Complete Objectives: Complete Large Civilization using Large Civilization/Draft",
-      "Player1: Complete Objectives: Complete Advanced Culture using Advanced Culture/Warmonger",
-      "Player1: Complete Objectives: Complete Religious Fervor using Religious Fervor/General",
-      "Player1: Complete Objectives: Complete City Planner using City Planner/Great Battle",
-      "Player1: Eureka!: Pay 2 ideas for Eureka!",
-      "Player1: Complete Objectives: Complete Eureka! using Eureka!/Defiance",
-      "Player1: Complete Objectives: Complete Sea Blockade using Education Lead/Sea Blockade",
-      "Player1: Complete Objectives: Complete Government using Government/Barbarian Conquest"
+      "Player1: Complete Objectives: Complete Large Civilization using Large Civilization/Draft, Complete Advanced Culture using Advanced Culture/Warmonger, Complete Religious Fervor using Religious Fervor/General, Complete City Planner using City Planner/Great Battle, Complete Eureka! using Eureka!/Defiance, Complete Sea Blockade using Education Lead/Sea Blockade, Complete Government using Government/Barbarian Conquest",
+      "Player1: Eureka!: Pay 2 ideas for Eureka!"
     ]
   ],
   "undo_limit": 1,

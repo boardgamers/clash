@@ -59,7 +59,7 @@
       "resources": {
         "wood": 6,
         "ore": 6,
-        "gold": 3,
+        "gold": 5,
         "mood_tokens": 9,
         "culture_tokens": 6
       },
@@ -149,10 +149,7 @@
         "Voting"
       ],
       "incident_tokens": 3,
-      "next_unit_id": 8,
-      "event_info": {
-        "StateReligion": "used"
-      }
+      "next_unit_id": 8
     },
     {
       "id": 1,
@@ -290,6 +287,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "food": 2
@@ -374,6 +380,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "CivilCard": 120
+                      }
+                    },
+                    {
+                      "player": 0,
                       "HandCard": {
                         "card": {
                           "ActionCard": 120
@@ -451,20 +466,16 @@
                     },
                     {
                       "player": 0,
-                      "Resources": {
-                        "resources": {
-                          "gold": 2
+                      "Structure": {
+                        "structure": {
+                          "Building": "Temple"
                         },
-                        "balance": "Loss"
+                        "balance": "Gain",
+                        "position": "C1"
                       },
                       "origin": {
-                        "Ability": "Construct Building"
-                      },
-                      "modifiers": [
-                        {
-                          "Advance": "StateReligion"
-                        }
-                      ]
+                        "CivilCard": 120
+                      }
                     }
                   ]
                 }
@@ -478,33 +489,27 @@
   "action_log_index": 5,
   "log": [
     [
-      "Player1: Advance: Pay 2 food",
-      "Player1: Storage: Gain 1 mood token",
-      "Player1: Advance: Gain Storage and take an event token (triggering an incident)"
+      "Player1: Advance: Pay 1 action, Pay 2 food, Gain Storage and take an event token (triggering an incident)",
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Great Prophet",
-      "Base effect: Barbarians move",
-      "Barbarians cannot move - will try to spawn a new city instead",
-      "Barbarians cannot spawn a new city"
+      "Player1: Great Prophet: Base effect: Barbarians move, Barbarians cannot move - will try to spawn a new city instead, Barbarians cannot spawn a new city"
     ],
     [
-      "Player1: Great Prophet: Pay 1 culture token",
-      "Player1: Great Prophet: Gain Great Prophet from the current event"
+      "Player1: Great Prophet: Pay 1 culture token, Gain Great Prophet from the current event"
     ],
     [
+      "Player1: Great Prophet: Pay 1 action, Gain Myths without taking an event token",
       "Player1: Action Card: Play Great Prophet",
-      "Player1: Myths: Gain 1 mood token",
-      "Player1: Great Prophet: Gain Myths without taking an event token"
+      "Player1: Myths: Gain 1 mood token"
     ],
     [
       "Player1: Great Prophet: Decided to build a Temple at C1"
     ],
     [
       "Player1: Construct Building: Pay 2 gold with State Religion",
-      "Player1: Construct Building: Pay 2 gold with State Religion",
-      "State Religion reduced the food cost to 0",
-      "Player1: Construct Building: Build a Temple in the city C1"
+      "Player1: Great Prophet: Gain Temple at C1"
     ]
   ],
   "undo_limit": 1,

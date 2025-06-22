@@ -284,9 +284,8 @@
   "log": [
     [
       "Player1: Action Card: Play Technology Trade/Surprise",
-      "Player1: Technology Trade: Selected Player2 as trade partner",
+      "Player1: Technology Trade: Selected Player2 as trade partner, Gain Storage without taking an event token",
       "Player1: Storage: Gain 1 mood token",
-      "Player1: Technology Trade: Gain Storage without taking an event token",
       "Player2: Fishing: Gain 1 mood token",
       "Player2: Technology Trade: Gain Fishing without taking an event token"
     ]

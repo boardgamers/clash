@@ -62,9 +62,11 @@ pub(crate) fn great_explorer() -> ActionCard {
                 )])
             },
             |game, s, a| {
-                let pos = a.selected_position.expect("position not found");
-                s.log(game, &format!("Built a city {pos} for {}", s.choice[0]));
-                found_city(game, s.player_index, pos);
+                found_city(
+                    game,
+                    &s.player(),
+                    a.selected_position.expect("position not found"),
+                );
             },
         )
         .build()
@@ -89,7 +91,7 @@ pub(crate) fn explore_adjacent_block(builder: ActionCardBuilder) -> ActionCardBu
                 .cloned()
                 .expect("Block not found");
             a.selected_positions = block_tiles(&dest.position);
-            move_to_unexplored_block(game, s.player_index, &dest, &[], position, None);
+            move_to_unexplored_block(game, &s.player(), &dest, &[], position, None);
         },
     )
 }

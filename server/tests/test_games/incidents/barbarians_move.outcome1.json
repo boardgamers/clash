@@ -361,13 +361,12 @@
     ],
     [
       "A new game event has been triggered: Population Boom",
-      "Base effect: Barbarians move"
+      "Player1: Population Boom: Base effect: Barbarians move"
     ],
     [
       "Player2: Dictator: Selected Barbarian Armies that may NOT move: A3",
-      "Player1: Population Boom: Barbarians move from B3 to B2: 2 infantry",
+      "Player1: Population Boom: Barbarians move from B3 to B2: 2 infantry, Player2 was selected to gain 1 settler.",
       "Barbarians: Population Boom: Gain 1 infantry at B3",
-      "Player1: Population Boom: Player2 was selected to gain 1 settler.",
       "Player2: Population Boom: Gain 1 settler at C1"
     ]
   ],

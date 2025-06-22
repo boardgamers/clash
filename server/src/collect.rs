@@ -78,6 +78,7 @@ impl Collect {
 pub fn get_total_collection(
     game: &Game,
     player_index: usize,
+    origin: &EventOrigin,
     city_position: Position,
     collections: &[PositionCollection],
     trigger: CostTrigger,
@@ -89,7 +90,7 @@ pub fn get_total_collection(
         return Err("Not your city".to_string());
     }
 
-    let i = possible_resource_collections(game, city_position, player_index, trigger);
+    let i = possible_resource_collections(game, city_position, player_index, origin, trigger);
     if i.max_selection < tiles_used(collections) {
         return Err(format!(
             "You can only collect {} resources at {city_position} - got {}",
@@ -163,7 +164,7 @@ pub(crate) fn execute_collect(
     c: &Collect,
 ) -> Result<(), String> {
     let origin = collect_event_origin(&c.action_type, game.player(player_index));
-    game.log_with_origin(
+    game.log(
         player_index,
         &origin,
         &format!("Use city {}", c.city_position),
@@ -172,6 +173,7 @@ pub(crate) fn execute_collect(
     let mut i = get_total_collection(
         game,
         player_index,
+        &origin,
         c.city_position,
         &c.collections,
         game.execute_cost_trigger(),
@@ -240,13 +242,14 @@ impl CollectInfo {
     pub(crate) fn new(
         choices: HashMap<Position, HashSet<ResourcePile>>,
         player: &Player,
+        origin: &EventOrigin,
         city: Position,
     ) -> CollectInfo {
         CollectInfo {
             choices,
             modifiers: Vec::new(),
             total: ResourcePile::empty(),
-            info: ActionInfo::new(player),
+            info: ActionInfo::new(player, origin.clone()),
             city,
             max_per_tile: 1,
             max_selection: player.get_city(city).mood_modified_size(player) as u8,
@@ -263,6 +266,7 @@ pub fn possible_resource_collections(
     game: &Game,
     city_pos: Position,
     player_index: usize,
+    origin: &EventOrigin,
     trigger: CostTrigger,
 ) -> CollectInfo {
     let set = [
@@ -295,7 +299,12 @@ pub fn possible_resource_collections(
         })
         .collect();
 
-    let mut collect_info = CollectInfo::new(collect_options, &game.players[player_index], city_pos);
+    let mut collect_info = CollectInfo::new(
+        collect_options,
+        &game.players[player_index],
+        origin,
+        city_pos,
+    );
     let collect_context = CollectContext {
         player_index,
         city_position: city_pos,
@@ -366,9 +375,9 @@ pub(crate) fn collect_event_origin(
     action_type: &PlayingActionType,
     player: &Player,
 ) -> EventOrigin {
-    custom_action_modifier_event_origin(
-        EventOrigin::Ability("Collect".to_string()),
-        action_type,
-        player,
-    )
+    custom_action_modifier_event_origin(base_collect_event_origin(), action_type, player)
+}
+
+pub(crate) fn base_collect_event_origin() -> EventOrigin {
+    EventOrigin::Ability("Collect".to_string())
 }

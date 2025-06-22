@@ -326,6 +326,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Units": {
                         "units": {
                           "infantry": 1
@@ -361,21 +370,20 @@
   "log": [
     [
       "Player1: Action Card: Play Negotiations/Scout",
-      "Player1 has to pay 1 culture token for Negotiations"
+      "Player1: Negotiations: Pay 1 culture token"
     ],
     [
-      "Player1: Negotiations: Pay 1 culture token",
-      "Player1: Negotiations: Started negotiations with Player2"
+      "Player1: Negotiations: Pay 1 culture token, Started negotiations with Player2"
     ],
     [
-      "Player1 ended their turn with 3 actions left"
+      "Player1: End Turn: 3 actions left"
     ],
     [
       "It's Player2's turn",
       "Player2: Negotiations: May not attack Player1 this turn."
     ],
     [
-      "Player2 ended their turn with 3 actions left"
+      "Player2: End Turn: 3 actions left"
     ],
     [
       "Round 2/3"
@@ -385,18 +393,14 @@
       "Player1: Negotiations: May attack Player2 again."
     ],
     [
-      "Player1 marched 1 infantry from C2 to B1"
+      "Player1: Move: marched 1 infantry from C2 to B1, Pay 1 action"
     ],
     [
       "Combat round 1",
-      "Attackers: 1 infantry",
-      "Defenders: 1 infantry",
-      "Player1 rolled 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units.",
-      "Player2 rolled 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against attacking units.",
+      "Player1: Combat: Attacking with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units, Lost 1 infantry at C2",
+      "Player2: Combat: Defending with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against attacking units, Lost 1 infantry at B1",
       "Player1: Choose Casualties: Remove all attacking units",
-      "Player1: Combat: Lost 1 infantry at C2",
       "Player2: Choose Casualties: Remove all defending units",
-      "Player2: Combat: Lost 1 infantry at B1",
       "Battle ends in a draw"
     ]
   ],

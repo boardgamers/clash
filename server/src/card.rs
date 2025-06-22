@@ -303,7 +303,7 @@ pub(crate) fn log_card_transfer(
         panic!("Invalid card transfer from {from:?} to {to:?}");
     };
 
-    game.log_with_origin(player_index, origin, message);
+    game.log(player_index, origin, message);
     add_action_log_item(
         game,
         player_index,

@@ -4,7 +4,7 @@ use crate::content::ability::Ability;
 use crate::content::persistent_events::{
     PersistentEventType, TriggerPersistentEventParams, trigger_persistent_event_with_listener,
 };
-use crate::events::EventOrigin;
+use crate::events::{EventOrigin, EventPlayer};
 use crate::player::Player;
 use crate::playing_actions::PlayingActionType;
 use crate::position::Position;
@@ -164,19 +164,16 @@ impl CustomActionType {
 
 pub(crate) fn log_start_custom_action(game: &mut Game, player_index: usize, action: &CustomAction) {
     let p = game.player(player_index);
-    let action_type = action.action;
-    let name = custom_action_execution(p, action_type)
-        .unwrap_or_else(|| panic!("Custom action {action_type:?} is not an action"))
-        .ability
-        .name;
-    game.add_info_log_item(&format!(
-        "{p} started {name}{}",
-        if let Some(p) = action.city {
-            format!(" at {p}")
-        } else {
-            String::new()
-        }
-    ));
+    let player = EventPlayer::from_player(
+        player_index,
+        game,
+        action.action.playing_action_type().origin(p),
+    );
+    if let Some(city) = action.city {
+        player.log(game, &format!("Start action in city {city}"));
+    } else {
+        player.log(game, "Start action");
+    }
 }
 
 pub(crate) fn on_custom_action(game: &mut Game, player_index: usize, a: CustomActionActivation) {
@@ -265,7 +262,7 @@ pub(crate) fn custom_action_modifier_event_origin(
     player: &Player,
 ) -> EventOrigin {
     if let PlayingActionType::Custom(c) = action_type {
-        c.playing_action_type().event_origin(player)
+        c.playing_action_type().origin(player)
     } else {
         base_action_origin
     }

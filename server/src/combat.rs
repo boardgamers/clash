@@ -1,7 +1,7 @@
 use crate::barbarians::get_barbarians_player;
 use crate::city::MoodState::Angry;
-use crate::city::{City, set_city_mood};
-use crate::city_pieces::{Building, remove_building};
+use crate::city::{City, gain_city, lose_city, raze_city, set_city_mood};
+use crate::city_pieces::{Building, gain_building, lose_building};
 use crate::combat_listeners::{
     CombatEventPhase, CombatResult, CombatRoundEnd, CombatRoundStart, CombatStrength,
     combat_round_end, combat_round_start, end_combat, kill_units_with_stats,
@@ -11,7 +11,7 @@ use crate::combat_stats;
 use crate::combat_stats::{CombatStats, active_defenders, new_combat_stats};
 use crate::content::ability::combat_event_origin;
 use crate::content::persistent_events::PersistentEventType;
-use crate::events::EventPlayer;
+use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
 use crate::movement::{MoveUnits, MovementRestriction, move_units, stop_current_move};
 use crate::position::Position;
@@ -19,7 +19,7 @@ use crate::resource_pile::ResourcePile;
 use crate::special_advance::SpecialAdvance;
 use crate::tactics_card::CombatRole;
 use crate::unit::{UnitType, Units, carried_units};
-use crate::wonder::{Wonder, deinit_wonder, init_wonder};
+use crate::wonder::{Wonder, gain_wonder, init_wonder, lose_wonder};
 use combat_stats::active_attackers;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -220,34 +220,43 @@ pub fn initiate_combat(
 
 pub(crate) fn log_round(game: &mut Game, c: &Combat) {
     game.add_info_log_group(format!("Combat round {}", c.stats.round));
-    game.add_info_log_item(&format!(
-        "Attackers: {}",
-        c.attackers
-            .iter()
-            .flat_map(|u| {
-                let p = game.player(c.attacker());
-                let u = p.get_unit(*u);
-                vec![u.unit_type]
-                    .into_iter()
-                    .chain(
-                        carried_units(u.id, p)
-                            .iter()
-                            .map(|u| p.get_unit(*u).unit_type),
-                    )
-                    .collect_vec()
-            })
-            .collect::<Units>()
-            .to_string(Some(game))
-    ));
-    game.add_info_log_item(&format!(
-        "Defenders: {}",
-        game.player(c.defender())
-            .get_units(c.defender_position())
-            .iter()
-            .map(|u| u.unit_type)
-            .collect::<Units>()
-            .to_string(Some(game))
-    ));
+    let origin = &combat_event_origin();
+    game.log(
+        c.attacker(),
+        origin,
+        &format!(
+            "Attacking with {}",
+            c.attackers
+                .iter()
+                .flat_map(|u| {
+                    let p = game.player(c.attacker());
+                    let u = p.get_unit(*u);
+                    vec![u.unit_type]
+                        .into_iter()
+                        .chain(
+                            carried_units(u.id, p)
+                                .iter()
+                                .map(|u| p.get_unit(*u).unit_type),
+                        )
+                        .collect_vec()
+                })
+                .collect::<Units>()
+                .to_string(Some(game))
+        ),
+    );
+    game.log(
+        c.defender(),
+        origin,
+        &format!(
+            "Defending with {}",
+            game.player(c.defender())
+                .get_units(c.defender_position())
+                .iter()
+                .map(|u| u.unit_type)
+                .collect::<Units>()
+                .to_string(Some(game))
+        ),
+    );
 }
 
 pub(crate) fn start_combat(game: &mut Game, combat: Combat) {
@@ -353,63 +362,71 @@ pub fn can_remove_after_combat(on_water: bool, unit_type: &UnitType) -> bool {
     }
 }
 
-pub(crate) fn conquer_city(game: &mut Game, position: Position, attacker: usize, defender: usize) {
-    let p = EventPlayer::from_player(attacker, game, combat_event_origin());
-    let Some(mut city) = game.players[defender].take_city(position) else {
-        panic!("player should have this city")
-    };
-    game.add_to_last_log_item(&format!(
-        " and captured {}'s city {position}",
-        game.player_name(defender)
-    ));
-    let attacker_is_human = p.get(game).is_human();
-    let size = city.mood_modified_size(&game.players[attacker]);
+pub(crate) fn conquer_city(
+    game: &mut Game,
+    position: Position,
+    attacker: &EventPlayer,
+    defender: &EventPlayer,
+) {
+    let city = lose_city(game, defender, position);
+    let attacker_is_human = attacker.get(game).is_human();
+    let size = city.mood_modified_size(attacker.get(game));
     if attacker_is_human {
-        p.gain_resources(game, ResourcePile::gold(size as u8));
+        attacker.gain_resources(game, ResourcePile::gold(size as u8));
     }
-    let take_over = game.player(attacker).is_city_available();
 
-    if take_over {
-        city.player_index = attacker;
+    if attacker.get(game).is_city_available() {
+        gain_city(game, attacker, city);
         if attacker_is_human {
-            take_over_city(game, &mut city, &p, defender);
+            take_over_city(game, position, attacker, defender);
         }
-        game.players[attacker].cities.push(city);
-        set_city_mood(game, position, &p.origin, Angry);
+        set_city_mood(game, position, &attacker.origin, Angry);
     } else {
-        p.gain_resources(game, ResourcePile::gold(city.size() as u8));
-        city.raze(game, defender);
+        raze_city(game, defender, position);
+        if attacker_is_human {
+            attacker.gain_resources(game, ResourcePile::gold(city.size() as u8));
+        }
     }
 }
 
-fn take_over_city(game: &mut Game, city: &mut City, attacker: &EventPlayer, defender: usize) {
-    for wonder in city.pieces.wonders.clone() {
-        deinit_wonder(game, defender, wonder);
+fn take_over_city(
+    game: &mut Game,
+    position: Position,
+    attacker: &EventPlayer,
+    defender: &EventPlayer,
+) {
+    let pieces = game
+        .player(attacker.index)
+        .get_city(position)
+        .pieces
+        .clone();
+    for wonder in pieces.wonders.clone() {
+        lose_wonder(game, defender, wonder, position);
+        gain_wonder(game, attacker, wonder, position);
         init_wonder(game, attacker.index, wonder);
-        game.player_mut(defender).wonders_owned.remove(wonder);
-        attacker.get_mut(game).wonders_owned.insert(wonder);
     }
 
-    for (building, owner) in city.pieces.building_owners() {
+    for (building, owner) in pieces.building_owners() {
         if matches!(building, Building::Obelisk) {
             continue;
         }
         let Some(owner) = owner else {
             continue;
         };
-        if owner != defender {
+        if owner != defender.index {
             continue;
         }
         if attacker.get(game).is_building_available(building, game) {
-            city.pieces.set_building(building, attacker.index);
+            gain_building(game, attacker, building, position);
         } else {
-            remove_building(city, building);
+            lose_building(game, defender, building, position);
             attacker.gain_resources(game, ResourcePile::gold(1));
         }
     }
 }
 
 pub(crate) fn capture_position(game: &mut Game, stats: &mut CombatStats) {
+    let p = &EventPlayer::from_player(stats.attacker.player, game, combat_event_origin());
     let old_player = stats.defender.player;
     let position = stats.defender.position;
     let captured_settlers = game.players[old_player]
@@ -418,15 +435,19 @@ pub(crate) fn capture_position(game: &mut Game, stats: &mut CombatStats) {
         .map(|unit| unit.id)
         .collect_vec();
     if !captured_settlers.is_empty() {
-        game.add_to_last_log_item(&format!(
-            " and killed {} settlers of {}",
-            captured_settlers.len(),
-            game.player_name(old_player)
-        ));
+        p.log(
+            game,
+            &format!(
+                "Kill {} settlers of {}",
+                captured_settlers.len(),
+                game.player_name(old_player)
+            ),
+        );
     }
     kill_units_with_stats(stats, game, old_player, &captured_settlers);
     if game.player(old_player).try_get_city(position).is_some() {
-        conquer_city(game, position, stats.attacker.player, old_player);
+        let d = &EventPlayer::from_player(old_player, game, combat_event_origin());
+        conquer_city(game, position, p, d);
     }
 }
 
@@ -459,8 +480,11 @@ fn move_to_enemy_player_tile(
             .wonders_owned
             .contains(Wonder::GreatWall)
     {
-        // automatic loss
-        game.add_info_log_item("Barbarians lost the battle due to the Great Wall");
+        game.log(
+            defender,
+            &EventOrigin::Wonder(Wonder::GreatWall),
+            "Automatic win against Barbarians",
+        );
 
         let mut s = new_combat_stats(
             game,
@@ -516,7 +540,12 @@ fn apply_battle_movement_restriction(game: &mut Game, player_index: usize, unit_
     }
 
     if used_longships {
-        game.add_info_log_item("Longships allow to ignore battle movement restrictions");
+        EventPlayer::from_player(
+            player_index,
+            game,
+            EventOrigin::SpecialAdvance(SpecialAdvance::Longships),
+        )
+        .log(game, "Ignore battle movement restrictions");
     }
 
     assert!(military, "Need military units to attack");

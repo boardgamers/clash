@@ -1,6 +1,8 @@
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::action::gain_action;
 use crate::action_card::ActionCard;
 use crate::collect::available_collect_actions_for_city;
+use crate::construct::ConstructDiscount;
 use crate::content::ability::Ability;
 use crate::content::action_cards::cultural_takeover::cultural_takeover;
 use crate::content::action_cards::mercenaries::mercenaries;
@@ -38,9 +40,9 @@ fn city_development(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     ActionCard::builder(
         id,
         "City Development",
-        "Construct a building without paying resources.",
+        "Construct a building without paying resources and without an action.",
         |c| c.action().culture_tokens(1),
-        |game, player, _| can_construct_any_building(game, player),
+        |game, p, _| can_construct_any_building(game, p, &[ConstructDiscount::NoResourceCost]),
     )
     .tactics_card(tactics_card)
     .add_simple_persistent_event_listener(
@@ -49,11 +51,11 @@ fn city_development(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |game, p, _| {
             game.permanent_effects
                 .push(PermanentEffect::Construct(ConstructEffect::CityDevelopment));
-            game.actions_left += 1; // to offset the action spent for building
+            gain_action(game, p); // to offset the action spent for building
             p.log(
                 game,
                 "You may build a building in a city without \
-                spending an action and without paying for it.",
+                spending an action and without paying resources.",
             );
         },
     )
@@ -76,7 +78,7 @@ fn production_focus(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |game, p, _| {
             game.permanent_effects
                 .push(PermanentEffect::Collect(CollectEffect::ProductionFocus));
-            game.actions_left += 1; // to offset the action spent for collecting
+            gain_action(game, p); // to offset the action spent for collecting
             p.log(
                 game,
                 "Production Focus: You may collect multiple times from the same tile.",
@@ -177,13 +179,7 @@ fn explorer(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
             },
             |game, s, _a| {
                 if !s.choice.is_empty() {
-                    gain_unit(
-                        game,
-                        s.player_index,
-                        s.choice[0],
-                        UnitType::Settler,
-                        &s.origin,
-                    );
+                    gain_unit(game, &s.player(), s.choice[0], UnitType::Settler);
                 }
             },
         )

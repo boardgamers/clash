@@ -267,7 +267,18 @@
                         "action": "Danegeld"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "LeaderAbility": "Danegeld"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -312,11 +323,10 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 started Danegeld"
+      "Player1: Danegeld: Pay 1 action, Start action"
     ],
     [
-      "Player1: Danegeld: Gain 4 food",
-      "Player1: Danegeld: City E2 became Neutral",
+      "Player1: Danegeld: Gain 4 food, City E2 became Neutral",
       "Player1: Waste: Could not store 4 food"
     ]
   ],

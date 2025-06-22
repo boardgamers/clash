@@ -216,12 +216,11 @@
                   "items": [
                     {
                       "player": 0,
-                      "MoodChange": {
-                        "city": "C2",
-                        "mood": "Neutral"
+                      "Action": {
+                        "balance": "Loss"
                       },
                       "origin": {
-                        "Ability": "Construct Building"
+                        "Ability": "Combat"
                       }
                     },
                     {
@@ -233,6 +232,29 @@
                           "ore": 1
                         },
                         "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "MoodChange": {
+                        "city": "C2",
+                        "mood": "Neutral"
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Observatory"
+                        },
+                        "balance": "Gain",
+                        "position": "C2"
                       },
                       "origin": {
                         "Ability": "Construct Building"
@@ -265,11 +287,9 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1: Construct Building: City C2 became Neutral",
-      "Player1: Construct Building: Pay 1 food, 1 wood and 1 ore",
-      "Player1: Construct Building: Build a Observatory in the city C2",
-      "Player1: Observatory: Draw an action card",
-      "Player1: Observatory: Observatory gained 1 action card"
+      "Player1: Combat: Pay 1 action",
+      "Player1: Construct Building: Pay 1 food, 1 wood and 1 ore, City C2 became Neutral, Gain Observatory at C2",
+      "Player1: Observatory: Draw an action card, Observatory gained 1 action card"
     ]
   ],
   "undo_limit": 0,

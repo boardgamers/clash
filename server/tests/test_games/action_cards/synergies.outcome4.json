@@ -220,6 +220,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "CivilCard": 34
+                      }
+                    },
+                    {
+                      "player": 0,
                       "HandCard": {
                         "card": {
                           "ActionCard": 34
@@ -343,6 +352,7 @@
   "action_log_index": 5,
   "log": [
     [
+      "Player1: Synergies: Pay 1 action",
       "Player1: Action Card: Play Synergies/Archers"
     ],
     [

@@ -25,10 +25,9 @@ fn math() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.advance_cost,
         1,
-        |i, &a, _, _| {
+        |i, &a, _, p| {
             if a == Advance::Engineering || a == Advance::Roads {
-                i.info.log.push("Math reduced the cost to 0".to_string());
-                i.set_zero_resources();
+                i.set_zero_resources(p);
             }
         },
     )
@@ -60,12 +59,9 @@ fn astronomy() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.advance_cost,
         0,
-        |i, &a, _, _| {
+        |i, &a, _, p| {
             if a == Advance::Navigation || a == Advance::Cartography {
-                i.set_zero_resources();
-                i.info
-                    .log
-                    .push("Astronomy reduced the cost to 0".to_string());
+                i.set_zero_resources(p);
             }
         },
     )
@@ -112,13 +108,11 @@ fn metallurgy() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.collect_total,
         0,
-        |i, _, _, _| {
+        |i, _, _, p| {
             if i.total.ore >= 2 {
                 i.total.ore -= 1;
                 i.total.gold += 1;
-                i.info
-                    .log
-                    .push("Metallurgy converted 1 ore to 1 gold".to_string());
+                i.info.add_log(p, "Convert 1 ore to 1 gold");
             }
         },
     )

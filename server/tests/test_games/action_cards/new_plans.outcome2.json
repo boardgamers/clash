@@ -211,6 +211,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "CivilCard": 31
+                      }
+                    },
+                    {
+                      "player": 0,
                       "HandCard": {
                         "card": {
                           "ActionCard": 31
@@ -337,17 +346,14 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player1: Action Card: Play New Plans/Flanking",
-      "Player1 has to pay 1 culture token for New Plans"
+      "Player1: New Plans: Pay 1 action, Pay 1 culture token",
+      "Player1: Action Card: Play New Plans/Flanking"
     ],
     [
-      "Player1: New Plans: Pay 1 culture token",
-      "Player1: New Plans: Draw an objective card",
-      "Player1: New Plans: Draw an objective card"
+      "Player1: New Plans: Pay 1 culture token, Draw an objective card, Draw an objective card"
     ],
     [
-      "Player1: New Plans: Shuffle an objective card back into the draw pile",
-      "Player1: New Plans: Reshuffled a card from the draw pile back into the draw pile"
+      "Player1: New Plans: Shuffle an objective card back into the draw pile, Reshuffled a card from the draw pile back into the draw pile"
     ]
   ],
   "undo_limit": 2,

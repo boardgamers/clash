@@ -1,4 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::action::gain_action;
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city::MoodState;
 use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
@@ -87,8 +88,7 @@ fn absolute_power() -> AdvanceBuilder {
                 |event| &mut event.custom_action,
                 0,
                 |game, p, _| {
-                    game.actions_left += 1;
-                    p.log(game, "Gain 1 action");
+                    gain_action(game, p);
                 },
             )
         },

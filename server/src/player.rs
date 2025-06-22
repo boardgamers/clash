@@ -3,7 +3,7 @@ use crate::city_pieces::DestroyedStructures;
 use crate::consts::{STACK_LIMIT, UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::content::ability::construct_event_origin;
 use crate::content::custom_actions::{CustomActionExecution, CustomActionInfo};
-use crate::events::{Event, EventOrigin};
+use crate::events::{Event, EventOrigin, EventPlayer};
 use crate::leader::Leader;
 use crate::leader_ability::LeaderAbility;
 use crate::log::{ActionLogBalance, ActionLogEntry, add_action_log_item};
@@ -29,7 +29,6 @@ use crate::{
     position::Position,
     resource_pile::ResourcePile,
     unit::{Unit, Units},
-    utils,
 };
 use enumset::EnumSet;
 use itertools::Itertools;
@@ -329,17 +328,13 @@ impl Player {
         }
     }
 
-    pub fn remove_wonder(&mut self, wonder: Wonder) {
-        utils::remove_element(&mut self.wonders_built, &wonder);
-        self.wonders_owned.remove(wonder);
-    }
-
     pub fn strip_secret(&mut self) {
         self.wonder_cards = self.wonder_cards.iter().map(|_| Wonder::Hidden).collect();
         self.action_cards = self.action_cards.iter().map(|_| 0).collect();
         self.objective_cards = self.objective_cards.iter().map(|_| 0).collect();
         self.secrets = Vec::new();
     }
+
     #[must_use]
     pub fn building_cost(&self, game: &Game, building: Building, execute: CostTrigger) -> CostInfo {
         self.trigger_cost_event(
@@ -397,16 +392,6 @@ impl Player {
     #[must_use]
     pub fn get_city_mut(&mut self, position: Position) -> &mut City {
         self.try_get_city_mut(position).expect("city should exist")
-    }
-
-    pub fn take_city(&mut self, position: Position) -> Option<City> {
-        Some(
-            self.cities.remove(
-                self.cities
-                    .iter()
-                    .position(|city| city.position == position)?,
-            ),
-        )
     }
 
     #[must_use]
@@ -550,19 +535,18 @@ impl Player {
     }
 }
 
-pub fn gain_unit(
+pub(crate) fn gain_unit(
     game: &mut Game,
-    player: usize,
+    player: &EventPlayer,
     position: Position,
     unit_type: UnitType,
-    origin: &EventOrigin,
 ) {
     gain_units(
         game,
-        player,
+        player.index,
         position,
         Units::from_iter(vec![unit_type]),
-        origin,
+        &player.origin,
     );
 }
 
@@ -580,7 +564,7 @@ pub fn gain_units(
                 p.available_leaders.retain(|name| name != leader);
                 p.recruited_leaders.push(*leader);
                 Player::with_leader(*leader, game, player, |game, leader| {
-                    leader.listeners.once_init(game, player);
+                    leader.listeners.init_first(game, player);
                 });
             }
             let p = game.player_mut(player);
@@ -590,7 +574,7 @@ pub fn gain_units(
         }
     }
 
-    game.log_with_origin(
+    game.log(
         player,
         origin,
         &format!("Gain {} at {}", units.to_string(Some(game)), position),

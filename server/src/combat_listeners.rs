@@ -1,9 +1,11 @@
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::advance::Advance;
 use crate::combat::{Combat, CombatRetreatState, capture_position, log_round};
 use crate::combat_roll::CombatHits;
 use crate::combat_stats::CombatStats;
 use crate::content::ability::{Ability, combat_event_origin};
 use crate::content::persistent_events::{PersistentEventType, PositionRequest, UnitsRequest};
+use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::log::current_log_action_mut;
 use crate::movement::move_units;
@@ -503,11 +505,11 @@ fn add_tactics_listener(
             }
         }
         if reveal_card {
-            game.add_info_log_item(&format!(
-                "{} reveals Tactics Card {}",
-                game.player_name(combat.player(role)),
-                card.name
-            ));
+            game.log(
+                combat.player(role),
+                &EventOrigin::Advance(Advance::Tactics),
+                &format!("Reveal Tactics Card {}", card.name),
+            );
         }
     }
 }
@@ -578,7 +580,7 @@ pub(crate) fn choose_fighter_casualties() -> Ability {
 }
 
 pub(crate) fn offer_retreat() -> Ability {
-    Ability::builder("Offer Retreat", "Do you want to retreat?")
+    Ability::builder("Retreat", "Do you want to retreat?")
         .add_bool_request(
             |event| &mut event.combat_round_end,
             0,
@@ -593,14 +595,13 @@ pub(crate) fn offer_retreat() -> Ability {
                     None
                 }
             },
-            |game, retreat, e| {
-                let player_name = &retreat.player_name;
-                if retreat.choice {
-                    game.add_info_log_item(&format!("{player_name} retreats",));
+            |game, s, e| {
+                if s.choice {
+                    s.log(game, "Retreat");
                 } else {
-                    game.add_info_log_item(&format!("{player_name} does not retreat",));
+                    s.log(game, "Do not retreat");
                 }
-                if retreat.choice {
+                if s.choice {
                     e.combat.retreat = CombatRetreatState::EndAfterCurrentRound;
                 }
             },
@@ -638,13 +639,7 @@ pub(crate) fn place_settler() -> Ability {
             }
         },
         |game, s, _e| {
-            gain_unit(
-                game,
-                s.player_index,
-                s.choice[0],
-                UnitType::Settler,
-                &s.origin,
-            );
+            gain_unit(game, &s.player(), s.choice[0], UnitType::Settler);
         },
     )
     .build()

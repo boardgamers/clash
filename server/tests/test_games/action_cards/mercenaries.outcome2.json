@@ -243,6 +243,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "CivilCard": 13
+                      }
+                    },
+                    {
+                      "player": 0,
                       "HandCard": {
                         "card": {
                           "ActionCard": 13
@@ -363,28 +372,21 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player1: Action Card: Play Mercenaries/For the People",
-      "Player1: Mercenaries: Player1 cannot move Barbarian army at A3 because Sulla is in range"
+      "Player1: Mercenaries: Pay 1 action, Player1 cannot move Barbarian army at A3 because Sulla is in range",
+      "Player1: Action Card: Play Mercenaries/For the People"
     ],
     [
       "Player1: Mercenaries: Selected Barbarian armies to move: B3"
     ],
     [
-      "Player1: Mercenaries: Pay 1 ore",
-      "Player1: Mercenaries: Selected Barbarian army to move: B3",
-      "Player1: Mercenaries: Selected destination for Barbarian army: B2",
-      "Player1: Mercenaries: Barbarians marched 2 infantry from B3 to B2"
+      "Player1: Mercenaries: Pay 1 ore, Selected Barbarian army to move: B3, Selected destination for Barbarian army: B2, marched 2 infantry from B3 to B2"
     ],
     [
       "Combat round 1",
-      "Attackers: 2 infantry",
-      "Defenders: 1 infantry",
-      "Barbarians rolled 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against defending units.",
-      "Player1 rolled 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against attacking units.",
+      "Barbarians: Combat: Attacking with 2 infantry, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against defending units, Lost 1 infantry at B3",
+      "Player1: Combat: Defending with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against attacking units, Lost 1 infantry at B2",
       "Barbarians: Choose Casualties: Remove 1 of their attacking units",
-      "Barbarians: Combat: Lost 1 infantry at B3",
       "Player1: Choose Casualties: Remove all defending units",
-      "Player1: Combat: Lost 1 infantry at B2",
       "Attacker wins",
       "Barbarians: Mercenaries: Gain 1 infantry at B3"
     ]

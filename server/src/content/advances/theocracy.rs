@@ -94,13 +94,13 @@ fn conversion() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.on_influence_culture_attempt,
         3,
-        |r, _, _, _| {
+        |r, _, _, p| {
             if let Ok(info) = r {
                 if !info.is_defender {
                     info.roll_boost += 1;
-                    info.info.log.push(
-                        "Player gets +1 to Influence Culture roll for Conversion Advance"
-                            .to_string(),
+                    info.info.add_log(
+                        p,
+                        "Gain +1 to Influence Culture roll for Conversion Advance",
                     );
                 }
             }
@@ -155,7 +155,7 @@ fn fanaticism() -> AdvanceBuilder {
                 }
             },
             |game, s, _| {
-                gain_unit(game, s.player_index, s.choice[0], UnitType::Infantry, &s.origin);
+                gain_unit(game, &s.player(), s.choice[0], UnitType::Infantry);
             },
         )
 }

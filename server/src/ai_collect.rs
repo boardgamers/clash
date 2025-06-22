@@ -144,6 +144,7 @@ pub(crate) fn total_collect(r: &Vec<PositionCollection>) -> ResourcePile {
 mod tests {
     use crate::ai_collect::{possible_collections, total_collect};
     use crate::collect::{CollectInfo, PositionCollection};
+    use crate::events::check_event_origin;
     use crate::player_events::ActionInfo;
     use crate::position::Position;
     use crate::resource_pile::ResourcePile;
@@ -164,6 +165,7 @@ mod tests {
                 player: 0,
                 info: HashMap::new(),
                 log: Vec::new(),
+                origin: check_event_origin(),
             },
         }
     }

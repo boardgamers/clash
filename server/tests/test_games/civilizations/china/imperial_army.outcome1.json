@@ -244,7 +244,18 @@
                         "action": "ImperialArmy"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "SpecialAdvance": "ImperialArmy"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -269,7 +280,7 @@
       "Player1 ended the movement action"
     ],
     [
-      "Player1 started Imperial Army"
+      "Player1: Imperial Army: Pay 1 action, Start action"
     ],
     [
       "Player1: Imperial Army: Convert infantry at C2, settler at B4"

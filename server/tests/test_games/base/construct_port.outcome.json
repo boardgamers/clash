@@ -221,6 +221,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "food": 1,
@@ -228,6 +237,19 @@
                           "ore": 1
                         },
                         "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Port"
+                        },
+                        "balance": "Gain",
+                        "position": "A1"
                       },
                       "origin": {
                         "Ability": "Construct Building"
@@ -245,8 +267,8 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1: Construct Building: Pay 1 food, 1 wood and 1 ore",
-      "Player1: Construct Building: Build a Port in the city A1"
+      "Player1: Combat: Pay 1 action",
+      "Player1: Construct Building: Pay 1 food, 1 wood and 1 ore, Gain Port at A1 at the water tile A2"
     ]
   ],
   "undo_limit": 0,

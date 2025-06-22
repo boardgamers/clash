@@ -429,7 +429,7 @@
     ],
     [
       "A new game event has been triggered: A successful year",
-      "Base effect: Pirates spawn"
+      "Player1: A successful year: Base effect: Pirates spawn"
     ],
     [
       "Player1: A successful year: Removed a Pirate Ships at D1"
@@ -439,7 +439,7 @@
     ],
     [
       "Pirates: A successful year: Gain 1 ship at D2",
-      "Player1 must pay 1 resource or token to bribe the pirates"
+      "Player1: A successful year: Must pay 1 resource or token to bribe the pirates"
     ]
   ],
   "undo_limit": 1,

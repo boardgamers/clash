@@ -5,6 +5,7 @@ use crate::combat_stats::CombatStats;
 use crate::events::EventOrigin;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
+use crate::structure::Structure;
 use crate::unit::Units;
 use crate::{action::Action, game::Game};
 use json_patch::PatchOperation;
@@ -104,6 +105,9 @@ pub enum ActionLogBalance {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub enum ActionLogEntry {
+    Action {
+        balance: ActionLogBalance,
+    },
     Resources {
         resources: ResourcePile,
         balance: ActionLogBalance,
@@ -116,6 +120,11 @@ pub enum ActionLogEntry {
     Units {
         units: Units,
         balance: ActionLogBalance,
+    },
+    Structure {
+        structure: Structure,
+        balance: ActionLogBalance,
+        position: Position,
     },
     HandCard {
         card: HandCard,
@@ -140,6 +149,24 @@ impl ActionLogEntry {
     }
 
     #[must_use]
+    pub fn advance(advance: Advance, balance: ActionLogBalance, take_incident_token: bool) -> Self {
+        Self::Advance {
+            advance,
+            take_incident_token,
+            balance,
+        }
+    }
+
+    #[must_use]
+    pub fn structure(structure: Structure, balance: ActionLogBalance, position: Position) -> Self {
+        Self::Structure {
+            structure,
+            balance,
+            position,
+        }
+    }
+
+    #[must_use]
     pub fn hand_card(card: HandCard, from: HandCardLocation, to: HandCardLocation) -> Self {
         Self::HandCard { card, from, to }
     }
@@ -147,6 +174,11 @@ impl ActionLogEntry {
     #[must_use]
     pub fn mood_change(city: Position, mood: MoodState) -> Self {
         Self::MoodChange { city, mood }
+    }
+
+    #[must_use]
+    pub fn action(balance: ActionLogBalance) -> Self {
+        Self::Action { balance }
     }
 }
 

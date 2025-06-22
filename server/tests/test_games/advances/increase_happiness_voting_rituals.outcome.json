@@ -330,11 +330,8 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 has to pay 1 mood token for Voting",
-      "Player1: Voting: City C2 became Neutral",
-      "Player1: Voting: City B3 became Happy",
-      "Player1: Voting: Pay 1 food, 1 ore, 3 ideas and 1 gold with Rituals",
-      "Rituals allows spending any resource as a substitute for mood tokens"
+      "Player1: Voting: Pay 1 mood token, City C2 became Neutral, City B3 became Happy, Pay 1 food, 1 ore, 3 ideas and 1 gold with Rituals",
+      "Player1: Rituals: Can pay with any resource"
     ]
   ],
   "undo_limit": 0,

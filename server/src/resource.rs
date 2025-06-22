@@ -92,14 +92,14 @@ pub(crate) fn gain_resources_with_modifiers(
     modifiers: Vec<EventOrigin>,
 ) {
     if modifiers.is_empty() {
-        game.log_with_origin(player, &origin, &format!("Gain {resources}"));
+        game.log(player, &origin, &format!("Gain {resources}"));
     } else {
         let modifier_names = modifiers
             .iter()
             .map(|m| m.name(game))
             .collect_vec()
             .join(", ");
-        game.log_with_origin(
+        game.log(
             player,
             &origin,
             &format!("Gain {resources} with {modifier_names}"),
@@ -129,7 +129,7 @@ pub(crate) fn check_for_waste(game: &mut Game) {
         let wasted_resources =
             mem::replace(&mut game.players[p].wasted_resources, ResourcePile::empty());
         if !wasted_resources.is_empty() {
-            game.log_with_origin(
+            game.log(
                 p,
                 &EventOrigin::Ability("Waste".to_string()),
                 &format!("Could not store {wasted_resources}",),
@@ -193,7 +193,7 @@ fn log_payment(game: &mut Game, player: usize, payment: &ResourcePile, cost: &Pa
         cost.modifiers.clone(),
     );
     if cost.modifiers.is_empty() {
-        game.log_with_origin(player, &cost.origin, &format!("Pay {payment}"));
+        game.log(player, &cost.origin, &format!("Pay {payment}"));
     } else {
         let modifiers = cost
             .modifiers
@@ -201,7 +201,7 @@ fn log_payment(game: &mut Game, player: usize, payment: &ResourcePile, cost: &Pa
             .map(|m| m.name(game))
             .collect_vec()
             .join(", ");
-        game.log_with_origin(
+        game.log(
             player,
             &cost.origin,
             &format!("Pay {payment} with {modifiers}"),

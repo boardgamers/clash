@@ -274,6 +274,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Increase Happiness"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "MoodChange": {
                         "city": "C2",
                         "mood": "Neutral"
@@ -316,9 +325,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1: Increase Happiness: City C2 became Neutral",
-      "Player1: Increase Happiness: City B3 became Happy",
-      "Player1: Increase Happiness: Pay 5 mood tokens"
+      "Player1: Increase Happiness: Pay 1 action, City C2 became Neutral, City B3 became Happy, Pay 5 mood tokens"
     ]
   ],
   "undo_limit": 0,

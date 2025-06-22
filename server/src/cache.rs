@@ -17,7 +17,7 @@ use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo};
 use crate::status_phase::StatusPhaseState::{ChangeGovernmentType, DetermineFirstPlayer};
 use crate::status_phase::{
     StatusPhaseState, complete_objectives, determine_first_player, draw_cards, free_advance,
-    get_status_phase, may_change_government, raze_city,
+    get_status_phase, may_change_government, use_raze_city,
 };
 use crate::tactics_card::TacticsCard;
 use crate::wonder::{Wonder, WonderInfo};
@@ -371,7 +371,7 @@ fn status_phase_handlers() -> HashMap<StatusPhaseState, Ability> {
         (CompleteObjectives, complete_objectives()),
         (FreeAdvance, free_advance()),
         (DrawCards, draw_cards()),
-        (RazeSize1City, raze_city()),
+        (RazeSize1City, use_raze_city()),
         (ChangeGovernmentType(false), may_change_government()),
         (DetermineFirstPlayer(0), determine_first_player()),
     ])

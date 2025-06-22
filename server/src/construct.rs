@@ -1,8 +1,7 @@
 use crate::advance::{Advance, gain_advance_without_payment};
 use crate::city::{City, MoodState, activate_city};
-use crate::city_pieces::Building;
+use crate::city_pieces::{Building, gain_building};
 use crate::consts::MAX_CITY_PIECES;
-use crate::content::ability::construct_event_origin;
 use crate::content::persistent_events::PersistentEventType;
 use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
@@ -39,6 +38,12 @@ impl Construct {
     }
 }
 
+#[derive(PartialEq, Eq, Clone, Debug, Copy)]
+pub enum ConstructDiscount {
+    NoCityActivation,
+    NoResourceCost,
+}
+
 ///
 /// # Errors
 /// Returns an error if the building cannot be built
@@ -51,13 +56,19 @@ pub fn can_construct(
     player: &Player,
     game: &Game,
     trigger: CostTrigger,
+    discounts: &[ConstructDiscount],
 ) -> Result<CostInfo, String> {
     let advance = game.cache.get_building_advance(building);
     if !player.can_use_advance(advance) {
         return Err(format!("Missing advance: {}", advance.name(game)));
     }
 
-    can_construct_anything(city, player)?;
+    let cost_info = player.building_cost(game, building, trigger);
+    can_construct_anything(
+        city,
+        player,
+        !discounts.contains(&ConstructDiscount::NoCityActivation) && cost_info.activate_city,
+    )?;
     if city.mood_state == MoodState::Angry {
         return Err("City is angry".to_string());
     }
@@ -67,16 +78,21 @@ pub fn can_construct(
     if !player.is_building_available(building, game) {
         return Err("All non-destroyed buildings are built".to_string());
     }
-    let cost_info = player.building_cost(game, building, trigger);
-    if !player.can_afford(&cost_info.cost) {
+    if !discounts.contains(&ConstructDiscount::NoResourceCost)
+        && !player.can_afford(&cost_info.cost)
+    {
         // construct cost event listener?
         return Err("Not enough resources".to_string());
     }
     Ok(cost_info)
 }
 
-pub(crate) fn can_construct_anything(city: &City, player: &Player) -> Result<(), String> {
-    if !city.can_activate() {
+pub(crate) fn can_construct_anything(
+    city: &City,
+    player: &Player,
+    city_activation: bool,
+) -> Result<(), String> {
+    if city_activation && !city.can_activate() {
         return Err("Can't activate".to_string());
     }
     if city.player_index != player.index {
@@ -96,17 +112,17 @@ pub(crate) fn execute_construct(
     game: &mut Game,
     player_index: usize,
     c: &Construct,
-    cost_modifier: impl Fn(CostInfo) -> CostInfo + Copy + Send + Sync,
 ) -> Result<(), String> {
     let player = &game.players[player_index];
     let city = player.get_city(c.city_position);
-    let cost = cost_modifier(can_construct(
+    let cost = can_construct(
         city,
         c.city_piece,
         player,
         game,
         game.execute_cost_trigger(),
-    )?);
+        &[],
+    )?;
     if matches!(c.city_piece, Building::Port) {
         let port_position = c.port_position.as_ref().expect("Illegal action");
         assert!(
@@ -117,43 +133,29 @@ pub(crate) fn execute_construct(
         panic!("Illegal action");
     }
 
-    let port_pos = if let Some(port_position) = c.port_position {
-        let adjacent_water_tiles = c
-            .city_position
-            .neighbors()
-            .iter()
-            .filter(|neighbor| game.map.is_sea(**neighbor))
-            .count();
-        if adjacent_water_tiles > 1 {
-            format!(" at the water tile {port_position}")
-        } else {
-            String::new()
-        }
-    } else {
-        String::new()
-    };
+    cost.pay(game, &c.payment);
+    do_construct(game, player_index, c, cost.activate_city, cost.origin());
+    Ok(())
+}
 
-    let city_piece = c.city_piece;
-    let city_position = c.city_position;
-
+pub(crate) fn do_construct(
+    game: &mut Game,
+    player_index: usize,
+    c: &Construct,
+    activate: bool,
+    origin: &EventOrigin,
+) {
     construct(
         game,
         player_index,
         c.city_piece,
         c.city_position,
         c.port_position,
-        cost.activate_city,
-        cost.origin(),
-    );
-    cost.pay(game, &c.payment);
-    game.log_with_origin(
-        player_index,
-        &construct_event_origin(),
-        &format!("Build a {city_piece} in the city {city_position}{port_pos}"),
+        activate,
+        origin,
     );
 
     on_construct(game, player_index, ConstructInfo::new(c.city_piece));
-    Ok(())
 }
 
 pub(crate) fn construct(
@@ -168,11 +170,17 @@ pub(crate) fn construct(
     if activate {
         activate_city(city_position, game, origin);
     }
-    let city = game.player_mut(player).get_city_mut(city_position);
-    city.pieces.set_building(building, player);
     if let Some(port_position) = port_position {
-        city.port_position = Some(port_position);
+        game.player_mut(player)
+            .get_city_mut(city_position)
+            .port_position = Some(port_position);
     }
+    gain_building(
+        game,
+        &EventPlayer::from_player(player, game, origin.clone()),
+        building,
+        city_position,
+    );
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
@@ -230,13 +238,14 @@ pub fn available_buildings(
     game: &Game,
     player: usize,
     city: Position,
+    discounts: &[ConstructDiscount],
 ) -> Vec<(Building, CostInfo)> {
     let player = game.player(player);
     let city = player.get_city(city);
     Building::all()
         .into_iter()
         .filter_map(|b| {
-            can_construct(city, b, player, game, CostTrigger::NoModifiers)
+            can_construct(city, b, player, game, CostTrigger::NoModifiers, discounts)
                 .ok()
                 .map(|i| (b, i))
         })

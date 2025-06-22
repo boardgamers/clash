@@ -50,12 +50,9 @@ fn aqueduct() -> SpecialAdvanceInfo {
     .add_transient_event_listener(
         |event| &mut event.advance_cost,
         3,
-        |i, &a, _, _| {
+        |i, &a, _, p| {
             if a == Advance::Sanitation {
-                i.set_zero_resources();
-                i.info
-                    .log
-                    .push("Aqueduct reduced the cost to 0".to_string());
+                i.set_zero_resources(p);
             }
         },
     )
@@ -104,15 +101,13 @@ fn captivi() -> SpecialAdvanceInfo {
     .add_transient_event_listener(
         |event| &mut event.building_cost,
         2,
-        |i, _b, _, _| {
+        |i, _b, _, p| {
             i.cost.conversions.push(PaymentConversion::new(
                 base_resources(),
                 ResourcePile::mood_tokens(1),
                 PaymentConversionType::Unlimited,
             ));
-            i.info
-                .log
-                .push("Captivi allows to replace resources with mood tokens".to_string());
+            i.info.add_log(p, "May replace resources with mood tokens");
         },
     )
     .build()
@@ -312,10 +307,9 @@ fn proconsul() -> LeaderAbility {
                 let p = s.player_index;
                 gain_unit(
                     game,
-                    p,
+                    &s.player(),
                     leader_position(game.player(p)),
                     UnitType::Infantry,
-                    &s.origin,
                 );
             }
         },

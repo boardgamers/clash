@@ -9,7 +9,7 @@ use crate::construct::ConstructInfo;
 use crate::content::custom_actions::CustomActionActivation;
 use crate::content::persistent_events::{KilledUnits, PaymentRequest};
 use crate::cultural_influence::{InfluenceCultureInfo, InfluenceCultureOutcome};
-use crate::events::{Event, EventOrigin};
+use crate::events::{Event, EventOrigin, EventPlayer};
 use crate::explore::ExploreResolutionState;
 use crate::game::Game;
 use crate::incident::PassedIncident;
@@ -57,7 +57,7 @@ pub(crate) struct TransientEvents {
     pub wonder_cost: Event<CostInfo, WonderBuildInfo, Game>,
     pub advance_cost: Event<CostInfo, Advance, Game>,
     pub happiness_cost: Event<CostInfo>,
-    pub recruit_cost: Event<CostInfo, Units, Player>,
+    pub recruit_cost: Event<CostInfo, Units, Game>,
 
     pub is_playing_action_available: Event<Result<(), String>, Game, PlayingActionType>,
 
@@ -165,27 +165,33 @@ impl PersistentEvents {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub(crate) struct ActionInfo {
     pub(crate) player: usize,
+    pub(crate) origin: EventOrigin,
     pub(crate) info: HashMap<String, String>,
-    pub(crate) log: Vec<String>,
+    pub(crate) log: Vec<(EventOrigin, String)>,
 }
 
 impl ActionInfo {
-    pub(crate) fn new(player: &Player) -> ActionInfo {
+    pub(crate) fn new(player: &Player, origin: EventOrigin) -> ActionInfo {
         ActionInfo {
             player: player.index,
+            origin,
             info: player.event_info.clone(),
             log: Vec::new(),
         }
     }
 
     pub(crate) fn execute(&self, game: &mut Game) {
-        for l in self.log.iter().unique() {
-            game.add_info_log_item(l);
+        for (o, l) in self.log.iter().unique() {
+            game.log(self.player, o, l);
         }
         let player = game.player_mut(self.player);
         for (k, v) in self.info.clone() {
             player.event_info.insert(k, v);
         }
+    }
+
+    pub(crate) fn add_log(&mut self, p: &EventPlayer, message: &str) {
+        self.log.push((p.origin.clone(), message.to_string()));
     }
 }
 
@@ -287,6 +293,10 @@ impl IncidentInfo {
     pub(crate) fn get_barbarian_state(&mut self) -> &mut BarbariansEventState {
         self.barbarians.as_mut().expect("barbarians should exist")
     }
+
+    pub(crate) fn origin(&self) -> EventOrigin {
+        EventOrigin::Incident(self.incident_id)
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -300,17 +310,19 @@ pub struct CostInfo {
 
 impl CostInfo {
     pub(crate) fn new(player: &Player, cost: PaymentOptions) -> CostInfo {
+        let info = ActionInfo::new(player, cost.origin.clone());
         CostInfo {
             cost,
-            info: ActionInfo::new(player),
+            info,
             activate_city: true,
             ignore_required_advances: false,
             ignore_action_cost: false,
         }
     }
 
-    pub(crate) fn set_zero_resources(&mut self) {
+    pub(crate) fn set_zero_resources(&mut self, p: &EventPlayer) {
         self.cost.default = ResourcePile::empty();
+        self.info.add_log(p, "Reduce the cost to 0");
     }
 
     pub(crate) fn pay(&self, game: &mut Game, payment: &ResourcePile) {

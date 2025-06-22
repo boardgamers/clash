@@ -3,13 +3,6 @@
   "players": [
     {
       "id": 0,
-      "resources": {
-        "food": 3,
-        "wood": 6,
-        "ore": 6,
-        "gold": 7,
-        "culture_tokens": 6
-      },
       "resource_limit": {
         "food": 2,
         "wood": 7,
@@ -225,6 +218,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "CivilCard": 17
+                      }
+                    },
+                    {
+                      "player": 0,
                       "HandCard": {
                         "card": {
                           "ActionCard": 17
@@ -262,6 +264,15 @@
                       "origin": {
                         "CivilCard": 17
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "CivilCard": 17
+                      }
                     }
                   ]
                 },
@@ -279,6 +290,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {},
                         "balance": "Loss"
@@ -294,6 +314,19 @@
                           "Ability": "Construct Only"
                         }
                       ]
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Fortress"
+                        },
+                        "balance": "Gain",
+                        "position": "C2"
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
+                      }
                     }
                   ]
                 }
@@ -307,17 +340,16 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player1: Action Card: Play City Development/Tactical Retreat",
-      "Player1 has to pay 1 culture token for City Development"
+      "Player1: City Development: Pay 1 action, Pay 1 culture token",
+      "Player1: Action Card: Play City Development/Tactical Retreat"
     ],
     [
-      "Player1: City Development: Pay 1 culture token",
-      "Player1: City Development: You may build a building in a city without spending an action and without paying for it."
+      "Player1: City Development: Pay 1 culture token, Gain 1 action, You may build a building in a city without spending an action and without paying resources."
     ],
     [
-      "Player1: Construct Building: Pay nothing with Captivi, Construct Only",
-      "Captivi allows to replace resources with mood tokens",
-      "Player1: Construct Building: Build a Fortress in the city C2"
+      "Player1: Combat: Pay 1 action",
+      "Player1: Construct Building: Pay nothing with Captivi, Construct Only, Gain Fortress at C2",
+      "Player1: Captivi: May replace resources with mood tokens"
     ]
   ],
   "undo_limit": 0,

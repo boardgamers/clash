@@ -1,4 +1,5 @@
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
+use crate::action::pay_action;
 use crate::advance::Advance;
 use crate::card::{HandCard, HandCardLocation, draw_card_from_pile, log_card_transfer};
 use crate::city::{City, MoodState, activate_city};
@@ -8,10 +9,12 @@ use crate::content::ability::Ability;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{PaymentRequest, PersistentEventType, PositionRequest};
 use crate::events::{EventOrigin, EventPlayer};
+use crate::log::ActionLogBalance;
 use crate::payment::PaymentOptions;
 use crate::player::{CostTrigger, Player};
 use crate::player_events::CostInfo;
 use crate::resource_pile::ResourcePile;
+use crate::structure::{Structure, log_structure};
 use crate::utils::remove_element;
 use crate::{ability_initializer::AbilityInitializerSetup, game::Game, position::Position};
 use enumset::EnumSetType;
@@ -215,7 +218,7 @@ pub(crate) fn draw_wonder_from_pile(game: &mut Game) -> Option<Wonder> {
     )
 }
 
-fn gain_wonder(game: &mut Game, player: &EventPlayer, wonder: Wonder, from: HandCardLocation) {
+fn gain_wonder_card(game: &mut Game, player: &EventPlayer, wonder: Wonder, from: HandCardLocation) {
     player.get_mut(game).wonder_cards.push(wonder);
     log_card_transfer(
         game,
@@ -256,7 +259,7 @@ pub(crate) fn draw_wonder_card_handler() -> Ability {
             |game, s, draw| {
                 if s.choice {
                     let name = *find_public_wonder(game).expect("public wonder card not found");
-                    gain_wonder(game, &s.player(), name, HandCardLocation::Public);
+                    gain_wonder_card(game, &s.player(), name, HandCardLocation::Public);
                     remove_public_wonder(game);
                 } else {
                     gain_wonder_from_pile(game, &s.player().with_origin(draw.origin.clone()));
@@ -277,7 +280,7 @@ pub(crate) fn force_draw_wonder_from_anywhere(
     } else if find_public_wonder(game).is_some_and(|w| w == &wonder) {
         gain_specific_wonder(game, player, wonder, HandCardLocation::Public);
         remove_public_wonder(game);
-        draw_public_wonder(game);
+        draw_public_wonder(game, player);
         true
     } else if let Some(last_player) = player_with_wonder_card(game, wonder) {
         gain_specific_wonder(
@@ -309,7 +312,7 @@ fn gain_specific_wonder(
     wonder: Wonder,
     from: HandCardLocation,
 ) {
-    gain_wonder(game, player, wonder, from);
+    gain_wonder_card(game, player, wonder, from);
 }
 
 fn player_with_wonder_card(game: &Game, wonder: Wonder) -> Option<usize> {
@@ -320,7 +323,7 @@ fn player_with_wonder_card(game: &Game, wonder: Wonder) -> Option<usize> {
 
 fn gain_wonder_from_pile(game: &mut Game, player: &EventPlayer) {
     if let Some(w) = draw_wonder_from_pile(game) {
-        gain_wonder(game, player, w, HandCardLocation::DrawPile);
+        gain_wonder_card(game, player, w, HandCardLocation::DrawPile);
     }
 }
 
@@ -371,7 +374,7 @@ pub(crate) fn can_construct_wonder(
     cost: CostInfo,
     trigger: CostTrigger,
 ) -> Result<CostInfo, String> {
-    can_construct_anything(city, player)?;
+    can_construct_anything(city, player, true)?;
 
     if !player.wonder_cards.contains(&wonder) {
         return Err("Wonder card not owned".to_string());
@@ -430,7 +433,7 @@ pub(crate) fn build_wonder_handler() -> Ability {
             |e| &mut e.play_wonder_card,
             11,
             move |game, p, i| {
-                game.add_info_log_item(&format!("{p} played the wonder card {}", i.wonder.name()));
+                p.log(game, &format!("Play the wonder card {}", i.wonder.name()));
 
                 Some(PositionRequest::new(
                     cities_for_wonder(i.wonder, game, p.get(game), i.cost.clone()),
@@ -450,8 +453,8 @@ pub(crate) fn build_wonder_handler() -> Ability {
         .add_payment_request_listener(
             |e| &mut e.play_wonder_card,
             10,
-            move |game, p, i| {
-                let p = p.get(game);
+            move |game, player, i| {
+                let p = player.get(game);
                 let city = p.get_city(i.selected_position.expect("city not selected"));
                 let cost = can_construct_wonder(
                     city,
@@ -466,7 +469,7 @@ pub(crate) fn build_wonder_handler() -> Ability {
                 i.cost = cost.clone();
 
                 if !cost.ignore_action_cost {
-                    game.actions_left -= 1;
+                    pay_action(game, player);
                 }
 
                 Some(vec![PaymentRequest::mandatory(
@@ -480,7 +483,7 @@ pub(crate) fn build_wonder_handler() -> Ability {
 
                 i.cost.info.execute(game);
                 remove_element(&mut game.player_mut(s.player_index).wonder_cards, &name);
-                construct_wonder(game, name, pos, &s.player().with_origin(i.origin.clone()));
+                construct_wonder(game, &s.player().with_origin(i.origin.clone()), name, pos);
             },
         )
         .build()
@@ -504,26 +507,87 @@ pub(crate) fn cities_for_wonder(
 
 fn construct_wonder(
     game: &mut Game,
+    player: &EventPlayer,
     wonder: Wonder,
     city_position: Position,
-    player: &EventPlayer,
 ) {
-    let player_index = player.index;
-    let p = &mut game.players[player_index];
-    p.wonders_built.push(wonder);
-    p.wonders_owned.insert(wonder);
-    let city = p.get_city_mut(city_position);
-    city.pieces.wonders.push(wonder);
+    player.get_mut(game).wonders_built.push(wonder);
     activate_city(city_position, game, &EventOrigin::Wonder(wonder));
     log_card_transfer(
         game,
         &HandCard::Wonder(wonder),
-        HandCardLocation::Hand(player_index),
+        HandCardLocation::Hand(player.index),
         HandCardLocation::PlayToKeep,
         &player.origin,
     );
-    let listeners = game.cache.get_wonder(wonder).listeners.clone();
-    listeners.once_init(game, player_index);
+    gain_wonder(game, player, wonder, city_position);
+    game.cache
+        .get_wonder(wonder)
+        .listeners
+        .clone()
+        .init_first(game, player.index);
+}
+
+pub(crate) fn gain_wonder(
+    game: &mut Game,
+    player: &EventPlayer,
+    wonder: Wonder,
+    city_position: Position,
+) {
+    player.log(game, &format!("Gain {} at {city_position}", wonder.name()));
+    log_structure(
+        game,
+        player,
+        Structure::Wonder(wonder),
+        ActionLogBalance::Gain,
+        city_position,
+    );
+    let p = player.get_mut(game);
+    p.get_city_mut(city_position).pieces.wonders.push(wonder);
+    p.wonders_owned.insert(wonder);
+}
+
+pub(crate) fn destroy_wonder(
+    game: &mut Game,
+    player: &EventPlayer,
+    wonder: Wonder,
+    position: Position,
+) {
+    lose_wonder(game, player, wonder, position);
+    for p in &mut game.players {
+        remove_element(&mut p.wonders_built, &wonder);
+    }
+}
+
+pub(crate) fn lose_wonder(
+    game: &mut Game,
+    player: &EventPlayer,
+    wonder: Wonder,
+    city_position: Position,
+) {
+    assert!(
+        player.get(game).wonders_owned.contains(wonder),
+        "Player does not own the wonder to lose it"
+    );
+
+    player.log(game, &format!("Lose {} at {city_position}", wonder.name()));
+    log_structure(
+        game,
+        player,
+        Structure::Wonder(wonder),
+        ActionLogBalance::Loss,
+        city_position,
+    );
+
+    let p = game.player_mut(player.index);
+    p.wonders_owned.remove(wonder);
+
+    p.get_city_mut(city_position)
+        .pieces
+        .wonders
+        .retain(|w| *w != wonder);
+
+    deinit_wonder(game, player.index, wonder);
 }
 
 #[must_use]
@@ -559,16 +623,16 @@ fn remove_public_wonder(game: &mut Game) {
         .retain(|e| !matches!(e, PermanentEffect::PublicWonderCard(_)));
 }
 
-pub(crate) fn draw_public_wonder(game: &mut Game) {
+pub(crate) fn draw_public_wonder(game: &mut Game, player: &EventPlayer) {
     if let Some(wonder) = draw_wonder_from_pile(game) {
-        game.add_info_log_item(&format!(
-            "{} is now available to be taken by anyone",
-            wonder.name()
-        ));
+        player.log(
+            game,
+            &format!("{} is now available to be taken by anyone", wonder.name()),
+        );
         game.permanent_effects
             .push(PermanentEffect::PublicWonderCard(wonder));
     } else {
-        game.add_info_log_item("No wonders left to draw as public wonder card");
+        player.log(game, "No wonders left to draw as public wonder card");
     }
 }
 
@@ -591,7 +655,7 @@ pub(crate) fn use_draw_replacement_wonder() -> Ability {
         |game, p, ()| {
             let player = p.get_mut(game);
             if player.event_info.remove(DRAW_REPLACEMENT_WONDER).is_some() {
-                game.add_info_log_item(&format!("{p} gets to draw a replacement wonder card."));
+                p.log(game, "Draw a replacement wonder card");
                 draw_wonder_card(game, p);
             }
         },

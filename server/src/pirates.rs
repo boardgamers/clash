@@ -5,6 +5,7 @@ use crate::content::ability::Ability;
 use crate::content::persistent_events::{
     PaymentRequest, PositionRequest, ResourceRewardRequest, UnitsRequest,
 };
+use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
 use crate::incident::{BASE_EFFECT_PRIORITY, IncidentBuilder};
 use crate::player::{Player, gain_unit, remove_unit};
@@ -72,9 +73,7 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
                 }
 
                 if player.resources.amount() > 0 {
-                    game.add_info_log_item(&format!(
-                        "{player} must pay 1 resource or token to bribe the pirates",
-                    ));
+                    p.log(game, "Must pay 1 resource or token to bribe the pirates");
                     Some(vec![PaymentRequest::mandatory(
                         p.payment_options()
                             .sum(p.get(game), 1, &ResourceType::all()),
@@ -86,8 +85,8 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
                     None
                 }
             },
-            |c, s, _| {
-                c.add_info_log_item(&format!("Pirates took {}", s.choice[0]));
+            |game, s, _| {
+                s.log(game, &format!("Pirates took {}", s.choice[0]));
             },
         )
         .add_incident_position_request(
@@ -107,10 +106,7 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
                     return None;
                 }
 
-                game.add_info_log_item(&format!(
-                    "{player} must reduce Mood in a city adjacent to pirates",
-                ));
-
+                p.log(game, "Must reduce Mood in a city adjacent to pirates");
                 let needed = 1..=1;
                 Some(PositionRequest::new(
                     choices,
@@ -202,7 +198,7 @@ fn place_pirate_ship(builder: IncidentBuilder, priority: i32, blockade: bool) ->
 
             if sea_spaces.is_empty() && blockade {
                 // don't log this twice (blockade is only for first call)
-                game.add_info_log_item("No valid positions for Pirate Ship");
+                p.log(game, "No valid positions for Pirate Ship");
             }
 
             let needed = 1..=1;
@@ -215,10 +211,9 @@ fn place_pirate_ship(builder: IncidentBuilder, priority: i32, blockade: bool) ->
         |game, s, _| {
             gain_unit(
                 game,
-                get_pirates_player(game).index,
+                &get_pirates_event_player(game, &s.origin),
                 s.choice[0],
                 UnitType::Ship,
-                &s.origin,
             );
         },
     )
@@ -248,6 +243,12 @@ fn cities_with_adjacent_pirates(player: &Player, game: &Game) -> Vec<Position> {
         })
         .map(|c| c.position)
         .collect()
+}
+
+#[must_use]
+pub(crate) fn get_pirates_event_player(game: &Game, origin: &EventOrigin) -> EventPlayer {
+    let player = get_pirates_player(game);
+    EventPlayer::new(player.index, player.get_name(), origin.clone())
 }
 
 #[must_use]

@@ -5,6 +5,7 @@ use crate::content::incidents::great_diplomat::{DIPLOMAT_ID, diplomatic_relation
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::map::Map;
+use crate::movement::move_event_origin;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::position::Position;
@@ -27,8 +28,7 @@ impl MoveRoute {
         cost: ResourcePile,
         modifiers: Vec<EventOrigin>,
     ) -> Self {
-        let mut options =
-            PaymentOptions::resources(player, EventOrigin::Ability("Move".to_string()), cost);
+        let mut options = PaymentOptions::resources(player, move_event_origin(), cost);
         options.modifiers = modifiers;
         Self {
             destination,

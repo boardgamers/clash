@@ -1,5 +1,5 @@
 use crate::city::City;
-use crate::city_pieces::Building;
+use crate::city_pieces::{Building, gain_building};
 use crate::content::persistent_events::{PositionRequest, ResourceRewardRequest};
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, PassedIncident};
@@ -174,21 +174,7 @@ fn reformation() -> Incident {
             ))
         },
         |game, s, _| {
-            let &p = game
-                .current_event()
-                .active_player()
-                .expect("should have active player");
-            let donor = game.player_mut(p);
-            let pos = s.choice[0];
-            donor
-                .get_city_mut(pos)
-                .pieces
-                .set_building(Building::Temple, s.player_index);
-            let donor_name = donor.get_name();
-            s.log(
-                game,
-                &format!("Gained a Temple from {donor_name} in {pos}",),
-            );
+            gain_building(game, &s.player(), Building::Temple, s.choice[0]);
         },
     )
     .build()

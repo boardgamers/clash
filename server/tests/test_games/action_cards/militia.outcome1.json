@@ -263,11 +263,10 @@
   "log": [
     [
       "Player1: Action Card: Play Militia/Wedge Formation",
-      "Player1 has to pay 1 culture token for Militia"
+      "Player1: Militia: Pay 1 culture token"
     ],
     [
-      "Player1: Militia: Pay 1 culture token",
-      "Player1: Militia: Gain 1 infantry at A1"
+      "Player1: Militia: Pay 1 culture token, Gain 1 infantry at A1"
     ]
   ],
   "undo_limit": 0,

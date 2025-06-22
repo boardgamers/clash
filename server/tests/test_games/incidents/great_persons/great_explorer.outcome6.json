@@ -367,6 +367,15 @@
                   "items": [
                     {
                       "player": 1,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 1,
                       "Resources": {
                         "resources": {
                           "food": 2
@@ -449,6 +458,15 @@
                     }
                   },
                   "items": [
+                    {
+                      "player": 1,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "CivilCard": 118
+                      }
+                    },
                     {
                       "player": 1,
                       "HandCard": {
@@ -536,6 +554,17 @@
                       "origin": {
                         "CivilCard": 118
                       }
+                    },
+                    {
+                      "player": 1,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Gain",
+                        "position": "A7"
+                      },
+                      "origin": {
+                        "CivilCard": 118
+                      }
                     }
                   ]
                 }
@@ -549,36 +578,32 @@
   "action_log_index": 7,
   "log": [
     [
-      "Player2: Advance: Pay 2 food",
-      "Player2: Storage: Gain 1 mood token",
-      "Player2: Advance: Gain Storage and take an event token (triggering an incident)"
+      "Player2: Advance: Pay 1 action, Pay 2 food, Gain Storage and take an event token (triggering an incident)",
+      "Player2: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Great Explorer",
       "Player2: Great Explorer: Exhausted the land in position E8"
     ],
     [
-      "Player2: Great Explorer: Pay 1 culture token",
-      "Player2: Great Explorer: Gain Great Explorer from the current event"
+      "Player2: Great Explorer: Pay 1 culture token, Gain Great Explorer from the current event"
     ],
     [
+      "Player2: Great Explorer: Pay 1 action, Gain Fishing without taking an event token",
       "Player2: Action Card: Play Great Explorer",
-      "Player2: Fishing: Gain 1 mood token",
-      "Player2: Great Explorer: Gain Fishing without taking an event token"
+      "Player2: Fishing: Gain 1 mood token"
     ],
     [
       "Player2: Great Explorer: Explored B6"
     ],
     [
-      "Player2 chose the orientation of the newly explored tiles",
-      "Explored tiles A7=Fertile, B6=Fertile, B7=Barren, C7=Fertile"
+      "Player2: Explore Resolution: Chose rotation 0, Explored tiles A7=Fertile, B6=Fertile, B7=Barren, C7=Fertile"
     ],
     [
       "Player2: Great Explorer: Decided to build a city A7"
     ],
     [
-      "Player2: Great Explorer: Pay 2 food",
-      "Player2: Great Explorer: Built a city A7 for 2 food"
+      "Player2: Great Explorer: Pay 2 food, Gain city A7"
     ]
   ],
   "undo_limit": 4,

@@ -1,4 +1,5 @@
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::action::gain_action;
 use crate::action_card::do_gain_action_card_from_pile;
 use crate::advance::{Advance, init_great_library};
 use crate::card::{HandCard, HandCardLocation, all_objective_hand_cards, log_card_transfer};
@@ -109,8 +110,7 @@ fn use_great_statue(b: AbilityBuilder) -> AbilityBuilder {
                 &s.origin,
                 HandCardLocation::DiscardPile,
             );
-            s.log(game, "Gain 1 action");
-            game.actions_left += 1;
+            gain_action(game, &s.player());
         },
     )
 }
@@ -264,7 +264,7 @@ fn use_great_lighthouse(b: AbilityBuilder) -> AbilityBuilder {
                 game,
                 &s.origin,
             );
-            gain_unit(game, s.player_index, s.choice[0], UnitType::Ship, &s.origin);
+            gain_unit(game, &s.player(), s.choice[0], UnitType::Ship);
         },
     )
 }

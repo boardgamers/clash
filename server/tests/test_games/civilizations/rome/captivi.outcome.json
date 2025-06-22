@@ -230,6 +230,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "food": 1,
@@ -246,6 +255,19 @@
                           "SpecialAdvance": "Captivi"
                         }
                       ]
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Market"
+                        },
+                        "balance": "Gain",
+                        "position": "A1"
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
+                      }
                     }
                   ]
                 }
@@ -259,9 +281,9 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1: Construct Building: Pay 1 food, 1 wood and 1 mood token with Captivi",
-      "Captivi allows to replace resources with mood tokens",
-      "Player1: Construct Building: Build a Market in the city A1"
+      "Player1: Combat: Pay 1 action",
+      "Player1: Construct Building: Pay 1 food, 1 wood and 1 mood token with Captivi, Gain Market at A1",
+      "Player1: Captivi: May replace resources with mood tokens"
     ]
   ],
   "undo_limit": 0,

@@ -226,6 +226,15 @@
                   "items": [
                     {
                       "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "Resources": {
                         "resources": {
                           "food": 2
@@ -320,6 +329,15 @@
                   "items": [
                     {
                       "player": 1,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "CivilCard": 119
+                      }
+                    },
+                    {
+                      "player": 1,
                       "HandCard": {
                         "card": {
                           "ActionCard": 119
@@ -361,6 +379,15 @@
                       "MoodChange": {
                         "city": "A1",
                         "mood": "Happy"
+                      },
+                      "origin": {
+                        "CivilCard": 119
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Action": {
+                        "balance": "Loss"
                       },
                       "origin": {
                         "CivilCard": 119
@@ -426,33 +453,26 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1: Advance: Pay 2 food",
-      "Player1: Storage: Gain 1 mood token",
-      "Player1: Advance: Gain Storage and take an event token (triggering an incident)"
+      "Player1: Advance: Pay 1 action, Pay 2 food, Gain Storage and take an event token (triggering an incident)",
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Great Artist",
-      "Base effect: Barbarians move",
-      "Barbarians cannot move - will try to spawn a new city instead",
-      "Barbarians cannot spawn a new city",
-      "Player1: Great Artist: Cannot afford to buy Great Artist"
+      "Player1: Great Artist: Base effect: Barbarians move, Barbarians cannot move - will try to spawn a new city instead, Barbarians cannot spawn a new city, Cannot afford to buy Great Artist"
     ],
     [
-      "Player2: Great Artist: Pay 2 culture tokens",
-      "Player2: Great Artist: Gain Great Artist from the current event"
+      "Player2: Great Artist: Pay 2 culture tokens, Gain Great Artist from the current event"
     ],
     [
-      "Player1 ended their turn with 2 actions left"
+      "Player1: End Turn: 2 actions left"
     ],
     [
       "It's Player2's turn"
     ],
     [
+      "Player2: Great Artist: Pay 1 action, Unlock Hellenistic Culture, Gain Arts without taking an event token, City A1 became Happy",
       "Player2: Action Card: Play Great Artist",
-      "Player2 unlocked Hellenistic Culture",
-      "Player2: Arts: Gain 1 culture token",
-      "Player2: Great Artist: Gain Arts without taking an event token",
-      "Player2: Great Artist: City A1 became Happy"
+      "Player2: Arts: Gain 1 culture token"
     ]
   ],
   "undo_limit": 0,

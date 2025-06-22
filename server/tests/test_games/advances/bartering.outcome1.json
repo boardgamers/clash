@@ -255,8 +255,7 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 started Bartering",
-      "Player1: Bartering: Discard Quick Advance/Peltasts"
+      "Player1: Bartering: Start action, Discard Quick Advance/Peltasts"
     ],
     [
       "Player1: Bartering: Gain 1 gold",

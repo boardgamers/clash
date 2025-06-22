@@ -398,6 +398,15 @@
                   },
                   "items": [
                     {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
                       "player": 1,
                       "Units": {
                         "units": {
@@ -410,12 +419,34 @@
                       }
                     },
                     {
+                      "player": 1,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Loss",
+                        "position": "D8"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
                       "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 2
                         },
                         "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Gain",
+                        "position": "D8"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -480,23 +511,17 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 marched Gaius Julius Caesar from E8 to D8"
+      "Player1: Move: marched Gaius Julius Caesar from E8 to D8, Pay 1 action"
     ],
     [
       "Combat round 1",
-      "Attackers: Gaius Julius Caesar",
-      "Defenders: 1 infantry",
-      "Player1 rolled 5 (cavalry, no bonus) for combined combat value of 5 and gets 1 hits against defending units.",
-      "Player2 rolled 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units.",
+      "Player1: Combat: Attacking with Gaius Julius Caesar, Roll 5 (cavalry, no bonus) for combined combat value of 5 and gets 1 hits against defending units, Gain 2 gold, Gain city D8, City D8 became Angry",
+      "Player2: Combat: Defending with 1 infantry, Roll 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units, Lost 1 infantry at D8, Lose city D8",
       "Player2: Choose Casualties: Remove all defending units",
-      "Player2: Combat: Lost 1 infantry at D8",
-      "Attacker wins and captured Player2's city D8",
-      "Player1: Combat: Gain 2 gold",
-      "Player1: Combat: City D8 became Angry"
+      "Attacker wins"
     ],
     [
-      "Player1: Proconsul: Pay 1 gold",
-      "Player1: Proconsul: Gain 1 infantry at D8"
+      "Player1: Proconsul: Pay 1 gold, Gain 1 infantry at D8"
     ]
   ],
   "undo_limit": 1,

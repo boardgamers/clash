@@ -261,6 +261,15 @@
                       "origin": {
                         "Advance": "AbsolutePower"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Absolute Power"
+                      }
                     }
                   ]
                 }
@@ -274,12 +283,10 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 started Absolute Power",
-      "Player1 has to pay 2 mood tokens for Absolute Power"
+      "Player1: Absolute Power: Start action, Pay 2 mood tokens"
     ],
     [
-      "Player1: Absolute Power: Pay 2 mood tokens",
-      "Player1: Absolute Power: Gain 1 action"
+      "Player1: Absolute Power: Pay 2 mood tokens, Gain 1 action"
     ]
   ],
   "undo_limit": 0,

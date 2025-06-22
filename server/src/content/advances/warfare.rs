@@ -148,14 +148,13 @@ fn draft() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.recruit_cost,
         2,
-        |cost, units, player, _| {
+        |cost, units, game, p| {
             if units.infantry > 0 {
                 // insert at beginning so that it's preferred over gold
 
-                let pile = ResourcePile::mood_tokens(draft_cost(player));
+                let pile = ResourcePile::mood_tokens(draft_cost(p.get(game)));
                 cost.info
-                    .log
-                    .push(format!("Draft reduced the cost of 1 Infantry to {pile}"));
+                    .add_log(p, "Reduce the cost of 1 Infantry to 1 mood token");
                 cost.cost.conversions.insert(
                     0,
                     PaymentConversion::limited(UnitType::cost(&UnitType::Infantry), pile, 1),

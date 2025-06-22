@@ -1,3 +1,4 @@
+use crate::action::lose_action;
 use crate::cache::Cache;
 use crate::combat_roll::{COMBAT_DIE_SIDES, CombatDieRoll};
 use crate::consts::ACTIONS;
@@ -7,7 +8,7 @@ use crate::content::persistent_events::{
     PersistentEventHandler, PersistentEventState, PersistentEventType,
     TriggerPersistentEventParams, trigger_persistent_event_ext,
 };
-use crate::events::{Event, EventOrigin};
+use crate::events::{Event, EventOrigin, EventPlayer};
 use crate::game_data::GameData;
 use crate::log::{
     ActionLogAge, add_player_log, add_round_log, current_player_turn_log,
@@ -311,19 +312,18 @@ impl Game {
         self.log[last_item_index].push(info.to_string());
     }
 
-    pub fn log_with_origin(&mut self, player: usize, origin: &EventOrigin, message: &str) {
-        self.add_info_log_item(&format!(
-            "{}: {}: {message}",
-            self.player_name(player),
-            origin.name(self)
-        ));
-    }
-
-    pub fn add_to_last_log_item(&mut self, edit: &str) {
+    pub fn log(&mut self, player: usize, origin: &EventOrigin, message: &str) {
+        let prefix = format!("{}: {}: ", self.player_name(player), origin.name(self));
         let last_item_index = self.log.len() - 1;
-        let vec = &mut self.log[last_item_index];
-        let l = vec.len() - 1;
-        vec[l] += edit;
+        let current = &mut self.log[last_item_index];
+        for c in current.iter_mut() {
+            if c.starts_with(&prefix) {
+                use std::fmt::Write as _;
+                let _ = write!(c, ", {message}");
+                return;
+            }
+        }
+        current.push(format!("{prefix}{message}"));
     }
 
     pub(crate) fn start_turn(&mut self) {
@@ -337,11 +337,17 @@ impl Game {
         let lost_action = self
             .permanent_effects
             .iter()
-            .position(|e| matches!(e, PermanentEffect::CivilWarLoseAction(p) if *p == player))
+            .position(|e| matches!(e, PermanentEffect::RevolutionLoseAction(p) if *p == player))
             .map(|i| self.permanent_effects.remove(i));
         if lost_action.is_some() {
-            self.add_info_log_item("Remove 1 action for Revolution");
-            self.actions_left -= 1;
+            lose_action(
+                self,
+                &EventPlayer::from_player(
+                    player,
+                    self,
+                    EventOrigin::Ability("Revolution".to_string()),
+                ),
+            );
         }
         self.successful_cultural_influence = false;
 
@@ -522,18 +528,6 @@ impl Game {
             })
             .cloned()
             .collect_vec()
-    }
-
-    ///
-    ///
-    /// # Panics
-    ///
-    /// Panics if the city does not exist
-    pub fn raze_city(&mut self, position: Position, player_index: usize) {
-        let city = self.players[player_index]
-            .take_city(position)
-            .expect("player should have this city");
-        city.raze(self, player_index);
     }
 }
 
