@@ -21,6 +21,7 @@ use crate::player::Player;
 use crate::player_events::MoveInfo;
 use crate::position::Position;
 use crate::resource::pay_cost;
+use crate::special_advance::SpecialAdvance;
 use crate::unit::{carried_units, get_current_move};
 use crate::wonder::Wonder;
 use itertools::Itertools;
@@ -168,7 +169,11 @@ pub(crate) fn move_units(
     }
 
     if !to_ship.is_empty() {
-        game.add_to_last_log_item(&format!(" converting {} to ships", to_ship.to_string(None)));
+        game.log(
+            player_index,
+            &EventOrigin::SpecialAdvance(SpecialAdvance::ShipConstruction),
+            &format!("Convert {} to ships", to_ship.to_string(None)),
+        );
         if let Movement(move_state) = &mut game.state {
             move_state.current_move = CurrentMove::Embark {
                 source: from,

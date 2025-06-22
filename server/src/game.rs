@@ -313,18 +313,16 @@ impl Game {
     }
 
     pub fn log(&mut self, player: usize, origin: &EventOrigin, message: &str) {
-        self.add_info_log_item(&format!(
-            "{}: {}: {message}",
-            self.player_name(player),
-            origin.name(self)
-        ));
-    }
-
-    pub fn add_to_last_log_item(&mut self, edit: &str) {
+        let prefix = format!("{}: {}", self.player_name(player), origin.name(self));
         let last_item_index = self.log.len() - 1;
-        let vec = &mut self.log[last_item_index];
-        let l = vec.len() - 1;
-        vec[l] += edit;
+        let current = &mut self.log[last_item_index];
+        for c in current.iter_mut() {
+            if c.starts_with(&prefix) {
+                c.push_str(&format!(", {c}"));
+                return;
+            }
+        }
+        current.push(format!("{prefix}: {message}"));
     }
 
     pub(crate) fn start_turn(&mut self) {
