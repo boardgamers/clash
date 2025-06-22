@@ -211,7 +211,7 @@ pub fn recruit_cost_without_replaced(
             ),
         ),
         units,
-        player,
+        game,
         execute,
     );
     if !player.can_afford(&cost.cost) {

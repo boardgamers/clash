@@ -1,4 +1,4 @@
-use crate::ability_initializer::{AbilityInitializerSetup, once_per_turn_advance};
+use crate::ability_initializer::{AbilityInitializerSetup, once_per_turn_ability};
 use crate::action_card::gain_action_card_from_pile;
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
@@ -11,16 +11,12 @@ use crate::resource::gain_resources;
 use crate::resource_pile::ResourcePile;
 
 pub(crate) fn education() -> AdvanceGroupInfo {
-    advance_group_builder(
-        AdvanceGroup::Education,
-        "Education",
-        vec![
-            writing(),
-            public_education(),
-            free_education(),
-            philosophy(),
-        ],
-    )
+    advance_group_builder(AdvanceGroup::Education, "Education", vec![
+        writing(),
+        public_education(),
+        free_education(),
+        philosophy(),
+    ])
 }
 
 fn writing() -> AdvanceBuilder {
@@ -63,20 +59,18 @@ fn public_education() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.collect_total,
         1,
-        |i, game, _, _| {
+        |i, game, _, p| {
             let city = game.get_any_city(i.city);
             if city.pieces.academy.is_some() {
-                once_per_turn_advance(
-                    Advance::PublicEducation,
+                once_per_turn_ability(
+                    p,
                     i,
                     &(),
                     &(),
                     |i| &mut i.info.info,
-                    |i, (), ()| {
+                    |i, (), (), p| {
                         i.total += ResourcePile::ideas(1);
-                        i.info
-                            .log
-                            .push("Public Education gained 1 idea".to_string());
+                        i.info.add_log(p, "Gain 1 idea");
                     },
                 );
             }

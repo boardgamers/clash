@@ -8,11 +8,12 @@ use crate::unit::UnitType;
 use crate::wonder::draw_wonder_card;
 
 pub(crate) fn construction() -> AdvanceGroupInfo {
-    advance_group_builder(
-        AdvanceGroup::Construction,
-        "Construction",
-        vec![mining(), engineering(), sanitation(), roads()],
-    )
+    advance_group_builder(AdvanceGroup::Construction, "Construction", vec![
+        mining(),
+        engineering(),
+        sanitation(),
+        roads(),
+    ])
 }
 
 fn mining() -> AdvanceBuilder {
@@ -43,12 +44,11 @@ fn sanitation() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.recruit_cost,
         1,
-        |cost, units, _, _| {
+        |cost, units, _, p| {
             if units.settlers > 0 {
                 // insert at beginning so that it's preferred over gold
                 cost.info
-                    .log
-                    .push("Sanitation reduced the cost of 1 Settler to 1 mood token".to_string());
+                    .add_log(p, "Reduce the cost of 1 Settler to 1 mood token");
 
                 cost.cost.conversions.insert(
                     0,

@@ -379,13 +379,13 @@
     [
       "Player1: Recruit: Pay 1 action",
       "Player1: Recruit: Pay 1 mood token with Draft",
-      "Player1: Recruit: Draft reduced the cost of 1 Infantry to 1 mood token",
+      "Player1: Draft: Reduce the cost of 1 Infantry to 1 mood token",
       "Player1: Recruit: Gain 1 infantry at A1"
     ],
     [
       "Player1: Recruit: Pay 1 action",
       "Player1: Recruit: Pay 1 mood token with Draft",
-      "Player1: Recruit: Draft reduced the cost of 1 Infantry to 1 mood token",
+      "Player1: Draft: Reduce the cost of 1 Infantry to 1 mood token",
       "Player1: Recruit: City A1 became Neutral",
       "Player1: Recruit: Gain 1 infantry at A1"
     ],

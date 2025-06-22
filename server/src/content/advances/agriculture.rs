@@ -1,4 +1,4 @@
-use crate::ability_initializer::{AbilityInitializerSetup, once_per_turn_advance};
+use crate::ability_initializer::{AbilityInitializerSetup, once_per_turn_ability};
 use crate::advance::Bonus::MoodToken;
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::collect::{CollectContext, CollectInfo};
@@ -7,6 +7,7 @@ use crate::game::Game;
 use crate::map::Terrain::Barren;
 use crate::resource_pile::ResourcePile;
 use std::collections::HashSet;
+use crate::events::EventPlayer;
 
 pub(crate) fn agriculture() -> AdvanceGroupInfo {
     advance_group_builder(
@@ -65,9 +66,9 @@ fn husbandry() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.collect_options,
         0,
-        |i, c, game, _| {
-            once_per_turn_advance(
-                Advance::Husbandry,
+        |i, c, game, p| {
+            once_per_turn_ability(
+                p,
                 i,
                 c,
                 game,
@@ -78,7 +79,7 @@ fn husbandry() -> AdvanceBuilder {
     )
 }
 
-fn husbandry_collect(i: &mut CollectInfo, c: &CollectContext, game: &Game) {
+fn husbandry_collect(i: &mut CollectInfo, c: &CollectContext, game: &Game, p: &EventPlayer) {
     let player = &game.players[c.player_index];
     let allowed = if player.can_use_advance(Advance::Roads) {
         2
@@ -87,8 +88,8 @@ fn husbandry_collect(i: &mut CollectInfo, c: &CollectContext, game: &Game) {
     };
     i.max_range2_tiles = allowed;
 
-    i.info.log.push(format!(
-        "Husbandry allows collecting {allowed} resources from 2 land spaces away"
+    i.info.add_log(p, &format!(
+        "Can collect {allowed} resources from 2 land spaces away"
     ));
 
     game.map

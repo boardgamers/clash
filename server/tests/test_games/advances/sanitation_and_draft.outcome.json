@@ -344,8 +344,8 @@
     [
       "Player1: Recruit: Pay 1 action",
       "Player1: Recruit: Pay 2 gold and 1 mood token with Draft, Sanitation",
-      "Player1: Recruit: Draft reduced the cost of 1 Infantry to 1 mood token",
-      "Player1: Recruit: Sanitation reduced the cost of 1 Settler to 1 mood token",
+      "Player1: Draft: Reduce the cost of 1 Infantry to 1 mood token",
+      "Player1: Sanitation: Reduce the cost of 1 Settler to 1 mood token",
       "Player1: Recruit: Gain 1 settler and 1 infantry at A1"
     ]
   ],

@@ -62,17 +62,16 @@ fn sparta() -> SpecialAdvanceInfo {
     .add_transient_event_listener(
         |event| &mut event.recruit_cost,
         0,
-        |cost, units, player, _| {
+        |cost, units, game, p| {
             if units.infantry > 0 {
                 cost.info
-                    .log
-                    .push("Sparta allows to pay the Draft cost as culture tokes".to_string());
+                    .add_log(p, "Can pay the Draft cost as culture tokens");
                 cost.cost.conversions.insert(
                     0,
                     PaymentConversion::limited(
                         ResourcePile::mood_tokens(1),
                         ResourcePile::culture_tokens(1),
-                        draft_cost(player),
+                        draft_cost(p.get(game)),
                     ),
                 );
             }

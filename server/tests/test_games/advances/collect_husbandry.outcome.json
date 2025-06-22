@@ -337,7 +337,7 @@
       "Player1: Collect: Use city B3",
       "Player1: Collect: City B3 became Neutral",
       "Player1: Collect: Gain 1 food",
-      "Player1: Collect: Husbandry allows collecting 1 resources from 2 land spaces away",
+      "Player1: Husbandry: Can collect 1 resources from 2 land spaces away",
       "Player1: Waste: Could not store 1 food"
     ]
   ],

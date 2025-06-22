@@ -1,4 +1,4 @@
-use crate::ability_initializer::{AbilityInitializerSetup, once_per_turn_advance};
+use crate::ability_initializer::{AbilityInitializerSetup, once_per_turn_ability};
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city_pieces::Building::Temple;
@@ -10,11 +10,12 @@ use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 
 pub(crate) fn spirituality() -> AdvanceGroupInfo {
-    advance_group_builder(
-        AdvanceGroup::Spirituality,
-        "Spirituality",
-        vec![myths(), rituals(), priesthood(), state_religion()],
-    )
+    advance_group_builder(AdvanceGroup::Spirituality, "Spirituality", vec![
+        myths(),
+        rituals(),
+        priesthood(),
+        state_religion(),
+    ])
 }
 
 fn myths() -> AdvanceBuilder {
@@ -57,7 +58,7 @@ fn rituals() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.happiness_cost,
         0,
-        |cost, (), (), _| {
+        |cost, (), (), p| {
             for r in &[
                 ResourceType::Food,
                 ResourceType::Wood,
@@ -65,10 +66,7 @@ fn rituals() -> AdvanceBuilder {
                 ResourceType::Ideas,
                 ResourceType::Gold,
             ] {
-                cost.info.log.push(
-                    "Rituals allows spending any resource as a substitute for mood tokens"
-                        .to_string(),
-                );
+                cost.info.add_log(p, "Can pay with any resource");
                 cost.cost.conversions.push(PaymentConversion::unlimited(
                     ResourcePile::mood_tokens(1),
                     ResourcePile::of(*r, 1),
@@ -87,7 +85,7 @@ fn priesthood() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.advance_cost,
         2,
-        |i, &advance, game, _| {
+        |i, &advance, game, p| {
             if game
                 .cache
                 .get_advance_group(AdvanceGroup::Science)
@@ -95,17 +93,14 @@ fn priesthood() -> AdvanceBuilder {
                 .iter()
                 .any(|a| a.advance == advance)
             {
-                once_per_turn_advance(
-                    Advance::Priesthood,
+                once_per_turn_ability(
+                    p,
                     i,
                     &(),
                     &(),
                     |i| &mut i.info.info,
-                    |i, (), ()| {
-                        i.set_zero_resources();
-                        i.info
-                            .log
-                            .push("Priesthood reduced the cost to 0".to_string());
+                    |i, (), (), p| {
+                        i.set_zero_resources(p);
                     },
                 );
             }
@@ -123,23 +118,21 @@ fn state_religion() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.building_cost,
         0,
-        |i, &b, _, _| {
+        |i, &b, _, p| {
             if matches!(b, Temple) {
-                once_per_turn_advance(
-                    Advance::StateReligion,
+                once_per_turn_ability(
+                    p,
                     i,
                     &b,
                     &(),
                     |i| &mut i.info.info,
-                    |i, _, ()| {
+                    |i, _, (), p| {
                         i.cost.conversions.push(PaymentConversion::limited(
                             ResourcePile::of(ResourceType::Food, 1),
                             ResourcePile::empty(),
                             1,
                         ));
-                        i.info
-                            .log
-                            .push("State Religion reduced the food cost to 0".to_string());
+                        i.info.add_log(p, "Reduce the food cost to 0");
                     },
                 );
             }

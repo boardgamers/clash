@@ -9,7 +9,7 @@ use crate::construct::ConstructInfo;
 use crate::content::custom_actions::CustomActionActivation;
 use crate::content::persistent_events::{KilledUnits, PaymentRequest};
 use crate::cultural_influence::{InfluenceCultureInfo, InfluenceCultureOutcome};
-use crate::events::{Event, EventOrigin};
+use crate::events::{Event, EventOrigin, EventPlayer};
 use crate::explore::ExploreResolutionState;
 use crate::game::Game;
 use crate::incident::PassedIncident;
@@ -57,7 +57,7 @@ pub(crate) struct TransientEvents {
     pub wonder_cost: Event<CostInfo, WonderBuildInfo, Game>,
     pub advance_cost: Event<CostInfo, Advance, Game>,
     pub happiness_cost: Event<CostInfo>,
-    pub recruit_cost: Event<CostInfo, Units, Player>,
+    pub recruit_cost: Event<CostInfo, Units, Game>,
 
     pub is_playing_action_available: Event<Result<(), String>, Game, PlayingActionType>,
 
@@ -167,7 +167,7 @@ pub(crate) struct ActionInfo {
     pub(crate) player: usize,
     pub(crate) origin: EventOrigin,
     pub(crate) info: HashMap<String, String>,
-    pub(crate) log: Vec<String>,
+    pub(crate) log: Vec<(EventOrigin, String)>,
 }
 
 impl ActionInfo {
@@ -181,13 +181,17 @@ impl ActionInfo {
     }
 
     pub(crate) fn execute(&self, game: &mut Game) {
-        for l in self.log.iter().unique() {
-            game.log(self.player, &self.origin, l);
+        for (o, l) in self.log.iter().unique() {
+            game.log(self.player, o, l);
         }
         let player = game.player_mut(self.player);
         for (k, v) in self.info.clone() {
             player.event_info.insert(k, v);
         }
+    }
+    
+    pub(crate) fn add_log(&mut self, p: &EventPlayer, message: &str) {
+        self.log.push((p.origin.clone(), message.to_string()));
     }
 }
 
@@ -316,8 +320,9 @@ impl CostInfo {
         }
     }
 
-    pub(crate) fn set_zero_resources(&mut self) {
+    pub(crate) fn set_zero_resources(&mut self, p: &EventPlayer) {
         self.cost.default = ResourcePile::empty();
+        self.info.add_log(p, "Reduce the cost to 0")
     }
 
     pub(crate) fn pay(&self, game: &mut Game, payment: &ResourcePile) {

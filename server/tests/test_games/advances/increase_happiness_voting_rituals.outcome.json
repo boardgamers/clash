@@ -334,7 +334,7 @@
       "Player1: Voting: City C2 became Neutral",
       "Player1: Voting: City B3 became Happy",
       "Player1: Voting: Pay 1 food, 1 ore, 3 ideas and 1 gold with Rituals",
-      "Player1: Voting: Rituals allows spending any resource as a substitute for mood tokens"
+      "Player1: Rituals: Can use Rituals to pay with any resource"
     ]
   ],
   "undo_limit": 0,

@@ -1091,19 +1091,19 @@ where
 }
 
 #[allow(clippy::map_entry)]
-pub(crate) fn once_per_turn_advance<F, T, U, V>(
-    id: Advance,
+pub(crate) fn once_per_turn_ability<F, T, U, V>(
+    player: &EventPlayer,
     value: &mut T,
     u: &U,
     v: &V,
     get_info: impl Fn(&mut T) -> &mut HashMap<String, String> + Clone + 'static + Sync + Send,
     listener: F,
 ) where
-    F: Fn(&mut T, &U, &V) + 'static + Clone + Sync + Send,
+    F: Fn(&mut T, &U, &V, &EventPlayer) + 'static + Clone + Sync + Send,
 {
-    let key = id.id();
+    let key = player.origin.id();
     if !get_info(value).contains_key(&key) {
-        listener(value, u, v);
+        listener(value, u, v, player);
         get_info(value).insert(key, "used".to_string());
     }
 }

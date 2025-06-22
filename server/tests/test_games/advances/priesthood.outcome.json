@@ -365,7 +365,7 @@
     [
       "Player2: Advance: Pay 1 action",
       "Player2: Advance: Pay nothing with Priesthood",
-      "Player2: Advance: Priesthood reduced the cost to 0",
+      "Player2: Priesthood: Reduce the cost to 0",
       "Player2: Math: Gain 1 culture token",
       "Player2: Advance: Gain Math and take an event token (2 left)",
       "Player2: Philosophy: Gain 1 idea"
