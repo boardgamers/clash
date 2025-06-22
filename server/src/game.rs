@@ -318,7 +318,8 @@ impl Game {
         let current = &mut self.log[last_item_index];
         for c in current.iter_mut() {
             if c.starts_with(&prefix) {
-                c.push_str(&format!(", {c}"));
+                use std::fmt::Write as _;
+                let _ = write!(c, ", {message}");
                 return;
             }
         }
