@@ -297,8 +297,8 @@
     ],
     [
       "Player1: Tactics: Play an action card face down, Reveal Tactics Card Flanking",
-      "Player1: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 13 and gets 2 hits against defending units., Combat modifiers: Flanking added 1 extra die, Lost 1 infantry at C2",
-      "Player2: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against attacking units., Lost 2 infantry at C1",
+      "Player1: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 13 and gets 2 hits against defending units, Combat modifiers: Flanking added 1 extra die, Lost 1 infantry at C2",
+      "Player2: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against attacking units, Lost 2 infantry at C1",
       "Player1: Choose Casualties: Remove all attacking units",
       "Player2: Choose Casualties: Remove all defending units",
       "Battle ends in a draw"

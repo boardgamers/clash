@@ -325,6 +325,19 @@
                       "origin": {
                         "Incident": 31
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Wonder": "GreatGardens"
+                        },
+                        "balance": "Loss",
+                        "position": "C2"
+                      },
+                      "origin": {
+                        "Incident": 31
+                      }
                     }
                   ]
                 },

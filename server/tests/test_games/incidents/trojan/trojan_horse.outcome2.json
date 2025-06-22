@@ -504,8 +504,8 @@
     ],
     [
       "Player1: Trojan Horse: Pay 1 gold and 1 culture token, Activated the Trojan Horse and gained 1 victory point",
-      "Player1: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 26 and gets 2 hits against defending units., Gain 1 gold, Gain city C1, Gain Temple at C1",
-      "Player2: Combat: Roll 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 4 and gets 0 hits against attacking units., Combat modifiers: Player gets +2 combat value for Fanaticism Advance, Trojan Horse denied playing Tactics Cards, Lost 2 infantry at C1, Lose city C1, Lose Temple at C1",
+      "Player1: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 26 and gets 2 hits against defending units, Gain 1 gold, Gain city C1, Gain Temple at C1",
+      "Player2: Combat: Roll 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 4 and gets 0 hits against attacking units, Combat modifiers: Player gets +2 combat value for Fanaticism Advance, Trojan Horse denied playing Tactics Cards, Lost 2 infantry at C1, Lose city C1, Lose Temple at C1",
       "Player2: Choose Casualties: Remove all defending units",
       "Attacker wins",
       "Player2: Fanaticism: Gain 1 infantry at C2",

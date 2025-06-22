@@ -592,8 +592,8 @@
     ],
     [
       "Combat round 1",
-      "Player2: Combat: Attacking with 1 infantry, Roll 5 (cavalry, no bonus) for combined combat value of 7 and gets 1 hits against defending units., Combat modifiers: Player gets +2 combat value for Great Warlord",
-      "Player1: Combat: Defending with 1 infantry, Roll 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units., Lost 1 infantry at C8",
+      "Player2: Combat: Attacking with 1 infantry, Roll 5 (cavalry, no bonus) for combined combat value of 7 and gets 1 hits against defending units, Combat modifiers: Player gets +2 combat value for Great Warlord",
+      "Player1: Combat: Defending with 1 infantry, Roll 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units, Lost 1 infantry at C8",
       "Player1: Choose Casualties: Remove all defending units",
       "Attacker wins"
     ]

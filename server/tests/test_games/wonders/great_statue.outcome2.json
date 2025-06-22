@@ -267,6 +267,19 @@
                     },
                     {
                       "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Wonder": "GreatStatue"
+                        },
+                        "balance": "Gain",
+                        "position": "A1"
+                      },
+                      "origin": {
+                        "Ability": "Build Wonder"
+                      }
+                    },
+                    {
+                      "player": 0,
                       "HandCard": {
                         "card": {
                           "ObjectiveCard": 1

@@ -267,6 +267,19 @@
                       "origin": {
                         "Ability": "Build Wonder"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Wonder": "Pyramids"
+                        },
+                        "balance": "Gain",
+                        "position": "A1"
+                      },
+                      "origin": {
+                        "Ability": "Build Wonder"
+                      }
                     }
                   ]
                 },

@@ -265,6 +265,19 @@
                       "origin": {
                         "Ability": "Build Wonder"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Wonder": "GreatGardens"
+                        },
+                        "balance": "Gain",
+                        "position": "A1"
+                      },
+                      "origin": {
+                        "Ability": "Build Wonder"
+                      }
                     }
                   ]
                 },

@@ -383,6 +383,19 @@
                       "origin": {
                         "CivilCard": 155
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Wonder": "Pyramids"
+                        },
+                        "balance": "Gain",
+                        "position": "A1"
+                      },
+                      "origin": {
+                        "CivilCard": 155
+                      }
                     }
                   ]
                 }

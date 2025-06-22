@@ -383,8 +383,8 @@
     ],
     [
       "Combat round 1",
-      "Barbarians: Combat: Attacking with 2 infantry, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against defending units., Lost 1 infantry at B3",
-      "Player1: Combat: Defending with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against attacking units., Lost 1 infantry at B2",
+      "Barbarians: Combat: Attacking with 2 infantry, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against defending units, Lost 1 infantry at B3",
+      "Player1: Combat: Defending with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against attacking units, Lost 1 infantry at B2",
       "Barbarians: Choose Casualties: Remove 1 of their attacking units",
       "Player1: Choose Casualties: Remove all defending units",
       "Attacker wins",

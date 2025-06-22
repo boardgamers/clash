@@ -308,6 +308,19 @@
                       "player": 0,
                       "Structure": {
                         "structure": {
+                          "Wonder": "Pyramids"
+                        },
+                        "balance": "Loss",
+                        "position": "C2"
+                      },
+                      "origin": {
+                        "Incident": 29
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
                           "Building": "Fortress"
                         },
                         "balance": "Loss",
@@ -322,6 +335,19 @@
                       "Structure": {
                         "structure": {
                           "Building": "Temple"
+                        },
+                        "balance": "Loss",
+                        "position": "C2"
+                      },
+                      "origin": {
+                        "Incident": 29
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Wonder": "Pyramids"
                         },
                         "balance": "Loss",
                         "position": "C2"

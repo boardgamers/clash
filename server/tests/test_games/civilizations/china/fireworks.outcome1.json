@@ -398,8 +398,8 @@
     ],
     [
       "Combat round 1",
-      "Player1: Combat: Attacking with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units.",
-      "Player2: Combat: Defending with 1 cavalry, Roll 6 (infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units."
+      "Player1: Combat: Attacking with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units",
+      "Player2: Combat: Defending with 1 cavalry, Roll 6 (infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units"
     ],
     [
       "Player1: Fireworks: Pay 2 gold, Ignore the first hit",

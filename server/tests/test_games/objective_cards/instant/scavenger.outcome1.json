@@ -502,8 +502,8 @@
     ],
     [
       "Combat round 1",
-      "Player1: Combat: Attacking with 2 ships, Roll 2 (cavalry, no bonus), 5 (cavalry, no bonus) for combined combat value of 7 and gets 1 hits against defending units., Lost 1 ship at F6",
-      "Player2: Combat: Defending with 1 ship, Roll 5 (cavalry, no bonus) for combined combat value of 5 and gets 1 hits against attacking units., Lost 1 ship at E7",
+      "Player1: Combat: Attacking with 2 ships, Roll 2 (cavalry, no bonus), 5 (cavalry, no bonus) for combined combat value of 7 and gets 1 hits against defending units, Lost 1 ship at F6",
+      "Player2: Combat: Defending with 1 ship, Roll 5 (cavalry, no bonus) for combined combat value of 5 and gets 1 hits against attacking units, Lost 1 ship at E7",
       "Player1: Choose Casualties: Remove 1 of their attacking units",
       "Player2: Choose Casualties: Remove all defending units",
       "Attacker wins"

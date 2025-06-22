@@ -505,8 +505,8 @@
     [
       "Player2: Tactics: Play an action card face down, Reveal Tactics Card Encircled",
       "Player1: Tactics: Reveal Tactics Card Peltasts",
-      "Player1: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 1 (leader, no bonus) for combined combat value of 22 and gets 2 hits against defending units., Combat modifiers: steel weapons added 1 combat value, Peltasts rolled a 6 and ignored a hit, Gain 1 gold, Gain city C1, Gain Fortress at C1",
-      "Player2: Combat: Roll 1 (leader, no bonus), 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 4 and gets 0 hits against attacking units., Combat modifiers: fortress added one extra die, steel weapons added 1 combat value, Lost 2 infantry at C1, Lose city C1, Lose Fortress at C1",
+      "Player1: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 1 (leader, no bonus) for combined combat value of 22 and gets 2 hits against defending units, Combat modifiers: steel weapons added 1 combat value, Peltasts rolled a 6 and ignored a hit, Gain 1 gold, Gain city C1, Gain Fortress at C1",
+      "Player2: Combat: Roll 1 (leader, no bonus), 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 4 and gets 0 hits against attacking units, Combat modifiers: fortress added one extra die, steel weapons added 1 combat value, Lost 2 infantry at C1, Lose city C1, Lose Fortress at C1",
       "Player2: Encircled: Cannot do damage - opponent has fewer losses",
       "Player2: Choose Casualties: Remove all defending units",
       "Attacker wins",

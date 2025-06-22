@@ -381,8 +381,8 @@
     ],
     [
       "Combat round 1",
-      "Player1: Combat: Attacking with 2 settlers, 2 infantry, 1 cavalry and 1 elephant, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 26 and gets 2 hits against defending units., Gain 1 gold, Gain city C1",
-      "Player2: Combat: Defending with 2 infantry, Roll 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 2 and gets 0 hits against attacking units., Lost 2 infantry at C1, Lose city C1",
+      "Player1: Combat: Attacking with 2 settlers, 2 infantry, 1 cavalry and 1 elephant, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 26 and gets 2 hits against defending units, Gain 1 gold, Gain city C1",
+      "Player2: Combat: Defending with 2 infantry, Roll 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 2 and gets 0 hits against attacking units, Lost 2 infantry at C1, Lose city C1",
       "Player2: Choose Casualties: Remove all defending units",
       "Attacker wins",
       "Player1: Waste: Could not store 1 gold"

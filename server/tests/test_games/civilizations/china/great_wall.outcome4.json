@@ -494,6 +494,19 @@
                       "origin": {
                         "Ability": "Build Wonder"
                       }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Wonder": "GreatWall"
+                        },
+                        "balance": "Gain",
+                        "position": "D1"
+                      },
+                      "origin": {
+                        "Ability": "Build Wonder"
+                      }
                     }
                   ]
                 },

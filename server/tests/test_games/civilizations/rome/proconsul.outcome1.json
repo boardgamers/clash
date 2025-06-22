@@ -515,8 +515,8 @@
     ],
     [
       "Combat round 1",
-      "Player1: Combat: Attacking with Gaius Julius Caesar, Roll 5 (cavalry, no bonus) for combined combat value of 5 and gets 1 hits against defending units., Gain 2 gold, Gain city D8, City D8 became Angry",
-      "Player2: Combat: Defending with 1 infantry, Roll 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units., Lost 1 infantry at D8, Lose city D8",
+      "Player1: Combat: Attacking with Gaius Julius Caesar, Roll 5 (cavalry, no bonus) for combined combat value of 5 and gets 1 hits against defending units, Gain 2 gold, Gain city D8, City D8 became Angry",
+      "Player2: Combat: Defending with 1 infantry, Roll 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units, Lost 1 infantry at D8, Lose city D8",
       "Player2: Choose Casualties: Remove all defending units",
       "Attacker wins"
     ],

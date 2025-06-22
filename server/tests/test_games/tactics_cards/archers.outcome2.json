@@ -326,8 +326,8 @@
     ],
     [
       "Player2: Archers: Player2 sacrifices an infantry for Archers",
-      "Player2: Combat: Lost 1 infantry at C1, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against attacking units., Lost 1 infantry at C1",
-      "Player1: Combat: Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units., Lost 1 infantry at C2",
+      "Player2: Combat: Lost 1 infantry at C1, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against attacking units, Lost 1 infantry at C1",
+      "Player1: Combat: Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units, Lost 1 infantry at C2",
       "Player1: Choose Casualties: Remove all attacking units",
       "Player2: Choose Casualties: Remove all defending units",
       "Battle ends in a draw"

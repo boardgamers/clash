@@ -357,8 +357,8 @@
       "Player2: Tactics: Play an action card face down, Reveal Tactics Card Scout",
       "Player1: Tactics: Reveal Tactics Card Peltasts",
       "Player2: Scout: Ignore the enemy tactics, Gain Quick Advance/Peltasts from discard pile",
-      "Player1: Combat: Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units., Lost 1 infantry at C2",
-      "Player2: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against attacking units., Lost 1 infantry at C1",
+      "Player1: Combat: Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units, Lost 1 infantry at C2",
+      "Player2: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against attacking units, Lost 1 infantry at C1",
       "Player1: Choose Casualties: Remove all attacking units",
       "Player2: Choose Casualties: Remove 1 of their defending units",
       "Defender wins"
