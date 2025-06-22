@@ -20,6 +20,8 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use std::sync::Arc;
+use crate::log::ActionLogBalance;
+use crate::structure::{log_structure, Structure};
 
 const DRAW_REPLACEMENT_WONDER: &str = "draw_replacement_wonder";
 
@@ -533,6 +535,13 @@ pub(crate) fn gain_wonder(
     city_position: Position,
 ) {
     player.log(game, &format!("Gain {} at {city_position}", wonder.name()));
+    log_structure(
+        game,
+        player,
+        Structure::Wonder(wonder),
+        ActionLogBalance::Gain,
+        city_position,
+    );
     let p = player.get_mut(game);
     p.get_city_mut(city_position).pieces.wonders.push(wonder);
     p.wonders_owned.insert(wonder);
@@ -562,6 +571,13 @@ pub(crate) fn lose_wonder(
     );
 
     player.log(game, &format!("Lose {} at {city_position}", wonder.name()));
+    log_structure(
+        game,
+        player,
+        Structure::Wonder(wonder),
+        ActionLogBalance::Loss,
+        city_position,
+    );
 
     let p = game.player_mut(player.index);
     p.wonders_owned.remove(wonder);

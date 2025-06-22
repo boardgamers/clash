@@ -8,7 +8,7 @@ use crate::events::{EventOrigin, EventPlayer};
 use crate::log::{ActionLogBalance, ActionLogEntry, add_action_log_item};
 use crate::map::Terrain;
 use crate::player::remove_unit;
-use crate::structure::{Structure, log_gain_structure, log_lose_structure};
+use crate::structure::{Structure, log_gain_city, log_lose_city};
 use crate::unit::{UnitType, Units};
 use crate::utils;
 use crate::wonder::destroy_wonder;
@@ -254,7 +254,7 @@ pub(crate) fn found_city(game: &mut Game, player: &EventPlayer, position: Positi
         .get_mut(game)
         .cities
         .push(City::new(player.index, position));
-    log_gain_structure(game, player, Structure::CityCenter, position);
+    log_gain_city(game, player, Structure::CityCenter, position);
     on_found_city(game, player.index, position);
 }
 
@@ -348,7 +348,7 @@ pub(crate) fn set_city_mood(
 
 pub(crate) fn gain_city(game: &mut Game, player: &EventPlayer, mut city: City) {
     city.player_index = player.index;
-    log_gain_structure(game, player, Structure::CityCenter, city.position);
+    log_gain_city(game, player, Structure::CityCenter, city.position);
     player.get_mut(game).cities.push(city);
 }
 
@@ -363,7 +363,7 @@ pub(crate) fn lose_city(game: &mut Game, player: &EventPlayer, position: Positio
             player.index, any_city
         );
     };
-    log_lose_structure(game, player, Structure::CityCenter, city.position);
+    log_lose_city(game, player, Structure::CityCenter, city.position);
     city
 }
 

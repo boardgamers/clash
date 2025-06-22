@@ -25,29 +25,27 @@ impl Structure {
     }
 }
 
-pub(crate) fn log_gain_structure(
+pub(crate) fn log_gain_city(
     game: &mut Game,
     player: &EventPlayer,
     structure: Structure,
     position: Position,
 ) {
-    // todo only city
     player.log(game, &format!("Gain city {position}"));
     log_structure(game, player, structure, ActionLogBalance::Gain, position);
 }
 
-pub(crate) fn log_lose_structure(
+pub(crate) fn log_lose_city(
     game: &mut Game,
     player: &EventPlayer,
     structure: Structure,
     position: Position,
 ) {
-    // todo only city
     player.log(game, &format!("Lose city {position}"));
     log_structure(game, player, structure, ActionLogBalance::Loss, position);
 }
 
-fn log_structure(
+pub(crate) fn log_structure(
     game: &mut Game,
     player: &EventPlayer,
     structure: Structure,

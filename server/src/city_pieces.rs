@@ -5,7 +5,7 @@ use crate::events::EventPlayer;
 use crate::game::Game;
 use crate::log::{ActionLogBalance, ActionLogEntry, add_action_log_item};
 use crate::position::Position;
-use crate::structure::Structure;
+use crate::structure::{log_structure, Structure};
 use crate::wonder::Wonder;
 use Building::*;
 use num::Zero;
@@ -398,7 +398,13 @@ pub(crate) fn log_gain_building(
         game,
         &format!("Gain {} at {position}{port_pos}", building.name()),
     );
-    log_building_action(game, player, building, position, ActionLogBalance::Gain);
+    log_structure(
+        game,
+        player,
+        Structure::Building(building),
+        ActionLogBalance::Gain,
+        position,
+    );
 }
 
 pub(crate) fn log_lose_building(
@@ -408,21 +414,11 @@ pub(crate) fn log_lose_building(
     position: Position,
 ) {
     player.log(game, &format!("Lose {} at {}", building.name(), position));
-    log_building_action(game, player, building, position, ActionLogBalance::Loss);
-}
-
-fn log_building_action(
-    game: &mut Game,
-    player: &EventPlayer,
-    building: Building,
-    position: Position,
-    balance: ActionLogBalance,
-) {
-    add_action_log_item(
+    log_structure(
         game,
-        player.index,
-        ActionLogEntry::structure(Structure::Building(building), balance, position),
-        player.origin.clone(),
-        vec![],
+        player,
+        Structure::Building(building),
+        ActionLogBalance::Loss,
+        position,
     );
 }
