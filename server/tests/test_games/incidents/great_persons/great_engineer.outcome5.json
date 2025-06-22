@@ -477,20 +477,15 @@
   "action_log_index": 6,
   "log": [
     [
-      "Player1: Advance: Pay 1 action",
-      "Player1: Advance: Pay 2 food",
-      "Player1: Storage: Gain 1 mood token",
-      "Player1: Advance: Gain Storage and take an event token (triggering an incident)"
+      "Player1: Advance: Pay 1 action, Pay 2 food, Gain Storage and take an event token (triggering an incident)",
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Great Engineer",
-      "Player1: Great Engineer: Base effect: Barbarians move",
-      "Player1: Great Engineer: Barbarians cannot move - will try to spawn a new city instead",
-      "Player1: Great Engineer: Barbarians cannot spawn a new city"
+      "Player1: Great Engineer: Base effect: Barbarians move, Barbarians cannot move - will try to spawn a new city instead, Barbarians cannot spawn a new city"
     ],
     [
-      "Player1: Great Engineer: Pay 1 culture token",
-      "Player1: Great Engineer: Gain Great Engineer from the current event"
+      "Player1: Great Engineer: Pay 1 culture token, Gain Great Engineer from the current event"
     ],
     [
       "Player1: Great Engineer: Pay 1 action",
@@ -498,18 +493,15 @@
     ],
     [
       "Player1: Engineering: Draw a wonder card",
-      "Player1: Great Engineer: Unlock Aqueduct",
-      "Player1: Great Engineer: Gain Engineering without taking an event token"
+      "Player1: Great Engineer: Unlock Aqueduct, Gain Engineering without taking an event token"
     ],
     [
-      "Player1: Great Engineer: Great Engineer: You may build a building in a city without spending an action and without activating it.",
-      "Player1: Great Engineer: Gain 1 action"
+      "Player1: Great Engineer: Great Engineer: You may build a building in a city without spending an action and without activating it., Gain 1 action"
     ],
     [
       "Player1: Combat: Pay 1 action",
-      "Player1: Construct Building: Pay 1 food, 1 wood and 1 ore with Captivi, Construct Only",
-      "Player1: Captivi: May replace resources with mood tokens",
-      "Player1: Construct Building: Gain Fortress at C2"
+      "Player1: Construct Building: Pay 1 food, 1 wood and 1 ore with Captivi, Construct Only, Gain Fortress at C2",
+      "Player1: Captivi: May replace resources with mood tokens"
     ]
   ],
   "undo_limit": 4,

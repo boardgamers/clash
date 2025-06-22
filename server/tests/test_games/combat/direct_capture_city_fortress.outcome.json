@@ -329,19 +329,10 @@
     ],
     [
       "Combat round 1",
-      "Player1: Combat: Attacking with 2 infantry, 1 cavalry and 1 elephant",
-      "Player2: Combat: Defending with 2 infantry",
-      "Player1: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 26 and gets 2 hits against defending units.",
-      "Player2: Combat: Roll 1 (leader, no bonus), 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 3 and gets 0 hits against attacking units.",
-      "Player2: Combat: Combat modifiers: fortress added one extra die, fortress cancelled one hit",
+      "Player1: Combat: Attacking with 2 infantry, 1 cavalry and 1 elephant, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 26 and gets 2 hits against defending units., Gain 1 gold, Gain city C1, Gain Fortress at C1",
+      "Player2: Combat: Defending with 2 infantry, Roll 1 (leader, no bonus), 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 3 and gets 0 hits against attacking units., Combat modifiers: fortress added one extra die, fortress cancelled one hit, Lost 2 infantry at C1, Lose city C1, Lose Fortress at C1",
       "Player2: Choose Casualties: Remove all defending units",
-      "Player2: Combat: Lost 2 infantry at C1",
       "Attacker wins",
-      "Player2: Combat: Lose city C1",
-      "Player1: Combat: Gain 1 gold",
-      "Player1: Combat: Gain city C1",
-      "Player2: Combat: Lose Fortress at C1",
-      "Player1: Combat: Gain Fortress at C1",
       "Player1: Waste: Could not store 1 gold"
     ]
   ],

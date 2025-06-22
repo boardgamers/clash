@@ -314,11 +314,8 @@
       "Player1: Hellenistic Culture: Pay 2 mood tokens"
     ],
     [
-      "Player1: Hellenistic Culture: Pay 2 mood tokens",
-      "Player1: Hellenistic Culture: Tried to influence the Port in the city at C2 by Player2",
-      "Player1: Hellenistic Culture: Cultural influence succeeded (rolled 6)",
-      "Player2: Hellenistic Culture: Lose Port at C2",
-      "Player1: Hellenistic Culture: Gain Port at C2 at the water tile C3"
+      "Player1: Hellenistic Culture: Pay 2 mood tokens, Tried to influence the Port in the city at C2 by Player2, Cultural influence succeeded (rolled 6), Gain Port at C2 at the water tile C3",
+      "Player2: Hellenistic Culture: Lose Port at C2"
     ]
   ],
   "undo_limit": 2,

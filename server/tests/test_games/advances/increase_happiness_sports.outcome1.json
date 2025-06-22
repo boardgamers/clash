@@ -318,12 +318,10 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1: Sports: Pay 1 action",
-      "Player1: Sports: Start action in city C2"
+      "Player1: Sports: Pay 1 action, Start action in city C2"
     ],
     [
-      "Player1: Sports: Pay 1 culture token",
-      "Player1: Sports: City C2 became Neutral"
+      "Player1: Sports: Pay 1 culture token, City C2 became Neutral"
     ]
   ],
   "undo_limit": 0,

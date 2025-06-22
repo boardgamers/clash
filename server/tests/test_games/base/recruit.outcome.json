@@ -334,11 +334,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1: Recruit: Pay 1 action",
-      "Player1: Recruit: Pay 1 food, 1 ore and 2 gold",
-      "Player1: Recruit: Lost 1 settler at C2",
-      "Player1: Recruit: City A1 became Angry",
-      "Player1: Recruit: Gain 1 settler and 1 infantry at A1",
+      "Player1: Recruit: Pay 1 action, Pay 1 food, 1 ore and 2 gold, Lost 1 settler at C2, City A1 became Angry, Gain 1 settler and 1 infantry at A1",
       "Player1: Complete Objectives: Complete Terror Regime using Shipping Routes/Terror Regime"
     ]
   ],

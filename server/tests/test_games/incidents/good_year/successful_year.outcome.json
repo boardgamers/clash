@@ -303,8 +303,7 @@
     ],
     [
       "A new game event has been triggered: A successful year",
-      "Player1: A successful year: Base effect: Pirates spawn",
-      "Player1: A successful year: No valid positions for Pirate Ship",
+      "Player1: A successful year: Base effect: Pirates spawn, No valid positions for Pirate Ship",
       "Player2: A successful year: Gain 1 food"
     ]
   ],

@@ -356,16 +356,12 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1: Recruit: Pay 1 action",
-      "Player1: Recruit: Pay 1 culture token with Draft, Sparta",
+      "Player1: Recruit: Pay 1 action, Pay 1 culture token with Draft, Sparta, City A1 became Neutral, Gain 1 infantry at A1",
       "Player1: Draft: Reduce the cost of 1 Infantry to 1 mood token",
-      "Player1: Sparta: Can pay the Draft cost as culture tokens",
-      "Player1: Recruit: City A1 became Neutral",
-      "Player1: Recruit: Gain 1 infantry at A1"
+      "Player1: Sparta: Can pay the Draft cost as culture tokens"
     ],
     [
-      "Player1: City States: City B3 became Neutral",
-      "Player1: City States: City A1 became Happy"
+      "Player1: City States: City B3 became Neutral, City A1 became Happy"
     ]
   ],
   "undo_limit": 0,

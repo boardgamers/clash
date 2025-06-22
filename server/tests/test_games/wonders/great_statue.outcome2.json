@@ -327,20 +327,14 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player1: Build Wonder: Play the wonder card Great Statue",
-      "Player1: Build Wonder: Decided to build Great Statue in city A1",
-      "Player1: Build Wonder: Pay 1 action"
+      "Player1: Build Wonder: Play the wonder card Great Statue, Decided to build Great Statue in city A1, Pay 1 action"
     ],
     [
-      "Player1: Great Statue: Pay 3 food, 4 wood, 5 ore and 5 culture tokens",
-      "Player1: Build Wonder: Play Great Statue",
-      "Player1: Build Wonder: Gain Great Statue at A1",
-      "Player1: Great Statue: Draw an objective card"
+      "Player1: Great Statue: Pay 3 food, 4 wood, 5 ore and 5 culture tokens, Draw an objective card",
+      "Player1: Build Wonder: Play Great Statue, Gain Great Statue at A1"
     ],
     [
-      "Player1: Great Statue: Start action",
-      "Player1: Great Statue: Discard Large Civilization/Draft",
-      "Player1: Great Statue: Gain 1 action"
+      "Player1: Great Statue: Start action, Discard Large Civilization/Draft, Gain 1 action"
     ]
   ],
   "undo_limit": 2,

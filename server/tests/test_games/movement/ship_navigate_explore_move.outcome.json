@@ -311,9 +311,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player2: Move: sailed 1 ship from B3 to F2",
-      "Player2: Move: Explored tiles E3=Fertile, F2=Forest, F3=Forest, G3=Water",
-      "Player2: Move: Teleported ship from F2 to G3"
+      "Player2: Move: sailed 1 ship from B3 to F2, Explored tiles E3=Fertile, F2=Forest, F3=Forest, G3=Water, Teleported ship from F2 to G3"
     ]
   ],
   "undo_limit": 1,

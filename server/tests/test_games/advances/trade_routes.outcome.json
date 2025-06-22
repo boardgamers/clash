@@ -449,9 +449,7 @@
     [
       "It's Player2's turn",
       "Player1: Market: Gain 1 gold",
-      "Player2: Trade Routes: ship at E7 traded with city D6",
-      "Player2: Trade Routes: settler at E7 traded with city E6",
-      "Player2: Trade Routes: Gain 2 food",
+      "Player2: Trade Routes: ship at E7 traded with city D6, settler at E7 traded with city E6, Gain 2 food",
       "Player2: Waste: Could not store 1 food"
     ]
   ],

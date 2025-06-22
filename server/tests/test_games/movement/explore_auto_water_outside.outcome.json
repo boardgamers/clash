@@ -349,8 +349,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player2: Move: marched 1 settler from E6 to F5",
-      "Player2: Move: Explored tiles E5=Mountain, F4=Barren, F5=Mountain, G5=Water"
+      "Player2: Move: marched 1 settler from E6 to F5, Explored tiles E5=Mountain, F4=Barren, F5=Mountain, G5=Water"
     ]
   ],
   "undo_limit": 1,

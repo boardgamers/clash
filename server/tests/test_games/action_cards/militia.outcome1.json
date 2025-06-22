@@ -266,8 +266,7 @@
       "Player1: Militia: Pay 1 culture token"
     ],
     [
-      "Player1: Militia: Pay 1 culture token",
-      "Player1: Militia: Gain 1 infantry at A1"
+      "Player1: Militia: Pay 1 culture token, Gain 1 infantry at A1"
     ]
   ],
   "undo_limit": 0,

@@ -322,15 +322,11 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1: Overproduction: Pay 1 action",
-      "Player1: Action Card: Play Overproduction/Defensive Formation",
-      "Player1: Overproduction: Gain 1 action",
-      "Player1: Overproduction: Can use Overproduction to collect from 2 additional tiles."
+      "Player1: Overproduction: Pay 1 action, Gain 1 action, Can use Overproduction to collect from 2 additional tiles.",
+      "Player1: Action Card: Play Overproduction/Defensive Formation"
     ],
     [
-      "Player1: Collect: Pay 1 action",
-      "Player1: Collect: Use city C2",
-      "Player1: Collect: Gain 1 wood, 1 ore and 1 mood token"
+      "Player1: Collect: Pay 1 action, Use city C2, Gain 1 wood, 1 ore and 1 mood token"
     ]
   ],
   "undo_limit": 0,

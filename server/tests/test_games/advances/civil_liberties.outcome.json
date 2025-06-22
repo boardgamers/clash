@@ -235,9 +235,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1: Civil Liberties: Pay 1 action",
-      "Player1: Civil Liberties: Start action",
-      "Player1: Civil Liberties: Gain 3 mood tokens"
+      "Player1: Civil Liberties: Pay 1 action, Start action, Gain 3 mood tokens"
     ]
   ],
   "undo_limit": 0,

@@ -333,8 +333,7 @@
       "Player1: Theaters: Start action"
     ],
     [
-      "Player1: Theaters: Pay 1 culture token",
-      "Player1: Theaters: Gain 1 mood token"
+      "Player1: Theaters: Pay 1 culture token, Gain 1 mood token"
     ]
   ],
   "undo_limit": 0,

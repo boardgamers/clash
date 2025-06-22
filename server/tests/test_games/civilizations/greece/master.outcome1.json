@@ -483,16 +483,11 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1: Master: Pay 1 action",
-      "Player1: Master: Start action",
-      "Player1: Master: Pay 1 mood token"
+      "Player1: Master: Pay 1 action, Start action, Pay 1 mood token"
     ],
     [
-      "Player1: Master: Pay 1 mood token",
-      "Player1: Writing: Draw an action card",
-      "Player1: Writing: Draw an objective card",
-      "Player1: Writing: Gain 1 culture token",
-      "Player1: Master: Gain Writing and take an event token (1 left)"
+      "Player1: Master: Pay 1 mood token, Gain Writing and take an event token (1 left)",
+      "Player1: Writing: Draw an action card, Draw an objective card, Gain 1 culture token"
     ]
   ],
   "undo_limit": 2,

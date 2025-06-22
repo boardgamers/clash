@@ -484,22 +484,14 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1: Move: marched Sun Tzu from E8 to D8",
-      "Player1: Move: Pay 1 action"
+      "Player1: Move: marched Sun Tzu from E8 to D8, Pay 1 action"
     ],
     [
       "Combat round 1",
-      "Player1: Combat: Attacking with Sun Tzu",
-      "Player2: Combat: Defending with 1 infantry",
-      "Player1: Combat: Roll 5 (cavalry, no bonus) for combined combat value of 5 and gets 1 hits against defending units.",
-      "Player2: Combat: Roll 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units.",
+      "Player1: Combat: Attacking with Sun Tzu, Roll 5 (cavalry, no bonus) for combined combat value of 5 and gets 1 hits against defending units., Gain 2 gold, Gain city D8, City D8 became Angry",
+      "Player2: Combat: Defending with 1 infantry, Roll 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units., Lost 1 infantry at D8, Lose city D8",
       "Player2: Choose Casualties: Remove all defending units",
-      "Player2: Combat: Lost 1 infantry at D8",
       "Attacker wins",
-      "Player2: Combat: Lose city D8",
-      "Player1: Combat: Gain 2 gold",
-      "Player1: Combat: Gain city D8",
-      "Player1: Combat: City D8 became Angry",
       "Player1: Fast War: Gain 1 mood token and 1 culture token"
     ]
   ],

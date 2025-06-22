@@ -361,9 +361,7 @@
       "Player1: Great Library: Use Engineering for the turn"
     ],
     [
-      "Player1: Build Wonder: Play the wonder card Pyramids",
-      "Player1: Build Wonder: Decided to build Pyramids in city C2",
-      "Player1: Build Wonder: Pay 1 action"
+      "Player1: Build Wonder: Play the wonder card Pyramids, Decided to build Pyramids in city C2, Pay 1 action"
     ]
   ],
   "undo_limit": 0,

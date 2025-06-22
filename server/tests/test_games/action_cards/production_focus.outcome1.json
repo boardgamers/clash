@@ -323,15 +323,11 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1: Production Focus: Pay 1 action",
-      "Player1: Action Card: Play Production Focus/Tactical Retreat",
-      "Player1: Production Focus: Gain 1 action",
-      "Player1: Production Focus: Production Focus: You may collect multiple times from the same tile."
+      "Player1: Production Focus: Pay 1 action, Gain 1 action, Production Focus: You may collect multiple times from the same tile.",
+      "Player1: Action Card: Play Production Focus/Tactical Retreat"
     ],
     [
-      "Player1: Collect: Pay 1 action",
-      "Player1: Collect: Use city C2",
-      "Player1: Collect: Gain 2 ore, 1 gold and 2 mood tokens",
+      "Player1: Collect: Pay 1 action, Use city C2, Gain 2 ore, 1 gold and 2 mood tokens",
       "Player1: Waste: Could not store 1 gold"
     ]
   ],

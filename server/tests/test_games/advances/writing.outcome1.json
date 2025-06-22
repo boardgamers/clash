@@ -434,17 +434,12 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1: Advance: Pay 1 action",
-      "Player1: Advance: Pay 1 food and 1 gold",
-      "Player1: Writing: Draw an action card",
-      "Player1: Writing: Draw an objective card",
-      "Player1: Writing: Gain 1 culture token",
-      "Player1: Advance: Gain Writing and take an event token (1 left)"
+      "Player1: Advance: Pay 1 action, Pay 1 food and 1 gold, Gain Writing and take an event token (1 left)",
+      "Player1: Writing: Draw an action card, Draw an objective card, Gain 1 culture token"
     ],
     [
       "Player1: Combat: Pay 1 action",
-      "Player1: Construct Building: Pay 1 food, 1 wood and 1 ore",
-      "Player1: Construct Building: Gain Academy at A1",
+      "Player1: Construct Building: Pay 1 food, 1 wood and 1 ore, Gain Academy at A1",
       "Player1: Academy: Gain 2 ideas"
     ]
   ],

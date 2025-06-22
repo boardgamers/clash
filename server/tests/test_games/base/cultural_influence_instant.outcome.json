@@ -251,11 +251,8 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player2: Influence Culture: Pay 1 action",
-      "Player2: Influence Culture: Tried to influence the Fortress in the city at C2 by Player1 with the city C1",
-      "Player2: Influence Culture: Cultural influence succeeded (rolled 6)",
-      "Player1: Influence Culture: Lose Fortress at C2",
-      "Player2: Influence Culture: Gain Fortress at C2"
+      "Player2: Influence Culture: Pay 1 action, Tried to influence the Fortress in the city at C2 by Player1 with the city C1, Cultural influence succeeded (rolled 6), Gain Fortress at C2",
+      "Player1: Influence Culture: Lose Fortress at C2"
     ]
   ],
   "undo_limit": 1,

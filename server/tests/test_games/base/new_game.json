@@ -628,24 +628,8 @@
     ],
     [
       "It's Player1's turn",
-      "Player1: Setup: Play as China",
-      "Player1: Setup: Gain 2 food",
-      "Player1: Setup: Gain Farming without taking an event token",
-      "Player1: Setup: Gain Mining without taking an event token",
-      "Player1: Setup: Draw an action card",
-      "Player1: Setup: Draw an objective card",
-      "Player1: Setup: Gain city D2",
-      "Player1: Setup: City D2 became Happy",
-      "Player1: Setup: Gain 1 settler at D2",
-      "Player2: Setup: Play as Greece",
-      "Player2: Setup: Gain 2 food",
-      "Player2: Setup: Gain Farming without taking an event token",
-      "Player2: Setup: Gain Mining without taking an event token",
-      "Player2: Setup: Draw an action card",
-      "Player2: Setup: Draw an objective card",
-      "Player2: Setup: Gain city D7",
-      "Player2: Setup: City D7 became Happy",
-      "Player2: Setup: Gain 1 settler at D7"
+      "Player1: Setup: Play as China, Gain 2 food, Gain Farming without taking an event token, Gain Mining without taking an event token, Draw an action card, Draw an objective card, Gain city D2, City D2 became Happy, Gain 1 settler at D2",
+      "Player2: Setup: Play as Greece, Gain 2 food, Gain Farming without taking an event token, Gain Mining without taking an event token, Draw an action card, Draw an objective card, Gain city D7, City D7 became Happy, Gain 1 settler at D7"
     ]
   ],
   "undo_limit": 0,

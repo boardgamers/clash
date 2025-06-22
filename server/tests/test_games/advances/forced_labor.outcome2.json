@@ -326,17 +326,13 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player1: Forced Labor: Start action",
-      "Player1: Forced Labor: Pay 1 mood token"
+      "Player1: Forced Labor: Start action, Pay 1 mood token"
     ],
     [
-      "Player1: Forced Labor: Pay 1 mood token",
-      "Player1: Forced Labor: Treating Angry cities as neutral"
+      "Player1: Forced Labor: Pay 1 mood token, Treating Angry cities as neutral"
     ],
     [
-      "Player1: Collect: Pay 1 action",
-      "Player1: Collect: Use city A1",
-      "Player1: Collect: Gain 1 food and 1 wood",
+      "Player1: Collect: Pay 1 action, Use city A1, Gain 1 food and 1 wood",
       "Player1: Waste: Could not store 1 food and 1 wood"
     ]
   ],

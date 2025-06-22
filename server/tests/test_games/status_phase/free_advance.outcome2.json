@@ -478,14 +478,11 @@
       "Player2: Free Advance: Gain Storage and take an event token (2 left)"
     ],
     [
-      "Player1: Philosophy: Gain 1 idea",
-      "Player1: Philosophy: Gain 1 mood token",
+      "Player1: Philosophy: Gain 1 idea, Gain 1 mood token",
       "Player1: Free Advance: Gain Philosophy and take an event token (2 left)",
-      "Player2: Draw Cards: Draw an action card",
+      "Player2: Draw Cards: Draw an action card, Draw an objective card",
       "Reshuffling Objective Card pile",
-      "Player2: Draw Cards: Draw an objective card",
-      "Player1: Draw Cards: Draw an action card",
-      "Player1: Draw Cards: Draw an objective card"
+      "Player1: Draw Cards: Draw an action card, Draw an objective card"
     ]
   ],
   "undo_limit": 3,

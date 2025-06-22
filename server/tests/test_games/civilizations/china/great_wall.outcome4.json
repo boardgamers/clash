@@ -546,21 +546,15 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1: Advance: Pay 1 action",
-      "Player1: Advance: Pay 2 food",
-      "Player1: Great Wall: Gain Great Wall from Player2",
-      "Player1: Advance: Gain Engineering and take an event token (1 left)"
+      "Player1: Advance: Pay 1 action, Pay 2 food, Gain Engineering and take an event token (1 left)",
+      "Player1: Great Wall: Gain Great Wall from Player2"
     ],
     [
-      "Player1: Build Wonder: Play the wonder card Great Wall",
-      "Player1: Build Wonder: Decided to build Great Wall in city D1"
+      "Player1: Build Wonder: Play the wonder card Great Wall, Decided to build Great Wall in city D1"
     ],
     [
-      "Player1: Great Wall: Pay 3 food, 2 wood, 7 ore and 3 culture tokens with Great Wall",
-      "Player1: Great Wall: Reduce the cost of Great Wall by 2 culture tokens",
-      "Player1: Great Wall: Great Wall can be built in the leader city as a free action",
-      "Player1: Build Wonder: Play Great Wall",
-      "Player1: Build Wonder: Gain Great Wall at D1"
+      "Player1: Great Wall: Pay 3 food, 2 wood, 7 ore and 3 culture tokens with Great Wall, Reduce the cost of Great Wall by 2 culture tokens, Great Wall can be built in the leader city as a free action",
+      "Player1: Build Wonder: Play Great Wall, Gain Great Wall at D1"
     ],
     [
       "Player1: End Turn: 0 actions left"

@@ -297,8 +297,7 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1: Move: marched 1 infantry from C2 to C1",
-      "Player1: Move: Pay 1 action"
+      "Player1: Move: marched 1 infantry from C2 to C1, Pay 1 action"
     ],
     [
       "Combat round 1",
@@ -306,15 +305,11 @@
       "Player2: Combat: Defending with 2 infantry"
     ],
     [
-      "Player2: Tactics: Play an action card face down",
-      "Player2: Tactics: Reveal Tactics Card Heavy Resistance",
-      "Player1: Combat: Roll 6 (infantry, +1 combat value) for combined combat value of 6 and gets 1 hits against defending units.",
-      "Player1: Combat: Combat modifiers: Heavy resistance added -1 to combat value for each unit",
-      "Player2: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against attacking units.",
+      "Player2: Tactics: Play an action card face down, Reveal Tactics Card Heavy Resistance",
+      "Player1: Combat: Roll 6 (infantry, +1 combat value) for combined combat value of 6 and gets 1 hits against defending units., Combat modifiers: Heavy resistance added -1 to combat value for each unit, Lost 1 infantry at C2",
+      "Player2: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against attacking units., Lost 1 infantry at C1",
       "Player1: Choose Casualties: Remove all attacking units",
-      "Player1: Combat: Lost 1 infantry at C2",
       "Player2: Choose Casualties: Remove 1 of their defending units",
-      "Player2: Combat: Lost 1 infantry at C1",
       "Defender wins"
     ]
   ],

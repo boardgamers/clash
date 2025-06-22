@@ -424,9 +424,8 @@
       "Player1: Tactics: Play an action card face down"
     ],
     [
-      "Player2: Tactics: Play an action card face down",
+      "Player2: Tactics: Play an action card face down, Reveal Tactics Card Martyr",
       "Player1: Tactics: Reveal Tactics Card High Morale",
-      "Player2: Tactics: Reveal Tactics Card Martyr",
       "Player1: Martyr: Cannot use tactics card (but it is still discarded)"
     ],
     [
@@ -434,12 +433,10 @@
       "Player1: Combat: Lost 1 ship at C3"
     ],
     [
-      "Player1: Choose Casualties (carried units): Killed carried units: 1 elephant",
-      "Player1: Choose Casualties (carried units): Lost 1 elephant at C3",
+      "Player1: Choose Casualties (carried units): Killed carried units: 1 elephant, Lost 1 elephant at C3",
       "Player2: Martyr: Player2 sacrifices a ship",
-      "Player2: Combat: Lost 1 ship at D2",
+      "Player2: Combat: Lost 1 ship at D2, Roll no dice for combined combat value of 0 and gets 0 hits against attacking units.",
       "Player1: Combat: Roll 6 (infantry, no bonus) for combined combat value of 6 and gets 0 hits against defending units.",
-      "Player2: Combat: Roll no dice for combined combat value of 0 and gets 0 hits against attacking units.",
       "Attacker wins"
     ]
   ],

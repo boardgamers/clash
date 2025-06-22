@@ -310,9 +310,7 @@
       "Player1 ended the movement action"
     ],
     [
-      "Player1: Recruit: Pay 1 action",
-      "Player1: Recruit: Pay 2 gold",
-      "Player1: Recruit: Gain 1 settler at A1",
+      "Player1: Recruit: Pay 1 action, Pay 2 gold, Gain 1 settler at A1",
       "Player1: Expansion: Expansion allows to move the settlers at B3, B3, A1"
     ]
   ],

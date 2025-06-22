@@ -327,9 +327,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1: Collect: Pay 1 action",
-      "Player1: Collect: Use city C2",
-      "Player1: Collect: Gain 1 mood token"
+      "Player1: Collect: Pay 1 action, Use city C2, Gain 1 mood token"
     ]
   ],
   "undo_limit": 0,

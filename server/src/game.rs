@@ -313,7 +313,7 @@ impl Game {
     }
 
     pub fn log(&mut self, player: usize, origin: &EventOrigin, message: &str) {
-        let prefix = format!("{}: {}", self.player_name(player), origin.name(self));
+        let prefix = format!("{}: {}: ", self.player_name(player), origin.name(self));
         let last_item_index = self.log.len() - 1;
         let current = &mut self.log[last_item_index];
         for c in current.iter_mut() {
@@ -323,7 +323,7 @@ impl Game {
                 return;
             }
         }
-        current.push(format!("{prefix}: {message}"));
+        current.push(format!("{prefix}{message}"));
     }
 
     pub(crate) fn start_turn(&mut self) {

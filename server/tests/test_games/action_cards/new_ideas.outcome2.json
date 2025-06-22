@@ -311,8 +311,7 @@
     [
       "Player1: Advance: Pay 2 food",
       "Player1: Storage: Gain 1 mood token",
-      "Player1: New Ideas: Gain Storage without taking an event token",
-      "Player1: New Ideas: Gain 2 ideas"
+      "Player1: New Ideas: Gain Storage without taking an event token, Gain 2 ideas"
     ]
   ],
   "undo_limit": 0,

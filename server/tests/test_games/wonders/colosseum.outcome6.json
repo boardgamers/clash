@@ -478,47 +478,35 @@
   "action_log_index": 7,
   "log": [
     [
-      "Player1: Build Wonder: Play the wonder card Colosseum",
-      "Player1: Build Wonder: Decided to build Colosseum in city A1",
-      "Player1: Build Wonder: Pay 1 action"
+      "Player1: Build Wonder: Play the wonder card Colosseum, Decided to build Colosseum in city A1, Pay 1 action"
     ],
     [
       "Player1: Colosseum: Pay 3 food, 4 wood, 5 ore and 5 culture tokens",
-      "Player1: Build Wonder: Play Colosseum",
-      "Player1: Build Wonder: Gain Colosseum at A1"
+      "Player1: Build Wonder: Play Colosseum, Gain Colosseum at A1"
     ],
     [
-      "Player1: Sports: Pay 1 action",
-      "Player1: Sports: Start action in city C2"
+      "Player1: Sports: Pay 1 action, Start action in city C2"
     ],
     [
-      "Player1: Sports: Pay 1 mood token",
-      "Player1: Sports: City C2 became Happy"
+      "Player1: Sports: Pay 1 mood token, City C2 became Happy"
     ],
     [
-      "Player1: Move: marched 2 infantry, 1 cavalry and 1 elephant from C2 to C1",
-      "Player1: Move: Pay 1 action"
+      "Player1: Move: marched 2 infantry, 1 cavalry and 1 elephant from C2 to C1, Pay 1 action"
     ],
     [
       "Combat round 1",
-      "Player1: Combat: Attacking with 2 infantry, 1 cavalry and 1 elephant",
-      "Player2: Combat: Defending with 2 infantry",
-      "Player1: Combat: Roll 4 (elephant, -1 hits, no combat value), 4 (elephant, no bonus), 3 (elephant, no bonus), 2 (elephant, no bonus) for combined combat value of 9 and gets 1 hits against defending units.",
-      "Player2: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against attacking units."
+      "Player1: Combat: Attacking with 2 infantry, 1 cavalry and 1 elephant, Roll 4 (elephant, -1 hits, no combat value), 4 (elephant, no bonus), 3 (elephant, no bonus), 2 (elephant, no bonus) for combined combat value of 9 and gets 1 hits against defending units.",
+      "Player2: Combat: Defending with 2 infantry, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against attacking units."
     ],
     [
-      "Player1: Colosseum: Pay 1 culture token",
-      "Player1: Colosseum: Increase combat value by 1, scoring an extra hit",
+      "Player1: Colosseum: Pay 1 culture token, Increase combat value by 1, scoring an extra hit",
       "Player1: Choose Casualties: Remove 1 of their attacking units"
     ],
     [
-      "Player1: Combat: Lost 1 infantry at C2",
+      "Player1: Combat: Lost 1 infantry at C2, Gain 1 gold, Gain city C1",
       "Player2: Choose Casualties: Remove all defending units",
-      "Player2: Combat: Lost 2 infantry at C1",
+      "Player2: Combat: Lost 2 infantry at C1, Lose city C1",
       "Attacker wins",
-      "Player2: Combat: Lose city C1",
-      "Player1: Combat: Gain 1 gold",
-      "Player1: Combat: Gain city C1",
       "Player1: Waste: Could not store 1 gold"
     ]
   ],

@@ -340,20 +340,16 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player1: City Development: Pay 1 action",
-      "Player1: Action Card: Play City Development/Tactical Retreat",
-      "Player1: City Development: Pay 1 culture token"
+      "Player1: City Development: Pay 1 action, Pay 1 culture token",
+      "Player1: Action Card: Play City Development/Tactical Retreat"
     ],
     [
-      "Player1: City Development: Pay 1 culture token",
-      "Player1: City Development: Gain 1 action",
-      "Player1: City Development: You may build a building in a city without spending an action and without paying resources."
+      "Player1: City Development: Pay 1 culture token, Gain 1 action, You may build a building in a city without spending an action and without paying resources."
     ],
     [
       "Player1: Combat: Pay 1 action",
-      "Player1: Construct Building: Pay nothing with Captivi, Construct Only",
-      "Player1: Captivi: May replace resources with mood tokens",
-      "Player1: Construct Building: Gain Fortress at C2"
+      "Player1: Construct Building: Pay nothing with Captivi, Construct Only, Gain Fortress at C2",
+      "Player1: Captivi: May replace resources with mood tokens"
     ]
   ],
   "undo_limit": 0,

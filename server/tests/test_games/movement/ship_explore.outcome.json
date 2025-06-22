@@ -352,8 +352,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player2: Move: sailed 1 ship from D5 to C5",
-      "Player2: Move: Explored tiles A5=Forest, B4=Forest, B5=Water, C5=Water"
+      "Player2: Move: sailed 1 ship from D5 to C5, Explored tiles A5=Forest, B4=Forest, B5=Water, C5=Water"
     ]
   ],
   "undo_limit": 1,

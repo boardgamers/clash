@@ -281,11 +281,9 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1: Advance: Pay 1 action",
-      "Player1: Advance: Pay nothing with Aqueduct",
+      "Player1: Advance: Pay 1 action, Pay nothing with Aqueduct, Gain Sanitation and take an event token (2 left)",
       "Player1: Aqueduct: Reduce the cost to 0",
-      "Player1: Sanitation: Gain 1 mood token",
-      "Player1: Advance: Gain Sanitation and take an event token (2 left)"
+      "Player1: Sanitation: Gain 1 mood token"
     ]
   ],
   "undo_limit": 0,

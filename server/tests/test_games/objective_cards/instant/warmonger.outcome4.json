@@ -364,15 +364,10 @@
     ],
     [
       "Combat round 1",
-      "Player1: Combat: Attacking with 1 infantry and 1 cavalry",
-      "Player2: Combat: Defending with 1 infantry",
-      "Player1: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 13 and gets 1 hits against defending units.",
-      "Player2: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 13 and gets 2 hits against attacking units.",
-      "Player2: Combat: Combat modifiers: fortress added one extra die, fortress cancelled one hit",
+      "Player1: Combat: Attacking with 1 infantry and 1 cavalry, Roll 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 13 and gets 1 hits against defending units., Lost 1 infantry and 1 cavalry at C2",
+      "Player2: Combat: Defending with 1 infantry, Roll 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 13 and gets 2 hits against attacking units., Combat modifiers: fortress added one extra die, fortress cancelled one hit, Lost 1 infantry at C1",
       "Player1: Choose Casualties: Remove all attacking units",
-      "Player1: Combat: Lost 1 infantry and 1 cavalry at C2",
       "Player2: Choose Casualties: Remove all defending units",
-      "Player2: Combat: Lost 1 infantry at C1",
       "Player2 wins the battle because he has a defending fortress"
     ],
     [
@@ -380,10 +375,8 @@
     ],
     [
       "Combat round 1",
-      "Player1: Combat: Attacking with 1 infantry and 1 elephant",
-      "Player2: Combat: Defending with 1 infantry",
-      "Player1: Combat: Roll 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 2 and gets 0 hits against defending units.",
-      "Player2: Combat: Roll 1 (leader, no bonus) for combined combat value of 1 and gets 0 hits against attacking units.",
+      "Player1: Combat: Attacking with 1 infantry and 1 elephant, Roll 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 2 and gets 0 hits against defending units.",
+      "Player2: Combat: Defending with 1 infantry, Roll 1 (leader, no bonus) for combined combat value of 1 and gets 0 hits against attacking units.",
       "Player1: Retreat: Player1 can retreat"
     ],
     [
@@ -391,10 +384,8 @@
     ],
     [
       "Combat round 2",
-      "Player1: Combat: Attacking with 1 infantry and 1 elephant",
-      "Player2: Combat: Defending with 1 infantry",
-      "Player1: Combat: Roll 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 2 and gets 0 hits against defending units.",
-      "Player2: Combat: Roll 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units.",
+      "Player1: Combat: Attacking with 1 infantry and 1 elephant, Roll 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 2 and gets 0 hits against defending units.",
+      "Player2: Combat: Defending with 1 infantry, Roll 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units.",
       "Player1: Retreat: Player1 can retreat"
     ],
     [
@@ -402,12 +393,9 @@
     ],
     [
       "Combat round 3",
-      "Player1: Combat: Attacking with 1 infantry and 1 elephant",
-      "Player2: Combat: Defending with 1 infantry",
-      "Player1: Combat: Roll 6 (infantry, +1 combat value), 1 (leader, no bonus) for combined combat value of 8 and gets 1 hits against defending units.",
-      "Player2: Combat: Roll 3 (elephant, no bonus) for combined combat value of 3 and gets 0 hits against attacking units.",
+      "Player1: Combat: Attacking with 1 infantry and 1 elephant, Roll 6 (infantry, +1 combat value), 1 (leader, no bonus) for combined combat value of 8 and gets 1 hits against defending units.",
+      "Player2: Combat: Defending with 1 infantry, Roll 3 (elephant, no bonus) for combined combat value of 3 and gets 0 hits against attacking units., Lost 1 infantry at B1",
       "Player2: Choose Casualties: Remove all defending units",
-      "Player2: Combat: Lost 1 infantry at B1",
       "Attacker wins"
     ],
     [

@@ -1588,16 +1588,11 @@
     ],
     [
       "AlphaZero: Martyr: AlphaZero sacrifices a Wu Zetian",
-      "AlphaZero: Combat: Lost Wu Zetian at D5",
-      "Spock: Combat: Roll 2 (elephant, no bonus), 5 (infantry, +1 combat value), 5 (infantry, +1 combat value) for combined combat value of 16 and gets 3 hits against defending units.",
-      "Spock: Combat: Combat modifiers: Ruler of the World adds 2 combat value",
-      "AlphaZero: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 2 (elephant, no bonus) for combined combat value of 18 and gets 3 hits against attacking units.",
-      "AlphaZero: Combat: Combat modifiers: Wu Zetian adds +2 combat value",
+      "AlphaZero: Combat: Lost Wu Zetian at D5, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 2 (elephant, no bonus) for combined combat value of 18 and gets 3 hits against attacking units., Combat modifiers: Wu Zetian adds +2 combat value, Lost 3 infantry at D5",
+      "Spock: Combat: Roll 2 (elephant, no bonus), 5 (infantry, +1 combat value), 5 (infantry, +1 combat value) for combined combat value of 16 and gets 3 hits against defending units., Combat modifiers: Ruler of the World adds 2 combat value, Lost 3 infantry at D4",
       "Spock: Choose Casualties: Remove all attacking units",
-      "Spock: Combat: Lost 3 infantry at D4",
       "AlphaZero: Fireworks: Not enough resources, no payment made.",
       "AlphaZero: Choose Casualties: Remove all defending units",
-      "AlphaZero: Combat: Lost 3 infantry at D5",
       "Battle ends in a draw"
     ]
   ],

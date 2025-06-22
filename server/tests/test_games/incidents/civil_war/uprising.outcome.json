@@ -352,10 +352,8 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1: Advance: Pay 1 action",
-      "Player1: Advance: Pay 2 gold",
-      "Player1: Storage: Gain 1 mood token",
-      "Player1: Advance: Gain Storage and take an event token (triggering an incident)"
+      "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Uprising"

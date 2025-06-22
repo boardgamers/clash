@@ -312,14 +312,11 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1: Build Wonder: Play the wonder card Great Gardens",
-      "Player1: Build Wonder: Decided to build Great Gardens in city A1",
-      "Player1: Build Wonder: Pay 1 action"
+      "Player1: Build Wonder: Play the wonder card Great Gardens, Decided to build Great Gardens in city A1, Pay 1 action"
     ],
     [
       "Player1: Great Gardens: Pay 5 food, 5 wood, 2 ore and 5 culture tokens",
-      "Player1: Build Wonder: Play Great Gardens",
-      "Player1: Build Wonder: Gain Great Gardens at A1"
+      "Player1: Build Wonder: Play Great Gardens, Gain Great Gardens at A1"
     ],
     [
       "Player1: End Turn: 1 actions left"
@@ -328,8 +325,7 @@
       "It's Player2's turn"
     ],
     [
-      "Player2: Move: marched 2 infantry from C1 to B1",
-      "Player2: Move: Pay 1 action"
+      "Player2: Move: marched 2 infantry from C1 to B1, Pay 1 action"
     ]
   ],
   "undo_limit": 0,

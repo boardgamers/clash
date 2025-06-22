@@ -399,10 +399,8 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1: Advance: Pay 1 action",
-      "Player1: Advance: Pay 1 food and 1 gold",
-      "Player1: Draft: Gain 1 culture token",
-      "Player1: Advance: Gain Draft and take an event token (1 left)"
+      "Player1: Advance: Pay 1 action, Pay 1 food and 1 gold, Gain Draft and take an event token (1 left)",
+      "Player1: Draft: Gain 1 culture token"
     ]
   ],
   "undo_limit": 0,

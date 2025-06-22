@@ -274,11 +274,8 @@
       "Player2: Arts: Pay 1 culture token"
     ],
     [
-      "Player2: Arts: Pay 1 culture token",
-      "Player2: Arts: Tried to influence the Fortress in the city at C2 by Player1 with the city C1",
-      "Player2: Arts: Cultural influence succeeded (rolled 6)",
-      "Player1: Arts: Lose Fortress at C2",
-      "Player2: Arts: Gain Fortress at C2"
+      "Player2: Arts: Pay 1 culture token, Tried to influence the Fortress in the city at C2 by Player1 with the city C1, Cultural influence succeeded (rolled 6), Gain Fortress at C2",
+      "Player1: Arts: Lose Fortress at C2"
     ]
   ],
   "undo_limit": 2,

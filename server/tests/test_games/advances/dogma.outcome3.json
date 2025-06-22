@@ -470,18 +470,14 @@
   "action_log_index": 4,
   "log": [
     [
-      "Player2: Advance: Pay 1 action",
-      "Player2: Advance: Pay 2 ideas",
+      "Player2: Advance: Pay 1 action, Pay 2 ideas, Unlock Provinces, Gain Dogma and take an event token (1 left)",
       "Player2: Dogma: Ideas limit reduced to 2",
-      "Player2: Advance: Unlock Provinces",
-      "Player2: Advance: Gain Dogma and take an event token (1 left)",
       "Player2: Waste: Could not store 2 ideas"
     ],
     [
       "Player2: Combat: Pay 1 action",
-      "Player2: Construct Building: Pay 1 wood and 1 ore with State Religion",
-      "Player2: State Religion: Reduc the food cost to 0",
-      "Player2: Construct Building: Gain Temple at C1"
+      "Player2: Construct Building: Pay 1 wood and 1 ore with State Religion, Gain Temple at C1",
+      "Player2: State Religion: Reduce the food cost to 0"
     ],
     [
       "Player2: Temple: Gain 1 culture token"

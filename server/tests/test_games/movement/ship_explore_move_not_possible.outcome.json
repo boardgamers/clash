@@ -354,9 +354,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player2: Explore Resolution: Chose rotation 3",
-      "Player2: Explore Resolution: Explored tiles E5=Forest, F4=Fertile, F5=Fertile, G5=Mountain",
-      "Player2: Explore Resolution: Ship can't move to the explored tile"
+      "Player2: Explore Resolution: Chose rotation 3, Explored tiles E5=Forest, F4=Fertile, F5=Fertile, G5=Mountain, Ship can't move to the explored tile"
     ]
   ],
   "undo_limit": 0,

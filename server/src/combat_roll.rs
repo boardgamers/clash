@@ -124,7 +124,7 @@ impl CombatRoundStats {
         p.log(
             game,
             &format!(
-                "Roll {} for combined combat value of {} and gets {} hits against {} units.",
+                "Roll {} for combined combat value of {} and gets {} hits against {} units",
                 self.log_str, self.combat_value, hits, self.opponent_str,
             ),
         );

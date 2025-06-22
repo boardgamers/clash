@@ -358,9 +358,7 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player1: Taxes: Pay 1 action",
-      "Player1: Taxes: Start action",
-      "Player1: Taxes: Pay 1 mood token"
+      "Player1: Taxes: Pay 1 action, Start action, Pay 1 mood token"
     ],
     [
       "Player1: Taxes: Pay 1 mood token"

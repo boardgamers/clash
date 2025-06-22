@@ -490,18 +490,14 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player2: Advance: Pay 1 action",
-      "Player2: Advance: Pay nothing with Priesthood",
+      "Player2: Advance: Pay 1 action, Pay nothing with Priesthood, Gain Math and take an event token (2 left)",
       "Player2: Priesthood: Reduce the cost to 0",
       "Player2: Math: Gain 1 culture token",
-      "Player2: Advance: Gain Math and take an event token (2 left)",
       "Player2: Philosophy: Gain 1 idea"
     ],
     [
-      "Player2: Advance: Pay 1 action",
-      "Player2: Advance: Pay 2 gold",
+      "Player2: Advance: Pay 1 action, Pay 2 gold, Gain Astronomy and take an event token (1 left)",
       "Player2: Astronomy: Gain 1 culture token",
-      "Player2: Advance: Gain Astronomy and take an event token (1 left)",
       "Player2: Philosophy: Gain 1 idea"
     ]
   ],

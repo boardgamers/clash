@@ -270,8 +270,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1: Raze city: Lose city A1",
-      "Player1: Raze city: Gain 1 gold"
+      "Player1: Raze city: Lose city A1, Gain 1 gold"
     ]
   ],
   "undo_limit": 1,

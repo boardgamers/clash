@@ -373,10 +373,8 @@
   "action_log_index": 4,
   "log": [
     [
-      "Player1: Advance: Pay 1 action",
-      "Player1: Advance: Pay 2 gold",
-      "Player1: Storage: Gain 1 mood token",
-      "Player1: Advance: Gain Storage and take an event token (triggering an incident)"
+      "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Revolution",
@@ -386,15 +384,11 @@
       "Player1: Revolution: Lost 1 elephant at C2"
     ],
     [
-      "Player1: Revolution: Declined to kill units",
-      "Player1: Revolution: Lose 1 action"
+      "Player1: Revolution: Declined to kill units, Lose 1 action"
     ],
     [
-      "Player1: Revolution: Player1 changed their government from Democracy to Theocracy",
-      "Player1: Revolution: Additional advances: none",
+      "Player1: Revolution: Player1 changed their government from Democracy to Theocracy, Additional advances: none, Unlock Provinces, Gain Dogma without taking an event token",
       "Player1: Dogma: Ideas limit reduced to 2",
-      "Player1: Revolution: Unlock Provinces",
-      "Player1: Revolution: Gain Dogma without taking an event token",
       "Player1: Waste: Could not store 3 ideas"
     ]
   ],
