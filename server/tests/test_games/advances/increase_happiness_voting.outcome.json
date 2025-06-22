@@ -318,7 +318,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 has to pay 1 mood token for Voting",
+      "Player1: Voting: Pay 1 mood token",
       "Player1: Voting: City C2 became Neutral",
       "Player1: Voting: City B3 became Happy",
       "Player1: Voting: Pay 6 mood tokens"

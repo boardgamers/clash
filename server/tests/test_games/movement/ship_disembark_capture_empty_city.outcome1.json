@@ -430,7 +430,7 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 disembarked 1 cavalry and 1 elephant from C3 to B2",
+      "Player1: Move: disembarked 1 cavalry and 1 elephant from C3 to B2",
       "Player2: Combat: Lose city B2",
       "Player1: Combat: Gain 2 gold",
       "Player1: Combat: Gain city B2",

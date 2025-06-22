@@ -343,7 +343,7 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player1 marched 1 infantry from C2 to C1",
+      "Player1: Move: marched 1 infantry from C2 to C1",
       "Player1: Move: Pay 1 action"
     ],
     [
@@ -356,12 +356,12 @@
     ],
     [
       "Player2: Tactics: Play an action card face down",
-      "Player1 reveals Tactics Card Peltasts",
-      "Player2 reveals Tactics Card Scout",
+      "Player1: Tactics: Reveal Tactics Card Peltasts",
+      "Player2: Tactics: Reveal Tactics Card Scout",
       "Player2: Scout: Ignore the enemy tactics",
       "Player2: Scout: Gain Quick Advance/Peltasts from discard pile",
-      "Player1 rolled 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units.",
-      "Player2 rolled 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against attacking units.",
+      "Player1: Combat: Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units.",
+      "Player2: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against attacking units.",
       "Player1: Choose Casualties: Remove all attacking units",
       "Player1: Combat: Lost 1 infantry at C2",
       "Player2: Choose Casualties: Remove 1 of their defending units",

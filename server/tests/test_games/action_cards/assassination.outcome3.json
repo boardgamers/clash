@@ -301,21 +301,21 @@
   "log": [
     [
       "Player1: Action Card: Play Assassination/High Ground",
-      "Player1 has to pay 1 culture token for Assassination"
+      "Player1: Assassination: Pay 1 culture token"
     ],
     [
       "Player1: Assassination: Pay 1 culture token",
       "Player1: Assassination: Assassinated Player2"
     ],
     [
-      "Player1 ended their turn with 3 actions left"
+      "Player1: End Turn: 3 actions left"
     ],
     [
       "It's Player2's turn",
       "Player2: Assassination: Lose 1 action"
     ],
     [
-      "Player2 ended their turn with 2 actions left"
+      "Player2: End Turn: 2 actions left"
     ],
     [
       "Round 2/3"

@@ -327,7 +327,7 @@
   "log": [
     [
       "Player1: Forced Labor: Start action",
-      "Player1 has to pay 1 mood token for Forced Labor"
+      "Player1: Forced Labor: Pay 1 mood token"
     ],
     [
       "Player1: Forced Labor: Pay 1 mood token",

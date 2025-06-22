@@ -342,7 +342,7 @@
     [
       "Player1: City Development: Pay 1 action",
       "Player1: Action Card: Play City Development/Tactical Retreat",
-      "Player1 has to pay 1 culture token for City Development"
+      "Player1: City Development: Pay 1 culture token"
     ],
     [
       "Player1: City Development: Pay 1 culture token",
@@ -352,7 +352,7 @@
     [
       "Player1: Combat: Pay 1 action",
       "Player1: Construct Building: Pay nothing with Captivi, Construct Only",
-      "Captivi allows to replace resources with mood tokens",
+      "Player1: Construct Building: Captivi allows to replace resources with mood tokens",
       "Player1: Construct Building: Gain Fortress at C2"
     ]
   ],

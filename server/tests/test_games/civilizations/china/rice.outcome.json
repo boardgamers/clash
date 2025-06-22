@@ -300,7 +300,7 @@
       "Player1: Collect: Pay 1 action",
       "Player1: Collect: Use city B3",
       "Player1: Collect: Gain 2 food with Irrigation",
-      "Rice Cultivation added 1 food"
+      "Player1: Collect: Rice Cultivation added 1 food"
     ]
   ],
   "undo_limit": 0,

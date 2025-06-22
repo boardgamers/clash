@@ -45,6 +45,9 @@
             "ignore_action_cost": false,
             "info": {
               "player": 0,
+              "origin": {
+                "Wonder": "Pyramids"
+              },
               "info": {},
               "log": []
             }
@@ -358,7 +361,7 @@
       "Player1: Great Library: Use Engineering for the turn"
     ],
     [
-      "Player1 played the wonder card Pyramids",
+      "Player1: Build Wonder: Play the wonder card Pyramids",
       "Player1: Build Wonder: Decided to build Pyramids in city C2",
       "Player1: Build Wonder: Pay 1 action"
     ]

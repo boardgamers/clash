@@ -447,7 +447,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 ended their turn with 3 actions left"
+      "Player1: End Turn: 3 actions left"
     ],
     [
       "Round 3/3"
@@ -462,7 +462,7 @@
       "Player2: Waste: Could not store 1 food"
     ],
     [
-      "Player2 ended their turn with 3 actions left"
+      "Player2: End Turn: 3 actions left"
     ],
     [
       "It's Player1's turn"

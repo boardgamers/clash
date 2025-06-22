@@ -312,7 +312,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 played the wonder card Great Gardens",
+      "Player1: Build Wonder: Play the wonder card Great Gardens",
       "Player1: Build Wonder: Decided to build Great Gardens in city A1",
       "Player1: Build Wonder: Pay 1 action"
     ],
@@ -322,13 +322,13 @@
       "Player1: Build Wonder: Gain Great Gardens at A1"
     ],
     [
-      "Player1 ended their turn with 1 actions left"
+      "Player1: End Turn: 1 actions left"
     ],
     [
       "It's Player2's turn"
     ],
     [
-      "Player2 marched 2 infantry from C1 to B1",
+      "Player2: Move: marched 2 infantry from C1 to B1",
       "Player2: Move: Pay 1 action"
     ]
   ],

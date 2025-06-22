@@ -592,15 +592,15 @@
       "Player2: Great Warlord: Gain Tactics without taking an event token"
     ],
     [
-      "Player2 marched 1 infantry from D7 to C8"
+      "Player2: Move: marched 1 infantry from D7 to C8"
     ],
     [
       "Combat round 1",
       "Player2: Combat: Attacking with 1 infantry",
       "Player1: Combat: Defending with 1 infantry",
-      "Player2 rolled 5 (cavalry, no bonus) for combined combat value of 7 and gets 1 hits against defending units.",
-      "Player2 used the following combat modifiers: Player gets +2 combat value for Great Warlord",
-      "Player1 rolled 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units.",
+      "Player2: Combat: Roll 5 (cavalry, no bonus) for combined combat value of 7 and gets 1 hits against defending units.",
+      "Player2: Combat: Combat modifiers: Player gets +2 combat value for Great Warlord",
+      "Player1: Combat: Roll 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units.",
       "Player1: Choose Casualties: Remove all defending units",
       "Player1: Combat: Lost 1 infantry at C8",
       "Attacker wins"

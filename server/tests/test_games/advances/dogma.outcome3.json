@@ -480,7 +480,7 @@
     [
       "Player2: Combat: Pay 1 action",
       "Player2: Construct Building: Pay 1 wood and 1 ore with State Religion",
-      "State Religion reduced the food cost to 0",
+      "Player2: Construct Building: State Religion reduced the food cost to 0",
       "Player2: Construct Building: Gain Temple at C1"
     ],
     [

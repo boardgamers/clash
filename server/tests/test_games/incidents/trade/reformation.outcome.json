@@ -356,7 +356,7 @@
       "Player1: Reformation: Barbarians cannot spawn a new city",
       "Player1: Reformation: Barbarians cannot reinforce",
       "Player1: Reformation: Selected Player3 to execute the event",
-      "Player Player1 has passed the incident to Player3"
+      "Player1: Reformation: Pass the event to Player3"
     ]
   ],
   "undo_limit": 1,

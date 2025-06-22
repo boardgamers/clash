@@ -315,7 +315,7 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player2 ended their turn with 1 actions left"
+      "Player2: End Turn: 1 actions left"
     ],
     [
       "The game has entered the 1st status phase"

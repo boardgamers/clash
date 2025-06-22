@@ -313,7 +313,7 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 marched 2 settlers, 2 infantry, 1 cavalry and 1 elephant from C2 to C1",
+      "Player1: Move: marched 2 settlers, 2 infantry, 1 cavalry and 1 elephant from C2 to C1",
       "Player2: Combat: Lose city C1",
       "Player1: Combat: Gain 1 gold",
       "Player1: Combat: Gain city C1",

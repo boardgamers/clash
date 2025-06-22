@@ -378,9 +378,11 @@
   "starting_player_index": 1,
   "current_player_index": 1,
   "action_log": [
-    { "age": 1,
+    {
+      "age": 1,
       "rounds": [
-        { "round": 1,
+        {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -435,11 +437,11 @@
       "Player2 ended the movement action"
     ],
     [
-      "Player2 marched 1 settler from D7 to D6"
+      "Player2: Move: marched 1 settler from D7 to D6"
     ],
     [
-      "Player2 chose the orientation of the newly explored tiles",
-      "Explored tiles C6=Fertile, D5=Forest, D6=Fertile, E6=Fertile"
+      "Player2: Explore Resolution: Chose rotation 3",
+      "Player2: Explore Resolution: Explored tiles C6=Fertile, D5=Forest, D6=Fertile, E6=Fertile"
     ]
   ],
   "undo_limit": 1,

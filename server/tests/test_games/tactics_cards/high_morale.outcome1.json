@@ -297,7 +297,7 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 marched 1 infantry from C2 to C1",
+      "Player1: Move: marched 1 infantry from C2 to C1",
       "Player1: Move: Pay 1 action"
     ],
     [
@@ -307,10 +307,10 @@
     ],
     [
       "Player1: Tactics: Play an action card face down",
-      "Player1 reveals Tactics Card High Morale",
-      "Player1 rolled 6 (infantry, +1 combat value) for combined combat value of 9 and gets 1 hits against defending units.",
-      "Player1 used the following combat modifiers: High Morale added 2 combat value",
-      "Player2 rolled 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against attacking units.",
+      "Player1: Tactics: Reveal Tactics Card High Morale",
+      "Player1: Combat: Roll 6 (infantry, +1 combat value) for combined combat value of 9 and gets 1 hits against defending units.",
+      "Player1: Combat: Combat modifiers: High Morale added 2 combat value",
+      "Player2: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against attacking units.",
       "Player1: Choose Casualties: Remove all attacking units",
       "Player1: Combat: Lost 1 infantry at C2",
       "Player2: Choose Casualties: Remove 1 of their defending units",

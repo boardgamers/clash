@@ -481,7 +481,7 @@
       "Player1: Advance: Gain Voting and take an event token (2 left)"
     ],
     [
-      "Player1 marched 1 infantry from C2 to B2",
+      "Player1: Move: marched 1 infantry from C2 to B2",
       "Player1: Move: Pay 1 action",
       "Player2: Combat: Lose city B2",
       "Player1: Combat: Gain 2 gold",

@@ -519,16 +519,16 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player2 marched 2 infantry from B1 to A1",
+      "Player2: Move: marched 2 infantry from B1 to A1",
       "Player2: Move: Pay 1 action"
     ],
     [
       "Combat round 1",
       "Player2: Combat: Attacking with 2 infantry",
       "Player1: Combat: Defending with 1 infantry and 1 cavalry",
-      "Player2 rolled 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 2 hits against defending units.",
-      "Player1 rolled 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 11 and gets 2 hits against attacking units.",
-      "Player1 used the following combat modifiers: Great Wall gives -2 combat value in the first round",
+      "Player2: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 2 hits against defending units.",
+      "Player1: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 11 and gets 2 hits against attacking units.",
+      "Player1: Combat: Combat modifiers: Great Wall gives -2 combat value in the first round",
       "Player2: Choose Casualties: Remove all attacking units",
       "Player2: Combat: Lost 2 infantry at B1",
       "Player1: Choose Casualties: Remove all defending units",
@@ -536,7 +536,7 @@
       "Battle ends in a draw"
     ],
     [
-      "Player2 ended their turn with 1 actions left"
+      "Player2: End Turn: 1 actions left"
     ],
     [
       "Round 2/3"
@@ -560,7 +560,7 @@
       "Barbarians: Envoy: Gain 1 infantry at B3",
       "Player1: Envoy: Gain 1 idea and 1 culture token",
       "No Wonders left to draw",
-      "No wonders left to draw as public wonder card",
+      "Player1: Envoy: No wonders left to draw as public wonder card",
       "Player2: Envoy: Gain 1 culture token"
     ],
     [

@@ -357,7 +357,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player2 sailed 1 ship from B5 to A7",
+      "Player2: Move: sailed 1 ship from B5 to A7",
       "Player2: Cartography: Gain 1 idea",
       "Player2: Cartography: Gain 1 culture token"
     ]

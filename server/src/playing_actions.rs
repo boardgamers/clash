@@ -229,9 +229,8 @@ impl PlayingAction {
                 player_index,
                 &payment_options.origin,
                 &format!(
-                    "Pay {} for {}",
+                    "Pay {}",
                     payment_options.default,
-                    action_type.origin(game.player(player_index)).name(game)
                 ),
             );
         }

@@ -327,7 +327,7 @@
   "action_log_index": 4,
   "log": [
     [
-      "Player1 played the wonder card Great Lighthouse",
+      "Player1: Build Wonder: Play the wonder card Great Lighthouse",
       "Player1: Build Wonder: Decided to build Great Lighthouse in city A1",
       "Player1: Build Wonder: Pay 1 action"
     ],

@@ -440,10 +440,10 @@
     [
       "A new game event has been triggered: Solar Eclipse",
       "Player1: Solar Eclipse: Base effect: Pirates spawn",
-      "No valid positions for Pirate Ship"
+      "Player1: Solar Eclipse: No valid positions for Pirate Ship"
     ],
     [
-      "Player1 marched 2 settlers, 2 infantry, 1 cavalry and 1 elephant from C2 to C1",
+      "Player1: Move: marched 2 settlers, 2 infantry, 1 cavalry and 1 elephant from C2 to C1",
       "Player1: Move: Pay 1 action"
     ],
     [
@@ -453,7 +453,7 @@
     ],
     [
       "Player2: Tactics: Play an action card face down",
-      "Player2 reveals Tactics Card Tactical Retreat",
+      "Player2: Tactics: Reveal Tactics Card Tactical Retreat",
       "Player2: Tactical Retreat: Player2 withdraws to B1",
       "Player1: Solar Eclipse: Gain 1 victory point for the Solar Eclipse",
       "Attacker wins",

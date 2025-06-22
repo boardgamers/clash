@@ -307,9 +307,11 @@
   "starting_player_index": 1,
   "current_player_index": 1,
   "action_log": [
-    { "age": 1,
+    {
+      "age": 1,
       "rounds": [
-        { "round": 1,
+        {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -336,9 +338,9 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player2 sailed 1 ship from C5 to C4",
-      "Explored tiles C4=Forest, D3=Fertile, D4=Water, E4=Barren",
-      "Teleported ship from C4 to D4"
+      "Player2: Move: sailed 1 ship from C5 to C4",
+      "Player2: Move: Explored tiles C4=Forest, D3=Fertile, D4=Water, E4=Barren",
+      "Player2: Move: Teleported ship from C4 to D4"
     ]
   ],
   "undo_limit": 1,

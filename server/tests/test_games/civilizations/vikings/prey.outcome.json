@@ -391,7 +391,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 marched Ragnar Lodbrok from E2 to D1",
+      "Player1: Move: marched Ragnar Lodbrok from E2 to D1",
       "Player1: Move: Pay 1 action",
       "Player2: Combat: Lose city D1",
       "Player1: Combat: Gain 1 gold",

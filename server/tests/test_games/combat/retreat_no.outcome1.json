@@ -267,25 +267,25 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 marched 1 infantry from C2 to C1"
+      "Player1: Move: marched 1 infantry from C2 to C1"
     ],
     [
       "Combat round 1",
       "Player1: Combat: Attacking with 1 infantry",
       "Player2: Combat: Defending with 2 infantry",
-      "Player1 rolled 1 (leader, no bonus) for combined combat value of 1 and gets 0 hits against defending units.",
-      "Player2 rolled 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 2 and gets 0 hits against attacking units.",
-      "Player1: Offer Retreat: Player1 can retreat"
+      "Player1: Combat: Roll 1 (leader, no bonus) for combined combat value of 1 and gets 0 hits against defending units.",
+      "Player2: Combat: Roll 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 2 and gets 0 hits against attacking units.",
+      "Player1: Retreat: Player1 can retreat"
     ],
     [
-      "Player1 does not retreat"
+      "Player1: Retreat: Do not retreat"
     ],
     [
       "Combat round 2",
       "Player1: Combat: Attacking with 1 infantry",
       "Player2: Combat: Defending with 2 infantry",
-      "Player1 rolled 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units.",
-      "Player2 rolled 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against attacking units.",
+      "Player1: Combat: Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units.",
+      "Player2: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 1 hits against attacking units.",
       "Player1: Choose Casualties: Remove all attacking units",
       "Player1: Combat: Lost 1 infantry at C2",
       "Player2: Choose Casualties: Remove 1 of their defending units",

@@ -437,16 +437,16 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 marched Sulla from E8 to D8",
+      "Player1: Move: marched Sulla from E8 to D8",
       "Player1: Move: Pay 1 action"
     ],
     [
       "Combat round 1",
       "Player1: Combat: Attacking with Sulla",
       "Barbarians: Combat: Defending with 1 infantry",
-      "Player1 rolled 5 (cavalry, no bonus) for combined combat value of 7 and gets 1 hits against defending units.",
-      "Player1 used the following combat modifiers: Sulla adds 2 combat value",
-      "Barbarians rolled 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units.",
+      "Player1: Combat: Roll 5 (cavalry, no bonus) for combined combat value of 7 and gets 1 hits against defending units.",
+      "Player1: Combat: Combat modifiers: Sulla adds 2 combat value",
+      "Barbarians: Combat: Roll 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units.",
       "Barbarians: Choose Casualties: Remove all defending units",
       "Barbarians: Combat: Lost 1 infantry at D8",
       "Attacker wins",

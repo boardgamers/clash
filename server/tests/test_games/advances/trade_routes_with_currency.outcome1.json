@@ -449,7 +449,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 ended their turn with 3 actions left"
+      "Player1: End Turn: 3 actions left"
     ],
     [
       "Round 3/3"

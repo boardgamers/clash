@@ -305,9 +305,11 @@
   "starting_player_index": 1,
   "current_player_index": 1,
   "action_log": [
-    { "age": 1,
+    {
+      "age": 1,
       "rounds": [
-        { "round": 1,
+        {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -327,7 +329,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 ended their turn"
+      "Player1: End Turn: 0 actions left"
     ],
     [
       "The game has entered the 2nd status phase"

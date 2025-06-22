@@ -506,13 +506,13 @@
   "log": [
     [
       "Player1: Idol: Start action",
-      "Player1 has to pay 1 culture token for Idol"
+      "Player1: Idol: Pay 1 culture token"
     ],
     [
       "Player1: Idol: Pay 1 culture token",
       "Player1: Idol: Decided to play Spy as a free action",
       "Player1: Action Card: Play Spy/Heavy Resistance",
-      "Player1 has to pay 1 culture token for Spy"
+      "Player1: Spy: Pay 1 culture token"
     ],
     [
       "Player1: Spy: Pay 1 culture token",

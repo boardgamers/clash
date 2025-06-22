@@ -247,9 +247,11 @@
   "starting_player_index": 0,
   "current_player_index": 0,
   "action_log": [
-    { "age": 1,
+    {
+      "age": 1,
       "rounds": [
-        { "round": 1,
+        {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -277,7 +279,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 disembarked 1 cavalry and 1 elephant from C3 to B3"
+      "Player1: Move: disembarked 1 cavalry and 1 elephant from C3 to B3"
     ]
   ],
   "undo_limit": 0,

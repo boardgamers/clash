@@ -459,7 +459,7 @@
     [
       "Player2: Explorer: Pay 1 action",
       "Player2: Action Card: Play Explorer/Encircled",
-      "Player2 has to pay 1 culture token for Explorer"
+      "Player2: Explorer: Pay 1 culture token"
     ],
     [
       "Player2: Explorer: Pay 1 culture token"
@@ -468,8 +468,8 @@
       "Player2: Explorer: Explored B6"
     ],
     [
-      "Player2 chose the orientation of the newly explored tiles",
-      "Explored tiles A7=Fertile, B6=Fertile, B7=Barren, C7=Fertile"
+      "Player2: Explore Resolution: Chose rotation 0",
+      "Player2: Explore Resolution: Explored tiles A7=Fertile, B6=Fertile, B7=Barren, C7=Fertile"
     ],
     [
       "Player2: Explorer: Gain 1 settler at D8"

@@ -338,9 +338,11 @@
   "starting_player_index": 0,
   "current_player_index": 0,
   "action_log": [
-    { "age": 1,
+    {
+      "age": 1,
       "rounds": [
-        { "round": 1,
+        {
+          "round": 1,
           "players": [
             {
               "index": 0,
@@ -367,8 +369,8 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 marched 1 settler from C2 to B2",
-      "Explored tiles A3=Forest, B2=Mountain, B3=Water, C3=Fertile"
+      "Player1: Move: marched 1 settler from C2 to B2",
+      "Player1: Move: Explored tiles A3=Forest, B2=Mountain, B3=Water, C3=Fertile"
     ]
   ],
   "undo_limit": 1,

@@ -404,7 +404,7 @@
     [
       "A new game event has been triggered: Great Architect",
       "Player1: Great Architect: Base effect: Pirates spawn",
-      "No valid positions for Pirate Ship"
+      "Player1: Great Architect: No valid positions for Pirate Ship"
     ],
     [
       "Player1: Great Architect: Pay 1 culture token",
@@ -412,7 +412,7 @@
     ],
     [
       "Player1: Action Card: Play Great Architect",
-      "Player1 played the wonder card Pyramids"
+      "Player1: Build Wonder: Play the wonder card Pyramids"
     ],
     [
       "Player1: Build Wonder: Decided to build Pyramids in city A1"

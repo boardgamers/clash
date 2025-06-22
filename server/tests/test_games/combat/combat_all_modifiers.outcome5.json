@@ -483,7 +483,7 @@
   "action_log_index": 6,
   "log": [
     [
-      "Player1 marched 2 settlers, 2 infantry, 1 cavalry and 1 elephant from C2 to C1",
+      "Player1: Move: marched 2 settlers, 2 infantry, 1 cavalry and 1 elephant from C2 to C1",
       "Player1: Move: Pay 1 action"
     ],
     [
@@ -507,12 +507,12 @@
     ],
     [
       "Player2: Tactics: Play an action card face down",
-      "Player1 reveals Tactics Card Peltasts",
-      "Player2 reveals Tactics Card Encircled",
-      "Player1 rolled 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 1 (leader, no bonus) for combined combat value of 22 and gets 2 hits against defending units.",
-      "Player1 used the following combat modifiers: steel weapons added 1 combat value, Peltasts rolled a 6 and ignored a hit",
-      "Player2 rolled 1 (leader, no bonus), 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 4 and gets 0 hits against attacking units.",
-      "Player2 used the following combat modifiers: fortress added one extra die, steel weapons added 1 combat value",
+      "Player1: Tactics: Reveal Tactics Card Peltasts",
+      "Player2: Tactics: Reveal Tactics Card Encircled",
+      "Player1: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 1 (leader, no bonus) for combined combat value of 22 and gets 2 hits against defending units.",
+      "Player1: Combat: Combat modifiers: steel weapons added 1 combat value, Peltasts rolled a 6 and ignored a hit",
+      "Player2: Combat: Roll 1 (leader, no bonus), 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 4 and gets 0 hits against attacking units.",
+      "Player2: Combat: Combat modifiers: fortress added one extra die, steel weapons added 1 combat value",
       "Player2: Encircled: Cannot do damage - opponent has fewer losses",
       "Player2: Choose Casualties: Remove all defending units",
       "Player2: Combat: Lost 2 infantry at C1",

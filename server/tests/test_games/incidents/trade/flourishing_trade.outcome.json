@@ -294,7 +294,7 @@
     [
       "A new game event has been triggered: Flourishing Trade",
       "Player1: Flourishing Trade: Base effect: Pirates spawn",
-      "No valid positions for Pirate Ship",
+      "Player1: Flourishing Trade: No valid positions for Pirate Ship",
       "Player1: Flourishing Trade: Gain 1 gold",
       "Player2: Flourishing Trade: Gain 1 gold",
       "Player2: Waste: Could not store 1 gold"

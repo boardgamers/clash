@@ -310,7 +310,7 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player1 played the wonder card Pyramids",
+      "Player1: Build Wonder: Play the wonder card Pyramids",
       "Player1: Build Wonder: Decided to build Pyramids in city A1",
       "Player1: Build Wonder: Pay 1 action"
     ],

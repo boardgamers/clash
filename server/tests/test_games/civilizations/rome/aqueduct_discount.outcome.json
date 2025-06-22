@@ -283,7 +283,7 @@
     [
       "Player1: Advance: Pay 1 action",
       "Player1: Advance: Pay nothing with Aqueduct",
-      "Aqueduct reduced the cost to 0",
+      "Player1: Advance: Aqueduct reduced the cost to 0",
       "Player1: Sanitation: Gain 1 mood token",
       "Player1: Advance: Gain Sanitation and take an event token (2 left)"
     ]
