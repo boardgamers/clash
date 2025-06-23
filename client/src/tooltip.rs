@@ -52,18 +52,19 @@ pub fn show_tooltip_for_rect(
 }
 
 fn is_circle_tooltip_active(rc: &RenderContext, center: Vec2, radius: f32) -> bool {
-    rc.state
-        .mouse_positions
-        .iter()
-        .all(|mp| (center - rc.screen_to_world(mp.position)).length() < radius)
+    rc.stage.is_tooltip()
+        && rc
+            .state
+            .mouse_positions
+            .iter()
+            .all(|mp| (center - rc.screen_to_world(mp.position)).length() < radius)
 }
 
 pub fn show_tooltip_for_circle(rc: &RenderContext, tooltip: &[String], center: Vec2, radius: f32) {
-    let screen_center = rc.world_to_screen(center);
     if is_circle_tooltip_active(rc, center, radius) {
         draw_circle(center.x, center.y, radius, Color::new(0.0, 0.0, 0.0, 0.5));
         let _ = rc.with_camera(CameraMode::Screen, |rc| {
-            show_tooltip_text(rc, tooltip, screen_center + vec2(radius, radius), 50.);
+            show_tooltip_text(rc, tooltip, rc.world_to_screen(center) + vec2(radius, radius), 50.);
             NO_UPDATE
         });
     }
