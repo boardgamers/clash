@@ -539,7 +539,7 @@ impl IncidentBuilder {
                         .with_origin(EventOrigin::Advance(Advance::Myths))
                         .payment_options()
                         .sum(p, needed, &[ResourceType::MoodTokens]);
-                    options.conversions.push(PaymentConversion::new(
+                    options.conversions.push(PaymentConversion::resource_options(
                         vec![ResourcePile::mood_tokens(1)],
                         ResourcePile::empty(),
                         PaymentConversionType::MayOverpay(needed),

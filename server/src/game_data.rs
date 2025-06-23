@@ -289,6 +289,9 @@ pub struct PlayerData {
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     secrets: Vec<String>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "HashMap::is_empty")]
+    custom_data: HashMap<String, u32>,
 }
 
 ///
@@ -391,6 +394,7 @@ fn player_from_data(data: PlayerData, game: &Game) -> Player {
         played_once_per_turn_actions: data.played_once_per_turn_actions,
         event_info: data.event_info,
         secrets: data.secrets,
+        custom_data: data.custom_data,
         objective_opportunities: Vec::new(),
         gained_objective: None,
         great_mausoleum_action_cards: 0,
@@ -438,6 +442,7 @@ pub fn player_data(player: Player) -> PlayerData {
         played_once_per_turn_actions: player.played_once_per_turn_actions,
         event_info: player.event_info,
         secrets: player.secrets,
+        custom_data: player.custom_data,
     }
 }
 
@@ -475,5 +480,6 @@ pub fn cloned_player_data(player: &Player) -> PlayerData {
         played_once_per_turn_actions: player.played_once_per_turn_actions.clone(),
         event_info: player.event_info.clone(),
         secrets: player.secrets.clone(),
+        custom_data: player.custom_data.clone(),
     }
 }

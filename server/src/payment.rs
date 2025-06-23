@@ -19,6 +19,7 @@ pub enum PaymentConversionType {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub struct PaymentConversion {
     pub from: Vec<ResourcePile>, // alternatives
+    pub custom_costs: Vec<CustomCost>, //alternatives
     pub to: ResourcePile,
     #[serde(rename = "type")]
     pub payment_conversion_type: PaymentConversionType,
@@ -27,22 +28,38 @@ pub struct PaymentConversion {
 impl PaymentConversion {
     #[must_use]
     pub fn unlimited(from: ResourcePile, to: ResourcePile) -> Self {
-        PaymentConversion::new(vec![from], to, PaymentConversionType::Unlimited)
+        PaymentConversion::new(vec![from], Vec::new(), to, PaymentConversionType::Unlimited)
     }
 
     #[must_use]
     pub fn limited(from: ResourcePile, to: ResourcePile, limit: u8) -> Self {
-        PaymentConversion::new(vec![from], to, PaymentConversionType::MayNotOverpay(limit))
+        PaymentConversion::new(vec![from], Vec::new(), to, PaymentConversionType::MayNotOverpay(limit))
     }
 
     #[must_use]
-    pub fn new(
+    pub fn resource_options(
         from: Vec<ResourcePile>,
         to: ResourcePile,
         payment_conversion_type: PaymentConversionType,
     ) -> Self {
         PaymentConversion {
             from,
+            custom_costs: Vec::new(),
+            to,
+            payment_conversion_type,
+        }
+    }
+
+    #[must_use]
+    pub fn new(
+        from: Vec<ResourcePile>,
+        custom_costs: Vec<CustomCost>,
+        to: ResourcePile,
+        payment_conversion_type: PaymentConversionType,
+    ) -> Self {
+        PaymentConversion {
+            from,
+            custom_costs,
             to,
             payment_conversion_type,
         }
@@ -152,7 +169,7 @@ impl PaymentOptions {
         let d = max - r.min().expect("range empty");
         PaymentOptions::new(
             ResourcePile::of(t, max),
-            vec![PaymentConversion::new(
+            vec![PaymentConversion::resource_options(
                 vec![ResourcePile::of(t, 1)],
                 ResourcePile::empty(),
                 PaymentConversionType::MayOverpay(d),
@@ -190,7 +207,7 @@ impl PaymentOptions {
     #[must_use]
     pub(self) fn resources_with_gold_conversion(cost: ResourcePile, origin: EventOrigin) -> Self {
         let conversions = if cost.food > 0 || cost.wood > 0 || cost.ore > 0 || cost.ideas > 0 {
-            vec![PaymentConversion::new(
+            vec![PaymentConversion::resource_options(
                 base_resources(),
                 ResourcePile::gold(1),
                 PaymentConversionType::Unlimited,
@@ -486,7 +503,7 @@ mod tests {
 
         let mut payment_options = PaymentOptions::resources_with_gold_conversion(cost, origin);
 
-        payment_options.conversions.push(PaymentConversion::new(
+        payment_options.conversions.push(PaymentConversion::resource_options(
             base_resources(),
             ResourcePile::empty(),
             discount_type,
@@ -557,7 +574,7 @@ mod tests {
     fn test_find_valid_payment() {
         let cost = PaymentOptions::new(
             ResourcePile::food(1),
-            vec![PaymentConversion::new(
+            vec![PaymentConversion::resource_options(
                 vec![ResourcePile::food(1)],
                 ResourcePile::wood(1),
                 PaymentConversionType::Unlimited,
@@ -591,7 +608,7 @@ mod tests {
                 name: "food to wood".to_string(),
                 options: PaymentOptions::new(
                     ResourcePile::food(1),
-                    vec![PaymentConversion::new(
+                    vec![PaymentConversion::resource_options(
                         vec![ResourcePile::food(1)],
                         ResourcePile::wood(1),
                         PaymentConversionType::Unlimited,
@@ -606,7 +623,7 @@ mod tests {
                 name: "food to wood with amount".to_string(),
                 options: PaymentOptions::new(
                     ResourcePile::food(2),
-                    vec![PaymentConversion::new(
+                    vec![PaymentConversion::resource_options(
                         vec![ResourcePile::food(1)],
                         ResourcePile::wood(1),
                         PaymentConversionType::Unlimited,
@@ -625,7 +642,7 @@ mod tests {
                 name: "food to wood with limit".to_string(),
                 options: PaymentOptions::new(
                     ResourcePile::food(2),
-                    vec![PaymentConversion::new(
+                    vec![PaymentConversion::resource_options(
                         vec![ResourcePile::food(1)],
                         ResourcePile::wood(1),
                         PaymentConversionType::MayNotOverpay(1),
@@ -643,7 +660,7 @@ mod tests {
                 name: "3 infantry with draft".to_string(),
                 options: PaymentOptions::new(
                     ResourcePile::food(3) + ResourcePile::ore(3),
-                    vec![PaymentConversion::new(
+                    vec![PaymentConversion::resource_options(
                         vec![ResourcePile::food(1) + ResourcePile::ore(1)],
                         ResourcePile::mood_tokens(1),
                         PaymentConversionType::MayNotOverpay(1),
@@ -664,7 +681,7 @@ mod tests {
                 name: "discount must be used".to_string(),
                 options: PaymentOptions::new(
                     ResourcePile::food(3),
-                    vec![PaymentConversion::new(
+                    vec![PaymentConversion::resource_options(
                         vec![ResourcePile::food(1)],
                         ResourcePile::empty(),
                         PaymentConversionType::MayNotOverpay(2),
@@ -679,7 +696,7 @@ mod tests {
                 name: "discount with overpay".to_string(),
                 options: PaymentOptions::new(
                     ResourcePile::food(3),
-                    vec![PaymentConversion::new(
+                    vec![PaymentConversion::resource_options(
                         vec![ResourcePile::food(1)],
                         ResourcePile::empty(),
                         PaymentConversionType::MayOverpay(2),
@@ -699,12 +716,12 @@ mod tests {
                 options: PaymentOptions::new(
                     ResourcePile::food(1),
                     vec![
-                        PaymentConversion::new(
+                        PaymentConversion::resource_options(
                             vec![ResourcePile::food(1)],
                             ResourcePile::wood(1),
                             PaymentConversionType::Unlimited,
                         ),
-                        PaymentConversion::new(
+                        PaymentConversion::resource_options(
                             vec![ResourcePile::wood(1)],
                             ResourcePile::ore(1),
                             PaymentConversionType::Unlimited,
@@ -725,12 +742,12 @@ mod tests {
                 options: PaymentOptions::new(
                     ResourcePile::food(1),
                     vec![
-                        PaymentConversion::new(
+                        PaymentConversion::resource_options(
                             vec![ResourcePile::wood(1)],
                             ResourcePile::ore(1),
                             PaymentConversionType::Unlimited,
                         ),
-                        PaymentConversion::new(
+                        PaymentConversion::resource_options(
                             vec![ResourcePile::food(1)],
                             ResourcePile::wood(1),
                             PaymentConversionType::Unlimited,
@@ -750,7 +767,7 @@ mod tests {
                 name: "gold can replace anything but mood and culture tokens".to_string(),
                 options: PaymentOptions::new(
                     ResourcePile::food(1) + ResourcePile::wood(1) + ResourcePile::mood_tokens(1),
-                    vec![PaymentConversion::new(
+                    vec![PaymentConversion::resource_options(
                         vec![
                             ResourcePile::food(1),
                             ResourcePile::wood(1),
@@ -790,6 +807,31 @@ mod tests {
                     test_case.name,
                     i
                 );
+            }
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
+pub enum CustomCost {
+    Prisoners(u32),
+}
+
+impl CustomCost {
+    fn can_afford(&self, player: &Player) -> bool {
+        match self {
+            CustomCost::Prisoners(count) => player.custom_data.get("prisoners").is_some_and(|available| {
+                available >= count
+            }),
+        }
+    }
+
+    fn deduct(&self, player: &mut Player) {
+        match self {
+            CustomCost::Prisoners(count) => {
+                if let Some(available) = player.custom_data.get_mut("prisoners") {
+                    *available -= count;
+                }
             }
         }
     }

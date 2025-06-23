@@ -73,6 +73,7 @@ pub struct Player {
     pub played_once_per_turn_actions: Vec<CustomActionType>,
     pub event_info: HashMap<String, String>,
     pub secrets: Vec<String>,
+    pub custom_data: HashMap<String, u32>,
     pub(crate) objective_opportunities: Vec<String>, // transient
     pub(crate) gained_objective: Option<u8>,         // transient
     pub(crate) great_mausoleum_action_cards: u8,     // transient
@@ -131,6 +132,7 @@ impl Player {
             played_once_per_turn_actions: Vec::new(),
             event_info: HashMap::new(),
             secrets: Vec::new(),
+            custom_data: HashMap::new(),
             objective_opportunities: Vec::new(),
             gained_objective: None,
             great_mausoleum_action_cards: 0,
@@ -557,8 +559,8 @@ pub fn gain_units(
     units: Units,
     origin: &EventOrigin,
 ) {
-    for (unit_type, amout) in units.clone() {
-        for _ in 0..amout {
+    for (unit_type, amount) in units.clone() {
+        for _ in 0..amount {
             if let UnitType::Leader(leader) = &unit_type {
                 let p = game.player_mut(player);
                 p.available_leaders.retain(|name| name != leader);
