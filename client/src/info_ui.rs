@@ -14,7 +14,36 @@ use server::game::Game;
 use server::incident::Incident;
 use server::objective_card::ObjectiveCard;
 use server::wonder::{Wonder, WonderInfo};
+use std::fmt::Display;
 use std::ops::Mul;
+
+enum VisibleCardLocation {
+    DiscardPile,
+    Public,
+    Unknown,
+}
+
+impl VisibleCardLocation {
+    pub(crate) fn from_piles<T: PartialEq>(card: &T, discarded: &[T], public: &[T]) -> Self {
+        if discarded.contains(card) {
+            VisibleCardLocation::DiscardPile
+        } else if public.contains(card) {
+            VisibleCardLocation::Public
+        } else {
+            VisibleCardLocation::Unknown
+        }
+    }
+}
+
+impl Display for VisibleCardLocation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            VisibleCardLocation::DiscardPile => write!(f, "Discard Pile"),
+            VisibleCardLocation::Public => write!(f, "Public"),
+            VisibleCardLocation::Unknown => write!(f, "Unknown"),
+        }
+    }
+}
 
 #[derive(Clone, Debug)]
 pub(crate) struct InfoDialog {
@@ -80,6 +109,8 @@ fn show_incidents(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
             },
             |d| &d.incident,
             |d, i| d.incident = i,
+            // todo public from permanent effects
+            |i| VisibleCardLocation::from_piles(&i.id, &rc.game.incidents_discarded, &[]),
         )
     })
 }
@@ -101,6 +132,7 @@ fn show_action_cards(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
                 |i| action_card_object(rc, i.id).description,
                 |d| &d.action_card,
                 |d, i| d.action_card = i,
+                |i| VisibleCardLocation::from_piles(&i.id, &rc.game.action_cards_discarded, &[]),
             )
         },
     )
@@ -123,6 +155,17 @@ fn show_objective_cards(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
                 |i| objective_card_object(rc, i.id, None).description,
                 |d| &d.objective_card,
                 |d, i| d.objective_card = i,
+                |i| {
+                    VisibleCardLocation::from_piles(
+                        &i.id,
+                        &[],
+                        &rc.game
+                            .players
+                            .iter()
+                            .flat_map(|p| p.completed_objectives.iter().map(|o| o.card))
+                            .collect_vec(),
+                    )
+                },
             )
         },
     )
@@ -139,6 +182,20 @@ fn show_wonders(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
             |w| wonder_description(rc, w),
             |d| &d.wonder,
             |d, w| d.wonder = w,
+            |w| {
+                VisibleCardLocation::from_piles(
+                    &w.wonder,
+                    &[],
+                    &rc.game
+                        .players
+                        .iter()
+                        .flat_map(
+                            // todo destroyed wonders
+                            |p| p.wonders_built.clone(),
+                        )
+                        .collect_vec(),
+                )
+            },
         )
     })
 }
@@ -212,30 +269,39 @@ fn show_civilization(rc: &RenderContext, c: &Civilization) {
 
 fn show_category_items<T: Clone, K: PartialEq + Ord + Clone>(
     rc: &RenderContext,
-    d: &InfoDialog,
+    dialog: &InfoDialog,
     get_all: impl Fn(&Game) -> &Vec<T>,
     get_key: impl Fn(&T) -> &K,
     name: impl Fn(&T) -> String,
     description: impl Fn(&T) -> Vec<String>,
     get_selected: impl Fn(&InfoDialog) -> &K,
     set_selected: impl Fn(&mut InfoDialog, K),
+    get_location: impl Fn(&T) -> VisibleCardLocation,
 ) -> RenderResult {
     for (i, info) in get_all(rc.game)
         .iter()
         .sorted_by_key(|info| get_key(info))
         .enumerate()
     {
-        let selected = get_key(info) == get_selected(d);
+        let selected = get_key(info) == get_selected(dialog);
         let name = name(info);
+        let mut desc = description(info);
+        let location = get_location(info);
+        desc.insert(0, format!("Location: {location}"));
+
         if draw_button_with_color(
             rc,
             &name,
             vec2(i.rem_euclid(8) as f32, ((i / 8) + 1) as f32),
-            &description(info),
+            &desc,
             selected,
-            GREEN,
+            match location {
+                VisibleCardLocation::DiscardPile => BLUE,
+                VisibleCardLocation::Public => YELLOW,
+                VisibleCardLocation::Unknown => GREEN,
+            },
         ) {
-            let mut new = d.clone();
+            let mut new = dialog.clone();
             set_selected(&mut new, get_key(info).clone());
             return StateUpdate::open_dialog(ActiveDialog::Info(new));
         }

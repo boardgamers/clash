@@ -214,7 +214,7 @@ pub(crate) fn draw_wonder_from_pile(game: &mut Game) -> Option<Wonder> {
         "Wonders",
         |game| &mut game.wonders_left,
         |_| Vec::new(),
-        |_| vec![],
+        |_| vec![], // not used since wonders are not shuffled
     )
 }
 
