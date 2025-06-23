@@ -4,14 +4,14 @@ use crate::client::Features;
 use crate::client_state::StateUpdate;
 use crate::dialog_ui::{OkTooltip, ok_button};
 use crate::layout_ui::{
-    ICON_SIZE, bottom_center_texture, bottom_centered_text, bottom_right_texture, icon_pos,
-    left_mouse_button_pressed_in_rect, top_center_anchor, top_center_texture,
+    ICON_SIZE, bottom_center_texture, bottom_centered_text, bottom_right_texture, button_pressed,
+    icon_pos, top_center_anchor, top_center_texture,
 };
 use crate::log_ui::multiline_label;
 use crate::map_ui::terrain_name;
 use crate::render_context::RenderContext;
 use crate::resource_ui::{new_resource_map, resource_name};
-use crate::tooltip::{show_tooltip_for_circle, show_tooltip_for_rect};
+use crate::tooltip::show_tooltip_for_circle;
 use crate::unit_ui;
 use itertools::Itertools;
 use macroquad::math::vec2;
@@ -73,8 +73,7 @@ pub fn player_select(rc: &RenderContext) -> StateUpdate {
         } else {
             pl.get_name()
         };
-        show_tooltip_for_rect(rc, &[tooltip], rect, 50.);
-        if !shown && left_mouse_button_pressed_in_rect(rect, rc) {
+        if button_pressed(rect, rc, &[tooltip], 50.) && !shown {
             return StateUpdate::SetShownPlayer(pl.index);
         }
 

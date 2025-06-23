@@ -16,11 +16,12 @@ use crate::construct_ui::pay_construction_dialog;
 use crate::event_ui::{custom_phase_event_origin, event_help};
 use crate::happiness_ui::{increase_happiness_click, increase_happiness_menu};
 use crate::hex_ui::pixel_to_coordinate;
+use crate::info_ui::{InfoDialog, show_info_dialog};
 use crate::layout_ui::{
     ICON_SIZE, bottom_center_anchor, bottom_centered_text_with_offset,
     draw_scaled_icon_with_tooltip, icon_pos, top_right_texture,
 };
-use crate::log_ui::show_log;
+use crate::log_ui::{LogDialog, show_log};
 use crate::map_ui::{draw_map, explore_dialog, show_tile_menu};
 use crate::player_ui::{player_select, show_global_controls, show_top_center, show_top_left};
 use crate::render_context::RenderContext;
@@ -35,8 +36,8 @@ fn render_with_mutable_state(game: &Game, state: &mut State, features: &Features
     if !state.active_dialog.is_modal() {
         map_ui::pan_and_zoom(state);
     }
-    if matches!(state.active_dialog, ActiveDialog::Log) {
-        state.log_scroll += mouse_wheel().1;
+    if let ActiveDialog::Log(d) = &mut state.active_dialog {
+        d.log_scroll += mouse_wheel().1;
     }
 
     set_y_zoom(state);
@@ -74,10 +75,10 @@ fn render(rc: &RenderContext, features: &Features) -> StateUpdate {
     }
 
     if top_right_texture(rc, &rc.assets().log, icon_pos(-1, 0), "Show log") {
-        if let ActiveDialog::Log = state.active_dialog {
+        if let ActiveDialog::Log(_) = state.active_dialog {
             return StateUpdate::CloseDialog;
         }
-        return StateUpdate::OpenDialog(ActiveDialog::Log);
+        return StateUpdate::OpenDialog(ActiveDialog::Log(LogDialog::new()));
     }
     if top_right_texture(rc, &rc.assets().advances, icon_pos(-2, 0), "Show advances") {
         if state.active_dialog.is_advance() {
@@ -96,6 +97,12 @@ fn render(rc: &RenderContext, features: &Features) -> StateUpdate {
         },
     ) {
         return StateUpdate::ToggleShowPermanentEffects;
+    }
+    if top_right_texture(rc, &rc.assets().info, icon_pos(-4, 0), "Show info") {
+        if let ActiveDialog::Info(_) = state.active_dialog {
+            return StateUpdate::CloseDialog;
+        }
+        return StateUpdate::OpenDialog(ActiveDialog::Info(InfoDialog::default()));
     }
 
     let can_control = rc.can_control_shown_player();
@@ -147,7 +154,8 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
     match &state.active_dialog {
         ActiveDialog::None | ActiveDialog::WaitingForUpdate => StateUpdate::None,
         ActiveDialog::DialogChooser(d) => dialog_chooser(rc, d),
-        ActiveDialog::Log => show_log(rc),
+        ActiveDialog::Log(d) => show_log(rc, d),
+        ActiveDialog::Info(d) => show_info_dialog(rc, d),
 
         // playing actions
         ActiveDialog::IncreaseHappiness(h) => increase_happiness_menu(rc, h),

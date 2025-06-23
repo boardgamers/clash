@@ -1,6 +1,6 @@
 use crate::log_ui::break_text;
 use crate::render_context::RenderContext;
-use crate::tooltip;
+use crate::tooltip::show_tooltip_for_rect;
 use macroquad::color::WHITE;
 use macroquad::math::{Vec2, f32, vec2};
 use macroquad::prelude::*;
@@ -76,7 +76,7 @@ pub fn bottom_centered_text_with_offset(
             dimensions.width,
             dimensions.height,
         );
-        tooltip::show_tooltip_for_rect(rc, tooltip, rect, 50.);
+        show_tooltip_for_rect(rc, tooltip, rect, 50.);
     }
 }
 
@@ -146,11 +146,20 @@ pub fn draw_scaled_icon_with_tooltip(
         },
     );
 
-    let rect = Rect::new(origin.x, origin.y, size, size);
+    button_pressed(Rect::new(origin.x, origin.y, size, size), rc, tooltip, 50.)
+}
+
+#[must_use]
+pub fn button_pressed(
+    rect: Rect,
+    rc: &RenderContext,
+    tooltip: &[String],
+    right_offset: f32,
+) -> bool {
     if !tooltip.is_empty() {
-        tooltip::show_tooltip_for_rect(rc, tooltip, rect, 50.);
+        show_tooltip_for_rect(rc, tooltip, rect, right_offset);
     }
-    left_mouse_button_pressed_in_rect(rect, rc)
+    left_mouse_button_pressed(rc).is_some_and(|p| rect.contains(p))
 }
 
 #[must_use]

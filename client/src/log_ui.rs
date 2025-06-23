@@ -3,8 +3,25 @@ use crate::render_context::RenderContext;
 use macroquad::math::vec2;
 use server::game::Game;
 
-pub fn show_log(rc: &RenderContext) -> StateUpdate {
-    draw_log(rc.game, rc.state.log_scroll, |label: &str, y: f32| {
+#[derive(Clone)]
+pub struct LogDialog {
+    pub log_scroll: f32,
+}
+
+impl Default for LogDialog {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl LogDialog {
+    pub fn new() -> Self {
+        LogDialog { log_scroll: 0. }
+    }
+}
+
+pub fn show_log(rc: &RenderContext, d: &LogDialog) -> StateUpdate {
+    draw_log(rc.game, d.log_scroll, |label: &str, y: f32| {
         let p = vec2(30., y * 25. + 20.);
         rc.state.draw_text(label, p.x, p.y);
     });

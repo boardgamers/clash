@@ -1,9 +1,9 @@
 use crate::city_ui::add_building_description;
 use crate::client_state::{ActiveDialog, StateUpdate};
-use crate::layout_ui::{left_mouse_button_pressed_in_rect, top_centered_text};
+use crate::layout_ui::{button_pressed, top_centered_text};
 use crate::payment_ui::{Payment, payment_dialog};
 use crate::render_context::RenderContext;
-use crate::tooltip::{add_tooltip_description, show_tooltip_for_rect};
+use crate::tooltip::add_tooltip_description;
 use crate::unit_ui::add_unit_description;
 use itertools::Itertools;
 use macroquad::color::Color;
@@ -121,14 +121,12 @@ pub fn show_advance_menu(
                     );
                 } else {
                     // tooltip should be shown on top of everything
-                    show_tooltip_for_rect(rc, &description(rc, a), rect, 50.);
-
-                    if rc.can_control_shown_player()
+                    if button_pressed(rect, rc, &description(rc, a), 50.)
+                        && rc.can_control_shown_player()
                         && matches!(
                             advance_state,
                             AdvanceState::Available | AdvanceState::Removable
                         )
-                        && left_mouse_button_pressed_in_rect(rect, rc)
                     {
                         return new_update(a);
                     }

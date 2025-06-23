@@ -2,12 +2,11 @@ use crate::client_state::{ActiveDialog, StateUpdate};
 use crate::custom_phase_ui;
 use crate::custom_phase_ui::MultiSelection;
 use crate::dialog_ui::ok_button;
-use crate::layout_ui::{bottom_centered_text, left_mouse_button_pressed_in_rect};
+use crate::layout_ui::{bottom_centered_text, button_pressed};
 use crate::log_ui::break_text;
 use crate::player_ui::get_combat;
 use crate::render_context::RenderContext;
 use crate::select_ui::HighlightType;
-use crate::tooltip::show_tooltip_for_rect;
 use custom_phase_ui::multi_select_tooltip;
 use itertools::Itertools;
 use macroquad::color::BLACK;
@@ -138,9 +137,7 @@ fn draw_card(
         let rect = Rect::new(pos.x, pos.y, size.x, size.y);
 
         // tooltip should be shown on top of everything
-        show_tooltip_for_rect(rc, &c.description, rect, 150.);
-
-        if left_mouse_button_pressed_in_rect(rect, rc) {
+        if button_pressed(rect, rc, &c.description, 150.) {
             if let Some(s) = selection {
                 return Some(StateUpdate::OpenDialog(ActiveDialog::HandCardsRequest(
                     s.selection.clone().toggle(c.id),

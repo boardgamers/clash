@@ -40,6 +40,7 @@ pub struct Assets {
     pub ok_blocked: Texture2D,
     pub ok: Texture2D,
     pub cancel: Texture2D,
+    pub info: Texture2D,
 
     pub victory_points: Texture2D,
     pub event_counter: Texture2D,
@@ -92,6 +93,7 @@ impl Assets {
             ok: load_png(include_bytes!("../assets/ok-circle-svgrepo-com.png")),
             ok_blocked: load_png(include_bytes!("../assets/in-progress-svgrepo-com.png")),
             cancel: load_png(include_bytes!("../assets/cancel-svgrepo-com.png")),
+            info: load_png(include_bytes!("../assets/info-svgrepo-com.png")),
 
             victory_points: load_png(include_bytes!("../assets/trophy-cup-svgrepo-com.png")),
             event_counter: load_png(include_bytes!(

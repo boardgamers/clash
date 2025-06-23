@@ -9,7 +9,7 @@ use crate::dialog_ui::BaseOrCustomDialog;
 use crate::event_ui::{custom_phase_event_help, custom_phase_event_origin, event_help, pay_help};
 use crate::happiness_ui::IncreaseHappinessConfig;
 use crate::layout_ui::FONT_SIZE;
-use crate::log_ui::get_log_end;
+use crate::log_ui::{LogDialog, get_log_end};
 use crate::map_ui::ExploreResolutionConfig;
 use crate::move_ui::{MoveIntent, MovePayment, MoveSelection};
 use crate::payment_ui::{Payment, new_gain};
@@ -33,7 +33,8 @@ use server::position::Position;
 #[derive(Clone)]
 pub enum ActiveDialog {
     None,
-    Log,
+    Log(LogDialog),
+    Info(InfoDialog),
     WaitingForUpdate,
     DialogChooser(Box<DialogChooser>),
 
@@ -73,7 +74,8 @@ impl ActiveDialog {
         match self {
             ActiveDialog::None => "none",
             ActiveDialog::DialogChooser(_) => "dialog chooser",
-            ActiveDialog::Log => "log",
+            ActiveDialog::Log(_) => "log",
+            ActiveDialog::Info(_) => "info",
             ActiveDialog::WaitingForUpdate => "waiting for update",
             ActiveDialog::IncreaseHappiness(_) => "increase happiness",
             ActiveDialog::AdvanceMenu => "advance menu",
@@ -104,7 +106,8 @@ impl ActiveDialog {
     pub fn help_message(&self, rc: &RenderContext) -> Vec<String> {
         match self {
             ActiveDialog::None
-            | ActiveDialog::Log
+            | ActiveDialog::Log(_)
+            | ActiveDialog::Info(_)
             | ActiveDialog::DialogChooser(_)
             | ActiveDialog::AdvanceMenu => vec![],
             ActiveDialog::IncreaseHappiness(h) => {
@@ -191,12 +194,12 @@ impl ActiveDialog {
 
     #[must_use]
     pub fn show_for_other_player(&self) -> bool {
-        matches!(self, ActiveDialog::Log | ActiveDialog::PlayerRequest(_)) | self.is_advance()
+        self.is_modal() || matches!(self, ActiveDialog::PlayerRequest(_))
     }
 
     #[must_use]
     pub fn is_modal(&self) -> bool {
-        matches!(self, ActiveDialog::Log) || self.is_advance()
+        matches!(self, ActiveDialog::Log(_) | ActiveDialog::Info(_)) || self.is_advance()
     }
 
     #[must_use]
@@ -370,6 +373,7 @@ pub enum CameraMode {
     World,
 }
 
+use crate::info_ui::InfoDialog;
 #[cfg(not(target_arch = "wasm32"))]
 use server::ai::AI;
 use server::events::EventOrigin;
@@ -383,7 +387,6 @@ pub struct State {
     pub camera: Camera2D,
     pub screen_size: Vec2,
     pub mouse_positions: Vec<MousePosition>,
-    pub log_scroll: f32,
     pub focused_tile: Option<Position>,
     pub show_permanent_effects: bool,
     pub ai_autoplay: bool,
@@ -412,7 +415,6 @@ impl State {
             },
             screen_size: vec2(0., 0.),
             mouse_positions: vec![],
-            log_scroll: 0.0,
             focused_tile: None,
             pan_map: false,
             show_permanent_effects: false,
@@ -460,9 +462,9 @@ impl State {
                     GameSyncRequest::None
                 }
             }
-            StateUpdate::OpenDialog(dialog) => {
-                if matches!(dialog, ActiveDialog::Log) {
-                    self.log_scroll = get_log_end(game, self.screen_size.y);
+            StateUpdate::OpenDialog(mut dialog) => {
+                if let ActiveDialog::Log(d) = &mut dialog {
+                    d.log_scroll = get_log_end(game, self.screen_size.y);
                 }
                 let d = self.game_state_dialog(game);
                 if matches!(dialog, ActiveDialog::AdvanceMenu) && d.is_advance() {

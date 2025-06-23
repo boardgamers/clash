@@ -55,6 +55,16 @@ pub enum SpecialAdvanceRequirement {
     Advance(Advance),
 }
 
+impl SpecialAdvanceRequirement {
+    #[must_use]
+    pub fn name(&self, game: &Game) -> String {
+        match self {
+            SpecialAdvanceRequirement::AnyGovernment => "Any government".to_string(),
+            SpecialAdvanceRequirement::Advance(a) => a.info(game).name.clone(),
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct SpecialAdvanceInfo {
     pub advance: SpecialAdvance,
