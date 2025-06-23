@@ -40,6 +40,7 @@ fn render_with_mutable_state(game: &Game, state: &mut State, features: &Features
     }
 
     set_y_zoom(state);
+    clear_background(WHITE);
     let () = render(&state.render_context(game, RenderStage::Map), features)
         .expect("all updates should be in Tooltip stage");
     let () = render(&state.render_context(game, RenderStage::UI), features)
@@ -56,8 +57,6 @@ fn set_y_zoom(state: &mut State) {
 }
 
 fn render(rc: &RenderContext, features: &Features) -> RenderResult {
-    clear_background(WHITE);
-
     let state = &rc.state;
     let show_map = !state.active_dialog.is_modal() && rc.stage.is_map();
     let show_ui = !state.active_dialog.is_modal() && rc.stage.is_ui();
