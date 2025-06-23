@@ -5,6 +5,7 @@ use crate::events::EventOrigin;
 use crate::game::Game;
 use enumset::EnumSetType;
 use serde::{Deserialize, Serialize};
+use std::fmt::Debug;
 
 #[derive(EnumSetType, Serialize, Deserialize, Debug, Ord, PartialOrd, Hash)]
 pub enum SpecialAdvance {
@@ -49,7 +50,7 @@ impl SpecialAdvance {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum SpecialAdvanceRequirement {
     AnyGovernment,
     Advance(Advance),
@@ -104,6 +105,17 @@ impl SpecialAdvanceInfo {
             requirement,
             listeners,
         }
+    }
+}
+
+impl Debug for SpecialAdvanceInfo {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("SpecialAdvanceInfo")
+            .field("advance", &self.advance)
+            .field("name", &self.name)
+            .field("description", &self.description)
+            .field("requirement", &self.requirement)
+            .finish()
     }
 }
 

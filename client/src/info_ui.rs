@@ -3,7 +3,7 @@ use crate::layout_ui::button_pressed;
 use crate::render_context::RenderContext;
 use crate::tooltip::add_tooltip_description;
 use macroquad::math::{Rect, Vec2, vec2};
-use macroquad::prelude::YELLOW;
+use macroquad::prelude::{BLUE, GREEN, MAGENTA, WHITE, YELLOW};
 use server::civilization::Civilization;
 use server::content::civilizations;
 use std::ops::Mul;
@@ -11,12 +11,6 @@ use std::ops::Mul;
 #[derive(Clone, Debug)]
 pub(crate) struct InfoDialog {
     pub select: InfoSelect,
-}
-
-impl Default for InfoDialog {
-    fn default() -> Self {
-        Self::new(InfoSelect::Civilization("Rome".to_string()))
-    }
 }
 
 impl InfoDialog {
@@ -27,7 +21,7 @@ impl InfoDialog {
 
 #[derive(Clone, Debug)]
 pub(crate) enum InfoSelect {
-    Civilization(String),
+    Civilization(Civilization),
     // Incident(String),
 }
 
@@ -37,6 +31,7 @@ pub(crate) fn show_info_dialog(rc: &RenderContext, d: &InfoDialog) -> RenderResu
         "Civilizations",
         vec2(0., 0.),
         &["Show civilization info".to_string()],
+        true,
     );
 
     match &d.select {
@@ -48,10 +43,10 @@ pub(crate) fn show_info_dialog(rc: &RenderContext, d: &InfoDialog) -> RenderResu
             {
                 if draw_button(rc, &c.name, vec2(i as f32, 1.), &[]) {
                     return StateUpdate::open_dialog(ActiveDialog::Info(InfoDialog::new(
-                        InfoSelect::Civilization(c.name.clone()),
+                        InfoSelect::Civilization(c.clone()),
                     )));
                 }
-                if c.name == *selected {
+                if c == selected {
                     show_civilization(rc, c);
                 }
             }
@@ -74,12 +69,23 @@ fn show_civilization(rc: &RenderContext, c: &Civilization) {
     }
 }
 
-fn draw_button(rc: &RenderContext, text: &str, pos: Vec2, tooltip: &[String]) -> bool {
+fn draw_button(rc: &RenderContext, text: &str, pos: Vec2, tooltip: &[String], selected: bool) -> bool {
     let button_size = vec2(140., 40.);
     let rect_pos = pos.mul(button_size) + vec2(20., 40.);
     let rect = Rect::new(rect_pos.x, rect_pos.y, 135., 30.);
 
-    rc.draw_rectangle(rect.x, rect.y, rect.w, rect.h, YELLOW);
+    let color = match pos.y {
+        0. => YELLOW,
+        1. => GREEN,
+        2. => BLUE,
+        3. => MAGENTA,
+        _ => WHITE,
+    };
+    rc.draw_rectangle(rect, color);
+
+    if selected {
+        rc.draw_rectangle_lines(rect, WHITE);
+    }
 
     rc.draw_text(text, rect.x + 10., rect.y + 25.);
 

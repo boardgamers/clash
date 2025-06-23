@@ -47,10 +47,9 @@ pub(crate) fn draw_unit_type(
     } else {
         radius + 2.
     };
-    rc.draw_circle(center.x, center.y, r, unit_highlight_type.color());
+    rc.draw_circle(center, r, unit_highlight_type.color());
     rc.draw_circle(
-        center.x,
-        center.y,
+        center,
         radius - 2.,
         rc.player_color(player_index),
     );

@@ -192,3 +192,10 @@ pub(crate) fn mouse_pressed_position(rc: &RenderContext) -> Option<Vec2> {
 pub(crate) fn is_mouse_pressed(rc: &RenderContext) -> bool {
     rc.stage.is_tooltip() && is_mouse_button_pressed(MouseButton::Left)
 }
+
+pub(crate) fn rect_from(
+    p: Vec2,
+    size: Vec2,
+) -> Rect {
+    Rect::new(p.x, p.y, size.x, size.y)
+}

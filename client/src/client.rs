@@ -15,7 +15,7 @@ use crate::construct_ui::pay_construction_dialog;
 use crate::event_ui::{custom_phase_event_origin, event_help};
 use crate::happiness_ui::{increase_happiness_click, increase_happiness_menu};
 use crate::hex_ui::pixel_to_coordinate;
-use crate::info_ui::{InfoDialog, show_info_dialog};
+use crate::info_ui::{InfoDialog, InfoSelect, show_info_dialog};
 use crate::layout_ui::{
     ICON_SIZE, bottom_center_anchor, bottom_centered_text_with_offset,
     draw_scaled_icon_with_tooltip, icon_pos, is_mouse_pressed, top_right_texture,
@@ -104,7 +104,9 @@ fn render(rc: &RenderContext, features: &Features) -> RenderResult {
         if let ActiveDialog::Info(_) = state.active_dialog {
             return StateUpdate::close_dialog();
         }
-        return StateUpdate::open_dialog(ActiveDialog::Info(InfoDialog::default()));
+        return StateUpdate::open_dialog(ActiveDialog::Info(InfoDialog::new(
+            InfoSelect::Civilization(rc.shown_player.civilization.clone()),
+        )));
     }
 
     let can_control = rc.can_control_shown_player();

@@ -4,6 +4,7 @@ use crate::player::Player;
 use crate::position::Position;
 use crate::unit::UnitType;
 use serde::{Deserialize, Serialize};
+use std::fmt::Debug;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Copy, Hash)]
 pub enum Leader {
@@ -60,6 +61,15 @@ impl LeaderInfo {
             name: name.to_string(),
             abilities: vec![first_ability, second_ability],
         }
+    }
+}
+
+impl Debug for LeaderInfo {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("LeaderInfo")
+            .field("leader", &self.leader)
+            .field("name", &self.name)
+            .finish()
     }
 }
 

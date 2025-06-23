@@ -47,8 +47,9 @@ pub(crate) fn player_select(rc: &RenderContext) -> RenderResult {
 
         let w = if shown { size + 10. } else { size };
         let x = pos.x - w + size;
-        rc.draw_rectangle(x, pos.y, w, size, color);
-        rc.draw_rectangle_lines(x, pos.y, w, size, 2.0, BLACK);
+        let rect = Rect::new(x, pos.y, w, size);
+        rc.draw_rectangle(rect, color);
+        rc.draw_rectangle_lines(rect, 2.0, BLACK);
         let text = format!("{}", pl.victory_points(game));
 
         rc.draw_text(&text, pos.x + 10., pos.y + 27.);
@@ -66,7 +67,6 @@ pub(crate) fn player_select(rc: &RenderContext) -> RenderResult {
             );
         }
 
-        let rect = Rect::new(x, pos.y, w, size);
         let tooltip = if rc.state.control_player.is_some_and(|p| p == pl.index) {
             format!("{pl} (You)")
         } else {

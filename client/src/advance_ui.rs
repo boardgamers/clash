@@ -83,23 +83,17 @@ pub(crate) fn show_advance_menu(
 
             let rect = Rect::new(pos.x, pos.y, 135., 30.);
             rc.draw_rectangle(
-                rect.x,
-                rect.y,
-                rect.w,
-                rect.h,
+                rect,
                 fill_color(rc, p, &advance_state),
             );
             rc.draw_text(name, pos.x + 10., pos.y + 22.);
 
             if find_special_advance(a.advance, rc.game, rc.shown_player.index).is_some() {
-                rc.draw_rectangle_lines(rect.x, rect.y, rect.w, rect.h, 12., GREEN);
+                rc.draw_rectangle_lines(rect, 12., GREEN);
             }
 
             rc.draw_rectangle_lines(
-                rect.x,
-                rect.y,
-                rect.w,
-                rect.h,
+                rect,
                 match &state.active_dialog {
                     ActiveDialog::AdvancePayment(p) => {
                         if p.name == *name {

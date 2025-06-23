@@ -5,7 +5,7 @@ use macroquad::camera::set_default_camera;
 use macroquad::color::{Color, PINK, YELLOW};
 use macroquad::input::mouse_position;
 use macroquad::math::{Vec2, bool};
-use macroquad::prelude::{BLACK, LIME, SKYBLUE, WHITE, set_camera};
+use macroquad::prelude::{BLACK, LIME, SKYBLUE, WHITE, set_camera, Rect};
 use server::game::Game;
 use server::payment::PaymentOptions;
 use server::player::Player;
@@ -153,35 +153,32 @@ impl RenderContext<'_> {
         }
     }
 
-    pub(crate) fn draw_rectangle(&self, x: f32, y: f32, w: f32, h: f32, color: Color) {
+    pub(crate) fn draw_rectangle(&self, r: Rect, color: Color) {
         if self.stage.is_main() {
-            macroquad::prelude::draw_rectangle(x, y, w, h, color);
+            macroquad::prelude::draw_rectangle(r.x, r.y, r.w, r.h, color);
         }
     }
 
     pub(crate) fn draw_rectangle_lines(
         &self,
-        x: f32,
-        y: f32,
-        w: f32,
-        h: f32,
+        r: Rect,
         thickness: f32,
         color: Color,
     ) {
         if self.stage.is_main() {
-            macroquad::prelude::draw_rectangle_lines(x, y, w, h, thickness, color);
+            macroquad::prelude::draw_rectangle_lines(r.x, r.y, r.w, r.h, thickness, color);
         }
     }
 
-    pub(crate) fn draw_circle(&self, x: f32, y: f32, r: f32, color: Color) {
+    pub(crate) fn draw_circle(&self, c: Vec2, r: f32, color: Color) {
         if self.stage.is_main() {
-            macroquad::prelude::draw_circle(x, y, r, color);
+            macroquad::prelude::draw_circle(c.x, c.y, r, color);
         }
     }
 
-    pub(crate) fn draw_circle_lines(&self, x: f32, y: f32, r: f32, thickness: f32, color: Color) {
+    pub(crate) fn draw_circle_lines(&self, c: Vec2, r: f32, thickness: f32, color: Color) {
         if self.stage.is_main() {
-            macroquad::prelude::draw_circle_lines(x, y, r, thickness, color);
+            macroquad::prelude::draw_circle_lines(c.x, c.y, r, thickness, color);
         }
     }
 }

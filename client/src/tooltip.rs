@@ -5,6 +5,7 @@ use macroquad::color::{Color, GRAY};
 use macroquad::input::mouse_position;
 use macroquad::math::{Rect, Vec2, bool, f32, f64, vec2};
 use macroquad::prelude::{draw_circle, draw_rectangle, get_time};
+use crate::layout_ui::rect_from;
 
 const TOOLTIP_DELAY: f64 = 0.5;
 
@@ -75,7 +76,7 @@ fn show_tooltip_text(rc: &RenderContext, tooltip: &[String], origin: Vec2, right
         vec2(acc.x.max(d.width), acc.y + 20.)
     });
 
-    let tooltip_rect = Rect::new(origin.x, origin.y, total.x, total.y);
+    let tooltip_rect = rect_from(origin, total);
     let w = tooltip_rect.size().x + 10.;
     let sx = state.screen_size.x - right_offset;
     let x = tooltip_rect.left().min(sx - w);

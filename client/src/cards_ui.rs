@@ -2,7 +2,7 @@ use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::custom_phase_ui;
 use crate::custom_phase_ui::MultiSelection;
 use crate::dialog_ui::ok_button;
-use crate::layout_ui::{bottom_centered_text, button_pressed};
+use crate::layout_ui::{bottom_centered_text, button_pressed, rect_from};
 use crate::log_ui::break_text;
 use crate::player_ui::get_combat;
 use crate::render_context::RenderContext;
@@ -95,11 +95,11 @@ fn draw_cards(
     let screen = rc.state.screen_size;
     let mut y = (cards.len() as f32 * -size.y) / 2.;
     for card in cards {
+        let pos = vec2(screen.x, screen.y / 2.0) + vec2(-size.x + x_offset, y);
         draw_card(
             rc,
-            size,
+            rect_from(pos, size),
             selection,
-            vec2(screen.x, screen.y / 2.0) + vec2(-size.x + x_offset, y),
             card,
         )?;
 
@@ -110,20 +110,18 @@ fn draw_cards(
 
 fn draw_card(
     rc: &RenderContext,
-    size: Vec2,
+    rect: Rect,
     selection: Option<&SelectionInfo>,
-    pos: Vec2,
     card: &HandCard,
 ) -> RenderResult {
     let c = get_card_object(rc, card, selection);
 
-    rc.draw_rectangle(pos.x, pos.y, size.x, size.y, c.color);
+    rc.draw_rectangle(rect, c.color);
     let (thickness, border) = highlight(rc, &c, selection);
-    rc.draw_rectangle_lines(pos.x, pos.y, size.x, size.y, thickness, border);
+    rc.draw_rectangle_lines(rect, thickness, border);
 
-    rc.draw_text(&c.name, pos.x + 10., pos.y + 22.);
+    rc.draw_text(&c.name, rect.x + 10., rect.y + 22.);
 
-    let rect = Rect::new(pos.x, pos.y, size.x, size.y);
     if button_pressed(rect, rc, &c.description, 150.) {
         if let Some(s) = selection {
             return StateUpdate::open_dialog(ActiveDialog::HandCardsRequest(
