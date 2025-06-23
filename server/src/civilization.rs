@@ -1,7 +1,6 @@
 use crate::content::civilizations::{BARBARIANS, PIRATES};
 use crate::map::Block;
 use crate::{leader::LeaderInfo, special_advance::SpecialAdvanceInfo};
-use std::fmt::Debug;
 
 #[derive(Clone)]
 pub struct Civilization {
@@ -40,22 +39,5 @@ impl Civilization {
     #[must_use]
     pub fn is_human(&self) -> bool {
         !self.is_barbarian() && !self.is_pirates()
-    }
-}
-
-impl PartialEq for Civilization {
-    fn eq(&self, other: &Self) -> bool {
-        self.name == other.name
-    }
-}
-
-impl Debug for Civilization {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Civilization")
-            .field("name", &self.name)
-            .field("special_advances", &self.special_advances)
-            .field("leaders", &self.leaders)
-            .field("start_block", &self.start_block)
-            .finish()
     }
 }

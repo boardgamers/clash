@@ -50,7 +50,7 @@ impl SpecialAdvance {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub enum SpecialAdvanceRequirement {
     AnyGovernment,
     Advance(Advance),
@@ -105,17 +105,6 @@ impl SpecialAdvanceInfo {
             requirement,
             listeners,
         }
-    }
-}
-
-impl Debug for SpecialAdvanceInfo {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("SpecialAdvanceInfo")
-            .field("advance", &self.advance)
-            .field("name", &self.name)
-            .field("description", &self.description)
-            .field("requirement", &self.requirement)
-            .finish()
     }
 }
 

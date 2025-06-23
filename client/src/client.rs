@@ -105,7 +105,7 @@ fn render(rc: &RenderContext, features: &Features) -> RenderResult {
             return StateUpdate::close_dialog();
         }
         return StateUpdate::open_dialog(ActiveDialog::Info(InfoDialog::new(
-            InfoSelect::Civilization(rc.shown_player.civilization.clone()),
+            InfoSelect::Civilization(rc.shown_player.civilization.name.clone()),
         )));
     }
 

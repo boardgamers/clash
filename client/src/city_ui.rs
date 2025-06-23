@@ -1,4 +1,3 @@
-use crate::layout_ui::rect_from;
 use crate::action_buttons::{base_or_custom_action, custom_action_buttons};
 use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::collect_ui::CollectResources;
@@ -9,7 +8,9 @@ use crate::happiness_ui::{
     open_increase_happiness_dialog,
 };
 use crate::hex_ui;
-use crate::layout_ui::{draw_scaled_icon, draw_scaled_icon_with_tooltip, is_in_circle, is_mouse_pressed};
+use crate::layout_ui::{
+    draw_scaled_icon, draw_scaled_icon_with_tooltip, is_in_circle, is_mouse_pressed,
+};
 use crate::map_ui::{move_units_buttons, show_map_action_buttons};
 use crate::recruit_unit_ui::RecruitAmount;
 use crate::render_context::RenderContext;

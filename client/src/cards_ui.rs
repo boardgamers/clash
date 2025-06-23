@@ -96,12 +96,7 @@ fn draw_cards(
     let mut y = (cards.len() as f32 * -size.y) / 2.;
     for card in cards {
         let pos = vec2(screen.x, screen.y / 2.0) + vec2(-size.x + x_offset, y);
-        draw_card(
-            rc,
-            rect_from(pos, size),
-            selection,
-            card,
-        )?;
+        draw_card(rc, rect_from(pos, size), selection, card)?;
 
         y += size.y;
     }
@@ -120,7 +115,7 @@ fn draw_card(
     let (thickness, border) = highlight(rc, &c, selection);
     rc.draw_rectangle_lines(rect, thickness, border);
 
-    rc.draw_text(&c.name, rect.x + 10., rect.y + 22.);
+    rc.draw_limited_text(&c.name, rect.x + 10., rect.y + 22., 20);
 
     if button_pressed(rect, rc, &c.description, 150.) {
         if let Some(s) = selection {

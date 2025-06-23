@@ -193,9 +193,20 @@ pub(crate) fn is_mouse_pressed(rc: &RenderContext) -> bool {
     rc.stage.is_tooltip() && is_mouse_button_pressed(MouseButton::Left)
 }
 
-pub(crate) fn rect_from(
-    p: Vec2,
-    size: Vec2,
-) -> Rect {
+pub(crate) fn rect_from(p: Vec2, size: Vec2) -> Rect {
     Rect::new(p.x, p.y, size.x, size.y)
+}
+
+pub(crate) fn limit_str(
+    s: &str,
+    max_length: usize,
+) -> String {
+    if s.len() > max_length {
+        let suffix = "..";
+        let mut limited = s.chars().take(max_length - suffix.len()).collect::<String>();
+        limited.push_str(suffix);
+        limited
+    } else {
+        s.to_string()
+    }
 }

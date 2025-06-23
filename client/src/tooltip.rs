@@ -1,11 +1,11 @@
 use crate::client_state::{MousePosition, State};
+use crate::layout_ui::rect_from;
 use crate::log_ui::break_text;
 use crate::render_context::RenderContext;
 use macroquad::color::{Color, GRAY};
 use macroquad::input::mouse_position;
 use macroquad::math::{Rect, Vec2, bool, f32, f64, vec2};
 use macroquad::prelude::{draw_circle, draw_rectangle, get_time};
-use crate::layout_ui::rect_from;
 
 const TOOLTIP_DELAY: f64 = 0.5;
 

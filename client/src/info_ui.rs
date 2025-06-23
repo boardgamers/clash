@@ -3,7 +3,7 @@ use crate::layout_ui::button_pressed;
 use crate::render_context::RenderContext;
 use crate::tooltip::add_tooltip_description;
 use macroquad::math::{Rect, Vec2, vec2};
-use macroquad::prelude::{BLUE, GREEN, MAGENTA, WHITE, YELLOW};
+use macroquad::prelude::{BLACK, BLUE, GREEN, MAGENTA, WHITE, YELLOW};
 use server::civilization::Civilization;
 use server::content::civilizations;
 use std::ops::Mul;
@@ -21,7 +21,7 @@ impl InfoDialog {
 
 #[derive(Clone, Debug)]
 pub(crate) enum InfoSelect {
-    Civilization(Civilization),
+    Civilization(String),
     // Incident(String),
 }
 
@@ -35,18 +35,19 @@ pub(crate) fn show_info_dialog(rc: &RenderContext, d: &InfoDialog) -> RenderResu
     );
 
     match &d.select {
-        InfoSelect::Civilization(selected) => {
+        InfoSelect::Civilization(civ) => {
             for (i, c) in civilizations::get_all_uncached()
                 .iter()
                 .filter(|c| c.is_human())
                 .enumerate()
             {
-                if draw_button(rc, &c.name, vec2(i as f32, 1.), &[]) {
+                let selected = &c.name == civ;
+                if draw_button(rc, &c.name, vec2(i as f32, 1.), &[], selected) {
                     return StateUpdate::open_dialog(ActiveDialog::Info(InfoDialog::new(
-                        InfoSelect::Civilization(c.clone()),
+                        InfoSelect::Civilization(c.name.clone()),
                     )));
                 }
-                if c == selected {
+                if selected {
                     show_civilization(rc, c);
                 }
             }
@@ -59,17 +60,24 @@ pub(crate) fn show_info_dialog(rc: &RenderContext, d: &InfoDialog) -> RenderResu
 fn show_civilization(rc: &RenderContext, c: &Civilization) {
     for (i, a) in c.special_advances.iter().enumerate() {
         let mut tooltip: Vec<String> = vec![];
+        add_tooltip_description(&mut tooltip, &format!("Name: {}", a.name));
         add_tooltip_description(
             &mut tooltip,
             &format!("Required advance: {}", a.requirement.name(rc.game)),
         );
         add_tooltip_description(&mut tooltip, &a.description);
 
-        draw_button(rc, &a.name, vec2(i as f32, 2.), &tooltip);
+        draw_button(rc, &a.name, vec2(i as f32, 2.), &tooltip, false);
     }
 }
 
-fn draw_button(rc: &RenderContext, text: &str, pos: Vec2, tooltip: &[String], selected: bool) -> bool {
+fn draw_button(
+    rc: &RenderContext,
+    text: &str,
+    pos: Vec2,
+    tooltip: &[String],
+    selected: bool,
+) -> bool {
     let button_size = vec2(140., 40.);
     let rect_pos = pos.mul(button_size) + vec2(20., 40.);
     let rect = Rect::new(rect_pos.x, rect_pos.y, 135., 30.);
@@ -84,10 +92,10 @@ fn draw_button(rc: &RenderContext, text: &str, pos: Vec2, tooltip: &[String], se
     rc.draw_rectangle(rect, color);
 
     if selected {
-        rc.draw_rectangle_lines(rect, WHITE);
+        rc.draw_rectangle_lines(rect, 4., BLACK);
     }
 
-    rc.draw_text(text, rect.x + 10., rect.y + 25.);
+    rc.draw_limited_text(text, rect.x + 10., rect.y + 25., 14);
 
     button_pressed(rect, rc, tooltip, 50.)
 }

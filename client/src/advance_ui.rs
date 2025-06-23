@@ -82,11 +82,8 @@ pub(crate) fn show_advance_menu(
             let advance_state = advance_state(a, p);
 
             let rect = Rect::new(pos.x, pos.y, 135., 30.);
-            rc.draw_rectangle(
-                rect,
-                fill_color(rc, p, &advance_state),
-            );
-            rc.draw_text(name, pos.x + 10., pos.y + 22.);
+            rc.draw_rectangle(rect, fill_color(rc, p, &advance_state));
+            rc.draw_limited_text(name, pos.x + 10., pos.y + 22., 14);
 
             if find_special_advance(a.advance, rc.game, rc.shown_player.index).is_some() {
                 rc.draw_rectangle_lines(rect, 12., GREEN);

@@ -5,11 +5,12 @@ use macroquad::camera::set_default_camera;
 use macroquad::color::{Color, PINK, YELLOW};
 use macroquad::input::mouse_position;
 use macroquad::math::{Vec2, bool};
-use macroquad::prelude::{BLACK, LIME, SKYBLUE, WHITE, set_camera, Rect};
+use macroquad::prelude::{BLACK, LIME, Rect, SKYBLUE, WHITE, set_camera};
 use server::game::Game;
 use server::payment::PaymentOptions;
 use server::player::Player;
 use server::playing_actions::PlayingActionType;
+use crate::layout_ui::limit_str;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum RenderStage {
@@ -141,6 +142,12 @@ impl RenderContext<'_> {
         self.screen_to_world(mouse_position().into())
     }
 
+    pub(crate) fn draw_limited_text(&self, text: &str, x: f32, y: f32, max_width: usize) {
+        if self.stage.is_main() {
+            self.state.draw_text(&limit_str(text, max_width), x, y);
+        }
+    }
+
     pub(crate) fn draw_text(&self, text: &str, x: f32, y: f32) {
         if self.stage.is_main() {
             self.state.draw_text(text, x, y);
@@ -159,12 +166,7 @@ impl RenderContext<'_> {
         }
     }
 
-    pub(crate) fn draw_rectangle_lines(
-        &self,
-        r: Rect,
-        thickness: f32,
-        color: Color,
-    ) {
+    pub(crate) fn draw_rectangle_lines(&self, r: Rect, thickness: f32, color: Color) {
         if self.stage.is_main() {
             macroquad::prelude::draw_rectangle_lines(r.x, r.y, r.w, r.h, thickness, color);
         }
