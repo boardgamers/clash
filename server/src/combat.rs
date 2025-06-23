@@ -368,16 +368,16 @@ pub(crate) fn conquer_city(
     attacker: &EventPlayer,
     defender: &EventPlayer,
 ) {
-    let a = attacker.get(game);
-    let attacker_is_human = a.is_human();
+    let attacker_is_human = attacker.get(game).is_human();
     let d = defender.get(game);
     let size = d.get_city(position).mood_modified_size(d);
     if attacker_is_human {
         attacker.gain_resources(game, ResourcePile::gold(size as u8));
     }
 
-    if a.is_city_available() {
-        gain_city(game, attacker, lose_city(game, defender, position));
+    if attacker.get(game).is_city_available() {
+        let city = lose_city(game, defender, position);
+        gain_city(game, attacker, city);
         if attacker_is_human {
             take_over_city(game, position, attacker, defender);
         }
