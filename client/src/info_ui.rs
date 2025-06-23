@@ -69,6 +69,16 @@ fn show_civilization(rc: &RenderContext, c: &Civilization) {
 
         draw_button(rc, &a.name, vec2(i as f32, 2.), &tooltip, false);
     }
+    for (i, l) in c.leaders.iter().enumerate() {
+        let mut tooltip: Vec<String> = vec![];
+        add_tooltip_description(&mut tooltip, &format!("Name: {}", l.name));
+        for a in &l.abilities {
+            tooltip.push(format!("Leader ability: {}", a.name));
+            add_tooltip_description(&mut tooltip, &a.description);
+        }
+
+        draw_button(rc, &l.name, vec2(i as f32, 3.), &tooltip, false);
+    }
 }
 
 fn draw_button(
