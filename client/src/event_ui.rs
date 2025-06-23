@@ -1,10 +1,10 @@
+use crate::log_ui::{break_each, break_text};
 use crate::payment_ui::Payment;
 use crate::render_context::RenderContext;
-use crate::tooltip::add_tooltip_description;
 use server::events::EventOrigin;
 
 #[must_use]
-pub fn event_help(rc: &RenderContext, origin: &EventOrigin) -> Vec<String> {
+pub(crate) fn event_help(rc: &RenderContext, origin: &EventOrigin) -> Vec<String> {
     let mut h = vec![origin.name(rc.game)];
     let cache = &rc.game.cache;
     let d = match origin {
@@ -22,19 +22,20 @@ pub fn event_help(rc: &RenderContext, origin: &EventOrigin) -> Vec<String> {
         }
         EventOrigin::SpecialAdvance(s) => vec![s.info(rc.game).description.clone()],
     };
-    h.extend(d);
+
+    break_each(&mut h, &d);
     h
 }
 
 #[must_use]
-pub fn custom_phase_event_help(rc: &RenderContext, description: &str) -> Vec<String> {
+pub(crate) fn custom_phase_event_help(rc: &RenderContext, description: &str) -> Vec<String> {
     let mut h = event_help(rc, &custom_phase_event_origin(rc));
-    add_tooltip_description(&mut h, description);
+    break_text(&mut h, description);
     h
 }
 
 #[must_use]
-pub fn custom_phase_event_origin(rc: &RenderContext) -> EventOrigin {
+pub(crate) fn custom_phase_event_origin(rc: &RenderContext) -> EventOrigin {
     rc.game
         .current_event()
         .origin_override
@@ -49,7 +50,7 @@ pub fn custom_phase_event_origin(rc: &RenderContext) -> EventOrigin {
         })
 }
 
-pub fn pay_help<T: Clone>(rc: &RenderContext, p: &Payment<T>) -> Vec<String> {
+pub(crate) fn pay_help<T: Clone>(rc: &RenderContext, p: &Payment<T>) -> Vec<String> {
     let mut result = vec!["Pay resources".to_string()];
     for o in p.cost.modifiers.clone() {
         result.extend(event_help(rc, &o));

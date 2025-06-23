@@ -1,5 +1,5 @@
 use crate::action_buttons::{base_or_custom_action, custom_action_buttons};
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::collect_ui::CollectResources;
 use crate::construct_ui::{ConstructionPayment, ConstructionProject};
 use crate::custom_phase_ui::{SelectedStructureInfo, SelectedStructureStatus};
@@ -8,12 +8,15 @@ use crate::happiness_ui::{
     open_increase_happiness_dialog,
 };
 use crate::hex_ui;
-use crate::layout_ui::{draw_scaled_icon, draw_scaled_icon_with_tooltip, is_in_circle};
+use crate::layout_ui::{
+    draw_scaled_icon, draw_scaled_icon_with_tooltip, is_in_circle, is_mouse_pressed,
+};
+use crate::log_ui::break_text;
 use crate::map_ui::{move_units_buttons, show_map_action_buttons};
 use crate::recruit_unit_ui::RecruitAmount;
 use crate::render_context::RenderContext;
 use crate::select_ui::HighlightType;
-use crate::tooltip::{add_tooltip_description, show_tooltip_for_circle};
+use crate::tooltip::show_tooltip_for_circle;
 use itertools::Itertools;
 use macroquad::math::f32;
 use macroquad::prelude::*;
@@ -31,19 +34,19 @@ use server::structure::Structure;
 use server::unit::{UnitType, Units};
 use std::ops::Add;
 
-pub struct IconAction<'a> {
+pub(crate) struct IconAction<'a> {
     pub texture: &'a Texture2D,
     pub tooltip: Vec<String>,
     pub warning: bool,
-    pub action: Box<dyn Fn() -> StateUpdate + 'a>,
+    pub action: Box<dyn Fn() -> RenderResult + 'a>,
 }
 
 impl<'a> IconAction<'a> {
     #[must_use]
-    pub fn new(
+    pub(crate) fn new(
         texture: &'a Texture2D,
         tooltip: Vec<String>,
-        action: Box<dyn Fn() -> StateUpdate + 'a>,
+        action: Box<dyn Fn() -> RenderResult + 'a>,
     ) -> IconAction<'a> {
         IconAction {
             texture,
@@ -54,14 +57,14 @@ impl<'a> IconAction<'a> {
     }
 
     #[must_use]
-    pub fn with_warning(self, warning: bool) -> IconAction<'a> {
+    pub(crate) fn with_warning(self, warning: bool) -> IconAction<'a> {
         IconAction { warning, ..self }
     }
 }
 
-pub type IconActionVec<'a> = Vec<IconAction<'a>>;
+pub(crate) type IconActionVec<'a> = Vec<IconAction<'a>>;
 
-pub fn show_city_menu<'a>(rc: &'a RenderContext, city: &'a City) -> StateUpdate {
+pub(crate) fn show_city_menu<'a>(rc: &'a RenderContext, city: &'a City) -> RenderResult {
     let base_icons: IconActionVec<'a> = vec![
         increase_happiness_button(rc, city),
         collect_resources_button(rc, city),
@@ -161,8 +164,8 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
                 &rc.assets().buildings[&b],
                 tooltip,
                 Box::new(move || {
-                    can.clone().map_or(StateUpdate::None, |cost_info| {
-                        StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(
+                    can.clone().map_or(NO_UPDATE, |cost_info| {
+                        StateUpdate::open_dialog(ActiveDialog::ConstructionPayment(
                             ConstructionPayment::new(
                                 rc,
                                 city,
@@ -221,7 +224,7 @@ fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option
     ))
 }
 
-pub fn city_labels(game: &Game, city: &City) -> Vec<String> {
+pub(crate) fn city_labels(game: &Game, city: &City) -> Vec<String> {
     [
         vec![format!(
             "City: {}, {}, {} {}",
@@ -258,7 +261,7 @@ fn draw_selected_state(
     center: Vec2,
     size: f32,
     info: &SelectedStructureInfo,
-) -> Option<StateUpdate> {
+) -> RenderResult {
     let ActiveDialog::StructuresRequest(d, r) = &rc.state.active_dialog else {
         panic!("Expected StructuresRequest");
     };
@@ -267,26 +270,26 @@ fn draw_selected_state(
     } else {
         info.highlight_type()
     };
-    draw_circle_lines(center.x, center.y, size, 3., t.color());
+    rc.draw_circle_lines(center, size, 3., t.color());
 
     if let Some(tooltip) = &info.tooltip {
         show_tooltip_for_circle(rc, &[tooltip.clone()], center, size);
     }
 
     if info.status != SelectedStructureStatus::Invalid
-        && is_mouse_button_pressed(MouseButton::Left)
+        && is_mouse_pressed(rc)
         && is_in_circle(rc.mouse_pos(), center, size)
     {
-        Some(StateUpdate::OpenDialog(ActiveDialog::StructuresRequest(
+        StateUpdate::open_dialog(ActiveDialog::StructuresRequest(
             d.clone(),
             r.clone().toggle(info.clone()),
-        )))
+        ))
     } else {
-        None
+        NO_UPDATE
     }
 }
 
-pub fn draw_city(rc: &RenderContext, city: &City) -> Option<StateUpdate> {
+pub(crate) fn draw_city(rc: &RenderContext, city: &City) -> RenderResult {
     let c = hex_ui::center(city.position);
     let owner = city.player_index;
 
@@ -296,26 +299,20 @@ pub fn draw_city(rc: &RenderContext, city: &City) -> Option<StateUpdate> {
     };
 
     if city.is_activated() {
-        draw_circle(c.x, c.y, 18.0, WHITE);
+        rc.draw_circle(c, 18.0, WHITE);
     }
-    draw_circle(c.x, c.y, 15.0, rc.player_color(owner));
+    rc.draw_circle(c, 15.0, rc.player_color(owner));
 
     if let Some(h) = highlighted
         .iter()
         .find(|s| s.position == city.position && matches!(s.structure, Structure::CityCenter))
     {
-        if let Some(u) = draw_selected_state(rc, c, 15., h) {
-            return Some(u);
-        }
+        draw_selected_state(rc, c, 15., h)?;
     } else {
         draw_mood_state(rc, city, c);
     }
 
-    let i = match draw_wonders(rc, city, c, owner, highlighted) {
-        Ok(value) => value,
-        Err(value) => return Some(value),
-    };
-
+    let i = draw_wonders(rc, city, c, owner, highlighted)?;
     draw_buildings(rc, city, c, highlighted, i)
 }
 
@@ -355,11 +352,11 @@ fn draw_buildings(
     center: Vec2,
     highlighted: &[SelectedStructureInfo],
     mut i: usize,
-) -> Option<StateUpdate> {
+) -> RenderResult {
     for player_index in 0..4 {
         for b in &city.pieces.buildings(Some(player_index)) {
             let p = building_position(city, center, i, *b);
-            draw_circle(p.x, p.y, BUILDING_SIZE, rc.player_color(player_index));
+            rc.draw_circle(p, BUILDING_SIZE, rc.player_color(player_index));
 
             let mut tooltip = vec![b.name().to_string()];
             add_building_description(rc, &mut tooltip, *b);
@@ -376,17 +373,15 @@ fn draw_buildings(
                 s.position == city.position
                     && matches!(s.structure, Structure::Building(bb) if bb == *b)
             }) {
-                if let Some(u) = draw_selected_state(rc, p, BUILDING_SIZE, h) {
-                    return Some(u);
-                }
+                draw_selected_state(rc, p, BUILDING_SIZE, h)?;
             }
             i += 1;
         }
     }
-    None
+    NO_UPDATE
 }
 
-pub fn add_building_description(rc: &RenderContext, parts: &mut Vec<String>, b: Building) {
+pub(crate) fn add_building_description(rc: &RenderContext, parts: &mut Vec<String>, b: Building) {
     let pile = rc
         .shown_player
         .building_cost(rc.game, b, CostTrigger::WithModifiers)
@@ -399,7 +394,7 @@ pub fn add_building_description(rc: &RenderContext, parts: &mut Vec<String>, b: 
         parts.push(format!("Base cost: {BUILDING_COST}"));
         parts.push(format!("Current cost: {pile}"));
     }
-    add_tooltip_description(parts, b.description());
+    break_text(parts, b.description());
 }
 
 #[allow(clippy::result_large_err)]
@@ -409,18 +404,16 @@ fn draw_wonders(
     c: Vec2,
     owner: usize,
     highlighted: &[SelectedStructureInfo],
-) -> Result<usize, StateUpdate> {
+) -> Result<usize, Box<StateUpdate>> {
     let mut i = 0;
     for w in &city.pieces.wonders {
         let p = hex_ui::rotate_around(c, 20.0, 90 * i);
-        draw_circle(p.x, p.y, 18.0, rc.player_color(owner));
+        rc.draw_circle(p, 18.0, rc.player_color(owner));
         let size = 20.;
         if let Some(h) = highlighted.iter().find(|s| {
             s.position == city.position && matches!(&s.structure, Structure::Wonder(n) if n == w)
         }) {
-            if let Some(u) = draw_selected_state(rc, p, 18., h) {
-                return Err(u);
-            }
+            draw_selected_state(rc, p, 18., h)?;
         } else {
             draw_scaled_icon(
                 rc,
@@ -435,7 +428,7 @@ fn draw_wonders(
     Ok(i)
 }
 
-pub fn building_position(city: &City, center: Vec2, i: usize, building: Building) -> Vec2 {
+pub(crate) fn building_position(city: &City, center: Vec2, i: usize, building: Building) -> Vec2 {
     if matches!(building, Building::Port) {
         let r: f32 = city
             .position

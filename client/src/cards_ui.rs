@@ -1,34 +1,33 @@
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::custom_phase_ui;
 use crate::custom_phase_ui::MultiSelection;
 use crate::dialog_ui::ok_button;
-use crate::layout_ui::{bottom_centered_text, left_mouse_button_pressed_in_rect};
+use crate::layout_ui::{bottom_centered_text, button_pressed, rect_from};
 use crate::log_ui::break_text;
 use crate::player_ui::get_combat;
 use crate::render_context::RenderContext;
 use crate::select_ui::HighlightType;
-use crate::tooltip::show_tooltip_for_rect;
 use custom_phase_ui::multi_select_tooltip;
 use itertools::Itertools;
 use macroquad::color::BLACK;
 use macroquad::math::{Rect, Vec2, vec2};
-use macroquad::prelude::{BEIGE, Color, GREEN, RED, YELLOW, draw_rectangle, draw_rectangle_lines};
+use macroquad::prelude::{BEIGE, Color, GREEN, RED, YELLOW};
 use server::action::Action;
 use server::card::{HandCard, HandCardType, hand_cards, validate_card_selection};
 use server::content::persistent_events::EventResponse;
 use server::events::check_event_origin;
 use server::playing_actions::{PlayingAction, PlayingActionType};
-use server::wonder::Wonder;
+use server::wonder::{Wonder, WonderInfo};
 
-pub struct HandCardObject {
+pub(crate) struct HandCardObject {
     id: HandCard,
     name: String,
-    description: Vec<String>,
+    pub description: Vec<String>,
     color: Color,
 }
 
 impl HandCardObject {
-    pub fn new(id: HandCard, color: Color, name: &str, description: Vec<String>) -> Self {
+    pub(crate) fn new(id: HandCard, color: Color, name: &str, description: Vec<String>) -> Self {
         Self {
             id,
             name: name.chars().take(17).collect(),
@@ -42,7 +41,7 @@ const ACTION_CARD_COLOR: Color = RED;
 const OBJECTIVE_CARD_COLOR: Color = BEIGE;
 const WONDER_CARD_COLOR: Color = YELLOW;
 
-struct SelectionInfo {
+pub(crate) struct SelectionInfo {
     selection: MultiSelection<HandCard>,
     show_names: Vec<(u8, String)>,
 }
@@ -56,7 +55,7 @@ impl SelectionInfo {
     }
 }
 
-pub(crate) fn show_cards(rc: &RenderContext) -> StateUpdate {
+pub(crate) fn show_cards(rc: &RenderContext) -> RenderResult {
     let p = rc.shown_player;
     let cards = hand_cards(p, &HandCardType::get_all());
     let size = vec2(180., 30.);
@@ -81,13 +80,9 @@ pub(crate) fn show_cards(rc: &RenderContext) -> StateUpdate {
         })
         .collect_vec();
 
-    if let Some(value) = draw_cards(rc, &cards, selection.as_ref(), size, -85.) {
-        return value;
-    }
-    if let Some(value) = draw_cards(rc, &swap_cards, selection.as_ref(), size, -310.) {
-        return value;
-    }
-    StateUpdate::None
+    draw_cards(rc, &cards, selection.as_ref(), size, -85.)?;
+    draw_cards(rc, &swap_cards, selection.as_ref(), size, -310.)?;
+    NO_UPDATE
 }
 
 fn draw_cards(
@@ -96,62 +91,41 @@ fn draw_cards(
     selection: Option<&SelectionInfo>,
     size: Vec2,
     x_offset: f32,
-) -> Option<StateUpdate> {
+) -> RenderResult {
     let screen = rc.state.screen_size;
-    for pass in 0..2 {
-        let mut y = (cards.len() as f32 * -size.y) / 2.;
-        for card in cards {
-            if let Some(value) = draw_card(
-                rc,
-                size,
-                selection,
-                pass,
-                vec2(screen.x, screen.y / 2.0) + vec2(-size.x + x_offset, y),
-                card,
-            ) {
-                return Some(value);
-            }
+    let mut y = (cards.len() as f32 * -size.y) / 2.;
+    for card in cards {
+        let pos = vec2(screen.x, screen.y / 2.0) + vec2(-size.x + x_offset, y);
+        draw_card(rc, rect_from(pos, size), selection, card)?;
 
-            y += size.y;
-        }
+        y += size.y;
     }
-    None
+    NO_UPDATE
 }
 
 fn draw_card(
     rc: &RenderContext,
-    size: Vec2,
+    rect: Rect,
     selection: Option<&SelectionInfo>,
-    pass: i32,
-    pos: Vec2,
     card: &HandCard,
-) -> Option<StateUpdate> {
+) -> RenderResult {
     let c = get_card_object(rc, card, selection);
 
-    if pass == 0 {
-        draw_rectangle(pos.x, pos.y, size.x, size.y, c.color);
-        let (thickness, border) = highlight(rc, &c, selection);
-        draw_rectangle_lines(pos.x, pos.y, size.x, size.y, thickness, border);
+    rc.draw_rectangle_with_text(rect, c.color, &c.name);
+    let (thickness, border) = highlight(rc, &c, selection);
+    rc.draw_rectangle_lines(rect, thickness, border);
 
-        rc.state.draw_text(&c.name, pos.x + 10., pos.y + 22.);
-    } else {
-        let rect = Rect::new(pos.x, pos.y, size.x, size.y);
-
-        // tooltip should be shown on top of everything
-        show_tooltip_for_rect(rc, &c.description, rect, 150.);
-
-        if left_mouse_button_pressed_in_rect(rect, rc) {
-            if let Some(s) = selection {
-                return Some(StateUpdate::OpenDialog(ActiveDialog::HandCardsRequest(
-                    s.selection.clone().toggle(c.id),
-                )));
-            }
-            if can_play_card(rc, card) {
-                return Some(play_card(rc, card));
-            }
+    if button_pressed(rect, rc, &c.description, 150.) {
+        if let Some(s) = selection {
+            return StateUpdate::open_dialog(ActiveDialog::HandCardsRequest(
+                s.selection.clone().toggle(c.id),
+            ));
+        }
+        if can_play_card(rc, card) {
+            return play_card(rc, card);
         }
     }
-    None
+    NO_UPDATE
 }
 
 fn can_play_card(rc: &RenderContext, card: &HandCard) -> bool {
@@ -162,7 +136,7 @@ fn can_play_card(rc: &RenderContext, card: &HandCard) -> bool {
     }
 }
 
-fn play_card(rc: &RenderContext, card: &HandCard) -> StateUpdate {
+fn play_card(rc: &RenderContext, card: &HandCard) -> RenderResult {
     match card {
         HandCard::ActionCard(a) => StateUpdate::execute_with_confirm(
             vec![format!(
@@ -229,17 +203,24 @@ fn get_card_object(
                 card.clone(),
                 WONDER_CARD_COLOR,
                 &w.name(),
-                vec![
-                    w.description.clone(),
-                    format!("Cost: {}", w.cost.to_string()),
-                    format!("Required advance: {}", w.required_advance.name(rc.game)),
-                ],
+                wonder_description(rc, w),
             )
         }
     }
 }
 
-fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
+pub(crate) fn wonder_description(rc: &RenderContext, w: &WonderInfo) -> Vec<String> {
+    let mut description = vec![];
+    break_text(&mut description, w.description.as_str());
+    description.push(format!("Cost: {}", w.cost));
+    description.push(format!(
+        "Required advance: {}",
+        w.required_advance.name(rc.game)
+    ));
+    description
+}
+
+pub(crate) fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
     let a = rc.game.cache.get_action_card(id);
 
     let name = match &a.tactics_card {
@@ -267,7 +248,7 @@ fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
     if !cost.is_free() {
         description.push(format!("Cost: {cost}"));
     }
-    break_text(a.civil_card.description.as_str(), 30, &mut description);
+    break_text(&mut description, a.civil_card.description.as_str());
     if let Some(t) = &a.tactics_card {
         description.extend(vec![
             format!("Tactics: {}", t.name),
@@ -293,7 +274,7 @@ fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
                 }
             ),
         ]);
-        break_text(t.description.as_str(), 30, &mut description);
+        break_text(&mut description, t.description.as_str());
     }
     HandCardObject::new(
         HandCard::ActionCard(id),
@@ -303,7 +284,7 @@ fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
     )
 }
 
-fn objective_card_object(
+pub(crate) fn objective_card_object(
     rc: &RenderContext,
     id: u8,
     selection: Option<&SelectionInfo>,
@@ -313,7 +294,7 @@ fn objective_card_object(
     let mut description = vec![];
     for o in &card.objectives {
         description.push(format!("Objective: {}", o.name));
-        break_text(o.description.as_str(), 30, &mut description);
+        break_text(&mut description, o.description.as_str());
     }
 
     let name = selection
@@ -333,7 +314,10 @@ fn objective_card_object(
     )
 }
 
-pub fn select_cards_dialog(rc: &RenderContext, s: &MultiSelection<HandCard>) -> StateUpdate {
+pub(crate) fn select_cards_dialog(
+    rc: &RenderContext,
+    s: &MultiSelection<HandCard>,
+) -> RenderResult {
     bottom_centered_text(
         rc,
         format!(
@@ -355,6 +339,6 @@ pub fn select_cards_dialog(rc: &RenderContext, s: &MultiSelection<HandCard>) -> 
     ) {
         StateUpdate::response(EventResponse::SelectHandCards(s.selected.clone()))
     } else {
-        StateUpdate::None
+        NO_UPDATE
     }
 }

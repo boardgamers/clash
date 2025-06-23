@@ -236,23 +236,23 @@
                   },
                   "items": [
                     {
-                      "player": 1,
-                      "Structure": {
-                        "structure": "CityCenter",
-                        "balance": "Loss",
-                        "position": "C1"
-                      },
-                      "origin": {
-                        "Ability": "Combat"
-                      }
-                    },
-                    {
                       "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 1
                         },
                         "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Loss",
+                        "position": "C1"
                       },
                       "origin": {
                         "Ability": "Combat"

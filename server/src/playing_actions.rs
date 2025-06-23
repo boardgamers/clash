@@ -11,7 +11,7 @@ use crate::city::execute_found_city_action;
 use crate::collect::{Collect, base_collect_event_origin, execute_collect};
 use crate::construct::Construct;
 use crate::content::ability::{
-    Ability, advance_event_origin, combat_event_origin, recruit_event_origin,
+    Ability, advance_event_origin, construct_event_origin, recruit_event_origin,
 };
 use crate::content::custom_actions::{
     CustomAction, CustomActionActivation, CustomActionType, can_play_custom_action,
@@ -128,7 +128,7 @@ impl PlayingActionType {
         match self {
             PlayingActionType::Advance => advance_event_origin(),
             PlayingActionType::FoundCity => EventOrigin::Ability("Found City".to_string()),
-            PlayingActionType::Construct => combat_event_origin(),
+            PlayingActionType::Construct => construct_event_origin(),
             PlayingActionType::Collect => base_collect_event_origin(),
             PlayingActionType::Recruit => recruit_event_origin(),
             PlayingActionType::IncreaseHappiness => happiness_base_event_origin(),

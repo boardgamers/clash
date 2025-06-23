@@ -307,23 +307,23 @@
                   },
                   "items": [
                     {
-                      "player": 1,
-                      "Structure": {
-                        "structure": "CityCenter",
-                        "balance": "Loss",
-                        "position": "B2"
-                      },
-                      "origin": {
-                        "Ability": "Combat"
-                      }
-                    },
-                    {
                       "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 2
                         },
                         "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Loss",
+                        "position": "B2"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -431,8 +431,8 @@
   "log": [
     [
       "Player1: Move: disembarked 1 cavalry and 1 elephant from C3 to B2",
-      "Player2: Combat: Lose city B2, Lose Port at B2",
       "Player1: Combat: Gain 2 gold, Gain city B2, Gain Port at B2 at the water tile C3, City B2 became Angry",
+      "Player2: Combat: Lose city B2, Lose Port at B2",
       "Player2: Place Settler: Gain 1 settler at C1",
       "Player1: Waste: Could not store 2 gold"
     ],

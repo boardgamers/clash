@@ -29,7 +29,7 @@ pub mod cache;
 pub mod card;
 pub mod city;
 pub mod city_pieces;
-mod civilization;
+pub mod civilization;
 pub mod collect;
 pub mod combat;
 mod combat_listeners;

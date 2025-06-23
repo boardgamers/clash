@@ -234,7 +234,7 @@
                         "balance": "Loss"
                       },
                       "origin": {
-                        "Ability": "Combat"
+                        "Ability": "Construct Building"
                       }
                     },
                     {
@@ -281,8 +281,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1: Combat: Pay 1 action",
-      "Player1: Construct Building: Pay 1 food, 1 wood and 1 mood token with Captivi, Gain Market at A1",
+      "Player1: Construct Building: Pay 1 action, Pay 1 food, 1 wood and 1 mood token with Captivi, Gain Market at A1",
       "Player1: Captivi: May replace resources with mood tokens"
     ]
   ],

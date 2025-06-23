@@ -300,8 +300,13 @@ where
                 "Pay to change government",
             )])
         },
-        move |_game, _s, v| {
-            set_paid2(v, true);
+        move |game, s, v| {
+            let cost = &s.choice[0];
+            if cost.is_empty() {
+                s.log(game, "Keep current government");
+            } else {
+                set_paid2(v, true);
+            }
         },
     )
     .add_persistent_event_listener(

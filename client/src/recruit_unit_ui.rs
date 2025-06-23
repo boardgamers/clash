@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use macroquad::prelude::*;
 
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::construct_ui::{ConstructionPayment, ConstructionProject};
 use crate::dialog_ui::{OkTooltip, cancel_button, ok_button};
 use crate::render_context::RenderContext;
@@ -17,15 +17,15 @@ use server::recruit::{recruit_cost, recruit_cost_without_replaced};
 use server::unit::UnitType::{Cavalry, Elephant, Infantry, Leader, Settler, Ship};
 use server::unit::{Unit, UnitType, Units, get_units_to_replace};
 
-#[derive(Clone)]
-pub struct SelectableUnit {
+#[derive(Clone, Debug)]
+pub(crate) struct SelectableUnit {
     pub unit_type: UnitType,
     pub selectable: CountSelector,
     cost: Result<CostInfo, String>,
 }
 
-#[derive(Clone)]
-pub struct RecruitAmount {
+#[derive(Clone, Debug)]
+pub(crate) struct RecruitAmount {
     player_index: usize,
     city_position: Position,
     pub units: Units,
@@ -39,19 +39,19 @@ impl HasCountSelectableObject for SelectableUnit {
 }
 
 impl RecruitAmount {
-    pub fn new_selection(
+    pub(crate) fn new_selection(
         game: &Game,
         player_index: usize,
         city_position: Position,
         units: Units,
-    ) -> StateUpdate {
+    ) -> RenderResult {
         let player = game.player(player_index);
         let selectable: Vec<SelectableUnit> = new_units(player)
             .into_iter()
             .map(|u| selectable_unit(city_position, &units, player, u, game))
             .collect();
 
-        StateUpdate::OpenDialog(ActiveDialog::RecruitUnitSelection(RecruitAmount {
+        StateUpdate::open_dialog(ActiveDialog::RecruitUnitSelection(RecruitAmount {
             player_index,
             city_position,
             units,
@@ -104,17 +104,16 @@ fn new_units(player: &Player) -> Vec<UnitType> {
         .collect()
 }
 
-#[derive(Clone)]
-pub struct RecruitSelection {
+#[derive(Clone, Debug)]
+pub(crate) struct RecruitSelection {
     pub player: usize,
     pub amount: RecruitAmount,
-    pub available_units: Units,
     pub need_replacement: Units,
     pub replaced_units: Vec<u32>,
 }
 
 impl RecruitSelection {
-    pub fn new(
+    pub(crate) fn new(
         game: &Game,
         player: usize,
         amount: RecruitAmount,
@@ -126,17 +125,16 @@ impl RecruitSelection {
         RecruitSelection {
             player,
             amount,
-            available_units,
             need_replacement,
             replaced_units,
         }
     }
 
-    pub fn is_finished(&self) -> bool {
+    pub(crate) fn is_finished(&self) -> bool {
         self.need_replacement.is_empty()
     }
 
-    pub fn confirm(&self, game: &Game) -> OkTooltip {
+    pub(crate) fn confirm(&self, game: &Game) -> OkTooltip {
         recruit_cost(
             game,
             game.player(self.amount.player_index),
@@ -166,7 +164,7 @@ impl UnitSelection for RecruitSelection {
     }
 }
 
-pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
+pub(crate) fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> RenderResult {
     let game = rc.game;
     let radius = 20.;
     select_ui::count_dialog(
@@ -203,7 +201,7 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
             if sel.is_finished() {
                 open_dialog(rc, a.city_position, sel)
             } else {
-                StateUpdate::OpenDialog(ActiveDialog::ReplaceUnits(sel))
+                StateUpdate::open_dialog(ActiveDialog::ReplaceUnits(sel))
             }
         },
         |_s, _u| true,
@@ -222,7 +220,7 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
     )
 }
 
-fn open_dialog(rc: &RenderContext, city: Position, sel: RecruitSelection) -> StateUpdate {
+fn open_dialog(rc: &RenderContext, city: Position, sel: RecruitSelection) -> RenderResult {
     let p = rc.shown_player.index;
     let cost = recruit_cost(
         rc.game,
@@ -233,7 +231,7 @@ fn open_dialog(rc: &RenderContext, city: Position, sel: RecruitSelection) -> Sta
         CostTrigger::WithModifiers,
     )
     .unwrap();
-    StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
+    StateUpdate::open_dialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
         rc,
         rc.game.city(p, city),
         &format!(
@@ -245,16 +243,16 @@ fn open_dialog(rc: &RenderContext, city: Position, sel: RecruitSelection) -> Sta
     )))
 }
 
-fn update_selection(game: &Game, s: &RecruitAmount, units: Units) -> StateUpdate {
+fn update_selection(game: &Game, s: &RecruitAmount, units: Units) -> RenderResult {
     RecruitAmount::new_selection(game, s.player_index, s.city_position, units)
 }
 
-pub fn replace_dialog(rc: &RenderContext, sel: &RecruitSelection) -> StateUpdate {
+pub(crate) fn replace_dialog(rc: &RenderContext, sel: &RecruitSelection) -> RenderResult {
     if ok_button(rc, sel.confirm(rc.game)) {
         open_dialog(rc, sel.amount.city_position, sel.clone())
     } else if cancel_button(rc) {
-        StateUpdate::Cancel
+        StateUpdate::cancel()
     } else {
-        StateUpdate::None
+        NO_UPDATE
     }
 }

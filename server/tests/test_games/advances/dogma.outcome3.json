@@ -359,7 +359,7 @@
                         "balance": "Loss"
                       },
                       "origin": {
-                        "Ability": "Combat"
+                        "Ability": "Construct Building"
                       }
                     },
                     {
@@ -475,8 +475,7 @@
       "Player2: Waste: Could not store 2 ideas"
     ],
     [
-      "Player2: Combat: Pay 1 action",
-      "Player2: Construct Building: Pay 1 wood and 1 ore with State Religion, Gain Temple at C1",
+      "Player2: Construct Building: Pay 1 action, Pay 1 wood and 1 ore with State Religion, Gain Temple at C1",
       "Player2: State Religion: Reduce the food cost to 0"
     ],
     [

@@ -54,44 +54,52 @@ fn war_ships() -> AdvanceBuilder {
 
 fn cartography() -> AdvanceBuilder {
     AdvanceInfo::builder(
-        Advance::Cartography,"Cartography",
-        "Gain 1 idea after a move action where you moved a Ship. If you used navigation, gain an additional 1 culture token.", )
-        .with_advance_bonus(CultureToken)
-        .add_transient_event_listener(
-            |event| &mut event.before_move,
-            0,
-            |game,  i, (), p| {
-                // info is the action that we last used this ability for
-                let key = game.actions_left.to_string();
-                if p.get(game).event_info.get("Cartography").is_some_and(|info| info == &key) {
-                    return;
-                }
-                let mut ship = false;
-                let mut navigation = false;
-                for id in &i.units {
-                    let unit = p.get(game).get_unit(*id);
-                    if unit.is_ship() {
-                        ship = true;
-                        if !unit.position.is_neighbor(i.to) {
-                            navigation = true;
-                        }
+        Advance::Cartography,
+        "Cartography",
+        "Gain 1 idea after a move action where you moved a Ship. \
+        If you used navigation, gain an additional 1 culture token.",
+    )
+    .with_advance_bonus(CultureToken)
+    .add_transient_event_listener(
+        |event| &mut event.before_move,
+        0,
+        |game, i, (), p| {
+            if game.map.is_land(i.from) {
+                // ship construction (or no ship at all)
+                return;
+            }
+
+            // info is the action that we last used this ability for
+            let key = game.actions_left.to_string();
+            if p.get(game)
+                .event_info
+                .get("Cartography")
+                .is_some_and(|info| info == &key)
+            {
+                return;
+            }
+            let mut ship = false;
+            let mut navigation = false;
+            for id in &i.units {
+                let unit = p.get(game).get_unit(*id);
+                if unit.is_ship() {
+                    ship = true;
+                    if !unit.position.is_neighbor(i.to) {
+                        navigation = true;
                     }
                 }
-                if ship {
-                    p.get_mut(game).event_info.insert("Cartography".to_string(), key);
-                    p.gain_resources(
-                        game,
-                        ResourcePile::ideas(1),
-                    );
-                    if navigation {
-                        p.gain_resources(
-                            game,
-                            ResourcePile::culture_tokens(1),
-                        );
-                    }
+            }
+            if ship {
+                p.get_mut(game)
+                    .event_info
+                    .insert("Cartography".to_string(), key);
+                p.gain_resources(game, ResourcePile::ideas(1));
+                if navigation {
+                    p.gain_resources(game, ResourcePile::culture_tokens(1));
                 }
-            },
-        )
+            }
+        },
+    )
 }
 
 #[must_use]

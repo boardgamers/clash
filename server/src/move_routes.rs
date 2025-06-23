@@ -245,7 +245,15 @@ fn reachable_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<M
         }
     });
     if let Some(ship) = ship {
-        let start = ship.neighbors().into_iter().find(|n| map.is_outside(*n));
+        let start = ship.neighbors().into_iter().find(|n| {
+            // otherwise we might have the ship position as only neighbor
+            map.is_outside(*n)
+                && n.neighbors()
+                    .iter()
+                    .filter(|nn| map.is_inside(**nn))
+                    .count()
+                    > 1
+        });
         if let Some(start) = start {
             let mut perimeter = vec![ship];
 

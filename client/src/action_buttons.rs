@@ -1,5 +1,5 @@
 use crate::city_ui::{IconAction, IconActionVec};
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::BaseOrCustomDialog;
 use crate::event_ui::event_help;
 use crate::happiness_ui::open_increase_happiness_dialog;
@@ -16,7 +16,7 @@ use server::happiness::available_happiness_actions;
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::resource::ResourceType;
 
-pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
+pub(crate) fn action_buttons(rc: &RenderContext) -> RenderResult {
     let assets = rc.assets();
     let game = rc.game;
 
@@ -51,7 +51,7 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
             &["Research advances".to_string()],
         )
     {
-        return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
+        return StateUpdate::open_dialog(ActiveDialog::AdvanceMenu);
     }
 
     let influence = available_influence_actions(game, rc.shown_player.index);
@@ -87,10 +87,10 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
             return (icon.action)();
         }
     }
-    StateUpdate::None
+    NO_UPDATE
 }
 
-pub fn custom_action_buttons<'a>(
+pub(crate) fn custom_action_buttons<'a>(
     rc: &'a RenderContext,
     city: Option<&'a City>,
 ) -> IconActionVec<'a> {
@@ -109,7 +109,7 @@ pub fn custom_action_buttons<'a>(
         .collect()
 }
 
-fn global_move(rc: &RenderContext) -> StateUpdate {
+fn global_move(rc: &RenderContext) -> RenderResult {
     let pos = rc.state.focused_tile;
     StateUpdate::move_units(
         rc,
@@ -126,7 +126,7 @@ fn generic_custom_action(
     rc: &RenderContext,
     c: &CustomActionInfo,
     city: Option<&City>,
-) -> Option<StateUpdate> {
+) -> Option<RenderResult> {
     let custom_action_type = c.action;
 
     if let Some(city) = city {
@@ -143,12 +143,12 @@ fn generic_custom_action(
     }
 }
 
-pub fn base_or_custom_action(
+pub(crate) fn base_or_custom_action(
     rc: &RenderContext,
     action_types: &[PlayingActionType],
     title: &str,
     execute: impl Fn(BaseOrCustomDialog) -> ActiveDialog,
-) -> StateUpdate {
+) -> RenderResult {
     StateUpdate::dialog_chooser(
         &format!("Choose action: {title}"),
         action_types

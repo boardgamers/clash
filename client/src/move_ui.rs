@@ -1,4 +1,4 @@
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::cancel_button_with_tooltip;
 use crate::payment_ui::{Payment, payment_dialog};
 use crate::render_context::RenderContext;
@@ -18,20 +18,20 @@ use server::resource_pile::ResourcePile;
 use server::unit::{Unit, UnitType};
 
 #[derive(Clone, Copy)]
-pub enum MoveIntent {
+pub(crate) enum MoveIntent {
     Land,
     Sea,
     Disembark,
 }
 
-#[derive(Clone)]
-pub struct MovePayment {
+#[derive(Clone, Debug)]
+pub(crate) struct MovePayment {
     pub action: MovementAction,
     pub payment: Payment<String>,
 }
 
 impl MoveIntent {
-    pub fn to_predicate(self) -> impl Fn(&Unit) -> bool {
+    pub(crate) fn to_predicate(self) -> impl Fn(&Unit) -> bool {
         match self {
             MoveIntent::Land => |u: &Unit| u.is_land_based() && !u.is_transported(),
             MoveIntent::Sea => |u: &Unit| !u.is_land_based(),
@@ -39,7 +39,7 @@ impl MoveIntent {
         }
     }
 
-    pub fn toolip(&self) -> &str {
+    pub(crate) fn toolip(&self) -> &str {
         match self {
             MoveIntent::Land => "Move land units",
             MoveIntent::Sea => "Move sea units",
@@ -47,7 +47,7 @@ impl MoveIntent {
         }
     }
 
-    pub fn icon<'a>(self, rc: &'a RenderContext) -> &'a Texture2D {
+    pub(crate) fn icon<'a>(self, rc: &'a RenderContext) -> &'a Texture2D {
         match self {
             MoveIntent::Land => &rc.assets().move_units,
             MoveIntent::Sea => rc.assets().unit(UnitType::Ship, rc.shown_player),
@@ -56,7 +56,12 @@ impl MoveIntent {
     }
 }
 
-pub fn click(rc: &RenderContext, pos: Position, s: &MoveSelection, mouse_pos: Vec2) -> StateUpdate {
+pub(crate) fn click(
+    rc: &RenderContext,
+    pos: Position,
+    s: &MoveSelection,
+    mouse_pos: Vec2,
+) -> RenderResult {
     let game = rc.game;
     let p = game.player(s.player_index);
     let carrier = click_unit(rc, pos, mouse_pos, p, false);
@@ -82,7 +87,7 @@ pub fn click(rc: &RenderContext, pos: Position, s: &MoveSelection, mouse_pos: Ve
             ));
 
             if !cost.is_free() {
-                return StateUpdate::OpenDialog(ActiveDialog::MovePayment(MovePayment {
+                return StateUpdate::open_dialog(ActiveDialog::MovePayment(MovePayment {
                     action,
                     payment: rc.new_payment(&cost, "Move units".to_string(), "Move units", true),
                 }));
@@ -92,7 +97,7 @@ pub fn click(rc: &RenderContext, pos: Position, s: &MoveSelection, mouse_pos: Ve
         _ => {
             if s.start.is_some_and(|p| p != pos) {
                 // first need to deselect units
-                StateUpdate::None
+                NO_UPDATE
             } else {
                 click_unit(rc, pos, mouse_pos, p, true).map_or_else(
                     || tile_clicked(pos, s, game, p),
@@ -109,7 +114,7 @@ fn unit_clicked(
     game: &Game,
     p: &Player,
     unit_id: u32,
-) -> StateUpdate {
+) -> RenderResult {
     let mut new = s.clone();
     new.start = Some(pos);
     let is_transported = p.get_unit(unit_id).is_transported();
@@ -122,28 +127,28 @@ fn unit_clicked(
     unit_selection_changed(pos, game, new)
 }
 
-fn tile_clicked(pos: Position, s: &MoveSelection, game: &Game, p: &Player) -> StateUpdate {
+fn tile_clicked(pos: Position, s: &MoveSelection, game: &Game, p: &Player) -> RenderResult {
     let mut new = s.clone();
     new.start = Some(pos);
     if new.units.is_empty() {
         new.units = movable_units(pos, game, p, |u| !u.is_transported());
         unit_selection_changed(pos, game, new)
     } else {
-        StateUpdate::None
+        NO_UPDATE
     }
 }
 
-fn unit_selection_changed(pos: Position, game: &Game, mut new: MoveSelection) -> StateUpdate {
+fn unit_selection_changed(pos: Position, game: &Game, mut new: MoveSelection) -> RenderResult {
     if new.units.is_empty() {
         new.destinations.list.clear();
         new.start = None;
     } else {
         new.destinations = possible_move_destinations(game, new.player_index, &new.units, pos);
     }
-    StateUpdate::OpenDialog(ActiveDialog::MoveUnits(new))
+    StateUpdate::open_dialog(ActiveDialog::MoveUnits(new))
 }
 
-pub fn movable_units(
+pub(crate) fn movable_units(
     pos: Position,
     game: &Game,
     p: &Player,
@@ -163,7 +168,7 @@ pub fn movable_units(
 }
 
 #[derive(Clone, Debug)]
-pub struct MoveSelection {
+pub(crate) struct MoveSelection {
     pub player_index: usize,
     pub units: Vec<u32>,
     pub start: Option<Position>,
@@ -171,7 +176,7 @@ pub struct MoveSelection {
 }
 
 impl MoveSelection {
-    pub fn new(
+    pub(crate) fn new(
         player_index: usize,
         start: Option<Position>,
         game: &Game,
@@ -225,16 +230,16 @@ impl MoveSelection {
     }
 }
 
-pub(crate) fn move_units_dialog(rc: &RenderContext) -> StateUpdate {
+pub(crate) fn move_units_dialog(rc: &RenderContext) -> RenderResult {
     if matches!(rc.game.state, GameState::Playing)
         && cancel_button_with_tooltip(rc, "Back to playing actions")
     {
-        return StateUpdate::CloseDialog;
+        return StateUpdate::close_dialog();
     }
-    StateUpdate::None
+    NO_UPDATE
 }
 
-pub(crate) fn move_payment_dialog(rc: &RenderContext, mp: &MovePayment) -> StateUpdate {
+pub(crate) fn move_payment_dialog(rc: &RenderContext, mp: &MovePayment) -> RenderResult {
     payment_dialog(
         rc,
         &mp.payment.clone(),

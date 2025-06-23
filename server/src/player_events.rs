@@ -349,7 +349,6 @@ pub struct OnAdvanceInfo {
 
 pub struct MoveInfo {
     pub units: Vec<u32>,
-    #[allow(dead_code)]
     pub from: Position,
     pub to: Position,
 }

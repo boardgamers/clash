@@ -2,7 +2,7 @@ use crate::ability_initializer::{
     AbilityInitializerBuilder, AbilityInitializerSetup, AbilityListeners,
 };
 use crate::advance::{Advance, gain_advance_without_payment};
-use crate::city::{City, activate_city};
+use crate::city::{City, MoodState, activate_city};
 use crate::content::ability::AbilityBuilder;
 use crate::content::advances::AdvanceGroup;
 use crate::content::custom_actions::CustomActionType;
@@ -44,7 +44,11 @@ impl LeaderAbility {
             action,
             |c| c.any_times().action().tokens(1),
             move |b| use_get_advance(b, group),
-            move |game, p| !advances_in_group(game, p, group).is_empty(),
+            move |game, p| {
+                !advances_in_group(game, p, group).is_empty()
+                    && p.try_get_city(leader_position(p))
+                        .is_some_and(|c| c.mood_state == MoodState::Happy)
+            },
         )
         .build()
     }

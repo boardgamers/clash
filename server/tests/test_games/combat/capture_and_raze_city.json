@@ -1,13 +1,17 @@
 {
-  "state": "Playing",
+  "state": {
+    "Movement": {
+      "movement_actions_left": 2
+    }
+  },
   "players": [
     {
       "id": 0,
       "resources": {
-        "food": 1,
-        "wood": 6,
-        "ore": 6,
-        "ideas": 3,
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 5,
         "gold": 7,
         "mood_tokens": 7,
         "culture_tokens": 7
@@ -23,19 +27,18 @@
       },
       "cities": [
         {
-          "city_pieces": {
-            "port": 0
-          },
           "mood_state": "Happy",
-          "activations": 1,
-          "position": "A1",
-          "port_position": "A2"
+          "position": "A1"
         },
         {
-          "mood_state": "Happy",
+          "mood_state": "Neutral",
+          "activations": 8,
           "position": "C2"
         }
       ],
+      "destroyed_structures": {
+        "cities": 6
+      },
       "units": [
         {
           "position": "C2",
@@ -81,11 +84,10 @@
       "civilization": "Rome",
       "advances": [
         "Farming",
-        "Fishing",
-        "Math",
-        "Mining"
+        "Mining",
+        "Tactics"
       ],
-      "incident_tokens": 1,
+      "incident_tokens": 2,
       "next_unit_id": 8
     },
     {
@@ -110,7 +112,14 @@
       },
       "cities": [
         {
+          "city_pieces": {
+            "fortress": 1,
+            "wonders": [
+              "GreatWall"
+            ]
+          },
           "mood_state": "Angry",
+          "activations": 2,
           "position": "C1"
         }
       ],
@@ -129,20 +138,11 @@
       "civilization": "Greece",
       "advances": [
         "Farming",
-        "Mining"
+        "Mining",
+        "Tactics"
       ],
       "incident_tokens": 3,
       "next_unit_id": 2
-    },
-    {
-      "id": 2,
-      "civilization": "Barbarians",
-      "next_unit_id": 0
-    },
-    {
-      "id": 3,
-      "civilization": "Pirates",
-      "next_unit_id": 0
     }
   ],
   "map": {
@@ -201,78 +201,18 @@
           "round": 1,
           "players": [
             {
-              "index": 0,
-              "actions": [
-                {
-                  "action": {
-                    "Playing": {
-                      "Construct": {
-                        "city_position": "A1",
-                        "city_piece": "Port",
-                        "payment": {
-                          "food": 1,
-                          "wood": 1,
-                          "ore": 1
-                        },
-                        "port_position": "A2"
-                      }
-                    }
-                  },
-                  "items": [
-                    {
-                      "player": 0,
-                      "Action": {
-                        "balance": "Loss"
-                      },
-                      "origin": {
-                        "Ability": "Construct Building"
-                      }
-                    },
-                    {
-                      "player": 0,
-                      "Resources": {
-                        "resources": {
-                          "food": 1,
-                          "wood": 1,
-                          "ore": 1
-                        },
-                        "balance": "Loss"
-                      },
-                      "origin": {
-                        "Ability": "Construct Building"
-                      }
-                    },
-                    {
-                      "player": 0,
-                      "Structure": {
-                        "structure": {
-                          "Building": "Port"
-                        },
-                        "balance": "Gain",
-                        "position": "A1"
-                      },
-                      "origin": {
-                        "Ability": "Construct Building"
-                      }
-                    }
-                  ]
-                }
-              ]
+              "index": 0
             }
           ]
         }
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player1: Construct Building: Pay 1 action, Pay 1 food, 1 wood and 1 ore, Gain Port at A1 at the water tile A2"
-    ]
-  ],
+  "action_log_index": 0,
+  "log": [],
   "undo_limit": 0,
-  "actions_left": 2,
-  "round": 2,
+  "actions_left": 1,
+  "round": 1,
   "age": 1,
   "messages": [
     "The game has started"
@@ -280,14 +220,13 @@
   "dice_roll_outcomes": [
     1,
     1,
-    10,
-    10,
-    10,
-    10,
-    10,
-    10,
-    10,
-    10
+    1,
+    1,
+    1,
+    11,
+    11,
+    11,
+    11
   ],
   "wonders_left": [
     "Pyramids"

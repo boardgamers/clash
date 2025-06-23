@@ -1,13 +1,13 @@
 use crate::advance_ui::{AdvanceState, show_advance_menu};
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, RenderResult, StateUpdate};
 use crate::dialog_ui::{OkTooltip, cancel_button_with_tooltip, ok_button};
 use crate::render_context::RenderContext;
 use server::advance::Advance;
 use server::content::persistent_events::EventResponse;
 use server::status_phase::ChangeGovernment;
 
-#[derive(Clone)]
-pub struct ChooseAdditionalAdvances {
+#[derive(Clone, Debug)]
+pub(crate) struct ChooseAdditionalAdvances {
     government: String,
     possible: Vec<Advance>,
     selected: Vec<Advance>,
@@ -25,7 +25,7 @@ impl ChooseAdditionalAdvances {
     }
 }
 
-pub fn change_government_type_dialog(rc: &RenderContext) -> StateUpdate {
+pub(crate) fn change_government_type_dialog(rc: &RenderContext) -> RenderResult {
     show_advance_menu(
         rc,
         "Change government",
@@ -65,17 +65,17 @@ pub fn change_government_type_dialog(rc: &RenderContext) -> StateUpdate {
                 .filter(|a| rc.shown_player.has_advance(a.advance))
                 .count()
                 - 1;
-            StateUpdate::OpenDialog(ActiveDialog::ChooseAdditionalAdvances(
+            StateUpdate::open_dialog(ActiveDialog::ChooseAdditionalAdvances(
                 ChooseAdditionalAdvances::new(g.clone(), additional, needed),
             ))
         },
     )
 }
 
-pub fn choose_additional_advances_dialog(
+pub(crate) fn choose_additional_advances_dialog(
     rc: &RenderContext,
     choose: &ChooseAdditionalAdvances,
-) -> StateUpdate {
+) -> RenderResult {
     let t = if choose.selected.len() == choose.needed {
         OkTooltip::Valid("Change government type".to_string())
     } else {
@@ -89,7 +89,7 @@ pub fn choose_additional_advances_dialog(
     }
 
     if cancel_button_with_tooltip(rc, "Back to choose government type") {
-        return StateUpdate::OpenDialog(ActiveDialog::ChangeGovernmentType);
+        return StateUpdate::open_dialog(ActiveDialog::ChangeGovernmentType);
     }
     show_advance_menu(
         rc,
@@ -111,7 +111,7 @@ pub fn choose_additional_advances_dialog(
             } else {
                 selected.push(a.advance);
             }
-            StateUpdate::OpenDialog(ActiveDialog::ChooseAdditionalAdvances(
+            StateUpdate::open_dialog(ActiveDialog::ChooseAdditionalAdvances(
                 ChooseAdditionalAdvances {
                     government: choose.government.clone(),
                     possible: choose.possible.clone(),

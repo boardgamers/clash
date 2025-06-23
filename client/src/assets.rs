@@ -11,11 +11,11 @@ use server::unit::UnitType;
 use server::wonder::Wonder;
 use std::collections::HashMap;
 
-pub struct CivAssets {
+pub(crate) struct CivAssets {
     pub units: HashMap<UnitType, Texture2D>,
 }
 
-pub struct Assets {
+pub(crate) struct Assets {
     pub terrain: HashMap<Terrain, Texture2D>,
     pub exhausted: Texture2D,
     pub font: Font,
@@ -33,13 +33,13 @@ pub struct Assets {
 
     // UI
     pub redo: Texture2D,
-    pub reset: Texture2D,
     pub undo: Texture2D,
     pub plus: Texture2D,
     pub minus: Texture2D,
     pub ok_blocked: Texture2D,
     pub ok: Texture2D,
     pub cancel: Texture2D,
+    pub info: Texture2D,
 
     pub victory_points: Texture2D,
     pub event_counter: Texture2D,
@@ -85,13 +85,13 @@ impl Assets {
 
             // UI
             redo: load_png(include_bytes!("../assets/redo-svgrepo-com.png")),
-            reset: load_png(include_bytes!("../assets/reset-svgrepo-com.png")),
             undo: load_png(include_bytes!("../assets/undo-svgrepo-com.png")),
             plus: load_png(include_bytes!("../assets/plus-circle-svgrepo-com.png")),
             minus: load_png(include_bytes!("../assets/minus-circle-svgrepo-com.png")),
             ok: load_png(include_bytes!("../assets/ok-circle-svgrepo-com.png")),
             ok_blocked: load_png(include_bytes!("../assets/in-progress-svgrepo-com.png")),
             cancel: load_png(include_bytes!("../assets/cancel-svgrepo-com.png")),
+            info: load_png(include_bytes!("../assets/info-svgrepo-com.png")),
 
             victory_points: load_png(include_bytes!("../assets/trophy-cup-svgrepo-com.png")),
             event_counter: load_png(include_bytes!(
@@ -416,7 +416,7 @@ impl Assets {
         CivAssets { units }
     }
 
-    pub fn unit(&self, mut unit_type: UnitType, player: &Player) -> &Texture2D {
+    pub(crate) fn unit(&self, mut unit_type: UnitType, player: &Player) -> &Texture2D {
         if unit_type.is_leader() {
             unit_type = unit::LEADER_UNIT;
         }

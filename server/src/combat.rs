@@ -368,24 +368,30 @@ pub(crate) fn conquer_city(
     attacker: &EventPlayer,
     defender: &EventPlayer,
 ) {
-    let city = lose_city(game, defender, position);
     let attacker_is_human = attacker.get(game).is_human();
-    let size = city.mood_modified_size(attacker.get(game));
+    let d = defender.get(game);
+    let size = d.get_city(position).mood_modified_size(d);
     if attacker_is_human {
         attacker.gain_resources(game, ResourcePile::gold(size as u8));
     }
 
     if attacker.get(game).is_city_available() {
+        let city = lose_city(game, defender, position);
         gain_city(game, attacker, city);
         if attacker_is_human {
             take_over_city(game, position, attacker, defender);
         }
         set_city_mood(game, position, &attacker.origin, Angry);
     } else {
-        raze_city(game, defender, position);
         if attacker_is_human {
-            attacker.gain_resources(game, ResourcePile::gold(city.size() as u8));
+            attacker
+                .with_origin(EventOrigin::Ability("Raze captured city".to_string()))
+                .gain_resources(
+                    game,
+                    ResourcePile::gold(defender.get(game).get_city(position).size() as u8),
+                );
         }
+        raze_city(game, defender, position);
     }
 }
 

@@ -62,6 +62,17 @@ fn test_direct_capture_city_fortress() {
 }
 
 #[test]
+fn test_capture_and_raze_city() {
+    JSON.test(
+        "capture_and_raze_city",
+        vec![TestAction::not_undoable(
+            0,
+            move_action(vec![0, 1, 2, 3], Position::from_offset("C1")),
+        )],
+    );
+}
+
+#[test]
 fn test_direct_capture_city_only_fortress() {
     JSON.test(
         "direct_capture_city_only_fortress",

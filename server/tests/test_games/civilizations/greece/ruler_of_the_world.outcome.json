@@ -418,23 +418,23 @@
                       }
                     },
                     {
-                      "player": 1,
-                      "Structure": {
-                        "structure": "CityCenter",
-                        "balance": "Loss",
-                        "position": "D8"
-                      },
-                      "origin": {
-                        "Ability": "Combat"
-                      }
-                    },
-                    {
                       "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 2
                         },
                         "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Loss",
+                        "position": "D8"
                       },
                       "origin": {
                         "Ability": "Combat"

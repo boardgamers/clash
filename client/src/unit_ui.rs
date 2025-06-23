@@ -1,30 +1,30 @@
 use macroquad::math::{Vec2, u32, vec2};
-use macroquad::shapes::draw_circle;
 
 use server::game::Game;
 use server::position::Position;
 use server::unit::{Unit, UnitType, carried_units};
 
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult};
 use crate::hex_ui;
 use crate::select_ui::HighlightType;
 
 use crate::layout_ui::{draw_scaled_icon_with_tooltip, is_in_circle};
+use crate::log_ui::break_text;
 use crate::render_context::RenderContext;
-use crate::tooltip::{add_tooltip_description, show_tooltip_for_circle};
+use crate::tooltip::show_tooltip_for_circle;
 use itertools::Itertools;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::movement::{MoveDestination, MovementRestriction};
 use server::player::Player;
 use server::wonder::Wonder;
 
-pub struct UnitPlace {
+pub(crate) struct UnitPlace {
     pub center: Vec2,
     pub radius: f32,
 }
 
 impl UnitPlace {
-    pub fn new(center: Vec2, radius: f32) -> UnitPlace {
+    pub(crate) fn new(center: Vec2, radius: f32) -> UnitPlace {
         UnitPlace { center, radius }
     }
 }
@@ -35,7 +35,7 @@ struct UnitHighlight {
     highlight_type: HighlightType,
 }
 
-pub fn draw_unit_type(
+pub(crate) fn draw_unit_type(
     rc: &RenderContext,
     unit_highlight_type: HighlightType,
     center: Vec2,
@@ -48,13 +48,8 @@ pub fn draw_unit_type(
     } else {
         radius + 2.
     };
-    draw_circle(center.x, center.y, r, unit_highlight_type.color());
-    draw_circle(
-        center.x,
-        center.y,
-        radius - 2.,
-        rc.player_color(player_index),
-    );
+    rc.draw_circle(center, r, unit_highlight_type.color());
+    rc.draw_circle(center, radius - 2., rc.player_color(player_index));
     let icon_size = radius * 1.1;
 
     draw_scaled_icon_with_tooltip(
@@ -88,7 +83,7 @@ fn unit_place(rc: &RenderContext, index: usize, position: Position) -> UnitPlace
     }
 }
 
-pub fn click_unit(
+pub(crate) fn click_unit(
     rc: &RenderContext,
     pos: Position,
     mouse_pos: Vec2,
@@ -121,7 +116,7 @@ pub fn click_unit(
         })
 }
 
-pub fn draw_units(rc: &RenderContext, tooltip: bool) {
+pub(crate) fn draw_units(rc: &RenderContext, tooltip: bool) {
     let player = rc.shown_player.index;
     let highlighted_units = match rc.state.active_dialog {
         ActiveDialog::MoveUnits(ref s) => {
@@ -252,13 +247,13 @@ pub trait UnitSelection {
     fn player_index(&self) -> usize;
 }
 
-pub fn unit_selection_click<T: UnitSelection + Clone>(
+pub(crate) fn unit_selection_click<T: UnitSelection + Clone>(
     rc: &RenderContext,
     pos: Position,
     mouse_pos: Vec2,
     sel: &T,
-    on_change: impl Fn(T) -> StateUpdate,
-) -> StateUpdate {
+    on_change: impl Fn(T) -> RenderResult,
+) -> RenderResult {
     let p = rc.game.player(sel.player_index());
     if let Some(unit_id) = click_unit(rc, pos, mouse_pos, p, true) {
         if sel.can_select(rc.game, p.get_unit(unit_id)) {
@@ -267,10 +262,13 @@ pub fn unit_selection_click<T: UnitSelection + Clone>(
             return on_change(new);
         }
     }
-    StateUpdate::None
+    NO_UPDATE
 }
 
-pub fn units_on_tile(game: &Game, pos: Position) -> impl Iterator<Item = (usize, Unit)> + '_ {
+pub(crate) fn units_on_tile(
+    game: &Game,
+    pos: Position,
+) -> impl Iterator<Item = (usize, Unit)> + '_ {
     game.players.iter().flat_map(move |p| {
         p.units.iter().filter_map(move |unit| {
             if unit.position == pos {
@@ -282,7 +280,7 @@ pub fn units_on_tile(game: &Game, pos: Position) -> impl Iterator<Item = (usize,
     })
 }
 
-pub fn unit_label(unit: &Unit, army_move: bool, game: &Game) -> String {
+pub(crate) fn unit_label(unit: &Unit, army_move: bool, game: &Game) -> String {
     let name = unit.unit_type.name(game);
     let mut notes = vec![];
 
@@ -320,7 +318,7 @@ pub fn unit_label(unit: &Unit, army_move: bool, game: &Game) -> String {
     format!("{name}{suffix}")
 }
 
-pub fn unit_selection_clicked(unit_id: u32, units: &mut Vec<u32>) {
+pub(crate) fn unit_selection_clicked(unit_id: u32, units: &mut Vec<u32>) {
     if units.contains(&unit_id) {
         // deselect unit
         units.retain(|&id| id != unit_id);
@@ -329,13 +327,13 @@ pub fn unit_selection_clicked(unit_id: u32, units: &mut Vec<u32>) {
     }
 }
 
-pub fn add_unit_description(rc: &RenderContext, parts: &mut Vec<String>, u: UnitType) {
+pub(crate) fn add_unit_description(rc: &RenderContext, parts: &mut Vec<String>, u: UnitType) {
     parts.push(format!("Cost: {}", u.cost()));
-    add_tooltip_description(parts, &u.description());
+    break_text(parts, &u.description());
     if let UnitType::Leader(l) = u {
         for a in &rc.game.cache.get_leader(&l).abilities {
             parts.push(format!("Leader ability: {}", a.name));
-            add_tooltip_description(parts, &a.description);
+            break_text(parts, &a.description);
         }
     }
 }

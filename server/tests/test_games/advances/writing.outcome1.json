@@ -380,7 +380,7 @@
                         "balance": "Loss"
                       },
                       "origin": {
-                        "Ability": "Combat"
+                        "Ability": "Construct Building"
                       }
                     },
                     {
@@ -438,8 +438,7 @@
       "Player1: Writing: Draw an action card, Draw an objective card, Gain 1 culture token"
     ],
     [
-      "Player1: Combat: Pay 1 action",
-      "Player1: Construct Building: Pay 1 food, 1 wood and 1 ore, Gain Academy at A1",
+      "Player1: Construct Building: Pay 1 action, Pay 1 food, 1 wood and 1 ore, Gain Academy at A1",
       "Player1: Academy: Gain 2 ideas"
     ]
   ],

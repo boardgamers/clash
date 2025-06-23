@@ -1,15 +1,14 @@
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::{BaseOrCustomDialog, OkTooltip, cancel_button, ok_button};
 use crate::event_ui::event_help;
 use crate::hex_ui;
-use crate::layout_ui::{draw_scaled_icon, is_in_circle, left_mouse_button_pressed};
+use crate::layout_ui::{draw_scaled_icon, is_in_circle, mouse_pressed_position};
 use crate::render_context::RenderContext;
 use crate::resource_ui::{new_resource_map, resource_name, show_resource_pile};
 use itertools::Itertools;
 use macroquad::color::BLACK;
 use macroquad::math::{Vec2, vec2};
 use macroquad::prelude::WHITE;
-use macroquad::shapes::draw_circle;
 use server::action::Action;
 use server::collect::{
     Collect, CollectInfo, PositionCollection, add_collect, get_total_collection,
@@ -22,8 +21,8 @@ use server::position::Position;
 use server::resource::ResourceType;
 use server::resource_pile::ResourcePile;
 
-#[derive(Clone)]
-pub struct CollectResources {
+#[derive(Clone, Debug)]
+pub(crate) struct CollectResources {
     player_index: usize,
     city_position: Position,
     collections: Vec<PositionCollection>,
@@ -32,7 +31,7 @@ pub struct CollectResources {
 }
 
 impl CollectResources {
-    pub fn new(
+    pub(crate) fn new(
         player_index: usize,
         city_position: Position,
         custom: BaseOrCustomDialog,
@@ -47,7 +46,7 @@ impl CollectResources {
         }
     }
 
-    pub fn help_text(&self, rc: &RenderContext) -> Vec<String> {
+    pub(crate) fn help_text(&self, rc: &RenderContext) -> Vec<String> {
         let extra = self.extra_resources();
         let mut r = vec![
             self.custom.title.clone(),
@@ -60,11 +59,11 @@ impl CollectResources {
         r
     }
 
-    pub fn extra_resources(&self) -> i8 {
+    pub(crate) fn extra_resources(&self) -> i8 {
         self.info.max_selection as i8 - tiles_used(&self.collections) as i8
     }
 
-    pub fn collected(&self) -> ResourcePile {
+    pub(crate) fn collected(&self) -> ResourcePile {
         self.collections
             .clone()
             .into_iter()
@@ -73,7 +72,7 @@ impl CollectResources {
     }
 }
 
-pub fn collect_dialog(rc: &RenderContext, collect: &CollectResources) -> StateUpdate {
+pub(crate) fn collect_dialog(rc: &RenderContext, collect: &CollectResources) -> RenderResult {
     show_resource_pile(rc, &collect.collected());
 
     let game = rc.game;
@@ -111,9 +110,9 @@ pub fn collect_dialog(rc: &RenderContext, collect: &CollectResources) -> StateUp
         );
     }
     if cancel_button(rc) {
-        return StateUpdate::Cancel;
+        return StateUpdate::cancel();
     }
-    StateUpdate::None
+    NO_UPDATE
 }
 
 fn click_collect_option(
@@ -121,7 +120,7 @@ fn click_collect_option(
     col: &CollectResources,
     p: Position,
     pile: &ResourcePile,
-) -> StateUpdate {
+) -> RenderResult {
     let c = add_collect(&col.info, p, pile, &col.collections);
 
     let i = possible_resource_collections(
@@ -134,13 +133,13 @@ fn click_collect_option(
     let mut new = col.clone();
     new.info = i;
     new.collections = c;
-    StateUpdate::OpenDialog(ActiveDialog::CollectResources(new))
+    StateUpdate::open_dialog(ActiveDialog::CollectResources(new))
 }
 
-pub fn draw_resource_collect_tile(rc: &RenderContext, pos: Position) -> StateUpdate {
+pub(crate) fn draw_resource_collect_tile(rc: &RenderContext, pos: Position) -> RenderResult {
     let state = &rc.state;
     let ActiveDialog::CollectResources(collect) = &state.active_dialog else {
-        return StateUpdate::None;
+        return NO_UPDATE;
     };
 
     let Some(possible) = collect
@@ -149,7 +148,7 @@ pub fn draw_resource_collect_tile(rc: &RenderContext, pos: Position) -> StateUpd
         .get(&pos)
         .map(|v| v.iter().sorted_by_key(ToString::to_string).collect_vec())
     else {
-        return StateUpdate::None;
+        return NO_UPDATE;
     };
 
     let tile_collects = collect
@@ -171,8 +170,8 @@ pub fn draw_resource_collect_tile(rc: &RenderContext, pos: Position) -> StateUpd
 
         let pile_collect = tile_collects.iter().find(|r| &r.pile == pile);
         let color = if pile_collect.is_some() { BLACK } else { WHITE };
-        draw_circle(center.x, center.y, radius, color);
-        if let Some(p) = left_mouse_button_pressed(rc) {
+        rc.draw_circle(center, radius, color);
+        if let Some(p) = mouse_pressed_position(rc) {
             if is_in_circle(p, center, radius) {
                 return click_collect_option(rc, collect, pos, pile);
             }
@@ -191,12 +190,11 @@ pub fn draw_resource_collect_tile(rc: &RenderContext, pos: Position) -> StateUpd
         if let Some(r) = pile_collect {
             let times = r.times;
             if times > 1 {
-                rc.state
-                    .draw_text(&format!("{times}"), center.x + 20., center.y + 5.);
+                rc.draw_text(&format!("{times}"), center.x + 20., center.y + 5.);
             }
         }
     }
-    StateUpdate::None
+    NO_UPDATE
 }
 
 fn draw_collect_item(

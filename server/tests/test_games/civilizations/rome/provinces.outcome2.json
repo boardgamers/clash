@@ -347,23 +347,23 @@
                       }
                     },
                     {
-                      "player": 1,
-                      "Structure": {
-                        "structure": "CityCenter",
-                        "balance": "Loss",
-                        "position": "B2"
-                      },
-                      "origin": {
-                        "Ability": "Combat"
-                      }
-                    },
-                    {
                       "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 2
                         },
                         "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Loss",
+                        "position": "B2"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -479,8 +479,8 @@
     ],
     [
       "Player1: Move: marched 1 infantry from C2 to B2, Pay 1 action",
-      "Player2: Combat: Lose city B2, Lose Port at B2",
-      "Player1: Combat: Gain 2 gold, Gain city B2, Gain Port at B2 at the water tile C3, City B2 became Angry"
+      "Player1: Combat: Gain 2 gold, Gain city B2, Gain Port at B2 at the water tile C3, City B2 became Angry",
+      "Player2: Combat: Lose city B2, Lose Port at B2"
     ],
     [
       "Player1: Provinces: Pay 1 culture token, City B2 became Happy",

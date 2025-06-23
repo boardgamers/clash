@@ -1,4 +1,4 @@
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, RenderResult, StateUpdate};
 use crate::payment_ui::{Payment, payment_dialog};
 use crate::recruit_unit_ui::RecruitSelection;
 use crate::render_context::RenderContext;
@@ -11,7 +11,10 @@ use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::recruit::Recruit;
 
-pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> StateUpdate {
+pub(crate) fn pay_construction_dialog(
+    rc: &RenderContext,
+    cp: &ConstructionPayment,
+) -> RenderResult {
     let city = rc.game.get_any_city(cp.city_position);
     payment_dialog(
         rc,
@@ -43,22 +46,21 @@ pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> 
     )
 }
 
-#[derive(Clone)]
-pub enum ConstructionProject {
+#[derive(Clone, Debug)]
+pub(crate) enum ConstructionProject {
     Building(Building, Option<Position>),
     Units(RecruitSelection),
 }
 
-#[derive(Clone)]
-pub struct ConstructionPayment {
-    pub player_index: usize,
+#[derive(Clone, Debug)]
+pub(crate) struct ConstructionPayment {
     pub city_position: Position,
     pub project: ConstructionProject,
     pub payment: Payment<String>,
 }
 
 impl ConstructionPayment {
-    pub fn new(
+    pub(crate) fn new(
         rc: &RenderContext,
         city: &City,
         name: &str,
@@ -66,7 +68,6 @@ impl ConstructionPayment {
         cost: &CostInfo,
     ) -> ConstructionPayment {
         ConstructionPayment {
-            player_index: city.player_index,
             city_position: city.position,
             project,
             payment: rc.new_payment(&cost.cost, name.to_string(), name, false),

@@ -40,16 +40,11 @@
           "mood_state": "Neutral",
           "activations": 8,
           "position": "C2"
-        },
-        {
-          "city_pieces": {
-            "fortress": 0
-          },
-          "mood_state": "Angry",
-          "activations": 2,
-          "position": "C1"
         }
       ],
+      "destroyed_structures": {
+        "cities": 6
+      },
       "units": [
         {
           "position": "C1",
@@ -111,20 +106,6 @@
         "Tactics"
       ],
       "incident_tokens": 2,
-      "completed_objectives": [
-        {
-          "card": 2,
-          "name": "Conqueror"
-        },
-        {
-          "card": 5,
-          "name": "General"
-        },
-        {
-          "card": 6,
-          "name": "Great Battle"
-        }
-      ],
       "next_unit_id": 8
     },
     {
@@ -245,10 +226,10 @@
                       "position": "C1",
                       "player": 1,
                       "present": {
-                        "infantry": 3
+                        "infantry": 2
                       },
                       "losses": {
-                        "infantry": 3
+                        "infantry": 2
                       }
                     },
                     "result": "AttackerWins",
@@ -259,7 +240,7 @@
                       "player": 1,
                       "Units": {
                         "units": {
-                          "infantry": 3
+                          "infantry": 2
                         },
                         "balance": "Loss"
                       },
@@ -280,25 +261,15 @@
                       }
                     },
                     {
-                      "player": 1,
-                      "Structure": {
-                        "structure": "CityCenter",
-                        "balance": "Loss",
-                        "position": "C1"
-                      },
-                      "origin": {
-                        "Ability": "Combat"
-                      }
-                    },
-                    {
                       "player": 0,
-                      "Structure": {
-                        "structure": "CityCenter",
-                        "balance": "Gain",
-                        "position": "C1"
+                      "Resources": {
+                        "resources": {
+                          "gold": 3
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
-                        "Ability": "Combat"
+                        "Ability": "Raze captured city"
                       }
                     },
                     {
@@ -315,86 +286,27 @@
                       }
                     },
                     {
-                      "player": 0,
+                      "player": 1,
                       "Structure": {
                         "structure": {
-                          "Building": "Fortress"
+                          "Wonder": "GreatWall"
                         },
-                        "balance": "Gain",
+                        "balance": "Loss",
                         "position": "C1"
                       },
                       "origin": {
                         "Ability": "Combat"
                       }
-                    }
-                  ]
-                },
-                {
-                  "action": {
-                    "Response": {
-                      "SelectHandCards": [
-                        {
-                          "ObjectiveCard": 2
-                        },
-                        {
-                          "ObjectiveCard": 5
-                        },
-                        {
-                          "ObjectiveCard": 6
-                        }
-                      ]
-                    }
-                  },
-                  "items": [
-                    {
-                      "player": 0,
-                      "HandCard": {
-                        "card": {
-                          "ObjectiveCard": 2
-                        },
-                        "from": {
-                          "Hand": 0
-                        },
-                        "to": {
-                          "CompleteObjective": "Conqueror"
-                        }
-                      },
-                      "origin": {
-                        "Ability": "Complete Objectives"
-                      }
                     },
                     {
-                      "player": 0,
-                      "HandCard": {
-                        "card": {
-                          "ObjectiveCard": 5
-                        },
-                        "from": {
-                          "Hand": 0
-                        },
-                        "to": {
-                          "CompleteObjective": "General"
-                        }
+                      "player": 1,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Loss",
+                        "position": "C1"
                       },
                       "origin": {
-                        "Ability": "Complete Objectives"
-                      }
-                    },
-                    {
-                      "player": 0,
-                      "HandCard": {
-                        "card": {
-                          "ObjectiveCard": 6
-                        },
-                        "from": {
-                          "Hand": 0
-                        },
-                        "to": {
-                          "CompleteObjective": "Great Battle"
-                        }
-                      },
-                      "origin": {
-                        "Ability": "Complete Objectives"
+                        "Ability": "Combat"
                       }
                     }
                   ]
@@ -406,21 +318,19 @@
       ]
     }
   ],
-  "action_log_index": 2,
+  "action_log_index": 1,
   "log": [
     [
       "Player1: Move: marched 2 infantry, 1 cavalry and 1 elephant from C2 to C1"
     ],
     [
       "Combat round 1",
-      "Player1: Combat: Attacking with 2 infantry, 1 cavalry and 1 elephant, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 26 and gets 3 hits against defending units, Gain 1 gold, Gain city C1, Gain Fortress at C1",
-      "Player2: Combat: Defending with 3 infantry, Roll 1 (leader, no bonus), 1 (leader, no bonus), 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 4 and gets 0 hits against attacking units, Combat modifiers: fortress added one extra die, fortress cancelled one hit, Lost 3 infantry at C1, Lose city C1, Lose Fortress at C1",
+      "Player1: Combat: Attacking with 2 infantry, 1 cavalry and 1 elephant, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 26 and gets 2 hits against defending units, Gain 1 gold",
+      "Player2: Combat: Defending with 2 infantry, Roll 1 (leader, no bonus), 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 3 and gets 0 hits against attacking units, Combat modifiers: fortress added one extra die, fortress cancelled one hit, Lost 2 infantry at C1, Lose Fortress at C1, Lose Great Wall at C1, Lose city C1",
       "Player2: Choose Casualties: Remove all defending units",
       "Attacker wins",
-      "Player1: Waste: Could not store 1 gold"
-    ],
-    [
-      "Player1: Complete Objectives: Complete Conqueror using Scientific Lead/Conqueror, Complete General using Religious Fervor/General, Complete Great Battle using City Planner/Great Battle"
+      "Player1: Raze captured city: Gain 3 gold",
+      "Player1: Waste: Could not store 4 gold"
     ]
   ],
   "undo_limit": 1,
@@ -431,6 +341,7 @@
     "The game has started"
   ],
   "dice_roll_outcomes": [
+    1,
     1
   ],
   "dice_roll_log": [
@@ -438,7 +349,6 @@
     11,
     11,
     11,
-    1,
     1,
     1,
     1

@@ -5,6 +5,7 @@ use crate::events::EventOrigin;
 use crate::game::Game;
 use enumset::EnumSetType;
 use serde::{Deserialize, Serialize};
+use std::fmt::Debug;
 
 #[derive(EnumSetType, Serialize, Deserialize, Debug, Ord, PartialOrd, Hash)]
 pub enum SpecialAdvance {
@@ -53,6 +54,16 @@ impl SpecialAdvance {
 pub enum SpecialAdvanceRequirement {
     AnyGovernment,
     Advance(Advance),
+}
+
+impl SpecialAdvanceRequirement {
+    #[must_use]
+    pub fn name(&self, game: &Game) -> String {
+        match self {
+            SpecialAdvanceRequirement::AnyGovernment => "Any government".to_string(),
+            SpecialAdvanceRequirement::Advance(a) => a.info(game).name.clone(),
+        }
+    }
 }
 
 #[derive(Clone)]

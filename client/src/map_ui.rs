@@ -1,5 +1,7 @@
 use crate::city_ui::{IconAction, IconActionVec, draw_city, show_city_menu};
-use crate::client_state::{ActiveDialog, MAX_OFFSET, MIN_OFFSET, State, StateUpdate, ZOOM};
+use crate::client_state::{
+    ActiveDialog, MAX_OFFSET, MIN_OFFSET, NO_UPDATE, RenderResult, State, StateUpdate, ZOOM,
+};
 use crate::dialog_ui::{OkTooltip, cancel_button_pos, ok_button};
 use crate::hex_ui::HexFeature;
 use crate::layout_ui::{
@@ -32,8 +34,8 @@ const fn color(r: u8, g: u8, b: u8, a: f32) -> Color {
     Color::new(r as f32 / 255., g as f32 / 255., b as f32 / 255., a)
 }
 
-#[derive(Clone)]
-pub struct ExploreResolutionConfig {
+#[derive(Clone, Debug)]
+pub(crate) struct ExploreResolutionConfig {
     pub block: UnexploredBlock,
     pub rotation: Rotation,
 }
@@ -45,7 +47,7 @@ fn terrain_font_color(t: &Terrain) -> Color {
     }
 }
 
-pub fn terrain_name(t: &Terrain) -> &'static str {
+pub(crate) fn terrain_name(t: &Terrain) -> &'static str {
     match t {
         Terrain::Barren => "Barren",
         Terrain::Mountain => "Mountain",
@@ -57,7 +59,7 @@ pub fn terrain_name(t: &Terrain) -> &'static str {
     }
 }
 
-pub fn draw_map(rc: &RenderContext) -> StateUpdate {
+pub(crate) fn draw_map(rc: &RenderContext) -> RenderResult {
     let game = rc.game;
     let overlay_terrain = get_overlay(rc);
     for (pos, t) in &game.map.tiles {
@@ -83,10 +85,7 @@ pub fn draw_map(rc: &RenderContext) -> StateUpdate {
             &features,
             rc,
         );
-        let update = collect_ui::draw_resource_collect_tile(rc, *pos);
-        if !matches!(update, StateUpdate::None) {
-            return update;
-        }
+        collect_ui::draw_resource_collect_tile(rc, *pos)?;
     }
     // get from current event
     if let Some(c) = get_combat(game) {
@@ -96,15 +95,13 @@ pub fn draw_map(rc: &RenderContext) -> StateUpdate {
     if !matches!(&state.active_dialog, ActiveDialog::CollectResources(_)) {
         for p in &game.players {
             for city in &p.cities {
-                if let Some(u) = draw_city(rc, city) {
-                    return u;
-                }
+                draw_city(rc, city)?;
             }
         }
         unit_ui::draw_units(rc, false);
         unit_ui::draw_units(rc, true);
     }
-    StateUpdate::None
+    NO_UPDATE
 }
 
 fn get_overlay(rc: &RenderContext) -> HashMap<Position, Terrain> {
@@ -120,7 +117,7 @@ fn get_overlay(rc: &RenderContext) -> HashMap<Position, Terrain> {
     }
 }
 
-pub fn pan_and_zoom(state: &mut State) {
+pub(crate) fn pan_and_zoom(state: &mut State) {
     let (_, wheel) = mouse_wheel();
     let new_zoom = state.camera.zoom + wheel * 0.0001;
     let x = new_zoom.x;
@@ -224,7 +221,7 @@ fn highlight_if(b: bool) -> Color {
     alpha_overlay(if b { 0.5 } else { 0. })
 }
 
-pub fn show_tile_menu(rc: &RenderContext, pos: Position) -> StateUpdate {
+pub(crate) fn show_tile_menu(rc: &RenderContext, pos: Position) -> RenderResult {
     if let Some(city) = rc.game.try_get_any_city(pos) {
         if rc.can_control_shown_player() && rc.shown_player.index == city.player_index {
             return show_city_menu(rc, city);
@@ -257,7 +254,7 @@ fn found_city_button<'a>(rc: &'a RenderContext<'a>, pos: Position) -> Option<Ico
     })
 }
 
-pub fn move_units_button<'a>(
+pub(crate) fn move_units_button<'a>(
     rc: &'a RenderContext,
     pos: Position,
     move_intent: MoveIntent,
@@ -274,7 +271,7 @@ pub fn move_units_button<'a>(
     ))
 }
 
-pub fn move_units_buttons<'a>(rc: &'a RenderContext, pos: Position) -> Vec<IconAction<'a>> {
+pub(crate) fn move_units_buttons<'a>(rc: &'a RenderContext, pos: Position) -> Vec<IconAction<'a>> {
     let mut res = vec![];
     if let Some(action) = move_units_button(rc, pos, MoveIntent::Land) {
         res.push(action);
@@ -288,28 +285,23 @@ pub fn move_units_buttons<'a>(rc: &'a RenderContext, pos: Position) -> Vec<IconA
     res
 }
 
-pub fn show_map_action_buttons(rc: &RenderContext, icons: &IconActionVec) -> StateUpdate {
-    for pass in 0..2 {
-        for (i, icon) in icons.iter().enumerate() {
-            let p = icon_pos(-(icons.len() as i8) / 2 + i as i8, -1);
-            let center = bottom_center_anchor(rc) + p + vec2(15., 15.);
-            let radius = 20.;
-            if pass == 0 {
-                if icon.warning {
-                    draw_circle(center.x, center.y, radius, RED);
-                }
-                if bottom_center_texture(rc, icon.texture, p, "") {
-                    return (icon.action)();
-                }
-            } else {
-                show_tooltip_for_circle(rc, &icon.tooltip, center, radius);
-            }
+pub(crate) fn show_map_action_buttons(rc: &RenderContext, icons: &IconActionVec) -> RenderResult {
+    for (i, icon) in icons.iter().enumerate() {
+        let p = icon_pos(-(icons.len() as i8) / 2 + i as i8, -1);
+        let center = bottom_center_anchor(rc) + p + vec2(15., 15.);
+        let radius = 20.;
+        if icon.warning {
+            rc.draw_circle(center, radius, RED);
         }
+        if bottom_center_texture(rc, icon.texture, p, "") {
+            return (icon.action)();
+        }
+        show_tooltip_for_circle(rc, &icon.tooltip, center, radius);
     }
-    StateUpdate::None
+    NO_UPDATE
 }
 
-pub fn explore_dialog(rc: &RenderContext, r: &ExploreResolutionConfig) -> StateUpdate {
+pub(crate) fn explore_dialog(rc: &RenderContext, r: &ExploreResolutionConfig) -> RenderResult {
     if ok_button(
         rc,
         OkTooltip::Valid("Accept current tile rotation".to_string()),
@@ -326,8 +318,8 @@ pub fn explore_dialog(rc: &RenderContext, r: &ExploreResolutionConfig) -> StateU
     ) {
         let mut new = r.clone();
         new.rotation = (r.rotation + 3).rem(6);
-        return StateUpdate::OpenDialog(ActiveDialog::ExploreResolution(new));
+        return StateUpdate::open_dialog(ActiveDialog::ExploreResolution(new));
     }
 
-    StateUpdate::None
+    NO_UPDATE
 }
