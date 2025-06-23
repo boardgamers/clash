@@ -10,12 +10,11 @@ use crate::resource_pile::ResourcePile;
 use std::collections::HashSet;
 
 pub(crate) fn seafaring() -> AdvanceGroupInfo {
-    advance_group_builder(AdvanceGroup::Seafaring, "Seafaring", vec![
-        fishing(),
-        navigation(),
-        war_ships(),
-        cartography(),
-    ])
+    advance_group_builder(
+        AdvanceGroup::Seafaring,
+        "Seafaring",
+        vec![fishing(), navigation(), war_ships(), cartography()],
+    )
 }
 
 fn fishing() -> AdvanceBuilder {
@@ -69,7 +68,7 @@ fn cartography() -> AdvanceBuilder {
                 // ship construction (or no ship at all)
                 return;
             }
-            
+
             // info is the action that we last used this ability for
             let key = game.actions_left.to_string();
             if p.get(game)

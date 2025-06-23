@@ -7,9 +7,6 @@
   "players": [
     {
       "id": 0,
-      "destroyed_structures": {
-        "cities": 6
-      },
       "resources": {
         "food": 2,
         "wood": 7,
@@ -39,6 +36,9 @@
           "position": "C2"
         }
       ],
+      "destroyed_structures": {
+        "cities": 6
+      },
       "units": [
         {
           "position": "C2",
@@ -113,10 +113,10 @@
       "cities": [
         {
           "city_pieces": {
+            "fortress": 1,
             "wonders": [
               "GreatWall"
-            ],
-            "fortress": 1
+            ]
           },
           "mood_state": "Angry",
           "activations": 2,

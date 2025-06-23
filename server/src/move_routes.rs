@@ -112,9 +112,13 @@ fn reachable_with_roads(
             .flat_map(|middle| next_road_step(player, game, middle, stack_size))
             .unique()
             .filter_map(|destination| {
-                road_route(player, start, destination, roman_roads, vec![
-                    EventOrigin::Advance(Advance::Roads),
-                ])
+                road_route(
+                    player,
+                    start,
+                    destination,
+                    roman_roads,
+                    vec![EventOrigin::Advance(Advance::Roads)],
+                )
             })
             .collect();
 
@@ -164,9 +168,13 @@ fn roman_roads_routes(
             if len > ROMAN_ROADS_LENGTH {
                 return None;
             }
-            road_route(player, start, dst, false, vec![
-                EventOrigin::SpecialAdvance(SpecialAdvance::RomanRoads),
-            ])
+            road_route(
+                player,
+                start,
+                dst,
+                false,
+                vec![EventOrigin::SpecialAdvance(SpecialAdvance::RomanRoads)],
+            )
         })
         .collect()
 }
@@ -239,7 +247,12 @@ fn reachable_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<M
     if let Some(ship) = ship {
         let start = ship.neighbors().into_iter().find(|n| {
             // otherwise we might have the ship position as only neighbor
-            map.is_outside(*n) && n.neighbors().iter().filter(|nn| map.is_inside(**nn)).count() > 1 
+            map.is_outside(*n)
+                && n.neighbors()
+                    .iter()
+                    .filter(|nn| map.is_inside(**nn))
+                    .count()
+                    > 1
         });
         if let Some(start) = start {
             let mut perimeter = vec![ship];
@@ -254,9 +267,12 @@ fn reachable_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<M
                 .into_iter()
                 .flatten()
                 .map(|destination| {
-                    MoveRoute::new(destination, player, ResourcePile::empty(), vec![
-                        EventOrigin::Advance(Advance::Navigation),
-                    ])
+                    MoveRoute::new(
+                        destination,
+                        player,
+                        ResourcePile::empty(),
+                        vec![EventOrigin::Advance(Advance::Navigation)],
+                    )
                 })
                 .collect();
         }

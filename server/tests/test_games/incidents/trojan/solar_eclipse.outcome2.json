@@ -361,23 +361,23 @@
                       }
                     },
                     {
-                      "player": 1,
-                      "Structure": {
-                        "structure": "CityCenter",
-                        "balance": "Loss",
-                        "position": "C1"
-                      },
-                      "origin": {
-                        "Ability": "Combat"
-                      }
-                    },
-                    {
                       "player": 0,
                       "Resources": {
                         "resources": {
                           "gold": 1
                         },
                         "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Loss",
+                        "position": "C1"
                       },
                       "origin": {
                         "Ability": "Combat"
@@ -452,8 +452,8 @@
       "Player2: Tactical Retreat: Player2 withdraws to B1",
       "Player1: Solar Eclipse: Gain 1 victory point for the Solar Eclipse",
       "Attacker wins",
-      "Player2: Combat: Lose city C1, Lose Temple at C1",
-      "Player1: Combat: Gain 1 gold, Gain city C1, Gain Temple at C1"
+      "Player1: Combat: Gain 1 gold, Gain city C1, Gain Temple at C1",
+      "Player2: Combat: Lose city C1, Lose Temple at C1"
     ]
   ],
   "undo_limit": 3,

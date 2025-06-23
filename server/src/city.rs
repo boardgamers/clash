@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use std::ops::{Add, Sub};
 
+use crate::city_pieces::lose_building;
 use crate::content::custom_actions::CustomActionType::ForcedLabor;
 use crate::content::persistent_events::PersistentEventType;
 use crate::events::{EventOrigin, EventPlayer};
@@ -21,7 +22,6 @@ use crate::{
 use MoodState::*;
 use itertools::Itertools;
 use num::Zero;
-use crate::city_pieces::lose_building;
 
 pub struct City {
     pub pieces: CityPieces,
@@ -368,11 +368,12 @@ pub(crate) fn lose_city(game: &mut Game, player: &EventPlayer, position: Positio
     city
 }
 
-pub(crate) fn raze_city(game: &mut Game, player: &EventPlayer, city: City) {
-    for b in &city.pieces.buildings(None) {
-        lose_building(game, player, *b, city.position);
+pub(crate) fn raze_city(game: &mut Game, player: &EventPlayer, position: Position) {
+    for b in &player.get(game).get_city(position).pieces.buildings(None) {
+        lose_building(game, player, *b, position);
     }
-    for wonder in &city.pieces.wonders {
-        destroy_wonder(game, player, *wonder, city.position);
+    for wonder in &player.get(game).get_city(position).pieces.wonders.clone() {
+        destroy_wonder(game, player, *wonder, position);
     }
+    lose_city(game, player, position);
 }
