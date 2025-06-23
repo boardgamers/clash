@@ -208,7 +208,7 @@ fn get_card_object(
 
 pub(crate) fn wonder_description(rc: &RenderContext, w: &WonderInfo) -> Vec<String> {
     let mut description = vec![];
-    break_text(w.description.as_str(), &mut description);
+    break_text(&mut description, w.description.as_str());
     description.push(format!("Cost: {}", w.cost));
     description.push(format!(
         "Required advance: {}",
@@ -245,7 +245,7 @@ fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
     if !cost.is_free() {
         description.push(format!("Cost: {cost}"));
     }
-    break_text(a.civil_card.description.as_str(), &mut description);
+    break_text(&mut description, a.civil_card.description.as_str());
     if let Some(t) = &a.tactics_card {
         description.extend(vec![
             format!("Tactics: {}", t.name),
@@ -265,7 +265,7 @@ fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
                 Some(l) => format!("{l}"),
             }),
         ]);
-        break_text(t.description.as_str(), &mut description);
+        break_text(&mut description, t.description.as_str());
     }
     HandCardObject::new(
         HandCard::ActionCard(id),
@@ -285,7 +285,7 @@ fn objective_card_object(
     let mut description = vec![];
     for o in &card.objectives {
         description.push(format!("Objective: {}", o.name));
-        break_text(o.description.as_str(), &mut description);
+        break_text(&mut description, o.description.as_str());
     }
 
     let name = selection

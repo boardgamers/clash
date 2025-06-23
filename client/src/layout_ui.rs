@@ -135,7 +135,7 @@ pub(crate) fn draw_scaled_icon(
         vec![]
     } else {
         let mut parts: Vec<String> = vec![];
-        break_text(tooltip, &mut parts);
+        break_text(&mut parts, tooltip);
         parts
     };
 

@@ -15,7 +15,7 @@ use crate::map_ui::{move_units_buttons, show_map_action_buttons};
 use crate::recruit_unit_ui::RecruitAmount;
 use crate::render_context::RenderContext;
 use crate::select_ui::HighlightType;
-use crate::tooltip::{add_tooltip_description, show_tooltip_for_circle};
+use crate::tooltip::show_tooltip_for_circle;
 use itertools::Itertools;
 use macroquad::math::f32;
 use macroquad::prelude::*;
@@ -32,6 +32,7 @@ use server::resource::ResourceType;
 use server::structure::Structure;
 use server::unit::{UnitType, Units};
 use std::ops::Add;
+use crate::log_ui::break_text;
 
 pub(crate) struct IconAction<'a> {
     pub texture: &'a Texture2D,
@@ -393,7 +394,7 @@ pub(crate) fn add_building_description(rc: &RenderContext, parts: &mut Vec<Strin
         parts.push(format!("Base cost: {BUILDING_COST}"));
         parts.push(format!("Current cost: {pile}"));
     }
-    add_tooltip_description(parts, b.description());
+    break_text(parts, b.description());
 }
 
 #[allow(clippy::result_large_err)]

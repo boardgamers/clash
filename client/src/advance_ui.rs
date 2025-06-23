@@ -3,7 +3,6 @@ use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::layout_ui::{button_pressed, top_centered_text};
 use crate::payment_ui::{Payment, payment_dialog};
 use crate::render_context::RenderContext;
-use crate::tooltip::add_tooltip_description;
 use crate::unit_ui::add_unit_description;
 use itertools::Itertools;
 use macroquad::color::Color;
@@ -16,6 +15,7 @@ use server::player::{CostTrigger, Player};
 use server::playing_actions::PlayingAction;
 use server::unit::UnitType;
 use std::ops::Rem;
+use crate::log_ui::break_text;
 
 const COLUMNS: usize = 6;
 
@@ -139,7 +139,7 @@ fn border_color(a: &AdvanceInfo) -> Color {
 fn description(rc: &RenderContext, a: &AdvanceInfo) -> Vec<String> {
     let mut parts: Vec<String> = vec![];
     parts.push(a.name.clone());
-    add_tooltip_description(&mut parts, &a.description);
+    break_text(&mut parts, &a.description);
     parts.push(format!(
         "Cost: {}",
         rc.shown_player
@@ -181,7 +181,7 @@ fn description(rc: &RenderContext, a: &AdvanceInfo) -> Vec<String> {
     if let Some(a) = find_special_advance(a.advance, rc.game, rc.shown_player.index) {
         let s = a.info(rc.game);
         parts.push(format!("Special advance: {}", s.name));
-        add_tooltip_description(&mut parts, &s.description);
+        break_text(&mut parts, &s.description);
     }
 
     parts

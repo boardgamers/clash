@@ -10,12 +10,13 @@ use crate::select_ui::HighlightType;
 
 use crate::layout_ui::{draw_scaled_icon_with_tooltip, is_in_circle};
 use crate::render_context::RenderContext;
-use crate::tooltip::{add_tooltip_description, show_tooltip_for_circle};
+use crate::tooltip::show_tooltip_for_circle;
 use itertools::Itertools;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::movement::{MoveDestination, MovementRestriction};
 use server::player::Player;
 use server::wonder::Wonder;
+use crate::log_ui::break_text;
 
 pub(crate) struct UnitPlace {
     pub center: Vec2,
@@ -328,11 +329,11 @@ pub(crate) fn unit_selection_clicked(unit_id: u32, units: &mut Vec<u32>) {
 
 pub(crate) fn add_unit_description(rc: &RenderContext, parts: &mut Vec<String>, u: UnitType) {
     parts.push(format!("Cost: {}", u.cost()));
-    add_tooltip_description(parts, &u.description());
+    break_text(parts, &u.description());
     if let UnitType::Leader(l) = u {
         for a in &rc.game.cache.get_leader(&l).abilities {
             parts.push(format!("Leader ability: {}", a.name));
-            add_tooltip_description(parts, &a.description);
+            break_text(parts, &a.description);
         }
     }
 }
