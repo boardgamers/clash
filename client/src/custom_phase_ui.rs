@@ -34,7 +34,7 @@ pub fn custom_phase_payment_dialog(
         payments.len() == 1 && payments[0].optional,
         |p| StateUpdate::response(EventResponse::Payment(p.clone())),
     );
-    if matches!(update, Err(StateUpdate::Cancel)) {
+    if  matches!(&update, Err(u) if matches!(**u, StateUpdate::Cancel)) {
         return StateUpdate::response(EventResponse::Payment(vec![ResourcePile::empty()]));
     }
     update

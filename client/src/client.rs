@@ -17,10 +17,7 @@ use crate::event_ui::{custom_phase_event_origin, event_help};
 use crate::happiness_ui::{increase_happiness_click, increase_happiness_menu};
 use crate::hex_ui::pixel_to_coordinate;
 use crate::info_ui::{InfoDialog, show_info_dialog};
-use crate::layout_ui::{
-    ICON_SIZE, bottom_center_anchor, bottom_centered_text_with_offset,
-    draw_scaled_icon_with_tooltip, icon_pos, top_right_texture,
-};
+use crate::layout_ui::{ICON_SIZE, bottom_center_anchor, bottom_centered_text_with_offset, draw_scaled_icon_with_tooltip, icon_pos, top_right_texture, is_mouse_pressed};
 use crate::log_ui::{LogDialog, show_log};
 use crate::map_ui::{draw_map, explore_dialog, show_tile_menu};
 use crate::player_ui::{player_select, show_global_controls, show_top_center, show_top_left};
@@ -150,7 +147,7 @@ pub fn render_and_update(
     }
 
     match render_with_mutable_state(game, state, features) {
-        Err(u) => state.update(game, u),
+        Err(u) => state.update(game, *u),
         Ok(()) => GameSyncRequest::None,
     }
 }
@@ -229,16 +226,15 @@ fn dialog_chooser(rc: &RenderContext, c: &DialogChooser) -> RenderResult {
     NO_UPDATE
 }
 
-pub fn try_click(rc: &RenderContext) -> RenderResult {
-    let game = rc.game;
-    let mouse_pos = rc.mouse_pos();
-    let pos = Position::from_coordinate(pixel_to_coordinate(mouse_pos));
-
-    if !game.map.tiles.contains_key(&pos) {
+pub(crate) fn try_click(rc: &RenderContext) -> RenderResult {
+    if !is_mouse_pressed(rc) {
         return NO_UPDATE;
     }
 
-    if !is_mouse_button_pressed(MouseButton::Left) {
+    let mouse_pos = rc.mouse_pos();
+    let pos = Position::from_coordinate(pixel_to_coordinate(mouse_pos));
+
+    if !rc.game.map.tiles.contains_key(&pos) {
         return NO_UPDATE;
     }
 

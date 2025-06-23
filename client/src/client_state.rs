@@ -245,13 +245,13 @@ pub enum StateUpdate {
     ToggleAiPlay,
 }
 
-pub type RenderResult = Result<(), StateUpdate>;
+pub type RenderResult = Result<(), Box<StateUpdate>>;
 
 pub const NO_UPDATE: RenderResult = Ok(());
 
 impl StateUpdate {
     pub fn of(update: StateUpdate) -> RenderResult {
-        Err(update)
+        Err(Box::new(update))
     }
 
     pub fn open_dialog(dialog: ActiveDialog) -> RenderResult {

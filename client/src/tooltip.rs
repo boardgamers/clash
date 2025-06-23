@@ -20,10 +20,12 @@ pub fn update(state: &mut State) {
 }
 
 fn is_rect_tooltip_active(rc: &RenderContext, rect: Rect) -> bool {
-    rc.state
-        .mouse_positions
-        .iter()
-        .all(|mp| rect.contains(rc.screen_to_world(mp.position)))
+    rc.stage.is_tooltip()
+        && rc
+            .state
+            .mouse_positions
+            .iter()
+            .all(|mp| rect.contains(rc.screen_to_world(mp.position)))
 }
 
 pub fn show_tooltip_for_rect(

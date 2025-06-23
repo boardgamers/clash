@@ -2,7 +2,7 @@ use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::{BaseOrCustomDialog, OkTooltip, cancel_button, ok_button};
 use crate::event_ui::event_help;
 use crate::hex_ui;
-use crate::layout_ui::{draw_scaled_icon, is_in_circle, left_mouse_button_pressed};
+use crate::layout_ui::{draw_scaled_icon, is_in_circle, mouse_pressed_position};
 use crate::render_context::RenderContext;
 use crate::resource_ui::{new_resource_map, resource_name, show_resource_pile};
 use itertools::Itertools;
@@ -172,7 +172,7 @@ pub fn draw_resource_collect_tile(rc: &RenderContext, pos: Position) -> RenderRe
         let pile_collect = tile_collects.iter().find(|r| &r.pile == pile);
         let color = if pile_collect.is_some() { BLACK } else { WHITE };
         draw_circle(center.x, center.y, radius, color);
-        if let Some(p) = left_mouse_button_pressed(rc) {
+        if let Some(p) = mouse_pressed_position(rc) {
             if is_in_circle(p, center, radius) {
                 return click_collect_option(rc, collect, pos, pile);
             }

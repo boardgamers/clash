@@ -135,16 +135,10 @@ pub fn draw_scaled_icon_with_tooltip(
     origin: Vec2,
     size: f32,
 ) -> bool {
-    draw_texture_ex(
-        texture,
-        origin.x,
-        origin.y,
-        WHITE,
-        DrawTextureParams {
-            dest_size: Some(vec2(size, size)),
-            ..Default::default()
-        },
-    );
+    draw_texture_ex(texture, origin.x, origin.y, WHITE, DrawTextureParams {
+        dest_size: Some(vec2(size, size)),
+        ..Default::default()
+    });
 
     button_pressed(Rect::new(origin.x, origin.y, size, size), rc, tooltip, 50.)
 }
@@ -159,12 +153,7 @@ pub fn button_pressed(
     if !tooltip.is_empty() {
         show_tooltip_for_rect(rc, tooltip, rect, right_offset);
     }
-    left_mouse_button_pressed(rc).is_some_and(|p| rect.contains(p))
-}
-
-#[must_use]
-pub fn left_mouse_button_pressed_in_rect(rect: Rect, rc: &RenderContext) -> bool {
-    left_mouse_button_pressed(rc).is_some_and(|p| rect.contains(p))
+    mouse_pressed_position(rc).is_some_and(|p| rect.contains(p))
 }
 
 #[must_use]
@@ -174,10 +163,10 @@ pub fn is_in_circle(mouse_pos: Vec2, center: Vec2, radius: f32) -> bool {
 }
 
 #[must_use]
-pub fn left_mouse_button_pressed(rc: &RenderContext) -> Option<Vec2> {
-    if is_mouse_button_pressed(MouseButton::Left) {
-        Some(rc.screen_to_world(mouse_position().into()))
-    } else {
-        None
-    }
+pub fn mouse_pressed_position(rc: &RenderContext) -> Option<Vec2> {
+    is_mouse_pressed(rc).then_some(rc.screen_to_world(mouse_position().into()))
+}
+
+pub(crate) fn is_mouse_pressed(rc: &RenderContext) -> bool {
+    rc.stage.is_tooltip() && is_mouse_button_pressed(MouseButton::Left)
 }

@@ -8,7 +8,7 @@ use crate::happiness_ui::{
     open_increase_happiness_dialog,
 };
 use crate::hex_ui;
-use crate::layout_ui::{draw_scaled_icon, draw_scaled_icon_with_tooltip, is_in_circle};
+use crate::layout_ui::{draw_scaled_icon, draw_scaled_icon_with_tooltip, is_in_circle, is_mouse_pressed};
 use crate::map_ui::{move_units_buttons, show_map_action_buttons};
 use crate::recruit_unit_ui::RecruitAmount;
 use crate::render_context::RenderContext;
@@ -274,7 +274,7 @@ fn draw_selected_state(
     }
 
     if info.status != SelectedStructureStatus::Invalid
-        && is_mouse_button_pressed(MouseButton::Left)
+        && is_mouse_pressed(rc)
         && is_in_circle(rc.mouse_pos(), center, size)
     {
         StateUpdate::open_dialog(ActiveDialog::StructuresRequest(
@@ -401,7 +401,7 @@ fn draw_wonders(
     c: Vec2,
     owner: usize,
     highlighted: &[SelectedStructureInfo],
-) -> Result<usize, StateUpdate> {
+) -> Result<usize, Box<StateUpdate>> {
     let mut i = 0;
     for w in &city.pieces.wonders {
         let p = hex_ui::rotate_around(c, 20.0, 90 * i);
