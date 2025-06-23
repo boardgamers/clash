@@ -1,5 +1,5 @@
 use crate::action_buttons::base_or_custom_action;
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::BaseOrCustomDialog;
 use crate::payment_ui::{Payment, payment_dialog};
 use crate::render_context::RenderContext;
@@ -15,7 +15,7 @@ use server::player::CostTrigger;
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct IncreaseHappinessConfig {
     pub steps: Vec<(Position, u8)>,
     pub payment: Payment<String>,
@@ -77,12 +77,9 @@ pub fn increase_happiness_click(
     h: &IncreaseHappinessConfig,
 ) -> RenderResult {
     if let Some(city) = rc.shown_player.try_get_city(pos) {
-        add_increase_happiness(rc, city, h.clone()).map_or(
-            NO_UPDATE,
-            |increase_happiness| {
-                StateUpdate::OpenDialog(ActiveDialog::IncreaseHappiness(increase_happiness))
-            },
-        )
+        add_increase_happiness(rc, city, h.clone()).map_or(NO_UPDATE, |increase_happiness| {
+            StateUpdate::open_dialog(ActiveDialog::IncreaseHappiness(increase_happiness))
+        })
     } else {
         NO_UPDATE
     }

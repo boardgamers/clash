@@ -1,16 +1,16 @@
-use crate::client_state::{PendingUpdate, StateUpdate};
+use crate::client_state::{NO_UPDATE, PendingUpdate, RenderResult, StateUpdate};
 use crate::layout_ui::{bottom_centered_text_with_offset, bottom_right_texture, icon_pos};
 use crate::render_context::RenderContext;
 use macroquad::math::{Vec2, vec2};
 use server::playing_actions::PlayingActionType;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum OkTooltip {
     Valid(String),
     Invalid(String),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BaseOrCustomDialog {
     pub title: String,
     pub action_type: PlayingActionType,
@@ -30,10 +30,10 @@ pub fn show_pending_update(update: &PendingUpdate, rc: &RenderContext) -> Render
     bottom_centered_text_with_offset(rc, t, vec2(0., 30.), &[]);
 
     if ok_button(rc, OkTooltip::Valid("OK".to_string())) {
-        return StateUpdate::ResolvePendingUpdate(true);
+        return StateUpdate::resolve_pending_update(true);
     }
     if cancel_button(rc) {
-        return StateUpdate::ResolvePendingUpdate(false);
+        return StateUpdate::resolve_pending_update(false);
     }
     NO_UPDATE
 }

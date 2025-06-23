@@ -30,7 +30,7 @@ use server::movement::{CurrentMove, MoveDestination};
 use server::playing_actions::PlayingActionType;
 use server::position::Position;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum ActiveDialog {
     None,
     Log(LogDialog),
@@ -215,14 +215,14 @@ impl ActiveDialog {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PendingUpdate {
     pub action: Action,
     pub warning: Vec<String>,
     pub info: Vec<String>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DialogChooser {
     pub title: String,
     pub options: Vec<(Option<EventOrigin>, ActiveDialog)>,
@@ -253,17 +253,29 @@ impl StateUpdate {
     pub fn of(update: StateUpdate) -> RenderResult {
         Err(update)
     }
-    
+
     pub fn open_dialog(dialog: ActiveDialog) -> RenderResult {
         Self::of(StateUpdate::OpenDialog(dialog))
     }
-    
+
     pub fn close_dialog() -> RenderResult {
         Self::of(StateUpdate::CloseDialog)
     }
 
     pub fn execute(action: Action) -> RenderResult {
         Self::of(StateUpdate::Execute(action))
+    }
+
+    pub fn cancel() -> RenderResult {
+        Self::of(StateUpdate::Cancel)
+    }
+
+    pub fn set_focused_tile(pos: Position) -> RenderResult {
+        Self::of(StateUpdate::SetFocusedTile(pos))
+    }
+
+    pub fn resolve_pending_update(confirm: bool) -> RenderResult {
+        Self::of(StateUpdate::ResolvePendingUpdate(confirm))
     }
 
     pub fn execute_with_warning(action: Action, warning: Vec<String>) -> RenderResult {
@@ -310,16 +322,16 @@ impl StateUpdate {
         title: &str,
         options: Vec<(Option<EventOrigin>, ActiveDialog)>,
     ) -> RenderResult {
-        Self::of(match options.len() {
+        match options.len() {
             0 => {
                 panic!("no dialog options provided");
             }
-            1 => StateUpdate::OpenDialog(options[0].1.clone()),
-            _ => StateUpdate::OpenDialog(ActiveDialog::DialogChooser(Box::new(DialogChooser {
+            1 => StateUpdate::open_dialog(options[0].1.clone()),
+            _ => StateUpdate::open_dialog(ActiveDialog::DialogChooser(Box::new(DialogChooser {
                 title: title.to_string(),
                 options,
             }))),
-        }                                                            )
+        }
     }
 
     pub fn response(action: EventResponse) -> RenderResult {
@@ -332,20 +344,13 @@ impl StateUpdate {
         intent: MoveIntent,
     ) -> RenderResult {
         let game = rc.game;
-        StateUpdate::OpenDialog(ActiveDialog::MoveUnits(MoveSelection::new(
+        StateUpdate::open_dialog(ActiveDialog::MoveUnits(MoveSelection::new(
             game.active_player(),
             pos,
             game,
             intent,
             &CurrentMove::None,
         )))
-    }
-
-    pub fn or(self, other: impl FnOnce() -> RenderResult) -> RenderResult {
-        match self {
-            NO_UPDATE => other(),
-            _ => self,
-        }
     }
 }
 
@@ -429,7 +434,6 @@ impl State {
 
     pub fn update(&mut self, game: &Game, update: StateUpdate) -> GameSyncRequest {
         match update {
-            NO_UPDATE => GameSyncRequest::None,
             StateUpdate::Execute(a) => GameSyncRequest::ExecuteAction(a),
             StateUpdate::ExecuteWithWarning(update) => {
                 self.pending_update = Some(update);
@@ -599,11 +603,16 @@ impl State {
     }
 
     pub fn draw_text_with_color(&self, text: &str, x: f32, y: f32, color: Color) {
-        draw_text_ex(text, x, y, TextParams {
-            font: Some(&self.assets.font),
-            font_size: FONT_SIZE,
-            color,
-            ..Default::default()
-        });
+        draw_text_ex(
+            text,
+            x,
+            y,
+            TextParams {
+                font: Some(&self.assets.font),
+                font_size: FONT_SIZE,
+                color,
+                ..Default::default()
+            },
+        );
     }
 }

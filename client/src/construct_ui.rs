@@ -1,4 +1,4 @@
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, RenderResult, StateUpdate};
 use crate::payment_ui::{Payment, payment_dialog};
 use crate::recruit_unit_ui::RecruitSelection;
 use crate::render_context::RenderContext;
@@ -43,13 +43,13 @@ pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> 
     )
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum ConstructionProject {
     Building(Building, Option<Position>),
     Units(RecruitSelection),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ConstructionPayment {
     pub player_index: usize,
     pub city_position: Position,

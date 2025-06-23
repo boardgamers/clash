@@ -1,4 +1,4 @@
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::layout_ui::button_pressed;
 use crate::render_context::RenderContext;
 use crate::tooltip::add_tooltip_description;
@@ -8,7 +8,7 @@ use server::civilization::Civilization;
 use server::content::civilizations;
 use std::ops::Mul;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct InfoDialog {
     pub select: InfoSelect,
 }
@@ -25,7 +25,7 @@ impl InfoDialog {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum InfoSelect {
     Civilization(String),
     // Incident(String),
@@ -49,7 +49,7 @@ pub fn show_info_dialog(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
                 .enumerate()
             {
                 if draw_button(rc, &c.name, vec2(i as f32, 1.), &[]) {
-                    return StateUpdate::OpenDialog(ActiveDialog::Info(InfoDialog::new(
+                    return StateUpdate::open_dialog(ActiveDialog::Info(InfoDialog::new(
                         InfoSelect::Civilization(c.name.clone()),
                     )));
                 }

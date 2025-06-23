@@ -1,4 +1,4 @@
-use crate::client_state::{CameraMode, MousePosition, State, StateUpdate};
+use crate::client_state::{CameraMode, MousePosition, NO_UPDATE, State};
 use crate::log_ui::break_text;
 use crate::render_context::RenderContext;
 use macroquad::color::{Color, GRAY};

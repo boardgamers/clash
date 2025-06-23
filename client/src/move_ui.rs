@@ -1,4 +1,4 @@
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::cancel_button_with_tooltip;
 use crate::payment_ui::{Payment, payment_dialog};
 use crate::render_context::RenderContext;
@@ -24,7 +24,7 @@ pub enum MoveIntent {
     Disembark,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct MovePayment {
     pub action: MovementAction,
     pub payment: Payment<String>,
@@ -56,7 +56,12 @@ impl MoveIntent {
     }
 }
 
-pub fn click(rc: &RenderContext, pos: Position, s: &MoveSelection, mouse_pos: Vec2) -> RenderResult {
+pub fn click(
+    rc: &RenderContext,
+    pos: Position,
+    s: &MoveSelection,
+    mouse_pos: Vec2,
+) -> RenderResult {
     let game = rc.game;
     let p = game.player(s.player_index);
     let carrier = click_unit(rc, pos, mouse_pos, p, false);
@@ -82,7 +87,7 @@ pub fn click(rc: &RenderContext, pos: Position, s: &MoveSelection, mouse_pos: Ve
             ));
 
             if !cost.is_free() {
-                return StateUpdate::OpenDialog(ActiveDialog::MovePayment(MovePayment {
+                return StateUpdate::open_dialog(ActiveDialog::MovePayment(MovePayment {
                     action,
                     payment: rc.new_payment(&cost, "Move units".to_string(), "Move units", true),
                 }));
@@ -140,7 +145,7 @@ fn unit_selection_changed(pos: Position, game: &Game, mut new: MoveSelection) ->
     } else {
         new.destinations = possible_move_destinations(game, new.player_index, &new.units, pos);
     }
-    StateUpdate::OpenDialog(ActiveDialog::MoveUnits(new))
+    StateUpdate::open_dialog(ActiveDialog::MoveUnits(new))
 }
 
 pub fn movable_units(
@@ -229,7 +234,7 @@ pub(crate) fn move_units_dialog(rc: &RenderContext) -> RenderResult {
     if matches!(rc.game.state, GameState::Playing)
         && cancel_button_with_tooltip(rc, "Back to playing actions")
     {
-        return StateUpdate::CloseDialog;
+        return StateUpdate::close_dialog();
     }
     NO_UPDATE
 }

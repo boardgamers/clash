@@ -1,4 +1,4 @@
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::OkTooltip;
 use crate::event_ui::event_help;
 use crate::layout_ui::{
@@ -165,7 +165,7 @@ pub fn multi_payment_dialog<T: Clone>(
             offset + vec2(0., -30.),
             &[],
         );
-        let result = select_ui::count_dialog(
+        select_ui::count_dialog(
             rc,
             payment,
             |p| p.current.clone(),
@@ -202,21 +202,17 @@ pub fn multi_payment_dialog<T: Clone>(
             },
             offset,
             may_cancel,
-        );
+        )?;
 
         if let Some(p) = added {
-            return StateUpdate::OpenDialog(to_dialog(replace_updated_payment(&p, payments)));
+            return StateUpdate::open_dialog(to_dialog(replace_updated_payment(&p, payments)));
         }
         if let Some(p) = removed {
-            return StateUpdate::OpenDialog(to_dialog(replace_updated_payment(&p, payments)));
+            return StateUpdate::open_dialog(to_dialog(replace_updated_payment(&p, payments)));
         }
 
         if exec {
             return execute_action(payments.iter().map(Payment::to_resource_pile).collect());
-        }
-
-        if !matches!(result, NO_UPDATE) {
-            return result;
         }
     }
     NO_UPDATE

@@ -1,7 +1,7 @@
 use crate::action_buttons::action_buttons;
 use crate::city_ui::city_labels;
 use crate::client::Features;
-use crate::client_state::{RenderResult, StateUpdate, NO_UPDATE};
+use crate::client_state::{NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::{OkTooltip, ok_button};
 use crate::layout_ui::{
     ICON_SIZE, bottom_center_texture, bottom_centered_text, bottom_right_texture, button_pressed,
@@ -74,7 +74,7 @@ pub fn player_select(rc: &RenderContext) -> RenderResult {
             pl.get_name()
         };
         if button_pressed(rect, rc, &[tooltip], 50.) && !shown {
-            return StateUpdate::SetShownPlayer(pl.index);
+            return StateUpdate::of(StateUpdate::SetShownPlayer(pl.index));
         }
 
         y += size;
@@ -329,10 +329,10 @@ pub fn show_global_controls(rc: &RenderContext, features: &Features) -> RenderRe
             }
         }
         if game.can_redo() && bottom_right_texture(rc, &assets.redo, icon_pos(-5, -1), "Redo") {
-            return StateUpdate::Execute(Action::Redo);
+            return StateUpdate::execute(Action::Redo);
         }
         if game.can_undo() && bottom_right_texture(rc, &assets.undo, icon_pos(-6, -1), "Undo") {
-            return StateUpdate::Execute(Action::Undo);
+            return StateUpdate::execute(Action::Undo);
         }
 
         if can_control {
@@ -342,10 +342,10 @@ pub fn show_global_controls(rc: &RenderContext, features: &Features) -> RenderRe
 
     if features.import_export {
         if bottom_right_texture(rc, &assets.export, icon_pos(-1, -3), "Export") {
-            return StateUpdate::Export;
+            return StateUpdate::of(StateUpdate::Export);
         }
         if bottom_right_texture(rc, &assets.import, icon_pos(-2, -3), "Import") {
-            return StateUpdate::Import;
+            return StateUpdate::of(StateUpdate::Import);
         }
     }
 
@@ -362,7 +362,7 @@ pub fn show_global_controls(rc: &RenderContext, features: &Features) -> RenderRe
             &assets.play
         };
         if bottom_right_texture(rc, texture, icon_pos(-3, -3), tooltip) {
-            return StateUpdate::ToggleAiPlay;
+            return StateUpdate::of(StateUpdate::ToggleAiPlay);
         }
     }
 

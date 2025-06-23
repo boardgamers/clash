@@ -1,5 +1,5 @@
 use crate::city_ui::{IconAction, IconActionVec};
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::BaseOrCustomDialog;
 use crate::event_ui::event_help;
 use crate::happiness_ui::open_increase_happiness_dialog;
@@ -51,7 +51,7 @@ pub fn action_buttons(rc: &RenderContext) -> RenderResult {
             &["Research advances".to_string()],
         )
     {
-        return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
+        return StateUpdate::open_dialog(ActiveDialog::AdvanceMenu);
     }
 
     let influence = available_influence_actions(game, rc.shown_player.index);
@@ -126,7 +126,7 @@ fn generic_custom_action(
     rc: &RenderContext,
     c: &CustomActionInfo,
     city: Option<&City>,
-) -> Option<StateUpdate> {
+) -> Option<RenderResult> {
     let custom_action_type = c.action;
 
     if let Some(city) = city {

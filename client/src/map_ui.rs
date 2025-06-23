@@ -1,5 +1,7 @@
 use crate::city_ui::{IconAction, IconActionVec, draw_city, show_city_menu};
-use crate::client_state::{ActiveDialog, MAX_OFFSET, MIN_OFFSET, State, StateUpdate, ZOOM};
+use crate::client_state::{
+    ActiveDialog, MAX_OFFSET, MIN_OFFSET, NO_UPDATE, RenderResult, State, StateUpdate, ZOOM,
+};
 use crate::dialog_ui::{OkTooltip, cancel_button_pos, ok_button};
 use crate::hex_ui::HexFeature;
 use crate::layout_ui::{
@@ -32,7 +34,7 @@ const fn color(r: u8, g: u8, b: u8, a: f32) -> Color {
     Color::new(r as f32 / 255., g as f32 / 255., b as f32 / 255., a)
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ExploreResolutionConfig {
     pub block: UnexploredBlock,
     pub rotation: Rotation,
@@ -93,9 +95,7 @@ pub fn draw_map(rc: &RenderContext) -> RenderResult {
     if !matches!(&state.active_dialog, ActiveDialog::CollectResources(_)) {
         for p in &game.players {
             for city in &p.cities {
-                if let Some(u) = draw_city(rc, city) {
-                    return u;
-                }
+                draw_city(rc, city)?;
             }
         }
         unit_ui::draw_units(rc, false);
@@ -323,7 +323,7 @@ pub fn explore_dialog(rc: &RenderContext, r: &ExploreResolutionConfig) -> Render
     ) {
         let mut new = r.clone();
         new.rotation = (r.rotation + 3).rem(6);
-        return StateUpdate::OpenDialog(ActiveDialog::ExploreResolution(new));
+        return StateUpdate::open_dialog(ActiveDialog::ExploreResolution(new));
     }
 
     NO_UPDATE

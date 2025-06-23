@@ -8,7 +8,9 @@ use server::position::Position;
 
 use crate::advance_ui::{pay_advance_dialog, show_paid_advance_menu};
 use crate::cards_ui::show_cards;
-use crate::client_state::{ActiveDialog, CameraMode, DialogChooser, RenderResult, State, StateUpdate,  NO_UPDATE};
+use crate::client_state::{
+    ActiveDialog, CameraMode, DialogChooser, NO_UPDATE, RenderResult, State, StateUpdate,
+};
 use crate::collect_ui::collect_dialog;
 use crate::construct_ui::pay_construction_dialog;
 use crate::event_ui::{custom_phase_event_origin, event_help};
@@ -39,9 +41,9 @@ fn render_with_mutable_state(game: &Game, state: &mut State, features: &Features
     }
 
     set_y_zoom(state);
-    let _ = render(&state.render_context(game, RenderStage::Map), features)
+    let () = render(&state.render_context(game, RenderStage::Map), features)
         .expect("all updates should be in Tooltip stage");
-    let _ = render(&state.render_context(game, RenderStage::UI), features)
+    let () = render(&state.render_context(game, RenderStage::UI), features)
         .expect("all updates should be in Tooltip stage");
     render(&state.render_context(game, RenderStage::Tooltip), features)
 }
@@ -78,15 +80,15 @@ fn render(rc: &RenderContext, features: &Features) -> RenderResult {
 
     if top_right_texture(rc, &rc.assets().log, icon_pos(-1, 0), "Show log") {
         if let ActiveDialog::Log(_) = state.active_dialog {
-            return StateUpdate::CloseDialog;
+            return StateUpdate::close_dialog();
         }
-        return StateUpdate::OpenDialog(ActiveDialog::Log(LogDialog::new()));
+        return StateUpdate::open_dialog(ActiveDialog::Log(LogDialog::new()));
     }
     if top_right_texture(rc, &rc.assets().advances, icon_pos(-2, 0), "Show advances") {
         if state.active_dialog.is_advance() {
-            return StateUpdate::CloseDialog;
+            return StateUpdate::close_dialog();
         }
-        return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
+        return StateUpdate::open_dialog(ActiveDialog::AdvanceMenu);
     }
     if top_right_texture(
         rc,
@@ -98,13 +100,13 @@ fn render(rc: &RenderContext, features: &Features) -> RenderResult {
             "Show permanent effects"
         },
     ) {
-        return StateUpdate::ToggleShowPermanentEffects;
+        return StateUpdate::of(StateUpdate::ToggleShowPermanentEffects);
     }
     if top_right_texture(rc, &rc.assets().info, icon_pos(-4, 0), "Show info") {
         if let ActiveDialog::Info(_) = state.active_dialog {
-            return StateUpdate::CloseDialog;
+            return StateUpdate::close_dialog();
         }
-        return StateUpdate::OpenDialog(ActiveDialog::Info(InfoDialog::default()));
+        return StateUpdate::open_dialog(ActiveDialog::Info(InfoDialog::default()));
     }
 
     let can_control = rc.can_control_shown_player();
@@ -149,7 +151,7 @@ pub fn render_and_update(
 
     match render_with_mutable_state(game, state, features) {
         Err(u) => state.update(game, u),
-        Ok(_) => GameSyncRequest::None,
+        Ok(()) => GameSyncRequest::None,
     }
 }
 
@@ -199,8 +201,12 @@ fn render_active_dialog(rc: &RenderContext) -> RenderResult {
 
 fn dialog_chooser(rc: &RenderContext, c: &DialogChooser) -> RenderResult {
     let h = -50.;
-    bottom_centered_text_with_offset(rc, &c.title, vec2(0., c.options.len() as f32 * h + 50.), &[
-    ]);
+    bottom_centered_text_with_offset(
+        rc,
+        &c.title,
+        vec2(0., c.options.len() as f32 * h + 50.),
+        &[],
+    );
 
     for (i, (origin, d)) in c.options.iter().enumerate() {
         let offset = vec2(0., i as f32 * h + 35.);
@@ -217,7 +223,7 @@ fn dialog_chooser(rc: &RenderContext, c: &DialogChooser) -> RenderResult {
             bottom_center_anchor(rc) + offset + vec2(100., -70.),
             ICON_SIZE,
         ) {
-            return StateUpdate::of(StateUpdate::OpenDialog(d.clone()));
+            return StateUpdate::open_dialog(d.clone());
         }
     }
     NO_UPDATE
@@ -237,9 +243,9 @@ pub fn try_click(rc: &RenderContext) -> RenderResult {
     }
 
     if rc.can_control_shown_player() {
-controlling_player_click(rc, mouse_pos, pos)?;
+        controlling_player_click(rc, mouse_pos, pos)?;
     }
-    StateUpdate::SetFocusedTile(pos)
+    StateUpdate::set_focused_tile(pos)
 }
 
 fn controlling_player_click(rc: &RenderContext, mouse_pos: Vec2, pos: Position) -> RenderResult {
@@ -247,18 +253,18 @@ fn controlling_player_click(rc: &RenderContext, mouse_pos: Vec2, pos: Position) 
         ActiveDialog::CollectResources(_) => NO_UPDATE,
         ActiveDialog::MoveUnits(s) => move_ui::click(rc, pos, s, mouse_pos),
         ActiveDialog::ReplaceUnits(s) => unit_selection_click(rc, pos, mouse_pos, s, |new| {
-            StateUpdate::OpenDialog(ActiveDialog::ReplaceUnits(new.clone()))
+            StateUpdate::open_dialog(ActiveDialog::ReplaceUnits(new.clone()))
         }),
         ActiveDialog::PositionRequest(r) => {
-            StateUpdate::OpenDialog(ActiveDialog::PositionRequest(r.clone().toggle(pos)))
+            StateUpdate::open_dialog(ActiveDialog::PositionRequest(r.clone().toggle(pos)))
         }
         ActiveDialog::UnitsRequest(s) => unit_selection_click(rc, pos, mouse_pos, s, |new| {
-            StateUpdate::OpenDialog(ActiveDialog::UnitsRequest(new.clone()))
+            StateUpdate::open_dialog(ActiveDialog::UnitsRequest(new.clone()))
         }),
         ActiveDialog::IncreaseHappiness(h) if h.city_restriction.is_none_or(|r| r == pos) => {
             increase_happiness_click(rc, pos, h)
         }
-        _ => StateUpdate::SetFocusedTile(pos),
+        _ => StateUpdate::set_focused_tile(pos),
     }
 }
 

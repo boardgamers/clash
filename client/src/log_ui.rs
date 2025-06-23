@@ -1,9 +1,9 @@
-use crate::client_state::StateUpdate;
+use crate::client_state::{NO_UPDATE, RenderResult};
 use crate::render_context::RenderContext;
 use macroquad::math::vec2;
 use server::game::Game;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct LogDialog {
     pub log_scroll: f32,
 }

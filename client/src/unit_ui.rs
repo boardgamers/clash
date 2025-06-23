@@ -5,7 +5,7 @@ use server::game::Game;
 use server::position::Position;
 use server::unit::{Unit, UnitType, carried_units};
 
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult};
 use crate::hex_ui;
 use crate::select_ui::HighlightType;
 

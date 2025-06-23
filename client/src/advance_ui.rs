@@ -1,5 +1,5 @@
 use crate::city_ui::add_building_description;
-use crate::client_state::{ActiveDialog, RenderResult, StateUpdate};
+use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::layout_ui::{button_pressed, top_centered_text};
 use crate::payment_ui::{Payment, payment_dialog};
 use crate::render_context::RenderContext;
@@ -56,7 +56,7 @@ pub fn show_paid_advance_menu(rc: &RenderContext) -> RenderResult {
                 AdvanceState::Unavailable
             }
         },
-        |a| StateUpdate::OpenDialog(ActiveDialog::AdvancePayment(new_advance_payment(rc, a))),
+        |a| StateUpdate::open_dialog(ActiveDialog::AdvancePayment(new_advance_payment(rc, a))),
     )
 }
 
@@ -208,7 +208,7 @@ fn description(rc: &RenderContext, a: &AdvanceInfo) -> Vec<String> {
 }
 
 pub fn pay_advance_dialog(ap: &Payment<Advance>, rc: &RenderContext) -> RenderResult {
-    show_paid_advance_menu(rc)?;  // select a different advance
+    show_paid_advance_menu(rc)?; // select a different advance
     payment_dialog(rc, ap, true, ActiveDialog::AdvancePayment, |payment| {
         StateUpdate::execute_with_warning(
             Action::Playing(PlayingAction::Advance(AdvanceAction::new(

@@ -1,4 +1,4 @@
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::{BaseOrCustomDialog, OkTooltip, cancel_button, ok_button};
 use crate::event_ui::event_help;
 use crate::hex_ui;
@@ -22,7 +22,7 @@ use server::position::Position;
 use server::resource::ResourceType;
 use server::resource_pile::ResourcePile;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CollectResources {
     player_index: usize,
     city_position: Position,
@@ -111,7 +111,7 @@ pub fn collect_dialog(rc: &RenderContext, collect: &CollectResources) -> RenderR
         );
     }
     if cancel_button(rc) {
-        return StateUpdate::Cancel;
+        return StateUpdate::cancel();
     }
     NO_UPDATE
 }
@@ -134,7 +134,7 @@ fn click_collect_option(
     let mut new = col.clone();
     new.info = i;
     new.collections = c;
-    StateUpdate::OpenDialog(ActiveDialog::CollectResources(new))
+    StateUpdate::open_dialog(ActiveDialog::CollectResources(new))
 }
 
 pub fn draw_resource_collect_tile(rc: &RenderContext, pos: Position) -> RenderResult {

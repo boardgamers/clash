@@ -1,5 +1,5 @@
 use crate::action_buttons::{base_or_custom_action, custom_action_buttons};
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::collect_ui::CollectResources;
 use crate::construct_ui::{ConstructionPayment, ConstructionProject};
 use crate::custom_phase_ui::{SelectedStructureInfo, SelectedStructureStatus};
@@ -162,7 +162,7 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
                 tooltip,
                 Box::new(move || {
                     can.clone().map_or(NO_UPDATE, |cost_info| {
-                        StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(
+                        StateUpdate::open_dialog(ActiveDialog::ConstructionPayment(
                             ConstructionPayment::new(
                                 rc,
                                 city,
@@ -258,7 +258,7 @@ fn draw_selected_state(
     center: Vec2,
     size: f32,
     info: &SelectedStructureInfo,
-) -> Option<StateUpdate> {
+) -> RenderResult {
     let ActiveDialog::StructuresRequest(d, r) = &rc.state.active_dialog else {
         panic!("Expected StructuresRequest");
     };
@@ -277,16 +277,16 @@ fn draw_selected_state(
         && is_mouse_button_pressed(MouseButton::Left)
         && is_in_circle(rc.mouse_pos(), center, size)
     {
-        Some(StateUpdate::OpenDialog(ActiveDialog::StructuresRequest(
+        StateUpdate::open_dialog(ActiveDialog::StructuresRequest(
             d.clone(),
             r.clone().toggle(info.clone()),
-        )))
+        ))
     } else {
-        None
+        NO_UPDATE
     }
 }
 
-pub fn draw_city(rc: &RenderContext, city: &City) -> Option<StateUpdate> {
+pub fn draw_city(rc: &RenderContext, city: &City) -> RenderResult {
     let c = hex_ui::center(city.position);
     let owner = city.player_index;
 
@@ -304,18 +304,12 @@ pub fn draw_city(rc: &RenderContext, city: &City) -> Option<StateUpdate> {
         .iter()
         .find(|s| s.position == city.position && matches!(s.structure, Structure::CityCenter))
     {
-        if let Some(u) = draw_selected_state(rc, c, 15., h) {
-            return Some(u);
-        }
+        draw_selected_state(rc, c, 15., h)?;
     } else {
         draw_mood_state(rc, city, c);
     }
 
-    let i = match draw_wonders(rc, city, c, owner, highlighted) {
-        Ok(value) => value,
-        Err(value) => return Some(value),
-    };
-
+    let i = draw_wonders(rc, city, c, owner, highlighted)?;
     draw_buildings(rc, city, c, highlighted, i)
 }
 
@@ -355,7 +349,7 @@ fn draw_buildings(
     center: Vec2,
     highlighted: &[SelectedStructureInfo],
     mut i: usize,
-) -> Option<StateUpdate> {
+) -> RenderResult {
     for player_index in 0..4 {
         for b in &city.pieces.buildings(Some(player_index)) {
             let p = building_position(city, center, i, *b);
@@ -376,14 +370,12 @@ fn draw_buildings(
                 s.position == city.position
                     && matches!(s.structure, Structure::Building(bb) if bb == *b)
             }) {
-                if let Some(u) = draw_selected_state(rc, p, BUILDING_SIZE, h) {
-                    return Some(u);
-                }
+                draw_selected_state(rc, p, BUILDING_SIZE, h)?;
             }
             i += 1;
         }
     }
-    None
+    NO_UPDATE
 }
 
 pub fn add_building_description(rc: &RenderContext, parts: &mut Vec<String>, b: Building) {
@@ -418,9 +410,7 @@ fn draw_wonders(
         if let Some(h) = highlighted.iter().find(|s| {
             s.position == city.position && matches!(&s.structure, Structure::Wonder(n) if n == w)
         }) {
-            if let Some(u) = draw_selected_state(rc, p, 18., h) {
-                return Err(u);
-            }
+            draw_selected_state(rc, p, 18., h)?;
         } else {
             draw_scaled_icon(
                 rc,

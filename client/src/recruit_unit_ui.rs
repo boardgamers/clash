@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use macroquad::prelude::*;
 
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::construct_ui::{ConstructionPayment, ConstructionProject};
 use crate::dialog_ui::{OkTooltip, cancel_button, ok_button};
 use crate::render_context::RenderContext;
@@ -17,14 +17,14 @@ use server::recruit::{recruit_cost, recruit_cost_without_replaced};
 use server::unit::UnitType::{Cavalry, Elephant, Infantry, Leader, Settler, Ship};
 use server::unit::{Unit, UnitType, Units, get_units_to_replace};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SelectableUnit {
     pub unit_type: UnitType,
     pub selectable: CountSelector,
     cost: Result<CostInfo, String>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RecruitAmount {
     player_index: usize,
     city_position: Position,
@@ -51,7 +51,7 @@ impl RecruitAmount {
             .map(|u| selectable_unit(city_position, &units, player, u, game))
             .collect();
 
-        StateUpdate::OpenDialog(ActiveDialog::RecruitUnitSelection(RecruitAmount {
+        StateUpdate::open_dialog(ActiveDialog::RecruitUnitSelection(RecruitAmount {
             player_index,
             city_position,
             units,
@@ -104,7 +104,7 @@ fn new_units(player: &Player) -> Vec<UnitType> {
         .collect()
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RecruitSelection {
     pub player: usize,
     pub amount: RecruitAmount,
@@ -203,7 +203,7 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> RenderResult {
             if sel.is_finished() {
                 open_dialog(rc, a.city_position, sel)
             } else {
-                StateUpdate::OpenDialog(ActiveDialog::ReplaceUnits(sel))
+                StateUpdate::open_dialog(ActiveDialog::ReplaceUnits(sel))
             }
         },
         |_s, _u| true,
@@ -233,7 +233,7 @@ fn open_dialog(rc: &RenderContext, city: Position, sel: RecruitSelection) -> Ren
         CostTrigger::WithModifiers,
     )
     .unwrap();
-    StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
+    StateUpdate::open_dialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
         rc,
         rc.game.city(p, city),
         &format!(
@@ -253,7 +253,7 @@ pub fn replace_dialog(rc: &RenderContext, sel: &RecruitSelection) -> RenderResul
     if ok_button(rc, sel.confirm(rc.game)) {
         open_dialog(rc, sel.amount.city_position, sel.clone())
     } else if cancel_button(rc) {
-        StateUpdate::Cancel
+        StateUpdate::cancel()
     } else {
         NO_UPDATE
     }

@@ -1,5 +1,5 @@
 use crate::assets::Assets;
-use crate::client_state::{CameraMode, State, StateUpdate};
+use crate::client_state::{CameraMode, RenderResult, State};
 use crate::payment_ui::Payment;
 use macroquad::camera::set_default_camera;
 use macroquad::color::{Color, PINK, YELLOW};

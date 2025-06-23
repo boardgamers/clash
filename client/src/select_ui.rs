@@ -1,4 +1,4 @@
-use crate::client_state::StateUpdate;
+use crate::client_state::{NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::{OkTooltip, cancel_button, ok_button};
 use crate::layout_ui::{ICON_SIZE, bottom_center_anchor, bottom_center_texture};
 use crate::render_context::RenderContext;
@@ -83,7 +83,7 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
         return execute_action();
     }
     if may_cancel && cancel_button(rc) {
-        return StateUpdate::Cancel;
+        return StateUpdate::cancel();
     }
 
     NO_UPDATE

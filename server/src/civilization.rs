@@ -11,7 +11,7 @@ pub struct Civilization {
 }
 
 impl Civilization {
-    #[must_use] 
+    #[must_use]
     pub fn new(
         name: &str,
         special_advances: Vec<SpecialAdvanceInfo>,
@@ -26,17 +26,17 @@ impl Civilization {
         }
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn is_barbarian(&self) -> bool {
         self.name == BARBARIANS
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn is_pirates(&self) -> bool {
         self.name == PIRATES
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn is_human(&self) -> bool {
         !self.is_barbarian() && !self.is_pirates()
     }

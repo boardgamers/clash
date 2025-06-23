@@ -1,4 +1,4 @@
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::custom_phase_ui;
 use crate::custom_phase_ui::MultiSelection;
 use crate::dialog_ui::ok_button;
@@ -80,12 +80,8 @@ pub(crate) fn show_cards(rc: &RenderContext) -> RenderResult {
         })
         .collect_vec();
 
-    if let Some(value) = draw_cards(rc, &cards, selection.as_ref(), size, -85.) {
-        return value;
-    }
-    if let Some(value) = draw_cards(rc, &swap_cards, selection.as_ref(), size, -310.) {
-        return value;
-    }
+    draw_cards(rc, &cards, selection.as_ref(), size, -85.)?;
+    draw_cards(rc, &swap_cards, selection.as_ref(), size, -310.)?;
     NO_UPDATE
 }
 
@@ -95,26 +91,24 @@ fn draw_cards(
     selection: Option<&SelectionInfo>,
     size: Vec2,
     x_offset: f32,
-) -> Option<StateUpdate> {
+) -> RenderResult {
     let screen = rc.state.screen_size;
     for pass in 0..2 {
         let mut y = (cards.len() as f32 * -size.y) / 2.;
         for card in cards {
-            if let Some(value) = draw_card(
+            draw_card(
                 rc,
                 size,
                 selection,
                 pass,
                 vec2(screen.x, screen.y / 2.0) + vec2(-size.x + x_offset, y),
                 card,
-            ) {
-                return Some(value);
-            }
+            )?;
 
             y += size.y;
         }
     }
-    None
+    NO_UPDATE
 }
 
 fn draw_card(
@@ -124,7 +118,7 @@ fn draw_card(
     pass: i32,
     pos: Vec2,
     card: &HandCard,
-) -> Option<StateUpdate> {
+) -> RenderResult {
     let c = get_card_object(rc, card, selection);
 
     if pass == 0 {
@@ -139,16 +133,16 @@ fn draw_card(
         // tooltip should be shown on top of everything
         if button_pressed(rect, rc, &c.description, 150.) {
             if let Some(s) = selection {
-                return Some(StateUpdate::OpenDialog(ActiveDialog::HandCardsRequest(
+                return StateUpdate::open_dialog(ActiveDialog::HandCardsRequest(
                     s.selection.clone().toggle(c.id),
-                )));
+                ));
             }
             if can_play_card(rc, card) {
-                return Some(play_card(rc, card));
+                return play_card(rc, card);
             }
         }
     }
-    None
+    NO_UPDATE
 }
 
 fn can_play_card(rc: &RenderContext, card: &HandCard) -> bool {

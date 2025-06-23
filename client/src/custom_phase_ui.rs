@@ -1,5 +1,5 @@
 use crate::advance_ui::{AdvanceState, show_advance_menu};
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::{BaseOrCustomDialog, OkTooltip, cancel_button_with_tooltip, ok_button};
 use crate::layout_ui::{bottom_center_anchor, bottom_centered_text, icon_pos};
 use crate::payment_ui::{Payment, multi_payment_dialog, payment_dialog};
@@ -32,12 +32,10 @@ pub fn custom_phase_payment_dialog(
         payments,
         |p| ActiveDialog::PaymentRequest(p.clone()),
         payments.len() == 1 && payments[0].optional,
-        |p| StateUpdate::Execute(Action::Response(EventResponse::Payment(p.clone()))),
+        |p| StateUpdate::response(EventResponse::Payment(p.clone())),
     );
-    if matches!(update, StateUpdate::Cancel) {
-        return StateUpdate::Execute(Action::Response(EventResponse::Payment(vec![
-            ResourcePile::empty(),
-        ])));
+    if matches!(update, Err(StateUpdate::Cancel)) {
+        return StateUpdate::response(EventResponse::Payment(vec![ResourcePile::empty()]));
     }
     update
 }
@@ -48,7 +46,7 @@ pub fn payment_reward_dialog(rc: &RenderContext, payment: &Payment<String>) -> R
         payment,
         false,
         |p| ActiveDialog::ResourceRewardRequest(p.clone()),
-        |p| StateUpdate::Execute(Action::Response(EventResponse::ResourceReward(p))),
+        |p| StateUpdate::response(EventResponse::ResourceReward(p)),
     )
 }
 
@@ -87,9 +85,7 @@ pub fn unit_request_dialog(rc: &RenderContext, r: &UnitTypeRequest) -> RenderRes
 
             if pass == 0 {
                 if draw_unit_type(rc, HighlightType::None, center, *u, r.player_index, 20.) {
-                    return StateUpdate::Execute(Action::Response(EventResponse::SelectUnitType(
-                        *u,
-                    )));
+                    return StateUpdate::response(EventResponse::SelectUnitType(*u));
                 }
             } else {
                 let mut tooltip = vec![u.name(rc.game).to_string()];
@@ -101,7 +97,7 @@ pub fn unit_request_dialog(rc: &RenderContext, r: &UnitTypeRequest) -> RenderRes
     NO_UPDATE
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UnitsSelection {
     pub player: usize,
     pub selection: MultiSelection<u32>,
@@ -157,7 +153,7 @@ pub fn select_units_dialog(rc: &RenderContext, s: &UnitsSelection) -> RenderResu
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct MultiSelection<T>
 where
     T: Clone + PartialEq + Ord,
@@ -193,14 +189,14 @@ impl<T: Clone + PartialEq + Ord> MultiSelection<T> {
     }
 }
 
-#[derive(Clone, PartialEq, Eq, Ord, PartialOrd)]
+#[derive(Clone, PartialEq, Eq, Ord, PartialOrd, Debug)]
 pub enum SelectedStructureStatus {
     Valid,
     Warn,
     Invalid,
 }
 
-#[derive(Clone, PartialEq, Eq, Ord, PartialOrd)]
+#[derive(Clone, PartialEq, Eq, Ord, PartialOrd, Debug)]
 pub struct SelectedStructureInfo {
     pub position: Position,
     pub structure: Structure,
@@ -266,7 +262,7 @@ pub fn select_structures_dialog(
     ) {
         if let Some(d) = d {
             if s.selected.is_empty() {
-                return StateUpdate::CloseDialog;
+                return StateUpdate::close_dialog();
             }
             StateUpdate::execute(Action::Playing(PlayingAction::InfluenceCultureAttempt(
                 InfluenceCultureAttempt::new(s.selected[0].selected(), d.action_type.clone()),
@@ -307,7 +303,7 @@ pub fn bool_request_dialog(rc: &RenderContext, description: &str) -> RenderResul
 }
 
 fn bool_answer(answer: bool) -> RenderResult {
-    StateUpdate::Execute(Action::Response(EventResponse::Bool(answer)))
+    StateUpdate::execute(Action::Response(EventResponse::Bool(answer)))
 }
 
 pub fn player_request_dialog(rc: &RenderContext, r: &PlayerRequest) -> RenderResult {

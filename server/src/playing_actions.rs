@@ -10,7 +10,9 @@ use crate::card::HandCardLocation;
 use crate::city::execute_found_city_action;
 use crate::collect::{Collect, base_collect_event_origin, execute_collect};
 use crate::construct::Construct;
-use crate::content::ability::{Ability, advance_event_origin, recruit_event_origin, construct_event_origin};
+use crate::content::ability::{
+    Ability, advance_event_origin, construct_event_origin, recruit_event_origin,
+};
 use crate::content::custom_actions::{
     CustomAction, CustomActionActivation, CustomActionType, can_play_custom_action,
     log_start_custom_action, on_custom_action,
