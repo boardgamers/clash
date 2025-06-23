@@ -382,10 +382,12 @@ pub(crate) fn conquer_city(
         }
         set_city_mood(game, position, &attacker.origin, Angry);
     } else {
-        raze_city(game, defender, position);
         if attacker_is_human {
-            attacker.gain_resources(game, ResourcePile::gold(city.size() as u8));
+            attacker
+                .with_origin(EventOrigin::Ability("Raze captured city".to_string()))
+                .gain_resources(game, ResourcePile::gold(city.size() as u8));
         }
+        raze_city(game, defender, city);
     }
 }
 

@@ -21,6 +21,7 @@ use crate::{
 use MoodState::*;
 use itertools::Itertools;
 use num::Zero;
+use crate::city_pieces::lose_building;
 
 pub struct City {
     pub pieces: CityPieces,
@@ -367,9 +368,11 @@ pub(crate) fn lose_city(game: &mut Game, player: &EventPlayer, position: Positio
     city
 }
 
-pub(crate) fn raze_city(game: &mut Game, player: &EventPlayer, position: Position) {
-    let city = lose_city(game, player, position);
+pub(crate) fn raze_city(game: &mut Game, player: &EventPlayer, city: City) {
+    for b in &city.pieces.buildings(None) {
+        lose_building(game, player, *b, city.position);
+    }
     for wonder in &city.pieces.wonders {
-        destroy_wonder(game, player, *wonder, position);
+        destroy_wonder(game, player, *wonder, city.position);
     }
 }
