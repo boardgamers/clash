@@ -12,7 +12,7 @@ use server::player::Player;
 use server::playing_actions::PlayingActionType;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum RenderStage {
+pub(crate) enum RenderStage {
     Map,
     UI,
     Tooltip,
@@ -23,15 +23,15 @@ impl RenderStage {
         !self.is_tooltip()
     }
 
-    pub fn is_ui(self) -> bool {
+    pub(crate) fn is_ui(self) -> bool {
         self == RenderStage::UI || self == RenderStage::Tooltip
     }
 
-    pub fn is_map(self) -> bool {
+    pub(crate) fn is_map(self) -> bool {
         self == RenderStage::Map || self == RenderStage::Tooltip
     }
 
-    pub fn is_tooltip(self) -> bool {
+    pub(crate) fn is_tooltip(self) -> bool {
         self == RenderStage::Tooltip
     }
 }
@@ -45,11 +45,11 @@ pub(crate) struct RenderContext<'a> {
 }
 
 impl RenderContext<'_> {
-    pub fn assets(&self) -> &Assets {
+    pub(crate) fn assets(&self) -> &Assets {
         &self.state.assets
     }
 
-    pub fn with_camera(
+    pub(crate) fn with_camera(
         &self,
         mode: CameraMode,
         f: impl FnOnce(&RenderContext) -> RenderResult + Sized,
@@ -75,7 +75,7 @@ impl RenderContext<'_> {
     }
 
     #[must_use]
-    pub fn world_to_screen(&self, point: Vec2) -> Vec2 {
+    pub(crate) fn world_to_screen(&self, point: Vec2) -> Vec2 {
         match self.camera_mode {
             CameraMode::Screen => point,
             CameraMode::World => self.state.camera.world_to_screen(point),
@@ -83,37 +83,41 @@ impl RenderContext<'_> {
     }
 
     #[must_use]
-    pub fn screen_to_world(&self, point: Vec2) -> Vec2 {
+    pub(crate) fn screen_to_world(&self, point: Vec2) -> Vec2 {
         match self.camera_mode {
             CameraMode::Screen => point,
             CameraMode::World => self.state.camera.screen_to_world(point),
         }
     }
 
-    pub fn can_play_action_for_player(&self, action: &PlayingActionType, player: usize) -> bool {
+    pub(crate) fn can_play_action_for_player(
+        &self,
+        action: &PlayingActionType,
+        player: usize,
+    ) -> bool {
         self.can_play_action(action) && self.game.active_player() == player
     }
 
-    pub fn can_play_action(&self, action: &PlayingActionType) -> bool {
+    pub(crate) fn can_play_action(&self, action: &PlayingActionType) -> bool {
         self.can_control_shown_player()
             && action
                 .is_available(self.game, self.shown_player.index)
                 .is_ok()
     }
 
-    pub fn can_control_shown_player(&self) -> bool {
+    pub(crate) fn can_control_shown_player(&self) -> bool {
         self.can_control_active_player() && self.shown_player_is_active()
     }
 
-    pub fn can_control_active_player(&self) -> bool {
+    pub(crate) fn can_control_active_player(&self) -> bool {
         self.state.control_player == Some(self.game.active_player())
     }
 
-    pub fn shown_player_is_active(&self) -> bool {
+    pub(crate) fn shown_player_is_active(&self) -> bool {
         self.game.active_player() == self.state.show_player
     }
 
-    pub fn new_payment<T: Clone>(
+    pub(crate) fn new_payment<T: Clone>(
         &self,
         cost: &PaymentOptions,
         value: T,
@@ -124,7 +128,7 @@ impl RenderContext<'_> {
         Payment::new(cost, available, value, name, optional)
     }
 
-    pub fn player_color(&self, player_index: usize) -> Color {
+    pub(crate) fn player_color(&self, player_index: usize) -> Color {
         let c = &self.game.player(player_index).civilization;
         if c.is_barbarian() {
             return WHITE;
@@ -141,29 +145,29 @@ impl RenderContext<'_> {
         }
     }
 
-    pub fn mouse_pos(&self) -> Vec2 {
+    pub(crate) fn mouse_pos(&self) -> Vec2 {
         self.screen_to_world(mouse_position().into())
     }
 
-    pub fn draw_text(&self, text: &str, x: f32, y: f32) {
+    pub(crate) fn draw_text(&self, text: &str, x: f32, y: f32) {
         if self.stage.is_main() {
             self.state.draw_text(text, x, y);
         }
     }
 
-    pub fn draw_text_with_color(&self, text: &str, x: f32, y: f32, color: Color) {
+    pub(crate) fn draw_text_with_color(&self, text: &str, x: f32, y: f32, color: Color) {
         if self.stage.is_main() {
             self.state.draw_text_with_color(text, x, y, color);
         }
     }
 
-    pub fn draw_rectangle(&self, x: f32, y: f32, w: f32, h: f32, color: Color) {
+    pub(crate) fn draw_rectangle(&self, x: f32, y: f32, w: f32, h: f32, color: Color) {
         if self.stage.is_main() {
             macroquad::prelude::draw_rectangle(x, y, w, h, color);
         }
     }
 
-    pub fn draw_rectangle_lines(
+    pub(crate) fn draw_rectangle_lines(
         &self,
         x: f32,
         y: f32,
@@ -177,13 +181,13 @@ impl RenderContext<'_> {
         }
     }
 
-    pub fn draw_circle(&self, x: f32, y: f32, r: f32, color: Color) {
+    pub(crate) fn draw_circle(&self, x: f32, y: f32, r: f32, color: Color) {
         if self.stage.is_main() {
             macroquad::prelude::draw_circle(x, y, r, color);
         }
     }
 
-    pub fn draw_circle_lines(&self, x: f32, y: f32, r: f32, thickness: f32, color: Color) {
+    pub(crate) fn draw_circle_lines(&self, x: f32, y: f32, r: f32, thickness: f32, color: Color) {
         if self.stage.is_main() {
             macroquad::prelude::draw_circle_lines(x, y, r, thickness, color);
         }

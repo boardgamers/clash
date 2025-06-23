@@ -7,7 +7,7 @@ use server::content::persistent_events::EventResponse;
 use server::status_phase::ChangeGovernment;
 
 #[derive(Clone, Debug)]
-pub struct ChooseAdditionalAdvances {
+pub(crate) struct ChooseAdditionalAdvances {
     government: String,
     possible: Vec<Advance>,
     selected: Vec<Advance>,
@@ -25,7 +25,7 @@ impl ChooseAdditionalAdvances {
     }
 }
 
-pub fn change_government_type_dialog(rc: &RenderContext) -> RenderResult {
+pub(crate) fn change_government_type_dialog(rc: &RenderContext) -> RenderResult {
     show_advance_menu(
         rc,
         "Change government",
@@ -72,7 +72,7 @@ pub fn change_government_type_dialog(rc: &RenderContext) -> RenderResult {
     )
 }
 
-pub fn choose_additional_advances_dialog(
+pub(crate) fn choose_additional_advances_dialog(
     rc: &RenderContext,
     choose: &ChooseAdditionalAdvances,
 ) -> RenderResult {

@@ -22,7 +22,7 @@ use server::resource::ResourceType;
 use server::resource_pile::ResourcePile;
 
 #[derive(Clone, Debug)]
-pub struct CollectResources {
+pub(crate) struct CollectResources {
     player_index: usize,
     city_position: Position,
     collections: Vec<PositionCollection>,
@@ -31,7 +31,7 @@ pub struct CollectResources {
 }
 
 impl CollectResources {
-    pub fn new(
+    pub(crate) fn new(
         player_index: usize,
         city_position: Position,
         custom: BaseOrCustomDialog,
@@ -46,7 +46,7 @@ impl CollectResources {
         }
     }
 
-    pub fn help_text(&self, rc: &RenderContext) -> Vec<String> {
+    pub(crate) fn help_text(&self, rc: &RenderContext) -> Vec<String> {
         let extra = self.extra_resources();
         let mut r = vec![
             self.custom.title.clone(),
@@ -59,11 +59,11 @@ impl CollectResources {
         r
     }
 
-    pub fn extra_resources(&self) -> i8 {
+    pub(crate) fn extra_resources(&self) -> i8 {
         self.info.max_selection as i8 - tiles_used(&self.collections) as i8
     }
 
-    pub fn collected(&self) -> ResourcePile {
+    pub(crate) fn collected(&self) -> ResourcePile {
         self.collections
             .clone()
             .into_iter()
@@ -72,7 +72,7 @@ impl CollectResources {
     }
 }
 
-pub fn collect_dialog(rc: &RenderContext, collect: &CollectResources) -> RenderResult {
+pub(crate) fn collect_dialog(rc: &RenderContext, collect: &CollectResources) -> RenderResult {
     show_resource_pile(rc, &collect.collected());
 
     let game = rc.game;
@@ -136,7 +136,7 @@ fn click_collect_option(
     StateUpdate::open_dialog(ActiveDialog::CollectResources(new))
 }
 
-pub fn draw_resource_collect_tile(rc: &RenderContext, pos: Position) -> RenderResult {
+pub(crate) fn draw_resource_collect_tile(rc: &RenderContext, pos: Position) -> RenderResult {
     let state = &rc.state;
     let ActiveDialog::CollectResources(collect) = &state.active_dialog else {
         return NO_UPDATE;

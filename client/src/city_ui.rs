@@ -33,7 +33,7 @@ use server::structure::Structure;
 use server::unit::{UnitType, Units};
 use std::ops::Add;
 
-pub struct IconAction<'a> {
+pub(crate) struct IconAction<'a> {
     pub texture: &'a Texture2D,
     pub tooltip: Vec<String>,
     pub warning: bool,
@@ -42,7 +42,7 @@ pub struct IconAction<'a> {
 
 impl<'a> IconAction<'a> {
     #[must_use]
-    pub fn new(
+    pub(crate) fn new(
         texture: &'a Texture2D,
         tooltip: Vec<String>,
         action: Box<dyn Fn() -> RenderResult + 'a>,
@@ -56,14 +56,14 @@ impl<'a> IconAction<'a> {
     }
 
     #[must_use]
-    pub fn with_warning(self, warning: bool) -> IconAction<'a> {
+    pub(crate) fn with_warning(self, warning: bool) -> IconAction<'a> {
         IconAction { warning, ..self }
     }
 }
 
-pub type IconActionVec<'a> = Vec<IconAction<'a>>;
+pub(crate) type IconActionVec<'a> = Vec<IconAction<'a>>;
 
-pub fn show_city_menu<'a>(rc: &'a RenderContext, city: &'a City) -> RenderResult {
+pub(crate) fn show_city_menu<'a>(rc: &'a RenderContext, city: &'a City) -> RenderResult {
     let base_icons: IconActionVec<'a> = vec![
         increase_happiness_button(rc, city),
         collect_resources_button(rc, city),
@@ -223,7 +223,7 @@ fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option
     ))
 }
 
-pub fn city_labels(game: &Game, city: &City) -> Vec<String> {
+pub(crate) fn city_labels(game: &Game, city: &City) -> Vec<String> {
     [
         vec![format!(
             "City: {}, {}, {} {}",
@@ -288,7 +288,7 @@ fn draw_selected_state(
     }
 }
 
-pub fn draw_city(rc: &RenderContext, city: &City) -> RenderResult {
+pub(crate) fn draw_city(rc: &RenderContext, city: &City) -> RenderResult {
     let c = hex_ui::center(city.position);
     let owner = city.player_index;
 
@@ -380,7 +380,7 @@ fn draw_buildings(
     NO_UPDATE
 }
 
-pub fn add_building_description(rc: &RenderContext, parts: &mut Vec<String>, b: Building) {
+pub(crate) fn add_building_description(rc: &RenderContext, parts: &mut Vec<String>, b: Building) {
     let pile = rc
         .shown_player
         .building_cost(rc.game, b, CostTrigger::WithModifiers)
@@ -427,7 +427,7 @@ fn draw_wonders(
     Ok(i)
 }
 
-pub fn building_position(city: &City, center: Vec2, i: usize, building: Building) -> Vec2 {
+pub(crate) fn building_position(city: &City, center: Vec2, i: usize, building: Building) -> Vec2 {
     if matches!(building, Building::Port) {
         let r: f32 = city
             .position

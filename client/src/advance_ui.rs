@@ -19,7 +19,7 @@ use std::ops::Rem;
 
 const COLUMNS: usize = 6;
 
-pub enum AdvanceState {
+pub(crate) enum AdvanceState {
     Owned,
     Removable,
     Available,
@@ -37,7 +37,7 @@ fn new_advance_payment(rc: &RenderContext, a: &AdvanceInfo) -> Payment<Advance> 
     )
 }
 
-pub fn show_paid_advance_menu(rc: &RenderContext) -> RenderResult {
+pub(crate) fn show_paid_advance_menu(rc: &RenderContext) -> RenderResult {
     let game = rc.game;
     show_advance_menu(
         rc,
@@ -58,7 +58,7 @@ pub fn show_paid_advance_menu(rc: &RenderContext) -> RenderResult {
     )
 }
 
-pub fn show_advance_menu(
+pub(crate) fn show_advance_menu(
     rc: &RenderContext,
     title: &str,
     advance_state: impl Fn(&AdvanceInfo, &Player) -> AdvanceState,
@@ -197,7 +197,7 @@ fn description(rc: &RenderContext, a: &AdvanceInfo) -> Vec<String> {
     parts
 }
 
-pub fn pay_advance_dialog(ap: &Payment<Advance>, rc: &RenderContext) -> RenderResult {
+pub(crate) fn pay_advance_dialog(ap: &Payment<Advance>, rc: &RenderContext) -> RenderResult {
     show_paid_advance_menu(rc)?; // select a different advance
     payment_dialog(rc, ap, true, ActiveDialog::AdvancePayment, |payment| {
         StateUpdate::execute_with_warning(

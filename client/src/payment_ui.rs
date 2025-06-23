@@ -16,13 +16,13 @@ use server::resource::ResourceType;
 use server::resource_pile::ResourcePile;
 
 #[derive(PartialEq, Eq, Debug, Clone)]
-pub struct ResourcePayment {
+pub(crate) struct ResourcePayment {
     pub resource: ResourceType,
     pub selectable: CountSelector,
 }
 
 impl ResourcePayment {
-    pub fn new(resource: ResourceType, current: u8, min: u8, max: u8) -> ResourcePayment {
+    pub(crate) fn new(resource: ResourceType, current: u8, min: u8, max: u8) -> ResourcePayment {
         ResourcePayment {
             resource,
             selectable: CountSelector { current, min, max },
@@ -37,7 +37,7 @@ impl HasCountSelectableObject for ResourcePayment {
 }
 
 #[derive(PartialEq, Eq, Debug, Clone)]
-pub struct Payment<T: Clone> {
+pub(crate) struct Payment<T: Clone> {
     pub value: T,
     pub name: String,
     pub cost: PaymentOptions,
@@ -51,7 +51,7 @@ where
     T: Clone,
 {
     #[must_use]
-    pub fn new(
+    pub(crate) fn new(
         cost: &PaymentOptions,
         available: &ResourcePile,
         value: T,
@@ -68,7 +68,7 @@ where
         }
     }
 
-    pub fn to_resource_pile(&self) -> ResourcePile {
+    pub(crate) fn to_resource_pile(&self) -> ResourcePile {
         let r = &self.current;
         ResourcePile::new(
             Self::current(r, ResourceType::Food),
@@ -81,15 +81,9 @@ where
         )
     }
 
-    pub fn get_mut(&mut self, r: ResourceType) -> &mut ResourcePayment {
+    pub(crate) fn get_mut(&mut self, r: ResourceType) -> &mut ResourcePayment {
         self.current
             .iter_mut()
-            .find(|p| p.resource == r)
-            .unwrap_or_else(|| panic!("Resource {r} not found in payment"))
-    }
-    pub fn get(&self, r: ResourceType) -> &ResourcePayment {
-        self.current
-            .iter()
             .find(|p| p.resource == r)
             .unwrap_or_else(|| panic!("Resource {r} not found in payment"))
     }
@@ -102,7 +96,7 @@ where
 }
 
 #[must_use]
-pub fn new_gain(reward: &ResourceReward, name: &str) -> Payment<String> {
+pub(crate) fn new_gain(reward: &ResourceReward, name: &str) -> Payment<String> {
     let options = &reward.payment_options;
     let a = options.default.amount();
     let mut available = ResourcePile::empty();
@@ -112,7 +106,7 @@ pub fn new_gain(reward: &ResourceReward, name: &str) -> Payment<String> {
     Payment::new(options, &available, name.to_string(), name, false)
 }
 
-pub fn payment_dialog<T: Clone>(
+pub(crate) fn payment_dialog<T: Clone>(
     rc: &RenderContext,
     payment: &Payment<T>,
     may_cancel: bool,
@@ -128,7 +122,7 @@ pub fn payment_dialog<T: Clone>(
     )
 }
 
-pub fn multi_payment_dialog<T: Clone>(
+pub(crate) fn multi_payment_dialog<T: Clone>(
     rc: &RenderContext,
     payments: &[Payment<T>],
     to_dialog: impl FnOnce(Vec<Payment<T>>) -> ActiveDialog,
@@ -270,14 +264,7 @@ fn resource_payment(options: &PaymentOptions, available: &ResourcePile) -> Vec<R
         .into_iter()
         .map(|e| {
             let resource_type = e.0;
-            ResourcePayment {
-                resource: resource_type,
-                selectable: CountSelector {
-                    current: e.1,
-                    min: 0,
-                    max: available.get(&resource_type),
-                },
-            }
+            ResourcePayment::new(resource_type, e.1, 0, available.get(&resource_type))
         })
         .collect();
 
@@ -285,12 +272,12 @@ fn resource_payment(options: &PaymentOptions, available: &ResourcePile) -> Vec<R
     resources
 }
 
-pub fn plus<T: Clone>(mut payment: Payment<T>, t: ResourceType) -> Payment<T> {
+pub(crate) fn plus<T: Clone>(mut payment: Payment<T>, t: ResourceType) -> Payment<T> {
     payment.get_mut(t).selectable.current += 1;
     payment
 }
 
-pub fn minus<T: Clone>(mut payment: Payment<T>, t: ResourceType) -> Payment<T> {
+pub(crate) fn minus<T: Clone>(mut payment: Payment<T>, t: ResourceType) -> Payment<T> {
     payment.get_mut(t).selectable.current -= 1;
     payment
 }

@@ -7,7 +7,7 @@ use macroquad::math::{Vec2, bool, vec2};
 use macroquad::prelude::{GRAY, RED};
 
 #[derive(PartialEq, Eq, Debug, Clone)]
-pub struct CountSelector {
+pub(crate) struct CountSelector {
     pub current: u8,
     pub min: u8,
     pub max: u8,
@@ -18,7 +18,7 @@ pub trait HasCountSelectableObject {
 }
 
 #[allow(clippy::too_many_arguments)]
-pub fn count_dialog<C, O: HasCountSelectableObject>(
+pub(crate) fn count_dialog<C, O: HasCountSelectableObject>(
     rc: &RenderContext,
     container: &C,
     get_objects: impl Fn(&C) -> Vec<O>,
@@ -85,7 +85,7 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum HighlightType {
+pub(crate) enum HighlightType {
     None,
     Primary,
     Choices,
@@ -94,7 +94,7 @@ pub enum HighlightType {
 }
 
 impl HighlightType {
-    pub fn color(self) -> Color {
+    pub(crate) fn color(self) -> Color {
         match self {
             HighlightType::None => BLACK,
             HighlightType::Primary => WHITE,

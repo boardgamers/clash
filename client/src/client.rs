@@ -274,7 +274,7 @@ pub struct Features {
 
 impl Features {
     #[must_use]
-    pub fn get_asset(&self, asset: &str) -> String {
+    pub(crate) fn get_asset(&self, asset: &str) -> String {
         format!("{}{}", self.assets_url, asset)
     }
 }

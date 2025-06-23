@@ -16,7 +16,7 @@ pub(crate) struct BaseOrCustomDialog {
     pub action_type: PlayingActionType,
 }
 
-pub fn show_pending_update(update: &PendingUpdate, rc: &RenderContext) -> RenderResult {
+pub(crate) fn show_pending_update(update: &PendingUpdate, rc: &RenderContext) -> RenderResult {
     let state = &rc.state;
     let t = if update.warning.is_empty() {
         if state.active_dialog.is_modal() {
@@ -39,22 +39,22 @@ pub fn show_pending_update(update: &PendingUpdate, rc: &RenderContext) -> Render
 }
 
 #[must_use]
-pub fn cancel_button(rc: &RenderContext) -> bool {
+pub(crate) fn cancel_button(rc: &RenderContext) -> bool {
     cancel_button_with_tooltip(rc, "Cancel")
 }
 
 #[must_use]
-pub fn cancel_button_with_tooltip(rc: &RenderContext, tooltip: &str) -> bool {
+pub(crate) fn cancel_button_with_tooltip(rc: &RenderContext, tooltip: &str) -> bool {
     bottom_right_texture(rc, &rc.assets().cancel, cancel_button_pos(), tooltip)
 }
 
 #[must_use]
-pub fn cancel_button_pos() -> Vec2 {
+pub(crate) fn cancel_button_pos() -> Vec2 {
     icon_pos(-7, -1)
 }
 
 #[must_use]
-pub fn ok_button(rc: &RenderContext, ok_tooltip: OkTooltip) -> bool {
+pub(crate) fn ok_button(rc: &RenderContext, ok_tooltip: OkTooltip) -> bool {
     let pos = icon_pos(-8, -1);
     match ok_tooltip {
         OkTooltip::Valid(tooltip) => bottom_right_texture(rc, &rc.assets().ok, pos, &tooltip),

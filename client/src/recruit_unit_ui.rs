@@ -39,7 +39,7 @@ impl HasCountSelectableObject for SelectableUnit {
 }
 
 impl RecruitAmount {
-    pub fn new_selection(
+    pub(crate) fn new_selection(
         game: &Game,
         player_index: usize,
         city_position: Position,
@@ -113,7 +113,7 @@ pub(crate) struct RecruitSelection {
 }
 
 impl RecruitSelection {
-    pub fn new(
+    pub(crate) fn new(
         game: &Game,
         player: usize,
         amount: RecruitAmount,
@@ -130,11 +130,11 @@ impl RecruitSelection {
         }
     }
 
-    pub fn is_finished(&self) -> bool {
+    pub(crate) fn is_finished(&self) -> bool {
         self.need_replacement.is_empty()
     }
 
-    pub fn confirm(&self, game: &Game) -> OkTooltip {
+    pub(crate) fn confirm(&self, game: &Game) -> OkTooltip {
         recruit_cost(
             game,
             game.player(self.amount.player_index),
@@ -164,7 +164,7 @@ impl UnitSelection for RecruitSelection {
     }
 }
 
-pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> RenderResult {
+pub(crate) fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> RenderResult {
     let game = rc.game;
     let radius = 20.;
     select_ui::count_dialog(
@@ -247,7 +247,7 @@ fn update_selection(game: &Game, s: &RecruitAmount, units: Units) -> RenderResul
     RecruitAmount::new_selection(game, s.player_index, s.city_position, units)
 }
 
-pub fn replace_dialog(rc: &RenderContext, sel: &RecruitSelection) -> RenderResult {
+pub(crate) fn replace_dialog(rc: &RenderContext, sel: &RecruitSelection) -> RenderResult {
     if ok_button(rc, sel.confirm(rc.game)) {
         open_dialog(rc, sel.amount.city_position, sel.clone())
     } else if cancel_button(rc) {

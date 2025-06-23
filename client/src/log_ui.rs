@@ -4,7 +4,7 @@ use macroquad::math::vec2;
 use server::game::Game;
 
 #[derive(Clone, Debug)]
-pub struct LogDialog {
+pub(crate) struct LogDialog {
     pub log_scroll: f32,
 }
 
@@ -15,12 +15,12 @@ impl Default for LogDialog {
 }
 
 impl LogDialog {
-    pub fn new() -> Self {
+    pub(crate) fn new() -> Self {
         LogDialog { log_scroll: 0. }
     }
 }
 
-pub fn show_log(rc: &RenderContext, d: &LogDialog) -> RenderResult {
+pub(crate) fn show_log(rc: &RenderContext, d: &LogDialog) -> RenderResult {
     draw_log(rc.game, d.log_scroll, |label: &str, y: f32| {
         let p = vec2(30., y * 25. + 20.);
         rc.draw_text(label, p.x, p.y);
@@ -28,7 +28,7 @@ pub fn show_log(rc: &RenderContext, d: &LogDialog) -> RenderResult {
     NO_UPDATE
 }
 
-pub fn get_log_end(game: &Game, height: f32) -> f32 {
+pub(crate) fn get_log_end(game: &Game, height: f32) -> f32 {
     let mut end = 0.;
     draw_log(game, 0., |_label: &str, y: f32| {
         end = y;
@@ -49,7 +49,7 @@ fn draw_log(game: &Game, start_scroll: f32, mut render: impl FnMut(&str, f32)) {
     }
 }
 
-pub fn multiline_label(label: &str, len: usize, mut print: impl FnMut(&str)) {
+pub(crate) fn multiline_label(label: &str, len: usize, mut print: impl FnMut(&str)) {
     let mut line = String::new();
     label.split(' ').for_each(|s| {
         if line.len() + s.len() > len {
@@ -66,7 +66,7 @@ pub fn multiline_label(label: &str, len: usize, mut print: impl FnMut(&str)) {
     }
 }
 
-pub fn break_text(label: &str, len: usize, result: &mut Vec<String>) {
+pub(crate) fn break_text(label: &str, len: usize, result: &mut Vec<String>) {
     multiline_label(label, len, |label: &str| {
         result.push(label.to_string());
     });

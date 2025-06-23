@@ -6,7 +6,7 @@ use server::resource::ResourceType;
 use server::resource_pile::ResourcePile;
 use std::collections::HashMap;
 
-pub fn resource_name(t: ResourceType) -> &'static str {
+pub(crate) fn resource_name(t: ResourceType) -> &'static str {
     match t {
         ResourceType::Food => "Food",
         ResourceType::Wood => "Wood",
@@ -19,7 +19,7 @@ pub fn resource_name(t: ResourceType) -> &'static str {
 }
 
 #[must_use]
-pub fn new_resource_map(p: &ResourcePile) -> HashMap<ResourceType, u8> {
+pub(crate) fn new_resource_map(p: &ResourcePile) -> HashMap<ResourceType, u8> {
     let mut m: HashMap<ResourceType, u8> = HashMap::new();
     add_resource(&mut m, p.food, ResourceType::Food);
     add_resource(&mut m, p.wood, ResourceType::Wood);
@@ -35,7 +35,7 @@ fn add_resource(m: &mut HashMap<ResourceType, u8>, amount: u8, resource_type: Re
     m.insert(resource_type, amount);
 }
 
-pub fn show_resource_pile(rc: &RenderContext, p: &ResourcePile) {
+pub(crate) fn show_resource_pile(rc: &RenderContext, p: &ResourcePile) {
     let resource_map = new_resource_map(p);
     let show: Vec<ResourceType> = ResourceType::all()
         .into_iter()

@@ -16,7 +16,7 @@ use server::happiness::available_happiness_actions;
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::resource::ResourceType;
 
-pub fn action_buttons(rc: &RenderContext) -> RenderResult {
+pub(crate) fn action_buttons(rc: &RenderContext) -> RenderResult {
     let assets = rc.assets();
     let game = rc.game;
 
@@ -90,7 +90,7 @@ pub fn action_buttons(rc: &RenderContext) -> RenderResult {
     NO_UPDATE
 }
 
-pub fn custom_action_buttons<'a>(
+pub(crate) fn custom_action_buttons<'a>(
     rc: &'a RenderContext,
     city: Option<&'a City>,
 ) -> IconActionVec<'a> {
@@ -143,7 +143,7 @@ fn generic_custom_action(
     }
 }
 
-pub fn base_or_custom_action(
+pub(crate) fn base_or_custom_action(
     rc: &RenderContext,
     action_types: &[PlayingActionType],
     title: &str,

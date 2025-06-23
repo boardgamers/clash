@@ -11,34 +11,44 @@ pub const MARGIN: f32 = 10.;
 
 pub const FONT_SIZE: u16 = 20;
 
-pub fn icon_offset(i: i8) -> f32 {
+pub(crate) fn icon_offset(i: i8) -> f32 {
     f32::from(i) * 1.4 * ICON_SIZE
 }
 
-pub fn icon_pos(x: i8, y: i8) -> Vec2 {
+pub(crate) fn icon_pos(x: i8, y: i8) -> Vec2 {
     vec2(icon_offset(x), icon_offset(y))
 }
 
-pub fn top_center_texture(rc: &RenderContext, texture: &Texture2D, p: Vec2, tooltip: &str) -> bool {
+pub(crate) fn top_center_texture(
+    rc: &RenderContext,
+    texture: &Texture2D,
+    p: Vec2,
+    tooltip: &str,
+) -> bool {
     let anchor = top_center_anchor(rc);
     draw_icon(rc, texture, tooltip, anchor + p)
 }
 
-pub fn top_centered_text(rc: &RenderContext, text: &str, p: Vec2) {
+pub(crate) fn top_centered_text(rc: &RenderContext, text: &str, p: Vec2) {
     let p = top_center_anchor(rc) + p;
     rc.draw_text(text, p.x - rc.state.measure_text(text).width / 2., p.y);
 }
 
-pub fn top_center_anchor(rc: &RenderContext) -> Vec2 {
+pub(crate) fn top_center_anchor(rc: &RenderContext) -> Vec2 {
     vec2(rc.state.screen_size.x / 2., MARGIN)
 }
 
-pub fn top_right_texture(rc: &RenderContext, texture: &Texture2D, p: Vec2, tooltip: &str) -> bool {
+pub(crate) fn top_right_texture(
+    rc: &RenderContext,
+    texture: &Texture2D,
+    p: Vec2,
+    tooltip: &str,
+) -> bool {
     let anchor = vec2(rc.state.screen_size.x - MARGIN, MARGIN);
     draw_icon(rc, texture, tooltip, anchor + p)
 }
 
-pub fn bottom_left_texture(
+pub(crate) fn bottom_left_texture(
     rc: &RenderContext,
     texture: &Texture2D,
     p: Vec2,
@@ -48,7 +58,7 @@ pub fn bottom_left_texture(
     draw_scaled_icon_with_tooltip(rc, texture, tooltip, anchor + p, ICON_SIZE)
 }
 
-pub fn bottom_center_texture(
+pub(crate) fn bottom_center_texture(
     rc: &RenderContext,
     texture: &Texture2D,
     p: Vec2,
@@ -58,7 +68,7 @@ pub fn bottom_center_texture(
     draw_icon(rc, texture, tooltip, anchor + p)
 }
 
-pub fn bottom_centered_text_with_offset(
+pub(crate) fn bottom_centered_text_with_offset(
     rc: &RenderContext,
     text: &str,
     offset: Vec2,
@@ -79,20 +89,20 @@ pub fn bottom_centered_text_with_offset(
     }
 }
 
-pub fn bottom_centered_text(rc: &RenderContext, text: &str) {
+pub(crate) fn bottom_centered_text(rc: &RenderContext, text: &str) {
     bottom_centered_text_with_offset(rc, text, vec2(0., 0.), &[]);
 }
 
-pub fn bottom_center_text(rc: &RenderContext, text: &str, p: Vec2) {
+pub(crate) fn bottom_center_text(rc: &RenderContext, text: &str, p: Vec2) {
     let p = bottom_center_anchor(rc) + p;
     rc.draw_text(text, p.x, p.y);
 }
 
-pub fn bottom_center_anchor(rc: &RenderContext) -> Vec2 {
+pub(crate) fn bottom_center_anchor(rc: &RenderContext) -> Vec2 {
     vec2(rc.state.screen_size.x / 2., rc.state.screen_size.y - MARGIN)
 }
 
-pub fn bottom_right_texture(
+pub(crate) fn bottom_right_texture(
     rc: &RenderContext,
     texture: &Texture2D,
     p: Vec2,
@@ -105,11 +115,16 @@ pub fn bottom_right_texture(
     draw_icon(rc, texture, tooltip, anchor + p)
 }
 
-pub fn draw_icon(rc: &RenderContext, texture: &Texture2D, tooltip: &str, origin: Vec2) -> bool {
+pub(crate) fn draw_icon(
+    rc: &RenderContext,
+    texture: &Texture2D,
+    tooltip: &str,
+    origin: Vec2,
+) -> bool {
     draw_scaled_icon(rc, texture, tooltip, origin, ICON_SIZE)
 }
 
-pub fn draw_scaled_icon(
+pub(crate) fn draw_scaled_icon(
     rc: &RenderContext,
     texture: &Texture2D,
     tooltip: &str,
@@ -127,7 +142,7 @@ pub fn draw_scaled_icon(
     draw_scaled_icon_with_tooltip(rc, texture, &t, origin, size)
 }
 
-pub fn draw_scaled_icon_with_tooltip(
+pub(crate) fn draw_scaled_icon_with_tooltip(
     rc: &RenderContext,
     texture: &Texture2D,
     tooltip: &[String],
@@ -151,7 +166,7 @@ pub fn draw_scaled_icon_with_tooltip(
 }
 
 #[must_use]
-pub fn button_pressed(
+pub(crate) fn button_pressed(
     rect: Rect,
     rc: &RenderContext,
     tooltip: &[String],
@@ -164,13 +179,13 @@ pub fn button_pressed(
 }
 
 #[must_use]
-pub fn is_in_circle(mouse_pos: Vec2, center: Vec2, radius: f32) -> bool {
+pub(crate) fn is_in_circle(mouse_pos: Vec2, center: Vec2, radius: f32) -> bool {
     let d = vec2(center.x - mouse_pos.x, center.y - mouse_pos.y);
     d.length() <= radius
 }
 
 #[must_use]
-pub fn mouse_pressed_position(rc: &RenderContext) -> Option<Vec2> {
+pub(crate) fn mouse_pressed_position(rc: &RenderContext) -> Option<Vec2> {
     is_mouse_pressed(rc).then_some(rc.screen_to_world(mouse_position().into()))
 }
 

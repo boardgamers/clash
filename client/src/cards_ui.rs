@@ -19,7 +19,7 @@ use server::events::check_event_origin;
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::wonder::Wonder;
 
-pub struct HandCardObject {
+pub(crate) struct HandCardObject {
     id: HandCard,
     name: String,
     description: Vec<String>,
@@ -27,7 +27,7 @@ pub struct HandCardObject {
 }
 
 impl HandCardObject {
-    pub fn new(id: HandCard, color: Color, name: &str, description: Vec<String>) -> Self {
+    pub(crate) fn new(id: HandCard, color: Color, name: &str, description: Vec<String>) -> Self {
         Self {
             id,
             name: name.chars().take(17).collect(),
@@ -316,7 +316,10 @@ fn objective_card_object(
     )
 }
 
-pub fn select_cards_dialog(rc: &RenderContext, s: &MultiSelection<HandCard>) -> RenderResult {
+pub(crate) fn select_cards_dialog(
+    rc: &RenderContext,
+    s: &MultiSelection<HandCard>,
+) -> RenderResult {
     bottom_centered_text(
         rc,
         format!(

@@ -8,7 +8,7 @@ use macroquad::prelude::{draw_circle, draw_rectangle, get_time};
 
 const TOOLTIP_DELAY: f64 = 0.5;
 
-pub fn update(state: &mut State) {
+pub(crate) fn update(state: &mut State) {
     let now = get_time();
     state
         .mouse_positions
@@ -28,7 +28,7 @@ fn is_rect_tooltip_active(rc: &RenderContext, rect: Rect) -> bool {
             .all(|mp| rect.contains(rc.screen_to_world(mp.position)))
 }
 
-pub fn show_tooltip_for_rect(
+pub(crate) fn show_tooltip_for_rect(
     rc: &RenderContext,
     tooltip: &[String],
     rect: Rect,
@@ -60,7 +60,12 @@ fn is_circle_tooltip_active(rc: &RenderContext, center: Vec2, radius: f32) -> bo
             .all(|mp| (center - rc.screen_to_world(mp.position)).length() < radius)
 }
 
-pub fn show_tooltip_for_circle(rc: &RenderContext, tooltip: &[String], center: Vec2, radius: f32) {
+pub(crate) fn show_tooltip_for_circle(
+    rc: &RenderContext,
+    tooltip: &[String],
+    center: Vec2,
+    radius: f32,
+) {
     if is_circle_tooltip_active(rc, center, radius) {
         draw_circle(center.x, center.y, radius, Color::new(0.0, 0.0, 0.0, 0.5));
         let _ = rc.with_camera(CameraMode::Screen, |rc| {
@@ -95,6 +100,6 @@ fn show_tooltip_text(rc: &RenderContext, tooltip: &[String], origin: Vec2, right
     }
 }
 
-pub fn add_tooltip_description(parts: &mut Vec<String>, label: &str) {
+pub(crate) fn add_tooltip_description(parts: &mut Vec<String>, label: &str) {
     break_text(label, 70, parts);
 }

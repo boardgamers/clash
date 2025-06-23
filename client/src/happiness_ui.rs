@@ -24,7 +24,7 @@ pub(crate) struct IncreaseHappinessConfig {
 }
 
 impl IncreaseHappinessConfig {
-    pub fn new(rc: &RenderContext, custom: BaseOrCustomDialog) -> IncreaseHappinessConfig {
+    pub(crate) fn new(rc: &RenderContext, custom: BaseOrCustomDialog) -> IncreaseHappinessConfig {
         let p = rc.shown_player;
         let steps = p.cities.iter().map(|c| (c.position, 0)).collect();
         let city_restriction = happiness_city_restriction(rc.shown_player, &custom.action_type);
@@ -61,7 +61,7 @@ impl IncreaseHappinessConfig {
     }
 }
 
-pub fn open_increase_happiness_dialog(
+pub(crate) fn open_increase_happiness_dialog(
     rc: &RenderContext,
     actions: &[PlayingActionType],
     init: impl Fn(IncreaseHappinessConfig) -> IncreaseHappinessConfig,
@@ -71,7 +71,7 @@ pub fn open_increase_happiness_dialog(
     })
 }
 
-pub fn increase_happiness_click(
+pub(crate) fn increase_happiness_click(
     rc: &RenderContext,
     pos: Position,
     h: &IncreaseHappinessConfig,
@@ -85,7 +85,7 @@ pub fn increase_happiness_click(
     }
 }
 
-pub fn add_increase_happiness(
+pub(crate) fn add_increase_happiness(
     rc: &RenderContext,
     city: &City,
     mut increase_happiness: IncreaseHappinessConfig,
@@ -148,7 +148,7 @@ fn increase_happiness_new_steps(
 }
 
 #[must_use]
-pub fn can_afford_increase_happiness(
+pub(crate) fn can_afford_increase_happiness(
     rc: &RenderContext,
     city: &City,
     steps: u8,
@@ -173,7 +173,7 @@ pub fn can_afford_increase_happiness(
 }
 
 #[must_use]
-pub fn available_happiness_actions_for_city(
+pub(crate) fn available_happiness_actions_for_city(
     game: &Game,
     player: usize,
     position: Position,
@@ -192,7 +192,10 @@ pub fn available_happiness_actions_for_city(
     }
 }
 
-pub fn increase_happiness_menu(rc: &RenderContext, h: &IncreaseHappinessConfig) -> RenderResult {
+pub(crate) fn increase_happiness_menu(
+    rc: &RenderContext,
+    h: &IncreaseHappinessConfig,
+) -> RenderResult {
     payment_dialog(
         rc,
         &h.payment,

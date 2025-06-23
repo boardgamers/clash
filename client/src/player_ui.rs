@@ -30,7 +30,7 @@ use server::resource::ResourceType;
 use server::status_phase::get_status_phase;
 use server::victory_points::victory_points_parts;
 
-pub fn player_select(rc: &RenderContext) -> RenderResult {
+pub(crate) fn player_select(rc: &RenderContext) -> RenderResult {
     let game = rc.game;
     let players = game.human_players(game.starting_player_index);
 
@@ -82,7 +82,7 @@ pub fn player_select(rc: &RenderContext) -> RenderResult {
     NO_UPDATE
 }
 
-pub fn top_icon_with_label(
+pub(crate) fn top_icon_with_label(
     rc: &RenderContext,
     label: &str,
     texture: &Texture2D,
@@ -99,7 +99,7 @@ pub fn top_icon_with_label(
     top_center_texture(rc, texture, p, tooltip);
 }
 
-pub fn bottom_icon_with_label(
+pub(crate) fn bottom_icon_with_label(
     rc: &RenderContext,
     label: &str,
     texture: &Texture2D,
@@ -117,7 +117,7 @@ pub fn bottom_icon_with_label(
     bottom_center_texture(rc, texture, p, tooltip);
 }
 
-pub fn show_top_center(rc: &RenderContext) {
+pub(crate) fn show_top_center(rc: &RenderContext) {
     let player = rc.shown_player;
 
     let pos = icon_pos(3, 0);
@@ -168,7 +168,7 @@ pub fn show_top_center(rc: &RenderContext) {
     }
 }
 
-pub fn show_top_left(rc: &RenderContext) {
+pub(crate) fn show_top_left(rc: &RenderContext) {
     let mut p = vec2(10., 10.);
     let mut label = |label: &str| {
         multiline_label(label, 30, |label: &str| {
@@ -305,7 +305,7 @@ fn show_permanent_effects(
     }
 }
 
-pub fn get_combat(game: &Game) -> Option<&CombatStats> {
+pub(crate) fn get_combat(game: &Game) -> Option<&CombatStats> {
     game.events.last().and_then(|e| match &e.event_type {
         PersistentEventType::CombatStart(c) => Some(&c.stats),
         PersistentEventType::CombatRoundStart(s) => Some(&s.combat.stats),
@@ -315,7 +315,7 @@ pub fn get_combat(game: &Game) -> Option<&CombatStats> {
     })
 }
 
-pub fn show_global_controls(rc: &RenderContext, features: &Features) -> RenderResult {
+pub(crate) fn show_global_controls(rc: &RenderContext, features: &Features) -> RenderResult {
     let assets = rc.assets();
     let can_control = rc.can_control_shown_player();
     if can_control {
@@ -401,7 +401,7 @@ fn end_move(game: &Game) -> RenderResult {
     )
 }
 
-pub fn choose_player_dialog(
+pub(crate) fn choose_player_dialog(
     rc: &RenderContext,
     choices: &[usize],
     execute: impl Fn(usize) -> Action,

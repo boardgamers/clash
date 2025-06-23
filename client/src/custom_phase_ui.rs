@@ -23,7 +23,7 @@ use server::resource_pile::ResourcePile;
 use server::structure::Structure;
 use server::unit::{Unit, validate_units_selection};
 
-pub fn custom_phase_payment_dialog(
+pub(crate) fn custom_phase_payment_dialog(
     rc: &RenderContext,
     payments: &[Payment<String>],
 ) -> RenderResult {
@@ -40,7 +40,7 @@ pub fn custom_phase_payment_dialog(
     update
 }
 
-pub fn payment_reward_dialog(rc: &RenderContext, payment: &Payment<String>) -> RenderResult {
+pub(crate) fn payment_reward_dialog(rc: &RenderContext, payment: &Payment<String>) -> RenderResult {
     payment_dialog(
         rc,
         payment,
@@ -50,7 +50,11 @@ pub fn payment_reward_dialog(rc: &RenderContext, payment: &Payment<String>) -> R
     )
 }
 
-pub fn advance_reward_dialog(rc: &RenderContext, r: &AdvanceRequest, name: &str) -> RenderResult {
+pub(crate) fn advance_reward_dialog(
+    rc: &RenderContext,
+    r: &AdvanceRequest,
+    name: &str,
+) -> RenderResult {
     let possible = &r.choices;
     show_advance_menu(
         rc,
@@ -73,7 +77,7 @@ pub fn advance_reward_dialog(rc: &RenderContext, r: &AdvanceRequest, name: &str)
     )
 }
 
-pub fn unit_request_dialog(rc: &RenderContext, r: &UnitTypeRequest) -> RenderResult {
+pub(crate) fn unit_request_dialog(rc: &RenderContext, r: &UnitTypeRequest) -> RenderResult {
     bottom_centered_text(rc, &r.description);
 
     let c = &r.choices;
@@ -93,13 +97,13 @@ pub fn unit_request_dialog(rc: &RenderContext, r: &UnitTypeRequest) -> RenderRes
 }
 
 #[derive(Clone, Debug)]
-pub struct UnitsSelection {
+pub(crate) struct UnitsSelection {
     pub player: usize,
     pub selection: MultiSelection<u32>,
 }
 
 impl UnitsSelection {
-    pub fn new(r: &UnitsRequest) -> Self {
+    pub(crate) fn new(r: &UnitsRequest) -> Self {
         UnitsSelection {
             player: r.player,
             selection: MultiSelection::new(r.request.clone()),
@@ -121,7 +125,7 @@ impl UnitSelection for UnitsSelection {
     }
 }
 
-pub fn select_units_dialog(rc: &RenderContext, s: &UnitsSelection) -> RenderResult {
+pub(crate) fn select_units_dialog(rc: &RenderContext, s: &UnitsSelection) -> RenderResult {
     let selected = &s.selection.selected;
     bottom_centered_text(
         rc,
@@ -149,7 +153,7 @@ pub fn select_units_dialog(rc: &RenderContext, s: &UnitsSelection) -> RenderResu
 }
 
 #[derive(Clone, Debug)]
-pub struct MultiSelection<T>
+pub(crate) struct MultiSelection<T>
 where
     T: Clone + PartialEq + Ord,
 {
@@ -158,18 +162,18 @@ where
 }
 
 impl<T: Clone + PartialEq + Ord> MultiSelection<T> {
-    pub fn new(request: MultiRequest<T>) -> Self {
+    pub(crate) fn new(request: MultiRequest<T>) -> Self {
         MultiSelection {
             request,
             selected: vec![],
         }
     }
 
-    pub fn is_valid(&self) -> bool {
+    pub(crate) fn is_valid(&self) -> bool {
         self.request.is_valid(&self.selected)
     }
 
-    pub fn toggle(self, value: T) -> Self {
+    pub(crate) fn toggle(self, value: T) -> Self {
         if let Some(i) = self.selected.iter().position(|s| s == &value) {
             let mut new = self.clone();
             new.selected.remove(i);
@@ -185,22 +189,22 @@ impl<T: Clone + PartialEq + Ord> MultiSelection<T> {
 }
 
 #[derive(Clone, PartialEq, Eq, Ord, PartialOrd, Debug)]
-pub enum SelectedStructureStatus {
+pub(crate) enum SelectedStructureStatus {
     Valid,
     Warn,
     Invalid,
 }
 
 #[derive(Clone, PartialEq, Eq, Ord, PartialOrd, Debug)]
-pub struct SelectedStructureInfo {
+pub(crate) struct SelectedStructureInfo {
     pub position: Position,
-    pub structure: Structure,
+    pub(crate) structure: Structure,
     pub status: SelectedStructureStatus,
     pub tooltip: Option<String>,
 }
 
 impl SelectedStructureInfo {
-    pub fn new(
+    pub(crate) fn new(
         position: Position,
         structure: Structure,
         status: SelectedStructureStatus,
@@ -214,11 +218,11 @@ impl SelectedStructureInfo {
         }
     }
 
-    pub fn selected(&self) -> SelectedStructure {
+    pub(crate) fn selected(&self) -> SelectedStructure {
         SelectedStructure::new(self.position, self.structure.clone())
     }
 
-    pub fn highlight_type(&self) -> HighlightType {
+    pub(crate) fn highlight_type(&self) -> HighlightType {
         match self.status {
             SelectedStructureStatus::Valid => HighlightType::Choices,
             SelectedStructureStatus::Warn => HighlightType::Warn,
@@ -227,7 +231,7 @@ impl SelectedStructureInfo {
     }
 }
 
-pub fn select_structures_dialog(
+pub(crate) fn select_structures_dialog(
     rc: &RenderContext,
     d: Option<&BaseOrCustomDialog>,
     s: &MultiSelection<SelectedStructureInfo>,
@@ -286,7 +290,7 @@ pub(crate) fn multi_select_tooltip<T: Clone + PartialEq + Ord>(
     }
 }
 
-pub fn bool_request_dialog(rc: &RenderContext, description: &str) -> RenderResult {
+pub(crate) fn bool_request_dialog(rc: &RenderContext, description: &str) -> RenderResult {
     bottom_centered_text(rc, description);
     if ok_button(rc, OkTooltip::Valid("OK".to_string())) {
         return bool_answer(true);
@@ -301,7 +305,7 @@ fn bool_answer(answer: bool) -> RenderResult {
     StateUpdate::execute(Action::Response(EventResponse::Bool(answer)))
 }
 
-pub fn player_request_dialog(rc: &RenderContext, r: &PlayerRequest) -> RenderResult {
+pub(crate) fn player_request_dialog(rc: &RenderContext, r: &PlayerRequest) -> RenderResult {
     choose_player_dialog(rc, &r.choices, |p| {
         Action::Response(EventResponse::SelectPlayer(p))
     })

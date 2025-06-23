@@ -31,7 +31,7 @@ use server::playing_actions::PlayingActionType;
 use server::position::Position;
 
 #[derive(Clone, Debug)]
-pub enum ActiveDialog {
+pub(crate) enum ActiveDialog {
     None,
     Log(LogDialog),
     Info(InfoDialog),
@@ -70,40 +70,7 @@ pub enum ActiveDialog {
 
 impl ActiveDialog {
     #[must_use]
-    pub fn title(&self) -> &str {
-        match self {
-            ActiveDialog::None => "none",
-            ActiveDialog::DialogChooser(_) => "dialog chooser",
-            ActiveDialog::Log(_) => "log",
-            ActiveDialog::Info(_) => "info",
-            ActiveDialog::WaitingForUpdate => "waiting for update",
-            ActiveDialog::IncreaseHappiness(_) => "increase happiness",
-            ActiveDialog::AdvanceMenu => "advance menu",
-            ActiveDialog::AdvancePayment(_) => "advance payment",
-            ActiveDialog::ConstructionPayment(_) => "construction payment",
-            ActiveDialog::CollectResources(_) => "collect resources",
-            ActiveDialog::RecruitUnitSelection(_) => "recruit unit selection",
-            ActiveDialog::ReplaceUnits(_) => "replace units",
-            ActiveDialog::MoveUnits(_) => "move units",
-            ActiveDialog::MovePayment(_) => "move payment",
-            ActiveDialog::ExploreResolution(_) => "explore resolution",
-            ActiveDialog::ChangeGovernmentType => "change government type",
-            ActiveDialog::ChooseAdditionalAdvances(_) => "choose additional advances",
-            ActiveDialog::ResourceRewardRequest(_) => "trade route selection",
-            ActiveDialog::AdvanceRequest(_) => "advance selection",
-            ActiveDialog::PaymentRequest(_) => "custom phase payment request",
-            ActiveDialog::PlayerRequest(_) => "custom phase player request",
-            ActiveDialog::PositionRequest(_) => "custom phase position request",
-            ActiveDialog::UnitTypeRequest(_) => "custom phase unit request",
-            ActiveDialog::UnitsRequest(_) => "custom phase units request",
-            ActiveDialog::StructuresRequest(_, _) => "custom phase structures request",
-            ActiveDialog::BoolRequest(_) => "custom phase bool request",
-            ActiveDialog::HandCardsRequest(_) => "custom phase hand cards request",
-        }
-    }
-
-    #[must_use]
-    pub fn help_message(&self, rc: &RenderContext) -> Vec<String> {
+    pub(crate) fn help_message(&self, rc: &RenderContext) -> Vec<String> {
         match self {
             ActiveDialog::None
             | ActiveDialog::Log(_)
@@ -193,17 +160,17 @@ impl ActiveDialog {
     }
 
     #[must_use]
-    pub fn show_for_other_player(&self) -> bool {
+    pub(crate) fn show_for_other_player(&self) -> bool {
         self.is_modal() || matches!(self, ActiveDialog::PlayerRequest(_))
     }
 
     #[must_use]
-    pub fn is_modal(&self) -> bool {
+    pub(crate) fn is_modal(&self) -> bool {
         matches!(self, ActiveDialog::Log(_) | ActiveDialog::Info(_)) || self.is_advance()
     }
 
     #[must_use]
-    pub fn is_advance(&self) -> bool {
+    pub(crate) fn is_advance(&self) -> bool {
         matches!(
             self,
             ActiveDialog::AdvanceMenu
@@ -216,14 +183,14 @@ impl ActiveDialog {
 }
 
 #[derive(Clone, Debug)]
-pub struct PendingUpdate {
+pub(crate) struct PendingUpdate {
     pub action: Action,
     pub warning: Vec<String>,
     pub info: Vec<String>,
 }
 
 #[derive(Clone, Debug)]
-pub struct DialogChooser {
+pub(crate) struct DialogChooser {
     pub title: String,
     pub options: Vec<(Option<EventOrigin>, ActiveDialog)>,
 }
@@ -245,40 +212,40 @@ pub(crate) enum StateUpdate {
     ToggleAiPlay,
 }
 
-pub type RenderResult = Result<(), Box<StateUpdate>>;
+pub(crate) type RenderResult = Result<(), Box<StateUpdate>>;
 
-pub const NO_UPDATE: RenderResult = Ok(());
+pub(crate) const NO_UPDATE: RenderResult = Ok(());
 
 impl StateUpdate {
-    pub fn of(update: StateUpdate) -> RenderResult {
+    pub(crate) fn of(update: StateUpdate) -> RenderResult {
         Err(Box::new(update))
     }
 
-    pub fn open_dialog(dialog: ActiveDialog) -> RenderResult {
+    pub(crate) fn open_dialog(dialog: ActiveDialog) -> RenderResult {
         Self::of(StateUpdate::OpenDialog(dialog))
     }
 
-    pub fn close_dialog() -> RenderResult {
+    pub(crate) fn close_dialog() -> RenderResult {
         Self::of(StateUpdate::CloseDialog)
     }
 
-    pub fn execute(action: Action) -> RenderResult {
+    pub(crate) fn execute(action: Action) -> RenderResult {
         Self::of(StateUpdate::Execute(action))
     }
 
-    pub fn cancel() -> RenderResult {
+    pub(crate) fn cancel() -> RenderResult {
         Self::of(StateUpdate::Cancel)
     }
 
-    pub fn set_focused_tile(pos: Position) -> RenderResult {
+    pub(crate) fn set_focused_tile(pos: Position) -> RenderResult {
         Self::of(StateUpdate::SetFocusedTile(pos))
     }
 
-    pub fn resolve_pending_update(confirm: bool) -> RenderResult {
+    pub(crate) fn resolve_pending_update(confirm: bool) -> RenderResult {
         Self::of(StateUpdate::ResolvePendingUpdate(confirm))
     }
 
-    pub fn execute_with_warning(action: Action, warning: Vec<String>) -> RenderResult {
+    pub(crate) fn execute_with_warning(action: Action, warning: Vec<String>) -> RenderResult {
         Self::of(if warning.is_empty() {
             StateUpdate::Execute(action)
         } else {
@@ -290,7 +257,7 @@ impl StateUpdate {
         })
     }
 
-    pub fn execute_with_confirm(info: Vec<String>, action: Action) -> RenderResult {
+    pub(crate) fn execute_with_confirm(info: Vec<String>, action: Action) -> RenderResult {
         Self::of(StateUpdate::ExecuteWithWarning(PendingUpdate {
             action,
             warning: vec![],
@@ -298,7 +265,11 @@ impl StateUpdate {
         }))
     }
 
-    pub fn execute_activation(action: Action, warning: Vec<String>, city: &City) -> RenderResult {
+    pub(crate) fn execute_activation(
+        action: Action,
+        warning: Vec<String>,
+        city: &City,
+    ) -> RenderResult {
         if city.is_activated() {
             match city.mood_state {
                 MoodState::Happy => {
@@ -318,7 +289,7 @@ impl StateUpdate {
         }
     }
 
-    pub fn dialog_chooser(
+    pub(crate) fn dialog_chooser(
         title: &str,
         options: Vec<(Option<EventOrigin>, ActiveDialog)>,
     ) -> RenderResult {
@@ -334,11 +305,11 @@ impl StateUpdate {
         }
     }
 
-    pub fn response(action: EventResponse) -> RenderResult {
+    pub(crate) fn response(action: EventResponse) -> RenderResult {
         Self::execute(Action::Response(action))
     }
 
-    pub fn move_units(
+    pub(crate) fn move_units(
         rc: &RenderContext,
         pos: Option<Position>,
         intent: MoveIntent,
@@ -354,12 +325,12 @@ impl StateUpdate {
     }
 }
 
-pub struct MousePosition {
+pub(crate) struct MousePosition {
     pub position: Vec2,
     pub time: f64,
 }
 
-pub enum CameraMode {
+pub(crate) enum CameraMode {
     Screen,
     World,
 }
@@ -370,14 +341,14 @@ use server::ai::AI;
 use server::events::EventOrigin;
 
 pub struct State {
-    pub assets: Assets,
+    pub(crate) assets: Assets,
     pub control_player: Option<usize>,
     pub show_player: usize,
-    pub active_dialog: ActiveDialog,
-    pub pending_update: Option<PendingUpdate>,
+    pub(crate) active_dialog: ActiveDialog,
+    pub(crate) pending_update: Option<PendingUpdate>,
     pub camera: Camera2D,
     pub screen_size: Vec2,
-    pub mouse_positions: Vec<MousePosition>,
+    pub(crate) mouse_positions: Vec<MousePosition>,
     pub focused_tile: Option<Position>,
     pub show_permanent_effects: bool,
     pub ai_autoplay: bool,
@@ -416,7 +387,11 @@ impl State {
     }
 
     #[must_use]
-    pub fn render_context<'a>(&'a self, game: &'a Game, stage: RenderStage) -> RenderContext<'a> {
+    pub(crate) fn render_context<'a>(
+        &'a self,
+        game: &'a Game,
+        stage: RenderStage,
+    ) -> RenderContext<'a> {
         RenderContext {
             shown_player: game.player(self.show_player),
             game,
@@ -426,13 +401,13 @@ impl State {
         }
     }
 
-    pub fn clear(&mut self) {
+    pub(crate) fn clear(&mut self) {
         self.active_dialog = ActiveDialog::None;
         self.pending_update = None;
         self.focused_tile = None;
     }
 
-    pub fn update(&mut self, game: &Game, update: StateUpdate) -> GameSyncRequest {
+    pub(crate) fn update(&mut self, game: &Game, update: StateUpdate) -> GameSyncRequest {
         match update {
             StateUpdate::Execute(a) => GameSyncRequest::ExecuteAction(a),
             StateUpdate::ExecuteWithWarning(update) => {
@@ -501,11 +476,11 @@ impl State {
         }
     }
 
-    pub fn set_dialog(&mut self, dialog: ActiveDialog) {
+    pub(crate) fn set_dialog(&mut self, dialog: ActiveDialog) {
         self.active_dialog = dialog;
     }
 
-    pub fn update_from_game(&mut self, game: &Game) -> GameSyncRequest {
+    pub(crate) fn update_from_game(&mut self, game: &Game) -> GameSyncRequest {
         let dialog = self.game_state_dialog(game);
         self.clear();
         self.active_dialog = dialog;
@@ -513,7 +488,7 @@ impl State {
     }
 
     #[must_use]
-    pub fn game_state_dialog(&self, game: &Game) -> ActiveDialog {
+    pub(crate) fn game_state_dialog(&self, game: &Game) -> ActiveDialog {
         if let Some(e) = &game.current_event_handler() {
             return match &e.request {
                 PersistentEventRequest::Payment(r) => ActiveDialog::PaymentRequest(
@@ -594,15 +569,15 @@ impl State {
     }
 
     #[must_use]
-    pub fn measure_text(&self, text: &str) -> TextDimensions {
+    pub(crate) fn measure_text(&self, text: &str) -> TextDimensions {
         measure_text(text, Some(&self.assets.font), FONT_SIZE, 1.0)
     }
 
-    pub fn draw_text(&self, text: &str, x: f32, y: f32) {
+    pub(crate) fn draw_text(&self, text: &str, x: f32, y: f32) {
         self.draw_text_with_color(text, x, y, BLACK);
     }
 
-    pub fn draw_text_with_color(&self, text: &str, x: f32, y: f32, color: Color) {
+    pub(crate) fn draw_text_with_color(&self, text: &str, x: f32, y: f32, color: Color) {
         draw_text_ex(
             text,
             x,

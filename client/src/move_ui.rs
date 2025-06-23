@@ -31,7 +31,7 @@ pub(crate) struct MovePayment {
 }
 
 impl MoveIntent {
-    pub fn to_predicate(self) -> impl Fn(&Unit) -> bool {
+    pub(crate) fn to_predicate(self) -> impl Fn(&Unit) -> bool {
         match self {
             MoveIntent::Land => |u: &Unit| u.is_land_based() && !u.is_transported(),
             MoveIntent::Sea => |u: &Unit| !u.is_land_based(),
@@ -39,7 +39,7 @@ impl MoveIntent {
         }
     }
 
-    pub fn toolip(&self) -> &str {
+    pub(crate) fn toolip(&self) -> &str {
         match self {
             MoveIntent::Land => "Move land units",
             MoveIntent::Sea => "Move sea units",
@@ -47,7 +47,7 @@ impl MoveIntent {
         }
     }
 
-    pub fn icon<'a>(self, rc: &'a RenderContext) -> &'a Texture2D {
+    pub(crate) fn icon<'a>(self, rc: &'a RenderContext) -> &'a Texture2D {
         match self {
             MoveIntent::Land => &rc.assets().move_units,
             MoveIntent::Sea => rc.assets().unit(UnitType::Ship, rc.shown_player),
@@ -56,7 +56,7 @@ impl MoveIntent {
     }
 }
 
-pub fn click(
+pub(crate) fn click(
     rc: &RenderContext,
     pos: Position,
     s: &MoveSelection,
@@ -148,7 +148,7 @@ fn unit_selection_changed(pos: Position, game: &Game, mut new: MoveSelection) ->
     StateUpdate::open_dialog(ActiveDialog::MoveUnits(new))
 }
 
-pub fn movable_units(
+pub(crate) fn movable_units(
     pos: Position,
     game: &Game,
     p: &Player,
@@ -176,7 +176,7 @@ pub(crate) struct MoveSelection {
 }
 
 impl MoveSelection {
-    pub fn new(
+    pub(crate) fn new(
         player_index: usize,
         start: Option<Position>,
         game: &Game,

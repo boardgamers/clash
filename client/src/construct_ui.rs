@@ -60,7 +60,7 @@ pub(crate) struct ConstructionPayment {
 }
 
 impl ConstructionPayment {
-    pub fn new(
+    pub(crate) fn new(
         rc: &RenderContext,
         city: &City,
         name: &str,

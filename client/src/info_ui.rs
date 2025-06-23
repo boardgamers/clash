@@ -9,7 +9,7 @@ use server::content::civilizations;
 use std::ops::Mul;
 
 #[derive(Clone, Debug)]
-pub struct InfoDialog {
+pub(crate) struct InfoDialog {
     pub select: InfoSelect,
 }
 
@@ -20,18 +20,18 @@ impl Default for InfoDialog {
 }
 
 impl InfoDialog {
-    pub fn new(select: InfoSelect) -> Self {
+    pub(crate) fn new(select: InfoSelect) -> Self {
         InfoDialog { select }
     }
 }
 
 #[derive(Clone, Debug)]
-pub enum InfoSelect {
+pub(crate) enum InfoSelect {
     Civilization(String),
     // Incident(String),
 }
 
-pub fn show_info_dialog(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
+pub(crate) fn show_info_dialog(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
     let p = rc.shown_player;
 
     draw_button(
