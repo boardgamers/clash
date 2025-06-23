@@ -11,7 +11,6 @@ use crate::{
     movement::{self, MoveUnits, MovementAction},
     pirates,
     position::Position,
-    unit::UnitType,
     utils::{self, Rng},
 };
 
@@ -132,10 +131,10 @@ impl ActiveMissions {
     fn missions_for_unit(&self, game: &Game, unit: u32) -> Vec<Mission> {
         let unit = game.players[self.player_index].get_unit(unit);
         let explore_target = decide_scouting_position(game, self.player_index, unit.position, self);
-        if matches!(unit.unit_type, UnitType::Settler) {
+        if unit.is_settler() {
             return self.get_settler_missions(game, unit, explore_target);
         }
-        if matches!(unit.unit_type, UnitType::Ship) {
+        if unit.is_ship() {
             return self.get_ship_missions(game, unit.id);
         }
         self.get_combat_unit_missions(game, explore_target, unit.id)
@@ -367,14 +366,12 @@ impl ActiveMissions {
         let players_active_missions = self.get_players_active_missions(game, rng);
         let difficulty_factor = ai::difficulty_factor(difficulty);
         for mission in &missions {
-            let mut game = game.clone();
-            game.supports_undo = false;
             let mut players_active_missions = players_active_missions.clone();
             players_active_missions[self.player_index]
                 .missions
                 .push(mission.clone());
             let score = ai::get_average_score(
-                game,
+                game.clone(),
                 self.player_index,
                 rng,
                 time_per_mission,
@@ -572,8 +569,8 @@ impl Mission {
     }
 
     fn next_movement(&self, game: &Game) -> Option<MovementAction> {
-        //todo: settlers and scouts should avoid enemy combat troupes in their path
-        let route = movement::move_units_destinations(
+        //todo: settlers and scouts should avoid enemy combat troops in their path
+        let route = movement::possible_move_routes(
             &game.players[self.player_index],
             game,
             &self.units,
@@ -673,9 +670,9 @@ fn settling_score(
     }
     if neighbors.contains(&&Terrain::Fertile)
         || (neighbors.contains(&&Terrain::Barren)
-            && game.players[player_index].has_advance(Advance::Irrigation))
+            && game.players[player_index].can_use_advance(Advance::Irrigation))
         || neighbors.contains(&&Terrain::Water)
-            && game.players[player_index].has_advance(Advance::Fishing)
+            && game.players[player_index].can_use_advance(Advance::Fishing)
     {
         score += 1.0;
     }
@@ -687,7 +684,7 @@ fn settling_score(
         {
             score += 0.75;
         }
-        if game.players[player_index].has_advance(Advance::Fishing) {
+        if game.players[player_index].can_use_advance(Advance::Fishing) {
             score += 0.25;
         }
     }

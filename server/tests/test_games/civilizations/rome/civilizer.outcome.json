@@ -1,0 +1,668 @@
+{
+  "state": "Playing",
+  "players": [
+    {
+      "id": 0,
+      "resources": {
+        "food": 2,
+        "gold": 1
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "mood_state": "Happy",
+          "position": "D1"
+        }
+      ],
+      "units": [
+        {
+          "position": "D8",
+          "unit_type": {
+            "Leader": "Sulla"
+          },
+          "movement_restrictions": [
+            "Battle"
+          ],
+          "id": 0
+        }
+      ],
+      "civilization": "Rome",
+      "advances": [
+        "Farming",
+        "Mining",
+        "Tactics"
+      ],
+      "incident_tokens": 1,
+      "next_unit_id": 1
+    },
+    {
+      "id": 1,
+      "resources": {
+        "food": 4,
+        "culture_tokens": 2
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "civilization": "Rome",
+      "advances": [
+        "Farming",
+        "Mining"
+      ],
+      "incident_tokens": 1,
+      "next_unit_id": 1
+    },
+    {
+      "id": 2,
+      "civilization": "Barbarians",
+      "next_unit_id": 0
+    }
+  ],
+  "map": {
+    "tiles": [
+      [
+        "A3",
+        "Unexplored"
+      ],
+      [
+        "A5",
+        "Unexplored"
+      ],
+      [
+        "A7",
+        "Unexplored"
+      ],
+      [
+        "B2",
+        "Unexplored"
+      ],
+      [
+        "B3",
+        "Unexplored"
+      ],
+      [
+        "B4",
+        "Unexplored"
+      ],
+      [
+        "B5",
+        "Unexplored"
+      ],
+      [
+        "B6",
+        "Unexplored"
+      ],
+      [
+        "B7",
+        "Unexplored"
+      ],
+      [
+        "C2",
+        "Forest"
+      ],
+      [
+        "C3",
+        "Unexplored"
+      ],
+      [
+        "C4",
+        "Unexplored"
+      ],
+      [
+        "C5",
+        "Unexplored"
+      ],
+      [
+        "C6",
+        "Unexplored"
+      ],
+      [
+        "C7",
+        "Unexplored"
+      ],
+      [
+        "C8",
+        "Barren"
+      ],
+      [
+        "D1",
+        "Fertile"
+      ],
+      [
+        "D2",
+        "Barren"
+      ],
+      [
+        "D3",
+        "Unexplored"
+      ],
+      [
+        "D4",
+        "Unexplored"
+      ],
+      [
+        "D5",
+        "Unexplored"
+      ],
+      [
+        "D6",
+        "Unexplored"
+      ],
+      [
+        "D7",
+        "Barren"
+      ],
+      [
+        "D8",
+        "Barren"
+      ],
+      [
+        "E2",
+        "Mountain"
+      ],
+      [
+        "E3",
+        "Unexplored"
+      ],
+      [
+        "E4",
+        "Unexplored"
+      ],
+      [
+        "E5",
+        "Unexplored"
+      ],
+      [
+        "E6",
+        "Unexplored"
+      ],
+      [
+        "E7",
+        "Unexplored"
+      ],
+      [
+        "E8",
+        "Forest"
+      ],
+      [
+        "F2",
+        "Unexplored"
+      ],
+      [
+        "F3",
+        "Unexplored"
+      ],
+      [
+        "F4",
+        "Unexplored"
+      ],
+      [
+        "F5",
+        "Unexplored"
+      ],
+      [
+        "F6",
+        "Unexplored"
+      ],
+      [
+        "F7",
+        "Unexplored"
+      ],
+      [
+        "G3",
+        "Unexplored"
+      ],
+      [
+        "G5",
+        "Unexplored"
+      ],
+      [
+        "G7",
+        "Unexplored"
+      ]
+    ],
+    "unexplored_blocks": [
+      {
+        "position": {
+          "top_tile": "B2",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Forest",
+            "Water",
+            "Fertile",
+            "Forest"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "F2",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Water",
+            "Water",
+            "Forest",
+            "Forest"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "D3",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Water",
+            "Forest",
+            "Water",
+            "Fertile"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "B4",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Water",
+            "Fertile",
+            "Forest",
+            "Mountain"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "F4",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Fertile",
+            "Water",
+            "Fertile",
+            "Barren"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "D5",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Forest",
+            "Mountain",
+            "Fertile",
+            "Mountain"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "B6",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Fertile",
+            "Fertile",
+            "Fertile",
+            "Barren"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "F6",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Fertile",
+            "Fertile",
+            "Fertile",
+            "Forest"
+          ]
+        }
+      }
+    ]
+  },
+  "starting_player_index": 1,
+  "current_player_index": 0,
+  "action_log": [
+    {
+      "age": 1,
+      "rounds": [
+        {
+          "round": 1,
+          "players": [
+            {
+              "index": 0,
+              "actions": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          0
+                        ],
+                        "destination": "D8"
+                      }
+                    }
+                  },
+                  "combat_stats": {
+                    "round": 1,
+                    "battleground": "Land",
+                    "attacker": {
+                      "position": "E8",
+                      "player": 0,
+                      "present": {
+                        "leader": "Sulla"
+                      }
+                    },
+                    "defender": {
+                      "position": "D8",
+                      "player": 2,
+                      "present": {
+                        "infantry": 1
+                      },
+                      "losses": {
+                        "infantry": 1
+                      }
+                    },
+                    "result": "AttackerWins"
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 2,
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Barbarian battle"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "action_log_index": 1,
+  "log": [
+    [
+      "Player1: Move: marched Sulla from E8 to D8, Pay 1 action"
+    ],
+    [
+      "Combat round 1",
+      "Player1: Combat: Attacking with Sulla, Roll 5 (cavalry, no bonus) for combined combat value of 7 and gets 1 hits against defending units, Combat modifiers: Sulla adds 2 combat value",
+      "Barbarians: Combat: Defending with 1 infantry, Roll 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units, Lost 1 infantry at D8",
+      "Barbarians: Choose Casualties: Remove all defending units",
+      "Attacker wins",
+      "Player1: Barbarian battle: Gain 1 gold"
+    ]
+  ],
+  "undo_limit": 1,
+  "actions_left": 2,
+  "round": 1,
+  "age": 1,
+  "messages": [
+    "The game has started"
+  ],
+  "dice_roll_outcomes": [
+    3,
+    3,
+    7,
+    1,
+    0,
+    6,
+    9,
+    7,
+    3,
+    5,
+    3,
+    0,
+    1,
+    11,
+    2,
+    5,
+    6,
+    3,
+    3,
+    9,
+    9,
+    4,
+    6,
+    2,
+    9,
+    8,
+    11,
+    6,
+    1,
+    0,
+    3,
+    2,
+    9,
+    1,
+    4,
+    6,
+    11,
+    8,
+    4,
+    0,
+    1,
+    5,
+    7,
+    4,
+    10,
+    5,
+    7,
+    4,
+    2,
+    11,
+    1,
+    5,
+    10,
+    5,
+    3,
+    9,
+    1,
+    10,
+    3,
+    7,
+    2,
+    11,
+    10,
+    2,
+    6,
+    5,
+    7,
+    3,
+    1,
+    3,
+    5,
+    1,
+    9,
+    5,
+    4,
+    4,
+    2,
+    7,
+    6,
+    11,
+    10,
+    6,
+    5,
+    8,
+    2,
+    10,
+    0,
+    3,
+    10,
+    0,
+    6,
+    4,
+    1,
+    10,
+    10,
+    0,
+    1,
+    11,
+    10,
+    2,
+    4,
+    1,
+    8,
+    8,
+    6,
+    9,
+    2,
+    0,
+    8,
+    8,
+    1,
+    7,
+    5,
+    5,
+    8,
+    8,
+    11,
+    5,
+    0,
+    3,
+    10,
+    7,
+    0,
+    11,
+    6,
+    0,
+    5,
+    3,
+    8,
+    9,
+    5,
+    7,
+    2,
+    7,
+    9,
+    9,
+    4,
+    0,
+    6,
+    5,
+    4,
+    5,
+    10,
+    2,
+    9,
+    3,
+    9,
+    7,
+    4,
+    4,
+    1,
+    8,
+    10,
+    4,
+    6,
+    3,
+    1,
+    10,
+    11,
+    6,
+    0,
+    0,
+    8,
+    8,
+    6,
+    10,
+    7,
+    6,
+    1,
+    3,
+    7,
+    3,
+    9,
+    5,
+    0,
+    8,
+    0,
+    10,
+    6,
+    11,
+    7,
+    1,
+    11,
+    11,
+    1,
+    1,
+    7,
+    10,
+    6,
+    9,
+    5,
+    5,
+    7,
+    6,
+    10,
+    6,
+    2,
+    0
+  ],
+  "dice_roll_log": [
+    8,
+    2
+  ],
+  "wonders_left": [
+    "Pyramids"
+  ],
+  "incidents_left": [
+    18
+  ]
+}

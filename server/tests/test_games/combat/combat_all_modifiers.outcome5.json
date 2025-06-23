@@ -12,89 +12,6 @@
       ]
     }
   },
-  "events": [
-    {
-      "event_type": {
-        "CombatRoundEnd": {
-          "attacker_casualties": {
-            "fighters": 1,
-            "tactics_card": 1
-          },
-          "defender_casualties": {
-            "fighters": 2,
-            "tactics_card": 2
-          },
-          "can_retreat": false,
-          "final_result": "AttackerWins",
-          "combat": {
-            "round": 1,
-            "defender": 1,
-            "defender_position": "C1",
-            "attacker": 0,
-            "attacker_position": "C2",
-            "attackers": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5
-            ],
-            "retreat": "CanRetreat",
-            "modifiers": [
-              "SteelWeaponsAttacker",
-              "CancelFortressIgnoreHit",
-              "SteelWeaponsDefender"
-            ],
-            "stats": {
-              "position": "C1",
-              "battleground": "CityWithFortress",
-              "attacker": {
-                "player": 0,
-                "present": {
-                  "settlers": 2,
-                  "infantry": 1,
-                  "cavalry": 1,
-                  "elephants": 1,
-                  "leaders": 1
-                }
-              },
-              "defender": {
-                "player": 1,
-                "present": {
-                  "infantry": 2
-                }
-              }
-            }
-          }
-        }
-      },
-      "player": 0,
-      "last_priority_used": 1,
-      "handler": {
-        "priority": 1,
-        "request": {
-          "SelectUnits": {
-            "player": 0,
-            "choices": [
-              0,
-              1,
-              2,
-              3
-            ],
-            "needed": {
-              "start": 1,
-              "end": 1
-            },
-            "description": "Remove 1 attacking units"
-          }
-        },
-        "origin": {
-          "Builtin": "Choose Casualties"
-        }
-      }
-    }
-  ],
   "players": [
     {
       "id": 0,
@@ -118,19 +35,24 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "A1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Neutral",
           "position": "C2"
+        },
+        {
+          "city_pieces": {
+            "fortress": 0
+          },
+          "mood_state": "Angry",
+          "position": "C1"
         }
       ],
       "units": [
         {
-          "position": "C2",
+          "position": "C1",
           "unit_type": "Infantry",
           "movement_restrictions": [
             "Battle"
@@ -138,7 +60,7 @@
           "id": 0
         },
         {
-          "position": "C2",
+          "position": "C1",
           "unit_type": "Cavalry",
           "movement_restrictions": [
             "Battle"
@@ -146,15 +68,15 @@
           "id": 1
         },
         {
-          "position": "C2",
-          "unit_type": "Leader",
+          "position": "C1",
+          "unit_type": "Infantry",
           "movement_restrictions": [
             "Battle"
           ],
           "id": 2
         },
         {
-          "position": "C2",
+          "position": "C1",
           "unit_type": "Elephant",
           "movement_restrictions": [
             "Battle"
@@ -162,12 +84,12 @@
           "id": 3
         },
         {
-          "position": "C2",
+          "position": "C1",
           "unit_type": "Settler",
           "id": 4
         },
         {
-          "position": "C2",
+          "position": "C1",
           "unit_type": "Settler",
           "id": 5
         },
@@ -182,7 +104,7 @@
           "id": 7
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Mining",
@@ -213,28 +135,7 @@
         "mood_tokens": 7,
         "culture_tokens": 7
       },
-      "cities": [
-        {
-          "city_pieces": {
-            "fortress": 1
-          },
-          "mood_state": "Angry",
-          "position": "C1"
-        }
-      ],
-      "units": [
-        {
-          "position": "C1",
-          "unit_type": "Infantry",
-          "id": 0
-        },
-        {
-          "position": "C1",
-          "unit_type": "Infantry",
-          "id": 1
-        }
-      ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Fanaticism",
         "Farming",
@@ -296,12 +197,14 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Movement": {
@@ -317,7 +220,18 @@
                         "destination": "C1"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -328,7 +242,21 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "ore": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Advance": "SteelWeapons"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -340,7 +268,31 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {},
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Advance": "Siegecraft"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "ore": 2
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Advance": "Siegecraft"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -351,7 +303,21 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 1,
+                      "Resources": {
+                        "resources": {
+                          "ore": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Advance": "SteelWeapons"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -362,7 +328,24 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 1
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToDiscardFaceDown"
+                      },
+                      "origin": {
+                        "Advance": "Tactics"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -373,7 +356,122 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "combat_stats": {
+                    "round": 1,
+                    "battleground": "CityWithFortress",
+                    "attacker": {
+                      "position": "C2",
+                      "player": 0,
+                      "present": {
+                        "settlers": 2,
+                        "infantry": 2,
+                        "cavalry": 1,
+                        "elephants": 1
+                      }
+                    },
+                    "defender": {
+                      "position": "C1",
+                      "player": 1,
+                      "present": {
+                        "infantry": 2
+                      },
+                      "losses": {
+                        "infantry": 2
+                      }
+                    },
+                    "result": "AttackerWins",
+                    "city_mood": "Angry"
+                  },
+                  "items": [
+                    {
+                      "player": 1,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 2
+                        },
+                        "from": {
+                          "Hand": 1
+                        },
+                        "to": "PlayToDiscardFaceDown"
+                      },
+                      "origin": {
+                        "Advance": "Tactics"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Units": {
+                        "units": {
+                          "infantry": 2
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Loss",
+                        "position": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Gain",
+                        "position": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Fortress"
+                        },
+                        "balance": "Loss",
+                        "position": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Fortress"
+                        },
+                        "balance": "Gain",
+                        "position": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -385,35 +483,34 @@
   "action_log_index": 6,
   "log": [
     [
-      "Player1 marched 2 settlers, 1 infantry, 1 cavalry, 1 elephant and a leader from C2 to C1"
+      "Player1: Move: marched 2 settlers, 2 infantry, 1 cavalry and 1 elephant from C2 to C1, Pay 1 action"
     ],
     [
       "Combat round 1",
-      "Attackers: 2 settlers, 1 infantry, 1 cavalry, 1 elephant and a leader",
-      "Defenders: 2 infantry"
+      "Player1: Combat: Attacking with 2 settlers, 2 infantry, 1 cavalry and 1 elephant",
+      "Player2: Combat: Defending with 2 infantry"
     ],
     [
-      "Player1 paid for steel weapons: 1 ore"
+      "Player1: Steel Weapons: Pay 1 ore"
     ],
     [
-      "Player1 paid for siegecraft: 2 ore to cancel the fortress ability to ignore a hit"
+      "Player1: Siegecraft: Pay nothing, Pay 2 ore, Cancel Fortress Ignore Hit"
     ],
     [
-      "Player2 paid for steel weapons: 1 ore"
+      "Player2: Steel Weapons: Pay 1 ore"
     ],
     [
-      "Player1 played a Tactics Card"
+      "Player1: Tactics: Play an action card face down"
     ],
     [
-      "Player2 played a Tactics Card",
-      "Player1 reveals Tactics Card Peltasts",
-      "Player2 reveals Tactics Card Encircled",
-      "Player1 rolled 6 (Infantry, +1 combat value), 6 (Infantry, no bonus), 6 (Infantry, no bonus), 1 (Leader, re-roll), 1 (Leader, re-roll), 1 (Leader, re-roll), 1 (Leader, re-roll), 1 (Leader, re-roll), 2 (Cavalry, +2 combat value) for combined combat value of 24 and gets 2 hits against defending units.",
-      "Player1 used the following combat modifiers: steel weapons added 1 combat value, Peltasts rolled a 6 and ignored a hit",
-      "Player2 rolled 6 (Infantry, +1 combat value), 1 (Leader, no bonus), 3 (Elephant, no bonus) for combined combat value of 12 and gets 1 hits against attacking units.",
-      "Player2 used the following combat modifiers: fortress added one extra die, steel weapons added 1 combat value",
-      "Encircled cannot do damage - opponent has fewer losses",
-      "Player1 has to remove 1 of their attacking units"
+      "Player2: Tactics: Play an action card face down, Reveal Tactics Card Encircled",
+      "Player1: Tactics: Reveal Tactics Card Peltasts",
+      "Player1: Combat: Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 1 (leader, no bonus) for combined combat value of 22 and gets 2 hits against defending units, Combat modifiers: steel weapons added 1 combat value, Peltasts rolled a 6 and ignored a hit, Gain 1 gold, Gain city C1, Gain Fortress at C1",
+      "Player2: Combat: Roll 1 (leader, no bonus), 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 4 and gets 0 hits against attacking units, Combat modifiers: fortress added one extra die, steel weapons added 1 combat value, Lost 2 infantry at C1, Lose city C1, Lose Fortress at C1",
+      "Player2: Encircled: Cannot do damage - opponent has fewer losses",
+      "Player2: Choose Casualties: Remove all defending units",
+      "Attacker wins",
+      "Player1: Waste: Could not store 1 gold"
     ]
   ],
   "undo_limit": 6,
@@ -423,7 +520,9 @@
   "messages": [
     "The game has started"
   ],
-  "rng": "295838188732677981854465749010340725692",
+  "dice_roll_outcomes": [
+    1
+  ],
   "dice_roll_log": [
     11,
     11,
@@ -432,14 +531,13 @@
     1,
     1,
     1,
-    1,
-    1,
-    2,
-    10,
-    0,
-    4
+    1
   ],
   "wonders_left": [
     "Pyramids"
+  ],
+  "action_cards_discarded": [
+    1,
+    2
   ]
 }

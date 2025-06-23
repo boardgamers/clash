@@ -2,67 +2,142 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
 use crate::advance::Advance;
 use crate::events::EventOrigin;
+use crate::game::Game;
+use enumset::EnumSetType;
+use serde::{Deserialize, Serialize};
+use std::fmt::Debug;
 
-pub struct SpecialAdvance {
-    pub advance: Advance,
+#[derive(EnumSetType, Serialize, Deserialize, Debug, Ord, PartialOrd, Hash)]
+pub enum SpecialAdvance {
+    // Maya
+    // Terrace,
+
+    // Rome
+    Aqueduct,
+    RomanRoads,
+    Captivi,
+    Provinces,
+
+    // Greece
+    Study,
+    Sparta,
+    HellenisticCulture,
+    CityStates,
+
+    // China
+    RiceCultivation,
+    Expansion,
+    Fireworks,
+    ImperialArmy,
+
+    // Vikings
+    ShipConstruction,
+    Longships,
+    Raiding,
+    RuneStones,
+}
+
+#[allow(clippy::trivially_copy_pass_by_ref)]
+impl SpecialAdvance {
+    #[must_use]
+    pub fn info<'a>(&self, game: &'a Game) -> &'a SpecialAdvanceInfo {
+        game.cache.get_special_advance(*self)
+    }
+
+    #[must_use]
+    pub fn name<'a>(&self, game: &'a Game) -> &'a str {
+        self.info(game).name.as_str()
+    }
+}
+
+#[derive(Clone)]
+pub enum SpecialAdvanceRequirement {
+    AnyGovernment,
+    Advance(Advance),
+}
+
+impl SpecialAdvanceRequirement {
+    #[must_use]
+    pub fn name(&self, game: &Game) -> String {
+        match self {
+            SpecialAdvanceRequirement::AnyGovernment => "Any government".to_string(),
+            SpecialAdvanceRequirement::Advance(a) => a.info(game).name.clone(),
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct SpecialAdvanceInfo {
+    pub advance: SpecialAdvance,
     pub name: String,
     pub description: String,
-    pub required_advance: Advance,
+    pub requirement: SpecialAdvanceRequirement,
     pub listeners: AbilityListeners,
 }
 
-impl SpecialAdvance {
+impl SpecialAdvanceInfo {
     #[must_use]
     pub fn builder(
-        advance: Advance,
+        advance: SpecialAdvance,
+        requirement: SpecialAdvanceRequirement,
         name: &str,
-        required_advance: Advance,
+        description: &str,
     ) -> SpecialAdvanceBuilder {
-        SpecialAdvanceBuilder::new(advance, name.to_string(), required_advance)
+        SpecialAdvanceBuilder::new(
+            advance,
+            requirement,
+            name.to_string(),
+            description.to_string(),
+        )
     }
 
     fn new(
-        advance: Advance,
+        advance: SpecialAdvance,
         name: String,
         description: String,
-        required_advance: Advance,
+        requirement: SpecialAdvanceRequirement,
         listeners: AbilityListeners,
     ) -> Self {
         Self {
             advance,
             name,
             description,
-            required_advance,
+            requirement,
             listeners,
         }
     }
 }
 
 pub struct SpecialAdvanceBuilder {
-    advance: Advance,
+    advance: SpecialAdvance,
     name: String,
-    descriptions: Vec<String>,
-    required_advance: Advance,
+    description: String,
+    requirement: SpecialAdvanceRequirement,
     builder: AbilityInitializerBuilder,
 }
 
 impl SpecialAdvanceBuilder {
-    fn new(advance: Advance, name: String, required_advance: Advance) -> Self {
+    fn new(
+        advance: SpecialAdvance,
+        requirement: SpecialAdvanceRequirement,
+        name: String,
+        description: String,
+    ) -> Self {
         Self {
             advance,
             name,
-            descriptions: Vec::new(),
-            required_advance,
+            description,
+            requirement,
             builder: AbilityInitializerBuilder::new(),
         }
     }
 
-    pub fn build(self) -> SpecialAdvance {
-        SpecialAdvance::new(
+    pub fn build(self) -> SpecialAdvanceInfo {
+        SpecialAdvanceInfo::new(
             self.advance,
             self.name,
-            String::from("✦ ") + &self.descriptions.join("\n✦ "),
-            self.required_advance,
+            self.description,
+            self.requirement,
             self.builder.build(),
         )
     }
@@ -75,5 +150,13 @@ impl AbilityInitializerSetup for SpecialAdvanceBuilder {
 
     fn get_key(&self) -> EventOrigin {
         EventOrigin::SpecialAdvance(self.advance)
+    }
+
+    fn name(&self) -> String {
+        self.name.clone()
+    }
+
+    fn description(&self) -> String {
+        self.description.clone()
     }
 }

@@ -25,7 +25,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "D1"
         },
@@ -38,7 +37,7 @@
           "port_position": "B3"
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Fishing",
@@ -63,7 +62,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "D8"
         },
@@ -83,7 +81,7 @@
           "id": 1
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Fishing",
@@ -331,99 +329,20 @@
   "current_player_index": 1,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Response": {
                       "ExploreResolution": 3
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "ExploreResolution": {
-                              "block": {
-                                "block": {
-                                  "terrain": [
-                                    "Fertile",
-                                    "Mountain",
-                                    "Forest",
-                                    "Fertile"
-                                  ]
-                                },
-                                "position": {
-                                  "rotation": 0,
-                                  "top_tile": "F4"
-                                }
-                              },
-                              "destination": "E5",
-                              "ship_can_teleport": false,
-                              "start": "D5",
-                              "units": [
-                                1
-                              ]
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Builtin": "Explore Resolution"
-                            },
-                            "priority": 0,
-                            "request": "ExploreResolution"
-                          },
-                          "last_priority_used": 0,
-                          "player": 1
-                        }
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/tiles/27/1",
-                      "value": "Unexplored"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/tiles/33/1",
-                      "value": "Unexplored"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/tiles/34/1",
-                      "value": "Unexplored"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/tiles/38/1",
-                      "value": "Unexplored"
-                    },
-                    {
-                      "op": "add",
-                      "path": "/map/unexplored_blocks/4",
-                      "value": {
-                        "block": {
-                          "terrain": [
-                            "Fertile",
-                            "Mountain",
-                            "Forest",
-                            "Fertile"
-                          ]
-                        },
-                        "position": {
-                          "rotation": 0,
-                          "top_tile": "F4"
-                        }
-                      }
-                    }
-                  ]
+                  }
                 }
               ]
             }
@@ -435,9 +354,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player2 chose the orientation of the newly explored tiles",
-      "Explored tiles E5=Forest, F4=Fertile, F5=Fertile, G5=Mountain",
-      "Ship can't move to the explored tile"
+      "Player2: Explore Resolution: Chose rotation 3, Explored tiles E5=Forest, F4=Fertile, F5=Fertile, G5=Mountain, Ship can't move to the explored tile"
     ]
   ],
   "undo_limit": 0,

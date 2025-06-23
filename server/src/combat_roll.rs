@@ -1,8 +1,60 @@
 use crate::combat::Combat;
 use crate::combat_listeners::CombatStrength;
+use crate::content::ability::combat_event_origin;
+use crate::events::EventPlayer;
 use crate::game::Game;
-use crate::unit::UnitType::{Cavalry, Elephant, Infantry, Leader};
-use crate::unit::{UnitType, Units};
+use crate::unit::UnitType::{Cavalry, Elephant, Infantry};
+use crate::unit::{LEADER_UNIT, UnitType, Units};
+use num::Zero;
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub(crate) struct CombatHits {
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tactics_card: Option<u8>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "u8::is_zero")]
+    pub opponent_hit_cancels: u8,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "u8::is_zero")]
+    pub opponent_fighters: u8,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "u8::is_zero")]
+    pub combat_value: u8,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "u8::is_zero")]
+    pub extra_hits: u8, // that cannot be cancelled
+}
+
+impl CombatHits {
+    #[must_use]
+    pub(crate) fn new(
+        tactics_card: Option<u8>,
+        opponent_hit_cancels: u8,
+        opponent_fighters: u8,
+        combat_value: u8,
+    ) -> CombatHits {
+        CombatHits {
+            tactics_card,
+            opponent_hit_cancels,
+            opponent_fighters,
+            combat_value,
+            extra_hits: 0,
+        }
+    }
+
+    #[must_use]
+    pub(crate) fn hits(&self) -> u8 {
+        let hits =
+            (self.combat_value / 5).saturating_sub(self.opponent_hit_cancels) + self.extra_hits;
+        hits.min(self.opponent_fighters)
+    }
+
+    pub(crate) fn all_opponents_killed(&self) -> bool {
+        self.hits() == self.opponent_fighters
+    }
+}
 
 pub(crate) struct CombatRoundStats {
     player: usize,
@@ -11,7 +63,6 @@ pub(crate) struct CombatRoundStats {
     log_str: String,
     combat_value: u8,
     hit_cancels: u8,
-    pub(crate) hits: u8,
     strength: CombatStrength,
 }
 
@@ -37,7 +88,7 @@ impl CombatRoundStats {
         let combat_value = rolls.combat_value as u8;
         let hit_cancels = rolls.hit_cancels + strength.hit_cancels;
 
-        let opponent_str = if c.defender == player {
+        let opponent_str = if c.defender() == player {
             "attacking"
         } else {
             "defending"
@@ -51,29 +102,43 @@ impl CombatRoundStats {
             log_str,
             combat_value,
             hit_cancels,
-            hits: 0,
             fighters: fighting.len() as u8,
         }
     }
 
-    pub(crate) fn determine_hits(&mut self, opponent: &CombatRoundStats, game: &mut Game) {
-        self.hits = (self.combat_value / 5)
-            .saturating_sub(opponent.hit_cancels)
-            .min(opponent.fighters);
+    pub(crate) fn determine_hits(
+        &mut self,
+        opponent: &CombatRoundStats,
+        game: &mut Game,
+        tactics_card: Option<u8>,
+    ) -> CombatHits {
+        let combat_hits = CombatHits::new(
+            tactics_card,
+            opponent.hit_cancels,
+            opponent.fighters,
+            self.combat_value,
+        );
+        let hits = combat_hits.hits();
 
-        let name = game.player_name(self.player);
-        game.add_info_log_item(&format!(
-            "{name} rolled {} for combined combat value of {} and gets {} hits \
-            against {} units.",
-            self.log_str, self.combat_value, self.hits, self.opponent_str,
-        ));
+        let p = EventPlayer::from_player(self.player, game, combat_event_origin());
+        p.log(
+            game,
+            &format!(
+                "Roll {} for combined combat value of {} and gets {} hits against {} units",
+                self.log_str, self.combat_value, hits, self.opponent_str,
+            ),
+        );
 
         if !self.strength.roll_log.is_empty() {
-            game.add_info_log_item(&format!(
-                "{name} used the following combat modifiers: {}",
-                self.strength.roll_log.join(", ")
-            ));
+            p.log(
+                game,
+                &format!(
+                    "Combat modifiers: {}",
+                    roll_log_str(&self.strength.roll_log)
+                ),
+            );
         }
+        combat_hits
     }
 }
 
@@ -103,8 +168,8 @@ impl CombatDieRoll {
 }
 
 pub(crate) const COMBAT_DIE_SIDES: [CombatDieRoll; 12] = [
-    CombatDieRoll::new(1, Leader),
-    CombatDieRoll::new(1, Leader),
+    CombatDieRoll::new(1, LEADER_UNIT),
+    CombatDieRoll::new(1, LEADER_UNIT),
     CombatDieRoll::new(2, Cavalry),
     CombatDieRoll::new(2, Elephant),
     CombatDieRoll::new(3, Elephant),
@@ -143,7 +208,7 @@ fn roll(
             dice_roll_with_leader_reroll(game, &mut unit_types, deny_combat_abilities, roll_log);
         let value = dice_roll.value;
         rolls.combat_value += value as i8;
-        if unit_types.has_unit(&dice_roll.bonus) && !deny_combat_abilities {
+        if unit_types.get_amount(&dice_roll.bonus) > 0 && !deny_combat_abilities {
             unit_types -= &dice_roll.bonus;
 
             match dice_roll.bonus {
@@ -180,18 +245,21 @@ fn dice_roll_with_leader_reroll(
 ) -> CombatDieRoll {
     let side = roll_die(game, roll_log);
 
-    if deny_combat_abilities || side.bonus != Leader || !unit_types.has_unit(&Leader) {
+    if deny_combat_abilities
+        || side.bonus != LEADER_UNIT
+        || unit_types.get_amount(&LEADER_UNIT) == 0
+    {
         return side;
     }
 
-    *unit_types -= &Leader;
+    *unit_types -= &LEADER_UNIT;
 
     // if used, the leader grants unlimited rerolls of 1s
     loop {
         add_roll_log_effect(roll_log, "re-roll");
         let side = roll_die(game, roll_log);
 
-        if side.bonus != Leader {
+        if side.bonus != LEADER_UNIT {
             return side;
         }
     }
@@ -204,6 +272,6 @@ fn add_roll_log_effect(roll_log: &mut [String], effect: &str) {
 
 fn roll_die(game: &mut Game, roll_log: &mut Vec<String>) -> CombatDieRoll {
     let roll = game.next_dice_roll();
-    roll_log.push(format!("{} ({:?}, ", roll.value, roll.bonus));
+    roll_log.push(format!("{} ({}, ", roll.value, roll.bonus.generic_name()));
     roll.clone()
 }

@@ -23,7 +23,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "A1"
         },
@@ -48,7 +47,7 @@
         },
         {
           "position": "C2",
-          "unit_type": "Leader",
+          "unit_type": "Infantry",
           "id": 2
         },
         {
@@ -77,7 +76,7 @@
           "id": 7
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "CivilLiberties",
         "Draft",
@@ -111,7 +110,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "position": "C1"
         }
@@ -128,7 +126,7 @@
           "id": 1
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining"
@@ -187,31 +185,43 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
                       "Custom": {
-                        "action": "CivilLiberties",
-                        "city": null
+                        "action": "CivilLiberties"
                       }
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 3
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Advance": "CivilLiberties"
+                      }
                     },
                     {
-                      "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 6
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "mood_tokens": 3
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Civil Liberties"
+                      }
                     }
                   ]
                 }
@@ -225,8 +235,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 started CivilLiberties",
-      "Player1 gained 3 mood tokens using Civil Liberties"
+      "Player1: Civil Liberties: Pay 1 action, Start action, Gain 3 mood tokens"
     ]
   ],
   "undo_limit": 0,

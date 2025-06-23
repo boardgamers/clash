@@ -1,106 +1,40 @@
-use itertools::{Either, Itertools};
+use crate::action_cost::ActionResourceCost;
 use serde::{Deserialize, Serialize};
 
-use crate::action_card::{ActionCardInfo, land_battle_won_action, play_action_card};
-use crate::advance::{Advance, gain_advance_without_payment};
-use crate::city::{MoodState, found_city};
-use crate::collect::{PositionCollection, collect};
+use crate::ability_initializer::AbilityInitializerSetup;
+use crate::action::pay_action;
+use crate::action_card::{can_play_civil_card, discard_action_card, play_action_card};
+use crate::action_cost::ActionCost;
+use crate::advance::{AdvanceAction, execute_advance_action};
+use crate::card::HandCardLocation;
+use crate::city::execute_found_city_action;
+use crate::collect::{Collect, base_collect_event_origin, execute_collect};
 use crate::construct::Construct;
-use crate::content::custom_actions::{CustomActionType, CustomEventAction, execute_custom_action};
-use crate::cultural_influence::{InfluenceCultureAttempt, influence_culture_attempt};
+use crate::content::ability::{
+    Ability, advance_event_origin, construct_event_origin, recruit_event_origin,
+};
+use crate::content::custom_actions::{
+    CustomAction, CustomActionActivation, CustomActionType, can_play_custom_action,
+    log_start_custom_action, on_custom_action,
+};
+use crate::content::persistent_events::{
+    PaymentRequest, PersistentEventType, TriggerPersistentEventParams, trigger_persistent_event_ext,
+};
+use crate::cultural_influence::{
+    InfluenceCultureAttempt, execute_influence_culture_attempt, influence_base_origin,
+};
+use crate::events::{EventOrigin, EventPlayer};
 use crate::game::GameState;
-use crate::happiness::increase_happiness;
+use crate::happiness::{
+    IncreaseHappiness, execute_increase_happiness, happiness_base_event_origin,
+    happiness_event_origin,
+};
+use crate::movement::move_event_origin;
+use crate::payment::PaymentOptions;
 use crate::player::Player;
-use crate::player_events::PlayingActionInfo;
-use crate::recruit::recruit;
-use crate::unit::Units;
-use crate::wonder::{WonderCardInfo, WonderDiscount, cities_for_wonder, on_play_wonder_card};
-use crate::{game::Game, position::Position, resource_pile::ResourcePile};
-
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
-pub struct Collect {
-    pub city_position: Position,
-    pub collections: Vec<PositionCollection>,
-    pub total: ResourcePile,
-    pub action_type: PlayingActionType,
-}
-
-impl Collect {
-    #[must_use]
-    pub fn new(
-        city_position: Position,
-        collections: Vec<PositionCollection>,
-        total: ResourcePile,
-        action_type: PlayingActionType,
-    ) -> Self {
-        Self {
-            city_position,
-            collections,
-            total,
-            action_type,
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub struct Recruit {
-    pub units: Units,
-    pub city_position: Position,
-    pub payment: ResourcePile,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub leader_name: Option<String>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub replaced_units: Vec<u32>,
-}
-
-impl Recruit {
-    #[must_use]
-    pub fn new(units: &Units, city_position: Position, payment: ResourcePile) -> Self {
-        Self {
-            units: units.clone(),
-            city_position,
-            payment,
-            leader_name: None,
-            replaced_units: Vec::new(),
-        }
-    }
-
-    #[must_use]
-    pub fn with_leader(mut self, leader_name: &str) -> Self {
-        self.leader_name = Some(leader_name.to_string());
-        self
-    }
-
-    #[must_use]
-    pub fn with_replaced_units(mut self, replaced_units: &[u32]) -> Self {
-        self.replaced_units = replaced_units.to_vec();
-        self
-    }
-}
-
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
-pub struct IncreaseHappiness {
-    pub happiness_increases: Vec<(Position, u8)>,
-    pub payment: ResourcePile,
-    pub action_type: PlayingActionType,
-}
-
-impl IncreaseHappiness {
-    #[must_use]
-    pub fn new(
-        happiness_increases: Vec<(Position, u8)>,
-        payment: ResourcePile,
-        action_type: PlayingActionType,
-    ) -> Self {
-        Self {
-            happiness_increases,
-            payment,
-            action_type,
-        }
-    }
-}
+use crate::recruit::{Recruit, execute_recruit};
+use crate::wonder::{Wonder, WonderCardInfo, cities_for_wonder, on_play_wonder_card, wonder_cost};
+use crate::{game::Game, resource_pile::ResourcePile};
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub enum PlayingActionType {
@@ -113,7 +47,7 @@ pub enum PlayingActionType {
     IncreaseHappiness,
     InfluenceCultureAttempt,
     ActionCard(u8),
-    WonderCard(String),
+    WonderCard(Wonder),
     Custom(CustomActionType),
     EndTurn,
 }
@@ -127,117 +61,101 @@ impl PlayingActionType {
             return Err("Game is not in playing state".to_string());
         }
 
-        self.cost(game).is_available(game, player_index)?;
+        self.cost(game, player_index)
+            .is_available(game, player_index)?;
 
         let p = game.player(player_index);
 
         match self {
             PlayingActionType::Custom(c) => {
-                let info = c.info();
-                if !p.custom_actions.contains_key(c) {
-                    return Err("Custom action not available".to_string());
-                }
-
-                if info.once_per_turn && p.played_once_per_turn_actions.contains(c) {
-                    return Err("Custom action already played this turn".to_string());
-                }
-
-                let can_play = match c {
-                    CustomActionType::Bartering => !p.action_cards.is_empty(),
-                    CustomActionType::Sports => p.resources.culture_tokens > 0 && any_non_happy(p),
-                    CustomActionType::Theaters => {
-                        p.resources.culture_tokens > 0 || p.resources.mood_tokens > 0
-                    }
-                    CustomActionType::ForcedLabor => any_angry(p),
-                    _ => true,
-                };
-                if !can_play {
-                    return Err("Cannot play custom action".to_string());
-                }
+                can_play_custom_action(game, p, *c)?;
             }
             PlayingActionType::ActionCard(id) => {
-                if !p.action_cards.contains(id) {
-                    return Err("Action card not available".to_string());
-                }
-
-                let civil_card = game.cache.get_civil_card(*id);
-                let mut satisfying_action: Option<usize> = None;
-                if civil_card.requirement_land_battle_won {
-                    if let Some(action_log_index) = land_battle_won_action(game, player_index, *id)
-                    {
-                        satisfying_action = Some(action_log_index);
-                    } else {
-                        return Err("Requirement not met".to_string());
-                    }
-                }
-                if !(civil_card.can_play)(
-                    game,
-                    p,
-                    &ActionCardInfo::new(*id, satisfying_action, None),
-                ) {
-                    return Err("Cannot play action card".to_string());
-                }
+                can_play_civil_card(game, p, *id)?;
             }
-            PlayingActionType::WonderCard(name) => {
-                if !p.wonder_cards.contains(name) {
+            PlayingActionType::WonderCard(w) => {
+                if !p.wonder_cards.contains(w) {
                     return Err("Wonder card not available".to_string());
                 }
 
-                if cities_for_wonder(name, game, p, &WonderDiscount::default()).is_empty() {
+                if cities_for_wonder(*w, game, p, wonder_cost(game, p, *w)).is_empty() {
                     return Err("no cities for wonder".to_string());
                 }
             }
             _ => {}
         }
 
-        let mut possible = Ok(());
+        let mut possible: Result<(), String> = Ok(());
         p.trigger_event(
             |e| &e.is_playing_action_available,
             &mut possible,
             game,
-            &PlayingActionInfo {
-                player: player_index,
-                action_type: self.clone(),
-            },
+            self,
         );
         possible
     }
 
     #[must_use]
-    pub fn cost(&self, game: &Game) -> ActionCost {
+    pub fn cost(&self, game: &Game, player: usize) -> ActionCost {
         match self {
-            PlayingActionType::Custom(custom_action) => custom_action.info().action_type.clone(),
+            PlayingActionType::Custom(custom_action) => game
+                .player(player)
+                .custom_action_info(*custom_action)
+                .cost
+                .cost
+                .clone(),
             PlayingActionType::ActionCard(id) => game.cache.get_civil_card(*id).action_type.clone(),
-            PlayingActionType::EndTurn => ActionCost::cost(ResourcePile::empty()),
-            _ => ActionCost::regular(),
+            // action cost of wonder is checked later
+            PlayingActionType::WonderCard(_) | PlayingActionType::EndTurn => {
+                ActionCost::new(true, ActionResourceCost::free())
+            }
+            _ => ActionCost::new(false, ActionResourceCost::free()),
         }
     }
 
     #[must_use]
-    pub fn remaining_resources(&self, p: &Player, game: &Game) -> ResourcePile {
-        let mut r = p.resources.clone();
-        r -= self.cost(game).cost.clone();
-        r
+    pub fn payment_options(&self, game: &Game, player_index: usize) -> PaymentOptions {
+        let p = game.player(player_index);
+        let cost = self.cost(game, player_index);
+        if let ActionResourceCost::Free = cost.cost {
+            PaymentOptions::free()
+        } else {
+            cost.payment_options(p, self.origin(p))
+        }
+    }
+
+    pub(crate) fn origin(&self, player: &Player) -> EventOrigin {
+        match self {
+            PlayingActionType::Advance => advance_event_origin(),
+            PlayingActionType::FoundCity => EventOrigin::Ability("Found City".to_string()),
+            PlayingActionType::Construct => construct_event_origin(),
+            PlayingActionType::Collect => base_collect_event_origin(),
+            PlayingActionType::Recruit => recruit_event_origin(),
+            PlayingActionType::IncreaseHappiness => happiness_base_event_origin(),
+            PlayingActionType::InfluenceCultureAttempt => influence_base_origin(),
+            PlayingActionType::ActionCard(a) => EventOrigin::CivilCard(*a),
+            PlayingActionType::WonderCard(w) => EventOrigin::Wonder(*w),
+            PlayingActionType::Custom(c) => player.custom_action_info(*c).event_origin,
+            PlayingActionType::MoveUnits => move_event_origin(),
+            PlayingActionType::EndTurn => panic!(
+                "PlayingAction::origin called on an action that does not have an origin: EndTurn",
+            ),
+        }
     }
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub enum PlayingAction {
-    Advance {
-        advance: Advance,
-        payment: ResourcePile,
-    },
-    FoundCity {
-        settler: u32,
-    },
+    Advance(AdvanceAction),
+    FoundCity { settler: u32 },
     Construct(Construct),
     Collect(Collect),
     Recruit(Recruit),
     IncreaseHappiness(IncreaseHappiness),
     InfluenceCultureAttempt(InfluenceCultureAttempt),
-    Custom(CustomEventAction),
+    Custom(CustomAction),
     ActionCard(u8),
-    WonderCard(String),
+    WonderCard(Wonder),
     EndTurn,
 }
 
@@ -248,210 +166,267 @@ impl PlayingAction {
         player_index: usize,
         redo: bool,
     ) -> Result<(), String> {
-        use crate::construct;
-        use PlayingAction::*;
-        let playing_action_type = self.playing_action_type();
+        let p = game.player(player_index);
+        let playing_action_type = self.playing_action_type(p);
         if !redo {
             playing_action_type.is_available(game, player_index)?;
         }
-        playing_action_type.cost(game).pay(game, player_index);
-
-        if let PlayingActionType::Custom(c) = playing_action_type {
-            if c.info().once_per_turn {
-                game.players[player_index]
-                    .played_once_per_turn_actions
-                    .push(c);
-            }
+        let action_cost = playing_action_type.cost(game, player_index);
+        if !action_cost.free {
+            pay_action(
+                game,
+                &EventPlayer::from_player(player_index, game, playing_action_type.origin(p)),
+            );
         }
 
-        match self {
-            Advance { advance, payment } => {
-                if !game.player(player_index).can_advance(advance, game) {
-                    return Err("Cannot advance".to_string());
-                }
-                game.player(player_index)
-                    .advance_cost(advance, game, game.execute_cost_trigger())
-                    .pay(game, &payment);
-                gain_advance_without_payment(game, advance, player_index, payment, true);
+        self.execute_without_action_cost(game, player_index)
+    }
+
+    pub(crate) fn execute_without_action_cost(
+        self,
+        game: &mut Game,
+        player_index: usize,
+    ) -> Result<(), String> {
+        // log these before the payment for clarity
+        match &self {
+            PlayingAction::Custom(a) => {
+                log_start_custom_action(game, player_index, a);
             }
-            FoundCity { settler } => {
-                let settler = game.players[player_index].remove_unit(settler);
-                if !settler.can_found_city(game) {
-                    return Err("Cannot found city".to_string());
-                }
-                found_city(game, player_index, settler.position);
-            }
-            Construct(c) => construct::construct(game, player_index, &c)?,
-            Collect(c) => collect(game, player_index, &c)?,
-            Recruit(r) => recruit(game, player_index, r)?,
-            IncreaseHappiness(i) => {
-                increase_happiness(game, player_index, &i.happiness_increases, Some(i.payment));
-            }
-            InfluenceCultureAttempt(c) => {
-                influence_culture_attempt(
+            PlayingAction::ActionCard(id) => {
+                discard_action_card(
                     game,
                     player_index,
-                    &c.selected_structure,
-                    &c.action_type,
+                    *id,
+                    &EventOrigin::Ability("Action Card".to_string()),
+                    HandCardLocation::PlayToDiscard,
                 );
             }
+            _ => {}
+        }
+
+        let action_type = self.playing_action_type(game.player(player_index));
+        let origin_override = match action_type {
+            PlayingActionType::Custom(c) => {
+                if let Some(key) = &game
+                    .player(player_index)
+                    .custom_action_info(c)
+                    .cost
+                    .once_per_turn
+                {
+                    game.players[player_index]
+                        .played_once_per_turn_actions
+                        .push(*key);
+                }
+                Some(game.player(player_index).custom_action_info(c).event_origin)
+            }
+            PlayingActionType::ActionCard(c) => Some(EventOrigin::CivilCard(c)),
+            _ => None,
+        };
+
+        let payment_options = action_type.payment_options(game, player_index);
+        if !payment_options.is_free() {
+            game.log(
+                player_index,
+                &payment_options.origin,
+                &format!("Pay {}", payment_options.default,),
+            );
+        }
+
+        ActionPayment::new(self).on_pay_action(game, player_index, origin_override)
+    }
+
+    pub(crate) fn execute_without_cost(
+        self,
+        game: &mut Game,
+        player_index: usize,
+        action_payment: ResourcePile,
+    ) -> Result<(), String> {
+        use crate::construct;
+        use PlayingAction::*;
+        match self {
+            Advance(a) => execute_advance_action(game, player_index, &a)?,
+            FoundCity { settler } => execute_found_city_action(game, player_index, settler)?,
+            Construct(c) => construct::execute_construct(game, player_index, &c)?,
+            Collect(c) => execute_collect(game, player_index, &c)?,
+            Recruit(r) => execute_recruit(game, player_index, r)?,
+            IncreaseHappiness(i) => execute_increase_happiness(
+                game,
+                player_index,
+                &i.happiness_increases,
+                &i.payment,
+                false,
+                &i.action_type,
+                &happiness_event_origin(&i.action_type, game.player(player_index)),
+            )?,
+            InfluenceCultureAttempt(c) => {
+                execute_influence_culture_attempt(game, player_index, &c)?;
+            }
             ActionCard(a) => play_action_card(game, player_index, a),
-            WonderCard(name) => {
+            WonderCard(w) => {
                 on_play_wonder_card(
                     game,
                     player_index,
-                    WonderCardInfo::new(name, WonderDiscount::default()),
+                    WonderCardInfo::new(
+                        w,
+                        wonder_cost(game, game.player(player_index), w),
+                        EventOrigin::Ability("Build Wonder".to_string()),
+                    ),
                 );
             }
             Custom(custom_action) => {
-                execute_custom_action(game, player_index, custom_action);
+                on_custom_action(
+                    game,
+                    player_index,
+                    CustomActionActivation::new(custom_action, action_payment),
+                );
             }
-            EndTurn => game.next_turn(),
+            EndTurn => {
+                end_turn(game, player_index);
+            }
         }
         Ok(())
     }
 
     #[must_use]
-    pub fn playing_action_type(&self) -> PlayingActionType {
+    pub fn playing_action_type(&self, player: &Player) -> PlayingActionType {
         match self {
-            PlayingAction::Advance { .. } => PlayingActionType::Advance,
+            PlayingAction::Advance(_) => PlayingActionType::Advance,
             PlayingAction::FoundCity { .. } => PlayingActionType::FoundCity,
             PlayingAction::Construct(_) => PlayingActionType::Construct,
-            PlayingAction::Collect(c) => allowed_types(
-                &c.action_type,
-                &[
-                    PlayingActionType::Collect,
-                    PlayingActionType::Custom(CustomActionType::FreeEconomyCollect),
-                ],
-            ),
+            PlayingAction::Collect(c) => {
+                assert_allowed_action_type(&c.action_type, &PlayingActionType::Collect, player)
+            }
             PlayingAction::Recruit(_) => PlayingActionType::Recruit,
-            PlayingAction::IncreaseHappiness(h) => allowed_types(
+            PlayingAction::IncreaseHappiness(h) => assert_allowed_action_type(
                 &h.action_type,
-                &[
-                    PlayingActionType::IncreaseHappiness,
-                    PlayingActionType::Custom(CustomActionType::VotingIncreaseHappiness),
-                ],
+                &PlayingActionType::IncreaseHappiness,
+                player,
             ),
-            PlayingAction::InfluenceCultureAttempt(i) => allowed_types(
+            PlayingAction::InfluenceCultureAttempt(i) => assert_allowed_action_type(
                 &i.action_type,
-                &[
-                    PlayingActionType::InfluenceCultureAttempt,
-                    PlayingActionType::Custom(CustomActionType::ArtsInfluenceCultureAttempt),
-                ],
+                &PlayingActionType::InfluenceCultureAttempt,
+                player,
             ),
             PlayingAction::ActionCard(a) => PlayingActionType::ActionCard(*a),
-            PlayingAction::WonderCard(name) => PlayingActionType::WonderCard(name.clone()),
-            PlayingAction::Custom(c) => PlayingActionType::Custom(c.action.clone()),
+            PlayingAction::WonderCard(name) => PlayingActionType::WonderCard(*name),
+            PlayingAction::Custom(c) => PlayingActionType::Custom(c.action),
             PlayingAction::EndTurn => PlayingActionType::EndTurn,
         }
     }
 }
 
-fn allowed_types(
+fn assert_allowed_action_type(
     playing_action_type: &PlayingActionType,
-    allowed: &[PlayingActionType],
+    base_type: &PlayingActionType,
+    player: &Player,
 ) -> PlayingActionType {
-    assert!(allowed.iter().any(|a| a == playing_action_type));
+    match playing_action_type {
+        PlayingActionType::Custom(c) => {
+            assert!(player.custom_action_modifiers(base_type).contains(c));
+        }
+        _ => {
+            assert!(base_type == playing_action_type);
+        }
+    }
     playing_action_type.clone()
-}
-
-#[derive(Default, Clone, Debug, PartialEq)]
-pub struct ActionCost {
-    pub free: bool,
-    pub cost: ResourcePile,
-}
-
-impl ActionCost {
-    pub(crate) fn is_available(&self, game: &Game, player_index: usize) -> Result<(), String> {
-        let p = game.player(player_index);
-        if !p.resources.has_at_least(&self.cost) {
-            return Err("Not enough resources for action type".to_string());
-        }
-
-        if !(self.free || game.actions_left > 0) {
-            return Err("No actions left".to_string());
-        }
-        Ok(())
-    }
-
-    pub(crate) fn pay(&self, game: &mut Game, player_index: usize) {
-        let p = game.player_mut(player_index);
-        let cost = self.cost.clone();
-        p.lose_resources(cost.clone());
-        if !self.free {
-            game.actions_left -= 1;
-        }
-    }
-}
-
-impl ActionCost {
-    #[must_use]
-    pub fn cost(cost: ResourcePile) -> Self {
-        Self::new(true, cost)
-    }
-
-    #[must_use]
-    pub fn regular() -> Self {
-        Self::new(false, ResourcePile::empty())
-    }
-
-    #[must_use]
-    pub fn regular_with_cost(cost: ResourcePile) -> Self {
-        Self::new(false, cost)
-    }
-
-    #[must_use]
-    pub fn free() -> Self {
-        Self::new(true, ResourcePile::empty())
-    }
-
-    #[must_use]
-    pub fn new(free: bool, cost: ResourcePile) -> Self {
-        Self { free, cost }
-    }
-}
-
-pub(crate) fn roll_boost_cost(roll: u8) -> ResourcePile {
-    ResourcePile::culture_tokens(5 - roll)
-}
-
-#[must_use]
-pub fn base_and_custom_action(
-    actions: Vec<PlayingActionType>,
-) -> (Option<PlayingActionType>, Option<CustomActionType>) {
-    let (mut custom, mut action): (Vec<_>, Vec<_>) = actions.into_iter().partition_map(|a| {
-        if let PlayingActionType::Custom(c) = a {
-            Either::Left(c.clone())
-        } else {
-            Either::Right(a.clone())
-        }
-    });
-    (action.pop(), custom.pop())
 }
 
 #[must_use]
 pub(crate) fn base_or_custom_available(
     game: &Game,
     player: usize,
-    action: PlayingActionType,
-    custom: &CustomActionType,
+    base: &PlayingActionType,
 ) -> Vec<PlayingActionType> {
-    vec![action, custom.playing_action_type()]
+    vec![base.clone()]
         .into_iter()
+        .chain(
+            game.player(player)
+                .custom_action_modifiers(base)
+                .iter()
+                .map(CustomActionType::playing_action_type),
+        )
         .filter_map(|a| a.is_available(game, player).map(|()| a).ok())
         .collect()
 }
 
-fn any_non_happy(player: &Player) -> bool {
-    player
-        .cities
-        .iter()
-        .any(|city| city.mood_state != MoodState::Happy)
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub struct ActionPayment {
+    pub action: PlayingAction,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "ResourcePile::is_empty")]
+    pub payment: ResourcePile,
 }
 
-fn any_angry(player: &Player) -> bool {
-    player
-        .cities
-        .iter()
-        .any(|city| city.mood_state == MoodState::Angry)
+impl ActionPayment {
+    #[must_use]
+    pub fn new(action: PlayingAction) -> Self {
+        Self {
+            action,
+            payment: ResourcePile::empty(),
+        }
+    }
+
+    pub(crate) fn on_pay_action(
+        self,
+        game: &mut Game,
+        player_index: usize,
+        origin_override: Option<EventOrigin>,
+    ) -> Result<(), String> {
+        let Some(a) = trigger_persistent_event_ext(
+            game,
+            &[player_index],
+            |e| &mut e.pay_action,
+            self,
+            PersistentEventType::PayAction,
+            TriggerPersistentEventParams {
+                origin_override,
+                ..Default::default()
+            },
+        ) else {
+            return Ok(());
+        };
+
+        a.action.execute_without_cost(game, player_index, a.payment)
+    }
+}
+
+pub(crate) fn pay_for_action() -> Ability {
+    Ability::builder(
+        "Pay for action",
+        "origin is overridden - so this text is not shown",
+    )
+    .add_payment_request_listener(
+        |e| &mut e.pay_action,
+        0,
+        |game, p, a| {
+            if matches!(a.action, PlayingAction::IncreaseHappiness(_)) {
+                // handled in the happiness action
+                return None;
+            }
+
+            let payment_options = a
+                .action
+                .playing_action_type(game.player(p.index))
+                .payment_options(game, p.index);
+            if payment_options.is_free() {
+                return None;
+            }
+
+            Some(vec![PaymentRequest::mandatory(
+                payment_options,
+                "Pay for action",
+            )])
+        },
+        |_game, _s, _a| {},
+    )
+    .build()
+}
+
+fn end_turn(game: &mut Game, player: usize) {
+    game.log(
+        player,
+        &EventOrigin::Ability("End Turn".to_string()),
+        &format!("{} actions left", game.actions_left),
+    );
+    game.next_turn();
 }

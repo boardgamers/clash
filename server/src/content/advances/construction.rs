@@ -1,14 +1,15 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
-use crate::content::advances::{AdvanceGroup, advance_group_builder};
+use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::payment::PaymentConversion;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
 use crate::wonder::draw_wonder_card;
 
-pub(crate) fn construction() -> AdvanceGroup {
+pub(crate) fn construction() -> AdvanceGroupInfo {
     advance_group_builder(
+        AdvanceGroup::Construction,
         "Construction",
         vec![mining(), engineering(), sanitation(), roads()],
     )
@@ -28,7 +29,7 @@ fn engineering() -> AdvanceBuilder {
         "Engineering",
         "Immediately draw 1 wonder card. May Construct wonders in happy cities",
     )
-    .add_one_time_ability_initializer(draw_wonder_card)
+    .add_once_initializer(draw_wonder_card)
 }
 
 fn sanitation() -> AdvanceBuilder {
@@ -42,12 +43,11 @@ fn sanitation() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.recruit_cost,
         1,
-        |cost, units, _| {
+        |cost, units, _, p| {
             if units.settlers > 0 {
                 // insert at beginning so that it's preferred over gold
                 cost.info
-                    .log
-                    .push("Sanitation reduced the cost of 1 Settler to 1 mood token".to_string());
+                    .add_log(p, "Reduce the cost of 1 Settler to 1 mood token");
 
                 cost.cost.conversions.insert(
                     0,

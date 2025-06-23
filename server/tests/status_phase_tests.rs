@@ -1,11 +1,12 @@
-use crate::common::TestAction;
+use crate::common::{TestAction, payment_response};
 use common::JsonTest;
 use server::action::Action;
 use server::advance;
 use server::content::persistent_events::EventResponse;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
-use server::status_phase::{ChangeGovernment, ChangeGovernmentType};
+use server::resource_pile::ResourcePile;
+use server::status_phase::ChangeGovernment;
 
 mod common;
 
@@ -90,14 +91,33 @@ fn test_determine_first_player() {
 fn test_change_government() {
     JSON.test(
         "change_government",
-        vec![TestAction::not_undoable(
-            0,
-            Action::Response(EventResponse::ChangeGovernmentType(
-                ChangeGovernmentType::ChangeGovernment(ChangeGovernment::new(
+        vec![
+            TestAction::not_undoable(1, Action::Response(EventResponse::SelectPositions(vec![])))
+                .skip_json(),
+            TestAction::undoable(
+                0,
+                payment_response(ResourcePile::culture_tokens(1) + ResourcePile::mood_tokens(1)),
+            )
+            .skip_json(),
+            TestAction::not_undoable(
+                0,
+                Action::Response(EventResponse::ChangeGovernmentType(ChangeGovernment::new(
                     String::from("Theocracy"),
                     vec![advance::Advance::Devotion],
-                )),
-            )),
-        )],
+                ))),
+            ),
+        ],
+    );
+}
+
+#[test]
+fn test_keep_government() {
+    JSON.test(
+        "keep_government",
+        vec![
+            TestAction::not_undoable(1, Action::Response(EventResponse::SelectPositions(vec![])))
+                .skip_json(),
+            TestAction::undoable(0, payment_response(ResourcePile::empty())),
+        ],
     );
 }

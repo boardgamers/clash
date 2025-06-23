@@ -9,8 +9,8 @@
         "ore": 5,
         "ideas": 1,
         "gold": 7,
-        "mood_tokens": 8,
-        "culture_tokens": 8
+        "mood_tokens": 9,
+        "culture_tokens": 7
       },
       "resource_limit": {
         "food": 7,
@@ -23,7 +23,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "A1"
         },
@@ -58,9 +57,8 @@
           "id": 7
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
-        "Cartography",
         "Farming",
         "Fishing",
         "Mining",
@@ -88,7 +86,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "position": "C1"
         }
@@ -105,7 +102,7 @@
           "id": 1
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Fishing",
@@ -128,7 +125,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Neutral",
           "position": "B3"
         }
@@ -207,82 +203,53 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
                       "ActionCard": 34
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 3
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "CivilCard": 34
+                      }
                     },
                     {
-                      "op": "add",
-                      "path": "/players/0/action_cards",
-                      "value": [
-                        34
-                      ]
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events"
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 34
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToDiscard"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
                     }
                   ]
                 },
                 {
                   "action": {
                     "Response": {
-                      "SelectAdvance": "Cartography"
+                      "SelectAdvance": "Fishing"
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "remove",
-                      "path": "/events/0/event_type/ActionCard/selected_advance"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/handler/priority",
-                      "value": 3
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/0/handler/request/SelectAdvance",
-                      "value": {
-                        "choices": [
-                          "Irrigation",
-                          "Husbandry",
-                          "Engineering",
-                          "Sanitation",
-                          "Roads",
-                          "Navigation",
-                          "WarShips",
-                          "Cartography",
-                          "Siegecraft",
-                          "SteelWeapons",
-                          "Draft"
-                        ]
-                      }
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/0/handler/request/Payment"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/last_priority_used",
-                      "value": 3
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -294,98 +261,41 @@
                       ]
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "replace",
-                      "path": "/events/0/handler/priority",
-                      "value": 2
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "ideas": 2
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
                     },
                     {
-                      "op": "add",
-                      "path": "/events/0/handler/request/Payment",
-                      "value": [
-                        {
-                          "cost": {
-                            "conversions": [
-                              {
-                                "from": [
-                                  {
-                                    "ideas": 1
-                                  }
-                                ],
-                                "to": {
-                                  "food": 1
-                                },
-                                "type": "Unlimited"
-                              },
-                              {
-                                "from": [
-                                  {
-                                    "food": 1
-                                  }
-                                ],
-                                "to": {
-                                  "gold": 1
-                                },
-                                "type": "Unlimited"
-                              }
-                            ],
-                            "default": {
-                              "ideas": 2
-                            }
-                          },
-                          "name": "Pay for Cartography",
-                          "optional": false
-                        }
-                      ]
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Advance": "Fishing"
+                      }
                     },
                     {
-                      "op": "remove",
-                      "path": "/events/0/handler/request/SelectAdvance"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/last_priority_used",
-                      "value": 2
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/advances/0",
-                      "value": "Farming"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/advances/1",
-                      "value": "Fishing"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/advances/2",
-                      "value": "Mining"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/advances/3",
-                      "value": "Storage"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/advances/4",
-                      "value": "Tactics"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/advances/5"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/culture_tokens",
-                      "value": 7
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/ideas",
-                      "value": 5
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Fishing",
+                        "take_incident_token": false,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "CivilCard": 34
+                      }
                     }
                   ]
                 },
@@ -394,38 +304,7 @@
                     "Response": {
                       "SelectAdvance": "WarShips"
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/events/0/event_type/ActionCard/selected_advance",
-                      "value": "Cartography"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/handler/priority",
-                      "value": 1
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/0/handler/request/SelectAdvance",
-                      "value": {
-                        "choices": [
-                          "Navigation",
-                          "WarShips"
-                        ]
-                      }
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/0/handler/request/Payment"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/last_priority_used",
-                      "value": 1
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -437,74 +316,29 @@
                       ]
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "ActionCard": {
-                              "id": 34,
-                              "selected_advance": "WarShips"
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "CivilCard": 34
-                            },
-                            "priority": 0,
-                            "request": {
-                              "Payment": [
-                                {
-                                  "cost": {
-                                    "conversions": [
-                                      {
-                                        "from": [
-                                          {
-                                            "ideas": 1
-                                          }
-                                        ],
-                                        "to": {
-                                          "food": 1
-                                        },
-                                        "type": "Unlimited"
-                                      },
-                                      {
-                                        "from": [
-                                          {
-                                            "food": 1
-                                          }
-                                        ],
-                                        "to": {
-                                          "gold": 1
-                                        },
-                                        "type": "Unlimited"
-                                      }
-                                    ],
-                                    "default": {
-                                      "ideas": 2
-                                    }
-                                  },
-                                  "name": "Pay for WarShips",
-                                  "optional": false
-                                }
-                              ]
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 0
-                        }
-                      ]
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "ideas": 2
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
                     },
                     {
-                      "op": "remove",
-                      "path": "/players/0/advances/6"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/ideas",
-                      "value": 3
+                      "player": 0,
+                      "Advance": {
+                        "advance": "WarShips",
+                        "take_incident_token": false,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "CivilCard": 34
+                      }
                     }
                   ]
                 }
@@ -518,20 +352,23 @@
   "action_log_index": 5,
   "log": [
     [
-      "Player1 played the action card Synergies as a regular action"
+      "Player1: Synergies: Pay 1 action",
+      "Player1: Action Card: Play Synergies/Archers"
     ],
     [
-      "Player1 selected Cartography as first advance for Synergies."
+      "Player1: Synergies: Selected Fishing as first advance"
     ],
     [
-      "Player1 paid 2 ideas for advance Cartography",
-      "Player gained 1 culture token as advance bonus"
+      "Player1: Advance: Pay 2 ideas",
+      "Player1: Fishing: Gain 1 mood token",
+      "Player1: Synergies: Gain Fishing without taking an event token"
     ],
     [
-      "Player1 selected WarShips as second advance for Synergies."
+      "Player1: Synergies: Selected WarShips as second advance"
     ],
     [
-      "Player1 paid 2 ideas for advance WarShips"
+      "Player1: Advance: Pay 2 ideas",
+      "Player1: Synergies: Gain WarShips without taking an event token"
     ]
   ],
   "undo_limit": 0,
@@ -557,6 +394,9 @@
   ],
   "wonders_left": [
     "Pyramids"
+  ],
+  "action_cards_discarded": [
+    34
   ],
   "incidents_left": [
     26

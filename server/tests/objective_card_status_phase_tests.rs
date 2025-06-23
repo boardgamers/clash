@@ -13,8 +13,7 @@ fn test_large_civ() {
     JSON.test(
         "large_civ",
         vec![
-            TestAction::not_undoable(1, Action::Playing(PlayingAction::EndTurn))
-                .without_json_comparison(),
+            TestAction::not_undoable(1, Action::Playing(PlayingAction::EndTurn)).skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![
@@ -42,7 +41,7 @@ fn test_large_civ() {
                 };
                 //can't fulfill all objectives with same name
                 assert_eq!(c.choices.len(), 8);
-                assert!(validate_card_selection(&c.choices, game).is_err());
+                assert!(validate_card_selection(&c.choices, &game).is_err());
             }),
         ],
     )
@@ -54,8 +53,7 @@ fn test_colony() {
     JSON.test(
         "colony",
         vec![
-            TestAction::not_undoable(0, Action::Playing(PlayingAction::EndTurn))
-                .without_json_comparison(),
+            TestAction::not_undoable(0, Action::Playing(PlayingAction::EndTurn)).skip_json(),
             TestAction::undoable(
                 1,
                 Action::Response(EventResponse::SelectHandCards(vec![
@@ -72,8 +70,7 @@ fn test_standing_army() {
     JSON.test(
         "standing_army",
         vec![
-            TestAction::not_undoable(1, Action::Playing(PlayingAction::EndTurn))
-                .without_json_comparison(),
+            TestAction::not_undoable(1, Action::Playing(PlayingAction::EndTurn)).skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![
@@ -95,7 +92,7 @@ fn test_standing_army() {
                 };
                 //can't fulfill all objectives with same name
                 assert_eq!(c.choices.len(), 2);
-                assert!(validate_card_selection(&c.choices, game).is_err());
+                assert!(validate_card_selection(&c.choices, &game).is_err());
             }),
         ],
     )

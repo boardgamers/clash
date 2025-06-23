@@ -1,6 +1,6 @@
 // combat
 
-use crate::common::{TestAction, move_action};
+use crate::common::{TestAction, move_action, payment_response};
 use common::JsonTest;
 use server::action::Action;
 use server::card::HandCard;
@@ -62,6 +62,17 @@ fn test_direct_capture_city_fortress() {
 }
 
 #[test]
+fn test_capture_and_raze_city() {
+    JSON.test(
+        "capture_and_raze_city",
+        vec![TestAction::not_undoable(
+            0,
+            move_action(vec![0, 1, 2, 3], Position::from_offset("C1")),
+        )],
+    );
+}
+
+#[test]
 fn test_direct_capture_city_only_fortress() {
     JSON.test(
         "direct_capture_city_only_fortress",
@@ -77,31 +88,28 @@ fn test_combat_all_modifiers() {
     JSON.test(
         "combat_all_modifiers",
         vec![
-            TestAction::not_undoable(
+            TestAction::undoable(
                 0,
                 move_action(vec![0, 1, 2, 3, 4, 5], Position::from_offset("C1")),
-            ),
-            TestAction::not_undoable(
-                0,
-                Action::Response(EventResponse::Payment(vec![ResourcePile::ore(1)])),
-            ),
+            )
+            .skip_json(),
+            TestAction::undoable(0, payment_response(ResourcePile::ore(1))).skip_json(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::Payment(vec![
                     ResourcePile::empty(),
                     ResourcePile::ore(2),
                 ])),
-            ),
-            TestAction::not_undoable(
-                1,
-                Action::Response(EventResponse::Payment(vec![ResourcePile::ore(1)])),
-            ),
+            )
+            .skip_json(),
+            TestAction::not_undoable(1, payment_response(ResourcePile::ore(1))).skip_json(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
                     1,
                 )])),
-            ),
+            )
+            .skip_json(),
             TestAction::not_undoable(
                 1,
                 Action::Response(EventResponse::SelectHandCards(vec![HandCard::ActionCard(
@@ -174,25 +182,44 @@ fn test_recruit_combat() {
         vec![
             TestAction::undoable(
                 0,
-                Action::Playing(Recruit(server::playing_actions::Recruit::new(
-                    &Units::new(0, 0, 3, 0, 0, 0),
+                Action::Playing(Recruit(server::recruit::Recruit::new(
+                    &Units::new(0, 0, 4, 0, 0, None),
                     Position::from_offset("C2"),
-                    ResourcePile::wood(5) + ResourcePile::gold(1),
+                    ResourcePile::wood(5) + ResourcePile::gold(3),
                 ))),
-            ),
+            )
+            .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::ResourceReward(ResourcePile::mood_tokens(1))),
-            ),
+            )
+            .skip_json(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::ResourceReward(ResourcePile::gold(1))),
-            ),
+            )
+            .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::ResourceReward(ResourcePile::culture_tokens(
                     1,
                 ))),
+            )
+            .skip_json(),
+            TestAction::not_undoable(0, move_action(vec![12, 13], Position::from_offset("C4")))
+                .skip_json(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::ResourceReward(ResourcePile::culture_tokens(
+                    1,
+                ))),
+            )
+            .skip_json(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectHandCards(vec![
+                    HandCard::ObjectiveCard(38),
+                ])),
             ),
         ],
     );

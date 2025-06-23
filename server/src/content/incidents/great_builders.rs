@@ -1,8 +1,10 @@
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::action::gain_action;
 use crate::action_card::ActionCard;
 use crate::card::HandCard;
-use crate::construct::available_buildings;
-use crate::content::builtin::Builtin;
+use crate::construct::{ConstructDiscount, available_buildings};
+use crate::content::ability::Ability;
+use crate::content::advances::AdvanceGroup;
 use crate::content::effects::ConstructEffect;
 use crate::content::effects::PermanentEffect::Construct;
 use crate::content::incidents::great_persons::{
@@ -11,71 +13,86 @@ use crate::content::incidents::great_persons::{
 use crate::content::persistent_events::HandCardsRequest;
 use crate::game::Game;
 use crate::player::Player;
-use crate::playing_actions::{ActionCost, PlayingActionType};
+use crate::player_events::CostInfo;
+use crate::playing_actions::PlayingActionType;
 use crate::resource_pile::ResourcePile;
 use crate::utils::remove_element_by;
-use crate::wonder::{WonderCardInfo, WonderDiscount, cities_for_wonder, on_play_wonder_card};
+use crate::wonder::{Wonder, WonderCardInfo, cities_for_wonder, on_play_wonder_card, wonder_cost};
 
 pub(crate) fn great_engineer() -> ActionCard {
-    let groups = &["Construction"];
+    let groups = vec![AdvanceGroup::Construction];
     great_person_action_card(
         26,
         "Great Engineer",
         &format!(
-            "{} Then, you may build a building in a city without spending an action and without activating it.",
-            great_person_description(groups)
+            "{} Then, you may build a building in a city \
+            without spending an action and without activating it.",
+            great_person_description(&groups)
         ),
-        ActionCost::regular(),
+        |c| c.action().no_resources(),
         groups,
-        can_construct_anything,
+        |game, p| can_construct_any_building(game, p, &[ConstructDiscount::NoCityActivation]),
     )
-        .add_bool_request(
-            |e| &mut e.play_action_card,
-            0,
-            |_, _, _| Some("Build a building in a city without spending an action and without activating it?".to_string()),
-            |game, s, _| {
-                if s.choice {
-                    game.permanent_effects.push(Construct(ConstructEffect::GreatEngineer));
-                    game.actions_left += 1; // to offset the action spent for building
-                    game.add_info_log_item("Great Engineer: You may build a building in a city without \
-                    spending an action and without activating it.");
-                } else {
-                    game.add_info_log_item("Great Engineer: You decided not to use the ability.");
-                }
-            },
-        )
-        .build()
+    .add_bool_request(
+        |e| &mut e.play_action_card,
+        0,
+        |_, _, _| {
+            Some(
+                "Build a building in a city without spending an action and without activating it?"
+                    .to_string(),
+            )
+        },
+        |game, s, _| {
+            if s.choice {
+                game.permanent_effects
+                    .push(Construct(ConstructEffect::GreatEngineer));
+                s.log(
+                    game,
+                    "Great Engineer: You may build a building in a city without \
+                    spending an action and without activating it.",
+                );
+                gain_action(game, &s.player()); // to offset the action spent for building
+            } else {
+                s.log(game, "Great Engineer: You decided not to use the ability.");
+            }
+        },
+    )
+    .build()
 }
 
-pub(crate) fn can_construct_anything(game: &Game, p: &Player) -> bool {
+pub(crate) fn can_construct_any_building(
+    game: &Game,
+    p: &Player,
+    discounts: &[ConstructDiscount],
+) -> bool {
     PlayingActionType::Construct
         .is_available(game, p.index)
         .is_ok()
         && p.cities
             .iter()
-            .any(|city| !available_buildings(game, p.index, city.position).is_empty())
+            .any(|city| !available_buildings(game, p.index, city.position, discounts).is_empty())
 }
 
-pub(crate) fn construct_only() -> Builtin {
-    Builtin::builder("construct only", "-")
+pub(crate) fn construct_only() -> Ability {
+    Ability::builder("Construct Only", "-")
         .add_transient_event_listener(
             |event| &mut event.is_playing_action_available,
             2,
-            |available, game, i| {
+            |available, game, t, _p| {
                 if game
                     .permanent_effects
                     .iter()
                     .any(|e| matches!(e, &Construct(_)))
-                    && !matches!(i.action_type, PlayingActionType::Construct)
+                    && t != &PlayingActionType::Construct
                 {
                     *available = Err("You may only construct buildings.".to_string());
                 }
             },
         )
         .add_transient_event_listener(
-            |event| &mut event.construct_cost,
+            |event| &mut event.building_cost,
             1,
-            |c, _, game| {
+            |c, _, game, _| {
                 if game
                     .permanent_effects
                     .contains(&Construct(ConstructEffect::GreatEngineer))
@@ -93,17 +110,15 @@ pub(crate) fn construct_only() -> Builtin {
         .add_simple_persistent_event_listener(
             |event| &mut event.construct,
             2,
-            |game, _, _, _| {
+            |game, _, _| {
                 remove_element_by(&mut game.permanent_effects, |e| matches!(e, &Construct(_)));
             },
         )
         .build()
 }
 
-const ARCHITECT_DISCOUNT: WonderDiscount = WonderDiscount::new(true, 3);
-
 pub(crate) fn great_architect() -> ActionCard {
-    great_person_action_card::<_, String>(
+    great_person_action_card::<_>(
         55,
         "Great Architect",
         &format!(
@@ -111,8 +126,8 @@ pub(crate) fn great_architect() -> ActionCard {
                 the requirement advances (but not Engineering). \
                 In addition, the cost of constructing the wonder is reduced by 3 culture tokens.",
         ),
-        ActionCost::free(),
-        &[],
+        |c| c.free_action().no_resources(),
+        vec![],
         |game, player| !playable_wonders(game, player).is_empty(),
     )
     .add_hand_card_request(
@@ -120,33 +135,48 @@ pub(crate) fn great_architect() -> ActionCard {
         0,
         |game, player, _| {
             Some(HandCardsRequest::new(
-                playable_wonders(game, game.player(player))
+                playable_wonders(game, player.get(game))
                     .iter()
-                    .map(|name| HandCard::Wonder(name.clone()))
+                    .map(|name| HandCard::Wonder(*name))
                     .collect(),
                 1..=1,
                 "Great Architect: Select a wonder to build",
             ))
         },
         |game, s, _| {
-            let HandCard::Wonder(name) = &s.choice[0] else {
+            let HandCard::Wonder(w) = &s.choice[0] else {
                 panic!("Invalid choice");
             };
             on_play_wonder_card(
                 game,
                 s.player_index,
-                WonderCardInfo::new(name.clone(), ARCHITECT_DISCOUNT),
+                WonderCardInfo::new(
+                    *w,
+                    architect_wonder_cost(game, game.player(s.player_index), *w),
+                    s.origin.clone(),
+                ),
             );
         },
     )
     .build()
 }
 
-fn playable_wonders(game: &Game, player: &Player) -> Vec<String> {
+fn playable_wonders(game: &Game, player: &Player) -> Vec<Wonder> {
     player
         .wonder_cards
         .iter()
-        .filter(|name| !cities_for_wonder(name, game, player, &ARCHITECT_DISCOUNT).is_empty())
-        .cloned()
+        .filter(|w| {
+            !cities_for_wonder(**w, game, player, architect_wonder_cost(game, player, **w))
+                .is_empty()
+        })
+        .copied()
         .collect()
+}
+
+fn architect_wonder_cost(game: &Game, player: &Player, w: Wonder) -> CostInfo {
+    let mut info = wonder_cost(game, player, w);
+    info.cost.default.culture_tokens -= 3;
+    info.ignore_required_advances = true;
+    info.ignore_action_cost = true; // we already paid for the action with the architect card
+    info
 }

@@ -1,25 +1,28 @@
 use crate::action_card::ActionCardInfo;
 use crate::advance::Advance;
 use crate::barbarians::BarbariansEventState;
-use crate::collect::{CollectContext, CollectInfo};
+use crate::collect::{CollectContext, CollectInfo, PositionCollection};
 use crate::combat::Combat;
-use crate::combat_listeners::{CombatEnd, CombatRoundEnd, CombatRoundStart};
+use crate::combat_listeners::{CombatRoundEnd, CombatRoundStart};
 use crate::combat_stats::CombatStats;
-use crate::content::custom_actions::CustomEventAction;
-use crate::content::persistent_events::KilledUnits;
+use crate::construct::ConstructInfo;
+use crate::content::custom_actions::CustomActionActivation;
+use crate::content::persistent_events::{KilledUnits, PaymentRequest};
 use crate::cultural_influence::{InfluenceCultureInfo, InfluenceCultureOutcome};
-use crate::events::Event;
+use crate::events::{Event, EventOrigin, EventPlayer};
 use crate::explore::ExploreResolutionState;
 use crate::game::Game;
 use crate::incident::PassedIncident;
 use crate::map::Terrain;
 use crate::objective_card::SelectObjectivesInfo;
 use crate::payment::PaymentOptions;
-use crate::playing_actions::{PlayingActionType, Recruit};
+use crate::playing_actions::{ActionPayment, PlayingActionType};
+use crate::recruit::Recruit;
+use crate::resource::pay_cost;
 use crate::status_phase::StatusPhaseState;
 use crate::unit::Units;
 use crate::utils;
-use crate::wonder::WonderCardInfo;
+use crate::wonder::{DrawWonderCard, WonderBuildInfo, WonderCardInfo};
 use crate::{
     city::City, city_pieces::Building, player::Player, position::Position,
     resource_pile::ResourcePile,
@@ -29,7 +32,7 @@ use num::Zero;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 
-pub(crate) type PersistentEvent<V = ()> = Event<Game, PersistentEventInfo, (), V>;
+pub(crate) type PersistentEvent<V = ()> = Event<Game, (), (), V>;
 
 pub(crate) struct PlayerEvents {
     pub persistent: PersistentEvents,
@@ -50,16 +53,17 @@ pub(crate) struct TransientEvents {
     pub on_influence_culture_resolve: Event<Game, InfluenceCultureOutcome>,
     pub before_move: Event<Game, MoveInfo>,
 
-    pub construct_cost: Event<CostInfo, Building, Game>,
+    pub building_cost: Event<CostInfo, Building, Game>,
+    pub wonder_cost: Event<CostInfo, WonderBuildInfo, Game>,
     pub advance_cost: Event<CostInfo, Advance, Game>,
     pub happiness_cost: Event<CostInfo>,
-    pub recruit_cost: Event<CostInfo, Units, Player>,
+    pub recruit_cost: Event<CostInfo, Units, Game>,
 
-    pub is_playing_action_available: Event<Result<(), String>, Game, PlayingActionInfo>,
+    pub is_playing_action_available: Event<Result<(), String>, Game, PlayingActionType>,
 
     pub terrain_collect_options: Event<HashMap<Terrain, HashSet<ResourcePile>>>,
     pub collect_options: Event<CollectInfo, CollectContext, Game>,
-    pub collect_total: Event<CollectInfo, Game>,
+    pub collect_total: Event<CollectInfo, Game, Vec<PositionCollection>>,
 }
 
 impl TransientEvents {
@@ -69,7 +73,8 @@ impl TransientEvents {
             on_influence_culture_resolve: Event::new("on_influence_culture_resolve"),
             before_move: Event::new("before_move"),
 
-            construct_cost: Event::new("construct_cost"),
+            building_cost: Event::new("building_cost"),
+            wonder_cost: Event::new("wonder_cost"),
             advance_cost: Event::new("advance_cost"),
             happiness_cost: Event::new("happiness_cost"),
             recruit_cost: Event::new("recruit_cost"),
@@ -85,30 +90,36 @@ impl TransientEvents {
 
 pub(crate) struct PersistentEvents {
     pub collect: PersistentEvent<CollectInfo>,
-    pub construct: PersistentEvent<Building>,
-    pub draw_wonder_card: PersistentEvent,
+    pub construct: PersistentEvent<ConstructInfo>,
+    pub draw_wonder_card: PersistentEvent<DrawWonderCard>,
     pub advance: PersistentEvent<OnAdvanceInfo>,
     pub recruit: PersistentEvent<Recruit>,
     pub found_city: PersistentEvent<Position>,
-    pub influence_culture_resolution: PersistentEvent<ResourcePile>,
+    pub influence_culture: PersistentEvent<InfluenceCultureInfo>,
     pub explore_resolution: PersistentEvent<ExploreResolutionState>,
+    pub pay_action: PersistentEvent<ActionPayment>,
     pub play_action_card: PersistentEvent<ActionCardInfo>,
     pub play_wonder_card: PersistentEvent<WonderCardInfo>,
 
     pub status_phase: PersistentEvent<StatusPhaseState>,
     pub turn_start: PersistentEvent,
     pub incident: PersistentEvent<IncidentInfo>,
+    pub stop_barbarian_movement: PersistentEvent<Vec<Position>>,
     pub combat_start: PersistentEvent<Combat>,
+    pub combat_round_start_allow_tactics: PersistentEvent<CombatRoundStart>,
     pub combat_round_start: PersistentEvent<CombatRoundStart>,
     pub combat_round_start_reveal_tactics: PersistentEvent<CombatRoundStart>,
     pub combat_round_start_tactics: PersistentEvent<CombatRoundStart>,
     pub combat_round_end: PersistentEvent<CombatRoundEnd>,
     pub combat_round_end_tactics: PersistentEvent<CombatRoundEnd>,
-    pub combat_end: PersistentEvent<CombatEnd>,
-    pub capture_undefended_position: PersistentEvent<CombatStats>,
+    pub combat_end: PersistentEvent<CombatStats>,
     pub units_killed: PersistentEvent<KilledUnits>,
     pub select_objective_cards: PersistentEvent<SelectObjectivesInfo>,
-    pub custom_action: PersistentEvent<CustomEventAction>,
+    pub custom_action: PersistentEvent<CustomActionActivation>,
+    pub choose_incident: PersistentEvent<IncidentInfo>,
+    pub choose_action_card: PersistentEvent,
+    pub city_activation_mood_decreased: PersistentEvent<Position>,
+    pub ship_construction_conversion: PersistentEvent<Vec<u32>>,
 }
 
 impl PersistentEvents {
@@ -121,26 +132,32 @@ impl PersistentEvents {
             advance: Event::new("advance"),
             recruit: Event::new("recruit"),
             found_city: Event::new("found_city"),
-            influence_culture_resolution: Event::new("influence_culture_resolution"),
+            influence_culture: Event::new("influence_culture"),
             explore_resolution: Event::new("explore_resolution"),
+            pay_action: Event::new("pay_action"),
             play_action_card: Event::new("play_action_card"),
             play_wonder_card: Event::new("play_wonder_card"),
 
             status_phase: Event::new("status_phase"),
             turn_start: Event::new("turn_start"),
             incident: Event::new("incident"),
+            stop_barbarian_movement: Event::new("stop_barbarian_movement"),
             combat_start: Event::new("combat_start"),
             combat_round_start: Event::new("combat_round_start"),
             combat_round_start_reveal_tactics: Event::new("combat_round_start_reveal_tactics"),
+            combat_round_start_allow_tactics: Event::new("combat_round_start_allow_tactics"),
             combat_round_start_tactics: Event::new("combat_round_start_tactics"),
             combat_round_end: Event::new("combat_round_end"),
             combat_round_end_tactics: Event::new("combat_round_end_tactics"),
             combat_end: Event::new("combat_end"),
-            capture_undefended_position: Event::new("capture_undefended_position"),
             units_killed: Event::new("units_killed"),
             select_objective_cards: Event::new("select_objective_cards"),
 
             custom_action: Event::new("custom_action_bartering"),
+            choose_action_card: Event::new("great_mausoleum_action_card"),
+            choose_incident: Event::new("great_mausoleum_incident"),
+            city_activation_mood_decreased: Event::new("city_activation_mood_decreased"),
+            ship_construction_conversion: Event::new("ship_construction_conversion"),
         }
     }
 }
@@ -148,27 +165,33 @@ impl PersistentEvents {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub(crate) struct ActionInfo {
     pub(crate) player: usize,
+    pub(crate) origin: EventOrigin,
     pub(crate) info: HashMap<String, String>,
-    pub(crate) log: Vec<String>,
+    pub(crate) log: Vec<(EventOrigin, String)>,
 }
 
 impl ActionInfo {
-    pub(crate) fn new(player: &Player) -> ActionInfo {
+    pub(crate) fn new(player: &Player, origin: EventOrigin) -> ActionInfo {
         ActionInfo {
             player: player.index,
+            origin,
             info: player.event_info.clone(),
             log: Vec::new(),
         }
     }
 
     pub(crate) fn execute(&self, game: &mut Game) {
-        for l in self.log.iter().unique() {
-            game.add_info_log_item(l);
+        for (o, l) in self.log.iter().unique() {
+            game.log(self.player, o, l);
         }
         let player = game.player_mut(self.player);
         for (k, v) in self.info.clone() {
             player.event_info.insert(k, v);
         }
+    }
+
+    pub(crate) fn add_log(&mut self, p: &EventPlayer, message: &str) {
+        self.log.push((p.origin.clone(), message.to_string()));
     }
 }
 
@@ -215,6 +238,7 @@ impl IncidentPlayerInfo {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct IncidentInfo {
+    pub incident_id: u8,
     pub active_player: usize,
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -239,9 +263,10 @@ pub struct IncidentInfo {
 
 impl IncidentInfo {
     #[must_use]
-    pub fn new(origin: usize) -> IncidentInfo {
+    pub fn new(incident_id: u8, active_player: usize) -> IncidentInfo {
         IncidentInfo {
-            active_player: origin,
+            incident_id,
+            active_player,
             passed: None,
             consumed: false,
             barbarians: None,
@@ -252,7 +277,7 @@ impl IncidentInfo {
     }
 
     #[must_use]
-    pub fn is_active(&self, role: IncidentTarget, player: usize) -> bool {
+    pub fn is_active_ignoring_protection(&self, role: IncidentTarget, player: usize) -> bool {
         if self.consumed || matches!(self.passed, Some(PassedIncident::NewPlayer(_))) {
             // wait until the new player is playing the advance
             return false;
@@ -268,31 +293,50 @@ impl IncidentInfo {
     pub(crate) fn get_barbarian_state(&mut self) -> &mut BarbariansEventState {
         self.barbarians.as_mut().expect("barbarians should exist")
     }
+
+    pub(crate) fn origin(&self) -> EventOrigin {
+        EventOrigin::Incident(self.incident_id)
+    }
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct CostInfo {
     pub cost: PaymentOptions,
     pub activate_city: bool,
+    pub(crate) ignore_required_advances: bool, // only used for wonder costs
+    pub(crate) ignore_action_cost: bool,       // only used for wonder costs
     pub(crate) info: ActionInfo,
 }
 
 impl CostInfo {
     pub(crate) fn new(player: &Player, cost: PaymentOptions) -> CostInfo {
+        let info = ActionInfo::new(player, cost.origin.clone());
         CostInfo {
             cost,
-            info: ActionInfo::new(player),
+            info,
             activate_city: true,
+            ignore_required_advances: false,
+            ignore_action_cost: false,
         }
     }
 
-    pub(crate) fn set_zero(&mut self) {
+    pub(crate) fn set_zero_resources(&mut self, p: &EventPlayer) {
         self.cost.default = ResourcePile::empty();
+        self.info.add_log(p, "Reduce the cost to 0");
     }
 
     pub(crate) fn pay(&self, game: &mut Game, payment: &ResourcePile) {
-        game.players[self.info.player].pay_cost(&self.cost, payment);
+        pay_cost(
+            game,
+            self.info.player,
+            &PaymentRequest::mandatory(self.cost.clone(), "info"),
+            payment,
+        );
         self.info.execute(game);
+    }
+
+    pub(crate) fn origin(&self) -> &EventOrigin {
+        &self.cost.origin
     }
 }
 
@@ -303,32 +347,30 @@ pub struct OnAdvanceInfo {
     pub take_incident_token: bool,
 }
 
-#[derive(Clone, PartialEq)]
-pub struct PersistentEventInfo {
-    pub player: usize, // player currently handling the event
-}
-
 pub struct MoveInfo {
-    pub player: usize,
     pub units: Vec<u32>,
-    #[allow(dead_code)]
     pub from: Position,
     pub to: Position,
 }
 
 impl MoveInfo {
     #[must_use]
-    pub fn new(player: usize, units: Vec<u32>, from: Position, to: Position) -> MoveInfo {
-        MoveInfo {
-            player,
-            units,
-            from,
-            to,
-        }
+    pub fn new(units: Vec<u32>, from: Position, to: Position) -> MoveInfo {
+        MoveInfo { units, from, to }
     }
 }
 
-pub struct PlayingActionInfo {
-    pub player: usize,
-    pub action_type: PlayingActionType,
+pub(crate) fn trigger_event_with_game_value<U, V, W>(
+    game: &mut Game,
+    player_index: usize,
+    event: impl Fn(&mut PlayerEvents) -> &mut Event<Game, U, V, W>,
+    info: &U,
+    details: &V,
+    extra_value: &mut W,
+) where
+    W: Clone + PartialEq,
+{
+    let e = event(&mut game.players[player_index].events).take();
+    e.trigger(game, info, details, extra_value);
+    event(&mut game.players[player_index].events).set(e);
 }

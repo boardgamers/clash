@@ -1,0 +1,359 @@
+{
+  "state": {
+    "Movement": {
+      "movement_actions_left": 1,
+      "moved_units": [
+        0,
+        1,
+        2,
+        3
+      ]
+    }
+  },
+  "players": [
+    {
+      "id": 0,
+      "resources": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 5,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "cities": [
+        {
+          "mood_state": "Happy",
+          "position": "A1"
+        },
+        {
+          "mood_state": "Neutral",
+          "activations": 8,
+          "position": "C2"
+        }
+      ],
+      "destroyed_structures": {
+        "cities": 6
+      },
+      "units": [
+        {
+          "position": "C1",
+          "unit_type": "Infantry",
+          "movement_restrictions": [
+            "Battle"
+          ],
+          "id": 0
+        },
+        {
+          "position": "C1",
+          "unit_type": "Cavalry",
+          "movement_restrictions": [
+            "Battle"
+          ],
+          "id": 1
+        },
+        {
+          "position": "C1",
+          "unit_type": "Infantry",
+          "movement_restrictions": [
+            "Battle"
+          ],
+          "id": 2
+        },
+        {
+          "position": "C1",
+          "unit_type": "Elephant",
+          "movement_restrictions": [
+            "Battle"
+          ],
+          "id": 3
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 4
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 5
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 6
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 7
+        }
+      ],
+      "civilization": "Rome",
+      "advances": [
+        "Farming",
+        "Mining",
+        "Tactics"
+      ],
+      "incident_tokens": 2,
+      "next_unit_id": 8
+    },
+    {
+      "id": 1,
+      "resources": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "civilization": "Greece",
+      "advances": [
+        "Farming",
+        "Mining",
+        "Tactics"
+      ],
+      "incident_tokens": 3,
+      "next_unit_id": 2
+    }
+  ],
+  "map": {
+    "tiles": [
+      [
+        "A1",
+        "Fertile"
+      ],
+      [
+        "A2",
+        "Water"
+      ],
+      [
+        "A3",
+        {
+          "Exhausted": "Forest"
+        }
+      ],
+      [
+        "B1",
+        "Mountain"
+      ],
+      [
+        "B2",
+        "Forest"
+      ],
+      [
+        "B3",
+        "Fertile"
+      ],
+      [
+        "C1",
+        "Barren"
+      ],
+      [
+        "C2",
+        "Forest"
+      ],
+      [
+        "C3",
+        "Water"
+      ],
+      [
+        "D2",
+        "Water"
+      ]
+    ]
+  },
+  "starting_player_index": 0,
+  "current_player_index": 0,
+  "action_log": [
+    {
+      "age": 1,
+      "rounds": [
+        {
+          "round": 1,
+          "players": [
+            {
+              "index": 0,
+              "actions": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          0,
+                          1,
+                          2,
+                          3
+                        ],
+                        "destination": "C1"
+                      }
+                    }
+                  },
+                  "combat_stats": {
+                    "round": 1,
+                    "battleground": "CityWithFortress",
+                    "attacker": {
+                      "position": "C2",
+                      "player": 0,
+                      "present": {
+                        "infantry": 2,
+                        "cavalry": 1,
+                        "elephants": 1
+                      }
+                    },
+                    "defender": {
+                      "position": "C1",
+                      "player": 1,
+                      "present": {
+                        "infantry": 2
+                      },
+                      "losses": {
+                        "infantry": 2
+                      }
+                    },
+                    "result": "AttackerWins",
+                    "city_mood": "Angry"
+                  },
+                  "items": [
+                    {
+                      "player": 1,
+                      "Units": {
+                        "units": {
+                          "infantry": 2
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 3
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Raze captured city"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Fortress"
+                        },
+                        "balance": "Loss",
+                        "position": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Structure": {
+                        "structure": {
+                          "Wonder": "GreatWall"
+                        },
+                        "balance": "Loss",
+                        "position": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Loss",
+                        "position": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "action_log_index": 1,
+  "log": [
+    [
+      "Player1: Move: marched 2 infantry, 1 cavalry and 1 elephant from C2 to C1"
+    ],
+    [
+      "Combat round 1",
+      "Player1: Combat: Attacking with 2 infantry, 1 cavalry and 1 elephant, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 26 and gets 2 hits against defending units, Gain 1 gold",
+      "Player2: Combat: Defending with 2 infantry, Roll 1 (leader, no bonus), 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 3 and gets 0 hits against attacking units, Combat modifiers: fortress added one extra die, fortress cancelled one hit, Lost 2 infantry at C1, Lose Fortress at C1, Lose Great Wall at C1, Lose city C1",
+      "Player2: Choose Casualties: Remove all defending units",
+      "Attacker wins",
+      "Player1: Raze captured city: Gain 3 gold",
+      "Player1: Waste: Could not store 4 gold"
+    ]
+  ],
+  "undo_limit": 1,
+  "actions_left": 1,
+  "round": 1,
+  "age": 1,
+  "messages": [
+    "The game has started"
+  ],
+  "dice_roll_outcomes": [
+    1,
+    1
+  ],
+  "dice_roll_log": [
+    11,
+    11,
+    11,
+    11,
+    1,
+    1,
+    1
+  ],
+  "wonders_left": [
+    "Pyramids"
+  ]
+}

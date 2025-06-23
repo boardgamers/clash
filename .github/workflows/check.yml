@@ -1,19 +1,9 @@
-name: Check All
+name: Check
 
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
-
-env:
-  RUSTFLAGS: "-Dwarnings" # Make sure CI fails on all warnings, including Clippy lints
-  CARGO_TERM_COLOR: always
+on: [pull_request]
 
 jobs:
-  build:
-
+  check:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,33 +11,5 @@ jobs:
     - uses: jdx/mise-action@v2
       with:
         experimental: 'true' # to get lock file support
-    - name: Install dependencies
-      uses: awalsh128/cache-apt-pkgs-action@latest
-      with:
-        packages: pkg-config libx11-dev libxi-dev libgl1-mesa-dev libasound2-dev
-        version: 1.0
-    - name: Build server
-      working-directory: ./server
-      run: |
-        cargo build
-    - name: Run tests server
-      working-directory: ./server
-      run: cargo test
-    - name: Run clippy server
-      working-directory: ./server
-      run: cargo clippy
-    - name: Format server
-      working-directory: ./server
-      run: cargo fmt --check
-    - name: Build client
-      working-directory: ./client
-      run: cargo build
-    - name: Run tests client
-      working-directory: ./client
-      run: cargo test
-    - name: Run clippy client
-      working-directory: ./client
-      run: cargo clippy
-    - name: Format client
-      working-directory: ./client
-      run: cargo fmt --check
+    - name: Check all
+      run: mise run ci

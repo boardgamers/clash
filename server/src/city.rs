@@ -1,11 +1,18 @@
 use serde::{Deserialize, Serialize};
+use std::fmt::Display;
 use std::ops::{Add, Sub};
 
+use crate::city_pieces::lose_building;
 use crate::content::custom_actions::CustomActionType::ForcedLabor;
 use crate::content::persistent_events::PersistentEventType;
+use crate::events::{EventOrigin, EventPlayer};
+use crate::log::{ActionLogBalance, ActionLogEntry, add_action_log_item};
 use crate::map::Terrain;
-use crate::playing_actions::Collect;
+use crate::player::remove_unit;
+use crate::structure::{Structure, log_gain_city, log_lose_city};
+use crate::unit::{UnitType, Units};
 use crate::utils;
+use crate::wonder::destroy_wonder;
 use crate::{
     city_pieces::{CityPieces, CityPiecesData},
     game::Game,
@@ -13,19 +20,18 @@ use crate::{
     position::Position,
 };
 use MoodState::*;
+use itertools::Itertools;
 use num::Zero;
 
-#[readonly::make]
 pub struct City {
     pub pieces: CityPieces,
-    #[readonly]
     pub mood_state: MoodState,
     pub activations: u32,
+    pub activation_mood_decreased: bool, // transient
     pub angry_activation: bool,
     pub player_index: usize,
     pub position: Position,
     pub port_position: Option<Position>,
-    pub(crate) possible_collections: Vec<Collect>,
 }
 
 impl City {
@@ -36,10 +42,10 @@ impl City {
             mood_state: data.mood_state,
             activations: data.activations,
             angry_activation: data.angry_activation,
+            activation_mood_decreased: false, // transient, not in data
             player_index,
             position: data.position,
             port_position: data.port_position,
-            possible_collections: data.possible_collections,
         }
     }
 
@@ -52,7 +58,6 @@ impl City {
             self.angry_activation,
             self.position,
             self.port_position,
-            self.possible_collections,
         )
     }
 
@@ -65,7 +70,6 @@ impl City {
             self.angry_activation,
             self.position,
             self.port_position,
-            self.possible_collections.clone(),
         )
     }
 
@@ -76,26 +80,16 @@ impl City {
             mood_state: Neutral,
             activations: 0,
             angry_activation: false,
+            activation_mood_decreased: false, // transient, not in data
             player_index,
             position,
             port_position: None,
-            possible_collections: vec![],
         }
     }
 
     #[must_use]
     pub fn can_activate(&self) -> bool {
         !self.angry_activation
-    }
-
-    pub fn activate(&mut self) {
-        if self.mood_state == Angry {
-            self.angry_activation = true;
-        }
-        if self.is_activated() {
-            self.decrease_mood_state();
-        }
-        self.activations += 1;
     }
 
     pub fn deactivate(&mut self) {
@@ -106,26 +100,6 @@ impl City {
     #[must_use]
     pub fn is_activated(&self) -> bool {
         self.activations > 0
-    }
-
-    ///
-    ///
-    /// # Panics
-    ///
-    /// Panics if the city does not have a builder
-    pub fn raze(self, game: &mut Game, player_index: usize) {
-        for wonder in &self.pieces.wonders {
-            game.cache
-                .get_wonder(wonder)
-                .listeners
-                .clone()
-                .deinit(game, player_index);
-        }
-        for wonder in &self.pieces.wonders {
-            for p in &mut game.players {
-                p.remove_wonder(wonder);
-            }
-        }
     }
 
     #[must_use]
@@ -148,28 +122,6 @@ impl City {
         }
     }
 
-    pub fn increase_mood_state(&mut self) {
-        self.mood_state = match self.mood_state {
-            Happy | Neutral => Happy,
-            Angry => Neutral,
-        };
-        self.angry_activation = false;
-        self.possible_collections.clear();
-    }
-
-    pub fn decrease_mood_state(&mut self) {
-        self.mood_state = match self.mood_state {
-            Happy => Neutral,
-            Neutral | Angry => Angry,
-        };
-        self.possible_collections.clear();
-    }
-
-    pub fn set_mood_state(&mut self, mood_state: MoodState) {
-        self.mood_state = mood_state;
-        self.possible_collections.clear();
-    }
-
     #[must_use]
     fn uninfluenced_buildings(&self) -> u32 {
         self.pieces.buildings(Some(self.player_index)).len() as u32
@@ -183,6 +135,8 @@ impl City {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct CityData {
+    #[serde(default)]
+    #[serde(skip_serializing_if = "CityPiecesData::is_empty")]
     city_pieces: CityPiecesData,
     mood_state: MoodState,
     #[serde(default)]
@@ -195,9 +149,6 @@ pub struct CityData {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     port_position: Option<Position>,
-    #[serde(default)]
-    #[serde(skip_serializing)]
-    pub(crate) possible_collections: Vec<Collect>, // only for AI performance
 }
 
 impl CityData {
@@ -209,7 +160,6 @@ impl CityData {
         angry_activation: bool,
         position: Position,
         port_position: Option<Position>,
-        possible_collections: Vec<Collect>,
     ) -> Self {
         Self {
             city_pieces,
@@ -218,16 +168,25 @@ impl CityData {
             angry_activation,
             position,
             port_position,
-            possible_collections,
         }
     }
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone, Ord, PartialOrd, Eq)]
 pub enum MoodState {
     Happy = 2,
     Neutral = 1,
     Angry = 0,
+}
+
+impl Display for MoodState {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Happy => write!(f, "Happy"),
+            Neutral => write!(f, "Neutral"),
+            Angry => write!(f, "Angry"),
+        }
+    }
 }
 
 impl Add<u8> for MoodState {
@@ -264,11 +223,40 @@ pub(crate) fn is_valid_city_terrain(t: &Terrain) -> bool {
     t.is_land() && !matches!(t, Terrain::Exhausted(_) | Terrain::Barren)
 }
 
-pub(crate) fn found_city(game: &mut Game, player: usize, position: Position) {
-    game.player_mut(player)
+pub(crate) fn execute_found_city_action(
+    game: &mut Game,
+    player_index: usize,
+    settler: u32,
+) -> Result<(), String> {
+    let settler = remove_unit(player_index, settler, game);
+    let mut u = Units::empty();
+    u += &UnitType::Settler;
+    let origin = EventOrigin::Ability("Found city".to_string());
+    add_action_log_item(
+        game,
+        player_index,
+        ActionLogEntry::units(u, ActionLogBalance::Loss),
+        origin.clone(),
+        vec![],
+    );
+    if !settler.can_found_city(game) {
+        return Err("Cannot found city".to_string());
+    }
+    found_city(
+        game,
+        &EventPlayer::from_player(player_index, game, origin),
+        settler.position,
+    );
+    Ok(())
+}
+
+pub(crate) fn found_city(game: &mut Game, player: &EventPlayer, position: Position) {
+    player
+        .get_mut(game)
         .cities
-        .push(City::new(player, position));
-    on_found_city(game, player, position);
+        .push(City::new(player.index, position));
+    log_gain_city(game, player, Structure::CityCenter, position);
+    on_found_city(game, player.index, position);
 }
 
 pub(crate) fn on_found_city(game: &mut Game, player_index: usize, position: Position) {
@@ -278,4 +266,114 @@ pub(crate) fn on_found_city(game: &mut Game, player_index: usize, position: Posi
         position,
         PersistentEventType::FoundCity,
     );
+}
+
+#[must_use]
+pub(crate) fn non_angry_cites(p: &Player) -> Vec<Position> {
+    p.cities
+        .iter()
+        .filter(|c| !matches!(c.mood_state, MoodState::Angry))
+        .map(|c| c.position)
+        .collect_vec()
+}
+
+pub(crate) fn activate_city(position: Position, game: &mut Game, origin: &EventOrigin) {
+    let city = game.get_any_city_mut(position);
+    assert!(city.can_activate());
+
+    if city.mood_state == Angry {
+        city.angry_activation = true;
+    }
+    let was_activated = city.is_activated();
+    city.activations += 1;
+    if was_activated {
+        city.activation_mood_decreased = true;
+        decrease_city_mood(game, position, origin);
+    }
+}
+
+pub(crate) fn decrease_city_mood(game: &mut Game, position: Position, origin: &EventOrigin) {
+    set_city_mood(
+        game,
+        position,
+        origin,
+        match game.get_any_city(position).mood_state {
+            Happy => Neutral,
+            Neutral | Angry => Angry,
+        },
+    );
+}
+
+pub fn increase_mood_state(game: &mut Game, position: Position, steps: u8, origin: &EventOrigin) {
+    let city = game.get_any_city_mut(position);
+    city.angry_activation = false;
+
+    let mut state = city.mood_state.clone();
+    for _ in 0..steps {
+        state = match state {
+            Happy | Neutral => Happy,
+            Angry => Neutral,
+        }
+    }
+
+    set_city_mood(game, position, origin, state);
+}
+
+pub(crate) fn set_city_mood(
+    game: &mut Game,
+    position: Position,
+    origin: &EventOrigin,
+    new_state: MoodState,
+) {
+    let city = game.get_any_city_mut(position);
+    let player = city.player_index;
+    let old_state = city.mood_state.clone();
+    if old_state == new_state {
+        return;
+    }
+    city.mood_state = new_state.clone();
+
+    game.log(
+        player,
+        origin,
+        &format!("City {position} became {new_state}"),
+    );
+    add_action_log_item(
+        game,
+        player,
+        ActionLogEntry::mood_change(position, new_state),
+        origin.clone(),
+        vec![],
+    );
+}
+
+pub(crate) fn gain_city(game: &mut Game, player: &EventPlayer, mut city: City) {
+    city.player_index = player.index;
+    log_gain_city(game, player, Structure::CityCenter, city.position);
+    player.get_mut(game).cities.push(city);
+}
+
+pub(crate) fn lose_city(game: &mut Game, player: &EventPlayer, position: Position) -> City {
+    let p = player.get_mut(game);
+    let city = if let Some(pos) = p.cities.iter().position(|city| city.position == position) {
+        p.cities.remove(pos)
+    } else {
+        let any_city = game.try_get_any_city(position).map(|c| c.player_index);
+        panic!(
+            "{} should have this city {position} but does not - found owner: {:?}",
+            player.index, any_city
+        );
+    };
+    log_lose_city(game, player, Structure::CityCenter, city.position);
+    city
+}
+
+pub(crate) fn raze_city(game: &mut Game, player: &EventPlayer, position: Position) {
+    for b in &player.get(game).get_city(position).pieces.buildings(None) {
+        lose_building(game, player, *b, position);
+    }
+    for wonder in &player.get(game).get_city(position).pieces.wonders.clone() {
+        destroy_wonder(game, player, *wonder, position);
+    }
+    lose_city(game, player, position);
 }

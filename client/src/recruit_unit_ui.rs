@@ -1,14 +1,7 @@
 use itertools::Itertools;
 use macroquad::prelude::*;
 
-use server::game::Game;
-use server::player::{CostTrigger, Player};
-use server::player_events::CostInfo;
-use server::position::Position;
-use server::recruit::{recruit_cost, recruit_cost_without_replaced};
-use server::unit::{Unit, UnitType, Units};
-
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::construct_ui::{ConstructionPayment, ConstructionProject};
 use crate::dialog_ui::{OkTooltip, cancel_button, ok_button};
 use crate::render_context::RenderContext;
@@ -16,21 +9,26 @@ use crate::select_ui;
 use crate::select_ui::{CountSelector, HasCountSelectableObject, HighlightType};
 use crate::tooltip::show_tooltip_for_circle;
 use crate::unit_ui::{UnitSelection, add_unit_description, draw_unit_type};
+use server::game::Game;
+use server::player::{CostTrigger, Player};
+use server::player_events::CostInfo;
+use server::position::Position;
+use server::recruit::{recruit_cost, recruit_cost_without_replaced};
+use server::unit::UnitType::{Cavalry, Elephant, Infantry, Leader, Settler, Ship};
+use server::unit::{Unit, UnitType, Units, get_units_to_replace};
 
-#[derive(Clone)]
-pub struct SelectableUnit {
+#[derive(Clone, Debug)]
+pub(crate) struct SelectableUnit {
     pub unit_type: UnitType,
     pub selectable: CountSelector,
-    leader_name: Option<String>,
     cost: Result<CostInfo, String>,
 }
 
-#[derive(Clone)]
-pub struct RecruitAmount {
+#[derive(Clone, Debug)]
+pub(crate) struct RecruitAmount {
     player_index: usize,
     city_position: Position,
     pub units: Units,
-    pub leader_name: Option<String>,
     pub selectable: Vec<SelectableUnit>,
 }
 
@@ -41,24 +39,22 @@ impl HasCountSelectableObject for SelectableUnit {
 }
 
 impl RecruitAmount {
-    pub fn new_selection(
+    pub(crate) fn new_selection(
         game: &Game,
         player_index: usize,
         city_position: Position,
         units: Units,
-        leader_name: Option<&String>,
-    ) -> StateUpdate {
+    ) -> RenderResult {
         let player = game.player(player_index);
         let selectable: Vec<SelectableUnit> = new_units(player)
             .into_iter()
-            .map(|u| selectable_unit(city_position, &units, leader_name, player, &u))
+            .map(|u| selectable_unit(city_position, &units, player, u, game))
             .collect();
 
-        StateUpdate::OpenDialog(ActiveDialog::RecruitUnitSelection(RecruitAmount {
+        StateUpdate::open_dialog(ActiveDialog::RecruitUnitSelection(RecruitAmount {
             player_index,
             city_position,
             units,
-            leader_name: leader_name.cloned(),
             selectable,
         }))
     }
@@ -67,108 +63,83 @@ impl RecruitAmount {
 fn selectable_unit(
     city_position: Position,
     units: &Units,
-    leader_name: Option<&String>,
     player: &Player,
-    unit: &NewUnit,
+    unit_type: UnitType,
+    game: &Game,
 ) -> SelectableUnit {
     let mut all = units.clone();
-    all += &unit.unit_type;
+    all += &unit_type;
 
-    let current: u8 = if matches!(unit.unit_type, UnitType::Leader) {
-        u8::from(leader_name.is_some_and(|i| *i == unit.leader_name.clone().unwrap()))
-    } else {
-        units.get(&unit.unit_type)
-    };
+    let current: u8 = units.get(&unit_type);
 
     let cost = recruit_cost_without_replaced(
+        game,
         player,
         &all,
         city_position,
-        unit.leader_name.as_ref().or(leader_name),
         CostTrigger::WithModifiers,
     );
     let max = if cost.is_ok() { current + 1 } else { current };
     SelectableUnit {
-        unit_type: unit.unit_type,
+        unit_type,
         cost,
         selectable: CountSelector {
             current,
             min: 0,
             max,
         },
-        leader_name: unit.leader_name.clone(),
     }
 }
 
-struct NewUnit {
-    unit_type: UnitType,
-    leader_name: Option<String>,
-}
-
-impl NewUnit {
-    fn new(unit_type: UnitType, leader_name: Option<String>) -> NewUnit {
-        NewUnit {
-            unit_type,
-            leader_name,
-        }
-    }
-}
-
-fn new_units(player: &Player) -> Vec<NewUnit> {
-    UnitType::get_all()
+fn new_units(player: &Player) -> Vec<UnitType> {
+    vec![Settler, Infantry, Ship, Cavalry, Elephant]
         .into_iter()
-        .flat_map(|u| {
-            if u == UnitType::Leader {
-                player
-                    .available_leaders
-                    .iter()
-                    .map(|l| NewUnit::new(UnitType::Leader, Some(l.to_string())))
-                    .collect_vec()
-            } else {
-                vec![NewUnit::new(u, None::<String>)]
-            }
-        })
+        .chain(
+            player
+                .available_leaders
+                .iter()
+                .map(|l| Leader(*l))
+                .collect_vec(),
+        )
         .collect()
 }
 
-#[derive(Clone)]
-pub struct RecruitSelection {
+#[derive(Clone, Debug)]
+pub(crate) struct RecruitSelection {
     pub player: usize,
     pub amount: RecruitAmount,
-    pub available_units: Units,
     pub need_replacement: Units,
     pub replaced_units: Vec<u32>,
 }
 
 impl RecruitSelection {
-    pub fn new(
+    pub(crate) fn new(
         game: &Game,
         player: usize,
         amount: RecruitAmount,
         replaced_units: Vec<u32>,
     ) -> RecruitSelection {
         let available_units = game.player(amount.player_index).available_units();
-        let need_replacement = available_units.get_units_to_replace(&amount.units);
+        let need_replacement = get_units_to_replace(&available_units, &amount.units);
 
         RecruitSelection {
             player,
             amount,
-            available_units,
             need_replacement,
             replaced_units,
         }
     }
 
-    pub fn is_finished(&self) -> bool {
+    pub(crate) fn is_finished(&self) -> bool {
         self.need_replacement.is_empty()
     }
 
-    pub fn confirm(&self, game: &Game) -> OkTooltip {
+    pub(crate) fn confirm(&self, game: &Game) -> OkTooltip {
         recruit_cost(
+            game,
             game.player(self.amount.player_index),
             &self.amount.units,
             self.amount.city_position,
-            self.amount.leader_name.as_ref(),
             self.replaced_units.as_slice(),
             CostTrigger::WithModifiers,
         )
@@ -193,7 +164,7 @@ impl UnitSelection for RecruitSelection {
     }
 }
 
-pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
+pub(crate) fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> RenderResult {
     let game = rc.game;
     let radius = 20.;
     select_ui::count_dialog(
@@ -219,12 +190,8 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
                 Ok(_) => format!(" ({} available with current resources)", s.selectable.max),
                 Err(e) => format!(" ({e})"),
             };
-            let name = match s.leader_name.as_ref() {
-                None => s.unit_type.name().to_string(),
-                Some(n) => n.to_string(),
-            };
-            let mut tooltip = vec![format!("Recruit {}{}", name, suffix)];
-            add_unit_description(&mut tooltip, s.unit_type);
+            let mut tooltip = vec![format!("Recruit {}{}", s.unit_type.name(game), suffix)];
+            add_unit_description(rc, &mut tooltip, s.unit_type);
             show_tooltip_for_circle(rc, &tooltip, p, radius);
         },
         || OkTooltip::Valid("Recruit units".to_string()),
@@ -234,82 +201,58 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
             if sel.is_finished() {
                 open_dialog(rc, a.city_position, sel)
             } else {
-                StateUpdate::OpenDialog(ActiveDialog::ReplaceUnits(sel))
+                StateUpdate::open_dialog(ActiveDialog::ReplaceUnits(sel))
             }
         },
         |_s, _u| true,
         |s, u| {
             let mut units = s.units.clone();
             units += &u.unit_type;
-            update_selection(
-                game,
-                s,
-                units,
-                u.leader_name.as_ref().or(s.leader_name.as_ref()),
-            )
+            update_selection(game, s, units)
         },
         |s, u| {
             let mut units = s.units.clone();
             units -= &u.unit_type;
-            update_selection(
-                game,
-                s,
-                units,
-                if matches!(u.unit_type, UnitType::Leader) {
-                    None
-                } else {
-                    s.leader_name.as_ref()
-                },
-            )
+            update_selection(game, s, units)
         },
         Vec2::new(0., 0.),
         true,
     )
 }
 
-fn open_dialog(rc: &RenderContext, city: Position, sel: RecruitSelection) -> StateUpdate {
+fn open_dialog(rc: &RenderContext, city: Position, sel: RecruitSelection) -> RenderResult {
     let p = rc.shown_player.index;
     let cost = recruit_cost(
+        rc.game,
         rc.shown_player,
         &sel.amount.units,
         city,
-        sel.amount.leader_name.as_ref(),
         &sel.replaced_units,
         CostTrigger::WithModifiers,
     )
     .unwrap();
-    StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
+    StateUpdate::open_dialog(ActiveDialog::ConstructionPayment(ConstructionPayment::new(
         rc,
         rc.game.city(p, city),
         &format!(
-            "Recruit {}{} in {}",
-            sel.amount.units,
-            sel.amount
-                .leader_name
-                .clone()
-                .map_or(String::new(), |name| format!(" ({name})")),
-            city
+            "Recruit {} in {city}",
+            sel.amount.units.to_string(Some(rc.game)),
         ),
         ConstructionProject::Units(sel),
         &cost,
     )))
 }
 
-fn update_selection(
-    game: &Game,
-    s: &RecruitAmount,
-    units: Units,
-    leader_name: Option<&String>,
-) -> StateUpdate {
-    RecruitAmount::new_selection(game, s.player_index, s.city_position, units, leader_name)
+fn update_selection(game: &Game, s: &RecruitAmount, units: Units) -> RenderResult {
+    RecruitAmount::new_selection(game, s.player_index, s.city_position, units)
 }
 
-pub fn replace_dialog(rc: &RenderContext, sel: &RecruitSelection) -> StateUpdate {
+pub(crate) fn replace_dialog(rc: &RenderContext, sel: &RecruitSelection) -> RenderResult {
     if ok_button(rc, sel.confirm(rc.game)) {
         open_dialog(rc, sel.amount.city_position, sel.clone())
     } else if cancel_button(rc) {
-        StateUpdate::Cancel
+        StateUpdate::cancel()
     } else {
-        StateUpdate::None
+        NO_UPDATE
     }
 }

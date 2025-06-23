@@ -49,7 +49,6 @@
           "position": "B1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "activations": 4,
           "angry_activation": true,
@@ -108,10 +107,7 @@
           "id": 9
         }
       ],
-      "civilization": "Maya",
-      "available_leaders": [
-        "Kʼinich Janaab Pakal I"
-      ],
+      "civilization": "China",
       "advances": [
         "Farming",
         "FreeEconomy",
@@ -124,7 +120,7 @@
       ],
       "incident_tokens": 2,
       "wonder_cards": [
-        "Great Gardens"
+        "GreatGardens"
       ],
       "next_unit_id": 10
     },
@@ -148,7 +144,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "activations": 2,
           "position": "C1"
@@ -174,11 +169,7 @@
           "id": 1
         }
       ],
-      "civilization": "test0",
-      "available_leaders": [
-        "Alexander",
-        "Kleopatra"
-      ],
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Mining"
@@ -269,12 +260,13 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
-              "index": 0,
-              "items": []
+              "index": 0
             }
           ]
         }

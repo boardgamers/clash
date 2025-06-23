@@ -50,7 +50,6 @@
           "position": "B1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "activations": 4,
           "angry_activation": true,
@@ -109,16 +108,13 @@
           "id": 9
         }
       ],
-      "civilization": "Maya",
-      "available_leaders": [
-        "Kʼinich Janaab Pakal I"
-      ],
+      "civilization": "China",
       "advances": [
         "Writing"
       ],
       "incident_tokens": 1,
       "wonder_cards": [
-        "Great Gardens"
+        "GreatGardens"
       ],
       "action_cards": [
         1
@@ -148,7 +144,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "activations": 2,
           "position": "C1"
@@ -174,11 +169,7 @@
           "id": 1
         }
       ],
-      "civilization": "test0",
-      "available_leaders": [
-        "Alexander",
-        "Kleopatra"
-      ],
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Mining"
@@ -269,12 +260,14 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -286,7 +279,84 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "food": 1,
+                          "gold": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 1
+                        },
+                        "from": "DrawPile",
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Writing"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 1
+                        },
+                        "from": "DrawPile",
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Writing"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Advance": "Writing"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Writing",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -303,39 +373,54 @@
                       }
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 1
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
+                      }
                     },
                     {
-                      "op": "remove",
-                      "path": "/players/0/cities/0/city_pieces/academy"
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "food": 1,
+                          "wood": 1,
+                          "ore": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
+                      }
                     },
                     {
-                      "op": "remove",
-                      "path": "/players/0/cities/0/activations"
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Academy"
+                        },
+                        "balance": "Gain",
+                        "position": "A1"
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
+                      }
                     },
                     {
-                      "op": "replace",
-                      "path": "/players/0/resources/food",
-                      "value": 6
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/ideas",
-                      "value": 1
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/ore",
-                      "value": 6
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/wood",
-                      "value": 6
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "ideas": 2
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Academy"
+                      }
                     }
                   ]
                 }
@@ -349,14 +434,12 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 paid 1 food and 1 gold to get the Writing advance",
-      "Player1 gained an action card from the pile",
-      "Player1 gained an objective card from the pile",
-      "Player gained 1 culture token as advance bonus"
+      "Player1: Advance: Pay 1 action, Pay 1 food and 1 gold, Gain Writing and take an event token (1 left)",
+      "Player1: Writing: Draw an action card, Draw an objective card, Gain 1 culture token"
     ],
     [
-      "Player1 paid 1 food, 1 wood and 1 ore to construct a Academy in the city at A1",
-      "Academy gained 2 ideas"
+      "Player1: Construct Building: Pay 1 action, Pay 1 food, 1 wood and 1 ore, Gain Academy at A1",
+      "Player1: Academy: Gain 2 ideas"
     ]
   ],
   "undo_limit": 1,

@@ -1,23 +1,33 @@
-use std::{cmp::Ordering::*, mem};
-
+use super::player::Player;
 use crate::action::execute_action;
+use crate::card::{HandCard, HandCardLocation};
+use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{
     EventResponse, PersistentEventRequest, PersistentEventType,
 };
-use crate::game_setup::setup_game;
-use crate::log::current_player_turn_log_mut;
+use crate::game::GameOptions;
+use crate::game_setup::{GameSetupBuilder, setup_game};
+use crate::log::{ActionLogAction, ActionLogEntry, linear_action_log};
 use crate::utils::Shuffle;
+use crate::victory_points::compare_score;
+use crate::wonder::Wonder;
 use crate::{
     action::Action,
-    game::{Game, GameState::*, Messages},
+    game::{Game, GameState::*},
     log::LogSliceOptions,
     utils::Rng,
 };
+use std::cmp::Ordering::*;
 // Game API methods, see https://docs.boardgamers.space/guide/engine-api.html#required-methods
 
 #[must_use]
-pub fn init(player_amount: usize, seed: String) -> Game {
-    setup_game(player_amount, seed, true)
+pub fn init(player_amount: usize, seed: String, options: GameOptions) -> Game {
+    setup_game(
+        &GameSetupBuilder::new(player_amount)
+            .seed(seed)
+            .options(options)
+            .build(),
+    )
 }
 
 #[must_use]
@@ -32,11 +42,11 @@ pub fn ended(game: &Game) -> bool {
 
 #[must_use]
 pub fn scores(game: &Game) -> Vec<f32> {
-    let mut scores: Vec<f32> = Vec::new();
-    for player in &game.players {
-        scores.push(player.victory_points(game));
-    }
-    scores
+    game.players
+        .iter()
+        .filter(|p| p.is_human())
+        .map(|player| player.victory_points(game))
+        .collect()
 }
 
 #[must_use]
@@ -46,23 +56,16 @@ pub fn drop_player(mut game: Game, player_index: usize) -> Game {
 }
 
 #[must_use]
-pub fn current_player(game: &Game) -> Option<usize> {
-    match game.state {
-        Finished => None,
-        _ => Some(game.active_player()),
-    }
-}
-
-#[must_use]
 pub fn log_length(game: &Game) -> usize {
-    game.log.len()
+    linear_action_log(game).len()
 }
 
 #[must_use]
-pub fn log_slice(game: &Game, options: &LogSliceOptions) -> Vec<Vec<String>> {
+pub fn log_slice(game: &Game, options: &LogSliceOptions) -> Vec<Action> {
+    let l = linear_action_log(game);
     match options.end {
-        Some(end) => &game.log[options.start..=end],
-        None => &game.log[options.start..],
+        Some(end) => &l[options.start..=end],
+        None => &l[options.start..],
     }
     .to_vec()
 }
@@ -77,9 +80,12 @@ pub fn set_player_name(mut game: Game, player_index: usize, name: String) -> Gam
 pub fn rankings(game: &Game) -> Vec<u32> {
     let mut rankings = Vec::new();
     for player in &game.players {
+        if !player.is_human() {
+            continue;
+        }
         let mut rank = 1;
         for other in &game.players {
-            if other.compare_score(player, game) == Greater {
+            if compare_score(other, player, game) == Greater {
                 rank += 1;
             }
         }
@@ -89,27 +95,36 @@ pub fn rankings(game: &Game) -> Vec<u32> {
 }
 
 #[must_use]
-pub fn round(game: &Game) -> Option<u32> {
-    match game.state {
-        Playing => Some((game.age - 1) * 3 + game.round),
-        _ => None,
-    }
+pub fn round(game: &Game) -> u32 {
+    // idea: you can easily see that "12" is age 1, round 2
+    // round 4 is status phase
+    (game.age) * 10 + game.round
 }
 
 #[must_use]
 pub fn civilizations(game: Game) -> Vec<String> {
     game.players
         .into_iter()
+        .filter(Player::is_human)
         .map(|player| player.civilization.name)
         .collect()
 }
 
 #[must_use]
 pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
+    for e in &mut game.permanent_effects {
+        if let PermanentEffect::GreatSeer(g) = e {
+            if player_index != Some(g.player) {
+                // player shouldn't see other player's great seer
+                g.strip_secret();
+            }
+        }
+    }
     game.incidents_left.shuffle(&mut game.rng);
     game.wonders_left.shuffle(&mut game.rng);
     game.action_cards_left.shuffle(&mut game.rng);
     game.objective_cards_left.shuffle(&mut game.rng);
+    game.seed = String::new();
     game.rng = Rng::default();
     for (i, player) in game.players.iter_mut().enumerate() {
         if player_index != Some(i) {
@@ -117,6 +132,58 @@ pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
         }
     }
     game.map.strip_secret();
+    strip_events(&mut game, player_index);
+    strip_log(&mut game, player_index);
+
+    game
+}
+
+fn strip_log(game: &mut Game, player_index: Option<usize>) {
+    for age in &mut game.action_log {
+        for round in &mut age.rounds {
+            for player in &mut round.players {
+                for action in &mut player.actions {
+                    strip_action(action, player_index);
+                }
+            }
+        }
+    }
+}
+
+fn strip_action(action: &mut ActionLogAction, player_index: Option<usize>) {
+    // undo has secret information, like gained action cards
+    action.undo.clear();
+
+    if let Action::Response(EventResponse::SelectHandCards(c)) = &mut action.action {
+        // player shouldn't see other player's hand cards
+        c.clear();
+    }
+
+    for item in &mut action.items {
+        if let ActionLogEntry::HandCard { card, from, to } = &mut item.entry {
+            if is_visible_card_info(player_index, from, to) {
+                match &card {
+                    HandCard::ActionCard(_) => *card = HandCard::ActionCard(0),
+                    HandCard::ObjectiveCard(_) => *card = HandCard::ObjectiveCard(0),
+                    HandCard::Wonder(_) => *card = HandCard::Wonder(Wonder::Hidden),
+                }
+            }
+        }
+    }
+}
+
+fn is_visible_card_info(
+    player_index: Option<usize>,
+    from: &HandCardLocation,
+    to: &HandCardLocation,
+) -> bool {
+    from.player() == player_index
+        || to.player() == player_index
+        || from.is_public()
+        || to.is_public()
+}
+
+fn strip_events(game: &mut Game, player_index: Option<usize>) {
     for s in &mut game.events {
         match &mut s.event_type {
             PersistentEventType::CombatRoundStart(r) => {
@@ -145,23 +212,4 @@ pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
             }
         }
     }
-    let player_log = current_player_turn_log_mut(&mut game);
-    if player_index != Some(player_log.index) {
-        for l in &mut player_log.items {
-            // undo has secret information, like gained and discarded action cards
-            l.undo.clear();
-            if let Action::Response(EventResponse::SelectHandCards(c)) = &mut l.action {
-                // player shouldn't see other player's hand cards
-                c.clear();
-            }
-        }
-    }
-
-    game
-}
-
-#[must_use]
-pub fn messages(mut game: Game) -> Messages {
-    let messages = mem::take(&mut game.messages);
-    Messages::new(messages, game.data())
 }

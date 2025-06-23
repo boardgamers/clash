@@ -1,39 +1,40 @@
 use crate::action_buttons::action_buttons;
 use crate::city_ui::city_labels;
 use crate::client::Features;
-use crate::client_state::StateUpdate;
+use crate::client_state::{NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::{OkTooltip, ok_button};
-use crate::event_ui::event_help;
 use crate::layout_ui::{
-    ICON_SIZE, bottom_center_texture, bottom_centered_text, bottom_right_texture, icon_pos,
-    left_mouse_button_pressed_in_rect, top_center_anchor, top_center_texture,
+    ICON_SIZE, bottom_center_texture, bottom_centered_text, bottom_right_texture, button_pressed,
+    icon_pos, top_center_anchor, top_center_texture,
 };
 use crate::log_ui::multiline_label;
 use crate::map_ui::terrain_name;
 use crate::render_context::RenderContext;
 use crate::resource_ui::{new_resource_map, resource_name};
-use crate::tooltip::{show_tooltip_for_circle, show_tooltip_for_rect};
+use crate::tooltip::show_tooltip_for_circle;
 use crate::unit_ui;
 use itertools::Itertools;
 use macroquad::math::vec2;
 use macroquad::prelude::*;
 use server::action::Action;
-use server::combat::Combat;
+use server::combat_stats::CombatStats;
 use server::consts::ARMY_MOVEMENT_REQUIRED_ADVANCE;
 use server::content::persistent_events::PersistentEventType;
 use server::game::{Game, GameState};
+use server::map::block_for_position;
 use server::movement::{CurrentMove, MovementAction};
 use server::player::Player;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::resource::ResourceType;
 use server::status_phase::get_status_phase;
+use server::victory_points::victory_points_parts;
 
-pub fn player_select(rc: &RenderContext) -> StateUpdate {
+pub(crate) fn player_select(rc: &RenderContext) -> RenderResult {
     let game = rc.game;
     let players = game.human_players(game.starting_player_index);
 
-    let size = 40.;
+    let size = 50.;
     let mut y = (players.len() as f32 * -size) / 2.;
 
     for player_index in players {
@@ -46,18 +47,18 @@ pub fn player_select(rc: &RenderContext) -> StateUpdate {
 
         let w = if shown { size + 10. } else { size };
         let x = pos.x - w + size;
-        draw_rectangle(x, pos.y, w, size, color);
-        draw_rectangle_lines(x, pos.y, w, size, 2.0, BLACK);
+        let rect = Rect::new(x, pos.y, w, size);
+        rc.draw_rectangle(rect, color);
+        rc.draw_rectangle_lines(rect, 2.0, BLACK);
         let text = format!("{}", pl.victory_points(game));
 
-        let state = rc.state;
-        state.draw_text(&text, pos.x + 10., pos.y + 22.);
+        rc.draw_text(&text, pos.x + 10., pos.y + 27.);
 
-        if game.active_player() == pl.index {
+        if game.active_player() == pl.index && rc.stage.is_main() {
             draw_texture_ex(
                 &rc.assets().active_player,
-                x - 25.,
-                pos.y + 10.,
+                x - 20.,
+                pos.y + 13.,
                 WHITE,
                 DrawTextureParams {
                     dest_size: Some(vec2(20., 20.)),
@@ -66,42 +67,39 @@ pub fn player_select(rc: &RenderContext) -> StateUpdate {
             );
         }
 
-        let rect = Rect::new(x, pos.y, w, size);
-        let tooltip = if state.control_player.is_some_and(|p| p == pl.index) {
-            format!("{} (You)", pl.get_name())
+        let tooltip = if rc.state.control_player.is_some_and(|p| p == pl.index) {
+            format!("{pl} (You)")
         } else {
             pl.get_name()
         };
-        show_tooltip_for_rect(rc, &[tooltip], rect, 50.);
-        if !shown && left_mouse_button_pressed_in_rect(rect, rc) {
-            return StateUpdate::SetShownPlayer(pl.index);
+        if button_pressed(rect, rc, &[tooltip], 50.) && !shown {
+            return StateUpdate::of(StateUpdate::SetShownPlayer(pl.index));
         }
 
         y += size;
     }
 
-    StateUpdate::None
+    NO_UPDATE
 }
 
-pub fn top_icon_with_label(
+pub(crate) fn top_icon_with_label(
     rc: &RenderContext,
     label: &str,
     texture: &Texture2D,
     p: Vec2,
     tooltip: &str,
 ) {
-    let state = rc.state;
-    let dimensions = state.measure_text(label);
+    let dimensions = rc.state.measure_text(label);
     let x = (ICON_SIZE - dimensions.width) / 2.0;
-    state.draw_text(
+    rc.draw_text(
         label,
-        state.screen_size.x / 2.0 + p.x + x,
+        rc.state.screen_size.x / 2.0 + p.x + x,
         p.y + ICON_SIZE + 30.,
     );
     top_center_texture(rc, texture, p, tooltip);
 }
 
-pub fn bottom_icon_with_label(
+pub(crate) fn bottom_icon_with_label(
     rc: &RenderContext,
     label: &str,
     texture: &Texture2D,
@@ -111,7 +109,7 @@ pub fn bottom_icon_with_label(
     let state = rc.state;
     let dimensions = state.measure_text(label);
     let x = (ICON_SIZE - dimensions.width) / 2.0;
-    state.draw_text(
+    rc.draw_text(
         label,
         rc.state.screen_size.x / 2.0 + p.x + x,
         rc.state.screen_size.y + p.y + 35.,
@@ -119,7 +117,7 @@ pub fn bottom_icon_with_label(
     bottom_center_texture(rc, texture, p, tooltip);
 }
 
-pub fn show_top_center(rc: &RenderContext) {
+pub(crate) fn show_top_center(rc: &RenderContext) {
     let player = rc.shown_player;
 
     let pos = icon_pos(3, 0);
@@ -132,7 +130,7 @@ pub fn show_top_center(rc: &RenderContext) {
     );
 
     let mut tooltip = vec![];
-    for (name, points) in player.victory_points_parts(rc.game) {
+    for (name, points) in victory_points_parts(player, rc.game) {
         tooltip.push(format!("{name}: {points}"));
     }
     show_tooltip_for_circle(
@@ -170,16 +168,15 @@ pub fn show_top_center(rc: &RenderContext) {
     }
 }
 
-pub fn show_top_left(rc: &RenderContext) {
-    let state = rc.state;
+pub(crate) fn show_top_left(rc: &RenderContext) {
     let mut p = vec2(10., 10.);
     let mut label = |label: &str| {
         multiline_label(label, 30, |label: &str| {
             p = vec2(p.x, p.y + 25.);
-            if p.y > state.screen_size.y - 150. {
+            if p.y > rc.state.screen_size.y - 150. {
                 p = vec2(p.x + 350., 85.);
             }
-            state.draw_text(label, p.x, p.y);
+            rc.draw_text(label, p.x, p.y);
         });
     };
 
@@ -190,7 +187,7 @@ pub fn show_top_left(rc: &RenderContext) {
         _ => label(&format!("Age {}", game.age)),
     }
     if let Some(s) = get_status_phase(game) {
-        label(&format!("Status Phase: {s:?}"));
+        label(&format!("Status Phase: {s}"));
     } else {
         label(&format!("Round {}", game.round));
     }
@@ -204,9 +201,9 @@ pub fn show_top_left(rc: &RenderContext) {
     label(&format!(
         "Leader {}",
         if let Some(l) = &player.active_leader() {
-            &l.name
+            l.name(game)
         } else {
-            "-"
+            "-".to_string()
         }
     ));
 
@@ -230,28 +227,28 @@ pub fn show_top_left(rc: &RenderContext) {
     }
 
     if let Some(c) = get_combat(game) {
-        if c.attacker == player.index {
+        if c.attacker.player == player.index {
             label(&format!("Attack - combat round {}", c.round));
-        } else if c.defender == player.index {
+        } else if c.defender.player == player.index {
             label(&format!("Defend - combat round {}", c.round));
         }
     }
 
-    if rc.shown_player_is_active() || state.active_dialog.show_for_other_player() {
-        for m in state.active_dialog.help_message(rc) {
+    if rc.shown_player_is_active() || rc.state.active_dialog.show_for_other_player() {
+        for m in rc.state.active_dialog.help_message(rc) {
             label(&m);
         }
     }
 
     if rc.shown_player_is_active() {
-        if let Some(u) = &state.pending_update {
+        if let Some(u) = &rc.state.pending_update {
             for m in &u.info {
                 label(m);
             }
         }
     }
 
-    if let Some(position) = state.focused_tile {
+    if let Some(position) = rc.state.focused_tile {
         show_focused_tile(&mut label, game, position);
     }
 
@@ -262,8 +259,9 @@ pub fn show_top_left(rc: &RenderContext) {
 
 fn show_focused_tile(label: &mut impl FnMut(&str), game: &Game, position: Position) {
     label(&format!(
-        "{}/{}",
+        "{}/{}/{}",
         position,
+        block_for_position(game, position).0,
         game.map
             .get(position)
             .map_or("outside the map", terrain_name),
@@ -282,7 +280,7 @@ fn show_focused_tile(label: &mut impl FnMut(&str), game: &Game, position: Positi
 
     for (p, unit) in units {
         let army_move = game.player(p).has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
-        label(&unit_ui::unit_label(&unit, army_move));
+        label(&unit_ui::unit_label(&unit, army_move, game));
     }
 }
 
@@ -301,23 +299,23 @@ fn show_permanent_effects(
     }
     label("Permanent effects:");
     for e in &game.permanent_effects {
-        for m in event_help(rc, &e.event_origin()) {
+        for m in e.description(rc.game) {
             label(&m);
         }
     }
 }
 
-pub fn get_combat(game: &Game) -> Option<&Combat> {
+pub(crate) fn get_combat(game: &Game) -> Option<&CombatStats> {
     game.events.last().and_then(|e| match &e.event_type {
-        PersistentEventType::CombatStart(c) => Some(c),
-        PersistentEventType::CombatRoundStart(s) => Some(&s.combat),
-        PersistentEventType::CombatRoundEnd(e) => Some(&e.combat),
-        PersistentEventType::CombatEnd(e) => Some(&e.combat),
+        PersistentEventType::CombatStart(c) => Some(&c.stats),
+        PersistentEventType::CombatRoundStart(s) => Some(&s.combat.stats),
+        PersistentEventType::CombatRoundEnd(e) => Some(&e.combat.stats),
+        PersistentEventType::CombatEnd(s) => Some(s),
         _ => None,
     })
 }
 
-pub fn show_global_controls(rc: &RenderContext, features: &Features) -> StateUpdate {
+pub(crate) fn show_global_controls(rc: &RenderContext, features: &Features) -> RenderResult {
     let assets = rc.assets();
     let can_control = rc.can_control_shown_player();
     if can_control {
@@ -328,26 +326,23 @@ pub fn show_global_controls(rc: &RenderContext, features: &Features) -> StateUpd
             }
         }
         if game.can_redo() && bottom_right_texture(rc, &assets.redo, icon_pos(-5, -1), "Redo") {
-            return StateUpdate::Execute(Action::Redo);
+            return StateUpdate::execute(Action::Redo);
         }
         if game.can_undo() && bottom_right_texture(rc, &assets.undo, icon_pos(-6, -1), "Undo") {
-            return StateUpdate::Execute(Action::Undo);
+            return StateUpdate::execute(Action::Undo);
         }
 
         if can_control {
-            let update = action_buttons(rc);
-            if !matches!(update, StateUpdate::None) {
-                return update;
-            }
+            action_buttons(rc)?;
         }
     }
 
     if features.import_export {
         if bottom_right_texture(rc, &assets.export, icon_pos(-1, -3), "Export") {
-            return StateUpdate::Export;
+            return StateUpdate::of(StateUpdate::Export);
         }
         if bottom_right_texture(rc, &assets.import, icon_pos(-2, -3), "Import") {
-            return StateUpdate::Import;
+            return StateUpdate::of(StateUpdate::Import);
         }
     }
 
@@ -364,22 +359,25 @@ pub fn show_global_controls(rc: &RenderContext, features: &Features) -> StateUpd
             &assets.play
         };
         if bottom_right_texture(rc, texture, icon_pos(-3, -3), tooltip) {
-            return StateUpdate::ToggleAiPlay;
+            return StateUpdate::of(StateUpdate::ToggleAiPlay);
         }
     }
 
-    StateUpdate::None
+    NO_UPDATE
 }
 
 fn can_end_move(game: &Game) -> Option<&str> {
+    if !game.events.is_empty() {
+        return None;
+    }
     match game.state {
-        GameState::Movement { .. } => Some("End movement"),
+        GameState::Movement(_) => Some("End movement"),
         GameState::Playing => Some("End turn"),
         GameState::Finished => None,
     }
 }
 
-fn end_move(game: &Game) -> StateUpdate {
+fn end_move(game: &Game) -> RenderResult {
     if let GameState::Movement(m) = &game.state {
         let movement_actions_left = m.movement_actions_left;
         return StateUpdate::execute_with_warning(
@@ -403,11 +401,11 @@ fn end_move(game: &Game) -> StateUpdate {
     )
 }
 
-pub fn choose_player_dialog(
+pub(crate) fn choose_player_dialog(
     rc: &RenderContext,
     choices: &[usize],
     execute: impl Fn(usize) -> Action,
-) -> StateUpdate {
+) -> RenderResult {
     let player = rc.shown_player.index;
     if rc.can_control_active_player() && choices.contains(&player) {
         bottom_centered_text(rc, &format!("Select {}", rc.shown_player.get_name()));
@@ -415,5 +413,5 @@ pub fn choose_player_dialog(
             return StateUpdate::execute(execute(player));
         }
     }
-    StateUpdate::None
+    NO_UPDATE
 }

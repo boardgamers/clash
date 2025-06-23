@@ -9,11 +9,11 @@
         "ore": 7,
         "ideas": 3,
         "gold": 7,
-        "mood_tokens": 8,
-        "culture_tokens": 7
+        "mood_tokens": 7,
+        "culture_tokens": 8
       },
       "resource_limit": {
-        "food": 7,
+        "food": 2,
         "wood": 7,
         "ore": 7,
         "ideas": 7,
@@ -23,17 +23,14 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "A1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Neutral",
           "position": "C2"
         },
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "position": "C1"
         }
@@ -57,7 +54,7 @@
         },
         {
           "position": "C1",
-          "unit_type": "Leader",
+          "unit_type": "Infantry",
           "movement_restrictions": [
             "Battle"
           ],
@@ -92,14 +89,20 @@
           "id": 7
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Mining",
-        "Storage",
-        "Tactics"
+        "Tactics",
+        "Writing"
       ],
       "incident_tokens": 2,
+      "action_cards": [
+        1
+      ],
+      "objective_cards": [
+        1
+      ],
       "next_unit_id": 8
     },
     {
@@ -122,13 +125,13 @@
         "mood_tokens": 7,
         "culture_tokens": 7
       },
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Fanaticism",
         "Farming",
         "Mining",
-        "Storage",
-        "Tactics"
+        "Tactics",
+        "Writing"
       ],
       "incident_tokens": 3,
       "next_unit_id": 2
@@ -184,12 +187,14 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Movement": {
@@ -207,19 +212,20 @@
                     }
                   },
                   "combat_stats": {
-                    "position": "C1",
+                    "round": 1,
                     "battleground": "City",
                     "attacker": {
+                      "position": "C2",
                       "player": 0,
                       "present": {
                         "settlers": 2,
-                        "infantry": 1,
+                        "infantry": 2,
                         "cavalry": 1,
-                        "elephants": 1,
-                        "leaders": 1
+                        "elephants": 1
                       }
                     },
                     "defender": {
+                      "position": "C1",
                       "player": 1,
                       "present": {
                         "infantry": 2
@@ -228,8 +234,57 @@
                         "infantry": 2
                       }
                     },
-                    "result": "AttackerWins"
-                  }
+                    "result": "AttackerWins",
+                    "city_mood": "Angry"
+                  },
+                  "items": [
+                    {
+                      "player": 1,
+                      "Units": {
+                        "units": {
+                          "infantry": 2
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Loss",
+                        "position": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Gain",
+                        "position": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -241,133 +296,76 @@
                       ]
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "CombatEnd": {
-                              "combat": {
-                                "attacker": 0,
-                                "attacker_position": "C2",
-                                "attackers": [
-                                  0,
-                                  1,
-                                  2,
-                                  3,
-                                  4,
-                                  5
-                                ],
-                                "defender": 1,
-                                "defender_position": "C1",
-                                "retreat": "CanRetreat",
-                                "round": 1,
-                                "stats": {
-                                  "attacker": {
-                                    "player": 0,
-                                    "present": {
-                                      "cavalry": 1,
-                                      "elephants": 1,
-                                      "infantry": 1,
-                                      "leaders": 1,
-                                      "settlers": 2
-                                    }
-                                  },
-                                  "battleground": "City",
-                                  "defender": {
-                                    "losses": {
-                                      "infantry": 2
-                                    },
-                                    "player": 1,
-                                    "present": {
-                                      "infantry": 2
-                                    }
-                                  },
-                                  "position": "C1",
-                                  "result": "AttackerWins"
-                                }
-                              },
-                              "result": "AttackerWins"
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Builtin": "Teach us"
-                            },
-                            "priority": 91,
-                            "request": {
-                              "SelectHandCards": {
-                                "choices": [
-                                  {
-                                    "ActionCard": 35
-                                  }
-                                ],
-                                "description": "Select Teach Us card",
-                                "needed": {
-                                  "end": 1,
-                                  "start": 0
-                                }
-                              }
-                            }
-                          },
-                          "last_priority_used": 91,
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/action_cards",
-                      "value": [
-                        35
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/advances/2",
-                      "value": "Tactics"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/advances/3"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resource_limit/food",
-                      "value": 2
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 7
-                    }
-                  ],
-                  "combat_stats": {
-                    "position": "C1",
-                    "battleground": "City",
-                    "attacker": {
                       "player": 0,
-                      "present": {
-                        "settlers": 2,
-                        "infantry": 1,
-                        "cavalry": 1,
-                        "elephants": 1,
-                        "leaders": 1
-                      }
-                    },
-                    "defender": {
-                      "player": 1,
-                      "present": {
-                        "infantry": 2
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 35
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToDiscard"
                       },
-                      "losses": {
-                        "infantry": 2
+                      "origin": {
+                        "Ability": "Teach us"
                       }
                     },
-                    "result": "AttackerWins"
-                  }
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 1
+                        },
+                        "from": "DrawPile",
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Writing"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 1
+                        },
+                        "from": "DrawPile",
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Writing"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Advance": "Writing"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Writing",
+                        "take_incident_token": false,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Teach us"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -379,26 +377,22 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 marched 2 settlers, 1 infantry, 1 cavalry, 1 elephant and a leader from C2 to C1"
+      "Player1: Move: marched 2 settlers, 2 infantry, 1 cavalry and 1 elephant from C2 to C1"
     ],
     [
       "Combat round 1",
-      "Attackers: 2 settlers, 1 infantry, 1 cavalry, 1 elephant and a leader",
-      "Defenders: 2 infantry",
-      "Player1 rolled 6 (Infantry, +1 combat value), 6 (Infantry, no bonus), 6 (Infantry, no bonus), 6 (Infantry, no bonus) for combined combat value of 25 and gets 2 hits against defending units.",
-      "Player2 rolled 1 (Leader, no bonus), 1 (Leader, no bonus) for combined combat value of 2 and gets 0 hits against attacking units.",
-      "Player2 has to remove all of their defending units",
-      "Player2 removed 2 infantry",
-      "Attacker wins and captured Player2's city at C1",
-      "Player1 could not store 1 gold"
+      "Player1: Combat: Attacking with 2 settlers, 2 infantry, 1 cavalry and 1 elephant, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 26 and gets 2 hits against defending units, Gain 1 gold, Gain city C1",
+      "Player2: Combat: Defending with 2 infantry, Roll 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 2 and gets 0 hits against attacking units, Lost 2 infantry at C1, Lose city C1",
+      "Player2: Choose Casualties: Remove all defending units",
+      "Attacker wins",
+      "Player1: Waste: Could not store 1 gold"
     ],
     [
-      "Player1 selected to use Teach Us.",
-      "Player1 selected Storage as advance for Teach Us.",
-      "Player gained 1 mood token as advance bonus"
+      "Player1: Teach us: Play Teach Us/Defensive Formation, Gain Writing without taking an event token",
+      "Player1: Writing: Draw an action card, Draw an objective card, Gain 1 culture token"
     ]
   ],
-  "undo_limit": 1,
+  "undo_limit": 2,
   "actions_left": 3,
   "round": 2,
   "age": 1,
@@ -420,5 +414,8 @@
   ],
   "wonders_left": [
     "Pyramids"
+  ],
+  "action_cards_discarded": [
+    35
   ]
 }

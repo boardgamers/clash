@@ -1,33 +1,39 @@
 use crate::action_buttons::base_or_custom_action;
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::BaseOrCustomDialog;
 use crate::payment_ui::{Payment, payment_dialog};
 use crate::render_context::RenderContext;
+use itertools::Itertools;
 use server::action::Action;
 use server::city::{City, MoodState};
+use server::events::check_event_origin;
 use server::game::Game;
-use server::happiness::{available_happiness_actions, happiness_cost};
+use server::happiness::{
+    IncreaseHappiness, available_happiness_actions, happiness_city_restriction, happiness_cost,
+};
 use server::player::CostTrigger;
-use server::player_events::CostInfo;
-use server::playing_actions::{IncreaseHappiness, PlayingAction, PlayingActionType};
+use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
 
-#[derive(Clone)]
-pub struct IncreaseHappinessConfig {
+#[derive(Clone, Debug)]
+pub(crate) struct IncreaseHappinessConfig {
     pub steps: Vec<(Position, u8)>,
     pub payment: Payment<String>,
     pub custom: BaseOrCustomDialog,
+    pub city_restriction: Option<Position>,
 }
 
 impl IncreaseHappinessConfig {
-    pub fn new(rc: &RenderContext, custom: BaseOrCustomDialog) -> IncreaseHappinessConfig {
+    pub(crate) fn new(rc: &RenderContext, custom: BaseOrCustomDialog) -> IncreaseHappinessConfig {
         let p = rc.shown_player;
         let steps = p.cities.iter().map(|c| (c.position, 0)).collect();
+        let city_restriction = happiness_city_restriction(rc.shown_player, &custom.action_type);
         IncreaseHappinessConfig {
             steps,
             payment: Self::happiness_payment(rc, 0, &custom)
                 .expect("Happiness payment should be available"),
             custom,
+            city_restriction,
         }
     }
 
@@ -37,46 +43,49 @@ impl IncreaseHappinessConfig {
         custom: &BaseOrCustomDialog,
     ) -> Option<Payment<String>> {
         let p = rc.shown_player;
-        let c = happiness_cost(p, new_steps, CostTrigger::WithModifiers).cost;
-        c.can_afford(&custom.action_type.remaining_resources(p, rc.game))
-            .then_some(Payment::new(
-                &c,
-                &custom.action_type.remaining_resources(p, rc.game),
-                "Increase happiness".to_string(),
-                "Increase happiness",
-                false,
-            ))
+        let c = happiness_cost(
+            p.index,
+            new_steps,
+            CostTrigger::WithModifiers,
+            &custom.action_type,
+            rc.game,
+            &check_event_origin(),
+        )
+        .cost;
+        p.can_afford(&c).then_some(rc.new_payment(
+            &c,
+            "Increase happiness".to_string(),
+            "Increase happiness",
+            false,
+        ))
     }
 }
 
-pub fn open_increase_happiness_dialog(
+pub(crate) fn open_increase_happiness_dialog(
     rc: &RenderContext,
-    actions: Vec<PlayingActionType>,
+    actions: &[PlayingActionType],
     init: impl Fn(IncreaseHappinessConfig) -> IncreaseHappinessConfig,
-) -> StateUpdate {
+) -> RenderResult {
     base_or_custom_action(rc, actions, "Increase happiness", |custom| {
         ActiveDialog::IncreaseHappiness(init(IncreaseHappinessConfig::new(rc, custom)))
     })
 }
 
-pub fn increase_happiness_click(
+pub(crate) fn increase_happiness_click(
     rc: &RenderContext,
     pos: Position,
     h: &IncreaseHappinessConfig,
-) -> StateUpdate {
+) -> RenderResult {
     if let Some(city) = rc.shown_player.try_get_city(pos) {
-        add_increase_happiness(rc, city, h.clone()).map_or(
-            StateUpdate::None,
-            |increase_happiness| {
-                StateUpdate::OpenDialog(ActiveDialog::IncreaseHappiness(increase_happiness))
-            },
-        )
+        add_increase_happiness(rc, city, h.clone()).map_or(NO_UPDATE, |increase_happiness| {
+            StateUpdate::open_dialog(ActiveDialog::IncreaseHappiness(increase_happiness))
+        })
     } else {
-        StateUpdate::None
+        NO_UPDATE
     }
 }
 
-pub fn add_increase_happiness(
+pub(crate) fn add_increase_happiness(
     rc: &RenderContext,
     city: &City,
     mut increase_happiness: IncreaseHappinessConfig,
@@ -135,44 +144,58 @@ fn increase_happiness_new_steps(
     new_steps: u8,
     action_type: &PlayingActionType,
 ) -> Option<u8> {
-    increase_happiness_cost(rc, city, new_steps, action_type).map(|_| new_steps)
+    can_afford_increase_happiness(rc, city, new_steps, action_type).then_some(new_steps)
 }
 
 #[must_use]
-pub fn increase_happiness_cost(
+pub(crate) fn can_afford_increase_happiness(
     rc: &RenderContext,
     city: &City,
     steps: u8,
     action_type: &PlayingActionType,
-) -> Option<CostInfo> {
-    let total_cost = happiness_cost(
-        rc.shown_player,
-        steps * city.size() as u8,
-        CostTrigger::WithModifiers,
-    );
+) -> bool {
     let max_steps = 2 - city.mood_state.clone() as u8;
-    (total_cost
-        .cost
-        .can_afford(&action_type.remaining_resources(rc.shown_player, rc.game))
-        && steps <= max_steps)
-        .then_some(total_cost)
+    if steps > max_steps {
+        return false;
+    }
+
+    rc.shown_player.can_afford(
+        &happiness_cost(
+            rc.shown_player.index,
+            steps * city.size() as u8,
+            CostTrigger::WithModifiers,
+            action_type,
+            rc.game,
+            &check_event_origin(),
+        )
+        .cost,
+    )
 }
 
 #[must_use]
-pub fn available_happiness_actions_for_city(
+pub(crate) fn available_happiness_actions_for_city(
     game: &Game,
     player: usize,
     position: Position,
 ) -> Vec<PlayingActionType> {
-    let city = game.player(player).get_city(position);
+    let p = game.player(player);
+    let city = p.get_city(position);
     if city.can_activate() && city.mood_state != MoodState::Happy {
         available_happiness_actions(game, player)
+            .into_iter()
+            .filter(|action_type| {
+                happiness_city_restriction(p, action_type).is_none_or(|r| r == position)
+            })
+            .collect_vec()
     } else {
         vec![]
     }
 }
 
-pub fn increase_happiness_menu(rc: &RenderContext, h: &IncreaseHappinessConfig) -> StateUpdate {
+pub(crate) fn increase_happiness_menu(
+    rc: &RenderContext,
+    h: &IncreaseHappinessConfig,
+) -> RenderResult {
     payment_dialog(
         rc,
         &h.payment,
@@ -182,6 +205,7 @@ pub fn increase_happiness_menu(rc: &RenderContext, h: &IncreaseHappinessConfig) 
                 steps: h.steps.clone(),
                 payment,
                 custom: h.custom.clone(),
+                city_restriction: h.city_restriction,
             })
         },
         |payment| {

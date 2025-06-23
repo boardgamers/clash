@@ -50,7 +50,6 @@
           "position": "B1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "activations": 4,
           "angry_activation": true,
@@ -109,10 +108,7 @@
           "id": 11
         }
       ],
-      "civilization": "Maya",
-      "available_leaders": [
-        "Kʼinich Janaab Pakal I"
-      ],
+      "civilization": "China",
       "advances": [
         "Draft",
         "Farming",
@@ -126,7 +122,7 @@
       ],
       "incident_tokens": 2,
       "wonder_cards": [
-        "Great Gardens"
+        "GreatGardens"
       ],
       "next_unit_id": 12
     },
@@ -150,7 +146,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "activations": 2,
           "position": "C1"
@@ -176,11 +171,7 @@
           "id": 1
         }
       ],
-      "civilization": "test0",
-      "available_leaders": [
-        "Alexander",
-        "Kleopatra"
-      ],
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Mining"
@@ -271,12 +262,14 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -293,38 +286,49 @@
                       }
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 1
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
+                      }
                     },
                     {
-                      "op": "remove",
-                      "path": "/players/0/cities/0/activations"
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 2,
+                          "mood_tokens": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
+                      },
+                      "modifiers": [
+                        {
+                          "Advance": "Draft"
+                        },
+                        {
+                          "Advance": "Sanitation"
+                        }
+                      ]
                     },
                     {
-                      "op": "replace",
-                      "path": "/players/0/next_unit_id",
-                      "value": 10
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/gold",
-                      "value": 5
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 11
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/units/6"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/units/6"
+                      "player": 0,
+                      "Units": {
+                        "units": {
+                          "settlers": 1,
+                          "infantry": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
+                      }
                     }
                   ]
                 }
@@ -338,9 +342,9 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 paid 2 gold and 1 mood token to recruit 1 settler and 1 infantry in the city at A1",
-      "Sanitation reduced the cost of 1 Settler to 1 mood token",
-      "Draft reduced the cost of 1 Infantry to 1 mood token"
+      "Player1: Recruit: Pay 1 action, Pay 2 gold and 1 mood token with Draft, Sanitation, Gain 1 settler and 1 infantry at A1",
+      "Player1: Draft: Reduce the cost of 1 Infantry to 1 mood token",
+      "Player1: Sanitation: Reduce the cost of 1 Settler to 1 mood token"
     ]
   ],
   "undo_limit": 0,

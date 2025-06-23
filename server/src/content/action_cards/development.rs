@@ -1,22 +1,23 @@
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::action::gain_action;
 use crate::action_card::ActionCard;
-use crate::ai_collect::reset_collection_stats;
+use crate::collect::available_collect_actions_for_city;
+use crate::construct::ConstructDiscount;
+use crate::content::ability::Ability;
 use crate::content::action_cards::cultural_takeover::cultural_takeover;
 use crate::content::action_cards::mercenaries::mercenaries;
-use crate::content::builtin::Builtin;
-use crate::content::custom_actions::CustomActionType;
+use crate::content::custom_actions::is_base_or_modifier;
 use crate::content::effects::{CollectEffect, ConstructEffect, PermanentEffect};
-use crate::content::incidents::great_builders::can_construct_anything;
+use crate::content::incidents::great_builders::can_construct_any_building;
 use crate::content::incidents::great_explorer::{action_explore_request, explore_adjacent_block};
 use crate::content::persistent_events::PositionRequest;
 use crate::content::tactics_cards::{
     TacticsCardFactory, defensive_formation, encircled, for_the_people, heavy_resistance,
     improved_defenses, peltasts, tactical_retreat,
 };
-use crate::player::add_unit;
-use crate::player_events::PlayingActionInfo;
-use crate::playing_actions::{ActionCost, PlayingActionType};
-use crate::resource_pile::ResourcePile;
+use crate::game::Game;
+use crate::player::{Player, gain_unit};
+use crate::playing_actions::PlayingActionType;
 use crate::unit::UnitType;
 use crate::utils::remove_element_by;
 
@@ -39,21 +40,22 @@ fn city_development(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     ActionCard::builder(
         id,
         "City Development",
-        "Construct a building without paying resources.",
-        ActionCost::regular_with_cost(ResourcePile::culture_tokens(1)),
-        |game, player, _| can_construct_anything(game, player),
+        "Construct a building without paying resources and without an action.",
+        |c| c.action().culture_tokens(1),
+        |game, p, _| can_construct_any_building(game, p, &[ConstructDiscount::NoResourceCost]),
     )
     .tactics_card(tactics_card)
     .add_simple_persistent_event_listener(
         |e| &mut e.play_action_card,
         0,
-        |game, _player, _name, _| {
+        |game, p, _| {
             game.permanent_effects
                 .push(PermanentEffect::Construct(ConstructEffect::CityDevelopment));
-            game.actions_left += 1; // to offset the action spent for building
-            game.add_info_log_item(
-                "City Development: You may build a building in a city without \
-                spending an action and without paying for it.",
+            gain_action(game, p); // to offset the action spent for building
+            p.log(
+                game,
+                "You may build a building in a city without \
+                spending an action and without paying resources.",
             );
         },
     )
@@ -66,37 +68,48 @@ fn production_focus(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Production Focus",
         "For the next collect action, you may collect multiple times from the same tile. \
         The total amount of resources does not change.",
-        ActionCost::regular(),
-        |_game, _player, _| true,
+        |c| c.action().no_resources(),
+        |game, player, _| collect_special_action(game, player),
     )
     .tactics_card(tactics_card)
     .add_simple_persistent_event_listener(
         |e| &mut e.play_action_card,
         0,
-        |game, player, _name, _| {
+        |game, p, _| {
             game.permanent_effects
                 .push(PermanentEffect::Collect(CollectEffect::ProductionFocus));
-            game.actions_left += 1; // to offset the action spent for collecting
-            game.add_info_log_item(
+            gain_action(game, p); // to offset the action spent for collecting
+            p.log(
+                game,
                 "Production Focus: You may collect multiple times from the same tile.",
             );
-            reset_collection_stats(game.player_mut(player));
         },
     )
     .build()
 }
 
-pub(crate) fn collect_only() -> Builtin {
-    Builtin::builder("collect only", "-")
+pub(crate) fn collect_special_action(game: &Game, player: &Player) -> bool {
+    !game
+        .permanent_effects
+        .iter()
+        .any(|e| matches!(e, PermanentEffect::Collect(_)))
+        && player
+            .cities
+            .iter()
+            .any(|c| !available_collect_actions_for_city(game, player.index, c.position).is_empty())
+}
+
+pub(crate) fn collect_only() -> Ability {
+    Ability::builder("collect only", "-")
         .add_transient_event_listener(
             |event| &mut event.is_playing_action_available,
             4,
-            |available, game, i| {
+            |available, game, t, p| {
                 if game
                     .permanent_effects
                     .iter()
                     .any(|e| matches!(e, &PermanentEffect::Collect(_)))
-                    && !is_collect(i)
+                    && !is_base_or_modifier(t, p.get(game), &PlayingActionType::Collect)
                 {
                     *available = Err("You may only collect.".to_string());
                 }
@@ -105,7 +118,7 @@ pub(crate) fn collect_only() -> Builtin {
         .add_transient_event_listener(
             |event| &mut event.collect_options,
             2,
-            |c, _context, game| {
+            |c, _context, game, _| {
                 if game
                     .permanent_effects
                     .iter()
@@ -125,25 +138,13 @@ pub(crate) fn collect_only() -> Builtin {
         .add_simple_persistent_event_listener(
             |event| &mut event.collect,
             2,
-            |game, player, _, _| {
-                if remove_element_by(&mut game.permanent_effects, |e| {
+            |game, _, _| {
+                remove_element_by(&mut game.permanent_effects, |e| {
                     matches!(e, &PermanentEffect::Collect(_))
-                })
-                .is_some()
-                {
-                    reset_collection_stats(game.player_mut(player));
-                }
+                });
             },
         )
         .build()
-}
-
-fn is_collect(i: &PlayingActionInfo) -> bool {
-    match &i.action_type {
-        PlayingActionType::Collect => true,
-        PlayingActionType::Custom(c) if *c == CustomActionType::FreeEconomyCollect => true,
-        _ => false,
-    }
 }
 
 fn explorer(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
@@ -152,7 +153,7 @@ fn explorer(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Explorer",
         "Explore a tile adjacent to a one of your cities - \
         AND/OR gain a free settler in one of your cities.",
-        ActionCost::regular_with_cost(ResourcePile::culture_tokens(1)),
+        |c| c.action().culture_tokens(1),
         |game, player, _| {
             !action_explore_request(game, player.index)
                 .choices
@@ -165,8 +166,8 @@ fn explorer(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         .add_position_request(
             |e| &mut e.play_action_card,
             0,
-            |game, player_index, _| {
-                let p = game.player(player_index);
+            |game, p, _| {
+                let p = p.get(game);
                 if p.available_units().settlers == 0 {
                     return None;
                 }
@@ -177,18 +178,8 @@ fn explorer(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                 ))
             },
             |game, s, _a| {
-                if s.choice.is_empty() {
-                    game.add_info_log_item(&format!(
-                        "{} decided not to gain a free settler",
-                        s.player_name
-                    ));
-                } else {
-                    let pos = s.choice[0];
-                    game.add_info_log_item(&format!(
-                        "{} decided to gain a free settler at {}",
-                        s.player_name, pos
-                    ));
-                    add_unit(s.player_index, pos, UnitType::Settler, game);
+                if !s.choice.is_empty() {
+                    gain_unit(game, &s.player(), s.choice[0], UnitType::Settler);
                 }
             },
         )

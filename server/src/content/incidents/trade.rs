@@ -1,9 +1,8 @@
 use crate::city::City;
-use crate::city_pieces::Building;
+use crate::city_pieces::{Building, gain_building};
 use crate::content::persistent_events::{PositionRequest, ResourceRewardRequest};
 use crate::game::Game;
 use crate::incident::{Incident, IncidentBaseEffect, PassedIncident};
-use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::player_events::IncidentTarget;
 use crate::resource_pile::ResourcePile;
@@ -25,9 +24,9 @@ fn scientific_trade() -> Incident {
         that have an Academy or Observatory. You gain at least 2 ideas.",
         IncidentBaseEffect::PiratesSpawnAndRaid,
     )
-    .add_simple_incident_listener(IncidentTarget::AllPlayers, 0, |game, p, name, i| {
-        let player = game.player_mut(p);
-        let mut ideas = player
+    .add_simple_incident_listener(IncidentTarget::AllPlayers, 0, |game, p, i| {
+        let mut ideas = p
+            .get(game)
             .cities
             .iter()
             .filter(|c| {
@@ -35,13 +34,10 @@ fn scientific_trade() -> Incident {
                 b.contains(&Building::Academy) || b.contains(&Building::Observatory)
             })
             .count();
-        if i.active_player == p {
+        if i.active_player == p.index {
             ideas = ideas.max(2);
         }
-
-        let pile = ResourcePile::ideas(ideas as u8);
-        player.gain_resources(pile.clone());
-        game.add_info_log_item(&format!("{name} gained {pile}"));
+        p.gain_resources(game, ResourcePile::ideas(ideas as u8));
     })
     .build()
 }
@@ -54,9 +50,9 @@ fn flourishing_trade() -> Incident {
         that have a Market or Port (up to a maximum of 3). You gain at least 1 gold.",
         IncidentBaseEffect::PiratesSpawnAndRaid,
     )
-    .add_simple_incident_listener(IncidentTarget::AllPlayers, 0, |game, p, name, i| {
-        let player = game.player_mut(p);
-        let mut gold = player
+    .add_simple_incident_listener(IncidentTarget::AllPlayers, 0, |game, p, i| {
+        let mut gold = p
+            .get_mut(game)
             .cities
             .iter()
             .filter(|c| {
@@ -67,13 +63,10 @@ fn flourishing_trade() -> Incident {
 
         gold = gold.min(3);
 
-        if i.active_player == p {
+        if i.active_player == p.index {
             gold = gold.max(1);
         }
-
-        let pile = ResourcePile::gold(gold as u8);
-        player.gain_resources(pile.clone());
-        game.add_info_log_item(&format!("{name} gained {pile}"));
+        p.gain_resources(game, ResourcePile::gold(gold as u8));
     })
     .build()
 }
@@ -87,32 +80,27 @@ fn era_of_stability() -> Incident {
         You gain at least 1 token.",
         IncidentBaseEffect::ExhaustedLand,
     )
-    .add_incident_resource_request(
-        IncidentTarget::AllPlayers,
-        0,
-        |game, p, i| {
-            let player = game.player(p);
-            let mut tokens = player
-                .cities
-                .iter()
-                .filter(|c| {
-                    let b = c.pieces.buildings(None);
-                    b.contains(&Building::Temple) || b.contains(&Building::Obelisk)
-                })
-                .count();
+    .add_incident_resource_request(IncidentTarget::AllPlayers, 0, |game, p, i| {
+        let player = p.get(game);
+        let mut tokens = player
+            .cities
+            .iter()
+            .filter(|c| {
+                let b = c.pieces.buildings(None);
+                b.contains(&Building::Temple) || b.contains(&Building::Obelisk)
+            })
+            .count();
 
-            tokens = tokens.min(3);
+        tokens = tokens.min(3);
 
-            if i.active_player == p {
-                tokens = tokens.max(1);
-            }
-            Some(ResourceRewardRequest::new(
-                PaymentOptions::tokens(tokens as u8),
-                "Select token to gain".to_string(),
-            ))
-        },
-        |_game, s| vec![format!("{} gained {}", s.player_name, s.choice)],
-    )
+        if i.active_player == p.index {
+            tokens = tokens.max(1);
+        }
+        Some(ResourceRewardRequest::new(
+            p.reward_options().tokens(tokens as u8),
+            "Select token to gain".to_string(),
+        ))
+    })
     .build()
 }
 
@@ -125,25 +113,19 @@ fn reformation() -> Incident {
         that has a Temple: they execute this event instead.",
         IncidentBaseEffect::BarbariansSpawn,
     )
-    .add_simple_incident_listener(
-        IncidentTarget::ActivePlayer,
-        4,
-        |game, p, player_name, i| {
-            if has_temple(game, p) {
-                i.selected_player = Some(p);
-            } else if game
-                .players
-                .iter()
-                .filter(|p| has_temple(game, p.index) && p.is_human())
-                .count()
-                > 1
-            {
-                game.add_info_log_item(&format!(
-                    "{player_name} has no temples - and must select a player to execute the event"
-                ));
-            }
-        },
-    )
+    .add_simple_incident_listener(IncidentTarget::ActivePlayer, 4, |game, p, i| {
+        if has_temple(game, p.index) {
+            i.selected_player = Some(p.index);
+        } else if game
+            .players
+            .iter()
+            .filter(|p| has_temple(game, p.index) && p.is_human())
+            .count()
+            > 1
+        {
+            p.log(game, "Has no temples: Select a player to execute the event");
+        }
+    })
     // select a player to execute the incident
     .add_incident_player_request(
         IncidentTarget::ActivePlayer,
@@ -153,11 +135,13 @@ fn reformation() -> Incident {
         |game, s, i| {
             // pass the event to the player itself
             i.passed = Some(PassedIncident::NewPlayer(s.choice));
-            game.add_info_log_item(&format!(
-                "{} selected {} to execute the event",
-                s.player_name,
-                game.player_name(s.choice)
-            ));
+            s.log(
+                game,
+                &format!(
+                    "Selected {} to execute the event",
+                    game.player_name(s.choice)
+                ),
+            );
         },
     )
     // select a player to gain a temple
@@ -190,21 +174,7 @@ fn reformation() -> Incident {
             ))
         },
         |game, s, _| {
-            let &p = game
-                .current_event()
-                .active_player()
-                .expect("should have active player");
-            let donor = game.player_mut(p);
-            let pos = s.choice[0];
-            donor
-                .get_city_mut(pos)
-                .pieces
-                .set_building(Building::Temple, s.player_index);
-            let donor_name = donor.get_name();
-            game.add_info_log_item(&format!(
-                "{} gained a Temple from {donor_name} in {pos}",
-                s.player_name,
-            ));
+            gain_building(game, &s.player(), Building::Temple, s.choice[0]);
         },
     )
     .build()

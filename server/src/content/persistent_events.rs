@@ -1,27 +1,32 @@
+use crate::ability_initializer::AbilityListeners;
 use crate::action::execute_custom_phase_action;
 use crate::action_card::ActionCardInfo;
 use crate::advance::Advance;
 use crate::card::HandCard;
-use crate::city_pieces::Building;
 use crate::collect::CollectInfo;
 use crate::combat::Combat;
-use crate::combat_listeners::{CombatEnd, CombatRoundEnd, CombatRoundStart};
+use crate::combat_listeners::{CombatRoundEnd, CombatRoundStart};
 use crate::combat_stats::CombatStats;
-use crate::content::custom_actions::CustomEventAction;
+use crate::construct::ConstructInfo;
+use crate::content::custom_actions::CustomActionActivation;
+use crate::cultural_influence::InfluenceCultureInfo;
 use crate::events::EventOrigin;
 use crate::explore::ExploreResolutionState;
 use crate::game::Game;
 use crate::map::Rotation;
-use crate::objective_card::SelectObjectivesInfo;
-use crate::payment::PaymentOptions;
-use crate::player::Player;
-use crate::player_events::{IncidentInfo, OnAdvanceInfo};
-use crate::playing_actions::Recruit;
+use crate::objective_card::{SelectObjectivesInfo, present_instant_objective_cards};
+use crate::payment::{PaymentOptions, ResourceReward};
+use crate::player_events::{
+    IncidentInfo, OnAdvanceInfo, PersistentEvent, PersistentEvents, trigger_event_with_game_value,
+};
+use crate::playing_actions::ActionPayment;
 use crate::position::Position;
+use crate::recruit::Recruit;
 use crate::resource_pile::ResourcePile;
-use crate::status_phase::{ChangeGovernmentType, StatusPhaseState};
+use crate::status_phase::{ChangeGovernment, StatusPhaseState};
+use crate::structure::Structure;
 use crate::unit::UnitType;
-use crate::wonder::WonderCardInfo;
+use crate::wonder::{DrawWonderCard, WonderCardInfo};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::ops::RangeInclusive;
@@ -38,7 +43,7 @@ pub enum PersistentEventRequest {
     SelectStructures(StructuresRequest),
     SelectHandCards(HandCardsRequest),
     BoolRequest(String),
-    ChangeGovernment(ChangeGovernmentRequest),
+    ChangeGovernment,
     ExploreResolution,
 }
 
@@ -54,7 +59,7 @@ pub enum EventResponse {
     SelectHandCards(Vec<HandCard>),
     SelectStructures(Vec<SelectedStructure>),
     Bool(bool),
-    ChangeGovernmentType(ChangeGovernmentType),
+    ChangeGovernmentType(ChangeGovernment),
     ExploreResolution(Rotation),
 }
 
@@ -96,45 +101,57 @@ impl PersistentEventPlayer {
 pub enum PersistentEventType {
     Collect(CollectInfo),
     ExploreResolution(ExploreResolutionState),
-    InfluenceCultureResolution(ResourcePile),
+    InfluenceCulture(InfluenceCultureInfo),
     UnitsKilled(KilledUnits),
     CombatStart(Combat),
     CombatRoundStart(CombatRoundStart),
     CombatRoundEnd(CombatRoundEnd),
-    CombatEnd(CombatEnd),
-    CaptureUndefendedPosition(CombatStats),
+    CombatEnd(CombatStats),
     StatusPhase(StatusPhaseState),
     TurnStart,
+    PayAction(ActionPayment),
     Advance(OnAdvanceInfo),
-    Construct(Building),
+    Construct(ConstructInfo),
     Recruit(Recruit),
     FoundCity(Position),
     Incident(IncidentInfo),
+    StopBarbarianMovement(Vec<Position>),
     ActionCard(ActionCardInfo),
     WonderCard(WonderCardInfo),
-    DrawWonderCard,
+    DrawWonderCard(DrawWonderCard),
     SelectObjectives(SelectObjectivesInfo),
-    CustomAction(CustomEventAction),
+    CustomAction(CustomActionActivation),
+    ChooseActionCard,
+    ChooseIncident(IncidentInfo),
+    CityActivationMoodDecreased(Position),
+    ShipConstructionConversion(Vec<u32>),
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct PersistentEventState {
     pub event_type: PersistentEventType,
     #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub origin_override: Option<EventOrigin>,
+    #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub players_used: Vec<usize>,
-
     #[serde(flatten)]
     pub player: PersistentEventPlayer,
 }
 
 impl PersistentEventState {
     #[must_use]
-    pub fn new(current_player: usize, event_type: PersistentEventType) -> Self {
+    pub fn new(
+        current_player: usize,
+        event_type: PersistentEventType,
+        origin_override: Option<EventOrigin>,
+    ) -> Self {
         Self {
             event_type,
             players_used: vec![],
             player: PersistentEventPlayer::new(current_player),
+            origin_override,
         }
     }
 
@@ -168,24 +185,34 @@ pub struct PaymentRequest {
 
 impl PaymentRequest {
     #[must_use]
-    pub fn new(cost: PaymentOptions, name: &str, optional: bool) -> Self {
+    fn new(cost: PaymentOptions, name: &str, optional: bool) -> Self {
         Self {
             cost,
             name: name.to_string(),
             optional,
         }
     }
+
+    #[must_use]
+    pub fn mandatory(cost: PaymentOptions, name: &str) -> Self {
+        Self::new(cost, name, false)
+    }
+
+    #[must_use]
+    pub fn optional(cost: PaymentOptions, name: &str) -> Self {
+        Self::new(cost, name, true)
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct ResourceRewardRequest {
-    pub reward: PaymentOptions,
+    pub reward: ResourceReward,
     pub name: String,
 }
 
 impl ResourceRewardRequest {
     #[must_use]
-    pub fn new(reward: PaymentOptions, name: String) -> Self {
+    pub fn new(reward: ResourceReward, name: String) -> Self {
         Self { reward, name }
     }
 }
@@ -283,24 +310,6 @@ impl UnitsRequest {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, PartialOrd, Ord)]
-pub enum Structure {
-    CityCenter,
-    Building(Building),
-    Wonder(String),
-}
-
-impl Structure {
-    #[must_use]
-    pub fn is_available(&self, player: &Player, game: &Game) -> bool {
-        match self {
-            Structure::CityCenter => player.is_city_available(),
-            Structure::Building(b) => player.is_building_available(*b, game),
-            Structure::Wonder(_) => false,
-        }
-    }
-}
-
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct MultiRequest<T> {
     pub choices: Vec<T>,
@@ -343,19 +352,6 @@ impl PlayerRequest {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub struct ChangeGovernmentRequest {
-    pub optional: bool,
-    pub cost: ResourcePile,
-}
-
-impl ChangeGovernmentRequest {
-    #[must_use]
-    pub fn new(optional: bool, cost: ResourcePile) -> Self {
-        Self { optional, cost }
-    }
-}
-
 impl EventResponse {
     pub(crate) fn redo(self, game: &mut Game, player_index: usize) -> Result<(), String> {
         let Some(s) = game.current_event_handler_mut() else {
@@ -365,4 +361,116 @@ impl EventResponse {
         let details = game.current_event().event_type.clone();
         execute_custom_phase_action(game, player_index, details)
     }
+}
+
+#[derive(Debug, Clone)]
+pub struct TriggerPersistentEventParams<V> {
+    pub log: Option<String>,
+    pub next_player: fn(&mut V) -> (),
+    pub origin_override: Option<EventOrigin>,
+}
+
+impl<V> Default for TriggerPersistentEventParams<V> {
+    fn default() -> Self {
+        Self {
+            log: None,
+            next_player: |_| {},
+            origin_override: None,
+        }
+    }
+}
+
+fn remaining_persistent_event_players(
+    players: &[usize],
+    state: &PersistentEventState,
+) -> Vec<usize> {
+    players
+        .iter()
+        .filter(|p| !state.players_used.contains(p))
+        .copied()
+        .collect_vec()
+}
+
+#[must_use]
+pub(crate) fn trigger_persistent_event_ext<V>(
+    game: &mut Game,
+    players: &[usize],
+    event: fn(&mut PersistentEvents) -> &mut PersistentEvent<V>,
+    mut value: V,
+    to_event_type: impl Fn(V) -> PersistentEventType,
+    params: TriggerPersistentEventParams<V>,
+) -> Option<V>
+where
+    V: Clone + PartialEq,
+{
+    let current_event_type = to_event_type(value.clone());
+    if game
+        .events
+        .last()
+        .is_none_or(|s| s.event_type != current_event_type)
+    {
+        if let Some(log) = params.log {
+            game.add_info_log_group(log.to_string());
+        }
+        game.events.push(PersistentEventState::new(
+            players[0],
+            current_event_type,
+            params.origin_override,
+        ));
+    }
+
+    let event_index = game.events.len() - 1;
+
+    for player_index in remaining_persistent_event_players(players, game.current_event()) {
+        trigger_event_with_game_value(
+            game,
+            player_index,
+            move |e| event(&mut e.persistent),
+            &(),
+            &(),
+            &mut value,
+        );
+
+        if game.current_event().player.handler.is_some() {
+            game.events[event_index].event_type = to_event_type(value);
+            return None;
+        }
+        let state = game.current_event_mut();
+        state.players_used.push(player_index);
+        if let Some(&p) = remaining_persistent_event_players(players, state).first() {
+            state.player = PersistentEventPlayer::new(p);
+            (params.next_player)(&mut value);
+        }
+    }
+    game.events.pop();
+
+    if game.events.is_empty() {
+        present_instant_objective_cards(game);
+    }
+
+    Some(value)
+}
+
+pub(crate) fn trigger_persistent_event_with_listener<V>(
+    game: &mut Game,
+    players: &[usize],
+    event: fn(&mut PersistentEvents) -> &mut PersistentEvent<V>,
+    listeners: &AbilityListeners,
+    event_type: V,
+    store_type: impl Fn(V) -> PersistentEventType,
+    params: TriggerPersistentEventParams<V>,
+) -> Option<V>
+where
+    V: Clone + PartialEq,
+{
+    for p in players {
+        listeners.init(game, *p);
+    }
+
+    let result = trigger_persistent_event_ext(game, players, event, event_type, store_type, params);
+
+    for p in players {
+        listeners.deinit(game, *p);
+    }
+    result
 }

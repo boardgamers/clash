@@ -12,44 +12,32 @@
       "event_type": {
         "CombatRoundStart": {
           "combat": {
-            "round": 1,
-            "defender": 1,
-            "defender_position": "C1",
-            "attacker": 0,
-            "attacker_position": "C2",
             "attackers": [
               0
             ],
             "retreat": "CanRetreat",
             "stats": {
-              "position": "C1",
+              "round": 1,
               "battleground": "City",
               "attacker": {
+                "position": "C2",
                 "player": 0,
                 "present": {
                   "infantry": 1
                 }
               },
               "defender": {
+                "position": "C1",
                 "player": 1,
                 "present": {
                   "infantry": 2
                 }
-              }
+              },
+              "city_mood": "Angry"
             }
           },
-          "attacker_strength": {
-            "extra_dies": 0,
-            "extra_combat_value": 0,
-            "hit_cancels": 0,
-            "roll_log": []
-          },
-          "defender_strength": {
-            "extra_dies": 0,
-            "extra_combat_value": 0,
-            "hit_cancels": 0,
-            "roll_log": []
-          }
+          "attacker_strength": {},
+          "defender_strength": {}
         }
       },
       "player": 0,
@@ -99,12 +87,10 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "A1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Neutral",
           "position": "C2"
         }
@@ -125,7 +111,7 @@
         },
         {
           "position": "C2",
-          "unit_type": "Leader",
+          "unit_type": "Infantry",
           "id": 2
         },
         {
@@ -154,7 +140,7 @@
           "id": 7
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Mining",
@@ -188,7 +174,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "position": "C1"
         }
@@ -205,7 +190,7 @@
           "id": 1
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Fanaticism",
         "Farming",
@@ -266,12 +251,14 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Movement": {
@@ -282,7 +269,18 @@
                         "destination": "C1"
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -294,15 +292,15 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 marched 1 infantry from C2 to C1"
+      "Player1: Move: marched 1 infantry from C2 to C1, Pay 1 action"
     ],
     [
       "Combat round 1",
-      "Attackers: 1 infantry",
-      "Defenders: 2 infantry"
+      "Player1: Combat: Attacking with 1 infantry",
+      "Player2: Combat: Defending with 2 infantry"
     ]
   ],
-  "undo_limit": 1,
+  "undo_limit": 0,
   "actions_left": 2,
   "round": 2,
   "age": 1,

@@ -5,7 +5,7 @@ use server::content::persistent_events::MultiRequest;
 use server::cultural_influence::available_influence_culture;
 use server::game::Game;
 
-pub fn new_cultural_influence_dialog(
+pub(crate) fn new_cultural_influence_dialog(
     game: &Game,
     player: usize,
     d: BaseOrCustomDialog,

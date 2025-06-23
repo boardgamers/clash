@@ -49,7 +49,6 @@
           "position": "B1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Neutral",
           "activations": 5,
           "position": "B3"
@@ -107,11 +106,7 @@
           "id": 9
         }
       ],
-      "civilization": "test0",
-      "available_leaders": [
-        "Alexander",
-        "Kleopatra"
-      ],
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "FreeEconomy",
@@ -148,7 +143,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "activations": 2,
           "position": "C1"
@@ -174,7 +168,7 @@
           "id": 1
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining"
@@ -269,12 +263,14 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -289,32 +285,41 @@
                             "times": 1
                           }
                         ],
-                        "total": {
-                          "food": 1
-                        },
                         "action_type": "Collect"
                       }
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 2
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Collect"
+                      }
                     },
                     {
-                      "op": "replace",
-                      "path": "/players/0/cities/3/activations",
-                      "value": 4
+                      "player": 0,
+                      "MoodChange": {
+                        "city": "B3",
+                        "mood": "Neutral"
+                      },
+                      "origin": {
+                        "Ability": "Collect"
+                      }
                     },
                     {
-                      "op": "replace",
-                      "path": "/players/0/cities/3/mood_state",
-                      "value": "Happy"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/event_info"
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "food": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Collect"
+                      }
                     }
                   ]
                 }
@@ -328,9 +333,9 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 collects 1 food in the city at B3 making it Neutral",
-      "Husbandry allows collecting 1 resources from 2 land spaces away",
-      "Player1 could not store 1 food"
+      "Player1: Collect: Pay 1 action, Use city B3, City B3 became Neutral, Gain 1 food",
+      "Player1: Husbandry: Can collect 1 resources from 2 land spaces away",
+      "Player1: Waste: Could not store 1 food"
     ]
   ],
   "undo_limit": 0,

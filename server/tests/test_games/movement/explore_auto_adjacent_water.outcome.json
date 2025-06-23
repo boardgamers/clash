@@ -16,7 +16,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "D1"
         }
@@ -28,7 +27,7 @@
           "id": 0
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Fishing",
@@ -52,7 +51,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "D8"
         }
@@ -64,7 +62,7 @@
           "id": 0
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Math",
@@ -314,12 +312,14 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Movement": {
@@ -342,8 +342,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 marched 1 settler from C6 to C7",
-      "Explored tiles A7=Barren, B6=Water, B7=Fertile, C7=Forest"
+      "Player1: Move: marched 1 settler from C6 to C7, Explored tiles A7=Barren, B6=Water, B7=Fertile, C7=Forest"
     ]
   ],
   "undo_limit": 1,

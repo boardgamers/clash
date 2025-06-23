@@ -33,7 +33,7 @@
           }
         },
         "origin": {
-          "Builtin": "Free Advance"
+          "Ability": "Free Advance"
         }
       }
     }
@@ -61,7 +61,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "A1"
         },
@@ -86,7 +85,7 @@
         },
         {
           "position": "C2",
-          "unit_type": "Leader",
+          "unit_type": "Infantry",
           "id": 2
         },
         {
@@ -115,7 +114,7 @@
           "id": 7
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Mining",
@@ -146,7 +145,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "position": "C1"
         }
@@ -163,7 +161,7 @@
           "id": 1
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining"
@@ -220,12 +218,13 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
-              "index": 0,
-              "items": []
+              "index": 0
             }
           ]
         }

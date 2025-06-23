@@ -18,7 +18,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "D1"
         },
@@ -31,7 +30,7 @@
           "port_position": "B3"
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Fishing",
@@ -56,7 +55,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "D8"
         },
@@ -76,7 +74,7 @@
           "id": 1
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Fishing",
@@ -310,12 +308,14 @@
   "current_player_index": 1,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Movement": {
@@ -338,9 +338,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player2 sailed 1 ship from C5 to C4",
-      "Explored tiles C4=Forest, D3=Fertile, D4=Water, E4=Barren",
-      "Teleported ship from C4 to D4"
+      "Player2: Move: sailed 1 ship from C5 to C4, Explored tiles C4=Forest, D3=Fertile, D4=Water, E4=Barren, Teleported ship from C4 to D4"
     ]
   ],
   "undo_limit": 1,

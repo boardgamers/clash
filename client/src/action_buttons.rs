@@ -1,5 +1,5 @@
 use crate::city_ui::{IconAction, IconActionVec};
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::BaseOrCustomDialog;
 use crate::event_ui::event_help;
 use crate::happiness_ui::open_increase_happiness_dialog;
@@ -7,15 +7,16 @@ use crate::influence_ui::new_cultural_influence_dialog;
 use crate::layout_ui::{bottom_left_texture, icon_pos};
 use crate::move_ui::MoveIntent;
 use crate::render_context::RenderContext;
+use itertools::Itertools;
 use server::action::Action;
 use server::city::City;
-use server::content::custom_actions::{CustomActionType, CustomEventAction};
+use server::content::custom_actions::{CustomAction, CustomActionInfo};
 use server::cultural_influence::available_influence_actions;
 use server::happiness::available_happiness_actions;
-use server::playing_actions::{PlayingAction, PlayingActionType, base_and_custom_action};
+use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::resource::ResourceType;
 
-pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
+pub(crate) fn action_buttons(rc: &RenderContext) -> RenderResult {
     let assets = rc.assets();
     let game = rc.game;
 
@@ -28,7 +29,7 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
             &["Increase happiness".to_string()],
         )
     {
-        return open_increase_happiness_dialog(rc, happiness, |h| h);
+        return open_increase_happiness_dialog(rc, &happiness, |h| h);
     }
 
     if rc.can_play_action(&PlayingActionType::MoveUnits)
@@ -50,7 +51,7 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
             &["Research advances".to_string()],
         )
     {
-        return StateUpdate::OpenDialog(ActiveDialog::AdvanceMenu);
+        return StateUpdate::open_dialog(ActiveDialog::AdvanceMenu);
     }
 
     let influence = available_influence_actions(game, rc.shown_player.index);
@@ -63,18 +64,18 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
             &["Cultural Influence".to_string()],
         )
     {
-        return base_or_custom_action(rc, influence, "Influence culture", |d| {
+        return base_or_custom_action(rc, &influence, "Influence culture", |d| {
             new_cultural_influence_dialog(rc.game, rc.shown_player.index, d)
         });
     }
     let mut i = 0;
-    for (a, origin) in game.available_custom_actions(rc.shown_player.index) {
-        if let Some(action) = generic_custom_action(rc, a.clone(), None) {
+    for c in game.available_custom_actions(rc.shown_player.index) {
+        if let Some(action) = generic_custom_action(rc, &c, None) {
             if bottom_left_texture(
                 rc,
-                &assets.custom_actions[&a],
+                &assets.custom_actions[&c.action],
                 icon_pos(i as i8, -1),
-                &event_help(rc, &origin),
+                &event_help(rc, &c.event_origin),
             ) {
                 return action;
             }
@@ -86,21 +87,21 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
             return (icon.action)();
         }
     }
-    StateUpdate::None
+    NO_UPDATE
 }
 
-pub fn custom_action_buttons<'a>(
+pub(crate) fn custom_action_buttons<'a>(
     rc: &'a RenderContext,
     city: Option<&'a City>,
 ) -> IconActionVec<'a> {
     rc.game
         .available_custom_actions(rc.shown_player.index)
         .into_iter()
-        .filter_map(|(a, origin)| {
-            generic_custom_action(rc, a.clone(), city).map(|action| {
+        .filter_map(|c| {
+            generic_custom_action(rc, &c, city).map(|action| {
                 IconAction::new(
-                    &rc.assets().custom_actions[&a],
-                    event_help(rc, &origin),
+                    &rc.assets().custom_actions[&c.action],
+                    event_help(rc, &c.event_origin),
                     Box::new(move || action.clone()),
                 )
             })
@@ -108,7 +109,7 @@ pub fn custom_action_buttons<'a>(
         .collect()
 }
 
-fn global_move(rc: &RenderContext) -> StateUpdate {
+fn global_move(rc: &RenderContext) -> RenderResult {
     let pos = rc.state.focused_tile;
     StateUpdate::move_units(
         rc,
@@ -123,54 +124,54 @@ fn global_move(rc: &RenderContext) -> StateUpdate {
 
 fn generic_custom_action(
     rc: &RenderContext,
-    custom_action_type: CustomActionType,
+    c: &CustomActionInfo,
     city: Option<&City>,
-) -> Option<StateUpdate> {
-    if let Some(city) = city {
-        return custom_action_type
-            .is_available_city(rc.shown_player, city)
-            .then_some(StateUpdate::execute(Action::Playing(
-                PlayingAction::Custom(CustomEventAction::new(
-                    custom_action_type,
-                    Some(city.position),
-                )),
-            )));
-    }
+) -> Option<RenderResult> {
+    let custom_action_type = c.action;
 
-    (!custom_action_type.is_city_bound()).then_some(StateUpdate::execute(Action::Playing(
-        PlayingAction::Custom(CustomEventAction::new(custom_action_type, None)),
-    )))
+    if let Some(city) = city {
+        c.is_city_available(rc.game, city)
+            .then_some(StateUpdate::execute(Action::Playing(
+                PlayingAction::Custom(CustomAction::new(custom_action_type, Some(city.position))),
+            )))
+    } else {
+        c.city_bound()
+            .is_none()
+            .then_some(StateUpdate::execute(Action::Playing(
+                PlayingAction::Custom(CustomAction::new(custom_action_type, None)),
+            )))
+    }
 }
 
-pub fn base_or_custom_action(
+pub(crate) fn base_or_custom_action(
     rc: &RenderContext,
-    actions: Vec<PlayingActionType>,
+    action_types: &[PlayingActionType],
     title: &str,
     execute: impl Fn(BaseOrCustomDialog) -> ActiveDialog,
-) -> StateUpdate {
-    let (action, custom) = base_and_custom_action(actions);
-
-    let base = action.map(|action_type| {
-        execute(BaseOrCustomDialog {
-            action_type,
-            title: title.to_string(),
-        })
-    });
-
-    let special = custom.map(|a| {
-        let origin = &rc.shown_player.custom_actions[&a];
-        let dialog = execute(BaseOrCustomDialog {
-            action_type: PlayingActionType::Custom(a),
-            title: format!("{title} with {}", origin.name(rc.game)),
-        });
-
-        StateUpdate::dialog_chooser(
-            &format!("Use special action from {}?", origin.name(rc.game)),
-            Some(dialog),
-            base.clone(),
-        )
-    });
-    special
-        .or_else(|| base.map(StateUpdate::OpenDialog))
-        .unwrap_or(StateUpdate::None)
+) -> RenderResult {
+    StateUpdate::dialog_chooser(
+        &format!("Choose action: {title}"),
+        action_types
+            .iter()
+            .map(|action_type| match action_type {
+                PlayingActionType::Custom(c) => {
+                    let origin = &rc.shown_player.custom_action_info(*c).event_origin;
+                    (
+                        Some(origin.clone()),
+                        execute(BaseOrCustomDialog {
+                            action_type: action_type.clone(),
+                            title: format!("{title} with {}", origin.name(rc.game)),
+                        }),
+                    )
+                }
+                _ => (
+                    None,
+                    execute(BaseOrCustomDialog {
+                        action_type: action_type.clone(),
+                        title: title.to_string(),
+                    }),
+                ),
+            })
+            .collect_vec(),
+    )
 }

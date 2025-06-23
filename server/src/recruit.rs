@@ -1,69 +1,95 @@
+use crate::city::activate_city;
 use crate::combat;
 use crate::consts::STACK_LIMIT;
+use crate::content::ability::recruit_event_origin;
 use crate::content::persistent_events::PersistentEventType;
 use crate::game::Game;
+use crate::map::capital_city_position;
 use crate::payment::PaymentOptions;
-use crate::player::{CostTrigger, Player, add_unit};
+use crate::player::{CostTrigger, Player, gain_units};
 use crate::player_events::CostInfo;
-use crate::playing_actions::Recruit;
 use crate::position::Position;
+use crate::resource_pile::ResourcePile;
+use crate::special_advance::SpecialAdvance;
 use crate::unit::{UnitType, Units, kill_units, set_unit_position};
 use itertools::Itertools;
+use serde::{Deserialize, Serialize};
 
-pub(crate) fn recruit(game: &mut Game, player_index: usize, r: Recruit) -> Result<(), String> {
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub struct Recruit {
+    pub units: Units,
+    pub city_position: Position,
+    pub payment: ResourcePile,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub replaced_units: Vec<u32>,
+}
+
+impl Recruit {
+    #[must_use]
+    pub fn new(units: &Units, city_position: Position, payment: ResourcePile) -> Self {
+        Self {
+            units: units.clone(),
+            city_position,
+            payment,
+            replaced_units: Vec::new(),
+        }
+    }
+
+    #[must_use]
+    pub fn with_replaced_units(mut self, replaced_units: &[u32]) -> Self {
+        self.replaced_units = replaced_units.to_vec();
+        self
+    }
+}
+
+pub(crate) fn execute_recruit(
+    game: &mut Game,
+    player_index: usize,
+    r: Recruit,
+) -> Result<(), String> {
     let cost = recruit_cost(
+        game,
         game.player(player_index),
         &r.units,
         r.city_position,
-        r.leader_name.as_ref(),
         &r.replaced_units,
         game.execute_cost_trigger(),
     )?;
     cost.pay(game, &r.payment);
+    let origin = cost.origin();
     for unit in &r.replaced_units {
         // kill separately, because they may be on different positions
-        kill_units(game, &[*unit], player_index, None);
-    }
-    if let Some(leader_name) = &r.leader_name {
-        if let Some(previous_leader) = game.player_mut(player_index).active_leader.take() {
-            Player::with_leader(
-                &previous_leader,
-                game,
-                player_index,
-                |game, previous_leader| {
-                    previous_leader.listeners.deinit(game, player_index);
-                },
-            );
-        }
-        set_active_leader(game, leader_name.clone(), player_index);
+        kill_units(game, &[*unit], player_index, None, origin);
     }
     let player = game.player_mut(player_index);
-    let vec = r.units.clone().to_vec();
-    player.units.reserve_exact(vec.len());
-    player.get_city_mut(r.city_position).activate();
-    for unit_type in vec {
-        let position = match &unit_type {
-            UnitType::Ship => game
-                .player(player_index)
-                .get_city(r.city_position)
-                .port_position
-                .expect("there should be a port in the city"),
-            _ => r.city_position,
-        };
-        add_unit(player_index, position, unit_type, game);
+    let types = r.units.clone().to_vec();
+    player.units.reserve_exact(types.len());
+    activate_city(r.city_position, game, origin);
+    let mut land = Units::empty();
+    let mut ship = Units::empty();
+
+    for unit_type in types {
+        if unit_type.is_ship() {
+            ship += &unit_type;
+        } else {
+            land += &unit_type;
+        }
     }
+    if !land.is_empty() {
+        gain_units(game, player_index, r.city_position, land, origin);
+    }
+    if !ship.is_empty() {
+        let position = game
+            .player(player_index)
+            .get_city(r.city_position)
+            .port_position
+            .expect("Cannot recruit ships without port");
+        gain_units(game, player_index, position, ship, origin);
+    }
+
     on_recruit(game, player_index, r);
     Ok(())
-}
-
-fn set_active_leader(game: &mut Game, leader_name: String, player_index: usize) {
-    game.players[player_index]
-        .available_leaders
-        .retain(|name| name != &leader_name);
-    Player::with_leader(&leader_name, game, player_index, |game, leader| {
-        leader.listeners.one_time_init(game, player_index);
-    });
-    game.player_mut(player_index).active_leader = Some(leader_name);
 }
 
 pub(crate) fn on_recruit(game: &mut Game, player_index: usize, r: Recruit) {
@@ -87,7 +113,7 @@ pub(crate) fn on_recruit(game: &mut Game, player_index: usize, r: Recruit) {
         let ships = game.players[player_index]
             .get_units(port_position)
             .iter()
-            .filter(|unit| unit.unit_type.is_ship())
+            .filter(|unit| unit.is_ship())
             .map(|unit| unit.id)
             .collect::<Vec<_>>();
         if !ships.is_empty() {
@@ -101,15 +127,7 @@ pub(crate) fn on_recruit(game: &mut Game, player_index: usize, r: Recruit) {
                 {
                     set_unit_position(player_index, ship, city_position, game);
                 }
-                combat::initiate_combat(
-                    game,
-                    defender,
-                    port_position,
-                    player_index,
-                    city_position,
-                    ships,
-                    false,
-                );
+                combat::initiate_combat(game, defender, port_position, player_index, ships, false);
             }
         }
     }
@@ -120,28 +138,34 @@ pub(crate) fn on_recruit(game: &mut Game, player_index: usize, r: Recruit) {
 ///
 /// Errors if the cost cannot be paid
 pub fn recruit_cost(
+    game: &Game,
     player: &Player,
     units: &Units,
     city_position: Position,
-    leader_name: Option<&String>,
     replaced_units: &[u32],
     execute: CostTrigger,
 ) -> Result<CostInfo, String> {
     let mut require_replace = units.clone();
     for t in player.available_units().to_vec() {
-        let a = require_replace.get_mut(&t);
-        if *a > 0 {
-            *a -= 1;
+        if require_replace.get_amount(&t) > 0 {
+            require_replace -= &t;
         }
     }
     let replaced_units = replaced_units
         .iter()
-        .map(|id| player.get_unit(*id).unit_type)
+        .map(|id| {
+            let unit_type = player.get_unit(*id).unit_type;
+            if unit_type.is_leader() {
+                require_replace.leader.map_or(unit_type, UnitType::Leader)
+            } else {
+                unit_type
+            }
+        })
         .collect();
     if require_replace != replaced_units {
         return Err("Invalid replacement".to_string());
     }
-    recruit_cost_without_replaced(player, units, city_position, leader_name, execute)
+    recruit_cost_without_replaced(game, player, units, city_position, execute)
 }
 
 ///
@@ -149,14 +173,18 @@ pub fn recruit_cost(
 ///
 /// Errors if the cost cannot be paid
 pub fn recruit_cost_without_replaced(
+    game: &Game,
     player: &Player,
     units: &Units,
     city_position: Position,
-    leader_name: Option<&String>,
     execute: CostTrigger,
 ) -> Result<CostInfo, String> {
     let city = player.get_city(city_position);
-    if (units.cavalry > 0 || units.elephants > 0) && city.pieces.market.is_none() {
+
+    if city.pieces.market.is_none()
+        && (units.elephants > 0
+            || (units.cavalry > 0 && !is_cavalry_province_city(player, city_position, game)))
+    {
         return Err("No market".to_string());
     }
     if units.ships > 0 && city.pieces.port.is_none() {
@@ -164,7 +192,7 @@ pub fn recruit_cost_without_replaced(
     }
 
     for (t, a) in units.clone() {
-        let avail = player.unit_limit().get(&t);
+        let avail = player.unit_limit().get_amount(&t);
         if a > avail {
             return Err(format!("Only have {avail} {t:?} - not {a}"));
         }
@@ -174,9 +202,16 @@ pub fn recruit_cost_without_replaced(
     }
     let cost = player.trigger_cost_event(
         |e| &e.recruit_cost,
-        &PaymentOptions::resources(units.clone().to_vec().iter().map(UnitType::cost).sum()),
+        CostInfo::new(
+            player,
+            PaymentOptions::resources(
+                player,
+                recruit_event_origin(),
+                units.clone().to_vec().iter().map(UnitType::cost).sum(),
+            ),
+        ),
         units,
-        player,
+        game,
         execute,
     );
     if !player.can_afford(&cost.cost) {
@@ -188,7 +223,7 @@ pub fn recruit_cost_without_replaced(
     if player
         .get_units(city_position)
         .iter()
-        .filter(|unit| unit.unit_type.is_army_unit())
+        .filter(|unit| unit.is_army_unit())
         .count() as u8
         + units.amount()
         - units.settlers
@@ -198,13 +233,16 @@ pub fn recruit_cost_without_replaced(
         return Err("Too many units in stack".to_string());
     }
 
-    let match_leader = match units.leaders {
-        0 => leader_name.is_none(),
-        1 => leader_name.is_some_and(|n| player.available_leaders.contains(n)),
-        _ => false,
-    };
-    if !match_leader {
-        return Err("Invalid leader".to_string());
+    if let Some(l) = units.leader {
+        if !player.available_leaders.contains(&l) {
+            return Err(format!("Leader {l:?} not available"));
+        }
     }
+
     Ok(cost)
+}
+
+fn is_cavalry_province_city(player: &Player, city: Position, game: &Game) -> bool {
+    player.has_special_advance(SpecialAdvance::Provinces)
+        && capital_city_position(game, player).distance(city) >= 3
 }

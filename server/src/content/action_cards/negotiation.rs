@@ -1,9 +1,8 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::action::Action;
+use crate::action::{Action, gain_action, lose_action};
 use crate::action_card::ActionCard;
-use crate::ai_collect::reset_collection_stats;
-use crate::city::City;
-use crate::content::builtin::Builtin;
+use crate::content::ability::Ability;
+use crate::content::action_cards::development::collect_special_action;
 use crate::content::effects::{CollectEffect, PermanentEffect};
 use crate::content::incidents::great_diplomat::{DiplomaticRelations, Negotiations};
 use crate::content::persistent_events::PlayerRequest;
@@ -12,8 +11,7 @@ use crate::content::tactics_cards::{
 };
 use crate::game::Game;
 use crate::log::current_player_turn_log;
-use crate::playing_actions::{ActionCost, PlayingAction};
-use crate::resource_pile::ResourcePile;
+use crate::playing_actions::PlayingAction;
 use crate::utils::remove_element_by;
 
 pub(crate) fn negotiation_action_cards() -> Vec<ActionCard> {
@@ -35,10 +33,10 @@ fn negotiations(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Negotiations",
         "Select another player. This turn, you may not attack that player. \
         In their next turn, they may not attack you.",
-        ActionCost::cost(ResourcePile::culture_tokens(1)),
+        |c| c.free_action().culture_tokens(1),
         move |game, _player, _| {
             !current_player_turn_log(game)
-                .items
+                .actions
                 .iter()
                 .any(|i| match &i.action {
                     Action::Playing(PlayingAction::ActionCard(i)) if *i == id => false,
@@ -50,11 +48,11 @@ fn negotiations(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     .add_player_request(
         |e| &mut e.play_action_card,
         0,
-        |game, player_index, _| {
+        |game, player, _| {
             Some(PlayerRequest::new(
                 game.players
                     .iter()
-                    .filter(|p| p.index != player_index && p.is_human())
+                    .filter(|p| p.index != player.index && p.is_human())
                     .map(|p| p.index)
                     .collect(),
                 "Select a player to negotiate with",
@@ -66,24 +64,23 @@ fn negotiations(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
                     relations: DiplomaticRelations::new(s.player_index, s.choice),
                     remaining_turns: 2,
                 }));
-            game.add_info_log_item(&format!(
-                "{} and {} are in negotiations.",
-                s.player_name,
-                game.player_name(s.choice)
-            ));
+            s.log(
+                game,
+                &format!("Started negotiations with {}", game.player_name(s.choice)),
+            );
         },
     )
     .tactics_card(tactics_card)
     .build()
 }
 
-pub(crate) fn use_negotiations() -> Builtin {
-    Builtin::builder("Negotiations", "")
+pub(crate) fn use_negotiations() -> Ability {
+    Ability::builder("Negotiations", "")
         .add_simple_persistent_event_listener(
             |e| &mut e.turn_start,
             1,
-            |game, player_index, player_name, ()| {
-                if let Some(negotiations_partner) = negotiations_partner(game, player_index) {
+            |game, p, ()| {
+                if let Some(negotiations_partner) = negotiations_partner(game, p.index) {
                     let partner_name = game.player_name(negotiations_partner);
 
                     let mut delete = Vec::new();
@@ -100,15 +97,11 @@ pub(crate) fn use_negotiations() -> Builtin {
                     }
                     // must be in reverse order to not mess up the indices during deletion
                     for i in delete.iter().rev() {
-                        game.add_info_log_item(&format!(
-                            "{player_name} may attack {partner_name} again.",
-                        ));
+                        p.log(game, &format!("May attack {partner_name} again.",));
                         game.permanent_effects.remove(*i);
                     }
                     for _ in remain {
-                        game.add_info_log_item(&format!(
-                            "{player_name} may not attack {partner_name} this turn.",
-                        ));
+                        p.log(game, &format!("May not attack {partner_name} this turn.",));
                     }
                 }
             },
@@ -131,16 +124,15 @@ fn leadership(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         id,
         "Leadership",
         "Gain 1 action.",
-        ActionCost::cost(ResourcePile::culture_tokens(1)),
+        |c| c.free_action().culture_tokens(1),
         move |_game, _player, _| true,
     )
     .tactics_card(tactics_card)
     .add_simple_persistent_event_listener(
         |e| &mut e.play_action_card,
         0,
-        |game, _player_index, player_name, _| {
-            game.add_info_log_item(&format!("{player_name} used Leadership to gain an action."));
-            game.actions_left += 1;
+        |game, p, _| {
+            gain_action(game, p);
         },
     )
     .build()
@@ -152,27 +144,26 @@ fn assassination(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Assassination",
         "Select a player (not affected by Assassination already) \
         to lose an action in their next turn.",
-        ActionCost::cost(ResourcePile::culture_tokens(1)),
+        |c| c.free_action().culture_tokens(1),
         move |game, p, _| !opponents_not_affected_by_assassination(game, p.index).is_empty(),
     )
     .tactics_card(tactics_card)
     .add_player_request(
         |e| &mut e.play_action_card,
         0,
-        |game, player_index, _| {
+        |game, p, _| {
             Some(PlayerRequest::new(
-                opponents_not_affected_by_assassination(game, player_index),
+                opponents_not_affected_by_assassination(game, p.index),
                 "Select a player to assassinate",
             ))
         },
         |game, s, _| {
             game.permanent_effects
-                .push(PermanentEffect::Assassination(s.choice));
-            game.add_info_log_item(&format!(
-                "{} has been assassinated by {}.",
-                game.player_name(s.choice),
-                s.player_name
-            ));
+                .push(PermanentEffect::AssassinationLoseAction(s.choice));
+            s.log(
+                game,
+                &format!("Assassinated {}", game.player_name(s.choice),),
+            );
         },
     )
     .build()
@@ -194,21 +185,16 @@ fn opponents_not_affected_by_assassination(game: &Game, player_index: usize) -> 
         .collect()
 }
 
-pub(crate) fn use_assassination() -> Builtin {
-    Builtin::builder("Assassination", "")
+pub(crate) fn use_assassination() -> Ability {
+    Ability::builder("Assassination", "")
         .add_simple_persistent_event_listener(
             |e| &mut e.turn_start,
             2,
-            |game, player_index, player_name, ()| {
-                if remove_element_by(&mut game.permanent_effects, |e| {
-                    is_assassinated(e, player_index)
-                })
-                .is_some()
+            |game, p, ()| {
+                if remove_element_by(&mut game.permanent_effects, |e| is_assassinated(e, p.index))
+                    .is_some()
                 {
-                    game.actions_left -= 1;
-                    game.add_info_log_item(&format!(
-                        "{player_name} has lost an action due to assassination."
-                    ));
+                    lose_action(game, p);
                 }
             },
         )
@@ -216,7 +202,7 @@ pub(crate) fn use_assassination() -> Builtin {
 }
 
 fn is_assassinated(e: &PermanentEffect, player: usize) -> bool {
-    matches!(e, PermanentEffect::Assassination(p) if player == *p)
+    matches!(e, PermanentEffect::AssassinationLoseAction(p) if player == *p)
 }
 
 fn overproduction(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
@@ -225,27 +211,21 @@ fn overproduction(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Overproduction",
         "You may collect from 2 additional tiles this turn. \
         (Cannot combine with Production Focus or another Overproduction.)",
-        ActionCost::regular(),
-        move |game, p, _| {
-            !game
-                .permanent_effects
-                .iter()
-                .any(|e| matches!(e, PermanentEffect::Collect(_)))
-                && p.cities.iter().any(City::can_activate)
-        },
+        |c| c.action().no_resources(),
+        move |game, p, _| collect_special_action(game, p),
     )
     .tactics_card(tactics_card)
     .add_simple_persistent_event_listener(
         |e| &mut e.play_action_card,
         0,
-        |game, player_index, player_name, _| {
+        |game, p, _| {
             game.permanent_effects
                 .push(PermanentEffect::Collect(CollectEffect::Overproduction));
-            game.actions_left += 1; // to offset the action spent for collecting
-            game.add_info_log_item(&format!(
-                "{player_name} can use Overproduction to collect from 2 additional tiles."
-            ));
-            reset_collection_stats(game.player_mut(player_index));
+            gain_action(game, p); // to offset the action spent for collecting
+            p.log(
+                game,
+                "Can use Overproduction to collect from 2 additional tiles.",
+            );
         },
     )
     .build()

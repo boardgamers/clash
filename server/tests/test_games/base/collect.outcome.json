@@ -23,7 +23,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "A1"
         },
@@ -49,7 +48,7 @@
         },
         {
           "position": "C2",
-          "unit_type": "Leader",
+          "unit_type": "Infantry",
           "id": 2
         },
         {
@@ -78,7 +77,7 @@
           "id": 7
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Math",
@@ -88,7 +87,7 @@
       "incident_tokens": 2,
       "next_unit_id": 8,
       "event_info": {
-        "Public Education": "used"
+        "PublicEducation": "used"
       }
     },
     {
@@ -113,7 +112,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "position": "C1"
         }
@@ -130,7 +128,7 @@
           "id": 1
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining"
@@ -189,12 +187,14 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -216,37 +216,33 @@
                             "times": 1
                           }
                         ],
-                        "total": {
-                          "wood": 1,
-                          "ore": 1
-                        },
                         "action_type": "Collect"
                       }
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 3
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Collect"
+                      }
                     },
                     {
-                      "op": "remove",
-                      "path": "/players/0/cities/1/activations"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/ideas",
-                      "value": 5
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/wood",
-                      "value": 6
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/event_info"
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "wood": 1,
+                          "ore": 1,
+                          "ideas": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Collect"
+                      }
                     }
                   ]
                 }
@@ -260,9 +256,9 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 collects 1 ore and 1 wood in the city at C2",
-      "Public Education gained 1 idea",
-      "Player1 could not store 1 ore"
+      "Player1: Collect: Pay 1 action, Use city C2, Gain 1 wood, 1 ore and 1 idea",
+      "Player1: Public Education: Gain 1 idea",
+      "Player1: Waste: Could not store 1 ore"
     ]
   ],
   "undo_limit": 0,

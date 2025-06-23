@@ -47,7 +47,7 @@
         },
         {
           "position": "C2",
-          "unit_type": "Leader",
+          "unit_type": "Infantry",
           "id": 2
         },
         {
@@ -76,14 +76,14 @@
           "id": 7
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Mining",
         "Storage",
         "Tactics"
       ],
-      "wonders_build": [
+      "wonders_built": [
         "Pyramids"
       ],
       "incident_tokens": 3,
@@ -125,7 +125,7 @@
           "id": 2
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining"
@@ -199,12 +199,14 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -215,7 +217,87 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 2
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Storage",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 2
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Gold deposits"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "MoodChange": {
+                        "city": "C2",
+                        "mood": "Neutral"
+                      },
+                      "origin": {
+                        "Incident": 34
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Units": {
+                        "units": {
+                          "settlers": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Incident": 34
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -227,15 +309,14 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 paid 2 gold to get the Storage advance",
-      "Player gained 1 mood token as advance bonus"
+      "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Migration",
-      "Player1 gained 2 gold from a Gold Mine",
-      "Player2 was selected to gain 1 settler.",
-      "Player1 decreased the mood in city C2 to Neutral",
-      "Player2 gained 1 settler in A4"
+      "Player1: Gold deposits: Gain 2 gold",
+      "Player1: Migration: Player2 was selected to gain 1 settler., City C2 became Neutral",
+      "Player2: Migration: Gain 1 settler at A4"
     ]
   ],
   "undo_limit": 1,
@@ -258,5 +339,8 @@
   ],
   "dice_roll_log": [
     10
+  ],
+  "incidents_discarded": [
+    34
   ]
 }

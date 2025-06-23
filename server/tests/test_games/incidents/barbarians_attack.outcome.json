@@ -32,7 +32,7 @@
           }
         },
         "origin": {
-          "Builtin": "Free Advance"
+          "Ability": "Free Advance"
         }
       }
     }
@@ -60,7 +60,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "A1"
         }
@@ -77,7 +76,7 @@
           "id": 9
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Mining",
@@ -109,7 +108,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "position": "C1"
         }
@@ -131,7 +129,7 @@
           "id": 2
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining"
@@ -150,7 +148,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Neutral",
           "position": "B3"
         },
@@ -242,12 +239,14 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Response": {
@@ -255,9 +254,10 @@
                     }
                   },
                   "combat_stats": {
-                    "position": "C2",
+                    "round": 1,
                     "battleground": "CityWithFortress",
                     "attacker": {
+                      "position": "B2",
                       "player": 2,
                       "present": {
                         "infantry": 2,
@@ -268,13 +268,137 @@
                       }
                     },
                     "defender": {
+                      "position": "C2",
                       "player": 0,
                       "present": {
                         "settlers": 4
+                      },
+                      "losses": {
+                        "settlers": 4
                       }
                     },
-                    "result": "AttackerWins"
-                  }
+                    "result": "AttackerWins",
+                    "city_mood": "Angry"
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Storage",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Free Advance"
+                      }
+                    },
+                    {
+                      "player": 2,
+                      "Units": {
+                        "units": {
+                          "elephants": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Units": {
+                        "units": {
+                          "settlers": 4
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Loss",
+                        "position": "C2"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 2,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Gain",
+                        "position": "C2"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Units": {
+                        "units": {
+                          "settlers": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Place Settler"
+                      }
+                    },
+                    {
+                      "player": 2,
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Incident": 28
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Units": {
+                        "units": {
+                          "settlers": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Incident": 28
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Units": {
+                        "units": {
+                          "settlers": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Incident": 28
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -286,29 +410,23 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 advanced Storage for free",
-      "Player gained 1 mood token as advance bonus"
+      "Player1: Storage: Gain 1 mood token",
+      "Player1: Free Advance: Gain Storage and take an event token (triggering an incident)"
     ],
     [
       "A new game event has been triggered: Population Boom",
-      "Base effect: Barbarians move",
-      "Barbarians move from B2 to C2: 2 infantry and 1 elephant"
+      "Player1: Population Boom: Base effect: Barbarians move, Barbarians move from B2 to C2: 2 infantry and 1 elephant"
     ],
     [
       "Combat round 1",
-      "Attackers: 2 infantry and 1 elephant",
-      "Defenders: 4 settlers",
-      "Barbarians rolled 6 (Infantry, +1 combat value), 6 (Infantry, +1 combat value), 6 (Infantry, no bonus) for combined combat value of 20 and gets 0 hits against defending units.",
-      "Player1 rolled 6 (Infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units.",
-      "Player1 used the following combat modifiers: fortress added one extra die, fortress cancelled one hit",
-      "Barbarians has to remove 1 of their attacking units",
-      "Barbarians removed 1 elephant",
-      "Attacker wins and killed 4 settlers of Player1 and captured Player1's city at C2",
-      "Player1 gained 1 free Settler Unit at A1 for losing a city",
-      "Barbarians spawned a new Infantry unit at C2",
-      "Player1 gained 1 settler in A1",
-      "Player2 was selected to gain 1 settler.",
-      "Player2 gained 1 settler in C1"
+      "Barbarians: Combat: Attacking with 2 infantry and 1 elephant, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus) for combined combat value of 20 and gets 0 hits against defending units, Lost 1 elephant at B2, Kill 4 settlers of Player1, Gain city C2",
+      "Player1: Combat: Defending with 4 settlers, Roll 6 (infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units, Combat modifiers: fortress added one extra die, fortress cancelled one hit, Lost 4 settlers at C2, Lose city C2",
+      "Barbarians: Choose Casualties: Remove 1 of their attacking units",
+      "Attacker wins",
+      "Player1: Place Settler: Gain 1 settler at A1",
+      "Barbarians: Population Boom: Gain 1 infantry at C2",
+      "Player1: Population Boom: Gain 1 settler at A1, Player2 was selected to gain 1 settler.",
+      "Player2: Population Boom: Gain 1 settler at C1"
     ]
   ],
   "undo_limit": 1,
@@ -334,5 +452,8 @@
   ],
   "wonders_left": [
     "Pyramids"
+  ],
+  "incidents_discarded": [
+    28
   ]
 }

@@ -15,7 +15,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "D1"
         }
@@ -27,7 +26,7 @@
           "id": 0
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining"
@@ -50,12 +49,10 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "D8"
         },
         {
-          "city_pieces": {},
           "mood_state": "Neutral",
           "position": "A7"
         }
@@ -67,7 +64,7 @@
           "id": 0
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Fishing",
@@ -348,12 +345,14 @@
   "current_player_index": 1,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -364,7 +363,53 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 1,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Resources": {
+                        "resources": {
+                          "food": 2
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Resources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Advance": {
+                        "advance": "Storage",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -375,14 +420,92 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 1,
+                      "Resources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Incident": 18
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 118
+                        },
+                        "from": "Incident",
+                        "to": {
+                          "Hand": 1
+                        }
+                      },
+                      "origin": {
+                        "Incident": 18
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
                     "Playing": {
                       "ActionCard": 118
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 1,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "CivilCard": 118
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 118
+                        },
+                        "from": {
+                          "Hand": 1
+                        },
+                        "to": "PlayToDiscard"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Resources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Advance": "Fishing"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Advance": {
+                        "advance": "Fishing",
+                        "take_incident_token": false,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "CivilCard": 118
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -398,103 +521,7 @@
                     "Response": {
                       "ExploreResolution": 0
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/events/0/last_priority_used",
-                      "value": 9
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/0/handler"
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/1",
-                      "value": {
-                        "event_type": {
-                          "ExploreResolution": {
-                            "block": {
-                              "block": {
-                                "terrain": [
-                                  "Fertile",
-                                  "Fertile",
-                                  "Fertile",
-                                  "Barren"
-                                ]
-                              },
-                              "position": {
-                                "rotation": 0,
-                                "top_tile": "B6"
-                              }
-                            },
-                            "destination": null,
-                            "ship_can_teleport": false,
-                            "start": "B6",
-                            "units": []
-                          }
-                        },
-                        "handler": {
-                          "origin": {
-                            "Builtin": "Explore Resolution"
-                          },
-                          "priority": 0,
-                          "request": "ExploreResolution"
-                        },
-                        "last_priority_used": 0,
-                        "player": 1
-                      }
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/tiles/2/1",
-                      "value": "Unexplored"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/tiles/7/1",
-                      "value": "Unexplored"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/tiles/8/1",
-                      "value": "Unexplored"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/tiles/14/1",
-                      "value": "Unexplored"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/unexplored_blocks/6/block/terrain/3",
-                      "value": "Barren"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/unexplored_blocks/6/position/top_tile",
-                      "value": "B6"
-                    },
-                    {
-                      "op": "add",
-                      "path": "/map/unexplored_blocks/7",
-                      "value": {
-                        "block": {
-                          "terrain": [
-                            "Fertile",
-                            "Fertile",
-                            "Fertile",
-                            "Forest"
-                          ]
-                        },
-                        "position": {
-                          "rotation": 0,
-                          "top_tile": "F6"
-                        }
-                      }
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -503,43 +530,7 @@
                         "A7"
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "remove",
-                      "path": "/events/0/event_type/ActionCard/selected_position"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/handler/priority",
-                      "value": 8
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/0/handler/request/SelectPositions",
-                      "value": {
-                        "choices": [
-                          "A7",
-                          "B6",
-                          "C7"
-                        ],
-                        "description": "Place a city for 2 food",
-                        "needed": {
-                          "end": 1,
-                          "start": 0
-                        }
-                      }
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/0/handler/request/Payment"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/last_priority_used",
-                      "value": 8
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -551,78 +542,29 @@
                       ]
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "ActionCard": {
-                              "id": 118,
-                              "selected_position": "A7",
-                              "selected_positions": [
-                                "B6",
-                                "A7",
-                                "C7",
-                                "B7"
-                              ]
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "CivilCard": 118
-                            },
-                            "priority": 7,
-                            "request": {
-                              "Payment": [
-                                {
-                                  "cost": {
-                                    "conversions": [
-                                      {
-                                        "from": [
-                                          {
-                                            "food": 1
-                                          },
-                                          {
-                                            "wood": 1
-                                          },
-                                          {
-                                            "ore": 1
-                                          },
-                                          {
-                                            "ideas": 1
-                                          }
-                                        ],
-                                        "to": {
-                                          "gold": 1
-                                        },
-                                        "type": "Unlimited"
-                                      }
-                                    ],
-                                    "default": {
-                                      "food": 2
-                                    }
-                                  },
-                                  "name": "Pay to build the city",
-                                  "optional": false
-                                }
-                              ]
-                            }
-                          },
-                          "last_priority_used": 7,
-                          "player": 1
-                        }
-                      ]
+                      "player": 1,
+                      "Resources": {
+                        "resources": {
+                          "food": 2
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "CivilCard": 118
+                      }
                     },
                     {
-                      "op": "remove",
-                      "path": "/players/1/cities/1"
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/1/resources/food",
-                      "value": 2
+                      "player": 1,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Gain",
+                        "position": "A7"
+                      },
+                      "origin": {
+                        "CivilCard": 118
+                      }
                     }
                   ]
                 }
@@ -636,33 +578,32 @@
   "action_log_index": 7,
   "log": [
     [
-      "Player2 paid 2 food to get the Storage advance",
-      "Player gained 1 mood token as advance bonus"
+      "Player2: Advance: Pay 1 action, Pay 2 food, Gain Storage and take an event token (triggering an incident)",
+      "Player2: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Great Explorer",
-      "Player2 exhausted the land in position E8"
+      "Player2: Great Explorer: Exhausted the land in position E8"
     ],
     [
-      "Player2 gained Great Explorer for 1 culture token"
+      "Player2: Great Explorer: Pay 1 culture token, Gain Great Explorer from the current event"
     ],
     [
-      "Player2 played the action card Great Explorer as a regular action",
-      "Player2 gained Fishing",
-      "Player gained 1 mood token as advance bonus"
+      "Player2: Great Explorer: Pay 1 action, Gain Fishing without taking an event token",
+      "Player2: Action Card: Play Great Explorer",
+      "Player2: Fishing: Gain 1 mood token"
     ],
     [
-      "Player2 explored B6"
+      "Player2: Great Explorer: Explored B6"
     ],
     [
-      "Player2 chose the orientation of the newly explored tiles",
-      "Explored tiles A7=Fertile, B6=Fertile, B7=Barren, C7=Fertile"
+      "Player2: Explore Resolution: Chose rotation 0, Explored tiles A7=Fertile, B6=Fertile, B7=Barren, C7=Fertile"
     ],
     [
-      "Player2 decided to build a city at A7"
+      "Player2: Great Explorer: Decided to build a city A7"
     ],
     [
-      "Player2 built a city at A7 for 2 food"
+      "Player2: Great Explorer: Pay 2 food, Gain city A7"
     ]
   ],
   "undo_limit": 4,
@@ -876,5 +817,11 @@
   ],
   "wonders_left": [
     "Pyramids"
+  ],
+  "action_cards_discarded": [
+    118
+  ],
+  "incidents_discarded": [
+    18
   ]
 }

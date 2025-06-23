@@ -56,7 +56,6 @@
           "position": "B1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "activations": 4,
           "angry_activation": true,
@@ -76,6 +75,24 @@
           "position": "C2",
           "unit_type": "Infantry",
           "id": 0
+        },
+        {
+          "position": "B2",
+          "unit_type": "Cavalry",
+          "movement_restrictions": [
+            "Battle",
+            "Forest"
+          ],
+          "id": 1
+        },
+        {
+          "position": "B2",
+          "unit_type": "Elephant",
+          "movement_restrictions": [
+            "Battle",
+            "Forest"
+          ],
+          "id": 2
         },
         {
           "position": "B3",
@@ -100,33 +117,15 @@
         {
           "position": "C3",
           "unit_type": "Ship",
-          "id": 7,
-          "carried_units": [
-            {
-              "unit_type": "Elephant",
-              "movement_restrictions": [
-                "Battle"
-              ],
-              "id": 2
-            }
-          ]
+          "id": 7
         },
         {
           "position": "C3",
           "unit_type": "Ship",
-          "id": 8,
-          "carried_units": [
-            {
-              "unit_type": "Cavalry",
-              "movement_restrictions": [
-                "Battle"
-              ],
-              "id": 1
-            }
-          ]
+          "id": 8
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "FreeEconomy",
@@ -136,7 +135,10 @@
       ],
       "incident_tokens": 3,
       "completed_objectives": [
-        "Naval Assault"
+        {
+          "card": 10,
+          "name": "Naval Assault"
+        }
       ],
       "wonder_cards": [
         "Pyramids"
@@ -163,7 +165,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "activations": 2,
           "position": "C1"
@@ -179,15 +180,20 @@
           "position": "C1",
           "unit_type": "Infantry",
           "id": 1
+        },
+        {
+          "position": "C1",
+          "unit_type": "Settler",
+          "id": 2
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Mining"
       ],
       "incident_tokens": 3,
-      "next_unit_id": 2
+      "next_unit_id": 3
     }
   ],
   "map": {
@@ -260,12 +266,14 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Movement": {
@@ -278,43 +286,107 @@
                       }
                     }
                   },
-                  "undo": [
-                    {
-                      "op": "remove",
-                      "path": "/players/0/cities/4"
+                  "combat_stats": {
+                    "round": 1,
+                    "battleground": "City",
+                    "disembarked": true,
+                    "attacker": {
+                      "position": "C3",
+                      "player": 0,
+                      "present": {
+                        "cavalry": 1,
+                        "elephants": 1
+                      }
                     },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/units/5/carried_units/0/movement_restrictions"
+                    "defender": {
+                      "position": "B2",
+                      "player": 1
                     },
+                    "result": "AttackerWins",
+                    "city_mood": "Neutral"
+                  },
+                  "items": [
                     {
-                      "op": "remove",
-                      "path": "/players/0/units/6/carried_units/0/movement_restrictions"
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/1/cities/1",
-                      "value": {
-                        "city_pieces": {
-                          "port": 1
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 2
                         },
-                        "mood_state": "Neutral",
-                        "port_position": "C3",
-                        "position": "B2"
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
                       }
                     },
                     {
-                      "op": "replace",
-                      "path": "/state/Movement/movement_actions_left",
-                      "value": 2
+                      "player": 1,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Loss",
+                        "position": "B2"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
                     },
                     {
-                      "op": "remove",
-                      "path": "/state/Movement/moved_units"
+                      "player": 0,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Gain",
+                        "position": "B2"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
                     },
                     {
-                      "op": "remove",
-                      "path": "/events"
+                      "player": 1,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Port"
+                        },
+                        "balance": "Loss",
+                        "position": "B2"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Port"
+                        },
+                        "balance": "Gain",
+                        "position": "B2"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "MoodChange": {
+                        "city": "B2",
+                        "mood": "Angry"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Units": {
+                        "units": {
+                          "settlers": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Place Settler"
+                      }
                     }
                   ]
                 },
@@ -328,63 +400,24 @@
                       ]
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "SelectObjectives": {
-                              "cards": [
-                                {
-                                  "ObjectiveCard": 10
-                                }
-                              ],
-                              "objective_opportunities": [
-                                "Naval Assault"
-                              ]
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Builtin": "Select Objective Cards to Complete"
-                            },
-                            "priority": 0,
-                            "request": {
-                              "SelectHandCards": {
-                                "choices": [
-                                  {
-                                    "ObjectiveCard": 10
-                                  }
-                                ],
-                                "description": "Select cards to complete",
-                                "needed": {
-                                  "end": 1,
-                                  "start": 0
-                                }
-                              }
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 0
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 10
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": {
+                          "CompleteObjective": "Naval Assault"
                         }
-                      ]
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/objective_cards",
-                      "value": [
-                        10
-                      ]
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/completed_objectives"
+                      },
+                      "origin": {
+                        "Ability": "Complete Objectives"
+                      }
                     }
-                  ],
-                  "completed_objectives": [
-                    "Naval Assault"
                   ]
                 }
               ]
@@ -397,11 +430,14 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 disembarked 1 cavalry and 1 elephant from C3 to B2 and captured Player2's city at B2",
-      "Player1 could not store 2 gold"
+      "Player1: Move: disembarked 1 cavalry and 1 elephant from C3 to B2",
+      "Player1: Combat: Gain 2 gold, Gain city B2, Gain Port at B2 at the water tile C3, City B2 became Angry",
+      "Player2: Combat: Lose city B2, Lose Port at B2",
+      "Player2: Place Settler: Gain 1 settler at C1",
+      "Player1: Waste: Could not store 2 gold"
     ],
     [
-      "Player1 completed objective Naval Assault"
+      "Player1: Complete Objectives: Complete Naval Assault using Optimized Storage/Naval Assault"
     ]
   ],
   "undo_limit": 0,

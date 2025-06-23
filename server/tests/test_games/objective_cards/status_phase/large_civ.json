@@ -30,22 +30,18 @@
           "position": "A1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "A2"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "A3"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "A4"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "A5"
         },
@@ -71,7 +67,7 @@
         },
         {
           "position": "C2",
-          "unit_type": "Leader",
+          "unit_type": "Infantry",
           "id": 2
         },
         {
@@ -115,7 +111,7 @@
           "id": 11
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "CivilLiberties",
         "Draft",
@@ -185,7 +181,7 @@
           "id": 1
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining"
@@ -248,12 +244,13 @@
   "current_player_index": 1,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
-              "index": 0,
-              "items": []
+              "index": 0
             }
           ]
         }

@@ -23,7 +23,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "A1"
         }
@@ -41,7 +40,7 @@
         },
         {
           "position": "C2",
-          "unit_type": "Leader",
+          "unit_type": "Infantry",
           "id": 2
         },
         {
@@ -70,7 +69,7 @@
           "id": 7
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Arts",
         "Engineering",
@@ -114,7 +113,6 @@
           "position": "C1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Neutral",
           "position": "C2"
         }
@@ -131,7 +129,7 @@
           "id": 1
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Fanaticism",
         "Farming",
@@ -193,12 +191,14 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -209,7 +209,53 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "food": 2
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Storage",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -220,7 +266,36 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Incident": 56
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 156
+                        },
+                        "from": "Incident",
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "Incident": 56
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -228,56 +303,53 @@
                       "ActionCard": 156
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 2
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "CivilCard": 156
+                      }
                     },
                     {
-                      "op": "add",
-                      "path": "/players/0/action_cards",
-                      "value": [
-                        156
-                      ]
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 156
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToDiscard"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
                     },
                     {
-                      "op": "replace",
-                      "path": "/players/0/advances/0",
-                      "value": "Engineering"
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Advance": "Arts"
+                      }
                     },
                     {
-                      "op": "replace",
-                      "path": "/players/0/advances/1",
-                      "value": "Farming"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/advances/2",
-                      "value": "Mining"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/advances/3",
-                      "value": "Storage"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/advances/4",
-                      "value": "Tactics"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/advances/5"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/culture_tokens",
-                      "value": 6
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events"
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Arts",
+                        "take_incident_token": false,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "CivilCard": 156
+                      }
                     }
                   ]
                 },
@@ -286,32 +358,7 @@
                     "Response": {
                       "Bool": true
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "remove",
-                      "path": "/events/0/event_type/ActionCard/answer"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/handler/priority",
-                      "value": 1
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/0/handler/request/BoolRequest",
-                      "value": "Convert culture to mood tokens?"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/0/handler/request/Payment"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/last_priority_used",
-                      "value": 1
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -323,64 +370,30 @@
                       ]
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "ActionCard": {
-                              "answer": true,
-                              "id": 156
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "CivilCard": 156
-                            },
-                            "priority": 0,
-                            "request": {
-                              "Payment": [
-                                {
-                                  "cost": {
-                                    "conversions": [
-                                      {
-                                        "from": [
-                                          {
-                                            "culture_tokens": 1
-                                          }
-                                        ],
-                                        "to": {},
-                                        "type": {
-                                          "MayOverpay": 7
-                                        }
-                                      }
-                                    ],
-                                    "default": {
-                                      "culture_tokens": 7
-                                    }
-                                  },
-                                  "name": "Convert resources",
-                                  "optional": true
-                                }
-                              ]
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 0
-                        }
-                      ]
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "CivilCard": 156
+                      }
                     },
                     {
-                      "op": "replace",
-                      "path": "/players/0/resources/culture_tokens",
-                      "value": 7
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 8
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "CivilCard": 156
+                      }
                     }
                   ]
                 }
@@ -394,30 +407,29 @@
   "action_log_index": 5,
   "log": [
     [
-      "Player1 paid 2 food to get the Storage advance",
-      "Player gained 1 mood token as advance bonus"
+      "Player1: Advance: Pay 1 action, Pay 2 food, Gain Storage and take an event token (triggering an incident)",
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Great Athlete",
-      "Base effect: Pirates spawn",
-      "No valid positions for Pirate Ship"
+      "Player1: Great Athlete: Base effect: Pirates spawn, No valid positions for Pirate Ship"
     ],
     [
-      "Player1 gained Great Athlete for 1 culture token"
+      "Player1: Great Athlete: Pay 1 culture token, Gain Great Athlete from the current event"
     ],
     [
-      "Player1 played the action card Great Athlete as a regular action",
-      "Player1 gained Arts",
-      "Player gained 1 culture token as advance bonus"
+      "Player1: Great Athlete: Pay 1 action, Gain Arts without taking an event token",
+      "Player1: Action Card: Play Great Athlete",
+      "Player1: Arts: Gain 1 culture token"
     ],
     [
-      "Player1 decided to convert culture to mood tokens"
+      "Player1: Great Athlete: Decided to convert culture to mood tokens"
     ],
     [
-      "Player1 converted 1 culture token mood to 1 mood token"
+      "Player1: Great Athlete: Pay 1 culture token, Gain 1 mood token"
     ]
   ],
-  "undo_limit": 2,
+  "undo_limit": 1,
   "actions_left": 1,
   "round": 2,
   "age": 1,
@@ -434,5 +446,11 @@
     11,
     11,
     11
+  ],
+  "action_cards_discarded": [
+    156
+  ],
+  "incidents_discarded": [
+    56
   ]
 }

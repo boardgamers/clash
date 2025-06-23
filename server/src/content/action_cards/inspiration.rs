@@ -1,7 +1,7 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::{ActionCard, ActionCardBuilder};
 use crate::advance::{Advance, gain_advance_without_payment};
-use crate::city::MoodState;
+use crate::city::{MoodState, increase_mood_state};
 use crate::content::action_cards::spy::spy;
 use crate::content::action_cards::synergies::teachable_advances;
 use crate::content::persistent_events::{AdvanceRequest, PaymentRequest, PositionRequest};
@@ -10,12 +10,11 @@ use crate::content::tactics_cards::{
     surprise, wedge_formation,
 };
 use crate::game::Game;
-use crate::payment::PaymentOptions;
 use crate::player::Player;
-use crate::playing_actions::ActionCost;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
+use std::sync::Arc;
 use std::vec;
 
 pub(crate) fn inspiration_action_cards() -> Vec<ActionCard> {
@@ -38,37 +37,24 @@ pub(crate) fn inspiration_action_cards() -> Vec<ActionCard> {
 fn advance(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     ActionCard::builder(
         id,
-        "Advance",
+        "Quick Advance",
         "Pay 1 culture token: Gain 1 advance without changing the Game Event counter.",
-        ActionCost::free(),
-        |game, player, _| {
-            player.resources.culture_tokens >= 1 && !possible_advances(player, game).is_empty()
-        },
+        |c| c.free_action().culture_tokens(1),
+        |game, player, _| !possible_advances(player, game).is_empty(),
     )
     .tactics_card(tactics_card)
     .add_advance_request(
         |e| &mut e.play_action_card,
         0,
-        |game, player, _| {
-            Some(AdvanceRequest::new(possible_advances(
-                game.player(player),
-                game,
-            )))
-        },
-        |game, sel, _| {
-            let advance = sel.choice;
+        |game, p, _| Some(AdvanceRequest::new(possible_advances(p.get(game), game))),
+        |game, s, _| {
             gain_advance_without_payment(
                 game,
-                advance,
-                sel.player_index,
-                ResourcePile::culture_tokens(1),
+                s.choice,
+                &s.player(),
+                ResourcePile::empty(), // only used for free education, where gold or ideas count
                 false,
             );
-            let name = &sel.player_name;
-            game.add_info_log_item(&format!(
-                "{name} gained {} for 1 culture token using the Advance action card.",
-                advance.name(game)
-            ));
         },
     )
     .build()
@@ -89,33 +75,21 @@ fn inspiration(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Inspiration",
         "Gain 1 advance for free (without changing the Game Event counter) \
         that a player owns who has a unit or city within range 2 of your units or cities.",
-        ActionCost::free(),
+        |c| c.free_action().no_resources(),
         |game, player, _| !possible_inspiration_advances(game, player).is_empty(),
     )
     .tactics_card(tactics_card)
     .add_advance_request(
         |e| &mut e.play_action_card,
         0,
-        |game, player, _| {
+        |game, p, _| {
             Some(AdvanceRequest::new(possible_inspiration_advances(
                 game,
-                game.player(player),
+                p.get(game),
             )))
         },
-        |game, sel, _| {
-            let advance = sel.choice;
-            gain_advance_without_payment(
-                game,
-                advance,
-                sel.player_index,
-                ResourcePile::empty(),
-                false,
-            );
-            let name = &sel.player_name;
-            game.add_info_log_item(&format!(
-                "{name} gained {} for free using Inspiration.",
-                advance.name(game)
-            ));
+        |game, s, _| {
+            gain_advance_without_payment(game, s.choice, &s.player(), ResourcePile::empty(), false);
         },
     )
     .build()
@@ -166,32 +140,32 @@ fn hero_general(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Hero General",
         "If you won a land battle this turn: Increase the mood in a city by 1. \
         You may pay 1 mood token to increase the mood in a city by 1.",
-        ActionCost::free(),
+        |c| c.free_action().no_resources(),
         |_game, player, _| !cities_where_mood_can_increase(player).is_empty(),
     )
-    .requirement_land_battle_won()
+    .combat_requirement(Arc::new(|s, p| {
+        s.is_winner(p.index) && s.is_battle() && s.battleground.is_land()
+    }))
     .tactics_card(tactics_card);
 
     b = increase_mood(b, 2, false);
     b = b.add_payment_request_listener(
         |e| &mut e.play_action_card,
         1,
-        |game, player, _| {
-            if cities_where_mood_can_increase(game.player(player)).is_empty() {
+        |game, p, _| {
+            let player = p.get(game);
+            if cities_where_mood_can_increase(player).is_empty() {
                 return None;
             }
 
-            Some(vec![PaymentRequest::new(
-                PaymentOptions::resources(ResourcePile::mood_tokens(1)),
+            Some(vec![PaymentRequest::optional(
+                p.payment_options()
+                    .resources(player, ResourcePile::mood_tokens(1)),
                 "Pay 1 mood token to increase the mood in a city by 1",
-                true,
             )])
         },
-        |game, s, a| {
-            if s.choice[0].is_empty() {
-                game.add_info_log_item(&format!("{} did not pay 1 mood token", s.player_name));
-            } else {
-                game.add_info_log_item(&format!("{} paid 1 mood token", s.player_name));
+        |_game, s, a| {
+            if !s.choice[0].is_empty() {
                 a.answer = Some(true);
             }
         },
@@ -205,11 +179,11 @@ fn increase_mood(b: ActionCardBuilder, priority: i32, need_payment: bool) -> Act
     b.add_position_request(
         |e| &mut e.play_action_card,
         priority,
-        move |game, player, a| {
+        move |game, p, a| {
             if need_payment && a.answer.is_none() {
                 return None;
             }
-            let choices = cities_where_mood_can_increase(game.player(player));
+            let choices = cities_where_mood_can_increase(p.get(game));
             let needed = 1..=1;
             Some(PositionRequest::new(
                 choices,
@@ -218,15 +192,7 @@ fn increase_mood(b: ActionCardBuilder, priority: i32, need_payment: bool) -> Act
             ))
         },
         |game, s, _| {
-            let pos = s.choice[0];
-            let player = s.player_index;
-            game.add_info_log_item(&format!(
-                "{} selected city {} to increase the mood by 1",
-                s.player_name, pos
-            ));
-            game.player_mut(player)
-                .get_city_mut(pos)
-                .increase_mood_state();
+            increase_mood_state(game, s.choice[0], 1, &s.origin);
         },
     )
 }
@@ -245,18 +211,15 @@ fn ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         id,
         "Ideas",
         "Gain 1 idea per Academy you own.",
-        ActionCost::free(),
+        |c| c.free_action().no_resources(),
         |_game, player, _| academies(player) > 0,
     )
     .tactics_card(tactics_card)
     .add_simple_persistent_event_listener(
         |e| &mut e.play_action_card,
         0,
-        |game, player, name, _| {
-            let p = game.player_mut(player);
-            let pile = ResourcePile::ideas(academies(p));
-            p.gain_resources(pile.clone());
-            game.add_info_log_item(&format!("{name} gained {pile} (1 for each Academy)"));
+        |game, p, _| {
+            p.gain_resources(game, ResourcePile::ideas(academies(p.get(game))));
         },
     )
     .build()
@@ -274,20 +237,19 @@ fn great_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     ActionCard::builder(
         id,
         "Great Ideas",
-        "After capturing a city or winning a land battle: Gain 2 ideas.",
-        ActionCost::free(),
+        "You captured a city or won a land battle this turn: Gain 2 ideas.",
+        |c| c.free_action().no_resources(),
         |_game, player, _| player.resources.ideas < player.resource_limit.ideas,
     )
-    .requirement_land_battle_won()
+    .combat_requirement(Arc::new(|s, p| {
+        s.is_winner(p.index) && s.battleground.is_land()
+    }))
     .tactics_card(tactics_card)
     .add_simple_persistent_event_listener(
         |e| &mut e.play_action_card,
         0,
-        |game, player, name, _| {
-            let p = game.player_mut(player);
-            let pile = ResourcePile::ideas(2);
-            p.gain_resources(pile.clone());
-            game.add_info_log_item(&format!("{name} gained {pile} for Great Ideas"));
+        |game, player, _| {
+            player.gain_resources(game, ResourcePile::ideas(2));
         },
     )
     .build()

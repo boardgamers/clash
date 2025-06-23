@@ -1,37 +1,33 @@
 use crate::action_card::on_play_action_card;
 use crate::advance::on_advance;
-use crate::ai_collect::set_city_collections;
+use crate::barbarians::on_stop_barbarian_movement;
 use crate::city::{MoodState, on_found_city};
 use crate::collect::on_collect;
-use crate::combat::{
-    combat_loop, move_with_possible_combat, on_capture_undefended_position, start_combat,
-};
-use crate::combat_listeners::{combat_round_end, combat_round_start, end_combat};
+use crate::combat::{combat_loop, start_combat};
+use crate::combat_listeners::{combat_round_end, combat_round_start, on_end_combat};
 use crate::construct::on_construct;
-use crate::content::custom_actions::execute_custom_action;
+use crate::content::custom_actions::on_custom_action;
 use crate::content::persistent_events::{EventResponse, PersistentEventType};
-use crate::cultural_influence::ask_for_cultural_influence_payment;
-use crate::explore::{ask_explore_resolution, move_to_unexplored_tile};
+use crate::cultural_influence::on_cultural_influence;
+use crate::events::EventPlayer;
+use crate::explore::ask_explore_resolution;
 use crate::game::GameState::{Finished, Movement, Playing};
-use crate::game::{Game, GameState};
-use crate::incident::on_trigger_incident;
-use crate::log;
-use crate::log::{add_action_log_item, current_player_turn_log_mut};
-use crate::map::Terrain::Unexplored;
-use crate::movement::MovementAction::{Move, Stop};
-use crate::movement::{
-    CurrentMove, MoveState, MoveUnits, MovementAction, has_movable_units, move_units_destinations,
+use crate::game::{Game, GameContext};
+use crate::incident::{on_choose_incident, on_trigger_incident};
+use crate::log::{
+    ActionLogBalance, ActionLogEntry, add_action_log_item, add_log_action,
+    current_player_turn_log_mut,
 };
-use crate::objective_card::{on_objective_cards, present_objective_cards};
+use crate::movement::{MovementAction, execute_movement_action, on_ship_construction_conversion};
+use crate::objective_card::{complete_objective_card, gain_objective_card, on_objective_cards};
 use crate::playing_actions::{PlayingAction, PlayingActionType};
+use crate::position::Position;
 use crate::recruit::on_recruit;
 use crate::resource::check_for_waste;
-use crate::resource_pile::ResourcePile;
 use crate::status_phase::play_status_phase;
 use crate::undo::{clean_patch, redo, to_serde_value, undo};
-use crate::unit::{get_current_move, units_killed};
-use crate::wonder::{draw_wonder_card, on_play_wonder_card};
-use itertools::Itertools;
+use crate::unit::units_killed;
+use crate::wonder::{on_draw_wonder_card, on_play_wonder_card};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
@@ -41,46 +37,7 @@ pub enum Action {
     Response(EventResponse),
     Undo,
     Redo,
-}
-
-impl Action {
-    #[must_use]
-    pub fn playing(self) -> Option<PlayingAction> {
-        if let Self::Playing(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-
-    #[must_use]
-    pub fn movement(self) -> Option<MovementAction> {
-        if let Self::Movement(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-
-    #[must_use]
-    pub fn response(self) -> Option<EventResponse> {
-        if let Self::Response(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-
-    #[must_use]
-    pub fn get_type(&self) -> ActionType {
-        match self {
-            Self::Playing(v) => ActionType::Playing(v.playing_action_type()),
-            Self::Movement(_) => ActionType::Movement,
-            Self::Response(_) => ActionType::Response,
-            Self::Undo => ActionType::Undo,
-            Self::Redo => ActionType::Redo,
-        }
-    }
+    StartTurn, // created for trade routes
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -98,63 +55,108 @@ pub enum ActionType {
 ///
 /// Panics if the action is illegal
 #[must_use]
-pub fn execute_action(mut game: Game, action: Action, player_index: usize) -> Game {
-    if !game.supports_undo {
-        return execute_without_undo(game, action, player_index)
-            .expect("action should be executed");
-    }
-    let add_undo = !matches!(&action, Action::Undo);
-    let old = to_serde_value(&game);
-    let old_player = game.active_player();
-    game = execute_without_undo(game, action, player_index).expect("action should be executed");
-    let new = to_serde_value(&game);
-    let new_player = game.active_player();
-    let patch = json_patch::diff(&new, &old);
-    if old_player != new_player {
-        game.lock_undo(); // don't undo player change
-    } else if add_undo && game.can_undo() {
-        let i = game.action_log_index - 1;
-        current_player_turn_log_mut(&mut game).items[i].undo = clean_patch(patch.0);
-    }
-    game
+pub fn execute_action(game: Game, action: Action, player_index: usize) -> Game {
+    try_execute_action(game, action, player_index).expect("could not execute action")
 }
 
-fn execute_without_undo(
+///
+///
+/// # Errors
+///
+/// Returns an error if the action is not valid
+pub fn try_execute_action(
     mut game: Game,
     action: Action,
     player_index: usize,
 ) -> Result<Game, String> {
     if player_index != game.active_player() {
-        return Err("Not your turn".to_string());
+        return Err(format!("Player {player_index} is not the active player"));
     }
+
+    if game.context == GameContext::AI {
+        return execute_without_undo(&mut game, action, player_index).map(|()| game);
+    }
+
     if let Action::Undo = action {
         if !game.can_undo() {
-            return Err("actions revealing new information can't be undone".to_string());
+            return Err("action can't be undone".to_string());
         }
         return undo(game);
     }
 
+    let add_undo = !matches!(&action, Action::Undo);
+    let old = to_serde_value(&game);
+    let old_player = game.active_player();
+    execute_without_undo(&mut game, action, player_index)?;
+    let new = to_serde_value(&game);
+    let new_player = game.active_player();
+    let patch = json_patch::diff(&new, &old);
+    if old_player != new_player {
+        game.player_changed();
+    } else if add_undo && game.can_undo() {
+        let i = game.action_log_index - 1;
+        current_player_turn_log_mut(&mut game).actions[i].undo = clean_patch(patch.0);
+    }
+    Ok(game)
+}
+
+///
+/// # Errors
+///
+/// Returns an error if the action is not valid
+pub fn execute_without_undo(
+    game: &mut Game,
+    action: Action,
+    player_index: usize,
+) -> Result<(), String> {
+    game.log.push(vec![]);
     if matches!(action, Action::Redo) {
         if !game.can_redo() {
             return Err("action can't be redone".to_string());
         }
-        redo(&mut game, player_index)?;
-        return Ok(game);
+        redo(game, player_index)?;
+        return Ok(());
     }
 
-    add_log_item_from_action(&mut game, &action);
-    add_action_log_item(&mut game, action.clone());
+    add_log_action(game, action.clone());
+
+    if game.context == GameContext::Replay
+        && !game.events.is_empty()
+        && !matches!(action, Action::Response(_))
+    {
+        // ignore missing response in replay
+        game.add_info_log_item(&format!(
+            "interrupted {} events in replay due to a missing response",
+            game.events.len()
+        ));
+        game.events.clear();
+    }
 
     match game.current_event_handler_mut() {
         Some(s) => {
-            s.response = action.response();
+            s.response = if let Action::Response(v) = action {
+                Some(v)
+            } else {
+                return Err(format!(
+                    "action should be a response: {action:?} - event: {s:?}"
+                ));
+            };
             let details = game.current_event().event_type.clone();
-            execute_custom_phase_action(&mut game, player_index, details)
+            execute_custom_phase_action(game, player_index, details)
         }
-        _ => execute_regular_action(&mut game, action, player_index),
+        _ => execute_regular_action(game, action, player_index),
     }?;
-    check_for_waste(&mut game);
-    update_stats(&mut game);
+
+    after_action(game, player_index);
+    Ok(())
+}
+
+pub(crate) fn after_action(game: &mut Game, player_index: usize) {
+    check_for_waste(game);
+
+    if let Some(o) = game.player_mut(player_index).gained_objective.take() {
+        gain_objective_card(game, player_index, o);
+    }
 
     if game
         .player(player_index)
@@ -163,31 +165,77 @@ fn execute_without_undo(
         .filter(|c| c.mood_state == MoodState::Angry)
         .count()
         >= 4
+        && !current_player_turn_log_mut(game).actions.is_empty()
     {
-        present_objective_cards(&mut game, player_index, vec!["Terror Regime".to_string()]);
+        //endless loop if this is not selected automatically
+        let card = game
+            .player(player_index)
+            .objective_cards
+            .iter()
+            .find(|o| **o == 29);
+        if let Some(o) = card {
+            // actually did an action
+            complete_objective_card(game, player_index, *o, "Terror Regime");
+        }
     }
 
-    Ok(game)
+    let p = game.player_mut(player_index);
+    if p.great_mausoleum_action_cards > 0 {
+        p.great_mausoleum_action_cards -= 1;
+        on_action_end(game, player_index);
+    }
+    let mut city: Option<Position> = None;
+    for c in &mut game.player_mut(player_index).cities {
+        if c.activation_mood_decreased {
+            city = Some(c.position);
+        }
+        c.activation_mood_decreased = false;
+    }
+    if let Some(pos) = city {
+        on_city_activation_mood_decreased(game, player_index, pos);
+    }
+}
+
+pub(crate) fn on_city_activation_mood_decreased(
+    game: &mut Game,
+    player_index: usize,
+    pos: Position,
+) {
+    let _ = game.trigger_persistent_event(
+        &[player_index],
+        |e| &mut e.city_activation_mood_decreased,
+        pos,
+        PersistentEventType::CityActivationMoodDecreased,
+    );
+}
+
+pub(crate) fn on_action_end(game: &mut Game, player_index: usize) {
+    let _ = game.trigger_persistent_event(
+        &[player_index],
+        |e| &mut e.choose_action_card,
+        (),
+        |()| PersistentEventType::ChooseActionCard,
+    );
 }
 
 pub(crate) fn execute_custom_phase_action(
     game: &mut Game,
-    player_index: usize,
+    player: usize,
     details: PersistentEventType,
 ) -> Result<(), String> {
     use PersistentEventType::*;
     match details {
-        Collect(i) => on_collect(game, player_index, i),
-        DrawWonderCard => {
-            draw_wonder_card(game, player_index);
+        Collect(i) => on_collect(game, player, i),
+        DrawWonderCard(draw) => {
+            on_draw_wonder_card(game, player, draw);
         }
         ExploreResolution(r) => {
-            ask_explore_resolution(game, player_index, r);
+            ask_explore_resolution(game, player, r);
         }
-        InfluenceCultureResolution(r) => {
-            ask_for_cultural_influence_payment(game, player_index, r);
+        InfluenceCulture(r) => {
+            on_cultural_influence(game, player, r);
         }
-        UnitsKilled(k) => units_killed(game, player_index, k),
+        UnitsKilled(k) => units_killed(game, player, k),
         CombatStart(c) => {
             start_combat(game, c);
         }
@@ -201,31 +249,38 @@ pub(crate) fn execute_custom_phase_action(
                 combat_loop(game, crate::combat_listeners::CombatRoundStart::new(c));
             }
         }
-        CombatEnd(r) => {
-            end_combat(game, r);
-        }
-        CaptureUndefendedPosition(c) => {
-            on_capture_undefended_position(game, player_index, c);
+        CombatEnd(s) => {
+            on_end_combat(game, s);
         }
         StatusPhase(s) => play_status_phase(game, s),
         TurnStart => game.on_start_turn(),
+        PayAction(a) => {
+            a.on_pay_action(game, player, game.current_event().origin_override.clone())?;
+        }
         Advance(a) => {
-            on_advance(game, player_index, a);
+            on_advance(game, player, a);
         }
         Construct(b) => {
-            on_construct(game, player_index, b);
+            on_construct(game, player, b);
         }
         Recruit(r) => {
-            on_recruit(game, player_index, r);
+            on_recruit(game, player, r);
         }
-        FoundCity(p) => on_found_city(game, player_index, p),
+        FoundCity(p) => on_found_city(game, player, p),
         Incident(i) => on_trigger_incident(game, i),
-        ActionCard(a) => on_play_action_card(game, player_index, a),
-        WonderCard(w) => on_play_wonder_card(game, player_index, w),
+        StopBarbarianMovement(movable) => on_stop_barbarian_movement(game, movable),
+        ActionCard(a) => on_play_action_card(game, player, a),
+        WonderCard(w) => on_play_wonder_card(game, player, w),
         SelectObjectives(c) => {
-            on_objective_cards(game, player_index, c);
+            on_objective_cards(game, player, c);
         }
-        CustomAction(a) => execute_custom_action(game, player_index, a),
+        CustomAction(a) => on_custom_action(game, player, a),
+        ChooseActionCard => on_action_end(game, player),
+        ChooseIncident(i) => on_choose_incident(game, player, i),
+        CityActivationMoodDecreased(p) => {
+            on_city_activation_mood_decreased(game, player, p);
+        }
+        ShipConstructionConversion(u) => on_ship_construction_conversion(game, player, u),
     }
 
     if let Some(s) = game.events.pop() {
@@ -241,10 +296,6 @@ pub(crate) fn execute_custom_phase_action(
     Ok(())
 }
 
-pub(crate) fn add_log_item_from_action(game: &mut Game, action: &Action) {
-    game.log.push(log::format_action_log_item(action, game));
-}
-
 fn execute_regular_action(
     game: &mut Game,
     action: Action,
@@ -252,137 +303,60 @@ fn execute_regular_action(
 ) -> Result<(), String> {
     match game.state {
         Playing => {
-            if let Some(m) = action.clone().movement() {
-                execute_movement_action(game, m, player_index)
+            if let Action::Movement(m) = action {
+                execute_movement_action(game, m.clone(), player_index)
             } else {
-                let action = action.playing().expect("action should be a playing action");
+                let Action::Playing(action) = action else {
+                    return Err(format!("Action {action:?} is not a playing action"));
+                };
                 action.execute(game, player_index, false)
             }
         }
-        Movement(_) => {
-            let action = action
-                .movement()
-                .expect("action should be a movement action");
-            execute_movement_action(game, action, player_index)
-        }
+        Movement(_) => execute_movement_action(
+            game,
+            if let Action::Movement(v) = action {
+                v
+            } else {
+                return Err(format!("action {action:?} is not a movement action"));
+            },
+            player_index,
+        ),
         Finished => Err("actions can't be executed when the game is finished".to_string()),
     }
 }
 
-pub(crate) fn execute_movement_action(
-    game: &mut Game,
-    action: MovementAction,
-    player_index: usize,
-) -> Result<(), String> {
-    if let GameState::Playing = game.state {
-        if game.actions_left == 0 {
-            return Err("No actions left".to_string());
-        }
-        game.actions_left -= 1;
-        game.state = GameState::Movement(MoveState::new());
-    }
-
-    match action {
-        Move(m) => {
-            execute_move_action(game, player_index, &m)?;
-
-            if let Movement(state) = &game.state {
-                let all_moves_used =
-                    state.movement_actions_left == 0 && state.current_move == CurrentMove::None;
-                if all_moves_used
-                    || !has_movable_units(game, game.player(game.current_player_index))
-                {
-                    game.state = GameState::Playing;
-                }
-            }
-        }
-        Stop => {
-            game.state = GameState::Playing;
-        }
-    }
-
-    Ok(())
-}
-
-fn execute_move_action(game: &mut Game, player_index: usize, m: &MoveUnits) -> Result<(), String> {
-    let player = &game.players[player_index];
-    let starting_position =
-        player
-            .get_unit(*m.units.first().expect(
-                "instead of providing no units to move a stop movement actions should be done",
-            ))
-            .position;
-    let destinations = move_units_destinations(
-        player,
+pub(crate) fn gain_action(game: &mut Game, player: &EventPlayer) {
+    player.log(game, "Gain 1 action");
+    game.actions_left += 1;
+    add_action_log_item(
         game,
-        &m.units,
-        starting_position,
-        m.embark_carrier_id,
-    )?;
-    let c = &destinations
-        .iter()
-        .find(|route| route.destination == m.destination)
-        .expect("destination should be a valid destination")
-        .cost;
-    if c.is_free() {
-        assert_eq!(m.payment, ResourcePile::empty(), "payment should be empty");
-    } else {
-        game.players[player_index].pay_cost(c, &m.payment);
-    }
-
-    let current_move = get_current_move(
-        game,
-        &m.units,
-        starting_position,
-        m.destination,
-        m.embark_carrier_id,
+        player.index,
+        ActionLogEntry::action(ActionLogBalance::Gain),
+        player.origin.clone(),
+        vec![],
     );
-    let Movement(move_state) = &mut game.state else {
-        return Err("no move state".to_string());
-    };
-    move_state.moved_units.extend(m.units.iter());
-    move_state.moved_units = move_state.moved_units.iter().unique().copied().collect();
-
-    if matches!(current_move, CurrentMove::None) || move_state.current_move != current_move {
-        move_state.movement_actions_left -= 1;
-        move_state.current_move = current_move;
-    }
-    if !starting_position.is_neighbor(m.destination) {
-        // roads move ends the current move
-        move_state.current_move = CurrentMove::None;
-    }
-
-    let dest_terrain = game
-        .map
-        .get(m.destination)
-        .expect("destination should be a valid tile");
-
-    if dest_terrain == &Unexplored {
-        move_to_unexplored_tile(
-            game,
-            player_index,
-            &m.units,
-            starting_position,
-            m.destination,
-        );
-    } else {
-        move_with_possible_combat(game, player_index, starting_position, m);
-    }
-
-    Ok(())
 }
 
-pub(crate) fn update_stats(game: &mut Game) {
-    let update = game
-        .players
-        .iter()
-        .flat_map(|p| {
-            p.cities
-                .iter()
-                .filter_map(|c| c.possible_collections.is_empty().then_some(c.position))
-        })
-        .collect_vec();
-    for p in update {
-        set_city_collections(game, p);
-    }
+pub(crate) fn lose_action(game: &mut Game, player: &EventPlayer) {
+    player.log(game, "Lose 1 action");
+    game.actions_left -= 1;
+    add_action_log_item(
+        game,
+        player.index,
+        ActionLogEntry::action(ActionLogBalance::Loss),
+        player.origin.clone(),
+        vec![],
+    );
+}
+
+pub(crate) fn pay_action(game: &mut Game, player: &EventPlayer) {
+    player.log(game, "Pay 1 action");
+    game.actions_left -= 1;
+    add_action_log_item(
+        game,
+        player.index,
+        ActionLogEntry::action(ActionLogBalance::Loss),
+        player.origin.clone(),
+        vec![],
+    );
 }

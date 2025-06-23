@@ -65,7 +65,6 @@
           "position": "B1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "activations": 4,
           "angry_activation": true,
@@ -124,7 +123,7 @@
           ]
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "FreeEconomy",
@@ -157,7 +156,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "activations": 2,
           "position": "C1"
@@ -183,7 +181,7 @@
           "id": 1
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Mining"
@@ -262,12 +260,14 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Movement": {
@@ -280,74 +280,7 @@
                         "embark_carrier_id": 9
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/5/id",
-                      "value": 5
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/5/position",
-                      "value": "B3"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/5/unit_type",
-                      "value": "Settler"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/6/id",
-                      "value": 6
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/6/position",
-                      "value": "B3"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/6/unit_type",
-                      "value": "Settler"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/7/id",
-                      "value": 7
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/units/7/carried_units"
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/units/8",
-                      "value": {
-                        "id": 8,
-                        "position": "C3",
-                        "unit_type": "Ship"
-                      }
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/units/9",
-                      "value": {
-                        "id": 9,
-                        "position": "C3",
-                        "unit_type": "Ship"
-                      }
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/state/Movement/moved_units/2"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/state/Movement/moved_units/2"
-                    }
-                  ]
+                  }
                 }
               ]
             }
@@ -359,7 +292,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 embarked 2 settlers from B3 to C3"
+      "Player1: Move: embarked 2 settlers from B3 to C3"
     ]
   ],
   "undo_limit": 0,

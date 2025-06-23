@@ -6,14 +6,16 @@ use server::content::custom_actions::CustomActionType;
 use server::map::Terrain;
 use server::player::Player;
 use server::resource::ResourceType;
+use server::unit;
 use server::unit::UnitType;
+use server::wonder::Wonder;
 use std::collections::HashMap;
 
-pub struct CivAssets {
+pub(crate) struct CivAssets {
     pub units: HashMap<UnitType, Texture2D>,
 }
 
-pub struct Assets {
+pub(crate) struct Assets {
     pub terrain: HashMap<Terrain, Texture2D>,
     pub exhausted: Texture2D,
     pub font: Font,
@@ -31,13 +33,13 @@ pub struct Assets {
 
     // UI
     pub redo: Texture2D,
-    pub reset: Texture2D,
     pub undo: Texture2D,
     pub plus: Texture2D,
     pub minus: Texture2D,
     pub ok_blocked: Texture2D,
     pub ok: Texture2D,
     pub cancel: Texture2D,
+    pub info: Texture2D,
 
     pub victory_points: Texture2D,
     pub event_counter: Texture2D,
@@ -51,7 +53,7 @@ pub struct Assets {
 
     pub resources: HashMap<ResourceType, Texture2D>,
     pub buildings: HashMap<Building, Texture2D>,
-    pub wonders: HashMap<String, Texture2D>,
+    pub wonders: HashMap<Wonder, Texture2D>,
     pub custom_actions: HashMap<CustomActionType, Texture2D>,
     pub civ: HashMap<String, CivAssets>,
     pub default_civ: CivAssets,
@@ -59,13 +61,13 @@ pub struct Assets {
 
 impl Assets {
     pub async fn new(features: &Features) -> Self {
-        let font_name = features.get_asset("HTOWERT.TTF");
+        let font_name = features.get_asset("SourceSans3-Regular.ttf");
         Self {
             font: load_ttf_font(&font_name).await.unwrap(), // can't share font - causes panic
             terrain: Self::terrain(features).await,
             exhausted: load_png(include_bytes!("../assets/cross-svgrepo-com.png")),
 
-            angry: load_png(include_bytes!("../assets/angry-face-svgrepo-com.png")),
+            angry: load_png(include_bytes!("../assets/angry-svgrepo-com.png")),
             resources: Self::resources(),
             buildings: Self::buildings(),
             civ: Self::new_civ_assets(),
@@ -83,13 +85,13 @@ impl Assets {
 
             // UI
             redo: load_png(include_bytes!("../assets/redo-svgrepo-com.png")),
-            reset: load_png(include_bytes!("../assets/reset-svgrepo-com.png")),
             undo: load_png(include_bytes!("../assets/undo-svgrepo-com.png")),
             plus: load_png(include_bytes!("../assets/plus-circle-svgrepo-com.png")),
             minus: load_png(include_bytes!("../assets/minus-circle-svgrepo-com.png")),
             ok: load_png(include_bytes!("../assets/ok-circle-svgrepo-com.png")),
             ok_blocked: load_png(include_bytes!("../assets/in-progress-svgrepo-com.png")),
             cancel: load_png(include_bytes!("../assets/cancel-svgrepo-com.png")),
+            info: load_png(include_bytes!("../assets/info-svgrepo-com.png")),
 
             victory_points: load_png(include_bytes!("../assets/trophy-cup-svgrepo-com.png")),
             event_counter: load_png(include_bytes!(
@@ -105,16 +107,43 @@ impl Assets {
         }
     }
 
-    fn wonders() -> HashMap<String, Texture2D> {
+    fn wonders() -> HashMap<Wonder, Texture2D> {
         [
             (
-                "Pyramids".to_string(),
+                Wonder::Colosseum,
+                load_png(include_bytes!("../assets/colosseum-rome-svgrepo-com.png")),
+            ),
+            (
+                Wonder::GreatGardens,
+                load_png(include_bytes!("../assets/fountain-svgrepo-com.png")),
+            ),
+            (
+                Wonder::GreatLibrary,
+                load_png(include_bytes!("../assets/library-14-svgrepo-com.png")),
+            ),
+            (
+                Wonder::GreatLighthouse,
+                load_png(include_bytes!("../assets/lighthouse-svgrepo-com.png")),
+            ),
+            (
+                Wonder::GreatMausoleum,
+                load_png(include_bytes!("../assets/mausoleum-svgrepo-com.png")),
+            ),
+            (
+                Wonder::Pyramids,
                 load_png(include_bytes!("../assets/pyramid-svgrepo-com.png")),
             ),
             (
-                "Great Gardens".to_string(),
-                // todo find a better icon
-                load_png(include_bytes!("../assets/pyramid-svgrepo-com.png")),
+                Wonder::GreatStatue,
+                load_png(include_bytes!(
+                    "../assets/statue-of-david-1-svgrepo-com.png"
+                )),
+            ),
+            (
+                Wonder::GreatWall,
+                load_png(include_bytes!(
+                    "../assets/great-wall-of-china-chinese-svgrepo-com.png"
+                )),
             ),
         ]
         .iter()
@@ -162,7 +191,7 @@ impl Assets {
                 )),
             ),
             (
-                UnitType::Leader,
+                unit::LEADER_UNIT,
                 None,
                 load_png(include_bytes!("../assets/flag-svgrepo-com.png")),
             ),
@@ -279,6 +308,67 @@ impl Assets {
                 CustomActionType::Sports,
                 load_png(include_bytes!("../assets/stadium-svgrepo-com.png")),
             ),
+            (
+                CustomActionType::GreatLibrary,
+                load_png(include_bytes!("../assets/library-14-svgrepo-com.png")),
+            ),
+            (
+                CustomActionType::GreatLighthouse,
+                load_png(include_bytes!("../assets/lighthouse-svgrepo-com.png")),
+            ),
+            (
+                CustomActionType::GreatStatue,
+                load_png(include_bytes!(
+                    "../assets/statue-of-david-1-svgrepo-com.png"
+                )),
+            ),
+            //Rome
+            (
+                CustomActionType::Aqueduct,
+                load_png(include_bytes!("../assets/aqueduct-svgrepo-com.png")),
+            ),
+            (
+                CustomActionType::Princeps,
+                load_png(include_bytes!(
+                    "../assets/augustus-of-prima-porta-svgrepo-com.png"
+                )),
+            ),
+            // Greece
+            (
+                CustomActionType::Idol,
+                load_png(include_bytes!(
+                    "../assets/alexander-the-great-svgrepo-com.png"
+                )),
+            ),
+            (
+                CustomActionType::Master,
+                load_png(include_bytes!("../assets/graduate-cap-svgrepo-com.png")),
+            ),
+            (
+                CustomActionType::ImperialArmy,
+                load_png(include_bytes!("../assets/farmer-farm-svgrepo-com.png")),
+            ),
+            (
+                CustomActionType::ArtOfWar,
+                load_png(include_bytes!("../assets/graduate-cap-svgrepo-com.png")),
+            ),
+            (
+                CustomActionType::AgricultureEconomist,
+                load_png(include_bytes!("../assets/graduate-cap-svgrepo-com.png")),
+            ),
+            // Vikings
+            (
+                CustomActionType::Danegeld,
+                load_png(include_bytes!("../assets/viking-ship-svgrepo-com.png")),
+            ),
+            (
+                CustomActionType::LegendaryExplorer,
+                load_png(include_bytes!("../assets/browser-safari-svgrepo-com.png")),
+            ),
+            (
+                CustomActionType::NewColonies,
+                load_png(include_bytes!("../assets/viking-helmet-svgrepo-com.png")),
+            ),
         ]
         .iter()
         .cloned()
@@ -326,7 +416,10 @@ impl Assets {
         CivAssets { units }
     }
 
-    pub fn unit(&self, unit_type: UnitType, player: &Player) -> &Texture2D {
+    pub(crate) fn unit(&self, mut unit_type: UnitType, player: &Player) -> &Texture2D {
+        if unit_type.is_leader() {
+            unit_type = unit::LEADER_UNIT;
+        }
         self.civ
             .get(&player.civilization.name)
             .and_then(|c| c.units.get(&unit_type))

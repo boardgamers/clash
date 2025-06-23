@@ -1,31 +1,33 @@
 use crate::action::{Action, ActionType};
-use crate::advance::Advance;
+use crate::advance::AdvanceAction;
+use crate::ai_collect::{possible_collections, total_collect};
 use crate::card::validate_card_selection;
 use crate::city::{City, MoodState};
-use crate::collect::available_collect_actions;
+use crate::collect::{Collect, available_collect_actions, possible_resource_collections};
 use crate::construct::{Construct, available_buildings, new_building_positions};
-use crate::content::custom_actions::CustomEventAction;
+use crate::content::custom_actions::{CustomAction, CustomActionType};
 use crate::content::persistent_events::{
-    ChangeGovernmentRequest, EventResponse, HandCardsRequest, MultiRequest, PersistentEventRequest,
-    PersistentEventState, PositionRequest, SelectedStructure, is_selected_structures_valid,
+    EventResponse, HandCardsRequest, MultiRequest, PersistentEventRequest, PersistentEventState,
+    PositionRequest, SelectedStructure, is_selected_structures_valid,
 };
 use crate::cultural_influence::{
     InfluenceCultureAttempt, available_influence_actions, available_influence_culture,
 };
-use crate::events::EventOrigin;
-use crate::game::Game;
-use crate::happiness::{available_happiness_actions, happiness_cost};
+use crate::events::{EventOrigin, check_event_origin};
+use crate::game::{Game, GameState};
+use crate::happiness::{
+    IncreaseHappiness, available_happiness_actions, happiness_city_restriction, happiness_cost,
+};
 use crate::payment::PaymentOptions;
 use crate::player::{CostTrigger, Player};
-use crate::playing_actions::{
-    IncreaseHappiness, PlayingAction, PlayingActionType, Recruit, base_and_custom_action,
-};
+use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::position::Position;
-use crate::recruit::recruit_cost;
+use crate::recruit::{Recruit, recruit_cost};
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
-use crate::status_phase::{ChangeGovernment, ChangeGovernmentType, government_advances};
-use crate::unit::{UnitType, Units};
+use crate::status_phase::{ChangeGovernment, government_advances};
+use crate::unit::{UnitType, Units, validate_units_selection};
+use crate::wonder::Wonder;
 use itertools::Itertools;
 use rustc_hash::FxHashMap;
 use std::vec;
@@ -69,9 +71,12 @@ impl AiActions {
     ///   e.g. selecting to sacrifice a unit for an incident)
     /// - move actions are not returned at all - this required special handling
     ///
+    /// # Panics
+    ///
+    /// Panics if the actions for any type is empty
     #[must_use]
     pub fn get_available_actions(&mut self, game: &Game) -> Vec<(ActionType, Vec<Action>)> {
-        if let Some(event) = game.events.last() {
+        let actions = if let Some(event) = game.events.last() {
             vec![(
                 ActionType::Response,
                 responses(event, game.player(game.active_player()), game)
@@ -79,9 +84,19 @@ impl AiActions {
                     .map(Action::Response)
                     .collect(),
             )]
-        } else {
+        } else if game.state == GameState::Playing {
             base_actions(self, game)
+        } else {
+            vec![]
+        };
+        for (t, a) in &actions {
+            assert!(
+                !a.is_empty(),
+                "Empty actions for action type: {t:?} - {:?}",
+                game.events.last().as_ref().expect("event not found")
+            );
         }
+        actions
     }
 }
 
@@ -129,10 +144,8 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
 
     // IncreaseHappiness
     let happiness = available_happiness_actions(game, p.index);
-    // if !happiness.is_empty() {
-    // let action_type = prefer_custom_action(happiness); // todo custom action is buggy
-    if let Some(action_type) = base_and_custom_action(happiness).0 {
-        if let Some(h) = calculate_increase_happiness(p, &action_type, game) {
+    if !happiness.is_empty() {
+        if let Some(h) = calculate_increase_happiness(p, &prefer_custom_action(&happiness), game) {
             actions.push((
                 ActionType::Playing(PlayingActionType::IncreaseHappiness),
                 vec![Action::Playing(PlayingAction::IncreaseHappiness(h))],
@@ -141,9 +154,7 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
     }
 
     // InfluenceCultureAttempt,
-    let influence = available_influence_actions(game, p.index);
-    if !influence.is_empty() {
-        let action_type = prefer_custom_action(influence);
+    for action_type in available_influence_actions(game, p.index) {
         if let Some(i) = calculate_influence(game, p, &action_type) {
             actions.push((
                 ActionType::Playing(PlayingActionType::Collect),
@@ -169,36 +180,45 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
         .wonder_cards
         .iter()
         .filter_map(|card| {
-            PlayingActionType::WonderCard(card.clone())
+            PlayingActionType::WonderCard(*card)
                 .is_available(game, p.index)
                 .is_ok()
-                .then_some(Action::Playing(PlayingAction::WonderCard(card.clone())))
+                .then_some(Action::Playing(PlayingAction::WonderCard(*card)))
         })
         .collect_vec();
 
     if !wonder_cards.is_empty() {
         actions.push((
-            ActionType::Playing(PlayingActionType::WonderCard(String::new())),
+            ActionType::Playing(PlayingActionType::WonderCard(Wonder::Pyramids)),
             wonder_cards,
         ));
     }
 
-    for (a, _) in game.available_custom_actions(p.index) {
-        let cities = if a.is_city_bound() {
+    for info in game.available_custom_actions(p.index) {
+        if info.action == CustomActionType::ImperialArmy {
+            // buggy
+            continue;
+        }
+
+        let cities = if info.city_bound().is_some() {
             p.cities
                 .iter()
-                .filter_map(|city| a.is_available_city(p, city).then_some(Some(city.position)))
+                .filter_map(|city| {
+                    info.is_city_available(game, city)
+                        .then_some(Some(city.position))
+                })
                 .collect_vec()
         } else {
             vec![None]
         };
 
+        let a = info.action;
         for c in cities {
             actions.push((
-                ActionType::Playing(PlayingActionType::Custom(a.clone())),
-                vec![Action::Playing(PlayingAction::Custom(
-                    CustomEventAction::new(a.clone(), c),
-                ))],
+                ActionType::Playing(PlayingActionType::Custom(a)),
+                vec![Action::Playing(PlayingAction::Custom(CustomAction::new(
+                    a, c,
+                )))],
             ));
         }
     }
@@ -207,8 +227,7 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
 }
 
 fn available_action_cards(game: &Game, p: &Player) -> Vec<Action> {
-    let action_cards = p
-        .action_cards
+    p.action_cards
         .iter()
         .filter_map(|card| {
             if *card == 126 || *card == 17 || *card == 18 {
@@ -224,11 +243,7 @@ fn available_action_cards(game: &Game, p: &Player) -> Vec<Action> {
                 return None;
             }
             if *card == 19 || *card == 20 || *card == 29 || *card == 30 {
-                // todo collect only is buggy
-                return None;
-            }
-            if *card == 15 || *card == 16 {
-                // todo influence only is buggy
+                // todo collect only is possible even if resources are wasted
                 return None;
             }
             if *card == 7 || *card == 8 {
@@ -245,25 +260,18 @@ fn available_action_cards(game: &Game, p: &Player) -> Vec<Action> {
                 .is_ok()
                 .then_some(Action::Playing(PlayingAction::ActionCard(*card)))
         })
-        .collect_vec();
-    action_cards
+        .collect_vec()
 }
 
 fn payment(ai_actions: &mut AiActions, o: &PaymentOptions, p: &Player) -> ResourcePile {
     try_payment(ai_actions, o, p).expect("expected payment")
 }
 
-fn payment_with_action(
+pub fn try_payment(
+    ai_actions: &mut AiActions,
     o: &PaymentOptions,
     p: &Player,
-    playing_action_type: &PlayingActionType,
-    game: &Game,
-) -> ResourcePile {
-    o.first_valid_payment(&playing_action_type.remaining_resources(p, game))
-        .expect("expected payment")
-}
-
-fn try_payment(ai_actions: &mut AiActions, o: &PaymentOptions, p: &Player) -> Option<ResourcePile> {
+) -> Option<ResourcePile> {
     let sum = o.default.amount();
 
     let mut max = p.resources.clone();
@@ -298,10 +306,6 @@ fn advances(ai_actions: &mut AiActions, p: &Player, game: &Game) -> Vec<Action> 
         .iter()
         .filter_map(|info| {
             let a = info.advance;
-            if deny_advance(a) {
-                return None;
-            }
-
             if !p.can_advance_free(a, game) {
                 return None;
             }
@@ -310,21 +314,9 @@ fn advances(ai_actions: &mut AiActions, p: &Player, game: &Game) -> Vec<Action> 
                 &p.advance_cost(a, game, CostTrigger::NoModifiers).cost,
                 p,
             )
-            .map(|r| {
-                Action::Playing(PlayingAction::Advance {
-                    advance: a,
-                    payment: r,
-                })
-            })
+            .map(|r| Action::Playing(PlayingAction::Advance(AdvanceAction::new(a, r))))
         })
         .collect()
-}
-
-fn deny_advance(name: Advance) -> bool {
-    //todo collect cache doesn't work, because husbandry can only be used once per turn
-    //correct cache: 1) only store total in cache 2) sort by distance 3) add husbandry flag
-
-    name == Advance::Husbandry
 }
 
 fn collect_actions(p: &Player, game: &Game) -> Vec<Action> {
@@ -332,21 +324,35 @@ fn collect_actions(p: &Player, game: &Game) -> Vec<Action> {
     if collect.is_empty() {
         return vec![];
     }
-    let action_type = prefer_custom_action(collect);
+    let action_type = prefer_custom_action(&collect);
 
     p.cities
         .iter()
         .filter(|city| city.can_activate())
         .flat_map(|city| {
-            city.possible_collections.iter().filter_map({
-                let action_type = action_type.clone();
-                move |c| {
-                    let mut a = c.clone();
-                    a.action_type = action_type.clone();
-                    p.can_gain(c.total.clone())
-                        .then_some(Action::Playing(PlayingAction::Collect(a)))
-                }
-            })
+            let info = possible_resource_collections(
+                game,
+                city.position,
+                p.index,
+                &check_event_origin(),
+                CostTrigger::NoModifiers,
+            );
+
+            possible_collections(&info)
+                .into_iter()
+                .filter_map(|c| {
+                    let total = total_collect(&c);
+                    if !can_gain(p, total.clone()) {
+                        return None;
+                    }
+
+                    Some(Action::Playing(PlayingAction::Collect(Collect::new(
+                        city.position,
+                        c,
+                        action_type.clone(),
+                    ))))
+                })
+                .collect_vec()
         })
         .collect_vec()
 }
@@ -371,12 +377,12 @@ fn recruit_strategies() -> Vec<Vec<UnitType>> {
     ]
 }
 
-fn recruit(ai_actions: &mut AiActions, p: &Player, _game: &Game) -> Vec<Action> {
+fn recruit(ai_actions: &mut AiActions, p: &Player, game: &Game) -> Vec<Action> {
     p.cities
         .iter()
         .flat_map(|city| {
             if city.can_activate() {
-                recruit_actions(ai_actions, p, city)
+                recruit_actions(ai_actions, p, city, game)
             } else {
                 vec![]
             }
@@ -384,7 +390,12 @@ fn recruit(ai_actions: &mut AiActions, p: &Player, _game: &Game) -> Vec<Action> 
         .collect()
 }
 
-fn recruit_actions(ai_actions: &mut AiActions, player: &Player, city: &City) -> Vec<Action> {
+fn recruit_actions(
+    ai_actions: &mut AiActions,
+    player: &Player,
+    city: &City,
+    game: &Game,
+) -> Vec<Action> {
     recruit_strategies()
         .iter()
         .map(|strategy| {
@@ -400,10 +411,10 @@ fn recruit_actions(ai_actions: &mut AiActions, player: &Player, city: &City) -> 
                 let mut next = units.clone();
                 next += &unit_type;
                 match recruit_cost(
+                    game,
                     player,
                     &next,
                     city.position,
-                    None,
                     &[],
                     CostTrigger::NoModifiers,
                 ) {
@@ -440,7 +451,6 @@ fn calculate_increase_happiness(
     let mut all_steps: Vec<(Position, u8)> = vec![];
     let mut step_sum = 0;
     let mut cost = PaymentOptions::free();
-    let available = action_type.remaining_resources(player, game);
 
     for c in player
         .cities
@@ -448,6 +458,11 @@ fn calculate_increase_happiness(
         .filter(|city| city.mood_state != MoodState::Happy)
         .sorted_by_key(|city| -(city.size() as i8))
     {
+        if happiness_city_restriction(player, action_type).is_some_and(|r| r != c.position) {
+            // city restriction is not met
+            continue;
+        }
+
         let steps = match c.mood_state {
             MoodState::Angry => 2,
             MoodState::Neutral => 1,
@@ -455,8 +470,15 @@ fn calculate_increase_happiness(
         };
         let new_steps_sum = step_sum + steps * c.size() as u8;
 
-        let info = happiness_cost(player, new_steps_sum, CostTrigger::NoModifiers);
-        if !info.cost.can_afford(&available) {
+        let info = happiness_cost(
+            player.index,
+            new_steps_sum,
+            CostTrigger::NoModifiers,
+            action_type,
+            game,
+            &check_event_origin(),
+        );
+        if !info.cost.can_afford(&player.resources) {
             break;
         }
         all_steps.push((c.position, steps));
@@ -466,16 +488,23 @@ fn calculate_increase_happiness(
 
     (!all_steps.is_empty()).then_some(IncreaseHappiness::new(
         all_steps,
-        payment_with_action(&cost, player, action_type, game),
+        cost.first_valid_payment(&player.resources)
+            .expect("expected payment"),
         action_type.clone(),
     ))
 }
 
-fn prefer_custom_action(actions: Vec<PlayingActionType>) -> PlayingActionType {
-    let (action, custom) = base_and_custom_action(actions);
-    action.unwrap_or_else(|| {
-        PlayingActionType::Custom(custom.expect("custom action should be present"))
-    })
+fn prefer_custom_action(actions: &[PlayingActionType]) -> PlayingActionType {
+    actions
+        .iter()
+        .find(|a| matches!(a, PlayingActionType::Custom(_)))
+        .or_else(|| {
+            actions
+                .iter()
+                .find(|a| !matches!(a, PlayingActionType::Custom(_)))
+        })
+        .cloned()
+        .expect("expected at least one action type, either custom or base")
 }
 
 #[allow(clippy::match_same_arms)]
@@ -499,12 +528,13 @@ fn responses(event: &PersistentEventState, player: &Player, game: &Game) -> Vec<
             )]
         }
         PersistentEventRequest::ResourceReward(r) => {
-            vec![EventResponse::ResourceReward(r.reward.default)]
+            vec![EventResponse::ResourceReward(
+                r.reward.payment_options.default,
+            )]
         }
         PersistentEventRequest::SelectAdvance(a) => a
             .choices
             .iter()
-            .filter(|c| !deny_advance(**c))
             .map(|c| EventResponse::SelectAdvance(*c))
             .collect(),
         PersistentEventRequest::SelectPlayer(p) => p
@@ -524,10 +554,12 @@ fn responses(event: &PersistentEventState, player: &Player, game: &Game) -> Vec<
             .map(|c| EventResponse::SelectUnitType(*c))
             .collect(),
         PersistentEventRequest::SelectUnits(r) => {
-            select_multi(&r.request, SelectMultiStrategy::All, |_| true)
-                .into_iter()
-                .map(EventResponse::SelectUnits)
-                .collect()
+            select_multi(&r.request, SelectMultiStrategy::All, |u| {
+                validate_units_selection(u, game, player).is_ok()
+            })
+            .into_iter()
+            .map(EventResponse::SelectUnits)
+            .collect()
         }
         PersistentEventRequest::SelectStructures(r) => {
             select_multi(&r, SelectMultiStrategy::All, |s| {
@@ -548,7 +580,7 @@ fn responses(event: &PersistentEventState, player: &Player, game: &Game) -> Vec<
         PersistentEventRequest::BoolRequest(_) => {
             vec![EventResponse::Bool(false), EventResponse::Bool(true)]
         }
-        PersistentEventRequest::ChangeGovernment(c) => change_government(player, &c, game),
+        PersistentEventRequest::ChangeGovernment => change_government(player, game),
         PersistentEventRequest::ExploreResolution => {
             vec![
                 EventResponse::ExploreResolution(0),
@@ -558,40 +590,32 @@ fn responses(event: &PersistentEventState, player: &Player, game: &Game) -> Vec<
     }
 }
 
-fn change_government(p: &Player, c: &ChangeGovernmentRequest, game: &Game) -> Vec<EventResponse> {
-    if c.optional {
-        vec![EventResponse::ChangeGovernmentType(
-            ChangeGovernmentType::KeepGovernment,
-        )]
-    } else {
-        // change to the first available government and take the first advances
-        let new = game
-            .cache
-            .get_governments()
-            .iter()
-            .find(|g| p.can_advance_in_change_government(g.advances[0].advance, game))
-            .expect("government not found");
+fn change_government(p: &Player, game: &Game) -> Vec<EventResponse> {
+    // change to the first available government and take the first advances
+    let new = game
+        .cache
+        .get_governments()
+        .iter()
+        .find(|g| p.can_advance_ignore_contradicting(g.advances[0].advance, game))
+        .expect("government not found");
 
-        let advances = new
-            .advances
-            .iter()
-            .dropping(1) // is taken implicitly
-            .take(government_advances(p, game).len() - 1)
-            .map(|a| a.advance)
-            .collect_vec();
+    let advances = new
+        .advances
+        .iter()
+        .dropping(1) // is taken implicitly
+        .take(government_advances(p, game).len() - 1)
+        .map(|a| a.advance)
+        .collect_vec();
 
-        vec![EventResponse::ChangeGovernmentType(
-            ChangeGovernmentType::ChangeGovernment(ChangeGovernment::new(
-                new.name.clone(),
-                advances,
-            )),
-        )]
-    }
+    vec![EventResponse::ChangeGovernmentType(ChangeGovernment::new(
+        new.name.clone(),
+        advances,
+    ))]
 }
 
 fn hand_card_strategy(o: &EventOrigin, r: &HandCardsRequest) -> SelectMultiStrategy {
     match o {
-        EventOrigin::Builtin(n) if n == "Select Objective Cards to Complete" => {
+        EventOrigin::Ability(n) if n == "Select Objective Cards to Complete" => {
             SelectMultiStrategy::Max
         }
         EventOrigin::CivilCard(_)
@@ -605,7 +629,7 @@ fn hand_card_strategy(o: &EventOrigin, r: &HandCardsRequest) -> SelectMultiStrat
 
 fn select_position_strategy(o: &EventOrigin, _r: &PositionRequest) -> SelectMultiStrategy {
     match o {
-        EventOrigin::Builtin(n) if n == "Raze city" => SelectMultiStrategy::Min,
+        EventOrigin::Ability(n) if n == "Raze city" => SelectMultiStrategy::Min,
         _ => SelectMultiStrategy::All,
     }
 }
@@ -669,7 +693,7 @@ pub(crate) fn get_construct_actions(
     p: &Player,
     city: &City,
 ) -> Vec<Action> {
-    available_buildings(game, p.index, city.position)
+    available_buildings(game, p.index, city.position, &[])
         .iter()
         .flat_map(|(building, cost)| {
             new_building_positions(game, *building, city)
@@ -687,4 +711,15 @@ pub(crate) fn get_construct_actions(
                 .collect_vec()
         })
         .collect()
+}
+
+pub(crate) fn can_gain_resource(player: &Player, r: ResourceType, amount: u8) -> bool {
+    match r {
+        ResourceType::MoodTokens | ResourceType::CultureTokens => true,
+        _ => player.resources.get(&r) + amount <= player.resource_limit.get(&r),
+    }
+}
+
+pub(crate) fn can_gain(player: &Player, r: ResourcePile) -> bool {
+    r.into_iter().all(|(t, a)| can_gain_resource(player, t, a))
 }

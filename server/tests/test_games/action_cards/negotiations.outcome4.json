@@ -1,0 +1,437 @@
+{
+  "state": {
+    "Movement": {
+      "movement_actions_left": 2,
+      "moved_units": [
+        0
+      ]
+    }
+  },
+  "players": [
+    {
+      "id": 0,
+      "resources": {
+        "food": 3,
+        "wood": 6,
+        "ore": 6,
+        "gold": 7,
+        "culture_tokens": 6
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {
+            "temple": 1
+          },
+          "mood_state": "Neutral",
+          "position": "C2"
+        },
+        {
+          "mood_state": "Happy",
+          "position": "C1"
+        },
+        {
+          "mood_state": "Happy",
+          "position": "B2"
+        },
+        {
+          "mood_state": "Happy",
+          "position": "B3"
+        }
+      ],
+      "units": [
+        {
+          "position": "C2",
+          "unit_type": "Infantry",
+          "id": 1
+        },
+        {
+          "position": "C2",
+          "unit_type": "Elephant",
+          "id": 3
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 4
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 5
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 6
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 7
+        }
+      ],
+      "civilization": "Rome",
+      "advances": [
+        "Arts",
+        "Bartering",
+        "Currency",
+        "Farming",
+        "Mining",
+        "Tactics"
+      ],
+      "incident_tokens": 1,
+      "next_unit_id": 8
+    },
+    {
+      "id": 1,
+      "resources": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 7,
+        "culture_tokens": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {
+            "fortress": 0
+          },
+          "mood_state": "Angry",
+          "position": "A1"
+        },
+        {
+          "mood_state": "Happy",
+          "position": "A3"
+        },
+        {
+          "city_pieces": {
+            "fortress": 0
+          },
+          "mood_state": "Happy",
+          "position": "A4"
+        }
+      ],
+      "civilization": "Greece",
+      "advances": [
+        "Farming",
+        "Mining"
+      ],
+      "incident_tokens": 3,
+      "next_unit_id": 2
+    },
+    {
+      "id": 2,
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "civilization": "Barbarians",
+      "incident_tokens": 3,
+      "next_unit_id": 0
+    }
+  ],
+  "map": {
+    "tiles": [
+      [
+        "A1",
+        "Fertile"
+      ],
+      [
+        "A2",
+        "Water"
+      ],
+      [
+        "A3",
+        "Mountain"
+      ],
+      [
+        "A4",
+        "Mountain"
+      ],
+      [
+        "B1",
+        "Mountain"
+      ],
+      [
+        "B2",
+        "Forest"
+      ],
+      [
+        "B3",
+        "Fertile"
+      ],
+      [
+        "C1",
+        "Barren"
+      ],
+      [
+        "C2",
+        "Forest"
+      ],
+      [
+        "C3",
+        "Water"
+      ],
+      [
+        "D2",
+        "Water"
+      ]
+    ]
+  },
+  "starting_player_index": 0,
+  "current_player_index": 0,
+  "action_log": [
+    {
+      "age": 1,
+      "rounds": [
+        {
+          "round": 1,
+          "players": [
+            {
+              "index": 0,
+              "actions": [
+                {
+                  "action": {
+                    "Playing": {
+                      "ActionCard": 23
+                    }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 23
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToDiscard"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "culture_tokens": 1
+                        }
+                      ]
+                    }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "CivilCard": 23
+                      }
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  }
+                }
+              ]
+            },
+            {
+              "index": 1,
+              "actions": [
+                {
+                  "action": {
+                    "Playing": "EndTurn"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "round": 2,
+          "players": [
+            {
+              "index": 0,
+              "actions": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          0
+                        ],
+                        "destination": "B1"
+                      }
+                    }
+                  },
+                  "combat_stats": {
+                    "round": 1,
+                    "battleground": "Land",
+                    "attacker": {
+                      "position": "C2",
+                      "player": 0,
+                      "present": {
+                        "infantry": 1
+                      },
+                      "losses": {
+                        "infantry": 1
+                      }
+                    },
+                    "defender": {
+                      "position": "B1",
+                      "player": 1,
+                      "present": {
+                        "infantry": 1
+                      },
+                      "losses": {
+                        "infantry": 1
+                      }
+                    },
+                    "result": "Draw"
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "action_log_index": 1,
+  "log": [
+    [
+      "Player1: Action Card: Play Negotiations/Scout",
+      "Player1: Negotiations: Pay 1 culture token"
+    ],
+    [
+      "Player1: Negotiations: Pay 1 culture token, Started negotiations with Player2"
+    ],
+    [
+      "Player1: End Turn: 3 actions left"
+    ],
+    [
+      "It's Player2's turn",
+      "Player2: Negotiations: May not attack Player1 this turn."
+    ],
+    [
+      "Player2: End Turn: 3 actions left"
+    ],
+    [
+      "Round 2/3"
+    ],
+    [
+      "It's Player1's turn",
+      "Player1: Negotiations: May attack Player2 again."
+    ],
+    [
+      "Player1: Move: marched 1 infantry from C2 to B1, Pay 1 action"
+    ],
+    [
+      "Combat round 1",
+      "Player1: Combat: Attacking with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units, Lost 1 infantry at C2",
+      "Player2: Combat: Defending with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against attacking units, Lost 1 infantry at B1",
+      "Player1: Choose Casualties: Remove all attacking units",
+      "Player2: Choose Casualties: Remove all defending units",
+      "Battle ends in a draw"
+    ]
+  ],
+  "undo_limit": 1,
+  "actions_left": 2,
+  "round": 2,
+  "age": 1,
+  "messages": [
+    "The game has started"
+  ],
+  "dice_roll_outcomes": [
+    1,
+    1,
+    10,
+    10,
+    10,
+    10,
+    10
+  ],
+  "dice_roll_log": [
+    10,
+    10,
+    10
+  ],
+  "wonders_left": [
+    "Pyramids"
+  ],
+  "action_cards_discarded": [
+    23
+  ],
+  "incidents_left": [
+    57
+  ]
+}

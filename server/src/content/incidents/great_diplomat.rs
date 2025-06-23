@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
-use crate::content::builtin::Builtin;
+use crate::content::ability::Ability;
 use crate::content::effects::PermanentEffect;
 use crate::content::incidents::great_persons::{
     GREAT_PERSON_DESCRIPTION, great_person_action_card,
@@ -8,14 +8,13 @@ use crate::content::incidents::great_persons::{
 use crate::game::Game;
 use crate::incident::IncidentBuilder;
 use crate::player_events::IncidentTarget;
-use crate::playing_actions::ActionCost;
 use crate::utils::remove_element_by;
 use serde::{Deserialize, Serialize};
 
 pub(crate) const DIPLOMAT_ID: u8 = 57;
 
 pub(crate) fn great_diplomat() -> ActionCard {
-    great_person_action_card::<_, String>(
+    great_person_action_card::<_>(
         DIPLOMAT_ID,
         "Great Diplomat",
         &format!(
@@ -24,15 +23,16 @@ pub(crate) fn great_diplomat() -> ActionCard {
                 Discard this card if either player attacks the other. \
                 You may discard the card as a regular action.",
         ),
-        ActionCost::regular(),
-        &[],
+        // action for ending diplomatic relations
+        |c| c.action().no_resources(),
+        vec![],
         |_game, _player| true,
     )
     .add_simple_persistent_event_listener(
         |e| &mut e.play_action_card,
         0,
-        |game, _player_index, player_name, _| {
-            game.add_info_log_item(&format!("{player_name} ended diplomatic relations.",));
+        |game, p, _| {
+            p.log(game, "Ended diplomatic relations.");
             remove_element_by(&mut game.permanent_effects, |e| {
                 matches!(e, PermanentEffect::DiplomaticRelations(_))
             });
@@ -80,11 +80,13 @@ pub(crate) fn choose_diplomat_partner(b: IncidentBuilder) -> IncidentBuilder {
         |_, _, _| true,
         1,
         |game, s, _| {
-            game.add_info_log_item(&format!(
-                "{} initiated diplomatic relations with {}",
-                s.player_name,
-                game.player_name(s.choice),
-            ));
+            s.log(
+                game,
+                &format!(
+                    "Initiated diplomatic relations with {}",
+                    game.player_name(s.choice),
+                ),
+            );
             game.permanent_effects
                 .push(PermanentEffect::DiplomaticRelations(
                     DiplomaticRelations::new(s.player_index, s.choice),
@@ -93,18 +95,20 @@ pub(crate) fn choose_diplomat_partner(b: IncidentBuilder) -> IncidentBuilder {
     )
 }
 
-pub(crate) fn use_diplomatic_relations() -> Builtin {
-    Builtin::builder("Diplomatic Relations", "")
+pub(crate) fn use_diplomatic_relations() -> Ability {
+    Ability::builder("Diplomatic Relations", "")
         .add_simple_persistent_event_listener(
             |e| &mut e.combat_start,
             2,
-            |game, player_index, player_name, _| {
-                if let Some(partner) = diplomatic_relations_partner(game, player_index) {
-                    game.add_info_log_item(&format!(
-                        "{} paid 2 culture tokens to end diplomatic relations with {} using a surprise attack.",
-                        player_name,
-                        game.player_name(partner),
-                    ));
+            |game, p, _| {
+                if let Some(partner) = diplomatic_relations_partner(game, p.index) {
+                    p.log(
+                        game,
+                        &format!(
+                            "Diplomatic relations with {} ended with a surprise attack.",
+                            game.player_name(partner),
+                        ),
+                    );
                     remove_element_by(&mut game.permanent_effects, |e| {
                         matches!(e, PermanentEffect::DiplomaticRelations(_))
                     });

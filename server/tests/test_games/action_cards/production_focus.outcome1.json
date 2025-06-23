@@ -23,7 +23,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "A1"
         },
@@ -61,7 +60,7 @@
           "id": 7
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Fishing",
@@ -89,7 +88,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "position": "C1"
         }
@@ -106,7 +104,7 @@
           "id": 1
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Fishing",
@@ -129,7 +127,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Neutral",
           "position": "B3"
         }
@@ -208,29 +205,53 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
                       "ActionCard": 19
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "add",
-                      "path": "/players/0/action_cards",
-                      "value": [
-                        19
-                      ]
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "CivilCard": 19
+                      }
                     },
                     {
-                      "op": "remove",
-                      "path": "/permanent_effects"
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 19
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToDiscard"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "CivilCard": 19
+                      }
                     }
                   ]
                 },
@@ -262,43 +283,33 @@
                             "times": 1
                           }
                         ],
-                        "total": {
-                          "ore": 1,
-                          "gold": 1,
-                          "mood_tokens": 1
-                        },
                         "action_type": "Collect"
                       }
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 3
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Collect"
+                      }
                     },
                     {
-                      "op": "add",
-                      "path": "/permanent_effects",
-                      "value": [
-                        {
-                          "Collect": "ProductionFocus"
-                        }
-                      ]
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/cities/1/activations"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 8
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/ore",
-                      "value": 5
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "ore": 2,
+                          "gold": 1,
+                          "mood_tokens": 2
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Collect"
+                      }
                     }
                   ]
                 }
@@ -312,12 +323,12 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 played the action card Production Focus as a regular action",
-      "Production Focus: You may collect multiple times from the same tile."
+      "Player1: Production Focus: Pay 1 action, Gain 1 action, Production Focus: You may collect multiple times from the same tile.",
+      "Player1: Action Card: Play Production Focus/Tactical Retreat"
     ],
     [
-      "Player1 collects 2 ore, 2 mood tokens and 1 gold in the city at C2",
-      "Player1 could not store 1 gold"
+      "Player1: Collect: Pay 1 action, Use city C2, Gain 2 ore, 1 gold and 2 mood tokens",
+      "Player1: Waste: Could not store 1 gold"
     ]
   ],
   "undo_limit": 0,
@@ -343,6 +354,9 @@
   ],
   "wonders_left": [
     "Pyramids"
+  ],
+  "action_cards_discarded": [
+    19
   ],
   "incidents_left": [
     26

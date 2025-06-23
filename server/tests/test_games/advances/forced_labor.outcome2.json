@@ -1,0 +1,358 @@
+{
+  "state": "Playing",
+  "players": [
+    {
+      "id": 0,
+      "resources": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 8,
+        "culture_tokens": 10
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {
+            "market": 1
+          },
+          "mood_state": "Angry",
+          "activations": 1,
+          "angry_activation": true,
+          "position": "A1"
+        },
+        {
+          "city_pieces": {
+            "academy": 1,
+            "port": 1
+          },
+          "mood_state": "Neutral",
+          "position": "C2",
+          "port_position": "C3"
+        },
+        {
+          "city_pieces": {
+            "obelisk": 1,
+            "observatory": 1,
+            "fortress": 1,
+            "temple": 1
+          },
+          "mood_state": "Neutral",
+          "position": "B1"
+        },
+        {
+          "mood_state": "Neutral",
+          "position": "B3"
+        }
+      ],
+      "units": [
+        {
+          "position": "C2",
+          "unit_type": "Infantry",
+          "id": 0
+        },
+        {
+          "position": "C2",
+          "unit_type": "Cavalry",
+          "id": 1
+        },
+        {
+          "position": "C2",
+          "unit_type": "Elephant",
+          "id": 2
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 3
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 4
+        },
+        {
+          "position": "C2",
+          "unit_type": "Settler",
+          "id": 5
+        },
+        {
+          "position": "B3",
+          "unit_type": "Settler",
+          "id": 6
+        }
+      ],
+      "civilization": "Greece",
+      "advances": [
+        "Farming",
+        "ForcedLabor",
+        "Math",
+        "Mining",
+        "Nationalism"
+      ],
+      "incident_tokens": 3,
+      "wonder_cards": [
+        "Pyramids"
+      ],
+      "next_unit_id": 7,
+      "played_once_per_turn_actions": [
+        "ForcedLabor"
+      ]
+    },
+    {
+      "id": 1,
+      "resources": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 9,
+        "culture_tokens": 10
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "mood_state": "Angry",
+          "position": "C1"
+        },
+        {
+          "city_pieces": {
+            "port": 1
+          },
+          "mood_state": "Neutral",
+          "position": "B2",
+          "port_position": "C3"
+        }
+      ],
+      "units": [
+        {
+          "position": "C1",
+          "unit_type": "Infantry",
+          "id": 0
+        },
+        {
+          "position": "C1",
+          "unit_type": "Infantry",
+          "id": 1
+        },
+        {
+          "position": "C3",
+          "unit_type": "Ship",
+          "id": 2
+        }
+      ],
+      "civilization": "Rome",
+      "advances": [
+        "Farming",
+        "Math",
+        "Mining"
+      ],
+      "incident_tokens": 2,
+      "next_unit_id": 3
+    }
+  ],
+  "map": {
+    "tiles": [
+      [
+        "A1",
+        "Fertile"
+      ],
+      [
+        "A2",
+        "Forest"
+      ],
+      [
+        "A3",
+        {
+          "Exhausted": "Forest"
+        }
+      ],
+      [
+        "A4",
+        "Mountain"
+      ],
+      [
+        "B1",
+        "Mountain"
+      ],
+      [
+        "B2",
+        "Forest"
+      ],
+      [
+        "B3",
+        "Fertile"
+      ],
+      [
+        "B4",
+        "Fertile"
+      ],
+      [
+        "C1",
+        "Barren"
+      ],
+      [
+        "C2",
+        "Forest"
+      ],
+      [
+        "C3",
+        "Water"
+      ],
+      [
+        "D2",
+        "Water"
+      ]
+    ]
+  },
+  "starting_player_index": 1,
+  "current_player_index": 0,
+  "action_log": [
+    {
+      "age": 1,
+      "rounds": [
+        {
+          "round": 1,
+          "players": [
+            {
+              "index": 0,
+              "actions": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Custom": {
+                        "action": "ForcedLabor"
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "mood_tokens": 1
+                        }
+                      ]
+                    }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Advance": "ForcedLabor"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Playing": {
+                      "Collect": {
+                        "city_position": "A1",
+                        "collections": [
+                          {
+                            "position": "A1",
+                            "pile": {
+                              "food": 1
+                            },
+                            "times": 1
+                          },
+                          {
+                            "position": "A2",
+                            "pile": {
+                              "wood": 1
+                            },
+                            "times": 1
+                          }
+                        ],
+                        "action_type": "Collect"
+                      }
+                    }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Collect"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "food": 1,
+                          "wood": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Collect"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "action_log_index": 3,
+  "log": [
+    [
+      "Player1: Forced Labor: Start action, Pay 1 mood token"
+    ],
+    [
+      "Player1: Forced Labor: Pay 1 mood token, Treating Angry cities as neutral"
+    ],
+    [
+      "Player1: Collect: Pay 1 action, Use city A1, Gain 1 food and 1 wood",
+      "Player1: Waste: Could not store 1 food and 1 wood"
+    ]
+  ],
+  "undo_limit": 0,
+  "actions_left": 0,
+  "round": 1,
+  "age": 2,
+  "messages": [
+    "The game has started"
+  ],
+  "dice_roll_outcomes": [
+    1,
+    1,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10
+  ]
+}

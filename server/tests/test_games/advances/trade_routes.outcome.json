@@ -41,7 +41,7 @@
           "id": 0
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Mining",
@@ -67,7 +67,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Neutral",
           "position": "D8"
         }
@@ -114,7 +113,7 @@
           "id": 7
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining",
@@ -380,12 +379,14 @@
   "current_player_index": 1,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": "EndTurn"
@@ -396,10 +397,41 @@
           ]
         },
         {
+          "round": 3,
           "players": [
             {
               "index": 1,
-              "items": []
+              "actions": [
+                {
+                  "action": "StartTurn",
+                  "items": [
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Market"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Resources": {
+                        "resources": {
+                          "food": 2
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Advance": "TradeRoutes"
+                      }
+                    }
+                  ]
+                }
+              ]
             }
           ]
         }
@@ -409,18 +441,16 @@
   "action_log_index": 0,
   "log": [
     [
-      "Player1 ended their turn with 3 actions left"
+      "Player1: End Turn: 3 actions left"
     ],
     [
       "Round 3/3"
     ],
     [
       "It's Player2's turn",
-      "Player1 gains 1 gold for using a Market in a trade route",
-      "Ship at E7 traded with city at D6",
-      "Settler at E7 traded with city at E6",
-      "Total reward is 2 food",
-      "Player2 could not store 1 food"
+      "Player1: Market: Gain 1 gold",
+      "Player2: Trade Routes: ship at E7 traded with city D6, settler at E7 traded with city E6, Gain 2 food",
+      "Player2: Waste: Could not store 1 food"
     ]
   ],
   "undo_limit": 0,

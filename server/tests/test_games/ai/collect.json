@@ -89,10 +89,8 @@
           "id": 9
         }
       ],
-      "civilization": "Maya",
-      "available_leaders": [
-        "Kʼinich Janaab Pakal I"
-      ],
+      "civilization": "China",
+      "available_leaders": [],
       "advances": [
         "Farming",
         "Fishing",
@@ -103,7 +101,7 @@
       ],
       "incident_tokens": 3,
       "wonder_cards": [
-        "Great Gardens"
+        "GreatGardens"
       ],
       "action_cards": [
         27
@@ -158,11 +156,8 @@
           "id": 1
         }
       ],
-      "civilization": "test0",
-      "available_leaders": [
-        "Alexander",
-        "Kleopatra"
-      ],
+      "civilization": "Rome",
+      "available_leaders": [],
       "advances": [
         "Farming",
         "Mining"
@@ -268,9 +263,9 @@
   "starting_player_index": 0,
   "current_player_index": 0,
   "action_log": [
-    {
+    { "age": 1,
       "rounds": [
-        {
+        { "round": 1,
           "players": [
             {
               "index": 0,
@@ -296,7 +291,7 @@
       "Player1 gained an objective card from the pile"
     ],
     [
-      "Player2 is playing as test0",
+      "Player2 is playing as Rome",
       "Player2 gained an action card from the pile",
       "Player2 gained an objective card from the pile"
     ],

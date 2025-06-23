@@ -1,26 +1,31 @@
-use crate::ability_initializer::{AbilityInitializerBuilder, AbilityListeners};
-use crate::ability_initializer::{AbilityInitializerSetup, SelectedChoice};
+use crate::ability_initializer::AbilityInitializerSetup;
+use crate::ability_initializer::{
+    AbilityInitializerBuilder, AbilityListeners, SelectedMultiChoice, SelectedSingleChoice,
+    SelectedWithoutChoices,
+};
 use crate::action_card::ActionCard;
 use crate::advance::Advance;
-use crate::ai_collect::reset_collect_within_range_for_all;
 use crate::barbarians::{barbarians_move, barbarians_spawn};
-use crate::card::{HandCard, draw_card_from_pile};
-use crate::city::{MoodState, is_valid_city_terrain};
+use crate::card::{HandCard, discard_card, draw_card_from_pile};
+use crate::city::{MoodState, decrease_city_mood, is_valid_city_terrain, set_city_mood};
 use crate::content::incidents::great_persons::GREAT_PERSON_OFFSET;
 use crate::content::persistent_events::{
     HandCardsRequest, PaymentRequest, PersistentEventType, PlayerRequest, PositionRequest,
-    ResourceRewardRequest, SelectedStructure, StructuresRequest, UnitsRequest,
+    ResourceRewardRequest, SelectedStructure, StructuresRequest, TriggerPersistentEventParams,
+    UnitsRequest, trigger_persistent_event_with_listener,
 };
-use crate::events::EventOrigin;
+use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
 use crate::map::Terrain;
-use crate::payment::{PaymentConversion, PaymentConversionType, PaymentOptions};
+use crate::payment::{PaymentConversion, PaymentConversionType};
 use crate::pirates::pirates_spawn_and_raid;
 use crate::player::Player;
 use crate::player_events::{IncidentInfo, IncidentPlayerInfo, IncidentTarget};
 use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
+use crate::special_advance::SpecialAdvance;
+use crate::wonder::Wonder;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
@@ -35,6 +40,7 @@ pub struct Incident {
     pub name: String,
     description: String,
     protection_advance: Option<Advance>,
+    protection_special_advance: Option<SpecialAdvance>,
     pub base_effect: IncidentBaseEffect,
     pub listeners: AbilityListeners,
     pub(crate) action_card: Option<ActionCard>,
@@ -42,7 +48,7 @@ pub struct Incident {
 
 impl Incident {
     #[must_use]
-    pub fn builder(
+    pub(crate) fn builder(
         id: u8,
         name: &str,
         description: &str,
@@ -59,6 +65,9 @@ impl Incident {
             h.push(self.base_effect.to_string());
         }
         if let Some(p) = &self.protection_advance {
+            h.push(format!("Protection advance: {}", p.name(game)));
+        }
+        if let Some(p) = &self.protection_special_advance {
             h.push(format!("Protection advance: {}", p.name(game)));
         }
         h.push(self.description.clone());
@@ -100,14 +109,21 @@ pub(crate) struct IncidentFilter {
     role: IncidentTarget,
     priority: i32,
     protection_advance: Option<Advance>,
+    protection_special_advance: Option<SpecialAdvance>,
 }
 
 impl IncidentFilter {
-    pub fn new(role: IncidentTarget, priority: i32, protection_advance: Option<Advance>) -> Self {
+    pub fn new(
+        role: IncidentTarget,
+        priority: i32,
+        protection_advance: Option<Advance>,
+        protection_special_advance: Option<SpecialAdvance>,
+    ) -> Self {
         Self {
             role,
             priority,
             protection_advance,
+            protection_special_advance,
         }
     }
 
@@ -115,6 +131,7 @@ impl IncidentFilter {
     pub fn is_active(&self, game: &Game, i: &IncidentInfo, player: usize) -> bool {
         is_active(
             &self.protection_advance,
+            &self.protection_special_advance,
             self.priority,
             game,
             i,
@@ -130,12 +147,36 @@ pub(crate) enum MoodModifier {
     MakeAngry,
 }
 
-pub struct IncidentBuilder {
+pub(crate) struct DecreaseMood {
+    pub choices: Vec<Position>,
+    pub needed: u8,
+}
+
+impl DecreaseMood {
+    #[must_use]
+    pub fn new(possible: Vec<Position>, needed: u8) -> Self {
+        Self {
+            needed: needed.min(possible.len() as u8),
+            choices: possible,
+        }
+    }
+
+    #[must_use]
+    pub fn none() -> Self {
+        Self {
+            choices: vec![],
+            needed: 0,
+        }
+    }
+}
+
+pub(crate) struct IncidentBuilder {
     id: u8,
     pub name: String,
     description: String,
     base_effect: IncidentBaseEffect,
     protection_advance: Option<Advance>,
+    protection_special_advance: Option<SpecialAdvance>,
     action_card: Option<ActionCard>,
     builder: AbilityInitializerBuilder,
 }
@@ -150,6 +191,7 @@ impl IncidentBuilder {
             base_effect,
             builder: AbilityInitializerBuilder::new(),
             protection_advance: None,
+            protection_special_advance: None,
             action_card: None,
         }
     }
@@ -174,6 +216,7 @@ impl IncidentBuilder {
             base_effect: builder.base_effect,
             listeners: builder.builder.build(),
             protection_advance: builder.protection_advance,
+            protection_special_advance: builder.protection_special_advance,
             action_card: builder.action_card,
         }
     }
@@ -181,6 +224,12 @@ impl IncidentBuilder {
     #[must_use]
     pub fn with_protection_advance(mut self, advance: Advance) -> Self {
         self.protection_advance = Some(advance);
+        self
+    }
+
+    #[must_use]
+    pub fn with_protection_special_advance(mut self, advance: SpecialAdvance) -> Self {
+        self.protection_special_advance = Some(advance);
         self
     }
 
@@ -198,14 +247,15 @@ impl IncidentBuilder {
         listener: F,
     ) -> Self
     where
-        F: Fn(&mut Game, usize, &str, &mut IncidentInfo) + 'static + Clone + Sync + Send,
+        F: Fn(&mut Game, &EventPlayer, &mut IncidentInfo) + 'static + Clone + Sync + Send,
     {
+        let f = self.new_filter(role, priority);
         self.add_simple_persistent_event_listener(
             |event| &mut event.incident,
             priority,
-            move |game, player_index, player_name, i| {
-                if i.is_active(role, player_index) {
-                    listener(game, player_index, player_name, i);
+            move |game, p, i| {
+                if f.is_active(game, i, p.index) {
+                    listener(game, p, i);
                 }
             },
         )
@@ -216,12 +266,12 @@ impl IncidentBuilder {
         self,
         role: IncidentTarget,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &mut IncidentInfo) -> Option<PositionRequest>
+        request: impl Fn(&mut Game, &EventPlayer, &mut IncidentInfo) -> Option<PositionRequest>
         + 'static
         + Clone
         + Sync
         + Send,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<Position>>, &mut IncidentInfo)
+        gain_reward: impl Fn(&mut Game, &SelectedMultiChoice<Vec<Position>>, &mut IncidentInfo)
         + 'static
         + Clone
         + Sync
@@ -231,9 +281,9 @@ impl IncidentBuilder {
         self.add_position_request(
             |event| &mut event.incident,
             priority,
-            move |game, player_index, i| {
-                if f.is_active(game, i, player_index) {
-                    request(game, player_index, i)
+            move |game, p, i| {
+                if f.is_active(game, i, p.index) {
+                    request(game, p, i)
                 } else {
                     None
                 }
@@ -249,12 +299,12 @@ impl IncidentBuilder {
         self,
         role: IncidentTarget,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &mut IncidentInfo) -> Option<UnitsRequest>
+        request: impl Fn(&mut Game, &EventPlayer, &mut IncidentInfo) -> Option<UnitsRequest>
         + 'static
         + Clone
         + Sync
         + Send,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<u32>>, &mut IncidentInfo)
+        gain_reward: impl Fn(&mut Game, &SelectedMultiChoice<Vec<u32>>, &mut IncidentInfo)
         + 'static
         + Clone
         + Sync
@@ -264,9 +314,9 @@ impl IncidentBuilder {
         self.add_units_request(
             |event| &mut event.incident,
             priority,
-            move |game, player_index, i| {
-                if f.is_active(game, i, player_index) {
-                    request(game, player_index, i)
+            move |game, p, i| {
+                if f.is_active(game, i, p.index) {
+                    request(game, p, i)
                 } else {
                     None
                 }
@@ -282,14 +332,14 @@ impl IncidentBuilder {
         self,
         role: IncidentTarget,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<StructuresRequest>
+        request: impl Fn(&mut Game, &EventPlayer, &IncidentInfo) -> Option<StructuresRequest>
         + 'static
         + Clone
         + Sync
         + Send,
         structures_selected: impl Fn(
             &mut Game,
-            &SelectedChoice<Vec<SelectedStructure>>,
+            &SelectedMultiChoice<Vec<SelectedStructure>>,
             &mut IncidentInfo,
         )
         + 'static
@@ -301,9 +351,9 @@ impl IncidentBuilder {
         self.add_structures_request(
             |event| &mut event.incident,
             priority,
-            move |game, player_index, i| {
-                if f.is_active(game, i, player_index) {
-                    request(game, player_index, i)
+            move |game, p, i| {
+                if f.is_active(game, i, p.index) {
+                    request(game, p, i)
                 } else {
                     None
                 }
@@ -319,12 +369,7 @@ impl IncidentBuilder {
         self,
         role: IncidentTarget,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<ResourceRewardRequest>
-        + 'static
-        + Clone
-        + Sync
-        + Send,
-        gain_reward_log: impl Fn(&Game, &SelectedChoice<ResourcePile>) -> Vec<String>
+        request: impl Fn(&mut Game, &EventPlayer, &IncidentInfo) -> Option<ResourceRewardRequest>
         + 'static
         + Clone
         + Sync
@@ -334,19 +379,23 @@ impl IncidentBuilder {
         self.add_resource_request(
             |event| &mut event.incident,
             priority,
-            move |game, player_index, i| {
-                if f.is_active(game, i, player_index) {
-                    request(game, player_index, i)
+            move |game, p, i| {
+                if f.is_active(game, i, p.index) {
+                    request(game, p, i)
                 } else {
                     None
                 }
             },
-            move |game, s, _| gain_reward_log(game, s),
         )
     }
 
     fn new_filter(&self, role: IncidentTarget, priority: i32) -> IncidentFilter {
-        IncidentFilter::new(role, priority, self.protection_advance)
+        IncidentFilter::new(
+            role,
+            priority,
+            self.protection_advance,
+            self.protection_special_advance,
+        )
     }
 
     #[must_use]
@@ -354,12 +403,12 @@ impl IncidentBuilder {
         self,
         role: IncidentTarget,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &mut IncidentInfo) -> Option<Vec<PaymentRequest>>
+        request: impl Fn(&mut Game, &EventPlayer, &mut IncidentInfo) -> Option<Vec<PaymentRequest>>
         + 'static
         + Clone
         + Sync
         + Send,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<Vec<ResourcePile>>, &mut IncidentInfo)
+        gain_reward: impl Fn(&mut Game, &SelectedWithoutChoices<Vec<ResourcePile>>, &mut IncidentInfo)
         + 'static
         + Clone
         + Sync
@@ -369,9 +418,9 @@ impl IncidentBuilder {
         self.add_payment_request_listener(
             |event| &mut event.incident,
             priority,
-            move |game, player_index, i| {
-                if f.is_active(game, i, player_index) {
-                    request(game, player_index, i)
+            move |game, p, i| {
+                if f.is_active(game, i, p.index) {
+                    request(game, p, i)
                 } else {
                     None
                 }
@@ -387,12 +436,12 @@ impl IncidentBuilder {
         self,
         role: IncidentTarget,
         priority: i32,
-        request: impl Fn(&mut Game, usize, &IncidentInfo) -> Option<HandCardsRequest>
+        request: impl Fn(&mut Game, &EventPlayer, &IncidentInfo) -> Option<HandCardsRequest>
         + 'static
         + Clone
         + Sync
         + Send,
-        cards_selected: impl Fn(&mut Game, &SelectedChoice<Vec<HandCard>>, &mut IncidentInfo)
+        cards_selected: impl Fn(&mut Game, &SelectedMultiChoice<Vec<HandCard>>, &mut IncidentInfo)
         + 'static
         + Clone
         + Sync
@@ -402,9 +451,9 @@ impl IncidentBuilder {
         self.add_hand_card_request(
             |event| &mut event.incident,
             priority,
-            move |game, player_index, i| {
-                if f.is_active(game, i, player_index) {
-                    request(game, player_index, i)
+            move |game, p, i| {
+                if f.is_active(game, i, p.index) {
+                    request(game, p, i)
                 } else {
                     None
                 }
@@ -422,7 +471,7 @@ impl IncidentBuilder {
         description: &str,
         player_pred: impl Fn(&Player, &Game, &IncidentInfo) -> bool + 'static + Clone + Sync + Send,
         priority: i32,
-        gain_reward: impl Fn(&mut Game, &SelectedChoice<usize>, &mut IncidentInfo)
+        gain_reward: impl Fn(&mut Game, &SelectedSingleChoice<usize>, &mut IncidentInfo)
         + 'static
         + Clone
         + Sync
@@ -433,13 +482,13 @@ impl IncidentBuilder {
         self.add_player_request(
             |event| &mut event.incident,
             priority,
-            move |game, player_index, i| {
-                if f.is_active(game, i, player_index) {
+            move |game, player, i| {
+                if f.is_active(game, i, player.index) {
                     let choices = game
                         .players
                         .iter()
                         .filter(|p| {
-                            p.is_human() && p.index != player_index && player_pred(p, game, i)
+                            p.is_human() && p.index != player.index && player_pred(p, game, i)
                         })
                         .map(|p| p.index)
                         .collect_vec();
@@ -463,14 +512,10 @@ impl IncidentBuilder {
         self,
         target: IncidentTarget,
         mood_modifier: MoodModifier,
-        cities: impl Fn(&Player, &Game, &IncidentInfo) -> (Vec<Position>, u8)
-        + 'static
-        + Clone
-        + Sync
-        + Send,
+        cities: impl Fn(&Player, &Game, &IncidentInfo) -> DecreaseMood + 'static + Clone + Sync + Send,
     ) -> Self {
         let cities2 = cities.clone();
-        self.add_myths_payment(target, mood_modifier, move |g, p, i| cities(p, g, i).1)
+        self.add_myths_payment(target, mood_modifier, move |g, p, i| cities(p, g, i).needed)
             .decrease_mood(target, mood_modifier, cities2)
     }
 
@@ -483,14 +528,17 @@ impl IncidentBuilder {
         self.add_incident_payment_request(
             target,
             10,
-            move |game, player_index, i| {
-                let p = game.player(player_index);
-                if p.has_advance(Advance::Myths) {
+            move |game, player, i| {
+                let p = player.get(game);
+                if p.can_use_advance(Advance::Myths) {
                     let needed = amount(game, p, i);
                     if needed == 0 {
                         return None;
                     }
-                    let mut options = PaymentOptions::sum(needed, &[ResourceType::MoodTokens]);
+                    let mut options = player
+                        .with_origin(EventOrigin::Advance(Advance::Myths))
+                        .payment_options()
+                        .sum(p, needed, &[ResourceType::MoodTokens]);
                     options.conversions.push(PaymentConversion::new(
                         vec![ResourcePile::mood_tokens(1)],
                         ResourcePile::empty(),
@@ -502,10 +550,10 @@ impl IncidentBuilder {
                         MoodModifier::MakeAngry => "making it Angry",
                     };
 
-                    Some(vec![PaymentRequest::new(
+                    // mandatory - but may be 0
+                    Some(vec![PaymentRequest::mandatory(
                         options,
                         &format!("You may pay 1 mood token for each city to avoid {action}"),
-                        false,
                     )])
                 } else {
                     None
@@ -514,10 +562,9 @@ impl IncidentBuilder {
             move |game, s, i| {
                 let pile = &s.choice[0];
                 i.player.myths_payment = pile.amount();
-                game.add_info_log_item(&format!(
-                    "{} paid {pile} to avoid the mood change using Myths",
-                    s.player_name
-                ));
+                s.player()
+                    .with_origin(EventOrigin::Advance(Advance::Myths))
+                    .log(game, "Avoid mood change");
             },
         )
     }
@@ -526,17 +573,14 @@ impl IncidentBuilder {
         self,
         target: IncidentTarget,
         mood_modifier: MoodModifier,
-        cities: impl Fn(&Player, &Game, &IncidentInfo) -> (Vec<Position>, u8)
-        + 'static
-        + Clone
-        + Sync
-        + Send,
+        cities: impl Fn(&Player, &Game, &IncidentInfo) -> DecreaseMood + 'static + Clone + Sync + Send,
     ) -> Self {
         self.add_incident_position_request(
             target,
             9,
             move |game, p, i| {
-                let (cities, mut needed) = cities(game.player(p), game, i);
+                let d = cities(p.get(game), game, i);
+                let mut needed = d.needed;
                 needed -= i.player.myths_payment;
 
                 let action = match mood_modifier {
@@ -546,7 +590,7 @@ impl IncidentBuilder {
 
                 let needed1 = needed..=needed;
                 let description = &format!("Select a city to {action}");
-                Some(PositionRequest::new(cities, needed1, description))
+                Some(PositionRequest::new(d.choices, needed1, description))
             },
             move |game, s, _| {
                 decrease_mod_and_log(game, s, mood_modifier);
@@ -563,13 +607,83 @@ impl AbilityInitializerSetup for IncidentBuilder {
     fn get_key(&self) -> EventOrigin {
         EventOrigin::Incident(self.id)
     }
+
+    fn name(&self) -> String {
+        self.name.clone()
+    }
+
+    fn description(&self) -> String {
+        self.description.clone()
+    }
+}
+
+pub(crate) fn trigger_incident(game: &mut Game, player_index: usize) {
+    if game
+        .player(player_index)
+        .wonders_owned
+        .contains(Wonder::GreatMausoleum)
+    {
+        on_choose_incident(game, player_index, IncidentInfo::new(0, player_index));
+    } else {
+        let info = IncidentInfo::new(
+            draw_and_discard_incident_card_from_pile(game, player_index),
+            player_index,
+        );
+        on_trigger_incident(game, info);
+    }
+}
+
+pub(crate) fn on_choose_incident(game: &mut Game, player_index: usize, info: IncidentInfo) {
+    if let Some(info) = game.trigger_persistent_event(
+        &[player_index],
+        |events| &mut events.choose_incident,
+        info,
+        PersistentEventType::ChooseIncident,
+    ) {
+        on_trigger_incident(game, info);
+    }
 }
 
 pub(crate) fn on_trigger_incident(game: &mut Game, mut info: IncidentInfo) {
-    let incident_id = draw_card_from_pile(
+    loop {
+        let log: Option<String> = play_base_effect(&info).then_some(format!(
+            "A new game event has been triggered: {}",
+            game.cache.get_incident(info.incident_id).name
+        ));
+        info = match trigger_persistent_event_with_listener(
+            game,
+            &game.human_players(info.active_player),
+            |events| &mut events.incident,
+            &game.cache.get_incident(info.incident_id).listeners.clone(),
+            info,
+            PersistentEventType::Incident,
+            TriggerPersistentEventParams {
+                log,
+                next_player: |i| i.player = IncidentPlayerInfo::new(),
+                ..Default::default()
+            },
+        ) {
+            Some(p) => p,
+            None => return,
+        };
+
+        if !game
+            .events
+            .iter()
+            .any(|e| matches!(e.event_type, PersistentEventType::Incident(_)))
+        {
+            if passed_to_player(game, &mut info) {
+                continue;
+            }
+            break;
+        }
+    }
+}
+
+pub(crate) fn draw_and_discard_incident_card_from_pile(game: &mut Game, player: usize) -> u8 {
+    let id = draw_card_from_pile(
         game,
         "Events",
-        true,
         |g| &mut g.incidents_left,
         |g| g.cache.get_incidents().iter().map(|i| i.id).collect_vec(),
         |p| {
@@ -587,37 +701,8 @@ pub(crate) fn on_trigger_incident(game: &mut Game, mut info: IncidentInfo) {
     )
     .expect("incident should exist");
 
-    loop {
-        let log: Option<String> = play_base_effect(&info).then_some(format!(
-            "A new game event has been triggered: {}",
-            game.cache.get_incident(incident_id).name
-        ));
-        info = match game.trigger_persistent_event_with_listener(
-            &game.human_players(info.active_player),
-            |events| &mut events.incident,
-            &game.cache.get_incident(incident_id).listeners.clone(),
-            info,
-            PersistentEventType::Incident,
-            log.as_deref(),
-            |i| i.player = IncidentPlayerInfo::new(),
-        ) {
-            Some(p) => p,
-            None => return,
-        };
-
-        if !game
-            .events
-            .iter()
-            .any(|e| matches!(e.event_type, PersistentEventType::Incident(_)))
-        {
-            if passed_to_player(game, &mut info) {
-                continue;
-            }
-            break;
-        }
-    }
-
-    game.incidents_left.remove(0);
+    discard_card(|g| &mut g.incidents_discarded, id, player, game);
+    id
 }
 
 pub(crate) fn play_base_effect(i: &IncidentInfo) -> bool {
@@ -626,11 +711,11 @@ pub(crate) fn play_base_effect(i: &IncidentInfo) -> bool {
 
 fn passed_to_player(game: &mut Game, i: &mut IncidentInfo) -> bool {
     if let Some(PassedIncident::NewPlayer(p)) = i.passed {
-        game.add_info_log_item(&format!(
-            "Player {} has passed the incident to {}",
-            game.player_name(i.active_player),
-            game.player_name(p)
-        ));
+        game.log(
+            i.active_player,
+            &i.origin(),
+            &format!("Pass the event to {}", game.player_name(p)),
+        );
         i.passed = Some(PassedIncident::AlreadyPassed);
         i.active_player = p;
         return true;
@@ -641,13 +726,14 @@ fn passed_to_player(game: &mut Game, i: &mut IncidentInfo) -> bool {
 #[must_use]
 pub fn is_active(
     protection_advance: &Option<Advance>,
+    protection_special_advance: &Option<SpecialAdvance>,
     priority: i32,
     game: &Game,
     i: &IncidentInfo,
     role: IncidentTarget,
     player: usize,
 ) -> bool {
-    if !i.is_active(role, player) {
+    if !i.is_active_ignoring_protection(role, player) {
         return false;
     }
     if priority >= BASE_EFFECT_PRIORITY {
@@ -655,7 +741,12 @@ pub fn is_active(
     }
     // protection advance does not protect against base effects
     if let Some(advance) = protection_advance {
-        if game.player(player).has_advance(*advance) {
+        if game.player(player).can_use_advance(*advance) {
+            return false;
+        }
+    }
+    if let Some(advance) = protection_special_advance {
+        if game.player(player).has_special_advance(*advance) {
             return false;
         }
     }
@@ -667,16 +758,16 @@ fn exhausted_land(builder: IncidentBuilder) -> IncidentBuilder {
     builder.add_incident_position_request(
         IncidentTarget::ActivePlayer,
         BASE_EFFECT_PRIORITY,
-        |game, player_index, _incident| {
-            let p = game.player(player_index);
+        |game, p, _incident| {
+            let p = game.player(p.index);
             let positions = p
                 .cities
                 .iter()
                 .flat_map(|c| c.position.neighbors())
-                .filter(|p| {
-                    game.try_get_any_city(*p).is_none()
-                        && !enemy_units_present(game, *p, player_index)
-                        && game.map.get(*p).is_some_and(is_valid_city_terrain)
+                .filter(|pos| {
+                    game.try_get_any_city(*pos).is_none()
+                        && !enemy_units_present(game, *pos, p.index)
+                        && game.map.get(*pos).is_some_and(is_valid_city_terrain)
                 })
                 .collect_vec();
             let needed = 1..=1;
@@ -688,65 +779,33 @@ fn exhausted_land(builder: IncidentBuilder) -> IncidentBuilder {
         },
         |game, s, _| {
             let pos = s.choice[0];
-            game.add_info_log_item(&format!(
-                "{} exhausted the land in position {}",
-                s.player_name, pos
-            ));
+            s.log(game, &format!("Exhausted the land in position {pos}",));
             let t = game.map.tiles.get_mut(&pos).expect("tile should exist");
             *t = Terrain::Exhausted(Box::new(t.clone()));
-            reset_collect_within_range_for_all(game, pos);
         },
     )
 }
 
 fn gold_deposits(b: IncidentBuilder) -> IncidentBuilder {
-    b.add_incident_resource_request(
+    b.add_simple_incident_listener(
         IncidentTarget::ActivePlayer,
         BASE_EFFECT_PRIORITY,
-        |_game, _player_index, _incident| {
-            Some(ResourceRewardRequest::new(
-                PaymentOptions::sum(2, &[ResourceType::Gold]),
-                "-".to_string(),
-            ))
-        },
-        |_game, s| {
-            vec![format!(
-                "{} gained {} from a Gold Mine",
-                s.player_name, s.choice
-            )]
+        |game, p, _incident| {
+            p.with_origin(EventOrigin::Ability("Gold deposits".to_string()))
+                .gain_resources(game, ResourcePile::gold(2));
         },
     )
 }
 
 pub(crate) fn decrease_mod_and_log(
     game: &mut Game,
-    s: &SelectedChoice<Vec<Position>>,
+    s: &SelectedMultiChoice<Vec<Position>>,
     mood_modifier: MoodModifier,
 ) {
     for &pos in &s.choice {
-        let name = &s.player_name;
         match mood_modifier {
-            MoodModifier::Decrease => {
-                game.player_mut(s.player_index)
-                    .get_city_mut(pos)
-                    .decrease_mood_state();
-                let mood_state = &game.player(s.player_index).get_city(pos).mood_state;
-                if s.actively_selected {
-                    game.add_info_log_item(&format!(
-                        "{name} selected to decrease the mood in city {pos} to {mood_state:?}",
-                    ));
-                } else {
-                    game.add_info_log_item(&format!(
-                        "{name} decreased the mood in city {pos} to {mood_state:?}",
-                    ));
-                }
-            }
-            MoodModifier::MakeAngry => {
-                game.add_info_log_item(&format!("{name} made city {pos} Angry"));
-                game.player_mut(s.player_index)
-                    .get_city_mut(pos)
-                    .set_mood_state(MoodState::Angry);
-            }
+            MoodModifier::Decrease => decrease_city_mood(game, pos, &s.origin),
+            MoodModifier::MakeAngry => set_city_mood(game, pos, &s.origin, MoodState::Angry),
         }
     }
 }

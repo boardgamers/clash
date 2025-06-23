@@ -1,6 +1,6 @@
 use crate::action_card::discard_action_card;
 use crate::advance::Advance;
-use crate::card::{HandCard, HandCardType, hand_cards};
+use crate::card::{HandCard, HandCardLocation, HandCardType, hand_cards};
 use crate::city::City;
 use crate::content::incidents::famine::{
     additional_sanitation_damage, famine, kill_incident_units,
@@ -9,10 +9,9 @@ use crate::content::persistent_events::{
     HandCardsRequest, PaymentRequest, PositionRequest, UnitsRequest,
 };
 use crate::game::Game;
-use crate::incident::{Incident, IncidentBaseEffect, MoodModifier};
+use crate::incident::{DecreaseMood, Incident, IncidentBaseEffect, MoodModifier};
 use crate::map::{Map, Terrain};
 use crate::objective_card::discard_objective_card;
-use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::player_events::{IncidentInfo, IncidentTarget};
 use crate::position::Position;
@@ -37,15 +36,17 @@ fn pandemics() -> Incident {
         IncidentTarget::AllPlayers,
         2,
         |game, p, i| {
-            game.add_info_log_item(&format!(
-                "{} has to lose a total of {} units, cards, and resources",
-                game.player_name(p),
-                pandemics_cost(game.player(p))
-            ));
+            p.log(
+                game,
+                &format!(
+                    "Lose a total of {} units, cards, and resources",
+                    pandemics_cost(p.get(game))
+                ),
+            );
 
-            let player = game.player(p);
+            let player = p.get(game);
             Some(UnitsRequest::new(
-                p,
+                p.index,
                 player.units.iter().map(|u| u.id).collect_vec(),
                 PandemicsContributions::range(player, i, 0),
                 "Select units to lose",
@@ -60,7 +61,7 @@ fn pandemics() -> Incident {
         IncidentTarget::AllPlayers,
         1,
         |game, p, i| {
-            let player = game.player(p);
+            let player = p.get(game);
             Some(HandCardsRequest::new(
                 hand_cards(player, &[HandCardType::Action]),
                 PandemicsContributions::range(player, i, 1),
@@ -71,18 +72,22 @@ fn pandemics() -> Incident {
             for id in &s.choice {
                 match id {
                     HandCard::ActionCard(a) => {
-                        discard_action_card(game, s.player_index, *a);
-                        game.add_info_log_item(&format!(
-                            "{} discarded an action card",
-                            s.player_name
-                        ));
+                        discard_action_card(
+                            game,
+                            s.player_index,
+                            *a,
+                            &s.origin,
+                            HandCardLocation::DiscardPile,
+                        );
                     }
                     HandCard::ObjectiveCard(o) => {
-                        discard_objective_card(game, s.player_index, *o);
-                        game.add_info_log_item(&format!(
-                            "{} discarded an objective card",
-                            s.player_name
-                        ));
+                        discard_objective_card(
+                            game,
+                            s.player_index,
+                            *o,
+                            &s.origin,
+                            HandCardLocation::DiscardPile,
+                        );
                     }
                     HandCard::Wonder(_) => panic!("Unexpected card type"),
                 }
@@ -94,7 +99,7 @@ fn pandemics() -> Incident {
         IncidentTarget::AllPlayers,
         0,
         |game, p, i| {
-            let player = game.player(p);
+            let player = p.get(game);
             let needed = PandemicsContributions::range(player, i, 2)
                 .min()
                 .expect("min not found");
@@ -103,14 +108,14 @@ fn pandemics() -> Incident {
                 return None;
             }
 
-            Some(vec![PaymentRequest::new(
-                PaymentOptions::sum(needed, &ResourceType::all()),
+            Some(vec![PaymentRequest::mandatory(
+                p.payment_options()
+                    .sum(player, needed, &ResourceType::all()),
                 "Select resources to lose",
-                false,
             )])
         },
         |game, s, _| {
-            game.add_info_log_item(&format!("{} lost {}", s.player_name, s.choice[0]));
+            s.log(game, &format!("Lose {}", s.choice[0]));
         },
     )
     .build()
@@ -166,7 +171,7 @@ fn black_death() -> Incident {
         IncidentTarget::AllPlayers,
         0,
         |game, p, _i| {
-            let player = game.player(p);
+            let player = p.get(game);
             let units = player.units.iter().map(|u| u.id).collect_vec();
             if units.len() < 4 {
                 return None;
@@ -178,7 +183,7 @@ fn black_death() -> Incident {
             }
 
             Some(UnitsRequest::new(
-                p,
+                p.index,
                 units,
                 needed..=needed,
                 "Select units to lose",
@@ -187,8 +192,9 @@ fn black_death() -> Incident {
         |game, s, _| {
             kill_incident_units(game, s);
             let vp = s.choice.len() as f32;
-            game.add_info_log_item(&format!("{} gained {} victory points", s.player_name, vp));
-            game.player_mut(s.player_index).event_victory_points += vp;
+            s.log(game, &format!("Gain {vp} victory points"));
+            game.player_mut(s.player_index)
+                .gain_event_victory_points(vp, &s.origin);
         },
     )
     .build()
@@ -202,7 +208,7 @@ fn vermin() -> Incident {
         IncidentTarget::AllPlayers,
         IncidentBaseEffect::None,
         |_, _| 1,
-        |p| p.has_advance(Advance::Storage),
+        |p| p.can_use_advance(Advance::Storage),
         |_, _| true,
     )
 }
@@ -247,22 +253,19 @@ fn fire() -> Incident {
         IncidentTarget::ActivePlayer,
         11,
         |game, p, _i| {
-            let player = game.player(p);
+            let player = p.get(game);
             let cities = player
                 .cities
                 .iter()
                 .filter(|c| game.map.get(c.position) == Some(&Terrain::Forest))
                 .map(|c| c.position)
                 .collect_vec();
-            let name = game.player_name(p);
             if cities.is_empty() {
                 if player.resources.wood > 0 {
-                    game.add_info_log_item(&format!("{name} lost 1 wood"));
+                    p.log(game, "Lose 1 wood");
                     return None;
                 }
-                game.add_info_log_item(&format!(
-                    "{name} has no cities on a Forest and no wood to lose"
-                ));
+                p.log(game, "No cities on a Forest and no wood to lose");
                 return None;
             }
             let needed = 1..=1;
@@ -282,7 +285,7 @@ fn fire() -> Incident {
         |p, game, i| {
             let b = burning_cities(p, game, i);
             let a = b.len() as u8;
-            (b, a)
+            DecreaseMood::new(b, a)
         },
     )
     .build()

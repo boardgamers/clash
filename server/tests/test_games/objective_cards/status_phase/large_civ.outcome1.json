@@ -30,7 +30,7 @@
           }
         },
         "origin": {
-          "Builtin": "Free Advance"
+          "Ability": "Free Advance"
         }
       }
     }
@@ -65,22 +65,18 @@
           "position": "A1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "A2"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "A3"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "A4"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "A5"
         },
@@ -106,7 +102,7 @@
         },
         {
           "position": "C2",
-          "unit_type": "Leader",
+          "unit_type": "Infantry",
           "id": 2
         },
         {
@@ -150,7 +146,7 @@
           "id": 11
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "CivilLiberties",
         "Draft",
@@ -167,13 +163,34 @@
       ],
       "incident_tokens": 2,
       "completed_objectives": [
-        "Large Civilization",
-        "Advanced Culture",
-        "Religious Fervor",
-        "City Planner",
-        "Eureka!",
-        "Sea Blockade",
-        "Government"
+        {
+          "card": 1,
+          "name": "Large Civilization"
+        },
+        {
+          "card": 4,
+          "name": "Advanced Culture"
+        },
+        {
+          "card": 5,
+          "name": "Religious Fervor"
+        },
+        {
+          "card": 6,
+          "name": "City Planner"
+        },
+        {
+          "card": 7,
+          "name": "Eureka!"
+        },
+        {
+          "card": 9,
+          "name": "Sea Blockade"
+        },
+        {
+          "card": 24,
+          "name": "Government"
+        }
       ],
       "objective_cards": [
         25
@@ -222,7 +239,7 @@
           "id": 1
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining"
@@ -285,12 +302,14 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": "EndTurn"
@@ -324,162 +343,138 @@
                       ]
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "replace",
-                      "path": "/events/0/event_type/StatusPhase",
-                      "value": "CompleteObjectives"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/0/handler"
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/1",
-                      "value": {
-                        "event_type": {
-                          "SelectObjectives": {
-                            "cards": [
-                              {
-                                "ObjectiveCard": 1
-                              },
-                              {
-                                "ObjectiveCard": 4
-                              },
-                              {
-                                "ObjectiveCard": 5
-                              },
-                              {
-                                "ObjectiveCard": 6
-                              },
-                              {
-                                "ObjectiveCard": 7
-                              },
-                              {
-                                "ObjectiveCard": 9
-                              },
-                              {
-                                "ObjectiveCard": 24
-                              },
-                              {
-                                "ObjectiveCard": 25
-                              }
-                            ],
-                            "objective_opportunities": [
-                              "Advanced Culture",
-                              "City Planner",
-                              "Eureka!",
-                              "Government",
-                              "Large Civilization",
-                              "Religious Fervor",
-                              "Sea Blockade"
-                            ]
-                          }
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 1
                         },
-                        "handler": {
-                          "origin": {
-                            "Builtin": "Select Objective Cards to Complete"
-                          },
-                          "priority": 0,
-                          "request": {
-                            "SelectHandCards": {
-                              "choices": [
-                                {
-                                  "ObjectiveCard": 1
-                                },
-                                {
-                                  "ObjectiveCard": 4
-                                },
-                                {
-                                  "ObjectiveCard": 5
-                                },
-                                {
-                                  "ObjectiveCard": 6
-                                },
-                                {
-                                  "ObjectiveCard": 7
-                                },
-                                {
-                                  "ObjectiveCard": 9
-                                },
-                                {
-                                  "ObjectiveCard": 24
-                                },
-                                {
-                                  "ObjectiveCard": 25
-                                }
-                              ],
-                              "description": "Select cards to complete",
-                              "needed": {
-                                "end": 8,
-                                "start": 0
-                              }
-                            }
-                          }
+                        "from": {
+                          "Hand": 0
                         },
-                        "last_priority_used": 0,
-                        "player": 0
+                        "to": {
+                          "CompleteObjective": "Large Civilization"
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Complete Objectives"
                       }
                     },
                     {
-                      "op": "replace",
-                      "path": "/players/0/objective_cards/0",
-                      "value": 1
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 4
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": {
+                          "CompleteObjective": "Advanced Culture"
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Complete Objectives"
+                      }
                     },
                     {
-                      "op": "add",
-                      "path": "/players/0/objective_cards/1",
-                      "value": 4
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 5
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": {
+                          "CompleteObjective": "Religious Fervor"
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Complete Objectives"
+                      }
                     },
                     {
-                      "op": "add",
-                      "path": "/players/0/objective_cards/2",
-                      "value": 5
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 6
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": {
+                          "CompleteObjective": "City Planner"
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Complete Objectives"
+                      }
                     },
                     {
-                      "op": "add",
-                      "path": "/players/0/objective_cards/3",
-                      "value": 6
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "ideas": 2
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Objective": "Eureka!"
+                      }
                     },
                     {
-                      "op": "add",
-                      "path": "/players/0/objective_cards/4",
-                      "value": 7
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 7
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": {
+                          "CompleteObjective": "Eureka!"
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Complete Objectives"
+                      }
                     },
                     {
-                      "op": "add",
-                      "path": "/players/0/objective_cards/5",
-                      "value": 9
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 9
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": {
+                          "CompleteObjective": "Sea Blockade"
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Complete Objectives"
+                      }
                     },
                     {
-                      "op": "add",
-                      "path": "/players/0/objective_cards/6",
-                      "value": 24
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/objective_cards/7",
-                      "value": 25
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/ideas",
-                      "value": 5
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/completed_objectives"
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 24
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": {
+                          "CompleteObjective": "Government"
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Complete Objectives"
+                      }
                     }
-                  ],
-                  "completed_objectives": [
-                    "Large Civilization",
-                    "Advanced Culture",
-                    "Religious Fervor",
-                    "City Planner",
-                    "Eureka!",
-                    "Sea Blockade",
-                    "Government"
                   ]
                 }
               ]
@@ -492,20 +487,14 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player2 ended their turn with 2 actions left"
+      "Player2: End Turn: 2 actions left"
     ],
     [
       "The game has entered the 1st status phase"
     ],
     [
-      "Player1 completed objective Large Civilization",
-      "Player1 completed objective Advanced Culture",
-      "Player1 completed objective Religious Fervor",
-      "Player1 completed objective City Planner",
-      "Player1 completed objective Eureka!",
-      "Player1 paid 2 ideas for Eureka!",
-      "Player1 completed objective Sea Blockade",
-      "Player1 completed objective Government"
+      "Player1: Complete Objectives: Complete Large Civilization using Large Civilization/Draft, Complete Advanced Culture using Advanced Culture/Warmonger, Complete Religious Fervor using Religious Fervor/General, Complete City Planner using City Planner/Great Battle, Complete Eureka! using Eureka!/Defiance, Complete Sea Blockade using Education Lead/Sea Blockade, Complete Government using Government/Barbarian Conquest",
+      "Player1: Eureka!: Pay 2 ideas for Eureka!"
     ]
   ],
   "undo_limit": 1,

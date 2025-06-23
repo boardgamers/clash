@@ -3,19 +3,26 @@ use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city::{City, MoodState};
 use crate::city_pieces::Building::Obelisk;
-use crate::content::advances::{AdvanceGroup, advance_group_builder};
-use crate::content::builtin::Builtin;
-use crate::content::custom_actions::CustomActionType;
+use crate::content::ability::AbilityBuilder;
+use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
+use crate::content::custom_actions::{CustomActionType, any_non_happy};
 use crate::content::persistent_events::PaymentRequest;
-use crate::happiness::increase_happiness;
+use crate::events::{EventOrigin, check_event_origin};
+use crate::happiness::execute_increase_happiness;
 use crate::payment::PaymentOptions;
+use crate::player::Player;
+use crate::playing_actions::PlayingActionType;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
-use crate::wonder::draw_wonder_card;
+use crate::wonder::{Wonder, draw_wonder_card};
 use std::vec;
 
-pub(crate) fn culture() -> AdvanceGroup {
-    advance_group_builder("Culture", vec![arts(), sports(), monuments(), theaters()])
+pub(crate) fn culture() -> AdvanceGroupInfo {
+    advance_group_builder(
+        AdvanceGroup::Culture,
+        "Culture",
+        vec![arts(), sports(), monuments(), theaters()],
+    )
 }
 
 fn arts() -> AdvanceBuilder {
@@ -23,20 +30,40 @@ fn arts() -> AdvanceBuilder {
         Advance::Arts,
         "Arts",
         "Once per turn, as a free action, you may spend \
-        1 culture token to get an influence culture action",
+            1 culture token to get an influence culture action",
     )
     .with_advance_bonus(CultureToken)
     .with_unlocked_building(Obelisk)
-    .add_custom_action(CustomActionType::ArtsInfluenceCultureAttempt)
+    .add_action_modifier(
+        CustomActionType::ArtsInfluenceCultureAttempt,
+        |c| {
+            c.once_per_turn()
+                .free_action()
+                .resources(ResourcePile::culture_tokens(1))
+        },
+        PlayingActionType::InfluenceCultureAttempt,
+    )
 }
 
-const SPORTS_DESC: &str = "As an action, you may spend \
-        1 or 2 culture tokens to increase the happiness of a city by 1 or 2, respectively";
-
 fn sports() -> AdvanceBuilder {
-    AdvanceInfo::builder(Advance::Sports, "Sports", SPORTS_DESC)
-        .with_advance_bonus(MoodToken)
-        .add_custom_action(CustomActionType::Sports)
+    AdvanceInfo::builder(
+        Advance::Sports,
+        "Sports",
+        "As an action, you may spend \
+        1 or 2 culture tokens to increase the happiness of a city by 1 or 2, respectively",
+    )
+    .with_advance_bonus(MoodToken)
+    .add_custom_action_with_city_checker(
+        CustomActionType::Sports,
+        |c| c.any_times().action().no_resources(),
+        use_sports,
+        |_game, p| can_use_sports(p),
+        |game, city| {
+            let p = game.player(city.player_index);
+            sports_options(p, city, check_event_origin())
+                .is_some_and(|c| c.can_afford(&p.resources))
+        },
+    )
 }
 
 fn monuments() -> AdvanceBuilder {
@@ -46,12 +73,12 @@ fn monuments() -> AdvanceBuilder {
         "Immediately draw 1 wonder card. \
         Your cities with wonders may not be the target of influence culture attempts",
     )
-    .add_one_time_ability_initializer(draw_wonder_card)
+    .add_once_initializer(draw_wonder_card)
     .with_advance_bonus(CultureToken)
     .add_transient_event_listener(
         |event| &mut event.on_influence_culture_attempt,
         1,
-        |r, city, _| {
+        |r, city, _, _| {
             if let Ok(info) = r {
                 if info.is_defender && !city.pieces.wonders.is_empty() {
                     *r = Err(
@@ -64,94 +91,105 @@ fn monuments() -> AdvanceBuilder {
     )
 }
 
-const THEATERS_DESC: &str = "Once per turn, as a free action, you may convert 1 culture token \
-        into 1 mood token, or 1 mood token into 1 culture token";
-
 fn theaters() -> AdvanceBuilder {
-    AdvanceInfo::builder(Advance::Theaters, "Theaters", THEATERS_DESC)
-        .with_advance_bonus(MoodToken)
-        .add_custom_action(CustomActionType::Theaters)
+    AdvanceInfo::builder(
+        Advance::Theaters,
+        "Theaters",
+        "Once per turn, as a free action, you may convert 1 culture token \
+        into 1 mood token, or 1 mood token into 1 culture token",
+    )
+    .with_advance_bonus(MoodToken)
+    .add_custom_action(
+        CustomActionType::Theaters,
+        |c| c.once_per_turn().free_action().no_resources(),
+        use_theaters,
+        |_game, p| p.resources.culture_tokens > 0 || p.resources.mood_tokens > 0,
+    )
 }
 
 #[must_use]
-pub fn sports_options(city: &City) -> Option<PaymentOptions> {
+pub fn sports_options(player: &Player, city: &City, origin: EventOrigin) -> Option<PaymentOptions> {
     match city.mood_state {
         MoodState::Happy => None,
-        MoodState::Neutral => Some(PaymentOptions::sum(1, &[ResourceType::CultureTokens])),
+        MoodState::Neutral => Some(PaymentOptions::sum(
+            player,
+            origin,
+            1,
+            &[ResourceType::CultureTokens],
+        )),
         MoodState::Angry => Some(PaymentOptions::single_type(
+            player,
+            origin,
             ResourceType::CultureTokens,
             1..=2,
         )),
     }
 }
 
-pub(crate) fn use_sports() -> Builtin {
-    Builtin::builder("Sports", SPORTS_DESC)
-        .add_payment_request_listener(
-            |event| &mut event.custom_action,
-            0,
-            |game, _player_index, a| {
-                let options = sports_options(game.get_any_city(a.city.expect("city not found")))
-                    .expect("Invalid options for sports");
-                Some(vec![PaymentRequest::new(
-                    options,
-                    "Each culture token increases the happiness by 1 step",
-                    false,
-                )])
-            },
-            |game, s, a| {
-                let position = a.city.expect("city not found");
-                let steps = s.choice[0].culture_tokens;
-                increase_happiness(
-                    game,
-                    s.player_index,
-                    &[(position, steps)],
-                    None,
-                );
-                game.add_info_log_item(
-                    &format!(
-                        "{} used Sports to increase the happiness of {} by {steps} steps, making it {:?}",
-                        s.player_name,
-                        position,
-                        game.get_any_city(position).mood_state
-                    ),
-                );
-            },
-        )
-        .build()
+fn can_use_sports(p: &Player) -> bool {
+    if !any_non_happy(p) {
+        return false;
+    }
+    if p.resources.culture_tokens > 0 {
+        return true;
+    }
+    p.wonders_owned.contains(Wonder::Colosseum) && p.resources.mood_tokens > 0
 }
 
-#[must_use]
-pub fn theaters_options() -> PaymentOptions {
-    PaymentOptions::sum(1, &[ResourceType::CultureTokens, ResourceType::MoodTokens])
+fn use_sports(b: AbilityBuilder) -> AbilityBuilder {
+    b.add_payment_request_listener(
+        |event| &mut event.custom_action,
+        0,
+        |game, player, a| {
+            let p = player.get(game);
+            let options = sports_options(
+                p,
+                p.get_city(a.action.city.expect("city not found")),
+                player.origin.clone(),
+            )
+            .expect("Invalid options for sports");
+            Some(vec![PaymentRequest::mandatory(
+                options,
+                "Each culture token increases the happiness by 1 step",
+            )])
+        },
+        |game, s, a| {
+            let position = a.action.city.expect("city not found");
+            let pile = s.choice[0].clone();
+            let steps = pile.amount();
+            execute_increase_happiness(
+                game,
+                s.player_index,
+                &[(position, steps)],
+                &pile,
+                true,
+                &a.action.action.playing_action_type(),
+                &s.origin,
+            )
+            .expect("Failed to increase happiness");
+        },
+    )
 }
 
-pub(crate) fn use_theaters() -> Builtin {
-    Builtin::builder("Theaters", THEATERS_DESC)
-        .add_payment_request_listener(
-            |event| &mut event.custom_action,
-            0,
-            |_game, _player_index, _| {
-                Some(vec![PaymentRequest::new(
-                    theaters_options(),
-                    "Convert 1 culture token into 1 mood token, or 1 mood token into 1 culture token",
-                    false,
-                )])
-            },
-            |game, s, _| {
-                let reward = theater_opposite(&s.choice[0]);
-                game.players[s.player_index].gain_resources(reward.clone());
-                game.add_info_log_item(
-                    &format!(
-                        "{} used Theaters to convert {} into {}",
-                        s.player_name,
-                        s.choice[0],
-                        reward
-                    ),
-                );
-            },
-        )
-        .build()
+fn use_theaters(b: AbilityBuilder) -> AbilityBuilder {
+    b.add_payment_request_listener(
+        |event| &mut event.custom_action,
+        0,
+        |game, player, _| {
+            Some(vec![PaymentRequest::mandatory(
+                player.payment_options().sum(
+                    player.get(game),
+                    1,
+                    &[ResourceType::CultureTokens, ResourceType::MoodTokens],
+                ),
+                "Convert 1 culture token into 1 mood token, or 1 mood token into 1 culture token",
+            )])
+        },
+        |game, s, _| {
+            s.player()
+                .gain_resources(game, theater_opposite(&s.choice[0]));
+        },
+    )
 }
 
 fn theater_opposite(payment: &ResourcePile) -> ResourcePile {

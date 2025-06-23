@@ -11,34 +11,37 @@
     {
       "event_type": {
         "CombatRoundEnd": {
-          "attacker_casualties": {},
-          "defender_casualties": {},
-          "can_retreat": true,
+          "attacker": {
+            "opponent_fighters": 2,
+            "combat_value": 1
+          },
+          "defender": {
+            "opponent_fighters": 1,
+            "combat_value": 2
+          },
           "combat": {
-            "round": 1,
-            "defender": 1,
-            "defender_position": "C1",
-            "attacker": 0,
-            "attacker_position": "C2",
             "attackers": [
               0
             ],
             "retreat": "CanRetreat",
             "stats": {
-              "position": "C1",
+              "round": 1,
               "battleground": "City",
               "attacker": {
+                "position": "C2",
                 "player": 0,
                 "present": {
                   "infantry": 1
                 }
               },
               "defender": {
+                "position": "C1",
                 "player": 1,
                 "present": {
                   "infantry": 2
                 }
-              }
+              },
+              "city_mood": "Angry"
             }
           }
         }
@@ -51,7 +54,7 @@
           "BoolRequest": "Do you want to retreat?"
         },
         "origin": {
-          "Builtin": "Offer Retreat"
+          "Ability": "Retreat"
         }
       }
     }
@@ -79,12 +82,10 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "A1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Neutral",
           "activations": 8,
           "position": "C2"
@@ -106,7 +107,7 @@
         },
         {
           "position": "C2",
-          "unit_type": "Leader",
+          "unit_type": "Infantry",
           "id": 2
         },
         {
@@ -135,7 +136,7 @@
           "id": 7
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Mining",
@@ -166,7 +167,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "activations": 2,
           "position": "C1"
@@ -184,7 +184,7 @@
           "id": 1
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining"
@@ -243,12 +243,14 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Movement": {
@@ -271,15 +273,13 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 marched 1 infantry from C2 to C1"
+      "Player1: Move: marched 1 infantry from C2 to C1"
     ],
     [
       "Combat round 1",
-      "Attackers: 1 infantry",
-      "Defenders: 2 infantry",
-      "Player1 rolled 1 (Leader, no bonus) for combined combat value of 1 and gets 0 hits against defending units.",
-      "Player2 rolled 1 (Leader, no bonus), 1 (Leader, no bonus) for combined combat value of 2 and gets 0 hits against attacking units.",
-      "Player1 can retreat"
+      "Player1: Combat: Attacking with 1 infantry, Roll 1 (leader, no bonus) for combined combat value of 1 and gets 0 hits against defending units",
+      "Player2: Combat: Defending with 2 infantry, Roll 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 2 and gets 0 hits against attacking units",
+      "Player1: Retreat: Player1 can retreat"
     ]
   ],
   "undo_limit": 1,

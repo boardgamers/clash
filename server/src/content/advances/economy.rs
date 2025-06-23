@@ -2,24 +2,25 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::discard_action_card;
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
-use crate::card::HandCard;
+use crate::card::{HandCard, HandCardLocation, all_action_hand_cards};
 use crate::city_pieces::Building::Market;
+use crate::content::ability::{AbilityBuilder, building_event_origin};
 use crate::content::advances::trade_routes::{TradeRoute, trade_route_log, trade_route_reward};
-use crate::content::advances::{AdvanceGroup, advance_group_builder};
-use crate::content::builtin::Builtin;
+use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
+use crate::content::civilizations::vikings::add_raid_bonus;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::custom_actions::CustomActionType::Taxes;
 use crate::content::persistent_events::{HandCardsRequest, ResourceRewardRequest};
 use crate::game::Game;
-use crate::payment::PaymentOptions;
-use crate::player::Player;
 use crate::player_events::{PersistentEvent, PersistentEvents};
-use crate::resource::ResourceType;
+use crate::resource::{ResourceType, gain_resources};
 use crate::resource_pile::ResourcePile;
+use crate::special_advance::SpecialAdvance;
 use itertools::Itertools;
 
-pub(crate) fn economy() -> AdvanceGroup {
+pub(crate) fn economy() -> AdvanceGroupInfo {
     advance_group_builder(
+        AdvanceGroup::Economy,
         "Economy",
         vec![bartering(), trade_routes(), taxes(), currency()],
     )
@@ -34,102 +35,96 @@ fn currency() -> AdvanceBuilder {
     .with_advance_bonus(CultureToken)
 }
 
-const BARTER_DESC: &str = "Once per turn, as a free action, \
-        you may spend discard an action card for 1 gold or 1 culture token.";
-
 fn bartering() -> AdvanceBuilder {
-    AdvanceInfo::builder(Advance::Bartering, "Bartering", BARTER_DESC)
-        .with_advance_bonus(MoodToken)
-        .add_custom_action(CustomActionType::Bartering)
-        .with_unlocked_building(Market)
+    AdvanceInfo::builder(
+        Advance::Bartering,
+        "Bartering",
+        "Once per turn, as a free action, \
+        you may spend discard an action card for 1 gold or 1 culture token.",
+    )
+    .with_advance_bonus(MoodToken)
+    .add_custom_action(
+        CustomActionType::Bartering,
+        |c| c.once_per_turn().free_action().no_resources(),
+        use_bartering,
+        |_game, p| !p.action_cards.is_empty(),
+    )
+    .with_unlocked_building(Market)
 }
 
-pub(crate) fn use_bartering() -> Builtin {
-    Builtin::builder("Bartering", BARTER_DESC)
-        .add_hand_card_request(
-            |event| &mut event.custom_action,
-            1,
-            |game, player_index, _| {
-                let cards = game
-                    .player(player_index)
-                    .action_cards
-                    .iter()
-                    .map(|a| HandCard::ActionCard(*a))
-                    .collect_vec();
-
-                Some(HandCardsRequest::new(
-                    cards,
-                    1..=1,
-                    "Select an action card to discard",
-                ))
-            },
-            |game, s, _e| {
-                let HandCard::ActionCard(card) = s.choice[0] else {
-                    panic!("Invalid type");
-                };
-                game.add_info_log_item(&format!(
-                    "{} discarded an action card for 1 gold or 1 culture token",
-                    s.player_name
-                ));
-                discard_action_card(game, s.player_index, card);
-            },
-        )
-        .add_resource_request(
-            |event| &mut event.custom_action,
-            0,
-            |_game, _player_index, _| {
-                Some(ResourceRewardRequest::new(
-                    PaymentOptions::sum(1, &[ResourceType::Gold, ResourceType::CultureTokens]),
-                    "Select a resource to gain".to_string(),
-                ))
-            },
-            |_game, s, _| {
-                vec![format!(
-                    "{} gained {} for discarding an action card",
-                    s.player_name, s.choice
-                )]
-            },
-        )
-        .build()
+fn use_bartering(b: AbilityBuilder) -> AbilityBuilder {
+    b.add_hand_card_request(
+        |event| &mut event.custom_action,
+        1,
+        |game, p, _| {
+            Some(HandCardsRequest::new(
+                all_action_hand_cards(p.get(game)),
+                1..=1,
+                "Select an action card to discard",
+            ))
+        },
+        |game, s, _e| {
+            let HandCard::ActionCard(card) = s.choice[0] else {
+                panic!("Invalid type");
+            };
+            discard_action_card(
+                game,
+                s.player_index,
+                card,
+                &s.origin,
+                HandCardLocation::DiscardPile,
+            );
+        },
+    )
+    .add_resource_request(
+        |event| &mut event.custom_action,
+        0,
+        |_game, p, _| {
+            Some(ResourceRewardRequest::new(
+                p.reward_options()
+                    .sum(1, &[ResourceType::Gold, ResourceType::CultureTokens]),
+                "Select a resource to gain".to_string(),
+            ))
+        },
+    )
 }
-
-const TAXES_DESCRIPTION: &str = "Once per turn, as an action, you may spend 1 mood token to gain \
-        food, wood, or ore equal to the number of cities you control. \
-        If you have the Currency advance, you may gain gold instead of food, wood, or ore.";
 
 fn taxes() -> AdvanceBuilder {
-    AdvanceInfo::builder(Advance::Taxes, "Taxes", TAXES_DESCRIPTION).add_custom_action(Taxes)
+    AdvanceInfo::builder(
+        Advance::Taxes,
+        "Taxes",
+        "Once per turn, as an action, you may spend 1 mood token to gain \
+            food, wood, or ore equal to the number of cities you control. \
+            If you have the Currency advance, you may gain gold instead of food, wood, or ore.",
+    )
+    .add_custom_action(
+        Taxes,
+        |c| {
+            c.once_per_turn()
+                .action()
+                .resources(ResourcePile::mood_tokens(1))
+        },
+        use_taxes,
+        |_, _| true,
+    )
 }
 
-pub(crate) fn use_taxes() -> Builtin {
-    Builtin::builder("Taxes", TAXES_DESCRIPTION)
-        .add_resource_request(
-            |event| &mut event.custom_action,
-            0,
-            |game, player_index, _| {
-                let options = tax_options(game.player(player_index));
-                Some(ResourceRewardRequest::new(
-                    options,
-                    "Select a resource to gain".to_string(),
-                ))
-            },
-            |_game, s, _| {
-                vec![format!(
-                    "{} gained {} for using Taxes",
-                    s.player_name, s.choice
-                )]
-            },
-        )
-        .build()
-}
-
-#[must_use]
-pub fn tax_options(player: &Player) -> PaymentOptions {
-    let mut c = vec![ResourceType::Food, ResourceType::Wood, ResourceType::Ore];
-    if player.has_advance(Advance::Currency) {
-        c.insert(0, ResourceType::Gold);
-    }
-    PaymentOptions::sum(player.cities.len() as u8, &c)
+pub(crate) fn use_taxes(b: AbilityBuilder) -> AbilityBuilder {
+    b.add_resource_request(
+        |event| &mut event.custom_action,
+        0,
+        |game, p, _| {
+            let player = p.get(game);
+            let mut c = vec![ResourceType::Food, ResourceType::Wood, ResourceType::Ore];
+            if player.can_use_advance(Advance::Currency) {
+                c.insert(0, ResourceType::Gold);
+            }
+            Some(ResourceRewardRequest::new(
+                p.reward_options().sum(player.cities.len() as u8, &c),
+                "Select a resource to gain".to_string(),
+            ))
+        },
+    )
 }
 
 fn trade_routes() -> AdvanceBuilder {
@@ -155,28 +150,29 @@ where
     S: AbilityInitializerSetup,
     V: Clone + PartialEq,
 {
-    b.add_resource_request(
+    b.add_resource_request_with_response(
         event,
         0,
-        |game, player_index, _| {
-            if !game.player(player_index).has_advance(Advance::TradeRoutes) {
+        |game, p, _| {
+            if !p.get(game).can_use_advance(Advance::TradeRoutes) {
                 return None;
             }
 
-            trade_route_reward(game).map(|(reward, routes)| {
+            trade_route_reward(game, p).map(|(reward, routes)| {
                 gain_market_bonus(game, &routes);
                 ResourceRewardRequest::new(reward, "Collect trade routes reward".to_string())
             })
         },
-        |game, p, _| {
-            let (_, routes) = trade_route_reward(game).expect("No trade route reward");
-            trade_route_log(
-                game,
-                p.player_index,
-                &routes,
-                &p.choice,
-                p.actively_selected,
-            )
+        |game, s, _| {
+            let (_, routes) = trade_route_reward(game, &s.player()).expect("No trade route reward");
+            let log = trade_route_log(game, s.player_index, &routes, s.actively_selected);
+            for l in &log {
+                s.log(game, l);
+            }
+            let p = game.player(s.player_index);
+            if p.has_special_advance(SpecialAdvance::Raiding) {
+                add_raid_bonus(game, p.index, &routes);
+            }
         },
     )
 }
@@ -196,10 +192,11 @@ fn gain_market_bonus(game: &mut Game, routes: &[TradeRoute]) {
         .unique()
         .collect_vec();
     for p in players {
-        let name = game.player_name(p);
-        game.add_info_log_item(&format!(
-            "{name} gains 1 gold for using a Market in a trade route",
-        ));
-        game.player_mut(p).gain_resources(ResourcePile::gold(1));
+        gain_resources(
+            game,
+            p,
+            ResourcePile::gold(1),
+            building_event_origin(Market),
+        );
     }
 }

@@ -79,7 +79,7 @@
           "id": 0
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining"
@@ -115,7 +115,7 @@
           "id": 0
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Mining",
@@ -408,9 +408,9 @@
   "starting_player_index": 1,
   "current_player_index": 1,
   "action_log": [
-    {
+    { "age": 1,
       "rounds": [
-        {
+        { "round": 1,
           "players": [
             {
               "index": 0,

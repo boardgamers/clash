@@ -21,7 +21,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "A1"
         },
@@ -46,7 +45,7 @@
         },
         {
           "position": "C2",
-          "unit_type": "Leader",
+          "unit_type": "Infantry",
           "id": 2
         },
         {
@@ -75,7 +74,7 @@
           "id": 7
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Mining",
@@ -107,7 +106,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "position": "C1"
         }
@@ -124,7 +122,7 @@
           "id": 1
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Fanaticism",
         "Farming",
@@ -186,34 +184,44 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
                       "ActionCard": 41
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 3
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "CivilCard": 41
+                      }
                     },
                     {
-                      "op": "add",
-                      "path": "/players/0/action_cards",
-                      "value": [
-                        41
-                      ]
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events"
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 41
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToDiscard"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
                     }
                   ]
                 },
@@ -222,50 +230,7 @@
                     "Response": {
                       "SelectAdvance": "Storage"
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "remove",
-                      "path": "/events/0/event_type/ActionCard/selected_advance"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/handler/priority",
-                      "value": 2
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/0/handler/request/SelectAdvance",
-                      "value": {
-                        "choices": [
-                          "Storage",
-                          "Irrigation",
-                          "Husbandry",
-                          "Engineering",
-                          "Sanitation",
-                          "Roads",
-                          "Fishing",
-                          "Writing",
-                          "Siegecraft",
-                          "SteelWeapons",
-                          "Draft",
-                          "Myths",
-                          "Bartering",
-                          "Arts",
-                          "Math"
-                        ]
-                      }
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/0/handler/request/Payment"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/last_priority_used",
-                      "value": 2
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -277,93 +242,53 @@
                       ]
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "ActionCard": {
-                              "id": 41,
-                              "selected_advance": "Storage"
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "CivilCard": 41
-                            },
-                            "priority": 1,
-                            "request": {
-                              "Payment": [
-                                {
-                                  "cost": {
-                                    "conversions": [
-                                      {
-                                        "from": [
-                                          {
-                                            "ideas": 1
-                                          }
-                                        ],
-                                        "to": {
-                                          "food": 1
-                                        },
-                                        "type": "Unlimited"
-                                      },
-                                      {
-                                        "from": [
-                                          {
-                                            "food": 1
-                                          }
-                                        ],
-                                        "to": {
-                                          "gold": 1
-                                        },
-                                        "type": "Unlimited"
-                                      }
-                                    ],
-                                    "default": {
-                                      "ideas": 2
-                                    }
-                                  },
-                                  "name": "Pay for Storage",
-                                  "optional": false
-                                }
-                              ]
-                            }
-                          },
-                          "last_priority_used": 1,
-                          "player": 0
-                        }
-                      ]
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "food": 2
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
                     },
                     {
-                      "op": "replace",
-                      "path": "/players/0/advances/2",
-                      "value": "Tactics"
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Advance": "Storage"
+                      }
                     },
                     {
-                      "op": "remove",
-                      "path": "/players/0/advances/3"
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Storage",
+                        "take_incident_token": false,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "CivilCard": 41
+                      }
                     },
                     {
-                      "op": "replace",
-                      "path": "/players/0/resource_limit/food",
-                      "value": 2
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/resources/food",
-                      "value": 2
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 7
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/resources/ideas"
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "ideas": 2
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "CivilCard": 41
+                      }
                     }
                   ]
                 }
@@ -377,15 +302,16 @@
   "action_log_index": 3,
   "log": [
     [
-      "Player1 played the action card New Ideas as a regular action"
+      "Player1: New Ideas: Pay 1 action",
+      "Player1: Action Card: Play New Ideas/High Morale"
     ],
     [
-      "Player1 selected Storage as advance for New Ideas."
+      "Player1: New Ideas: Selected Storage as advance for New Ideas."
     ],
     [
-      "Player1 paid 2 food for advance Storage",
-      "Player gained 1 mood token as advance bonus",
-      "Player1 used gain 2 ideas from New Ideas."
+      "Player1: Advance: Pay 2 food",
+      "Player1: Storage: Gain 1 mood token",
+      "Player1: New Ideas: Gain Storage without taking an event token, Gain 2 ideas"
     ]
   ],
   "undo_limit": 0,
@@ -408,5 +334,8 @@
   ],
   "wonders_left": [
     "Pyramids"
+  ],
+  "action_cards_discarded": [
+    41
   ]
 }

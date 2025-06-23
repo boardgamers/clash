@@ -21,12 +21,10 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Neutral",
           "position": "D1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Neutral",
           "position": "C7"
         }
@@ -38,7 +36,7 @@
           "id": 1
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Fishing",
@@ -61,12 +59,10 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "D8"
         },
         {
-          "city_pieces": {},
           "mood_state": "Neutral",
           "position": "E7"
         }
@@ -78,7 +74,7 @@
           "id": 1
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Math",
@@ -338,12 +334,13 @@
   "current_player_index": 1,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
-              "index": 0,
-              "items": []
+              "index": 0
             }
           ]
         }

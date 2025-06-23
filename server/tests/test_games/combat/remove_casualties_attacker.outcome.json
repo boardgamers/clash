@@ -14,20 +14,16 @@
     {
       "event_type": {
         "CombatRoundEnd": {
-          "attacker_casualties": {
-            "fighters": 2
+          "attacker": {
+            "opponent_fighters": 2,
+            "combat_value": 26
           },
-          "defender_casualties": {
-            "fighters": 2
+          "defender": {
+            "opponent_fighters": 4,
+            "combat_value": 14
           },
-          "can_retreat": false,
           "final_result": "AttackerWins",
           "combat": {
-            "round": 1,
-            "defender": 1,
-            "defender_position": "C1",
-            "attacker": 0,
-            "attacker_position": "C2",
             "attackers": [
               0,
               1,
@@ -36,23 +32,25 @@
             ],
             "retreat": "CanRetreat",
             "stats": {
-              "position": "C1",
+              "round": 1,
               "battleground": "City",
               "attacker": {
+                "position": "C2",
                 "player": 0,
                 "present": {
-                  "infantry": 1,
+                  "infantry": 2,
                   "cavalry": 1,
-                  "elephants": 1,
-                  "leaders": 1
+                  "elephants": 1
                 }
               },
               "defender": {
+                "position": "C1",
                 "player": 1,
                 "present": {
                   "infantry": 2
                 }
-              }
+              },
+              "city_mood": "Angry"
             }
           }
         }
@@ -78,7 +76,7 @@
           }
         },
         "origin": {
-          "Builtin": "Choose Casualties"
+          "Ability": "Choose Casualties"
         }
       }
     }
@@ -106,12 +104,10 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "A1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Neutral",
           "activations": 8,
           "position": "C2"
@@ -136,7 +132,7 @@
         },
         {
           "position": "C2",
-          "unit_type": "Leader",
+          "unit_type": "Infantry",
           "movement_restrictions": [
             "Battle"
           ],
@@ -171,7 +167,7 @@
           "id": 7
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Mining",
@@ -202,7 +198,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "activations": 2,
           "position": "C1"
@@ -220,7 +215,7 @@
           "id": 1
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining"
@@ -279,12 +274,14 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Movement": {
@@ -310,15 +307,13 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 marched 1 infantry, 1 cavalry, 1 elephant and a leader from C2 to C1"
+      "Player1: Move: marched 2 infantry, 1 cavalry and 1 elephant from C2 to C1"
     ],
     [
       "Combat round 1",
-      "Attackers: 1 infantry, 1 cavalry, 1 elephant and a leader",
-      "Defenders: 2 infantry",
-      "Player1 rolled 6 (Infantry, +1 combat value), 6 (Infantry, no bonus), 6 (Infantry, no bonus), 6 (Infantry, no bonus) for combined combat value of 25 and gets 2 hits against defending units.",
-      "Player2 rolled 6 (Infantry, +1 combat value), 6 (Infantry, +1 combat value) for combined combat value of 14 and gets 2 hits against attacking units.",
-      "Player1 has to remove 2 of their attacking units"
+      "Player1: Combat: Attacking with 2 infantry, 1 cavalry and 1 elephant, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 26 and gets 2 hits against defending units",
+      "Player2: Combat: Defending with 2 infantry, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value) for combined combat value of 14 and gets 2 hits against attacking units",
+      "Player1: Choose Casualties: Remove 2 of their attacking units"
     ]
   ],
   "undo_limit": 1,

@@ -7,28 +7,38 @@ repository = "git@github.com:boardgamers/clash.git"
 homepage = "https://www.boardgamers.space/"
 description = "A server for Clash of Cultures"
 
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [lib]
 name = "server"
 crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "api_tool"
+path = "src/api_tool/bin/main.rs"
 
 [dependencies]
 hex2d = "1.1.0"
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"
-wasm-bindgen = "0.2.95"
+wasm-bindgen = "0.2.100"
 async-std = "1.13.1"
 wasm-bindgen-futures = "0.4.50"
-serde-wasm-bindgen = "0.6.0"
+serde-wasm-bindgen = "0.6.5"
 itertools = "0.14.0"
 console_error_panic_hook = "0.1.7"
 num = "0.4"
 json-patch = "4.0.0"
 pathfinding = "4.14.0"
-tokio = { version = "1.44.2", features = ["full"] }
 num_cpus = "1.16.0"
-readonly = "0.2.13"
-enumset = { version = "1.1.5" }
+enumset = { version = "1.1.6" }
 rustc-hash = "2.1.1"
+pyroscope = { version = "0.5.8", optional = true }
+pyroscope_pprofrs = { version = "0.2.10", optional = true }
+chrono = "0.4.41"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+tokio = { version = "1.45.0", features = ["full"]}
+
+[features]
+profiling = ["dep:pyroscope", "dep:pyroscope_pprofrs"]
+
+

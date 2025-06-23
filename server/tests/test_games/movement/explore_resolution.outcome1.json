@@ -15,7 +15,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "D1"
         }
@@ -27,10 +26,7 @@
           "id": 0
         }
       ],
-      "civilization": "Maya",
-      "available_leaders": [
-        "Kʼinich Janaab Pakal I"
-      ],
+      "civilization": "China",
       "advances": [
         "Farming",
         "Mining"
@@ -52,7 +48,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "D8"
         }
@@ -61,10 +56,13 @@
         {
           "position": "D6",
           "unit_type": "Settler",
+          "movement_restrictions": [
+            "Fertile"
+          ],
           "id": 0
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining"
@@ -381,12 +379,14 @@
   "current_player_index": 1,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Movement": {
@@ -404,158 +404,7 @@
                     "Response": {
                       "ExploreResolution": 3
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "ExploreResolution": {
-                              "block": {
-                                "block": {
-                                  "terrain": [
-                                    "Fertile",
-                                    "Fertile",
-                                    "Fertile",
-                                    "Forest"
-                                  ]
-                                },
-                                "position": {
-                                  "rotation": 0,
-                                  "top_tile": "D5"
-                                }
-                              },
-                              "destination": "D6",
-                              "ship_can_teleport": false,
-                              "start": "D7",
-                              "units": [
-                                0
-                              ]
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Builtin": "Explore Resolution"
-                            },
-                            "priority": 0,
-                            "request": "ExploreResolution"
-                          },
-                          "last_priority_used": 0,
-                          "player": 1
-                        }
-                      ]
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/tiles/13/1",
-                      "value": "Unexplored"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/tiles/20/1",
-                      "value": "Unexplored"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/tiles/21/1",
-                      "value": "Unexplored"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/tiles/28/1",
-                      "value": "Unexplored"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/unexplored_blocks/4/block/terrain/0",
-                      "value": "Fertile"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/unexplored_blocks/4/block/terrain/1",
-                      "value": "Fertile"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/unexplored_blocks/4/block/terrain/3",
-                      "value": "Forest"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/unexplored_blocks/4/position/top_tile",
-                      "value": "D5"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/unexplored_blocks/5/block/terrain/0",
-                      "value": "Forest"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/unexplored_blocks/5/block/terrain/1",
-                      "value": "Mountain"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/unexplored_blocks/5/block/terrain/2",
-                      "value": "Fertile"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/unexplored_blocks/5/block/terrain/3",
-                      "value": "Mountain"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/unexplored_blocks/5/position/top_tile",
-                      "value": "F2"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/unexplored_blocks/6/block/terrain/1",
-                      "value": "Water"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/unexplored_blocks/6/block/terrain/2",
-                      "value": "Forest"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/unexplored_blocks/6/block/terrain/3",
-                      "value": "Forest"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/map/unexplored_blocks/6/position/top_tile",
-                      "value": "F4"
-                    },
-                    {
-                      "op": "add",
-                      "path": "/map/unexplored_blocks/7",
-                      "value": {
-                        "block": {
-                          "terrain": [
-                            "Water",
-                            "Forest",
-                            "Water",
-                            "Fertile"
-                          ]
-                        },
-                        "position": {
-                          "rotation": 0,
-                          "top_tile": "F6"
-                        }
-                      }
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/units/0/position",
-                      "value": "D7"
-                    }
-                  ]
+                  }
                 }
               ]
             }
@@ -588,11 +437,10 @@
       "Player2 ended the movement action"
     ],
     [
-      "Player2 marched 1 settler from D7 to D6"
+      "Player2: Move: marched 1 settler from D7 to D6"
     ],
     [
-      "Player2 chose the orientation of the newly explored tiles",
-      "Explored tiles C6=Fertile, D5=Forest, D6=Fertile, E6=Fertile"
+      "Player2: Explore Resolution: Chose rotation 3, Explored tiles C6=Fertile, D5=Forest, D6=Fertile, E6=Fertile"
     ]
   ],
   "undo_limit": 1,
@@ -604,7 +452,7 @@
   ],
   "rng": "175288996178563520907356813494494136334",
   "wonders_left": [
-    "Great Gardens",
+    "GreatGardens",
     "Pyramids"
   ]
 }

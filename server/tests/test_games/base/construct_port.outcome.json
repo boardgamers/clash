@@ -32,7 +32,6 @@
           "port_position": "A2"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "C2"
         }
@@ -50,7 +49,7 @@
         },
         {
           "position": "C2",
-          "unit_type": "Leader",
+          "unit_type": "Infantry",
           "id": 2
         },
         {
@@ -79,7 +78,7 @@
           "id": 7
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Fishing",
@@ -111,7 +110,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "position": "C1"
         }
@@ -128,7 +126,7 @@
           "id": 1
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining"
@@ -197,12 +195,14 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -218,38 +218,42 @@
                       }
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 3
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
+                      }
                     },
                     {
-                      "op": "remove",
-                      "path": "/players/0/cities/0/city_pieces/port"
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "food": 1,
+                          "wood": 1,
+                          "ore": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
+                      }
                     },
                     {
-                      "op": "remove",
-                      "path": "/players/0/cities/0/activations"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/cities/0/port_position"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/food",
-                      "value": 2
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/ore",
-                      "value": 7
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/wood",
-                      "value": 7
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Port"
+                        },
+                        "balance": "Gain",
+                        "position": "A1"
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
+                      }
                     }
                   ]
                 }
@@ -263,7 +267,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 paid 1 food, 1 wood and 1 ore to construct a Port in the city at A1"
+      "Player1: Construct Building: Pay 1 action, Pay 1 food, 1 wood and 1 ore, Gain Port at A1 at the water tile A2"
     ]
   ],
   "undo_limit": 0,

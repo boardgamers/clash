@@ -9,32 +9,32 @@ use crate::dialog_ui::BaseOrCustomDialog;
 use crate::event_ui::{custom_phase_event_help, custom_phase_event_origin, event_help, pay_help};
 use crate::happiness_ui::IncreaseHappinessConfig;
 use crate::layout_ui::FONT_SIZE;
-use crate::log_ui::get_log_end;
+use crate::log_ui::{LogDialog, get_log_end};
 use crate::map_ui::ExploreResolutionConfig;
-use crate::move_ui::{MoveDestination, MoveIntent, MovePayment, MoveSelection};
+use crate::move_ui::{MoveIntent, MovePayment, MoveSelection};
 use crate::payment_ui::{Payment, new_gain};
 use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
-use crate::render_context::RenderContext;
+use crate::render_context::{RenderContext, RenderStage};
 use crate::status_phase_ui::ChooseAdditionalAdvances;
 use macroquad::prelude::*;
 use server::action::Action;
 use server::advance::Advance;
-use server::ai::AI;
 use server::card::HandCard;
 use server::city::{City, MoodState};
 use server::content::persistent_events::{
-    AdvanceRequest, ChangeGovernmentRequest, EventResponse, MultiRequest, PersistentEventRequest,
-    PersistentEventType, PlayerRequest, UnitTypeRequest,
+    AdvanceRequest, EventResponse, MultiRequest, PersistentEventRequest, PersistentEventType,
+    PlayerRequest, UnitTypeRequest,
 };
 use server::game::{Game, GameState};
-use server::movement::CurrentMove;
+use server::movement::{CurrentMove, MoveDestination};
 use server::playing_actions::PlayingActionType;
 use server::position::Position;
 
-#[derive(Clone)]
-pub enum ActiveDialog {
+#[derive(Clone, Debug)]
+pub(crate) enum ActiveDialog {
     None,
-    Log,
+    Log(LogDialog),
+    Info(InfoDialog),
     WaitingForUpdate,
     DialogChooser(Box<DialogChooser>),
 
@@ -64,48 +64,17 @@ pub enum ActiveDialog {
     ),
     HandCardsRequest(MultiSelection<HandCard>),
     BoolRequest(String),
-    ChangeGovernmentType(ChangeGovernmentRequest),
+    ChangeGovernmentType,
     ChooseAdditionalAdvances(ChooseAdditionalAdvances),
 }
 
 impl ActiveDialog {
     #[must_use]
-    pub fn title(&self) -> &str {
-        match self {
-            ActiveDialog::None => "none",
-            ActiveDialog::DialogChooser(_) => "dialog chooser",
-            ActiveDialog::Log => "log",
-            ActiveDialog::WaitingForUpdate => "waiting for update",
-            ActiveDialog::IncreaseHappiness(_) => "increase happiness",
-            ActiveDialog::AdvanceMenu => "advance menu",
-            ActiveDialog::AdvancePayment(_) => "advance payment",
-            ActiveDialog::ConstructionPayment(_) => "construction payment",
-            ActiveDialog::CollectResources(_) => "collect resources",
-            ActiveDialog::RecruitUnitSelection(_) => "recruit unit selection",
-            ActiveDialog::ReplaceUnits(_) => "replace units",
-            ActiveDialog::MoveUnits(_) => "move units",
-            ActiveDialog::MovePayment(_) => "move payment",
-            ActiveDialog::ExploreResolution(_) => "explore resolution",
-            ActiveDialog::ChangeGovernmentType(_) => "change government type",
-            ActiveDialog::ChooseAdditionalAdvances(_) => "choose additional advances",
-            ActiveDialog::ResourceRewardRequest(_) => "trade route selection",
-            ActiveDialog::AdvanceRequest(_) => "advance selection",
-            ActiveDialog::PaymentRequest(_) => "custom phase payment request",
-            ActiveDialog::PlayerRequest(_) => "custom phase player request",
-            ActiveDialog::PositionRequest(_) => "custom phase position request",
-            ActiveDialog::UnitTypeRequest(_) => "custom phase unit request",
-            ActiveDialog::UnitsRequest(_) => "custom phase units request",
-            ActiveDialog::StructuresRequest(_, _) => "custom phase structures request",
-            ActiveDialog::BoolRequest(_) => "custom phase bool request",
-            ActiveDialog::HandCardsRequest(_) => "custom phase hand cards request",
-        }
-    }
-
-    #[must_use]
-    pub fn help_message(&self, rc: &RenderContext) -> Vec<String> {
+    pub(crate) fn help_message(&self, rc: &RenderContext) -> Vec<String> {
         match self {
             ActiveDialog::None
-            | ActiveDialog::Log
+            | ActiveDialog::Log(_)
+            | ActiveDialog::Info(_)
             | ActiveDialog::DialogChooser(_)
             | ActiveDialog::AdvanceMenu => vec![],
             ActiveDialog::IncreaseHappiness(h) => {
@@ -124,12 +93,8 @@ impl ActiveDialog {
             ActiveDialog::ExploreResolution(_) => {
                 vec!["Click on the new tile to rotate it".to_string()]
             }
-            ActiveDialog::ChangeGovernmentType(r) => {
-                if r.optional {
-                    vec!["Click on a government type to change - or click cancel".to_string()]
-                } else {
-                    vec!["Click on a government type to change".to_string()]
-                }
+            ActiveDialog::ChangeGovernmentType => {
+                vec!["Click on a government type to change".to_string()]
             }
             ActiveDialog::ChooseAdditionalAdvances(_) => {
                 vec!["Click on an advance to choose it".to_string()]
@@ -148,7 +113,10 @@ impl ActiveDialog {
                     let v = vec!["Click on a building to influence its culture".to_string()];
                     if let PlayingActionType::Custom(c) = &b.action_type {
                         let mut r = v.clone();
-                        r.extend(event_help(rc, &rc.shown_player.custom_actions[c]));
+                        r.extend(event_help(
+                            rc,
+                            &rc.shown_player.custom_action_info(*c).event_origin,
+                        ));
                     }
                     v
                 } else {
@@ -192,46 +160,44 @@ impl ActiveDialog {
     }
 
     #[must_use]
-    pub fn show_for_other_player(&self) -> bool {
-        matches!(self, ActiveDialog::Log | ActiveDialog::PlayerRequest(_)) | self.is_advance()
+    pub(crate) fn show_for_other_player(&self) -> bool {
+        self.is_modal() || matches!(self, ActiveDialog::PlayerRequest(_))
     }
 
     #[must_use]
-    pub fn is_modal(&self) -> bool {
-        matches!(self, ActiveDialog::Log) || self.is_advance()
+    pub(crate) fn is_modal(&self) -> bool {
+        matches!(self, ActiveDialog::Log(_) | ActiveDialog::Info(_)) || self.is_advance()
     }
 
     #[must_use]
-    pub fn is_advance(&self) -> bool {
+    pub(crate) fn is_advance(&self) -> bool {
         matches!(
             self,
             ActiveDialog::AdvanceMenu
                 | ActiveDialog::AdvancePayment(_)
-                | ActiveDialog::ChangeGovernmentType(_)
+                | ActiveDialog::ChangeGovernmentType
                 | ActiveDialog::ChooseAdditionalAdvances(_)
                 | ActiveDialog::AdvanceRequest(_)
         )
     }
 }
 
-#[derive(Clone)]
-pub struct PendingUpdate {
+#[derive(Clone, Debug)]
+pub(crate) struct PendingUpdate {
     pub action: Action,
     pub warning: Vec<String>,
     pub info: Vec<String>,
 }
 
-#[derive(Clone)]
-pub struct DialogChooser {
+#[derive(Clone, Debug)]
+pub(crate) struct DialogChooser {
     pub title: String,
-    pub yes: ActiveDialog,
-    pub no: ActiveDialog,
+    pub options: Vec<(Option<EventOrigin>, ActiveDialog)>,
 }
 
 #[must_use]
-#[derive(Clone)]
-pub enum StateUpdate {
-    None,
+#[derive(Clone, Debug)]
+pub(crate) enum StateUpdate {
     OpenDialog(ActiveDialog),
     CloseDialog,
     Cancel,
@@ -246,13 +212,41 @@ pub enum StateUpdate {
     ToggleAiPlay,
 }
 
+pub(crate) type RenderResult = Result<(), Box<StateUpdate>>;
+
+pub(crate) const NO_UPDATE: RenderResult = Ok(());
+
 impl StateUpdate {
-    pub fn execute(action: Action) -> StateUpdate {
-        StateUpdate::Execute(action)
+    pub(crate) fn of(update: StateUpdate) -> RenderResult {
+        Err(Box::new(update))
     }
 
-    pub fn execute_with_warning(action: Action, warning: Vec<String>) -> StateUpdate {
-        if warning.is_empty() {
+    pub(crate) fn open_dialog(dialog: ActiveDialog) -> RenderResult {
+        Self::of(StateUpdate::OpenDialog(dialog))
+    }
+
+    pub(crate) fn close_dialog() -> RenderResult {
+        Self::of(StateUpdate::CloseDialog)
+    }
+
+    pub(crate) fn execute(action: Action) -> RenderResult {
+        Self::of(StateUpdate::Execute(action))
+    }
+
+    pub(crate) fn cancel() -> RenderResult {
+        Self::of(StateUpdate::Cancel)
+    }
+
+    pub(crate) fn set_focused_tile(pos: Position) -> RenderResult {
+        Self::of(StateUpdate::SetFocusedTile(pos))
+    }
+
+    pub(crate) fn resolve_pending_update(confirm: bool) -> RenderResult {
+        Self::of(StateUpdate::ResolvePendingUpdate(confirm))
+    }
+
+    pub(crate) fn execute_with_warning(action: Action, warning: Vec<String>) -> RenderResult {
+        Self::of(if warning.is_empty() {
             StateUpdate::Execute(action)
         } else {
             StateUpdate::ExecuteWithWarning(PendingUpdate {
@@ -260,18 +254,22 @@ impl StateUpdate {
                 warning,
                 info: vec![],
             })
-        }
-    }
-
-    pub fn execute_with_confirm(info: Vec<String>, action: Action) -> StateUpdate {
-        StateUpdate::ExecuteWithWarning(PendingUpdate {
-            action,
-            warning: vec![],
-            info,
         })
     }
 
-    pub fn execute_activation(action: Action, warning: Vec<String>, city: &City) -> StateUpdate {
+    pub(crate) fn execute_with_confirm(info: Vec<String>, action: Action) -> RenderResult {
+        Self::of(StateUpdate::ExecuteWithWarning(PendingUpdate {
+            action,
+            warning: vec![],
+            info,
+        }))
+    }
+
+    pub(crate) fn execute_activation(
+        action: Action,
+        warning: Vec<String>,
+        city: &City,
+    ) -> RenderResult {
         if city.is_activated() {
             match city.mood_state {
                 MoodState::Happy => {
@@ -291,42 +289,33 @@ impl StateUpdate {
         }
     }
 
-    pub fn dialog_chooser(
+    pub(crate) fn dialog_chooser(
         title: &str,
-        yes: Option<ActiveDialog>,
-        no: Option<ActiveDialog>,
-    ) -> StateUpdate {
-        match yes {
-            Some(yes) => match no {
-                Some(no) => {
-                    StateUpdate::OpenDialog(ActiveDialog::DialogChooser(Box::new(DialogChooser {
-                        title: title.to_string(),
-                        yes,
-                        no,
-                    })))
-                }
-                _ => StateUpdate::OpenDialog(yes),
-            },
-            _ => match no {
-                Some(no) => StateUpdate::OpenDialog(no),
-                _ => {
-                    panic!("no dialog to open")
-                }
-            },
+        options: Vec<(Option<EventOrigin>, ActiveDialog)>,
+    ) -> RenderResult {
+        match options.len() {
+            0 => {
+                panic!("no dialog options provided");
+            }
+            1 => StateUpdate::open_dialog(options[0].1.clone()),
+            _ => StateUpdate::open_dialog(ActiveDialog::DialogChooser(Box::new(DialogChooser {
+                title: title.to_string(),
+                options,
+            }))),
         }
     }
 
-    pub fn response(action: EventResponse) -> StateUpdate {
-        StateUpdate::Execute(Action::Response(action))
+    pub(crate) fn response(action: EventResponse) -> RenderResult {
+        Self::execute(Action::Response(action))
     }
 
-    pub fn move_units(
+    pub(crate) fn move_units(
         rc: &RenderContext,
         pos: Option<Position>,
         intent: MoveIntent,
-    ) -> StateUpdate {
+    ) -> RenderResult {
         let game = rc.game;
-        StateUpdate::OpenDialog(ActiveDialog::MoveUnits(MoveSelection::new(
+        StateUpdate::open_dialog(ActiveDialog::MoveUnits(MoveSelection::new(
             game.active_player(),
             pos,
             game,
@@ -334,68 +323,37 @@ impl StateUpdate {
             &CurrentMove::None,
         )))
     }
-
-    pub fn or(self, other: impl FnOnce() -> StateUpdate) -> StateUpdate {
-        match self {
-            StateUpdate::None => other(),
-            _ => self,
-        }
-    }
 }
 
-#[must_use]
-pub struct StateUpdates {
-    updates: Vec<StateUpdate>,
-}
-
-impl Default for StateUpdates {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl StateUpdates {
-    pub fn new() -> StateUpdates {
-        StateUpdates { updates: vec![] }
-    }
-    pub fn add(&mut self, update: StateUpdate) {
-        if !matches!(update, StateUpdate::None) {
-            self.updates.push(update);
-        }
-    }
-
-    pub fn result(self) -> StateUpdate {
-        self.updates
-            .into_iter()
-            .find(|u| !matches!(u, StateUpdate::None))
-            .unwrap_or(StateUpdate::None)
-    }
-}
-
-pub struct MousePosition {
+pub(crate) struct MousePosition {
     pub position: Vec2,
     pub time: f64,
 }
 
-pub enum CameraMode {
+pub(crate) enum CameraMode {
     Screen,
     World,
 }
 
+use crate::info_ui::InfoDialog;
+#[cfg(not(target_arch = "wasm32"))]
+use server::ai::AI;
+use server::events::EventOrigin;
+
 pub struct State {
-    pub assets: Assets,
+    pub(crate) assets: Assets,
     pub control_player: Option<usize>,
     pub show_player: usize,
-    pub active_dialog: ActiveDialog,
-    pub pending_update: Option<PendingUpdate>,
+    pub(crate) active_dialog: ActiveDialog,
+    pub(crate) pending_update: Option<PendingUpdate>,
     pub camera: Camera2D,
     pub screen_size: Vec2,
-    pub mouse_positions: Vec<MousePosition>,
-    pub log_scroll: f32,
+    pub(crate) mouse_positions: Vec<MousePosition>,
     pub focused_tile: Option<Position>,
     pub show_permanent_effects: bool,
     pub ai_autoplay: bool,
     pub pan_map: bool,
+    #[cfg(not(target_arch = "wasm32"))]
     pub ai_players: Vec<AI>,
 }
 
@@ -419,34 +377,38 @@ impl State {
             },
             screen_size: vec2(0., 0.),
             mouse_positions: vec![],
-            log_scroll: 0.0,
             focused_tile: None,
             pan_map: false,
             show_permanent_effects: false,
             ai_autoplay: false,
+            #[cfg(not(target_arch = "wasm32"))]
             ai_players: vec![],
         }
     }
 
     #[must_use]
-    pub fn render_context<'a>(&'a self, game: &'a Game) -> RenderContext<'a> {
+    pub(crate) fn render_context<'a>(
+        &'a self,
+        game: &'a Game,
+        stage: RenderStage,
+    ) -> RenderContext<'a> {
         RenderContext {
             shown_player: game.player(self.show_player),
             game,
             state: self,
             camera_mode: CameraMode::Screen,
+            stage,
         }
     }
 
-    pub fn clear(&mut self) {
+    pub(crate) fn clear(&mut self) {
         self.active_dialog = ActiveDialog::None;
         self.pending_update = None;
         self.focused_tile = None;
     }
 
-    pub fn update(&mut self, game: &Game, update: StateUpdate) -> GameSyncRequest {
+    pub(crate) fn update(&mut self, game: &Game, update: StateUpdate) -> GameSyncRequest {
         match update {
-            StateUpdate::None => GameSyncRequest::None,
             StateUpdate::Execute(a) => GameSyncRequest::ExecuteAction(a),
             StateUpdate::ExecuteWithWarning(update) => {
                 self.pending_update = Some(update);
@@ -466,9 +428,9 @@ impl State {
                     GameSyncRequest::None
                 }
             }
-            StateUpdate::OpenDialog(dialog) => {
-                if matches!(dialog, ActiveDialog::Log) {
-                    self.log_scroll = get_log_end(game, self.screen_size.y);
+            StateUpdate::OpenDialog(mut dialog) => {
+                if let ActiveDialog::Log(d) = &mut dialog {
+                    d.log_scroll = get_log_end(game, self.screen_size.y);
                 }
                 let d = self.game_state_dialog(game);
                 if matches!(dialog, ActiveDialog::AdvanceMenu) && d.is_advance() {
@@ -514,11 +476,11 @@ impl State {
         }
     }
 
-    pub fn set_dialog(&mut self, dialog: ActiveDialog) {
+    pub(crate) fn set_dialog(&mut self, dialog: ActiveDialog) {
         self.active_dialog = dialog;
     }
 
-    pub fn update_from_game(&mut self, game: &Game) -> GameSyncRequest {
+    pub(crate) fn update_from_game(&mut self, game: &Game) -> GameSyncRequest {
         let dialog = self.game_state_dialog(game);
         self.clear();
         self.active_dialog = dialog;
@@ -526,7 +488,7 @@ impl State {
     }
 
     #[must_use]
-    pub fn game_state_dialog(&self, game: &Game) -> ActiveDialog {
+    pub(crate) fn game_state_dialog(&self, game: &Game) -> ActiveDialog {
         if let Some(e) = &game.current_event_handler() {
             return match &e.request {
                 PersistentEventRequest::Payment(r) => ActiveDialog::PaymentRequest(
@@ -575,9 +537,7 @@ impl State {
                 ),
                 PersistentEventRequest::SelectPlayer(r) => ActiveDialog::PlayerRequest(r.clone()),
                 PersistentEventRequest::BoolRequest(d) => ActiveDialog::BoolRequest(d.clone()),
-                PersistentEventRequest::ChangeGovernment(r) => {
-                    ActiveDialog::ChangeGovernmentType(r.clone())
-                }
+                PersistentEventRequest::ChangeGovernment => ActiveDialog::ChangeGovernmentType,
                 PersistentEventRequest::ExploreResolution => {
                     match &game.current_event().event_type {
                         PersistentEventType::ExploreResolution(r) => {
@@ -609,15 +569,15 @@ impl State {
     }
 
     #[must_use]
-    pub fn measure_text(&self, text: &str) -> TextDimensions {
+    pub(crate) fn measure_text(&self, text: &str) -> TextDimensions {
         measure_text(text, Some(&self.assets.font), FONT_SIZE, 1.0)
     }
 
-    pub fn draw_text(&self, text: &str, x: f32, y: f32) {
+    pub(crate) fn draw_text(&self, text: &str, x: f32, y: f32) {
         self.draw_text_with_color(text, x, y, BLACK);
     }
 
-    pub fn draw_text_with_color(&self, text: &str, x: f32, y: f32, color: Color) {
+    pub(crate) fn draw_text_with_color(&self, text: &str, x: f32, y: f32, color: Color) {
         draw_text_ex(
             text,
             x,

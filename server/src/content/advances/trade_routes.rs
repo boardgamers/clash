@@ -1,46 +1,45 @@
 use crate::advance::Advance;
 use crate::city::{City, MoodState};
+use crate::events::EventPlayer;
 use crate::game::Game;
-use crate::payment::PaymentOptions;
+use crate::payment::ResourceReward;
 use crate::player::Player;
 use crate::position::Position;
 use crate::resource::ResourceType;
-use crate::resource_pile::ResourcePile;
 use crate::unit::Unit;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct TradeRoute {
-    unit_id: u32,
+    pub(crate) unit_id: u32,
     from: Position,
     pub to: Position,
 }
 
 #[must_use]
-pub fn trade_route_reward(game: &Game) -> Option<(PaymentOptions, Vec<TradeRoute>)> {
-    let p = game.current_player_index;
-    let trade_routes = find_trade_routes(game, &game.players[p], false);
+pub(crate) fn trade_route_reward(
+    game: &Game,
+    p: &EventPlayer,
+) -> Option<(ResourceReward, Vec<TradeRoute>)> {
+    let trade_routes = find_trade_routes(game, p.get(game), false);
     if trade_routes.is_empty() {
         return None;
     }
 
-    Some((
-        if game.players[p].has_advance(Advance::Currency) {
-            PaymentOptions::sum(
-                trade_routes.len() as u8,
-                &[ResourceType::Gold, ResourceType::Food],
-            )
+    let reward = p.reward_options().sum(
+        trade_routes.len() as u8,
+        if p.get(game).can_use_advance(Advance::Currency) {
+            &[ResourceType::Gold, ResourceType::Food]
         } else {
-            PaymentOptions::sum(trade_routes.len() as u8, &[ResourceType::Food])
+            &[ResourceType::Food]
         },
-        trade_routes,
-    ))
+    );
+    Some((reward, trade_routes))
 }
 
 pub(crate) fn trade_route_log(
     game: &Game,
     player_index: usize,
     trade_routes: &[TradeRoute],
-    reward: &ResourcePile,
     selected: bool,
 ) -> Vec<String> {
     let mut log = Vec::new();
@@ -52,13 +51,15 @@ pub(crate) fn trade_route_log(
     }
     for t in trade_routes {
         log.push(format!(
-            "{:?} at {:?} traded with city at {:?}",
-            game.players[player_index].get_unit(t.unit_id).unit_type,
+            "{} at {} traded with city {}",
+            game.players[player_index]
+                .get_unit(t.unit_id)
+                .unit_type
+                .non_leader_name(),
             t.from,
             t.to,
         ));
     }
-    log.push(format!("Total reward is {reward}"));
     log
 }
 
@@ -67,7 +68,7 @@ pub fn find_trade_routes(game: &Game, player: &Player, only_ships: bool) -> Vec<
     let all: Vec<Vec<TradeRoute>> = player
         .units
         .iter()
-        .filter(|u| !only_ships || u.unit_type.is_ship())
+        .filter(|u| !only_ships || u.is_ship())
         .map(|u| find_trade_route_for_unit(game, player, u))
         .filter(|r| !r.is_empty())
         .collect();
@@ -109,12 +110,12 @@ pub(crate) fn find_trade_route_for_unit(
     player: &Player,
     unit: &Unit,
 ) -> Vec<TradeRoute> {
-    if !player.has_advance(Advance::TradeRoutes) {
+    if !player.can_use_advance(Advance::TradeRoutes) {
         // not only used from the regular Trade Routes method, so we need to check the advance
         return vec![];
     }
 
-    let expected_type = unit.unit_type.is_ship() || unit.unit_type.is_settler();
+    let expected_type = unit.is_ship() || unit.is_settler();
     if !expected_type {
         return vec![];
     }

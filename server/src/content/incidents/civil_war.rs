@@ -1,3 +1,5 @@
+use crate::action::lose_action;
+use crate::city;
 use crate::city::MoodState;
 use crate::content::effects::PermanentEffect;
 use crate::content::incidents::famine::kill_incident_units;
@@ -5,18 +7,18 @@ use crate::content::incidents::good_year::select_player_to_gain_settler;
 use crate::content::persistent_events::{PaymentRequest, PositionRequest, UnitsRequest};
 use crate::game::Game;
 use crate::incident::{
-    Incident, IncidentBaseEffect, IncidentBuilder, MoodModifier, decrease_mod_and_log,
+    DecreaseMood, Incident, IncidentBaseEffect, IncidentBuilder, MoodModifier, decrease_mod_and_log,
 };
-use crate::payment::{PaymentConversion, PaymentConversionType, PaymentOptions};
+use crate::payment::{PaymentConversion, PaymentConversionType};
 use crate::player::Player;
 use crate::player_events::IncidentTarget;
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::status_phase::{
-    add_change_government, can_change_government_for_free, get_status_phase,
+    ChangeGovernmentOption, add_change_government, can_change_government_for_free, get_status_phase,
 };
-use crate::unit::{UnitType, kill_units};
-use crate::wonder::draw_wonder_from_pile;
+use crate::unit::kill_units;
+use crate::wonder::draw_public_wonder;
 use itertools::Itertools;
 
 pub(crate) fn civil_war_incidents() -> Vec<Incident> {
@@ -32,28 +34,19 @@ pub(crate) fn civil_war_incidents() -> Vec<Incident> {
 }
 
 fn migration(id: u8) -> Incident {
-    let b = Incident::builder(
+    select_player_to_gain_settler(Incident::builder(
         id,
         "Migration",
         "Select a player to gain 1 settler in one of their cities. \
         Decrease the mood in one of your cities.",
         IncidentBaseEffect::GoldDeposits,
-    );
-    select_player_to_gain_settler(b)
-        .add_decrease_mood(
-            IncidentTarget::ActivePlayer,
-            MoodModifier::Decrease,
-            |p, _game, _| (non_angry_cites(p), 1),
-        )
-        .build()
-}
-
-pub(crate) fn non_angry_cites(p: &Player) -> Vec<Position> {
-    p.cities
-        .iter()
-        .filter(|c| !matches!(c.mood_state, MoodState::Angry))
-        .map(|c| c.position)
-        .collect_vec()
+    ))
+    .add_decrease_mood(
+        IncidentTarget::ActivePlayer,
+        MoodModifier::Decrease,
+        |p, _game, _| DecreaseMood::new(city::non_angry_cites(p), 1),
+    )
+    .build()
 }
 
 fn civil_war(id: u8) -> Incident {
@@ -70,18 +63,18 @@ fn civil_war(id: u8) -> Incident {
         MoodModifier::Decrease,
         |p, _game, _| {
             if non_happy_cites_with_infantry(p).is_empty() {
-                (non_angry_cites(p), 1)
+                DecreaseMood::new(city::non_angry_cites(p), 1)
             } else {
-                (vec![], 0)
+                DecreaseMood::none()
             }
         },
     )
     .add_incident_position_request(
         IncidentTarget::ActivePlayer,
         0,
-        |game, player_index, i| {
-            let p = game.player(player_index);
-            let suffix = if !non_angry_cites(p).is_empty() && i.player.payment.is_empty() {
+        |game, p, i| {
+            let p = p.get(game);
+            let suffix = if !city::non_angry_cites(p).is_empty() && i.player.payment.is_empty() {
                 " and decrease the mood"
             } else {
                 ""
@@ -102,16 +95,12 @@ fn civil_war(id: u8) -> Incident {
                 .player(s.player_index)
                 .get_units(position)
                 .iter()
-                .filter(|u| matches!(u.unit_type, UnitType::Infantry))
+                .filter(|u| u.is_infantry())
                 .sorted_by_key(|u| u.movement_restrictions.len())
                 .next_back()
                 .expect("infantry should exist")
                 .id;
-            game.add_info_log_item(&format!(
-                "{} killed an Infantry in {}",
-                s.player_name, position
-            ));
-            kill_units(game, &[unit], s.player_index, None);
+            kill_units(game, &[unit], s.player_index, None, &s.origin);
         },
     )
     .build()
@@ -122,9 +111,7 @@ fn non_happy_cites_with_infantry(p: &Player) -> Vec<Position> {
         .iter()
         .filter(|c| {
             !matches!(c.mood_state, MoodState::Happy)
-                && p.get_units(c.position)
-                    .iter()
-                    .any(|u| matches!(u.unit_type, UnitType::Infantry))
+                && p.get_units(c.position).iter().any(|u| u.is_infantry())
         })
         .map(|c| c.position)
         .collect_vec()
@@ -141,22 +128,35 @@ fn revolution() -> Incident {
     );
     b = kill_unit_for_revolution(
         b,
-        3,
+        11,
         "Kill a unit to avoid losing an action",
         |game, _player| can_lose_action(game),
     );
-    b = b.add_simple_incident_listener(IncidentTarget::ActivePlayer, 2, |game, player, _, i| {
+    b = b.add_simple_incident_listener(IncidentTarget::ActivePlayer, 2, |game, p, i| {
         if can_lose_action(game) && i.player.sacrifice == 0 {
-            lose_action(game, player);
+            if get_status_phase(game).is_some() {
+                p.log(game, "Lose an action for the next turn");
+                game.permanent_effects
+                    .push(PermanentEffect::RevolutionLoseAction(p.index));
+            } else {
+                lose_action(game, p);
+            }
         }
     });
     b = kill_unit_for_revolution(
         b,
-        1,
+        10,
         "Kill a unit to avoid changing government",
         |game, player| can_change_government_for_free(player, game),
     );
-    b = add_change_government(b, |event| &mut event.incident, false, ResourcePile::empty());
+    b = add_change_government(
+        b,
+        |event| &mut event.incident,
+        ChangeGovernmentOption::FreeAndMandatory,
+        |i, p, game| i.active_player == p && can_change_government_for_free(game.player(p), game),
+        |_, _| {}, // don't need to pay
+        |_| true,
+    );
     b.build()
 }
 
@@ -170,18 +170,18 @@ fn kill_unit_for_revolution(
     b.add_incident_units_request(
         IncidentTarget::ActivePlayer,
         priority,
-        move |game, player_index, i| {
+        move |game, p, i| {
             i.player.sacrifice = 0;
-            let units = game
-                .player(player_index)
+            let units = p
+                .get(game)
                 .units
                 .iter()
-                .filter(|u| u.unit_type.is_army_unit())
+                .filter(|u| u.is_army_unit())
                 .map(|u| u.id)
                 .collect_vec();
             Some(UnitsRequest::new(
-                player_index,
-                if pred(game, game.player(player_index)) {
+                p.index,
+                if pred(game, p.get(game)) {
                     units
                 } else {
                     vec![]
@@ -203,18 +203,6 @@ fn can_lose_action(game: &Game) -> bool {
     get_status_phase(game).is_some() || game.actions_left > 0
 }
 
-fn lose_action(game: &mut Game, player: usize) {
-    let name = game.player_name(player);
-    if get_status_phase(game).is_some() {
-        game.add_info_log_item(&format!("{name} lost an action for the next turn"));
-        game.permanent_effects
-            .push(PermanentEffect::LoseAction(player));
-    } else {
-        game.add_info_log_item(&format!("{name} lost an action"));
-        game.actions_left -= 1;
-    }
-}
-
 #[allow(clippy::float_cmp)]
 fn uprising() -> Incident {
     Incident::builder(
@@ -227,9 +215,9 @@ fn uprising() -> Incident {
     .add_incident_payment_request(
         IncidentTarget::ActivePlayer,
         0,
-        |game, player_index, _incident| {
-            let player = game.player(player_index);
-            let mut cost = PaymentOptions::tokens(4);
+        |game, p, _incident| {
+            let player = p.get(game);
+            let mut cost = p.payment_options().tokens(player, 4);
             cost.conversions.push(PaymentConversion::new(
                 vec![
                     ResourcePile::mood_tokens(1),
@@ -238,24 +226,26 @@ fn uprising() -> Incident {
                 ResourcePile::empty(),
                 PaymentConversionType::MayOverpay(3),
             ));
-            player.can_afford(&cost).then_some(vec![PaymentRequest::new(
-                cost,
-                "Pay 1-4 mood or culture tokens",
-                false,
-            )])
+            player
+                .can_afford(&cost)
+                .then_some(vec![PaymentRequest::mandatory(
+                    cost,
+                    "Pay 1-4 mood or culture tokens",
+                )])
         },
         |game, s, _| {
             let player = game.player_mut(s.player_index);
             let pile = &s.choice[0];
             let v = pile.amount() as f32 / 2_f32;
-            player.event_victory_points += v;
-            game.add_info_log_item(&format!(
-                "{} paid {} to gain {} victory point{}",
-                s.player_name,
-                pile,
-                v,
-                if v == 1.0 { "" } else { "s" }
-            ));
+            player.gain_event_victory_points(v, &s.origin);
+            s.log(
+                game,
+                &format!(
+                    "Gain {} victory point{}",
+                    v,
+                    if v == 1.0 { "" } else { "s" }
+                ),
+            );
         },
     )
     .build()
@@ -266,39 +256,27 @@ fn envoy() -> Incident {
         40,
         "Envoy",
         "Gain 1 idea and 1 culture token. \
-                      Select another player to gain 1 culture token. \
-                      Draw the top card from the wonder deck. \
-                      This card can be taken by anyone instead of drawing from the wonder pile.",
+        Select another player to gain 1 culture token. \
+        Draw the top card from the wonder deck. \
+        This card can be taken by anyone instead of drawing from the wonder pile.",
         IncidentBaseEffect::BarbariansMove,
     )
-    .add_simple_incident_listener(
-        IncidentTarget::ActivePlayer,
-        1,
-        |game, player, player_name, _| {
-            game.add_info_log_item(&format!("{player_name} gained 1 idea and 1 culture token"));
-            game.player_mut(player)
-                .gain_resources(ResourcePile::culture_tokens(1) + ResourcePile::ideas(1));
+    .add_simple_incident_listener(IncidentTarget::ActivePlayer, 1, |game, player, _| {
+        player.gain_resources(
+            game,
+            ResourcePile::ideas(1) + ResourcePile::culture_tokens(1),
+        );
 
-            if let Some(wonder) = draw_wonder_from_pile(game) {
-                game.add_info_log_item(&format!("{wonder} is now available to be taken by anyone"));
-                game.permanent_effects
-                    .push(PermanentEffect::PublicWonderCard(wonder));
-            }
-        },
-    )
+        draw_public_wonder(game, player);
+    })
     .add_incident_player_request(
         IncidentTarget::ActivePlayer,
         "Select a player to gain 1 culture token",
         |_p, _, _| true,
         0,
         |game, s, _| {
-            let p = s.choice;
-            game.add_info_log_item(&format!(
-                "{} was selected to gain 1 culture token.",
-                game.player_name(p)
-            ));
-            game.player_mut(p)
-                .gain_resources(ResourcePile::culture_tokens(1));
+            s.other_player(s.choice, game)
+                .gain_resources(game, ResourcePile::culture_tokens(1));
         },
     )
     .build()

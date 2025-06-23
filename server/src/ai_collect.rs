@@ -1,170 +1,325 @@
-use crate::ability_initializer::AbilityInitializerSetup;
-use crate::advance::Advance;
-use crate::city::City;
-use crate::collect::{
-    CollectInfo, PositionCollection, add_collect, apply_total_collect,
-    possible_resource_collections, tiles_used,
-};
-use crate::content::builtin::Builtin;
-use crate::game::Game;
-use crate::player::{CostTrigger, Player};
-use crate::playing_actions::{Collect, PlayingActionType};
+use crate::collect::{CollectInfo, PositionCollection};
 use crate::position::Position;
-use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use itertools::Itertools;
+use std::collections::HashSet;
+use std::mem;
 
-pub fn set_city_collections(game: &mut Game, city_position: Position) {
-    let city = game.get_any_city(city_position);
-    let player = city.player_index;
-    let p = city_collections_uncached(game, game.player(player), city);
-    game.player_mut(player)
-        .get_city_mut(city_position)
-        .possible_collections
-        .clone_from(&p);
-}
+pub(crate) fn possible_collections(info: &CollectInfo) -> Vec<Vec<PositionCollection>> {
+    let choices = info.choices.clone();
 
-#[must_use]
-pub fn city_collections_uncached(game: &Game, player: &Player, city: &City) -> Vec<Collect> {
-    let info = possible_resource_collections(
-        game,
-        city.position,
-        player.index,
-        &[],
-        CostTrigger::NoModifiers,
-    );
+    let mut list = choices.iter().collect_vec();
+    let tiles = list.len(); // production focus is not considered
+    let mut max_tiles = tiles;
 
-    let all = ResourceType::all()
+    // avoid husbandry
+    list.sort_by_key(|(pos, _)| (pos.distance(info.city), *(*pos)));
+    if info.max_range2_tiles > 0 {
+        let range2_tiles = list
+            .iter()
+            .filter(|(pos, _)| pos.distance(info.city) > 1)
+            .count();
+        max_tiles -= range2_tiles.saturating_sub(info.max_range2_tiles as usize);
+    }
+    let take = (info.max_selection as usize).min(max_tiles);
+
+    let combinations = generate_all_combinations(tiles, take);
+
+    combinations
         .into_iter()
-        .filter(|r| {
-            info.choices
-                .iter()
-                .any(|(_, choices)| choices.iter().any(|pile| pile.get(r) > 0))
+        .flat_map(|c| {
+            let mut result = vec![vec![]];
+            add_combination(&c, &list, &mut result);
+            result
         })
-        .collect_vec();
-    let l = all.len();
-    all.into_iter()
-        .permutations(l)
-        .filter_map(|priority| city_collection_uncached(game, player, city, &priority))
-        .unique_by(|c| c.total.clone())
+        .filter(|c| {
+            info.max_range2_tiles == 0
+                || c.iter()
+                    .filter(|p| p.position.distance(info.city) > 1)
+                    .count()
+                    <= info.max_range2_tiles as usize
+        })
+        .filter_map(|c| {
+            let t = total_collect(&c);
+            (t.amount() > 0).then_some((c, t))
+        })
+        .unique_by(|(_, t)| t.clone())
+        .map(|(c, _)| c)
         .collect_vec()
 }
 
-fn city_collection_uncached(
-    game: &Game,
-    player: &Player,
-    city: &City,
-    priority: &[ResourceType],
-) -> Option<Collect> {
-    let mut c: Vec<PositionCollection> = vec![];
+fn add_combination(
+    combo: &[usize],
+    choices: &[(&Position, &HashSet<ResourcePile>)],
+    result: &mut Vec<Vec<PositionCollection>>,
+) {
+    if combo.is_empty() {
+        return;
+    }
 
-    loop {
-        let info = possible_resource_collections(
-            game,
-            city.position,
-            player.index,
-            &c,
-            CostTrigger::NoModifiers,
+    let (pos, pile) = choices[combo[0]];
+
+    if pile.len() > 1 {
+        let old = mem::take(result);
+        for j in pile {
+            for r in &old.clone() {
+                let mut r = r.clone();
+                r.push(PositionCollection::new(*pos, j.clone()));
+                result.push(r);
+            }
+        }
+    } else {
+        let n = pile.iter().next().expect("pile empty");
+        for r in &mut *result {
+            r.push(PositionCollection::new(*pos, n.clone()));
+        }
+    }
+    add_combination(&combo[1..], choices, result);
+}
+
+/// Generates all possible combinations of `k` numbers out of `0...n-1`.
+///
+/// # Arguments
+///
+/// * `n` - The upper limit of the range (`0` to `n-1`).
+/// * `k` - The number of elements in each combination.
+///
+/// # Returns
+///
+/// A `Result` containing a vector with all possible combinations of `k` numbers out of `0...n-1`,
+/// or a `CombinationError` if the input is invalid.
+#[must_use]
+fn generate_all_combinations(n: usize, k: usize) -> Vec<Vec<usize>> {
+    assert!(
+        !(n == 0 && k > 0),
+        "Invalid input: n is 0 and k is greater than 0"
+    );
+
+    assert!(k <= n, "Invalid input: k is greater than n");
+
+    let mut combinations = vec![];
+    let mut current = vec![0; k];
+    backtrack(0, n, k, 0, &mut current, &mut combinations);
+    combinations
+}
+
+/// Helper function to generate combinations recursively.
+///
+/// # Arguments
+///
+/// * `start` - The current number to start the combination with.
+/// * `n` - The upper limit of the range (`0` to `n-1`).
+/// * `k` - The number of elements left to complete the combination.
+/// * `index` - The current index being filled in the combination.
+/// * `current` - A mutable reference to the current combination being constructed.
+/// * `combinations` - A mutable reference to the vector holding all combinations.
+fn backtrack(
+    start: usize,
+    n: usize,
+    k: usize,
+    index: usize,
+    current: &mut Vec<usize>,
+    combinations: &mut Vec<Vec<usize>>,
+) {
+    if index == k {
+        combinations.push(current.clone());
+        return;
+    }
+
+    for num in start..=(n - k + index) {
+        current[index] = num;
+        backtrack(num + 1, n, k, index + 1, current, combinations);
+    }
+}
+
+pub(crate) fn total_collect(r: &Vec<PositionCollection>) -> ResourcePile {
+    let mut total = ResourcePile::empty();
+    for c in r {
+        total += c.total();
+    }
+    total
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::ai_collect::{possible_collections, total_collect};
+    use crate::collect::{CollectInfo, PositionCollection};
+    use crate::events::check_event_origin;
+    use crate::player_events::ActionInfo;
+    use crate::position::Position;
+    use crate::resource_pile::ResourcePile;
+    use itertools::Itertools;
+    use rustc_hash::FxBuildHasher;
+    use std::collections::{HashMap, HashSet};
+
+    fn info(max: u8, choices: HashMap<Position, HashSet<ResourcePile>>) -> CollectInfo {
+        CollectInfo {
+            total: ResourcePile::empty(),
+            city: Position::from_offset("D3"),
+            modifiers: Vec::new(),
+            choices,
+            max_selection: max,
+            max_per_tile: 0,
+            max_range2_tiles: 0,
+            info: ActionInfo {
+                player: 0,
+                info: HashMap::new(),
+                log: Vec::new(),
+                origin: check_event_origin(),
+            },
+        }
+    }
+
+    fn assert_total(result: &[Vec<PositionCollection>], expected: &[ResourcePile]) {
+        let got = result.iter().map(total_collect).collect::<Vec<_>>();
+        let want: HashSet<&ResourcePile, FxBuildHasher> =
+            expected.iter().collect::<HashSet<_, _>>();
+        let got: HashSet<&ResourcePile, FxBuildHasher> = got.iter().collect::<HashSet<_, _>>();
+        assert_eq!(got, want, "Total mismatch");
+    }
+
+    #[test]
+    fn test_possible_collections() {
+        let mut info = info(
+            1,
+            HashMap::from([
+                (
+                    Position::from_offset("D2"),
+                    HashSet::from([ResourcePile::food(1)]),
+                ),
+                (
+                    Position::from_offset("E2"),
+                    HashSet::from([ResourcePile::wood(1)]),
+                ),
+                (
+                    Position::from_offset("E3"),
+                    HashSet::from([ResourcePile::ore(1)]),
+                ),
+                (
+                    Position::from_offset("D4"),
+                    HashSet::from([ResourcePile::ore(1)]),
+                ),
+            ]),
+        );
+        assert_total(
+            &possible_collections(&info),
+            &[
+                ResourcePile::ore(1),
+                ResourcePile::food(1),
+                ResourcePile::wood(1),
+            ],
         );
 
-        let Some((pos, pile)) = pick_resource(&info, &c, priority) else {
-            return apply_total_collect(&c, player, info, game)
-                .ok()
-                .map(|i| Collect::new(city.position, c, i.total, PlayingActionType::Collect));
-        };
-        c = add_collect(&info, pos, &pile, &c);
-    }
-}
-
-fn pick_resource(
-    info: &CollectInfo,
-    collected: &[PositionCollection],
-    priority: &[ResourceType],
-) -> Option<(Position, ResourcePile)> {
-    if info.max_selection == tiles_used(collected) {
-        return None;
+        info.max_selection = 2;
+        assert_total(
+            &possible_collections(&info),
+            &[
+                ResourcePile::ore(2),
+                ResourcePile::food(1) + ResourcePile::wood(1),
+                ResourcePile::food(1) + ResourcePile::ore(1),
+                ResourcePile::wood(1) + ResourcePile::ore(1),
+            ],
+        );
     }
 
-    let used = collected
-        .iter()
-        .chunk_by(|c| c.position)
-        .into_iter()
-        .map(|(p, group)| (p, group.map(|c| c.times).sum::<u8>()))
-        .collect_vec();
+    // todo test port
 
-    let available = info
-        .choices
-        .iter()
-        // .sorted_by_key(|(pos, _)| **pos)
-        .filter(|(pos, _)| {
-            let u = used
-                .iter()
-                .find_map(|(p, u)| (*p == **pos).then_some(*u))
-                .unwrap_or(0);
-
-            u < info.max_per_tile
-        })
-        .collect_vec();
-
-    priority.iter().find_map(|r| {
-        available.iter().find_map(|(pos, choices)| {
-            choices
-                .iter()
-                .find_map(|pile| (pile.get(r) > 0).then_some((**pos, pile.clone())))
-        })
-    })
-}
-
-pub(crate) fn invalidate_collect_cache() -> Builtin {
-    Builtin::builder("InvalidateCollectCache", "-")
-        .add_simple_persistent_event_listener(
-            |event| &mut event.found_city,
+    #[test]
+    fn test_husbandry() {
+        let mut info = info(
             1,
-            |game, player, _, p| {
-                reset_collect_within_range(game.player_mut(player), *p);
-            },
-        )
-        .add_simple_persistent_event_listener(
-            |event| &mut event.combat_end,
-            0,
-            |game, _player, _, p| {
-                reset_collect_within_range_for_all(game, p.combat.defender_position);
-            },
-        )
-        .build()
-}
+            HashMap::from([
+                (
+                    Position::from_offset("D4"), // prefer this
+                    HashSet::from([ResourcePile::food(1)]),
+                ),
+                (
+                    Position::from_offset("D1"), // over the further away food
+                    HashSet::from([ResourcePile::food(1)]),
+                ),
+                (
+                    Position::from_offset("C5"),
+                    HashSet::from([ResourcePile::gold(1)]),
+                ),
+                (
+                    Position::from_offset("D5"),
+                    HashSet::from([ResourcePile::gold(1)]),
+                ),
+            ]),
+        );
+        info.max_range2_tiles = 1;
+        let collections = possible_collections(&info);
 
-pub(crate) fn reset_collect_within_range(p: &mut Player, position: Position) {
-    let has_husbandry = p.has_advance(Advance::Husbandry);
-    let range = if has_husbandry { 2 } else { 1 };
-    for c in &mut p.cities {
-        if c.position.distance(position) <= range {
-            c.possible_collections.clear();
-        }
+        assert_total(
+            &collections,
+            &[ResourcePile::gold(1), ResourcePile::food(1)],
+        );
+
+        let positions = collections
+            .iter()
+            .map(|c| c.iter().map(|p| p.position).collect_vec())
+            .collect_vec();
+
+        assert_eq!(
+            positions,
+            vec![
+                vec![Position::from_offset("D4")], // don't take the further away food
+                vec![Position::from_offset("C5")],
+            ]
+        );
+
+        info.max_range2_tiles = 2;
+        info.max_selection = 3;
+        assert_total(
+            &possible_collections(&info),
+            &[
+                ResourcePile::gold(2) + ResourcePile::food(1),
+                ResourcePile::gold(1) + ResourcePile::food(2),
+            ],
+        );
     }
-}
 
-pub(crate) fn reset_collect_within_range_for_all(game: &mut Game, pos: Position) {
-    for p in &mut game.players {
-        reset_collect_within_range(p, pos);
+    #[test]
+    fn test_husbandry_not_enough_tiles() {
+        let mut info = info(
+            2,
+            HashMap::from([
+                (
+                    Position::from_offset("C5"),
+                    HashSet::from([ResourcePile::gold(1)]),
+                ),
+                (
+                    Position::from_offset("D5"),
+                    HashSet::from([ResourcePile::gold(1)]),
+                ),
+            ]),
+        );
+        info.max_range2_tiles = 1;
+
+        assert_total(&possible_collections(&info), &[ResourcePile::gold(1)]);
     }
-}
 
-pub(crate) fn reset_collect_within_range_for_all_except(
-    game: &mut Game,
-    pos: Position,
-    player: usize,
-) {
-    for p in &mut game.players {
-        if p.index == player {
-            continue;
-        }
-        reset_collect_within_range(p, pos);
-    }
-}
-
-pub(crate) fn reset_collection_stats(p: &mut Player) {
-    for c in &mut p.cities {
-        c.possible_collections.clear();
+    #[test]
+    fn test_port() {
+        let info = info(
+            2,
+            HashMap::from([
+                (
+                    Position::from_offset("D3"),
+                    HashSet::from([ResourcePile::gold(1), ResourcePile::mood_tokens(1)]),
+                ),
+                (
+                    Position::from_offset("D4"),
+                    HashSet::from([ResourcePile::gold(1)]),
+                ),
+            ]),
+        );
+        assert_total(
+            &possible_collections(&info),
+            &[
+                ResourcePile::gold(2),
+                ResourcePile::gold(1) + ResourcePile::mood_tokens(1),
+            ],
+        );
     }
 }

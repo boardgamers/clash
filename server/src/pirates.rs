@@ -1,14 +1,14 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::barbarians;
-use crate::city::MoodState;
-use crate::content::builtin::Builtin;
+use crate::city::{MoodState, decrease_city_mood};
+use crate::content::ability::Ability;
 use crate::content::persistent_events::{
     PaymentRequest, PositionRequest, ResourceRewardRequest, UnitsRequest,
 };
+use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
 use crate::incident::{BASE_EFFECT_PRIORITY, IncidentBuilder};
-use crate::payment::PaymentOptions;
-use crate::player::{Player, add_unit};
+use crate::player::{Player, gain_unit, remove_unit};
 use crate::player_events::IncidentTarget;
 use crate::position::Position;
 use crate::resource::ResourceType;
@@ -16,65 +16,44 @@ use crate::tactics_card::CombatRole;
 use crate::unit::UnitType;
 use itertools::Itertools;
 
-pub(crate) fn pirates_round_bonus() -> Builtin {
-    Builtin::builder("Pirates bonus", "-")
+pub(crate) fn pirates_round_bonus() -> Ability {
+    Ability::builder("Pirate ship destroyed", "-")
         .add_resource_request(
             |event| &mut event.combat_round_end,
             3,
-            |game, player_index, r| {
+            |game, p, r| {
                 let c = &r.combat;
-                if c.is_sea_battle(game)
-                    && c.opponent(player_index) == get_pirates_player(game).index
-                {
-                    let hits = r.casualties(CombatRole::Defender).fighters as u32;
+                if c.is_sea_battle(game) && c.opponent(p.index) == get_pirates_player(game).index {
                     Some(ResourceRewardRequest::new(
-                        PaymentOptions::sum(hits as u8, &[ResourceType::Gold]),
+                        p.reward_options()
+                            .sum(r.hits(CombatRole::Attacker), &[ResourceType::Gold]),
                         "-".to_string(),
                     ))
                 } else {
                     None
                 }
             },
-            |_game, s, _| {
-                vec![format!(
-                    "{} gained {} for destroying Pirate Ships",
-                    s.player_name, s.choice
-                )]
-            },
         )
         .build()
 }
 
-pub(crate) fn pirates_bonus() -> Builtin {
-    Builtin::builder(
-        "Barbarians bonus",
-        "Select a reward for fighting the Pirates",
-    )
-    .add_resource_request(
-        |event| &mut event.combat_end,
-        103,
-        |game, player_index, i| {
-            if game
-                .player(i.opponent(player_index))
-                .civilization
-                .is_pirates()
-            {
-                Some(ResourceRewardRequest::new(
-                    PaymentOptions::tokens(1),
-                    "Select a reward for fighting the Pirates".to_string(),
-                ))
-            } else {
-                None
-            }
-        },
-        |_game, s, _| {
-            vec![format!(
-                "{} gained {} for fighting the Pirates",
-                s.player_name, s.choice
-            )]
-        },
-    )
-    .build()
+pub(crate) fn pirates_bonus() -> Ability {
+    Ability::builder("Pirates battle", "Select a reward for fighting the Pirates")
+        .add_resource_request(
+            |event| &mut event.combat_end,
+            103,
+            |game, p, i| {
+                if i.opponent_player(p.index, game).civilization.is_pirates() {
+                    Some(ResourceRewardRequest::new(
+                        p.reward_options().tokens(1),
+                        "Select a reward for fighting the Pirates".to_string(),
+                    ))
+                } else {
+                    None
+                }
+            },
+        )
+        .build()
 }
 
 pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBuilder {
@@ -87,45 +66,38 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
         .add_incident_payment_request(
             IncidentTarget::AllPlayers,
             BASE_EFFECT_PRIORITY + 2,
-            |game, player_index, i| {
-                let player = game.player(player_index);
+            |game, p, i| {
+                let player = p.get(game);
                 if cities_with_adjacent_pirates(player, game).is_empty() {
                     return None;
                 }
 
                 if player.resources.amount() > 0 {
-                    game.add_info_log_item(&format!(
-                        "{} must pay 1 resource or token to bribe the pirates",
-                        player.get_name()
-                    ));
-                    Some(vec![PaymentRequest::new(
-                        PaymentOptions::sum(1, &ResourceType::all()),
+                    p.log(game, "Must pay 1 resource or token to bribe the pirates");
+                    Some(vec![PaymentRequest::mandatory(
+                        p.payment_options()
+                            .sum(p.get(game), 1, &ResourceType::all()),
                         "Pay 1 Resource or token to bribe the pirates",
-                        false,
                     )])
                 } else {
                     let state = i.get_barbarian_state();
-                    state.must_reduce_mood.push(player_index);
+                    state.must_reduce_mood.push(p.index);
                     None
                 }
             },
-            |c, s, _| {
-                c.add_info_log_item(&format!("Pirates took {}", s.choice[0]));
+            |game, s, _| {
+                s.log(game, &format!("Pirates took {}", s.choice[0]));
             },
         )
         .add_incident_position_request(
             IncidentTarget::AllPlayers,
             BASE_EFFECT_PRIORITY + 1,
-            |game, player_index, i| {
-                if !i
-                    .get_barbarian_state()
-                    .must_reduce_mood
-                    .contains(&player_index)
-                {
+            |game, p, i| {
+                if !i.get_barbarian_state().must_reduce_mood.contains(&p.index) {
                     return None;
                 }
 
-                let player = game.player(player_index);
+                let player = p.get(game);
                 let choices = cities_with_adjacent_pirates(player, game)
                     .into_iter()
                     .filter(|&pos| !matches!(player.get_city(pos).mood_state, MoodState::Angry))
@@ -134,11 +106,7 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
                     return None;
                 }
 
-                game.add_info_log_item(&format!(
-                    "{} must reduce Mood in a city adjacent to pirates",
-                    player.get_name()
-                ));
-
+                p.log(game, "Must reduce Mood in a city adjacent to pirates");
                 let needed = 1..=1;
                 Some(PositionRequest::new(
                     choices,
@@ -147,14 +115,7 @@ pub(crate) fn pirates_spawn_and_raid(mut builder: IncidentBuilder) -> IncidentBu
                 ))
             },
             |game, s, _| {
-                let pos = s.choice[0];
-                game.add_info_log_item(&format!(
-                    "{} reduced Mood in the city at {}",
-                    s.player_name, pos
-                ));
-                game.player_mut(s.player_index)
-                    .get_city_mut(pos)
-                    .decrease_mood_state();
+                decrease_city_mood(game, s.choice[0], &s.origin);
             },
         )
 }
@@ -163,8 +124,8 @@ fn remove_pirate_ships(builder: IncidentBuilder) -> IncidentBuilder {
     builder.add_units_request(
         |event| &mut event.incident,
         BASE_EFFECT_PRIORITY + 5,
-        |game, player_index, i| {
-            if !i.is_active(IncidentTarget::ActivePlayer, player_index) {
+        |game, p, i| {
+            if !i.is_active_ignoring_protection(IncidentTarget::ActivePlayer, p.index) {
                 return None;
             }
 
@@ -172,7 +133,7 @@ fn remove_pirate_ships(builder: IncidentBuilder) -> IncidentBuilder {
             let pirate_ships = pirates
                 .units
                 .iter()
-                .filter(|u| u.unit_type == UnitType::Ship)
+                .filter(|u| u.is_ship())
                 .map(|u| u.id)
                 .collect();
             let needs_removal = 2_u8.saturating_sub(pirates.available_units().get(&UnitType::Ship));
@@ -186,16 +147,18 @@ fn remove_pirate_ships(builder: IncidentBuilder) -> IncidentBuilder {
         },
         |game, s, _| {
             let pirates = get_pirates_player(game).index;
-            game.add_info_log_item(&format!(
-                "{} removed a Pirate Ships at {}",
-                s.player_name,
-                s.choice
-                    .iter()
-                    .map(|u| game.player(pirates).get_unit(*u).position.to_string())
-                    .join(", ")
-            ));
+            s.log(
+                game,
+                &format!(
+                    "Removed a Pirate Ships at {}",
+                    s.choice
+                        .iter()
+                        .map(|u| game.player(pirates).get_unit(*u).position.to_string())
+                        .join(", ")
+                ),
+            );
             for unit in &s.choice {
-                game.player_mut(pirates).remove_unit(*unit);
+                remove_unit(pirates, *unit, game);
             }
         },
     )
@@ -205,9 +168,9 @@ fn place_pirate_ship(builder: IncidentBuilder, priority: i32, blockade: bool) ->
     builder.add_incident_position_request(
         IncidentTarget::ActivePlayer,
         priority,
-        move |game, player_index, _i| {
+        move |game, p, _i| {
             let pirates = get_pirates_player(game).index;
-            let player = game.player(player_index);
+            let player = p.get(game);
             let mut sea_spaces = game
                 .map
                 .tiles
@@ -235,7 +198,7 @@ fn place_pirate_ship(builder: IncidentBuilder, priority: i32, blockade: bool) ->
 
             if sea_spaces.is_empty() && blockade {
                 // don't log this twice (blockade is only for first call)
-                game.add_info_log_item("No valid positions for Pirate Ship");
+                p.log(game, "No valid positions for Pirate Ship");
             }
 
             let needed = 1..=1;
@@ -246,10 +209,12 @@ fn place_pirate_ship(builder: IncidentBuilder, priority: i32, blockade: bool) ->
             ))
         },
         |game, s, _| {
-            let pirate = get_pirates_player(game).index;
-            let pos = s.choice[0];
-            game.add_info_log_item(&format!("Pirates spawned a Pirate Ship at {pos}"));
-            add_unit(pirate, pos, UnitType::Ship, game);
+            gain_unit(
+                game,
+                &get_pirates_event_player(game, &s.origin),
+                s.choice[0],
+                UnitType::Ship,
+            );
         },
     )
 }
@@ -273,11 +238,17 @@ fn cities_with_adjacent_pirates(player: &Player, game: &Game) -> Vec<Position> {
                 pirates
                     .get_units(*p)
                     .iter()
-                    .any(|u| u.unit_type == UnitType::Ship && u.position == *p)
+                    .any(|u| u.is_ship() && u.position == *p)
             })
         })
         .map(|c| c.position)
         .collect()
+}
+
+#[must_use]
+pub(crate) fn get_pirates_event_player(game: &Game, origin: &EventOrigin) -> EventPlayer {
+    let player = get_pirates_player(game);
+    EventPlayer::new(player.index, player.get_name(), origin.clone())
 }
 
 #[must_use]

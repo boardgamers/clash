@@ -19,17 +19,14 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "D6"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "C6"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "E6"
         }
@@ -41,7 +38,7 @@
           "id": 0
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Mining",
@@ -67,7 +64,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Neutral",
           "position": "D8"
         }
@@ -114,7 +110,7 @@
           "id": 7
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Currency",
         "Farming",
@@ -381,12 +377,13 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
-              "index": 0,
-              "items": []
+              "index": 0
             }
           ]
         }

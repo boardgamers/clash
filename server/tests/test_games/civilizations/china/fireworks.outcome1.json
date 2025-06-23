@@ -1,0 +1,434 @@
+{
+  "state": {
+    "Movement": {
+      "movement_actions_left": 2,
+      "moved_units": [
+        0
+      ]
+    }
+  },
+  "players": [
+    {
+      "id": 0,
+      "resources": {
+        "wood": 7,
+        "ore": 7,
+        "ideas": 5,
+        "gold": 6,
+        "mood_tokens": 9,
+        "culture_tokens": 10
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {
+            "market": 1
+          },
+          "mood_state": "Happy",
+          "position": "A1"
+        },
+        {
+          "city_pieces": {
+            "academy": 1,
+            "obelisk": 0,
+            "port": 1
+          },
+          "mood_state": "Happy",
+          "activations": 4,
+          "position": "C2",
+          "port_position": "C3"
+        },
+        {
+          "city_pieces": {
+            "obelisk": 1,
+            "observatory": 1,
+            "fortress": 1,
+            "temple": 1
+          },
+          "mood_state": "Neutral",
+          "position": "B1"
+        },
+        {
+          "mood_state": "Angry",
+          "position": "B3"
+        },
+        {
+          "mood_state": "Angry",
+          "activations": 2,
+          "position": "C1"
+        }
+      ],
+      "units": [
+        {
+          "position": "C1",
+          "unit_type": "Infantry",
+          "movement_restrictions": [
+            "Battle"
+          ],
+          "id": 0
+        },
+        {
+          "position": "B4",
+          "unit_type": "Settler",
+          "id": 4
+        },
+        {
+          "position": "B3",
+          "unit_type": "Settler",
+          "id": 5
+        },
+        {
+          "position": "B3",
+          "unit_type": "Settler",
+          "id": 6
+        }
+      ],
+      "civilization": "China",
+      "advances": [
+        "Farming",
+        "Metallurgy",
+        "Mining",
+        "Tactics"
+      ],
+      "incident_tokens": 3,
+      "wonder_cards": [
+        "Pyramids"
+      ],
+      "objective_cards": [
+        38
+      ],
+      "next_unit_id": 10
+    },
+    {
+      "id": 1,
+      "resources": {
+        "food": 6,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 9,
+        "culture_tokens": 9
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {
+            "port": 1
+          },
+          "mood_state": "Neutral",
+          "position": "B2",
+          "port_position": "C3"
+        }
+      ],
+      "units": [
+        {
+          "position": "B2",
+          "unit_type": "Settler",
+          "id": 3
+        }
+      ],
+      "civilization": "Rome",
+      "advances": [
+        "Farming",
+        "Mining"
+      ],
+      "incident_tokens": 3,
+      "next_unit_id": 4
+    },
+    {
+      "id": 2,
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "units": [
+        {
+          "position": "C3",
+          "unit_type": "Ship",
+          "id": 1
+        },
+        {
+          "position": "C3",
+          "unit_type": "Ship",
+          "id": 2
+        }
+      ],
+      "civilization": "Pirates",
+      "incident_tokens": 3,
+      "next_unit_id": 9
+    }
+  ],
+  "map": {
+    "tiles": [
+      [
+        "A1",
+        "Fertile"
+      ],
+      [
+        "A2",
+        "Water"
+      ],
+      [
+        "A3",
+        {
+          "Exhausted": "Forest"
+        }
+      ],
+      [
+        "A4",
+        "Mountain"
+      ],
+      [
+        "B1",
+        "Mountain"
+      ],
+      [
+        "B2",
+        "Forest"
+      ],
+      [
+        "B3",
+        "Fertile"
+      ],
+      [
+        "B4",
+        "Fertile"
+      ],
+      [
+        "C1",
+        "Barren"
+      ],
+      [
+        "C2",
+        "Forest"
+      ],
+      [
+        "C3",
+        "Water"
+      ],
+      [
+        "C4",
+        "Water"
+      ],
+      [
+        "C5",
+        "Water"
+      ],
+      [
+        "D1",
+        "Fertile"
+      ],
+      [
+        "D2",
+        "Water"
+      ]
+    ]
+  },
+  "starting_player_index": 0,
+  "current_player_index": 0,
+  "action_log": [
+    {
+      "age": 1,
+      "rounds": [
+        {
+          "round": 1,
+          "players": [
+            {
+              "index": 0,
+              "actions": [
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          0
+                        ],
+                        "destination": "C1"
+                      }
+                    }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "Payment": [
+                        {
+                          "gold": 2
+                        }
+                      ]
+                    }
+                  },
+                  "combat_stats": {
+                    "round": 1,
+                    "battleground": "City",
+                    "attacker": {
+                      "position": "C2",
+                      "player": 0,
+                      "present": {
+                        "infantry": 1
+                      }
+                    },
+                    "defender": {
+                      "position": "C1",
+                      "player": 1,
+                      "present": {
+                        "cavalry": 1
+                      },
+                      "losses": {
+                        "cavalry": 1
+                      }
+                    },
+                    "result": "AttackerWins",
+                    "city_mood": "Angry"
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 2
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "SpecialAdvance": "Fireworks"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Units": {
+                        "units": {
+                          "cavalry": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Loss",
+                        "position": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Gain",
+                        "position": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Units": {
+                        "units": {
+                          "settlers": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Place Settler"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "action_log_index": 2,
+  "log": [
+    [
+      "Player1 ended the movement action"
+    ],
+    [
+      "Player1: Move: marched 1 infantry from C2 to C1, Pay 1 action"
+    ],
+    [
+      "Combat round 1",
+      "Player1: Combat: Attacking with 1 infantry, Roll 6 (infantry, +1 combat value) for combined combat value of 7 and gets 1 hits against defending units",
+      "Player2: Combat: Defending with 1 cavalry, Roll 6 (infantry, no bonus) for combined combat value of 6 and gets 1 hits against attacking units"
+    ],
+    [
+      "Player1: Fireworks: Pay 2 gold, Ignore the first hit",
+      "Player2: Choose Casualties: Remove all defending units",
+      "Player2: Combat: Lost 1 cavalry at C1, Lose city C1",
+      "Attacker wins",
+      "Player1: Combat: Gain 1 gold, Gain city C1",
+      "Player2: Place Settler: Gain 1 settler at B2"
+    ]
+  ],
+  "undo_limit": 1,
+  "actions_left": 1,
+  "round": 6,
+  "age": 1,
+  "messages": [
+    "The game has started"
+  ],
+  "dice_roll_outcomes": [
+    1,
+    1,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10
+  ],
+  "dice_roll_log": [
+    10,
+    10
+  ]
+}

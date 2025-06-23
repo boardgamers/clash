@@ -9,7 +9,7 @@ if [ -z "$VERSION" ]; then
 fi
 
 echo "Building client..."
-./scripts/build-remote-client.sh # --release
+./scripts/build-remote-client.sh --release
 
 echo "Publishing client..."
 pushd client/js/dist

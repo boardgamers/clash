@@ -33,12 +33,10 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "A1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Neutral",
           "activations": 8,
           "position": "C2"
@@ -71,7 +69,7 @@
         },
         {
           "position": "C1",
-          "unit_type": "Leader",
+          "unit_type": "Infantry",
           "movement_restrictions": [
             "Battle"
           ],
@@ -106,7 +104,7 @@
           "id": 7
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Mining",
@@ -114,9 +112,18 @@
       ],
       "incident_tokens": 2,
       "completed_objectives": [
-        "Conqueror",
-        "General",
-        "Great Battle"
+        {
+          "card": 2,
+          "name": "Conqueror"
+        },
+        {
+          "card": 5,
+          "name": "General"
+        },
+        {
+          "card": 6,
+          "name": "Great Battle"
+        }
       ],
       "next_unit_id": 8
     },
@@ -140,7 +147,7 @@
         "mood_tokens": 7,
         "culture_tokens": 7
       },
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining",
@@ -200,12 +207,14 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Movement": {
@@ -221,18 +230,19 @@
                     }
                   },
                   "combat_stats": {
-                    "position": "C1",
+                    "round": 1,
                     "battleground": "CityWithFortress",
                     "attacker": {
+                      "position": "C2",
                       "player": 0,
                       "present": {
-                        "infantry": 1,
+                        "infantry": 2,
                         "cavalry": 1,
-                        "elephants": 1,
-                        "leaders": 1
+                        "elephants": 1
                       }
                     },
                     "defender": {
+                      "position": "C1",
                       "player": 1,
                       "present": {
                         "infantry": 3
@@ -241,8 +251,83 @@
                         "infantry": 3
                       }
                     },
-                    "result": "AttackerWins"
-                  }
+                    "result": "AttackerWins",
+                    "city_mood": "Angry"
+                  },
+                  "items": [
+                    {
+                      "player": 1,
+                      "Units": {
+                        "units": {
+                          "infantry": 3
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Loss",
+                        "position": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": "CityCenter",
+                        "balance": "Gain",
+                        "position": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Fortress"
+                        },
+                        "balance": "Loss",
+                        "position": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Fortress"
+                        },
+                        "balance": "Gain",
+                        "position": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -260,81 +345,58 @@
                       ]
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "SelectObjectives": {
-                              "cards": [
-                                {
-                                  "ObjectiveCard": 2
-                                },
-                                {
-                                  "ObjectiveCard": 5
-                                },
-                                {
-                                  "ObjectiveCard": 6
-                                }
-                              ],
-                              "objective_opportunities": [
-                                "Conqueror",
-                                "General",
-                                "Great Battle"
-                              ]
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Builtin": "Select Objective Cards to Complete"
-                            },
-                            "priority": 0,
-                            "request": {
-                              "SelectHandCards": {
-                                "choices": [
-                                  {
-                                    "ObjectiveCard": 2
-                                  },
-                                  {
-                                    "ObjectiveCard": 5
-                                  },
-                                  {
-                                    "ObjectiveCard": 6
-                                  }
-                                ],
-                                "description": "Select cards to complete",
-                                "needed": {
-                                  "end": 3,
-                                  "start": 0
-                                }
-                              }
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 0
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 2
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": {
+                          "CompleteObjective": "Conqueror"
                         }
-                      ]
+                      },
+                      "origin": {
+                        "Ability": "Complete Objectives"
+                      }
                     },
                     {
-                      "op": "add",
-                      "path": "/players/0/objective_cards",
-                      "value": [
-                        2,
-                        5,
-                        6
-                      ]
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 5
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": {
+                          "CompleteObjective": "General"
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Complete Objectives"
+                      }
                     },
                     {
-                      "op": "remove",
-                      "path": "/players/0/completed_objectives"
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 6
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": {
+                          "CompleteObjective": "Great Battle"
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Complete Objectives"
+                      }
                     }
-                  ],
-                  "completed_objectives": [
-                    "Conqueror",
-                    "General",
-                    "Great Battle"
                   ]
                 }
               ]
@@ -347,24 +409,18 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 marched 1 infantry, 1 cavalry, 1 elephant and a leader from C2 to C1"
+      "Player1: Move: marched 2 infantry, 1 cavalry and 1 elephant from C2 to C1"
     ],
     [
       "Combat round 1",
-      "Attackers: 1 infantry, 1 cavalry, 1 elephant and a leader",
-      "Defenders: 3 infantry",
-      "Player1 rolled 6 (Infantry, +1 combat value), 6 (Infantry, no bonus), 6 (Infantry, no bonus), 6 (Infantry, no bonus) for combined combat value of 25 and gets 3 hits against defending units.",
-      "Player2 rolled 1 (Leader, no bonus), 1 (Leader, no bonus), 1 (Leader, no bonus), 1 (Leader, no bonus) for combined combat value of 4 and gets 0 hits against attacking units.",
-      "Player2 used the following combat modifiers: fortress added one extra die, fortress cancelled one hit",
-      "Player2 has to remove all of their defending units",
-      "Player2 removed 3 infantry",
-      "Attacker wins and captured Player2's city at C1",
-      "Player1 could not store 1 gold"
+      "Player1: Combat: Attacking with 2 infantry, 1 cavalry and 1 elephant, Roll 6 (infantry, +1 combat value), 6 (infantry, +1 combat value), 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 26 and gets 3 hits against defending units, Gain 1 gold, Gain city C1, Gain Fortress at C1",
+      "Player2: Combat: Defending with 3 infantry, Roll 1 (leader, no bonus), 1 (leader, no bonus), 1 (leader, no bonus), 1 (leader, no bonus) for combined combat value of 4 and gets 0 hits against attacking units, Combat modifiers: fortress added one extra die, fortress cancelled one hit, Lost 3 infantry at C1, Lose city C1, Lose Fortress at C1",
+      "Player2: Choose Casualties: Remove all defending units",
+      "Attacker wins",
+      "Player1: Waste: Could not store 1 gold"
     ],
     [
-      "Player1 completed objective Conqueror",
-      "Player1 completed objective General",
-      "Player1 completed objective Great Battle"
+      "Player1: Complete Objectives: Complete Conqueror using Scientific Lead/Conqueror, Complete General using Religious Fervor/General, Complete Great Battle using City Planner/Great Battle"
     ]
   ],
   "undo_limit": 1,

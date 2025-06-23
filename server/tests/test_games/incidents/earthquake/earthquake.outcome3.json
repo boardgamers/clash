@@ -30,12 +30,10 @@
           "position": "C2"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "C1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "B3"
         }
@@ -57,7 +55,7 @@
         },
         {
           "position": "C2",
-          "unit_type": "Leader",
+          "unit_type": "Infantry",
           "id": 2
         },
         {
@@ -86,7 +84,7 @@
           "id": 7
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Mining",
@@ -94,11 +92,19 @@
         "Storage",
         "Tactics"
       ],
-      "wonders_build": [
+      "wonders_built": [
         "Pyramids"
       ],
       "incident_tokens": 3,
-      "event_victory_points": 8.0,
+      "special_victory_points": [
+        {
+          "points": 8.0,
+          "origin": {
+            "Incident": 31
+          },
+          "attribution": "Events"
+        }
+      ],
       "next_unit_id": 8
     },
     {
@@ -133,14 +139,22 @@
       "destroyed_structures": {
         "cities": 2
       },
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining",
         "Myths"
       ],
       "incident_tokens": 3,
-      "event_victory_points": 4.0,
+      "special_victory_points": [
+        {
+          "points": 4.0,
+          "origin": {
+            "Incident": 31
+          },
+          "attribution": "Events"
+        }
+      ],
       "next_unit_id": 2
     },
     {
@@ -209,12 +223,14 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -225,7 +241,53 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 2
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Storage",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -244,12 +306,40 @@
                         {
                           "position": "C2",
                           "structure": {
-                            "Wonder": "Pyramids"
+                            "Wonder": "GreatGardens"
                           }
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Fortress"
+                        },
+                        "balance": "Loss",
+                        "position": "C2"
+                      },
+                      "origin": {
+                        "Incident": 31
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Wonder": "GreatGardens"
+                        },
+                        "balance": "Loss",
+                        "position": "C2"
+                      },
+                      "origin": {
+                        "Incident": 31
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -260,7 +350,21 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Advance": "Myths"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -282,7 +386,22 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 1,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Fortress"
+                        },
+                        "balance": "Loss",
+                        "position": "A1"
+                      },
+                      "origin": {
+                        "Incident": 31
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -294,24 +413,21 @@
   "action_log_index": 4,
   "log": [
     [
-      "Player1 paid 2 gold to get the Storage advance",
-      "Player gained 1 mood token as advance bonus"
+      "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Heavy Earthquake"
     ],
     [
-      "Player1 gained 2 points for the Fortress at C2",
-      "Player1 gained 2 points for the Pyramids at C2",
-      "Player1 gained 2 points for the city center at B2"
+      "Player1: Heavy Earthquake: Lose Fortress at C2, Gain 2 points for the Fortress at C2, Lose Great Gardens at C2, Gain 2 points for the Great Gardens at C2, Gain 2 points for the city center at B2"
     ],
     [
-      "Player1 paid 1 mood token to avoid the mood change using Myths"
+      "Player1: Myths: Pay 1 mood token, Avoid mood change"
     ],
     [
-      "Player1 gained 2 points for the Fortress at A1",
-      "Player2 gained 2 points for the city center at A1",
-      "Player2 gained 2 points for the city center at A3"
+      "Player2: Heavy Earthquake: Lose Fortress at A1, Gain 2 points for the city center at A1, Gain 2 points for the city center at A3",
+      "Player1: Heavy Earthquake: Gain 2 points for the Fortress at A1"
     ]
   ],
   "undo_limit": 4,
@@ -334,5 +450,8 @@
   ],
   "dice_roll_log": [
     10
+  ],
+  "incidents_discarded": [
+    31
   ]
 }

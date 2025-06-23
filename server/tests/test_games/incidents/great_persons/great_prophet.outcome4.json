@@ -13,7 +13,9 @@
     },
     {
       "event_type": {
-        "Construct": "Temple"
+        "Construct": {
+          "building": "Temple"
+        }
       },
       "player": 0,
       "last_priority_used": 1,
@@ -37,13 +39,16 @@
                   },
                   "type": "Unlimited"
                 }
-              ]
+              ],
+              "origin": {
+                "Ability": "Temple"
+              }
             },
             "name": "Select Temple bonus"
           }
         },
         "origin": {
-          "Advance": "Myths"
+          "Ability": "Temple"
         }
       }
     }
@@ -54,7 +59,7 @@
       "resources": {
         "wood": 6,
         "ore": 6,
-        "gold": 3,
+        "gold": 5,
         "mood_tokens": 9,
         "culture_tokens": 6
       },
@@ -81,16 +86,13 @@
             "temple": 0
           },
           "mood_state": "Happy",
-          "activations": 1,
           "position": "C1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "B2"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "B3"
         }
@@ -135,7 +137,7 @@
           "id": 7
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Arts",
         "Farming",
@@ -147,10 +149,7 @@
         "Voting"
       ],
       "incident_tokens": 3,
-      "next_unit_id": 8,
-      "event_info": {
-        "State Religion": "used"
-      }
+      "next_unit_id": 8
     },
     {
       "id": 1,
@@ -181,7 +180,6 @@
           "position": "A1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "A3"
         },
@@ -193,7 +191,7 @@
           "position": "A4"
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining"
@@ -267,12 +265,14 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -283,7 +283,53 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "food": 2
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Storage",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -294,7 +340,36 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Incident": 20
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 120
+                        },
+                        "from": "Incident",
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "Incident": 20
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -302,51 +377,53 @@
                       "ActionCard": 120
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 2
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "CivilCard": 120
+                      }
                     },
                     {
-                      "op": "add",
-                      "path": "/players/0/action_cards",
-                      "value": [
-                        120
-                      ]
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 120
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToDiscard"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
                     },
                     {
-                      "op": "replace",
-                      "path": "/players/0/advances/3",
-                      "value": "StateReligion"
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Advance": "Myths"
+                      }
                     },
                     {
-                      "op": "replace",
-                      "path": "/players/0/advances/4",
-                      "value": "Storage"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/advances/5",
-                      "value": "Tactics"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/advances/6",
-                      "value": "Voting"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/advances/7"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 8
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events"
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Myths",
+                        "take_incident_token": false,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "CivilCard": 120
+                      }
                     }
                   ]
                 },
@@ -357,43 +434,7 @@
                         "C1"
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "remove",
-                      "path": "/events/0/event_type/ActionCard/selected_position"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/handler/priority",
-                      "value": 1
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/0/handler/request/SelectPositions",
-                      "value": {
-                        "choices": [
-                          "B2",
-                          "B3",
-                          "C1"
-                        ],
-                        "description": "Build a Temple",
-                        "needed": {
-                          "end": 1,
-                          "start": 0
-                        }
-                      }
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/0/handler/request/Payment"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/last_priority_used",
-                      "value": 1
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -405,90 +446,36 @@
                       ]
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "add",
-                      "path": "/events/0/handler",
-                      "value": {
-                        "origin": {
-                          "CivilCard": 120
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 2
                         },
-                        "priority": 0,
-                        "request": {
-                          "Payment": [
-                            {
-                              "cost": {
-                                "conversions": [
-                                  {
-                                    "from": [
-                                      {
-                                        "food": 1
-                                      },
-                                      {
-                                        "wood": 1
-                                      },
-                                      {
-                                        "ore": 1
-                                      },
-                                      {
-                                        "ideas": 1
-                                      }
-                                    ],
-                                    "to": {
-                                      "gold": 1
-                                    },
-                                    "type": "Unlimited"
-                                  },
-                                  {
-                                    "from": [
-                                      {
-                                        "food": 1
-                                      }
-                                    ],
-                                    "to": {},
-                                    "type": {
-                                      "MayNotOverpay": 1
-                                    }
-                                  }
-                                ],
-                                "default": {
-                                  "food": 1,
-                                  "ore": 1,
-                                  "wood": 1
-                                },
-                                "modifiers": [
-                                  {
-                                    "Advance": "StateReligion"
-                                  }
-                                ]
-                              },
-                              "name": "Pay to build the Temple",
-                              "optional": true
-                            }
-                          ]
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
+                      },
+                      "modifiers": [
+                        {
+                          "Advance": "StateReligion"
                         }
+                      ]
+                    },
+                    {
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Temple"
+                        },
+                        "balance": "Gain",
+                        "position": "C1"
+                      },
+                      "origin": {
+                        "CivilCard": 120
                       }
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/1"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/cities/1/city_pieces/temple"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/cities/1/activations"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/gold",
-                      "value": 7
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/event_info"
                     }
                   ]
                 }
@@ -502,32 +489,30 @@
   "action_log_index": 5,
   "log": [
     [
-      "Player1 paid 2 food to get the Storage advance",
-      "Player gained 1 mood token as advance bonus"
+      "Player1: Advance: Pay 1 action, Pay 2 food, Gain Storage and take an event token (triggering an incident)",
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Great Prophet",
-      "Base effect: Barbarians move",
-      "Barbarians cannot move - will try to spawn a new city instead",
-      "Barbarians cannot spawn a new city"
+      "Player1: Great Prophet: Base effect: Barbarians move, Barbarians cannot move - will try to spawn a new city instead, Barbarians cannot spawn a new city"
     ],
     [
-      "Player1 gained Great Prophet for 1 culture token"
+      "Player1: Great Prophet: Pay 1 culture token, Gain Great Prophet from the current event"
     ],
     [
-      "Player1 played the action card Great Prophet as a regular action",
-      "Player1 gained Myths",
-      "Player gained 1 mood token as advance bonus"
+      "Player1: Great Prophet: Pay 1 action, Gain Myths without taking an event token",
+      "Player1: Action Card: Play Great Prophet",
+      "Player1: Myths: Gain 1 mood token"
     ],
     [
-      "Player1 decided to build a Temple at C1"
+      "Player1: Great Prophet: Decided to build a Temple at C1"
     ],
     [
-      "Player1 built a Temple at C1 for 2 gold",
-      "State Religion reduced the food cost to 0"
+      "Player1: Construct Building: Pay 2 gold with State Religion",
+      "Player1: Great Prophet: Gain Temple at C1"
     ]
   ],
-  "undo_limit": 2,
+  "undo_limit": 1,
   "actions_left": 1,
   "round": 1,
   "age": 1,
@@ -550,5 +535,11 @@
   ],
   "wonders_left": [
     "Pyramids"
+  ],
+  "action_cards_discarded": [
+    120
+  ],
+  "incidents_discarded": [
+    20
   ]
 }

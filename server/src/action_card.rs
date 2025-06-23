@@ -1,23 +1,29 @@
 use crate::ability_initializer::{
     AbilityInitializerBuilder, AbilityInitializerSetup, AbilityListeners,
 };
+use crate::action_cost::{ActionCost, ActionCostBuilder, ActionCostOncePerTurn};
 use crate::advance::Advance;
-use crate::card::draw_card_from_pile;
-use crate::combat_listeners::CombatResult;
-use crate::content::persistent_events::PersistentEventType;
+use crate::card::{
+    HandCard, HandCardLocation, discard_card, draw_card_from_pile, log_card_transfer,
+};
+use crate::combat_stats::CombatStats;
+use crate::content::persistent_events::{
+    PersistentEventType, TriggerPersistentEventParams, trigger_persistent_event_with_listener,
+};
 use crate::content::tactics_cards::TacticsCardFactory;
-use crate::events::EventOrigin;
+use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
 use crate::log::{current_player_turn_log, current_player_turn_log_mut};
 use crate::player::Player;
-use crate::playing_actions::ActionCost;
 use crate::position::Position;
 use crate::tactics_card::TacticsCard;
 use crate::utils::remove_element_by;
+use crate::wonder::Wonder;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
 pub type CanPlayCard = Arc<dyn Fn(&Game, &Player, &ActionCardInfo) -> bool + Sync + Send>;
+pub type CombatRequirement = Arc<dyn Fn(&CombatStats, &Player) -> bool + Sync + Send>;
 
 #[derive(PartialEq, Eq, Copy, Clone)]
 pub enum CivilCardTarget {
@@ -32,7 +38,7 @@ pub struct CivilCard {
     pub can_play: CanPlayCard,
     pub listeners: AbilityListeners,
     pub action_type: ActionCost,
-    pub requirement_land_battle_won: bool,
+    pub combat_requirement: Option<CombatRequirement>,
     pub(crate) target: CivilCardTarget,
 }
 
@@ -54,11 +60,11 @@ impl ActionCard {
     }
 
     #[must_use]
-    pub fn builder<F>(
+    pub(crate) fn builder<F>(
         id: u8,
         name: &str,
         description: &str,
-        action_type: ActionCost,
+        cost: impl Fn(ActionCostBuilder) -> ActionCostOncePerTurn + Send + Sync + 'static,
         can_play: F,
     ) -> ActionCardBuilder
     where
@@ -69,11 +75,20 @@ impl ActionCard {
             name: name.to_string(),
             description: description.to_string(),
             can_play: Arc::new(can_play),
-            requirement_land_battle_won: false,
+            combat_requirement: None,
             builder: AbilityInitializerBuilder::new(),
             tactics_card: None,
-            action_type,
+            action_cost: cost(ActionCostBuilder::new(None)).cost,
             target: CivilCardTarget::ActivePlayer,
+        }
+    }
+
+    #[must_use]
+    pub fn name(&self) -> String {
+        if let Some(tactics_card) = &self.tactics_card {
+            format!("{}/{}", self.civil_card.name, tactics_card.name)
+        } else {
+            self.civil_card.name.clone()
         }
     }
 }
@@ -82,9 +97,9 @@ pub struct ActionCardBuilder {
     id: u8,
     name: String,
     description: String,
-    action_type: ActionCost,
+    action_cost: ActionCost,
     can_play: CanPlayCard,
-    requirement_land_battle_won: bool,
+    combat_requirement: Option<CombatRequirement>,
     tactics_card: Option<TacticsCard>,
     builder: AbilityInitializerBuilder,
     target: CivilCardTarget,
@@ -98,8 +113,8 @@ impl ActionCardBuilder {
     }
 
     #[must_use]
-    pub fn requirement_land_battle_won(mut self) -> Self {
-        self.requirement_land_battle_won = true;
+    pub fn combat_requirement(mut self, requirement: CombatRequirement) -> Self {
+        self.combat_requirement = Some(requirement);
         self
     }
 
@@ -117,9 +132,9 @@ impl ActionCardBuilder {
                 name: self.name,
                 description: self.description,
                 can_play: self.can_play,
-                requirement_land_battle_won: self.requirement_land_battle_won,
+                combat_requirement: self.combat_requirement,
                 listeners: self.builder.build(),
-                action_type: self.action_type,
+                action_type: self.action_cost,
                 target: self.target,
             },
             self.tactics_card,
@@ -135,17 +150,25 @@ impl AbilityInitializerSetup for ActionCardBuilder {
     fn get_key(&self) -> EventOrigin {
         EventOrigin::CivilCard(self.id)
     }
+
+    fn name(&self) -> String {
+        self.name.clone()
+    }
+
+    fn description(&self) -> String {
+        self.description.clone()
+    }
 }
 
 pub(crate) fn play_action_card(game: &mut Game, player_index: usize, id: u8) {
-    discard_action_card(game, player_index, id);
+    let card = game.cache.get_civil_card(id).clone();
+
     let mut satisfying_action: Option<usize> = None;
-    let card = game.cache.get_civil_card(id);
     let civil_card_target = card.target;
-    if card.requirement_land_battle_won {
-        if let Some(action_log_index) = land_battle_won_action(game, player_index, id) {
+    if let Some(r) = &card.combat_requirement {
+        if let Some(action_log_index) = combat_requirement_met(game, player_index, id, r) {
             satisfying_action = Some(action_log_index);
-            current_player_turn_log_mut(game).items[action_log_index]
+            current_player_turn_log_mut(game).actions[action_log_index]
                 .combat_stats
                 .as_mut()
                 .expect("combat stats")
@@ -170,24 +193,32 @@ pub(crate) fn on_play_action_card(game: &mut Game, player_index: usize, i: Actio
         CivilCardTarget::AllPlayers => game.human_players(player_index),
     };
 
-    let _ = game.trigger_persistent_event_with_listener(
+    let _ = trigger_persistent_event_with_listener(
+        game,
         &players,
         |e| &mut e.play_action_card,
         &game.cache.get_civil_card(i.id).listeners.clone(),
         i,
         PersistentEventType::ActionCard,
-        None,
-        |_| {},
+        TriggerPersistentEventParams::default(),
     );
 }
 
-pub(crate) fn gain_action_card_from_pile(game: &mut Game, player: usize) {
+pub(crate) fn gain_action_card_from_pile(game: &mut Game, player: &EventPlayer) {
+    if player
+        .get(game)
+        .wonders_owned
+        .contains(Wonder::GreatMausoleum)
+    {
+        player.get_mut(game).great_mausoleum_action_cards += 1;
+    } else {
+        do_gain_action_card_from_pile(game, player);
+    }
+}
+
+pub(crate) fn do_gain_action_card_from_pile(game: &mut Game, player: &EventPlayer) {
     if let Some(c) = draw_action_card_from_pile(game) {
-        gain_action_card(game, player, c);
-        game.add_info_log_item(&format!(
-            "{} gained an action card from the pile",
-            game.player_name(player)
-        ));
+        gain_action_card(game, player, c, HandCardLocation::DrawPile);
     }
 }
 
@@ -195,20 +226,45 @@ fn draw_action_card_from_pile(game: &mut Game) -> Option<u8> {
     draw_card_from_pile(
         game,
         "Action Card",
-        false,
         |g| &mut g.action_cards_left,
         |g| g.cache.get_action_cards().iter().map(|c| c.id).collect(),
         |p| p.action_cards.clone(),
     )
 }
 
-pub(crate) fn gain_action_card(game: &mut Game, player_index: usize, action_card: u8) {
-    game.players[player_index].action_cards.push(action_card);
+pub(crate) fn gain_action_card(
+    game: &mut Game,
+    player: &EventPlayer,
+    action_card: u8,
+    from: HandCardLocation,
+) {
+    player.get_mut(game).action_cards.push(action_card);
+    log_card_transfer(
+        game,
+        &HandCard::ActionCard(action_card),
+        from,
+        HandCardLocation::Hand(player.index),
+        &player.origin,
+    );
 }
 
-pub(crate) fn discard_action_card(game: &mut Game, player: usize, card: u8) {
-    remove_element_by(&mut game.player_mut(player).action_cards, |&id| id == card)
+pub(crate) fn discard_action_card(
+    game: &mut Game,
+    player: usize,
+    card: u8,
+    origin: &EventOrigin,
+    to: HandCardLocation,
+) {
+    let card = remove_element_by(&mut game.player_mut(player).action_cards, |&id| id == card)
         .unwrap_or_else(|| panic!("action card not found {card}"));
+    discard_card(|g| &mut g.action_cards_discarded, card, player, game);
+    log_card_transfer(
+        game,
+        &HandCard::ActionCard(card),
+        HandCardLocation::Hand(player),
+        to,
+        origin,
+    );
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -254,18 +310,21 @@ impl ActionCardInfo {
 }
 
 #[must_use]
-pub fn land_battle_won_action(game: &Game, player: usize, action_card_id: u8) -> Option<usize> {
+pub fn combat_requirement_met(
+    game: &Game,
+    player: usize,
+    action_card_id: u8,
+    requirement: &CombatRequirement,
+) -> Option<usize> {
     let sister_card = if action_card_id % 2 == 0 {
         action_card_id - 1
     } else {
         action_card_id + 1
     };
 
-    current_player_turn_log(game).items.iter().position(|a| {
+    current_player_turn_log(game).actions.iter().position(|a| {
         if let Some(stats) = &a.combat_stats {
-            if stats.result == Some(CombatResult::AttackerWins)
-                && stats.battleground.is_land()
-                && stats.attacker.player == player
+            if requirement(stats, game.player(player))
                 && !stats.claimed_action_cards.contains(&sister_card)
             {
                 return true;
@@ -273,4 +332,24 @@ pub fn land_battle_won_action(game: &Game, player: usize, action_card_id: u8) ->
         }
         false
     })
+}
+
+pub(crate) fn can_play_civil_card(game: &Game, p: &Player, id: u8) -> Result<(), String> {
+    if !p.action_cards.contains(&id) {
+        return Err("Action card not available".to_string());
+    }
+
+    let civil_card = game.cache.get_civil_card(id);
+    let mut satisfying_action: Option<usize> = None;
+    if let Some(r) = &civil_card.combat_requirement {
+        if let Some(action_log_index) = combat_requirement_met(game, p.index, id, r) {
+            satisfying_action = Some(action_log_index);
+        } else {
+            return Err("Requirement not met".to_string());
+        }
+    }
+    if !(civil_card.can_play)(game, p, &ActionCardInfo::new(id, satisfying_action, None)) {
+        return Err("Cannot play action card".to_string());
+    }
+    Ok(())
 }

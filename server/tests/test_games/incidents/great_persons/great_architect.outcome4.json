@@ -5,11 +5,11 @@
       "id": 0,
       "resources": {
         "wood": 4,
-        "ore": 4,
+        "ore": 1,
         "ideas": 3,
-        "gold": 7,
+        "gold": 6,
         "mood_tokens": 8,
-        "culture_tokens": 5
+        "culture_tokens": 4
       },
       "resource_limit": {
         "food": 7,
@@ -28,10 +28,10 @@
             ]
           },
           "mood_state": "Happy",
+          "activations": 1,
           "position": "A1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "A2"
         }
@@ -49,7 +49,7 @@
         },
         {
           "position": "C2",
-          "unit_type": "Leader",
+          "unit_type": "Infantry",
           "id": 2
         },
         {
@@ -78,7 +78,7 @@
           "id": 7
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Engineering",
         "Farming",
@@ -86,7 +86,7 @@
         "Storage",
         "Tactics"
       ],
-      "wonders_build": [
+      "wonders_built": [
         "Pyramids"
       ],
       "incident_tokens": 3,
@@ -121,7 +121,6 @@
           "position": "C1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Neutral",
           "position": "C2"
         }
@@ -138,7 +137,7 @@
           "id": 1
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Fanaticism",
         "Farming",
@@ -200,12 +199,14 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -216,7 +217,53 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "food": 2
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Storage",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -227,7 +274,36 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Incident": 55
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 155
+                        },
+                        "from": "Incident",
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "Incident": 55
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -235,17 +311,21 @@
                       "ActionCard": 155
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "add",
-                      "path": "/players/0/action_cards",
-                      "value": [
-                        155
-                      ]
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events"
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 155
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToDiscard"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
                     }
                   ]
                 },
@@ -256,42 +336,7 @@
                         "A1"
                       ]
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "remove",
-                      "path": "/events/1/event_type/WonderCard/selected_position"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/1/handler/priority",
-                      "value": 11
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/1/handler/request/SelectPositions",
-                      "value": {
-                        "choices": [
-                          "A1",
-                          "A2"
-                        ],
-                        "description": "Select city to build wonder",
-                        "needed": {
-                          "end": 1,
-                          "start": 1
-                        }
-                      }
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/1/handler/request/Payment"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/1/last_priority_used",
-                      "value": 11
-                    }
-                  ]
+                  }
                 },
                 {
                   "action": {
@@ -300,143 +345,59 @@
                         {
                           "food": 2,
                           "wood": 3,
-                          "ore": 3,
-                          "culture_tokens": 1
+                          "ore": 6,
+                          "gold": 1,
+                          "culture_tokens": 2
                         }
                       ]
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "ActionCard": {
-                              "id": 155
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 0
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "food": 2,
+                          "wood": 3,
+                          "ore": 6,
+                          "gold": 1,
+                          "culture_tokens": 2
                         },
-                        {
-                          "event_type": {
-                            "WonderCard": {
-                              "discount": {
-                                "culture_tokens": 3,
-                                "ignore_required_advances": true
-                              },
-                              "name": "Pyramids",
-                              "selected_position": "A1"
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Builtin": "Build Wonder"
-                            },
-                            "priority": 10,
-                            "request": {
-                              "Payment": [
-                                {
-                                  "cost": {
-                                    "conversions": [
-                                      {
-                                        "from": [
-                                          {
-                                            "food": 1
-                                          },
-                                          {
-                                            "wood": 1
-                                          },
-                                          {
-                                            "ore": 1
-                                          },
-                                          {
-                                            "ideas": 1
-                                          }
-                                        ],
-                                        "to": {
-                                          "gold": 1
-                                        },
-                                        "type": "Unlimited"
-                                      },
-                                      {
-                                        "from": [
-                                          {
-                                            "food": 1
-                                          },
-                                          {
-                                            "wood": 1
-                                          },
-                                          {
-                                            "ore": 1
-                                          },
-                                          {
-                                            "ideas": 1
-                                          }
-                                        ],
-                                        "to": {},
-                                        "type": {
-                                          "MayNotOverpay": 1
-                                        }
-                                      }
-                                    ],
-                                    "default": {
-                                      "culture_tokens": 1,
-                                      "food": 3,
-                                      "ore": 3,
-                                      "wood": 3
-                                    }
-                                  },
-                                  "name": "Pay to build wonder",
-                                  "optional": false
-                                }
-                              ]
-                            }
-                          },
-                          "last_priority_used": 10,
-                          "player": 0
-                        }
-                      ]
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Wonder": "Pyramids"
+                      }
                     },
                     {
-                      "op": "remove",
-                      "path": "/players/0/cities/0/city_pieces/wonders"
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "Wonder": "Pyramids"
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToKeep"
+                      },
+                      "origin": {
+                        "CivilCard": 155
+                      }
                     },
                     {
-                      "op": "replace",
-                      "path": "/players/0/resources/culture_tokens",
-                      "value": 6
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/resources/food",
-                      "value": 2
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/ore",
-                      "value": 7
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/wood",
-                      "value": 7
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/wonder_cards",
-                      "value": [
-                        "Pyramids"
-                      ]
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/0/wonders_build"
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Wonder": "Pyramids"
+                        },
+                        "balance": "Gain",
+                        "position": "A1"
+                      },
+                      "origin": {
+                        "CivilCard": 155
+                      }
                     }
-                  ],
-                  "wonder_built": "Pyramids"
+                  ]
                 }
               ]
             }
@@ -448,28 +409,29 @@
   "action_log_index": 5,
   "log": [
     [
-      "Player1 paid 2 food to get the Storage advance",
-      "Player gained 1 mood token as advance bonus"
+      "Player1: Advance: Pay 1 action, Pay 2 food, Gain Storage and take an event token (triggering an incident)",
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Great Architect",
-      "Base effect: Pirates spawn",
-      "No valid positions for Pirate Ship"
+      "Player1: Great Architect: Base effect: Pirates spawn, No valid positions for Pirate Ship"
     ],
     [
-      "Player1 gained Great Architect for 1 culture token"
+      "Player1: Great Architect: Pay 1 culture token, Gain Great Architect from the current event"
     ],
     [
-      "Player1 played the action card Great Architect"
+      "Player1: Action Card: Play Great Architect",
+      "Player1: Build Wonder: Play the wonder card Pyramids"
     ],
     [
-      "Player1 decided to build Pyramids in city A1"
+      "Player1: Build Wonder: Decided to build Pyramids in city A1"
     ],
     [
-      "Player1 built Pyramids in city A1 for 2 food, 3 wood, 3 ore and 1 culture token"
+      "Player1: Pyramids: Pay 2 food, 3 wood, 6 ore, 1 gold and 2 culture tokens",
+      "Player1: Great Architect: Play Pyramids, Gain Pyramids at A1"
     ]
   ],
-  "undo_limit": 2,
+  "undo_limit": 1,
   "actions_left": 2,
   "round": 2,
   "age": 1,
@@ -486,5 +448,11 @@
     11,
     11,
     11
+  ],
+  "action_cards_discarded": [
+    155
+  ],
+  "incidents_discarded": [
+    55
   ]
 }

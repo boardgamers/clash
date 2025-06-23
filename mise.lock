@@ -1,7 +1,0 @@
-[tools."cargo:cargo-nextest"]
-version = "0.9.94"
-backend = "cargo:cargo-nextest"
-
-[tools.rust]
-version = "1.86.0"
-backend = "core:rust"

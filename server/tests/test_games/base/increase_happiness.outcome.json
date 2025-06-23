@@ -48,7 +48,6 @@
           "position": "B1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "activations": 4,
           "position": "B3"
@@ -106,11 +105,7 @@
           "id": 9
         }
       ],
-      "civilization": "test0",
-      "available_leaders": [
-        "Alexander",
-        "Kleopatra"
-      ],
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "FreeEconomy",
@@ -143,7 +138,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "activations": 2,
           "position": "C1"
@@ -169,7 +163,7 @@
           "id": 1
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining"
@@ -248,12 +242,14 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -275,36 +271,47 @@
                       }
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 3
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Increase Happiness"
+                      }
                     },
                     {
-                      "op": "add",
-                      "path": "/players/0/cities/1/angry_activation",
-                      "value": true
+                      "player": 0,
+                      "MoodChange": {
+                        "city": "C2",
+                        "mood": "Neutral"
+                      },
+                      "origin": {
+                        "Ability": "Increase Happiness"
+                      }
                     },
                     {
-                      "op": "replace",
-                      "path": "/players/0/cities/1/mood_state",
-                      "value": "Angry"
+                      "player": 0,
+                      "MoodChange": {
+                        "city": "B3",
+                        "mood": "Happy"
+                      },
+                      "origin": {
+                        "Ability": "Increase Happiness"
+                      }
                     },
                     {
-                      "op": "add",
-                      "path": "/players/0/cities/3/angry_activation",
-                      "value": true
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/cities/3/mood_state",
-                      "value": "Angry"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 9
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "mood_tokens": 5
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Increase Happiness"
+                      }
                     }
                   ]
                 }
@@ -318,7 +325,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 paid 5 mood tokens to increase happiness in the city at C2 by 1 steps, making it Neutral and the city at B3 by 2 steps, making it Happy"
+      "Player1: Increase Happiness: Pay 1 action, City C2 became Neutral, City B3 became Happy, Pay 5 mood tokens"
     ]
   ],
   "undo_limit": 0,

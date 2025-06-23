@@ -1,49 +1,122 @@
-use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-
-use crate::city::City;
-use crate::content::advances::autocracy::{use_absolute_power, use_forced_labor};
-use crate::content::advances::culture::{sports_options, use_sports, use_theaters};
-use crate::content::advances::democracy::use_civil_liberties;
-use crate::content::advances::economy::{use_bartering, use_taxes};
-use crate::content::builtin::Builtin;
-use crate::content::persistent_events::PersistentEventType;
+use crate::action_cost::ActionCostOncePerTurn;
+use crate::city::{City, MoodState};
+use crate::content::ability::Ability;
+use crate::content::persistent_events::{
+    PersistentEventType, TriggerPersistentEventParams, trigger_persistent_event_with_listener,
+};
+use crate::events::{EventOrigin, EventPlayer};
 use crate::player::Player;
 use crate::playing_actions::PlayingActionType;
 use crate::position::Position;
-use crate::{game::Game, playing_actions::ActionCost, resource_pile::ResourcePile};
+use crate::{game::Game, resource_pile::ResourcePile};
+use serde::{Deserialize, Serialize};
+use std::fmt::Debug;
+use std::sync::Arc;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
-pub struct CustomEventAction {
+pub struct CustomAction {
     pub action: CustomActionType,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub city: Option<Position>,
 }
 
-impl CustomEventAction {
+impl CustomAction {
     #[must_use]
     pub fn new(action: CustomActionType, city: Option<Position>) -> Self {
         Self { action, city }
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
+pub struct CustomActionActivation {
+    #[serde(flatten)]
+    pub action: CustomAction,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "ResourcePile::is_empty")]
+    pub payment: ResourcePile,
+}
+
+impl CustomActionActivation {
+    #[must_use]
+    pub fn new(action: CustomAction, payment: ResourcePile) -> Self {
+        Self { action, payment }
+    }
+}
+
+#[derive(Clone)]
 pub struct CustomActionInfo {
-    pub action_type: ActionCost,
-    pub once_per_turn: bool,
+    pub action: CustomActionType,
+    pub execution: CustomActionExecution,
+    pub event_origin: EventOrigin,
+    pub cost: ActionCostOncePerTurn,
 }
 
 impl CustomActionInfo {
     #[must_use]
-    fn new(free: bool, once_per_turn: bool, cost: ResourcePile) -> CustomActionInfo {
+    pub fn new(
+        action: CustomActionType,
+        execution: CustomActionExecution,
+        event_origin: EventOrigin,
+        cost: ActionCostOncePerTurn,
+    ) -> CustomActionInfo {
         CustomActionInfo {
-            action_type: ActionCost::new(free, cost),
-            once_per_turn,
+            action,
+            execution,
+            event_origin,
+            cost,
+        }
+    }
+
+    #[must_use]
+    pub fn is_city_available(&self, game: &Game, city: &City) -> bool {
+        self.city_bound().is_some_and(|checker| checker(game, city))
+    }
+
+    #[must_use]
+    pub fn city_bound(&self) -> Option<&CustomActionCityChecker> {
+        if let CustomActionExecution::Action(a) = &self.execution {
+            a.city_checker.as_ref()
+        } else {
+            None
         }
     }
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Hash, Debug)]
+type CustomActionChecker = Arc<dyn Fn(&Game, &Player) -> bool + Sync + Send>;
+type CustomActionCityChecker = Arc<dyn Fn(&Game, &City) -> bool + Sync + Send>;
+
+#[derive(Clone)]
+pub struct CustomActionActionExecution {
+    pub checker: CustomActionChecker,
+    pub ability: Ability,
+    pub city_checker: Option<CustomActionCityChecker>,
+}
+
+impl CustomActionActionExecution {
+    #[must_use]
+    pub fn new(
+        ability: Ability,
+        checker: CustomActionChecker,
+        city_checker: Option<CustomActionCityChecker>,
+    ) -> Self {
+        Self {
+            checker,
+            ability,
+            city_checker,
+        }
+    }
+}
+
+#[derive(Clone)]
+pub enum CustomActionExecution {
+    Modifier(PlayingActionType),
+    Action(CustomActionActionExecution),
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Copy, Hash, Debug)]
 pub enum CustomActionType {
+    // Advances
     AbsolutePower,
     ForcedLabor,
     CivilLiberties,
@@ -54,108 +127,143 @@ pub enum CustomActionType {
     Sports,
     Taxes,
     Theaters,
+
+    // Wonders
+    GreatLibrary,
+    GreatLighthouse,
+    GreatStatue,
+
+    // Civilizations,
+    // Rome
+    Aqueduct,
+    Princeps,
+    StatesmanIncreaseHappiness,
+
+    // Greece
+    HellenisticInfluenceCultureAttempt,
+    Idol,
+    Master,
+
+    // China
+    ImperialArmy,
+    ArtOfWar,
+    AgricultureEconomist,
+
+    // Vikings
+    Danegeld,
+    LegendaryExplorer,
+    NewColonies,
 }
 
 impl CustomActionType {
     #[must_use]
-    pub fn info(&self) -> CustomActionInfo {
-        match self {
-            CustomActionType::AbsolutePower => {
-                CustomActionType::free_and_once_per_turn(ResourcePile::mood_tokens(2))
-            }
-            CustomActionType::CivilLiberties | CustomActionType::Sports => {
-                CustomActionType::regular()
-            }
-            CustomActionType::Bartering | CustomActionType::Theaters => {
-                CustomActionType::free_and_once_per_turn(ResourcePile::empty())
-            }
-            CustomActionType::ArtsInfluenceCultureAttempt => {
-                CustomActionType::free_and_once_per_turn(ResourcePile::culture_tokens(1))
-            }
-            CustomActionType::VotingIncreaseHappiness => {
-                CustomActionType::cost(ResourcePile::mood_tokens(1))
-            }
-            CustomActionType::FreeEconomyCollect | CustomActionType::ForcedLabor => {
-                CustomActionType::free_and_once_per_turn(ResourcePile::mood_tokens(1))
-            }
-            CustomActionType::Taxes => {
-                CustomActionType::once_per_turn(ResourcePile::mood_tokens(1))
-            }
-        }
-    }
-
-    #[must_use]
-    pub fn is_available(&self, game: &Game, player_index: usize) -> bool {
-        self.playing_action_type()
-            .is_available(game, player_index)
-            .is_ok()
-    }
-
-    #[must_use]
-    pub fn is_available_city(&self, player: &Player, city: &City) -> bool {
-        match self {
-            CustomActionType::Sports => {
-                sports_options(city).is_some_and(|c| c.can_afford(&player.resources))
-            }
-            _ => false,
-        }
-    }
-
-    #[must_use]
-    pub fn is_city_bound(&self) -> bool {
-        matches!(self, CustomActionType::Sports)
-    }
-
-    #[must_use]
     pub fn playing_action_type(&self) -> PlayingActionType {
-        PlayingActionType::Custom(self.clone())
-    }
-
-    #[must_use]
-    fn regular() -> CustomActionInfo {
-        CustomActionInfo::new(false, false, ResourcePile::empty())
-    }
-
-    #[must_use]
-    fn cost(cost: ResourcePile) -> CustomActionInfo {
-        CustomActionInfo::new(true, false, cost)
-    }
-
-    #[must_use]
-    fn once_per_turn(cost: ResourcePile) -> CustomActionInfo {
-        CustomActionInfo::new(false, true, cost)
-    }
-
-    #[must_use]
-    fn free_and_once_per_turn(cost: ResourcePile) -> CustomActionInfo {
-        CustomActionInfo::new(true, true, cost)
+        PlayingActionType::Custom(*self)
     }
 }
 
-pub(crate) fn custom_action_builtins() -> HashMap<CustomActionType, Builtin> {
-    HashMap::from([
-        (CustomActionType::AbsolutePower, use_absolute_power()),
-        (CustomActionType::ForcedLabor, use_forced_labor()),
-        (CustomActionType::CivilLiberties, use_civil_liberties()),
-        (CustomActionType::Bartering, use_bartering()),
-        (CustomActionType::Sports, use_sports()),
-        (CustomActionType::Taxes, use_taxes()),
-        (CustomActionType::Theaters, use_theaters()),
-    ])
+pub(crate) fn log_start_custom_action(game: &mut Game, player_index: usize, action: &CustomAction) {
+    let p = game.player(player_index);
+    let player = EventPlayer::from_player(
+        player_index,
+        game,
+        action.action.playing_action_type().origin(p),
+    );
+    if let Some(city) = action.city {
+        player.log(game, &format!("Start action in city {city}"));
+    } else {
+        player.log(game, "Start action");
+    }
 }
 
-pub(crate) fn execute_custom_action(
-    game: &mut Game,
-    player_index: usize,
-    action: CustomEventAction,
-) {
-    let _ = game.trigger_persistent_event_with_listener(
+pub(crate) fn on_custom_action(game: &mut Game, player_index: usize, a: CustomActionActivation) {
+    let Some(execution) = custom_action_execution(game.player(player_index), a.action.action)
+    else {
+        // may have disappeared due to a game change,
+        // such as Erik the Red unloading units and being killed
+        game.events.pop();
+        return;
+    };
+    let _ = trigger_persistent_event_with_listener(
+        game,
         &[player_index],
         |e| &mut e.custom_action,
-        &custom_action_builtins()[&action.action.clone()].listeners,
-        action,
+        &execution.ability.listeners,
+        a,
         PersistentEventType::CustomAction,
-        None,
-        |_| {},
+        TriggerPersistentEventParams::default(),
     );
+}
+
+pub(crate) fn custom_action_execution(
+    player: &Player,
+    action_type: CustomActionType,
+) -> Option<CustomActionActionExecution> {
+    if let CustomActionExecution::Action(e) =
+        player.custom_actions.get(&action_type)?.execution.clone()
+    {
+        Some(e)
+    } else {
+        None
+    }
+}
+
+pub(crate) fn can_play_custom_action(
+    game: &Game,
+    p: &Player,
+    c: CustomActionType,
+) -> Result<(), String> {
+    if !p.custom_actions.contains_key(&c) {
+        return Err("Custom action not available".to_string());
+    }
+
+    let info = p.custom_action_info(c);
+    if let Some(key) = info.cost.once_per_turn {
+        if p.played_once_per_turn_actions.contains(&key) {
+            return Err("Custom action already played this turn".to_string());
+        }
+    }
+
+    if let CustomActionExecution::Action(e) = &info.execution {
+        if !(e.checker)(game, p) {
+            return Err("Custom action cannot be played".to_string());
+        }
+    }
+    Ok(())
+}
+
+pub(crate) fn any_non_happy(player: &Player) -> bool {
+    player
+        .cities
+        .iter()
+        .any(|city| city.mood_state != MoodState::Happy)
+}
+
+pub(crate) fn is_base_or_modifier(
+    action_type: &PlayingActionType,
+    p: &Player,
+    base_type: &PlayingActionType,
+) -> bool {
+    match base_type {
+        PlayingActionType::Custom(c) => {
+            if let CustomActionExecution::Modifier(t) = &p.custom_action_info(*c).execution {
+                t == action_type
+            } else {
+                false
+            }
+        }
+        action_type => action_type == base_type,
+    }
+}
+
+pub(crate) fn custom_action_modifier_event_origin(
+    base_action_origin: EventOrigin,
+    action_type: &PlayingActionType,
+    player: &Player,
+) -> EventOrigin {
+    if let PlayingActionType::Custom(c) = action_type {
+        c.playing_action_type().origin(player)
+    } else {
+        base_action_origin
+    }
 }

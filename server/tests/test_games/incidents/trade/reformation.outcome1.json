@@ -30,17 +30,14 @@
           "position": "C2"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "C1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "B2"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "B3"
         }
@@ -85,7 +82,7 @@
           "id": 7
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Arts",
         "Farming",
@@ -120,7 +117,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "A3"
         },
@@ -132,7 +128,7 @@
           "position": "A4"
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining"
@@ -169,7 +165,7 @@
           "position": "A1"
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining"
@@ -243,12 +239,14 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -259,14 +257,88 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 2
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Storage",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
                     "Response": {
                       "SelectPlayer": 1
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 2,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Temple"
+                        },
+                        "balance": "Loss",
+                        "position": "A1"
+                      },
+                      "origin": {
+                        "Incident": 48
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Temple"
+                        },
+                        "balance": "Gain",
+                        "position": "A1"
+                      },
+                      "origin": {
+                        "Incident": 48
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -278,19 +350,16 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 paid 2 gold to get the Storage advance",
-      "Player gained 1 mood token as advance bonus"
+      "Player1: Advance: Pay 1 action, Pay 2 gold, Gain Storage and take an event token (triggering an incident)",
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Reformation",
-      "Base effect: Barbarians spawn",
-      "Barbarians cannot spawn a new city",
-      "Barbarians cannot reinforce",
-      "Player1 selected Player3 to execute the event",
-      "Player Player1 has passed the incident to Player3"
+      "Player1: Reformation: Base effect: Barbarians spawn, Barbarians cannot spawn a new city, Barbarians cannot reinforce, Selected Player3 to execute the event, Pass the event to Player3"
     ],
     [
-      "Player2 gained a Temple from Player3 in A1"
+      "Player3: Reformation: Lose Temple at A1",
+      "Player2: Reformation: Gain Temple at A1"
     ]
   ],
   "undo_limit": 2,
@@ -316,5 +385,8 @@
   ],
   "wonders_left": [
     "Pyramids"
+  ],
+  "incidents_discarded": [
+    48
   ]
 }

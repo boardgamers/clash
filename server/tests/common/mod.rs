@@ -1,18 +1,21 @@
 #![allow(dead_code)]
 
 use server::action::Action;
+use server::advance::AdvanceAction;
 use server::cache::Cache;
 use server::city_pieces::Building::Temple;
-use server::content::persistent_events::{SelectedStructure, Structure};
-use server::game::Game;
+use server::content::custom_actions::{CustomAction, CustomActionType};
+use server::content::persistent_events::{EventResponse, SelectedStructure};
+use server::game::{Game, GameContext};
 use server::log::current_player_turn_log_mut;
 use server::movement::MoveUnits;
 use server::movement::MovementAction::Move;
-use server::playing_actions::PlayingAction::InfluenceCultureAttempt;
-use server::playing_actions::PlayingActionType;
+use server::playing_actions::PlayingAction::{Advance, InfluenceCultureAttempt};
+use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
 use server::resource_pile::ResourcePile;
-use server::{cultural_influence, game_api};
+use server::structure::Structure;
+use server::{advance, cultural_influence, game_api};
 use std::fmt::Display;
 use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::{
@@ -146,7 +149,7 @@ pub(crate) fn write_result(actual: &str, result_path: &GamePath) {
         .expect("Failed to write output file");
 }
 
-pub(crate) type TestAssert = Vec<Box<dyn FnOnce(&Game)>>;
+pub(crate) type TestAssert = Vec<Box<dyn FnOnce(Game)>>;
 
 pub struct TestAction {
     action: Action,
@@ -187,17 +190,17 @@ impl TestAction {
         Self::new(action, false, false, player_index)
     }
 
-    pub fn with_pre_assert(mut self, pre_assert: impl FnOnce(&Game) + 'static) -> Self {
+    pub fn with_pre_assert(mut self, pre_assert: impl FnOnce(Game) + 'static) -> Self {
         self.pre_asserts.push(Box::new(pre_assert));
         self
     }
 
-    pub fn with_post_assert(mut self, post_assert: impl FnOnce(&Game) + 'static) -> Self {
+    pub fn with_post_assert(mut self, post_assert: impl FnOnce(Game) + 'static) -> Self {
         self.post_asserts.push(Box::new(post_assert));
         self
     }
 
-    pub fn without_json_comparison(mut self) -> Self {
+    pub fn skip_json(mut self) -> Self {
         self.compare_json = false;
         self
     }
@@ -277,7 +280,7 @@ fn test_action_internal(
     let a = serde_json::to_string(&action).expect("action should be serializable");
     let a2 = serde_json::from_str(&a).expect("action should be deserializable");
     for pre_assert in test.pre_asserts {
-        pre_assert(&game);
+        pre_assert(game.clone());
     }
 
     if test.illegal_action_test {
@@ -301,7 +304,7 @@ fn test_action_internal(
         return game;
     }
     for post_assert in test.post_asserts {
-        post_assert(&game);
+        post_assert(game.clone());
     }
     let compare_json = test.compare_json && last_json_compare;
     undo_redo(
@@ -358,7 +361,19 @@ fn assert_illegal_action(game: Game, player: usize, action: Action) {
 }
 
 pub(crate) fn to_json(game: &Game) -> String {
-    serde_json::to_string_pretty(&game.cloned_data()).expect("game data should be serializable")
+    let mut data = game.cloned_data();
+    // strip data that only make the tests hard to compare
+    for a in &mut data.action_log {
+        for r in &mut a.rounds {
+            for p in &mut r.players {
+                for i in &mut p.actions {
+                    i.undo.clear();
+                }
+            }
+        }
+    }
+
+    serde_json::to_string_pretty(&data).expect("game data should be serializable")
 }
 
 fn read_game_str(name: &GamePath) -> String {
@@ -382,7 +397,7 @@ fn undo_redo(
     let game = game_api::execute(game, Action::Undo, player_index);
     if compare_json {
         let mut trimmed_game = game.clone();
-        current_player_turn_log_mut(&mut trimmed_game).items.pop();
+        current_player_turn_log_mut(&mut trimmed_game).actions.pop();
         assert_eq_game_json(
             &original_game,
             &to_json(&trimmed_game),
@@ -419,6 +434,7 @@ pub fn load_game(path: &GamePath) -> Game {
         serde_json::from_str(&read_game_str(path))
             .unwrap_or_else(|e| panic!("the game file should be deserializable {path}: {e}",)),
         Cache::new(),
+        GameContext::Play,
     );
     if update_expected() {
         write_result(&to_json(&game), path);
@@ -427,12 +443,20 @@ pub fn load_game(path: &GamePath) -> Game {
 }
 
 pub fn move_action(units: Vec<u32>, destination: Position) -> Action {
-    Action::Movement(Move(MoveUnits {
+    Action::Movement(Move(MoveUnits::new(
         units,
         destination,
-        embark_carrier_id: None,
-        payment: ResourcePile::empty(),
-    }))
+        None,
+        ResourcePile::empty(),
+    )))
+}
+
+pub fn advance_action(advance: advance::Advance, payment: ResourcePile) -> Action {
+    Action::Playing(Advance(AdvanceAction::new(advance, payment)))
+}
+
+pub fn custom_action(action: CustomActionType) -> Action {
+    Action::Playing(PlayingAction::Custom(CustomAction::new(action, None)))
 }
 
 pub fn influence_action() -> Action {
@@ -442,4 +466,8 @@ pub fn influence_action() -> Action {
             PlayingActionType::InfluenceCultureAttempt,
         ),
     ))
+}
+
+pub fn payment_response(payment: ResourcePile) -> Action {
+    Action::Response(EventResponse::Payment(vec![payment]))
 }

@@ -15,12 +15,11 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "D1"
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining"
@@ -44,7 +43,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "D8"
         }
@@ -59,7 +57,7 @@
           "id": 0
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Mining",
@@ -354,12 +352,14 @@
   "current_player_index": 1,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -370,7 +370,53 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 1,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Resources": {
+                        "resources": {
+                          "food": 2
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Resources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Advance": {
+                        "advance": "Storage",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -381,14 +427,92 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 1,
+                      "Resources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Incident": 24
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 124
+                        },
+                        "from": "Incident",
+                        "to": {
+                          "Hand": 1
+                        }
+                      },
+                      "origin": {
+                        "Incident": 24
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
                     "Playing": {
                       "ActionCard": 124
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 1,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "CivilCard": 124
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 124
+                        },
+                        "from": {
+                          "Hand": 1
+                        },
+                        "to": "PlayToDiscard"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Resources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Advance": "Tactics"
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Advance": {
+                        "advance": "Tactics",
+                        "take_incident_token": false,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "CivilCard": 124
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -402,15 +526,17 @@
                     }
                   },
                   "combat_stats": {
-                    "position": "C8",
+                    "round": 1,
                     "battleground": "Land",
                     "attacker": {
+                      "position": "D7",
                       "player": 1,
                       "present": {
                         "infantry": 1
                       }
                     },
                     "defender": {
+                      "position": "C8",
                       "player": 0,
                       "present": {
                         "infantry": 1
@@ -420,7 +546,21 @@
                       }
                     },
                     "result": "AttackerWins"
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Units": {
+                        "units": {
+                          "infantry": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -432,33 +572,29 @@
   "action_log_index": 4,
   "log": [
     [
-      "Player2 paid 2 food to get the Storage advance",
-      "Player gained 1 mood token as advance bonus"
+      "Player2: Advance: Pay 1 action, Pay 2 food, Gain Storage and take an event token (triggering an incident)",
+      "Player2: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Great Warlord",
-      "Player2 exhausted the land in position E8"
+      "Player2: Great Warlord: Exhausted the land in position E8"
     ],
     [
-      "Player2 gained Great Warlord for 1 culture token"
+      "Player2: Great Warlord: Pay 1 culture token, Gain Great Warlord from the current event"
     ],
     [
-      "Player2 played the action card Great Warlord as a regular action",
-      "Player2 gained Tactics",
-      "Player gained 1 culture token as advance bonus"
+      "Player2: Great Warlord: Pay 1 action, Gain Tactics without taking an event token",
+      "Player2: Action Card: Play Great Warlord",
+      "Player2: Tactics: Gain 1 culture token"
     ],
     [
-      "Player2 marched 1 infantry from D7 to C8"
+      "Player2: Move: marched 1 infantry from D7 to C8"
     ],
     [
       "Combat round 1",
-      "Attackers: 1 infantry",
-      "Defenders: 1 infantry",
-      "Player2 rolled 5 (Cavalry, no bonus) for combined combat value of 7 and gets 1 hits against defending units.",
-      "Player2 used the following combat modifiers: Player gets +2 combat value for Great Warlord",
-      "Player1 rolled 2 (Cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units.",
-      "Player1 has to remove all of their defending units",
-      "Player1 removed 1 infantry",
+      "Player2: Combat: Attacking with 1 infantry, Roll 5 (cavalry, no bonus) for combined combat value of 7 and gets 1 hits against defending units, Combat modifiers: Player gets +2 combat value for Great Warlord",
+      "Player1: Combat: Defending with 1 infantry, Roll 2 (cavalry, no bonus) for combined combat value of 2 and gets 0 hits against attacking units, Lost 1 infantry at C8",
+      "Player1: Choose Casualties: Remove all defending units",
       "Attacker wins"
     ]
   ],
@@ -675,5 +811,11 @@
   ],
   "wonders_left": [
     "Pyramids"
+  ],
+  "action_cards_discarded": [
+    124
+  ],
+  "incidents_discarded": [
+    24
   ]
 }

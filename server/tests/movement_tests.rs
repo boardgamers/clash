@@ -5,7 +5,7 @@ use server::content::persistent_events::EventResponse;
 use server::game::Game;
 use server::movement::MoveUnits;
 use server::movement::MovementAction::Move;
-use server::movement::move_units_destinations;
+use server::movement::possible_move_routes;
 use server::position::Position;
 use server::resource_pile::ResourcePile;
 use server::unit::set_unit_position;
@@ -108,12 +108,12 @@ fn test_ship_embark() {
         "ship_embark",
         vec![TestAction::undoable(
             0,
-            Action::Movement(Move(MoveUnits {
-                units: vec![3, 4],
-                destination: Position::from_offset("C3"),
-                embark_carrier_id: Some(8),
-                payment: ResourcePile::empty(),
-            })),
+            Action::Movement(Move(MoveUnits::new(
+                vec![3, 4],
+                Position::from_offset("C3"),
+                Some(8),
+                ResourcePile::empty(),
+            ))),
         )],
     );
 }
@@ -124,12 +124,12 @@ fn test_ship_embark_continue() {
         "ship_embark_continue",
         vec![TestAction::undoable(
             0,
-            Action::Movement(Move(MoveUnits {
-                units: vec![5, 6],
-                destination: Position::from_offset("C3"),
-                embark_carrier_id: Some(9),
-                payment: ResourcePile::empty(),
-            })),
+            Action::Movement(Move(MoveUnits::new(
+                vec![5, 6],
+                Position::from_offset("C3"),
+                Some(9),
+                ResourcePile::empty(),
+            ))),
         )],
     );
 }
@@ -151,7 +151,7 @@ fn test_ship_disembark_capture_empty_city() {
         "ship_disembark_capture_empty_city",
         vec![
             TestAction::undoable(0, move_action(vec![1, 2], Position::from_offset("B2")))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![
@@ -228,7 +228,7 @@ fn test_ship_navigate_coordinates() {
 
 fn assert_navigate(game: &mut Game, from: Position, to: Position) {
     set_unit_position(1, 1, from, game);
-    let result = move_units_destinations(game.player(1), game, &[1], from, None)
+    let result = possible_move_routes(game.player(1), game, &[1], from, None)
         .is_ok_and(|d| d.iter().any(|route| route.destination == to));
     assert!(
         result,

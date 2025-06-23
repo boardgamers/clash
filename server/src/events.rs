@@ -1,12 +1,22 @@
-#![allow(dead_code)]
+use crate::advance::Advance;
+use crate::game::Game;
+use crate::payment::{PaymentOptionsBuilder, RewardBuilder};
+use crate::player::{CostTrigger, Player};
+use crate::resource::{gain_resources, lose_resources};
+use crate::resource_pile::ResourcePile;
+use crate::special_advance::SpecialAdvance;
+use crate::wonder::Wonder;
+use serde::{Deserialize, Serialize};
+use std::fmt::Display;
+use std::sync::Arc;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub enum EventOrigin {
     Advance(Advance),
-    SpecialAdvance(Advance),
-    Leader(String),
-    Wonder(String),
-    Builtin(String),
+    SpecialAdvance(SpecialAdvance),
+    LeaderAbility(String),
+    Wonder(Wonder),
+    Ability(String),
     Incident(u8),
     CivilCard(u8),
     TacticsCard(u8),
@@ -17,13 +27,13 @@ impl EventOrigin {
     #[must_use]
     pub fn id(&self) -> String {
         match self {
-            EventOrigin::Advance(name)
             // can't call to_string, because cache is not constructed
-            | EventOrigin::SpecialAdvance(name) => format!("{name:?}"),
-            | EventOrigin::Wonder(name)
-            | EventOrigin::Leader(name)
+            EventOrigin::Wonder(name) => format!("{name:?}"),
+            EventOrigin::Advance(name) => format!("{name:?}"),
+            EventOrigin::SpecialAdvance(name) => format!("{name:?}"),
+            EventOrigin::LeaderAbility(name)
             | EventOrigin::Objective(name)
-            | EventOrigin::Builtin(name) => name.to_string(),
+            | EventOrigin::Ability(name) => name.to_string(),
             EventOrigin::CivilCard(id)
             | EventOrigin::TacticsCard(id)
             | EventOrigin::Incident(id) => id.to_string(),
@@ -34,13 +44,12 @@ impl EventOrigin {
     pub fn name(&self, game: &Game) -> String {
         let cache = &game.cache;
         match self {
-            EventOrigin::Advance(name) | EventOrigin::SpecialAdvance(name) => {
-                name.name(game).to_string()
-            }
-            EventOrigin::Wonder(name)
-            | EventOrigin::Leader(name)
+            EventOrigin::Advance(name) => name.name(game).to_string(),
+            EventOrigin::SpecialAdvance(name) => name.name(game).to_string(),
+            EventOrigin::Wonder(name) => name.name().to_string(),
+            EventOrigin::LeaderAbility(name)
             | EventOrigin::Objective(name)
-            | EventOrigin::Builtin(name) => name.to_string(),
+            | EventOrigin::Ability(name) => name.to_string(),
             EventOrigin::CivilCard(id) => cache.get_civil_card(*id).name.clone(),
             EventOrigin::TacticsCard(id) => cache.get_tactics_card(*id).name.clone(),
             EventOrigin::Incident(id) => cache.get_incident(*id).name.clone(),
@@ -48,23 +57,109 @@ impl EventOrigin {
     }
 }
 
-use crate::advance::Advance;
-use crate::game::Game;
-use crate::player::CostTrigger;
-use serde::{Deserialize, Serialize};
-use std::sync::Arc;
+// to check if a payment option is affordable
+#[must_use]
+pub fn check_event_origin() -> EventOrigin {
+    EventOrigin::Ability("only for checking".to_string())
+}
 
-type Listener<T, U, V, W> = (
-    Arc<dyn Fn(&mut T, &U, &V, &mut W) + Sync + Send>,
-    i32,
-    usize,
-    EventOrigin,
-);
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub(crate) struct EventPlayer {
+    pub index: usize,
+    pub name: String,
+    pub origin: EventOrigin,
+}
+
+impl EventPlayer {
+    #[must_use]
+    pub fn new(player_index: usize, player_name: String, origin: EventOrigin) -> Self {
+        Self {
+            index: player_index,
+            name: player_name,
+            origin,
+        }
+    }
+
+    #[must_use]
+    pub fn from_player(player: usize, game: &Game, origin: EventOrigin) -> Self {
+        Self {
+            index: player,
+            name: game.player_name(player),
+            origin,
+        }
+    }
+
+    #[must_use]
+    pub fn get<'a>(&self, game: &'a Game) -> &'a Player {
+        game.player(self.index)
+    }
+
+    #[must_use]
+    pub fn get_mut<'a>(&self, game: &'a mut Game) -> &'a mut Player {
+        game.player_mut(self.index)
+    }
+
+    pub fn gain_resources(&self, game: &mut Game, resources: ResourcePile) {
+        gain_resources(game, self.index, resources, self.origin.clone());
+    }
+
+    pub fn lose_resources(&self, game: &mut Game, resources: ResourcePile) {
+        lose_resources(game, self.index, resources, self.origin.clone(), vec![]);
+    }
+
+    #[must_use]
+    pub fn with_origin(&self, origin: EventOrigin) -> Self {
+        Self {
+            index: self.index,
+            name: self.name.clone(),
+            origin,
+        }
+    }
+
+    #[must_use]
+    pub fn payment_options(&self) -> PaymentOptionsBuilder {
+        PaymentOptionsBuilder::new(self.origin.clone())
+    }
+
+    #[must_use]
+    pub fn reward_options(&self) -> RewardBuilder {
+        RewardBuilder::new(self.origin.clone())
+    }
+
+    pub fn log(&self, game: &mut Game, message: &str) {
+        game.log(self.index, &self.origin, message);
+    }
+}
+
+impl Display for EventPlayer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.name)
+    }
+}
+
+struct Listener<T, U, V, W> {
+    #[allow(clippy::type_complexity)]
+    callback: Arc<dyn Fn(&mut T, &U, &V, &mut W, &EventPlayer) + Sync + Send>,
+    priority: i32,
+    player: EventPlayer,
+}
+
+impl<T, U, V, W> Listener<T, U, V, W> {
+    fn new<F>(callback: F, priority: i32, player: EventPlayer) -> Self
+    where
+        F: Fn(&mut T, &U, &V, &mut W, &EventPlayer) + 'static + Sync + Send,
+    {
+        Self {
+            callback: Arc::new(callback),
+            priority,
+            player,
+        }
+    }
+}
 
 pub struct EventMut<T, U = (), V = (), W = ()> {
     name: String, // for debugging
     listeners: Vec<Listener<T, U, V, W>>,
-    next_id: usize,
 }
 
 impl<T, U, V, W> EventMut<T, U, V, W>
@@ -76,7 +171,6 @@ where
         Self {
             name: name.to_string(),
             listeners: Vec::new(),
-            next_id: 0,
         }
     }
 
@@ -85,31 +179,34 @@ where
         &mut self,
         new_listener: F,
         priority: i32,
-        key: EventOrigin,
-    ) -> usize
-    where
-        F: Fn(&mut T, &U, &V, &mut W) + 'static + Sync + Send,
+        player: EventPlayer,
+    ) where
+        F: Fn(&mut T, &U, &V, &mut W, &EventPlayer) + 'static + Sync + Send,
     {
-        let id = self.next_id;
-        if let Some(old) = self.listeners.iter().find(|(_, p, _, _)| &priority == p) {
+        // objectives can have the same key, but you still can only fulfill one of them at a time
+        let key = &player.origin;
+        if let Some(old) = self
+            .listeners
+            .iter()
+            .find(|l| priority == l.priority && &l.player.origin != key)
+        {
             panic!(
                 "Event {}: Priority {priority} already used by listener with key {:?} when adding {key:?}",
-                self.name, old.3
+                self.name, old.player.origin
             )
         }
         self.listeners
-            .push((Arc::new(new_listener), priority, id, key));
-        self.listeners.sort_by_key(|(_, priority, _, _)| *priority);
+            .push(Listener::new(new_listener, priority, player));
+
+        self.listeners.sort_by_key(|l| l.priority);
         self.listeners.reverse();
-        self.next_id += 1;
-        id
     }
 
     pub(crate) fn remove_listener_mut_by_key(&mut self, key: &EventOrigin) {
         let _ = self.listeners.remove(
             self.listeners
                 .iter()
-                .position(|(_, _, _, value)| value == key)
+                .position(|l| &l.player.origin == key)
                 .unwrap_or_else(|| panic!("Listeners should include the key {key:?} to remove")),
         );
     }
@@ -124,7 +221,16 @@ where
         trigger: CostTrigger,
     ) -> Vec<EventOrigin> {
         if trigger == CostTrigger::WithModifiers {
-            self.trigger_with_exclude(value, info, details, extra_value, &[])
+            let mut modifiers = Vec::new();
+            for l in &self.listeners {
+                let previous_value = value.clone();
+                let previous_extra_value = extra_value.clone();
+                (l.callback)(value, info, details, extra_value, &l.player);
+                if *value != previous_value || *extra_value != previous_extra_value {
+                    modifiers.push(l.player.origin.clone());
+                }
+            }
+            modifiers
         } else {
             self.trigger(value, info, details, extra_value);
             vec![]
@@ -132,37 +238,14 @@ where
     }
 
     pub(crate) fn trigger(&self, value: &mut T, info: &U, details: &V, extra_value: &mut W) {
-        for (listener, _, _, _) in &self.listeners {
-            listener(value, info, details, extra_value);
+        for l in &self.listeners {
+            (l.callback)(value, info, details, extra_value, &l.player);
         }
-    }
-
-    #[must_use]
-    fn trigger_with_exclude(
-        &self,
-        value: &mut T,
-        info: &U,
-        details: &V,
-        extra_value: &mut W,
-        exclude: &[EventOrigin],
-    ) -> Vec<EventOrigin> {
-        let mut modifiers = Vec::new();
-        for (listener, _, _, key) in &self.listeners {
-            if exclude.contains(key) {
-                continue;
-            }
-            let previous_value = value.clone();
-            let previous_extra_value = extra_value.clone();
-            listener(value, info, details, extra_value);
-            if *value != previous_value || *extra_value != previous_extra_value {
-                modifiers.push(key.clone());
-            }
-        }
-        modifiers
     }
 }
 
 pub struct Event<T, U = (), V = (), W = ()> {
+    pub name: String,
     pub inner: Option<EventMut<T, U, V, W>>,
 }
 
@@ -174,6 +257,7 @@ impl<T, U, V, W> Event<T, U, V, W> {
         W: Clone + PartialEq,
     {
         Self {
+            name: name.to_string(),
             inner: Some(EventMut::new(name)),
         }
     }
@@ -193,7 +277,7 @@ impl<T, U, V, W> Event<T, U, V, W> {
 
 #[cfg(test)]
 mod tests {
-    use super::{EventMut, EventOrigin};
+    use super::{EventMut, EventOrigin, EventPlayer};
     use crate::advance::Advance;
     use crate::player::CostTrigger;
 
@@ -202,24 +286,24 @@ mod tests {
         let mut event = EventMut::new("test");
         let add_constant = Advance::Arts;
         event.add_listener_mut(
-            |item, constant, _, ()| *item += constant,
+            |item, constant, _, (), _| *item += constant,
             0,
-            EventOrigin::Advance(add_constant),
+            EventPlayer::new(0, String::new(), EventOrigin::Advance(add_constant)),
         );
         let multiply_value = Advance::Sanitation;
         event.add_listener_mut(
-            |item, _, multiplier, ()| *item *= multiplier,
+            |item, _, multiplier, (), _| *item *= multiplier,
             -1,
-            EventOrigin::Advance(multiply_value),
+            EventPlayer::new(0, String::new(), EventOrigin::Advance(multiply_value)),
         );
         let no_change = Advance::Bartering;
         event.add_listener_mut(
-            |item, _, _, ()| {
+            |item, _, _, (), _| {
                 *item += 1;
                 *item -= 1;
             },
             1,
-            EventOrigin::Advance(no_change),
+            EventPlayer::new(0, String::new(), EventOrigin::Advance(no_change)),
         );
 
         let mut item = 0;

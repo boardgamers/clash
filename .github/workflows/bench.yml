@@ -1,0 +1,15 @@
+name: Performance Benchmark
+
+on: [pull_request]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: jdx/mise-action@v2
+      with:
+        experimental: 'true' # to get lock file support
+    - name: Random actions test
+      run: mise run random-actions

@@ -1,0 +1,646 @@
+{
+  "state": {
+    "Movement": {
+      "movement_actions_left": 2,
+      "moved_units": [
+        12,
+        13
+      ]
+    }
+  },
+  "players": [
+    {
+      "id": 0,
+      "resources": {
+        "food": 2,
+        "wood": 2,
+        "ore": 7,
+        "ideas": 5,
+        "gold": 7,
+        "mood_tokens": 10,
+        "culture_tokens": 12
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "city_pieces": {
+            "market": 1
+          },
+          "mood_state": "Happy",
+          "position": "A1"
+        },
+        {
+          "city_pieces": {
+            "academy": 1,
+            "obelisk": 0,
+            "port": 1
+          },
+          "mood_state": "Neutral",
+          "activations": 5,
+          "position": "C2",
+          "port_position": "C3"
+        },
+        {
+          "city_pieces": {
+            "obelisk": 1,
+            "observatory": 1,
+            "fortress": 1,
+            "temple": 1
+          },
+          "mood_state": "Neutral",
+          "position": "B1"
+        },
+        {
+          "mood_state": "Angry",
+          "activations": 4,
+          "angry_activation": true,
+          "position": "B3"
+        }
+      ],
+      "units": [
+        {
+          "position": "C2",
+          "unit_type": "Infantry",
+          "id": 0
+        },
+        {
+          "position": "B3",
+          "unit_type": "Settler",
+          "id": 4
+        },
+        {
+          "position": "B3",
+          "unit_type": "Settler",
+          "id": 5
+        },
+        {
+          "position": "B3",
+          "unit_type": "Settler",
+          "id": 6
+        },
+        {
+          "position": "C4",
+          "unit_type": "Ship",
+          "movement_restrictions": [
+            "Battle"
+          ],
+          "id": 12
+        },
+        {
+          "position": "C4",
+          "unit_type": "Ship",
+          "movement_restrictions": [
+            "Battle"
+          ],
+          "id": 13
+        }
+      ],
+      "civilization": "Greece",
+      "advances": [
+        "Farming",
+        "Fishing",
+        "Medicine",
+        "Mining",
+        "Nationalism"
+      ],
+      "incident_tokens": 3,
+      "completed_objectives": [
+        {
+          "card": 38,
+          "name": "Sea Cleansing"
+        }
+      ],
+      "wonder_cards": [
+        "Pyramids"
+      ],
+      "next_unit_id": 14
+    },
+    {
+      "id": 1,
+      "resources": {
+        "food": 6,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7,
+        "mood_tokens": 9,
+        "culture_tokens": 9
+      },
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "cities": [
+        {
+          "mood_state": "Angry",
+          "activations": 2,
+          "position": "C1"
+        },
+        {
+          "city_pieces": {
+            "port": 1
+          },
+          "mood_state": "Neutral",
+          "position": "B2",
+          "port_position": "C3"
+        }
+      ],
+      "civilization": "Rome",
+      "advances": [
+        "Farming",
+        "Mining"
+      ],
+      "incident_tokens": 3,
+      "next_unit_id": 3
+    },
+    {
+      "id": 2,
+      "resource_limit": {
+        "food": 2,
+        "wood": 7,
+        "ore": 7,
+        "ideas": 7,
+        "gold": 7
+      },
+      "civilization": "Pirates",
+      "incident_tokens": 3,
+      "next_unit_id": 9
+    }
+  ],
+  "map": {
+    "tiles": [
+      [
+        "A1",
+        "Fertile"
+      ],
+      [
+        "A2",
+        "Water"
+      ],
+      [
+        "A3",
+        {
+          "Exhausted": "Forest"
+        }
+      ],
+      [
+        "A4",
+        "Mountain"
+      ],
+      [
+        "B1",
+        "Mountain"
+      ],
+      [
+        "B2",
+        "Forest"
+      ],
+      [
+        "B3",
+        "Fertile"
+      ],
+      [
+        "B4",
+        "Fertile"
+      ],
+      [
+        "C1",
+        "Barren"
+      ],
+      [
+        "C2",
+        "Forest"
+      ],
+      [
+        "C3",
+        "Water"
+      ],
+      [
+        "C4",
+        "Water"
+      ],
+      [
+        "C5",
+        "Water"
+      ],
+      [
+        "D1",
+        "Fertile"
+      ],
+      [
+        "D2",
+        "Water"
+      ]
+    ]
+  },
+  "starting_player_index": 0,
+  "current_player_index": 0,
+  "action_log": [
+    {
+      "age": 1,
+      "rounds": [
+        {
+          "round": 1,
+          "players": [
+            {
+              "index": 0,
+              "actions": [
+                {
+                  "action": {
+                    "Playing": {
+                      "Recruit": {
+                        "units": {
+                          "ships": 4
+                        },
+                        "city_position": "C2",
+                        "payment": {
+                          "wood": 5,
+                          "gold": 3
+                        }
+                      }
+                    }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "wood": 5,
+                          "gold": 3
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "MoodChange": {
+                        "city": "C2",
+                        "mood": "Neutral"
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Units": {
+                        "units": {
+                          "ships": 4
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Recruit"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "ResourceReward": {
+                        "mood_tokens": 1
+                      }
+                    }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Advance": "Nationalism"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "ResourceReward": {
+                        "gold": 1
+                      }
+                    }
+                  },
+                  "combat_stats": {
+                    "round": 1,
+                    "battleground": "Sea",
+                    "attacker": {
+                      "position": "C2",
+                      "player": 0,
+                      "present": {
+                        "ships": 4
+                      },
+                      "losses": {
+                        "ships": 2
+                      }
+                    },
+                    "defender": {
+                      "position": "C3",
+                      "player": 2,
+                      "present": {
+                        "ships": 2
+                      },
+                      "losses": {
+                        "ships": 2
+                      }
+                    },
+                    "result": "AttackerWins"
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Advance": "Medicine"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 2
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Pirate ship destroyed"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Units": {
+                        "units": {
+                          "ships": 2
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    },
+                    {
+                      "player": 2,
+                      "Units": {
+                        "units": {
+                          "ships": 2
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "ResourceReward": {
+                        "culture_tokens": 1
+                      }
+                    }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Pirates battle"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Movement": {
+                      "Move": {
+                        "units": [
+                          12,
+                          13
+                        ],
+                        "destination": "C4"
+                      }
+                    }
+                  },
+                  "combat_stats": {
+                    "round": 1,
+                    "battleground": "Sea",
+                    "attacker": {
+                      "position": "C3",
+                      "player": 0,
+                      "present": {
+                        "ships": 2
+                      }
+                    },
+                    "defender": {
+                      "position": "C4",
+                      "player": 2,
+                      "present": {
+                        "ships": 1
+                      },
+                      "losses": {
+                        "ships": 1
+                      }
+                    },
+                    "result": "AttackerWins"
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Move"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "gold": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Pirate ship destroyed"
+                      }
+                    },
+                    {
+                      "player": 2,
+                      "Units": {
+                        "units": {
+                          "ships": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Combat"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "ResourceReward": {
+                        "culture_tokens": 1
+                      }
+                    }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Pirates battle"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ObjectiveCard": 38
+                        }
+                      ]
+                    }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 38
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": {
+                          "CompleteObjective": "Sea Cleansing"
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Complete Objectives"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "action_log_index": 7,
+  "log": [
+    [
+      "Player1 ended the movement action"
+    ],
+    [
+      "Player1: Recruit: Pay 1 action, Pay 5 wood and 3 gold, City C2 became Neutral, Gain 4 ships at C3"
+    ],
+    [
+      "Player1: Nationalism: Gain 1 mood token",
+      "Player1: Waste: Could not store 4 food"
+    ],
+    [
+      "Player1: Medicine: Gain 1 gold"
+    ],
+    [
+      "Combat round 1",
+      "Player1: Combat: Attacking with 4 ships, Roll 6 (infantry, no bonus), 6 (infantry, no bonus), 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 24 and gets 2 hits against defending units, Lost 2 ships at C2",
+      "Pirates: Combat: Defending with 2 ships, Roll 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 12 and gets 2 hits against attacking units, Lost 2 ships at C3",
+      "Player1: Pirate ship destroyed: Gain 2 gold",
+      "Player1: Choose Casualties: Remove 2 of their attacking units",
+      "Pirates: Choose Casualties: Remove all defending units",
+      "Attacker wins"
+    ],
+    [
+      "Player1: Pirates battle: Gain 1 culture token"
+    ],
+    [
+      "Player1: Move: sailed 2 ships from C3 to C4, Pay 1 action"
+    ],
+    [
+      "Combat round 1",
+      "Player1: Combat: Attacking with 2 ships, Roll 6 (infantry, no bonus), 6 (infantry, no bonus) for combined combat value of 12 and gets 1 hits against defending units",
+      "Pirates: Combat: Defending with 1 ship, Roll 1 (leader, no bonus) for combined combat value of 1 and gets 0 hits against attacking units, Lost 1 ship at C4",
+      "Player1: Pirate ship destroyed: Gain 1 gold",
+      "Pirates: Choose Casualties: Remove all defending units",
+      "Attacker wins",
+      "Player1: Waste: Could not store 1 gold"
+    ],
+    [
+      "Player1: Pirates battle: Gain 1 culture token"
+    ],
+    [
+      "Player1: Complete Objectives: Complete Sea Cleansing using High Culture/Sea Cleansing"
+    ]
+  ],
+  "undo_limit": 5,
+  "actions_left": 0,
+  "round": 6,
+  "age": 1,
+  "messages": [
+    "The game has started"
+  ],
+  "dice_roll_outcomes": [
+    1
+  ],
+  "dice_roll_log": [
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    1
+  ]
+}

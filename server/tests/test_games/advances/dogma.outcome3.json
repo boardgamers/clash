@@ -47,7 +47,6 @@
           "position": "B1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "position": "B3"
         }
@@ -104,10 +103,7 @@
           "id": 9
         }
       ],
-      "civilization": "Maya",
-      "available_leaders": [
-        "Kʼinich Janaab Pakal I"
-      ],
+      "civilization": "China",
       "advances": [
         "Farming",
         "Fishing",
@@ -120,7 +116,7 @@
       ],
       "incident_tokens": 3,
       "wonder_cards": [
-        "Great Gardens"
+        "GreatGardens"
       ],
       "next_unit_id": 10
     },
@@ -139,7 +135,7 @@
         "food": 2,
         "wood": 7,
         "ore": 7,
-        "ideas": 2,
+        "ideas": 7,
         "gold": 7
       },
       "cities": [
@@ -172,21 +168,24 @@
           "id": 1
         }
       ],
-      "civilization": "test0",
-      "available_leaders": [
-        "Alexander",
-        "Kleopatra"
-      ],
+      "civilization": "Rome",
       "advances": [
-        "Dogma",
-        "Fanaticism",
         "Farming",
         "Fishing",
         "Mining",
         "Myths",
         "StateReligion"
       ],
-      "incident_tokens": 1,
+      "incident_tokens": 3,
+      "special_victory_points": [
+        {
+          "points": 2.0,
+          "origin": {
+            "Incident": 44
+          },
+          "attribution": "Events"
+        }
+      ],
       "next_unit_id": 2,
       "event_info": {
         "StateReligion": "used"
@@ -285,12 +284,14 @@
   "current_player_index": 1,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -302,55 +303,38 @@
                       }
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 3
+                      "player": 1,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
                     },
                     {
-                      "op": "replace",
-                      "path": "/players/1/advances/0",
-                      "value": "Farming"
+                      "player": 1,
+                      "Resources": {
+                        "resources": {
+                          "ideas": 2
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
                     },
                     {
-                      "op": "replace",
-                      "path": "/players/1/advances/1",
-                      "value": "Fishing"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/2",
-                      "value": "Mining"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/3",
-                      "value": "Myths"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/4",
-                      "value": "StateReligion"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/1/advances/5"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/incident_tokens",
-                      "value": 3
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/resource_limit/ideas",
-                      "value": 7
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/resources/ideas",
-                      "value": 6
+                      "player": 1,
+                      "Advance": {
+                        "advance": "Dogma",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
                     }
                   ]
                 },
@@ -368,37 +352,46 @@
                       }
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 2
+                      "player": 1,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
+                      }
                     },
                     {
-                      "op": "remove",
-                      "path": "/players/1/cities/0/city_pieces/temple"
+                      "player": 1,
+                      "Resources": {
+                        "resources": {
+                          "wood": 1,
+                          "ore": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
+                      },
+                      "modifiers": [
+                        {
+                          "Advance": "StateReligion"
+                        }
+                      ]
                     },
                     {
-                      "op": "remove",
-                      "path": "/players/1/cities/0/activations"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/resources/ore",
-                      "value": 5
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/resources/wood",
-                      "value": 5
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/1/event_info"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events"
+                      "player": 1,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Temple"
+                        },
+                        "balance": "Gain",
+                        "position": "C1"
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
+                      }
                     }
                   ]
                 },
@@ -410,55 +403,18 @@
                       }
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "replace",
-                      "path": "/events/0/handler/origin/Advance",
-                      "value": "Myths"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/handler/priority",
-                      "value": 1
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events/0/handler/request/ResourceReward",
-                      "value": {
-                        "name": "Select Temple bonus",
-                        "reward": {
-                          "conversions": [
-                            {
-                              "from": [
-                                {
-                                  "mood_tokens": 1
-                                }
-                              ],
-                              "to": {
-                                "culture_tokens": 1
-                              },
-                              "type": "Unlimited"
-                            }
-                          ],
-                          "default": {
-                            "mood_tokens": 1
-                          }
-                        }
+                      "player": 1,
+                      "Resources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Temple"
                       }
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/events/0/handler/request/SelectAdvance"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/events/0/last_priority_used",
-                      "value": 1
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/resources/culture_tokens",
-                      "value": 9
                     }
                   ]
                 },
@@ -468,68 +424,39 @@
                       "SelectAdvance": "Fanaticism"
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "Construct": "Temple"
-                          },
-                          "handler": {
-                            "origin": {
-                              "Advance": "Dogma"
-                            },
-                            "priority": 0,
-                            "request": {
-                              "SelectAdvance": {
-                                "choices": [
-                                  "Devotion",
-                                  "Conversion",
-                                  "Fanaticism"
-                                ]
-                              }
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 1
-                        }
-                      ]
+                      "player": 1,
+                      "Advance": {
+                        "advance": "Fanaticism",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Advance": "Dogma"
+                      }
                     },
                     {
-                      "op": "replace",
-                      "path": "/players/1/advances/1",
-                      "value": "Farming"
+                      "player": 1,
+                      "Advance": {
+                        "advance": "Dogma",
+                        "take_incident_token": false,
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Incident": 44
+                      }
                     },
                     {
-                      "op": "replace",
-                      "path": "/players/1/advances/2",
-                      "value": "Fishing"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/3",
-                      "value": "Mining"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/4",
-                      "value": "Myths"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/5",
-                      "value": "StateReligion"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/1/advances/6"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/incident_tokens",
-                      "value": 2
+                      "player": 1,
+                      "Advance": {
+                        "advance": "Fanaticism",
+                        "take_incident_token": false,
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Incident": 44
+                      }
                     }
                   ]
                 }
@@ -543,22 +470,26 @@
   "action_log_index": 4,
   "log": [
     [
-      "Player2 paid 2 ideas to get the Dogma advance",
-      "Player2 is now limited to a maximum of 2 ideas for Dogma Advance",
-      "Player2 could not store 2 ideas"
+      "Player2: Advance: Pay 1 action, Pay 2 ideas, Unlock Provinces, Gain Dogma and take an event token (1 left)",
+      "Player2: Dogma: Ideas limit reduced to 2",
+      "Player2: Waste: Could not store 2 ideas"
     ],
     [
-      "Player2 paid 1 wood and 1 ore to construct a Temple in the city at C1",
-      "State Religion reduced the food cost to 0"
+      "Player2: Construct Building: Pay 1 action, Pay 1 wood and 1 ore with State Religion, Gain Temple at C1",
+      "Player2: State Religion: Reduce the food cost to 0"
     ],
     [
-      "Player2 selected 1 culture token as a reward for constructing a Temple"
+      "Player2: Temple: Gain 1 culture token"
     ],
     [
-      "Player2 selected Fanaticism as a reward for constructing a Temple"
+      "Player2: Dogma: Gain Fanaticism and take an event token (triggering an incident)"
+    ],
+    [
+      "A new game event has been triggered: Anarchy",
+      "Player2: Anarchy: Lose 2 government advances due to Anarchy - adding 2 victory points"
     ]
   ],
-  "undo_limit": 0,
+  "undo_limit": 4,
   "actions_left": 1,
   "round": 1,
   "age": 2,
@@ -580,5 +511,16 @@
   "rng": "46312381643103681595563341886777350953",
   "wonders_left": [
     "Pyramids"
+  ],
+  "incidents_discarded": [
+    44
+  ],
+  "permanent_effects": [
+    {
+      "Anarchy": {
+        "player": 1,
+        "advances_lost": 2
+      }
+    }
   ]
 }

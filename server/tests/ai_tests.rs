@@ -1,44 +1,27 @@
+#[cfg(not(target_arch = "wasm32"))]
 use crate::common::JsonTest;
-use itertools::Itertools;
-use server::action::{Action, ActionType};
-use server::ai_actions::AiActions;
-use server::ai_collect::city_collections_uncached;
-use server::collect::PositionCollection;
-use server::playing_actions::{
-    Collect, IncreaseHappiness, PlayingAction, PlayingActionType, Recruit,
-};
-use server::position::Position;
-use server::resource_pile::ResourcePile;
-use server::unit::Units;
-use server::utils::remove_element_by;
-use std::vec;
+use server::collect::Collect;
+use server::happiness::IncreaseHappiness;
+use server::recruit::Recruit;
 
 mod common;
 
+#[cfg(not(target_arch = "wasm32"))]
 const JSON: JsonTest = JsonTest::new("ai");
 
-#[test]
-fn collect_city() {
-    let game = &JSON.load_game("collect");
-    let p = game.player(0);
-    let mut collect = city_collections_uncached(game, p, p.get_city(Position::from_offset("C2")));
-    for c in &mut collect {
-        c.collections.sort_by_key(|x| x.position);
-    }
-    assert_eq!(collect.len(), 3);
-    let got = collect.into_iter().map(|c| c.total).collect_vec();
-    assert_eq!(
-        got,
-        vec![
-            ResourcePile::wood(1) + ResourcePile::food(2),
-            ResourcePile::food(1) + ResourcePile::wood(1) + ResourcePile::gold(1),
-            ResourcePile::food(1) + ResourcePile::wood(1) + ResourcePile::mood_tokens(1),
-        ]
-    )
-}
-
+#[cfg(not(target_arch = "wasm32"))]
 #[test]
 fn all_actions() {
+    use server::action::{Action, ActionType};
+    use server::ai_actions::AiActions;
+    use server::collect::PositionCollection;
+    use server::playing_actions::{PlayingAction, PlayingActionType};
+    use server::position::Position;
+    use server::resource_pile::ResourcePile;
+    use server::unit::Units;
+    use server::utils::remove_element_by;
+    use std::vec;
+
     let game = &JSON.load_game("start");
     let mut actions = AiActions::new();
     let mut all = actions.get_available_actions(game);
@@ -46,7 +29,7 @@ fn all_actions() {
         matches!(t, ActionType::Playing(PlayingActionType::Advance))
     })
     .unwrap();
-    assert_eq!(advances.len(), 12);
+    assert_eq!(advances.len(), 13);
 
     assert_eq!(
         all,
@@ -54,7 +37,7 @@ fn all_actions() {
             (
                 ActionType::Playing(PlayingActionType::Recruit),
                 vec![Action::Playing(PlayingAction::Recruit(Recruit::new(
-                    &Units::new(1, 0, 0, 0, 0, 0),
+                    &Units::new(1, 0, 0, 0, 0, None),
                     Position::from_offset("D8"),
                     ResourcePile::food(2)
                 )))]
@@ -65,21 +48,19 @@ fn all_actions() {
                     Action::Playing(PlayingAction::Collect(Collect::new(
                         Position::from_offset("D8"),
                         vec![PositionCollection::new(
-                            Position::from_offset("E8"),
-                            ResourcePile::wood(1)
+                            Position::from_offset("C8"),
+                            ResourcePile::ore(1)
                         )],
-                        ResourcePile::wood(1),
                         PlayingActionType::Collect,
                     ))),
                     Action::Playing(PlayingAction::Collect(Collect::new(
                         Position::from_offset("D8"),
                         vec![PositionCollection::new(
-                            Position::from_offset("C8"),
-                            ResourcePile::ore(1)
+                            Position::from_offset("E8"),
+                            ResourcePile::wood(1)
                         )],
-                        ResourcePile::ore(1),
                         PlayingActionType::Collect,
-                    )))
+                    ))),
                 ]
             ),
             (

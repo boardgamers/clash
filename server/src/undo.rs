@@ -1,7 +1,7 @@
-use crate::action::{Action, add_log_item_from_action, execute_movement_action};
+use crate::action::{Action, after_action};
 use crate::game::Game;
 use crate::log::{current_player_turn_log, current_player_turn_log_mut};
-use crate::resource::check_for_waste;
+use crate::movement::execute_movement_action;
 use json_patch::{PatchOperation, patch};
 use serde_json::Value;
 
@@ -20,7 +20,7 @@ pub(crate) fn undo(mut game: Game) -> Result<Game, String> {
     game.action_log_index -= 1;
     game.log.remove(game.log.len() - 1);
 
-    let l = &mut current_player_turn_log_mut(&mut game).items;
+    let l = &mut current_player_turn_log_mut(&mut game).actions;
     let Some(i) = l.iter().rposition(|a| !a.undo.is_empty()) else {
         return Err("No undoable action".to_string());
     };
@@ -41,6 +41,7 @@ pub(crate) fn undo(mut game: Game) -> Result<Game, String> {
     Ok(Game::from_data(
         serde_json::from_value(v).map_err(|e| format!("Failed to deserialize game: {e}"))?,
         game.cache,
+        game.context,
     ))
 }
 
@@ -50,17 +51,16 @@ pub(crate) fn to_serde_value(game: &Game) -> Value {
 }
 
 pub fn redo(game: &mut Game, player_index: usize) -> Result<(), String> {
-    let copy = current_player_turn_log(game).item(game).clone();
+    let copy = current_player_turn_log(game).action(game).clone();
     game.action_log_index += 1;
-    add_log_item_from_action(game, &copy.action);
 
-    match copy.action.clone() {
+    let a = copy.action;
+    match a {
         Action::Playing(action) => action.execute(game, player_index, true),
         Action::Movement(action) => execute_movement_action(game, action, player_index),
         Action::Response(action) => action.redo(game, player_index),
-        Action::Undo => return Err("undo action can't be redone".to_string()),
-        Action::Redo => return Err("redo action can't be redone".to_string()),
+        _ => return Err(format!("{a:?} can't be redone")),
     }?;
-    check_for_waste(game);
+    after_action(game, player_index);
     Ok(())
 }

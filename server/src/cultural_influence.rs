@@ -1,21 +1,23 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action::Action;
-use crate::city::City;
-use crate::city_pieces::Building;
-use crate::content::builtin::Builtin;
-use crate::content::custom_actions::CustomActionType;
-use crate::content::persistent_events::{
-    PaymentRequest, PersistentEventType, SelectedStructure, Structure,
-};
+use crate::city::{City, gain_city, lose_city};
+use crate::city_pieces::{Building, gain_building};
+use crate::consts::INFLUENCE_MIN_ROLL;
+use crate::content::ability::Ability;
+use crate::content::custom_actions::custom_action_modifier_event_origin;
+use crate::content::persistent_events::{PaymentRequest, PersistentEventType, SelectedStructure};
+use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
 use crate::log::current_player_turn_log;
 use crate::payment::PaymentOptions;
+use crate::player::Player;
 use crate::player_events::ActionInfo;
-use crate::playing_actions::{
-    PlayingAction, PlayingActionType, base_or_custom_available, roll_boost_cost,
-};
+use crate::playing_actions::{PlayingAction, PlayingActionType, base_or_custom_available};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
+use crate::special_advance::SpecialAdvance;
+use crate::structure::Structure;
+use crate::wonder::Wonder;
 use itertools::Itertools;
 use pathfinding::prelude::astar;
 use serde::{Deserialize, Serialize};
@@ -36,16 +38,19 @@ impl InfluenceCultureAttempt {
     }
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub struct InfluenceCultureInfo {
     pub is_defender: bool,
     pub structure: Structure,
     pub prevent_boost: bool,
     pub range_boost_cost: PaymentOptions,
+    pub roll: u8,
+    pub roll_boost_cost: PaymentOptions,
     pub(crate) info: ActionInfo,
     pub roll_boost: u8,
     pub position: Position,
     pub starting_city_position: Position,
+    pub barbarian_takeover_check: bool,
 }
 
 impl InfluenceCultureInfo {
@@ -56,6 +61,7 @@ impl InfluenceCultureInfo {
         position: Position,
         structure: Structure,
         starting_city_position: Position,
+        barbarian_takeover_check: bool,
     ) -> InfluenceCultureInfo {
         InfluenceCultureInfo {
             prevent_boost: false,
@@ -63,14 +69,22 @@ impl InfluenceCultureInfo {
             range_boost_cost,
             info,
             roll_boost: 0,
+            roll: 0,
+            roll_boost_cost: PaymentOptions::free(),
             is_defender: false,
             position,
             starting_city_position,
+            barbarian_takeover_check,
         }
     }
 
     pub fn set_no_boost(&mut self) {
         self.prevent_boost = true;
+    }
+
+    #[must_use]
+    pub(crate) fn player(&self, player: usize, game: &Game) -> EventPlayer {
+        EventPlayer::from_player(player, game, self.info.origin.clone())
     }
 }
 
@@ -92,117 +106,201 @@ impl InfluenceCultureOutcome {
     }
 }
 
-pub(crate) fn influence_culture_attempt(
+pub(crate) fn execute_influence_culture_attempt(
     game: &mut Game,
     player_index: usize,
-    c: &SelectedStructure,
-    action_type: &PlayingActionType,
-) {
-    let target_city_position = c.position;
-    let info = influence_culture_boost_cost(game, player_index, c, action_type)
-        .expect("this should be a valid action");
-    let self_influence = info.starting_city_position == target_city_position;
+    i: &InfluenceCultureAttempt,
+) -> Result<(), String> {
+    let s = &i.selected_structure;
+    let target_city_position = s.position;
+    let target_city = game.get_any_city(target_city_position);
+    let target_player_index = target_city.player_index;
+    let info = influence_culture_boost_cost(game, player_index, s, &i.action_type, false, false)?;
 
-    // currently, there is no way to have different costs for this
-    game.players[player_index].lose_resources(info.range_boost_cost.default.clone());
-    let roll = game.next_dice_roll().value + info.roll_boost;
-    let success = roll >= 5;
-    if success {
-        game.add_to_last_log_item(&format!(" and succeeded (rolled {roll})"));
-        info.info.execute(game);
-        influence_culture(game, player_index, c);
-        return;
-    }
-
-    if self_influence || info.prevent_boost {
-        game.add_to_last_log_item(&format!(" and failed (rolled {roll})"));
-        info.info.execute(game);
-        attempt_failed(game, player_index, target_city_position);
-        return;
-    }
-    if let Some(roll_boost_cost) = PaymentOptions::resources(roll_boost_cost(roll))
-        .first_valid_payment(&game.players[player_index].resources)
-    {
-        game.add_to_last_log_item(&format!(" and rolled a {roll}"));
-        info.info.execute(game);
-        game.add_info_log_item(&format!("{} now has the option to pay {roll_boost_cost} to increase the dice roll and proceed with the cultural influence", game.player_name(player_index)));
-        ask_for_cultural_influence_payment(game, player_index, roll_boost_cost);
+    let player = if target_player_index == player_index {
+        String::from("themselves")
     } else {
-        game.add_to_last_log_item(&format!(
-            " but rolled a {roll} and has not enough culture tokens to increase the roll "
-        ));
-        info.info.execute(game);
-        attempt_failed(game, player_index, target_city_position);
-    }
+        game.player_name(target_player_index)
+    };
+    let start = info.starting_city_position;
+    let city = if start == target_city_position {
+        String::new()
+    } else {
+        format!(" with the city {start}")
+    };
+    let range_boost_cost = &info.range_boost_cost;
+    // this cost can't be changed by the player
+    let cost = if range_boost_cost.is_free() {
+        String::new()
+    } else {
+        format!(
+            " and may pay {} to boost the range",
+            range_boost_cost.default
+        )
+    };
+    let city_piece = match s.structure {
+        Structure::CityCenter => "City Center",
+        Structure::Building(b) => b.name(),
+        Structure::Wonder(_) => panic!("Wonder is not allowed here"),
+    };
+
+    info.player(player_index, game).log(
+        game,
+        &format!(
+            "Tried to influence the {city_piece} in the city \
+            at {target_city_position} by {player}{city}{cost}",
+        ),
+    );
+
+    on_cultural_influence(game, player_index, info);
+    Ok(())
 }
 
-pub(crate) fn ask_for_cultural_influence_payment(
+pub(crate) fn on_cultural_influence(
     game: &mut Game,
     player_index: usize,
-    roll_boost_cost: ResourcePile,
+    info: InfluenceCultureInfo,
 ) {
     let _ = game.trigger_persistent_event(
         &[player_index],
-        |e| &mut e.influence_culture_resolution,
-        roll_boost_cost,
-        PersistentEventType::InfluenceCultureResolution,
+        |e| &mut e.influence_culture,
+        info,
+        PersistentEventType::InfluenceCulture,
     );
 }
 
-pub(crate) fn cultural_influence_resolution() -> Builtin {
-    Builtin::builder(
-        "Influence Culture",
-        "Pay culture tokens to increase the dice roll",
-    )
-    .add_payment_request_listener(
-        |e| &mut e.influence_culture_resolution,
-        0,
-        |_game, _player_index, cost| {
-            Some(vec![PaymentRequest::new(
-                PaymentOptions::resources(cost.clone()),
-                &format!("Pay {cost} to increase the dice roll"),
-                true,
-            )])
-        },
-        |game, s, _| {
-            let a = current_player_turn_log(game)
-                .items
-                .iter()
-                .rev()
-                .find_map(|l| {
-                    if let Action::Playing(PlayingAction::InfluenceCultureAttempt(a)) = &l.action {
-                        Some(a)
-                    } else {
-                        None
-                    }
-                })
-                .expect(
-                    "there should be a cultural influence attempt action log item before \
-                    a cultural influence resolution action log item",
-                )
-                .clone();
+pub(crate) fn use_cultural_influence() -> Ability {
+    Ability::builder("Influence Culture", "")
+        .add_payment_request_listener(
+            |e| &mut e.influence_culture,
+            2,
+            |game, p, info| {
+                let cost = &info.range_boost_cost;
+                if cost.is_free() {
+                    info.roll_boost_cost = range_boost_cost(game, info, p.index);
+                    return None;
+                }
 
-            let roll_boost_cost = s.choice[0].clone();
-            if roll_boost_cost.is_empty() {
-                game.add_info_log_item(&format!(
-                    "{} declined to pay to increase the dice roll and failed the \
-                        cultural influence",
-                    s.player_name
-                ));
-                attempt_failed(game, s.player_index, a.selected_structure.position);
-                return;
+                Some(vec![PaymentRequest::mandatory(
+                    cost.clone(),
+                    &format!("Pay {cost} to increase the range of the influence"),
+                )])
+            },
+            |game, s, info| {
+                info.roll_boost_cost = range_boost_cost(game, info, s.player_index);
+            },
+        )
+        .add_payment_request_listener(
+            |e| &mut e.influence_culture,
+            0,
+            roll_boost_payment,
+            |game, s, info| roll_boost_paid(game, s.player_index, &s.choice[0], info),
+        )
+        .build()
+}
+
+fn roll_boost_paid(
+    game: &mut Game,
+    player_index: usize,
+    payment: &ResourcePile,
+    info: &mut InfluenceCultureInfo,
+) {
+    let a = current_player_turn_log(game)
+        .actions
+        .iter()
+        .rev()
+        .find_map(|l| {
+            if let Action::Playing(PlayingAction::InfluenceCultureAttempt(a)) = &l.action {
+                Some(a)
+            } else {
+                None
             }
+        })
+        .expect(
+            "there should be a cultural influence attempt action log item before \
+            a cultural influence resolution action log item",
+        )
+        .clone();
 
-            game.add_info_log_item(&format!(
-                "{} paid {roll_boost_cost} to increase the dice roll and proceed \
-                    with the cultural influence",
-                s.player_name
-            ));
+    let player = info.player(player_index, game);
+    if payment.is_empty() {
+        player.log(game, "Declined to pay to increase the dice roll");
+        attempt_failed(game, player_index, a.selected_structure.position);
+        return;
+    }
 
-            influence_culture(game, s.player_index, &a.selected_structure);
-        },
+    player.log(game, "Paying to increase the dice roll");
+    influence_culture(game, player_index, info);
+}
+
+fn roll_boost_payment(
+    game: &mut Game,
+    p: &EventPlayer,
+    info: &mut InfluenceCultureInfo,
+) -> Option<Vec<PaymentRequest>> {
+    let cost = &info.roll_boost_cost;
+    if cost.is_free() {
+        return None;
+    }
+
+    let roll = info.roll;
+    if !p.get(game).can_afford(cost) {
+        p.log(
+            game,
+            &format!("Rolled a {roll} and does not have enough resources to increase the roll"),
+        );
+        info.info.execute(game);
+        attempt_failed(game, p.index, info.position);
+        return None;
+    }
+
+    info.info.execute(game);
+    p.log(
+        game,
+        &format!(
+            "Rolled a {roll} and now has the option to pay {cost} to \
+            increase the dice roll and proceed with the cultural influence",
+        ),
+    );
+
+    Some(vec![PaymentRequest::optional(
+        cost.clone(),
+        &format!("Pay {cost} to increase the dice roll"),
+    )])
+}
+
+fn range_boost_cost(
+    game: &mut Game,
+    info: &mut InfluenceCultureInfo,
+    player_index: usize,
+) -> PaymentOptions {
+    let p = info.player(player_index, game);
+
+    let roll = game.next_dice_roll().value + info.roll_boost;
+    info.roll = roll;
+    let success = roll >= INFLUENCE_MIN_ROLL;
+    if success {
+        p.log(
+            game,
+            &format!("Cultural influence succeeded (rolled {roll})"),
+        );
+        info.info.execute(game);
+        influence_culture(game, player_index, info);
+        return PaymentOptions::free();
+    }
+
+    if (info.starting_city_position == info.position) || info.prevent_boost {
+        p.log(game, &format!("Cultural influence failed (rolled {roll})"));
+        info.info.execute(game);
+        attempt_failed(game, player_index, info.position);
+        return PaymentOptions::free();
+    }
+
+    PaymentOptions::resources(
+        game.player(player_index),
+        p.origin.clone(),
+        ResourcePile::culture_tokens(INFLUENCE_MIN_ROLL - roll),
     )
-    .build()
 }
 
 fn influence_distance(game: &Game, src: Position, dst: Position) -> u8 {
@@ -233,6 +331,8 @@ pub fn influence_culture_boost_cost(
     player_index: usize,
     selected: &SelectedStructure,
     action_type: &PlayingActionType,
+    add_action_cost: bool,
+    barbarian_takeover_check: bool,
 ) -> Result<InfluenceCultureInfo, String> {
     let target_city_position = selected.position;
     let structure = &selected.structure;
@@ -263,14 +363,26 @@ pub fn influence_culture_boost_cost(
 
     let target_player_index = target_city.player_index;
 
-    let (start, range_boost) = affordable_start_city(game, player_index, target_city, action_type)?;
+    let (start, range_boost) = affordable_start_city(
+        game,
+        player_index,
+        target_city,
+        action_type,
+        add_action_cost,
+    )?;
 
+    let origin = influence_event_origin(action_type, attacker);
     let mut info = Ok(InfluenceCultureInfo::new(
-        PaymentOptions::resources(ResourcePile::culture_tokens(range_boost)),
-        ActionInfo::new(attacker),
+        PaymentOptions::resources(
+            attacker,
+            origin.clone(),
+            ResourcePile::culture_tokens(range_boost),
+        ),
+        ActionInfo::new(attacker, origin),
         target_city_position,
         structure.clone(),
         start,
+        barbarian_takeover_check,
     ));
     attacker.trigger_event(
         |e| &e.on_influence_culture_attempt,
@@ -313,8 +425,14 @@ pub fn available_influence_culture(
                     structures(city)
                         .into_iter()
                         .map(|s| {
-                            let result =
-                                influence_culture_boost_cost(game, player, &s, action_type);
+                            let result = influence_culture_boost_cost(
+                                game,
+                                player,
+                                &s,
+                                action_type,
+                                true,
+                                false,
+                            );
                             (s, result)
                         })
                         .collect_vec()
@@ -336,23 +454,16 @@ fn structures(city: &City) -> Vec<SelectedStructure> {
     structures
 }
 
-fn influence_culture(game: &mut Game, influencer_index: usize, structure: &SelectedStructure) {
-    let city_position = structure.position;
+fn influence_culture(game: &mut Game, influencer_index: usize, info: &InfluenceCultureInfo) {
+    let city_position = info.position;
     let city_owner = game.get_any_city(city_position).player_index;
-    match structure.structure {
+    let new = &info.player(influencer_index, game);
+    match info.structure {
         Structure::CityCenter => {
-            let mut city = game
-                .player_mut(city_owner)
-                .take_city(city_position)
-                .expect("city should be taken");
-            city.player_index = influencer_index;
-            game.player_mut(influencer_index).cities.push(city);
+            let city = lose_city(game, &info.player(city_owner, game), city_position);
+            gain_city(game, new, city);
         }
-        Structure::Building(b) => game
-            .player_mut(city_owner)
-            .get_city_mut(city_position)
-            .pieces
-            .set_building(b, influencer_index),
+        Structure::Building(b) => gain_building(game, new, b, city_position),
         Structure::Wonder(_) => panic!("Wonder is not allowed here"),
     }
     game.successful_cultural_influence = true;
@@ -374,100 +485,100 @@ fn attempt_failed(game: &mut Game, player: usize, city_position: Position) {
     );
 }
 
-fn affordable_start_city(
+/// Returns the position of the starting city and the cost to boost the influence range.
+///
+/// # Errors
+/// This function returns an error if no starting city is available or
+/// if the player can't afford the boost.
+///
+/// # Panics
+/// This function panics in an inconsistent state
+pub fn affordable_start_city(
     game: &Game,
     player_index: usize,
     target_city: &City,
     action_type: &PlayingActionType,
+    add_action_cost: bool,
 ) -> Result<(Position, u8), String> {
     if target_city.player_index == player_index {
         Ok((target_city.position, 0))
     } else {
         let player = game.player(player_index);
-        let available = action_type.remaining_resources(player, game);
 
-        player
+        let available = &player.resources;
+        let mut tokens = available.culture_tokens;
+        let mut action_cost = ResourcePile::empty();
+        if add_action_cost {
+            // either none (action cost and boost cost) or both can use Colosseum
+            action_cost = action_type.payment_options(game, player_index).default;
+            let c = action_cost.culture_tokens;
+            if c > 0 {
+                tokens -= c;
+            }
+        }
+        if player.wonders_owned.contains(Wonder::Colosseum) {
+            tokens += available.mood_tokens;
+            let m = action_cost.mood_tokens;
+            if m > 0 {
+                tokens -= m;
+            }
+        }
+
+        let mut start = player
             .cities
             .iter()
-            .filter_map(|c| {
-                if c.influenced() {
-                    return None;
-                }
-
-                let min_cost = c
-                    .position
+            .filter_map(|c| (!c.influenced()).then_some((c.position, c.size())))
+            .collect_vec();
+        if player.has_special_advance(SpecialAdvance::HellenisticCulture) {
+            let extra = game
+                .players
+                .iter()
+                .flat_map(|p| {
+                    p.cities.iter().filter_map(|c| {
+                        let t = (c.position, c.size());
+                        (!c.pieces.buildings(Some(player.index)).is_empty() && !start.contains(&t))
+                            .then_some(t)
+                    })
+                })
+                .collect_vec();
+            start.extend(extra);
+        }
+        start
+            .iter()
+            .filter_map(|&(position, size)| {
+                let min_cost = position
                     .distance(target_city.position)
-                    .saturating_sub(c.size() as u32) as u8;
-                if min_cost > available.culture_tokens {
+                    .saturating_sub(size as u32) as u8;
+
+                if min_cost > tokens {
                     // avoid unnecessary calculations
                     return None;
                 }
 
-                let boost_cost = influence_distance(game, c.position, target_city.position)
-                    .saturating_sub(c.size() as u8);
-                if boost_cost > available.culture_tokens {
+                let distance = influence_distance(game, position, target_city.position);
+                let boost_cost = distance.saturating_sub(size as u8);
+                if boost_cost > tokens {
                     return None;
                 }
-                Some((c.position, boost_cost))
+                Some((position, boost_cost))
             })
             .min_by_key(|(_, boost)| *boost)
             .ok_or("No starting city available".to_string())
     }
 }
 
-pub(crate) fn format_cultural_influence_attempt_log_item(
-    game: &Game,
-    player_index: usize,
-    player_name: &str,
-    i: &InfluenceCultureAttempt,
-) -> String {
-    let s = &i.selected_structure;
-    let target_city_position = s.position;
-    let target_city = game.get_any_city(target_city_position);
-    let target_player_index = target_city.player_index;
-    let info = influence_culture_boost_cost(game, player_index, s, &i.action_type)
-        .expect("this should be a valid action");
-
-    let player = if target_player_index == game.active_player() {
-        String::from("themselves")
-    } else {
-        game.player_name(target_player_index)
-    };
-    let start = info.starting_city_position;
-    let city = if start == target_city_position {
-        String::new()
-    } else {
-        format!(" with the city at {start}")
-    };
-    let range_boost_cost = info.range_boost_cost;
-    // this cost can't be changed by the player
-    let cost = if range_boost_cost.is_free() {
-        String::new()
-    } else {
-        format!(" and paid {} to boost the range", range_boost_cost.default)
-    };
-    let city_piece = match s.structure {
-        Structure::CityCenter => "City Center",
-        Structure::Building(b) => b.name(),
-        Structure::Wonder(_) => panic!("Wonder is not allowed here"),
-    };
-    let suffix = if let PlayingActionType::Custom(_) = i.action_type {
-        " using Arts"
-    } else {
-        ""
-    };
-
-    format!(
-        "{player_name} tried to influence culture the {city_piece} in the city at {target_city_position} by {player}{city}{cost}{suffix}"
-    )
-}
-
 #[must_use]
 pub fn available_influence_actions(game: &Game, player: usize) -> Vec<PlayingActionType> {
-    base_or_custom_available(
-        game,
-        player,
-        PlayingActionType::InfluenceCultureAttempt,
-        &CustomActionType::ArtsInfluenceCultureAttempt,
-    )
+    base_or_custom_available(game, player, &PlayingActionType::InfluenceCultureAttempt)
+}
+
+pub(crate) fn influence_event_origin(
+    action_type: &PlayingActionType,
+    player: &Player,
+) -> EventOrigin {
+    custom_action_modifier_event_origin(influence_base_origin(), action_type, player)
+}
+
+pub(crate) fn influence_base_origin() -> EventOrigin {
+    EventOrigin::Ability("Influence Culture".to_string())
 }

@@ -1,41 +1,77 @@
-use crate::ability_initializer::AbilityListeners;
-use crate::action::update_stats;
+use crate::action::lose_action;
 use crate::cache::Cache;
 use crate::combat_roll::{COMBAT_DIE_SIDES, CombatDieRoll};
 use crate::consts::ACTIONS;
+use crate::content::custom_actions::{CustomActionExecution, CustomActionInfo};
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{
-    PersistentEventHandler, PersistentEventPlayer, PersistentEventState, PersistentEventType,
+    PersistentEventHandler, PersistentEventState, PersistentEventType,
+    TriggerPersistentEventParams, trigger_persistent_event_ext,
 };
-use crate::events::{Event, EventOrigin};
+use crate::events::{Event, EventOrigin, EventPlayer};
+use crate::game_data::GameData;
 use crate::log::{
-    ActionLogAge, ActionLogPlayer, ActionLogRound, current_player_turn_log,
+    ActionLogAge, add_player_log, add_round_log, current_player_turn_log,
     current_player_turn_log_mut,
 };
 use crate::movement::MoveState;
-use crate::objective_card::present_instant_objective_cards;
 use crate::pirates::get_pirates_player;
-use crate::player::CostTrigger;
+use crate::player::{CostTrigger, end_turn};
 use crate::player_events::{
-    PersistentEvent, PersistentEventInfo, PersistentEvents, PlayerEvents, TransientEvents,
+    PersistentEvent, PersistentEvents, TransientEvents, trigger_event_with_game_value,
 };
 use crate::resource::check_for_waste;
 use crate::status_phase::enter_status_phase;
-use crate::utils;
 use crate::utils::Rng;
-use crate::{
-    city::City,
-    content::custom_actions::CustomActionType,
-    map::{Map, MapData},
-    player::{Player, PlayerData},
-    position::Position,
-};
+use crate::victory_points::compare_score;
+use crate::wonder::Wonder;
+use crate::{city::City, game_data, map::Map, player::Player, position::Position};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::vec;
 
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Default)]
+pub enum UndoOption {
+    // prevent undoing when secret information is revealed (default)
+    #[default]
+    ProtectSecrets,
+    // allow undoing any action when the same player is playing
+    SamePlayer,
+}
+
+impl UndoOption {
+    #[must_use]
+    pub fn is_default(&self) -> bool {
+        self == &UndoOption::ProtectSecrets
+    }
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Clone, Default)]
+pub struct GameOptions {
+    #[serde(default)]
+    #[serde(skip_serializing_if = "UndoOption::is_default")]
+    pub undo: UndoOption,
+}
+
+impl GameOptions {
+    #[must_use]
+    pub fn is_default(&self) -> bool {
+        self == &GameOptions::default()
+    }
+}
+
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub enum GameContext {
+    Play,
+    AI,
+    Replay,
+}
+
 pub struct Game {
     pub cache: Cache,
+    pub context: GameContext, // trasient
+    pub options: GameOptions,
+    pub version: u16, // JSON schema version
     pub state: GameState,
     pub events: Vec<PersistentEventState>,
     // in turn order starting from starting_player_index and wrapping around
@@ -48,28 +84,28 @@ pub struct Game {
     pub action_log_index: usize,
     pub log: Vec<Vec<String>>,
     pub undo_limit: usize,
-    pub supports_undo: bool, // if false: optimizend AI mode
     pub actions_left: u32,
     pub successful_cultural_influence: bool,
     pub round: u32, // starts at 1
     pub age: u32,   // starts at 1
     pub messages: Vec<String>,
+    pub seed: String,
     pub rng: Rng,
     pub dice_roll_outcomes: Vec<u8>, // for testing
     pub dice_roll_log: Vec<u8>,
     pub dropped_players: Vec<usize>,
-    pub wonders_left: Vec<String>,
+    pub wonders_left: Vec<Wonder>,
     pub action_cards_left: Vec<u8>,
+    pub action_cards_discarded: Vec<u8>,
     pub objective_cards_left: Vec<u8>,
     pub incidents_left: Vec<u8>,
+    pub incidents_discarded: Vec<u8>,
     pub permanent_effects: Vec<PermanentEffect>,
 }
 
 impl Clone for Game {
     fn clone(&self) -> Self {
-        let mut game = Self::from_data(self.cloned_data(), self.cache.clone());
-        game.supports_undo = self.supports_undo;
-        game
+        Self::from_data(self.cloned_data(), self.cache.clone(), self.context.clone())
     }
 }
 
@@ -80,106 +116,19 @@ impl PartialEq for Game {
 }
 
 impl Game {
-    ///
-    ///
-    /// # Panics
-    ///
-    /// Panics if any wonder does not exist
     #[must_use]
-    pub fn from_data(data: GameData, cache: Cache) -> Self {
-        let mut game = Self {
-            cache,
-            state: data.state,
-            players: Vec::new(),
-            map: Map::from_data(data.map),
-            starting_player_index: data.starting_player_index,
-            current_player_index: data.current_player_index,
-            actions_left: data.actions_left,
-            successful_cultural_influence: data.successful_cultural_influence,
-            action_log: data.action_log,
-            action_log_index: data.action_log_index,
-            log: data.log,
-            undo_limit: data.undo_limit,
-            supports_undo: true,
-            round: data.round,
-            age: data.age,
-            messages: data.messages,
-            rng: Rng::from_seed_string(&data.rng),
-            dice_roll_outcomes: data.dice_roll_outcomes,
-            dice_roll_log: data.dice_roll_log,
-            dropped_players: data.dropped_players,
-            wonders_left: data.wonders_left,
-            action_cards_left: data.action_cards_left,
-            objective_cards_left: data.objective_cards_left,
-            incidents_left: data.incidents_left,
-            permanent_effects: data.permanent_effects,
-            events: data.events,
-        };
-        for player in data.players {
-            Player::initialize_player(player, &mut game);
-        }
-        update_stats(&mut game);
-        game
+    pub fn from_data(data: GameData, cache: Cache, context: GameContext) -> Self {
+        game_data::from_data(data, cache, context)
     }
 
     #[must_use]
     pub fn data(self) -> GameData {
-        GameData {
-            state: self.state,
-            events: self.events,
-            players: self.players.into_iter().map(Player::data).collect(),
-            map: self.map.data(),
-            starting_player_index: self.starting_player_index,
-            current_player_index: self.current_player_index,
-            action_log: self.action_log,
-            action_log_index: self.action_log_index,
-            log: self.log,
-            undo_limit: self.undo_limit,
-            actions_left: self.actions_left,
-            successful_cultural_influence: self.successful_cultural_influence,
-            round: self.round,
-            age: self.age,
-            messages: self.messages,
-            rng: self.rng.seed.to_string(),
-            dice_roll_outcomes: self.dice_roll_outcomes,
-            dice_roll_log: self.dice_roll_log,
-            dropped_players: self.dropped_players,
-            wonders_left: self.wonders_left,
-            action_cards_left: self.action_cards_left,
-            objective_cards_left: self.objective_cards_left,
-            incidents_left: self.incidents_left,
-            permanent_effects: self.permanent_effects,
-        }
+        game_data::data(self)
     }
 
     #[must_use]
     pub fn cloned_data(&self) -> GameData {
-        GameData {
-            state: self.state.clone(),
-            events: self.events.clone(),
-            players: self.players.iter().map(Player::cloned_data).collect(),
-            map: self.map.cloned_data(),
-            starting_player_index: self.starting_player_index,
-            current_player_index: self.current_player_index,
-            action_log: self.action_log.clone(),
-            action_log_index: self.action_log_index,
-            log: self.log.clone(),
-            undo_limit: self.undo_limit,
-            actions_left: self.actions_left,
-            successful_cultural_influence: self.successful_cultural_influence,
-            round: self.round,
-            age: self.age,
-            messages: self.messages.clone(),
-            rng: self.rng.seed.to_string(),
-            dice_roll_outcomes: self.dice_roll_outcomes.clone(),
-            dice_roll_log: self.dice_roll_log.clone(),
-            dropped_players: self.dropped_players.clone(),
-            wonders_left: self.wonders_left.clone(),
-            action_cards_left: self.action_cards_left.clone(),
-            objective_cards_left: self.objective_cards_left.clone(),
-            incidents_left: self.incidents_left.clone(),
-            permanent_effects: self.permanent_effects.clone(),
-        }
+        game_data::cloned_data(self)
     }
 
     #[must_use]
@@ -218,15 +167,35 @@ impl Game {
     }
 
     #[must_use]
+    pub(crate) fn get_any_city_mut(&mut self, position: Position) -> &mut City {
+        self.players
+            .iter_mut()
+            .find_map(|player| player.try_get_city_mut(position))
+            .expect("city not found")
+    }
+
+    #[must_use]
     pub fn try_get_any_city(&self, position: Position) -> Option<&City> {
         self.players
             .iter()
             .find_map(|player| player.try_get_city(position))
     }
 
-    pub(crate) fn lock_undo(&mut self) {
-        self.undo_limit = self.action_log_index;
-        current_player_turn_log_mut(self).clear_undo();
+    pub(crate) fn information_revealed(&mut self) {
+        if self.options.undo == UndoOption::ProtectSecrets {
+            self.lock_undo();
+        }
+    }
+
+    pub(crate) fn player_changed(&mut self) {
+        self.lock_undo();
+    }
+
+    fn lock_undo(&mut self) {
+        if self.context != GameContext::AI {
+            self.undo_limit = self.action_log_index;
+            current_player_turn_log_mut(self).clear_undo();
+        }
     }
 
     ///
@@ -253,38 +222,6 @@ impl Game {
             .and_then(|s| s.player.handler.as_mut())
     }
 
-    pub(crate) fn trigger_persistent_event_with_listener<V>(
-        &mut self,
-        players: &[usize],
-        event: fn(&mut PersistentEvents) -> &mut PersistentEvent<V>,
-        listeners: &AbilityListeners,
-        event_type: V,
-        store_type: impl Fn(V) -> PersistentEventType,
-        log: Option<&str>,
-        next_player: fn(&mut V) -> (),
-    ) -> Option<V>
-    where
-        V: Clone + PartialEq,
-    {
-        for p in players {
-            listeners.init(self, *p);
-        }
-
-        let result = self.trigger_persistent_event_ext(
-            players,
-            event,
-            event_type,
-            store_type,
-            log,
-            next_player,
-        );
-
-        for p in players {
-            listeners.deinit(self, *p);
-        }
-        result
-    }
-
     #[must_use]
     pub(crate) fn trigger_persistent_event<V>(
         &mut self,
@@ -296,79 +233,14 @@ impl Game {
     where
         V: Clone + PartialEq,
     {
-        self.trigger_persistent_event_ext(players, event, value, to_event_type, None, |_| {})
-    }
-
-    #[must_use]
-    pub(crate) fn trigger_persistent_event_ext<V>(
-        &mut self,
-        players: &[usize],
-        event: fn(&mut PersistentEvents) -> &mut PersistentEvent<V>,
-        mut value: V,
-        to_event_type: impl Fn(V) -> PersistentEventType,
-        log: Option<&str>,
-        next_player: fn(&mut V) -> (),
-    ) -> Option<V>
-    where
-        V: Clone + PartialEq,
-    {
-        let current_event_type = to_event_type(value.clone());
-        if self
-            .events
-            .last()
-            .is_none_or(|s| s.event_type != current_event_type)
-        {
-            if let Some(log) = log {
-                self.add_info_log_group(log.to_string());
-            }
-            self.events
-                .push(PersistentEventState::new(players[0], current_event_type));
-        }
-
-        let event_index = self.events.len() - 1;
-
-        for player_index in Self::remaining_persistent_event_players(players, self.current_event())
-        {
-            let info = PersistentEventInfo {
-                player: player_index,
-            };
-            self.trigger_event_with_game_value(
-                player_index,
-                move |e| event(&mut e.persistent),
-                &info,
-                &(),
-                &mut value,
-            );
-
-            if self.current_event().player.handler.is_some() {
-                self.events[event_index].event_type = to_event_type(value);
-                return None;
-            }
-            let state = self.current_event_mut();
-            state.players_used.push(player_index);
-            if let Some(&p) = Self::remaining_persistent_event_players(players, state).first() {
-                state.player = PersistentEventPlayer::new(p);
-                next_player(&mut value);
-            }
-        }
-        self.events.pop();
-
-        if self.events.is_empty() {
-            present_instant_objective_cards(self);
-        }
-
-        Some(value)
-    }
-
-    fn remaining_persistent_event_players(
-        players: &[usize],
-        state: &PersistentEventState,
-    ) -> Vec<usize> {
-        players
-            .iter()
-            .filter(|p| !state.players_used.contains(p))
-            .copied()
-            .collect_vec()
+        trigger_persistent_event_ext(
+            self,
+            players,
+            event,
+            value,
+            to_event_type,
+            TriggerPersistentEventParams::default(),
+        )
     }
 
     pub(crate) fn trigger_transient_event_with_game_value<U, V>(
@@ -378,7 +250,8 @@ impl Game {
         info: &U,
         details: &V,
     ) {
-        self.trigger_event_with_game_value(
+        trigger_event_with_game_value(
+            self,
             player_index,
             move |e| event(&mut e.transient),
             info,
@@ -387,38 +260,24 @@ impl Game {
         );
     }
 
-    fn trigger_event_with_game_value<U, V, W>(
-        &mut self,
-        player_index: usize,
-        event: impl Fn(&mut PlayerEvents) -> &mut Event<Game, U, V, W>,
-        info: &U,
-        details: &V,
-        extra_value: &mut W,
-    ) where
-        W: Clone + PartialEq,
-    {
-        let e = event(&mut self.players[player_index].events).take();
-        e.trigger(self, info, details, extra_value);
-        event(&mut self.players[player_index].events).set(e);
-    }
-
     #[must_use]
     pub(crate) fn execute_cost_trigger(&self) -> CostTrigger {
-        if self.supports_undo {
-            CostTrigger::WithModifiers
-        } else {
+        if self.context == GameContext::AI {
             CostTrigger::NoModifiers
+        } else {
+            CostTrigger::WithModifiers
         }
     }
 
     #[must_use]
     pub fn can_undo(&self) -> bool {
-        self.supports_undo && self.undo_limit < self.action_log_index
+        self.context != GameContext::AI && self.undo_limit < self.action_log_index
     }
 
     #[must_use]
     pub fn can_redo(&self) -> bool {
-        self.supports_undo && self.action_log_index < current_player_turn_log(self).items.len()
+        self.context != GameContext::AI
+            && self.action_log_index < current_player_turn_log(self).actions.len()
     }
 
     pub(crate) fn is_pirate_zone(&self, position: Position) -> bool {
@@ -453,40 +312,42 @@ impl Game {
         self.log[last_item_index].push(info.to_string());
     }
 
-    pub fn add_to_last_log_item(&mut self, edit: &str) {
+    pub fn log(&mut self, player: usize, origin: &EventOrigin, message: &str) {
+        let prefix = format!("{}: {}: ", self.player_name(player), origin.name(self));
         let last_item_index = self.log.len() - 1;
-        let vec = &mut self.log[last_item_index];
-        let l = vec.len() - 1;
-        vec[l] += edit;
+        let current = &mut self.log[last_item_index];
+        for c in current.iter_mut() {
+            if c.starts_with(&prefix) {
+                use std::fmt::Write as _;
+                let _ = write!(c, ", {message}");
+                return;
+            }
+        }
+        current.push(format!("{prefix}{message}"));
     }
 
     pub(crate) fn start_turn(&mut self) {
-        self.action_log
-            .last_mut()
-            .expect("action log should exist")
-            .rounds
-            .last_mut()
-            .expect("round should exist")
-            .players
-            .push(ActionLogPlayer::new(self.current_player_index));
+        let player = self.current_player_index;
+        add_player_log(self, player);
         self.action_log_index = 0;
         self.undo_limit = 0;
 
-        self.add_info_log_group(format!(
-            "It's {}'s turn",
-            self.player_name(self.current_player_index)
-        ));
+        self.add_info_log_group(format!("It's {}'s turn", self.player_name(player)));
         self.actions_left = ACTIONS;
         let lost_action = self
             .permanent_effects
             .iter()
-            .position(
-                |e| matches!(e, PermanentEffect::LoseAction(p) if *p == self.current_player_index),
-            )
+            .position(|e| matches!(e, PermanentEffect::RevolutionLoseAction(p) if *p == player))
             .map(|i| self.permanent_effects.remove(i));
         if lost_action.is_some() {
-            self.add_info_log_item("Remove 1 action for Revolution");
-            self.actions_left -= 1;
+            lose_action(
+                self,
+                &EventPlayer::from_player(
+                    player,
+                    self,
+                    EventOrigin::Ability("Revolution".to_string()),
+                ),
+            );
         }
         self.successful_cultural_influence = false;
 
@@ -564,8 +425,8 @@ impl Game {
     }
 
     pub fn next_turn(&mut self) {
-        self.player_mut(self.current_player_index).end_turn();
-        for i in &mut current_player_turn_log_mut(self).items {
+        end_turn(self, self.current_player_index);
+        for i in &mut current_player_turn_log_mut(self).actions {
             i.undo.clear();
         }
         check_for_waste(self);
@@ -586,11 +447,7 @@ impl Game {
             return;
         }
         self.add_info_log_group(format!("Round {}/3", self.round));
-        self.action_log
-            .last_mut()
-            .expect("action log should exist")
-            .rounds
-            .push(ActionLogRound::new());
+        add_round_log(self, self.round);
         self.start_turn();
     }
 
@@ -598,8 +455,10 @@ impl Game {
         self.age += 1;
         self.round = 0;
         self.current_player_index = self.starting_player_index;
-        self.add_info_log_group(format!("Age {} has started", self.age));
-        self.action_log.push(ActionLogAge::new());
+        let m = format!("Age {} has started", self.age);
+        self.add_message(&m);
+        self.add_info_log_group(m);
+        self.action_log.push(ActionLogAge::new(self.age));
         self.next_round();
     }
 
@@ -608,17 +467,18 @@ impl Game {
             .players
             .iter()
             .enumerate()
-            .max_by(|(_, player), (_, other)| player.compare_score(other, self))
+            .max_by(|(_, player), (_, other)| compare_score(player, other, self))
             .expect("there should be at least one player in the game")
             .0;
         let winner_name = self.player_name(winner_player_index);
-        self.add_info_log_group(format!("The game has ended. {winner_name} has won"));
-        self.add_message("The game has ended");
+        let m = format!("The game has ended. {winner_name} has won");
+        self.add_message(&m);
+        self.add_info_log_group(m);
         self.state = GameState::Finished;
     }
 
     pub(crate) fn next_dice_roll(&mut self) -> CombatDieRoll {
-        self.lock_undo(); // dice rolls are not undoable
+        self.information_revealed();
         let dice_roll = if self.dice_roll_outcomes.is_empty() {
             self.rng.range(0, 12) as u8
         } else {
@@ -651,97 +511,24 @@ impl Game {
     }
 
     #[must_use]
-    pub fn available_custom_actions(
-        &self,
-        player_index: usize,
-    ) -> Vec<(CustomActionType, EventOrigin)> {
-        self.player(self.current_player_index)
+    pub fn available_custom_actions(&self, player_index: usize) -> Vec<CustomActionInfo> {
+        self.player(player_index)
             .custom_actions
-            .clone()
-            .into_iter()
-            .filter(|(t, _)| {
-                if matches!(
-                    t,
-                    CustomActionType::ArtsInfluenceCultureAttempt
-                        | CustomActionType::FreeEconomyCollect
-                        | CustomActionType::VotingIncreaseHappiness
-                ) {
+            .values()
+            .filter(|&c| {
+                if matches!(c.execution, CustomActionExecution::Modifier(_)) {
                     // returned as part of "base_or_custom_available"
                     return false;
                 }
 
-                t.is_available(self, player_index)
+                c.action
+                    .playing_action_type()
+                    .is_available(self, player_index)
+                    .is_ok()
             })
-            .collect()
+            .cloned()
+            .collect_vec()
     }
-
-    ///
-    ///
-    /// # Panics
-    ///
-    /// Panics if the city does not exist
-    pub fn raze_city(&mut self, position: Position, player_index: usize) {
-        let city = self.players[player_index]
-            .take_city(position)
-            .expect("player should have this city");
-        city.raze(self, player_index);
-    }
-}
-
-#[derive(Serialize, Deserialize, PartialEq)]
-pub struct GameData {
-    state: GameState,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    events: Vec<PersistentEventState>,
-    players: Vec<PlayerData>,
-    map: MapData,
-    starting_player_index: usize,
-    current_player_index: usize,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    action_log: Vec<ActionLogAge>,
-    action_log_index: usize,
-    log: Vec<Vec<String>>,
-    undo_limit: usize,
-    actions_left: u32,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "utils::is_false")]
-    successful_cultural_influence: bool,
-    round: u32,
-    age: u32,
-    messages: Vec<String>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    dice_roll_outcomes: Vec<u8>, // for testing purposes
-    #[serde(default)]
-    #[serde(skip_serializing_if = "is_string_zero")]
-    rng: String,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    dice_roll_log: Vec<u8>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    dropped_players: Vec<usize>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    wonders_left: Vec<String>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    action_cards_left: Vec<u8>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    objective_cards_left: Vec<u8>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    incidents_left: Vec<u8>,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    permanent_effects: Vec<PermanentEffect>,
-}
-
-fn is_string_zero(s: &String) -> bool {
-    s == "0"
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -749,17 +536,4 @@ pub enum GameState {
     Playing,
     Movement(MoveState),
     Finished,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct Messages {
-    messages: Vec<String>,
-    data: GameData,
-}
-
-impl Messages {
-    #[must_use]
-    pub fn new(messages: Vec<String>, data: GameData) -> Self {
-        Self { messages, data }
-    }
 }

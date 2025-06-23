@@ -15,7 +15,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "D1"
         }
@@ -27,10 +26,7 @@
           "id": 0
         }
       ],
-      "civilization": "Maya",
-      "available_leaders": [
-        "Kʼinich Janaab Pakal I"
-      ],
+      "civilization": "China",
       "advances": [
         "Farming",
         "Mining"
@@ -58,14 +54,12 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "D8"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
-          "position": "D3"
+          "position": "D2"
         }
       ],
       "units": [
@@ -85,15 +79,21 @@
           "id": 2
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining"
       ],
       "incident_tokens": 3,
       "completed_objectives": [
-        "Colony",
-        "Outpost"
+        {
+          "card": 17,
+          "name": "Colony"
+        },
+        {
+          "card": 32,
+          "name": "Outpost"
+        }
       ],
       "action_cards": [
         42
@@ -393,16 +393,17 @@
   "current_player_index": 1,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
-              "index": 1,
-              "items": []
+              "index": 1
             },
             {
               "index": 1,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": "EndTurn"
@@ -421,88 +422,41 @@
                       ]
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "StatusPhase": "CompleteObjectives"
-                          },
-                          "last_priority_used": 0,
-                          "player": 1
+                      "player": 1,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 17
                         },
-                        {
-                          "event_type": {
-                            "SelectObjectives": {
-                              "cards": [
-                                {
-                                  "ObjectiveCard": 17
-                                },
-                                {
-                                  "ObjectiveCard": 32
-                                }
-                              ],
-                              "objective_opportunities": [
-                                "Colony",
-                                "Outpost"
-                              ]
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "Builtin": "Select Objective Cards to Complete"
-                            },
-                            "priority": 0,
-                            "request": {
-                              "SelectHandCards": {
-                                "choices": [
-                                  {
-                                    "ObjectiveCard": 17
-                                  },
-                                  {
-                                    "ObjectiveCard": 32
-                                  }
-                                ],
-                                "description": "Select cards to complete",
-                                "needed": {
-                                  "end": 2,
-                                  "start": 0
-                                }
-                              }
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 1
+                        "from": {
+                          "Hand": 1
+                        },
+                        "to": {
+                          "CompleteObjective": "Colony"
                         }
-                      ]
+                      },
+                      "origin": {
+                        "Ability": "Complete Objectives"
+                      }
                     },
                     {
-                      "op": "remove",
-                      "path": "/messages/1"
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/1/objective_cards",
-                      "value": [
-                        17,
-                        32
-                      ]
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/1/completed_objectives"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/state",
-                      "value": "Playing"
+                      "player": 1,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 32
+                        },
+                        "from": {
+                          "Hand": 1
+                        },
+                        "to": {
+                          "CompleteObjective": "Outpost"
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Complete Objectives"
+                      }
                     }
-                  ],
-                  "completed_objectives": [
-                    "Colony",
-                    "Outpost"
                   ]
                 }
               ]
@@ -523,7 +477,7 @@
       "Player1 gained an objective card from the pile"
     ],
     [
-      "Player2 is playing as test1",
+      "Player2 is playing as Greece",
       "Player2 gained an action card from the pile",
       "Player2 gained an objective card from the pile"
     ],
@@ -540,14 +494,13 @@
       "It's Player2's turn"
     ],
     [
-      "Player1 ended their turn with 3 actions left"
+      "Player1: End Turn: 3 actions left"
     ],
     [
       "The game has entered the 6th status phase"
     ],
     [
-      "Player2 completed objective Colony",
-      "Player2 completed objective Outpost"
+      "Player2: Complete Objectives: Complete Colony using Colony/Threat, Complete Outpost using Magnificent Culture/Outpost"
     ],
     [
       "The game has ended. Player2 has won"
@@ -559,11 +512,11 @@
   "age": 6,
   "messages": [
     "The game has started",
-    "The game has ended"
+    "The game has ended. Player2 has won"
   ],
   "rng": "184103094459271804140360825922843067546",
   "wonders_left": [
-    "Great Gardens",
+    "GreatGardens",
     "Pyramids"
   ],
   "action_cards_left": [

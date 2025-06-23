@@ -1,0 +1,5 @@
+[profile.default]
+default-filter = 'not test(test_random_actions)'
+
+[profile.bench]
+default-filter = 'test(random_actions)'

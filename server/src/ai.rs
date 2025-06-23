@@ -8,11 +8,13 @@ use tokio::runtime::Runtime;
 
 use crate::ai_actions::AiActions;
 use crate::cache::Cache;
+use crate::game::GameContext;
+use crate::game_data::GameData;
 use crate::movement::MovementAction;
 use crate::{
     action::{self, Action, ActionType},
     ai_missions::ActiveMissions,
-    game::{Game, GameData, GameState},
+    game::{Game, GameState},
     playing_actions::{PlayingAction, PlayingActionType},
     utils::{self, Rng},
 };
@@ -81,7 +83,7 @@ impl AI {
     ///
     /// Panics if it's not the AI's turn
     pub fn next_action(&mut self, game: &Game) -> Action {
-        assert_eq!(game.current_player_index, self.active_missions.player_index);
+        assert_eq!(game.active_player(), self.active_missions.player_index);
         let start_time = std::time::Instant::now();
 
         if can_move(game, self.active_missions.player_index) {
@@ -222,9 +224,7 @@ async fn evaluate_action(
     let action_score = get_action_score(game, action, &players_active_missions[player_index]);
     let action_group_score =
         get_action_group_score(game, action_group, &players_active_missions[player_index]);
-    let mut game = game.clone();
-    game.supports_undo = false;
-    let game = action::execute_action(game, action.clone(), player_index);
+    let game = action::execute_action(game.clone(), action.clone(), player_index);
     let score = get_average_score(
         game,
         player_index,
@@ -263,8 +263,15 @@ pub async fn get_average_score(
             let thread_rng = rng.clone();
             let new_game = game.cloned_data();
             let new_active_missions = players_active_missions.to_vec();
+            let cache = game.cache.clone();
             let handle = tokio::spawn(async move {
-                monte_carlo_score(thread_rng, player_index, new_game, new_active_missions)
+                monte_carlo_score(
+                    thread_rng,
+                    player_index,
+                    new_game,
+                    new_active_missions,
+                    cache,
+                )
             });
             handles.push(handle);
         }
@@ -285,11 +292,12 @@ fn monte_carlo_score(
     player_index: usize,
     game_data: GameData,
     players_active_missions: Vec<ActiveMissions>,
+    cache: Cache,
 ) -> f64 {
     let mut ai = AiActions::new();
     let new_game = monte_carlo_run(
         &mut ai,
-        Game::from_data(game_data, Cache::new()),
+        game_from_data(game_data, cache),
         &mut rng,
         players_active_missions,
     );
@@ -304,6 +312,10 @@ fn monte_carlo_score(
         }
     }
     ai_score - max_opponent_score
+}
+
+fn game_from_data(game_data: GameData, cache: Cache) -> Game {
+    Game::from_data(game_data, cache, GameContext::AI)
 }
 
 fn monte_carlo_run(
@@ -368,7 +380,11 @@ fn choose_monte_carlo_action(
 }
 
 fn forced_action(game: &Game) -> Action {
-    if matches!(game.state, GameState::Movement(_)) { Action::Movement(MovementAction::Stop) } else { Action::Playing(PlayingAction::EndTurn) }
+    if matches!(game.state, GameState::Movement(_)) {
+        Action::Movement(MovementAction::Stop)
+    } else {
+        Action::Playing(PlayingAction::EndTurn)
+    }
 }
 
 fn get_actions(
@@ -503,10 +519,10 @@ pub async fn evaluate_position(game: &Game, evaluation_time: Duration) -> Vec<f6
             let thread_rng = rng.clone();
             let new_game = game.cloned_data();
             let new_active_missions = players_active_missions.clone();
-            let handle =
-                tokio::spawn(
-                    async move { simulate_game(new_game, thread_rng, new_active_missions) },
-                );
+            let cache = game.cache.clone();
+            let handle = tokio::spawn(async move {
+                simulate_game(new_game, thread_rng, new_active_missions, cache)
+            });
             handles.push(handle);
         }
         for handle in handles {
@@ -527,10 +543,11 @@ fn simulate_game(
     game: GameData,
     mut rng: Rng,
     players_active_missions: Vec<ActiveMissions>,
+    cache: Cache,
 ) -> usize {
     let new_game = monte_carlo_run(
         &mut AiActions::new(),
-        Game::from_data(game, Cache::new()),
+        game_from_data(game, cache),
         &mut rng,
         players_active_missions,
     );

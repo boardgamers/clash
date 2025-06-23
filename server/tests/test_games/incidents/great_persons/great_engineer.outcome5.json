@@ -26,20 +26,18 @@
             "temple": 1
           },
           "mood_state": "Neutral",
+          "angry_activation": true,
           "position": "C2"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "C1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "B2"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "B3"
         }
@@ -84,7 +82,7 @@
           "id": 7
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Arts",
         "Bartering",
@@ -130,7 +128,6 @@
           "position": "A1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "A3"
         },
@@ -142,7 +139,7 @@
           "position": "A4"
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining"
@@ -216,12 +213,14 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
@@ -232,7 +231,53 @@
                         }
                       }
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "food": 2
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Storage",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Advance"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -243,21 +288,104 @@
                         }
                       ]
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "culture_tokens": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Incident": 26
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 126
+                        },
+                        "from": "Incident",
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "Incident": 26
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
                     "Playing": {
                       "ActionCard": 126
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "CivilCard": 126
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 126
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToDiscard"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
                     "Response": {
                       "SelectAdvance": "Engineering"
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "Wonder": "Pyramids"
+                        },
+                        "from": "DrawPile",
+                        "to": {
+                          "Hand": 0
+                        }
+                      },
+                      "origin": {
+                        "Advance": "Engineering"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Engineering",
+                        "take_incident_token": false,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "CivilCard": 126
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -265,39 +393,15 @@
                       "Bool": true
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 1
-                    },
-                    {
-                      "op": "add",
-                      "path": "/events",
-                      "value": [
-                        {
-                          "event_type": {
-                            "ActionCard": {
-                              "id": 126
-                            }
-                          },
-                          "handler": {
-                            "origin": {
-                              "CivilCard": 126
-                            },
-                            "priority": 0,
-                            "request": {
-                              "BoolRequest": "Build a building in a city without spending an action and without activating it?"
-                            }
-                          },
-                          "last_priority_used": 0,
-                          "player": 0
-                        }
-                      ]
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/permanent_effects"
+                      "player": 0,
+                      "Action": {
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "CivilCard": 126
+                      }
                     }
                   ]
                 },
@@ -316,39 +420,50 @@
                       }
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "replace",
-                      "path": "/actions_left",
-                      "value": 2
+                      "player": 0,
+                      "Action": {
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
+                      }
                     },
                     {
-                      "op": "add",
-                      "path": "/permanent_effects",
-                      "value": [
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "food": 1,
+                          "wood": 1,
+                          "ore": 1
+                        },
+                        "balance": "Loss"
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
+                      },
+                      "modifiers": [
                         {
-                          "Construct": "GreatEngineer"
+                          "SpecialAdvance": "Captivi"
+                        },
+                        {
+                          "Ability": "Construct Only"
                         }
                       ]
                     },
                     {
-                      "op": "remove",
-                      "path": "/players/0/cities/0/city_pieces/fortress"
-                    },
-                    {
-                      "op": "add",
-                      "path": "/players/0/resources/food",
-                      "value": 1
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/ore",
-                      "value": 6
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/wood",
-                      "value": 6
+                      "player": 0,
+                      "Structure": {
+                        "structure": {
+                          "Building": "Fortress"
+                        },
+                        "balance": "Gain",
+                        "position": "C2"
+                      },
+                      "origin": {
+                        "Ability": "Construct Building"
+                      }
                     }
                   ]
                 }
@@ -362,30 +477,30 @@
   "action_log_index": 6,
   "log": [
     [
-      "Player1 paid 2 food to get the Storage advance",
-      "Player gained 1 mood token as advance bonus"
+      "Player1: Advance: Pay 1 action, Pay 2 food, Gain Storage and take an event token (triggering an incident)",
+      "Player1: Storage: Gain 1 mood token"
     ],
     [
       "A new game event has been triggered: Great Engineer",
-      "Base effect: Barbarians move",
-      "Barbarians cannot move - will try to spawn a new city instead",
-      "Barbarians cannot spawn a new city"
+      "Player1: Great Engineer: Base effect: Barbarians move, Barbarians cannot move - will try to spawn a new city instead, Barbarians cannot spawn a new city"
     ],
     [
-      "Player1 gained Great Engineer for 1 culture token"
+      "Player1: Great Engineer: Pay 1 culture token, Gain Great Engineer from the current event"
     ],
     [
-      "Player1 played the action card Great Engineer as a regular action"
+      "Player1: Great Engineer: Pay 1 action",
+      "Player1: Action Card: Play Great Engineer"
     ],
     [
-      "Player1 gained Engineering",
-      "Player1 drew a wonder card from the pile"
+      "Player1: Engineering: Draw a wonder card",
+      "Player1: Great Engineer: Unlock Aqueduct, Gain Engineering without taking an event token"
     ],
     [
-      "Great Engineer: You may build a building in a city without spending an action and without activating it."
+      "Player1: Great Engineer: Great Engineer: You may build a building in a city without spending an action and without activating it., Gain 1 action"
     ],
     [
-      "Player1 paid 1 food, 1 wood and 1 ore to construct a Fortress in the city at C2"
+      "Player1: Construct Building: Pay 1 action, Pay 1 food, 1 wood and 1 ore with Captivi, Construct Only, Gain Fortress at C2",
+      "Player1: Captivi: May replace resources with mood tokens"
     ]
   ],
   "undo_limit": 4,
@@ -408,5 +523,11 @@
   ],
   "dice_roll_log": [
     10
+  ],
+  "action_cards_discarded": [
+    126
+  ],
+  "incidents_discarded": [
+    26
   ]
 }

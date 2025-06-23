@@ -2,9 +2,9 @@ use crate::common::{JsonTest, TestAction, move_action};
 use server::action::Action;
 use server::card::{HandCard, validate_card_selection};
 use server::content::persistent_events::{EventResponse, PersistentEventRequest};
-use server::playing_actions;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
+use server::recruit;
 use server::resource_pile::ResourcePile;
 use server::unit::Units;
 
@@ -14,16 +14,16 @@ const JSON: JsonTest = JsonTest::child("objective_cards", "instant");
 
 #[test]
 fn test_draft() {
-    let r = Action::Playing(PlayingAction::Recruit(playing_actions::Recruit::new(
-        &Units::new(0, 1, 0, 0, 0, 0),
+    let r = Action::Playing(PlayingAction::Recruit(recruit::Recruit::new(
+        &Units::new(0, 1, 0, 0, 0, None),
         Position::from_offset("A1"),
         ResourcePile::mood_tokens(1),
     )));
     JSON.test(
         "draft",
         vec![
-            TestAction::undoable(0, r.clone()).without_json_comparison(),
-            TestAction::undoable(0, r).without_json_comparison(),
+            TestAction::undoable(0, r.clone()).skip_json(),
+            TestAction::undoable(0, r).skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![
@@ -43,7 +43,7 @@ fn test_conqueror() {
                 0,
                 move_action(vec![0, 1, 2, 3], Position::from_offset("C1")),
             )
-            .without_json_comparison(),
+            .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![
@@ -62,9 +62,8 @@ fn test_defiance() {
         "defiance",
         vec![
             TestAction::not_undoable(0, move_action(vec![0], Position::from_offset("C1")))
-                .without_json_comparison(),
-            TestAction::not_undoable(0, Action::Response(EventResponse::Bool(false)))
-                .without_json_comparison(),
+                .skip_json(),
+            TestAction::not_undoable(0, Action::Response(EventResponse::Bool(false))).skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![
@@ -81,9 +80,11 @@ fn test_warmonger() {
         "warmonger",
         vec![
             TestAction::not_undoable(0, move_action(vec![0, 1], Position::from_offset("C1")))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::not_undoable(0, move_action(vec![2, 3], Position::from_offset("B1")))
-                .without_json_comparison(),
+                .skip_json(),
+            TestAction::not_undoable(0, Action::Response(EventResponse::Bool(false))).skip_json(),
+            TestAction::not_undoable(0, Action::Response(EventResponse::Bool(false))).skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![
@@ -91,21 +92,15 @@ fn test_warmonger() {
                 ])),
             )
             .with_pre_assert(|game| {
-                let PersistentEventRequest::SelectHandCards(c) = &game
-                    .events
-                    .last()
-                    .expect("last event")
-                    .player
-                    .handler
-                    .as_ref()
-                    .expect("handler")
-                    .request
+                let h = &game.events.last().expect("last event").player.handler;
+                let PersistentEventRequest::SelectHandCards(c) =
+                    &h.as_ref().expect("handler").request
                 else {
-                    panic!("Expected SelectHandCards request");
+                    panic!("Expected SelectHandCards request, got: {h:?}");
                 };
                 //can't fulfill both objectives with same name
                 assert_eq!(c.choices.len(), 2);
-                assert!(validate_card_selection(&c.choices, game).is_err());
+                assert!(validate_card_selection(&c.choices, &game).is_err());
             }),
         ],
     );
@@ -117,7 +112,7 @@ fn test_scavenger() {
         "scavenger",
         vec![
             TestAction::not_undoable(0, move_action(vec![0, 1], Position::from_offset("E7")))
-                .without_json_comparison(),
+                .skip_json(),
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![

@@ -1,19 +1,83 @@
-use crate::action::update_stats;
 use crate::action_card::gain_action_card_from_pile;
-use crate::advance::Advance;
+use crate::advance::{Advance, do_advance};
 use crate::cache::Cache;
-use crate::consts::{ACTIONS, NON_HUMAN_PLAYERS};
+use crate::city;
+use crate::city::{City, MoodState, set_city_mood};
+use crate::consts::{ACTIONS, JSON_SCHEMA_VERSION, NON_HUMAN_PLAYERS};
 use crate::content::civilizations::{BARBARIANS, PIRATES};
-use crate::content::{builtin, civilizations};
-use crate::game::{Game, GameState};
-use crate::map::Map;
+use crate::content::{ability, civilizations};
+use crate::events::{EventOrigin, EventPlayer};
+use crate::game::{Game, GameContext, GameOptions, GameState};
+use crate::log::{add_player_log, add_round_log};
+use crate::map::{Map, MapSetup, get_map_setup};
 use crate::objective_card::gain_objective_card_from_pile;
-use crate::player::{Player, add_unit};
+use crate::player::{Player, gain_unit};
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
 use crate::utils::{Rng, Shuffle};
+use city::gain_city;
 use itertools::Itertools;
 use std::collections::HashMap;
+
+#[must_use]
+pub struct GameSetup {
+    player_amount: usize,
+    seed: String,
+    random_map: bool,
+    options: GameOptions,
+    civilizations: Vec<String>,
+}
+
+#[must_use]
+pub struct GameSetupBuilder {
+    player_amount: usize,
+    seed: String,
+    random_map: bool,
+    options: GameOptions,
+    civilizations: Vec<String>,
+}
+
+impl GameSetupBuilder {
+    pub fn new(player_amount: usize) -> Self {
+        GameSetupBuilder {
+            player_amount,
+            seed: String::new(),
+            random_map: true,
+            options: GameOptions::default(),
+            civilizations: Vec::new(),
+        }
+    }
+
+    pub fn seed(mut self, seed: String) -> Self {
+        self.seed = seed;
+        self
+    }
+
+    pub fn skip_random_map(mut self) -> Self {
+        self.random_map = false;
+        self
+    }
+
+    pub fn options(mut self, options: GameOptions) -> Self {
+        self.options = options;
+        self
+    }
+
+    pub fn civilizations(mut self, civilizations: Vec<String>) -> Self {
+        self.civilizations = civilizations;
+        self
+    }
+
+    pub fn build(self) -> GameSetup {
+        GameSetup {
+            player_amount: self.player_amount,
+            seed: self.seed,
+            random_map: self.random_map,
+            options: self.options,
+            civilizations: self.civilizations,
+        }
+    }
+}
 
 /// Creates a new [`Game`].
 ///
@@ -21,32 +85,41 @@ use std::collections::HashMap;
 ///
 /// Panics only if there is an internal bug
 #[must_use]
-pub fn setup_game(player_amount: usize, seed: String, setup: bool) -> Game {
-    let mut rng = init_rng(seed);
-    let cache = Cache::new();
-    let mut players = init_human_players(player_amount, &mut rng);
+pub fn setup_game(setup: &GameSetup) -> Game {
+    setup_game_with_cache(setup, Cache::new())
+}
+
+/// Creates a new [`Game`].
+///
+/// # Panics
+///
+/// Panics only if there is an internal bug
+#[must_use]
+pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
+    let mut rng = init_rng(setup.seed.clone());
+
+    let mut players = create_human_players(setup, &mut rng, &cache);
 
     let starting_player = rng.range(0, players.len());
 
     players.push(Player::new(
-        civilizations::get_civilization(BARBARIANS).expect("civ not found"),
+        cache.get_civilization(BARBARIANS),
         players.len(),
     ));
-    players.push(Player::new(
-        civilizations::get_civilization(PIRATES).expect("civ not found"),
-        players.len(),
-    ));
+    players.push(Player::new(cache.get_civilization(PIRATES), players.len()));
 
-    let map = if setup {
-        Map::random_map(&mut players, &mut rng)
+    let (map_setup, map) = if setup.random_map {
+        let setup = get_map_setup(setup.player_amount);
+        let map = Map::random_map(&mut rng, &setup);
+        (Some(setup), map)
     } else {
-        Map::new(HashMap::new())
+        (None, Map::new(HashMap::new()))
     };
 
     let wonders_left = cache
         .get_wonders()
         .iter()
-        .map(|w| w.name.clone())
+        .map(|w| w.wonder)
         .collect_vec()
         .shuffled(&mut rng);
     let action_cards_left = cache
@@ -67,7 +140,12 @@ pub fn setup_game(player_amount: usize, seed: String, setup: bool) -> Game {
         .map(|i| i.id)
         .collect_vec()
         .shuffled(&mut rng);
+    let all = &cache.get_abilities().clone();
     let mut game = Game {
+        seed: setup.seed.clone(),
+        context: GameContext::Play,
+        version: JSON_SCHEMA_VERSION,
+        options: setup.options.clone(),
         cache,
         state: GameState::Playing,
         events: Vec::new(),
@@ -82,44 +160,72 @@ pub fn setup_game(player_amount: usize, seed: String, setup: bool) -> Game {
             .map(|s| vec![s.clone()])
             .collect(),
         undo_limit: 0,
-        supports_undo: true,
         actions_left: ACTIONS,
         successful_cultural_influence: false,
         round: 1,
         age: 0,
-        messages: vec![String::from("The game has started")],
+        messages: vec![],
         rng,
         dice_roll_outcomes: Vec::new(),
         dice_roll_log: Vec::new(),
         dropped_players: Vec::new(),
         wonders_left,
         action_cards_left,
+        action_cards_discarded: Vec::new(),
         objective_cards_left,
         incidents_left,
+        incidents_discarded: Vec::new(),
         permanent_effects: Vec::new(),
     };
     for i in 0..game.players.len() {
-        builtin::init_player(&mut game, i);
+        ability::init_player(&mut game, i, all);
     }
 
-    for player_index in 0..player_amount {
-        let p = game.player(player_index);
-        game.add_info_log_group(format!(
-            "{} is playing as {}",
-            p.get_name(),
-            p.civilization.name
-        ));
-        gain_action_card_from_pile(&mut game, player_index);
-        gain_objective_card_from_pile(&mut game, player_index);
-        let p = game.player(player_index);
-        if setup {
-            add_unit(p.index, p.cities[0].position, UnitType::Settler, &mut game);
+    execute_setup_round(setup, &mut game, map_setup.as_ref());
+    game
+}
+
+fn execute_setup_round(setup: &GameSetup, game: &mut Game, map_setup: Option<&MapSetup>) {
+    game.next_age();
+    add_round_log(game, 0);
+
+    for player_index in 0..setup.player_amount {
+        add_player_log(game, player_index);
+
+        let origin = setup_event_origin();
+        let player = &EventPlayer::from_player(player_index, game, origin.clone());
+        player.log(
+            game,
+            &format!("Play as {}", player.get(game).civilization.name),
+        );
+
+        player.gain_resources(game, ResourcePile::food(2));
+        do_advance(game, Advance::Farming, player, false);
+        do_advance(game, Advance::Mining, player, false);
+
+        gain_action_card_from_pile(game, player);
+        gain_objective_card_from_pile(game, player);
+        if let Some(m) = &map_setup {
+            let h = &m.home_positions[player_index];
+            let home = player
+                .get(game)
+                .civilization
+                .start_block
+                .as_ref()
+                .unwrap_or(&h.block)
+                .clone();
+            let position = home.tiles(&h.position, h.position.rotation)[0].0;
+            game.map
+                .add_block_tiles(&h.position, &home, h.position.rotation);
+            gain_city(game, player, City::new(player_index, position));
+            set_city_mood(game, position, &origin, MoodState::Happy);
+            gain_unit(game, player, position, UnitType::Settler);
         }
     }
+}
 
-    update_stats(&mut game);
-    game.next_age();
-    game
+fn setup_event_origin() -> EventOrigin {
+    EventOrigin::Ability("Setup".to_string())
 }
 
 fn init_rng(seed: String) -> Rng {
@@ -140,16 +246,18 @@ fn init_rng(seed: String) -> Rng {
     Rng::from_seed(seed)
 }
 
-fn init_human_players(player_amount: usize, rng: &mut Rng) -> Vec<Player> {
+fn create_human_players(setup: &GameSetup, rng: &mut Rng, cache: &Cache) -> Vec<Player> {
     let mut players = Vec::new();
-    let mut civilizations = civilizations::get_all();
-    for player_index in 0..player_amount {
-        let civilization = rng.range(NON_HUMAN_PLAYERS, civilizations.len());
-        let mut player = Player::new(civilizations.remove(civilization), player_index);
+    let mut civilizations = civilizations::get_all_uncached();
+    for player_index in 0..setup.player_amount {
+        let civilization = if setup.civilizations.is_empty() {
+            civilizations.remove(rng.range(NON_HUMAN_PLAYERS, civilizations.len()))
+        } else {
+            rng.next_seed(); // need to call next_seed to have the same number of calls to rng
+            cache.get_civilization(&setup.civilizations[player_index])
+        };
+        let mut player = Player::new(civilization, player_index);
         player.resource_limit = ResourcePile::new(2, 7, 7, 7, 7, 0, 0);
-        player.gain_resources(ResourcePile::food(2));
-        player.advances.insert(Advance::Farming);
-        player.advances.insert(Advance::Mining);
         player.incident_tokens = 3;
         players.push(player);
     }

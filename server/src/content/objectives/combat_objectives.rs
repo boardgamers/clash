@@ -1,5 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
-use crate::combat_stats::CombatStats;
+use crate::combat_stats::Battleground;
+use crate::content::advances::AdvanceGroup;
 use crate::content::advances::trade_routes::find_trade_route_for_unit;
 use crate::game::Game;
 use crate::log::current_player_turn_log;
@@ -17,11 +18,12 @@ pub(crate) fn conqueror() -> Objective {
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
         1,
-        |game, player, _, e| {
-            let s = &e.combat.stats;
-            if s.is_winner(player) && s.battleground.is_city() && s.opponent_is_human(player, game)
+        |game, player, s| {
+            if s.is_winner(player.index)
+                && s.battleground.is_city()
+                && s.opponent_is_human(player.index, game)
             {
-                objective_is_ready(game.player_mut(player), name);
+                objective_is_ready(player.get_mut(game), name);
             }
         },
     )
@@ -38,20 +40,20 @@ pub(crate) fn warmonger() -> Objective {
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
         2,
-        |game, player, _, _e| {
+        |game, player, _e| {
             let stat = current_player_turn_log(game)
-                .items
+                .actions
                 .iter()
                 .filter_map(|i| i.combat_stats.as_ref().filter(|s| s.battleground.is_land()))
                 .collect_vec();
             if stat.len() < 2
-                || !stat.iter().any(|s| s.is_winner(player))
+                || !stat.iter().any(|s| s.is_winner(player.index))
                 // we just check that the combat position is different - not tracking the actual unit IDs
-                || stat.iter().all(|s| s.position == stat[0].position)
+                || stat.iter().all(|s| s.defender.position == stat[0].defender.position)
             {
                 return;
             }
-            objective_is_ready(game.player_mut(player), name);
+            objective_is_ready(player.get_mut(game), name);
         },
     )
     .build()
@@ -66,17 +68,16 @@ pub(crate) fn general() -> Objective {
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
         3,
-        |game, player, _, e| {
-            let s = &e.combat.stats;
+        |game, player, s| {
             let army_units_killed_by_you: u8 = s
-                .opponent(player)
+                .opponent(player.index)
                 .fighter_losses(s.battleground)
                 .clone()
                 .into_iter()
                 .filter_map(|(u, loss)| u.is_army_unit().then_some(loss))
                 .sum();
             if s.battleground.is_land() && army_units_killed_by_you >= 3 {
-                objective_is_ready(game.player_mut(player), name);
+                objective_is_ready(player.get_mut(game), name);
             }
         },
     )
@@ -92,13 +93,16 @@ pub(crate) fn great_battle() -> Objective {
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
         4,
-        |game, player, _, e| {
-            let s = &e.combat.stats;
+        |game, player, s| {
+            if !s.is_battle() {
+                return;
+            }
+
             let b = s.battleground;
             let army_units_present: u8 =
                 s.attacker.fighters(b).amount() + s.defender.fighters(b).amount();
             if s.battleground.is_land() && army_units_present >= 6 {
-                objective_is_ready(game.player_mut(player), name);
+                objective_is_ready(player.get_mut(game), name);
             }
         },
     )
@@ -114,8 +118,12 @@ pub(crate) fn defiance() -> Objective {
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
         5,
-        |game, player, _, e| {
-            let s = &e.combat.stats;
+        |game, p, s| {
+            if !s.is_battle() {
+                return;
+            }
+
+            let player = p.index;
             let b = s.battleground;
             let fewer_fighters =
                 s.player(player).fighters(b).amount() < s.opponent(player).fighters(b).amount();
@@ -134,28 +142,20 @@ pub(crate) fn naval_assault() -> Objective {
         "You captured a city with army units that disembarked from a ship.",
     )
     .add_simple_persistent_event_listener(
-        |event| &mut event.capture_undefended_position,
-        0,
-        |game, p, _, s| eval_naval_assault(game, p, s),
-    )
-    .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
         6,
-        |game, p, _, e| {
-            eval_naval_assault(game, p, &e.combat.stats);
+        |game, player, e| {
+            let p = player.index;
+            if e.disembarked
+                && e.opponent_is_human(p, game)
+                && e.is_winner(p)
+                && e.battleground.is_city()
+            {
+                objective_is_ready(game.player_mut(p), "Naval Assault");
+            }
         },
     )
     .build()
-}
-
-fn eval_naval_assault(game: &mut Game, player: usize, s: &CombatStats) {
-    if s.disembarked
-        && s.opponent_is_human(player, game)
-        && s.is_winner(player)
-        && s.battleground.is_city()
-    {
-        objective_is_ready(game.player_mut(player), "Naval Assault");
-    }
 }
 
 pub(crate) fn bold() -> Objective {
@@ -167,8 +167,12 @@ pub(crate) fn bold() -> Objective {
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
         7,
-        |game, player, _, e| {
-            let s = &e.combat.stats;
+        |game, p, s| {
+            if !s.is_battle() {
+                return;
+            }
+
+            let player = p.index;
             let b = s.battleground;
             let o = s.opponent(player);
             let fewer_fighters =
@@ -184,7 +188,7 @@ pub(crate) fn bold() -> Objective {
 
 fn warfare_advances(player: &Player, game: &Game) -> usize {
     game.cache
-        .get_advance_group("Warfare")
+        .get_advance_group(AdvanceGroup::Warfare)
         .advances
         .iter()
         .filter(|a| player.has_advance(a.advance))
@@ -200,9 +204,13 @@ pub(crate) fn legendary_battle() -> Objective {
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
         8,
-        |game, player, _, e| {
-            let s = &e.combat.stats;
-            if let Some(city) = game.try_get_any_city(s.position) {
+        |game, p, s| {
+            if !s.is_battle() {
+                return;
+            }
+
+            let player = p.index;
+            if let Some(city) = game.try_get_any_city(s.defender.position) {
                 let fighters = s.player(player).fighters(s.battleground).amount() >= 3;
                 let city_size = city.size() >= 5;
                 let wonders = !city.pieces.wonders.is_empty();
@@ -225,14 +233,14 @@ pub(crate) fn scavenger() -> Objective {
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
         9,
-        |game, player, _, e| {
-            let s = &e.combat.stats;
+        |game, p, s| {
+            let player = p.index;
             let o = s.opponent(player);
             let opponent = game.player(o.player);
             let units = &o.losses;
             if units.settlers > 0 || units.ships > 0 {
                 // just the position and type matter
-                let unit = Unit::new(o.player, s.position, UnitType::Settler, 0);
+                let unit = Unit::new(o.player, s.defender.position, UnitType::Settler, 0);
                 if !find_trade_route_for_unit(game, opponent, &unit).is_empty() {
                     objective_is_ready(game.player_mut(player), name);
                 }
@@ -251,8 +259,8 @@ pub(crate) fn aggressor() -> Objective {
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
         10,
-        |game, player, _, e| {
-            let s = &e.combat.stats;
+        |game, p, s| {
+            let player = p.index;
             if s.is_winner(player)
                 && s.battleground.is_land()
                 && s.opponent(player).fighter_losses(s.battleground).amount() >= 2
@@ -273,8 +281,8 @@ pub(crate) fn barbarian_conquest() -> Objective {
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
         11,
-        |game, player, _, e| {
-            let s = &e.combat.stats;
+        |game, p, s| {
+            let player = p.index;
             if s.is_winner(player)
                 && s.battleground.is_city()
                 && !s.opponent_is_human(player, game)
@@ -296,8 +304,8 @@ pub(crate) fn resistance() -> Objective {
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
         12,
-        |game, player, _, e| {
-            let s = &e.combat.stats;
+        |game, p, s| {
+            let player = p.index;
             if s.is_winner(player)
                 && !s.opponent_is_human(player, game)
                 && s.battleground.is_city()
@@ -319,13 +327,17 @@ pub(crate) fn great_commander() -> Objective {
     .add_simple_persistent_event_listener(
         |event| &mut event.combat_end,
         13,
-        |game, player, _, e| {
-            let s = &e.combat.stats;
+        |game, p, s| {
+            if !s.is_battle() {
+                return;
+            }
+
+            let player = p.index;
             let b = s.battleground;
             let o = s.opponent(player);
             let not_more_fighters = s.player(player).fighters(b).amount() <= o.fighters(b).amount();
 
-            if s.is_winner(player) && s.player(player).present.leaders > 0 && not_more_fighters {
+            if s.is_winner(player) && s.player(player).present.has_leader() && not_more_fighters {
                 objective_is_ready(game.player_mut(player), name);
             }
         },
@@ -339,11 +351,11 @@ pub(crate) fn brutus() -> Objective {
         .add_simple_persistent_event_listener(
             |event| &mut event.combat_end,
             14,
-            |game, player, _, e| {
-                let s = &e.combat.stats;
+            |game, p, s| {
+                let player = p.index;
                 let l = &s.opponent(player).losses;
 
-                if l.leaders > 0
+                if l.has_leader()
                     && l.clone()
                         .to_vec()
                         .iter()
@@ -351,6 +363,66 @@ pub(crate) fn brutus() -> Objective {
                         .count()
                         >= 3
                 {
+                    objective_is_ready(game.player_mut(player), name);
+                }
+            },
+        )
+        .build()
+}
+
+pub(crate) fn trample() -> Objective {
+    let name = "Trample";
+    Objective::builder(
+        name,
+        "You won a land battle as attacker where 1 elephant or 1 cavalry unit survived.",
+    )
+    .add_simple_persistent_event_listener(
+        |event| &mut event.combat_end,
+        15,
+        |game, player, s| {
+            if !s.is_battle() {
+                return;
+            }
+
+            let player = player.index;
+            let p = s.player(player);
+            let mut survived = p.present.clone();
+            for l in p.losses.clone().to_vec() {
+                survived -= &l;
+            }
+
+            if s.is_winner(player)
+                && s.battleground.is_land()
+                && s.attacker.player == player
+                && (survived.elephants > 0 || survived.cavalry > 0)
+            {
+                objective_is_ready(game.player_mut(player), name);
+            }
+        },
+    )
+    .build()
+}
+
+pub(crate) fn sea_cleansing() -> Objective {
+    let name = "Sea Cleansing";
+    Objective::builder(name, "You won the second battle against Pirates this turn.")
+        .add_simple_persistent_event_listener(
+            |event| &mut event.combat_end,
+            16,
+            |game, p, _e| {
+                let player = p.index;
+                let battles = current_player_turn_log(game)
+                    .actions
+                    .iter()
+                    .filter_map(|i| {
+                        i.combat_stats.as_ref().filter(|s| {
+                            s.is_winner(player)
+                                && s.battleground == Battleground::Sea
+                                && !s.opponent_is_human(player, game)
+                        })
+                    })
+                    .count();
+                if battles >= 2 {
                     objective_is_ready(game.player_mut(player), name);
                 }
             },

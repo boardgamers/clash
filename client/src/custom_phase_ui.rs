@@ -1,5 +1,5 @@
 use crate::advance_ui::{AdvanceState, show_advance_menu};
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::{BaseOrCustomDialog, OkTooltip, cancel_button_with_tooltip, ok_button};
 use crate::layout_ui::{bottom_center_anchor, bottom_centered_text, icon_pos};
 use crate::payment_ui::{Payment, multi_payment_dialog, payment_dialog};
@@ -12,39 +12,49 @@ use itertools::Itertools;
 use macroquad::math::vec2;
 use server::action::Action;
 use server::content::persistent_events::{
-    AdvanceRequest, EventResponse, MultiRequest, PlayerRequest, SelectedStructure, Structure,
-    UnitTypeRequest, UnitsRequest, is_selected_structures_valid,
+    AdvanceRequest, EventResponse, MultiRequest, PlayerRequest, SelectedStructure, UnitTypeRequest,
+    UnitsRequest, is_selected_structures_valid,
 };
 use server::cultural_influence::InfluenceCultureAttempt;
 use server::game::Game;
 use server::playing_actions::PlayingAction;
 use server::position::Position;
-use server::unit::Unit;
+use server::resource_pile::ResourcePile;
+use server::structure::Structure;
+use server::unit::{Unit, validate_units_selection};
 
-pub fn custom_phase_payment_dialog(
+pub(crate) fn custom_phase_payment_dialog(
     rc: &RenderContext,
     payments: &[Payment<String>],
-) -> StateUpdate {
-    multi_payment_dialog(
+) -> RenderResult {
+    let update = multi_payment_dialog(
         rc,
         payments,
         |p| ActiveDialog::PaymentRequest(p.clone()),
-        false,
-        |p| StateUpdate::Execute(Action::Response(EventResponse::Payment(p.clone()))),
-    )
+        payments.len() == 1 && payments[0].optional,
+        |p| StateUpdate::response(EventResponse::Payment(p.clone())),
+    );
+    if matches!(&update, Err(u) if matches!(**u, StateUpdate::Cancel)) {
+        return StateUpdate::response(EventResponse::Payment(vec![ResourcePile::empty()]));
+    }
+    update
 }
 
-pub fn payment_reward_dialog(rc: &RenderContext, payment: &Payment<String>) -> StateUpdate {
+pub(crate) fn payment_reward_dialog(rc: &RenderContext, payment: &Payment<String>) -> RenderResult {
     payment_dialog(
         rc,
         payment,
         false,
         |p| ActiveDialog::ResourceRewardRequest(p.clone()),
-        |p| StateUpdate::Execute(Action::Response(EventResponse::ResourceReward(p))),
+        |p| StateUpdate::response(EventResponse::ResourceReward(p)),
     )
 }
 
-pub fn advance_reward_dialog(rc: &RenderContext, r: &AdvanceRequest, name: &str) -> StateUpdate {
+pub(crate) fn advance_reward_dialog(
+    rc: &RenderContext,
+    r: &AdvanceRequest,
+    name: &str,
+) -> RenderResult {
     let possible = &r.choices;
     show_advance_menu(
         rc,
@@ -67,40 +77,33 @@ pub fn advance_reward_dialog(rc: &RenderContext, r: &AdvanceRequest, name: &str)
     )
 }
 
-pub fn unit_request_dialog(rc: &RenderContext, r: &UnitTypeRequest) -> StateUpdate {
+pub(crate) fn unit_request_dialog(rc: &RenderContext, r: &UnitTypeRequest) -> RenderResult {
     bottom_centered_text(rc, &r.description);
 
     let c = &r.choices;
     let anchor = bottom_center_anchor(rc) + vec2(0., 60.);
-    for pass in 0..2 {
-        for (i, u) in c.iter().enumerate() {
-            let x = (c.len() - i) as i8 - 1;
-            let center = icon_pos(x, -2) + anchor;
+    for (i, u) in c.iter().enumerate() {
+        let x = (c.len() - i) as i8 - 1;
+        let center = icon_pos(x, -2) + anchor;
 
-            if pass == 0 {
-                if draw_unit_type(rc, HighlightType::None, center, *u, r.player_index, 20.) {
-                    return StateUpdate::Execute(Action::Response(EventResponse::SelectUnitType(
-                        *u,
-                    )));
-                }
-            } else {
-                let mut tooltip = vec![u.name().to_string()];
-                add_unit_description(&mut tooltip, *u);
-                show_tooltip_for_circle(rc, &tooltip, center, 20.);
-            }
+        if draw_unit_type(rc, HighlightType::None, center, *u, r.player_index, 20.) {
+            return StateUpdate::response(EventResponse::SelectUnitType(*u));
         }
+        let mut tooltip = vec![u.name(rc.game).to_string()];
+        add_unit_description(rc, &mut tooltip, *u);
+        show_tooltip_for_circle(rc, &tooltip, center, 20.);
     }
-    StateUpdate::None
+    NO_UPDATE
 }
 
-#[derive(Clone)]
-pub struct UnitsSelection {
+#[derive(Clone, Debug)]
+pub(crate) struct UnitsSelection {
     pub player: usize,
     pub selection: MultiSelection<u32>,
 }
 
 impl UnitsSelection {
-    pub fn new(r: &UnitsRequest) -> Self {
+    pub(crate) fn new(r: &UnitsRequest) -> Self {
         UnitsSelection {
             player: r.player,
             selection: MultiSelection::new(r.request.clone()),
@@ -122,29 +125,35 @@ impl UnitSelection for UnitsSelection {
     }
 }
 
-pub fn select_units_dialog(rc: &RenderContext, s: &UnitsSelection) -> StateUpdate {
+pub(crate) fn select_units_dialog(rc: &RenderContext, s: &UnitsSelection) -> RenderResult {
+    let selected = &s.selection.selected;
     bottom_centered_text(
         rc,
         format!(
             "{}: {} units selected",
             s.selection.request.description,
-            s.selection.selected.len()
+            selected.len()
         )
         .as_str(),
     );
 
     if ok_button(
         rc,
-        multi_select_tooltip(&s.selection, s.selection.is_valid(), "units"),
+        multi_select_tooltip(
+            &s.selection,
+            s.selection.is_valid()
+                && validate_units_selection(selected, rc.game, rc.shown_player).is_ok(),
+            "units",
+        ),
     ) {
-        StateUpdate::response(EventResponse::SelectUnits(s.selection.selected.clone()))
+        StateUpdate::response(EventResponse::SelectUnits(selected.clone()))
     } else {
-        StateUpdate::None
+        NO_UPDATE
     }
 }
 
-#[derive(Clone)]
-pub struct MultiSelection<T>
+#[derive(Clone, Debug)]
+pub(crate) struct MultiSelection<T>
 where
     T: Clone + PartialEq + Ord,
 {
@@ -153,18 +162,18 @@ where
 }
 
 impl<T: Clone + PartialEq + Ord> MultiSelection<T> {
-    pub fn new(request: MultiRequest<T>) -> Self {
+    pub(crate) fn new(request: MultiRequest<T>) -> Self {
         MultiSelection {
             request,
             selected: vec![],
         }
     }
 
-    pub fn is_valid(&self) -> bool {
+    pub(crate) fn is_valid(&self) -> bool {
         self.request.is_valid(&self.selected)
     }
 
-    pub fn toggle(self, value: T) -> Self {
+    pub(crate) fn toggle(self, value: T) -> Self {
         if let Some(i) = self.selected.iter().position(|s| s == &value) {
             let mut new = self.clone();
             new.selected.remove(i);
@@ -179,23 +188,23 @@ impl<T: Clone + PartialEq + Ord> MultiSelection<T> {
     }
 }
 
-#[derive(Clone, PartialEq, Eq, Ord, PartialOrd)]
-pub enum SelectedStructureStatus {
+#[derive(Clone, PartialEq, Eq, Ord, PartialOrd, Debug)]
+pub(crate) enum SelectedStructureStatus {
     Valid,
     Warn,
     Invalid,
 }
 
-#[derive(Clone, PartialEq, Eq, Ord, PartialOrd)]
-pub struct SelectedStructureInfo {
+#[derive(Clone, PartialEq, Eq, Ord, PartialOrd, Debug)]
+pub(crate) struct SelectedStructureInfo {
     pub position: Position,
-    pub structure: Structure,
+    pub(crate) structure: Structure,
     pub status: SelectedStructureStatus,
     pub tooltip: Option<String>,
 }
 
 impl SelectedStructureInfo {
-    pub fn new(
+    pub(crate) fn new(
         position: Position,
         structure: Structure,
         status: SelectedStructureStatus,
@@ -209,11 +218,11 @@ impl SelectedStructureInfo {
         }
     }
 
-    pub fn selected(&self) -> SelectedStructure {
+    pub(crate) fn selected(&self) -> SelectedStructure {
         SelectedStructure::new(self.position, self.structure.clone())
     }
 
-    pub fn highlight_type(&self) -> HighlightType {
+    pub(crate) fn highlight_type(&self) -> HighlightType {
         match self.status {
             SelectedStructureStatus::Valid => HighlightType::Choices,
             SelectedStructureStatus::Warn => HighlightType::Warn,
@@ -222,11 +231,11 @@ impl SelectedStructureInfo {
     }
 }
 
-pub fn select_structures_dialog(
+pub(crate) fn select_structures_dialog(
     rc: &RenderContext,
     d: Option<&BaseOrCustomDialog>,
     s: &MultiSelection<SelectedStructureInfo>,
-) -> StateUpdate {
+) -> RenderResult {
     bottom_centered_text(
         rc,
         format!(
@@ -252,7 +261,7 @@ pub fn select_structures_dialog(
     ) {
         if let Some(d) = d {
             if s.selected.is_empty() {
-                return StateUpdate::CloseDialog;
+                return StateUpdate::close_dialog();
             }
             StateUpdate::execute(Action::Playing(PlayingAction::InfluenceCultureAttempt(
                 InfluenceCultureAttempt::new(s.selected[0].selected(), d.action_type.clone()),
@@ -261,7 +270,7 @@ pub fn select_structures_dialog(
             StateUpdate::response(EventResponse::SelectStructures(sel))
         }
     } else {
-        StateUpdate::None
+        NO_UPDATE
     }
 }
 
@@ -281,7 +290,7 @@ pub(crate) fn multi_select_tooltip<T: Clone + PartialEq + Ord>(
     }
 }
 
-pub fn bool_request_dialog(rc: &RenderContext, description: &str) -> StateUpdate {
+pub(crate) fn bool_request_dialog(rc: &RenderContext, description: &str) -> RenderResult {
     bottom_centered_text(rc, description);
     if ok_button(rc, OkTooltip::Valid("OK".to_string())) {
         return bool_answer(true);
@@ -289,14 +298,14 @@ pub fn bool_request_dialog(rc: &RenderContext, description: &str) -> StateUpdate
     if cancel_button_with_tooltip(rc, "Decline") {
         return bool_answer(false);
     }
-    StateUpdate::None
+    NO_UPDATE
 }
 
-fn bool_answer(answer: bool) -> StateUpdate {
-    StateUpdate::Execute(Action::Response(EventResponse::Bool(answer)))
+fn bool_answer(answer: bool) -> RenderResult {
+    StateUpdate::execute(Action::Response(EventResponse::Bool(answer)))
 }
 
-pub fn player_request_dialog(rc: &RenderContext, r: &PlayerRequest) -> StateUpdate {
+pub(crate) fn player_request_dialog(rc: &RenderContext, r: &PlayerRequest) -> RenderResult {
     choose_player_dialog(rc, &r.choices, |p| {
         Action::Response(EventResponse::SelectPlayer(p))
     })
@@ -305,7 +314,7 @@ pub fn player_request_dialog(rc: &RenderContext, r: &PlayerRequest) -> StateUpda
 pub(crate) fn position_request_dialog(
     rc: &RenderContext,
     s: &MultiSelection<Position>,
-) -> StateUpdate {
+) -> RenderResult {
     bottom_centered_text(
         rc,
         format!("{}: {} selected", s.request.description, s.selected.len()).as_str(),
@@ -313,6 +322,6 @@ pub(crate) fn position_request_dialog(
     if ok_button(rc, multi_select_tooltip(s, s.is_valid(), "positions")) {
         StateUpdate::response(EventResponse::SelectPositions(s.selected.clone()))
     } else {
-        StateUpdate::None
+        NO_UPDATE
     }
 }

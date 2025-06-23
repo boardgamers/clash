@@ -62,7 +62,6 @@
           "position": "B1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "activations": 4,
           "angry_activation": true,
@@ -111,7 +110,7 @@
           ]
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "FreeEconomy",
@@ -145,7 +144,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "activations": 2,
           "position": "C1"
@@ -171,7 +169,7 @@
           "id": 1
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Mining"
@@ -250,12 +248,14 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Movement": {
@@ -266,27 +266,7 @@
                         "destination": "D2"
                       }
                     }
-                  },
-                  "undo": [
-                    {
-                      "op": "replace",
-                      "path": "/players/0/units/5/position",
-                      "value": "C3"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/state/Movement/movement_actions_left",
-                      "value": 2
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/state/Movement/current_move"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/state/Movement/moved_units"
-                    }
-                  ]
+                  }
                 }
               ]
             }
@@ -298,7 +278,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 sailed 1 ship from C3 to D2"
+      "Player1: Move: sailed 1 ship from C3 to D2"
     ]
   ],
   "undo_limit": 0,

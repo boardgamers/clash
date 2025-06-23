@@ -2,21 +2,22 @@ use crate::ability_initializer::{
     AbilityInitializerBuilder, AbilityInitializerSetup, AbilityListeners,
 };
 use crate::cache::Cache;
-use crate::card::{HandCard, draw_card_from_pile};
-use crate::content::builtin::Builtin;
+use crate::card::{HandCard, HandCardLocation, draw_card_from_pile, log_card_transfer};
+use crate::content::ability::Ability;
+use crate::content::effects::PermanentEffect;
+use crate::content::incidents::great_persons::find_great_seer;
 use crate::content::persistent_events::{HandCardsRequest, PersistentEventType};
-use crate::events::EventOrigin;
+use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
-use crate::log::current_action_log_item;
 use crate::player::Player;
-use crate::utils::remove_element_by;
+use crate::utils::{remove_element, remove_element_by};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
 type StatusPhaseCheck = Arc<dyn Fn(&Game, &Player) -> bool + Sync + Send>;
 
-type StatusPhaseUpdate = Arc<dyn Fn(&mut Game, usize) + Sync + Send>;
+type StatusPhaseUpdate = Arc<dyn Fn(&mut Game, &EventPlayer) + Sync + Send>;
 
 #[derive(Clone)]
 pub struct Objective {
@@ -53,6 +54,11 @@ impl ObjectiveCard {
     fn has_objective(&self, got: &[String]) -> bool {
         self.objectives.iter().any(|o| got.contains(&o.name))
     }
+
+    #[must_use]
+    pub fn name(&self) -> String {
+        format!("{}/{}", self.objectives[0].name, self.objectives[1].name)
+    }
 }
 
 pub struct ObjectiveBuilder {
@@ -78,7 +84,7 @@ impl ObjectiveBuilder {
     }
 
     #[must_use]
-    pub fn status_phase_check<F>(mut self, f: F) -> Self
+    pub(crate) fn status_phase_check<F>(mut self, f: F) -> Self
     where
         F: Fn(&Game, &Player) -> bool + 'static + Sync + Send,
     {
@@ -87,22 +93,22 @@ impl ObjectiveBuilder {
     }
 
     #[must_use]
-    pub fn status_phase_update<F>(mut self, f: F) -> Self
+    pub(crate) fn status_phase_update<F>(mut self, f: F) -> Self
     where
-        F: Fn(&mut Game, usize) + 'static + Sync + Send,
+        F: Fn(&mut Game, &EventPlayer) + 'static + Sync + Send,
     {
         self.status_phase_update = Some(Arc::new(f));
         self
     }
 
     #[must_use]
-    pub fn contradicting_status_phase_objective(mut self, name: &str) -> Self {
+    pub(crate) fn contradicting_status_phase_objective(mut self, name: &str) -> Self {
         self.contradicting_status_phase_objective = Some(name.to_string());
         self
     }
 
     #[must_use]
-    pub fn build(self) -> Objective {
+    pub(crate) fn build(self) -> Objective {
         Objective {
             name: self.name,
             description: self.description,
@@ -121,6 +127,14 @@ impl AbilityInitializerSetup for ObjectiveBuilder {
 
     fn get_key(&self) -> EventOrigin {
         EventOrigin::Objective(self.name.clone())
+    }
+
+    fn name(&self) -> String {
+        self.name.clone()
+    }
+
+    fn description(&self) -> String {
+        self.description.clone()
     }
 }
 
@@ -143,6 +157,12 @@ impl SelectObjectivesInfo {
         self.cards.clear();
         self.objective_opportunities.clear();
     }
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub struct CompletedObjective {
+    pub card: u8,
+    pub name: String,
 }
 
 pub(crate) fn objective_is_ready(player: &mut Player, name: &str) {
@@ -200,8 +220,8 @@ pub(crate) fn on_objective_cards(game: &mut Game, player_index: usize, info: Sel
     );
 }
 
-pub(crate) fn select_objectives() -> Builtin {
-    Builtin::builder(
+pub(crate) fn select_objectives() -> Ability {
+    Ability::builder(
         "Select Objective Cards to Complete",
         "Select which Objective Cards to use \
         (because the requirements are now met)",
@@ -223,7 +243,7 @@ pub(crate) fn select_objectives() -> Builtin {
                 match_objective_cards(&s.choice, &cards.objective_opportunities, game)
                     .expect("invalid card selection")
             {
-                complete_objective_card(game, p, card, objective);
+                complete_objective_card(game, p, card, &objective);
             }
         },
     )
@@ -245,28 +265,35 @@ pub(crate) fn status_phase_completable(game: &Game, player: &Player, id: u8) -> 
         .collect()
 }
 
-pub(crate) fn complete_objective_card(game: &mut Game, player: usize, id: u8, objective: String) {
-    game.add_info_log_item(&format!(
-        "{} completed objective {objective}",
-        game.player_name(player),
-    ));
-    let card = game.cache.get_objective_card(id);
-    if let Some(s) = card
+pub(crate) fn complete_objective_card(game: &mut Game, player: usize, id: u8, objective: &str) {
+    if let Some(s) = game
+        .cache
+        .get_objective_card(id)
         .objectives
         .iter()
         .find(|o| o.name == objective)
         .and_then(|o| o.status_phase_update.clone())
     {
-        s(game, player);
+        s(
+            game,
+            &EventPlayer::from_player(player, game, EventOrigin::Objective(objective.to_string())),
+        );
     }
 
-    discard_objective_card(game, player, id);
+    discard_objective_card(
+        game,
+        player,
+        id,
+        &EventOrigin::Ability("Complete Objectives".to_string()),
+        HandCardLocation::CompleteObjective(objective.to_string()),
+    );
+    let completed_objective = CompletedObjective {
+        card: id,
+        name: objective.to_string(),
+    };
     game.player_mut(player)
         .completed_objectives
-        .push(objective.clone());
-    current_action_log_item(game)
-        .completed_objectives
-        .push(objective);
+        .push(completed_objective.clone());
 }
 
 pub(crate) fn match_objective_cards(
@@ -389,80 +416,120 @@ fn filter_duplicated_objectives(
         .collect_vec()
 }
 
-pub(crate) fn gain_objective_card_from_pile(game: &mut Game, player: usize) {
-    if let Some(c) = draw_objective_card_from_pile(game) {
-        game.add_info_log_item(&format!(
-            "{} gained an objective card from the pile",
-            game.player_name(player)
-        ));
-        gain_objective_card(game, player, c);
+pub(crate) fn gain_objective_card_from_pile(game: &mut Game, player: &EventPlayer) {
+    if let Some(c) = draw_objective_card_from_pile(game, player) {
+        gain_objective_card(game, player.index, c);
     }
 }
 
-fn draw_objective_card_from_pile(game: &mut Game) -> Option<u8> {
-    draw_card_from_pile(
+pub(crate) fn log_gain_objective_card(
+    game: &mut Game,
+    player: &EventPlayer,
+    objective_card: u8,
+    from: HandCardLocation,
+) {
+    log_card_transfer(
         game,
-        "Objective Card",
-        false,
-        |g| &mut g.objective_cards_left,
-        |g| g.cache.get_objective_cards().iter().map(|c| c.id).collect(),
-        |p| p.objective_cards.clone(),
-    )
+        &HandCard::ObjectiveCard(objective_card),
+        from,
+        HandCardLocation::Hand(player.index),
+        &player.origin,
+    );
+}
+
+pub(crate) fn draw_objective_card_from_pile(game: &mut Game, player: &EventPlayer) -> Option<u8> {
+    draw_great_seer_card(game, player).or_else(|| {
+        let card = draw_card_from_pile(
+            game,
+            "Objective Card",
+            |g| &mut g.objective_cards_left,
+            |g| g.cache.get_objective_cards().iter().map(|c| c.id).collect(),
+            |p| {
+                p.objective_cards
+                    .clone()
+                    .into_iter()
+                    .chain(p.completed_objectives.iter().map(|o| o.card))
+                    .collect_vec()
+            },
+        );
+        if let Some(card) = card {
+            log_gain_objective_card(game, player, card, HandCardLocation::DrawPile);
+        }
+        card
+    })
+}
+
+fn draw_great_seer_card(game: &mut Game, player: &EventPlayer) -> Option<u8> {
+    let mut remove_great_seer = false;
+    let mut result = None;
+    if let Some(great_seer) = find_great_seer(game) {
+        if let Some(o) = great_seer.assigned_objectives.iter().find_map(|o| {
+            if o.player == player.index {
+                Some(o.clone())
+            } else {
+                None
+            }
+        }) {
+            remove_element(&mut great_seer.assigned_objectives, &o)
+                .unwrap_or_else(|| panic!("should be able to remove objective card {o:?}"));
+            remove_great_seer = great_seer.assigned_objectives.is_empty();
+            result = Some(o.objective_card);
+            log_gain_objective_card(
+                game,
+                player,
+                o.objective_card,
+                HandCardLocation::GreatSeer(player.index),
+            );
+        }
+    }
+
+    if remove_great_seer {
+        remove_element_by(&mut game.permanent_effects, |e| {
+            matches!(e, PermanentEffect::GreatSeer(_))
+        })
+        .unwrap_or_else(|| panic!("should be able to remove great seer"));
+    }
+    result
 }
 
 pub(crate) fn gain_objective_card(game: &mut Game, player_index: usize, objective_card: u8) {
-    let mut o = game
-        .player(player_index)
-        .objective_cards
-        .iter()
-        .flat_map(|&id| {
-            game.cache
-                .get_objective_card(id)
-                .objectives
-                .iter()
-                .map(|o| o.name.clone())
-        })
-        .collect_vec();
-    init_objective_card(game, player_index, &mut o, objective_card);
+    init_objective_card(game, player_index, objective_card);
     game.players[player_index]
         .objective_cards
         .push(objective_card);
 }
 
-pub(crate) fn init_objective_card(
-    game: &mut Game,
-    player_index: usize,
-    objectives: &mut Vec<String>,
-    id: u8,
-) {
+pub(crate) fn init_objective_card(game: &mut Game, player_index: usize, id: u8) {
     for o in &game.cache.get_objective_card(id).objectives.clone() {
-        if objectives.contains(&o.name) {
-            // can't fulfill 2 objectives with the same name, so we can skip it here
-            continue;
-        }
         o.listeners.init(game, player_index);
-        objectives.push(o.name.clone());
     }
 }
 
-pub(crate) fn discard_objective_card(game: &mut Game, player: usize, card: u8) {
+pub(crate) fn deinit_objective_card(game: &mut Game, player: usize, card: u8) {
+    for o in &game.cache.get_objective_card(card).objectives.clone() {
+        o.listeners.deinit(game, player);
+    }
+}
+
+pub(crate) fn discard_objective_card(
+    game: &mut Game,
+    player: usize,
+    card: u8,
+    origin: &EventOrigin,
+    to: HandCardLocation,
+) {
     let card = remove_element_by(&mut game.player_mut(player).objective_cards, |&id| {
         id == card
     })
     .unwrap_or_else(|| panic!("should be able to discard objective card {card}"));
-    for o in &game.cache.get_objective_card(card).objectives.clone() {
-        if game.player(player).objective_cards.iter().any(|c| {
-            game.cache
-                .get_objective_card(*c)
-                .objectives
-                .iter()
-                .any(|o2| o2.name == o.name)
-        }) {
-            // this objective is still in play
-            continue;
-        }
-        o.listeners.deinit(game, player);
-    }
+    deinit_objective_card(game, player, card);
+    log_card_transfer(
+        game,
+        &HandCard::ObjectiveCard(card),
+        HandCardLocation::Hand(player),
+        to,
+        origin,
+    );
 }
 
 #[cfg(test)]

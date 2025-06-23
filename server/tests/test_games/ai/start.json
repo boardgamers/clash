@@ -15,7 +15,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "D1"
         }
@@ -27,10 +26,7 @@
           "id": 0
         }
       ],
-      "civilization": "Maya",
-      "available_leaders": [
-        "Kʼinich Janaab Pakal I"
-      ],
+      "civilization": "China",
       "advances": [
         "Farming",
         "Mining"
@@ -59,7 +55,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Neutral",
           "position": "D8"
         }
@@ -71,7 +66,7 @@
           "id": 0
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining"
@@ -378,16 +373,16 @@
   "current_player_index": 1,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
-              "index": 1,
-              "items": []
+              "index": 1
             },
             {
-              "index": 1,
-              "items": []
+              "index": 1
             }
           ]
         }
@@ -405,7 +400,7 @@
       "Player1 gained an objective card from the pile"
     ],
     [
-      "Player2 is playing as test1",
+      "Player2 is playing as Greece",
       "Player2 gained an action card from the pile",
       "Player2 gained an objective card from the pile"
     ],
@@ -431,7 +426,7 @@
   ],
   "rng": "56536148275208401720410447045136877105",
   "wonders_left": [
-    "Great Gardens",
+    "GreatGardens",
     "Pyramids"
   ],
   "action_cards_left": [

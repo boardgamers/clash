@@ -1,13 +1,16 @@
 use crate::ability_initializer::AbilityInitializerSetup;
+use crate::action::gain_action;
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
-use crate::content::advances::{AdvanceGroup, advance_group_builder};
-use crate::content::builtin::Builtin;
+use crate::city::MoodState;
+use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::content::custom_actions::CustomActionType::{AbsolutePower, ForcedLabor};
 use crate::content::persistent_events::ResourceRewardRequest;
-use crate::payment::PaymentOptions;
+use crate::player::Player;
+use crate::resource_pile::ResourcePile;
 
-pub(crate) fn autocracy() -> AdvanceGroup {
+pub(crate) fn autocracy() -> AdvanceGroupInfo {
     advance_group_builder(
+        AdvanceGroup::Autocracy,
         "Autocracy",
         vec![
             nationalism(),
@@ -27,27 +30,17 @@ fn nationalism() -> AdvanceBuilder {
     .add_resource_request(
         |event| &mut event.recruit,
         1,
-        |_game, _player_index, recruit| {
-            if recruit
+        |_game, p, recruit| {
+            recruit
                 .units
                 .clone()
                 .to_vec()
                 .iter()
                 .any(|u| u.is_army_unit() || u.is_ship())
-            {
-                Some(ResourceRewardRequest::new(
-                    PaymentOptions::tokens(1),
+                .then_some(ResourceRewardRequest::new(
+                    p.reward_options().tokens(1),
                     "Select token to gain".to_string(),
                 ))
-            } else {
-                None
-            }
-        },
-        |_game, resource, _| {
-            vec![format!(
-                "{} selected {} for Nationalism Advance",
-                resource.player_name, resource.choice
-            )]
         },
     )
 }
@@ -61,14 +54,14 @@ fn totalitarianism() -> AdvanceBuilder {
     .add_transient_event_listener(
         |event| &mut event.on_influence_culture_attempt,
         0,
-        |r, city, game| {
+        |r, city, game, _| {
             if let Ok(info) = r {
                 if info.is_defender
                     && game
                         .player(city.player_index)
                         .get_units(city.position)
                         .iter()
-                        .any(|u| u.unit_type.is_army_unit())
+                        .any(|u| u.is_army_unit())
                 {
                     info.set_no_boost();
                 }
@@ -83,44 +76,56 @@ fn absolute_power() -> AdvanceBuilder {
         "Absolute Power",
         "Once per turn, as a free action, you may spend 2 mood tokens to get an additional action",
     )
-    .add_custom_action(AbsolutePower)
-}
-
-pub(crate) fn use_absolute_power() -> Builtin {
-    Builtin::builder("Absolute Power", "")
-        .add_simple_persistent_event_listener(
-            |event| &mut event.custom_action,
-            0,
-            |game, _, player_name, _| {
-                game.actions_left += 1;
-                game.add_info_log_item(&format!(
-                    "{player_name} paid 2 mood tokens to get an extra action using Absolute Power",
-                ));
-            },
-        )
-        .build()
+    .add_custom_action(
+        AbsolutePower,
+        |c| {
+            c.once_per_turn()
+                .free_action()
+                .resources(ResourcePile::mood_tokens(2))
+        },
+        |b| {
+            b.add_simple_persistent_event_listener(
+                |event| &mut event.custom_action,
+                0,
+                |game, p, _| {
+                    gain_action(game, p);
+                },
+            )
+        },
+        |_, _| true,
+    )
 }
 
 fn forced_labor() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::ForcedLabor,
         "Forced Labor",
-        "Once per turn, as a free action, you may spend 1 mood token to treat your Angry cities as neutral for the rest of the turn",
+        "Once per turn, as a free action, \
+        you may spend 1 mood token to treat your Angry cities as neutral for the rest of the turn",
     )
-        .add_custom_action(ForcedLabor)
+    .add_custom_action(
+        ForcedLabor,
+        |c| {
+            c.once_per_turn()
+                .free_action()
+                .resources(ResourcePile::mood_tokens(1))
+        },
+        |b| {
+            b.add_simple_persistent_event_listener(
+                |event| &mut event.custom_action,
+                0,
+                |game, p, _| {
+                    p.log(game, "Treating Angry cities as neutral");
+                },
+            )
+        },
+        |_game, player| any_angry(player),
+    )
 }
 
-pub(crate) fn use_forced_labor() -> Builtin {
-    Builtin::builder("Forced Labor", "")
-        .add_simple_persistent_event_listener(
-            |event| &mut event.custom_action,
-            0,
-            |game, _, player_name, _| {
-                // we check that the action was played
-                game.add_info_log_item(&format!(
-                    "{player_name} paid 1 mood token to treat Angry cities as neutral"
-                ));
-            },
-        )
-        .build()
+fn any_angry(player: &Player) -> bool {
+    player
+        .cities
+        .iter()
+        .any(|city| city.mood_state == MoodState::Angry)
 }

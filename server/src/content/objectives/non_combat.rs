@@ -1,12 +1,11 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Advance;
+use crate::card::{HandCard, HandCardLocation};
 use crate::content::advances::warfare::draft_cost;
 use crate::game::Game;
-use crate::log::{ActionLogItem, ActionLogPlayer};
-use crate::map::get_map_setup;
+use crate::log::{ActionLogAction, ActionLogEntry, ActionLogPlayer};
+use crate::map::capital_city_position;
 use crate::objective_card::{Objective, objective_is_ready};
-use crate::player::Player;
-use crate::position::Position;
 use itertools::Itertools;
 
 pub(crate) fn draft() -> Objective {
@@ -15,12 +14,12 @@ pub(crate) fn draft() -> Objective {
         .add_simple_persistent_event_listener(
             |event| &mut event.recruit,
             2,
-            |game, player, _, r| {
-                let p = game.player_mut(player);
+            |game, player, r| {
+                let p = player.get_mut(game);
                 // Draft is just a cost conversion
                 let used_draft = r.units.infantry > 0
                     && r.payment.mood_tokens >= draft_cost(p)
-                    && p.has_advance(Advance::Draft);
+                    && p.can_use_advance(Advance::Draft);
                 if used_draft {
                     if p.event_info.contains_key("Used Draft") {
                         objective_is_ready(p, name);
@@ -43,9 +42,9 @@ pub(crate) fn city_founder() -> Objective {
     .add_simple_persistent_event_listener(
         |event| &mut event.found_city,
         0,
-        |game, player, _, p| {
-            if home_position(game, game.player(player)).distance(*p) >= 5 {
-                objective_is_ready(game.player_mut(player), name);
+        |game, player, p| {
+            if capital_city_position(game, player.get(game)).distance(*p) >= 5 {
+                objective_is_ready(player.get_mut(game), name);
             }
         },
     )
@@ -65,32 +64,33 @@ pub(crate) fn magnificent_culture() -> Objective {
         you built have built the only wonder in the last round.",
     )
     .status_phase_check(|game, player| {
-        let wonders = last_round(game)
-            .iter()
-            .filter_map(|p| {
-                p.items
-                    .iter()
-                    .find_map(|i| i.wonder_built.as_ref().map(|n| (n, p.index)))
+        last_round(game).iter().any(|p| {
+            p.actions.iter().any(|a| {
+                a.items.iter().any(|i| {
+                    matches!(&i.entry, ActionLogEntry::HandCard {
+                        card: HandCard::Wonder(_),
+                        from: HandCardLocation::Hand(p) ,
+                        to: HandCardLocation::PlayToKeep,
+                    } if *p == player.index)
+                })
             })
-            .collect_vec();
-
-        wonders.len() == 1 && wonders[0].1 == player.index
+        })
     })
     .add_simple_persistent_event_listener(
         |event| &mut event.play_wonder_card,
         0,
-        |game, player, _, _| {
-            objective_is_ready(game.player_mut(player), name);
+        |game, player, _| {
+            objective_is_ready(player.get_mut(game), name);
         },
     )
     .build()
 }
 
-pub(crate) fn last_player_round(game: &Game, player: usize) -> Vec<&ActionLogItem> {
+pub(crate) fn last_player_round(game: &Game, player: usize) -> Vec<&ActionLogAction> {
     last_round(game)
         .iter()
         .filter(|p| p.index == player)
-        .flat_map(|p| p.items.iter())
+        .flat_map(|p| p.actions.iter())
         .collect()
 }
 
@@ -101,10 +101,4 @@ fn last_round(game: &Game) -> Vec<&ActionLogPlayer> {
         .iter()
         .flat_map(|r| r.players.iter())
         .collect_vec()
-}
-
-pub(crate) fn home_position(game: &Game, player: &Player) -> Position {
-    let setup = get_map_setup(game.human_players_count());
-    let h = &setup.home_positions[player.index];
-    h.block.tiles(&h.position, h.position.rotation)[0].0
 }

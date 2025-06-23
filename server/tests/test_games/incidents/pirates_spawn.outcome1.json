@@ -11,6 +11,7 @@
     {
       "event_type": {
         "Incident": {
+          "incident_id": 54,
           "active_player": 0,
           "barbarians": {}
         }
@@ -63,7 +64,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "A1"
         },
@@ -97,7 +97,7 @@
           "id": 7
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Mining",
@@ -120,7 +120,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Neutral",
           "position": "C1"
         }
@@ -137,7 +136,7 @@
           "id": 1
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Farming",
         "Mining"
@@ -156,7 +155,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Neutral",
           "position": "B3"
         }
@@ -230,18 +228,45 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Response": {
                       "SelectAdvance": "Storage"
                     }
-                  }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Advance": "Storage"
+                      }
+                    },
+                    {
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Storage",
+                        "take_incident_token": true,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Free Advance"
+                      }
+                    }
+                  ]
                 },
                 {
                   "action": {
@@ -262,18 +287,18 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1 advanced Storage for free",
-      "Player gained 1 mood token as advance bonus"
+      "Player1: Storage: Gain 1 mood token",
+      "Player1: Free Advance: Gain Storage and take an event token (triggering an incident)"
     ],
     [
       "A new game event has been triggered: A successful year",
-      "Base effect: Pirates spawn"
+      "Player1: A successful year: Base effect: Pirates spawn"
     ],
     [
-      "Player1 removed a Pirate Ships at D1"
+      "Player1: A successful year: Removed a Pirate Ships at D1"
     ]
   ],
-  "undo_limit": 2,
+  "undo_limit": 1,
   "actions_left": 3,
   "round": 1,
   "age": 1,
@@ -297,7 +322,7 @@
   "wonders_left": [
     "Pyramids"
   ],
-  "incidents_left": [
+  "incidents_discarded": [
     54
   ]
 }

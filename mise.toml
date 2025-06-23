@@ -1,47 +1,74 @@
 [env]
 RUST_BACKTRACE = '1'
+RUSTFLAGS = '-Dwarnings' # Make sure CI fails on all warnings, including Clippy lints
+CARGO_TERM_COLOR = 'always'
 
 [tasks.random-actions]
-description = "Run server tests"
-run = 'cargo nextest run --nocapture random_actions'
+description = "Run random actions tests"
+run = 'cargo test --package server --test random_actions test_random_actions -- --exact --nocapture'
+dir = "server"
+
+[tasks.profile-random-actions]
+description = "Run AI random actions test with profiling"
+run = ["cargo test --release --features profiling --package server --test random_actions test_random_actions -- --exact --nocapture"]
+env = { ITERATIONS = "100000" }
 dir = "server"
 
 [tasks.test]
 description = "Run server tests"
-run = 'cargo nextest run {{arg(name="test", default="")}}'
+run = 'cargo test {{arg(name="test", default="")}}'
 dir = "server"
 
 [tasks.update-tests]
 description = "Run server tests and update JSON files"
-run = 'cargo nextest run {{arg(name="test", default="")}}'
-env = { UPDATE_EXPECTED = "true" }
+run = 'cargo test --jobs 2 {{arg(name="test", default="")}}'
+env = { UPDATE_EXPECTED = "true", RUSTFLAGS = '' }
 dir = "server"
-
-[tasks.server-format-and-lint]
-description = "Format and lint all code"
-run = [
-    "cargo fmt",
-    "cargo clippy --fix --allow-dirty --allow-staged"
-]
-dir = "server"
-
-[tasks.client-format-and-lint]
-description = "Format and lint all code"
-run = [
-    "cargo fmt",
-    "cargo clippy --fix --allow-dirty --allow-staged"
-]
-dir = "client"
 
 [tasks.format-and-lint]
-depends = ["server-format-and-lint", "client-format-and-lint"]
+description = "Format and lint all code"
+run = [
+    "cargo fmt",
+    "cargo clippy --fix --allow-dirty --allow-staged"
+]
+
+[tasks.ci]
+description = "Run CI tasks server"
+run = [
+    "rustup component add rustfmt", # should be dony by `tools` section, but doesn't work reliably in CI
+    "rustup component add clippy", # should be dony by `tools` section, but doesn't work reliably in CI
+    "cargo build",
+    "cargo fmt --check",
+    "cargo clippy",
+    "cargo nextest run",
+    "git diff --exit-code || exit 1", # Check if there are any uncommitted changes updating JSON files
+]
+env = { UPDATE_EXPECTED = "true", RUSTFLAGS = '' }
 
 [tasks.profile]
 description = "Run AI client with profiling"
 run = ["cargo run --release --package client --features profiling --bin local_client -- ai"]
 dir = "client"
 
+[tasks.build-remote-server]
+description = "Build remote server"
+run = "./scripts/build-remote-server.sh test"
+
+[tasks.build-remote-client]
+description = "Build remote client"
+run = "./scripts/build-remote-client.sh"
+
+[tasks.test-pubish-server]
+description = "Test publish server (the real one is done in GitHub Actions)"
+run = "./scripts/publish-server.sh test"
+
+[tasks.test-pubish-client]
+description = "Test publish client (the real one is done in GitHub Actions)"
+run = "./scripts/publish-client.sh test"
+
 [tools]
-"cargo:cargo-nextest" = "latest"
-rust = { version = "latest", components = "clippy,rustfmt" }
+"cargo:cargo-nextest" = "0.9.98"
+"cargo:wasm-bindgen-cli" = "0.2.100"
+"cargo:wasm-pack" = "0.13.1"
+rust = { version = "1.87.0", targets = "wasm32-unknown-unknown", components = "clippy,rustfmt" }
 

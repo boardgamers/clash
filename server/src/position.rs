@@ -84,7 +84,7 @@ impl Display for Position {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let row = (self.r + (self.q - (self.q.rem_euclid(2))) / 2) + 1;
         let col = char::from_u32(('A' as u32) + self.q as u32)
-            .expect("Input should be a valid character");
+            .unwrap_or_else(|| panic!("Invalid column index: {}{}", self.q, self.r));
         write!(f, "{col}{row}")
     }
 }

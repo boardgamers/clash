@@ -10,7 +10,7 @@
         "ideas": 3,
         "gold": 7,
         "mood_tokens": 8,
-        "culture_tokens": 6
+        "culture_tokens": 7
       },
       "resource_limit": {
         "food": 7,
@@ -23,12 +23,10 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Happy",
           "position": "A1"
         },
         {
-          "city_pieces": {},
           "mood_state": "Neutral",
           "position": "C2"
         }
@@ -46,7 +44,7 @@
         },
         {
           "position": "C2",
-          "unit_type": "Leader",
+          "unit_type": "Infantry",
           "id": 2
         },
         {
@@ -75,7 +73,7 @@
           "id": 7
         }
       ],
-      "civilization": "test0",
+      "civilization": "Rome",
       "advances": [
         "Farming",
         "Fishing",
@@ -108,7 +106,6 @@
       },
       "cities": [
         {
-          "city_pieces": {},
           "mood_state": "Angry",
           "position": "C1"
         }
@@ -125,7 +122,7 @@
           "id": 1
         }
       ],
-      "civilization": "test1",
+      "civilization": "Greece",
       "advances": [
         "Fanaticism",
         "Farming",
@@ -198,73 +195,81 @@
   "current_player_index": 0,
   "action_log": [
     {
+      "age": 1,
       "rounds": [
         {
+          "round": 1,
           "players": [
             {
               "index": 0,
-              "items": [
+              "actions": [
                 {
                   "action": {
                     "Playing": {
                       "ActionCard": 39
                     }
                   },
-                  "undo": [
+                  "items": [
                     {
-                      "op": "add",
-                      "path": "/players/0/action_cards",
-                      "value": [
-                        39
-                      ]
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ActionCard": 39
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": "PlayToDiscard"
+                      },
+                      "origin": {
+                        "Ability": "Action Card"
+                      }
                     },
                     {
-                      "op": "replace",
-                      "path": "/players/0/advances/3",
-                      "value": "Tactics"
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Advance": "Storage"
+                      }
                     },
                     {
-                      "op": "remove",
-                      "path": "/players/0/advances/4"
+                      "player": 0,
+                      "Advance": {
+                        "advance": "Storage",
+                        "take_incident_token": false,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "CivilCard": 39
+                      }
                     },
                     {
-                      "op": "replace",
-                      "path": "/players/0/resource_limit/food",
-                      "value": 2
+                      "player": 1,
+                      "Resources": {
+                        "resources": {
+                          "mood_tokens": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Advance": "Fishing"
+                      }
                     },
                     {
-                      "op": "replace",
-                      "path": "/players/0/resources/culture_tokens",
-                      "value": 7
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/0/resources/mood_tokens",
-                      "value": 7
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/2",
-                      "value": "Mining"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/3",
-                      "value": "Storage"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/advances/4",
-                      "value": "Tactics"
-                    },
-                    {
-                      "op": "remove",
-                      "path": "/players/1/advances/5"
-                    },
-                    {
-                      "op": "replace",
-                      "path": "/players/1/resources/mood_tokens",
-                      "value": 7
+                      "player": 1,
+                      "Advance": {
+                        "advance": "Fishing",
+                        "take_incident_token": false,
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "CivilCard": 39
+                      }
                     }
                   ]
                 }
@@ -278,12 +283,11 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1 played the action card Technology Trade for 1 culture token",
-      "Player1 selected Player2 as player for Technology Trade.",
-      "Player1 selected Storage as advance for Technology Trade.",
-      "Player gained 1 mood token as advance bonus",
-      "Player2 selected Fishing as advance for Technology Trade.",
-      "Player gained 1 mood token as advance bonus"
+      "Player1: Action Card: Play Technology Trade/Surprise",
+      "Player1: Technology Trade: Selected Player2 as trade partner, Gain Storage without taking an event token",
+      "Player1: Storage: Gain 1 mood token",
+      "Player2: Fishing: Gain 1 mood token",
+      "Player2: Technology Trade: Gain Fishing without taking an event token"
     ]
   ],
   "undo_limit": 0,
@@ -306,5 +310,8 @@
   ],
   "wonders_left": [
     "Pyramids"
+  ],
+  "action_cards_discarded": [
+    39
   ]
 }
