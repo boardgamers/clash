@@ -225,7 +225,7 @@
                         "balance": "Loss"
                       },
                       "origin": {
-                        "Ability": "Combat"
+                        "Ability": "Construct Building"
                       }
                     },
                     {
@@ -267,8 +267,7 @@
   "action_log_index": 1,
   "log": [
     [
-      "Player1: Combat: Pay 1 action",
-      "Player1: Construct Building: Pay 1 food, 1 wood and 1 ore, Gain Port at A1 at the water tile A2"
+      "Player1: Construct Building: Pay 1 action, Pay 1 food, 1 wood and 1 ore, Gain Port at A1 at the water tile A2"
     ]
   ],
   "undo_limit": 0,

@@ -4,16 +4,24 @@
     {
       "event_type": {
         "StatusPhase": {
-          "ChangeGovernmentType": true
+          "DetermineFirstPlayer": 0
         }
       },
       "player": 0,
       "last_priority_used": 0,
       "handler": {
         "priority": 0,
-        "request": "ChangeGovernment",
+        "request": {
+          "SelectPlayer": {
+            "choices": [
+              0,
+              1
+            ],
+            "description": "Determine the first player"
+          }
+        },
         "origin": {
-          "Ability": "Change Government"
+          "Ability": "Determine First Player"
         }
       }
     }
@@ -263,7 +271,7 @@
       "Player2: Raze city: Did not raze a city"
     ],
     [
-      "Player1: Change Government: Pay nothing"
+      "Player1: Change Government: Pay nothing, Keep current government"
     ]
   ],
   "undo_limit": 1,

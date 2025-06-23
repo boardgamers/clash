@@ -427,7 +427,7 @@
                         "balance": "Loss"
                       },
                       "origin": {
-                        "Ability": "Combat"
+                        "Ability": "Construct Building"
                       }
                     },
                     {
@@ -499,8 +499,7 @@
       "Player1: Great Engineer: Great Engineer: You may build a building in a city without spending an action and without activating it., Gain 1 action"
     ],
     [
-      "Player1: Combat: Pay 1 action",
-      "Player1: Construct Building: Pay 1 food, 1 wood and 1 ore with Captivi, Construct Only, Gain Fortress at C2",
+      "Player1: Construct Building: Pay 1 action, Pay 1 food, 1 wood and 1 ore with Captivi, Construct Only, Gain Fortress at C2",
       "Player1: Captivi: May replace resources with mood tokens"
     ]
   ],
