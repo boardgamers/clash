@@ -142,9 +142,9 @@ impl RenderContext<'_> {
         self.screen_to_world(mouse_position().into())
     }
 
-    pub(crate) fn draw_limited_text(&self, text: &str, x: f32, y: f32, max_width: usize) {
+    pub(crate) fn draw_limited_text(&self, text: &str, x: f32, y: f32, max_width: f32) {
         if self.stage.is_main() {
-            self.state.draw_text(&limit_str(text, max_width), x, y);
+            self.state.draw_text(&limit_str(text, max_width, |t|self.state.measure_text(t)), x, y);
         }
     }
 
@@ -163,6 +163,13 @@ impl RenderContext<'_> {
     pub(crate) fn draw_rectangle(&self, r: Rect, color: Color) {
         if self.stage.is_main() {
             macroquad::prelude::draw_rectangle(r.x, r.y, r.w, r.h, color);
+        }
+    }
+
+    pub(crate) fn draw_rectangle_with_text(&self, r: Rect, color: Color, text: &str) {
+        if self.stage.is_main() {
+            self.draw_rectangle(r, color);
+            self.draw_limited_text(text, r.x + 10., r.y + 22., r.w - 30.);
         }
     }
 

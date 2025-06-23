@@ -199,14 +199,21 @@ pub(crate) fn rect_from(p: Vec2, size: Vec2) -> Rect {
 
 pub(crate) fn limit_str(
     s: &str,
-    max_length: usize,
+    max_width: f32,
+    measure: impl Fn(&str) -> TextDimensions,
 ) -> String {
-    if s.len() > max_length {
-        let suffix = "..";
-        let mut limited = s.chars().take(max_length - suffix.len()).collect::<String>();
-        limited.push_str(suffix);
-        limited
-    } else {
+    let mut limited = String::new();
+    for c in s.chars() {
+        limited.push(c);
+        if measure(&limited).width > max_width {
+            limited.pop();
+            limited.push_str("..");
+            break;
+        }
+    }
+    if limited.is_empty() {
         s.to_string()
+    } else {
+        limited
     }
 }

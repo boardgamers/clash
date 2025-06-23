@@ -99,13 +99,11 @@ fn draw_button(
         3. => MAGENTA,
         _ => WHITE,
     };
-    rc.draw_rectangle(rect, color);
+    rc.draw_rectangle_with_text(rect, color, text);
 
     if selected {
         rc.draw_rectangle_lines(rect, 4., BLACK);
     }
-
-    rc.draw_limited_text(text, rect.x + 10., rect.y + 25., 14);
 
     button_pressed(rect, rc, tooltip, 50.)
 }

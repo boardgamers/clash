@@ -111,11 +111,9 @@ fn draw_card(
 ) -> RenderResult {
     let c = get_card_object(rc, card, selection);
 
-    rc.draw_rectangle(rect, c.color);
+    rc.draw_rectangle_with_text(rect, c.color, &c.name);
     let (thickness, border) = highlight(rc, &c, selection);
     rc.draw_rectangle_lines(rect, thickness, border);
-
-    rc.draw_limited_text(&c.name, rect.x + 10., rect.y + 22., 20);
 
     if button_pressed(rect, rc, &c.description, 150.) {
         if let Some(s) = selection {
