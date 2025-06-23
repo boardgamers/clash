@@ -38,45 +38,40 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
         .collect::<Vec<_>>();
     let start_x = objects.len() as f32 * -1. / 2.;
     let anchor = bottom_center_anchor(rc);
-    for pass in 0..2 {
-        for (i, o) in objects.iter().enumerate() {
-            let x = (start_x + i as f32) * ICON_SIZE * 2.;
-            let c = o.counter();
+    for (i, o) in objects.iter().enumerate() {
+        let x = (start_x + i as f32) * ICON_SIZE * 2.;
+        let c = o.counter();
 
-            let point = vec2(x + 7., -60.) + anchor + offset;
-            if pass == 0 {
-                draw(o, point);
-                let current_pos = vec2(x + 13., -ICON_SIZE) + anchor + offset;
-                rc.state.draw_text_with_color(
-                    &format!("{}", c.current),
-                    current_pos.x,
-                    current_pos.y,
-                    BLACK,
-                );
-                if c.current > c.min
-                    && bottom_center_texture(
-                        rc,
-                        &rc.assets().minus,
-                        vec2(x - 15., -ICON_SIZE) + offset,
-                        "Remove one",
-                    )
-                {
-                    return minus(container, o);
-                }
-                if c.current < c.max
-                    && bottom_center_texture(
-                        rc,
-                        &rc.assets().plus,
-                        vec2(x + 15., -ICON_SIZE) + offset,
-                        "Add one",
-                    )
-                {
-                    return plus(container, o);
-                }
-            } else {
-                draw_tooltip(o, point);
-            }
+        let point = vec2(x + 7., -60.) + anchor + offset;
+        draw(o, point);
+        let current_pos = vec2(x + 13., -ICON_SIZE) + anchor + offset;
+        rc.state.draw_text_with_color(
+            &format!("{}", c.current),
+            current_pos.x,
+            current_pos.y,
+            BLACK,
+        );
+        if c.current > c.min
+            && bottom_center_texture(
+                rc,
+                &rc.assets().minus,
+                vec2(x - 15., -ICON_SIZE) + offset,
+                "Remove one",
+            )
+        {
+            return minus(container, o);
         }
+        if c.current < c.max
+            && bottom_center_texture(
+                rc,
+                &rc.assets().plus,
+                vec2(x + 15., -ICON_SIZE) + offset,
+                "Add one",
+            )
+        {
+            return plus(container, o);
+        }
+        draw_tooltip(o, point);
     }
 
     if ok_button(rc, is_valid()) {

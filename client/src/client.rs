@@ -1,4 +1,3 @@
-use macroquad::input::{MouseButton, is_mouse_button_pressed};
 use macroquad::prelude::clear_background;
 use macroquad::prelude::*;
 

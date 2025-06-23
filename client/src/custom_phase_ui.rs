@@ -34,7 +34,7 @@ pub fn custom_phase_payment_dialog(
         payments.len() == 1 && payments[0].optional,
         |p| StateUpdate::response(EventResponse::Payment(p.clone())),
     );
-    if  matches!(&update, Err(u) if matches!(**u, StateUpdate::Cancel)) {
+    if matches!(&update, Err(u) if matches!(**u, StateUpdate::Cancel)) {
         return StateUpdate::response(EventResponse::Payment(vec![ResourcePile::empty()]));
     }
     update
@@ -78,21 +78,16 @@ pub fn unit_request_dialog(rc: &RenderContext, r: &UnitTypeRequest) -> RenderRes
 
     let c = &r.choices;
     let anchor = bottom_center_anchor(rc) + vec2(0., 60.);
-    for pass in 0..2 {
-        for (i, u) in c.iter().enumerate() {
-            let x = (c.len() - i) as i8 - 1;
-            let center = icon_pos(x, -2) + anchor;
+    for (i, u) in c.iter().enumerate() {
+        let x = (c.len() - i) as i8 - 1;
+        let center = icon_pos(x, -2) + anchor;
 
-            if pass == 0 {
-                if draw_unit_type(rc, HighlightType::None, center, *u, r.player_index, 20.) {
-                    return StateUpdate::response(EventResponse::SelectUnitType(*u));
-                }
-            } else {
-                let mut tooltip = vec![u.name(rc.game).to_string()];
-                add_unit_description(rc, &mut tooltip, *u);
-                show_tooltip_for_circle(rc, &tooltip, center, 20.);
-            }
+        if draw_unit_type(rc, HighlightType::None, center, *u, r.player_index, 20.) {
+            return StateUpdate::response(EventResponse::SelectUnitType(*u));
         }
+        let mut tooltip = vec![u.name(rc.game).to_string()];
+        add_unit_description(rc, &mut tooltip, *u);
+        show_tooltip_for_circle(rc, &tooltip, center, 20.);
     }
     NO_UPDATE
 }

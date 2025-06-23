@@ -286,22 +286,17 @@ pub fn move_units_buttons<'a>(rc: &'a RenderContext, pos: Position) -> Vec<IconA
 }
 
 pub fn show_map_action_buttons(rc: &RenderContext, icons: &IconActionVec) -> RenderResult {
-    for pass in 0..2 {
-        for (i, icon) in icons.iter().enumerate() {
-            let p = icon_pos(-(icons.len() as i8) / 2 + i as i8, -1);
-            let center = bottom_center_anchor(rc) + p + vec2(15., 15.);
-            let radius = 20.;
-            if pass == 0 {
-                if icon.warning {
-                    draw_circle(center.x, center.y, radius, RED);
-                }
-                if bottom_center_texture(rc, icon.texture, p, "") {
-                    return (icon.action)();
-                }
-            } else {
-                show_tooltip_for_circle(rc, &icon.tooltip, center, radius);
-            }
+    for (i, icon) in icons.iter().enumerate() {
+        let p = icon_pos(-(icons.len() as i8) / 2 + i as i8, -1);
+        let center = bottom_center_anchor(rc) + p + vec2(15., 15.);
+        let radius = 20.;
+        if icon.warning {
+            draw_circle(center.x, center.y, radius, RED);
         }
+        if bottom_center_texture(rc, icon.texture, p, "") {
+            return (icon.action)();
+        }
+        show_tooltip_for_circle(rc, &icon.tooltip, center, radius);
     }
     NO_UPDATE
 }

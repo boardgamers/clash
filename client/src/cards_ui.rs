@@ -93,20 +93,17 @@ fn draw_cards(
     x_offset: f32,
 ) -> RenderResult {
     let screen = rc.state.screen_size;
-    for pass in 0..2 {
-        let mut y = (cards.len() as f32 * -size.y) / 2.;
-        for card in cards {
-            draw_card(
-                rc,
-                size,
-                selection,
-                pass,
-                vec2(screen.x, screen.y / 2.0) + vec2(-size.x + x_offset, y),
-                card,
-            )?;
+    let mut y = (cards.len() as f32 * -size.y) / 2.;
+    for card in cards {
+        draw_card(
+            rc,
+            size,
+            selection,
+            vec2(screen.x, screen.y / 2.0) + vec2(-size.x + x_offset, y),
+            card,
+        )?;
 
-            y += size.y;
-        }
+        y += size.y;
     }
     NO_UPDATE
 }
@@ -115,31 +112,26 @@ fn draw_card(
     rc: &RenderContext,
     size: Vec2,
     selection: Option<&SelectionInfo>,
-    pass: i32,
     pos: Vec2,
     card: &HandCard,
 ) -> RenderResult {
     let c = get_card_object(rc, card, selection);
 
-    if pass == 0 {
-        draw_rectangle(pos.x, pos.y, size.x, size.y, c.color);
-        let (thickness, border) = highlight(rc, &c, selection);
-        draw_rectangle_lines(pos.x, pos.y, size.x, size.y, thickness, border);
+    draw_rectangle(pos.x, pos.y, size.x, size.y, c.color);
+    let (thickness, border) = highlight(rc, &c, selection);
+    draw_rectangle_lines(pos.x, pos.y, size.x, size.y, thickness, border);
 
-        rc.state.draw_text(&c.name, pos.x + 10., pos.y + 22.);
-    } else {
-        let rect = Rect::new(pos.x, pos.y, size.x, size.y);
+    rc.state.draw_text(&c.name, pos.x + 10., pos.y + 22.);
 
-        // tooltip should be shown on top of everything
-        if button_pressed(rect, rc, &c.description, 150.) {
-            if let Some(s) = selection {
-                return StateUpdate::open_dialog(ActiveDialog::HandCardsRequest(
-                    s.selection.clone().toggle(c.id),
-                ));
-            }
-            if can_play_card(rc, card) {
-                return play_card(rc, card);
-            }
+    let rect = Rect::new(pos.x, pos.y, size.x, size.y);
+    if button_pressed(rect, rc, &c.description, 150.) {
+        if let Some(s) = selection {
+            return StateUpdate::open_dialog(ActiveDialog::HandCardsRequest(
+                s.selection.clone().toggle(c.id),
+            ));
+        }
+        if can_play_card(rc, card) {
+            return play_card(rc, card);
         }
     }
     NO_UPDATE
@@ -194,38 +186,30 @@ fn get_card_object(
     selection: Option<&SelectionInfo>,
 ) -> HandCardObject {
     match card {
-        HandCard::ActionCard(a) if *a == 0 => HandCardObject::new(
-            card.clone(),
-            ACTION_CARD_COLOR,
-            "Action Card",
-            vec!["Hidden Action Card".to_string()],
-        ),
+        HandCard::ActionCard(a) if *a == 0 => {
+            HandCardObject::new(card.clone(), ACTION_CARD_COLOR, "Action Card", vec![
+                "Hidden Action Card".to_string(),
+            ])
+        }
         HandCard::ActionCard(id) => action_card_object(rc, *id),
-        HandCard::ObjectiveCard(o) if *o == 0 => HandCardObject::new(
-            card.clone(),
-            OBJECTIVE_CARD_COLOR,
-            "Objective Card",
-            vec!["Hidden Objective Card".to_string()],
-        ),
+        HandCard::ObjectiveCard(o) if *o == 0 => {
+            HandCardObject::new(card.clone(), OBJECTIVE_CARD_COLOR, "Objective Card", vec![
+                "Hidden Objective Card".to_string(),
+            ])
+        }
         HandCard::ObjectiveCard(id) => objective_card_object(rc, *id, selection),
-        HandCard::Wonder(n) if n == &Wonder::Hidden => HandCardObject::new(
-            card.clone(),
-            WONDER_CARD_COLOR,
-            "Wonder Card",
-            vec!["Hidden Wonder Card".to_string()],
-        ),
+        HandCard::Wonder(n) if n == &Wonder::Hidden => {
+            HandCardObject::new(card.clone(), WONDER_CARD_COLOR, "Wonder Card", vec![
+                "Hidden Wonder Card".to_string(),
+            ])
+        }
         HandCard::Wonder(name) => {
             let w = rc.game.cache.get_wonder(*name);
-            HandCardObject::new(
-                card.clone(),
-                WONDER_CARD_COLOR,
-                &w.name(),
-                vec![
-                    w.description.clone(),
-                    format!("Cost: {}", w.cost.to_string()),
-                    format!("Required advance: {}", w.required_advance.name(rc.game)),
-                ],
-            )
+            HandCardObject::new(card.clone(), WONDER_CARD_COLOR, &w.name(), vec![
+                w.description.clone(),
+                format!("Cost: {}", w.cost.to_string()),
+                format!("Required advance: {}", w.required_advance.name(rc.game)),
+            ])
         }
     }
 }
@@ -269,20 +253,14 @@ fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
                     .map(|f| format!("{f}"))
                     .join(", ")
             ),
-            format!(
-                "Role: {}",
-                match t.role_requirement {
-                    None => "Attacker or Defender".to_string(),
-                    Some(r) => format!("{r}"),
-                }
-            ),
-            format!(
-                "Location: {}",
-                match &t.location_requirement {
-                    None => "Any".to_string(),
-                    Some(l) => format!("{l}"),
-                }
-            ),
+            format!("Role: {}", match t.role_requirement {
+                None => "Attacker or Defender".to_string(),
+                Some(r) => format!("{r}"),
+            }),
+            format!("Location: {}", match &t.location_requirement {
+                None => "Any".to_string(),
+                Some(l) => format!("{l}"),
+            }),
         ]);
         break_text(t.description.as_str(), 30, &mut description);
     }

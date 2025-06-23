@@ -70,67 +70,59 @@ pub fn show_advance_menu(
     let p = rc.shown_player;
     let state = rc.state;
 
-    for pass in 0..2 {
-        for (i, group) in rc.game.cache.get_advance_groups().iter().enumerate() {
-            let pos =
-                vec2(i.rem(COLUMNS) as f32 * 140., (i / COLUMNS) as f32 * 180.) + vec2(20., 70.);
-            if pass == 0 {
-                state.draw_text(
-                    &group.name,
-                    pos.x + (140. - state.measure_text(&group.name).width) / 2.,
-                    pos.y - 15.,
-                );
+    for (i, group) in rc.game.cache.get_advance_groups().iter().enumerate() {
+        let pos = vec2(i.rem(COLUMNS) as f32 * 140., (i / COLUMNS) as f32 * 180.) + vec2(20., 70.);
+        state.draw_text(
+            &group.name,
+            pos.x + (140. - state.measure_text(&group.name).width) / 2.,
+            pos.y - 15.,
+        );
+
+        for (i, a) in group.advances.iter().enumerate() {
+            let pos = pos + vec2(0., i as f32 * 35.);
+            let name = &a.name;
+            let advance_state = advance_state(a, p);
+
+            let rect = Rect::new(pos.x, pos.y, 135., 30.);
+            draw_rectangle(
+                rect.x,
+                rect.y,
+                rect.w,
+                rect.h,
+                fill_color(rc, p, &advance_state),
+            );
+            state.draw_text(name, pos.x + 10., pos.y + 22.);
+
+            if find_special_advance(a.advance, rc.game, rc.shown_player.index).is_some() {
+                draw_rectangle_lines(rect.x, rect.y, rect.w, rect.h, 12., GREEN);
             }
 
-            for (i, a) in group.advances.iter().enumerate() {
-                let pos = pos + vec2(0., i as f32 * 35.);
-                let name = &a.name;
-                let advance_state = advance_state(a, p);
-
-                let rect = Rect::new(pos.x, pos.y, 135., 30.);
-                if pass == 0 {
-                    draw_rectangle(
-                        rect.x,
-                        rect.y,
-                        rect.w,
-                        rect.h,
-                        fill_color(rc, p, &advance_state),
-                    );
-                    state.draw_text(name, pos.x + 10., pos.y + 22.);
-
-                    if find_special_advance(a.advance, rc.game, rc.shown_player.index).is_some() {
-                        draw_rectangle_lines(rect.x, rect.y, rect.w, rect.h, 12., GREEN);
+            draw_rectangle_lines(
+                rect.x,
+                rect.y,
+                rect.w,
+                rect.h,
+                match &state.active_dialog {
+                    ActiveDialog::AdvancePayment(p) => {
+                        if p.name == *name {
+                            8.
+                        } else {
+                            4.
+                        }
                     }
-
-                    draw_rectangle_lines(
-                        rect.x,
-                        rect.y,
-                        rect.w,
-                        rect.h,
-                        match &state.active_dialog {
-                            ActiveDialog::AdvancePayment(p) => {
-                                if p.name == *name {
-                                    8.
-                                } else {
-                                    4.
-                                }
-                            }
-                            _ => 4.,
-                        },
-                        border_color(a),
-                    );
-                } else {
-                    // tooltip should be shown on top of everything
-                    if button_pressed(rect, rc, &description(rc, a), 50.)
-                        && rc.can_control_shown_player()
-                        && matches!(
-                            advance_state,
-                            AdvanceState::Available | AdvanceState::Removable
-                        )
-                    {
-                        return new_update(a);
-                    }
-                }
+                    _ => 4.,
+                },
+                border_color(a),
+            );
+            // tooltip should be shown on top of everything
+            if button_pressed(rect, rc, &description(rc, a), 50.)
+                && rc.can_control_shown_player()
+                && matches!(
+                    advance_state,
+                    AdvanceState::Available | AdvanceState::Removable
+                )
+            {
+                return new_update(a);
             }
         }
     }
@@ -176,13 +168,10 @@ fn description(rc: &RenderContext, a: &AdvanceInfo) -> Vec<String> {
         ));
     }
     if let Some(b) = &a.bonus {
-        parts.push(format!(
-            "Bonus: {}",
-            match b {
-                Bonus::MoodToken => "Mood Token",
-                Bonus::CultureToken => "Culture Token",
-            }
-        ));
+        parts.push(format!("Bonus: {}", match b {
+            Bonus::MoodToken => "Mood Token",
+            Bonus::CultureToken => "Culture Token",
+        }));
     }
     if let Some(g) = &a.government {
         parts.push(format!("Government: {g}"));
