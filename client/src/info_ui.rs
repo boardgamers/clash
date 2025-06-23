@@ -6,54 +6,106 @@ use macroquad::math::{Rect, Vec2, vec2};
 use macroquad::prelude::{BLACK, BLUE, GREEN, MAGENTA, WHITE, YELLOW};
 use server::civilization::Civilization;
 use server::content::civilizations;
+use server::game::Game;
+use server::wonder::{Wonder, WonderInfo};
 use std::ops::Mul;
+use crate::cards_ui::wonder_description;
 
 #[derive(Clone, Debug)]
 pub(crate) struct InfoDialog {
-    pub select: InfoSelect,
+    pub select: InfoCategory,
+    pub civilization: String,
+    pub wonder: Wonder,
 }
 
 impl InfoDialog {
-    pub(crate) fn new(select: InfoSelect) -> Self {
-        InfoDialog { select }
+    pub(crate) fn new(civilization: String) -> Self {
+        InfoDialog {
+            select: InfoCategory::Civilization,
+            civilization,
+            wonder: Wonder::GreatWall,
+        }
     }
 }
 
-#[derive(Clone, Debug)]
-pub(crate) enum InfoSelect {
-    Civilization(String),
-    // Incident(String),
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) enum InfoCategory {
+    Civilization,
+    Wonder,
 }
 
 pub(crate) fn show_info_dialog(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
-    draw_button(
+    show_category(
         rc,
+        d,
+        0,
+        InfoCategory::Civilization,
         "Civilizations",
-        vec2(0., 0.),
-        &["Show civilization info".to_string()],
-        true,
-    );
+        "Show civilization info",
+        show_civilizations,
+    )?;
+    show_category(
+        rc,
+        d,
+        1,
+        InfoCategory::Wonder,
+        "Wonders",
+        "Show wonder info",
+        |rc, d| {
+            show_category_items::<WonderInfo, Wonder>(
+                rc,
+                d,
+                |g| g.cache.get_wonders(),
+                |w| &w.wonder,
+                WonderInfo::name,
+                |w| wonder_description(rc, w),
+                |d| &d.wonder,
+                |d, w| d.wonder = w,
+            )
+        },
+    )?;
 
-    match &d.select {
-        InfoSelect::Civilization(civ) => {
-            for (i, c) in civilizations::get_all_uncached()
-                .iter()
-                .filter(|c| c.is_human())
-                .enumerate()
-            {
-                let selected = &c.name == civ;
-                if draw_button(rc, &c.name, vec2(i as f32, 1.), &[], selected) {
-                    return StateUpdate::open_dialog(ActiveDialog::Info(InfoDialog::new(
-                        InfoSelect::Civilization(c.name.clone()),
-                    )));
-                }
-                if selected {
-                    show_civilization(rc, c);
-                }
-            }
+    NO_UPDATE
+}
+
+fn show_category(
+    rc: &RenderContext,
+    d: &InfoDialog,
+    x: usize,
+    category: InfoCategory,
+    name: &str,
+    tooltip: &str,
+    show: impl Fn(&RenderContext, &InfoDialog) -> RenderResult,
+) -> RenderResult {
+    let pos = vec2(x as f32, 0.);
+    let selected = d.select == category;
+    if draw_button(rc, name, pos, &[tooltip.to_string()], selected) {
+        let mut new = d.clone();
+        new.select = category;
+        return StateUpdate::open_dialog(ActiveDialog::Info(new));
+    }
+    if selected {
+        show(rc, d)?;
+    }
+    NO_UPDATE
+}
+
+fn show_civilizations(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
+    for (i, c) in civilizations::get_all_uncached()
+        .iter()
+        .filter(|c| c.is_human())
+        .enumerate()
+    {
+        let selected = c.name == d.civilization;
+        if draw_button(rc, &c.name, vec2(i as f32, 1.), &[], selected) {
+            let mut new = d.clone();
+            new.civilization.clone_from(&c.name);
+            return StateUpdate::open_dialog(ActiveDialog::Info(new));
+        }
+        if selected {
+            show_civilization(rc, c);
         }
     }
-
     NO_UPDATE
 }
 
@@ -79,6 +131,28 @@ fn show_civilization(rc: &RenderContext, c: &Civilization) {
 
         draw_button(rc, &l.name, vec2(i as f32, 3.), &tooltip, false);
     }
+}
+
+fn show_category_items<T: Clone, K: PartialEq + Clone>(
+    rc: &RenderContext,
+    d: &InfoDialog,
+    get_all: impl Fn(&Game) -> &Vec<T>,
+    get_key: impl Fn(&T) -> &K,
+    name: impl Fn(&T) -> String,
+    description: impl Fn(&T) -> Vec<String>,
+    get_selected: impl Fn(&InfoDialog) -> &K,
+    set_selected: impl Fn(&mut InfoDialog, K),
+) -> RenderResult {
+    for (i, info) in get_all(rc.game).iter().enumerate() {
+        let selected = get_key(info) == get_selected(d);
+        let name = name(info);
+        if draw_button(rc, &name, vec2(i as f32, 1.), &description(info), selected) {
+            let mut new = d.clone();
+            set_selected(&mut new, get_key(info).clone());
+            return StateUpdate::open_dialog(ActiveDialog::Info(new));
+        }
+    }
+    NO_UPDATE
 }
 
 fn draw_button(

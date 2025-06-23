@@ -66,8 +66,8 @@ pub(crate) fn multiline_label(label: &str, len: usize, mut print: impl FnMut(&st
     }
 }
 
-pub(crate) fn break_text(label: &str, len: usize, result: &mut Vec<String>) {
-    multiline_label(label, len, |label: &str| {
+pub(crate) fn break_text(label: &str, result: &mut Vec<String>) {
+    multiline_label(label, 70, |label: &str| {
         result.push(label.to_string());
     });
 }

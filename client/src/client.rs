@@ -8,19 +8,19 @@ use server::position::Position;
 use crate::advance_ui::{pay_advance_dialog, show_paid_advance_menu};
 use crate::cards_ui::show_cards;
 use crate::client_state::{
-    ActiveDialog, CameraMode, DialogChooser, NO_UPDATE, RenderResult, State, StateUpdate,
+    ActiveDialog, CameraMode, DialogChooser, RenderResult, State, StateUpdate, NO_UPDATE,
 };
 use crate::collect_ui::collect_dialog;
 use crate::construct_ui::pay_construction_dialog;
 use crate::event_ui::{custom_phase_event_origin, event_help};
 use crate::happiness_ui::{increase_happiness_click, increase_happiness_menu};
 use crate::hex_ui::pixel_to_coordinate;
-use crate::info_ui::{InfoDialog, InfoSelect, show_info_dialog};
+use crate::info_ui::{show_info_dialog, InfoDialog};
 use crate::layout_ui::{
-    ICON_SIZE, bottom_center_anchor, bottom_centered_text_with_offset,
-    draw_scaled_icon_with_tooltip, icon_pos, is_mouse_pressed, top_right_texture,
+    bottom_center_anchor, bottom_centered_text_with_offset, draw_scaled_icon_with_tooltip,
+    icon_pos, is_mouse_pressed, top_right_texture, ICON_SIZE,
 };
-use crate::log_ui::{LogDialog, show_log};
+use crate::log_ui::{show_log, LogDialog};
 use crate::map_ui::{draw_map, explore_dialog, show_tile_menu};
 use crate::player_ui::{player_select, show_global_controls, show_top_center, show_top_left};
 use crate::render_context::{RenderContext, RenderStage};
@@ -105,7 +105,7 @@ fn render(rc: &RenderContext, features: &Features) -> RenderResult {
             return StateUpdate::close_dialog();
         }
         return StateUpdate::open_dialog(ActiveDialog::Info(InfoDialog::new(
-            InfoSelect::Civilization(rc.shown_player.civilization.name.clone()),
+            rc.shown_player.civilization.name.clone(),
         )));
     }
 
@@ -201,12 +201,8 @@ fn render_active_dialog(rc: &RenderContext) -> RenderResult {
 
 fn dialog_chooser(rc: &RenderContext, c: &DialogChooser) -> RenderResult {
     let h = -50.;
-    bottom_centered_text_with_offset(
-        rc,
-        &c.title,
-        vec2(0., c.options.len() as f32 * h + 50.),
-        &[],
-    );
+    bottom_centered_text_with_offset(rc, &c.title, vec2(0., c.options.len() as f32 * h + 50.), &[
+    ]);
 
     for (i, (origin, d)) in c.options.iter().enumerate() {
         let offset = vec2(0., i as f32 * h + 35.);

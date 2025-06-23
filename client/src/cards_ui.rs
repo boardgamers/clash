@@ -17,7 +17,7 @@ use server::card::{HandCard, HandCardType, hand_cards, validate_card_selection};
 use server::content::persistent_events::EventResponse;
 use server::events::check_event_origin;
 use server::playing_actions::{PlayingAction, PlayingActionType};
-use server::wonder::Wonder;
+use server::wonder::{Wonder, WonderInfo};
 
 pub(crate) struct HandCardObject {
     id: HandCard,
@@ -177,40 +177,44 @@ fn get_card_object(
     selection: Option<&SelectionInfo>,
 ) -> HandCardObject {
     match card {
-        HandCard::ActionCard(a) if *a == 0 => HandCardObject::new(
-            card.clone(),
-            ACTION_CARD_COLOR,
-            "Action Card",
-            vec!["Hidden Action Card".to_string()],
-        ),
+        HandCard::ActionCard(a) if *a == 0 => {
+            HandCardObject::new(card.clone(), ACTION_CARD_COLOR, "Action Card", vec![
+                "Hidden Action Card".to_string(),
+            ])
+        }
         HandCard::ActionCard(id) => action_card_object(rc, *id),
-        HandCard::ObjectiveCard(o) if *o == 0 => HandCardObject::new(
-            card.clone(),
-            OBJECTIVE_CARD_COLOR,
-            "Objective Card",
-            vec!["Hidden Objective Card".to_string()],
-        ),
+        HandCard::ObjectiveCard(o) if *o == 0 => {
+            HandCardObject::new(card.clone(), OBJECTIVE_CARD_COLOR, "Objective Card", vec![
+                "Hidden Objective Card".to_string(),
+            ])
+        }
         HandCard::ObjectiveCard(id) => objective_card_object(rc, *id, selection),
-        HandCard::Wonder(n) if n == &Wonder::Hidden => HandCardObject::new(
-            card.clone(),
-            WONDER_CARD_COLOR,
-            "Wonder Card",
-            vec!["Hidden Wonder Card".to_string()],
-        ),
+        HandCard::Wonder(n) if n == &Wonder::Hidden => {
+            HandCardObject::new(card.clone(), WONDER_CARD_COLOR, "Wonder Card", vec![
+                "Hidden Wonder Card".to_string(),
+            ])
+        }
         HandCard::Wonder(name) => {
             let w = rc.game.cache.get_wonder(*name);
             HandCardObject::new(
                 card.clone(),
                 WONDER_CARD_COLOR,
                 &w.name(),
-                vec![
-                    w.description.clone(),
-                    format!("Cost: {}", w.cost.to_string()),
-                    format!("Required advance: {}", w.required_advance.name(rc.game)),
-                ],
+                wonder_description(rc, w),
             )
         }
     }
+}
+
+pub(crate) fn wonder_description(rc: &RenderContext, w: &WonderInfo) -> Vec<String> {
+    let mut description = vec![];
+    break_text(w.description.as_str(), &mut description);
+    description.push(format!("Cost: {}", w.cost));
+    description.push(format!(
+        "Required advance: {}",
+        w.required_advance.name(rc.game)
+    ));
+    description
 }
 
 fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
@@ -241,7 +245,7 @@ fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
     if !cost.is_free() {
         description.push(format!("Cost: {cost}"));
     }
-    break_text(a.civil_card.description.as_str(), 30, &mut description);
+    break_text(a.civil_card.description.as_str(), &mut description);
     if let Some(t) = &a.tactics_card {
         description.extend(vec![
             format!("Tactics: {}", t.name),
@@ -252,22 +256,16 @@ fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
                     .map(|f| format!("{f}"))
                     .join(", ")
             ),
-            format!(
-                "Role: {}",
-                match t.role_requirement {
-                    None => "Attacker or Defender".to_string(),
-                    Some(r) => format!("{r}"),
-                }
-            ),
-            format!(
-                "Location: {}",
-                match &t.location_requirement {
-                    None => "Any".to_string(),
-                    Some(l) => format!("{l}"),
-                }
-            ),
+            format!("Role: {}", match t.role_requirement {
+                None => "Attacker or Defender".to_string(),
+                Some(r) => format!("{r}"),
+            }),
+            format!("Location: {}", match &t.location_requirement {
+                None => "Any".to_string(),
+                Some(l) => format!("{l}"),
+            }),
         ]);
-        break_text(t.description.as_str(), 30, &mut description);
+        break_text(t.description.as_str(), &mut description);
     }
     HandCardObject::new(
         HandCard::ActionCard(id),
@@ -287,7 +285,7 @@ fn objective_card_object(
     let mut description = vec![];
     for o in &card.objectives {
         description.push(format!("Objective: {}", o.name));
-        break_text(o.description.as_str(), 30, &mut description);
+        break_text(o.description.as_str(), &mut description);
     }
 
     let name = selection

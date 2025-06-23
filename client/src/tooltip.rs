@@ -90,5 +90,5 @@ fn show_tooltip_text(rc: &RenderContext, tooltip: &[String], origin: Vec2, right
 }
 
 pub(crate) fn add_tooltip_description(parts: &mut Vec<String>, label: &str) {
-    break_text(label, 70, parts);
+    break_text(label, parts);
 }
