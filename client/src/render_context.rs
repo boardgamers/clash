@@ -19,6 +19,10 @@ pub enum RenderStage {
 }
 
 impl RenderStage {
+    pub(crate) fn is_main(self) -> bool {
+        !self.is_tooltip()
+    }
+
     pub fn is_ui(self) -> bool {
         self == RenderStage::UI || self == RenderStage::Tooltip
     }
@@ -32,10 +36,10 @@ impl RenderStage {
     }
 }
 
-pub struct RenderContext<'a> {
+pub(crate) struct RenderContext<'a> {
     pub game: &'a Game,
     pub state: &'a State,
-    pub shown_player: &'a Player, // the player that is being shown
+    pub shown_player: &'a Player,
     pub camera_mode: CameraMode,
     pub stage: RenderStage,
 }
@@ -139,5 +143,49 @@ impl RenderContext<'_> {
 
     pub fn mouse_pos(&self) -> Vec2 {
         self.screen_to_world(mouse_position().into())
+    }
+
+    pub fn draw_text(&self, text: &str, x: f32, y: f32) {
+        if self.stage.is_main() {
+            self.state.draw_text(text, x, y);
+        }
+    }
+
+    pub fn draw_text_with_color(&self, text: &str, x: f32, y: f32, color: Color) {
+        if self.stage.is_main() {
+            self.state.draw_text_with_color(text, x, y, color);
+        }
+    }
+
+    pub fn draw_rectangle(&self, x: f32, y: f32, w: f32, h: f32, color: Color) {
+        if self.stage.is_main() {
+            macroquad::prelude::draw_rectangle(x, y, w, h, color);
+        }
+    }
+
+    pub fn draw_rectangle_lines(
+        &self,
+        x: f32,
+        y: f32,
+        w: f32,
+        h: f32,
+        thickness: f32,
+        color: Color,
+    ) {
+        if self.stage.is_main() {
+            macroquad::prelude::draw_rectangle_lines(x, y, w, h, thickness, color);
+        }
+    }
+
+    pub fn draw_circle(&self, x: f32, y: f32, r: f32, color: Color) {
+        if self.stage.is_main() {
+            macroquad::prelude::draw_circle(x, y, r, color);
+        }
+    }
+
+    pub fn draw_circle_lines(&self, x: f32, y: f32, r: f32, thickness: f32, color: Color) {
+        if self.stage.is_main() {
+            macroquad::prelude::draw_circle_lines(x, y, r, thickness, color);
+        }
     }
 }

@@ -11,7 +11,10 @@ use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::recruit::Recruit;
 
-pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> RenderResult {
+pub(crate) fn pay_construction_dialog(
+    rc: &RenderContext,
+    cp: &ConstructionPayment,
+) -> RenderResult {
     let city = rc.game.get_any_city(cp.city_position);
     payment_dialog(
         rc,
@@ -44,14 +47,13 @@ pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> 
 }
 
 #[derive(Clone, Debug)]
-pub enum ConstructionProject {
+pub(crate) enum ConstructionProject {
     Building(Building, Option<Position>),
     Units(RecruitSelection),
 }
 
 #[derive(Clone, Debug)]
-pub struct ConstructionPayment {
-    pub player_index: usize,
+pub(crate) struct ConstructionPayment {
     pub city_position: Position,
     pub project: ConstructionProject,
     pub payment: Payment<String>,
@@ -66,7 +68,6 @@ impl ConstructionPayment {
         cost: &CostInfo,
     ) -> ConstructionPayment {
         ConstructionPayment {
-            player_index: city.player_index,
             city_position: city.position,
             project,
             payment: rc.new_payment(&cost.cost, name.to_string(), name, false),

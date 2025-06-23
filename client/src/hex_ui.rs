@@ -39,32 +39,33 @@ pub fn draw_hex(
     rc: &RenderContext,
 ) {
     let c = center(p);
-    if let Some(terrain) = terrain {
-        draw_texture_ex(
-            terrain,
-            c.x - SIZE,
-            c.y - SHORT_SIZE,
-            WHITE,
-            DrawTextureParams {
-                source: Some(Rect::new(0., 0., 298., 257.)),
-                dest_size: Some(vec2(SIZE * 2.0, SHORT_SIZE * 2.)),
-                ..Default::default()
-            },
+    if rc.stage.is_main() {
+        if let Some(terrain) = terrain {
+            draw_texture_ex(
+                terrain,
+                c.x - SIZE,
+                c.y - SHORT_SIZE,
+                WHITE,
+                DrawTextureParams {
+                    source: Some(Rect::new(0., 0., 298., 257.)),
+                    dest_size: Some(vec2(SIZE * 2.0, SHORT_SIZE * 2.)),
+                    ..Default::default()
+                },
+            );
+        } else {
+            // Terrain::Unexplored
+            draw_hexagon(c.x, c.y, SIZE, 2.0, false, DARKGRAY, BEIGE);
+        }
+        draw_hexagon(c.x, c.y, SIZE, 2.0, false, DARKGRAY, overlay);
+        let text_y = c.y - 35.0;
+        rc.draw_text_with_color(&p.to_string(), c.x - 30.0, text_y, text_color);
+        rc.draw_text_with_color(
+            &block_for_position(rc.game, p).0.to_string(),
+            c.x + 10.0,
+            text_y,
+            text_color,
         );
-    } else {
-        // Terrain::Unexplored
-        draw_hexagon(c.x, c.y, SIZE, 2.0, false, DARKGRAY, BEIGE);
     }
-    draw_hexagon(c.x, c.y, SIZE, 2.0, false, DARKGRAY, overlay);
-    let text_y = c.y - 35.0;
-    rc.state
-        .draw_text_with_color(&p.to_string(), c.x - 30.0, text_y, text_color);
-    rc.state.draw_text_with_color(
-        &block_for_position(rc.game, p).0.to_string(),
-        c.x + 10.0,
-        text_y,
-        text_color,
-    );
 
     for f in features {
         match f {

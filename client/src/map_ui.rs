@@ -291,7 +291,7 @@ pub fn show_map_action_buttons(rc: &RenderContext, icons: &IconActionVec) -> Ren
         let center = bottom_center_anchor(rc) + p + vec2(15., 15.);
         let radius = 20.;
         if icon.warning {
-            draw_circle(center.x, center.y, radius, RED);
+            rc.draw_circle(center.x, center.y, radius, RED);
         }
         if bottom_center_texture(rc, icon.texture, p, "") {
             return (icon.action)();

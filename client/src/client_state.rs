@@ -230,7 +230,7 @@ pub struct DialogChooser {
 
 #[must_use]
 #[derive(Clone, Debug)]
-pub enum StateUpdate {
+pub(crate) enum StateUpdate {
     OpenDialog(ActiveDialog),
     CloseDialog,
     Cancel,

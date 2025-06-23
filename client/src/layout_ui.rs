@@ -26,8 +26,7 @@ pub fn top_center_texture(rc: &RenderContext, texture: &Texture2D, p: Vec2, tool
 
 pub fn top_centered_text(rc: &RenderContext, text: &str, p: Vec2) {
     let p = top_center_anchor(rc) + p;
-    rc.state
-        .draw_text(text, p.x - rc.state.measure_text(text).width / 2., p.y);
+    rc.draw_text(text, p.x - rc.state.measure_text(text).width / 2., p.y);
 }
 
 pub fn top_center_anchor(rc: &RenderContext) -> Vec2 {
@@ -86,7 +85,7 @@ pub fn bottom_centered_text(rc: &RenderContext, text: &str) {
 
 pub fn bottom_center_text(rc: &RenderContext, text: &str, p: Vec2) {
     let p = bottom_center_anchor(rc) + p;
-    rc.state.draw_text(text, p.x, p.y);
+    rc.draw_text(text, p.x, p.y);
 }
 
 pub fn bottom_center_anchor(rc: &RenderContext) -> Vec2 {
@@ -135,10 +134,18 @@ pub fn draw_scaled_icon_with_tooltip(
     origin: Vec2,
     size: f32,
 ) -> bool {
-    draw_texture_ex(texture, origin.x, origin.y, WHITE, DrawTextureParams {
-        dest_size: Some(vec2(size, size)),
-        ..Default::default()
-    });
+    if rc.stage.is_main() {
+        draw_texture_ex(
+            texture,
+            origin.x,
+            origin.y,
+            WHITE,
+            DrawTextureParams {
+                dest_size: Some(vec2(size, size)),
+                ..Default::default()
+            },
+        );
+    }
 
     button_pressed(Rect::new(origin.x, origin.y, size, size), rc, tooltip, 50.)
 }

@@ -1,5 +1,4 @@
 use macroquad::math::{Vec2, u32, vec2};
-use macroquad::shapes::draw_circle;
 
 use server::game::Game;
 use server::position::Position;
@@ -48,8 +47,8 @@ pub fn draw_unit_type(
     } else {
         radius + 2.
     };
-    draw_circle(center.x, center.y, r, unit_highlight_type.color());
-    draw_circle(
+    rc.draw_circle(center.x, center.y, r, unit_highlight_type.color());
+    rc.draw_circle(
         center.x,
         center.y,
         radius - 2.,

@@ -5,13 +5,13 @@ use macroquad::math::{Vec2, vec2};
 use server::playing_actions::PlayingActionType;
 
 #[derive(Clone, Debug)]
-pub enum OkTooltip {
+pub(crate) enum OkTooltip {
     Valid(String),
     Invalid(String),
 }
 
 #[derive(Clone, Debug)]
-pub struct BaseOrCustomDialog {
+pub(crate) struct BaseOrCustomDialog {
     pub title: String,
     pub action_type: PlayingActionType,
 }

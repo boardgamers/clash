@@ -11,7 +11,7 @@ use custom_phase_ui::multi_select_tooltip;
 use itertools::Itertools;
 use macroquad::color::BLACK;
 use macroquad::math::{Rect, Vec2, vec2};
-use macroquad::prelude::{BEIGE, Color, GREEN, RED, YELLOW, draw_rectangle, draw_rectangle_lines};
+use macroquad::prelude::{BEIGE, Color, GREEN, RED, YELLOW};
 use server::action::Action;
 use server::card::{HandCard, HandCardType, hand_cards, validate_card_selection};
 use server::content::persistent_events::EventResponse;
@@ -117,11 +117,11 @@ fn draw_card(
 ) -> RenderResult {
     let c = get_card_object(rc, card, selection);
 
-    draw_rectangle(pos.x, pos.y, size.x, size.y, c.color);
+    rc.draw_rectangle(pos.x, pos.y, size.x, size.y, c.color);
     let (thickness, border) = highlight(rc, &c, selection);
-    draw_rectangle_lines(pos.x, pos.y, size.x, size.y, thickness, border);
+    rc.draw_rectangle_lines(pos.x, pos.y, size.x, size.y, thickness, border);
 
-    rc.state.draw_text(&c.name, pos.x + 10., pos.y + 22.);
+    rc.draw_text(&c.name, pos.x + 10., pos.y + 22.);
 
     let rect = Rect::new(pos.x, pos.y, size.x, size.y);
     if button_pressed(rect, rc, &c.description, 150.) {
@@ -186,30 +186,38 @@ fn get_card_object(
     selection: Option<&SelectionInfo>,
 ) -> HandCardObject {
     match card {
-        HandCard::ActionCard(a) if *a == 0 => {
-            HandCardObject::new(card.clone(), ACTION_CARD_COLOR, "Action Card", vec![
-                "Hidden Action Card".to_string(),
-            ])
-        }
+        HandCard::ActionCard(a) if *a == 0 => HandCardObject::new(
+            card.clone(),
+            ACTION_CARD_COLOR,
+            "Action Card",
+            vec!["Hidden Action Card".to_string()],
+        ),
         HandCard::ActionCard(id) => action_card_object(rc, *id),
-        HandCard::ObjectiveCard(o) if *o == 0 => {
-            HandCardObject::new(card.clone(), OBJECTIVE_CARD_COLOR, "Objective Card", vec![
-                "Hidden Objective Card".to_string(),
-            ])
-        }
+        HandCard::ObjectiveCard(o) if *o == 0 => HandCardObject::new(
+            card.clone(),
+            OBJECTIVE_CARD_COLOR,
+            "Objective Card",
+            vec!["Hidden Objective Card".to_string()],
+        ),
         HandCard::ObjectiveCard(id) => objective_card_object(rc, *id, selection),
-        HandCard::Wonder(n) if n == &Wonder::Hidden => {
-            HandCardObject::new(card.clone(), WONDER_CARD_COLOR, "Wonder Card", vec![
-                "Hidden Wonder Card".to_string(),
-            ])
-        }
+        HandCard::Wonder(n) if n == &Wonder::Hidden => HandCardObject::new(
+            card.clone(),
+            WONDER_CARD_COLOR,
+            "Wonder Card",
+            vec!["Hidden Wonder Card".to_string()],
+        ),
         HandCard::Wonder(name) => {
             let w = rc.game.cache.get_wonder(*name);
-            HandCardObject::new(card.clone(), WONDER_CARD_COLOR, &w.name(), vec![
-                w.description.clone(),
-                format!("Cost: {}", w.cost.to_string()),
-                format!("Required advance: {}", w.required_advance.name(rc.game)),
-            ])
+            HandCardObject::new(
+                card.clone(),
+                WONDER_CARD_COLOR,
+                &w.name(),
+                vec![
+                    w.description.clone(),
+                    format!("Cost: {}", w.cost.to_string()),
+                    format!("Required advance: {}", w.required_advance.name(rc.game)),
+                ],
+            )
         }
     }
 }
@@ -253,14 +261,20 @@ fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
                     .map(|f| format!("{f}"))
                     .join(", ")
             ),
-            format!("Role: {}", match t.role_requirement {
-                None => "Attacker or Defender".to_string(),
-                Some(r) => format!("{r}"),
-            }),
-            format!("Location: {}", match &t.location_requirement {
-                None => "Any".to_string(),
-                Some(l) => format!("{l}"),
-            }),
+            format!(
+                "Role: {}",
+                match t.role_requirement {
+                    None => "Attacker or Defender".to_string(),
+                    Some(r) => format!("{r}"),
+                }
+            ),
+            format!(
+                "Location: {}",
+                match &t.location_requirement {
+                    None => "Any".to_string(),
+                    Some(l) => format!("{l}"),
+                }
+            ),
         ]);
         break_text(t.description.as_str(), 30, &mut description);
     }

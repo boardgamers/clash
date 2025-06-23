@@ -18,14 +18,14 @@ use server::resource_pile::ResourcePile;
 use server::unit::{Unit, UnitType};
 
 #[derive(Clone, Copy)]
-pub enum MoveIntent {
+pub(crate) enum MoveIntent {
     Land,
     Sea,
     Disembark,
 }
 
 #[derive(Clone, Debug)]
-pub struct MovePayment {
+pub(crate) struct MovePayment {
     pub action: MovementAction,
     pub payment: Payment<String>,
 }
@@ -168,7 +168,7 @@ pub fn movable_units(
 }
 
 #[derive(Clone, Debug)]
-pub struct MoveSelection {
+pub(crate) struct MoveSelection {
     pub player_index: usize,
     pub units: Vec<u32>,
     pub start: Option<Position>,

@@ -16,7 +16,7 @@ use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::position::Position;
 
 #[derive(Clone, Debug)]
-pub struct IncreaseHappinessConfig {
+pub(crate) struct IncreaseHappinessConfig {
     pub steps: Vec<(Position, u8)>,
     pub payment: Payment<String>,
     pub custom: BaseOrCustomDialog,

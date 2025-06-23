@@ -45,7 +45,7 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
         let point = vec2(x + 7., -60.) + anchor + offset;
         draw(o, point);
         let current_pos = vec2(x + 13., -ICON_SIZE) + anchor + offset;
-        rc.state.draw_text_with_color(
+        rc.draw_text_with_color(
             &format!("{}", c.current),
             current_pos.x,
             current_pos.y,

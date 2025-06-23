@@ -3,7 +3,7 @@ use crate::layout_ui::button_pressed;
 use crate::render_context::RenderContext;
 use crate::tooltip::add_tooltip_description;
 use macroquad::math::{Rect, Vec2, vec2};
-use macroquad::prelude::{YELLOW, draw_rectangle};
+use macroquad::prelude::YELLOW;
 use server::civilization::Civilization;
 use server::content::civilizations;
 use std::ops::Mul;
@@ -81,9 +81,9 @@ fn draw_button(rc: &RenderContext, text: &str, pos: Vec2, tooltip: &[String]) ->
     let rect_pos = pos.mul(button_size) + vec2(20., 40.);
     let rect = Rect::new(rect_pos.x, rect_pos.y, 135., 30.);
 
-    draw_rectangle(rect.x, rect.y, rect.w, rect.h, YELLOW);
+    rc.draw_rectangle(rect.x, rect.y, rect.w, rect.h, YELLOW);
 
-    rc.state.draw_text(text, rect.x + 10., rect.y + 25.);
+    rc.draw_text(text, rect.x + 10., rect.y + 25.);
 
     button_pressed(rect, rc, tooltip, 50.)
 }

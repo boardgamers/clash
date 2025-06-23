@@ -23,7 +23,7 @@ impl LogDialog {
 pub fn show_log(rc: &RenderContext, d: &LogDialog) -> RenderResult {
     draw_log(rc.game, d.log_scroll, |label: &str, y: f32| {
         let p = vec2(30., y * 25. + 20.);
-        rc.state.draw_text(label, p.x, p.y);
+        rc.draw_text(label, p.x, p.y);
     });
     NO_UPDATE
 }

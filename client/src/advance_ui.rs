@@ -8,9 +8,7 @@ use crate::unit_ui::add_unit_description;
 use itertools::Itertools;
 use macroquad::color::Color;
 use macroquad::math::vec2;
-use macroquad::prelude::{
-    BLACK, BLUE, GRAY, GREEN, Rect, WHITE, YELLOW, draw_rectangle, draw_rectangle_lines,
-};
+use macroquad::prelude::{BLACK, BLUE, GRAY, GREEN, Rect, WHITE, YELLOW};
 use server::action::Action;
 use server::advance::{Advance, AdvanceAction, AdvanceInfo, Bonus, find_special_advance};
 use server::game::GameState;
@@ -72,7 +70,7 @@ pub fn show_advance_menu(
 
     for (i, group) in rc.game.cache.get_advance_groups().iter().enumerate() {
         let pos = vec2(i.rem(COLUMNS) as f32 * 140., (i / COLUMNS) as f32 * 180.) + vec2(20., 70.);
-        state.draw_text(
+        rc.draw_text(
             &group.name,
             pos.x + (140. - state.measure_text(&group.name).width) / 2.,
             pos.y - 15.,
@@ -84,20 +82,20 @@ pub fn show_advance_menu(
             let advance_state = advance_state(a, p);
 
             let rect = Rect::new(pos.x, pos.y, 135., 30.);
-            draw_rectangle(
+            rc.draw_rectangle(
                 rect.x,
                 rect.y,
                 rect.w,
                 rect.h,
                 fill_color(rc, p, &advance_state),
             );
-            state.draw_text(name, pos.x + 10., pos.y + 22.);
+            rc.draw_text(name, pos.x + 10., pos.y + 22.);
 
             if find_special_advance(a.advance, rc.game, rc.shown_player.index).is_some() {
-                draw_rectangle_lines(rect.x, rect.y, rect.w, rect.h, 12., GREEN);
+                rc.draw_rectangle_lines(rect.x, rect.y, rect.w, rect.h, 12., GREEN);
             }
 
-            draw_rectangle_lines(
+            rc.draw_rectangle_lines(
                 rect.x,
                 rect.y,
                 rect.w,
@@ -168,10 +166,13 @@ fn description(rc: &RenderContext, a: &AdvanceInfo) -> Vec<String> {
         ));
     }
     if let Some(b) = &a.bonus {
-        parts.push(format!("Bonus: {}", match b {
-            Bonus::MoodToken => "Mood Token",
-            Bonus::CultureToken => "Culture Token",
-        }));
+        parts.push(format!(
+            "Bonus: {}",
+            match b {
+                Bonus::MoodToken => "Mood Token",
+                Bonus::CultureToken => "Culture Token",
+            }
+        ));
     }
     if let Some(g) = &a.government {
         parts.push(format!("Government: {g}"));

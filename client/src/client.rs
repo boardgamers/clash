@@ -16,7 +16,10 @@ use crate::event_ui::{custom_phase_event_origin, event_help};
 use crate::happiness_ui::{increase_happiness_click, increase_happiness_menu};
 use crate::hex_ui::pixel_to_coordinate;
 use crate::info_ui::{InfoDialog, show_info_dialog};
-use crate::layout_ui::{ICON_SIZE, bottom_center_anchor, bottom_centered_text_with_offset, draw_scaled_icon_with_tooltip, icon_pos, top_right_texture, is_mouse_pressed};
+use crate::layout_ui::{
+    ICON_SIZE, bottom_center_anchor, bottom_centered_text_with_offset,
+    draw_scaled_icon_with_tooltip, icon_pos, is_mouse_pressed, top_right_texture,
+};
 use crate::log_ui::{LogDialog, show_log};
 use crate::map_ui::{draw_map, explore_dialog, show_tile_menu};
 use crate::player_ui::{player_select, show_global_controls, show_top_center, show_top_left};

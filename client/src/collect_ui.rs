@@ -9,7 +9,6 @@ use itertools::Itertools;
 use macroquad::color::BLACK;
 use macroquad::math::{Vec2, vec2};
 use macroquad::prelude::WHITE;
-use macroquad::shapes::draw_circle;
 use server::action::Action;
 use server::collect::{
     Collect, CollectInfo, PositionCollection, add_collect, get_total_collection,
@@ -171,7 +170,7 @@ pub fn draw_resource_collect_tile(rc: &RenderContext, pos: Position) -> RenderRe
 
         let pile_collect = tile_collects.iter().find(|r| &r.pile == pile);
         let color = if pile_collect.is_some() { BLACK } else { WHITE };
-        draw_circle(center.x, center.y, radius, color);
+        rc.draw_circle(center.x, center.y, radius, color);
         if let Some(p) = mouse_pressed_position(rc) {
             if is_in_circle(p, center, radius) {
                 return click_collect_option(rc, collect, pos, pile);
@@ -191,8 +190,7 @@ pub fn draw_resource_collect_tile(rc: &RenderContext, pos: Position) -> RenderRe
         if let Some(r) = pile_collect {
             let times = r.times;
             if times > 1 {
-                rc.state
-                    .draw_text(&format!("{times}"), center.x + 20., center.y + 5.);
+                rc.draw_text(&format!("{times}"), center.x + 20., center.y + 5.);
             }
         }
     }

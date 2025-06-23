@@ -8,7 +8,9 @@ use crate::happiness_ui::{
     open_increase_happiness_dialog,
 };
 use crate::hex_ui;
-use crate::layout_ui::{draw_scaled_icon, draw_scaled_icon_with_tooltip, is_in_circle, is_mouse_pressed};
+use crate::layout_ui::{
+    draw_scaled_icon, draw_scaled_icon_with_tooltip, is_in_circle, is_mouse_pressed,
+};
 use crate::map_ui::{move_units_buttons, show_map_action_buttons};
 use crate::recruit_unit_ui::RecruitAmount;
 use crate::render_context::RenderContext;
@@ -267,7 +269,7 @@ fn draw_selected_state(
     } else {
         info.highlight_type()
     };
-    draw_circle_lines(center.x, center.y, size, 3., t.color());
+    rc.draw_circle_lines(center.x, center.y, size, 3., t.color());
 
     if let Some(tooltip) = &info.tooltip {
         show_tooltip_for_circle(rc, &[tooltip.clone()], center, size);
@@ -296,9 +298,9 @@ pub fn draw_city(rc: &RenderContext, city: &City) -> RenderResult {
     };
 
     if city.is_activated() {
-        draw_circle(c.x, c.y, 18.0, WHITE);
+        rc.draw_circle(c.x, c.y, 18.0, WHITE);
     }
-    draw_circle(c.x, c.y, 15.0, rc.player_color(owner));
+    rc.draw_circle(c.x, c.y, 15.0, rc.player_color(owner));
 
     if let Some(h) = highlighted
         .iter()
@@ -353,7 +355,7 @@ fn draw_buildings(
     for player_index in 0..4 {
         for b in &city.pieces.buildings(Some(player_index)) {
             let p = building_position(city, center, i, *b);
-            draw_circle(p.x, p.y, BUILDING_SIZE, rc.player_color(player_index));
+            rc.draw_circle(p.x, p.y, BUILDING_SIZE, rc.player_color(player_index));
 
             let mut tooltip = vec![b.name().to_string()];
             add_building_description(rc, &mut tooltip, *b);
@@ -405,7 +407,7 @@ fn draw_wonders(
     let mut i = 0;
     for w in &city.pieces.wonders {
         let p = hex_ui::rotate_around(c, 20.0, 90 * i);
-        draw_circle(p.x, p.y, 18.0, rc.player_color(owner));
+        rc.draw_circle(p.x, p.y, 18.0, rc.player_color(owner));
         let size = 20.;
         if let Some(h) = highlighted.iter().find(|s| {
             s.position == city.position && matches!(&s.structure, Structure::Wonder(n) if n == w)

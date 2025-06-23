@@ -47,14 +47,13 @@ pub fn player_select(rc: &RenderContext) -> RenderResult {
 
         let w = if shown { size + 10. } else { size };
         let x = pos.x - w + size;
-        draw_rectangle(x, pos.y, w, size, color);
-        draw_rectangle_lines(x, pos.y, w, size, 2.0, BLACK);
+        rc.draw_rectangle(x, pos.y, w, size, color);
+        rc.draw_rectangle_lines(x, pos.y, w, size, 2.0, BLACK);
         let text = format!("{}", pl.victory_points(game));
 
-        let state = rc.state;
-        state.draw_text(&text, pos.x + 10., pos.y + 27.);
+        rc.draw_text(&text, pos.x + 10., pos.y + 27.);
 
-        if game.active_player() == pl.index {
+        if game.active_player() == pl.index && rc.stage.is_main() {
             draw_texture_ex(
                 &rc.assets().active_player,
                 x - 20.,
@@ -68,7 +67,7 @@ pub fn player_select(rc: &RenderContext) -> RenderResult {
         }
 
         let rect = Rect::new(x, pos.y, w, size);
-        let tooltip = if state.control_player.is_some_and(|p| p == pl.index) {
+        let tooltip = if rc.state.control_player.is_some_and(|p| p == pl.index) {
             format!("{pl} (You)")
         } else {
             pl.get_name()
@@ -90,12 +89,11 @@ pub fn top_icon_with_label(
     p: Vec2,
     tooltip: &str,
 ) {
-    let state = rc.state;
-    let dimensions = state.measure_text(label);
+    let dimensions = rc.state.measure_text(label);
     let x = (ICON_SIZE - dimensions.width) / 2.0;
-    state.draw_text(
+    rc.draw_text(
         label,
-        state.screen_size.x / 2.0 + p.x + x,
+        rc.state.screen_size.x / 2.0 + p.x + x,
         p.y + ICON_SIZE + 30.,
     );
     top_center_texture(rc, texture, p, tooltip);
@@ -111,7 +109,7 @@ pub fn bottom_icon_with_label(
     let state = rc.state;
     let dimensions = state.measure_text(label);
     let x = (ICON_SIZE - dimensions.width) / 2.0;
-    state.draw_text(
+    rc.draw_text(
         label,
         rc.state.screen_size.x / 2.0 + p.x + x,
         rc.state.screen_size.y + p.y + 35.,
@@ -171,15 +169,14 @@ pub fn show_top_center(rc: &RenderContext) {
 }
 
 pub fn show_top_left(rc: &RenderContext) {
-    let state = rc.state;
     let mut p = vec2(10., 10.);
     let mut label = |label: &str| {
         multiline_label(label, 30, |label: &str| {
             p = vec2(p.x, p.y + 25.);
-            if p.y > state.screen_size.y - 150. {
+            if p.y > rc.state.screen_size.y - 150. {
                 p = vec2(p.x + 350., 85.);
             }
-            state.draw_text(label, p.x, p.y);
+            rc.draw_text(label, p.x, p.y);
         });
     };
 
@@ -237,21 +234,21 @@ pub fn show_top_left(rc: &RenderContext) {
         }
     }
 
-    if rc.shown_player_is_active() || state.active_dialog.show_for_other_player() {
-        for m in state.active_dialog.help_message(rc) {
+    if rc.shown_player_is_active() || rc.state.active_dialog.show_for_other_player() {
+        for m in rc.state.active_dialog.help_message(rc) {
             label(&m);
         }
     }
 
     if rc.shown_player_is_active() {
-        if let Some(u) = &state.pending_update {
+        if let Some(u) = &rc.state.pending_update {
             for m in &u.info {
                 label(m);
             }
         }
     }
 
-    if let Some(position) = state.focused_tile {
+    if let Some(position) = rc.state.focused_tile {
         show_focused_tile(&mut label, game, position);
     }
 

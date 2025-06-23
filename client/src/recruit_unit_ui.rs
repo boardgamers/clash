@@ -18,14 +18,14 @@ use server::unit::UnitType::{Cavalry, Elephant, Infantry, Leader, Settler, Ship}
 use server::unit::{Unit, UnitType, Units, get_units_to_replace};
 
 #[derive(Clone, Debug)]
-pub struct SelectableUnit {
+pub(crate) struct SelectableUnit {
     pub unit_type: UnitType,
     pub selectable: CountSelector,
     cost: Result<CostInfo, String>,
 }
 
 #[derive(Clone, Debug)]
-pub struct RecruitAmount {
+pub(crate) struct RecruitAmount {
     player_index: usize,
     city_position: Position,
     pub units: Units,
@@ -105,10 +105,9 @@ fn new_units(player: &Player) -> Vec<UnitType> {
 }
 
 #[derive(Clone, Debug)]
-pub struct RecruitSelection {
+pub(crate) struct RecruitSelection {
     pub player: usize,
     pub amount: RecruitAmount,
-    pub available_units: Units,
     pub need_replacement: Units,
     pub replaced_units: Vec<u32>,
 }
@@ -126,7 +125,6 @@ impl RecruitSelection {
         RecruitSelection {
             player,
             amount,
-            available_units,
             need_replacement,
             replaced_units,
         }

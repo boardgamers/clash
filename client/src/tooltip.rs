@@ -64,7 +64,12 @@ pub fn show_tooltip_for_circle(rc: &RenderContext, tooltip: &[String], center: V
     if is_circle_tooltip_active(rc, center, radius) {
         draw_circle(center.x, center.y, radius, Color::new(0.0, 0.0, 0.0, 0.5));
         let _ = rc.with_camera(CameraMode::Screen, |rc| {
-            show_tooltip_text(rc, tooltip, rc.world_to_screen(center) + vec2(radius, radius), 50.);
+            show_tooltip_text(
+                rc,
+                tooltip,
+                rc.world_to_screen(center) + vec2(radius, radius),
+                50.,
+            );
             NO_UPDATE
         });
     }
