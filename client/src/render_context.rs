@@ -1,5 +1,6 @@
 use crate::assets::Assets;
 use crate::client_state::{CameraMode, RenderResult, State};
+use crate::layout_ui::limit_str;
 use crate::payment_ui::Payment;
 use macroquad::camera::set_default_camera;
 use macroquad::color::{Color, PINK, YELLOW};
@@ -10,7 +11,6 @@ use server::game::Game;
 use server::payment::PaymentOptions;
 use server::player::Player;
 use server::playing_actions::PlayingActionType;
-use crate::layout_ui::limit_str;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum RenderStage {
@@ -144,7 +144,11 @@ impl RenderContext<'_> {
 
     pub(crate) fn draw_limited_text(&self, text: &str, x: f32, y: f32, max_width: f32) {
         if self.stage.is_main() {
-            self.state.draw_text(&limit_str(text, max_width, |t|self.state.measure_text(t)), x, y);
+            self.state.draw_text(
+                &limit_str(text, max_width, |t| self.state.measure_text(t)),
+                x,
+                y,
+            );
         }
     }
 

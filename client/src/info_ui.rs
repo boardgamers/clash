@@ -1,18 +1,20 @@
-use crate::cards_ui::wonder_description;
+use crate::cards_ui::{action_card_object, objective_card_object, wonder_description};
 use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::layout_ui::button_pressed;
+use crate::log_ui::{break_each, break_text};
 use crate::render_context::RenderContext;
 use itertools::Itertools;
 use macroquad::color::Color;
 use macroquad::math::{Rect, Vec2, vec2};
 use macroquad::prelude::{BLACK, BLUE, GREEN, MAGENTA, WHITE, YELLOW};
+use server::action_card::ActionCard;
 use server::civilization::Civilization;
 use server::content::civilizations;
 use server::game::Game;
 use server::incident::Incident;
+use server::objective_card::ObjectiveCard;
 use server::wonder::{Wonder, WonderInfo};
 use std::ops::Mul;
-use crate::log_ui::{break_each, break_text};
 
 #[derive(Clone, Debug)]
 pub(crate) struct InfoDialog {
@@ -20,6 +22,8 @@ pub(crate) struct InfoDialog {
     pub civilization: String,
     pub wonder: Wonder,
     pub incident: u8,
+    pub action_card: u8,
+    pub objective_card: u8,
 }
 
 impl InfoDialog {
@@ -29,6 +33,8 @@ impl InfoDialog {
             civilization,
             wonder: Wonder::Colosseum,
             incident: 1,
+            action_card: 1,
+            objective_card: 1,
         }
     }
 }
@@ -38,6 +44,8 @@ pub(crate) enum InfoCategory {
     Civilization,
     Wonder,
     Incident,
+    ActionCard,
+    ObjectiveCard,
 }
 
 pub(crate) fn show_info_dialog(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
@@ -51,6 +59,8 @@ pub(crate) fn show_info_dialog(rc: &RenderContext, d: &InfoDialog) -> RenderResu
     )?;
     show_wonders(rc, d)?;
     show_incidents(rc, d)?;
+    show_action_cards(rc, d)?;
+    show_objective_cards(rc, d)?;
 
     NO_UPDATE
 }
@@ -72,6 +82,50 @@ fn show_incidents(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
             |d, i| d.incident = i,
         )
     })
+}
+
+fn show_action_cards(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
+    show_category(
+        rc,
+        d,
+        3,
+        InfoCategory::ActionCard,
+        "Action Cards",
+        |rc, d| {
+            show_category_items::<ActionCard, u8>(
+                rc,
+                d,
+                |g| g.cache.get_action_cards(),
+                |i| &i.id,
+                ActionCard::name,
+                |i| action_card_object(rc, i.id).description,
+                |d| &d.action_card,
+                |d, i| d.action_card = i,
+            )
+        },
+    )
+}
+
+fn show_objective_cards(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
+    show_category(
+        rc,
+        d,
+        4,
+        InfoCategory::ObjectiveCard,
+        "Objective Cards",
+        |rc, d| {
+            show_category_items::<ObjectiveCard, u8>(
+                rc,
+                d,
+                |g| g.cache.get_objective_cards(),
+                |i| &i.id,
+                ObjectiveCard::name,
+                |i| objective_card_object(rc, i.id, None).description,
+                |d| &d.objective_card,
+                |d, i| d.objective_card = i,
+            )
+        },
+    )
 }
 
 fn show_wonders(rc: &RenderContext, d: &InfoDialog) -> RenderResult {

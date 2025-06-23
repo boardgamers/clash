@@ -1,7 +1,7 @@
+use crate::log_ui::{break_each, break_text};
 use crate::payment_ui::Payment;
 use crate::render_context::RenderContext;
 use server::events::EventOrigin;
-use crate::log_ui::{break_each, break_text};
 
 #[must_use]
 pub(crate) fn event_help(rc: &RenderContext, origin: &EventOrigin) -> Vec<String> {
@@ -22,7 +22,7 @@ pub(crate) fn event_help(rc: &RenderContext, origin: &EventOrigin) -> Vec<String
         }
         EventOrigin::SpecialAdvance(s) => vec![s.info(rc.game).description.clone()],
     };
-    
+
     break_each(&mut h, &d);
     h
 }

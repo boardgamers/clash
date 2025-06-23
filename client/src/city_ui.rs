@@ -11,6 +11,7 @@ use crate::hex_ui;
 use crate::layout_ui::{
     draw_scaled_icon, draw_scaled_icon_with_tooltip, is_in_circle, is_mouse_pressed,
 };
+use crate::log_ui::break_text;
 use crate::map_ui::{move_units_buttons, show_map_action_buttons};
 use crate::recruit_unit_ui::RecruitAmount;
 use crate::render_context::RenderContext;
@@ -32,7 +33,6 @@ use server::resource::ResourceType;
 use server::structure::Structure;
 use server::unit::{UnitType, Units};
 use std::ops::Add;
-use crate::log_ui::break_text;
 
 pub(crate) struct IconAction<'a> {
     pub texture: &'a Texture2D,

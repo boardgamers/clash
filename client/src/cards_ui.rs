@@ -22,7 +22,7 @@ use server::wonder::{Wonder, WonderInfo};
 pub(crate) struct HandCardObject {
     id: HandCard,
     name: String,
-    description: Vec<String>,
+    pub description: Vec<String>,
     color: Color,
 }
 
@@ -41,7 +41,7 @@ const ACTION_CARD_COLOR: Color = RED;
 const OBJECTIVE_CARD_COLOR: Color = BEIGE;
 const WONDER_CARD_COLOR: Color = YELLOW;
 
-struct SelectionInfo {
+pub(crate) struct SelectionInfo {
     selection: MultiSelection<HandCard>,
     show_names: Vec<(u8, String)>,
 }
@@ -177,23 +177,26 @@ fn get_card_object(
     selection: Option<&SelectionInfo>,
 ) -> HandCardObject {
     match card {
-        HandCard::ActionCard(a) if *a == 0 => {
-            HandCardObject::new(card.clone(), ACTION_CARD_COLOR, "Action Card", vec![
-                "Hidden Action Card".to_string(),
-            ])
-        }
+        HandCard::ActionCard(a) if *a == 0 => HandCardObject::new(
+            card.clone(),
+            ACTION_CARD_COLOR,
+            "Action Card",
+            vec!["Hidden Action Card".to_string()],
+        ),
         HandCard::ActionCard(id) => action_card_object(rc, *id),
-        HandCard::ObjectiveCard(o) if *o == 0 => {
-            HandCardObject::new(card.clone(), OBJECTIVE_CARD_COLOR, "Objective Card", vec![
-                "Hidden Objective Card".to_string(),
-            ])
-        }
+        HandCard::ObjectiveCard(o) if *o == 0 => HandCardObject::new(
+            card.clone(),
+            OBJECTIVE_CARD_COLOR,
+            "Objective Card",
+            vec!["Hidden Objective Card".to_string()],
+        ),
         HandCard::ObjectiveCard(id) => objective_card_object(rc, *id, selection),
-        HandCard::Wonder(n) if n == &Wonder::Hidden => {
-            HandCardObject::new(card.clone(), WONDER_CARD_COLOR, "Wonder Card", vec![
-                "Hidden Wonder Card".to_string(),
-            ])
-        }
+        HandCard::Wonder(n) if n == &Wonder::Hidden => HandCardObject::new(
+            card.clone(),
+            WONDER_CARD_COLOR,
+            "Wonder Card",
+            vec!["Hidden Wonder Card".to_string()],
+        ),
         HandCard::Wonder(name) => {
             let w = rc.game.cache.get_wonder(*name);
             HandCardObject::new(
@@ -217,7 +220,7 @@ pub(crate) fn wonder_description(rc: &RenderContext, w: &WonderInfo) -> Vec<Stri
     description
 }
 
-fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
+pub(crate) fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
     let a = rc.game.cache.get_action_card(id);
 
     let name = match &a.tactics_card {
@@ -256,14 +259,20 @@ fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
                     .map(|f| format!("{f}"))
                     .join(", ")
             ),
-            format!("Role: {}", match t.role_requirement {
-                None => "Attacker or Defender".to_string(),
-                Some(r) => format!("{r}"),
-            }),
-            format!("Location: {}", match &t.location_requirement {
-                None => "Any".to_string(),
-                Some(l) => format!("{l}"),
-            }),
+            format!(
+                "Role: {}",
+                match t.role_requirement {
+                    None => "Attacker or Defender".to_string(),
+                    Some(r) => format!("{r}"),
+                }
+            ),
+            format!(
+                "Location: {}",
+                match &t.location_requirement {
+                    None => "Any".to_string(),
+                    Some(l) => format!("{l}"),
+                }
+            ),
         ]);
         break_text(&mut description, t.description.as_str());
     }
@@ -275,7 +284,7 @@ fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
     )
 }
 
-fn objective_card_object(
+pub(crate) fn objective_card_object(
     rc: &RenderContext,
     id: u8,
     selection: Option<&SelectionInfo>,

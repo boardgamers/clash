@@ -1,6 +1,7 @@
 use crate::city_ui::add_building_description;
 use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::layout_ui::{button_pressed, top_centered_text};
+use crate::log_ui::break_text;
 use crate::payment_ui::{Payment, payment_dialog};
 use crate::render_context::RenderContext;
 use crate::unit_ui::add_unit_description;
@@ -15,7 +16,6 @@ use server::player::{CostTrigger, Player};
 use server::playing_actions::PlayingAction;
 use server::unit::UnitType;
 use std::ops::Rem;
-use crate::log_ui::break_text;
 
 const COLUMNS: usize = 6;
 
