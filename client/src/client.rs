@@ -24,7 +24,7 @@ use crate::layout_ui::{
 use crate::log_ui::{LogDialog, show_log};
 use crate::map_ui::{draw_map, explore_dialog, show_tile_menu};
 use crate::player_ui::{player_select, show_global_controls, show_top_center, show_top_left};
-use crate::render_context::RenderContext;
+use crate::render_context::{RenderContext, RenderStage};
 use crate::unit_ui::unit_selection_click;
 use crate::{
     cards_ui, custom_phase_ui, dialog_ui, map_ui, move_ui, recruit_unit_ui, status_phase_ui,
@@ -41,7 +41,9 @@ fn render_with_mutable_state(game: &Game, state: &mut State, features: &Features
     }
 
     set_y_zoom(state);
-    render(&state.render_context(game), features)
+    let _ = render(&state.render_context(game, RenderStage::Map), features);
+    let _ = render(&state.render_context(game, RenderStage::UI), features);
+    render(&state.render_context(game, RenderStage::Tooltip), features)
 }
 
 fn set_y_zoom(state: &mut State) {
@@ -56,19 +58,20 @@ fn render(rc: &RenderContext, features: &Features) -> StateUpdate {
     clear_background(WHITE);
 
     let state = &rc.state;
-    let show_map = !state.active_dialog.is_modal();
+    let show_map = !state.active_dialog.is_modal() && rc.stage.is_map();
+    let show_ui = !state.active_dialog.is_modal() && rc.stage.is_ui();
 
     let mut updates = StateUpdates::new();
     if show_map {
         updates.add(rc.with_camera(CameraMode::World, draw_map));
     }
-    if !state.active_dialog.is_modal() {
+    if show_ui {
         show_top_left(rc);
     }
     if show_map {
         show_top_center(rc);
     }
-    if !state.active_dialog.is_modal() {
+    if show_ui {
         updates.add(show_cards(rc));
         updates.add(player_select(rc));
         updates.add(show_global_controls(rc, features));

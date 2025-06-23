@@ -11,11 +11,33 @@ use server::payment::PaymentOptions;
 use server::player::Player;
 use server::playing_actions::PlayingActionType;
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum RenderStage {
+    Map,
+    UI,
+    Tooltip,
+}
+
+impl RenderStage {
+    pub fn is_ui(self) -> bool {
+        self == RenderStage::UI || self == RenderStage::Tooltip
+    }
+
+    pub fn is_map(self) -> bool {
+        self == RenderStage::Map || self == RenderStage::Tooltip
+    }
+
+    pub fn is_tooltip(self) -> bool {
+        self == RenderStage::Tooltip
+    }
+}
+
 pub struct RenderContext<'a> {
     pub game: &'a Game,
     pub state: &'a State,
     pub shown_player: &'a Player, // the player that is being shown
     pub camera_mode: CameraMode,
+    pub stage: RenderStage,
 }
 
 impl RenderContext<'_> {
@@ -33,6 +55,7 @@ impl RenderContext<'_> {
             state: self.state,
             shown_player: self.shown_player,
             camera_mode: mode,
+            stage: self.stage,
         };
         next.set_camera();
         let update = f(&next);

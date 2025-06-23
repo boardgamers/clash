@@ -14,7 +14,7 @@ use crate::map_ui::ExploreResolutionConfig;
 use crate::move_ui::{MoveIntent, MovePayment, MoveSelection};
 use crate::payment_ui::{Payment, new_gain};
 use crate::recruit_unit_ui::{RecruitAmount, RecruitSelection};
-use crate::render_context::RenderContext;
+use crate::render_context::{RenderContext, RenderStage};
 use crate::status_phase_ui::ChooseAdditionalAdvances;
 use macroquad::prelude::*;
 use server::action::Action;
@@ -425,12 +425,13 @@ impl State {
     }
 
     #[must_use]
-    pub fn render_context<'a>(&'a self, game: &'a Game) -> RenderContext<'a> {
+    pub fn render_context<'a>(&'a self, game: &'a Game, stage: RenderStage) -> RenderContext<'a> {
         RenderContext {
             shown_player: game.player(self.show_player),
             game,
             state: self,
             camera_mode: CameraMode::Screen,
+            stage
         }
     }
 
