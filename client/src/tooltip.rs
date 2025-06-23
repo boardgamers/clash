@@ -1,4 +1,4 @@
-use crate::client_state::{CameraMode, MousePosition, NO_UPDATE, State};
+use crate::client_state::{MousePosition, State};
 use crate::log_ui::break_text;
 use crate::render_context::RenderContext;
 use macroquad::color::{Color, GRAY};
@@ -35,7 +35,6 @@ pub(crate) fn show_tooltip_for_rect(
     right_offset: f32,
 ) {
     let origin = rect.point();
-    let screen_origin = rc.world_to_screen(rect.point());
     if is_rect_tooltip_active(rc, rect) {
         draw_rectangle(
             origin.x,
@@ -44,10 +43,7 @@ pub(crate) fn show_tooltip_for_rect(
             rect.size().y,
             Color::new(0.0, 0.0, 0.0, 0.5),
         );
-        let _ = rc.with_camera(CameraMode::Screen, |rc| {
-            show_tooltip_text(rc, tooltip, screen_origin, right_offset);
-            NO_UPDATE
-        });
+        show_tooltip_text(rc, tooltip, rect.point(), right_offset);
     }
 }
 
@@ -68,15 +64,7 @@ pub(crate) fn show_tooltip_for_circle(
 ) {
     if is_circle_tooltip_active(rc, center, radius) {
         draw_circle(center.x, center.y, radius, Color::new(0.0, 0.0, 0.0, 0.5));
-        let _ = rc.with_camera(CameraMode::Screen, |rc| {
-            show_tooltip_text(
-                rc,
-                tooltip,
-                rc.world_to_screen(center) + vec2(radius, radius),
-                50.,
-            );
-            NO_UPDATE
-        });
+        show_tooltip_text(rc, tooltip, center + vec2(radius, radius), 50.);
     }
 }
 

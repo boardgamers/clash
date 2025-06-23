@@ -32,8 +32,6 @@ pub(crate) enum InfoSelect {
 }
 
 pub(crate) fn show_info_dialog(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
-    let p = rc.shown_player;
-
     draw_button(
         rc,
         "Civilizations",

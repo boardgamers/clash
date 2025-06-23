@@ -75,14 +75,6 @@ impl RenderContext<'_> {
     }
 
     #[must_use]
-    pub(crate) fn world_to_screen(&self, point: Vec2) -> Vec2 {
-        match self.camera_mode {
-            CameraMode::Screen => point,
-            CameraMode::World => self.state.camera.world_to_screen(point),
-        }
-    }
-
-    #[must_use]
     pub(crate) fn screen_to_world(&self, point: Vec2) -> Vec2 {
         match self.camera_mode {
             CameraMode::Screen => point,
