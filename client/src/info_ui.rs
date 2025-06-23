@@ -9,6 +9,7 @@ use server::content::civilizations;
 use server::game::Game;
 use server::wonder::{Wonder, WonderInfo};
 use std::ops::Mul;
+use itertools::Itertools;
 use crate::cards_ui::wonder_description;
 
 #[derive(Clone, Debug)]
@@ -23,7 +24,7 @@ impl InfoDialog {
         InfoDialog {
             select: InfoCategory::Civilization,
             civilization,
-            wonder: Wonder::GreatWall,
+            wonder: Wonder::Colosseum,
         }
     }
 }
@@ -94,6 +95,7 @@ fn show_civilizations(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
     for (i, c) in civilizations::get_all_uncached()
         .iter()
         .filter(|c| c.is_human())
+        .sorted_by_key(|c| c.name.clone())
         .enumerate()
     {
         let selected = c.name == d.civilization;
@@ -133,7 +135,7 @@ fn show_civilization(rc: &RenderContext, c: &Civilization) {
     }
 }
 
-fn show_category_items<T: Clone, K: PartialEq + Clone>(
+fn show_category_items<T: Clone, K: PartialEq + Ord + Clone>(
     rc: &RenderContext,
     d: &InfoDialog,
     get_all: impl Fn(&Game) -> &Vec<T>,
@@ -143,7 +145,9 @@ fn show_category_items<T: Clone, K: PartialEq + Clone>(
     get_selected: impl Fn(&InfoDialog) -> &K,
     set_selected: impl Fn(&mut InfoDialog, K),
 ) -> RenderResult {
-    for (i, info) in get_all(rc.game).iter().enumerate() {
+    for (i, info) in get_all(rc.game).iter()
+        .sorted_by_key(|info| get_key(info))
+        .enumerate() {
         let selected = get_key(info) == get_selected(d);
         let name = name(info);
         if draw_button(rc, &name, vec2(i as f32, 1.), &description(info), selected) {
