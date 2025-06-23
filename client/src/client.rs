@@ -8,9 +8,7 @@ use server::position::Position;
 
 use crate::advance_ui::{pay_advance_dialog, show_paid_advance_menu};
 use crate::cards_ui::show_cards;
-use crate::client_state::{
-    ActiveDialog, CameraMode, DialogChooser, State, StateUpdate, StateUpdates,
-};
+use crate::client_state::{ActiveDialog, CameraMode, DialogChooser, RenderResult, State, StateUpdate,  NO_UPDATE};
 use crate::collect_ui::collect_dialog;
 use crate::construct_ui::pay_construction_dialog;
 use crate::event_ui::{custom_phase_event_origin, event_help};
@@ -31,7 +29,7 @@ use crate::{
     tooltip,
 };
 
-fn render_with_mutable_state(game: &Game, state: &mut State, features: &Features) -> StateUpdate {
+fn render_with_mutable_state(game: &Game, state: &mut State, features: &Features) -> RenderResult {
     tooltip::update(state);
     if !state.active_dialog.is_modal() {
         map_ui::pan_and_zoom(state);
@@ -41,8 +39,10 @@ fn render_with_mutable_state(game: &Game, state: &mut State, features: &Features
     }
 
     set_y_zoom(state);
-    let _ = render(&state.render_context(game, RenderStage::Map), features);
-    let _ = render(&state.render_context(game, RenderStage::UI), features);
+    let _ = render(&state.render_context(game, RenderStage::Map), features)
+        .expect("all updates should be in Tooltip stage");
+    let _ = render(&state.render_context(game, RenderStage::UI), features)
+        .expect("all updates should be in Tooltip stage");
     render(&state.render_context(game, RenderStage::Tooltip), features)
 }
 
@@ -54,16 +54,15 @@ fn set_y_zoom(state: &mut State) {
     state.camera.zoom.y = state.camera.zoom.x * w / h;
 }
 
-fn render(rc: &RenderContext, features: &Features) -> StateUpdate {
+fn render(rc: &RenderContext, features: &Features) -> RenderResult {
     clear_background(WHITE);
 
     let state = &rc.state;
     let show_map = !state.active_dialog.is_modal() && rc.stage.is_map();
     let show_ui = !state.active_dialog.is_modal() && rc.stage.is_ui();
 
-    let mut updates = StateUpdates::new();
     if show_map {
-        updates.add(rc.with_camera(CameraMode::World, draw_map));
+        rc.with_camera(CameraMode::World, draw_map)?;
     }
     if show_ui {
         show_top_left(rc);
@@ -72,9 +71,9 @@ fn render(rc: &RenderContext, features: &Features) -> StateUpdate {
         show_top_center(rc);
     }
     if show_ui {
-        updates.add(show_cards(rc));
-        updates.add(player_select(rc));
-        updates.add(show_global_controls(rc, features));
+        show_cards(rc)?;
+        player_select(rc)?;
+        show_global_controls(rc, features)?;
     }
 
     if top_right_texture(rc, &rc.assets().log, icon_pos(-1, 0), "Show log") {
@@ -111,21 +110,21 @@ fn render(rc: &RenderContext, features: &Features) -> StateUpdate {
     let can_control = rc.can_control_shown_player();
     if can_control {
         if let Some(u) = &state.pending_update {
-            updates.add(dialog_ui::show_pending_update(u, rc));
+            dialog_ui::show_pending_update(u, rc)?;
         }
     }
 
     if can_control || state.active_dialog.show_for_other_player() {
-        updates.add(render_active_dialog(rc));
+        render_active_dialog(rc)?;
     }
 
     if let Some(pos) = state.focused_tile {
         if matches!(state.active_dialog, ActiveDialog::None) {
-            updates.add(show_tile_menu(rc, pos));
+            show_tile_menu(rc, pos)?;
         }
     }
-    updates.add(rc.with_camera(CameraMode::World, try_click));
-    updates.result()
+    rc.with_camera(CameraMode::World, try_click)?;
+    NO_UPDATE
 }
 
 pub async fn init(features: &Features) -> State {
@@ -148,14 +147,16 @@ pub fn render_and_update(
         }
     }
 
-    let update = render_with_mutable_state(game, state, features);
-    state.update(game, update)
+    match render_with_mutable_state(game, state, features) {
+        Err(u) => state.update(game, u),
+        Ok(_) => GameSyncRequest::None,
+    }
 }
 
-fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
+fn render_active_dialog(rc: &RenderContext) -> RenderResult {
     let state = rc.state;
     match &state.active_dialog {
-        ActiveDialog::None | ActiveDialog::WaitingForUpdate => StateUpdate::None,
+        ActiveDialog::None | ActiveDialog::WaitingForUpdate => NO_UPDATE,
         ActiveDialog::DialogChooser(d) => dialog_chooser(rc, d),
         ActiveDialog::Log(d) => show_log(rc, d),
         ActiveDialog::Info(d) => show_info_dialog(rc, d),
@@ -196,14 +197,10 @@ fn render_active_dialog(rc: &RenderContext) -> StateUpdate {
     }
 }
 
-fn dialog_chooser(rc: &RenderContext, c: &DialogChooser) -> StateUpdate {
+fn dialog_chooser(rc: &RenderContext, c: &DialogChooser) -> RenderResult {
     let h = -50.;
-    bottom_centered_text_with_offset(
-        rc,
-        &c.title,
-        vec2(0., c.options.len() as f32 * h + 50.),
-        &[],
-    );
+    bottom_centered_text_with_offset(rc, &c.title, vec2(0., c.options.len() as f32 * h + 50.), &[
+    ]);
 
     for (i, (origin, d)) in c.options.iter().enumerate() {
         let offset = vec2(0., i as f32 * h + 35.);
@@ -220,37 +217,34 @@ fn dialog_chooser(rc: &RenderContext, c: &DialogChooser) -> StateUpdate {
             bottom_center_anchor(rc) + offset + vec2(100., -70.),
             ICON_SIZE,
         ) {
-            return StateUpdate::OpenDialog(d.clone());
+            return StateUpdate::of(StateUpdate::OpenDialog(d.clone()));
         }
     }
-    StateUpdate::None
+    NO_UPDATE
 }
 
-pub fn try_click(rc: &RenderContext) -> StateUpdate {
+pub fn try_click(rc: &RenderContext) -> RenderResult {
     let game = rc.game;
     let mouse_pos = rc.mouse_pos();
     let pos = Position::from_coordinate(pixel_to_coordinate(mouse_pos));
 
     if !game.map.tiles.contains_key(&pos) {
-        return StateUpdate::None;
+        return NO_UPDATE;
     }
 
     if !is_mouse_button_pressed(MouseButton::Left) {
-        return StateUpdate::None;
+        return NO_UPDATE;
     }
 
     if rc.can_control_shown_player() {
-        let update = controlling_player_click(rc, mouse_pos, pos);
-        if !matches!(update, StateUpdate::None) {
-            return update;
-        }
+controlling_player_click(rc, mouse_pos, pos)?;
     }
     StateUpdate::SetFocusedTile(pos)
 }
 
-fn controlling_player_click(rc: &RenderContext, mouse_pos: Vec2, pos: Position) -> StateUpdate {
+fn controlling_player_click(rc: &RenderContext, mouse_pos: Vec2, pos: Position) -> RenderResult {
     match &rc.state.active_dialog {
-        ActiveDialog::CollectResources(_) => StateUpdate::None,
+        ActiveDialog::CollectResources(_) => NO_UPDATE,
         ActiveDialog::MoveUnits(s) => move_ui::click(rc, pos, s, mouse_pos),
         ActiveDialog::ReplaceUnits(s) => unit_selection_click(rc, pos, mouse_pos, s, |new| {
             StateUpdate::OpenDialog(ActiveDialog::ReplaceUnits(new.clone()))

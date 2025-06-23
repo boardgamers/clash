@@ -25,13 +25,13 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
     draw: impl Fn(&O, Vec2),
     draw_tooltip: impl Fn(&O, Vec2),
     is_valid: impl FnOnce() -> OkTooltip,
-    execute_action: impl FnOnce() -> StateUpdate,
+    execute_action: impl FnOnce() -> RenderResult,
     show: impl Fn(&C, &O) -> bool,
-    plus: impl FnOnce(&C, &O) -> StateUpdate,
-    minus: impl FnOnce(&C, &O) -> StateUpdate,
+    plus: impl FnOnce(&C, &O) -> RenderResult,
+    minus: impl FnOnce(&C, &O) -> RenderResult,
     offset: Vec2,
     may_cancel: bool,
-) -> StateUpdate {
+) -> RenderResult {
     let objects = get_objects(container)
         .into_iter()
         .filter(|o| show(container, o))
@@ -86,7 +86,7 @@ pub fn count_dialog<C, O: HasCountSelectableObject>(
         return StateUpdate::Cancel;
     }
 
-    StateUpdate::None
+    NO_UPDATE
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]

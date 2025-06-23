@@ -257,8 +257,8 @@ pub fn unit_selection_click<T: UnitSelection + Clone>(
     pos: Position,
     mouse_pos: Vec2,
     sel: &T,
-    on_change: impl Fn(T) -> StateUpdate,
-) -> StateUpdate {
+    on_change: impl Fn(T) -> RenderResult,
+) -> RenderResult {
     let p = rc.game.player(sel.player_index());
     if let Some(unit_id) = click_unit(rc, pos, mouse_pos, p, true) {
         if sel.can_select(rc.game, p.get_unit(unit_id)) {
@@ -267,7 +267,7 @@ pub fn unit_selection_click<T: UnitSelection + Clone>(
             return on_change(new);
         }
     }
-    StateUpdate::None
+    NO_UPDATE
 }
 
 pub fn units_on_tile(game: &Game, pos: Position) -> impl Iterator<Item = (usize, Unit)> + '_ {

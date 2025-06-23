@@ -48,8 +48,8 @@ impl RenderContext<'_> {
     pub fn with_camera(
         &self,
         mode: CameraMode,
-        f: impl FnOnce(&RenderContext) -> StateUpdate + Sized,
-    ) -> StateUpdate {
+        f: impl FnOnce(&RenderContext) -> RenderResult + Sized,
+    ) -> RenderResult {
         let next = RenderContext {
             game: self.game,
             state: self.state,

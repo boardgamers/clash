@@ -55,7 +55,7 @@ impl SelectionInfo {
     }
 }
 
-pub(crate) fn show_cards(rc: &RenderContext) -> StateUpdate {
+pub(crate) fn show_cards(rc: &RenderContext) -> RenderResult {
     let p = rc.shown_player;
     let cards = hand_cards(p, &HandCardType::get_all());
     let size = vec2(180., 30.);
@@ -86,7 +86,7 @@ pub(crate) fn show_cards(rc: &RenderContext) -> StateUpdate {
     if let Some(value) = draw_cards(rc, &swap_cards, selection.as_ref(), size, -310.) {
         return value;
     }
-    StateUpdate::None
+    NO_UPDATE
 }
 
 fn draw_cards(
@@ -159,7 +159,7 @@ fn can_play_card(rc: &RenderContext, card: &HandCard) -> bool {
     }
 }
 
-fn play_card(rc: &RenderContext, card: &HandCard) -> StateUpdate {
+fn play_card(rc: &RenderContext, card: &HandCard) -> RenderResult {
     match card {
         HandCard::ActionCard(a) => StateUpdate::execute_with_confirm(
             vec![format!(
@@ -330,7 +330,7 @@ fn objective_card_object(
     )
 }
 
-pub fn select_cards_dialog(rc: &RenderContext, s: &MultiSelection<HandCard>) -> StateUpdate {
+pub fn select_cards_dialog(rc: &RenderContext, s: &MultiSelection<HandCard>) -> RenderResult {
     bottom_centered_text(
         rc,
         format!(
@@ -352,6 +352,6 @@ pub fn select_cards_dialog(rc: &RenderContext, s: &MultiSelection<HandCard>) -> 
     ) {
         StateUpdate::response(EventResponse::SelectHandCards(s.selected.clone()))
     } else {
-        StateUpdate::None
+        NO_UPDATE
     }
 }

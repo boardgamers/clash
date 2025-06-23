@@ -26,7 +26,7 @@ use server::unit::{Unit, validate_units_selection};
 pub fn custom_phase_payment_dialog(
     rc: &RenderContext,
     payments: &[Payment<String>],
-) -> StateUpdate {
+) -> RenderResult {
     let update = multi_payment_dialog(
         rc,
         payments,
@@ -42,7 +42,7 @@ pub fn custom_phase_payment_dialog(
     update
 }
 
-pub fn payment_reward_dialog(rc: &RenderContext, payment: &Payment<String>) -> StateUpdate {
+pub fn payment_reward_dialog(rc: &RenderContext, payment: &Payment<String>) -> RenderResult {
     payment_dialog(
         rc,
         payment,
@@ -52,7 +52,7 @@ pub fn payment_reward_dialog(rc: &RenderContext, payment: &Payment<String>) -> S
     )
 }
 
-pub fn advance_reward_dialog(rc: &RenderContext, r: &AdvanceRequest, name: &str) -> StateUpdate {
+pub fn advance_reward_dialog(rc: &RenderContext, r: &AdvanceRequest, name: &str) -> RenderResult {
     let possible = &r.choices;
     show_advance_menu(
         rc,
@@ -75,7 +75,7 @@ pub fn advance_reward_dialog(rc: &RenderContext, r: &AdvanceRequest, name: &str)
     )
 }
 
-pub fn unit_request_dialog(rc: &RenderContext, r: &UnitTypeRequest) -> StateUpdate {
+pub fn unit_request_dialog(rc: &RenderContext, r: &UnitTypeRequest) -> RenderResult {
     bottom_centered_text(rc, &r.description);
 
     let c = &r.choices;
@@ -98,7 +98,7 @@ pub fn unit_request_dialog(rc: &RenderContext, r: &UnitTypeRequest) -> StateUpda
             }
         }
     }
-    StateUpdate::None
+    NO_UPDATE
 }
 
 #[derive(Clone)]
@@ -130,7 +130,7 @@ impl UnitSelection for UnitsSelection {
     }
 }
 
-pub fn select_units_dialog(rc: &RenderContext, s: &UnitsSelection) -> StateUpdate {
+pub fn select_units_dialog(rc: &RenderContext, s: &UnitsSelection) -> RenderResult {
     let selected = &s.selection.selected;
     bottom_centered_text(
         rc,
@@ -153,7 +153,7 @@ pub fn select_units_dialog(rc: &RenderContext, s: &UnitsSelection) -> StateUpdat
     ) {
         StateUpdate::response(EventResponse::SelectUnits(selected.clone()))
     } else {
-        StateUpdate::None
+        NO_UPDATE
     }
 }
 
@@ -240,7 +240,7 @@ pub fn select_structures_dialog(
     rc: &RenderContext,
     d: Option<&BaseOrCustomDialog>,
     s: &MultiSelection<SelectedStructureInfo>,
-) -> StateUpdate {
+) -> RenderResult {
     bottom_centered_text(
         rc,
         format!(
@@ -275,7 +275,7 @@ pub fn select_structures_dialog(
             StateUpdate::response(EventResponse::SelectStructures(sel))
         }
     } else {
-        StateUpdate::None
+        NO_UPDATE
     }
 }
 
@@ -295,7 +295,7 @@ pub(crate) fn multi_select_tooltip<T: Clone + PartialEq + Ord>(
     }
 }
 
-pub fn bool_request_dialog(rc: &RenderContext, description: &str) -> StateUpdate {
+pub fn bool_request_dialog(rc: &RenderContext, description: &str) -> RenderResult {
     bottom_centered_text(rc, description);
     if ok_button(rc, OkTooltip::Valid("OK".to_string())) {
         return bool_answer(true);
@@ -303,14 +303,14 @@ pub fn bool_request_dialog(rc: &RenderContext, description: &str) -> StateUpdate
     if cancel_button_with_tooltip(rc, "Decline") {
         return bool_answer(false);
     }
-    StateUpdate::None
+    NO_UPDATE
 }
 
-fn bool_answer(answer: bool) -> StateUpdate {
+fn bool_answer(answer: bool) -> RenderResult {
     StateUpdate::Execute(Action::Response(EventResponse::Bool(answer)))
 }
 
-pub fn player_request_dialog(rc: &RenderContext, r: &PlayerRequest) -> StateUpdate {
+pub fn player_request_dialog(rc: &RenderContext, r: &PlayerRequest) -> RenderResult {
     choose_player_dialog(rc, &r.choices, |p| {
         Action::Response(EventResponse::SelectPlayer(p))
     })
@@ -319,7 +319,7 @@ pub fn player_request_dialog(rc: &RenderContext, r: &PlayerRequest) -> StateUpda
 pub(crate) fn position_request_dialog(
     rc: &RenderContext,
     s: &MultiSelection<Position>,
-) -> StateUpdate {
+) -> RenderResult {
     bottom_centered_text(
         rc,
         format!("{}: {} selected", s.request.description, s.selected.len()).as_str(),
@@ -327,6 +327,6 @@ pub(crate) fn position_request_dialog(
     if ok_button(rc, multi_select_tooltip(s, s.is_valid(), "positions")) {
         StateUpdate::response(EventResponse::SelectPositions(s.selected.clone()))
     } else {
-        StateUpdate::None
+        NO_UPDATE
     }
 }

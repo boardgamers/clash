@@ -25,7 +25,7 @@ impl ChooseAdditionalAdvances {
     }
 }
 
-pub fn change_government_type_dialog(rc: &RenderContext) -> StateUpdate {
+pub fn change_government_type_dialog(rc: &RenderContext) -> RenderResult {
     show_advance_menu(
         rc,
         "Change government",
@@ -75,7 +75,7 @@ pub fn change_government_type_dialog(rc: &RenderContext) -> StateUpdate {
 pub fn choose_additional_advances_dialog(
     rc: &RenderContext,
     choose: &ChooseAdditionalAdvances,
-) -> StateUpdate {
+) -> RenderResult {
     let t = if choose.selected.len() == choose.needed {
         OkTooltip::Valid("Change government type".to_string())
     } else {

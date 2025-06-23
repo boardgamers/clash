@@ -1,7 +1,7 @@
 use crate::action_buttons::action_buttons;
 use crate::city_ui::city_labels;
 use crate::client::Features;
-use crate::client_state::StateUpdate;
+use crate::client_state::{RenderResult, StateUpdate, NO_UPDATE};
 use crate::dialog_ui::{OkTooltip, ok_button};
 use crate::layout_ui::{
     ICON_SIZE, bottom_center_texture, bottom_centered_text, bottom_right_texture, button_pressed,
@@ -30,7 +30,7 @@ use server::resource::ResourceType;
 use server::status_phase::get_status_phase;
 use server::victory_points::victory_points_parts;
 
-pub fn player_select(rc: &RenderContext) -> StateUpdate {
+pub fn player_select(rc: &RenderContext) -> RenderResult {
     let game = rc.game;
     let players = game.human_players(game.starting_player_index);
 
@@ -80,7 +80,7 @@ pub fn player_select(rc: &RenderContext) -> StateUpdate {
         y += size;
     }
 
-    StateUpdate::None
+    NO_UPDATE
 }
 
 pub fn top_icon_with_label(
@@ -318,7 +318,7 @@ pub fn get_combat(game: &Game) -> Option<&CombatStats> {
     })
 }
 
-pub fn show_global_controls(rc: &RenderContext, features: &Features) -> StateUpdate {
+pub fn show_global_controls(rc: &RenderContext, features: &Features) -> RenderResult {
     let assets = rc.assets();
     let can_control = rc.can_control_shown_player();
     if can_control {
@@ -336,10 +336,7 @@ pub fn show_global_controls(rc: &RenderContext, features: &Features) -> StateUpd
         }
 
         if can_control {
-            let update = action_buttons(rc);
-            if !matches!(update, StateUpdate::None) {
-                return update;
-            }
+            action_buttons(rc)?;
         }
     }
 
@@ -369,7 +366,7 @@ pub fn show_global_controls(rc: &RenderContext, features: &Features) -> StateUpd
         }
     }
 
-    StateUpdate::None
+    NO_UPDATE
 }
 
 fn can_end_move(game: &Game) -> Option<&str> {
@@ -383,7 +380,7 @@ fn can_end_move(game: &Game) -> Option<&str> {
     }
 }
 
-fn end_move(game: &Game) -> StateUpdate {
+fn end_move(game: &Game) -> RenderResult {
     if let GameState::Movement(m) = &game.state {
         let movement_actions_left = m.movement_actions_left;
         return StateUpdate::execute_with_warning(
@@ -411,7 +408,7 @@ pub fn choose_player_dialog(
     rc: &RenderContext,
     choices: &[usize],
     execute: impl Fn(usize) -> Action,
-) -> StateUpdate {
+) -> RenderResult {
     let player = rc.shown_player.index;
     if rc.can_control_active_player() && choices.contains(&player) {
         bottom_centered_text(rc, &format!("Select {}", rc.shown_player.get_name()));
@@ -419,5 +416,5 @@ pub fn choose_player_dialog(
             return StateUpdate::execute(execute(player));
         }
     }
-    StateUpdate::None
+    NO_UPDATE
 }

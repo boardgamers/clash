@@ -57,7 +57,7 @@ pub fn terrain_name(t: &Terrain) -> &'static str {
     }
 }
 
-pub fn draw_map(rc: &RenderContext) -> StateUpdate {
+pub fn draw_map(rc: &RenderContext) -> RenderResult {
     let game = rc.game;
     let overlay_terrain = get_overlay(rc);
     for (pos, t) in &game.map.tiles {
@@ -83,10 +83,7 @@ pub fn draw_map(rc: &RenderContext) -> StateUpdate {
             &features,
             rc,
         );
-        let update = collect_ui::draw_resource_collect_tile(rc, *pos);
-        if !matches!(update, StateUpdate::None) {
-            return update;
-        }
+        collect_ui::draw_resource_collect_tile(rc, *pos)?;
     }
     // get from current event
     if let Some(c) = get_combat(game) {
@@ -104,7 +101,7 @@ pub fn draw_map(rc: &RenderContext) -> StateUpdate {
         unit_ui::draw_units(rc, false);
         unit_ui::draw_units(rc, true);
     }
-    StateUpdate::None
+    NO_UPDATE
 }
 
 fn get_overlay(rc: &RenderContext) -> HashMap<Position, Terrain> {
@@ -224,7 +221,7 @@ fn highlight_if(b: bool) -> Color {
     alpha_overlay(if b { 0.5 } else { 0. })
 }
 
-pub fn show_tile_menu(rc: &RenderContext, pos: Position) -> StateUpdate {
+pub fn show_tile_menu(rc: &RenderContext, pos: Position) -> RenderResult {
     if let Some(city) = rc.game.try_get_any_city(pos) {
         if rc.can_control_shown_player() && rc.shown_player.index == city.player_index {
             return show_city_menu(rc, city);
@@ -288,7 +285,7 @@ pub fn move_units_buttons<'a>(rc: &'a RenderContext, pos: Position) -> Vec<IconA
     res
 }
 
-pub fn show_map_action_buttons(rc: &RenderContext, icons: &IconActionVec) -> StateUpdate {
+pub fn show_map_action_buttons(rc: &RenderContext, icons: &IconActionVec) -> RenderResult {
     for pass in 0..2 {
         for (i, icon) in icons.iter().enumerate() {
             let p = icon_pos(-(icons.len() as i8) / 2 + i as i8, -1);
@@ -306,10 +303,10 @@ pub fn show_map_action_buttons(rc: &RenderContext, icons: &IconActionVec) -> Sta
             }
         }
     }
-    StateUpdate::None
+    NO_UPDATE
 }
 
-pub fn explore_dialog(rc: &RenderContext, r: &ExploreResolutionConfig) -> StateUpdate {
+pub fn explore_dialog(rc: &RenderContext, r: &ExploreResolutionConfig) -> RenderResult {
     if ok_button(
         rc,
         OkTooltip::Valid("Accept current tile rotation".to_string()),
@@ -329,5 +326,5 @@ pub fn explore_dialog(rc: &RenderContext, r: &ExploreResolutionConfig) -> StateU
         return StateUpdate::OpenDialog(ActiveDialog::ExploreResolution(new));
     }
 
-    StateUpdate::None
+    NO_UPDATE
 }

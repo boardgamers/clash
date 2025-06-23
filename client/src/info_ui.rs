@@ -31,7 +31,7 @@ pub enum InfoSelect {
     // Incident(String),
 }
 
-pub fn show_info_dialog(rc: &RenderContext, d: &InfoDialog) -> StateUpdate {
+pub fn show_info_dialog(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
     let p = rc.shown_player;
 
     draw_button(
@@ -60,7 +60,7 @@ pub fn show_info_dialog(rc: &RenderContext, d: &InfoDialog) -> StateUpdate {
         }
     }
 
-    StateUpdate::None
+    NO_UPDATE
 }
 
 fn show_civilization(rc: &RenderContext, c: &Civilization) {

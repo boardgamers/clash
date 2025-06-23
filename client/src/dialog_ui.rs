@@ -16,7 +16,7 @@ pub struct BaseOrCustomDialog {
     pub action_type: PlayingActionType,
 }
 
-pub fn show_pending_update(update: &PendingUpdate, rc: &RenderContext) -> StateUpdate {
+pub fn show_pending_update(update: &PendingUpdate, rc: &RenderContext) -> RenderResult {
     let state = &rc.state;
     let t = if update.warning.is_empty() {
         if state.active_dialog.is_modal() {
@@ -35,7 +35,7 @@ pub fn show_pending_update(update: &PendingUpdate, rc: &RenderContext) -> StateU
     if cancel_button(rc) {
         return StateUpdate::ResolvePendingUpdate(false);
     }
-    StateUpdate::None
+    NO_UPDATE
 }
 
 #[must_use]

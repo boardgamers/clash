@@ -35,7 +35,7 @@ pub struct IconAction<'a> {
     pub texture: &'a Texture2D,
     pub tooltip: Vec<String>,
     pub warning: bool,
-    pub action: Box<dyn Fn() -> StateUpdate + 'a>,
+    pub action: Box<dyn Fn() -> RenderResult + 'a>,
 }
 
 impl<'a> IconAction<'a> {
@@ -43,7 +43,7 @@ impl<'a> IconAction<'a> {
     pub fn new(
         texture: &'a Texture2D,
         tooltip: Vec<String>,
-        action: Box<dyn Fn() -> StateUpdate + 'a>,
+        action: Box<dyn Fn() -> RenderResult + 'a>,
     ) -> IconAction<'a> {
         IconAction {
             texture,
@@ -61,7 +61,7 @@ impl<'a> IconAction<'a> {
 
 pub type IconActionVec<'a> = Vec<IconAction<'a>>;
 
-pub fn show_city_menu<'a>(rc: &'a RenderContext, city: &'a City) -> StateUpdate {
+pub fn show_city_menu<'a>(rc: &'a RenderContext, city: &'a City) -> RenderResult {
     let base_icons: IconActionVec<'a> = vec![
         increase_happiness_button(rc, city),
         collect_resources_button(rc, city),
@@ -161,7 +161,7 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
                 &rc.assets().buildings[&b],
                 tooltip,
                 Box::new(move || {
-                    can.clone().map_or(StateUpdate::None, |cost_info| {
+                    can.clone().map_or(NO_UPDATE, |cost_info| {
                         StateUpdate::OpenDialog(ActiveDialog::ConstructionPayment(
                             ConstructionPayment::new(
                                 rc,

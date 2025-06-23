@@ -44,7 +44,7 @@ pub fn show_tooltip_for_rect(
         );
         let _ = rc.with_camera(CameraMode::Screen, |rc| {
             show_tooltip_text(rc, tooltip, screen_origin, right_offset);
-            StateUpdate::None
+            NO_UPDATE
         });
     }
 }
@@ -62,7 +62,7 @@ pub fn show_tooltip_for_circle(rc: &RenderContext, tooltip: &[String], center: V
         draw_circle(center.x, center.y, radius, Color::new(0.0, 0.0, 0.0, 0.5));
         let _ = rc.with_camera(CameraMode::Screen, |rc| {
             show_tooltip_text(rc, tooltip, screen_center + vec2(radius, radius), 50.);
-            StateUpdate::None
+            NO_UPDATE
         });
     }
 }

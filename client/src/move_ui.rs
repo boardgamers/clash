@@ -56,7 +56,7 @@ impl MoveIntent {
     }
 }
 
-pub fn click(rc: &RenderContext, pos: Position, s: &MoveSelection, mouse_pos: Vec2) -> StateUpdate {
+pub fn click(rc: &RenderContext, pos: Position, s: &MoveSelection, mouse_pos: Vec2) -> RenderResult {
     let game = rc.game;
     let p = game.player(s.player_index);
     let carrier = click_unit(rc, pos, mouse_pos, p, false);
@@ -92,7 +92,7 @@ pub fn click(rc: &RenderContext, pos: Position, s: &MoveSelection, mouse_pos: Ve
         _ => {
             if s.start.is_some_and(|p| p != pos) {
                 // first need to deselect units
-                StateUpdate::None
+                NO_UPDATE
             } else {
                 click_unit(rc, pos, mouse_pos, p, true).map_or_else(
                     || tile_clicked(pos, s, game, p),
@@ -109,7 +109,7 @@ fn unit_clicked(
     game: &Game,
     p: &Player,
     unit_id: u32,
-) -> StateUpdate {
+) -> RenderResult {
     let mut new = s.clone();
     new.start = Some(pos);
     let is_transported = p.get_unit(unit_id).is_transported();
@@ -122,18 +122,18 @@ fn unit_clicked(
     unit_selection_changed(pos, game, new)
 }
 
-fn tile_clicked(pos: Position, s: &MoveSelection, game: &Game, p: &Player) -> StateUpdate {
+fn tile_clicked(pos: Position, s: &MoveSelection, game: &Game, p: &Player) -> RenderResult {
     let mut new = s.clone();
     new.start = Some(pos);
     if new.units.is_empty() {
         new.units = movable_units(pos, game, p, |u| !u.is_transported());
         unit_selection_changed(pos, game, new)
     } else {
-        StateUpdate::None
+        NO_UPDATE
     }
 }
 
-fn unit_selection_changed(pos: Position, game: &Game, mut new: MoveSelection) -> StateUpdate {
+fn unit_selection_changed(pos: Position, game: &Game, mut new: MoveSelection) -> RenderResult {
     if new.units.is_empty() {
         new.destinations.list.clear();
         new.start = None;
@@ -225,16 +225,16 @@ impl MoveSelection {
     }
 }
 
-pub(crate) fn move_units_dialog(rc: &RenderContext) -> StateUpdate {
+pub(crate) fn move_units_dialog(rc: &RenderContext) -> RenderResult {
     if matches!(rc.game.state, GameState::Playing)
         && cancel_button_with_tooltip(rc, "Back to playing actions")
     {
         return StateUpdate::CloseDialog;
     }
-    StateUpdate::None
+    NO_UPDATE
 }
 
-pub(crate) fn move_payment_dialog(rc: &RenderContext, mp: &MovePayment) -> StateUpdate {
+pub(crate) fn move_payment_dialog(rc: &RenderContext, mp: &MovePayment) -> RenderResult {
     payment_dialog(
         rc,
         &mp.payment.clone(),

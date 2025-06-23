@@ -16,7 +16,7 @@ use server::happiness::available_happiness_actions;
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::resource::ResourceType;
 
-pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
+pub fn action_buttons(rc: &RenderContext) -> RenderResult {
     let assets = rc.assets();
     let game = rc.game;
 
@@ -87,7 +87,7 @@ pub fn action_buttons(rc: &RenderContext) -> StateUpdate {
             return (icon.action)();
         }
     }
-    StateUpdate::None
+    NO_UPDATE
 }
 
 pub fn custom_action_buttons<'a>(
@@ -109,7 +109,7 @@ pub fn custom_action_buttons<'a>(
         .collect()
 }
 
-fn global_move(rc: &RenderContext) -> StateUpdate {
+fn global_move(rc: &RenderContext) -> RenderResult {
     let pos = rc.state.focused_tile;
     StateUpdate::move_units(
         rc,
@@ -148,7 +148,7 @@ pub fn base_or_custom_action(
     action_types: &[PlayingActionType],
     title: &str,
     execute: impl Fn(BaseOrCustomDialog) -> ActiveDialog,
-) -> StateUpdate {
+) -> RenderResult {
     StateUpdate::dialog_chooser(
         &format!("Choose action: {title}"),
         action_types

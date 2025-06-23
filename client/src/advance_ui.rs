@@ -1,5 +1,5 @@
 use crate::city_ui::add_building_description;
-use crate::client_state::{ActiveDialog, StateUpdate};
+use crate::client_state::{ActiveDialog, RenderResult, StateUpdate};
 use crate::layout_ui::{button_pressed, top_centered_text};
 use crate::payment_ui::{Payment, payment_dialog};
 use crate::render_context::RenderContext;
@@ -39,7 +39,7 @@ fn new_advance_payment(rc: &RenderContext, a: &AdvanceInfo) -> Payment<Advance> 
     )
 }
 
-pub fn show_paid_advance_menu(rc: &RenderContext) -> StateUpdate {
+pub fn show_paid_advance_menu(rc: &RenderContext) -> RenderResult {
     let game = rc.game;
     show_advance_menu(
         rc,
@@ -64,8 +64,8 @@ pub fn show_advance_menu(
     rc: &RenderContext,
     title: &str,
     advance_state: impl Fn(&AdvanceInfo, &Player) -> AdvanceState,
-    new_update: impl Fn(&AdvanceInfo) -> StateUpdate,
-) -> StateUpdate {
+    new_update: impl Fn(&AdvanceInfo) -> RenderResult,
+) -> RenderResult {
     top_centered_text(rc, title, vec2(0., 10.));
     let p = rc.shown_player;
     let state = rc.state;
@@ -134,7 +134,7 @@ pub fn show_advance_menu(
             }
         }
     }
-    StateUpdate::None
+    NO_UPDATE
 }
 
 fn fill_color(rc: &RenderContext, p: &Player, advance_state: &AdvanceState) -> Color {
@@ -207,12 +207,8 @@ fn description(rc: &RenderContext, a: &AdvanceInfo) -> Vec<String> {
     parts
 }
 
-pub fn pay_advance_dialog(ap: &Payment<Advance>, rc: &RenderContext) -> StateUpdate {
-    let update = show_paid_advance_menu(rc);
-    if !matches!(update, StateUpdate::None) {
-        // select a different advance
-        return update;
-    }
+pub fn pay_advance_dialog(ap: &Payment<Advance>, rc: &RenderContext) -> RenderResult {
+    show_paid_advance_menu(rc)?;  // select a different advance
     payment_dialog(rc, ap, true, ActiveDialog::AdvancePayment, |payment| {
         StateUpdate::execute_with_warning(
             Action::Playing(PlayingAction::Advance(AdvanceAction::new(

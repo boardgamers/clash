@@ -229,9 +229,8 @@ pub struct DialogChooser {
 }
 
 #[must_use]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum StateUpdate {
-    None,
     OpenDialog(ActiveDialog),
     CloseDialog,
     Cancel,
@@ -246,13 +245,29 @@ pub enum StateUpdate {
     ToggleAiPlay,
 }
 
+pub type RenderResult = Result<(), StateUpdate>;
+
+pub const NO_UPDATE: RenderResult = Ok(());
+
 impl StateUpdate {
-    pub fn execute(action: Action) -> StateUpdate {
-        StateUpdate::Execute(action)
+    pub fn of(update: StateUpdate) -> RenderResult {
+        Err(update)
+    }
+    
+    pub fn open_dialog(dialog: ActiveDialog) -> RenderResult {
+        Self::of(StateUpdate::OpenDialog(dialog))
+    }
+    
+    pub fn close_dialog() -> RenderResult {
+        Self::of(StateUpdate::CloseDialog)
     }
 
-    pub fn execute_with_warning(action: Action, warning: Vec<String>) -> StateUpdate {
-        if warning.is_empty() {
+    pub fn execute(action: Action) -> RenderResult {
+        Self::of(StateUpdate::Execute(action))
+    }
+
+    pub fn execute_with_warning(action: Action, warning: Vec<String>) -> RenderResult {
+        Self::of(if warning.is_empty() {
             StateUpdate::Execute(action)
         } else {
             StateUpdate::ExecuteWithWarning(PendingUpdate {
@@ -260,18 +275,18 @@ impl StateUpdate {
                 warning,
                 info: vec![],
             })
-        }
-    }
-
-    pub fn execute_with_confirm(info: Vec<String>, action: Action) -> StateUpdate {
-        StateUpdate::ExecuteWithWarning(PendingUpdate {
-            action,
-            warning: vec![],
-            info,
         })
     }
 
-    pub fn execute_activation(action: Action, warning: Vec<String>, city: &City) -> StateUpdate {
+    pub fn execute_with_confirm(info: Vec<String>, action: Action) -> RenderResult {
+        Self::of(StateUpdate::ExecuteWithWarning(PendingUpdate {
+            action,
+            warning: vec![],
+            info,
+        }))
+    }
+
+    pub fn execute_activation(action: Action, warning: Vec<String>, city: &City) -> RenderResult {
         if city.is_activated() {
             match city.mood_state {
                 MoodState::Happy => {
@@ -294,8 +309,8 @@ impl StateUpdate {
     pub fn dialog_chooser(
         title: &str,
         options: Vec<(Option<EventOrigin>, ActiveDialog)>,
-    ) -> StateUpdate {
-        match options.len() {
+    ) -> RenderResult {
+        Self::of(match options.len() {
             0 => {
                 panic!("no dialog options provided");
             }
@@ -304,18 +319,18 @@ impl StateUpdate {
                 title: title.to_string(),
                 options,
             }))),
-        }
+        }                                                            )
     }
 
-    pub fn response(action: EventResponse) -> StateUpdate {
-        StateUpdate::Execute(Action::Response(action))
+    pub fn response(action: EventResponse) -> RenderResult {
+        Self::execute(Action::Response(action))
     }
 
     pub fn move_units(
         rc: &RenderContext,
         pos: Option<Position>,
         intent: MoveIntent,
-    ) -> StateUpdate {
+    ) -> RenderResult {
         let game = rc.game;
         StateUpdate::OpenDialog(ActiveDialog::MoveUnits(MoveSelection::new(
             game.active_player(),
@@ -326,40 +341,11 @@ impl StateUpdate {
         )))
     }
 
-    pub fn or(self, other: impl FnOnce() -> StateUpdate) -> StateUpdate {
+    pub fn or(self, other: impl FnOnce() -> RenderResult) -> RenderResult {
         match self {
-            StateUpdate::None => other(),
+            NO_UPDATE => other(),
             _ => self,
         }
-    }
-}
-
-#[must_use]
-pub struct StateUpdates {
-    updates: Vec<StateUpdate>,
-}
-
-impl Default for StateUpdates {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl StateUpdates {
-    pub fn new() -> StateUpdates {
-        StateUpdates { updates: vec![] }
-    }
-    pub fn add(&mut self, update: StateUpdate) {
-        if !matches!(update, StateUpdate::None) {
-            self.updates.push(update);
-        }
-    }
-
-    pub fn result(self) -> StateUpdate {
-        self.updates
-            .into_iter()
-            .find(|u| !matches!(u, StateUpdate::None))
-            .unwrap_or(StateUpdate::None)
     }
 }
 
@@ -431,7 +417,7 @@ impl State {
             game,
             state: self,
             camera_mode: CameraMode::Screen,
-            stage
+            stage,
         }
     }
 
@@ -443,7 +429,7 @@ impl State {
 
     pub fn update(&mut self, game: &Game, update: StateUpdate) -> GameSyncRequest {
         match update {
-            StateUpdate::None => GameSyncRequest::None,
+            NO_UPDATE => GameSyncRequest::None,
             StateUpdate::Execute(a) => GameSyncRequest::ExecuteAction(a),
             StateUpdate::ExecuteWithWarning(update) => {
                 self.pending_update = Some(update);
@@ -613,16 +599,11 @@ impl State {
     }
 
     pub fn draw_text_with_color(&self, text: &str, x: f32, y: f32, color: Color) {
-        draw_text_ex(
-            text,
-            x,
-            y,
-            TextParams {
-                font: Some(&self.assets.font),
-                font_size: FONT_SIZE,
-                color,
-                ..Default::default()
-            },
-        );
+        draw_text_ex(text, x, y, TextParams {
+            font: Some(&self.assets.font),
+            font_size: FONT_SIZE,
+            color,
+            ..Default::default()
+        });
     }
 }

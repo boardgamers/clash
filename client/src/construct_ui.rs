@@ -11,7 +11,7 @@ use server::playing_actions::PlayingAction;
 use server::position::Position;
 use server::recruit::Recruit;
 
-pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> StateUpdate {
+pub fn pay_construction_dialog(rc: &RenderContext, cp: &ConstructionPayment) -> RenderResult {
     let city = rc.game.get_any_city(cp.city_position);
     payment_dialog(
         rc,

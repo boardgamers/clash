@@ -117,8 +117,8 @@ pub fn payment_dialog<T: Clone>(
     payment: &Payment<T>,
     may_cancel: bool,
     to_dialog: impl FnOnce(Payment<T>) -> ActiveDialog,
-    execute_action: impl FnOnce(ResourcePile) -> StateUpdate,
-) -> StateUpdate {
+    execute_action: impl FnOnce(ResourcePile) -> RenderResult,
+) -> RenderResult {
     multi_payment_dialog(
         rc,
         &[payment.clone()],
@@ -133,8 +133,8 @@ pub fn multi_payment_dialog<T: Clone>(
     payments: &[Payment<T>],
     to_dialog: impl FnOnce(Vec<Payment<T>>) -> ActiveDialog,
     may_cancel: bool,
-    execute_action: impl FnOnce(Vec<ResourcePile>) -> StateUpdate,
-) -> StateUpdate {
+    execute_action: impl FnOnce(Vec<ResourcePile>) -> RenderResult,
+) -> RenderResult {
     let tooltip = ok_tooltip(payments, payments[0].available.clone());
     let mut exec = false;
     let mut added: Option<Payment<T>> = None;
@@ -189,16 +189,16 @@ pub fn multi_payment_dialog<T: Clone>(
             || tooltip.clone(),
             || {
                 exec = true;
-                StateUpdate::None
+                NO_UPDATE
             },
             |_, o| types.contains(&o.resource),
             |_, o| {
                 added = Some(plus(payment.clone(), o.resource));
-                StateUpdate::None
+                NO_UPDATE
             },
             |_, o| {
                 removed = Some(minus(payment.clone(), o.resource));
-                StateUpdate::None
+                NO_UPDATE
             },
             offset,
             may_cancel,
@@ -215,11 +215,11 @@ pub fn multi_payment_dialog<T: Clone>(
             return execute_action(payments.iter().map(Payment::to_resource_pile).collect());
         }
 
-        if !matches!(result, StateUpdate::None) {
+        if !matches!(result, NO_UPDATE) {
             return result;
         }
     }
-    StateUpdate::None
+    NO_UPDATE
 }
 
 fn ok_tooltip<T: Clone>(payments: &[Payment<T>], mut available: ResourcePile) -> OkTooltip {

@@ -44,7 +44,7 @@ impl RecruitAmount {
         player_index: usize,
         city_position: Position,
         units: Units,
-    ) -> StateUpdate {
+    ) -> RenderResult {
         let player = game.player(player_index);
         let selectable: Vec<SelectableUnit> = new_units(player)
             .into_iter()
@@ -166,7 +166,7 @@ impl UnitSelection for RecruitSelection {
     }
 }
 
-pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
+pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> RenderResult {
     let game = rc.game;
     let radius = 20.;
     select_ui::count_dialog(
@@ -222,7 +222,7 @@ pub fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> StateUpdate {
     )
 }
 
-fn open_dialog(rc: &RenderContext, city: Position, sel: RecruitSelection) -> StateUpdate {
+fn open_dialog(rc: &RenderContext, city: Position, sel: RecruitSelection) -> RenderResult {
     let p = rc.shown_player.index;
     let cost = recruit_cost(
         rc.game,
@@ -245,16 +245,16 @@ fn open_dialog(rc: &RenderContext, city: Position, sel: RecruitSelection) -> Sta
     )))
 }
 
-fn update_selection(game: &Game, s: &RecruitAmount, units: Units) -> StateUpdate {
+fn update_selection(game: &Game, s: &RecruitAmount, units: Units) -> RenderResult {
     RecruitAmount::new_selection(game, s.player_index, s.city_position, units)
 }
 
-pub fn replace_dialog(rc: &RenderContext, sel: &RecruitSelection) -> StateUpdate {
+pub fn replace_dialog(rc: &RenderContext, sel: &RecruitSelection) -> RenderResult {
     if ok_button(rc, sel.confirm(rc.game)) {
         open_dialog(rc, sel.amount.city_position, sel.clone())
     } else if cancel_button(rc) {
         StateUpdate::Cancel
     } else {
-        StateUpdate::None
+        NO_UPDATE
     }
 }

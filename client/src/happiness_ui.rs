@@ -65,7 +65,7 @@ pub fn open_increase_happiness_dialog(
     rc: &RenderContext,
     actions: &[PlayingActionType],
     init: impl Fn(IncreaseHappinessConfig) -> IncreaseHappinessConfig,
-) -> StateUpdate {
+) -> RenderResult {
     base_or_custom_action(rc, actions, "Increase happiness", |custom| {
         ActiveDialog::IncreaseHappiness(init(IncreaseHappinessConfig::new(rc, custom)))
     })
@@ -75,16 +75,16 @@ pub fn increase_happiness_click(
     rc: &RenderContext,
     pos: Position,
     h: &IncreaseHappinessConfig,
-) -> StateUpdate {
+) -> RenderResult {
     if let Some(city) = rc.shown_player.try_get_city(pos) {
         add_increase_happiness(rc, city, h.clone()).map_or(
-            StateUpdate::None,
+            NO_UPDATE,
             |increase_happiness| {
                 StateUpdate::OpenDialog(ActiveDialog::IncreaseHappiness(increase_happiness))
             },
         )
     } else {
-        StateUpdate::None
+        NO_UPDATE
     }
 }
 
@@ -195,7 +195,7 @@ pub fn available_happiness_actions_for_city(
     }
 }
 
-pub fn increase_happiness_menu(rc: &RenderContext, h: &IncreaseHappinessConfig) -> StateUpdate {
+pub fn increase_happiness_menu(rc: &RenderContext, h: &IncreaseHappinessConfig) -> RenderResult {
     payment_dialog(
         rc,
         &h.payment,

@@ -73,7 +73,7 @@ impl CollectResources {
     }
 }
 
-pub fn collect_dialog(rc: &RenderContext, collect: &CollectResources) -> StateUpdate {
+pub fn collect_dialog(rc: &RenderContext, collect: &CollectResources) -> RenderResult {
     show_resource_pile(rc, &collect.collected());
 
     let game = rc.game;
@@ -113,7 +113,7 @@ pub fn collect_dialog(rc: &RenderContext, collect: &CollectResources) -> StateUp
     if cancel_button(rc) {
         return StateUpdate::Cancel;
     }
-    StateUpdate::None
+    NO_UPDATE
 }
 
 fn click_collect_option(
@@ -121,7 +121,7 @@ fn click_collect_option(
     col: &CollectResources,
     p: Position,
     pile: &ResourcePile,
-) -> StateUpdate {
+) -> RenderResult {
     let c = add_collect(&col.info, p, pile, &col.collections);
 
     let i = possible_resource_collections(
@@ -137,10 +137,10 @@ fn click_collect_option(
     StateUpdate::OpenDialog(ActiveDialog::CollectResources(new))
 }
 
-pub fn draw_resource_collect_tile(rc: &RenderContext, pos: Position) -> StateUpdate {
+pub fn draw_resource_collect_tile(rc: &RenderContext, pos: Position) -> RenderResult {
     let state = &rc.state;
     let ActiveDialog::CollectResources(collect) = &state.active_dialog else {
-        return StateUpdate::None;
+        return NO_UPDATE;
     };
 
     let Some(possible) = collect
@@ -149,7 +149,7 @@ pub fn draw_resource_collect_tile(rc: &RenderContext, pos: Position) -> StateUpd
         .get(&pos)
         .map(|v| v.iter().sorted_by_key(ToString::to_string).collect_vec())
     else {
-        return StateUpdate::None;
+        return NO_UPDATE;
     };
 
     let tile_collects = collect
@@ -196,7 +196,7 @@ pub fn draw_resource_collect_tile(rc: &RenderContext, pos: Position) -> StateUpd
             }
         }
     }
-    StateUpdate::None
+    NO_UPDATE
 }
 
 fn draw_collect_item(
