@@ -18,7 +18,7 @@ pub enum PaymentConversionType {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub struct PaymentConversion {
-    pub from: Vec<ResourcePile>, // alternatives
+    pub from: Vec<ResourcePile>,       // alternatives
     pub custom_costs: Vec<CustomCost>, //alternatives
     pub to: ResourcePile,
     #[serde(rename = "type")]
@@ -33,7 +33,12 @@ impl PaymentConversion {
 
     #[must_use]
     pub fn limited(from: ResourcePile, to: ResourcePile, limit: u8) -> Self {
-        PaymentConversion::new(vec![from], Vec::new(), to, PaymentConversionType::MayNotOverpay(limit))
+        PaymentConversion::new(
+            vec![from],
+            Vec::new(),
+            to,
+            PaymentConversionType::MayNotOverpay(limit),
+        )
     }
 
     #[must_use]
@@ -503,11 +508,13 @@ mod tests {
 
         let mut payment_options = PaymentOptions::resources_with_gold_conversion(cost, origin);
 
-        payment_options.conversions.push(PaymentConversion::resource_options(
-            base_resources(),
-            ResourcePile::empty(),
-            discount_type,
-        ));
+        payment_options
+            .conversions
+            .push(PaymentConversion::resource_options(
+                base_resources(),
+                ResourcePile::empty(),
+                discount_type,
+            ));
 
         payment_options
     }
@@ -820,9 +827,10 @@ pub enum CustomCost {
 impl CustomCost {
     fn can_afford(&self, player: &Player) -> bool {
         match self {
-            CustomCost::Prisoners(count) => player.custom_data.get("prisoners").is_some_and(|available| {
-                available >= count
-            }),
+            CustomCost::Prisoners(count) => player
+                .custom_data
+                .get("prisoners")
+                .is_some_and(|available| available >= count),
         }
     }
 
