@@ -21,7 +21,7 @@ use itertools::Itertools;
 use macroquad::math::f32;
 use macroquad::prelude::*;
 use server::city::{City, MoodState};
-use server::city_pieces::Building;
+use server::city_pieces::{Building, BUILDINGS};
 use server::collect::{available_collect_actions_for_city, possible_resource_collections};
 use server::construct::{can_construct, new_building_positions};
 use server::consts::BUILDING_COST;
@@ -119,7 +119,7 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
         return vec![];
     }
     let game = rc.game;
-    Building::all()
+    BUILDINGS
         .into_iter()
         .flat_map(|b| {
             let can = can_construct(

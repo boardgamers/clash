@@ -18,6 +18,8 @@ use server::unit::UnitType;
 use server::wonder::{Wonder, WonderInfo};
 use std::fmt::Display;
 use std::ops::Mul;
+use server::city_pieces::{Building, BUILDINGS};
+use crate::city_ui::add_building_description;
 
 enum VisibleCardLocation {
     DiscardPile,
@@ -56,6 +58,7 @@ pub(crate) struct InfoDialog {
     pub action_card: u8,
     pub objective_card: u8,
     pub unit: UnitType,
+    pub building: Building,
 }
 
 impl InfoDialog {
@@ -68,6 +71,7 @@ impl InfoDialog {
             action_card: 1,
             objective_card: 1,
             unit: UnitType::Settler,
+            building: Building::Academy,
         }
     }
 }
@@ -79,6 +83,7 @@ pub(crate) enum InfoCategory {
     Incident,
     ActionCard,
     ObjectiveCard,
+    Buildings,
     Unit,
 }
 
@@ -95,6 +100,7 @@ pub(crate) fn show_info_dialog(rc: &RenderContext, d: &InfoDialog) -> RenderResu
     show_incidents(rc, d)?;
     show_action_cards(rc, d)?;
     show_objective_cards(rc, d)?;
+    show_buildings(rc, d)?;
     show_units(rc, d)?;
 
     NO_UPDATE
@@ -156,7 +162,7 @@ fn show_action_cards(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
         d,
         3,
         InfoCategory::ActionCard,
-        "Action Cards",
+        "Actions",
         |rc, d| {
             show_category_items::<ActionCard, u8>(
                 rc,
@@ -179,7 +185,7 @@ fn show_objective_cards(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
         d,
         4,
         InfoCategory::ObjectiveCard,
-        "Objective Cards",
+        "Objectives",
         |rc, d| {
             show_category_items::<ObjectiveCard, u8>(
                 rc,
@@ -206,8 +212,39 @@ fn show_objective_cards(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
     )
 }
 
+fn show_buildings(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
+    show_category(rc, d, 5, InfoCategory::Buildings, "Buildings", |rc, d| {
+        show_category_items::<Building, Building>(
+            rc,
+            d,
+            |_| &BUILDINGS,
+            |b| b,
+            |b| b.name().to_string(),
+            |b| {
+                let mut desc = vec![b.name().to_string()];
+                let advance = rc.game.cache.get_building_advance(*b).name(rc.game);
+                desc.push(format!("Required advance: {advance}")); 
+                add_building_description(rc, &mut desc, *b);
+                desc
+            },
+            |d| &d.building,
+            |d, b| d.building = b,
+            |_| None,
+        )
+    })
+}
+
+const UNIT_TYPES: [UnitType; 6] = [
+    UnitType::Settler,
+    UnitType::Infantry,
+    UnitType::Ship,
+    UnitType::Cavalry,
+    UnitType::Elephant,
+    UnitType::Leader(Leader::Alexander), // Placeholder for leaders
+];
+
 fn show_units(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
-    show_category(rc, d, 5, InfoCategory::Unit, "Units", |rc, d| {
+    show_category(rc, d, 6, InfoCategory::Unit, "Units", |rc, d| {
         show_category_items::<UnitType, UnitType>(
             rc,
             d,
@@ -226,10 +263,10 @@ fn show_units(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
             |u| {
                 let mut parts: Vec<String> = vec![];
                 parts.push(format!("Cost: {}", u.cost()));
-                break_text(&mut parts, &u.description());
                 if let Some(r) = u.required_building() {
                     parts.push(format!("Required building: {}", r.name()));
                 }
+                break_text(&mut parts, &u.description());
                 parts
             },
             |d| &d.unit,
@@ -238,15 +275,6 @@ fn show_units(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
         )
     })
 }
-
-const UNIT_TYPES: [UnitType; 6] = [
-    UnitType::Settler,
-    UnitType::Infantry,
-    UnitType::Ship,
-    UnitType::Cavalry,
-    UnitType::Elephant,
-    UnitType::Leader(Leader::Alexander), // Placeholder for leaders
-];
 
 fn show_category(
     rc: &RenderContext,
@@ -338,10 +366,11 @@ fn show_category_items<T: Clone, K: PartialEq + Ord + Clone>(
         if let Some(l) = &location {
             desc.insert(0, format!("Location: {l}"));
         }
+        let columns = 7;
         if draw_button_with_color(
             rc,
             &name,
-            vec2(i.rem_euclid(8) as f32, ((i / 8) + 1) as f32),
+            vec2(i.rem_euclid(columns) as f32, ((i / columns) + 1) as f32),
             &desc,
             selected,
             match location {

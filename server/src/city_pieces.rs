@@ -285,40 +285,17 @@ pub enum Building {
     Temple,
 }
 
+pub const BUILDINGS: [Building; 7] = [
+    Academy,
+    Market,
+    Obelisk,
+    Observatory,
+    Fortress,
+    Port,
+    Temple,
+];
+
 impl Building {
-    /// Returns the json of this [`Building`].
-    ///
-    /// # Panics
-    ///
-    /// Panics if `serde_json` produces invalid json
-    #[must_use]
-    pub fn json(&self) -> String {
-        serde_json::to_string(&self).expect("city piece data should be valid json")
-    }
-
-    ///
-    ///
-    /// # Panics
-    ///
-    /// Panics if invalid json is given
-    #[must_use]
-    pub fn from_json(json: &str) -> Self {
-        serde_json::from_str(json).expect("API call should receive valid city piece data json")
-    }
-
-    #[must_use]
-    pub fn all() -> Vec<Building> {
-        vec![
-            Academy,
-            Market,
-            Obelisk,
-            Observatory,
-            Fortress,
-            Port,
-            Temple,
-        ]
-    }
-
     #[must_use]
     pub fn name(&self) -> &'static str {
         match self {
