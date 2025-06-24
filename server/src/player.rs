@@ -625,20 +625,32 @@ pub(crate) fn can_add_army_unit(p: &Player, position: Position) -> bool {
         < STACK_LIMIT
 }
 
+#[derive(Serialize, Deserialize, PartialEq, Clone)]
 pub enum Data {
     Number(u32),
     Positions(Vec<Position>),
 }
 
 impl Data {
-    pub fn number(&self) -> u32 {
+    /// Returns the number of this [`Data`].
+    ///
+    /// # Panics
+    ///
+    /// Panics if the data is not a number.
+    #[must_use] pub fn number(&self) -> u32 {
         if let Self::Number(v) = self {
             *v
         } else {
             panic!("Data is not a number")
         }
     }
-    pub fn number_mut(&mut self) -> &mut u32 {
+
+    /// Returns the number of this [`Data`].
+    ///
+    /// # Panics
+    ///
+    /// Panics if the data is not a number.
+    #[must_use] pub fn number_mut(&mut self) -> &mut u32 {
         if let Self::Number(v) = self {
             v
         } else {
@@ -646,14 +658,25 @@ impl Data {
         }
     }
 
-    pub fn positions(&self) -> &Vec<Position> {
+    /// Returns the number of this [`Data`].
+    ///
+    /// # Panics
+    ///
+    /// Panics if the data is not a list of positions.
+    #[must_use] pub fn positions(&self) -> &Vec<Position> {
         if let Self::Positions(v) = self {
             v
         } else {
             panic!("Data is not positions")
         }
     }
-    pub fn positions_mut(&mut self) -> &mut Vec<Position> {
+
+    /// Returns the number of this [`Data`].
+    ///
+    /// # Panics
+    ///
+    /// Panics if the data is not a list of positions.
+    #[must_use] pub fn positions_mut(&mut self) -> &mut Vec<Position> {
         if let Self::Positions(v) = self {
             v
         } else {

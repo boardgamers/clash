@@ -12,7 +12,7 @@ use crate::leader::Leader;
 use crate::log::ActionLogAge;
 use crate::map::{Map, MapData};
 use crate::objective_card::{CompletedObjective, init_objective_card};
-use crate::player::Player;
+use crate::player::{Data, Player};
 use crate::player_events::PlayerEvents;
 use crate::resource_pile::ResourcePile;
 use crate::unit::{Unit, UnitData};
@@ -291,7 +291,7 @@ pub struct PlayerData {
     secrets: Vec<String>,
     #[serde(default)]
     #[serde(skip_serializing_if = "HashMap::is_empty")]
-    custom_data: HashMap<String, u32>,
+    custom_data: HashMap<String, Data>,
 }
 
 ///
