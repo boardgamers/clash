@@ -18,6 +18,7 @@ use crate::movement::{CurrentMove, MovementRestriction};
 use crate::player::{Player, remove_unit};
 use crate::special_advance::SpecialAdvance;
 use crate::{game::Game, leader, position::Position, resource_pile::ResourcePile, unit, utils};
+use crate::city_pieces::Building;
 
 #[derive(Clone)]
 pub struct Unit {
@@ -177,7 +178,7 @@ impl Unit {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, Debug, Copy)]
+#[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, Debug, Copy, Ord, PartialOrd)]
 pub enum UnitType {
     Settler,
     Infantry,
@@ -229,6 +230,15 @@ impl UnitType {
             Ship => ResourcePile::wood(2),
             Cavalry => ResourcePile::food(1) + ResourcePile::wood(1),
             Leader(_) => ResourcePile::culture_tokens(1) + ResourcePile::mood_tokens(1),
+        }
+    }
+    
+    #[must_use]
+    pub fn required_building(&self) -> Option<Building> {
+        match self {
+            Ship => Some(Building::Port),
+            Cavalry | Elephant => Some(Building::Market),
+            _ => None,
         }
     }
 

@@ -116,7 +116,8 @@ fn movable_settlers(game: &Game, player: &Player) -> Vec<Position> {
         .units
         .iter()
         .filter(|u| {
-            player.try_get_city(u.position).is_some()
+            u.is_settler()
+                && player.try_get_city(u.position).is_some()
                 && !possible_move_destinations(game, player.index, &[u.id], u.position)
                     .list
                     .is_empty()

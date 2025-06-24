@@ -5,7 +5,7 @@ use crate::position::Position;
 use crate::unit::UnitType;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Copy, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Copy, Hash, Ord, PartialOrd)]
 pub enum Leader {
     // Rome
     Augustus,

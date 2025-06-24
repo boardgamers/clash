@@ -12,7 +12,9 @@ use server::civilization::Civilization;
 use server::content::civilizations;
 use server::game::Game;
 use server::incident::Incident;
+use server::leader::Leader;
 use server::objective_card::ObjectiveCard;
+use server::unit::UnitType;
 use server::wonder::{Wonder, WonderInfo};
 use std::fmt::Display;
 use std::ops::Mul;
@@ -53,6 +55,7 @@ pub(crate) struct InfoDialog {
     pub incident: u8,
     pub action_card: u8,
     pub objective_card: u8,
+    pub unit: UnitType,
 }
 
 impl InfoDialog {
@@ -64,6 +67,7 @@ impl InfoDialog {
             incident: 1,
             action_card: 1,
             objective_card: 1,
+            unit: UnitType::Settler,
         }
     }
 }
@@ -75,6 +79,7 @@ pub(crate) enum InfoCategory {
     Incident,
     ActionCard,
     ObjectiveCard,
+    Unit,
 }
 
 pub(crate) fn show_info_dialog(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
@@ -90,8 +95,38 @@ pub(crate) fn show_info_dialog(rc: &RenderContext, d: &InfoDialog) -> RenderResu
     show_incidents(rc, d)?;
     show_action_cards(rc, d)?;
     show_objective_cards(rc, d)?;
+    show_units(rc, d)?;
 
     NO_UPDATE
+}
+
+fn show_wonders(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
+    show_category(rc, d, 1, InfoCategory::Wonder, "Wonders", |rc, d| {
+        show_category_items::<WonderInfo, Wonder>(
+            rc,
+            d,
+            |g| g.cache.get_wonders(),
+            |w| &w.wonder,
+            WonderInfo::name,
+            |w| wonder_description(rc, w),
+            |d| &d.wonder,
+            |d, w| d.wonder = w,
+            |w| {
+                Some(VisibleCardLocation::from_piles(
+                    &w.wonder,
+                    &[],
+                    &rc.game
+                        .players
+                        .iter()
+                        .flat_map(
+                            // todo destroyed wonders
+                            |p| p.wonders_built.clone(),
+                        )
+                        .collect_vec(),
+                )    )
+            },
+        )
+    })
 }
 
 fn show_incidents(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
@@ -110,7 +145,7 @@ fn show_incidents(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
             |d| &d.incident,
             |d, i| d.incident = i,
             // todo public from permanent effects
-            |i| VisibleCardLocation::from_piles(&i.id, &rc.game.incidents_discarded, &[]),
+            |i| Some(VisibleCardLocation::from_piles(&i.id, &rc.game.incidents_discarded, &[])),
         )
     })
 }
@@ -132,7 +167,7 @@ fn show_action_cards(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
                 |i| action_card_object(rc, i.id).description,
                 |d| &d.action_card,
                 |d, i| d.action_card = i,
-                |i| VisibleCardLocation::from_piles(&i.id, &rc.game.action_cards_discarded, &[]),
+                |i| Some(VisibleCardLocation::from_piles(&i.id, &rc.game.action_cards_discarded, &[])),
             )
         },
     )
@@ -156,7 +191,7 @@ fn show_objective_cards(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
                 |d| &d.objective_card,
                 |d, i| d.objective_card = i,
                 |i| {
-                    VisibleCardLocation::from_piles(
+                    Some(VisibleCardLocation::from_piles(
                         &i.id,
                         &[],
                         &rc.game
@@ -164,41 +199,54 @@ fn show_objective_cards(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
                             .iter()
                             .flat_map(|p| p.completed_objectives.iter().map(|o| o.card))
                             .collect_vec(),
-                    )
+                    ))
                 },
             )
         },
     )
 }
 
-fn show_wonders(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
-    show_category(rc, d, 1, InfoCategory::Wonder, "Wonders", |rc, d| {
-        show_category_items::<WonderInfo, Wonder>(
+fn show_units(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
+    show_category(rc, d, 5, InfoCategory::Unit, "Units", |rc, d| {
+        show_category_items::<UnitType, UnitType>(
             rc,
             d,
-            |g| g.cache.get_wonders(),
-            |w| &w.wonder,
-            WonderInfo::name,
-            |w| wonder_description(rc, w),
-            |d| &d.wonder,
-            |d, w| d.wonder = w,
-            |w| {
-                VisibleCardLocation::from_piles(
-                    &w.wonder,
-                    &[],
-                    &rc.game
-                        .players
-                        .iter()
-                        .flat_map(
-                            // todo destroyed wonders
-                            |p| p.wonders_built.clone(),
-                        )
-                        .collect_vec(),
-                )
+            |_| {
+                &UNIT_TYPES
             },
+            |u| u,
+            |u| {
+                if u.is_leader() {
+                    "leader"
+                } else {
+                    u.non_leader_name()
+                }
+                .to_string()
+            },
+            |u| {
+                let mut parts: Vec<String> = vec![];
+                parts.push(format!("Cost: {}", u.cost()));
+                break_text(&mut parts, &u.description());
+                if let Some(r) = u.required_building() {
+                    parts.push(format!("Required building: {}", r.name()));
+                }
+                parts
+            },
+            |d| &d.unit,
+            |d, u| d.unit = u,
+            |_| None,
         )
     })
 }
+
+const UNIT_TYPES: [UnitType; 6] = [
+    UnitType::Settler,
+    UnitType::Infantry,
+    UnitType::Ship,
+    UnitType::Cavalry,
+    UnitType::Elephant,
+    UnitType::Leader(Leader::Alexander), // Placeholder for leaders
+];
 
 fn show_category(
     rc: &RenderContext,
@@ -270,13 +318,13 @@ fn show_civilization(rc: &RenderContext, c: &Civilization) {
 fn show_category_items<T: Clone, K: PartialEq + Ord + Clone>(
     rc: &RenderContext,
     dialog: &InfoDialog,
-    get_all: impl Fn(&Game) -> &Vec<T>,
+    get_all: impl Fn(&Game) -> &[T],
     get_key: impl Fn(&T) -> &K,
     name: impl Fn(&T) -> String,
     description: impl Fn(&T) -> Vec<String>,
     get_selected: impl Fn(&InfoDialog) -> &K,
     set_selected: impl Fn(&mut InfoDialog, K),
-    get_location: impl Fn(&T) -> VisibleCardLocation,
+    get_location: impl Fn(&T) -> Option<VisibleCardLocation>,
 ) -> RenderResult {
     for (i, info) in get_all(rc.game)
         .iter()
@@ -287,8 +335,9 @@ fn show_category_items<T: Clone, K: PartialEq + Ord + Clone>(
         let name = name(info);
         let mut desc = description(info);
         let location = get_location(info);
-        desc.insert(0, format!("Location: {location}"));
-
+        if let Some(l) = &location {
+            desc.insert(0, format!("Location: {l}"));
+        }
         if draw_button_with_color(
             rc,
             &name,
@@ -296,9 +345,9 @@ fn show_category_items<T: Clone, K: PartialEq + Ord + Clone>(
             &desc,
             selected,
             match location {
-                VisibleCardLocation::DiscardPile => BLUE,
-                VisibleCardLocation::Public => YELLOW,
-                VisibleCardLocation::Unknown => GREEN,
+                Some(VisibleCardLocation::DiscardPile) => BLUE,
+                Some(VisibleCardLocation::Public) => YELLOW,
+                Some(VisibleCardLocation::Unknown) | None => GREEN,
             },
         ) {
             let mut new = dialog.clone();
