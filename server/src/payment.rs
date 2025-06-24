@@ -830,16 +830,14 @@ impl CustomCost {
             CustomCost::Prisoners(count) => player
                 .custom_data
                 .get("prisoners")
-                .is_some_and(|available| available >= count),
+                .is_some_and(|available| available.number() >= *count),
         }
     }
 
     fn deduct(&self, player: &mut Player) {
         match self {
             CustomCost::Prisoners(count) => {
-                if let Some(available) = player.custom_data.get_mut("prisoners") {
-                    *available -= count;
-                }
+                *player.custom_data.get_mut("prisoners").expect("prisoners data is missing").number_mut() -= count;
             }
         }
     }

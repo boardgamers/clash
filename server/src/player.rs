@@ -73,7 +73,7 @@ pub struct Player {
     pub played_once_per_turn_actions: Vec<CustomActionType>,
     pub event_info: HashMap<String, String>,
     pub secrets: Vec<String>,
-    pub custom_data: HashMap<String, u32>,
+    pub custom_data: HashMap<String, Data>,
     pub(crate) objective_opportunities: Vec<String>, // transient
     pub(crate) gained_objective: Option<u8>,         // transient
     pub(crate) great_mausoleum_action_cards: u8,     // transient
@@ -623,4 +623,41 @@ pub(crate) fn can_add_army_unit(p: &Player, position: Position) -> bool {
         .filter(|u| u.is_army_unit())
         .count()
         < STACK_LIMIT
+}
+
+pub enum Data {
+    Number(u32),
+    Positions(Vec<Position>),
+}
+
+impl Data {
+    pub fn number(&self) -> u32 {
+        if let Self::Number(v) = self {
+            *v
+        } else {
+            panic!("Data is not a number")
+        }
+    }
+    pub fn number_mut(&mut self) -> &mut u32 {
+        if let Self::Number(v) = self {
+            v
+        } else {
+            panic!("Data is not a number")
+        }
+    }
+
+    pub fn positions(&self) -> &Vec<Position> {
+        if let Self::Positions(v) = self {
+            v
+        } else {
+            panic!("Data is not positions")
+        }
+    }
+    pub fn positions_mut(&mut self) -> &mut Vec<Position> {
+        if let Self::Positions(v) = self {
+            v
+        } else {
+            panic!("Data is not positions")
+        }
+    }
 }

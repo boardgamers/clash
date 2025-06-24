@@ -16,14 +16,14 @@ use crate::leader::{Leader, LeaderInfo, leader_position};
 use crate::leader_ability::{LeaderAbility, activate_leader_city, can_activate_leader_city};
 use crate::map::{Block, Terrain, block_for_position, capital_city_position};
 use crate::movement::{MoveUnits, move_action_log};
-use crate::player::Player;
+use crate::player::{Data, Player};
 use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
 use crate::unit::{Unit, UnitType, Units, carried_units};
 use crate::victory_points::{
-    SpecialVictoryPoints, VictoryPointAttribution, set_special_victory_points,
+    VictoryPointAttribution, set_special_victory_points,
     update_special_victory_points,
 };
 use itertools::Itertools;
@@ -459,12 +459,12 @@ fn use_legendary_explorer(b: AbilityBuilder) -> AbilityBuilder {
                 &p.origin,
                 VictoryPointAttribution::Objectives,
                 |mut v| {
-                    v.points += 1.0;
-                    v.explorer_tokens.push(position);
+                    v += 1.0;
                     v
                 },
             );
-
+            
+            player.custom_data.entry(String::from("explorer")).or_insert(Data::Positions(Vec::new())).positions_mut().push(position);
             p.log(game, &format!("Place an explorer token at {position}"));
         },
     )
@@ -472,26 +472,16 @@ fn use_legendary_explorer(b: AbilityBuilder) -> AbilityBuilder {
 
 fn is_current_block_tagged(game: &Game, player: &Player, position: Position) -> bool {
     let block_position = block_for_position(game, position).1;
-    explore_points(player).is_some_and(|v| {
-        v.points
-            .explorer_tokens
+    player.custom_data.get("explorer").is_some_and(|data| 
+        data.positions()
             .iter()
-            .any(|p| block_for_position(game, *p).1 == block_position)
-    })
-}
-
-#[must_use]
-fn explore_points(player: &Player) -> Option<&SpecialVictoryPoints> {
-    player
-        .special_victory_points
-        .iter()
-        .find(|v| !v.points.explorer_tokens.is_empty())
+            .any(|p| block_for_position(game, *p).1 == block_position))
 }
 
 #[must_use]
 pub fn has_explore_token(game: &Game, position: Position) -> bool {
     game.players.iter().any(|player| {
-        explore_points(player).is_some_and(|v| v.points.explorer_tokens.contains(&position))
+        player.custom_data.get("explorer").is_some_and(|v| v.positions().contains(&position))
     })
 }
 
