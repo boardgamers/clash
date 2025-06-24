@@ -1,4 +1,5 @@
 use crate::cards_ui::{action_card_object, objective_card_object, wonder_description};
+use crate::city_ui::add_building_description;
 use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::layout_ui::button_pressed;
 use crate::log_ui::{break_each, break_text};
@@ -8,6 +9,7 @@ use macroquad::color::Color;
 use macroquad::math::{Rect, Vec2, vec2};
 use macroquad::prelude::{BLACK, BLUE, GREEN, MAGENTA, WHITE, YELLOW};
 use server::action_card::ActionCard;
+use server::city_pieces::{BUILDINGS, Building};
 use server::civilization::Civilization;
 use server::content::civilizations;
 use server::game::Game;
@@ -18,8 +20,6 @@ use server::unit::UnitType;
 use server::wonder::{Wonder, WonderInfo};
 use std::fmt::Display;
 use std::ops::Mul;
-use server::city_pieces::{Building, BUILDINGS};
-use crate::city_ui::add_building_description;
 
 enum VisibleCardLocation {
     DiscardPile,
@@ -129,7 +129,7 @@ fn show_wonders(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
                             |p| p.wonders_built.clone(),
                         )
                         .collect_vec(),
-                )    )
+                ))
             },
         )
     })
@@ -151,32 +151,37 @@ fn show_incidents(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
             |d| &d.incident,
             |d, i| d.incident = i,
             // todo public from permanent effects
-            |i| Some(VisibleCardLocation::from_piles(&i.id, &rc.game.incidents_discarded, &[])),
+            |i| {
+                Some(VisibleCardLocation::from_piles(
+                    &i.id,
+                    &rc.game.incidents_discarded,
+                    &[],
+                ))
+            },
         )
     })
 }
 
 fn show_action_cards(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
-    show_category(
-        rc,
-        d,
-        3,
-        InfoCategory::ActionCard,
-        "Actions",
-        |rc, d| {
-            show_category_items::<ActionCard, u8>(
-                rc,
-                d,
-                |g| g.cache.get_action_cards(),
-                |i| &i.id,
-                ActionCard::name,
-                |i| action_card_object(rc, i.id).description,
-                |d| &d.action_card,
-                |d, i| d.action_card = i,
-                |i| Some(VisibleCardLocation::from_piles(&i.id, &rc.game.action_cards_discarded, &[])),
-            )
-        },
-    )
+    show_category(rc, d, 3, InfoCategory::ActionCard, "Actions", |rc, d| {
+        show_category_items::<ActionCard, u8>(
+            rc,
+            d,
+            |g| g.cache.get_action_cards(),
+            |i| &i.id,
+            ActionCard::name,
+            |i| action_card_object(rc, i.id).description,
+            |d| &d.action_card,
+            |d, i| d.action_card = i,
+            |i| {
+                Some(VisibleCardLocation::from_piles(
+                    &i.id,
+                    &rc.game.action_cards_discarded,
+                    &[],
+                ))
+            },
+        )
+    })
 }
 
 fn show_objective_cards(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
@@ -223,7 +228,7 @@ fn show_buildings(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
             |b| {
                 let mut desc = vec![b.name().to_string()];
                 let advance = rc.game.cache.get_building_advance(*b).name(rc.game);
-                desc.push(format!("Required advance: {advance}")); 
+                desc.push(format!("Required advance: {advance}"));
                 add_building_description(rc, &mut desc, *b);
                 desc
             },
@@ -248,9 +253,7 @@ fn show_units(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
         show_category_items::<UnitType, UnitType>(
             rc,
             d,
-            |_| {
-                &UNIT_TYPES
-            },
+            |_| &UNIT_TYPES,
             |u| u,
             |u| {
                 if u.is_leader() {
