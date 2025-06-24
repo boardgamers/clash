@@ -15,10 +15,13 @@ use crate::incident::draw_and_discard_incident_card_from_pile;
 use crate::map::Terrain;
 use crate::map::Terrain::Fertile;
 use crate::objective_card::{discard_objective_card, gain_objective_card_from_pile};
+use crate::payment::PaymentConversion;
 use crate::player::{Player, gain_unit};
 use crate::position::Position;
+use crate::resource::ResourceType;
 use crate::tactics_card::CombatRole;
 use crate::unit::UnitType;
+use crate::utils;
 use crate::wonder::Wonder;
 use crate::{resource_pile::ResourcePile, wonder::WonderInfo};
 use itertools::Itertools;
@@ -399,6 +402,17 @@ fn colosseum() -> WonderInfo {
             }
         },
     )
+    .add_transient_event_listener(|events| &mut events.general_payment_conversions, 50, |conversions, (), (), _| {
+        conversions.push(PaymentConversion::unlimited(ResourcePile::of(ResourceType::MoodTokens, 1), ResourcePile::of(ResourceType::CultureTokens, 1)));
+        conversions.push(PaymentConversion::unlimited(ResourcePile::of(ResourceType::CultureTokens, 1), ResourcePile::of(ResourceType::MoodTokens, 1)));
+    })
+    .add_transient_event_listener(|events| &mut events.building_cost, 100, |costs, _, _, _| {
+        let conversions = &mut costs.cost.conversions;
+        let conversion = PaymentConversion::unlimited(ResourcePile::of(ResourceType::MoodTokens, 1), ResourcePile::of(ResourceType::CultureTokens, 1));
+        utils::remove_element(conversions, &conversion);
+        let conversion = PaymentConversion::unlimited(ResourcePile::of(ResourceType::CultureTokens, 1), ResourcePile::of(ResourceType::MoodTokens, 1));
+        utils::remove_element(conversions, &conversion);
+    })
     .build()
 }
 

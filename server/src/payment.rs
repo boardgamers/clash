@@ -3,7 +3,6 @@ use crate::events::{EventOrigin, EventPlayer, check_event_origin};
 use crate::player::Player;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
-use crate::wonder::Wonder;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
@@ -186,16 +185,9 @@ impl PaymentOptions {
     }
 
     fn add_extra_options(mut self, player: &Player, _origin: EventOrigin) -> Self {
-        if player.wonders_owned.contains(Wonder::Colosseum) {
-            self.conversions.push(PaymentConversion::unlimited(
-                ResourcePile::of(ResourceType::CultureTokens, 1),
-                ResourcePile::of(ResourceType::MoodTokens, 1),
-            ));
-            self.conversions.push(PaymentConversion::unlimited(
-                ResourcePile::of(ResourceType::MoodTokens, 1),
-                ResourcePile::of(ResourceType::CultureTokens, 1),
-            ));
-        }
+        let mut extra_conversions = Vec::new();
+        player.trigger_event(|events| &events.general_payment_conversions, &mut extra_conversions, &(), &());
+        self.conversions.append(&mut extra_conversions);
         self
     }
 
@@ -265,9 +257,9 @@ impl Display for PaymentOptions {
         // this is a bit ugly, make it nicer
         for conversion in &self.conversions {
             if let Some(to) = conversion.to.types().first() {
-                write!(f, " > {to}")?;
+                write!(f, " (replaceable by {to})")?;
             } else {
-                write!(f, " > may reduce payment")?;
+                write!(f, " (may reduce payment)")?;
             }
             match conversion.payment_conversion_type {
                 PaymentConversionType::Unlimited => {}
@@ -275,7 +267,7 @@ impl Display for PaymentOptions {
                     write!(f, " (up to: {i})")?;
                 }
                 PaymentConversionType::MayNotOverpay(i) => {
-                    write!(f, " (limit: {i})")?;
+                    write!(f, " (up to: {i})")?;
                 }
             }
         }

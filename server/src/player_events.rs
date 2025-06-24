@@ -15,7 +15,7 @@ use crate::game::Game;
 use crate::incident::PassedIncident;
 use crate::map::Terrain;
 use crate::objective_card::SelectObjectivesInfo;
-use crate::payment::PaymentOptions;
+use crate::payment::{PaymentConversion, PaymentOptions};
 use crate::playing_actions::{ActionPayment, PlayingActionType};
 use crate::recruit::Recruit;
 use crate::resource::pay_cost;
@@ -64,6 +64,8 @@ pub(crate) struct TransientEvents {
     pub terrain_collect_options: Event<HashMap<Terrain, HashSet<ResourcePile>>>,
     pub collect_options: Event<CollectInfo, CollectContext, Game>,
     pub collect_total: Event<CollectInfo, Game, Vec<PositionCollection>>,
+
+    pub general_payment_conversions: Event<Vec<PaymentConversion>>
 }
 
 impl TransientEvents {
@@ -84,6 +86,8 @@ impl TransientEvents {
             terrain_collect_options: Event::new("terrain_collect_options"),
             collect_options: Event::new("collect_options"),
             collect_total: Event::new("collect_total"),
+
+            general_payment_conversions: Event::new("payment_conversions"),
         }
     }
 }
