@@ -7,7 +7,7 @@ use crate::content::ability::Ability;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::PersistentEventState;
-use crate::game::{Game, GameContext, GameOptions, GameState};
+use crate::game::{Game, GameContext, GameOptions, GameState, UIElement};
 use crate::leader::Leader;
 use crate::log::ActionLogAge;
 use crate::map::{Map, MapData};
@@ -92,6 +92,9 @@ pub struct GameData {
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     permanent_effects: Vec<PermanentEffect>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "HashMap::is_empty")]
+    custom_ui_elements: HashMap<String, UIElement>,
 }
 
 ///
@@ -133,6 +136,7 @@ pub fn from_data(data: GameData, cache: Cache, context: GameContext) -> Game {
         incidents_discarded: data.incidents_discarded,
         permanent_effects: data.permanent_effects,
         events: data.events,
+        custom_ui_elements: data.custom_ui_elements,
     };
     let all = game.cache.get_abilities().clone();
     let mut objectives = vec![];
@@ -179,6 +183,7 @@ pub fn data(game: Game) -> GameData {
         incidents_left: game.incidents_left,
         incidents_discarded: game.incidents_discarded,
         permanent_effects: game.permanent_effects,
+        custom_ui_elements: game.custom_ui_elements,
     }
 }
 
@@ -214,6 +219,7 @@ pub fn cloned_data(game: &Game) -> GameData {
         incidents_left: game.incidents_left.clone(),
         incidents_discarded: game.incidents_discarded.clone(),
         permanent_effects: game.permanent_effects.clone(),
+        custom_ui_elements: game.custom_ui_elements.clone(),
     }
 }
 

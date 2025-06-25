@@ -176,6 +176,7 @@ pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
         incidents_left,
         incidents_discarded: Vec::new(),
         permanent_effects: Vec::new(),
+        custom_ui_elements: HashMap::new(),
     };
     for i in 0..game.players.len() {
         ability::init_player(&mut game, i, all);
