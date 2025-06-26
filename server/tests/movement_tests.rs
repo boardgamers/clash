@@ -230,11 +230,7 @@ fn assert_navigate(game: &mut Game, from: Position, to: Position) {
     set_unit_position(1, 1, from, game);
     let result = possible_move_routes(game.player(1), game, &[1], from, None)
         .is_ok_and(|d| d.iter().any(|route| route.destination == to));
-    assert!(
-        result,
-        "expected to be able to move from {} to {}",
-        from, to,
-    );
+    assert!(result, "expected to be able to move from {from} to {to}");
 }
 
 #[test]

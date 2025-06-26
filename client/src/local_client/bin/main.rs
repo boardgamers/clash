@@ -63,7 +63,7 @@ fn get_modes(args: &[String]) -> Vec<Mode> {
             "generate" => vec![Mode::Local],
             "ai" => vec![Mode::AI, Mode::Local],
             _ => {
-                panic!("Unknown argument: {}", arg);
+                panic!("Unknown argument: {arg}");
             }
         },
         _ => vec![Mode::Local],

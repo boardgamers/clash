@@ -103,7 +103,7 @@ impl RemoteClient {
         loop {
             let p = self.control.receive_player_index().as_f64();
             if let Some(p) = p {
-                log(&format!("received player index: {}", p));
+                log(&format!("received player index: {p}"));
                 self.state.control_player = Some(p as usize);
                 self.state.show_player = p as usize;
             }

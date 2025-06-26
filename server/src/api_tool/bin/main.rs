@@ -20,7 +20,7 @@ fn main() {
             replay(args.get(2));
         }
         _ => {
-            println!("Unknown command: {}", command);
+            println!("Unknown command: {command}");
         }
     }
 }
