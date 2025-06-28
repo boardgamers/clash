@@ -13,6 +13,11 @@ pub const FONT_SIZE: u16 = 20;
 
 pub const UI_BACKGROUND: Color = WHITE.with_alpha(0.8);
 
+pub(crate) enum IconBackground {
+    None,
+    Circle,
+}
+
 pub(crate) fn icon_offset(i: i8) -> f32 {
     f32::from(i) * 1.4 * ICON_SIZE
 }
@@ -65,8 +70,7 @@ pub(crate) fn bottom_center_texture(
     p: Vec2,
     tooltip: &str,
 ) -> bool {
-    let anchor = bottom_center_anchor(rc);
-    draw_icon(rc, texture, tooltip, anchor + p)
+    draw_icon(rc, texture, tooltip, bottom_center_anchor(rc) + p)
 }
 
 pub(crate) fn bottom_centered_text_with_offset(
