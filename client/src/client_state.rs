@@ -8,7 +8,7 @@ use crate::custom_phase_ui::{
 use crate::dialog_ui::BaseOrCustomDialog;
 use crate::event_ui::{custom_phase_event_help, custom_phase_event_origin, event_help, pay_help};
 use crate::happiness_ui::IncreaseHappinessConfig;
-use crate::layout_ui::FONT_SIZE;
+use crate::layout_ui::{FONT_SIZE, IconBackground};
 use crate::log_ui::{LogDialog, get_log_end};
 use crate::map_ui::ExploreResolutionConfig;
 use crate::move_ui::{MoveIntent, MovePayment, MoveSelection};
@@ -330,6 +330,7 @@ pub(crate) struct MousePosition {
     pub time: f64,
 }
 
+#[derive(Clone)]
 pub(crate) enum CameraMode {
     Screen,
     World,
@@ -398,6 +399,7 @@ impl State {
             state: self,
             camera_mode: CameraMode::Screen,
             stage,
+            icon_background: IconBackground::Auto,
         }
     }
 

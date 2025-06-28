@@ -3,7 +3,11 @@ use crate::city_ui::city_labels;
 use crate::client::Features;
 use crate::client_state::{NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::{OkTooltip, ok_button};
-use crate::layout_ui::{ICON_SIZE, UI_BACKGROUND, bottom_center_texture, bottom_centered_text, bottom_right_texture, button_pressed, icon_pos, top_center_anchor, top_center_texture, bottom_center_anchor};
+use crate::layout_ui::{
+    ICON_SIZE, IconBackground, UI_BACKGROUND, bottom_center_anchor, bottom_center_texture,
+    bottom_centered_text, bottom_right_texture, button_pressed, icon_pos, top_center_anchor,
+    top_center_texture,
+};
 use crate::log_ui::multiline_label;
 use crate::map_ui::terrain_name;
 use crate::render_context::RenderContext;
@@ -108,13 +112,15 @@ pub(crate) fn bottom_icon_with_label(
         25.,
         UI_BACKGROUND,
     );
-    
+
     rc.draw_text(
         label,
         rc.state.screen_size.x / 2.0 + p.x + x,
-        rc.state.screen_size.y + p.y + 35.,
+        rc.state.screen_size.y + p.y + 33.,
     );
-    bottom_center_texture(rc, texture, p, tooltip);
+    let mut r = rc.clone();
+    r.icon_background = IconBackground::None;
+    bottom_center_texture(&r, texture, p, tooltip);
 }
 
 pub(crate) fn show_top_center(rc: &RenderContext) {

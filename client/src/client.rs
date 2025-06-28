@@ -61,21 +61,21 @@ fn render(rc: &RenderContext, features: &Features) -> RenderResult {
     if rc.stage.is_main() {
         render_map(rc)?;
     }
-    
-    if !(&rc.state).active_dialog.is_modal() && rc.stage.is_ui() {
+
+    if !rc.state.active_dialog.is_modal() && rc.stage.is_ui() {
         render_ui(rc, features)?;
     }
 
-    show_modal_dialog_toggles(&rc)?;
+    show_modal_dialog_toggles(rc)?;
 
-    if rc.can_control_shown_player() || (&rc.state).active_dialog.show_for_other_player() {
+    if rc.can_control_shown_player() || rc.state.active_dialog.show_for_other_player() {
         render_active_dialog(rc)?;
     }
 
     if rc.stage.is_tooltip() {
         render_map(rc)?;
     }
-    
+
     NO_UPDATE
 }
 

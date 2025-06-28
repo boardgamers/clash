@@ -13,9 +13,11 @@ pub const FONT_SIZE: u16 = 20;
 
 pub const UI_BACKGROUND: Color = WHITE.with_alpha(0.8);
 
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) enum IconBackground {
     None,
-    Circle,
+    // Circle unless on map
+    Auto,
 }
 
 pub(crate) fn icon_offset(i: i8) -> f32 {
@@ -156,14 +158,14 @@ pub(crate) fn draw_scaled_icon_with_tooltip(
     size: f32,
 ) -> bool {
     if rc.stage.is_main() {
-        if rc.stage.is_ui() {
+        if rc.stage.is_ui() && rc.icon_background == IconBackground::Auto {
             rc.draw_circle(
                 origin + vec2(size / 2., size / 2.),
                 (size / 2.) + 5.,
                 UI_BACKGROUND,
             );
         }
-        
+
         draw_texture_ex(
             texture,
             origin.x,
