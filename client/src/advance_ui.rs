@@ -139,7 +139,7 @@ fn border_color(a: &AdvanceInfo) -> Color {
 fn description(rc: &RenderContext, a: &AdvanceInfo) -> Vec<String> {
     let mut parts: Vec<String> = vec![];
     parts.push(a.name.clone());
-    break_text(&mut parts, &a.description);
+    break_text(rc, &mut parts, &a.description);
     parts.push(format!(
         "Cost: {}",
         rc.shown_player
@@ -181,7 +181,7 @@ fn description(rc: &RenderContext, a: &AdvanceInfo) -> Vec<String> {
     if let Some(a) = find_special_advance(a.advance, rc.game, rc.shown_player.index) {
         let s = a.info(rc.game);
         parts.push(format!("Special advance: {}", s.name));
-        break_text(&mut parts, &s.description);
+        break_text(rc, &mut parts, &s.description);
     }
 
     parts

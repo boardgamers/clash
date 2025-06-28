@@ -1,4 +1,4 @@
-use crate::client_state::{NO_UPDATE, RenderResult};
+use crate::client_state::{NO_UPDATE, RenderResult, State};
 use crate::render_context::RenderContext;
 use macroquad::math::vec2;
 use server::game::Game;
@@ -21,27 +21,27 @@ impl LogDialog {
 }
 
 pub(crate) fn show_log(rc: &RenderContext, d: &LogDialog) -> RenderResult {
-    draw_log(rc.game, d.log_scroll, |label: &str, y: f32| {
+    draw_log(rc.game, rc.state, d.log_scroll, |label: &str, y: f32| {
         let p = vec2(30., y * 25. + 20.);
         rc.draw_text(label, p.x, p.y);
     });
     NO_UPDATE
 }
 
-pub(crate) fn get_log_end(game: &Game, height: f32) -> f32 {
+pub(crate) fn get_log_end(game: &Game, state: &State, height: f32) -> f32 {
     let mut end = 0.;
-    draw_log(game, 0., |_label: &str, y: f32| {
+    draw_log(game, state, 0., |_label: &str, y: f32| {
         end = y;
     });
     -end + (height - 40.) / 25.
 }
 
-fn draw_log(game: &Game, start_scroll: f32, mut render: impl FnMut(&str, f32)) {
+fn draw_log(game: &Game, state: &State, start_scroll: f32, mut render: impl FnMut(&str, f32)) {
     let mut y = start_scroll;
 
     for l in &game.log {
         for e in l {
-            multiline_label(e, 90, |label: &str| {
+            multiline_label(state, e, state.screen_size.x - 100., |label: &str| {
                 render(label, y);
                 y += 1.;
             });
@@ -49,10 +49,12 @@ fn draw_log(game: &Game, start_scroll: f32, mut render: impl FnMut(&str, f32)) {
     }
 }
 
-pub(crate) fn multiline_label(label: &str, len: usize, mut print: impl FnMut(&str)) {
+pub(crate) fn multiline_label(state: &State, label: &str, len: f32, mut print: impl FnMut(&str)) {
     let mut line = String::new();
     label.split(' ').for_each(|s| {
-        if line.len() + s.len() > len {
+        let next = format!("{line} {s}");
+        let dimensions = state.measure_text(&next);
+        if dimensions.width > len {
             print(&line);
             line = "    ".to_string();
         }
@@ -66,14 +68,14 @@ pub(crate) fn multiline_label(label: &str, len: usize, mut print: impl FnMut(&st
     }
 }
 
-pub(crate) fn break_text(result: &mut Vec<String>, label: &str) {
-    multiline_label(label, 70, |label: &str| {
+pub(crate) fn break_text(rc: &RenderContext, result: &mut Vec<String>, label: &str) {
+    multiline_label(rc.state, label, 500., |label: &str| {
         result.push(label.to_string());
     });
 }
 
-pub(crate) fn break_each(result: &mut Vec<String>, labels: &[String]) {
+pub(crate) fn break_each(rc: &RenderContext, result: &mut Vec<String>, labels: &[String]) {
     for label in labels {
-        break_text(result, label);
+        break_text(rc, result, label);
     }
 }

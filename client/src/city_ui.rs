@@ -394,7 +394,7 @@ pub(crate) fn add_building_description(rc: &RenderContext, parts: &mut Vec<Strin
         parts.push(format!("Base cost: {BUILDING_COST}"));
         parts.push(format!("Current cost: {pile}"));
     }
-    break_text(parts, b.description());
+    break_text(rc, parts, b.description());
 }
 
 #[allow(clippy::result_large_err)]

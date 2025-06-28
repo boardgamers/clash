@@ -4,8 +4,8 @@ use crate::client::Features;
 use crate::client_state::{NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::{OkTooltip, ok_button};
 use crate::layout_ui::{
-    ICON_SIZE, bottom_center_texture, bottom_centered_text, bottom_right_texture, button_pressed,
-    icon_pos, top_center_anchor, top_center_texture,
+    ICON_SIZE, UI_BACKGROUND, bottom_center_texture, bottom_centered_text, bottom_right_texture,
+    button_pressed, icon_pos, top_center_anchor, top_center_texture,
 };
 use crate::log_ui::multiline_label;
 use crate::map_ui::terrain_name;
@@ -90,12 +90,9 @@ pub(crate) fn top_icon_with_label(
     tooltip: &str,
 ) {
     let dimensions = rc.state.measure_text(label);
-    let x = (ICON_SIZE - dimensions.width) / 2.0;
-    rc.draw_text(
-        label,
-        rc.state.screen_size.x / 2.0 + p.x + x,
-        p.y + ICON_SIZE + 30.,
-    );
+    let x = rc.state.screen_size.x / 2.0 + p.x + ((ICON_SIZE - dimensions.width) / 2.0) - 20.;
+    let y = p.y + ICON_SIZE + 30.;
+    rc.draw_text(label, x, y);
     top_center_texture(rc, texture, p, tooltip);
 }
 
@@ -119,6 +116,8 @@ pub(crate) fn bottom_icon_with_label(
 
 pub(crate) fn show_top_center(rc: &RenderContext) {
     let player = rc.shown_player;
+
+    rc.draw_rectangle(top_center_rect(rc), UI_BACKGROUND);
 
     let pos = icon_pos(3, 0);
     top_icon_with_label(
@@ -168,37 +167,30 @@ pub(crate) fn show_top_center(rc: &RenderContext) {
     }
 }
 
-pub(crate) fn show_top_left(rc: &RenderContext) {
-    let mut p = vec2(10., 10.);
-    let mut label = |label: &str| {
-        multiline_label(label, 30, |label: &str| {
-            p = vec2(p.x, p.y + 25.);
-            if p.y > rc.state.screen_size.y - 150. {
-                p = vec2(p.x + 350., 85.);
-            }
-            rc.draw_text(label, p.x, p.y);
-        });
-    };
+fn top_center_rect(rc: &RenderContext) -> Rect {
+    Rect::new(rc.state.screen_size.x / 2. - 200., 5., 400., 60.)
+}
 
+pub(crate) fn show_top_left(rc: &RenderContext, painter: &mut ColumnLabelPainter) {
     let game = rc.game;
 
     match &game.state {
-        GameState::Finished => label("Finished"),
-        _ => label(&format!("Age {}", game.age)),
+        GameState::Finished => painter.label("Finished"),
+        _ => painter.label(&format!("Age {}", game.age)),
     }
     if let Some(s) = get_status_phase(game) {
-        label(&format!("Status Phase: {s}"));
+        painter.label(&format!("Status Phase: {s}"));
     } else {
-        label(&format!("Round {}", game.round));
+        painter.label(&format!("Round {}", game.round));
     }
 
     let player = rc.shown_player;
 
-    label(&player.get_name());
+    painter.label(&player.get_name());
 
-    label(&format!("Civ {}", player.civilization.name));
+    painter.label(&format!("Civ {}", player.civilization.name));
 
-    label(&format!(
+    painter.label(&format!(
         "Leader {}",
         if let Some(l) = &player.active_leader() {
             l.name(game)
@@ -209,17 +201,17 @@ pub(crate) fn show_top_left(rc: &RenderContext) {
 
     if game.current_player_index == player.index {
         if get_status_phase(game).is_none() && game.state != GameState::Finished {
-            label(&format!("{} actions left", game.actions_left));
+            painter.label(&format!("{} actions left", game.actions_left));
         }
         if let GameState::Movement(moves) = &game.state {
             let movement_actions_left = moves.movement_actions_left;
-            label(&format!("Move units: {movement_actions_left} moves left"));
+            painter.label(&format!("Move units: {movement_actions_left} moves left"));
             match moves.current_move {
-                CurrentMove::Fleet { .. } => label(
+                CurrentMove::Fleet { .. } => painter.label(
                     "May continue to move the fleet in the same sea without using movement actions",
                 ),
                 CurrentMove::Embark { .. } => {
-                    label("May continue to embark units without using movement actions");
+                    painter.label("May continue to embark units without using movement actions");
                 }
                 CurrentMove::None => {}
             }
@@ -228,37 +220,103 @@ pub(crate) fn show_top_left(rc: &RenderContext) {
 
     if let Some(c) = get_combat(game) {
         if c.attacker.player == player.index {
-            label(&format!("Attack - combat round {}", c.round));
+            painter.label(&format!("Attack - combat round {}", c.round));
         } else if c.defender.player == player.index {
-            label(&format!("Defend - combat round {}", c.round));
+            painter.label(&format!("Defend - combat round {}", c.round));
         }
     }
 
     if rc.shown_player_is_active() || rc.state.active_dialog.show_for_other_player() {
         for m in rc.state.active_dialog.help_message(rc) {
-            label(&m);
+            painter.label(&m);
         }
     }
 
     if rc.shown_player_is_active() {
         if let Some(u) = &rc.state.pending_update {
             for m in &u.info {
-                label(m);
+                painter.label(m);
             }
         }
     }
 
     if let Some(position) = rc.state.focused_tile {
-        show_focused_tile(&mut label, game, position);
+        show_focused_tile(painter, game, position);
     }
 
     if rc.state.show_permanent_effects {
-        show_permanent_effects(rc, &mut label, game, player);
+        show_permanent_effects(painter, game, player);
     }
 }
 
-fn show_focused_tile(label: &mut impl FnMut(&str), game: &Game, position: Position) {
-    label(&format!(
+pub(crate) struct ColumnLabelPainter<'a> {
+    rc: &'a RenderContext<'a>,
+    start: Vec2,
+    position: Vec2,
+    pub background_mode: bool,
+    max_column_width: f32,
+    used_column_width: f32,
+}
+
+impl<'a> ColumnLabelPainter<'a> {
+    pub fn new(rc: &'a RenderContext, background_mode: bool) -> Self {
+        let p = vec2(10., 10.);
+        let mut painter = Self {
+            rc,
+            position: p,
+            start: p,
+            background_mode,
+            max_column_width: rc.state.screen_size.x / 4.,
+            used_column_width: 0.,
+        };
+        painter.new_column();
+        painter
+    }
+
+    pub fn label(&mut self, text: &str) {
+        let rc = self.rc;
+        multiline_label(rc.state, text, self.max_column_width, |label| {
+            self.used_column_width = self
+                .used_column_width
+                .max(rc.state.measure_text(label).width);
+            if !self.background_mode {
+                rc.draw_text(label, self.position.x, self.position.y + 15.);
+            }
+            self.position.y += 25.;
+        });
+
+        if self.position.y > rc.state.screen_size.y - 150. {
+            self.draw_rect();
+            self.start = vec2(self.position.x + self.used_column_width + 10., 10.);
+            self.new_column();
+        }
+    }
+
+    fn new_column(&mut self) {
+        let center_rect = top_center_rect(self.rc);
+        if self.start.x + self.max_column_width > center_rect.x {
+            self.start.y = center_rect.y + center_rect.h + 10.;
+        }
+        self.position = self.start;
+    }
+
+    pub fn draw_rect(&mut self) {
+        if self.background_mode {
+            self.rc.draw_rectangle(
+                Rect::new(
+                    self.start.x,
+                    self.start.y,
+                    self.used_column_width,
+                    self.position.y - self.start.y,
+                ),
+                UI_BACKGROUND,
+            );
+        }
+    }
+}
+
+fn show_focused_tile(painter: &mut ColumnLabelPainter, game: &Game, position: Position) {
+    painter.label(&format!(
         "{}/{}/{}",
         position,
         block_for_position(game, position).0,
@@ -269,38 +327,33 @@ fn show_focused_tile(label: &mut impl FnMut(&str), game: &Game, position: Positi
 
     if let Some(c) = game.try_get_any_city(position) {
         for l in city_labels(game, c) {
-            label(&l);
+            painter.label(&l);
         }
     }
 
     let units = unit_ui::units_on_tile(game, position).collect_vec();
     if !units.is_empty() {
-        label(&format!("Controlled by: {}", game.player_name(units[0].0)));
+        painter.label(&format!("Controlled by: {}", game.player_name(units[0].0)));
     }
 
     for (p, unit) in units {
         let army_move = game.player(p).has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
-        label(&unit_ui::unit_label(&unit, army_move, game));
+        painter.label(&unit_ui::unit_label(&unit, army_move, game));
     }
 }
 
-fn show_permanent_effects(
-    rc: &RenderContext,
-    label: &mut impl FnMut(&str),
-    game: &Game,
-    player: &Player,
-) {
+fn show_permanent_effects(painter: &mut ColumnLabelPainter, game: &Game, player: &Player) {
     let s = &player.secrets;
     if !s.is_empty() {
-        label("Secrets:");
+        painter.label("Secrets:");
         for e in s {
-            label(e);
+            painter.label(e);
         }
     }
-    label("Permanent effects:");
+    painter.label("Permanent effects:");
     for e in &game.permanent_effects {
-        for m in e.description(rc.game) {
-            label(&m);
+        for m in e.description(painter.rc.game) {
+            painter.label(&m);
         }
     }
 }

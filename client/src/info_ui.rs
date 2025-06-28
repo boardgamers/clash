@@ -145,7 +145,7 @@ fn show_incidents(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
             |i| i.name.clone(),
             |i| {
                 let mut d: Vec<String> = vec![];
-                break_each(&mut d, &i.description(rc.game));
+                break_each(rc, &mut d, &i.description(rc.game));
                 d
             },
             |d| &d.incident,
@@ -269,7 +269,7 @@ fn show_units(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
                 if let Some(r) = u.required_building() {
                     parts.push(format!("Required building: {}", r.name()));
                 }
-                break_text(&mut parts, &u.description());
+                break_text(rc, &mut parts, &u.description());
                 parts
             },
             |d| &d.unit,
@@ -324,22 +324,22 @@ fn show_civilization(rc: &RenderContext, c: &Civilization) {
     for (i, a) in c.special_advances.iter().enumerate() {
         let mut tooltip: Vec<String> = vec![];
         let label = &format!("Name: {}", a.name);
-        break_text(&mut tooltip, label);
+        break_text(rc, &mut tooltip, label);
         let label = &format!("Required advance: {}", a.requirement.name(rc.game));
-        break_text(&mut tooltip, label);
+        break_text(rc, &mut tooltip, label);
         let label = &a.description;
-        break_text(&mut tooltip, label);
+        break_text(rc, &mut tooltip, label);
 
         draw_button(rc, &a.name, vec2(i as f32, 2.), &tooltip, false);
     }
     for (i, l) in c.leaders.iter().enumerate() {
         let mut tooltip: Vec<String> = vec![];
         let label = &format!("Name: {}", l.name);
-        break_text(&mut tooltip, label);
+        break_text(rc, &mut tooltip, label);
         for a in &l.abilities {
             tooltip.push(format!("Leader ability: {}", a.name));
             let label = &a.description;
-            break_text(&mut tooltip, label);
+            break_text(rc, &mut tooltip, label);
         }
 
         draw_button(rc, &l.name, vec2(i as f32, 3.), &tooltip, false);

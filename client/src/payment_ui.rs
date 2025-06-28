@@ -1,6 +1,6 @@
 use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::OkTooltip;
-use crate::event_ui::event_help;
+use crate::event_ui::event_help_tooltip;
 use crate::layout_ui::{
     ICON_SIZE, bottom_centered_text_with_offset, draw_scaled_icon_with_tooltip,
 };
@@ -143,7 +143,7 @@ pub(crate) fn multi_payment_dialog<T: Clone>(
             payments
                 .iter()
                 .flat_map(|p| &p.cost.modifiers)
-                .flat_map(|o| event_help(rc, o))
+                .flat_map(|o| event_help_tooltip(rc, o))
                 .collect::<Vec<_>>()
         } else {
             vec![]

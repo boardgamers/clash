@@ -12,7 +12,7 @@ use crate::client_state::{
 };
 use crate::collect_ui::collect_dialog;
 use crate::construct_ui::pay_construction_dialog;
-use crate::event_ui::{custom_phase_event_origin, event_help};
+use crate::event_ui::{custom_phase_event_origin, event_help_tooltip};
 use crate::happiness_ui::{increase_happiness_click, increase_happiness_menu};
 use crate::hex_ui::pixel_to_coordinate;
 use crate::info_ui::{InfoDialog, show_info_dialog};
@@ -22,7 +22,9 @@ use crate::layout_ui::{
 };
 use crate::log_ui::{LogDialog, show_log};
 use crate::map_ui::{draw_map, explore_dialog, show_tile_menu};
-use crate::player_ui::{player_select, show_global_controls, show_top_center, show_top_left};
+use crate::player_ui::{
+    ColumnLabelPainter, player_select, show_global_controls, show_top_center, show_top_left,
+};
 use crate::render_context::{RenderContext, RenderStage};
 use crate::unit_ui::unit_selection_click;
 use crate::{
@@ -49,33 +51,76 @@ fn render_with_mutable_state(game: &Game, state: &mut State, features: &Features
 }
 
 fn set_y_zoom(state: &mut State) {
-    let w = state.screen_size.x - 530.;
-    let h = state.screen_size.y - 170.;
-    state.camera.viewport = Some((270, 90, w as i32, h as i32));
-
+    let w = state.screen_size.x;
+    let h = state.screen_size.y;
+    state.camera.viewport = Some((0, 0, w as i32, h as i32));
     state.camera.zoom.y = state.camera.zoom.x * w / h;
 }
 
 fn render(rc: &RenderContext, features: &Features) -> RenderResult {
     let state = &rc.state;
-    let show_map = !state.active_dialog.is_modal() && rc.stage.is_map();
-    let show_ui = !state.active_dialog.is_modal() && rc.stage.is_ui();
 
-    if show_map {
-        rc.with_camera(CameraMode::World, draw_map)?;
+    if !state.active_dialog.is_modal() && rc.stage.is_map() {
+        rc.with_camera(CameraMode::World, render_map)?;
     }
-    if show_ui {
-        show_top_left(rc);
+    if !state.active_dialog.is_modal() && rc.stage.is_ui() {
+        render_ui(rc, features)?;
     }
-    if show_map {
-        show_top_center(rc);
-    }
-    if show_ui {
-        show_cards(rc)?;
-        player_select(rc)?;
-        show_global_controls(rc, features)?;
+    
+    show_modal_dialog_toggles(&rc)?;
+    
+    if rc.can_control_shown_player() || state.active_dialog.show_for_other_player() {
+        render_active_dialog(rc)?;
     }
 
+    NO_UPDATE
+}
+
+fn render_map(rc: &RenderContext) -> RenderResult {
+    draw_map(rc)?;
+    try_click(rc)
+}
+
+fn render_ui(rc: &RenderContext, features: &Features) -> RenderResult {
+    show_top_center(rc);
+    let mut painter = ColumnLabelPainter::new(rc, true);
+
+    show_top_left(rc, &mut painter);
+    painter.draw_rect();
+    show_top_left(rc, &mut ColumnLabelPainter::new(rc, false));
+
+    show_cards(rc)?;
+    player_select(rc)?;
+    show_global_controls(rc, features)?;
+
+    let state = &rc.state;
+    if top_right_texture(
+        rc,
+        &rc.assets().show_permanent_effects,
+        icon_pos(-4, 0),
+        if state.show_permanent_effects {
+            "Hide permanent effects"
+        } else {
+            "Show permanent effects"
+        },
+    ) {
+        return StateUpdate::of(StateUpdate::ToggleShowPermanentEffects);
+    }
+
+    if rc.can_control_shown_player() && let Some(u) = &state.pending_update {
+        dialog_ui::show_pending_update(u, rc)?;
+    }
+
+    if let Some(pos) = state.focused_tile {
+        if matches!(state.active_dialog, ActiveDialog::None) {
+            show_tile_menu(rc, pos)?;
+        }
+    }
+    NO_UPDATE
+}
+
+fn show_modal_dialog_toggles(rc: &RenderContext) -> RenderResult {
+    let state = &rc.state;
     if top_right_texture(rc, &rc.assets().log, icon_pos(-1, 0), "Show log") {
         if let ActiveDialog::Log(_) = state.active_dialog {
             return StateUpdate::close_dialog();
@@ -88,19 +133,7 @@ fn render(rc: &RenderContext, features: &Features) -> RenderResult {
         }
         return StateUpdate::open_dialog(ActiveDialog::AdvanceMenu);
     }
-    if top_right_texture(
-        rc,
-        &rc.assets().show_permanent_effects,
-        icon_pos(-3, 0),
-        if state.show_permanent_effects {
-            "Hide permanent effects"
-        } else {
-            "Show permanent effects"
-        },
-    ) {
-        return StateUpdate::of(StateUpdate::ToggleShowPermanentEffects);
-    }
-    if top_right_texture(rc, &rc.assets().info, icon_pos(-4, 0), "Show info") {
+    if top_right_texture(rc, &rc.assets().info, icon_pos(-3, 0), "Show info") {
         if let ActiveDialog::Info(_) = state.active_dialog {
             return StateUpdate::close_dialog();
         }
@@ -108,22 +141,6 @@ fn render(rc: &RenderContext, features: &Features) -> RenderResult {
             rc.shown_player.civilization.name.clone(),
         )));
     }
-
-    let can_control = rc.can_control_shown_player();
-    if can_control && let Some(u) = &state.pending_update {
-        dialog_ui::show_pending_update(u, rc)?;
-    }
-
-    if can_control || state.active_dialog.show_for_other_player() {
-        render_active_dialog(rc)?;
-    }
-
-    if let Some(pos) = state.focused_tile {
-        if matches!(state.active_dialog, ActiveDialog::None) {
-            show_tile_menu(rc, pos)?;
-        }
-    }
-    rc.with_camera(CameraMode::World, try_click)?;
     NO_UPDATE
 }
 
@@ -210,7 +227,7 @@ fn dialog_chooser(rc: &RenderContext, c: &DialogChooser) -> RenderResult {
         let offset = vec2(0., i as f32 * h + 35.);
         let (name, tooltip) = origin.as_ref().map_or_else(
             || ("standard action".to_string(), vec![]),
-            |o| (o.name(rc.game), event_help(rc, o)),
+            |o| (o.name(rc.game), event_help_tooltip(rc, o)),
         );
 
         bottom_centered_text_with_offset(rc, &name, offset, &tooltip);

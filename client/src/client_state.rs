@@ -358,7 +358,7 @@ pub struct State {
 }
 
 pub const ZOOM: f32 = 0.001;
-pub const OFFSET: Vec2 = vec2(0., 0.45);
+pub const OFFSET: Vec2 = vec2(-0.75, 0.55);
 pub const MIN_OFFSET: Vec2 = vec2(-1.7, -1.);
 pub const MAX_OFFSET: Vec2 = vec2(1.2, 3.);
 
@@ -430,7 +430,7 @@ impl State {
             }
             StateUpdate::OpenDialog(mut dialog) => {
                 if let ActiveDialog::Log(d) = &mut dialog {
-                    d.log_scroll = get_log_end(game, self.screen_size.y);
+                    d.log_scroll = get_log_end(game, self, self.screen_size.y);
                 }
                 let d = self.game_state_dialog(game);
                 if matches!(dialog, ActiveDialog::AdvanceMenu) && d.is_advance() {
