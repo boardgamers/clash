@@ -1,6 +1,8 @@
 use crate::client_state::{NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::{OkTooltip, cancel_button, ok_button};
-use crate::layout_ui::{ICON_SIZE, bottom_center_anchor, bottom_center_texture, IconBackground, UI_BACKGROUND};
+use crate::layout_ui::{
+    ICON_SIZE, IconBackground, UI_BACKGROUND, bottom_center_anchor, bottom_center_texture,
+};
 use crate::render_context::RenderContext;
 use macroquad::color::{BLACK, BLUE, Color, WHITE};
 use macroquad::math::{Vec2, bool, vec2};
@@ -45,11 +47,7 @@ pub(crate) fn count_dialog<C, O: HasCountSelectableObject>(
         let c = o.counter();
 
         let point = vec2(x + 17., -70.) + anchor + offset;
-        rc.draw_circle(
-            point,
-            SELECT_RADIUS,
-            UI_BACKGROUND
-        );
+        rc.draw_circle(point, SELECT_RADIUS, UI_BACKGROUND);
         let mut r = rc.clone();
         r.icon_background = IconBackground::None;
         draw(&r, o, point);

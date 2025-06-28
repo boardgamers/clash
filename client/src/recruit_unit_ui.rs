@@ -172,7 +172,7 @@ pub(crate) fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> RenderResu
         |s| s.selectable.clone(),
         |rc, s, p| {
             draw_unit_type(
-                &rc,
+                rc,
                 if s.cost.is_ok() {
                     HighlightType::None
                 } else {
