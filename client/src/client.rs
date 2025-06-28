@@ -110,10 +110,8 @@ fn render(rc: &RenderContext, features: &Features) -> RenderResult {
     }
 
     let can_control = rc.can_control_shown_player();
-    if can_control {
-        if let Some(u) = &state.pending_update {
-            dialog_ui::show_pending_update(u, rc)?;
-        }
+    if can_control && let Some(u) = &state.pending_update {
+        dialog_ui::show_pending_update(u, rc)?;
     }
 
     if can_control || state.active_dialog.show_for_other_player() {

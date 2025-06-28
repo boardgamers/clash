@@ -49,7 +49,7 @@ async fn test_random_actions() {
             handle.await;
             iteration += 1;
             if iteration % 100 == 0 {
-                println!("Iterations: {}", iteration);
+                println!("Iterations: {iteration}");
             }
         }
         if iteration >= iterations {

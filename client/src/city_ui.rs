@@ -435,7 +435,7 @@ pub(crate) fn building_position(city: &City, center: Vec2, i: usize, building: B
             .coordinate()
             .directions_to(city.port_position.unwrap().coordinate())[0]
             .to_radians_pointy();
-        hex_ui::rotate_around_rad(center, 60.0, r * -1.0 + std::f32::consts::PI / 3.0)
+        hex_ui::rotate_around_rad(center, 60.0, -r + std::f32::consts::PI / 3.0)
     } else {
         hex_ui::rotate_around(center, 25.0, 90 * i)
     }

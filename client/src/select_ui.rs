@@ -36,7 +36,7 @@ pub(crate) fn count_dialog<C, O: HasCountSelectableObject>(
         .into_iter()
         .filter(|o| show(container, o))
         .collect::<Vec<_>>();
-    let start_x = objects.len() as f32 * -1. / 2.;
+    let start_x = -(objects.len() as f32) / 2.;
     let anchor = bottom_center_anchor(rc);
     for (i, o) in objects.iter().enumerate() {
         let x = (start_x + i as f32) * ICON_SIZE * 2.;
