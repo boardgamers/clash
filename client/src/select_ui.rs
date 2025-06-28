@@ -1,6 +1,6 @@
 use crate::client_state::{NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::{OkTooltip, cancel_button, ok_button};
-use crate::layout_ui::{ICON_SIZE, bottom_center_anchor, bottom_center_texture};
+use crate::layout_ui::{ICON_SIZE, bottom_center_anchor, bottom_center_texture, IconBackground, UI_BACKGROUND};
 use crate::render_context::RenderContext;
 use macroquad::color::{BLACK, BLUE, Color, WHITE};
 use macroquad::math::{Vec2, bool, vec2};
@@ -17,12 +17,14 @@ pub trait HasCountSelectableObject {
     fn counter(&self) -> &CountSelector;
 }
 
+pub(crate) const SELECT_RADIUS: f32 = 35.;
+
 #[allow(clippy::too_many_arguments)]
 pub(crate) fn count_dialog<C, O: HasCountSelectableObject>(
     rc: &RenderContext,
     container: &C,
     get_objects: impl Fn(&C) -> Vec<O>,
-    draw: impl Fn(&O, Vec2),
+    draw: impl Fn(&RenderContext, &O, Vec2),
     draw_tooltip: impl Fn(&O, Vec2),
     is_valid: impl FnOnce() -> OkTooltip,
     execute_action: impl FnOnce() -> RenderResult,
@@ -42,9 +44,16 @@ pub(crate) fn count_dialog<C, O: HasCountSelectableObject>(
         let x = (start_x + i as f32) * ICON_SIZE * 2.;
         let c = o.counter();
 
-        let point = vec2(x + 7., -60.) + anchor + offset;
-        draw(o, point);
-        let current_pos = vec2(x + 13., -ICON_SIZE) + anchor + offset;
+        let point = vec2(x + 17., -70.) + anchor + offset;
+        rc.draw_circle(
+            point,
+            SELECT_RADIUS,
+            UI_BACKGROUND
+        );
+        let mut r = rc.clone();
+        r.icon_background = IconBackground::None;
+        draw(&r, o, point);
+        let current_pos = vec2(x + 13., -40.) + anchor + offset;
         rc.draw_text_with_color(
             &format!("{}", c.current),
             current_pos.x,

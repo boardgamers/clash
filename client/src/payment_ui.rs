@@ -7,7 +7,7 @@ use crate::layout_ui::{
 use crate::render_context::RenderContext;
 use crate::resource_ui::{new_resource_map, resource_name};
 use crate::select_ui;
-use crate::select_ui::{CountSelector, HasCountSelectableObject};
+use crate::select_ui::{CountSelector, HasCountSelectableObject, SELECT_RADIUS};
 use crate::tooltip::show_tooltip_for_circle;
 use itertools::Itertools;
 use macroquad::math::{bool, vec2};
@@ -156,19 +156,19 @@ pub(crate) fn multi_payment_dialog<T: Clone>(
         bottom_centered_text_with_offset(
             rc,
             &format!("{name} for {cost}{suffix}"),
-            offset + vec2(0., -30.),
+            offset + vec2(0., -70.),
             &[],
         );
         select_ui::count_dialog(
             rc,
             payment,
             |p| p.current.clone(),
-            |s, p| {
+            |rc, s, p| {
                 let _ = draw_scaled_icon_with_tooltip(
                     rc,
                     &rc.assets().resources[&s.resource],
                     &[],
-                    p + vec2(0., -10.),
+                    p + vec2(-15., -15.),
                     ICON_SIZE,
                 );
             },
@@ -176,8 +176,8 @@ pub(crate) fn multi_payment_dialog<T: Clone>(
                 show_tooltip_for_circle(
                     rc,
                     &[resource_name(s.resource).to_string()],
-                    p + vec2(0., -10.),
-                    ICON_SIZE,
+                    p,
+                    SELECT_RADIUS,
                 );
             },
             || tooltip.clone(),
