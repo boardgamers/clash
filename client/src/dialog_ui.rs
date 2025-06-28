@@ -27,7 +27,7 @@ pub(crate) fn show_pending_update(update: &PendingUpdate, rc: &RenderContext) ->
     } else {
         &format!("Warning: {}", update.warning.join(", "))
     };
-    bottom_centered_text_with_offset(rc, t, vec2(0., 30.), &[]);
+    bottom_centered_text_with_offset(rc, t, vec2(0., -110.), &[]);
 
     if ok_button(rc, OkTooltip::Valid("OK".to_string())) {
         return StateUpdate::resolve_pending_update(true);

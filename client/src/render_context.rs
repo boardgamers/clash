@@ -1,6 +1,6 @@
 use crate::assets::Assets;
 use crate::client_state::{CameraMode, RenderResult, State};
-use crate::layout_ui::limit_str;
+use crate::layout_ui::{IconBackground, limit_str};
 use crate::payment_ui::Payment;
 use macroquad::camera::set_default_camera;
 use macroquad::color::{Color, PINK, YELLOW};
@@ -37,12 +37,14 @@ impl RenderStage {
     }
 }
 
+#[derive(Clone)]
 pub(crate) struct RenderContext<'a> {
     pub game: &'a Game,
     pub state: &'a State,
     pub shown_player: &'a Player,
     pub camera_mode: CameraMode,
     pub stage: RenderStage,
+    pub icon_background: IconBackground,
 }
 
 impl RenderContext<'_> {
@@ -61,6 +63,7 @@ impl RenderContext<'_> {
             shown_player: self.shown_player,
             camera_mode: mode,
             stage: self.stage,
+            icon_background: self.icon_background.clone(),
         };
         next.set_camera();
         let update = f(&next);

@@ -1,4 +1,5 @@
 use crate::cards_ui::{action_card_object, objective_card_object, wonder_description};
+use crate::city_ui::add_building_description;
 use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::layout_ui::button_pressed;
 use crate::log_ui::{break_each, break_text};
@@ -8,11 +9,14 @@ use macroquad::color::Color;
 use macroquad::math::{Rect, Vec2, vec2};
 use macroquad::prelude::{BLACK, BLUE, GREEN, MAGENTA, WHITE, YELLOW};
 use server::action_card::ActionCard;
+use server::city_pieces::{BUILDINGS, Building};
 use server::civilization::Civilization;
 use server::content::civilizations;
 use server::game::Game;
 use server::incident::Incident;
+use server::leader::Leader;
 use server::objective_card::ObjectiveCard;
+use server::unit::UnitType;
 use server::wonder::{Wonder, WonderInfo};
 use std::fmt::Display;
 use std::ops::Mul;
@@ -53,6 +57,8 @@ pub(crate) struct InfoDialog {
     pub incident: u8,
     pub action_card: u8,
     pub objective_card: u8,
+    pub unit: UnitType,
+    pub building: Building,
 }
 
 impl InfoDialog {
@@ -64,6 +70,8 @@ impl InfoDialog {
             incident: 1,
             action_card: 1,
             objective_card: 1,
+            unit: UnitType::Settler,
+            building: Building::Academy,
         }
     }
 }
@@ -75,6 +83,8 @@ pub(crate) enum InfoCategory {
     Incident,
     ActionCard,
     ObjectiveCard,
+    Buildings,
+    Unit,
 }
 
 pub(crate) fn show_info_dialog(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
@@ -90,85 +100,10 @@ pub(crate) fn show_info_dialog(rc: &RenderContext, d: &InfoDialog) -> RenderResu
     show_incidents(rc, d)?;
     show_action_cards(rc, d)?;
     show_objective_cards(rc, d)?;
+    show_buildings(rc, d)?;
+    show_units(rc, d)?;
 
     NO_UPDATE
-}
-
-fn show_incidents(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
-    show_category(rc, d, 2, InfoCategory::Incident, "Events", |rc, d| {
-        show_category_items::<Incident, u8>(
-            rc,
-            d,
-            |g| g.cache.get_incidents(),
-            |i| &i.id,
-            |i| i.name.clone(),
-            |i| {
-                let mut d: Vec<String> = vec![];
-                break_each(&mut d, &i.description(rc.game));
-                d
-            },
-            |d| &d.incident,
-            |d, i| d.incident = i,
-            // todo public from permanent effects
-            |i| VisibleCardLocation::from_piles(&i.id, &rc.game.incidents_discarded, &[]),
-        )
-    })
-}
-
-fn show_action_cards(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
-    show_category(
-        rc,
-        d,
-        3,
-        InfoCategory::ActionCard,
-        "Action Cards",
-        |rc, d| {
-            show_category_items::<ActionCard, u8>(
-                rc,
-                d,
-                |g| g.cache.get_action_cards(),
-                |i| &i.id,
-                ActionCard::name,
-                |i| action_card_object(rc, i.id).description,
-                |d| &d.action_card,
-                |d, i| d.action_card = i,
-                |i| VisibleCardLocation::from_piles(&i.id, &rc.game.action_cards_discarded, &[]),
-            )
-        },
-    )
-}
-
-fn show_objective_cards(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
-    show_category(
-        rc,
-        d,
-        4,
-        InfoCategory::ObjectiveCard,
-        "Objective Cards",
-        |rc, d| {
-            show_category_items::<ObjectiveCard, u8>(
-                rc,
-                d,
-                |g| g.cache.get_objective_cards(),
-                |i| &i.id,
-                ObjectiveCard::name,
-                |i| objective_card_object(rc, i.id, None).description,
-                |d| &d.objective_card,
-                |d, i| d.objective_card = i,
-                |i| {
-                    VisibleCardLocation::from_piles(
-                        &i.id,
-                        &[],
-                        &rc.game
-                            .players
-                            .iter()
-                            .flat_map(|p| p.completed_objectives.iter().map(|o| o.card))
-                            .collect_vec(),
-                    )
-                },
-            )
-        },
-    )
 }
 
 fn show_wonders(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
@@ -183,7 +118,7 @@ fn show_wonders(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
             |d| &d.wonder,
             |d, w| d.wonder = w,
             |w| {
-                VisibleCardLocation::from_piles(
+                Some(VisibleCardLocation::from_piles(
                     &w.wonder,
                     &[],
                     &rc.game
@@ -194,8 +129,152 @@ fn show_wonders(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
                             |p| p.wonders_built.clone(),
                         )
                         .collect_vec(),
-                )
+                ))
             },
+        )
+    })
+}
+
+fn show_incidents(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
+    show_category(rc, d, 2, InfoCategory::Incident, "Events", |rc, d| {
+        show_category_items::<Incident, u8>(
+            rc,
+            d,
+            |g| g.cache.get_incidents(),
+            |i| &i.id,
+            |i| i.name.clone(),
+            |i| {
+                let mut d: Vec<String> = vec![];
+                break_each(rc, &mut d, &i.description(rc.game));
+                d
+            },
+            |d| &d.incident,
+            |d, i| d.incident = i,
+            // todo public from permanent effects
+            |i| {
+                Some(VisibleCardLocation::from_piles(
+                    &i.id,
+                    &rc.game.incidents_discarded,
+                    &[],
+                ))
+            },
+        )
+    })
+}
+
+fn show_action_cards(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
+    show_category(rc, d, 3, InfoCategory::ActionCard, "Actions", |rc, d| {
+        show_category_items::<ActionCard, u8>(
+            rc,
+            d,
+            |g| g.cache.get_action_cards(),
+            |i| &i.id,
+            ActionCard::name,
+            |i| action_card_object(rc, i.id).description,
+            |d| &d.action_card,
+            |d, i| d.action_card = i,
+            |i| {
+                Some(VisibleCardLocation::from_piles(
+                    &i.id,
+                    &rc.game.action_cards_discarded,
+                    &[],
+                ))
+            },
+        )
+    })
+}
+
+fn show_objective_cards(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
+    show_category(
+        rc,
+        d,
+        4,
+        InfoCategory::ObjectiveCard,
+        "Objectives",
+        |rc, d| {
+            show_category_items::<ObjectiveCard, u8>(
+                rc,
+                d,
+                |g| g.cache.get_objective_cards(),
+                |i| &i.id,
+                ObjectiveCard::name,
+                |i| objective_card_object(rc, i.id, None).description,
+                |d| &d.objective_card,
+                |d, i| d.objective_card = i,
+                |i| {
+                    Some(VisibleCardLocation::from_piles(
+                        &i.id,
+                        &[],
+                        &rc.game
+                            .players
+                            .iter()
+                            .flat_map(|p| p.completed_objectives.iter().map(|o| o.card))
+                            .collect_vec(),
+                    ))
+                },
+            )
+        },
+    )
+}
+
+fn show_buildings(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
+    show_category(rc, d, 5, InfoCategory::Buildings, "Buildings", |rc, d| {
+        show_category_items::<Building, Building>(
+            rc,
+            d,
+            |_| &BUILDINGS,
+            |b| b,
+            |b| b.name().to_string(),
+            |b| {
+                let mut desc = vec![b.name().to_string()];
+                let advance = rc.game.cache.get_building_advance(*b).name(rc.game);
+                desc.push(format!("Required advance: {advance}"));
+                add_building_description(rc, &mut desc, *b);
+                desc
+            },
+            |d| &d.building,
+            |d, b| d.building = b,
+            |_| None,
+        )
+    })
+}
+
+const UNIT_TYPES: [UnitType; 6] = [
+    UnitType::Settler,
+    UnitType::Infantry,
+    UnitType::Ship,
+    UnitType::Cavalry,
+    UnitType::Elephant,
+    UnitType::Leader(Leader::Alexander), // Placeholder for leaders
+];
+
+fn show_units(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
+    show_category(rc, d, 6, InfoCategory::Unit, "Units", |rc, d| {
+        show_category_items::<UnitType, UnitType>(
+            rc,
+            d,
+            |_| &UNIT_TYPES,
+            |u| u,
+            |u| {
+                if u.is_leader() {
+                    "leader"
+                } else {
+                    u.non_leader_name()
+                }
+                .to_string()
+            },
+            |u| {
+                let mut parts: Vec<String> = vec![];
+                parts.push(format!("Cost: {}", u.cost()));
+                if let Some(r) = u.required_building() {
+                    parts.push(format!("Required building: {}", r.name()));
+                }
+                break_text(rc, &mut parts, &u.description());
+                parts
+            },
+            |d| &d.unit,
+            |d, u| d.unit = u,
+            |_| None,
         )
     })
 }
@@ -245,22 +324,22 @@ fn show_civilization(rc: &RenderContext, c: &Civilization) {
     for (i, a) in c.special_advances.iter().enumerate() {
         let mut tooltip: Vec<String> = vec![];
         let label = &format!("Name: {}", a.name);
-        break_text(&mut tooltip, label);
+        break_text(rc, &mut tooltip, label);
         let label = &format!("Required advance: {}", a.requirement.name(rc.game));
-        break_text(&mut tooltip, label);
+        break_text(rc, &mut tooltip, label);
         let label = &a.description;
-        break_text(&mut tooltip, label);
+        break_text(rc, &mut tooltip, label);
 
         draw_button(rc, &a.name, vec2(i as f32, 2.), &tooltip, false);
     }
     for (i, l) in c.leaders.iter().enumerate() {
         let mut tooltip: Vec<String> = vec![];
         let label = &format!("Name: {}", l.name);
-        break_text(&mut tooltip, label);
+        break_text(rc, &mut tooltip, label);
         for a in &l.abilities {
             tooltip.push(format!("Leader ability: {}", a.name));
             let label = &a.description;
-            break_text(&mut tooltip, label);
+            break_text(rc, &mut tooltip, label);
         }
 
         draw_button(rc, &l.name, vec2(i as f32, 3.), &tooltip, false);
@@ -270,13 +349,13 @@ fn show_civilization(rc: &RenderContext, c: &Civilization) {
 fn show_category_items<T: Clone, K: PartialEq + Ord + Clone>(
     rc: &RenderContext,
     dialog: &InfoDialog,
-    get_all: impl Fn(&Game) -> &Vec<T>,
+    get_all: impl Fn(&Game) -> &[T],
     get_key: impl Fn(&T) -> &K,
     name: impl Fn(&T) -> String,
     description: impl Fn(&T) -> Vec<String>,
     get_selected: impl Fn(&InfoDialog) -> &K,
     set_selected: impl Fn(&mut InfoDialog, K),
-    get_location: impl Fn(&T) -> VisibleCardLocation,
+    get_location: impl Fn(&T) -> Option<VisibleCardLocation>,
 ) -> RenderResult {
     for (i, info) in get_all(rc.game)
         .iter()
@@ -287,18 +366,20 @@ fn show_category_items<T: Clone, K: PartialEq + Ord + Clone>(
         let name = name(info);
         let mut desc = description(info);
         let location = get_location(info);
-        desc.insert(0, format!("Location: {location}"));
-
+        if let Some(l) = &location {
+            desc.insert(0, format!("Location: {l}"));
+        }
+        let columns = 7;
         if draw_button_with_color(
             rc,
             &name,
-            vec2(i.rem_euclid(8) as f32, ((i / 8) + 1) as f32),
+            vec2(i.rem_euclid(columns) as f32, ((i / columns) + 1) as f32),
             &desc,
             selected,
             match location {
-                VisibleCardLocation::DiscardPile => BLUE,
-                VisibleCardLocation::Public => YELLOW,
-                VisibleCardLocation::Unknown => GREEN,
+                Some(VisibleCardLocation::DiscardPile) => BLUE,
+                Some(VisibleCardLocation::Public) => YELLOW,
+                Some(VisibleCardLocation::Unknown) | None => GREEN,
             },
         ) {
             let mut new = dialog.clone();

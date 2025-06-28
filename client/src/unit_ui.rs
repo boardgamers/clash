@@ -329,11 +329,11 @@ pub(crate) fn unit_selection_clicked(unit_id: u32, units: &mut Vec<u32>) {
 
 pub(crate) fn add_unit_description(rc: &RenderContext, parts: &mut Vec<String>, u: UnitType) {
     parts.push(format!("Cost: {}", u.cost()));
-    break_text(parts, &u.description());
+    break_text(rc, parts, &u.description());
     if let UnitType::Leader(l) = u {
         for a in &rc.game.cache.get_leader(&l).abilities {
             parts.push(format!("Leader ability: {}", a.name));
-            break_text(parts, &a.description);
+            break_text(rc, parts, &a.description);
         }
     }
 }

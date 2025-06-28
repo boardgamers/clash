@@ -1,13 +1,19 @@
-use crate::log_ui::{break_each, break_text};
+use crate::log_ui::break_each;
 use crate::payment_ui::Payment;
 use crate::render_context::RenderContext;
 use server::events::EventOrigin;
 
 #[must_use]
+pub(crate) fn event_help_tooltip(rc: &RenderContext, origin: &EventOrigin) -> Vec<String> {
+    let mut help = vec![];
+    break_each(rc, &mut help, &event_help(rc, origin));
+    help
+}
+
+#[must_use]
 pub(crate) fn event_help(rc: &RenderContext, origin: &EventOrigin) -> Vec<String> {
-    let mut h = vec![origin.name(rc.game)];
     let cache = &rc.game.cache;
-    let d = match origin {
+    match origin {
         EventOrigin::Advance(a) => vec![a.info(rc.game).description.clone()],
         EventOrigin::Wonder(w) => vec![rc.game.cache.get_wonder(*w).description.clone()],
         EventOrigin::Ability(b) => {
@@ -21,16 +27,13 @@ pub(crate) fn event_help(rc: &RenderContext, origin: &EventOrigin) -> Vec<String
             vec![rc.shown_player.get_leader_ability(l).description.clone()]
         }
         EventOrigin::SpecialAdvance(s) => vec![s.info(rc.game).description.clone()],
-    };
-
-    break_each(&mut h, &d);
-    h
+    }
 }
 
 #[must_use]
 pub(crate) fn custom_phase_event_help(rc: &RenderContext, description: &str) -> Vec<String> {
     let mut h = event_help(rc, &custom_phase_event_origin(rc));
-    break_text(&mut h, description);
+    h.push(description.to_string());
     h
 }
 

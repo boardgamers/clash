@@ -8,7 +8,7 @@ use crate::custom_phase_ui::{
 use crate::dialog_ui::BaseOrCustomDialog;
 use crate::event_ui::{custom_phase_event_help, custom_phase_event_origin, event_help, pay_help};
 use crate::happiness_ui::IncreaseHappinessConfig;
-use crate::layout_ui::FONT_SIZE;
+use crate::layout_ui::{FONT_SIZE, IconBackground};
 use crate::log_ui::{LogDialog, get_log_end};
 use crate::map_ui::ExploreResolutionConfig;
 use crate::move_ui::{MoveIntent, MovePayment, MoveSelection};
@@ -330,6 +330,7 @@ pub(crate) struct MousePosition {
     pub time: f64,
 }
 
+#[derive(Clone)]
 pub(crate) enum CameraMode {
     Screen,
     World,
@@ -358,7 +359,7 @@ pub struct State {
 }
 
 pub const ZOOM: f32 = 0.001;
-pub const OFFSET: Vec2 = vec2(0., 0.45);
+pub const OFFSET: Vec2 = vec2(-0.75, 0.55);
 pub const MIN_OFFSET: Vec2 = vec2(-1.7, -1.);
 pub const MAX_OFFSET: Vec2 = vec2(1.2, 3.);
 
@@ -398,6 +399,7 @@ impl State {
             state: self,
             camera_mode: CameraMode::Screen,
             stage,
+            icon_background: IconBackground::Auto,
         }
     }
 
@@ -430,7 +432,7 @@ impl State {
             }
             StateUpdate::OpenDialog(mut dialog) => {
                 if let ActiveDialog::Log(d) = &mut dialog {
-                    d.log_scroll = get_log_end(game, self.screen_size.y);
+                    d.log_scroll = get_log_end(game, self, self.screen_size.y);
                 }
                 let d = self.game_state_dialog(game);
                 if matches!(dialog, ActiveDialog::AdvanceMenu) && d.is_advance() {

@@ -21,7 +21,7 @@ use itertools::Itertools;
 use macroquad::math::f32;
 use macroquad::prelude::*;
 use server::city::{City, MoodState};
-use server::city_pieces::Building;
+use server::city_pieces::{BUILDINGS, Building};
 use server::collect::{available_collect_actions_for_city, possible_resource_collections};
 use server::construct::{can_construct, new_building_positions};
 use server::consts::BUILDING_COST;
@@ -119,7 +119,7 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
         return vec![];
     }
     let game = rc.game;
-    Building::all()
+    BUILDINGS
         .into_iter()
         .flat_map(|b| {
             let can = can_construct(
@@ -394,7 +394,7 @@ pub(crate) fn add_building_description(rc: &RenderContext, parts: &mut Vec<Strin
         parts.push(format!("Base cost: {BUILDING_COST}"));
         parts.push(format!("Current cost: {pile}"));
     }
-    break_text(parts, b.description());
+    break_text(rc, parts, b.description());
 }
 
 #[allow(clippy::result_large_err)]

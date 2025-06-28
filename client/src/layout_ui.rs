@@ -11,6 +11,15 @@ pub const MARGIN: f32 = 10.;
 
 pub const FONT_SIZE: u16 = 20;
 
+pub const UI_BACKGROUND: Color = WHITE.with_alpha(0.8);
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) enum IconBackground {
+    None,
+    // Circle unless on map
+    Auto,
+}
+
 pub(crate) fn icon_offset(i: i8) -> f32 {
     f32::from(i) * 1.4 * ICON_SIZE
 }
@@ -25,8 +34,7 @@ pub(crate) fn top_center_texture(
     p: Vec2,
     tooltip: &str,
 ) -> bool {
-    let anchor = top_center_anchor(rc);
-    draw_icon(rc, texture, tooltip, anchor + p)
+    draw_icon(rc, texture, tooltip, top_center_anchor(rc) + p)
 }
 
 pub(crate) fn top_centered_text(rc: &RenderContext, text: &str, p: Vec2) {
@@ -64,8 +72,7 @@ pub(crate) fn bottom_center_texture(
     p: Vec2,
     tooltip: &str,
 ) -> bool {
-    let anchor = bottom_center_anchor(rc);
-    draw_icon(rc, texture, tooltip, anchor + p)
+    draw_icon(rc, texture, tooltip, bottom_center_anchor(rc) + p)
 }
 
 pub(crate) fn bottom_centered_text_with_offset(
@@ -76,15 +83,16 @@ pub(crate) fn bottom_centered_text_with_offset(
 ) {
     let dimensions = rc.state.measure_text(text);
     let p = vec2(-dimensions.width / 2., -50.) + offset;
+    let a = bottom_center_anchor(rc) + p;
+    let rect = Rect::new(
+        a.x,
+        a.y - dimensions.offset_y,
+        dimensions.width,
+        dimensions.height,
+    );
+    rc.draw_rectangle(rect, UI_BACKGROUND);
     bottom_center_text(rc, text, p);
     if !tooltip.is_empty() {
-        let p = bottom_center_anchor(rc) + p;
-        let rect = Rect::new(
-            p.x,
-            p.y - dimensions.offset_y,
-            dimensions.width,
-            dimensions.height,
-        );
         show_tooltip_for_rect(rc, tooltip, rect, 50.);
     }
 }
@@ -135,7 +143,7 @@ pub(crate) fn draw_scaled_icon(
         vec![]
     } else {
         let mut parts: Vec<String> = vec![];
-        break_text(&mut parts, tooltip);
+        break_text(rc, &mut parts, tooltip);
         parts
     };
 
@@ -150,6 +158,14 @@ pub(crate) fn draw_scaled_icon_with_tooltip(
     size: f32,
 ) -> bool {
     if rc.stage.is_main() {
+        if rc.stage.is_ui() && rc.icon_background == IconBackground::Auto {
+            rc.draw_circle(
+                origin + vec2(size / 2., size / 2.),
+                (size / 2.) + 5.,
+                UI_BACKGROUND,
+            );
+        }
+
         draw_texture_ex(
             texture,
             origin.x,

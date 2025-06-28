@@ -1,7 +1,7 @@
 use crate::city_ui::{IconAction, IconActionVec};
 use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::BaseOrCustomDialog;
-use crate::event_ui::event_help;
+use crate::event_ui::event_help_tooltip;
 use crate::happiness_ui::open_increase_happiness_dialog;
 use crate::influence_ui::new_cultural_influence_dialog;
 use crate::layout_ui::{bottom_left_texture, icon_pos};
@@ -75,7 +75,7 @@ pub(crate) fn action_buttons(rc: &RenderContext) -> RenderResult {
                 rc,
                 &assets.custom_actions[&c.action],
                 icon_pos(i as i8, -1),
-                &event_help(rc, &c.event_origin),
+                &event_help_tooltip(rc, &c.event_origin),
             ) {
                 return action;
             }
@@ -101,7 +101,7 @@ pub(crate) fn custom_action_buttons<'a>(
             generic_custom_action(rc, &c, city).map(|action| {
                 IconAction::new(
                     &rc.assets().custom_actions[&c.action],
-                    event_help(rc, &c.event_origin),
+                    event_help_tooltip(rc, &c.event_origin),
                     Box::new(move || action.clone()),
                 )
             })

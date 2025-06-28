@@ -1,6 +1,6 @@
 use crate::advance::{Advance, gain_advance_without_payment};
 use crate::city::{City, MoodState, activate_city};
-use crate::city_pieces::{Building, gain_building};
+use crate::city_pieces::{BUILDINGS, Building, gain_building};
 use crate::consts::MAX_CITY_PIECES;
 use crate::content::persistent_events::PersistentEventType;
 use crate::events::{EventOrigin, EventPlayer};
@@ -242,7 +242,7 @@ pub fn available_buildings(
 ) -> Vec<(Building, CostInfo)> {
     let player = game.player(player);
     let city = player.get_city(city);
-    Building::all()
+    BUILDINGS
         .into_iter()
         .filter_map(|b| {
             can_construct(city, b, player, game, CostTrigger::NoModifiers, discounts)

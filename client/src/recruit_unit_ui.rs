@@ -6,7 +6,7 @@ use crate::construct_ui::{ConstructionPayment, ConstructionProject};
 use crate::dialog_ui::{OkTooltip, cancel_button, ok_button};
 use crate::render_context::RenderContext;
 use crate::select_ui;
-use crate::select_ui::{CountSelector, HasCountSelectableObject, HighlightType};
+use crate::select_ui::{CountSelector, HasCountSelectableObject, HighlightType, SELECT_RADIUS};
 use crate::tooltip::show_tooltip_for_circle;
 use crate::unit_ui::{UnitSelection, add_unit_description, draw_unit_type};
 use server::game::Game;
@@ -166,12 +166,11 @@ impl UnitSelection for RecruitSelection {
 
 pub(crate) fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> RenderResult {
     let game = rc.game;
-    let radius = 20.;
     select_ui::count_dialog(
         rc,
         a,
         |s| s.selectable.clone(),
-        |s, p| {
+        |rc, s, p| {
             draw_unit_type(
                 rc,
                 if s.cost.is_ok() {
@@ -179,10 +178,10 @@ pub(crate) fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> RenderResu
                 } else {
                     HighlightType::Warn
                 },
-                p,
+                p + Vec2::new(0., -6.),
                 s.unit_type,
                 rc.shown_player.index,
-                radius,
+                20.,
             );
         },
         |s, p| {
@@ -192,7 +191,7 @@ pub(crate) fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> RenderResu
             };
             let mut tooltip = vec![format!("Recruit {}{}", s.unit_type.name(game), suffix)];
             add_unit_description(rc, &mut tooltip, s.unit_type);
-            show_tooltip_for_circle(rc, &tooltip, p, radius);
+            show_tooltip_for_circle(rc, &tooltip, p, SELECT_RADIUS);
         },
         || OkTooltip::Valid("Recruit units".to_string()),
         || {

@@ -44,12 +44,13 @@ pub(crate) fn show_resource_pile(rc: &RenderContext, p: &ResourcePile) {
     for (i, r) in show.iter().rev().enumerate() {
         let x = (show.len() - i) as i8 - 3;
         let a = resource_map[r];
+        let pos = icon_pos(x, -2);
 
         bottom_icon_with_label(
             rc,
             &format!("{a}"),
             &rc.assets().resources[r],
-            icon_pos(x, -2) + vec2(0., 10.),
+            pos + vec2(0., 10.),
             resource_name(*r),
         );
     }
