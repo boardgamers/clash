@@ -18,7 +18,6 @@ pub enum VictoryPointAttribution {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct SpecialVictoryPoints {
-    #[serde(flatten)]
     pub points: f32,
     pub origin: EventOrigin,
     pub attribution: VictoryPointAttribution,

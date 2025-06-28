@@ -89,9 +89,6 @@
       "special_victory_points": [
         {
           "points": 1.0,
-          "explorer_tokens": [
-            "D2"
-          ],
           "origin": {
             "Ability": "Legendary Explorer"
           },
@@ -101,7 +98,14 @@
       "wonder_cards": [
         "Pyramids"
       ],
-      "next_unit_id": 10
+      "next_unit_id": 10,
+      "custom_data": {
+        "explorer": {
+          "Positions": [
+            "D2"
+          ]
+        }
+      }
     },
     {
       "id": 1,

@@ -17,7 +17,9 @@ pub enum PaymentConversionType {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 pub struct PaymentConversion {
-    pub from: Vec<ResourcePile>,       // alternatives
+    pub from: Vec<ResourcePile>, // alternatives
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub custom_costs: Vec<CustomCost>, //alternatives
     pub to: ResourcePile,
     #[serde(rename = "type")]
