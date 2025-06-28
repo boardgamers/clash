@@ -58,25 +58,35 @@ fn set_y_zoom(state: &mut State) {
 }
 
 fn render(rc: &RenderContext, features: &Features) -> RenderResult {
-    let state = &rc.state;
-
-    if !state.active_dialog.is_modal() && rc.stage.is_map() {
-        rc.with_camera(CameraMode::World, render_map)?;
+    if rc.stage.is_main() {
+        render_map(rc)?;
     }
-    if !state.active_dialog.is_modal() && rc.stage.is_ui() {
+    
+    if !(&rc.state).active_dialog.is_modal() && rc.stage.is_ui() {
         render_ui(rc, features)?;
     }
-    
+
     show_modal_dialog_toggles(&rc)?;
-    
-    if rc.can_control_shown_player() || state.active_dialog.show_for_other_player() {
+
+    if rc.can_control_shown_player() || (&rc.state).active_dialog.show_for_other_player() {
         render_active_dialog(rc)?;
     }
 
+    if rc.stage.is_tooltip() {
+        render_map(rc)?;
+    }
+    
     NO_UPDATE
 }
 
-fn render_map(rc: &RenderContext) -> RenderResult {
+fn render_map(rc: &RenderContext) -> Result<(), Box<StateUpdate>> {
+    if !rc.state.active_dialog.is_modal() && rc.stage.is_map() {
+        rc.with_camera(CameraMode::World, render_with_world)?;
+    }
+    Ok(())
+}
+
+fn render_with_world(rc: &RenderContext) -> RenderResult {
     draw_map(rc)?;
     try_click(rc)
 }
@@ -107,7 +117,9 @@ fn render_ui(rc: &RenderContext, features: &Features) -> RenderResult {
         return StateUpdate::of(StateUpdate::ToggleShowPermanentEffects);
     }
 
-    if rc.can_control_shown_player() && let Some(u) = &state.pending_update {
+    if rc.can_control_shown_player()
+        && let Some(u) = &state.pending_update
+    {
         dialog_ui::show_pending_update(u, rc)?;
     }
 

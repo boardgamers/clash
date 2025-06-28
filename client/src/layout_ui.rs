@@ -152,12 +152,13 @@ pub(crate) fn draw_scaled_icon_with_tooltip(
     size: f32,
 ) -> bool {
     if rc.stage.is_main() {
-        // todo
-        // if rc.stage.is_ui() {
-        //     rc.draw_circle(
-        //         
-        //     )
-        // }
+        if rc.stage.is_ui() {
+            rc.draw_circle(
+                origin + vec2(size / 2., size / 2.),
+                (size / 2.) + 5.,
+                UI_BACKGROUND,
+            );
+        }
         
         draw_texture_ex(
             texture,
