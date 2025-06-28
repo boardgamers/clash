@@ -28,6 +28,7 @@ use crate::wonder::Wonder;
 use crate::{city::City, game_data, map::Map, player::Player, position::Position};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::vec;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Default)]
@@ -101,6 +102,7 @@ pub struct Game {
     pub incidents_left: Vec<u8>,
     pub incidents_discarded: Vec<u8>,
     pub permanent_effects: Vec<PermanentEffect>,
+    pub custom_ui_elements: HashMap<String, UIElement>,
 }
 
 impl Clone for Game {
@@ -536,4 +538,11 @@ pub enum GameState {
     Playing,
     Movement(MoveState),
     Finished,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub struct UIElement {
+    text: String,
+    tooltip: String,
+    priority: u8,
 }

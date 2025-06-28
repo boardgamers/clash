@@ -102,7 +102,7 @@ fn captivi() -> SpecialAdvanceInfo {
         |event| &mut event.building_cost,
         2,
         |i, _b, _, p| {
-            i.cost.conversions.push(PaymentConversion::new(
+            i.cost.conversions.push(PaymentConversion::resource_options(
                 base_resources(),
                 ResourcePile::mood_tokens(1),
                 PaymentConversionType::Unlimited,

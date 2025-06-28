@@ -7,12 +7,12 @@ use crate::content::ability::Ability;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::PersistentEventState;
-use crate::game::{Game, GameContext, GameOptions, GameState};
+use crate::game::{Game, GameContext, GameOptions, GameState, UIElement};
 use crate::leader::Leader;
 use crate::log::ActionLogAge;
 use crate::map::{Map, MapData};
 use crate::objective_card::{CompletedObjective, init_objective_card};
-use crate::player::Player;
+use crate::player::{Data, Player};
 use crate::player_events::PlayerEvents;
 use crate::resource_pile::ResourcePile;
 use crate::unit::{Unit, UnitData};
@@ -92,6 +92,9 @@ pub struct GameData {
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     permanent_effects: Vec<PermanentEffect>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "HashMap::is_empty")]
+    custom_ui_elements: HashMap<String, UIElement>,
 }
 
 ///
@@ -133,6 +136,7 @@ pub fn from_data(data: GameData, cache: Cache, context: GameContext) -> Game {
         incidents_discarded: data.incidents_discarded,
         permanent_effects: data.permanent_effects,
         events: data.events,
+        custom_ui_elements: data.custom_ui_elements,
     };
     let all = game.cache.get_abilities().clone();
     let mut objectives = vec![];
@@ -179,6 +183,7 @@ pub fn data(game: Game) -> GameData {
         incidents_left: game.incidents_left,
         incidents_discarded: game.incidents_discarded,
         permanent_effects: game.permanent_effects,
+        custom_ui_elements: game.custom_ui_elements,
     }
 }
 
@@ -214,6 +219,7 @@ pub fn cloned_data(game: &Game) -> GameData {
         incidents_left: game.incidents_left.clone(),
         incidents_discarded: game.incidents_discarded.clone(),
         permanent_effects: game.permanent_effects.clone(),
+        custom_ui_elements: game.custom_ui_elements.clone(),
     }
 }
 
@@ -289,6 +295,9 @@ pub struct PlayerData {
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     secrets: Vec<String>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "HashMap::is_empty")]
+    custom_data: HashMap<String, Data>,
 }
 
 ///
@@ -391,6 +400,7 @@ fn player_from_data(data: PlayerData, game: &Game) -> Player {
         played_once_per_turn_actions: data.played_once_per_turn_actions,
         event_info: data.event_info,
         secrets: data.secrets,
+        custom_data: data.custom_data,
         objective_opportunities: Vec::new(),
         gained_objective: None,
         great_mausoleum_action_cards: 0,
@@ -438,6 +448,7 @@ pub fn player_data(player: Player) -> PlayerData {
         played_once_per_turn_actions: player.played_once_per_turn_actions,
         event_info: player.event_info,
         secrets: player.secrets,
+        custom_data: player.custom_data,
     }
 }
 
@@ -475,5 +486,6 @@ pub fn cloned_player_data(player: &Player) -> PlayerData {
         played_once_per_turn_actions: player.played_once_per_turn_actions.clone(),
         event_info: player.event_info.clone(),
         secrets: player.secrets.clone(),
+        custom_data: player.custom_data.clone(),
     }
 }
