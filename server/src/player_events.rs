@@ -65,7 +65,7 @@ pub(crate) struct TransientEvents {
     pub collect_options: Event<CollectInfo, CollectContext, Game>,
     pub collect_total: Event<CollectInfo, Game, Vec<PositionCollection>>,
 
-    pub general_payment_conversions: Event<Vec<PaymentConversion>>
+    pub general_payment_conversions: Event<Vec<PaymentConversion>>,
 }
 
 impl TransientEvents {

@@ -402,17 +402,37 @@ fn colosseum() -> WonderInfo {
             }
         },
     )
-    .add_transient_event_listener(|events| &mut events.general_payment_conversions, 50, |conversions, (), (), _| {
-        conversions.push(PaymentConversion::unlimited(ResourcePile::of(ResourceType::MoodTokens, 1), ResourcePile::of(ResourceType::CultureTokens, 1)));
-        conversions.push(PaymentConversion::unlimited(ResourcePile::of(ResourceType::CultureTokens, 1), ResourcePile::of(ResourceType::MoodTokens, 1)));
-    })
-    .add_transient_event_listener(|events| &mut events.building_cost, 100, |costs, _, _, _| {
-        let conversions = &mut costs.cost.conversions;
-        let conversion = PaymentConversion::unlimited(ResourcePile::of(ResourceType::MoodTokens, 1), ResourcePile::of(ResourceType::CultureTokens, 1));
-        utils::remove_element(conversions, &conversion);
-        let conversion = PaymentConversion::unlimited(ResourcePile::of(ResourceType::CultureTokens, 1), ResourcePile::of(ResourceType::MoodTokens, 1));
-        utils::remove_element(conversions, &conversion);
-    })
+    .add_transient_event_listener(
+        |events| &mut events.general_payment_conversions,
+        50,
+        |conversions, (), (), _| {
+            conversions.push(PaymentConversion::unlimited(
+                ResourcePile::of(ResourceType::MoodTokens, 1),
+                ResourcePile::of(ResourceType::CultureTokens, 1),
+            ));
+            conversions.push(PaymentConversion::unlimited(
+                ResourcePile::of(ResourceType::CultureTokens, 1),
+                ResourcePile::of(ResourceType::MoodTokens, 1),
+            ));
+        },
+    )
+    .add_transient_event_listener(
+        |events| &mut events.building_cost,
+        100,
+        |costs, _, _, _| {
+            let conversions = &mut costs.cost.conversions;
+            let conversion = PaymentConversion::unlimited(
+                ResourcePile::of(ResourceType::MoodTokens, 1),
+                ResourcePile::of(ResourceType::CultureTokens, 1),
+            );
+            utils::remove_element(conversions, &conversion);
+            let conversion = PaymentConversion::unlimited(
+                ResourcePile::of(ResourceType::CultureTokens, 1),
+                ResourcePile::of(ResourceType::MoodTokens, 1),
+            );
+            utils::remove_element(conversions, &conversion);
+        },
+    )
     .build()
 }
 

@@ -637,7 +637,8 @@ impl Data {
     /// # Panics
     ///
     /// Panics if the data is not a number.
-    #[must_use] pub fn number(&self) -> u32 {
+    #[must_use]
+    pub fn number(&self) -> u32 {
         if let Self::Number(v) = self {
             *v
         } else {
@@ -650,7 +651,8 @@ impl Data {
     /// # Panics
     ///
     /// Panics if the data is not a number.
-    #[must_use] pub fn number_mut(&mut self) -> &mut u32 {
+    #[must_use]
+    pub fn number_mut(&mut self) -> &mut u32 {
         if let Self::Number(v) = self {
             v
         } else {
@@ -663,7 +665,8 @@ impl Data {
     /// # Panics
     ///
     /// Panics if the data is not a list of positions.
-    #[must_use] pub fn positions(&self) -> &Vec<Position> {
+    #[must_use]
+    pub fn positions(&self) -> &Vec<Position> {
         if let Self::Positions(v) = self {
             v
         } else {
@@ -676,7 +679,8 @@ impl Data {
     /// # Panics
     ///
     /// Panics if the data is not a list of positions.
-    #[must_use] pub fn positions_mut(&mut self) -> &mut Vec<Position> {
+    #[must_use]
+    pub fn positions_mut(&mut self) -> &mut Vec<Position> {
         if let Self::Positions(v) = self {
             v
         } else {

@@ -186,7 +186,12 @@ impl PaymentOptions {
 
     fn add_extra_options(mut self, player: &Player, _origin: EventOrigin) -> Self {
         let mut extra_conversions = Vec::new();
-        player.trigger_event(|events| &events.general_payment_conversions, &mut extra_conversions, &(), &());
+        player.trigger_event(
+            |events| &events.general_payment_conversions,
+            &mut extra_conversions,
+            &(),
+            &(),
+        );
         self.conversions.append(&mut extra_conversions);
         self
     }
@@ -816,6 +821,7 @@ pub enum CustomCost {
     Prisoners(u32),
 }
 
+#[allow(dead_code)]
 impl CustomCost {
     fn can_afford(&self, player: &Player) -> bool {
         match self {
@@ -829,7 +835,11 @@ impl CustomCost {
     fn deduct(&self, player: &mut Player) {
         match self {
             CustomCost::Prisoners(count) => {
-                *player.custom_data.get_mut("prisoners").expect("prisoners data is missing").number_mut() -= count;
+                *player
+                    .custom_data
+                    .get_mut("prisoners")
+                    .expect("prisoners data is missing")
+                    .number_mut() -= count;
             }
         }
     }

@@ -26,11 +26,7 @@ pub struct SpecialVictoryPoints {
 
 impl SpecialVictoryPoints {
     #[must_use]
-    pub fn new(
-        points: f32,
-        origin: EventOrigin,
-        attribution: VictoryPointAttribution,
-    ) -> Self {
+    pub fn new(points: f32, origin: EventOrigin, attribution: VictoryPointAttribution) -> Self {
         Self {
             points,
             origin,
@@ -79,9 +75,7 @@ pub(crate) fn update_special_victory_points(
                 attribution,
             ));
     }
-    player
-        .special_victory_points
-        .retain(|p| p.points > 0.0);
+    player.special_victory_points.retain(|p| p.points > 0.0);
 }
 
 pub(crate) fn special_victory_points(p: &Player, attribution: VictoryPointAttribution) -> f32 {
