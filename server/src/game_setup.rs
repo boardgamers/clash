@@ -1,8 +1,9 @@
+use crate::action::Action;
 use crate::action_card::gain_action_card_from_pile;
-use crate::advance::{do_advance, Advance};
+use crate::advance::{Advance, do_advance};
 use crate::cache::Cache;
 use crate::city;
-use crate::city::{set_city_mood, City, MoodState};
+use crate::city::{City, MoodState, set_city_mood};
 use crate::civilization::Civilization;
 use crate::consts::{ACTIONS, JSON_SCHEMA_VERSION};
 use crate::content::civilizations::{BARBARIANS, CHOOSE_CIV, PIRATES};
@@ -10,9 +11,9 @@ use crate::content::{ability, civilizations};
 use crate::events::{EventOrigin, EventPlayer};
 use crate::game::{CivSetupOption, Game, GameContext, GameOptions, GameState};
 use crate::log::{add_player_log, add_round_log};
-use crate::map::{get_map_setup, Map, MapSetup};
+use crate::map::{Map, MapSetup, get_map_setup};
 use crate::objective_card::gain_objective_card_from_pile;
-use crate::player::{gain_unit, Player};
+use crate::player::{Player, gain_unit};
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
 use crate::utils::{Rng, Shuffle};
@@ -284,4 +285,26 @@ fn player_civ(
         }
         cache.get_civilization(&setup.assigned_civilizations[player_index])
     }
+}
+
+pub(crate) fn execute_choose_civ(
+    game: &mut Game,
+    player_index: usize,
+    action: &Action,
+) -> Result<(), String> {
+    if let Action::ChooseCiv(civ) = action {
+        game.player_mut(player_index).civilization = game.cache.get_civilization(&civ);
+    } else {
+        return Err("action should be a choose civ action".to_string());
+    }
+
+    game.log(
+        player_index,
+        &setup_event_origin(),
+        &format!(
+            "Player {player_index} chose civilization {}",
+            game.player(player_index).civilization.name
+        ),
+    );
+    Ok(())
 }

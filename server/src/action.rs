@@ -6,6 +6,7 @@ use crate::collect::on_collect;
 use crate::combat::{combat_loop, start_combat};
 use crate::combat_listeners::{combat_round_end, combat_round_start, on_end_combat};
 use crate::construct::on_construct;
+use crate::content::civilizations::CHOOSE_CIV;
 use crate::content::custom_actions::on_custom_action;
 use crate::content::persistent_events::{EventResponse, PersistentEventType};
 use crate::cultural_influence::on_cultural_influence;
@@ -29,6 +30,7 @@ use crate::undo::{clean_patch, redo, to_serde_value, undo};
 use crate::unit::units_killed;
 use crate::wonder::{on_draw_wonder_card, on_play_wonder_card};
 use serde::{Deserialize, Serialize};
+use crate::game_setup::execute_choose_civ;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub enum Action {
@@ -38,6 +40,7 @@ pub enum Action {
     Undo,
     Redo,
     StartTurn, // created for trade routes
+    ChooseCiv(String),
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -130,6 +133,10 @@ pub fn execute_without_undo(
             game.events.len()
         ));
         game.events.clear();
+    }
+
+    if game.player(player_index).civilization.name == CHOOSE_CIV {
+        execute_choose_civ(game, player_index, &action)?
     }
 
     match game.current_event_handler_mut() {
