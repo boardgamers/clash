@@ -6,14 +6,14 @@ use crate::collect::on_collect;
 use crate::combat::{combat_loop, start_combat};
 use crate::combat_listeners::{combat_round_end, combat_round_start, on_end_combat};
 use crate::construct::on_construct;
-use crate::content::civilizations::CHOOSE_CIV;
 use crate::content::custom_actions::on_custom_action;
 use crate::content::persistent_events::{EventResponse, PersistentEventType};
 use crate::cultural_influence::on_cultural_influence;
 use crate::events::EventPlayer;
 use crate::explore::ask_explore_resolution;
-use crate::game::GameState::{Finished, Movement, Playing};
+use crate::game::GameState;
 use crate::game::{Game, GameContext};
+use crate::game_setup::execute_choose_civ;
 use crate::incident::{on_choose_incident, on_trigger_incident};
 use crate::log::{
     ActionLogBalance, ActionLogEntry, add_action_log_item, add_log_action,
@@ -30,7 +30,6 @@ use crate::undo::{clean_patch, redo, to_serde_value, undo};
 use crate::unit::units_killed;
 use crate::wonder::{on_draw_wonder_card, on_play_wonder_card};
 use serde::{Deserialize, Serialize};
-use crate::game_setup::execute_choose_civ;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub enum Action {
@@ -40,7 +39,7 @@ pub enum Action {
     Undo,
     Redo,
     StartTurn, // created for trade routes
-    ChooseCiv(String),
+    ChooseCivilization(String),
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -133,10 +132,6 @@ pub fn execute_without_undo(
             game.events.len()
         ));
         game.events.clear();
-    }
-
-    if game.player(player_index).civilization.name == CHOOSE_CIV {
-        execute_choose_civ(game, player_index, &action)?
     }
 
     match game.current_event_handler_mut() {
@@ -309,7 +304,8 @@ fn execute_regular_action(
     player_index: usize,
 ) -> Result<(), String> {
     match game.state {
-        Playing => {
+        GameState::ChooseCivilization => execute_choose_civ(game, player_index, &action),
+        GameState::Playing => {
             if let Action::Movement(m) = action {
                 execute_movement_action(game, m.clone(), player_index)
             } else {
@@ -319,7 +315,7 @@ fn execute_regular_action(
                 action.execute(game, player_index, false)
             }
         }
-        Movement(_) => execute_movement_action(
+        GameState::Movement(_) => execute_movement_action(
             game,
             if let Action::Movement(v) = action {
                 v
@@ -328,7 +324,9 @@ fn execute_regular_action(
             },
             player_index,
         ),
-        Finished => Err("actions can't be executed when the game is finished".to_string()),
+        GameState::Finished => {
+            Err("actions can't be executed when the game is finished".to_string())
+        }
     }
 }
 

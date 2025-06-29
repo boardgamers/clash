@@ -435,7 +435,7 @@ fn can_end_move(game: &Game) -> Option<&str> {
     match game.state {
         GameState::Movement(_) => Some("End movement"),
         GameState::Playing => Some("End turn"),
-        GameState::Finished => None,
+        GameState::Finished | GameState::ChooseCivilization => None,
     }
 }
 

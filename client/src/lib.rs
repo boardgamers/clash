@@ -38,3 +38,4 @@ mod select_ui;
 mod status_phase_ui;
 mod tooltip;
 mod unit_ui;
+mod setup_ui;

@@ -62,7 +62,7 @@ pub(crate) struct InfoDialog {
 }
 
 impl InfoDialog {
-    pub(crate) fn new(civilization: String) -> Self {
+    pub(crate) fn select_civilization(civilization: String) -> Self {
         InfoDialog {
             select: InfoCategory::Civilization,
             civilization,

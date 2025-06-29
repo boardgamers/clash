@@ -149,7 +149,11 @@ pub fn setup_game_with_cache(setup: &GameSetup, cache: Cache) -> Game {
         version: JSON_SCHEMA_VERSION,
         options: setup.options.clone(),
         cache,
-        state: GameState::Playing,
+        state: if setup.options.civilization == CivSetupOption::ChooseCivilization {
+            GameState::ChooseCivilization
+        } else {
+            GameState::Playing
+        },
         events: Vec::new(),
         players,
         map,
@@ -292,13 +296,16 @@ pub(crate) fn execute_choose_civ(
     player_index: usize,
     action: &Action,
 ) -> Result<(), String> {
-    if let Action::ChooseCiv(civ) = action {
+    if let Action::ChooseCivilization(civ) = action {
         game.player_mut(player_index).civilization = game.cache.get_civilization(&civ);
     } else {
         return Err("action should be a choose civ action".to_string());
     }
 
     game.increment_player_index();
+    if game.current_player_index == 0 {
+        game.state = GameState::Playing;
+    }
     game.log(
         player_index,
         &setup_event_origin(),

@@ -48,9 +48,10 @@ pub(crate) enum ActiveDialog {
     ReplaceUnits(RecruitSelection),
     MoveUnits(MoveSelection),
     MovePayment(MovePayment),
-    ExploreResolution(ExploreResolutionConfig),
+    ChooseCivilization,
 
-    // custom
+    // event requests
+    ExploreResolution(ExploreResolutionConfig),
     ResourceRewardRequest(Payment<String>),
     AdvanceRequest(AdvanceRequest),
     PaymentRequest(Vec<Payment<String>>),
@@ -77,6 +78,9 @@ impl ActiveDialog {
             | ActiveDialog::Info(_)
             | ActiveDialog::DialogChooser(_)
             | ActiveDialog::AdvanceMenu => vec![],
+            ActiveDialog::ChooseCivilization => {
+                vec!["Click on a civilization to choose it".to_string()]
+            }
             ActiveDialog::IncreaseHappiness(h) => {
                 vec![
                     h.custom.title.clone(),
@@ -166,7 +170,7 @@ impl ActiveDialog {
 
     #[must_use]
     pub(crate) fn is_modal(&self) -> bool {
-        matches!(self, ActiveDialog::Log(_) | ActiveDialog::Info(_)) || self.is_advance()
+        matches!(self, ActiveDialog::Log(_) | ActiveDialog::Info(_) | ActiveDialog::ChooseCivilization) || self.is_advance()
     }
 
     #[must_use]
@@ -482,7 +486,7 @@ impl State {
         self.active_dialog = dialog;
     }
 
-    pub(crate) fn update_from_game(&mut self, game: &Game) -> GameSyncRequest {
+    pub fn update_from_game(&mut self, game: &Game) -> GameSyncRequest {
         let dialog = self.game_state_dialog(game);
         self.clear();
         self.active_dialog = dialog;
@@ -559,6 +563,7 @@ impl State {
             };
         }
         match &game.state {
+            GameState::ChooseCivilization => ActiveDialog::ChooseCivilization,
             GameState::Playing | GameState::Finished => ActiveDialog::None,
             GameState::Movement(move_state) => ActiveDialog::MoveUnits(MoveSelection::new(
                 game.active_player(),

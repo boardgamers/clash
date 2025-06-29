@@ -35,7 +35,7 @@ use std::vec;
 pub enum CivSetupOption {
     #[default]
     Random,
-    Select,
+    ChooseCivilization,
 }
 
 impl CivSetupOption {
@@ -552,6 +552,7 @@ impl Game {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum GameState {
+    ChooseCivilization,
     Playing,
     Movement(MoveState),
     Finished,
