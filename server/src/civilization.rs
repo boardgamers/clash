@@ -35,7 +35,7 @@ impl Civilization {
     pub fn is_pirates(&self) -> bool {
         self.name == PIRATES
     }
-    
+
     #[must_use]
     pub fn is_choose_civ(&self) -> bool {
         self.name == CHOOSE_CIV
@@ -44,5 +44,10 @@ impl Civilization {
     #[must_use]
     pub fn is_human(&self) -> bool {
         !self.is_barbarian() && !self.is_pirates()
+    }
+
+    #[must_use]
+    pub fn can_choose(&self) -> bool {
+        self.is_human() || !self.is_choose_civ()
     }
 }

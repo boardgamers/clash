@@ -253,7 +253,7 @@ fn create_human_players(setup: &GameSetup, rng: &mut Rng, cache: &Cache) -> Vec<
     let mut players = Vec::new();
     let mut civilizations = civilizations::get_all_uncached()
         .into_iter()
-        .filter(|c| c.is_human() || !c.is_choose_civ())
+        .filter(|c| c.can_choose())
         .collect_vec();
     for player_index in 0..setup.player_amount {
         let civilization = player_civ(&setup, rng, cache, &mut civilizations, player_index);
@@ -298,6 +298,7 @@ pub(crate) fn execute_choose_civ(
         return Err("action should be a choose civ action".to_string());
     }
 
+    game.increment_player_index();
     game.log(
         player_index,
         &setup_event_origin(),
