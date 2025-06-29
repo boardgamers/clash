@@ -133,7 +133,7 @@ impl Cache {
 
             all_civilizations: civilizations::get_all_uncached()
                 .into_iter()
-                .filter(|c| c.can_choose())
+                .filter(super::civilization::Civilization::can_choose)
                 .sorted_by_key(|c| c.name.clone())
                 .collect_vec(),
             civilizations_by_name: civilizations::get_all_uncached()
@@ -345,7 +345,7 @@ impl Cache {
     pub fn get_incident(&self, id: u8) -> &Incident {
         self.incidents_by_id.get(&id).expect("incident not found")
     }
-    
+
     #[must_use]
     pub fn get_civilizations(&self) -> &Vec<Civilization> {
         &self.all_civilizations

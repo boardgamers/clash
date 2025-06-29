@@ -257,7 +257,7 @@ fn create_human_players(setup: &GameSetup, rng: &mut Rng, cache: &Cache) -> Vec<
     let mut players = Vec::new();
     let mut civilizations = cache.get_civilizations().clone();
     for player_index in 0..setup.player_amount {
-        let civilization = player_civ(&setup, rng, cache, &mut civilizations, player_index);
+        let civilization = player_civ(setup, rng, cache, &mut civilizations, player_index);
         let mut player = Player::new(civilization, player_index);
         player.resource_limit = ResourcePile::new(2, 7, 7, 7, 7, 0, 0);
         player.incident_tokens = 3;
@@ -294,7 +294,7 @@ pub(crate) fn execute_choose_civ(
     action: &Action,
 ) -> Result<(), String> {
     if let Action::ChooseCivilization(civ) = action {
-        game.player_mut(player_index).civilization = game.cache.get_civilization(&civ);
+        game.player_mut(player_index).civilization = game.cache.get_civilization(civ);
     } else {
         return Err("action should be a choose civ action".to_string());
     }
@@ -306,10 +306,7 @@ pub(crate) fn execute_choose_civ(
     game.log(
         player_index,
         &setup_event_origin(),
-        &format!(
-            "Player {player_index} chose civilization {}",
-            game.player(player_index).civilization.name
-        ),
+        &format!("Play as {}", game.player(player_index).civilization.name),
     );
     Ok(())
 }

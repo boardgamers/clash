@@ -68,7 +68,7 @@ impl InfoDialog {
             game.cache
                 .get_civilizations()
                 .iter()
-                .find(|c| !c.is_used(game))
+                .find(|c| c.is_used(game).is_none())
                 .expect("No unused civilization found")
                 .name
                 .clone(),
@@ -324,7 +324,12 @@ fn show_civilizations(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
         .enumerate()
     {
         let selected = c.name == d.civilization;
-        if draw_button(rc, &c.name, vec2(i as f32, 1.), &[], selected) {
+        let color = if let Some(p) = c.is_used(rc.game) {
+            rc.player_color(p)
+        } else {
+            WHITE
+        };
+        if draw_button_with_color(rc, &c.name, vec2(i as f32, 1.), &[], selected, color) {
             let mut new = d.clone();
             new.civilization.clone_from(&c.name);
             return StateUpdate::open_dialog(ActiveDialog::Info(new));
@@ -340,7 +345,7 @@ fn show_civilization(rc: &RenderContext, c: &Civilization) -> RenderResult {
     if rc.game.state == GameState::ChooseCivilization
         && ok_button(
             rc,
-            if c.is_used(rc.game) {
+            if c.is_used(rc.game).is_some() {
                 OkTooltip::Invalid(format!("{} is already used by another player", c.name))
             } else {
                 OkTooltip::Valid(format!("Choose {}", c.name))

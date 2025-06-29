@@ -446,7 +446,7 @@ impl State {
             StateUpdate::CloseDialog => {
                 let d = self.game_state_dialog(game);
                 // should be able to look around before making a decision
-                if d.is_advance() || matches!(d, ActiveDialog::Info(_)) { 
+                if d.is_advance() || matches!(d, ActiveDialog::Info(_)) {
                     self.set_dialog(ActiveDialog::None);
                 } else {
                     self.set_dialog(d);
@@ -560,7 +560,9 @@ impl State {
             };
         }
         match &game.state {
-            GameState::ChooseCivilization => ActiveDialog::Info(InfoDialog::choose_civilization(game)),
+            GameState::ChooseCivilization => {
+                ActiveDialog::Info(InfoDialog::choose_civilization(game))
+            }
             GameState::Playing | GameState::Finished => ActiveDialog::None,
             GameState::Movement(move_state) => ActiveDialog::MoveUnits(MoveSelection::new(
                 game.active_player(),
