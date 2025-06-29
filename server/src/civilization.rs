@@ -1,4 +1,4 @@
-use crate::content::civilizations::{BARBARIANS, PIRATES};
+use crate::content::civilizations::{BARBARIANS, CHOOSE_CIV, PIRATES};
 use crate::map::Block;
 use crate::{leader::LeaderInfo, special_advance::SpecialAdvanceInfo};
 
@@ -34,6 +34,11 @@ impl Civilization {
     #[must_use]
     pub fn is_pirates(&self) -> bool {
         self.name == PIRATES
+    }
+    
+    #[must_use]
+    pub fn is_choose_civ(&self) -> bool {
+        self.name == CHOOSE_CIV
     }
 
     #[must_use]

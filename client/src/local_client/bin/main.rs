@@ -6,7 +6,7 @@ use macroquad::miniquad::window::set_window_size;
 use macroquad::prelude::{next_frame, screen_width, vec2};
 use macroquad::window::screen_height;
 use server::action::execute_action;
-use server::game::{Game, GameContext, GameOptions, UndoOption};
+use server::game::{CivSetupOption, Game, GameContext, GameOptions, UndoOption};
 use server::game_data::GameData;
 use server::game_setup::{GameSetupBuilder, setup_game};
 use server::profiling::start_profiling;
@@ -50,6 +50,7 @@ async fn main() {
             .seed(seed)
             .options(GameOptions {
                 undo: UndoOption::SamePlayer,
+                civilization: CivSetupOption::Select,
             })
             .build(),
     );

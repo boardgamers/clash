@@ -1,17 +1,18 @@
 use crate::action_card::gain_action_card_from_pile;
-use crate::advance::{Advance, do_advance};
+use crate::advance::{do_advance, Advance};
 use crate::cache::Cache;
 use crate::city;
-use crate::city::{City, MoodState, set_city_mood};
-use crate::consts::{ACTIONS, JSON_SCHEMA_VERSION, NON_HUMAN_PLAYERS};
-use crate::content::civilizations::{BARBARIANS, PIRATES};
+use crate::city::{set_city_mood, City, MoodState};
+use crate::civilization::Civilization;
+use crate::consts::{ACTIONS, JSON_SCHEMA_VERSION};
+use crate::content::civilizations::{BARBARIANS, CHOOSE_CIV, PIRATES};
 use crate::content::{ability, civilizations};
 use crate::events::{EventOrigin, EventPlayer};
-use crate::game::{Game, GameContext, GameOptions, GameState};
+use crate::game::{CivSetupOption, Game, GameContext, GameOptions, GameState};
 use crate::log::{add_player_log, add_round_log};
-use crate::map::{Map, MapSetup, get_map_setup};
+use crate::map::{get_map_setup, Map, MapSetup};
 use crate::objective_card::gain_objective_card_from_pile;
-use crate::player::{Player, gain_unit};
+use crate::player::{gain_unit, Player};
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
 use crate::utils::{Rng, Shuffle};
@@ -25,7 +26,7 @@ pub struct GameSetup {
     seed: String,
     random_map: bool,
     options: GameOptions,
-    civilizations: Vec<String>,
+    assigned_civilizations: Vec<String>,
 }
 
 #[must_use]
@@ -34,7 +35,7 @@ pub struct GameSetupBuilder {
     seed: String,
     random_map: bool,
     options: GameOptions,
-    civilizations: Vec<String>,
+    assigned_civilizations: Vec<String>,
 }
 
 impl GameSetupBuilder {
@@ -44,7 +45,7 @@ impl GameSetupBuilder {
             seed: String::new(),
             random_map: true,
             options: GameOptions::default(),
-            civilizations: Vec::new(),
+            assigned_civilizations: Vec::new(),
         }
     }
 
@@ -63,8 +64,8 @@ impl GameSetupBuilder {
         self
     }
 
-    pub fn civilizations(mut self, civilizations: Vec<String>) -> Self {
-        self.civilizations = civilizations;
+    pub fn assigned_civilizations(mut self, civilizations: Vec<String>) -> Self {
+        self.assigned_civilizations = civilizations;
         self
     }
 
@@ -74,7 +75,7 @@ impl GameSetupBuilder {
             seed: self.seed,
             random_map: self.random_map,
             options: self.options,
-            civilizations: self.civilizations,
+            assigned_civilizations: self.assigned_civilizations,
         }
     }
 }
@@ -249,18 +250,38 @@ fn init_rng(seed: String) -> Rng {
 
 fn create_human_players(setup: &GameSetup, rng: &mut Rng, cache: &Cache) -> Vec<Player> {
     let mut players = Vec::new();
-    let mut civilizations = civilizations::get_all_uncached();
+    let mut civilizations = civilizations::get_all_uncached()
+        .into_iter()
+        .filter(|c| c.is_human() || !c.is_choose_civ())
+        .collect_vec();
     for player_index in 0..setup.player_amount {
-        let civilization = if setup.civilizations.is_empty() {
-            civilizations.remove(rng.range(NON_HUMAN_PLAYERS, civilizations.len()))
-        } else {
-            rng.next_seed(); // need to call next_seed to have the same number of calls to rng
-            cache.get_civilization(&setup.civilizations[player_index])
-        };
+        let civilization = player_civ(&setup, rng, cache, &mut civilizations, player_index);
         let mut player = Player::new(civilization, player_index);
         player.resource_limit = ResourcePile::new(2, 7, 7, 7, 7, 0, 0);
         player.incident_tokens = 3;
         players.push(player);
     }
     players
+}
+
+fn player_civ(
+    setup: &GameSetup,
+    rng: &mut Rng,
+    cache: &Cache,
+    civilizations: &mut Vec<Civilization>,
+    player_index: usize,
+) -> Civilization {
+    let random = setup.options.civilization == CivSetupOption::Random;
+    if setup.assigned_civilizations.is_empty() {
+        if random {
+            civilizations.remove(rng.range(0, civilizations.len()))
+        } else {
+            cache.get_civilization(CHOOSE_CIV)
+        }
+    } else {
+        if random {
+            rng.next_seed(); // need to call next_seed to have the same number of calls to rng
+        }
+        cache.get_civilization(&setup.assigned_civilizations[player_index])
+    }
 }
