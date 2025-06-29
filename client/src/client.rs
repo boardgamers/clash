@@ -2,28 +2,29 @@ use macroquad::prelude::clear_background;
 use macroquad::prelude::*;
 
 use server::action::Action;
-use server::game::Game;
+use server::game::{Game, GameState};
 use server::position::Position;
 
 use crate::advance_ui::{pay_advance_dialog, show_paid_advance_menu};
 use crate::cards_ui::show_cards;
 use crate::client_state::{
-    ActiveDialog, CameraMode, DialogChooser, RenderResult, State, StateUpdate, NO_UPDATE,
+    ActiveDialog, CameraMode, DialogChooser, NO_UPDATE, RenderResult, State, StateUpdate,
 };
 use crate::collect_ui::collect_dialog;
 use crate::construct_ui::pay_construction_dialog;
+use crate::dialog_ui::cancel_button_with_tooltip;
 use crate::event_ui::{custom_phase_event_origin, event_help_tooltip};
 use crate::happiness_ui::{increase_happiness_click, increase_happiness_menu};
 use crate::hex_ui::pixel_to_coordinate;
-use crate::info_ui::{show_info_dialog, InfoDialog};
+use crate::info_ui::{InfoDialog, show_info_dialog};
 use crate::layout_ui::{
-    bottom_center_anchor, bottom_centered_text_with_offset, draw_scaled_icon_with_tooltip,
-    icon_pos, is_mouse_pressed, top_right_texture, ICON_SIZE,
+    ICON_SIZE, bottom_center_anchor, bottom_centered_text_with_offset,
+    draw_scaled_icon_with_tooltip, icon_pos, is_mouse_pressed, top_right_texture,
 };
-use crate::log_ui::{show_log, LogDialog};
+use crate::log_ui::{LogDialog, show_log};
 use crate::map_ui::{draw_map, explore_dialog, show_tile_menu};
 use crate::player_ui::{
-    player_select, show_global_controls, show_top_center, show_top_left, ColumnLabelPainter,
+    ColumnLabelPainter, player_select, show_global_controls, show_top_center, show_top_left,
 };
 use crate::render_context::{RenderContext, RenderStage};
 use crate::unit_ui::unit_selection_click;
@@ -62,6 +63,12 @@ fn render(rc: &RenderContext, features: &Features) -> RenderResult {
         render_map(rc)?;
     }
 
+    if rc.can_control_shown_player()
+        && let Some(u) = &rc.state.pending_update
+    {
+        dialog_ui::show_pending_update(u, rc)?;
+    }
+
     if !rc.state.active_dialog.is_modal() && rc.stage.is_ui() {
         render_ui(rc, features)?;
     }
@@ -69,6 +76,9 @@ fn render(rc: &RenderContext, features: &Features) -> RenderResult {
     show_modal_dialog_toggles(rc)?;
 
     if rc.can_control_shown_player() || rc.state.active_dialog.show_for_other_player() {
+        if rc.state.active_dialog.is_modal() && cancel_button_with_tooltip(rc, "Close dialog") {
+            return StateUpdate::close_dialog();
+        }
         render_active_dialog(rc)?;
     }
 
@@ -117,12 +127,6 @@ fn render_ui(rc: &RenderContext, features: &Features) -> RenderResult {
         return StateUpdate::of(StateUpdate::ToggleShowPermanentEffects);
     }
 
-    if rc.can_control_shown_player()
-        && let Some(u) = &state.pending_update
-    {
-        dialog_ui::show_pending_update(u, rc)?;
-    }
-
     if let Some(pos) = state.focused_tile {
         if matches!(state.active_dialog, ActiveDialog::None) {
             show_tile_menu(rc, pos)?;
@@ -145,13 +149,22 @@ fn show_modal_dialog_toggles(rc: &RenderContext) -> RenderResult {
         }
         return StateUpdate::open_dialog(ActiveDialog::AdvanceMenu);
     }
-    if top_right_texture(rc, &rc.assets().info, icon_pos(-3, 0), "Show info") {
+    let (name, dialog) = if rc.game.state == GameState::ChooseCivilization {
+        (
+            "Select civilization",
+            InfoDialog::choose_civilization(rc.game),
+        )
+    } else {
+        (
+            "Show info",
+            InfoDialog::show_civilization(rc.shown_player.civilization.name.clone()),
+        )
+    };
+    if top_right_texture(rc, &rc.assets().info, icon_pos(-3, 0), name) {
         if let ActiveDialog::Info(_) = state.active_dialog {
             return StateUpdate::close_dialog();
         }
-        return StateUpdate::open_dialog(ActiveDialog::Info(InfoDialog::select_civilization(
-            rc.shown_player.civilization.name.clone(),
-        )));
+        return StateUpdate::open_dialog(ActiveDialog::Info(dialog));
     }
     NO_UPDATE
 }
@@ -189,12 +202,6 @@ fn render_active_dialog(rc: &RenderContext) -> RenderResult {
         ActiveDialog::DialogChooser(d) => dialog_chooser(rc, d),
         ActiveDialog::Log(d) => show_log(rc, d),
         ActiveDialog::Info(d) => show_info_dialog(rc, d),
-
-        // playing actions
-        // ActiveDialog::ChooseCivilization => choose_civilization_dialog(rc),
-        ActiveDialog::ChooseCivilization => show_info_dialog(rc, &InfoDialog::select_civilization(
-            "Rome".to_string()
-        )),
         ActiveDialog::IncreaseHappiness(h) => increase_happiness_menu(rc, h),
         ActiveDialog::AdvanceMenu => show_paid_advance_menu(rc),
         ActiveDialog::AdvancePayment(p) => pay_advance_dialog(p, rc),

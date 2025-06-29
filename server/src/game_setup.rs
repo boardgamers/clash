@@ -6,8 +6,8 @@ use crate::city;
 use crate::city::{City, MoodState, set_city_mood};
 use crate::civilization::Civilization;
 use crate::consts::{ACTIONS, JSON_SCHEMA_VERSION};
+use crate::content::ability;
 use crate::content::civilizations::{BARBARIANS, CHOOSE_CIV, PIRATES};
-use crate::content::{ability, civilizations};
 use crate::events::{EventOrigin, EventPlayer};
 use crate::game::{CivSetupOption, Game, GameContext, GameOptions, GameState};
 use crate::log::{add_player_log, add_round_log};
@@ -255,10 +255,7 @@ fn init_rng(seed: String) -> Rng {
 
 fn create_human_players(setup: &GameSetup, rng: &mut Rng, cache: &Cache) -> Vec<Player> {
     let mut players = Vec::new();
-    let mut civilizations = civilizations::get_all_uncached()
-        .into_iter()
-        .filter(|c| c.can_choose())
-        .collect_vec();
+    let mut civilizations = cache.get_civilizations().clone();
     for player_index in 0..setup.player_amount {
         let civilization = player_civ(&setup, rng, cache, &mut civilizations, player_index);
         let mut player = Player::new(civilization, player_index);
@@ -303,7 +300,7 @@ pub(crate) fn execute_choose_civ(
     }
 
     game.increment_player_index();
-    if game.current_player_index == 0 {
+    if game.players.iter().all(|p| !p.civilization.is_choose_civ()) {
         game.state = GameState::Playing;
     }
     game.log(

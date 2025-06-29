@@ -1,6 +1,7 @@
 use crate::cards_ui::{action_card_object, objective_card_object, wonder_description};
 use crate::city_ui::add_building_description;
 use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
+use crate::dialog_ui::{OkTooltip, ok_button};
 use crate::layout_ui::button_pressed;
 use crate::log_ui::{break_each, break_text};
 use crate::render_context::RenderContext;
@@ -8,11 +9,11 @@ use itertools::Itertools;
 use macroquad::color::Color;
 use macroquad::math::{Rect, Vec2, vec2};
 use macroquad::prelude::{BLACK, BLUE, GREEN, MAGENTA, WHITE, YELLOW};
+use server::action::Action;
 use server::action_card::ActionCard;
 use server::city_pieces::{BUILDINGS, Building};
 use server::civilization::Civilization;
-use server::content::civilizations;
-use server::game::Game;
+use server::game::{Game, GameState};
 use server::incident::Incident;
 use server::leader::Leader;
 use server::objective_card::ObjectiveCard;
@@ -62,7 +63,19 @@ pub(crate) struct InfoDialog {
 }
 
 impl InfoDialog {
-    pub(crate) fn select_civilization(civilization: String) -> Self {
+    pub(crate) fn choose_civilization(game: &Game) -> Self {
+        Self::show_civilization(
+            game.cache
+                .get_civilizations()
+                .iter()
+                .find(|c| !c.is_used(game))
+                .expect("No unused civilization found")
+                .name
+                .clone(),
+        )
+    }
+
+    pub(crate) fn show_civilization(civilization: String) -> Self {
         InfoDialog {
             select: InfoCategory::Civilization,
             civilization,
@@ -301,7 +314,10 @@ fn show_category(
 }
 
 fn show_civilizations(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
-    for (i, c) in civilizations::get_all_uncached()
+    for (i, c) in rc
+        .game
+        .cache
+        .get_civilizations()
         .iter()
         .filter(|c| c.is_human())
         .sorted_by_key(|c| c.name.clone())
@@ -314,13 +330,29 @@ fn show_civilizations(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
             return StateUpdate::open_dialog(ActiveDialog::Info(new));
         }
         if selected {
-            show_civilization(rc, c);
+            show_civilization(rc, c)?;
         }
     }
     NO_UPDATE
 }
 
-fn show_civilization(rc: &RenderContext, c: &Civilization) {
+fn show_civilization(rc: &RenderContext, c: &Civilization) -> RenderResult {
+    if rc.game.state == GameState::ChooseCivilization
+        && ok_button(
+            rc,
+            if c.is_used(rc.game) {
+                OkTooltip::Invalid(format!("{} is already used by another player", c.name))
+            } else {
+                OkTooltip::Valid(format!("Choose {}", c.name))
+            },
+        )
+    {
+        return StateUpdate::execute_with_confirm(
+            vec![format!("Play as {}?", c.name)],
+            Action::ChooseCivilization(c.name.clone()),
+        );
+    }
+
     for (i, a) in c.special_advances.iter().enumerate() {
         let mut tooltip: Vec<String> = vec![];
         let label = &format!("Name: {}", a.name);
@@ -344,6 +376,7 @@ fn show_civilization(rc: &RenderContext, c: &Civilization) {
 
         draw_button(rc, &l.name, vec2(i as f32, 3.), &tooltip, false);
     }
+    NO_UPDATE
 }
 
 fn show_category_items<T: Clone, K: PartialEq + Ord + Clone>(

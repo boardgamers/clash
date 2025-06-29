@@ -50,6 +50,7 @@ pub struct Cache {
     all_incidents: Vec<Incident>,
     incidents_by_id: HashMap<u8, Incident>,
 
+    all_civilizations: Vec<Civilization>,
     civilizations_by_name: HashMap<String, Civilization>,
     all_special_advances: Vec<SpecialAdvanceInfo>,
     leaders: HashMap<Leader, LeaderInfo>,
@@ -130,6 +131,11 @@ impl Cache {
                 .map(|incident| (incident.id, incident))
                 .collect(),
 
+            all_civilizations: civilizations::get_all_uncached()
+                .into_iter()
+                .filter(|c| c.can_choose())
+                .sorted_by_key(|c| c.name.clone())
+                .collect_vec(),
             civilizations_by_name: civilizations::get_all_uncached()
                 .into_iter()
                 .map(|c| (c.name.clone(), c))
@@ -338,6 +344,11 @@ impl Cache {
     #[must_use]
     pub fn get_incident(&self, id: u8) -> &Incident {
         self.incidents_by_id.get(&id).expect("incident not found")
+    }
+    
+    #[must_use]
+    pub fn get_civilizations(&self) -> &Vec<Civilization> {
+        &self.all_civilizations
     }
 
     ///

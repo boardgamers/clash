@@ -1,6 +1,7 @@
 use crate::content::civilizations::{BARBARIANS, CHOOSE_CIV, PIRATES};
 use crate::map::Block;
 use crate::{leader::LeaderInfo, special_advance::SpecialAdvanceInfo};
+use crate::game::Game;
 
 #[derive(Clone)]
 pub struct Civilization {
@@ -48,6 +49,11 @@ impl Civilization {
 
     #[must_use]
     pub fn can_choose(&self) -> bool {
-        self.is_human() || !self.is_choose_civ()
+        self.is_human() && !self.is_choose_civ()
+    }
+    
+    #[must_use]
+    pub fn is_used(&self, game: &Game) -> bool {
+        game.players.iter().any(|p| p.civilization.name == self.name)
     }
 }
