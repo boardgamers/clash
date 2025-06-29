@@ -73,7 +73,7 @@ fn get_modes(args: &[String]) -> Vec<Mode> {
 
 async fn run(mut game: Game, features: &mut Features) {
     let mut state = init(features).await;
-    state.update_from_game(&mut game);
+    state.update_from_game(&game);
 
     start_ai(&mut game, features, &mut state);
 
