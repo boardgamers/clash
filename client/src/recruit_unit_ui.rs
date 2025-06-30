@@ -1,6 +1,6 @@
 use itertools::Itertools;
 use macroquad::prelude::*;
-
+use server::construct::NOT_ENOUGH_RESOURCES;
 use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::construct_ui::{ConstructionPayment, ConstructionProject};
 use crate::dialog_ui::{OkTooltip, cancel_button, ok_button};
@@ -173,10 +173,17 @@ pub(crate) fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> RenderResu
         |rc, s, p| {
             draw_unit_type(
                 rc,
-                if s.cost.is_ok() {
-                    HighlightType::None
-                } else {
-                    HighlightType::Warn
+                match &s.cost {
+                    Ok(_) => HighlightType::None,
+                    Err(e) => {
+                        if e.contains("Mising building:") {
+                            HighlightType::MissingAdvance
+                        } else if e == NOT_ENOUGH_RESOURCES {
+                            HighlightType::NotEnoughResources 
+                        } else { 
+                            HighlightType::Warn
+                        }
+                    }
                 },
                 p + Vec2::new(0., -6.),
                 s.unit_type,

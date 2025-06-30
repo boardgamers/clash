@@ -293,7 +293,7 @@ pub(crate) fn show_map_action_buttons(rc: &RenderContext, icons: &IconActionVec)
         let center = bottom_center_anchor(rc) + p + vec2(15., 15.);
         let radius = 20.;
         if let Some(c) = icon.warning {
-            rc.draw_circle(center, radius, c);
+            rc.draw_circle(center, radius, c.color());
         }
         if icon.with_rc(rc, |rc| bottom_center_texture(rc, icon.texture, p, "")) {
             return (icon.action)();

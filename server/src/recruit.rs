@@ -14,6 +14,7 @@ use crate::special_advance::SpecialAdvance;
 use crate::unit::{UnitType, Units, kill_units, set_unit_position};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
+use crate::construct::NOT_ENOUGH_RESOURCES;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct Recruit {
@@ -185,10 +186,10 @@ pub fn recruit_cost_without_replaced(
         && (units.elephants > 0
             || (units.cavalry > 0 && !is_cavalry_province_city(player, city_position, game)))
     {
-        return Err("No market".to_string());
+        return Err("Mising building: market".to_string());
     }
     if units.ships > 0 && city.pieces.port.is_none() {
-        return Err("No port".to_string());
+        return Err("Mising building: port".to_string());
     }
 
     for (t, a) in units.clone() {
@@ -215,7 +216,7 @@ pub fn recruit_cost_without_replaced(
         execute,
     );
     if !player.can_afford(&cost.cost) {
-        return Err("Cannot afford".to_string());
+        return Err(NOT_ENOUGH_RESOURCES.to_string());
     }
     if units.amount() > city.mood_modified_size(player) as u8 {
         return Err("Too many units".to_string());

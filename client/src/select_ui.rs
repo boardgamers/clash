@@ -4,7 +4,7 @@ use crate::layout_ui::{ICON_SIZE, UI_BACKGROUND, bottom_center_anchor, bottom_ce
 use crate::render_context::RenderContext;
 use macroquad::color::{BLACK, BLUE, Color, WHITE};
 use macroquad::math::{Vec2, bool, vec2};
-use macroquad::prelude::{GRAY, RED};
+use macroquad::prelude::{GRAY, GREEN, RED, YELLOW};
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub(crate) struct CountSelector {
@@ -94,6 +94,9 @@ pub(crate) enum HighlightType {
     Choices,
     Warn,
     Invalid,
+    MissingAdvance,
+    NotEnoughResources,
+    AlreadyExists,
 }
 
 impl HighlightType {
@@ -101,9 +104,11 @@ impl HighlightType {
         match self {
             HighlightType::None => BLACK,
             HighlightType::Primary => WHITE,
-            HighlightType::Choices => BLUE,
+            HighlightType::Choices | HighlightType::MissingAdvance => BLUE,
             HighlightType::Warn => RED,
             HighlightType::Invalid => GRAY,
+            HighlightType::AlreadyExists => GREEN,
+            HighlightType::NotEnoughResources => YELLOW
         }
     }
 }

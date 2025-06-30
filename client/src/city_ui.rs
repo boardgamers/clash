@@ -40,7 +40,7 @@ pub(crate) struct IconAction<'a> {
     pub texture: &'a Texture2D,
     pub skip_background: bool,
     pub tooltip: Vec<String>,
-    pub warning: Option<Color>,
+    pub warning: Option<HighlightType>,
     pub action: Box<dyn Fn() -> RenderResult + 'a>,
 }
 
@@ -62,7 +62,7 @@ impl<'a> IconAction<'a> {
     }
 
     #[must_use]
-    pub(crate) fn with_warning(self, warning: Option<Color>) -> IconAction<'a> {
+    pub(crate) fn with_warning(self, warning: Option<HighlightType>) -> IconAction<'a> {
         IconAction { warning, ..self }
     }
 
@@ -159,13 +159,13 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
             let name = b.name();
             let warn = can.as_ref().err().map(|e| {
                 if e == NOT_ENOUGH_RESOURCES {
-                    YELLOW
+                    HighlightType::NotEnoughResources
                 } else if e == BUILDING_ALREADY_EXISTS {
-                    GREEN
+                    HighlightType::AlreadyExists
                 } else if e.contains("Missing advance") {
-                    BLUE
+                    HighlightType::MissingAdvance
                 } else {
-                    RED
+                    HighlightType::Warn
                 }
             });
 
