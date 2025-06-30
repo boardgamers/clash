@@ -27,11 +27,11 @@
           "id": 0
         }
       ],
-      "civilization": "China",
+      "civilization": "Rome",
       "available_leaders": [
-        "SunTzu",
-        "Qin",
-        "Wu"
+        "Augustus",
+        "Caesar",
+        "Sulla"
       ],
       "advances": [
         "Farming",
@@ -628,7 +628,7 @@
     ],
     [
       "It's Player1's turn",
-      "Player1: Setup: Play as China, Gain 2 food, Gain Farming without taking an event token, Gain Mining without taking an event token, Draw an action card, Draw an objective card, Gain city D2, City D2 became Happy, Gain 1 settler at D2",
+      "Player1: Setup: Play as Rome, Gain 2 food, Gain Farming without taking an event token, Gain Mining without taking an event token, Draw an action card, Draw an objective card, Gain city D2, City D2 became Happy, Gain 1 settler at D2",
       "Player2: Setup: Play as Greece, Gain 2 food, Gain Farming without taking an event token, Gain Mining without taking an event token, Draw an action card, Draw an objective card, Gain city D7, City D7 became Happy, Gain 1 settler at D7"
     ]
   ],

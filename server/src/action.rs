@@ -11,8 +11,9 @@ use crate::content::persistent_events::{EventResponse, PersistentEventType};
 use crate::cultural_influence::on_cultural_influence;
 use crate::events::EventPlayer;
 use crate::explore::ask_explore_resolution;
-use crate::game::GameState::{Finished, Movement, Playing};
+use crate::game::GameState;
 use crate::game::{Game, GameContext};
+use crate::game_setup::execute_choose_civ;
 use crate::incident::{on_choose_incident, on_trigger_incident};
 use crate::log::{
     ActionLogBalance, ActionLogEntry, add_action_log_item, add_log_action,
@@ -38,6 +39,7 @@ pub enum Action {
     Undo,
     Redo,
     StartTurn, // created for trade routes
+    ChooseCivilization(String),
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -302,7 +304,8 @@ fn execute_regular_action(
     player_index: usize,
 ) -> Result<(), String> {
     match game.state {
-        Playing => {
+        GameState::ChooseCivilization => execute_choose_civ(game, player_index, &action),
+        GameState::Playing => {
             if let Action::Movement(m) = action {
                 execute_movement_action(game, m.clone(), player_index)
             } else {
@@ -312,7 +315,7 @@ fn execute_regular_action(
                 action.execute(game, player_index, false)
             }
         }
-        Movement(_) => execute_movement_action(
+        GameState::Movement(_) => execute_movement_action(
             game,
             if let Action::Movement(v) = action {
                 v
@@ -321,7 +324,9 @@ fn execute_regular_action(
             },
             player_index,
         ),
-        Finished => Err("actions can't be executed when the game is finished".to_string()),
+        GameState::Finished => {
+            Err("actions can't be executed when the game is finished".to_string())
+        }
     }
 }
 

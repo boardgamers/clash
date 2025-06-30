@@ -6,7 +6,7 @@ use macroquad::miniquad::window::set_window_size;
 use macroquad::prelude::{next_frame, screen_width, vec2};
 use macroquad::window::screen_height;
 use server::action::execute_action;
-use server::game::{Game, GameContext, GameOptions, UndoOption};
+use server::game::{CivSetupOption, Game, GameContext, GameOptions, UndoOption};
 use server::game_data::GameData;
 use server::game_setup::{GameSetupBuilder, setup_game};
 use server::profiling::start_profiling;
@@ -17,6 +17,7 @@ use std::{env, vec};
 #[derive(PartialEq)]
 enum Mode {
     Local,
+    ChooseCivilization,
     AI,
 }
 
@@ -50,6 +51,11 @@ async fn main() {
             .seed(seed)
             .options(GameOptions {
                 undo: UndoOption::SamePlayer,
+                civilization: if modes.contains(&Mode::ChooseCivilization) {
+                    CivSetupOption::ChooseCivilization
+                } else {
+                    CivSetupOption::Random
+                },
             })
             .build(),
     );
@@ -61,6 +67,7 @@ fn get_modes(args: &[String]) -> Vec<Mode> {
     match args.first() {
         Some(arg) => match arg.as_str() {
             "generate" => vec![Mode::Local],
+            "choose" => vec![Mode::Local, Mode::ChooseCivilization],
             "ai" => vec![Mode::AI, Mode::Local],
             _ => {
                 panic!("Unknown argument: {arg}");
@@ -72,6 +79,7 @@ fn get_modes(args: &[String]) -> Vec<Mode> {
 
 async fn run(mut game: Game, features: &mut Features) {
     let mut state = init(features).await;
+    state.update_from_game(&game);
 
     start_ai(&mut game, features, &mut state);
 

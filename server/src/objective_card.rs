@@ -1,9 +1,8 @@
 use crate::ability_initializer::{
     AbilityInitializerBuilder, AbilityInitializerSetup, AbilityListeners,
 };
-use crate::cache::Cache;
 use crate::card::{HandCard, HandCardLocation, draw_card_from_pile, log_card_transfer};
-use crate::content::ability::Ability;
+use crate::content::ability::{Ability, AbilityBuilder};
 use crate::content::effects::PermanentEffect;
 use crate::content::incidents::great_persons::find_great_seer;
 use crate::content::persistent_events::{HandCardsRequest, PersistentEventType};
@@ -34,7 +33,15 @@ impl Objective {
     pub fn builder(name: &str, description: &str) -> ObjectiveBuilder {
         ObjectiveBuilder::new(name, description)
     }
+
+    // high priority means it is checked first
+    #[must_use]
+    pub fn priority(&self) -> i32 {
+        // status_phase_update == we have to pay for this objective
+        i32::from(self.status_phase_update.is_none())
+    }
 }
+
 #[derive(Clone)]
 pub struct ObjectiveCard {
     pub id: u8,
@@ -51,8 +58,8 @@ impl ObjectiveCard {
     }
 
     #[must_use]
-    fn has_objective(&self, got: &[String]) -> bool {
-        self.objectives.iter().any(|o| got.contains(&o.name))
+    fn has_objective(&self, name: &str) -> bool {
+        self.objectives.iter().any(|o| name == o.name)
     }
 
     #[must_use]
@@ -141,20 +148,20 @@ impl AbilityInitializerSetup for ObjectiveBuilder {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct SelectObjectivesInfo {
     pub(crate) objective_opportunities: Vec<String>,
-    pub(crate) cards: Vec<HandCard>,
+    pub(crate) current_objective: Option<String>,
 }
 
 impl SelectObjectivesInfo {
     #[must_use]
-    pub(crate) fn new(objective_opportunities: Vec<String>, cards: Vec<HandCard>) -> Self {
+    pub(crate) fn new(objective_opportunities: Vec<String>) -> Self {
         Self {
             objective_opportunities,
-            cards,
+            current_objective: None,
         }
     }
 
     pub(crate) fn strip_secret(&mut self) {
-        self.cards.clear();
+        self.current_objective = None;
         self.objective_opportunities.clear();
     }
 }
@@ -191,24 +198,12 @@ pub(crate) fn present_objective_cards(
     player: usize,
     mut opportunities: Vec<String>,
 ) {
-    opportunities.sort();
+    opportunities.sort_by_cached_key(|name| {
+        let o = game.cache.get_objective(name);
+        (-o.priority(), o.name.clone())
+    });
     opportunities.dedup(); // can't use 2 objectives with the same name at once
-
-    let cards = game
-        .player(player)
-        .objective_cards
-        .iter()
-        .filter_map(|&card_id| {
-            let card = game.cache.get_objective_card(card_id);
-            card.has_objective(&opportunities)
-                .then_some(HandCard::ObjectiveCard(card.id))
-        })
-        .collect_vec();
-    on_objective_cards(
-        game,
-        player,
-        SelectObjectivesInfo::new(opportunities, cards),
-    );
+    on_objective_cards(game, player, SelectObjectivesInfo::new(opportunities));
 }
 
 pub(crate) fn on_objective_cards(game: &mut Game, player_index: usize, info: SelectObjectivesInfo) {
@@ -221,33 +216,78 @@ pub(crate) fn on_objective_cards(game: &mut Game, player_index: usize, info: Sel
 }
 
 pub(crate) fn select_objectives() -> Ability {
-    Ability::builder(
+    let mut b = Ability::builder(
         "Select Objective Cards to Complete",
         "Select which Objective Cards to use \
         (because the requirements are now met)",
-    )
-    .add_hand_card_request(
+    );
+    // probably less than this at most
+    for i in 0..10 {
+        b = add_select_objective_card_to_complete(b, i);
+    }
+    b.build()
+}
+
+fn add_select_objective_card_to_complete(b: AbilityBuilder, prio: i32) -> AbilityBuilder {
+    b.add_hand_card_request(
         |e| &mut e.select_objective_cards,
-        0,
-        |_game, _player_index, i| {
-            let cards = &i.cards;
+        prio,
+        |game, player, i| {
+            if i.objective_opportunities.is_empty() {
+                return None;
+            }
+            let objective = i.objective_opportunities.remove(0);
+            i.current_objective = Some(objective.clone());
+
+            let cards = player
+                .get(game)
+                .objective_cards
+                .iter()
+                .filter_map(|&card_id| {
+                    let card = game.cache.get_objective_card(card_id);
+                    card.has_objective(&objective)
+                        .then_some(HandCard::ObjectiveCard(card.id))
+                })
+                .collect_vec();
+
             Some(HandCardsRequest::new(
                 cards.clone(),
-                0..=cards.len() as u8,
-                "Select cards to complete",
+                0..=1,
+                &format!("You may select a card to complete objective: {objective}"),
             ))
         },
-        |game, s, cards| {
-            let p = s.player_index;
-            for (card, objective) in
-                match_objective_cards(&s.choice, &cards.objective_opportunities, game)
-                    .expect("invalid card selection")
+        |game, s, i| {
+            let card_id = match s.choice.first() {
+                None => {
+                    s.log(game, "No card selected");
+                    return;
+                }
+                Some(HandCard::ObjectiveCard(card_id)) => card_id,
+                _ => {
+                    panic!("Expected an objective card to be selected");
+                }
+            };
+
+            if let Some(contradicting) = game
+                .cache
+                .get_objective_card(*card_id)
+                .objectives
+                .iter()
+                .find_map(|o| o.contradicting_status_phase_objective.as_ref())
             {
-                complete_objective_card(game, p, card, &objective);
+                i.objective_opportunities.retain(|o| o != contradicting);
             }
+
+            complete_objective_card(
+                game,
+                s.player_index,
+                *card_id,
+                i.current_objective
+                    .as_ref()
+                    .expect("Expected current objective to be set"),
+            );
         },
     )
-    .build()
 }
 
 pub(crate) fn status_phase_completable(game: &Game, player: &Player, id: u8) -> Vec<String> {
@@ -294,126 +334,6 @@ pub(crate) fn complete_objective_card(game: &mut Game, player: usize, id: u8, ob
     game.player_mut(player)
         .completed_objectives
         .push(completed_objective.clone());
-}
-
-pub(crate) fn match_objective_cards(
-    hand_cards: &[HandCard],
-    opportunities: &[String],
-    game: &Game,
-) -> Result<Vec<(u8, String)>, String> {
-    if hand_cards.is_empty() {
-        // is checked by needed range
-        return Ok(Vec::new());
-    }
-
-    let mut cards = vec![];
-
-    for card in hand_cards {
-        match card {
-            HandCard::ObjectiveCard(id) => {
-                cards.push(game.cache.get_objective_card(*id));
-            }
-            _ => return Err(format!("Invalid hand card: {card:?}"))?,
-        }
-    }
-
-    for c in &cards {
-        for o in &c.objectives {
-            if let Some(contradict) = &o.contradicting_status_phase_objective {
-                if cards
-                    .iter()
-                    .any(|c2| c2.objectives.iter().any(|o2| &o2.name == contradict))
-                {
-                    return Err(format!(
-                        "Cannot select {} and {} at the same time",
-                        c.objectives[0].name, contradict
-                    ));
-                }
-            }
-        }
-    }
-
-    combinations(&cards, opportunities, &game.cache)
-        .into_iter()
-        .find(|v| {
-            v.iter().zip(hand_cards).all(|((id, _), card)| match card {
-                HandCard::ObjectiveCard(c) => c == id,
-                _ => false,
-            })
-        })
-        .ok_or("Invalid selection of objective cards".to_string())
-}
-
-fn combinations(
-    cards: &[&ObjectiveCard],
-    opportunities: &[String],
-    cache: &Cache,
-) -> Vec<Vec<(u8, String)>> {
-    let Some((first, rest)) = cards.split_first() else {
-        return vec![];
-    };
-
-    let first = first
-        .objectives
-        .iter()
-        .filter_map(|o| {
-            opportunities
-                .contains(&o.name)
-                .then_some((cards[0].id, o.name.clone()))
-        })
-        .collect_vec();
-    let rest_combinations = combinations(rest, opportunities, cache);
-    if rest_combinations.is_empty() {
-        return filter_duplicated_objectives(vec![first], cache);
-    }
-
-    let result = rest_combinations
-        .iter()
-        .flat_map(|rest_objectives| {
-            first
-                .iter()
-                .map(|first_objective| {
-                    let name = &first_objective.1;
-                    let mut r = rest_objectives.clone();
-                    if !r.iter().any(|(_id, n)| name == n) {
-                        r.insert(0, first_objective.clone());
-                    }
-                    r
-                })
-                .collect_vec()
-        })
-        .collect_vec();
-    filter_duplicated_objectives(result, cache)
-}
-
-fn filter_duplicated_objectives(
-    o: Vec<Vec<(u8, String)>>,
-    cache: &Cache,
-) -> Vec<Vec<(u8, String)>> {
-    o.into_iter()
-        .map(|mut v| {
-            for (id, group) in &v.clone().iter().chunk_by(|(id, _name)| *id) {
-                if group.into_iter().count() == 1 {
-                    continue;
-                }
-                let card = cache.get_objective_card(id);
-                let remove = card
-                    .objectives
-                    .iter()
-                    .find_map(
-                        |o| o.status_phase_update.is_some().then_some(o.name.clone()), // update means we have to pay
-                    )
-                    .unwrap_or(card.objectives[0].name.clone());
-
-                remove_element_by(&mut v, |(id2, name)| id == *id2 && name == &remove)
-                    .unwrap_or_else(|| {
-                        panic!("should be able to remove objective card {id} with name {remove}")
-                    });
-            }
-
-            v
-        })
-        .collect_vec()
 }
 
 pub(crate) fn gain_objective_card_from_pile(game: &mut Game, player: &EventPlayer) {
@@ -530,48 +450,4 @@ pub(crate) fn discard_objective_card(
         to,
         origin,
     );
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::cache::Cache;
-
-    #[test]
-    fn test_combinations_single_card() {
-        // avoid ore supplies - because that costs ore to complete
-        let cache = Cache::new();
-        let o1 = cache.get_objective_card(12);
-        let cards = vec![o1];
-
-        let opportunities = vec!["Ore Supplies".to_string(), "Large Army".to_string()];
-
-        let mut got = combinations(&cards, &opportunities, &cache);
-        got.sort();
-        assert_eq!(got, vec![vec![(12, "Large Army".to_string())]]);
-    }
-
-    #[test]
-    fn test_combinations() {
-        // ObjectiveCard::new(23, seafarers(), aggressor()),
-        // ObjectiveCard::new(25, government(), aggressor()),
-
-        let cache = Cache::new();
-        let o1 = cache.get_objective_card(23);
-        let o2 = cache.get_objective_card(25);
-
-        let cards = vec![o1, o2];
-
-        let opportunities = vec!["Seafarers".to_string(), "Aggressor".to_string()];
-
-        let mut got = combinations(&cards, &opportunities, &cache);
-        got.sort();
-        assert_eq!(
-            got,
-            vec![
-                vec![(23, "Seafarers".to_string()), (25, "Aggressor".to_string()),],
-                vec![(25, "Aggressor".to_string())],
-            ]
-        );
-    }
 }

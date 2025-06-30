@@ -195,6 +195,11 @@ fn strip_events(game: &mut Game, player_index: Option<usize>) {
             PersistentEventType::SelectObjectives(o) if Some(s.player.index) != player_index => {
                 // player shouldn't see other player's objectives
                 o.strip_secret();
+                if let Some(handler) = &mut s.player.handler {
+                    if let PersistentEventRequest::SelectHandCards(c) = &mut handler.request {
+                        c.description = "Complete an objective card".to_string();
+                    }
+                }
             }
             _ => {}
         }

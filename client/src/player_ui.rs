@@ -4,9 +4,8 @@ use crate::client::Features;
 use crate::client_state::{NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::{OkTooltip, ok_button};
 use crate::layout_ui::{
-    ICON_SIZE, IconBackground, UI_BACKGROUND, bottom_center_anchor, bottom_center_texture,
-    bottom_centered_text, bottom_right_texture, button_pressed, icon_pos, top_center_anchor,
-    top_center_texture,
+    ICON_SIZE, UI_BACKGROUND, bottom_center_anchor, bottom_center_texture, bottom_centered_text,
+    bottom_right_texture, button_pressed, icon_pos, top_center_anchor, top_center_texture,
 };
 use crate::log_ui::multiline_label;
 use crate::map_ui::terrain_name;
@@ -91,7 +90,7 @@ pub(crate) fn top_icon_with_label(
     tooltip: &str,
 ) {
     let dimensions = rc.state.measure_text(label);
-    let x = rc.state.screen_size.x / 2.0 + p.x + ((ICON_SIZE - dimensions.width) / 2.0) - 20.;
+    let x = rc.state.screen_size.x / 2.0 + p.x + ((ICON_SIZE - dimensions.width) / 2.0);
     let y = p.y + ICON_SIZE + 30.;
     rc.draw_text(label, x, y);
     top_center_texture(rc, texture, p, tooltip);
@@ -118,9 +117,7 @@ pub(crate) fn bottom_icon_with_label(
         rc.state.screen_size.x / 2.0 + p.x + x,
         rc.state.screen_size.y + p.y + 33.,
     );
-    let mut r = rc.clone();
-    r.icon_background = IconBackground::None;
-    bottom_center_texture(&r, texture, p, tooltip);
+    bottom_center_texture(&rc.no_icon_background(), texture, p, tooltip);
 }
 
 pub(crate) fn show_top_center(rc: &RenderContext) {
@@ -177,7 +174,7 @@ pub(crate) fn show_top_center(rc: &RenderContext) {
 }
 
 fn top_center_rect(rc: &RenderContext) -> Rect {
-    Rect::new(rc.state.screen_size.x / 2. - 200., 5., 400., 60.)
+    Rect::new(rc.state.screen_size.x / 2. - 180., 5., 390., 60.)
 }
 
 pub(crate) fn show_top_left(rc: &RenderContext, painter: &mut ColumnLabelPainter) {
@@ -435,7 +432,7 @@ fn can_end_move(game: &Game) -> Option<&str> {
     match game.state {
         GameState::Movement(_) => Some("End movement"),
         GameState::Playing => Some("End turn"),
-        GameState::Finished => None,
+        GameState::Finished | GameState::ChooseCivilization => None,
     }
 }
 

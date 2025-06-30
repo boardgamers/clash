@@ -1,6 +1,3 @@
-use itertools::Itertools;
-use macroquad::prelude::*;
-
 use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::construct_ui::{ConstructionPayment, ConstructionProject};
 use crate::dialog_ui::{OkTooltip, cancel_button, ok_button};
@@ -9,6 +6,9 @@ use crate::select_ui;
 use crate::select_ui::{CountSelector, HasCountSelectableObject, HighlightType, SELECT_RADIUS};
 use crate::tooltip::show_tooltip_for_circle;
 use crate::unit_ui::{UnitSelection, add_unit_description, draw_unit_type};
+use itertools::Itertools;
+use macroquad::prelude::*;
+use server::construct::NOT_ENOUGH_RESOURCES;
 use server::game::Game;
 use server::player::{CostTrigger, Player};
 use server::player_events::CostInfo;
@@ -173,10 +173,17 @@ pub(crate) fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> RenderResu
         |rc, s, p| {
             draw_unit_type(
                 rc,
-                if s.cost.is_ok() {
-                    HighlightType::None
-                } else {
-                    HighlightType::Warn
+                match &s.cost {
+                    Ok(_) => HighlightType::None,
+                    Err(e) => {
+                        if e.contains("Mising building:") {
+                            HighlightType::MissingAdvance
+                        } else if e == NOT_ENOUGH_RESOURCES {
+                            HighlightType::NotEnoughResources
+                        } else {
+                            HighlightType::Warn
+                        }
+                    }
                 },
                 p + Vec2::new(0., -6.),
                 s.unit_type,

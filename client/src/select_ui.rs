@@ -1,12 +1,10 @@
 use crate::client_state::{NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::{OkTooltip, cancel_button, ok_button};
-use crate::layout_ui::{
-    ICON_SIZE, IconBackground, UI_BACKGROUND, bottom_center_anchor, bottom_center_texture,
-};
+use crate::layout_ui::{ICON_SIZE, UI_BACKGROUND, bottom_center_anchor, bottom_center_texture};
 use crate::render_context::RenderContext;
 use macroquad::color::{BLACK, BLUE, Color, WHITE};
 use macroquad::math::{Vec2, bool, vec2};
-use macroquad::prelude::{GRAY, RED};
+use macroquad::prelude::{GRAY, GREEN, RED, YELLOW};
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub(crate) struct CountSelector {
@@ -48,9 +46,7 @@ pub(crate) fn count_dialog<C, O: HasCountSelectableObject>(
 
         let point = vec2(x + 17., -70.) + anchor + offset;
         rc.draw_circle(point, SELECT_RADIUS, UI_BACKGROUND);
-        let mut r = rc.clone();
-        r.icon_background = IconBackground::None;
-        draw(&r, o, point);
+        draw(&rc.no_icon_background(), o, point);
         let current_pos = vec2(x + 13., -40.) + anchor + offset;
         rc.draw_text_with_color(
             &format!("{}", c.current),
@@ -98,6 +94,9 @@ pub(crate) enum HighlightType {
     Choices,
     Warn,
     Invalid,
+    MissingAdvance,
+    NotEnoughResources,
+    AlreadyExists,
 }
 
 impl HighlightType {
@@ -105,9 +104,11 @@ impl HighlightType {
         match self {
             HighlightType::None => BLACK,
             HighlightType::Primary => WHITE,
-            HighlightType::Choices => BLUE,
+            HighlightType::Choices | HighlightType::MissingAdvance => BLUE,
             HighlightType::Warn => RED,
             HighlightType::Invalid => GRAY,
+            HighlightType::AlreadyExists => GREEN,
+            HighlightType::NotEnoughResources => YELLOW,
         }
     }
 }

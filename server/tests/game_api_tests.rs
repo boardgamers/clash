@@ -38,7 +38,7 @@ fn new_game() {
 fn basic_actions() {
     let mut game = setup_game(
         &GameSetupBuilder::new(1)
-            .civilizations(vec!["Rome".to_string(), "Greece".to_string()])
+            .assigned_civilizations(vec!["Rome".to_string(), "Greece".to_string()])
             .skip_random_map()
             .build(),
     );

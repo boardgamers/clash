@@ -1,5 +1,6 @@
 use crate::city::activate_city;
 use crate::combat;
+use crate::construct::NOT_ENOUGH_RESOURCES;
 use crate::consts::STACK_LIMIT;
 use crate::content::ability::recruit_event_origin;
 use crate::content::persistent_events::PersistentEventType;
@@ -185,10 +186,10 @@ pub fn recruit_cost_without_replaced(
         && (units.elephants > 0
             || (units.cavalry > 0 && !is_cavalry_province_city(player, city_position, game)))
     {
-        return Err("No market".to_string());
+        return Err("Mising building: market".to_string());
     }
     if units.ships > 0 && city.pieces.port.is_none() {
-        return Err("No port".to_string());
+        return Err("Mising building: port".to_string());
     }
 
     for (t, a) in units.clone() {
@@ -215,7 +216,7 @@ pub fn recruit_cost_without_replaced(
         execute,
     );
     if !player.can_afford(&cost.cost) {
-        return Err("Cannot afford".to_string());
+        return Err(NOT_ENOUGH_RESOURCES.to_string());
     }
     if units.amount() > city.mood_modified_size(player) as u8 {
         return Err("Too many units".to_string());

@@ -1,11 +1,9 @@
 use crate::content::action_cards::spy::validate_spy_cards;
 use crate::content::action_cards::synergies::validate_new_plans;
 use crate::content::civilizations::rome::validate_princeps_cards;
-use crate::content::persistent_events::PersistentEventType;
 use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::log::{ActionLogEntry, add_action_log_item};
-use crate::objective_card::match_objective_cards;
 use crate::player::Player;
 use crate::utils::Shuffle;
 use crate::wonder::Wonder;
@@ -215,13 +213,6 @@ pub(crate) fn validate_card_selection_for_origin(
         }
         EventOrigin::CivilCard(id) if *id == 31 || *id == 32 => {
             validate_new_plans(cards, game).map(|()| Vec::new())
-        }
-        EventOrigin::Ability(b) if b == "Select Objective Cards to Complete" => {
-            let PersistentEventType::SelectObjectives(c) = &game.current_event().event_type else {
-                return Err("no selection handler".to_string());
-            };
-
-            match_objective_cards(cards, &c.objective_opportunities, game)
         }
         EventOrigin::Ability(b) if b == "Princeps" => {
             validate_princeps_cards(cards).map(|()| Vec::new())

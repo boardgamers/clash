@@ -71,6 +71,13 @@ impl RenderContext<'_> {
         update
     }
 
+    pub(crate) fn no_icon_background(&self) -> RenderContext {
+        RenderContext {
+            icon_background: IconBackground::None,
+            ..self.clone()
+        }
+    }
+
     fn set_camera(&self) {
         match self.camera_mode {
             CameraMode::Screen => set_default_camera(),

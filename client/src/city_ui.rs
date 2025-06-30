@@ -23,7 +23,9 @@ use macroquad::prelude::*;
 use server::city::{City, MoodState};
 use server::city_pieces::{BUILDINGS, Building};
 use server::collect::{available_collect_actions_for_city, possible_resource_collections};
-use server::construct::{can_construct, new_building_positions};
+use server::construct::{
+    BUILDING_ALREADY_EXISTS, NOT_ENOUGH_RESOURCES, can_construct, new_building_positions,
+};
 use server::consts::BUILDING_COST;
 use server::events::check_event_origin;
 use server::game::Game;
@@ -36,8 +38,9 @@ use std::ops::Add;
 
 pub(crate) struct IconAction<'a> {
     pub texture: &'a Texture2D,
+    pub skip_background: bool,
     pub tooltip: Vec<String>,
-    pub warning: bool,
+    pub warning: Option<HighlightType>,
     pub action: Box<dyn Fn() -> RenderResult + 'a>,
 }
 
@@ -45,20 +48,35 @@ impl<'a> IconAction<'a> {
     #[must_use]
     pub(crate) fn new(
         texture: &'a Texture2D,
+        skip_background: bool,
         tooltip: Vec<String>,
         action: Box<dyn Fn() -> RenderResult + 'a>,
     ) -> IconAction<'a> {
         IconAction {
             texture,
+            skip_background,
             tooltip,
-            warning: false,
+            warning: None,
             action,
         }
     }
 
     #[must_use]
-    pub(crate) fn with_warning(self, warning: bool) -> IconAction<'a> {
+    pub(crate) fn with_warning(self, warning: Option<HighlightType>) -> IconAction<'a> {
         IconAction { warning, ..self }
+    }
+
+    #[must_use]
+    pub(crate) fn with_rc(
+        &self,
+        rc: &RenderContext,
+        button: impl Fn(&RenderContext) -> bool,
+    ) -> bool {
+        if self.skip_background {
+            button(&rc.no_icon_background())
+        } else {
+            button(rc)
+        }
     }
 }
 
@@ -99,6 +117,7 @@ fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Optio
 
     Some(IconAction::new(
         &rc.assets().resources[&ResourceType::MoodTokens],
+        false,
         vec!["Increase happiness".to_string()],
         Box::new(move || {
             open_increase_happiness_dialog(rc, &actions, |mut happiness| {
@@ -138,7 +157,18 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
         })
         .map(|(b, can, pos)| {
             let name = b.name();
-            let warn = can.is_err();
+            let warn = can.as_ref().err().map(|e| {
+                if e == NOT_ENOUGH_RESOURCES {
+                    HighlightType::NotEnoughResources
+                } else if e == BUILDING_ALREADY_EXISTS {
+                    HighlightType::AlreadyExists
+                } else if e.contains("Missing advance") {
+                    HighlightType::MissingAdvance
+                } else {
+                    HighlightType::Warn
+                }
+            });
+
             let suffix = match &can {
                 Ok(c) => format!(
                     " for {}{}",
@@ -162,6 +192,7 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
             ];
             IconAction::new(
                 &rc.assets().buildings[&b],
+                true,
                 tooltip,
                 Box::new(move || {
                     can.clone().map_or(NO_UPDATE, |cost_info| {
@@ -188,6 +219,7 @@ fn recruit_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconActio
     }
     Some(IconAction::new(
         rc.assets().unit(UnitType::Infantry, rc.shown_player),
+        false,
         vec!["Recruit Units".to_string()],
         Box::new(|| {
             RecruitAmount::new_selection(rc.game, city.player_index, city.position, Units::empty())
@@ -203,6 +235,7 @@ fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option
 
     Some(IconAction::new(
         &rc.assets().resources[&ResourceType::Food],
+        false,
         vec!["Collect Resources".to_string()],
         Box::new(move || {
             base_or_custom_action(rc, &actions, "Collect resources", |custom| {

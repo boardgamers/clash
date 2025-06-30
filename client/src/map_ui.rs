@@ -244,6 +244,7 @@ fn found_city_button<'a>(rc: &'a RenderContext<'a>, pos: Position) -> Option<Ico
             && rc.can_play_action_for_player(&PlayingActionType::FoundCity, unit.player_index))
         .then_some(IconAction::new(
             rc.assets().unit(UnitType::Settler, rc.shown_player),
+            false,
             vec!["Found a new city".to_string()],
             Box::new(move || {
                 StateUpdate::execute(Action::Playing(PlayingAction::FoundCity {
@@ -266,6 +267,7 @@ pub(crate) fn move_units_button<'a>(
     }
     Some(IconAction::new(
         move_intent.icon(rc),
+        false,
         vec![move_intent.toolip().to_string()],
         Box::new(move || StateUpdate::move_units(rc, Some(pos), move_intent)),
     ))
@@ -290,10 +292,10 @@ pub(crate) fn show_map_action_buttons(rc: &RenderContext, icons: &IconActionVec)
         let p = icon_pos(-(icons.len() as i8) / 2 + i as i8, -1);
         let center = bottom_center_anchor(rc) + p + vec2(15., 15.);
         let radius = 20.;
-        if icon.warning {
-            rc.draw_circle(center, radius, RED);
+        if let Some(c) = icon.warning {
+            rc.draw_circle(center, radius, c.color());
         }
-        if bottom_center_texture(rc, icon.texture, p, "") {
+        if icon.with_rc(rc, |rc| bottom_center_texture(rc, icon.texture, p, "")) {
             return (icon.action)();
         }
         show_tooltip_for_circle(rc, &icon.tooltip, center, radius);

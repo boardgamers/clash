@@ -32,6 +32,20 @@ use std::collections::HashMap;
 use std::vec;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Default)]
+pub enum CivSetupOption {
+    #[default]
+    Random,
+    ChooseCivilization,
+}
+
+impl CivSetupOption {
+    #[must_use]
+    pub fn is_default(&self) -> bool {
+        self == &CivSetupOption::Random
+    }
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Default)]
 pub enum UndoOption {
     // prevent undoing when secret information is revealed (default)
     #[default]
@@ -52,6 +66,9 @@ pub struct GameOptions {
     #[serde(default)]
     #[serde(skip_serializing_if = "UndoOption::is_default")]
     pub undo: UndoOption,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "CivSetupOption::is_default")]
+    pub civilization: CivSetupOption,
 }
 
 impl GameOptions {
@@ -535,6 +552,7 @@ impl Game {
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum GameState {
+    ChooseCivilization,
     Playing,
     Movement(MoveState),
     Finished,

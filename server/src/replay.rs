@@ -70,7 +70,7 @@ pub fn replay(mut data: ReplayGameData, to: Option<usize>) -> Game {
         &GameSetupBuilder::new(data.players.len() - NON_HUMAN_PLAYERS)
             .seed(data.seed)
             .options(data.options)
-            .civilizations(
+            .assigned_civilizations(
                 data.players
                     .iter()
                     .map(|player| player.civilization.clone())

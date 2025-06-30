@@ -48,9 +48,9 @@ pub(crate) enum ActiveDialog {
     ReplaceUnits(RecruitSelection),
     MoveUnits(MoveSelection),
     MovePayment(MovePayment),
-    ExploreResolution(ExploreResolutionConfig),
 
-    // custom
+    // event requests
+    ExploreResolution(ExploreResolutionConfig),
     ResourceRewardRequest(Payment<String>),
     AdvanceRequest(AdvanceRequest),
     PaymentRequest(Vec<Payment<String>>),
@@ -445,7 +445,8 @@ impl State {
             }
             StateUpdate::CloseDialog => {
                 let d = self.game_state_dialog(game);
-                if d.is_advance() {
+                // should be able to look around before making a decision
+                if d.is_advance() || matches!(d, ActiveDialog::Info(_)) {
                     self.set_dialog(ActiveDialog::None);
                 } else {
                     self.set_dialog(d);
@@ -482,7 +483,7 @@ impl State {
         self.active_dialog = dialog;
     }
 
-    pub(crate) fn update_from_game(&mut self, game: &Game) -> GameSyncRequest {
+    pub fn update_from_game(&mut self, game: &Game) -> GameSyncRequest {
         let dialog = self.game_state_dialog(game);
         self.clear();
         self.active_dialog = dialog;
@@ -559,6 +560,9 @@ impl State {
             };
         }
         match &game.state {
+            GameState::ChooseCivilization => {
+                ActiveDialog::Info(InfoDialog::choose_civilization(game))
+            }
             GameState::Playing | GameState::Finished => ActiveDialog::None,
             GameState::Movement(move_state) => ActiveDialog::MoveUnits(MoveSelection::new(
                 game.active_player(),
