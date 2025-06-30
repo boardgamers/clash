@@ -108,7 +108,7 @@ impl HighlightType {
             HighlightType::Warn => RED,
             HighlightType::Invalid => GRAY,
             HighlightType::AlreadyExists => GREEN,
-            HighlightType::NotEnoughResources => YELLOW
+            HighlightType::NotEnoughResources => YELLOW,
         }
     }
 }
