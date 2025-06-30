@@ -4,9 +4,8 @@ use crate::client::Features;
 use crate::client_state::{NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::{OkTooltip, ok_button};
 use crate::layout_ui::{
-    ICON_SIZE, IconBackground, UI_BACKGROUND, bottom_center_anchor, bottom_center_texture,
-    bottom_centered_text, bottom_right_texture, button_pressed, icon_pos, top_center_anchor,
-    top_center_texture,
+    ICON_SIZE, UI_BACKGROUND, bottom_center_anchor, bottom_center_texture, bottom_centered_text,
+    bottom_right_texture, button_pressed, icon_pos, top_center_anchor, top_center_texture,
 };
 use crate::log_ui::multiline_label;
 use crate::map_ui::terrain_name;

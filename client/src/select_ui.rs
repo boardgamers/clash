@@ -1,8 +1,6 @@
 use crate::client_state::{NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::{OkTooltip, cancel_button, ok_button};
-use crate::layout_ui::{
-    ICON_SIZE, IconBackground, UI_BACKGROUND, bottom_center_anchor, bottom_center_texture,
-};
+use crate::layout_ui::{ICON_SIZE, UI_BACKGROUND, bottom_center_anchor, bottom_center_texture};
 use crate::render_context::RenderContext;
 use macroquad::color::{BLACK, BLUE, Color, WHITE};
 use macroquad::math::{Vec2, bool, vec2};

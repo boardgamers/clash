@@ -23,7 +23,9 @@ use macroquad::prelude::*;
 use server::city::{City, MoodState};
 use server::city_pieces::{BUILDINGS, Building};
 use server::collect::{available_collect_actions_for_city, possible_resource_collections};
-use server::construct::{can_construct, new_building_positions};
+use server::construct::{
+    BUILDING_ALREADY_EXISTS, NOT_ENOUGH_RESOURCES, can_construct, new_building_positions,
+};
 use server::consts::BUILDING_COST;
 use server::events::check_event_origin;
 use server::game::Game;
@@ -38,7 +40,7 @@ pub(crate) struct IconAction<'a> {
     pub texture: &'a Texture2D,
     pub skip_background: bool,
     pub tooltip: Vec<String>,
-    pub warning: bool,
+    pub warning: Option<Color>,
     pub action: Box<dyn Fn() -> RenderResult + 'a>,
 }
 
@@ -54,18 +56,22 @@ impl<'a> IconAction<'a> {
             texture,
             skip_background,
             tooltip,
-            warning: false,
+            warning: None,
             action,
         }
     }
 
     #[must_use]
-    pub(crate) fn with_warning(self, warning: bool) -> IconAction<'a> {
+    pub(crate) fn with_warning(self, warning: Option<Color>) -> IconAction<'a> {
         IconAction { warning, ..self }
     }
-    
+
     #[must_use]
-    pub(crate) fn with_rc(&self, rc: &RenderContext, button: impl Fn(&RenderContext) -> bool) -> bool {
+    pub(crate) fn with_rc(
+        &self,
+        rc: &RenderContext,
+        button: impl Fn(&RenderContext) -> bool,
+    ) -> bool {
         if self.skip_background {
             button(&rc.no_icon_background())
         } else {
@@ -151,7 +157,18 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
         })
         .map(|(b, can, pos)| {
             let name = b.name();
-            let warn = can.is_err();
+            let warn = can.as_ref().err().map(|e| {
+                if e == NOT_ENOUGH_RESOURCES {
+                    YELLOW
+                } else if e == BUILDING_ALREADY_EXISTS {
+                    GREEN
+                } else if e.contains("Missing advance") {
+                    BLUE
+                } else {
+                    RED
+                }
+            });
+
             let suffix = match &can {
                 Ok(c) => format!(
                     " for {}{}",

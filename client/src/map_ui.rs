@@ -292,10 +292,10 @@ pub(crate) fn show_map_action_buttons(rc: &RenderContext, icons: &IconActionVec)
         let p = icon_pos(-(icons.len() as i8) / 2 + i as i8, -1);
         let center = bottom_center_anchor(rc) + p + vec2(15., 15.);
         let radius = 20.;
-        if icon.warning {
-            rc.draw_circle(center, radius, RED);
+        if let Some(c) = icon.warning {
+            rc.draw_circle(center, radius, c);
         }
-        if icon.with_rc(rc, |rc|bottom_center_texture(rc, icon.texture, p, "")) {
+        if icon.with_rc(rc, |rc| bottom_center_texture(rc, icon.texture, p, "")) {
             return (icon.action)();
         }
         show_tooltip_for_circle(rc, &icon.tooltip, center, radius);

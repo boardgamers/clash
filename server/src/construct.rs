@@ -44,6 +44,9 @@ pub enum ConstructDiscount {
     NoResourceCost,
 }
 
+pub const BUILDING_ALREADY_EXISTS: &str = "Building already exists";
+pub const NOT_ENOUGH_RESOURCES: &str = "Not enough resources";
+
 ///
 /// # Errors
 /// Returns an error if the building cannot be built
@@ -73,7 +76,7 @@ pub fn can_construct(
         return Err("City is angry".to_string());
     }
     if !city.pieces.can_add_building(building) {
-        return Err("Building already exists".to_string());
+        return Err(BUILDING_ALREADY_EXISTS.to_string());
     }
     if !player.is_building_available(building, game) {
         return Err("All non-destroyed buildings are built".to_string());
@@ -82,7 +85,7 @@ pub fn can_construct(
         && !player.can_afford(&cost_info.cost)
     {
         // construct cost event listener?
-        return Err("Not enough resources".to_string());
+        return Err(NOT_ENOUGH_RESOURCES.to_string());
     }
     Ok(cost_info)
 }

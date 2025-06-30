@@ -83,7 +83,9 @@ pub(crate) fn action_buttons(rc: &RenderContext) -> RenderResult {
         }
     }
     for (i, icon) in custom_action_buttons(rc, None).iter().enumerate() {
-        if icon.with_rc(rc, |rc|bottom_left_texture(rc, icon.texture, icon_pos(i as i8, -1), &icon.tooltip)) {
+        if icon.with_rc(rc, |rc| {
+            bottom_left_texture(rc, icon.texture, icon_pos(i as i8, -1), &icon.tooltip)
+        }) {
             return (icon.action)();
         }
     }
