@@ -70,6 +70,12 @@ impl RenderContext<'_> {
         self.set_camera();
         update
     }
+    
+    pub(crate) fn no_icon_background(&self) -> RenderContext {
+        let mut r = self.clone();
+        r.icon_background = IconBackground::None;
+        r
+    }
 
     fn set_camera(&self) {
         match self.camera_mode {

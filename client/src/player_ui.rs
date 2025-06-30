@@ -118,9 +118,7 @@ pub(crate) fn bottom_icon_with_label(
         rc.state.screen_size.x / 2.0 + p.x + x,
         rc.state.screen_size.y + p.y + 33.,
     );
-    let mut r = rc.clone();
-    r.icon_background = IconBackground::None;
-    bottom_center_texture(&r, texture, p, tooltip);
+    bottom_center_texture(&rc.no_icon_background(), texture, p, tooltip);
 }
 
 pub(crate) fn show_top_center(rc: &RenderContext) {

@@ -83,7 +83,7 @@ pub(crate) fn action_buttons(rc: &RenderContext) -> RenderResult {
         }
     }
     for (i, icon) in custom_action_buttons(rc, None).iter().enumerate() {
-        if bottom_left_texture(rc, icon.texture, icon_pos(i as i8, -1), &icon.tooltip) {
+        if icon.with_rc(rc, |rc|bottom_left_texture(rc, icon.texture, icon_pos(i as i8, -1), &icon.tooltip)) {
             return (icon.action)();
         }
     }
@@ -101,6 +101,7 @@ pub(crate) fn custom_action_buttons<'a>(
             generic_custom_action(rc, &c, city).map(|action| {
                 IconAction::new(
                     &rc.assets().custom_actions[&c.action],
+                    false,
                     event_help_tooltip(rc, &c.event_origin),
                     Box::new(move || action.clone()),
                 )

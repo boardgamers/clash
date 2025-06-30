@@ -48,9 +48,7 @@ pub(crate) fn count_dialog<C, O: HasCountSelectableObject>(
 
         let point = vec2(x + 17., -70.) + anchor + offset;
         rc.draw_circle(point, SELECT_RADIUS, UI_BACKGROUND);
-        let mut r = rc.clone();
-        r.icon_background = IconBackground::None;
-        draw(&r, o, point);
+        draw(&rc.no_icon_background(), o, point);
         let current_pos = vec2(x + 13., -40.) + anchor + offset;
         rc.draw_text_with_color(
             &format!("{}", c.current),
