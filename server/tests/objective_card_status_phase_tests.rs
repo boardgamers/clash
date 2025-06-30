@@ -1,7 +1,7 @@
 use crate::common::{JsonTest, TestAction};
 use server::action::Action;
-use server::card::{HandCard, validate_card_selection};
-use server::content::persistent_events::{EventResponse, PersistentEventRequest};
+use server::card::HandCard;
+use server::content::persistent_events::EventResponse;
 use server::playing_actions::PlayingAction;
 
 mod common;
@@ -17,32 +17,58 @@ fn test_large_civ() {
             TestAction::undoable(
                 0,
                 Action::Response(EventResponse::SelectHandCards(vec![
-                    HandCard::ObjectiveCard(1),
                     HandCard::ObjectiveCard(4),
-                    HandCard::ObjectiveCard(5),
+                ])),
+            )
+            .skip_json(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectHandCards(vec![
                     HandCard::ObjectiveCard(6),
-                    HandCard::ObjectiveCard(7),
-                    HandCard::ObjectiveCard(9),
+                ])),
+            )
+            .skip_json(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectHandCards(vec![
                     HandCard::ObjectiveCard(24),
                 ])),
             )
-            .with_pre_assert(|game| {
-                let PersistentEventRequest::SelectHandCards(c) = &game
-                    .events
-                    .last()
-                    .expect("last event")
-                    .player
-                    .handler
-                    .as_ref()
-                    .expect("handler")
-                    .request
-                else {
-                    panic!("Expected SelectHandCards request");
-                };
-                //can't fulfill all objectives with same name
-                assert_eq!(c.choices.len(), 8);
-                assert!(validate_card_selection(&c.choices, &game).is_err());
-            }),
+            .skip_json(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectHandCards(vec![
+                    HandCard::ObjectiveCard(1),
+                ])),
+            )
+            .skip_json(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectHandCards(vec![
+                    HandCard::ObjectiveCard(11),
+                ])),
+            )
+            .skip_json(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectHandCards(vec![
+                    HandCard::ObjectiveCard(5),
+                ])),
+            )
+            .skip_json(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectHandCards(vec![
+                    HandCard::ObjectiveCard(9),
+                ])),
+            )
+            .skip_json(),
+            TestAction::undoable(
+                0,
+                Action::Response(EventResponse::SelectHandCards(vec![
+                    HandCard::ObjectiveCard(7),
+                ])),
+            ),
         ],
     )
 }
@@ -58,6 +84,12 @@ fn test_colony() {
                 1,
                 Action::Response(EventResponse::SelectHandCards(vec![
                     HandCard::ObjectiveCard(17),
+                ])),
+            )
+            .skip_json(),
+            TestAction::undoable(
+                1,
+                Action::Response(EventResponse::SelectHandCards(vec![
                     HandCard::ObjectiveCard(32),
                 ])),
             ),
@@ -76,24 +108,7 @@ fn test_standing_army() {
                 Action::Response(EventResponse::SelectHandCards(vec![
                     HandCard::ObjectiveCard(14),
                 ])),
-            )
-            .with_pre_assert(|game| {
-                let PersistentEventRequest::SelectHandCards(c) = &game
-                    .events
-                    .last()
-                    .expect("last event")
-                    .player
-                    .handler
-                    .as_ref()
-                    .expect("handler")
-                    .request
-                else {
-                    panic!("Expected SelectHandCards request");
-                };
-                //can't fulfill all objectives with same name
-                assert_eq!(c.choices.len(), 2);
-                assert!(validate_card_selection(&c.choices, &game).is_err());
-            }),
+            ),
         ],
     )
 }

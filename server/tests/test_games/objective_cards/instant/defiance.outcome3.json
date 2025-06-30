@@ -302,6 +302,13 @@
                 {
                   "action": {
                     "Response": {
+                      "SelectHandCards": []
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "Response": {
                       "SelectHandCards": [
                         {
                           "ObjectiveCard": 7
@@ -336,7 +343,7 @@
       ]
     }
   ],
-  "action_log_index": 3,
+  "action_log_index": 4,
   "log": [
     [
       "Player1: Move: marched 1 infantry from C2 to C1"
@@ -359,6 +366,9 @@
       "Player2: Choose Casualties: Remove all defending units",
       "Attacker wins",
       "Player1: Waste: Could not store 1 gold"
+    ],
+    [
+      "Player1: Select Objective Cards to Complete: No card selected"
     ],
     [
       "Player1: Complete Objectives: Complete Defiance using Eureka!/Defiance"

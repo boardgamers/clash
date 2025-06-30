@@ -164,32 +164,36 @@
       "incident_tokens": 2,
       "completed_objectives": [
         {
-          "card": 1,
-          "name": "Large Civilization"
-        },
-        {
           "card": 4,
           "name": "Advanced Culture"
-        },
-        {
-          "card": 5,
-          "name": "Religious Fervor"
         },
         {
           "card": 6,
           "name": "City Planner"
         },
         {
-          "card": 7,
-          "name": "Eureka!"
+          "card": 24,
+          "name": "Government"
+        },
+        {
+          "card": 1,
+          "name": "Large Civilization"
+        },
+        {
+          "card": 11,
+          "name": "Large Fleet"
+        },
+        {
+          "card": 5,
+          "name": "Religious Fervor"
         },
         {
           "card": 9,
           "name": "Sea Blockade"
         },
         {
-          "card": 24,
-          "name": "Government"
+          "card": 7,
+          "name": "Eureka!"
         }
       ],
       "objective_cards": [
@@ -320,25 +324,97 @@
                     "Response": {
                       "SelectHandCards": [
                         {
-                          "ObjectiveCard": 1
-                        },
-                        {
+                          "ObjectiveCard": 4
+                        }
+                      ]
+                    }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
                           "ObjectiveCard": 4
                         },
-                        {
-                          "ObjectiveCard": 5
+                        "from": {
+                          "Hand": 0
                         },
+                        "to": {
+                          "CompleteObjective": "Advanced Culture"
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Complete Objectives"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
                         {
                           "ObjectiveCard": 6
+                        }
+                      ]
+                    }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 6
                         },
-                        {
-                          "ObjectiveCard": 7
+                        "from": {
+                          "Hand": 0
                         },
-                        {
-                          "ObjectiveCard": 9
-                        },
+                        "to": {
+                          "CompleteObjective": "City Planner"
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Complete Objectives"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
                         {
                           "ObjectiveCard": 24
+                        }
+                      ]
+                    }
+                  },
+                  "items": [
+                    {
+                      "player": 0,
+                      "HandCard": {
+                        "card": {
+                          "ObjectiveCard": 24
+                        },
+                        "from": {
+                          "Hand": 0
+                        },
+                        "to": {
+                          "CompleteObjective": "Government"
+                        }
+                      },
+                      "origin": {
+                        "Ability": "Complete Objectives"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ObjectiveCard": 1
                         }
                       ]
                     }
@@ -360,24 +436,50 @@
                       "origin": {
                         "Ability": "Complete Objectives"
                       }
-                    },
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ObjectiveCard": 11
+                        }
+                      ]
+                    }
+                  },
+                  "items": [
                     {
                       "player": 0,
                       "HandCard": {
                         "card": {
-                          "ObjectiveCard": 4
+                          "ObjectiveCard": 11
                         },
                         "from": {
                           "Hand": 0
                         },
                         "to": {
-                          "CompleteObjective": "Advanced Culture"
+                          "CompleteObjective": "Large Fleet"
                         }
                       },
                       "origin": {
                         "Ability": "Complete Objectives"
                       }
-                    },
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ObjectiveCard": 5
+                        }
+                      ]
+                    }
+                  },
+                  "items": [
                     {
                       "player": 0,
                       "HandCard": {
@@ -394,24 +496,50 @@
                       "origin": {
                         "Ability": "Complete Objectives"
                       }
-                    },
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ObjectiveCard": 9
+                        }
+                      ]
+                    }
+                  },
+                  "items": [
                     {
                       "player": 0,
                       "HandCard": {
                         "card": {
-                          "ObjectiveCard": 6
+                          "ObjectiveCard": 9
                         },
                         "from": {
                           "Hand": 0
                         },
                         "to": {
-                          "CompleteObjective": "City Planner"
+                          "CompleteObjective": "Sea Blockade"
                         }
                       },
                       "origin": {
                         "Ability": "Complete Objectives"
                       }
-                    },
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ObjectiveCard": 7
+                        }
+                      ]
+                    }
+                  },
+                  "items": [
                     {
                       "player": 0,
                       "Resources": {
@@ -440,40 +568,6 @@
                       "origin": {
                         "Ability": "Complete Objectives"
                       }
-                    },
-                    {
-                      "player": 0,
-                      "HandCard": {
-                        "card": {
-                          "ObjectiveCard": 9
-                        },
-                        "from": {
-                          "Hand": 0
-                        },
-                        "to": {
-                          "CompleteObjective": "Sea Blockade"
-                        }
-                      },
-                      "origin": {
-                        "Ability": "Complete Objectives"
-                      }
-                    },
-                    {
-                      "player": 0,
-                      "HandCard": {
-                        "card": {
-                          "ObjectiveCard": 24
-                        },
-                        "from": {
-                          "Hand": 0
-                        },
-                        "to": {
-                          "CompleteObjective": "Government"
-                        }
-                      },
-                      "origin": {
-                        "Ability": "Complete Objectives"
-                      }
                     }
                   ]
                 }
@@ -484,7 +578,7 @@
       ]
     }
   ],
-  "action_log_index": 2,
+  "action_log_index": 9,
   "log": [
     [
       "Player2: End Turn: 2 actions left"
@@ -493,8 +587,29 @@
       "The game has entered the 1st status phase"
     ],
     [
-      "Player1: Complete Objectives: Complete Large Civilization using Large Civilization/Draft, Complete Advanced Culture using Advanced Culture/Warmonger, Complete Religious Fervor using Religious Fervor/General, Complete City Planner using City Planner/Great Battle, Complete Eureka! using Eureka!/Defiance, Complete Sea Blockade using Education Lead/Sea Blockade, Complete Government using Government/Barbarian Conquest",
-      "Player1: Eureka!: Pay 2 ideas for Eureka!"
+      "Player1: Complete Objectives: Complete Advanced Culture using Advanced Culture/Warmonger"
+    ],
+    [
+      "Player1: Complete Objectives: Complete City Planner using City Planner/Great Battle"
+    ],
+    [
+      "Player1: Complete Objectives: Complete Government using Government/Barbarian Conquest"
+    ],
+    [
+      "Player1: Complete Objectives: Complete Large Civilization using Large Civilization/Draft"
+    ],
+    [
+      "Player1: Complete Objectives: Complete Large Fleet using Wealth/Large Fleet"
+    ],
+    [
+      "Player1: Complete Objectives: Complete Religious Fervor using Religious Fervor/General"
+    ],
+    [
+      "Player1: Complete Objectives: Complete Sea Blockade using Education Lead/Sea Blockade"
+    ],
+    [
+      "Player1: Eureka!: Pay 2 ideas for Eureka!",
+      "Player1: Complete Objectives: Complete Eureka! using Eureka!/Defiance"
     ]
   ],
   "undo_limit": 1,

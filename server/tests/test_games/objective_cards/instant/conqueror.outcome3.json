@@ -335,12 +335,6 @@
                       "SelectHandCards": [
                         {
                           "ObjectiveCard": 2
-                        },
-                        {
-                          "ObjectiveCard": 5
-                        },
-                        {
-                          "ObjectiveCard": 6
                         }
                       ]
                     }
@@ -362,7 +356,20 @@
                       "origin": {
                         "Ability": "Complete Objectives"
                       }
-                    },
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ObjectiveCard": 5
+                        }
+                      ]
+                    }
+                  },
+                  "items": [
                     {
                       "player": 0,
                       "HandCard": {
@@ -379,7 +386,20 @@
                       "origin": {
                         "Ability": "Complete Objectives"
                       }
-                    },
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectHandCards": [
+                        {
+                          "ObjectiveCard": 6
+                        }
+                      ]
+                    }
+                  },
+                  "items": [
                     {
                       "player": 0,
                       "HandCard": {
@@ -406,7 +426,7 @@
       ]
     }
   ],
-  "action_log_index": 2,
+  "action_log_index": 4,
   "log": [
     [
       "Player1: Move: marched 2 infantry, 1 cavalry and 1 elephant from C2 to C1"
@@ -420,7 +440,13 @@
       "Player1: Waste: Could not store 1 gold"
     ],
     [
-      "Player1: Complete Objectives: Complete Conqueror using Scientific Lead/Conqueror, Complete General using Religious Fervor/General, Complete Great Battle using City Planner/Great Battle"
+      "Player1: Complete Objectives: Complete Conqueror using Scientific Lead/Conqueror"
+    ],
+    [
+      "Player1: Complete Objectives: Complete General using Religious Fervor/General"
+    ],
+    [
+      "Player1: Complete Objectives: Complete Great Battle using City Planner/Great Battle"
     ]
   ],
   "undo_limit": 1,
