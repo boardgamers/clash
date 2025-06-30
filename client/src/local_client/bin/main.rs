@@ -17,6 +17,7 @@ use std::{env, vec};
 #[derive(PartialEq)]
 enum Mode {
     Local,
+    ChooseCivilization,
     AI,
 }
 
@@ -50,7 +51,11 @@ async fn main() {
             .seed(seed)
             .options(GameOptions {
                 undo: UndoOption::SamePlayer,
-                civilization: CivSetupOption::ChooseCivilization,
+                civilization: if modes.contains(&Mode::ChooseCivilization) {
+                    CivSetupOption::ChooseCivilization
+                } else {
+                    CivSetupOption::Random
+                },
             })
             .build(),
     );
@@ -62,6 +67,7 @@ fn get_modes(args: &[String]) -> Vec<Mode> {
     match args.first() {
         Some(arg) => match arg.as_str() {
             "generate" => vec![Mode::Local],
+            "choose" => vec![Mode::Local, Mode::ChooseCivilization],
             "ai" => vec![Mode::AI, Mode::Local],
             _ => {
                 panic!("Unknown argument: {arg}");

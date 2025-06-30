@@ -91,7 +91,7 @@ pub(crate) fn top_icon_with_label(
     tooltip: &str,
 ) {
     let dimensions = rc.state.measure_text(label);
-    let x = rc.state.screen_size.x / 2.0 + p.x + ((ICON_SIZE - dimensions.width) / 2.0) - 20.;
+    let x = rc.state.screen_size.x / 2.0 + p.x + ((ICON_SIZE - dimensions.width) / 2.0);
     let y = p.y + ICON_SIZE + 30.;
     rc.draw_text(label, x, y);
     top_center_texture(rc, texture, p, tooltip);
@@ -177,7 +177,7 @@ pub(crate) fn show_top_center(rc: &RenderContext) {
 }
 
 fn top_center_rect(rc: &RenderContext) -> Rect {
-    Rect::new(rc.state.screen_size.x / 2. - 200., 5., 400., 60.)
+    Rect::new(rc.state.screen_size.x / 2. - 180., 5., 390., 60.)
 }
 
 pub(crate) fn show_top_left(rc: &RenderContext, painter: &mut ColumnLabelPainter) {
