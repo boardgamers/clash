@@ -208,7 +208,7 @@ fn roll(
             dice_roll_with_leader_reroll(game, &mut unit_types, deny_combat_abilities, roll_log);
         let value = dice_roll.value;
         rolls.combat_value += value as i8;
-        if unit_types.get_amount(&dice_roll.bonus) > 0 && !deny_combat_abilities {
+        if unit_types.has_unit(&dice_roll.bonus) && !deny_combat_abilities {
             unit_types -= &dice_roll.bonus;
 
             match dice_roll.bonus {
