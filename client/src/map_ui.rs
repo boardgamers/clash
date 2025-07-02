@@ -1,4 +1,5 @@
 use crate::city_ui::{IconAction, IconActionVec, draw_city, show_city_menu};
+use crate::client::mouse_wheel_speed;
 use crate::client_state::{
     ActiveDialog, MAX_OFFSET, MIN_OFFSET, NO_UPDATE, RenderResult, State, StateUpdate, ZOOM,
 };
@@ -27,7 +28,6 @@ use server::unit::UnitType;
 use std::collections::HashMap;
 use std::ops::{Add, Mul, Rem, Sub};
 use std::vec;
-use crate::client::mouse_wheel_speed;
 
 const MOVE_DESTINATION: Color = color(51, 255, 72, 0.4);
 

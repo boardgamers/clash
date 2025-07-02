@@ -61,6 +61,12 @@ pub fn can_construct(
     trigger: CostTrigger,
     discounts: &[ConstructDiscount],
 ) -> Result<CostInfo, String> {
+    if !city.pieces.can_add_building(building) {
+        return Err(BUILDING_ALREADY_EXISTS.to_string());
+    }
+    if !player.is_building_available(building, game) {
+        return Err("All non-destroyed buildings are built".to_string());
+    }
     let advance = game.cache.get_building_advance(building);
     if !player.can_use_advance(advance) {
         return Err(format!("Missing advance: {}", advance.name(game)));
@@ -75,16 +81,9 @@ pub fn can_construct(
     if city.mood_state == MoodState::Angry {
         return Err("City is angry".to_string());
     }
-    if !city.pieces.can_add_building(building) {
-        return Err(BUILDING_ALREADY_EXISTS.to_string());
-    }
-    if !player.is_building_available(building, game) {
-        return Err("All non-destroyed buildings are built".to_string());
-    }
-    if !discounts.contains(&ConstructDiscount::NoResourceCost)
-        && !player.can_afford(&cost_info.cost)
-    {
-        // construct cost event listener?
+    let can_afford = discounts.contains(&ConstructDiscount::NoResourceCost)
+        || player.can_afford(&cost_info.cost);
+    if !can_afford {
         return Err(NOT_ENOUGH_RESOURCES.to_string());
     }
     Ok(cost_info)
@@ -102,7 +101,7 @@ pub(crate) fn can_construct_anything(
         return Err("Not your city".to_string());
     }
     if city.pieces.amount() >= MAX_CITY_PIECES {
-        return Err("City is full".to_string());
+        return Err("City already has maximum size".to_string());
     }
     if city.size() >= player.cities.len() {
         return Err("Need more cities".to_string());

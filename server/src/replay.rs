@@ -76,7 +76,7 @@ pub fn replay(mut data: ReplayGameData, to: Option<usize>) -> Game {
                 .iter()
                 .map(|player| player.civilization.clone())
                 .collect_vec(),
-        )
+        );
     }
 
     let mut game = setup_game(&builder.build());
