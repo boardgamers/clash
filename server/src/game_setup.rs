@@ -11,7 +11,7 @@ use crate::content::civilizations::{BARBARIANS, CHOOSE_CIV, PIRATES};
 use crate::events::{EventOrigin, EventPlayer};
 use crate::game::{CivSetupOption, Game, GameContext, GameOptions, GameState};
 use crate::log::{add_player_log, add_round_log};
-use crate::map::{Map, MapHomePosition, MapSetup, get_map_setup};
+use crate::map::{Map, MapSetup, get_map_setup};
 use crate::objective_card::gain_objective_card_from_pile;
 use crate::player::{Player, gain_unit};
 use crate::resource_pile::ResourcePile;

@@ -4,6 +4,7 @@ use playing_actions::PlayingActionType;
 use server::card::HandCard;
 use server::collect::PositionCollection;
 use server::content::persistent_events::{EventResponse, SelectedStructure};
+use server::game::{CivSetupOption, GameOptions, UndoOption};
 use server::game_setup::{GameSetupBuilder, setup_game};
 use server::leader::Leader;
 use server::structure::Structure;
@@ -23,7 +24,6 @@ use server::{
     resource_pile::ResourcePile,
 };
 use std::{collections::HashMap, vec};
-use server::game::{CivSetupOption, GameOptions, UndoOption};
 
 mod common;
 
@@ -31,12 +31,14 @@ const JSON: JsonTest = JsonTest::new("base");
 
 #[test]
 fn new_game() {
-    let mut game = setup_game(&GameSetupBuilder::new(2)
-        .options(GameOptions {
-            civilization: CivSetupOption::ChooseCivilization,
-            undo: UndoOption::SamePlayer,
-        })
-        .build());
+    let mut game = setup_game(
+        &GameSetupBuilder::new(2)
+            .options(GameOptions {
+                civilization: CivSetupOption::ChooseCivilization,
+                undo: UndoOption::SamePlayer,
+            })
+            .build(),
+    );
     let player_index = game.current_player_index;
     game = game_api::execute(
         game,
