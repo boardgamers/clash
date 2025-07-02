@@ -5,6 +5,7 @@ use server::game::Game;
 use server::replay;
 use server::replay::ReplayGameData;
 use std::fs::File;
+use std::time::SystemTime;
 use std::{env, fs};
 
 fn main() {
@@ -36,10 +37,21 @@ fn replay(to: Option<&String>) {
 }
 
 fn read_game_str() -> String {
-    let escaped = fs::read_to_string("escaped-game.json").expect("Failed to read export file");
-    let val: String = serde_json::from_str(&escaped).expect("Failed to parse export file");
-    fs::write("game.json", &val).expect("Failed to write export file");
+    // read from game.json instead of escaped-game.json if the modification date is newer
+    let g = "game.json";
+    let e = "escaped-game.json";
+    if modified(g) > modified(e) {
+        return fs::read_to_string(g).expect("Failed to read export file");
+    }
+    let val: String =
+        serde_json::from_str(&fs::read_to_string(e).expect("Failed to read export file"))
+            .expect("Failed to parse export file");
+    fs::write(g, &val).expect("Failed to write export file");
     val
+}
+
+fn modified(g: &str) -> SystemTime {
+    fs::metadata(g).unwrap().modified().unwrap()
 }
 
 fn export(game: Game) {
