@@ -148,7 +148,7 @@ pub fn recruit_cost(
 ) -> Result<CostInfo, String> {
     let mut require_replace = units.clone();
     for t in player.available_units().to_vec() {
-        if require_replace.get_amount(&t) > 0 {
+        if require_replace.has_unit(&t) {
             require_replace -= &t;
         }
     }

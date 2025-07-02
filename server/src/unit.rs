@@ -353,9 +353,10 @@ impl Units {
         Self::new(0, 0, 0, 0, 0, None)
     }
 
+    /// Type of leader is ignored, it is just a placeholder.
     #[must_use]
     pub fn has_unit(&self, unit: &UnitType) -> bool {
-        self.get(unit) > 0
+        self.get_amount(unit) > 0
     }
 
     #[must_use]
