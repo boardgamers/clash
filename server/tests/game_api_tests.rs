@@ -23,6 +23,7 @@ use server::{
     resource_pile::ResourcePile,
 };
 use std::{collections::HashMap, vec};
+use server::game::{CivSetupOption, GameOptions, UndoOption};
 
 mod common;
 
@@ -30,7 +31,19 @@ const JSON: JsonTest = JsonTest::new("base");
 
 #[test]
 fn new_game() {
-    let game = setup_game(&GameSetupBuilder::new(2).build());
+    let mut game = setup_game(&GameSetupBuilder::new(2)
+        .options(GameOptions {
+            civilization: CivSetupOption::ChooseCivilization,
+            undo: UndoOption::SamePlayer,
+        })
+        .build());
+    let player_index = game.current_player_index;
+    game = game_api::execute(
+        game,
+        Action::ChooseCivilization("Vikings".to_string()),
+        player_index,
+    );
+    // should have a water tile now
     JSON.compare_game("new_game", &game);
 }
 

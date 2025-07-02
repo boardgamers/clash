@@ -11,7 +11,7 @@ use crate::content::civilizations::{BARBARIANS, CHOOSE_CIV, PIRATES};
 use crate::events::{EventOrigin, EventPlayer};
 use crate::game::{CivSetupOption, Game, GameContext, GameOptions, GameState};
 use crate::log::{add_player_log, add_round_log};
-use crate::map::{Map, MapSetup, get_map_setup};
+use crate::map::{Map, MapHomePosition, MapSetup, get_map_setup};
 use crate::objective_card::gain_objective_card_from_pile;
 use crate::player::{Player, gain_unit};
 use crate::resource_pile::ResourcePile;
@@ -214,21 +214,26 @@ fn execute_setup_round(setup: &GameSetup, game: &mut Game, map_setup: Option<&Ma
         gain_objective_card_from_pile(game, player);
         if let Some(m) = &map_setup {
             let h = &m.home_positions[player_index];
-            let home = player
-                .get(game)
-                .civilization
-                .start_block
-                .as_ref()
-                .unwrap_or(&h.block)
-                .clone();
-            let position = home.tiles(&h.position, h.position.rotation)[0].0;
-            game.map
-                .add_block_tiles(&h.position, &home, h.position.rotation);
+            place_home_tiles(game, player);
+            let position = h.block.tiles(&h.position, h.position.rotation)[0].0;
             gain_city(game, player, City::new(player_index, position));
             set_city_mood(game, position, &origin, MoodState::Happy);
             gain_unit(game, player, position, UnitType::Settler);
         }
     }
+}
+
+pub(crate) fn place_home_tiles(game: &mut Game, player: &EventPlayer) {
+    let h = &get_map_setup(game.human_players_count()).home_positions[player.index];
+    let home = player
+        .get(game)
+        .civilization
+        .start_block
+        .as_ref()
+        .unwrap_or(&h.block)
+        .clone();
+    game.map
+        .add_block_tiles(&h.position, &home, h.position.rotation);
 }
 
 fn setup_event_origin() -> EventOrigin {
@@ -293,8 +298,10 @@ pub(crate) fn execute_choose_civ(
     player_index: usize,
     action: &Action,
 ) -> Result<(), String> {
+    let player = EventPlayer::from_player(player_index, game, setup_event_origin());
     if let Action::ChooseCivilization(civ) = action {
         game.player_mut(player_index).civilization = game.cache.get_civilization(civ);
+        place_home_tiles(game, &player);
     } else {
         return Err("action should be a choose civ action".to_string());
     }
@@ -303,9 +310,8 @@ pub(crate) fn execute_choose_civ(
     if game.players.iter().all(|p| !p.civilization.is_choose_civ()) {
         game.state = GameState::Playing;
     }
-    game.log(
-        player_index,
-        &setup_event_origin(),
+    player.log(
+        game,
         &format!("Play as {}", game.player(player_index).civilization.name),
     );
     Ok(())

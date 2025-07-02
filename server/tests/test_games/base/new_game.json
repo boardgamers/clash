@@ -1,6 +1,10 @@
 {
+  "options": {
+    "undo": "SamePlayer",
+    "civilization": "ChooseCivilization"
+  },
   "version": 2,
-  "state": "Playing",
+  "state": "ChooseCivilization",
   "players": [
     {
       "id": 0,
@@ -27,12 +31,7 @@
           "id": 0
         }
       ],
-      "civilization": "Rome",
-      "available_leaders": [
-        "Augustus",
-        "Caesar",
-        "Sulla"
-      ],
+      "civilization": "Vikings",
       "advances": [
         "Farming",
         "Mining"
@@ -42,7 +41,7 @@
         27
       ],
       "objective_cards": [
-        18
+        8
       ],
       "next_unit_id": 1
     },
@@ -71,22 +70,17 @@
           "id": 0
         }
       ],
-      "civilization": "Greece",
-      "available_leaders": [
-        "Alexander",
-        "Leonidas",
-        "Pericles"
-      ],
+      "civilization": "Choose Civilization",
       "advances": [
         "Farming",
         "Mining"
       ],
       "incident_tokens": 3,
       "action_cards": [
-        22
+        25
       ],
       "objective_cards": [
-        16
+        36
       ],
       "next_unit_id": 1
     },
@@ -169,7 +163,7 @@
       ],
       [
         "D1",
-        "Barren"
+        "Water"
       ],
       [
         "D2",
@@ -272,8 +266,8 @@
         },
         "block": {
           "terrain": [
-            "Forest",
             "Mountain",
+            "Water",
             "Fertile",
             "Mountain"
           ]
@@ -286,9 +280,9 @@
         },
         "block": {
           "terrain": [
+            "Water",
             "Mountain",
             "Water",
-            "Fertile",
             "Mountain"
           ]
         }
@@ -296,6 +290,48 @@
       {
         "position": {
           "top_tile": "B6",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Fertile",
+            "Mountain",
+            "Forest",
+            "Fertile"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "D3",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Water",
+            "Water",
+            "Mountain",
+            "Fertile"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "D5",
+          "rotation": 0
+        },
+        "block": {
+          "terrain": [
+            "Forest",
+            "Mountain",
+            "Fertile",
+            "Mountain"
+          ]
+        }
+      },
+      {
+        "position": {
+          "top_tile": "F2",
           "rotation": 0
         },
         "block": {
@@ -309,35 +345,7 @@
       },
       {
         "position": {
-          "top_tile": "D3",
-          "rotation": 0
-        },
-        "block": {
-          "terrain": [
-            "Mountain",
-            "Forest",
-            "Mountain",
-            "Barren"
-          ]
-        }
-      },
-      {
-        "position": {
-          "top_tile": "D5",
-          "rotation": 0
-        },
-        "block": {
-          "terrain": [
-            "Water",
-            "Mountain",
-            "Water",
-            "Mountain"
-          ]
-        }
-      },
-      {
-        "position": {
-          "top_tile": "F2",
+          "top_tile": "F4",
           "rotation": 0
         },
         "block": {
@@ -351,28 +359,14 @@
       },
       {
         "position": {
-          "top_tile": "F4",
-          "rotation": 0
-        },
-        "block": {
-          "terrain": [
-            "Water",
-            "Water",
-            "Mountain",
-            "Fertile"
-          ]
-        }
-      },
-      {
-        "position": {
           "top_tile": "F6",
           "rotation": 0
         },
         "block": {
           "terrain": [
-            "Forest",
             "Water",
-            "Fertile",
+            "Mountain",
+            "Mountain",
             "Forest"
           ]
         }
@@ -380,7 +374,7 @@
     ]
   },
   "starting_player_index": 0,
-  "current_player_index": 0,
+  "current_player_index": 1,
   "action_log": [
     {
       "age": 1,
@@ -455,7 +449,7 @@
                       "player": 0,
                       "HandCard": {
                         "card": {
-                          "ObjectiveCard": 18
+                          "ObjectiveCard": 8
                         },
                         "from": "DrawPile",
                         "to": {
@@ -507,106 +501,9 @@
               "index": 1,
               "actions": [
                 {
-                  "action": "StartTurn",
-                  "items": [
-                    {
-                      "player": 1,
-                      "Resources": {
-                        "resources": {
-                          "food": 2
-                        },
-                        "balance": "Gain"
-                      },
-                      "origin": {
-                        "Ability": "Setup"
-                      }
-                    },
-                    {
-                      "player": 1,
-                      "Advance": {
-                        "advance": "Farming",
-                        "take_incident_token": false,
-                        "balance": "Gain"
-                      },
-                      "origin": {
-                        "Ability": "Setup"
-                      }
-                    },
-                    {
-                      "player": 1,
-                      "Advance": {
-                        "advance": "Mining",
-                        "take_incident_token": false,
-                        "balance": "Gain"
-                      },
-                      "origin": {
-                        "Ability": "Setup"
-                      }
-                    },
-                    {
-                      "player": 1,
-                      "HandCard": {
-                        "card": {
-                          "ActionCard": 22
-                        },
-                        "from": "DrawPile",
-                        "to": {
-                          "Hand": 1
-                        }
-                      },
-                      "origin": {
-                        "Ability": "Setup"
-                      }
-                    },
-                    {
-                      "player": 1,
-                      "HandCard": {
-                        "card": {
-                          "ObjectiveCard": 16
-                        },
-                        "from": "DrawPile",
-                        "to": {
-                          "Hand": 1
-                        }
-                      },
-                      "origin": {
-                        "Ability": "Setup"
-                      }
-                    },
-                    {
-                      "player": 1,
-                      "Structure": {
-                        "structure": "CityCenter",
-                        "balance": "Gain",
-                        "position": "D7"
-                      },
-                      "origin": {
-                        "Ability": "Setup"
-                      }
-                    },
-                    {
-                      "player": 1,
-                      "MoodChange": {
-                        "city": "D7",
-                        "mood": "Happy"
-                      },
-                      "origin": {
-                        "Ability": "Setup"
-                      }
-                    },
-                    {
-                      "player": 1,
-                      "Units": {
-                        "units": {
-                          "settlers": 1
-                        },
-                        "balance": "Gain"
-                      },
-                      "origin": {
-                        "Ability": "Setup"
-                      }
-                    }
-                  ]
+                  "action": {
+                    "ChooseCivilization": "Vikings"
+                  }
                 }
               ]
             }
@@ -615,7 +512,7 @@
       ]
     }
   ],
-  "action_log_index": 0,
+  "action_log_index": 1,
   "log": [
     [
       "The game has started"
@@ -628,166 +525,169 @@
     ],
     [
       "It's Player1's turn",
-      "Player1: Setup: Play as Rome, Gain 2 food, Gain Farming without taking an event token, Gain Mining without taking an event token, Draw an action card, Draw an objective card, Gain city D2, City D2 became Happy, Gain 1 settler at D2",
-      "Player2: Setup: Play as Greece, Gain 2 food, Gain Farming without taking an event token, Gain Mining without taking an event token, Draw an action card, Draw an objective card, Gain city D7, City D7 became Happy, Gain 1 settler at D7"
+      "Player1: Setup: Play as Choose Civilization, Gain 2 food, Gain Farming without taking an event token, Gain Mining without taking an event token, Draw an action card, Draw an objective card, Gain city D2, City D2 became Happy, Gain 1 settler at D2",
+      "Player2: Setup: Play as Choose Civilization, Gain 2 food, Gain Farming without taking an event token, Gain Mining without taking an event token, Draw an action card, Draw an objective card, Gain city D7, City D7 became Happy, Gain 1 settler at D7"
+    ],
+    [
+      "Player1: Setup: Play as Vikings"
     ]
   ],
-  "undo_limit": 0,
+  "undo_limit": 1,
   "actions_left": 3,
   "round": 1,
   "age": 1,
   "messages": [
     "Age 1 has started"
   ],
-  "rng": "108765015509370288601255407935512047263",
+  "rng": "187713005158128829250871947649707797698",
   "wonders_left": [
-    "GreatLibrary",
-    "GreatMausoleum",
     "GreatGardens",
-    "Pyramids",
     "GreatLighthouse",
-    "GreatStatue",
+    "GreatMausoleum",
+    "GreatLibrary",
     "Colosseum",
-    "GreatWall"
+    "Pyramids",
+    "GreatWall",
+    "GreatStatue"
   ],
   "action_cards_left": [
-    1,
-    31,
-    28,
-    13,
-    36,
-    4,
-    20,
-    17,
-    8,
-    39,
-    35,
-    5,
-    30,
-    38,
-    15,
-    29,
-    18,
-    37,
-    42,
+    9,
     40,
-    14,
-    12,
+    5,
+    22,
+    11,
     41,
     24,
-    32,
-    9,
-    3,
-    10,
-    19,
-    23,
-    25,
+    29,
+    31,
+    20,
     7,
-    2,
-    21,
+    23,
+    37,
+    1,
+    13,
+    18,
+    16,
+    17,
+    39,
+    10,
+    36,
+    8,
+    12,
+    14,
+    26,
+    4,
+    30,
+    28,
+    35,
     33,
     34,
-    11,
-    16,
-    26,
-    6
+    6,
+    2,
+    21,
+    19,
+    42,
+    3,
+    15,
+    38,
+    32
   ],
   "objective_cards_left": [
-    9,
-    32,
-    14,
-    24,
     19,
-    7,
-    28,
-    10,
+    5,
+    9,
+    6,
     15,
-    2,
+    37,
+    35,
+    34,
+    25,
+    16,
+    24,
+    20,
     1,
     31,
-    3,
-    20,
-    11,
-    35,
-    27,
-    38,
-    29,
-    37,
-    21,
-    12,
-    23,
-    26,
-    17,
-    30,
-    4,
-    8,
+    14,
     13,
-    36,
+    30,
+    38,
+    2,
+    10,
+    32,
+    21,
+    11,
+    29,
+    4,
+    7,
     33,
-    5,
+    3,
+    12,
+    17,
+    18,
+    27,
     22,
-    34,
-    6,
-    25
+    28,
+    26,
+    23
   ],
   "incidents_left": [
-    32,
-    1,
-    54,
-    5,
-    38,
-    55,
-    8,
-    26,
-    46,
-    56,
-    9,
-    25,
-    19,
     53,
-    44,
-    2,
-    41,
-    40,
-    18,
-    51,
-    22,
     50,
-    45,
-    4,
-    10,
-    29,
-    43,
-    35,
-    20,
-    13,
-    27,
-    23,
-    6,
-    36,
-    34,
-    17,
-    15,
-    33,
-    28,
-    31,
-    57,
-    39,
-    37,
-    48,
-    24,
-    12,
-    42,
-    47,
-    52,
-    58,
-    49,
-    11,
-    16,
-    21,
-    14,
-    3,
     30,
-    7
+    24,
+    29,
+    47,
+    46,
+    57,
+    25,
+    58,
+    41,
+    15,
+    4,
+    38,
+    28,
+    19,
+    11,
+    2,
+    44,
+    35,
+    5,
+    27,
+    42,
+    36,
+    17,
+    16,
+    49,
+    14,
+    56,
+    8,
+    43,
+    40,
+    7,
+    37,
+    51,
+    52,
+    26,
+    22,
+    54,
+    20,
+    45,
+    34,
+    39,
+    3,
+    10,
+    6,
+    1,
+    9,
+    33,
+    21,
+    18,
+    55,
+    12,
+    31,
+    23,
+    48,
+    13,
+    32
   ]
 }
