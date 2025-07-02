@@ -39,7 +39,7 @@ fn render_with_mutable_state(game: &Game, state: &mut State, features: &Features
         map_ui::pan_and_zoom(state);
     }
     if let ActiveDialog::Log(d) = &mut state.active_dialog {
-        d.log_scroll += mouse_wheel().1;
+        d.log_scroll += mouse_wheel_speed() * 25.;
     }
 
     set_y_zoom(state);
@@ -56,6 +56,10 @@ fn set_y_zoom(state: &mut State) {
     let h = state.screen_size.y;
     state.camera.viewport = Some((0, 0, w as i32, h as i32));
     state.camera.zoom.y = state.camera.zoom.x * w / h;
+}
+
+pub(crate) fn mouse_wheel_speed() -> f32 {
+    mouse_wheel().1 * get_frame_time()
 }
 
 fn render(rc: &RenderContext, features: &Features) -> RenderResult {

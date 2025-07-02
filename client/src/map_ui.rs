@@ -27,6 +27,7 @@ use server::unit::UnitType;
 use std::collections::HashMap;
 use std::ops::{Add, Mul, Rem, Sub};
 use std::vec;
+use crate::client::mouse_wheel_speed;
 
 const MOVE_DESTINATION: Color = color(51, 255, 72, 0.4);
 
@@ -118,8 +119,7 @@ fn get_overlay(rc: &RenderContext) -> HashMap<Position, Terrain> {
 }
 
 pub(crate) fn pan_and_zoom(state: &mut State) {
-    let (_, wheel) = mouse_wheel();
-    let new_zoom = state.camera.zoom + wheel * get_frame_time() * 0.0006;
+    let new_zoom = state.camera.zoom + mouse_wheel_speed() * 0.0006;
     let x = new_zoom.x;
     if x < 0.005 && x > 0.0005 {
         state.camera.zoom = new_zoom;
