@@ -54,9 +54,10 @@ pub(crate) fn count_dialog<C, O: HasCountSelectableObject>(
             current_pos.y,
             BLACK,
         );
+        let small = &rc.small_background();
         if c.current > c.min
             && bottom_center_texture(
-                rc,
+                small,
                 &rc.assets().minus,
                 vec2(x - 15., -ICON_SIZE) + offset,
                 "Remove one",
@@ -66,7 +67,7 @@ pub(crate) fn count_dialog<C, O: HasCountSelectableObject>(
         }
         if c.current < c.max
             && bottom_center_texture(
-                rc,
+                small,
                 &rc.assets().plus,
                 vec2(x + 15., -ICON_SIZE) + offset,
                 "Add one",
