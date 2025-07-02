@@ -4,6 +4,7 @@ use playing_actions::PlayingActionType;
 use server::card::HandCard;
 use server::collect::PositionCollection;
 use server::content::persistent_events::{EventResponse, SelectedStructure};
+use server::game::{CivSetupOption, GameOptions, UndoOption};
 use server::game_setup::{GameSetupBuilder, setup_game};
 use server::leader::Leader;
 use server::structure::Structure;
@@ -30,7 +31,21 @@ const JSON: JsonTest = JsonTest::new("base");
 
 #[test]
 fn new_game() {
-    let game = setup_game(&GameSetupBuilder::new(2).build());
+    let mut game = setup_game(
+        &GameSetupBuilder::new(2)
+            .options(GameOptions {
+                civilization: CivSetupOption::ChooseCivilization,
+                undo: UndoOption::SamePlayer,
+            })
+            .build(),
+    );
+    let player_index = game.current_player_index;
+    game = game_api::execute(
+        game,
+        Action::ChooseCivilization("Vikings".to_string()),
+        player_index,
+    );
+    // should have a water tile now
     JSON.compare_game("new_game", &game);
 }
 
