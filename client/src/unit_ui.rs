@@ -61,9 +61,15 @@ pub(crate) fn draw_unit_type(
     )
 }
 
-fn carried_unit_place(carrier: &UnitPlace, index: usize) -> UnitPlace {
+fn carried_unit_place(carrier: &UnitPlace, index: usize, total_carried: usize) -> UnitPlace {
     let r = carrier.radius / 2.0;
-    UnitPlace::new(hex_ui::rotate_around(carrier.center, r, 180 * index), r)
+    if total_carried == 1 {
+        return UnitPlace::new(carrier.center, r);
+    }
+    UnitPlace::new(
+        hex_ui::rotate_around(carrier.center, r, 360 / total_carried * index),
+        r,
+    )
 }
 
 fn unit_place(rc: &RenderContext, index: usize, position: Position) -> UnitPlace {
@@ -101,8 +107,9 @@ pub(crate) fn click_unit(
                 let game = rc.game;
                 let player_index = player.index;
                 let carried_units = carried_units(u.id, &game.players[player_index]);
+                let total_carried = carried_units.len();
                 for (j, carried) in carried_units.iter().enumerate() {
-                    let carried_place = carried_unit_place(&place, j);
+                    let carried_place = carried_unit_place(&place, j, total_carried);
                     if is_in_circle(mouse_pos, carried_place.center, carried_place.radius) {
                         return Some(*carried);
                     }
@@ -177,6 +184,7 @@ pub(crate) fn draw_units(rc: &RenderContext, tooltip: bool) {
                 let player_index = *p;
                 let carrier = u.id;
                 let carried = carried_units(carrier, &game.players[player_index]);
+                let total_carried = carried.len();
                 carried.iter().enumerate().for_each(|(j, u)| {
                     draw_unit(
                         rc,
@@ -184,7 +192,7 @@ pub(crate) fn draw_units(rc: &RenderContext, tooltip: bool) {
                         &highlighted_units,
                         *p,
                         player.get_unit(*u),
-                        &carried_unit_place(&place, j),
+                        &carried_unit_place(&place, j, total_carried),
                     );
                 });
             });

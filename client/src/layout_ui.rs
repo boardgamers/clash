@@ -18,6 +18,7 @@ pub(crate) enum IconBackground {
     None,
     // Circle unless on map
     Auto,
+    SmallCircle,
 }
 
 pub(crate) fn icon_offset(i: i8) -> f32 {
@@ -158,12 +159,22 @@ pub(crate) fn draw_scaled_icon_with_tooltip(
     size: f32,
 ) -> bool {
     if rc.stage.is_main() {
-        if rc.stage.is_ui() && rc.icon_background == IconBackground::Auto {
-            rc.draw_circle(
-                origin + vec2(size / 2., size / 2.),
-                (size / 2.) + 5.,
-                UI_BACKGROUND,
-            );
+        match rc.icon_background {
+            IconBackground::Auto if rc.stage.is_ui() => {
+                rc.draw_circle(
+                    origin + vec2(size / 2., size / 2.),
+                    (size / 2.) + 5.,
+                    UI_BACKGROUND,
+                );
+            }
+            IconBackground::SmallCircle => {
+                rc.draw_circle(
+                    origin + vec2(size / 2., size / 2.),
+                    size / 2.,
+                    UI_BACKGROUND,
+                );
+            }
+            _ => {}
         }
 
         draw_texture_ex(

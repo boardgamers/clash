@@ -52,7 +52,7 @@ pub(crate) fn move_to_unexplored_block(
     game.information_revealed(); // tile is revealed
 
     let base = move_to.position.rotation;
-    let opposite = (base + 3) as Rotation;
+    let opposite = (base + 3).rem_euclid(6) as Rotation;
 
     let block = &move_to.block;
     let tiles = block.tiles(&move_to.position, base);
@@ -286,7 +286,8 @@ pub(crate) fn explore_resolution() -> Ability {
 
             p.log(game, &format!("Chose rotation {rotation}"));
             let unexplored_block = &r.block;
-            let rotate_by = rotation - unexplored_block.position.rotation;
+            let rotate_by =
+                ((rotation as i8) - (unexplored_block.position.rotation as i8)).rem_euclid(6);
             let valid_rotation = rotate_by == 0 || rotate_by == 3;
             assert!(valid_rotation, "Invalid rotation {rotate_by}");
 

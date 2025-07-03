@@ -1,4 +1,5 @@
 use crate::city_ui::{IconAction, IconActionVec, draw_city, show_city_menu};
+use crate::client::mouse_wheel_speed;
 use crate::client_state::{
     ActiveDialog, MAX_OFFSET, MIN_OFFSET, NO_UPDATE, RenderResult, State, StateUpdate, ZOOM,
 };
@@ -118,8 +119,7 @@ fn get_overlay(rc: &RenderContext) -> HashMap<Position, Terrain> {
 }
 
 pub(crate) fn pan_and_zoom(state: &mut State) {
-    let (_, wheel) = mouse_wheel();
-    let new_zoom = state.camera.zoom + wheel * 0.00001;
+    let new_zoom = state.camera.zoom + mouse_wheel_speed() * 0.0006;
     let x = new_zoom.x;
     if x < 0.005 && x > 0.0005 {
         state.camera.zoom = new_zoom;

@@ -1,6 +1,6 @@
 use crate::action::{Action, try_execute_action};
 use crate::consts::NON_HUMAN_PLAYERS;
-use crate::game::{Game, GameContext, GameOptions};
+use crate::game::{CivSetupOption, Game, GameContext, GameOptions};
 use crate::game_setup::{GameSetupBuilder, setup_game};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -66,18 +66,20 @@ pub struct ReplayPlayerData {
 pub fn replay(mut data: ReplayGameData, to: Option<usize>) -> Game {
     let log = linear_action_log(mem::take(&mut data.action_log));
     let to = to.unwrap_or(log.len() - 1);
-    let mut game = setup_game(
-        &GameSetupBuilder::new(data.players.len() - NON_HUMAN_PLAYERS)
-            .seed(data.seed)
-            .options(data.options)
-            .assigned_civilizations(
-                data.players
-                    .iter()
-                    .map(|player| player.civilization.clone())
-                    .collect_vec(),
-            )
-            .build(),
-    );
+    let random = data.options.civilization == CivSetupOption::Random;
+    let mut builder = GameSetupBuilder::new(data.players.len() - NON_HUMAN_PLAYERS)
+        .seed(data.seed)
+        .options(data.options);
+    if random {
+        builder = builder.assigned_civilizations(
+            data.players
+                .iter()
+                .map(|player| player.civilization.clone())
+                .collect_vec(),
+        );
+    }
+
+    let mut game = setup_game(&builder.build());
     game.dropped_players = data.dropped_players;
     for player in &data.players {
         if let Some(name) = &player.name {
