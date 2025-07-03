@@ -502,8 +502,9 @@ fn ragnar() -> LeaderInfo {
                 |event| &mut event.combat_end,
                 25,
                 |game, player, s| {
-                    if s.attacker.survived_leader() && s.captured_city(player.index)
-                        .is_some_and(|m| m != MoodState::Angry)
+                    if s.attacker.survived_leader()
+                        && s.captured_city(player.index)
+                            .is_some_and(|m| m != MoodState::Angry)
                     {
                         player.gain_resources(game, ResourcePile::gold(2));
                     }

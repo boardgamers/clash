@@ -286,7 +286,8 @@ pub(crate) fn explore_resolution() -> Ability {
 
             p.log(game, &format!("Chose rotation {rotation}"));
             let unexplored_block = &r.block;
-            let rotate_by = ((rotation as i8) - (unexplored_block.position.rotation as i8)).rem_euclid(6);
+            let rotate_by =
+                ((rotation as i8) - (unexplored_block.position.rotation as i8)).rem_euclid(6);
             let valid_rotation = rotate_by == 0 || rotate_by == 3;
             assert!(valid_rotation, "Invalid rotation {rotate_by}");
 

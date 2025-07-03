@@ -66,7 +66,10 @@ fn carried_unit_place(carrier: &UnitPlace, index: usize, total_carried: usize) -
     if total_carried == 1 {
         return UnitPlace::new(carrier.center, r);
     }
-    UnitPlace::new(hex_ui::rotate_around(carrier.center, r, 360 / total_carried * index), r)
+    UnitPlace::new(
+        hex_ui::rotate_around(carrier.center, r, 360 / total_carried * index),
+        r,
+    )
 }
 
 fn unit_place(rc: &RenderContext, index: usize, position: Position) -> UnitPlace {
