@@ -371,7 +371,7 @@ pub(crate) fn conquer_city(
     let attacker_is_human = attacker.get(game).is_human();
     let d = defender.get(game);
     let size = d.get_city(position).mood_modified_size(d);
-    if attacker_is_human {
+    if attacker_is_human && defender.get(game).is_human()  {
         attacker.gain_resources(game, ResourcePile::gold(size as u8));
     }
 
