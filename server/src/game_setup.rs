@@ -20,6 +20,7 @@ use crate::utils::{Rng, Shuffle};
 use city::gain_city;
 use itertools::Itertools;
 use std::collections::HashMap;
+use crate::leader::Leader;
 
 #[must_use]
 pub struct GameSetup {
@@ -301,6 +302,8 @@ pub(crate) fn execute_choose_civ(
     let player = EventPlayer::from_player(player_index, game, setup_event_origin());
     if let Action::ChooseCivilization(civ) = action {
         game.player_mut(player_index).civilization = game.cache.get_civilization(civ);
+        let p = game.player_mut(player_index);
+        p.available_leaders = all_leaders(&p.civilization);
         place_home_tiles(game, &player);
     } else {
         return Err("action should be a choose civ action".to_string());
@@ -315,4 +318,12 @@ pub(crate) fn execute_choose_civ(
         &format!("Play as {}", game.player(player_index).civilization.name),
     );
     Ok(())
+}
+
+pub(crate) fn all_leaders(civilization: &Civilization) -> Vec<Leader> {
+    civilization
+        .leaders
+        .iter()
+        .map(|leader| leader.leader)
+        .collect_vec()
 }

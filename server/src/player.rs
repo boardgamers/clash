@@ -35,6 +35,7 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt::Display;
+use crate::game_setup::all_leaders;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq)]
 pub enum PlayerType {
@@ -108,11 +109,7 @@ impl Player {
             cities: Vec::new(),
             destroyed_structures: DestroyedStructures::new(),
             units: Vec::new(),
-            available_leaders: civilization
-                .leaders
-                .iter()
-                .map(|leader| leader.leader)
-                .collect_vec(),
+            available_leaders: all_leaders(&civilization),
             recruited_leaders: Vec::new(),
             civilization,
             advances: EnumSet::empty(),
