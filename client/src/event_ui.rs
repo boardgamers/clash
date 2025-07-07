@@ -12,8 +12,9 @@ pub(crate) fn event_help_tooltip(rc: &RenderContext, origin: &EventOrigin) -> Ve
 
 #[must_use]
 pub(crate) fn event_help(rc: &RenderContext, origin: &EventOrigin) -> Vec<String> {
+    let mut h = vec![origin.name(rc.game)];
     let cache = &rc.game.cache;
-    match origin {
+    let d = match origin {
         EventOrigin::Advance(a) => vec![a.info(rc.game).description.clone()],
         EventOrigin::Wonder(w) => vec![rc.game.cache.get_wonder(*w).description.clone()],
         EventOrigin::Ability(b) => {
@@ -27,7 +28,9 @@ pub(crate) fn event_help(rc: &RenderContext, origin: &EventOrigin) -> Vec<String
             vec![rc.shown_player.get_leader_ability(l).description.clone()]
         }
         EventOrigin::SpecialAdvance(s) => vec![s.info(rc.game).description.clone()],
-    }
+    };
+    h.extend(d);
+    h
 }
 
 #[must_use]
