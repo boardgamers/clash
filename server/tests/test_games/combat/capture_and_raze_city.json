@@ -112,6 +112,11 @@
       },
       "cities": [
         {
+          "mood_state": "Angry",
+          "activations": 2,
+          "position": "A2"
+        },
+        {
           "city_pieces": {
             "fortress": 1,
             "wonders": [

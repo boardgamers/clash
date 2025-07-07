@@ -10,6 +10,7 @@ use crate::content::ability;
 use crate::content::civilizations::{BARBARIANS, CHOOSE_CIV, PIRATES};
 use crate::events::{EventOrigin, EventPlayer};
 use crate::game::{CivSetupOption, Game, GameContext, GameOptions, GameState};
+use crate::leader::Leader;
 use crate::log::{add_player_log, add_round_log};
 use crate::map::{Map, MapSetup, get_map_setup};
 use crate::objective_card::gain_objective_card_from_pile;
@@ -301,6 +302,8 @@ pub(crate) fn execute_choose_civ(
     let player = EventPlayer::from_player(player_index, game, setup_event_origin());
     if let Action::ChooseCivilization(civ) = action {
         game.player_mut(player_index).civilization = game.cache.get_civilization(civ);
+        let p = game.player_mut(player_index);
+        p.available_leaders = all_leaders(&p.civilization);
         place_home_tiles(game, &player);
     } else {
         return Err("action should be a choose civ action".to_string());
@@ -315,4 +318,12 @@ pub(crate) fn execute_choose_civ(
         &format!("Play as {}", game.player(player_index).civilization.name),
     );
     Ok(())
+}
+
+pub(crate) fn all_leaders(civilization: &Civilization) -> Vec<Leader> {
+    civilization
+        .leaders
+        .iter()
+        .map(|leader| leader.leader)
+        .collect_vec()
 }

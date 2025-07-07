@@ -4,6 +4,7 @@ use crate::consts::{STACK_LIMIT, UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::content::ability::construct_event_origin;
 use crate::content::custom_actions::{CustomActionExecution, CustomActionInfo};
 use crate::events::{Event, EventOrigin, EventPlayer};
+use crate::game_setup::all_leaders;
 use crate::leader::Leader;
 use crate::leader_ability::LeaderAbility;
 use crate::log::{ActionLogBalance, ActionLogEntry, add_action_log_item};
@@ -108,11 +109,7 @@ impl Player {
             cities: Vec::new(),
             destroyed_structures: DestroyedStructures::new(),
             units: Vec::new(),
-            available_leaders: civilization
-                .leaders
-                .iter()
-                .map(|leader| leader.leader)
-                .collect_vec(),
+            available_leaders: all_leaders(&civilization),
             recruited_leaders: Vec::new(),
             civilization,
             advances: EnumSet::empty(),

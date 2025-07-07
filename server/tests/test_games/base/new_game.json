@@ -32,6 +32,11 @@
         }
       ],
       "civilization": "Vikings",
+      "available_leaders": [
+        "Knut",
+        "Erik",
+        "Ragnar"
+      ],
       "advances": [
         "Farming",
         "Mining"
