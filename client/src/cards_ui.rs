@@ -7,7 +7,7 @@ use crate::log_ui::break_text;
 use crate::player_ui::get_combat;
 use crate::render_context::RenderContext;
 use crate::select_ui::HighlightType;
-use custom_phase_ui::multi_select_tooltip;
+use custom_phase_ui::multi_select_tooltip_from_error;
 use itertools::Itertools;
 use macroquad::color::BLACK;
 use macroquad::math::{Rect, Vec2, vec2};
@@ -330,11 +330,12 @@ pub(crate) fn select_cards_dialog(
 
     if ok_button(
         rc,
-        multi_select_tooltip(
-            s,
-            s.request.is_valid(&s.selected)
-                && validate_card_selection(&s.selected, rc.game).is_ok(),
+        multi_select_tooltip_from_error(
             "cards",
+            s.request
+                .is_valid(&s.selected)
+                .then_some(validate_card_selection(&s.selected, rc.game).err())
+                .flatten(),
         ),
     ) {
         StateUpdate::response(EventResponse::SelectHandCards(s.selected.clone()))
