@@ -49,7 +49,7 @@ fn pandemics() -> Incident {
                 p.index,
                 player.units.iter().map(|u| u.id).collect_vec(),
                 PandemicsContributions::range(player, i, 0),
-                "Select units to lose",
+                "Select units to lose (or select a card or resources instead later)",
             ))
         },
         |game, s, i| {
@@ -65,7 +65,7 @@ fn pandemics() -> Incident {
             Some(HandCardsRequest::new(
                 hand_cards(player, &[HandCardType::Action, HandCardType::Objective]),
                 PandemicsContributions::range(player, i, 1),
-                "Select cards to lose",
+                "Select cards to lose (or select resources instead later)",
             ))
         },
         |game, s, i| {
