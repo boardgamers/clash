@@ -128,6 +128,20 @@
         "mood_tokens": 7,
         "culture_tokens": 7
       },
+      "cities": [
+        {
+          "mood_state": "Angry",
+          "activations": 2,
+          "position": "A2"
+        }
+      ],
+      "units": [
+        {
+          "position": "A2",
+          "unit_type": "Settler",
+          "id": 2
+        }
+      ],
       "civilization": "Greece",
       "advances": [
         "Farming",
@@ -135,7 +149,7 @@
         "Tactics"
       ],
       "incident_tokens": 3,
-      "next_unit_id": 2
+      "next_unit_id": 3
     }
   ],
   "map": {
@@ -308,6 +322,18 @@
                       "origin": {
                         "Ability": "Combat"
                       }
+                    },
+                    {
+                      "player": 1,
+                      "Units": {
+                        "units": {
+                          "settlers": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Ability": "Place Settler"
+                      }
                     }
                   ]
                 }
@@ -330,6 +356,7 @@
       "Player2: Choose Casualties: Remove all defending units",
       "Attacker wins",
       "Player1: Raze captured city: Gain 3 gold",
+      "Player2: Place Settler: Gain 1 settler at A2",
       "Player1: Waste: Could not store 4 gold"
     ]
   ],

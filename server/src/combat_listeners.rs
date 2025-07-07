@@ -622,7 +622,7 @@ pub(crate) fn place_settler() -> Ability {
             let p = game.player(player_index);
             if i.is_defender(player_index)
                 && i.is_loser(player_index)
-                && game.try_get_any_city(i.defender.position).is_some()
+                && i.battleground.is_city()
                 && !p.cities.is_empty()
                 && p.available_units().settlers > 0
                 && p.is_human()
