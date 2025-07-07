@@ -10,6 +10,7 @@ use crate::content::ability;
 use crate::content::civilizations::{BARBARIANS, CHOOSE_CIV, PIRATES};
 use crate::events::{EventOrigin, EventPlayer};
 use crate::game::{CivSetupOption, Game, GameContext, GameOptions, GameState};
+use crate::leader::Leader;
 use crate::log::{add_player_log, add_round_log};
 use crate::map::{Map, MapSetup, get_map_setup};
 use crate::objective_card::gain_objective_card_from_pile;
@@ -20,7 +21,6 @@ use crate::utils::{Rng, Shuffle};
 use city::gain_city;
 use itertools::Itertools;
 use std::collections::HashMap;
-use crate::leader::Leader;
 
 #[must_use]
 pub struct GameSetup {

@@ -4,6 +4,7 @@ use crate::consts::{STACK_LIMIT, UNIT_LIMIT_BARBARIANS, UNIT_LIMIT_PIRATES};
 use crate::content::ability::construct_event_origin;
 use crate::content::custom_actions::{CustomActionExecution, CustomActionInfo};
 use crate::events::{Event, EventOrigin, EventPlayer};
+use crate::game_setup::all_leaders;
 use crate::leader::Leader;
 use crate::leader_ability::LeaderAbility;
 use crate::log::{ActionLogBalance, ActionLogEntry, add_action_log_item};
@@ -35,7 +36,6 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt::Display;
-use crate::game_setup::all_leaders;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq)]
 pub enum PlayerType {
