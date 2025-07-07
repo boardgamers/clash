@@ -275,10 +275,7 @@ pub(crate) fn select_structures_dialog(
     }
 }
 
-pub(crate) fn multi_select_tooltip_from_error(
-    name: &str,
-    error: Option<String>,
-) -> OkTooltip {
+pub(crate) fn multi_select_tooltip_from_error(name: &str, error: Option<String>) -> OkTooltip {
     if let Some(e) = error {
         OkTooltip::Invalid(e)
     } else {
@@ -331,10 +328,7 @@ pub(crate) fn position_request_dialog(
         rc,
         format!("{}: {} selected", s.request.description, s.selected.len()).as_str(),
     );
-    if ok_button(
-        rc,
-        multi_select_tooltip(s, s.is_valid(), "positions"),
-    ) {
+    if ok_button(rc, multi_select_tooltip(s, s.is_valid(), "positions")) {
         StateUpdate::response(EventResponse::SelectPositions(s.selected.clone()))
     } else {
         NO_UPDATE
