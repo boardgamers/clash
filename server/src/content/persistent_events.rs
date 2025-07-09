@@ -444,9 +444,7 @@ where
     }
     game.events.pop();
 
-    if game.events.is_empty() {
-        present_instant_objective_cards(game);
-    }
+    present_instant_objective_cards(game);
 
     Some(value)
 }
