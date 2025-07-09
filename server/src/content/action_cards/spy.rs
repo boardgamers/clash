@@ -1,9 +1,9 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
-use crate::card::{HandCard, HandCardLocation, HandCardType, hand_cards, log_card_transfer};
-use crate::content::persistent_events::{HandCardsRequest, PersistentEventType, PlayerRequest};
+use crate::card::{hand_cards, log_card_transfer, HandCard, HandCardLocation, HandCardType};
+use crate::content::persistent_events::{HandCardsRequest, PlayerRequest};
 use crate::content::tactics_cards::TacticsCardFactory;
-use crate::events::{EventOrigin, EventPlayer};
+use crate::events::EventPlayer;
 use crate::game::Game;
 use crate::objective_card::{deinit_objective_card, init_objective_card};
 use crate::player::Player;
@@ -260,16 +260,32 @@ fn get_swap_secrets(other: &Player, game: &Game) -> Vec<String> {
 }
 
 pub(crate) fn validate_spy_cards(cards: &[HandCard], game: &Game) -> Result<(), String> {
-    let s = game.current_event();
-    let PersistentEventType::ActionCard(c) = &s.event_type else {
-        panic!("wrong event type");
-    };
+    if cards.is_empty() {
+        return Ok(());
+    }
 
-    // too inefficient to clone the game for AI play
-    swap_spy_cards(
-        &mut game.clone(),
-        cards,
-        &EventPlayer::from_player(s.player.index, game, EventOrigin::CivilCard(7)),
-        c.selected_player.expect("no player found"),
-    )
+    if cards.len() != 2 {
+        return Err("must select 2 cards".to_string());
+    }
+
+    let our = hand_cards(game.player(game.current_event().player.index), &HandCardType::get_all())
+        .into_iter()
+        .filter(|c| cards.contains(c))
+        .collect_vec();
+    if our.len() != 1 {
+        return Err("you must select exactly 1 card from your hand".to_string());
+    }
+
+    // don't use `hand_cards` here, because the cards are hidden (strip_secret)
+    let their = cards
+        .iter()
+        .find(|c| !our.contains(c))
+        .expect("card not found")
+        .card_type();
+
+    if our[0].card_type() != their {
+        return Err("you must select a card of the same type".to_string());
+    }
+
+    Ok(())
 }
