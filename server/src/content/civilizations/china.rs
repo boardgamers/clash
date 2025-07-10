@@ -60,7 +60,7 @@ fn rice() -> SpecialAdvanceInfo {
                 .min(2);
             i.total += ResourcePile::food(food as u8);
             i.info
-                .add_log(p, &format!("Add {}", ResourcePile::food(food as u8)));
+                .add_log(p, &format!("Gain {}", ResourcePile::food(food as u8)));
         },
     )
     .build()

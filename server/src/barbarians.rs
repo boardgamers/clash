@@ -345,7 +345,7 @@ fn reinforce_after_move(game: &mut Game, player: &EventPlayer) {
     let cities: Vec<Position> = p
         .cities
         .iter()
-        .flat_map(|c| cities_in_range(game, |p| p.index == barbarian.index, c.position, 2))
+        .flat_map(|c| cities_in_land_range(game, |p| p.index == barbarian.index, c.position, 2))
         .unique()
         .filter(|&p| get_barbarians_player(game).get_units(p).len() < STACK_LIMIT)
         .take(available)
@@ -386,7 +386,7 @@ fn barbarian_march_steps(
     from: Position,
     stack_size: usize,
 ) -> Vec<Position> {
-    let primary = cities_in_range(game, |p| p.index == human.index, from, 1);
+    let primary = cities_in_land_range(game, |p| p.index == human.index, from, 1);
     if !primary.is_empty() {
         return primary;
     }
@@ -457,7 +457,7 @@ fn possible_barbarians_spawns(game: &Game, player: &Player) -> Vec<Position> {
         .keys()
         .filter(|&pos| {
             is_base_barbarian_spawn_pos(game, *pos, player)
-                && cities_in_range(game, |p| p.index == player.index, *pos, 1).is_empty()
+                && cities_in_land_range(game, |p| p.index == player.index, *pos, 1).is_empty()
                 && !steps_towards_land_range2_cites(game, player, *pos).is_empty()
         })
         .copied()
@@ -512,7 +512,7 @@ fn is_base_barbarian_spawn_pos(game: &Game, pos: Position, player: &Player) -> b
     game.map.get(pos).is_some_and(|t| {
         t.is_land() && !matches!(t, Terrain::Barren) && !matches!(t, Terrain::Exhausted(_))
     }) && !anything_present(game, pos)
-        && cities_in_range(game, |p| p.index != player.index, pos, 2).is_empty()
+        && cities_in_land_range(game, |p| p.index != player.index, pos, 2).is_empty()
 }
 
 fn anything_present(game: &Game, pos: Position) -> bool {
@@ -526,15 +526,22 @@ fn anything_present(game: &Game, pos: Position) -> bool {
 }
 
 fn steps_towards_land_range2_cites(game: &Game, player: &Player, start: Position) -> Vec<Position> {
+    let mut steps = player
+        .cities
+        .iter()
+        .flat_map(|c| land_steps_towards_range2(game, start, c.position))
+        .collect_vec();
+    steps.sort();
+    steps.dedup();
+    steps
+}
+
+fn land_steps_towards_range2(game: &Game, start: Position, end: Position) -> Vec<Position> {
     start
         .neighbors()
         .into_iter()
         .filter(|&middle| {
-            game.map.is_land(middle)
-                && player
-                    .cities
-                    .iter()
-                    .any(|c| c.position.distance(start) == 2 && c.position.distance(middle) == 1)
+            game.map.is_land(middle) && end.distance(start) == 2 && end.distance(middle) == 1
         })
         .collect()
 }
@@ -546,19 +553,27 @@ fn adjacent_to_cities(player: &Player, pos: Position) -> bool {
         .any(|c| c.position.neighbors().contains(&pos))
 }
 
-fn cities_in_range(
+fn cities_in_land_range(
     game: &Game,
     player: impl Fn(&Player) -> bool,
-    pos: Position,
+    start: Position,
     range: u32,
 ) -> Vec<Position> {
+    if range < 1 || range > 2 {
+        panic!("cities_in_land_range only supports range 1 or 2, got {range}");
+    }
+
     game.players
         .iter()
         .filter(|p| player(p))
         .flat_map(|p| {
             p.cities
                 .iter()
-                .filter(|c| c.position.distance(pos) <= range)
+                .filter(|c| {
+                    let end = c.position;
+                    let d = end.distance(start);
+                    d <= range && (d == 1 || !land_steps_towards_range2(game, start, end).is_empty())
+                })
                 .map(|c| c.position)
         })
         .collect()
