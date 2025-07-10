@@ -251,8 +251,13 @@ pub(crate) fn get_pirates_event_player(game: &Game, origin: &EventOrigin) -> Eve
     EventPlayer::new(player.index, player.get_name(), origin.clone())
 }
 
+///
+/// Returns the player that represents the Pirates civilization.
+///
+/// # Panics
+/// If there is no player with the Pirates civilization in the game.
 #[must_use]
-pub(crate) fn get_pirates_player(game: &Game) -> &Player {
+pub fn get_pirates_player(game: &Game) -> &Player {
     game.players
         .iter()
         .find(|p| p.civilization.is_pirates())

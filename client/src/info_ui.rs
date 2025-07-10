@@ -8,15 +8,20 @@ use crate::render_context::RenderContext;
 use itertools::Itertools;
 use macroquad::color::Color;
 use macroquad::math::{Rect, Vec2, vec2};
-use macroquad::prelude::{BLACK, BLUE, GREEN, MAGENTA, WHITE, YELLOW};
+use macroquad::prelude::{
+    BLACK, BLUE, DrawTextureParams, GREEN, MAGENTA, Texture2D, WHITE, YELLOW, draw_texture_ex,
+};
 use server::action::Action;
 use server::action_card::ActionCard;
+use server::barbarians::get_barbarians_player;
 use server::city_pieces::{BUILDINGS, Building};
 use server::civilization::Civilization;
 use server::game::{Game, GameState};
-use server::incident::Incident;
+use server::incident::{Incident, IncidentBaseEffect};
 use server::leader::Leader;
 use server::objective_card::ObjectiveCard;
+use server::pirates::get_pirates_player;
+use server::resource::ResourceType;
 use server::unit::UnitType;
 use server::wonder::{Wonder, WonderInfo};
 use std::fmt::Display;
@@ -127,6 +132,7 @@ fn show_wonders(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
             |g| g.cache.get_wonders(),
             |w| &w.wonder,
             WonderInfo::name,
+            |_, _| None,
             |w| wonder_description(rc, w),
             |d| &d.wonder,
             |d, w| d.wonder = w,
@@ -156,6 +162,7 @@ fn show_incidents(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
             |g| g.cache.get_incidents(),
             |i| &i.id,
             |i| i.name.clone(),
+            incident_icon,
             |i| {
                 let mut d: Vec<String> = vec![];
                 break_each(rc, &mut d, &i.description(rc.game));
@@ -175,6 +182,22 @@ fn show_incidents(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
     })
 }
 
+fn incident_icon<'a>(rc: &'a RenderContext, i: &Incident) -> Option<&'a Texture2D> {
+    let a = rc.assets();
+    match &i.base_effect {
+        IncidentBaseEffect::None => None,
+        IncidentBaseEffect::BarbariansSpawn => {
+            Some(a.unit(UnitType::Infantry, get_barbarians_player(rc.game)))
+        }
+        IncidentBaseEffect::BarbariansMove => Some(&a.move_units),
+        IncidentBaseEffect::PiratesSpawnAndRaid => {
+            Some(a.unit(UnitType::Ship, get_pirates_player(rc.game)))
+        }
+        IncidentBaseEffect::ExhaustedLand => Some(&a.exhausted),
+        IncidentBaseEffect::GoldDeposits => Some(&a.resources[&ResourceType::Gold]),
+    }
+}
+
 fn show_action_cards(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
     show_category(rc, d, 3, InfoCategory::ActionCard, "Actions", |rc, d| {
         show_category_items::<ActionCard, u8>(
@@ -183,6 +206,7 @@ fn show_action_cards(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
             |g| g.cache.get_action_cards(),
             |i| &i.id,
             ActionCard::name,
+            |_, _| None,
             |i| action_card_object(rc, i.id).description,
             |d| &d.action_card,
             |d, i| d.action_card = i,
@@ -211,6 +235,7 @@ fn show_objective_cards(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
                 |g| g.cache.get_objective_cards(),
                 |i| &i.id,
                 ObjectiveCard::name,
+                |_, _| None,
                 |i| objective_card_object(rc, i.id, None).description,
                 |d| &d.objective_card,
                 |d, i| d.objective_card = i,
@@ -238,6 +263,7 @@ fn show_buildings(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
             |_| &BUILDINGS,
             |b| b,
             |b| b.name().to_string(),
+            |_, _| None,
             |b| {
                 let mut desc = vec![b.name().to_string()];
                 let advance = rc.game.cache.get_building_advance(*b).name(rc.game);
@@ -276,6 +302,7 @@ fn show_units(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
                 }
                 .to_string()
             },
+            |_, _| None,
             |u| {
                 let mut parts: Vec<String> = vec![];
                 parts.push(format!("Cost: {}", u.cost()));
@@ -329,7 +356,7 @@ fn show_civilizations(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
         } else {
             WHITE
         };
-        if draw_button_with_color(rc, &c.name, vec2(i as f32, 1.), &[], selected, color) {
+        if draw_button_with_color(rc, &c.name, None, vec2(i as f32, 1.), &[], selected, color) {
             let mut new = d.clone();
             new.civilization.clone_from(&c.name);
             return StateUpdate::open_dialog(ActiveDialog::Info(new));
@@ -390,6 +417,7 @@ fn show_category_items<T: Clone, K: PartialEq + Ord + Clone>(
     get_all: impl Fn(&Game) -> &[T],
     get_key: impl Fn(&T) -> &K,
     name: impl Fn(&T) -> String,
+    icon: impl for<'a> Fn(&'a RenderContext<'a>, &T) -> Option<&'a Texture2D>,
     description: impl Fn(&T) -> Vec<String>,
     get_selected: impl Fn(&InfoDialog) -> &K,
     set_selected: impl Fn(&mut InfoDialog, K),
@@ -408,10 +436,12 @@ fn show_category_items<T: Clone, K: PartialEq + Ord + Clone>(
             desc.insert(0, format!("Location: {l}"));
         }
         let columns = 7;
+        let rect = vec2(i.rem_euclid(columns) as f32, ((i / columns) + 1) as f32);
         if draw_button_with_color(
             rc,
             &name,
-            vec2(i.rem_euclid(columns) as f32, ((i / columns) + 1) as f32),
+            icon(rc, info),
+            rect,
             &desc,
             selected,
             match location {
@@ -442,26 +472,51 @@ fn draw_button(
         3. => MAGENTA,
         _ => WHITE,
     };
-    draw_button_with_color(rc, text, pos, tooltip, selected, color)
+    draw_button_with_color(rc, text, None, pos, tooltip, selected, color)
 }
 
 fn draw_button_with_color(
     rc: &RenderContext,
     text: &str,
+    icon: Option<&Texture2D>,
     pos: Vec2,
     tooltip: &[String],
     selected: bool,
     color: Color,
 ) -> bool {
-    let button_size = vec2(140., 40.);
-    let rect_pos = pos.mul(button_size) + vec2(20., 40.);
-    let rect = Rect::new(rect_pos.x, rect_pos.y, 135., 30.);
+    let r = button_rect(pos);
 
-    rc.draw_rectangle_with_text(rect, color, text);
+    if rc.stage.is_main() {
+        rc.draw_rectangle(r, color);
+        let mut w = r.w - 30.;
 
-    if selected {
-        rc.draw_rectangle_lines(rect, 4., BLACK);
+        if let Some(icon) = icon {
+            draw_texture_ex(
+                icon,
+                r.x + 105.,
+                r.y + 5.,
+                WHITE,
+                DrawTextureParams {
+                    dest_size: Some(vec2(20., 20.)),
+                    ..Default::default()
+                },
+            );
+            w -= 25.;
+        }
+
+        rc.draw_limited_text(text, r.x + 10., r.y + 22., w);
     }
 
-    button_pressed(rect, rc, tooltip, 50.)
+    if selected {
+        rc.draw_rectangle_lines(r, 4., BLACK);
+    }
+
+    button_pressed(r, rc, tooltip, 50.)
+}
+
+fn button_rect(pos: Vec2) -> Rect {
+    let button_size = vec2(140., 40.);
+    let rect_pos = pos.mul(button_size) + vec2(20., 40.);
+
+    Rect::new(rect_pos.x, rect_pos.y, 135., 30.)
 }

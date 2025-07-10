@@ -123,7 +123,7 @@ fn philosophy() -> AdvanceBuilder {
     AdvanceInfo::builder(
         Advance::Philosophy,
         "Philosophy",
-        "Immediately gain 1 idea after getting a Science advance",
+        "Immediately gain 1 idea. Gain 1 idea after getting a Science advance",
     )
     .add_once_initializer(move |game, player| {
         gain_resources(

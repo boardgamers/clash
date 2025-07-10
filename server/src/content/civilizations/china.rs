@@ -18,7 +18,7 @@ use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
 use crate::tactics_card::CombatRole;
-use crate::unit::UnitType;
+use crate::unit::{Unit, UnitType};
 use crate::wonder::Wonder;
 use itertools::Itertools;
 
@@ -60,7 +60,7 @@ fn rice() -> SpecialAdvanceInfo {
                 .min(2);
             i.total += ResourcePile::food(food as u8);
             i.info
-                .add_log(p, &format!("Add {}", ResourcePile::food(food as u8)));
+                .add_log(p, &format!("Gain {}", ResourcePile::food(food as u8)));
         },
     )
     .build()
@@ -89,7 +89,7 @@ fn expansion() -> SpecialAdvanceInfo {
             let moved_units = p
                 .units
                 .iter()
-                .filter(|u| !u.is_settler())
+                .filter(|u| !is_movable_settler(game, p, u))
                 .map(|u| u.id)
                 .collect_vec();
 
@@ -115,15 +115,17 @@ fn movable_settlers(game: &Game, player: &Player) -> Vec<Position> {
     player
         .units
         .iter()
-        .filter(|u| {
-            u.is_settler()
-                && player.try_get_city(u.position).is_some()
-                && !possible_move_destinations(game, player.index, &[u.id], u.position)
-                    .list
-                    .is_empty()
-        })
+        .filter(|u| is_movable_settler(game, player, u))
         .map(|u| u.position)
         .collect_vec()
+}
+
+fn is_movable_settler(game: &Game, player: &Player, u: &Unit) -> bool {
+    u.is_settler()
+        && player.try_get_city(u.position).is_some()
+        && !possible_move_destinations(game, player.index, &[u.id], u.position)
+            .list
+            .is_empty()
 }
 
 fn fireworks() -> SpecialAdvanceInfo {

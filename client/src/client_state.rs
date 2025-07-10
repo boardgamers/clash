@@ -91,7 +91,7 @@ impl ActiveDialog {
             ActiveDialog::ReplaceUnits(_) => vec!["Click on a unit to replace".to_string()],
             ActiveDialog::MoveUnits(m) => Self::move_units_help(rc, m),
             ActiveDialog::ExploreResolution(_) => {
-                vec!["Click on the new tile to rotate it".to_string()]
+                vec!["Click on the rotate button to rotate".to_string()]
             }
             ActiveDialog::ChangeGovernmentType => {
                 vec!["Click on a government type to change".to_string()]

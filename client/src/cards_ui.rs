@@ -331,11 +331,10 @@ pub(crate) fn select_cards_dialog(
     if ok_button(
         rc,
         multi_select_tooltip_from_error(
+            s,
+            s.request.is_valid(&s.selected),
             "cards",
-            s.request
-                .is_valid(&s.selected)
-                .then_some(validate_card_selection(&s.selected, rc.game).err())
-                .flatten(),
+            validate_card_selection(&s.selected, rc.game).err(),
         ),
     ) {
         StateUpdate::response(EventResponse::SelectHandCards(s.selected.clone()))

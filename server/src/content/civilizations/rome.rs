@@ -38,8 +38,7 @@ fn aqueduct() -> SpecialAdvanceInfo {
         SpecialAdvance::Aqueduct,
         SpecialAdvanceRequirement::Advance(Advance::Engineering),
         "Aqueduct",
-        "Ignore Famine events. \
-                Sanitation cost is reduced to 0 resources or a free action",
+        "Ignore Famine events. Sanitation cost is reduced to 0 resources or a free action",
     )
     .add_custom_action(
         CustomActionType::Aqueduct,

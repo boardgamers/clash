@@ -140,11 +140,10 @@ pub(crate) fn select_units_dialog(rc: &RenderContext, s: &UnitsSelection) -> Ren
     if ok_button(
         rc,
         multi_select_tooltip_from_error(
+            &s.selection,
+            s.selection.is_valid(),
             "units",
-            s.selection
-                .is_valid()
-                .then_some(validate_units_selection(selected, rc.game, rc.shown_player).err())
-                .flatten(),
+            validate_units_selection(selected, rc.game, rc.shown_player).err(),
         ),
     ) {
         StateUpdate::response(EventResponse::SelectUnits(selected.clone()))
@@ -275,11 +274,16 @@ pub(crate) fn select_structures_dialog(
     }
 }
 
-pub(crate) fn multi_select_tooltip_from_error(name: &str, error: Option<String>) -> OkTooltip {
-    if let Some(e) = error {
+pub(crate) fn multi_select_tooltip_from_error<T: Clone + PartialEq + Ord>(
+    s: &MultiSelection<T>,
+    valid: bool,
+    name: &str,
+    error: Option<String>,
+) -> OkTooltip {
+    if valid && let Some(e) = error {
         OkTooltip::Invalid(e)
     } else {
-        OkTooltip::Valid(format!("Select {name}"))
+        multi_select_tooltip(s, valid, name)
     }
 }
 
