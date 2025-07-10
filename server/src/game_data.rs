@@ -302,11 +302,7 @@ pub struct PlayerData {
 /// # Panics
 ///
 /// Panics if elements like wonders or advances don't exist
-fn initialize_player(
-    player_index: usize,
-    game: &mut Game,
-    builtin_abilities: &[Ability],
-) {
+fn initialize_player(player_index: usize, game: &mut Game, builtin_abilities: &[Ability]) {
     ability::init_player(game, player_index, builtin_abilities);
     advance::init_player(game, player_index);
 

@@ -253,8 +253,8 @@ pub(crate) fn get_pirates_event_player(game: &Game, origin: &EventOrigin) -> Eve
 
 ///
 /// Returns the player that represents the Pirates civilization.
-/// 
-/// # Panics 
+///
+/// # Panics
 /// If there is no player with the Pirates civilization in the game.
 #[must_use]
 pub fn get_pirates_player(game: &Game) -> &Player {

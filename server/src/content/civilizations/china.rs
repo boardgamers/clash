@@ -115,7 +115,7 @@ fn movable_settlers(game: &Game, player: &Player) -> Vec<Position> {
     player
         .units
         .iter()
-        .filter(|u| is_movable_settler(game, player, &u))
+        .filter(|u| is_movable_settler(game, player, u))
         .map(|u| u.position)
         .collect_vec()
 }

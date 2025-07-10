@@ -1,6 +1,6 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action_card::ActionCard;
-use crate::card::{hand_cards, log_card_transfer, HandCard, HandCardLocation, HandCardType};
+use crate::card::{HandCard, HandCardLocation, HandCardType, hand_cards, log_card_transfer};
 use crate::content::persistent_events::{HandCardsRequest, PlayerRequest};
 use crate::content::tactics_cards::TacticsCardFactory;
 use crate::events::EventPlayer;
@@ -268,10 +268,13 @@ pub(crate) fn validate_spy_cards(cards: &[HandCard], game: &Game) -> Result<(), 
         return Err("must select 2 cards".to_string());
     }
 
-    let our = hand_cards(game.player(game.current_event().player.index), &HandCardType::get_all())
-        .into_iter()
-        .filter(|c| cards.contains(c))
-        .collect_vec();
+    let our = hand_cards(
+        game.player(game.current_event().player.index),
+        &HandCardType::get_all(),
+    )
+    .into_iter()
+    .filter(|c| cards.contains(c))
+    .collect_vec();
     if our.len() != 1 {
         return Err("you must select exactly 1 card from your hand".to_string());
     }

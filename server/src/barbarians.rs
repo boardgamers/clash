@@ -52,6 +52,7 @@ impl Default for BarbariansEventState {
 }
 
 impl BarbariansEventState {
+    #[must_use]
     pub fn new() -> BarbariansEventState {
         BarbariansEventState {
             moved_units: Vec::new(),
@@ -559,9 +560,7 @@ fn cities_in_land_range(
     start: Position,
     range: u32,
 ) -> Vec<Position> {
-    if range < 1 || range > 2 {
-        panic!("cities_in_land_range only supports range 1 or 2, got {range}");
-    }
+    assert!((1..=2).contains(&range), "cities_in_land_range only supports range 1 or 2, got {range}");
 
     game.players
         .iter()
@@ -572,7 +571,8 @@ fn cities_in_land_range(
                 .filter(|c| {
                     let end = c.position;
                     let d = end.distance(start);
-                    d <= range && (d == 1 || !land_steps_towards_range2(game, start, end).is_empty())
+                    d <= range
+                        && (d == 1 || !land_steps_towards_range2(game, start, end).is_empty())
                 })
                 .map(|c| c.position)
         })

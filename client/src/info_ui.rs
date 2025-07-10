@@ -162,7 +162,7 @@ fn show_incidents(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
             |g| g.cache.get_incidents(),
             |i| &i.id,
             |i| i.name.clone(),
-            |rc, i| incident_icon(rc, i),
+            incident_icon,
             |i| {
                 let mut d: Vec<String> = vec![];
                 break_each(rc, &mut d, &i.description(rc.game));
@@ -517,6 +517,6 @@ fn draw_button_with_color(
 fn button_rect(pos: Vec2) -> Rect {
     let button_size = vec2(140., 40.);
     let rect_pos = pos.mul(button_size) + vec2(20., 40.);
-    let rect = Rect::new(rect_pos.x, rect_pos.y, 135., 30.);
-    rect
+    
+    Rect::new(rect_pos.x, rect_pos.y, 135., 30.)
 }
