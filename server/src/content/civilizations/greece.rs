@@ -126,8 +126,7 @@ fn city_states() -> SpecialAdvanceInfo {
         SpecialAdvanceRequirement::AnyGovernment,
         "City States",
         "Once per turn, when the mood of a city was decreased due to activating a city, \
-        you may instead decrease the mood of another city \
-        of at least the same size and mood level.",
+        you may instead activate another city of at least the same size and mood level.",
     )
     .add_position_request(
         |event| &mut event.city_activation_mood_decreased,
@@ -166,7 +165,7 @@ fn city_states() -> SpecialAdvanceInfo {
             Some(PositionRequest::new(
                 cities,
                 0..=1,
-                "Select a city to decrease its mood instead of the activated city",
+                "Select a city to activate instead of the activated city",
             ))
         },
         |game, s, position| {
@@ -189,7 +188,7 @@ fn alexander() -> LeaderInfo {
         LeaderAbility::builder(
             "Idol",
             "As a free action, pay 1 culture token and activate the leader city: \
-            play an action card as a free action",
+            play an action card that requires an action as a free action instead.",
         )
         .add_custom_action(
             CustomActionType::Idol,
