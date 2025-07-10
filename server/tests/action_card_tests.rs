@@ -293,9 +293,9 @@ fn test_assassination() {
 }
 
 #[test]
-fn test_overproduction() {
+fn test_mass_production() {
     JSON.test(
-        "overproduction",
+        "mass_production",
         vec![
             TestAction::undoable(0, Action::Playing(PlayingAction::ActionCard(29))).skip_json(),
             TestAction::undoable(

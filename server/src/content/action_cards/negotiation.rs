@@ -22,8 +22,8 @@ pub(crate) fn negotiation_action_cards() -> Vec<ActionCard> {
         leadership(26, archers),
         assassination(27, high_ground),
         assassination(28, archers),
-        overproduction(29, defensive_formation),
-        overproduction(30, encircled),
+        mass_production(29, defensive_formation),
+        mass_production(30, encircled),
     ]
 }
 
@@ -205,13 +205,13 @@ fn is_assassinated(e: &PermanentEffect, player: usize) -> bool {
     matches!(e, PermanentEffect::AssassinationLoseAction(p) if player == *p)
 }
 
-fn overproduction(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
+fn mass_production(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
     ActionCard::builder(
         id,
-        "Overproduction",
+        "Mass Production",
         "You may collect from 2 additional tiles this turn. \
-        (Cannot combine with Production Focus or another Overproduction.)",
-        |c| c.action().no_resources(),
+        (Cannot combine with Production Focus or another Mass Production.)",
+        |c| c.free_action().no_resources(),
         move |game, p, _| collect_special_action(game, p),
     )
     .tactics_card(tactics_card)
@@ -220,11 +220,10 @@ fn overproduction(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         0,
         |game, p, _| {
             game.permanent_effects
-                .push(PermanentEffect::Collect(CollectEffect::Overproduction));
-            gain_action(game, p); // to offset the action spent for collecting
+                .push(PermanentEffect::Collect(CollectEffect::MassProduction));
             p.log(
                 game,
-                "Can use Overproduction to collect from 2 additional tiles.",
+                "Can use Mass Production to collect from 2 additional tiles.",
             );
         },
     )

@@ -18,7 +18,7 @@ pub enum ConstructEffect {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub enum CollectEffect {
     ProductionFocus,
-    Overproduction,
+    MassProduction,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -74,7 +74,7 @@ impl PermanentEffect {
                 CollectEffect::ProductionFocus => {
                     vec![cache.get_civil_card(19).description.clone()]
                 }
-                CollectEffect::Overproduction => cache.get_incident(29).description(game),
+                CollectEffect::MassProduction => cache.get_incident(29).description(game),
             },
             PermanentEffect::RevolutionLoseAction(p) => {
                 vec![format!(

@@ -591,7 +591,9 @@ pub(crate) fn get_barbarians_event_player(game: &Game, origin: &EventOrigin) -> 
 ///
 /// Returns the player controlling the barbarians.
 ///
-/// # Panics if the barbarians player does not exist.
+/// # Panics
+///
+/// Panics if the barbarians player does not exist.
 #[must_use]
 pub fn get_barbarians_player(game: &Game) -> &Player {
     game.players
