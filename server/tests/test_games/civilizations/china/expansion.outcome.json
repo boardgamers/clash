@@ -3,7 +3,8 @@
     "Movement": {
       "movement_actions_left": 3,
       "moved_units": [
-        0
+        0,
+        4
       ]
     }
   },
