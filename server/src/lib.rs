@@ -24,7 +24,7 @@ pub mod ai_actions;
 pub mod ai_collect;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod ai_missions;
-mod barbarians;
+pub mod barbarians;
 pub mod cache;
 pub mod card;
 pub mod city;
@@ -56,7 +56,7 @@ mod move_routes;
 pub mod movement;
 pub mod objective_card;
 pub mod payment;
-mod pirates;
+pub mod pirates;
 pub mod player;
 pub mod player_events;
 pub mod playing_actions;

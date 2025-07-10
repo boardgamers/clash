@@ -585,8 +585,12 @@ pub(crate) fn get_barbarians_event_player(game: &Game, origin: &EventOrigin) -> 
     EventPlayer::new(player.index, player.get_name(), origin.clone())
 }
 
+///
+/// Returns the player controlling the barbarians.
+///
+/// # Panics if the barbarians player does not exist.
 #[must_use]
-pub(crate) fn get_barbarians_player(game: &Game) -> &Player {
+pub fn get_barbarians_player(game: &Game) -> &Player {
     game.players
         .iter()
         .find(|p| p.civilization.is_barbarian())
