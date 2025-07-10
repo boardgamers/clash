@@ -517,6 +517,6 @@ fn draw_button_with_color(
 fn button_rect(pos: Vec2) -> Rect {
     let button_size = vec2(140., 40.);
     let rect_pos = pos.mul(button_size) + vec2(20., 40.);
-    
+
     Rect::new(rect_pos.x, rect_pos.y, 135., 30.)
 }

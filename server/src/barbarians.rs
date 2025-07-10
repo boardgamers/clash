@@ -560,7 +560,10 @@ fn cities_in_land_range(
     start: Position,
     range: u32,
 ) -> Vec<Position> {
-    assert!((1..=2).contains(&range), "cities_in_land_range only supports range 1 or 2, got {range}");
+    assert!(
+        (1..=2).contains(&range),
+        "cities_in_land_range only supports range 1 or 2, got {range}"
+    );
 
     game.players
         .iter()
