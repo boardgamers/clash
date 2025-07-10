@@ -68,7 +68,7 @@ fn production_focus(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         "Production Focus",
         "For the next collect action, you may collect multiple times from the same tile. \
         The total amount of resources does not change.",
-        |c| c.action().no_resources(),
+        |c| c.free_action().no_resources(),
         |game, player, _| collect_special_action(game, player),
     )
     .tactics_card(tactics_card)
@@ -78,7 +78,6 @@ fn production_focus(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
         |game, p, _| {
             game.permanent_effects
                 .push(PermanentEffect::Collect(CollectEffect::ProductionFocus));
-            gain_action(game, p); // to offset the action spent for collecting
             p.log(
                 game,
                 "Production Focus: You may collect multiple times from the same tile.",
@@ -129,7 +128,7 @@ pub(crate) fn collect_only() -> Ability {
                 if game
                     .permanent_effects
                     .iter()
-                    .any(|e| matches!(e, &PermanentEffect::Collect(CollectEffect::Overproduction)))
+                    .any(|e| matches!(e, &PermanentEffect::Collect(CollectEffect::MassProduction)))
                 {
                     c.max_selection += 2;
                 }

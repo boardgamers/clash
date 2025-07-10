@@ -221,15 +221,6 @@
                   "items": [
                     {
                       "player": 0,
-                      "Action": {
-                        "balance": "Loss"
-                      },
-                      "origin": {
-                        "CivilCard": 29
-                      }
-                    },
-                    {
-                      "player": 0,
                       "HandCard": {
                         "card": {
                           "ActionCard": 29
@@ -241,15 +232,6 @@
                       },
                       "origin": {
                         "Ability": "Action Card"
-                      }
-                    },
-                    {
-                      "player": 0,
-                      "Action": {
-                        "balance": "Gain"
-                      },
-                      "origin": {
-                        "CivilCard": 29
                       }
                     }
                   ]
@@ -322,8 +304,8 @@
   "action_log_index": 2,
   "log": [
     [
-      "Player1: Overproduction: Pay 1 action, Gain 1 action, Can use Overproduction to collect from 2 additional tiles.",
-      "Player1: Action Card: Play Overproduction/Defensive Formation"
+      "Player1: Action Card: Play Mass Production/Defensive Formation",
+      "Player1: Mass Production: Can use Mass Production to collect from 2 additional tiles."
     ],
     [
       "Player1: Collect: Pay 1 action, Use city C2, Gain 1 wood, 1 ore and 1 mood token"
