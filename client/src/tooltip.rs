@@ -30,7 +30,7 @@ fn is_rect_tooltip_active(rc: &RenderContext, rect: Rect) -> bool {
 
 pub(crate) fn show_tooltip_for_rect(
     rc: &RenderContext,
-    tooltip: &[String],
+    tooltip: &MultilineText,
     rect: Rect,
     right_offset: f32,
 ) {
@@ -58,7 +58,7 @@ fn is_circle_tooltip_active(rc: &RenderContext, center: Vec2, radius: f32) -> bo
 
 pub(crate) fn show_tooltip_for_circle(
     rc: &RenderContext,
-    tooltip: &[String],
+    tooltip: &MultilineText,
     center: Vec2,
     radius: f32,
 ) {
@@ -68,7 +68,7 @@ pub(crate) fn show_tooltip_for_circle(
     }
 }
 
-fn show_tooltip_text(rc: &RenderContext, tooltip: &[String], origin: Vec2, right_offset: f32) {
+fn show_tooltip_text(rc: &RenderContext, tooltip: &MultilineText, origin: Vec2, right_offset: f32) {
     let state = rc.state;
     let dim = tooltip.iter().map(|t| state.measure_text(t));
     let total = dim.fold(Vec2::new(0., 0.), |acc, d| {

@@ -4,7 +4,7 @@ use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::{OkTooltip, ok_button};
 use crate::event_ui::event_help_tooltip;
 use crate::layout_ui::button_pressed;
-use crate::log_ui::break_text;
+use crate::log_ui::{break_text, MultilineText};
 use crate::render_context::RenderContext;
 use itertools::Itertools;
 use macroquad::color::Color;
@@ -417,7 +417,7 @@ fn show_category_items<T: Clone, K: PartialEq + Ord + Clone>(
     get_key: impl Fn(&T) -> &K,
     name: impl Fn(&T) -> String,
     icon: impl for<'a> Fn(&'a RenderContext<'a>, &T) -> Option<&'a Texture2D>,
-    description: impl Fn(&T) -> Vec<String>,
+    description: impl Fn(&T) -> MultilineText,
     get_selected: impl Fn(&InfoDialog) -> &K,
     set_selected: impl Fn(&mut InfoDialog, K),
     get_location: impl Fn(&T) -> Option<VisibleCardLocation>,
@@ -432,7 +432,7 @@ fn show_category_items<T: Clone, K: PartialEq + Ord + Clone>(
         let mut desc = description(info);
         let location = get_location(info);
         if let Some(l) = &location {
-            desc.push(format!("Location: {l}"));
+            desc.text.push(format!("Location: {l}"));
         }
         let columns = 7;
         let rect = vec2(i.rem_euclid(columns) as f32, ((i / columns) + 1) as f32);
@@ -461,7 +461,7 @@ fn draw_button(
     rc: &RenderContext,
     text: &str,
     pos: Vec2,
-    tooltip: &[String],
+    tooltip: &MultilineText,
     selected: bool,
 ) -> bool {
     let color = match pos.y {
@@ -479,7 +479,7 @@ fn draw_button_with_color(
     text: &str,
     icon: Option<&Texture2D>,
     pos: Vec2,
-    tooltip: &[String],
+    tooltip: &MultilineText,
     selected: bool,
     color: Color,
 ) -> bool {
