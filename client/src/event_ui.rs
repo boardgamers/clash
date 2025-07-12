@@ -1,7 +1,7 @@
-use server::content::effects;
 use crate::log_ui::break_each;
 use crate::payment_ui::Payment;
 use crate::render_context::RenderContext;
+use server::content::effects;
 use server::events::EventOrigin;
 
 #[must_use]

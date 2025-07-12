@@ -12,7 +12,6 @@ use crate::game::Game;
 use crate::incident::Incident;
 use crate::leader::{Leader, LeaderInfo};
 use crate::objective_card::{Objective, ObjectiveCard};
-use crate::player::Player;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo};
 use crate::status_phase::StatusPhaseState::{ChangeGovernmentType, DetermineFirstPlayer};
 use crate::status_phase::{
@@ -214,12 +213,7 @@ impl Cache {
     }
 
     #[must_use]
-    fn with_ability<T>(
-        &self,
-        name: &str,
-        game: &Game,
-        t: impl Fn(&Ability) -> T,
-    ) -> T {
+    fn with_ability<T>(&self, name: &str, game: &Game, t: impl Fn(&Ability) -> T) -> T {
         self.abilities_by_name
             .get(name)
             .map_or_else(
@@ -241,13 +235,9 @@ impl Cache {
             )
             .unwrap_or_else(|| panic!("ability not found: {name}"))
     }
-    
+
     #[must_use]
-    pub fn ability_description(
-        &self,
-        name: &str,
-        game: &Game,
-    ) -> String {
+    pub fn ability_description(&self, name: &str, game: &Game) -> String {
         self.with_ability(name, game, |a| a.description.clone())
     }
 
