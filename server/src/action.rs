@@ -311,7 +311,7 @@ fn execute_regular_action(
             } else {
                 let Action::Playing(action) = action else {
                     if game.context == GameContext::Replay {
-                        return Ok(())
+                        return Ok(());
                     }
                     return Err(format!("Action {action:?} is not a playing action"));
                 };
@@ -324,7 +324,7 @@ fn execute_regular_action(
                 v
             } else {
                 if game.context == GameContext::Replay {
-                    return Ok(())
+                    return Ok(());
                 }
                 return Err(format!("action {action:?} is not a movement action"));
             },
@@ -332,7 +332,7 @@ fn execute_regular_action(
         ),
         GameState::Finished => {
             if game.context == GameContext::Replay {
-                return Ok(())
+                return Ok(());
             }
             Err("actions can't be executed when the game is finished".to_string())
         }

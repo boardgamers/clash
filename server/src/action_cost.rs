@@ -46,7 +46,7 @@ pub struct ActionCost {
 impl ActionCost {
     pub(crate) fn is_available(&self, game: &Game, player_index: usize) -> Result<(), String> {
         if game.context == GameContext::Replay {
-            return Ok(())
+            return Ok(());
         }
 
         let p = game.player(player_index);

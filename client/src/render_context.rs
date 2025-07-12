@@ -55,19 +55,24 @@ impl RenderContext<'_> {
     pub(crate) fn with_camera(
         &self,
         mode: CameraMode,
+        auto_translate: bool,
         f: impl FnOnce(&RenderContext) -> RenderResult + Sized,
     ) -> RenderResult {
         let next = RenderContext {
             game: self.game,
             state: self.state,
             shown_player: self.shown_player,
-            camera_mode: mode,
+            camera_mode: if auto_translate {
+                mode.clone()
+            } else {
+                self.camera_mode.clone()
+            },
             stage: self.stage,
             icon_background: self.icon_background.clone(),
         };
-        next.set_camera();
+        next.set_camera(&mode);
         let update = f(&next);
-        self.set_camera();
+        self.set_camera(&self.camera_mode);
         update
     }
 
@@ -85,10 +90,18 @@ impl RenderContext<'_> {
         }
     }
 
-    fn set_camera(&self) {
-        match self.camera_mode {
+    fn set_camera(&self, mode: &CameraMode) {
+        match mode {
             CameraMode::Screen => set_default_camera(),
             CameraMode::World => set_camera(&self.state.camera),
+        }
+    }
+
+    #[must_use]
+    pub(crate) fn world_to_screen(&self, point: Vec2) -> Vec2 {
+        match self.camera_mode {
+            CameraMode::Screen => point,
+            CameraMode::World => self.state.camera.world_to_screen(point),
         }
     }
 
