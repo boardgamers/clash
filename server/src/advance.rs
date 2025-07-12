@@ -91,6 +91,12 @@ pub enum Advance {
     Devotion = 45,
     Conversion = 46,
     Fanaticism = 47,
+
+    // Update patch Replacements
+    CityPlanning = 48,
+    WelfareState = 49,
+    ForcedMarch = 50,
+    MilitaryState = 51,
 }
 
 impl Advance {

@@ -196,6 +196,13 @@ pub(crate) fn after_action(game: &mut Game, player_index: usize) {
     if let Some(pos) = city {
         on_city_activation_mood_decreased(game, player_index, pos);
     }
+
+    game.trigger_transient_event_with_game_value(
+        player_index,
+        |event| &mut event.after_action,
+        &(),
+        &(),
+    );
 }
 
 pub(crate) fn on_city_activation_mood_decreased(

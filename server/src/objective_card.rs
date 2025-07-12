@@ -148,7 +148,7 @@ impl AbilityInitializerSetup for ObjectiveBuilder {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct SelectObjectivesInfo {
     pub(crate) objective_opportunities: Vec<String>,
-    pub(crate) current_objective: Option<String>,
+    pub(crate) shown_objective: Option<String>,
 }
 
 impl SelectObjectivesInfo {
@@ -156,12 +156,12 @@ impl SelectObjectivesInfo {
     pub(crate) fn new(objective_opportunities: Vec<String>) -> Self {
         Self {
             objective_opportunities,
-            current_objective: None,
+            shown_objective: None,
         }
     }
 
     pub(crate) fn strip_secret(&mut self) {
-        self.current_objective = None;
+        self.shown_objective = None;
         self.objective_opportunities.clear();
     }
 }
@@ -228,16 +228,16 @@ pub(crate) fn select_objectives() -> Ability {
     b.build()
 }
 
-fn add_select_objective_card_to_complete(b: AbilityBuilder, prio: i32) -> AbilityBuilder {
+fn add_select_objective_card_to_complete(b: AbilityBuilder, priority: i32) -> AbilityBuilder {
     b.add_hand_card_request(
         |e| &mut e.select_objective_cards,
-        prio,
+        priority,
         |game, player, i| {
             if i.objective_opportunities.is_empty() {
                 return None;
             }
             let objective = i.objective_opportunities.remove(0);
-            i.current_objective = Some(objective.clone());
+            i.shown_objective = Some(objective.clone());
 
             let cards = player
                 .get(game)
@@ -282,7 +282,7 @@ fn add_select_objective_card_to_complete(b: AbilityBuilder, prio: i32) -> Abilit
                 game,
                 s.player_index,
                 *card_id,
-                i.current_objective
+                i.shown_objective
                     .as_ref()
                     .expect("Expected current objective to be set"),
             );

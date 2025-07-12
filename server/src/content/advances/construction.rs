@@ -2,7 +2,9 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
+use crate::content::custom_actions::CustomActionType;
 use crate::payment::PaymentConversion;
+use crate::playing_actions::PlayingActionType;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
 use crate::wonder::draw_wonder_card;
@@ -71,4 +73,13 @@ fn roads() -> AdvanceBuilder {
     May not be used to embark, disembark, or explore",
     )
     .with_advance_bonus(CultureToken)
+}
+
+fn city_planning() -> AdvanceBuilder {
+    AdvanceInfo::builder(
+        Advance::CityPlanning,
+        "City Planning",
+        "Once per turn, as a free action, you may pay 1 idea and 1 wood to get a free Construct action.",
+    )
+    .add_action_modifier(CustomActionType::CityPlanning, |cost| cost.once_per_turn().free_action().resources(ResourcePile::ideas(1) + ResourcePile::wood(1)), PlayingActionType::Construct)
 }

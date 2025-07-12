@@ -66,6 +66,7 @@ pub(crate) struct TransientEvents {
     pub collect_total: Event<CollectInfo, Game, Vec<PositionCollection>>,
 
     pub general_payment_conversions: Event<Vec<PaymentConversion>>,
+    pub after_action: Event<Game>,
 }
 
 impl TransientEvents {
@@ -88,6 +89,7 @@ impl TransientEvents {
             collect_total: Event::new("collect_total"),
 
             general_payment_conversions: Event::new("payment_conversions"),
+            after_action: Event::new("after_action"),
         }
     }
 }
