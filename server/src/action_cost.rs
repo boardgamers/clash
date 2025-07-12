@@ -1,7 +1,7 @@
 use crate::advance::base_advance_cost;
 use crate::content::custom_actions::CustomActionType;
 use crate::events::{EventOrigin, check_event_origin};
-use crate::game::Game;
+use crate::game::{Game, GameContext};
 use crate::payment::PaymentOptions;
 use crate::player::Player;
 use crate::resource_pile::ResourcePile;
@@ -45,6 +45,10 @@ pub struct ActionCost {
 
 impl ActionCost {
     pub(crate) fn is_available(&self, game: &Game, player_index: usize) -> Result<(), String> {
+        if game.context == GameContext::Replay {
+            return Ok(())
+        }
+
         let p = game.player(player_index);
         if !p.can_afford(&self.payment_options(p, check_event_origin())) {
             return Err("Not enough resources for action type".to_string());

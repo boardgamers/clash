@@ -13,7 +13,7 @@ use crate::content::persistent_events::{PaymentRequest, PersistentEventType};
 use crate::events::{EventOrigin, EventPlayer};
 use crate::explore::move_to_unexplored_tile;
 use crate::game::GameState::Movement;
-use crate::game::{Game, GameState};
+use crate::game::{Game, GameContext, GameState};
 use crate::move_routes::{MoveRoute, move_routes};
 use crate::movement::MovementAction::{Move, Stop};
 use crate::payment::PaymentOptions;
@@ -297,7 +297,7 @@ pub(crate) fn execute_movement_action(
 
     let p = &EventPlayer::from_player(player_index, game, move_event_origin());
     if let GameState::Playing = game.state {
-        if game.actions_left == 0 {
+        if game.actions_left == 0 && game.context != GameContext::Replay {
             return Err("No actions left".to_string());
         }
         pay_action(game, p);
