@@ -330,7 +330,7 @@ pub(crate) struct MousePosition {
     pub time: f64,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum CameraMode {
     Screen,
     World,

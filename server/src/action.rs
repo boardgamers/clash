@@ -310,6 +310,9 @@ fn execute_regular_action(
                 execute_movement_action(game, m.clone(), player_index)
             } else {
                 let Action::Playing(action) = action else {
+                    if game.context == GameContext::Replay {
+                        return Ok(());
+                    }
                     return Err(format!("Action {action:?} is not a playing action"));
                 };
                 action.execute(game, player_index, false)
@@ -320,11 +323,17 @@ fn execute_regular_action(
             if let Action::Movement(v) = action {
                 v
             } else {
+                if game.context == GameContext::Replay {
+                    return Ok(());
+                }
                 return Err(format!("action {action:?} is not a movement action"));
             },
             player_index,
         ),
         GameState::Finished => {
+            if game.context == GameContext::Replay {
+                return Ok(());
+            }
             Err("actions can't be executed when the game is finished".to_string())
         }
     }
@@ -344,18 +353,19 @@ pub(crate) fn gain_action(game: &mut Game, player: &EventPlayer) {
 
 pub(crate) fn lose_action(game: &mut Game, player: &EventPlayer) {
     player.log(game, "Lose 1 action");
-    game.actions_left -= 1;
-    add_action_log_item(
-        game,
-        player.index,
-        ActionLogEntry::action(ActionLogBalance::Loss),
-        player.origin.clone(),
-        vec![],
-    );
+    subtract_action(game, player);
 }
 
 pub(crate) fn pay_action(game: &mut Game, player: &EventPlayer) {
     player.log(game, "Pay 1 action");
+    subtract_action(game, player);
+}
+
+fn subtract_action(game: &mut Game, player: &EventPlayer) {
+    if game.actions_left == 0 && game.context == GameContext::Replay {
+        return;
+    }
+
     game.actions_left -= 1;
     add_action_log_item(
         game,

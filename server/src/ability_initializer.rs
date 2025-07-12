@@ -14,6 +14,7 @@ use crate::content::persistent_events::{
     ResourceRewardRequest, SelectedStructure, StructuresRequest, UnitTypeRequest, UnitsRequest,
 };
 use crate::events::{Event, EventOrigin, EventPlayer};
+use crate::game::GameContext;
 use crate::player::Player;
 use crate::player_events::{PersistentEvent, PersistentEvents, TransientEvents};
 use crate::playing_actions::PlayingActionType;
@@ -869,10 +870,12 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             },
             move |game, p, action, request, details| {
                 let (choices, selected) = from_request(&request, action);
-                assert!(
-                    choices.contains(&selected),
-                    "Invalid choice {selected:?} - available: {choices:?}"
-                );
+                if game.context != GameContext::Replay {
+                    assert!(
+                        choices.contains(&selected),
+                        "Invalid choice {selected:?} - available: {choices:?}"
+                    );
+                }
                 gain_reward(
                     game,
                     &SelectedSingleChoice::new(p, true, choices, selected),
@@ -939,17 +942,19 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             },
             move |game, p, action, request, details| {
                 let (choices, selected, needed) = from_request(&request, action);
-                assert!(
-                    selected.iter().all(|s| choices.contains(s)),
-                    "Invalid choice {selected:?} - available: {choices:?}",
-                );
-                assert!(
-                    needed.contains(&(selected.len() as u8)),
-                    "Invalid choice count: {} (min: {}, max: {})",
-                    selected.len(),
-                    needed.start(),
-                    needed.end(),
-                );
+                if game.context != GameContext::Replay {
+                    assert!(
+                        selected.iter().all(|s| choices.contains(s)),
+                        "Invalid choice {selected:?} - available: {choices:?}",
+                    );
+                    assert!(
+                        needed.contains(&(selected.len() as u8)),
+                        "Invalid choice count: {} (min: {}, max: {})",
+                        selected.len(),
+                        needed.start(),
+                        needed.end(),
+                    );
+                }
                 gain_reward(
                     game,
                     &SelectedMultiChoice::new(p, true, choices, selected),

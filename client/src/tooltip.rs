@@ -1,4 +1,4 @@
-use crate::client_state::{MousePosition, State};
+use crate::client_state::{CameraMode, MousePosition, NO_UPDATE, State};
 use crate::layout_ui::rect_from;
 use crate::log_ui::MultilineText;
 use crate::render_context::RenderContext;
@@ -44,7 +44,14 @@ pub(crate) fn show_tooltip_for_rect(
             rect.size().y,
             Color::new(0.0, 0.0, 0.0, 0.5),
         );
-        show_tooltip_text(rc, tooltip, rect.point(), right_offset);
+        let _ = rc.with_camera(CameraMode::Screen, false, |rc| {
+            let rect = rect_from(
+                rc.world_to_screen(rect.point()),
+                rc.world_to_screen(rect.size()),
+            );
+            show_tooltip_text(rc, tooltip, rect.point(), right_offset);
+            NO_UPDATE
+        });
     }
 }
 
@@ -65,7 +72,11 @@ pub(crate) fn show_tooltip_for_circle(
 ) {
     if is_circle_tooltip_active(rc, center, radius) {
         draw_circle(center.x, center.y, radius, Color::new(0.0, 0.0, 0.0, 0.5));
-        show_tooltip_text(rc, tooltip, center + vec2(radius, radius), 50.);
+        let _ = rc.with_camera(CameraMode::Screen, false, |rc| {
+            let center = rc.world_to_screen(center);
+            show_tooltip_text(rc, tooltip, center + vec2(radius, radius), 50.);
+            NO_UPDATE
+        });
     }
 }
 

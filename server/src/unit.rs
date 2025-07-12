@@ -578,6 +578,9 @@ pub(crate) fn kill_units(
     killer: Option<usize>,
     origin: &EventOrigin,
 ) {
+    if unit_ids.is_empty() {
+        return;
+    }
     let pos = game
         .player(player_index)
         .get_unit(*unit_ids.first().expect("no units"))

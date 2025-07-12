@@ -95,7 +95,7 @@ fn render(rc: &RenderContext, features: &Features) -> RenderResult {
 
 fn render_map(rc: &RenderContext) -> Result<(), Box<StateUpdate>> {
     if !rc.state.active_dialog.is_modal() && rc.stage.is_map() {
-        rc.with_camera(CameraMode::World, render_with_world)?;
+        rc.with_camera(CameraMode::World, true, render_with_world)?;
     }
     Ok(())
 }
