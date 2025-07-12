@@ -1,4 +1,5 @@
 use crate::client::Features;
+use macroquad::miniquad::FilterMode;
 use macroquad::prelude::{Font, ImageFormat, load_texture, load_ttf_font};
 use macroquad::texture::Texture2D;
 use server::city_pieces::Building;
@@ -62,8 +63,11 @@ pub(crate) struct Assets {
 impl Assets {
     pub async fn new(features: &Features) -> Self {
         let font_name = features.get_asset("SourceSans3-Regular.ttf");
+        // can't share font - causes panic
+        let mut font = load_ttf_font(&font_name).await.unwrap();
+        font.set_filter(FilterMode::Nearest);
         Self {
-            font: load_ttf_font(&font_name).await.unwrap(), // can't share font - causes panic
+            font,
             terrain: Self::terrain(features).await,
             exhausted: load_png(include_bytes!("../assets/cross-svgrepo-com.png")),
 
