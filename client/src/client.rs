@@ -21,7 +21,7 @@ use crate::layout_ui::{
     ICON_SIZE, bottom_center_anchor, bottom_centered_text_with_offset,
     draw_scaled_icon_with_tooltip, icon_pos, is_mouse_pressed, top_right_texture,
 };
-use crate::log_ui::{LogDialog, show_log};
+use crate::log_ui::{LogDialog, MultilineText, show_log};
 use crate::map_ui::{draw_map, explore_dialog, show_tile_menu};
 use crate::player_ui::{
     ColumnLabelPainter, player_select, show_global_controls, show_top_center, show_top_left,
@@ -247,13 +247,13 @@ fn dialog_chooser(rc: &RenderContext, c: &DialogChooser) -> RenderResult {
         rc,
         &c.title,
         vec2(0., c.options.len() as f32 * h + 50.),
-        &[],
+        &MultilineText::default(),
     );
 
     for (i, (origin, d)) in c.options.iter().enumerate() {
         let offset = vec2(0., i as f32 * h + 35.);
         let (name, tooltip) = origin.as_ref().map_or_else(
-            || ("standard action".to_string(), vec![]),
+            || ("standard action".to_string(), MultilineText::default()),
             |o| (o.name(rc.game), event_help_tooltip(rc, o)),
         );
 

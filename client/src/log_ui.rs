@@ -90,16 +90,9 @@ impl MultilineText {
     pub(crate) fn from(rc: &RenderContext, text: &[String]) -> Self {
         let mut t = Self::default();
         for label in text {
-            t.add(rc, &label);
+            t.add(rc, label);
         }
         t
-    }
-
-    pub(crate) fn new(width: f32) -> Self {
-        MultilineText {
-            width,
-            text: vec![],
-        }
     }
 
     pub(crate) fn add(&mut self, rc: &RenderContext, label: &str) {

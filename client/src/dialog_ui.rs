@@ -1,5 +1,6 @@
 use crate::client_state::{NO_UPDATE, PendingUpdate, RenderResult, StateUpdate};
 use crate::layout_ui::{bottom_centered_text_with_offset, bottom_right_texture, icon_pos};
+use crate::log_ui::MultilineText;
 use crate::render_context::RenderContext;
 use macroquad::math::{Vec2, vec2};
 use server::playing_actions::PlayingActionType;
@@ -32,7 +33,7 @@ pub(crate) fn show_pending_update(update: &PendingUpdate, rc: &RenderContext) ->
     } else {
         -110.
     };
-    bottom_centered_text_with_offset(rc, t, vec2(0., y), &[]);
+    bottom_centered_text_with_offset(rc, t, vec2(0., y), &MultilineText::default());
 
     if ok_button(rc, OkTooltip::Valid("OK".to_string())) {
         return StateUpdate::resolve_pending_update(true);

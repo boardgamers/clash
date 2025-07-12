@@ -1,10 +1,10 @@
-use macroquad::math::{u32, vec2, Vec2};
+use macroquad::math::{Vec2, u32, vec2};
 
 use server::game::Game;
 use server::position::Position;
-use server::unit::{carried_units, Unit, UnitType};
+use server::unit::{Unit, UnitType, carried_units};
 
-use crate::client_state::{ActiveDialog, RenderResult, NO_UPDATE};
+use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult};
 use crate::hex_ui;
 use crate::select_ui::HighlightType;
 
@@ -55,7 +55,7 @@ pub(crate) fn draw_unit_type(
     draw_scaled_icon_with_tooltip(
         rc,
         rc.assets().unit(unit_type, rc.game.player(player_index)),
-        &[],
+        &MultilineText::default(),
         vec2(center.x - icon_size / 2., center.y - icon_size / 2.),
         icon_size,
     )
@@ -229,7 +229,7 @@ fn draw_unit(
         let army_move = game
             .player(player_index)
             .has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
-        let mut tooltip = vec![unit_label(unit, army_move, game)];
+        let mut tooltip = MultilineText::of(rc, &unit_label(unit, army_move, game));
         add_unit_description(rc, &mut tooltip, unit.unit_type);
         show_tooltip_for_circle(rc, &tooltip, center, radius);
     } else {
@@ -340,7 +340,7 @@ pub(crate) fn add_unit_description(rc: &RenderContext, parts: &mut MultilineText
     parts.add(rc, &u.description());
     if let UnitType::Leader(l) = u {
         for a in &rc.game.cache.get_leader(&l).abilities {
-            parts.add(rc, format!("Leader ability: {}", a.name));
+            parts.add(rc, &format!("Leader ability: {}", a.name));
             parts.add(rc, &a.description);
         }
     }

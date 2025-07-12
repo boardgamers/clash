@@ -263,7 +263,7 @@ fn show_buildings(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
             |b| b.name().to_string(),
             |_, _| None,
             |b| {
-                let mut desc = MultilineText::of(rc, &b.name());
+                let mut desc = MultilineText::of(rc, b.name());
                 let advance = rc.game.cache.get_building_advance(*b).name(rc.game);
                 desc.add(rc, &format!("Required advance: {advance}"));
                 add_building_description(rc, &mut desc, *b);
@@ -303,7 +303,7 @@ fn show_units(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
             |_, _| None,
             |u| {
                 let mut parts = MultilineText::default();
-                parts.add(rc, &u.generic_name());
+                parts.add(rc, u.generic_name());
                 parts.add(rc, &format!("Cost: {}", u.cost()));
                 if let Some(r) = u.required_building() {
                     parts.add(rc, &format!("Required building: {}", r.name()));
@@ -355,7 +355,15 @@ fn show_civilizations(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
         } else {
             WHITE
         };
-        if draw_button_with_color(rc, &c.name, None, vec2(i as f32, 1.), &MultilineText::default(), selected, color) {
+        if draw_button_with_color(
+            rc,
+            &c.name,
+            None,
+            vec2(i as f32, 1.),
+            &MultilineText::default(),
+            selected,
+            color,
+        ) {
             let mut new = d.clone();
             new.civilization.clone_from(&c.name);
             return StateUpdate::open_dialog(ActiveDialog::Info(new));
@@ -387,7 +395,10 @@ fn show_civilization(rc: &RenderContext, c: &Civilization) -> RenderResult {
     for (i, a) in c.special_advances.iter().enumerate() {
         let mut tooltip = MultilineText::default();
         tooltip.add(rc, &format!("Name: {}", a.name));
-        tooltip.add(rc, &format!("Required advance: {}", a.requirement.name(rc.game)));
+        tooltip.add(
+            rc,
+            &format!("Required advance: {}", a.requirement.name(rc.game)),
+        );
         tooltip.add(rc, &a.description);
 
         draw_button(rc, &a.name, vec2(i as f32, 2.), &tooltip, false);

@@ -5,6 +5,7 @@ use crate::event_ui::event_help_tooltip;
 use crate::happiness_ui::open_increase_happiness_dialog;
 use crate::influence_ui::new_cultural_influence_dialog;
 use crate::layout_ui::{bottom_left_texture, icon_pos};
+use crate::log_ui::MultilineText;
 use crate::move_ui::MoveIntent;
 use crate::render_context::RenderContext;
 use itertools::Itertools;
@@ -15,7 +16,6 @@ use server::cultural_influence::available_influence_actions;
 use server::happiness::available_happiness_actions;
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::resource::ResourceType;
-use crate::log_ui::MultilineText;
 
 pub(crate) fn action_buttons(rc: &RenderContext) -> RenderResult {
     let assets = rc.assets();

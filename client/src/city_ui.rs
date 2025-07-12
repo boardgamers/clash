@@ -118,7 +118,7 @@ fn increase_happiness_button<'a>(rc: &'a RenderContext, city: &'a City) -> Optio
     Some(IconAction::new(
         &rc.assets().resources[&ResourceType::MoodTokens],
         false,
-        vec!["Increase happiness".to_string()],
+        MultilineText::of(rc, "Increase happiness"),
         Box::new(move || {
             open_increase_happiness_dialog(rc, &actions, |mut happiness| {
                 let mut target = city.mood_state.clone();
@@ -223,7 +223,7 @@ fn recruit_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option<IconActio
     Some(IconAction::new(
         rc.assets().unit(UnitType::Infantry, rc.shown_player),
         false,
-        vec!["Recruit Units".to_string()],
+        MultilineText::of(rc, "Recruit Units"),
         Box::new(|| {
             RecruitAmount::new_selection(rc.game, city.player_index, city.position, Units::empty())
         }),
@@ -239,7 +239,7 @@ fn collect_resources_button<'a>(rc: &'a RenderContext, city: &'a City) -> Option
     Some(IconAction::new(
         &rc.assets().resources[&ResourceType::Food],
         false,
-        vec!["Collect Resources".to_string()],
+        MultilineText::of(rc, "Collect Resources"),
         Box::new(move || {
             base_or_custom_action(rc, &actions, "Collect resources", |custom| {
                 let i = possible_resource_collections(
@@ -394,7 +394,7 @@ fn draw_buildings(
             let p = building_position(city, center, i, *b);
             rc.draw_circle(p, BUILDING_SIZE, rc.player_color(player_index));
 
-            let mut tooltip = MultilineText::of(rc, &b.name());
+            let mut tooltip = MultilineText::of(rc, b.name());
             add_building_description(rc, &mut tooltip, *b);
 
             draw_scaled_icon_with_tooltip(

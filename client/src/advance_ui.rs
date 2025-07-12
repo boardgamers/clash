@@ -1,7 +1,7 @@
 use crate::city_ui::add_building_description;
 use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::layout_ui::{button_pressed, top_centered_text};
-use crate::log_ui::{ MultilineText};
+use crate::log_ui::MultilineText;
 use crate::payment_ui::{Payment, payment_dialog};
 use crate::render_context::RenderContext;
 use crate::unit_ui::add_unit_description;
@@ -140,29 +140,38 @@ fn description(rc: &RenderContext, a: &AdvanceInfo) -> MultilineText {
     let mut parts = MultilineText::default();
     parts.add(rc, &a.name);
     parts.add(rc, &a.description);
-    parts.add(rc, &format!(
-        "Cost: {}",
-        rc.shown_player
-            .advance_cost(a.advance, rc.game, CostTrigger::WithModifiers)
-            .cost
-    ));
+    parts.add(
+        rc,
+        &format!(
+            "Cost: {}",
+            rc.shown_player
+                .advance_cost(a.advance, rc.game, CostTrigger::WithModifiers)
+                .cost
+        ),
+    );
     if let Some(r) = &a.required {
         parts.add(rc, &format!("Required: {}", r.name(rc.game)));
     }
     if !a.contradicting.is_empty() {
-        parts.add(rc, &format!(
-            "Contradicts: {}",
-            a.contradicting.iter().map(|a| a.name(rc.game)).join(", ")
-        ));
+        parts.add(
+            rc,
+            &format!(
+                "Contradicts: {}",
+                a.contradicting.iter().map(|a| a.name(rc.game)).join(", ")
+            ),
+        );
     }
     if let Some(b) = &a.bonus {
-        parts.add(rc, &format!(
-            "Bonus: {}",
-            match b {
-                Bonus::MoodToken => "Mood Token",
-                Bonus::CultureToken => "Culture Token",
-            }
-        ));
+        parts.add(
+            rc,
+            &format!(
+                "Bonus: {}",
+                match b {
+                    Bonus::MoodToken => "Mood Token",
+                    Bonus::CultureToken => "Culture Token",
+                }
+            ),
+        );
     }
     if let Some(g) = &a.government {
         parts.add(rc, &format!("Government: {g}"));

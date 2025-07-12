@@ -2,6 +2,7 @@ use crate::advance_ui::{AdvanceState, show_advance_menu};
 use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::{BaseOrCustomDialog, OkTooltip, cancel_button_with_tooltip, ok_button};
 use crate::layout_ui::{bottom_center_anchor, bottom_centered_text, icon_pos};
+use crate::log_ui::MultilineText;
 use crate::payment_ui::{Payment, multi_payment_dialog, payment_dialog};
 use crate::player_ui::choose_player_dialog;
 use crate::render_context::RenderContext;
@@ -89,7 +90,7 @@ pub(crate) fn unit_request_dialog(rc: &RenderContext, r: &UnitTypeRequest) -> Re
         if draw_unit_type(rc, HighlightType::None, center, *u, r.player_index, 20.) {
             return StateUpdate::response(EventResponse::SelectUnitType(*u));
         }
-        let mut tooltip = vec![u.name(rc.game).to_string()];
+        let mut tooltip = MultilineText::of(rc, &u.name(rc.game));
         add_unit_description(rc, &mut tooltip, *u);
         show_tooltip_for_circle(rc, &tooltip, center, 20.);
     }

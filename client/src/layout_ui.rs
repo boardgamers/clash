@@ -2,7 +2,7 @@ use crate::log_ui::MultilineText;
 use crate::render_context::RenderContext;
 use crate::tooltip::show_tooltip_for_rect;
 use macroquad::color::WHITE;
-use macroquad::math::{f32, vec2, Vec2};
+use macroquad::math::{Vec2, f32, vec2};
 use macroquad::prelude::*;
 
 pub const ICON_SIZE: f32 = 30.;

@@ -1,6 +1,7 @@
 use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::construct_ui::{ConstructionPayment, ConstructionProject};
 use crate::dialog_ui::{OkTooltip, cancel_button, ok_button};
+use crate::log_ui::MultilineText;
 use crate::render_context::RenderContext;
 use crate::select_ui;
 use crate::select_ui::{CountSelector, HasCountSelectableObject, HighlightType, SELECT_RADIUS};
@@ -196,7 +197,8 @@ pub(crate) fn select_dialog(rc: &RenderContext, a: &RecruitAmount) -> RenderResu
                 Ok(_) => format!(" ({} available with current resources)", s.selectable.max),
                 Err(e) => format!(" ({e})"),
             };
-            let mut tooltip = vec![format!("Recruit {}{}", s.unit_type.name(game), suffix)];
+            let mut tooltip =
+                MultilineText::of(rc, &format!("Recruit {}{}", s.unit_type.name(game), suffix));
             add_unit_description(rc, &mut tooltip, s.unit_type);
             show_tooltip_for_circle(rc, &tooltip, p, SELECT_RADIUS);
         },
