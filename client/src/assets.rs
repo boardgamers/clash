@@ -65,7 +65,7 @@ impl Assets {
         let font_name = features.get_asset("SourceSans3-Regular.ttf");
         // can't share font - causes panic
         let mut font = load_ttf_font(&font_name).await.unwrap();
-        font.set_filter(FilterMode::Nearest);
+        font.set_filter(FilterMode::Linear);
         Self {
             font,
             terrain: Self::terrain(features).await,
