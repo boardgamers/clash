@@ -11,7 +11,7 @@ use crate::hex_ui;
 use crate::layout_ui::{
     draw_scaled_icon, draw_scaled_icon_with_tooltip, is_in_circle, is_mouse_pressed,
 };
-use crate::log_ui::break_text;
+use crate::log_ui::MultilineText;
 use crate::map_ui::{move_units_buttons, show_map_action_buttons};
 use crate::recruit_unit_ui::RecruitAmount;
 use crate::render_context::RenderContext;
@@ -39,7 +39,7 @@ use std::ops::Add;
 pub(crate) struct IconAction<'a> {
     pub texture: &'a Texture2D,
     pub skip_background: bool,
-    pub tooltip: Vec<String>,
+    pub tooltip: MultilineText,
     pub warning: Option<HighlightType>,
     pub action: Box<dyn Fn() -> RenderResult + 'a>,
 }
@@ -49,7 +49,7 @@ impl<'a> IconAction<'a> {
     pub(crate) fn new(
         texture: &'a Texture2D,
         skip_background: bool,
-        tooltip: Vec<String>,
+        tooltip: MultilineText,
         action: Box<dyn Fn() -> RenderResult + 'a>,
     ) -> IconAction<'a> {
         IconAction {
@@ -181,15 +181,18 @@ fn building_icons<'a>(rc: &'a RenderContext, city: &'a City) -> IconActionVec<'a
                 ),
                 Err(e) => format!(" ({e})"),
             };
-            let tooltip = vec![
-                format!(
-                    "{}{}{}",
-                    name,
-                    pos.map_or(String::new(), |p| format!(" at {p}")),
-                    suffix,
-                ),
-                b.description().to_string(),
-            ];
+            let tooltip = MultilineText::from(
+                rc,
+                &[
+                    format!(
+                        "{}{}{}",
+                        name,
+                        pos.map_or(String::new(), |p| format!(" at {p}")),
+                        suffix,
+                    ),
+                    b.description().to_string(),
+                ],
+            );
             IconAction::new(
                 &rc.assets().buildings[&b],
                 true,
@@ -306,7 +309,7 @@ fn draw_selected_state(
     rc.draw_circle_lines(center, size, 3., t.color());
 
     if let Some(tooltip) = &info.tooltip {
-        show_tooltip_for_circle(rc, &[tooltip.clone()], center, size);
+        show_tooltip_for_circle(rc, &MultilineText::of(rc, tooltip), center, size);
     }
 
     if info.status != SelectedStructureStatus::Invalid
@@ -391,7 +394,7 @@ fn draw_buildings(
             let p = building_position(city, center, i, *b);
             rc.draw_circle(p, BUILDING_SIZE, rc.player_color(player_index));
 
-            let mut tooltip = vec![b.name().to_string()];
+            let mut tooltip = MultilineText::of(rc, &b.name());
             add_building_description(rc, &mut tooltip, *b);
 
             draw_scaled_icon_with_tooltip(
@@ -414,7 +417,7 @@ fn draw_buildings(
     NO_UPDATE
 }
 
-pub(crate) fn add_building_description(rc: &RenderContext, parts: &mut Vec<String>, b: Building) {
+pub(crate) fn add_building_description(rc: &RenderContext, parts: &mut MultilineText, b: Building) {
     let pile = rc
         .shown_player
         .building_cost(rc.game, b, CostTrigger::WithModifiers)
@@ -422,12 +425,12 @@ pub(crate) fn add_building_description(rc: &RenderContext, parts: &mut Vec<Strin
         .first_valid_payment(&BUILDING_COST)
         .expect("Building cost should be valid");
     if pile == BUILDING_COST {
-        parts.push(format!("Cost: {BUILDING_COST}"));
+        parts.add(rc, &format!("Cost: {BUILDING_COST}"));
     } else {
-        parts.push(format!("Base cost: {BUILDING_COST}"));
-        parts.push(format!("Current cost: {pile}"));
+        parts.add(rc, &format!("Base cost: {BUILDING_COST}"));
+        parts.add(rc, &format!("Current cost: {pile}"));
     }
-    break_text(rc, parts, b.description());
+    parts.add(rc, b.description());
 }
 
 #[allow(clippy::result_large_err)]

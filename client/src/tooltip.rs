@@ -1,3 +1,4 @@
+use crate::log_ui::MultilineText;
 use crate::client_state::{MousePosition, State};
 use crate::layout_ui::rect_from;
 use crate::render_context::RenderContext;

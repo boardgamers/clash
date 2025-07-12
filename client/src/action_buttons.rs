@@ -15,6 +15,7 @@ use server::cultural_influence::available_influence_actions;
 use server::happiness::available_happiness_actions;
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::resource::ResourceType;
+use crate::log_ui::MultilineText;
 
 pub(crate) fn action_buttons(rc: &RenderContext) -> RenderResult {
     let assets = rc.assets();
@@ -26,7 +27,7 @@ pub(crate) fn action_buttons(rc: &RenderContext) -> RenderResult {
             rc,
             &assets.resources[&ResourceType::MoodTokens],
             icon_pos(0, -2),
-            &["Increase happiness".to_string()],
+            &MultilineText::of(rc, "Increase happiness"),
         )
     {
         return open_increase_happiness_dialog(rc, &happiness, |h| h);
@@ -37,7 +38,7 @@ pub(crate) fn action_buttons(rc: &RenderContext) -> RenderResult {
             rc,
             &assets.move_units,
             icon_pos(0, -3),
-            &["Move units".to_string()],
+            &MultilineText::of(rc, "Move units"),
         )
     {
         return global_move(rc);
@@ -48,7 +49,7 @@ pub(crate) fn action_buttons(rc: &RenderContext) -> RenderResult {
             rc,
             &assets.advances,
             icon_pos(1, -3),
-            &["Research advances".to_string()],
+            &MultilineText::of(rc, "Research advances"),
         )
     {
         return StateUpdate::open_dialog(ActiveDialog::AdvanceMenu);
@@ -61,7 +62,7 @@ pub(crate) fn action_buttons(rc: &RenderContext) -> RenderResult {
             rc,
             &assets.resources[&ResourceType::CultureTokens],
             icon_pos(1, -2),
-            &["Cultural Influence".to_string()],
+            &MultilineText::of(rc, "Cultural Influence"),
         )
     {
         return base_or_custom_action(rc, &influence, "Influence culture", |d| {

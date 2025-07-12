@@ -1,4 +1,4 @@
-use crate::log_ui::{break_each, MultilineText};
+use crate::log_ui::MultilineText;
 use crate::payment_ui::Payment;
 use crate::render_context::RenderContext;
 use server::content::effects;
@@ -6,8 +6,11 @@ use server::events::EventOrigin;
 
 #[must_use]
 pub(crate) fn event_help_tooltip(rc: &RenderContext, origin: &EventOrigin) -> MultilineText {
-    let mut help = vec![];
-    break_each(rc, &mut help, &event_help(rc, origin));
+    let mut help = MultilineText::default();
+    let labels = &event_help(rc, origin);
+    for label in labels {
+        help.add(rc, label);
+    }
     help
 }
 

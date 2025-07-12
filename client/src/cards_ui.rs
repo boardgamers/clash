@@ -1,19 +1,19 @@
-use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
+use crate::client_state::{ActiveDialog, RenderResult, StateUpdate, NO_UPDATE};
 use crate::custom_phase_ui;
 use crate::custom_phase_ui::MultiSelection;
 use crate::dialog_ui::ok_button;
 use crate::layout_ui::{bottom_centered_text, button_pressed, rect_from};
-use crate::log_ui::break_text;
+use crate::log_ui::MultilineText;
 use crate::player_ui::get_combat;
 use crate::render_context::RenderContext;
 use crate::select_ui::HighlightType;
 use custom_phase_ui::multi_select_tooltip_from_error;
 use itertools::Itertools;
 use macroquad::color::BLACK;
-use macroquad::math::{Rect, Vec2, vec2};
-use macroquad::prelude::{BEIGE, Color, GREEN, RED, YELLOW};
+use macroquad::math::{vec2, Rect, Vec2};
+use macroquad::prelude::{Color, BEIGE, GREEN, RED, YELLOW};
 use server::action::Action;
-use server::card::{HandCard, HandCardType, hand_cards, validate_card_selection};
+use server::card::{hand_cards, validate_card_selection, HandCard, HandCardType};
 use server::content::persistent_events::EventResponse;
 use server::events::check_event_origin;
 use server::objective_card::ObjectiveType;
@@ -23,12 +23,12 @@ use server::wonder::{Wonder, WonderInfo};
 pub(crate) struct HandCardObject {
     id: HandCard,
     name: String,
-    pub description: Vec<String>,
+    pub description: MultilineText,
     color: Color,
 }
 
 impl HandCardObject {
-    pub(crate) fn new(id: HandCard, color: Color, name: &str, description: Vec<String>) -> Self {
+    pub(crate) fn new(id: HandCard, color: Color, name: &str, description: MultilineText) -> Self {
         Self {
             id,
             name: name.chars().take(17).collect(),
@@ -182,21 +182,21 @@ fn get_card_object(
             card.clone(),
             ACTION_CARD_COLOR,
             "Action Card",
-            vec!["Hidden Action Card".to_string()],
+            MultilineText::of(rc, "Hidden Action Card"),
         ),
         HandCard::ActionCard(id) => action_card_object(rc, *id),
         HandCard::ObjectiveCard(o) if *o == 0 => HandCardObject::new(
             card.clone(),
             OBJECTIVE_CARD_COLOR,
             "Objective Card",
-            vec!["Hidden Objective Card".to_string()],
+            MultilineText::of(rc, "Hidden Objective Card"),
         ),
         HandCard::ObjectiveCard(id) => objective_card_object(rc, *id, selection),
         HandCard::Wonder(n) if n == &Wonder::Hidden => HandCardObject::new(
             card.clone(),
             WONDER_CARD_COLOR,
             "Wonder Card",
-            vec!["Hidden Wonder Card".to_string()],
+            MultilineText::of(rc, "Hidden Wonder Card"),
         ),
         HandCard::Wonder(name) => {
             let w = rc.game.cache.get_wonder(*name);
@@ -210,15 +210,15 @@ fn get_card_object(
     }
 }
 
-pub(crate) fn wonder_description(rc: &RenderContext, w: &WonderInfo) -> Vec<String> {
-    let mut description = vec![];
-    description.push(w.name());
-    break_text(rc, &mut description, w.description.as_str());
-    description.push(format!("Cost: {}", w.cost));
-    description.push(format!(
-        "Required advance: {}",
-        w.required_advance.name(rc.game)
-    ));
+pub(crate) fn wonder_description(rc: &RenderContext, w: &WonderInfo) -> MultilineText {
+    let mut description = MultilineText::default();
+    description.add(rc, &w.name());
+    description.add(rc, w.description.as_str());
+    description.add(rc, &format!("Cost: {}", w.cost));
+    description.add(
+        rc,
+        &format!("Required advance: {}", w.required_advance.name(rc.game)),
+    );
     description
 }
 
@@ -236,47 +236,55 @@ pub(crate) fn action_card_object(rc: &RenderContext, id: u8) -> HandCardObject {
         _ => a.civil_card.name.clone(),
     };
 
-    let mut description = vec![format!("Civil: {}", a.civil_card.name)];
+    let mut description = MultilineText::default();
+    description.add(rc, &format!("Civil: {}", a.civil_card.name));
     let action_type = &a.civil_card.action_type;
-    description.push(
+    description.add(
+        rc,
         if action_type.free {
             "As a free action"
         } else {
             "As a regular action"
-        }
-        .to_string(),
+        },
     );
     let cost = &action_type.payment_options(rc.shown_player, check_event_origin());
     if !cost.is_free() {
-        description.push(format!("Cost: {cost}"));
+        description.add(rc, &format!("Cost: {cost}"));
     }
-    break_text(rc, &mut description, a.civil_card.description.as_str());
+    description.add(rc, a.civil_card.description.as_str());
     if let Some(t) = &a.tactics_card {
-        description.extend(vec![
-            format!("Tactics: {}", t.name),
-            format!(
+        description.add(rc, &format!("Tactics: {}", t.name));
+        description.add(
+            rc,
+            &format!(
                 "Unit Types: {}",
                 t.fighter_requirement
                     .iter()
                     .map(|f| format!("{f}"))
                     .join(", ")
             ),
-            format!(
+        );
+        description.add(
+            rc,
+            &format!(
                 "Role: {}",
                 match t.role_requirement {
                     None => "Attacker or Defender".to_string(),
                     Some(r) => format!("{r}"),
                 }
             ),
-            format!(
+        );
+        description.add(
+            rc,
+            &format!(
                 "Location: {}",
                 match &t.location_requirement {
                     None => "Any".to_string(),
                     Some(l) => format!("{l}"),
                 }
             ),
-        ]);
-        break_text(rc, &mut description, t.description.as_str());
+        );
+        description.add(rc, t.description.as_str());
     }
     HandCardObject::new(
         HandCard::ActionCard(id),
@@ -293,17 +301,20 @@ pub(crate) fn objective_card_object(
 ) -> HandCardObject {
     let card = rc.game.cache.get_objective_card(id);
 
-    let mut description = vec![];
+    let mut description = MultilineText::default();
     for o in &card.objectives {
-        description.push(format!("Objective: {}", o.name));
-        description.push(format!(
-            "Type: {}",
-            match o.get_type() {
-                ObjectiveType::Instant => "Instant",
-                ObjectiveType::StatusPhase => "Status Phase",
-            }
-        ));
-        break_text(rc, &mut description, o.description.as_str());
+        description.add(rc, &format!("Objective: {}", o.name));
+        description.add(
+            rc,
+            &format!(
+                "Type: {}",
+                match o.get_type() {
+                    ObjectiveType::Instant => "Instant",
+                    ObjectiveType::StatusPhase => "Status Phase",
+                }
+            ),
+        );
+        description.add(rc, o.description.as_str());
     }
 
     let name = selection

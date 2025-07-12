@@ -1,8 +1,8 @@
-use crate::log_ui::{break_text, MultilineText};
+use crate::log_ui::MultilineText;
 use crate::render_context::RenderContext;
 use crate::tooltip::show_tooltip_for_rect;
 use macroquad::color::WHITE;
-use macroquad::math::{Vec2, f32, vec2};
+use macroquad::math::{f32, vec2, Vec2};
 use macroquad::prelude::*;
 
 pub const ICON_SIZE: f32 = 30.;
@@ -93,13 +93,13 @@ pub(crate) fn bottom_centered_text_with_offset(
     );
     rc.draw_rectangle(rect, UI_BACKGROUND);
     bottom_center_text(rc, text, p);
-    if !tooltip.is_empty() {
+    if !tooltip.text.is_empty() {
         show_tooltip_for_rect(rc, tooltip, rect, 50.);
     }
 }
 
 pub(crate) fn bottom_centered_text(rc: &RenderContext, text: &str) {
-    bottom_centered_text_with_offset(rc, text, vec2(0., 0.), &[]);
+    bottom_centered_text_with_offset(rc, text, vec2(0., 0.), &MultilineText::default());
 }
 
 pub(crate) fn bottom_center_text(rc: &RenderContext, text: &str, p: Vec2) {
@@ -141,11 +141,11 @@ pub(crate) fn draw_scaled_icon(
     size: f32,
 ) -> bool {
     let t = if tooltip.is_empty() {
-        vec![]
+        MultilineText::default()
     } else {
-        let mut parts: Vec<String> = vec![];
-        break_text(rc, &mut parts, tooltip);
-        parts
+        let mut text = MultilineText::default();
+        text.add(rc, tooltip);
+        text
     };
 
     draw_scaled_icon_with_tooltip(rc, texture, &t, origin, size)
@@ -199,7 +199,7 @@ pub(crate) fn button_pressed(
     tooltip: &MultilineText,
     right_offset: f32,
 ) -> bool {
-    if !tooltip.is_empty() {
+    if !tooltip.text.is_empty() {
         show_tooltip_for_rect(rc, tooltip, rect, right_offset);
     }
     mouse_pressed_position(rc).is_some_and(|p| rect.contains(p))

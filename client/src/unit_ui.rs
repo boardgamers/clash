@@ -1,15 +1,15 @@
-use macroquad::math::{Vec2, u32, vec2};
+use macroquad::math::{u32, vec2, Vec2};
 
 use server::game::Game;
 use server::position::Position;
-use server::unit::{Unit, UnitType, carried_units};
+use server::unit::{carried_units, Unit, UnitType};
 
-use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult};
+use crate::client_state::{ActiveDialog, RenderResult, NO_UPDATE};
 use crate::hex_ui;
 use crate::select_ui::HighlightType;
 
 use crate::layout_ui::{draw_scaled_icon_with_tooltip, is_in_circle};
-use crate::log_ui::break_text;
+use crate::log_ui::MultilineText;
 use crate::render_context::RenderContext;
 use crate::tooltip::show_tooltip_for_circle;
 use itertools::Itertools;
@@ -335,13 +335,13 @@ pub(crate) fn unit_selection_clicked(unit_id: u32, units: &mut Vec<u32>) {
     }
 }
 
-pub(crate) fn add_unit_description(rc: &RenderContext, parts: &mut Vec<String>, u: UnitType) {
-    parts.push(format!("Cost: {}", u.cost()));
-    break_text(rc, parts, &u.description());
+pub(crate) fn add_unit_description(rc: &RenderContext, parts: &mut MultilineText, u: UnitType) {
+    parts.add(rc, &format!("Cost: {}", u.cost()));
+    parts.add(rc, &u.description());
     if let UnitType::Leader(l) = u {
         for a in &rc.game.cache.get_leader(&l).abilities {
-            parts.push(format!("Leader ability: {}", a.name));
-            break_text(rc, parts, &a.description);
+            parts.add(rc, format!("Leader ability: {}", a.name));
+            parts.add(rc, &a.description);
         }
     }
 }
