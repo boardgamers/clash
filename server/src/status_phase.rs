@@ -157,7 +157,7 @@ pub(crate) fn free_advance() -> Ability {
                 let choices = game
                     .cache
                     .get_advances()
-                    .iter()
+                    .values()
                     .filter(|advance| p.get(game).can_advance_free(advance.advance, game))
                     .map(|a| a.advance)
                     .collect_vec();

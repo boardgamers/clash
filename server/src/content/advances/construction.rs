@@ -13,7 +13,13 @@ pub(crate) fn construction() -> AdvanceGroupInfo {
     advance_group_builder(
         AdvanceGroup::Construction,
         "Construction",
-        vec![mining(), engineering(), sanitation(), roads()],
+        vec![
+            mining(),
+            engineering(),
+            sanitation(),
+            city_planning(), // balance
+            roads(),
+        ],
     )
 }
 
@@ -81,5 +87,6 @@ fn city_planning() -> AdvanceBuilder {
         "City Planning",
         "Once per turn, as a free action, you may pay 1 idea and 1 wood to get a free Construct action.",
     )
+        .replaces(Advance::Sanitation)
     .add_action_modifier(CustomActionType::CityPlanning, |cost| cost.once_per_turn().free_action().resources(ResourcePile::ideas(1) + ResourcePile::wood(1)), PlayingActionType::Construct)
 }

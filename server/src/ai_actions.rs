@@ -303,7 +303,7 @@ pub fn try_payment(
 fn advances(ai_actions: &mut AiActions, p: &Player, game: &Game) -> Vec<Action> {
     game.cache
         .get_advances()
-        .iter()
+        .values()
         .filter_map(|info| {
             let a = info.advance;
             if !p.can_advance_free(a, game) {

@@ -521,7 +521,7 @@ fn new_ideas(id: u8, tactics_card: TacticsCardFactory) -> ActionCard {
 fn advances_that_can_be_gained(player: &Player, game: &Game) -> Vec<Advance> {
     game.cache
         .get_advances()
-        .iter()
+        .values()
         .filter(|a| player.can_advance(a.advance, game))
         .map(|a| a.advance)
         .collect()

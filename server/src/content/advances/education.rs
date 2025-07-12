@@ -23,6 +23,7 @@ pub(crate) fn education() -> AdvanceGroupInfo {
             public_education(),
             free_education(),
             philosophy(),
+            philosophy_patched(),
         ],
     )
 }
@@ -185,6 +186,7 @@ fn philosophy_patched() -> AdvanceBuilder {
         "Philosophy",
         "As a free action, you may pay 3 ideas to get a free advance action",
     )
+    .replaces(Advance::Philosophy)
     .add_action_modifier(
         CustomActionType::Philosophy,
         |cost| {

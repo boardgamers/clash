@@ -160,9 +160,18 @@ pub(crate) fn advance_group_builder(
     AdvanceGroupInfo {
         advance_group,
         name: name.to_string(),
-        advances: a,
+        advances: remove_replaced(a),
         government: government.map(|i| i.name.to_string()),
     }
+}
+
+fn remove_replaced(advances: Vec<AdvanceInfo>) -> Vec<AdvanceInfo> {
+    // Remove advances that are replaced by others
+    let replaced: Vec<Advance> = advances.iter().filter_map(|a| a.replaces).collect();
+    advances
+        .into_iter()
+        .filter(|a| a.replaces.is_some() || !replaced.contains(&a.advance))
+        .collect_vec()
 }
 
 #[must_use]
@@ -183,7 +192,7 @@ mod tests {
         let cache = Cache::new();
         let all = cache.get_advances();
         assert!(!all.is_empty());
-        let unsorted = all.iter().map(|a| a.advance).collect_vec();
+        let unsorted = all.values().map(|a| a.advance).collect_vec();
 
         let sorted = unsorted
             .clone()
@@ -191,7 +200,7 @@ mod tests {
             .sorted_by_key(|a| *a as usize)
             .collect_vec();
         assert_eq!(sorted, unsorted);
-        for advance in all {
+        for advance in all.values() {
             assert_eq!(cache.get_advance(advance.advance).advance, advance.advance);
         }
     }

@@ -2,7 +2,6 @@ use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action::Action;
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city::{self, MoodState};
-use crate::content::ability::AbilityBuilder;
 use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::content::custom_actions::CustomActionType::{
     self, CivilLiberties, FreeEconomyCollect, VotingIncreaseHappiness,
@@ -19,6 +18,7 @@ pub(crate) fn democracy() -> AdvanceGroupInfo {
         vec![
             voting(),
             separation_of_power(),
+            welfare_state(), // balance
             civil_liberties(),
             free_economy(),
         ],
@@ -132,6 +132,7 @@ fn welfare_state() -> AdvanceBuilder {
         "Welfare State",
         "As an action, you may spend 2 mood tokens to gain 5 resources of your choice.",
     )
+    .replaces(Advance::SeparationOfPower)
     .add_custom_action(
         CustomActionType::WelfareState,
         |cost| {

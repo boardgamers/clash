@@ -32,7 +32,7 @@ pub struct Cache {
 
     all_advance_groups: Vec<AdvanceGroupInfo>,
     advance_groups_by_name: HashMap<AdvanceGroup, AdvanceGroupInfo>,
-    all_advances: Vec<AdvanceInfo>,
+    all_advances: HashMap<Advance, AdvanceInfo>,
     all_governments: Vec<AdvanceGroupInfo>,
     governments_by_name: HashMap<String, AdvanceGroupInfo>,
     advances_by_building: HashMap<Building, Advance>,
@@ -73,7 +73,10 @@ impl Cache {
                 .collect(),
             status_phase_handlers: status_phase_handlers(),
 
-            all_advances: advances::get_all_uncached(),
+            all_advances: advances::get_all_uncached()
+                .into_iter()
+                .map(|advance| (advance.advance, advance))
+                .collect(),
 
             all_advance_groups: advances::get_groups_uncached(),
             advance_groups_by_name: advances::get_groups_uncached()
@@ -154,13 +157,13 @@ impl Cache {
     }
 
     #[must_use]
-    pub fn get_advances(&self) -> &Vec<AdvanceInfo> {
+    pub fn get_advances(&self) -> &HashMap<Advance, AdvanceInfo> {
         &self.all_advances
     }
 
     #[must_use]
     pub fn get_advance(&self, a: Advance) -> &AdvanceInfo {
-        &self.all_advances[a as usize]
+        &self.all_advances[&a]
     }
 
     #[must_use]
