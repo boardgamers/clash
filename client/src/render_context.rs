@@ -63,16 +63,16 @@ impl RenderContext<'_> {
             state: self.state,
             shown_player: self.shown_player,
             camera_mode: if auto_translate {
-                mode.clone()
+                mode
             } else {
-                self.camera_mode.clone()
+                self.camera_mode
             },
             stage: self.stage,
             icon_background: self.icon_background.clone(),
         };
-        next.set_camera(&mode);
+        next.set_camera(mode);
         let update = f(&next);
-        self.set_camera(&self.camera_mode);
+        self.set_camera(self.camera_mode);
         update
     }
 
@@ -90,7 +90,7 @@ impl RenderContext<'_> {
         }
     }
 
-    fn set_camera(&self, mode: &CameraMode) {
+    fn set_camera(&self, mode: CameraMode) {
         match mode {
             CameraMode::Screen => set_default_camera(),
             CameraMode::World => set_camera(&self.state.camera),

@@ -37,17 +37,17 @@ pub(crate) fn show_tooltip_for_rect(
 ) {
     let origin = rect.point();
     if is_rect_tooltip_active(rc, rect) {
+        draw_rectangle(
+            origin.x,
+            origin.y,
+            rect.size().x,
+            rect.size().y,
+            Color::new(0.0, 0.0, 0.0, 0.5),
+        );
         let _ = rc.with_camera(CameraMode::Screen, false, |rc| {
             let rect = rect_from(
                 rc.world_to_screen(rect.point()),
                 rc.world_to_screen(rect.size()),
-            );
-            draw_rectangle(
-                origin.x,
-                origin.y,
-                rect.size().x,
-                rect.size().y,
-                Color::new(0.0, 0.0, 0.0, 0.5),
             );
             show_tooltip_text(rc, tooltip, rect.point(), right_offset);
             NO_UPDATE
@@ -71,9 +71,9 @@ pub(crate) fn show_tooltip_for_circle(
     radius: f32,
 ) {
     if is_circle_tooltip_active(rc, center, radius) {
+        draw_circle(center.x, center.y, radius, Color::new(0.0, 0.0, 0.0, 0.5));
         let _ = rc.with_camera(CameraMode::Screen, false, |rc| {
             let center = rc.world_to_screen(center);
-            draw_circle(center.x, center.y, radius, Color::new(0.0, 0.0, 0.0, 0.5));
             show_tooltip_text(rc, tooltip, center + vec2(radius, radius), 50.);
             NO_UPDATE
         });
