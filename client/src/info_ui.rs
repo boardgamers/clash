@@ -2,8 +2,9 @@ use crate::cards_ui::{action_card_object, objective_card_object, wonder_descript
 use crate::city_ui::add_building_description;
 use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::{OkTooltip, ok_button};
+use crate::event_ui::event_help_tooltip;
 use crate::layout_ui::button_pressed;
-use crate::log_ui::{break_each, break_text};
+use crate::log_ui::break_text;
 use crate::render_context::RenderContext;
 use itertools::Itertools;
 use macroquad::color::Color;
@@ -16,6 +17,7 @@ use server::action_card::ActionCard;
 use server::barbarians::get_barbarians_player;
 use server::city_pieces::{BUILDINGS, Building};
 use server::civilization::Civilization;
+use server::events::EventOrigin;
 use server::game::{Game, GameState};
 use server::incident::{Incident, IncidentBaseEffect};
 use server::leader::Leader;
@@ -163,11 +165,7 @@ fn show_incidents(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
             |i| &i.id,
             |i| i.name.clone(),
             incident_icon,
-            |i| {
-                let mut d: Vec<String> = vec![];
-                break_each(rc, &mut d, &i.description(rc.game));
-                d
-            },
+            |i| event_help_tooltip(rc, &EventOrigin::Incident(i.id)),
             |d| &d.incident,
             |d, i| d.incident = i,
             // todo public from permanent effects
@@ -305,6 +303,7 @@ fn show_units(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
             |_, _| None,
             |u| {
                 let mut parts: Vec<String> = vec![];
+                parts.push(u.generic_name().to_string());
                 parts.push(format!("Cost: {}", u.cost()));
                 if let Some(r) = u.required_building() {
                     parts.push(format!("Required building: {}", r.name()));
@@ -433,7 +432,7 @@ fn show_category_items<T: Clone, K: PartialEq + Ord + Clone>(
         let mut desc = description(info);
         let location = get_location(info);
         if let Some(l) = &location {
-            desc.insert(0, format!("Location: {l}"));
+            desc.push(format!("Location: {l}"));
         }
         let columns = 7;
         let rect = vec2(i.rem_euclid(columns) as f32, ((i / columns) + 1) as f32);

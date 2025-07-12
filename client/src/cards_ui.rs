@@ -211,6 +211,7 @@ fn get_card_object(
 
 pub(crate) fn wonder_description(rc: &RenderContext, w: &WonderInfo) -> Vec<String> {
     let mut description = vec![];
+    description.push(w.name());
     break_text(rc, &mut description, w.description.as_str());
     description.push(format!("Cost: {}", w.cost));
     description.push(format!(

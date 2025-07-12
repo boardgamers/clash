@@ -213,23 +213,18 @@ impl Cache {
         &self.all_abilities
     }
 
-    ///
-    /// # Panics
-    ///
-    /// Panics if ability does not exist
     #[must_use]
-    pub fn with_ability<T>(
+    fn with_ability<T>(
         &self,
         name: &str,
         game: &Game,
-        player: &Player,
         t: impl Fn(&Ability) -> T,
     ) -> T {
         self.abilities_by_name
             .get(name)
             .map_or_else(
                 || {
-                    for c in player.custom_actions.values() {
+                    for c in game.player(game.active_player()).custom_actions.values() {
                         if let CustomActionExecution::Action(e) = &c.execution {
                             if e.ability.name == name {
                                 return Some(t(&e.ability));
@@ -245,6 +240,15 @@ impl Cache {
                 |a| Some(t(a)),
             )
             .unwrap_or_else(|| panic!("ability not found: {name}"))
+    }
+    
+    #[must_use]
+    pub fn ability_description(
+        &self,
+        name: &str,
+        game: &Game,
+    ) -> String {
+        self.with_ability(name, game, |a| a.description.clone())
     }
 
     #[must_use]
