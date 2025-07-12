@@ -16,6 +16,7 @@ use server::action::Action;
 use server::card::{HandCard, HandCardType, hand_cards, validate_card_selection};
 use server::content::persistent_events::EventResponse;
 use server::events::check_event_origin;
+use server::objective_card::ObjectiveType;
 use server::playing_actions::{PlayingAction, PlayingActionType};
 use server::wonder::{Wonder, WonderInfo};
 
@@ -295,6 +296,13 @@ pub(crate) fn objective_card_object(
     let mut description = vec![];
     for o in &card.objectives {
         description.push(format!("Objective: {}", o.name));
+        description.push(format!(
+            "Type: {}",
+            match o.get_type() {
+                ObjectiveType::Instant => "Instant",
+                ObjectiveType::StatusPhase => "Status Phase",
+            }
+        ));
         break_text(rc, &mut description, o.description.as_str());
     }
 
