@@ -68,14 +68,36 @@ pub(crate) fn multiline_label(state: &State, label: &str, len: f32, mut print: i
     }
 }
 
-pub(crate) fn break_text(rc: &RenderContext, result: &mut Vec<String>, label: &str) {
-    multiline_label(rc.state, label, 500., |label: &str| {
-        result.push(label.to_string());
-    });
+pub(crate) struct MultilineText {
+    pub width: f32,
+    pub text: Vec<String>,
 }
 
-pub(crate) fn break_each(rc: &RenderContext, result: &mut Vec<String>, labels: &[String]) {
-    for label in labels {
-        break_text(rc, result, label);
+impl MultilineText {
+    pub(crate) fn default() -> Self {
+        MultilineText {
+            width: 500.,
+            text: vec![],
+        }
+    }
+
+    pub(crate) fn of(rc: &RenderContext, text: &str) -> Self {
+        let mut t = Self::default();
+        t.add(rc, text);
+        t
+    }
+
+    pub(crate) fn from(rc: &RenderContext, text: &[String]) -> Self {
+        let mut t = Self::default();
+        for label in text {
+            t.add(rc, label);
+        }
+        t
+    }
+
+    pub(crate) fn add(&mut self, rc: &RenderContext, label: &str) {
+        multiline_label(rc.state, label, self.width, |line: &str| {
+            self.text.push(line.to_string());
+        });
     }
 }

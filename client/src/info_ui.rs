@@ -2,8 +2,9 @@ use crate::cards_ui::{action_card_object, objective_card_object, wonder_descript
 use crate::city_ui::add_building_description;
 use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::{OkTooltip, ok_button};
+use crate::event_ui::event_help_tooltip;
 use crate::layout_ui::button_pressed;
-use crate::log_ui::{break_each, break_text};
+use crate::log_ui::MultilineText;
 use crate::render_context::RenderContext;
 use itertools::Itertools;
 use macroquad::color::Color;
@@ -16,6 +17,7 @@ use server::action_card::ActionCard;
 use server::barbarians::get_barbarians_player;
 use server::city_pieces::{BUILDINGS, Building};
 use server::civilization::Civilization;
+use server::events::EventOrigin;
 use server::game::{Game, GameState};
 use server::incident::{Incident, IncidentBaseEffect};
 use server::leader::Leader;
@@ -163,11 +165,7 @@ fn show_incidents(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
             |i| &i.id,
             |i| i.name.clone(),
             incident_icon,
-            |i| {
-                let mut d: Vec<String> = vec![];
-                break_each(rc, &mut d, &i.description(rc.game));
-                d
-            },
+            |i| event_help_tooltip(rc, &EventOrigin::Incident(i.id)),
             |d| &d.incident,
             |d, i| d.incident = i,
             // todo public from permanent effects
@@ -265,9 +263,9 @@ fn show_buildings(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
             |b| b.name().to_string(),
             |_, _| None,
             |b| {
-                let mut desc = vec![b.name().to_string()];
+                let mut desc = MultilineText::of(rc, b.name());
                 let advance = rc.game.cache.get_building_advance(*b).name(rc.game);
-                desc.push(format!("Required advance: {advance}"));
+                desc.add(rc, &format!("Required advance: {advance}"));
                 add_building_description(rc, &mut desc, *b);
                 desc
             },
@@ -304,12 +302,13 @@ fn show_units(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
             },
             |_, _| None,
             |u| {
-                let mut parts: Vec<String> = vec![];
-                parts.push(format!("Cost: {}", u.cost()));
+                let mut parts = MultilineText::default();
+                parts.add(rc, u.generic_name());
+                parts.add(rc, &format!("Cost: {}", u.cost()));
                 if let Some(r) = u.required_building() {
-                    parts.push(format!("Required building: {}", r.name()));
+                    parts.add(rc, &format!("Required building: {}", r.name()));
                 }
-                break_text(rc, &mut parts, &u.description());
+                parts.add(rc, &u.description());
                 parts
             },
             |d| &d.unit,
@@ -329,7 +328,7 @@ fn show_category(
 ) -> RenderResult {
     let pos = vec2(x as f32, 0.);
     let selected = d.select == category;
-    if draw_button(rc, name, pos, &[], selected) {
+    if draw_button(rc, name, pos, &MultilineText::default(), selected) {
         let mut new = d.clone();
         new.select = category;
         return StateUpdate::open_dialog(ActiveDialog::Info(new));
@@ -356,7 +355,15 @@ fn show_civilizations(rc: &RenderContext, d: &InfoDialog) -> RenderResult {
         } else {
             WHITE
         };
-        if draw_button_with_color(rc, &c.name, None, vec2(i as f32, 1.), &[], selected, color) {
+        if draw_button_with_color(
+            rc,
+            &c.name,
+            None,
+            vec2(i as f32, 1.),
+            &MultilineText::default(),
+            selected,
+            color,
+        ) {
             let mut new = d.clone();
             new.civilization.clone_from(&c.name);
             return StateUpdate::open_dialog(ActiveDialog::Info(new));
@@ -386,24 +393,23 @@ fn show_civilization(rc: &RenderContext, c: &Civilization) -> RenderResult {
     }
 
     for (i, a) in c.special_advances.iter().enumerate() {
-        let mut tooltip: Vec<String> = vec![];
-        let label = &format!("Name: {}", a.name);
-        break_text(rc, &mut tooltip, label);
-        let label = &format!("Required advance: {}", a.requirement.name(rc.game));
-        break_text(rc, &mut tooltip, label);
-        let label = &a.description;
-        break_text(rc, &mut tooltip, label);
+        let mut tooltip = MultilineText::default();
+        tooltip.add(rc, &format!("Name: {}", a.name));
+        tooltip.add(
+            rc,
+            &format!("Required advance: {}", a.requirement.name(rc.game)),
+        );
+        tooltip.add(rc, &a.description);
 
         draw_button(rc, &a.name, vec2(i as f32, 2.), &tooltip, false);
     }
     for (i, l) in c.leaders.iter().enumerate() {
-        let mut tooltip: Vec<String> = vec![];
+        let mut tooltip = MultilineText::default();
         let label = &format!("Name: {}", l.name);
-        break_text(rc, &mut tooltip, label);
+        tooltip.add(rc, label);
         for a in &l.abilities {
-            tooltip.push(format!("Leader ability: {}", a.name));
-            let label = &a.description;
-            break_text(rc, &mut tooltip, label);
+            tooltip.add(rc, &format!("Leader ability: {}", a.name));
+            tooltip.add(rc, &a.description);
         }
 
         draw_button(rc, &l.name, vec2(i as f32, 3.), &tooltip, false);
@@ -418,7 +424,7 @@ fn show_category_items<T: Clone, K: PartialEq + Ord + Clone>(
     get_key: impl Fn(&T) -> &K,
     name: impl Fn(&T) -> String,
     icon: impl for<'a> Fn(&'a RenderContext<'a>, &T) -> Option<&'a Texture2D>,
-    description: impl Fn(&T) -> Vec<String>,
+    description: impl Fn(&T) -> MultilineText,
     get_selected: impl Fn(&InfoDialog) -> &K,
     set_selected: impl Fn(&mut InfoDialog, K),
     get_location: impl Fn(&T) -> Option<VisibleCardLocation>,
@@ -433,7 +439,7 @@ fn show_category_items<T: Clone, K: PartialEq + Ord + Clone>(
         let mut desc = description(info);
         let location = get_location(info);
         if let Some(l) = &location {
-            desc.insert(0, format!("Location: {l}"));
+            desc.add(rc, &format!("Location: {l}"));
         }
         let columns = 7;
         let rect = vec2(i.rem_euclid(columns) as f32, ((i / columns) + 1) as f32);
@@ -462,7 +468,7 @@ fn draw_button(
     rc: &RenderContext,
     text: &str,
     pos: Vec2,
-    tooltip: &[String],
+    tooltip: &MultilineText,
     selected: bool,
 ) -> bool {
     let color = match pos.y {
@@ -480,7 +486,7 @@ fn draw_button_with_color(
     text: &str,
     icon: Option<&Texture2D>,
     pos: Vec2,
-    tooltip: &[String],
+    tooltip: &MultilineText,
     selected: bool,
     color: Color,
 ) -> bool {

@@ -1,4 +1,5 @@
 use crate::content::incidents::great_diplomat::{DiplomaticRelations, Negotiations};
+use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::wonder::Wonder;
 use serde::{Deserialize, Serialize};
@@ -63,18 +64,14 @@ impl PermanentEffect {
     pub fn description(&self, game: &Game) -> Vec<String> {
         let cache = &game.cache;
         match self {
-            PermanentEffect::Pestilence => cache.get_incident(1).description(game),
+            PermanentEffect::Pestilence => incident_effect(game, 1),
             PermanentEffect::Construct(c) => match c {
-                ConstructEffect::CityDevelopment => {
-                    vec![cache.get_civil_card(17).description.clone()]
-                }
-                ConstructEffect::GreatEngineer => cache.get_incident(26).description(game),
+                ConstructEffect::CityDevelopment => civil_effect(game, 17),
+                ConstructEffect::GreatEngineer => incident_effect(game, 26),
             },
             PermanentEffect::Collect(c) => match c {
-                CollectEffect::ProductionFocus => {
-                    vec![cache.get_civil_card(19).description.clone()]
-                }
-                CollectEffect::MassProduction => cache.get_incident(29).description(game),
+                CollectEffect::ProductionFocus => civil_effect(game, 19),
+                CollectEffect::MassProduction => incident_effect(game, 29),
             },
             PermanentEffect::RevolutionLoseAction(p) => {
                 vec![format!(
@@ -88,8 +85,8 @@ impl PermanentEffect {
                     cache.get_wonder(*w).name()
                 )]
             }
-            PermanentEffect::SolarEclipse => cache.get_incident(41).description(game),
-            PermanentEffect::TrojanHorse => cache.get_incident(42).description(game),
+            PermanentEffect::SolarEclipse => incident_effect(game, 41),
+            PermanentEffect::TrojanHorse => incident_effect(game, 42),
             PermanentEffect::Anarchy(a) => {
                 vec![format!(
                     "{} has lost {} advances (each worth 1 victory point) due to Anarchy",
@@ -106,7 +103,7 @@ impl PermanentEffect {
                 )]
             }
             // can also be 16, but that doesn't matter for the help text
-            PermanentEffect::CulturalTakeover => vec![cache.get_civil_card(15).description.clone()],
+            PermanentEffect::CulturalTakeover => civil_effect(game, 15),
             PermanentEffect::Negotiations(n) => {
                 vec![format!(
                     "{} and {} are in negotiations. ({} turns left).",
@@ -140,4 +137,36 @@ impl PermanentEffect {
             }
         }
     }
+}
+
+fn incident_effect(game: &Game, id: u8) -> Vec<String> {
+    event_help(game, &EventOrigin::Incident(id))
+}
+
+fn civil_effect(game: &Game, id: u8) -> Vec<String> {
+    event_help(game, &EventOrigin::CivilCard(id))
+}
+
+#[must_use]
+pub fn event_help(game: &Game, origin: &EventOrigin) -> Vec<String> {
+    let mut h = vec![origin.name(game)];
+    let cache = &game.cache;
+    let d = match origin {
+        EventOrigin::Advance(a) => vec![a.info(game).description.clone()],
+        EventOrigin::Wonder(w) => vec![game.cache.get_wonder(*w).description.clone()],
+        EventOrigin::Ability(b) => vec![cache.ability_description(b, game)],
+        EventOrigin::CivilCard(id) => vec![cache.get_civil_card(*id).description.clone()],
+        EventOrigin::TacticsCard(id) => vec![cache.get_tactics_card(*id).description.clone()],
+        EventOrigin::Incident(id) => cache.get_incident(*id).description(game),
+        EventOrigin::Objective(name) => vec![cache.get_objective(name).description.clone()],
+        EventOrigin::LeaderAbility(l) => vec![
+            game.player(game.active_player())
+                .get_leader_ability(l)
+                .description
+                .clone(),
+        ],
+        EventOrigin::SpecialAdvance(s) => vec![s.info(game).description.clone()],
+    };
+    h.extend(d);
+    h
 }

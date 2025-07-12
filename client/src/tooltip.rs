@@ -1,5 +1,6 @@
 use crate::client_state::{MousePosition, State};
 use crate::layout_ui::rect_from;
+use crate::log_ui::MultilineText;
 use crate::render_context::RenderContext;
 use macroquad::color::{Color, GRAY};
 use macroquad::input::mouse_position;
@@ -30,7 +31,7 @@ fn is_rect_tooltip_active(rc: &RenderContext, rect: Rect) -> bool {
 
 pub(crate) fn show_tooltip_for_rect(
     rc: &RenderContext,
-    tooltip: &[String],
+    tooltip: &MultilineText,
     rect: Rect,
     right_offset: f32,
 ) {
@@ -58,7 +59,7 @@ fn is_circle_tooltip_active(rc: &RenderContext, center: Vec2, radius: f32) -> bo
 
 pub(crate) fn show_tooltip_for_circle(
     rc: &RenderContext,
-    tooltip: &[String],
+    tooltip: &MultilineText,
     center: Vec2,
     radius: f32,
 ) {
@@ -68,9 +69,9 @@ pub(crate) fn show_tooltip_for_circle(
     }
 }
 
-fn show_tooltip_text(rc: &RenderContext, tooltip: &[String], origin: Vec2, right_offset: f32) {
+fn show_tooltip_text(rc: &RenderContext, tooltip: &MultilineText, origin: Vec2, right_offset: f32) {
     let state = rc.state;
-    let dim = tooltip.iter().map(|t| state.measure_text(t));
+    let dim = tooltip.text.iter().map(|t| state.measure_text(t));
     let total = dim.fold(Vec2::new(0., 0.), |acc, d| {
         vec2(acc.x.max(d.width), acc.y + 20.)
     });
@@ -83,7 +84,7 @@ fn show_tooltip_text(rc: &RenderContext, tooltip: &[String], origin: Vec2, right
         .max(40.)
         .min(state.screen_size.y - tooltip_rect.h - 40.);
     draw_rectangle(x, y, w, tooltip_rect.size().y + 10., GRAY);
-    for (i, line) in tooltip.iter().enumerate() {
+    for (i, line) in tooltip.text.iter().enumerate() {
         state.draw_text(line, x + 5., y + 20. + i as f32 * 20.);
     }
 }

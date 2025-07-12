@@ -1,7 +1,7 @@
 use crate::city_ui::add_building_description;
 use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::layout_ui::{button_pressed, top_centered_text};
-use crate::log_ui::break_text;
+use crate::log_ui::MultilineText;
 use crate::payment_ui::{Payment, payment_dialog};
 use crate::render_context::RenderContext;
 use crate::unit_ui::add_unit_description;
@@ -136,52 +136,61 @@ fn border_color(a: &AdvanceInfo) -> Color {
     }
 }
 
-fn description(rc: &RenderContext, a: &AdvanceInfo) -> Vec<String> {
-    let mut parts: Vec<String> = vec![];
-    parts.push(a.name.clone());
-    break_text(rc, &mut parts, &a.description);
-    parts.push(format!(
-        "Cost: {}",
-        rc.shown_player
-            .advance_cost(a.advance, rc.game, CostTrigger::WithModifiers)
-            .cost
-    ));
+fn description(rc: &RenderContext, a: &AdvanceInfo) -> MultilineText {
+    let mut parts = MultilineText::default();
+    parts.add(rc, &a.name);
+    parts.add(rc, &a.description);
+    parts.add(
+        rc,
+        &format!(
+            "Cost: {}",
+            rc.shown_player
+                .advance_cost(a.advance, rc.game, CostTrigger::WithModifiers)
+                .cost
+        ),
+    );
     if let Some(r) = &a.required {
-        parts.push(format!("Required: {}", r.name(rc.game)));
+        parts.add(rc, &format!("Required: {}", r.name(rc.game)));
     }
     if !a.contradicting.is_empty() {
-        parts.push(format!(
-            "Contradicts: {}",
-            a.contradicting.iter().map(|a| a.name(rc.game)).join(", ")
-        ));
+        parts.add(
+            rc,
+            &format!(
+                "Contradicts: {}",
+                a.contradicting.iter().map(|a| a.name(rc.game)).join(", ")
+            ),
+        );
     }
     if let Some(b) = &a.bonus {
-        parts.push(format!(
-            "Bonus: {}",
-            match b {
-                Bonus::MoodToken => "Mood Token",
-                Bonus::CultureToken => "Culture Token",
-            }
-        ));
+        parts.add(
+            rc,
+            &format!(
+                "Bonus: {}",
+                match b {
+                    Bonus::MoodToken => "Mood Token",
+                    Bonus::CultureToken => "Culture Token",
+                }
+            ),
+        );
     }
     if let Some(g) = &a.government {
-        parts.push(format!("Government: {g}"));
+        parts.add(rc, &format!("Government: {g}"));
     }
     if let Some(b) = &a.unlocked_building {
-        parts.push(format!("Unlocks building: {}", b.name()));
+        parts.add(rc, &format!("Unlocks building: {}", b.name()));
         add_building_description(rc, &mut parts, *b);
     }
     if a.advance == Advance::Bartering {
-        parts.push("Can build in a city with a Market: cavalry".to_string());
+        parts.add(rc, "Can build in a city with a Market: cavalry");
         add_unit_description(rc, &mut parts, UnitType::Cavalry);
-        parts.push("Can build in a city with a Market: elephant".to_string());
+        parts.add(rc, "Can build in a city with a Market: elephant");
         add_unit_description(rc, &mut parts, UnitType::Elephant);
     }
 
     if let Some(a) = find_special_advance(a.advance, rc.game, rc.shown_player.index) {
         let s = a.info(rc.game);
-        parts.push(format!("Special advance: {}", s.name));
-        break_text(rc, &mut parts, &s.description);
+        parts.add(rc, &format!("Special advance: {}", s.name));
+        parts.add(rc, &s.description);
     }
 
     parts

@@ -7,7 +7,7 @@ use crate::layout_ui::{
     ICON_SIZE, UI_BACKGROUND, bottom_center_anchor, bottom_center_texture, bottom_centered_text,
     bottom_right_texture, button_pressed, icon_pos, top_center_anchor, top_center_texture,
 };
-use crate::log_ui::multiline_label;
+use crate::log_ui::{MultilineText, multiline_label};
 use crate::map_ui::terrain_name;
 use crate::render_context::RenderContext;
 use crate::resource_ui::{new_resource_map, resource_name};
@@ -72,7 +72,7 @@ pub(crate) fn player_select(rc: &RenderContext) -> RenderResult {
         } else {
             pl.get_name()
         };
-        if button_pressed(rect, rc, &[tooltip], 50.) && !shown {
+        if button_pressed(rect, rc, &MultilineText::of(rc, &tooltip), 50.) && !shown {
             return StateUpdate::of(StateUpdate::SetShownPlayer(pl.index));
         }
 
@@ -134,9 +134,9 @@ pub(crate) fn show_top_center(rc: &RenderContext) {
         "",
     );
 
-    let mut tooltip = vec![];
+    let mut tooltip = MultilineText::default();
     for (name, points) in victory_points_parts(player, rc.game) {
-        tooltip.push(format!("{name}: {points}"));
+        tooltip.add(rc, &format!("{name}: {points}"));
     }
     show_tooltip_for_circle(
         rc,

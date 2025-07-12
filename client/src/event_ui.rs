@@ -1,36 +1,22 @@
-use crate::log_ui::break_each;
+use crate::log_ui::MultilineText;
 use crate::payment_ui::Payment;
 use crate::render_context::RenderContext;
+use server::content::effects;
 use server::events::EventOrigin;
 
 #[must_use]
-pub(crate) fn event_help_tooltip(rc: &RenderContext, origin: &EventOrigin) -> Vec<String> {
-    let mut help = vec![];
-    break_each(rc, &mut help, &event_help(rc, origin));
+pub(crate) fn event_help_tooltip(rc: &RenderContext, origin: &EventOrigin) -> MultilineText {
+    let mut help = MultilineText::default();
+    let labels = &event_help(rc, origin);
+    for label in labels {
+        help.add(rc, label);
+    }
     help
 }
 
 #[must_use]
 pub(crate) fn event_help(rc: &RenderContext, origin: &EventOrigin) -> Vec<String> {
-    let mut h = vec![origin.name(rc.game)];
-    let cache = &rc.game.cache;
-    let d = match origin {
-        EventOrigin::Advance(a) => vec![a.info(rc.game).description.clone()],
-        EventOrigin::Wonder(w) => vec![rc.game.cache.get_wonder(*w).description.clone()],
-        EventOrigin::Ability(b) => {
-            vec![cache.with_ability(b, rc.game, rc.shown_player, |a| a.description.clone())]
-        }
-        EventOrigin::CivilCard(id) => vec![cache.get_civil_card(*id).description.clone()],
-        EventOrigin::TacticsCard(id) => vec![cache.get_tactics_card(*id).description.clone()],
-        EventOrigin::Incident(id) => cache.get_incident(*id).description(rc.game),
-        EventOrigin::Objective(name) => vec![cache.get_objective(name).description.clone()],
-        EventOrigin::LeaderAbility(l) => {
-            vec![rc.shown_player.get_leader_ability(l).description.clone()]
-        }
-        EventOrigin::SpecialAdvance(s) => vec![s.info(rc.game).description.clone()],
-    };
-    h.extend(d);
-    h
+    effects::event_help(rc.game, origin)
 }
 
 #[must_use]

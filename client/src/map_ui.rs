@@ -8,6 +8,7 @@ use crate::hex_ui::HexFeature;
 use crate::layout_ui::{
     bottom_center_anchor, bottom_center_texture, bottom_right_texture, icon_pos,
 };
+use crate::log_ui::MultilineText;
 use crate::move_ui::{MoveIntent, movable_units};
 use crate::player_ui::get_combat;
 use crate::render_context::RenderContext;
@@ -245,7 +246,7 @@ fn found_city_button<'a>(rc: &'a RenderContext<'a>, pos: Position) -> Option<Ico
         .then_some(IconAction::new(
             rc.assets().unit(UnitType::Settler, rc.shown_player),
             false,
-            vec!["Found a new city".to_string()],
+            MultilineText::of(rc, "Found a new city"),
             Box::new(move || {
                 StateUpdate::execute(Action::Playing(PlayingAction::FoundCity {
                     settler: unit.id,
@@ -268,7 +269,7 @@ pub(crate) fn move_units_button<'a>(
     Some(IconAction::new(
         move_intent.icon(rc),
         false,
-        vec![move_intent.toolip().to_string()],
+        MultilineText::of(rc, move_intent.toolip()),
         Box::new(move || StateUpdate::move_units(rc, Some(pos), move_intent)),
     ))
 }

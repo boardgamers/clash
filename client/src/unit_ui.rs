@@ -9,7 +9,7 @@ use crate::hex_ui;
 use crate::select_ui::HighlightType;
 
 use crate::layout_ui::{draw_scaled_icon_with_tooltip, is_in_circle};
-use crate::log_ui::break_text;
+use crate::log_ui::MultilineText;
 use crate::render_context::RenderContext;
 use crate::tooltip::show_tooltip_for_circle;
 use itertools::Itertools;
@@ -55,7 +55,7 @@ pub(crate) fn draw_unit_type(
     draw_scaled_icon_with_tooltip(
         rc,
         rc.assets().unit(unit_type, rc.game.player(player_index)),
-        &[],
+        &MultilineText::default(),
         vec2(center.x - icon_size / 2., center.y - icon_size / 2.),
         icon_size,
     )
@@ -229,7 +229,7 @@ fn draw_unit(
         let army_move = game
             .player(player_index)
             .has_advance(ARMY_MOVEMENT_REQUIRED_ADVANCE);
-        let mut tooltip = vec![unit_label(unit, army_move, game)];
+        let mut tooltip = MultilineText::of(rc, &unit_label(unit, army_move, game));
         add_unit_description(rc, &mut tooltip, unit.unit_type);
         show_tooltip_for_circle(rc, &tooltip, center, radius);
     } else {
@@ -335,13 +335,13 @@ pub(crate) fn unit_selection_clicked(unit_id: u32, units: &mut Vec<u32>) {
     }
 }
 
-pub(crate) fn add_unit_description(rc: &RenderContext, parts: &mut Vec<String>, u: UnitType) {
-    parts.push(format!("Cost: {}", u.cost()));
-    break_text(rc, parts, &u.description());
+pub(crate) fn add_unit_description(rc: &RenderContext, parts: &mut MultilineText, u: UnitType) {
+    parts.add(rc, &format!("Cost: {}", u.cost()));
+    parts.add(rc, &u.description());
     if let UnitType::Leader(l) = u {
         for a in &rc.game.cache.get_leader(&l).abilities {
-            parts.push(format!("Leader ability: {}", a.name));
-            break_text(rc, parts, &a.description);
+            parts.add(rc, &format!("Leader ability: {}", a.name));
+            parts.add(rc, &a.description);
         }
     }
 }

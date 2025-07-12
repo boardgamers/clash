@@ -10,6 +10,6 @@ jobs:
     - uses: actions/checkout@v4
     - uses: jdx/mise-action@v2
       with:
-        experimental: 'true' # to get lock file support
+        version: 2025.7.3
     - name: Random actions test
       run: mise run random-actions

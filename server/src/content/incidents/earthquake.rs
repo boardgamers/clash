@@ -10,6 +10,7 @@ use crate::incident::{DecreaseMood, Incident, IncidentBaseEffect, MoodModifier};
 use crate::player_events::{IncidentInfo, IncidentTarget};
 use crate::position::Position;
 use crate::structure::Structure;
+use crate::unit::kill_units;
 use crate::wonder::{Wonder, destroy_wonder};
 use itertools::Itertools;
 
@@ -60,8 +61,16 @@ fn volcano() -> Incident {
             }
             for wonder in wonders {
                 destroy_wonder_for_points(game, pos, wonder, &s.origin);
-                destroy_city_center(game, pos, &s.origin);
             }
+            destroy_city_center(game, pos, &s.origin);
+            let units = s
+                .player()
+                .get(game)
+                .get_units(pos)
+                .iter()
+                .map(|u| u.id)
+                .collect_vec();
+            kill_units(game, &units, s.player_index, None, &s.origin);
         },
     )
     .build()

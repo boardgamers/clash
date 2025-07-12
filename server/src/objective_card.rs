@@ -18,6 +18,11 @@ type StatusPhaseCheck = Arc<dyn Fn(&Game, &Player) -> bool + Sync + Send>;
 
 type StatusPhaseUpdate = Arc<dyn Fn(&mut Game, &EventPlayer) + Sync + Send>;
 
+pub enum ObjectiveType {
+    Instant,
+    StatusPhase,
+}
+
 #[derive(Clone)]
 pub struct Objective {
     pub name: String,
@@ -39,6 +44,15 @@ impl Objective {
     pub fn priority(&self) -> i32 {
         // status_phase_update == we have to pay for this objective
         i32::from(self.status_phase_update.is_none())
+    }
+
+    #[must_use]
+    pub fn get_type(&self) -> ObjectiveType {
+        if self.status_phase_check.is_some() {
+            ObjectiveType::StatusPhase
+        } else {
+            ObjectiveType::Instant
+        }
     }
 }
 

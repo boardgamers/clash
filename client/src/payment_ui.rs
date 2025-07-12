@@ -1,9 +1,10 @@
 use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, StateUpdate};
 use crate::dialog_ui::OkTooltip;
-use crate::event_ui::event_help_tooltip;
+use crate::event_ui::event_help;
 use crate::layout_ui::{
     ICON_SIZE, bottom_centered_text_with_offset, draw_scaled_icon_with_tooltip,
 };
+use crate::log_ui::MultilineText;
 use crate::render_context::RenderContext;
 use crate::resource_ui::{new_resource_map, resource_name};
 use crate::select_ui;
@@ -143,7 +144,7 @@ pub(crate) fn multi_payment_dialog<T: Clone>(
             payments
                 .iter()
                 .flat_map(|p| &p.cost.modifiers)
-                .flat_map(|o| event_help_tooltip(rc, o))
+                .flat_map(|o| event_help(rc, o))
                 .collect::<Vec<_>>()
         } else {
             vec![]
@@ -157,7 +158,7 @@ pub(crate) fn multi_payment_dialog<T: Clone>(
             rc,
             &format!("{name} for {cost}{suffix}"),
             offset + vec2(0., -70.),
-            &[],
+            &MultilineText::default(),
         );
         select_ui::count_dialog(
             rc,
@@ -167,7 +168,7 @@ pub(crate) fn multi_payment_dialog<T: Clone>(
                 let _ = draw_scaled_icon_with_tooltip(
                     rc,
                     &rc.assets().resources[&s.resource],
-                    &[],
+                    &MultilineText::default(),
                     p + vec2(-15., -15.),
                     ICON_SIZE,
                 );
@@ -175,7 +176,7 @@ pub(crate) fn multi_payment_dialog<T: Clone>(
             |s, p| {
                 show_tooltip_for_circle(
                     rc,
-                    &[resource_name(s.resource).to_string()],
+                    &MultilineText::of(rc, resource_name(s.resource)),
                     p,
                     SELECT_RADIUS,
                 );
