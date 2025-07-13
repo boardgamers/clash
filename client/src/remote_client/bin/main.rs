@@ -8,6 +8,7 @@ use client::client_state::State;
 use macroquad::math::vec2;
 use server::action::Action;
 use server::cache::Cache;
+use server::game_data::GameData;
 use std::panic;
 use wasm_bindgen::prelude::*;
 
@@ -132,12 +133,13 @@ impl RemoteClient {
         if !s.is_null() {
             if let Some(state) = s.as_string() {
                 log("received state");
-                let cache = self.game.take().map_or_else(Cache::new, |g| g.cache);
-                let g = Game::from_data(
-                    serde_json::from_str(&state).expect("game should be of type game data"),
-                    cache,
-                    GameContext::Play,
-                );
+                let game_data: GameData =
+                    serde_json::from_str(&state).expect("game should be of type game data");
+                let cache = self
+                    .game
+                    .take()
+                    .map_or_else(|| Cache::new(&game_data.options), |g| g.cache);
+                let g = Game::from_data(game_data, cache, GameContext::Play);
                 self.state.show_player = g.active_player();
                 self.game = Some(g);
                 self.sync_state = SyncState::Playing;

@@ -447,10 +447,9 @@ impl Game {
         all
     }
 
-    #[must_use] pub fn human_player_ids(&self) -> Vec<usize> {
-        
-        self
-            .players
+    #[must_use]
+    pub fn human_player_ids(&self) -> Vec<usize> {
+        self.players
             .iter()
             .enumerate()
             .filter_map(|(i, p)| self.is_active_human(i, p))

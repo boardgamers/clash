@@ -8,16 +8,18 @@ use crate::content::ability::Ability;
 use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::PaymentRequest;
+use crate::game::GameOptions;
 use crate::log::{self, ActionLogEntry};
 use crate::objective_card::draw_objective_card_from_pile;
 use crate::playing_actions::PlayingActionType;
 use crate::resource::gain_resources;
 use crate::resource_pile::ResourcePile;
 
-pub(crate) fn education() -> AdvanceGroupInfo {
+pub(crate) fn education(options: &GameOptions) -> AdvanceGroupInfo {
     advance_group_builder(
         AdvanceGroup::Education,
         "Education",
+        options,
         vec![
             writing(),
             public_education(),

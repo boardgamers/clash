@@ -7,14 +7,16 @@ use crate::content::custom_actions::CustomActionType::{
     self, CivilLiberties, FreeEconomyCollect, VotingIncreaseHappiness,
 };
 use crate::content::persistent_events::PositionRequest;
+use crate::game::GameOptions;
 use crate::log::current_player_turn_log;
 use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::resource_pile::ResourcePile;
 
-pub(crate) fn democracy() -> AdvanceGroupInfo {
+pub(crate) fn democracy(options: &GameOptions) -> AdvanceGroupInfo {
     advance_group_builder(
         AdvanceGroup::Democracy,
         "Democracy",
+        options,
         vec![
             voting(),
             separation_of_power(),

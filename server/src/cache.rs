@@ -8,7 +8,7 @@ use crate::content::custom_actions::CustomActionExecution;
 use crate::content::{
     ability, action_cards, advances, civilizations, incidents, objective_cards, objectives, wonders,
 };
-use crate::game::Game;
+use crate::game::{Game, GameOptions};
 use crate::incident::Incident;
 use crate::leader::{Leader, LeaderInfo};
 use crate::objective_card::{Objective, ObjectiveCard};
@@ -56,15 +56,9 @@ pub struct Cache {
     leaders: HashMap<Leader, LeaderInfo>,
 }
 
-impl Default for Cache {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl Cache {
     #[must_use]
-    pub fn new() -> Self {
+    pub fn new(options: &GameOptions) -> Self {
         Cache {
             all_abilities: ability::get_all_uncached(),
             abilities_by_name: ability::get_all_uncached()
@@ -73,13 +67,13 @@ impl Cache {
                 .collect(),
             status_phase_handlers: status_phase_handlers(),
 
-            all_advances: advances::get_all_uncached()
+            all_advances: advances::get_all_uncached(options)
                 .into_iter()
                 .map(|advance| (advance.advance, advance))
                 .collect(),
 
-            all_advance_groups: advances::get_groups_uncached(),
-            advance_groups_by_name: advances::get_groups_uncached()
+            all_advance_groups: advances::get_groups_uncached(options),
+            advance_groups_by_name: advances::get_groups_uncached(options)
                 .into_iter()
                 .map(|advance_group| (advance_group.advance_group, advance_group))
                 .collect(),
@@ -90,7 +84,7 @@ impl Cache {
                 .map(|government| (government.name.clone(), government))
                 .collect(),
 
-            advances_by_building: advances::get_all_uncached()
+            advances_by_building: advances::get_all_uncached(options)
                 .into_iter()
                 .filter_map(|advance| {
                     advance
@@ -161,9 +155,12 @@ impl Cache {
         &self.all_advances
     }
 
+    ///
+    /// # Panics
+    /// Panics if advance does not exist
     #[must_use]
     pub fn get_advance(&self, a: Advance) -> &AdvanceInfo {
-        &self.all_advances.get(&a).unwrap_or_else(|| {
+        self.all_advances.get(&a).unwrap_or_else(|| {
             panic!("Advance {a:?} not found in cache");
         })
     }

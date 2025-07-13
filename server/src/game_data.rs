@@ -1,3 +1,4 @@
+use crate::advance;
 use crate::advance::{Advance, is_special_advance_active};
 use crate::cache::Cache;
 use crate::city::{City, CityData};
@@ -19,7 +20,6 @@ use crate::unit::{Unit, UnitData};
 use crate::utils::Rng;
 use crate::victory_points::SpecialVictoryPoints;
 use crate::wonder::{Wonder, init_wonder};
-use crate::advance;
 use enumset::EnumSet;
 use itertools::Itertools;
 use num::Zero;
@@ -31,7 +31,7 @@ use std::mem;
 pub struct GameData {
     #[serde(default)]
     #[serde(skip_serializing_if = "GameOptions::is_default")]
-    options: GameOptions,
+    pub options: GameOptions,
     #[serde(default)]
     #[serde(skip_serializing_if = "u16::is_zero")]
     version: u16,

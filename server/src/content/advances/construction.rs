@@ -3,16 +3,18 @@ use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::content::custom_actions::CustomActionType;
+use crate::game::GameOptions;
 use crate::payment::PaymentConversion;
 use crate::playing_actions::PlayingActionType;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
 use crate::wonder::draw_wonder_card;
 
-pub(crate) fn construction() -> AdvanceGroupInfo {
+pub(crate) fn construction(options: &GameOptions) -> AdvanceGroupInfo {
     advance_group_builder(
         AdvanceGroup::Construction,
         "Construction",
+        options,
         vec![
             mining(),
             engineering(),

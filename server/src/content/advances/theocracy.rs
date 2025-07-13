@@ -4,16 +4,18 @@ use crate::city_pieces::Building::Temple;
 use crate::construct::ConstructAdvanceBonus;
 use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::content::persistent_events::{AdvanceRequest, PositionRequest};
+use crate::game::GameOptions;
 use crate::player::{Player, can_add_army_unit, gain_unit};
 use crate::position::Position;
 use crate::resource::apply_resource_limit;
 use crate::resource_pile::ResourcePile;
 use crate::unit::UnitType;
 
-pub(crate) fn theocracy() -> AdvanceGroupInfo {
+pub(crate) fn theocracy(options: &GameOptions) -> AdvanceGroupInfo {
     advance_group_builder(
         AdvanceGroup::Theocracy,
         "Theocracy",
+        options,
         vec![dogma(), devotion(), conversion(), fanaticism()],
     )
 }
