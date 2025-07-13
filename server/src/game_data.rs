@@ -19,7 +19,7 @@ use crate::unit::{Unit, UnitData};
 use crate::utils::Rng;
 use crate::victory_points::SpecialVictoryPoints;
 use crate::wonder::{Wonder, init_wonder};
-use crate::{advance, utils};
+use crate::advance;
 use enumset::EnumSet;
 use itertools::Itertools;
 use num::Zero;
@@ -54,7 +54,7 @@ pub struct GameData {
     undo_limit: usize,
     actions_left: u32,
     #[serde(default)]
-    #[serde(skip_serializing_if = "utils::is_false")]
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
     successful_cultural_influence: bool,
     round: u32,
     age: u32,

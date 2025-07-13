@@ -128,7 +128,7 @@ fn start_ai(game: &mut Game, features: &mut Features, state: &mut State) {
 
     if features.ai {
         state.ai_players = game
-            .human_players(0)
+            .human_player_ids()
             .into_iter()
             .map(|p| AI::new(1., std::time::Duration::from_secs(5), false, game, p))
             .collect()

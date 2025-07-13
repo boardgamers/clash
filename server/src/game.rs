@@ -437,19 +437,24 @@ impl Game {
     /// # Panics
     /// Panics if the player is not human
     #[must_use]
-    pub fn human_players(&self, first: usize) -> Vec<usize> {
-        let mut all = self
-            .players
-            .iter()
-            .enumerate()
-            .filter_map(|(i, p)| self.is_active_human(i, p))
-            .collect_vec();
+    pub fn human_players_sorted(&self, first: usize) -> Vec<usize> {
+        let mut all = self.human_player_ids();
         let i = all
             .iter()
             .position(|&p| p == first)
             .expect("player should exist");
         all.rotate_left(i);
         all
+    }
+
+    #[must_use] pub fn human_player_ids(&self) -> Vec<usize> {
+        
+        self
+            .players
+            .iter()
+            .enumerate()
+            .filter_map(|(i, p)| self.is_active_human(i, p))
+            .collect_vec()
     }
 
     fn is_active_human(&self, i: usize, p: &Player) -> Option<usize> {

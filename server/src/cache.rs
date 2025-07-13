@@ -163,7 +163,9 @@ impl Cache {
 
     #[must_use]
     pub fn get_advance(&self, a: Advance) -> &AdvanceInfo {
-        &self.all_advances[&a]
+        &self.all_advances.get(&a).unwrap_or_else(|| {
+            panic!("Advance {a:?} not found in cache");
+        })
     }
 
     #[must_use]

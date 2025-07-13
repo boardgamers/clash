@@ -32,7 +32,7 @@ use server::victory_points::victory_points_parts;
 
 pub(crate) fn player_select(rc: &RenderContext) -> RenderResult {
     let game = rc.game;
-    let players = game.human_players(game.starting_player_index);
+    let players = game.human_players_sorted(game.starting_player_index);
 
     let size = 50.;
     let mut y = (players.len() as f32 * -size) / 2.;

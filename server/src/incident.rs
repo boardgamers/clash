@@ -654,7 +654,7 @@ pub(crate) fn on_trigger_incident(game: &mut Game, mut info: IncidentInfo) {
         ));
         info = match trigger_persistent_event_with_listener(
             game,
-            &game.human_players(info.active_player),
+            &game.human_players_sorted(info.active_player),
             |events| &mut events.incident,
             &game.cache.get_incident(info.incident_id).listeners.clone(),
             info,

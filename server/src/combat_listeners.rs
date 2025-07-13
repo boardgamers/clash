@@ -14,7 +14,6 @@ use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::position::Position;
 use crate::tactics_card::{CombatRole, TacticsCard, TacticsCardTarget};
 use crate::unit::{UnitType, kill_units};
-use crate::utils;
 use itertools::Itertools;
 use num::Zero;
 use serde::{Deserialize, Serialize};
@@ -37,10 +36,10 @@ pub struct CombatStrength {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tactics_card: Option<u8>,
     #[serde(default)]
-    #[serde(skip_serializing_if = "utils::is_false")]
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub deny_combat_abilities: bool,
     #[serde(default)]
-    #[serde(skip_serializing_if = "utils::is_false")]
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub deny_tactics_card: bool,
 }
 

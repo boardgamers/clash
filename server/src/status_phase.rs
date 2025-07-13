@@ -84,7 +84,7 @@ pub(crate) fn play_status_phase(game: &mut Game, mut phase: StatusPhaseState) {
     loop {
         phase = match trigger_persistent_event_with_listener(
             game,
-            &game.human_players(game.starting_player_index),
+            &game.human_players_sorted(game.starting_player_index),
             |events| &mut events.status_phase,
             &game.cache.status_phase_handler(&phase).listeners.clone(),
             phase,
@@ -114,7 +114,7 @@ pub(crate) fn play_status_phase(game: &mut Game, mut phase: StatusPhaseState) {
             RazeSize1City => ChangeGovernmentType(false),
             ChangeGovernmentType(_) => DetermineFirstPlayer(player_that_chooses_next_first_player(
                 &game
-                    .human_players(game.starting_player_index)
+                    .human_players_sorted(game.starting_player_index)
                     .into_iter()
                     .map(|p| game.player(p))
                     .collect_vec(),
@@ -445,7 +445,7 @@ pub(crate) fn determine_first_player() -> Ability {
             |game, p, phase| {
                 if let StatusPhaseState::DetermineFirstPlayer(want) = phase {
                     (*want == p.index).then_some(PlayerRequest::new(
-                        game.human_players(game.starting_player_index),
+                        game.human_players_sorted(game.starting_player_index),
                         "Determine the first player",
                     ))
                 } else {
