@@ -504,7 +504,7 @@ fn choose_great_seer_cards(b: ActionCardBuilder, player_order: usize) -> ActionC
                 game.information_revealed(); // new information revealed about objective cards
             }
 
-            let players = game.human_players(p.index);
+            let players = game.human_players_sorted(p.index);
             let target = game.player_name(*players.get(player_order)?);
             let cards = game
                 .objective_cards_left
@@ -522,7 +522,7 @@ fn choose_great_seer_cards(b: ActionCardBuilder, player_order: usize) -> ActionC
             ))
         },
         move |game, s, _| {
-            let players = game.human_players(s.player_index);
+            let players = game.human_players_sorted(s.player_index);
             let target = players[player_order];
             let HandCard::ObjectiveCard(card) = &s.choice[0] else {
                 panic!("Expected an objective card");

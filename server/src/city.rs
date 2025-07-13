@@ -11,7 +11,6 @@ use crate::map::Terrain;
 use crate::player::remove_unit;
 use crate::structure::{Structure, log_gain_city, log_lose_city};
 use crate::unit::{UnitType, Units};
-use crate::utils;
 use crate::wonder::destroy_wonder;
 use crate::{
     city_pieces::{CityPieces, CityPiecesData},
@@ -143,7 +142,7 @@ pub struct CityData {
     #[serde(skip_serializing_if = "u32::is_zero")]
     activations: u32,
     #[serde(default)]
-    #[serde(skip_serializing_if = "utils::is_false")]
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
     angry_activation: bool,
     position: Position,
     #[serde(skip_serializing_if = "Option::is_none")]

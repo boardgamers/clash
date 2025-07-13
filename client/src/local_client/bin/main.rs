@@ -6,7 +6,7 @@ use macroquad::miniquad::window::set_window_size;
 use macroquad::prelude::{next_frame, screen_width, vec2};
 use macroquad::window::screen_height;
 use server::action::execute_action;
-use server::game::{CivSetupOption, Game, GameContext, GameOptions, UndoOption};
+use server::game::{CivSetupOption, Game, GameContext, GameOptions, PatchOption, UndoOption};
 use server::game_data::GameData;
 use server::game_setup::{GameSetupBuilder, setup_game};
 use server::profiling::start_profiling;
@@ -56,6 +56,7 @@ async fn main() {
                 } else {
                     CivSetupOption::Random
                 },
+                patch: PatchOption::BalancePatch,
             })
             .build(),
     );
@@ -127,7 +128,7 @@ fn start_ai(game: &mut Game, features: &mut Features, state: &mut State) {
 
     if features.ai {
         state.ai_players = game
-            .human_players(0)
+            .human_player_ids()
             .into_iter()
             .map(|p| AI::new(1., std::time::Duration::from_secs(5), false, game, p))
             .collect()

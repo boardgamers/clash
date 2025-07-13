@@ -40,11 +40,6 @@ pub(crate) fn format_list<S: AsRef<str>>(
     }
 }
 
-#[must_use]
-pub fn is_false(value: &bool) -> bool {
-    !value
-}
-
 pub fn remove_element<T>(list: &mut Vec<T>, element: &T) -> Option<T>
 where
     T: PartialEq,

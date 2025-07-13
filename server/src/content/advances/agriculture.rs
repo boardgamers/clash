@@ -4,15 +4,16 @@ use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::collect::{CollectContext, CollectInfo};
 use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::events::EventPlayer;
-use crate::game::Game;
+use crate::game::{Game, GameOptions};
 use crate::map::Terrain::Barren;
 use crate::resource_pile::ResourcePile;
 use std::collections::HashSet;
 
-pub(crate) fn agriculture() -> AdvanceGroupInfo {
+pub(crate) fn agriculture(options: &GameOptions) -> AdvanceGroupInfo {
     advance_group_builder(
         AdvanceGroup::Agriculture,
         "Agriculture",
+        options,
         vec![farming(), storage(), irrigation(), husbandry()],
     )
 }

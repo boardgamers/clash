@@ -6,12 +6,14 @@ use crate::city_pieces::Building;
 use crate::content::ability::Ability;
 use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::content::persistent_events::ResourceRewardRequest;
+use crate::game::GameOptions;
 use crate::resource::ResourceType;
 
-pub(crate) fn science() -> AdvanceGroupInfo {
+pub(crate) fn science(options: &GameOptions) -> AdvanceGroupInfo {
     advance_group_builder(
         AdvanceGroup::Science,
         "Science",
+        options,
         vec![math(), astronomy(), medicine(), metallurgy()],
     )
 }

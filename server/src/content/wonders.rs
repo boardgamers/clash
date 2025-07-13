@@ -299,7 +299,7 @@ fn use_great_library(b: AbilityBuilder) -> AbilityBuilder {
             Some(AdvanceRequest::new(
                 game.cache
                     .get_advances()
-                    .iter()
+                    .values()
                     .filter_map(|a| {
                         (a.government.is_none() && !player.has_advance(a.advance))
                             .then_some(a.advance)

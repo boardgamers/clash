@@ -3,6 +3,7 @@
 extern crate console_error_panic_hook;
 use crate::cache::Cache;
 use crate::game::{GameContext, GameOptions};
+use crate::game_data::GameData;
 use crate::replay::ReplayGameData;
 use crate::{game::Game, game_api, replay};
 use serde::{Deserialize, Serialize};
@@ -16,11 +17,9 @@ pub struct PlayerMetaData {
 
 fn get_game(data: String) -> Game {
     console_error_panic_hook::set_once();
-    Game::from_data(
-        serde_json::from_str(&data).expect("Could not deserialize game data"),
-        Cache::new(),
-        GameContext::Play,
-    )
+    let game_data: GameData = serde_json::from_str(&data).expect("Could not deserialize game data");
+    let cache = Cache::new(&game_data.options);
+    Game::from_data(game_data, cache, GameContext::Play)
 }
 
 fn from_game(game: Game) -> String {

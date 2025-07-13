@@ -4,7 +4,7 @@ use itertools::Itertools;
 use server::action::ActionType;
 use server::ai_actions::AiActions;
 use server::cache::Cache;
-use server::game::{Game, GameContext};
+use server::game::{Game, GameContext, GameOptions};
 use server::game_setup::GameSetupBuilder;
 use server::movement::{MoveUnits, MovementAction, possible_move_routes};
 use server::playing_actions::PlayingActionType;
@@ -31,7 +31,7 @@ async fn test_random_actions() {
 
     start_profiling();
     let num_cores = num_cpus::get();
-    let cache = Cache::new();
+    let cache = Cache::new(&GameOptions::default());
 
     let mut rng = Rng::new();
     let mut iteration = 0;

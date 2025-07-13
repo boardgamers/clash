@@ -7,6 +7,7 @@ use server::city_pieces::Building::Temple;
 use server::content::custom_actions::{CustomAction, CustomActionType};
 use server::content::persistent_events::{EventResponse, SelectedStructure};
 use server::game::{Game, GameContext};
+use server::game_data::GameData;
 use server::log::current_player_turn_log_mut;
 use server::movement::MoveUnits;
 use server::movement::MovementAction::Move;
@@ -430,12 +431,10 @@ fn update_expected() -> bool {
 }
 
 pub fn load_game(path: &GamePath) -> Game {
-    let game = Game::from_data(
-        serde_json::from_str(&read_game_str(path))
-            .unwrap_or_else(|e| panic!("the game file should be deserializable {path}: {e}",)),
-        Cache::new(),
-        GameContext::Play,
-    );
+    let game_data: GameData = serde_json::from_str(&read_game_str(path))
+        .unwrap_or_else(|e| panic!("the game file should be deserializable {path}: {e}",));
+    let cache = Cache::new(&game_data.options);
+    let game = Game::from_data(game_data, cache, GameContext::Play);
     if update_expected() {
         write_result(&to_json(&game), path);
     }

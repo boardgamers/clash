@@ -89,7 +89,7 @@ impl GameSetupBuilder {
 /// Panics only if there is an internal bug
 #[must_use]
 pub fn setup_game(setup: &GameSetup) -> Game {
-    setup_game_with_cache(setup, Cache::new())
+    setup_game_with_cache(setup, Cache::new(&setup.options))
 }
 
 /// Creates a new [`Game`].

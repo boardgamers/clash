@@ -190,7 +190,7 @@ pub(crate) fn play_action_card(game: &mut Game, player_index: usize, id: u8) {
 pub(crate) fn on_play_action_card(game: &mut Game, player_index: usize, i: ActionCardInfo) {
     let players = match &game.cache.get_civil_card(i.id).target {
         CivilCardTarget::ActivePlayer => vec![player_index],
-        CivilCardTarget::AllPlayers => game.human_players(player_index),
+        CivilCardTarget::AllPlayers => game.human_players_sorted(player_index),
     };
 
     let _ = trigger_persistent_event_with_listener(

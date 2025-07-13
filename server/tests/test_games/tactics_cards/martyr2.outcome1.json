@@ -20,7 +20,7 @@
       "event_type": {
         "SelectObjectives": {
           "objective_opportunities": [],
-          "current_objective": "General"
+          "shown_objective": "General"
         }
       },
       "player": 0,

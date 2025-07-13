@@ -2,7 +2,6 @@ use crate::map::Map;
 use crate::map::Terrain::{Fertile, Forest, Mountain, Unexplored};
 use crate::resource_pile::ResourcePile;
 use crate::unit::{Unit, UnitType, Units, set_unit_position, ship_capacity};
-use crate::utils;
 use std::collections::HashSet;
 
 use crate::action::pay_action;
@@ -100,7 +99,7 @@ pub struct MoveState {
     #[serde(skip_serializing_if = "CurrentMove::is_none")]
     pub current_move: CurrentMove,
     #[serde(default)]
-    #[serde(skip_serializing_if = "utils::is_false")]
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub great_warlord_used: bool,
 }
 

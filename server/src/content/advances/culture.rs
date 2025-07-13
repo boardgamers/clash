@@ -8,6 +8,7 @@ use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_bui
 use crate::content::custom_actions::{CustomActionType, any_non_happy};
 use crate::content::persistent_events::PaymentRequest;
 use crate::events::{EventOrigin, check_event_origin};
+use crate::game::GameOptions;
 use crate::happiness::execute_increase_happiness;
 use crate::payment::PaymentOptions;
 use crate::player::Player;
@@ -17,10 +18,11 @@ use crate::resource_pile::ResourcePile;
 use crate::wonder::{Wonder, draw_wonder_card};
 use std::vec;
 
-pub(crate) fn culture() -> AdvanceGroupInfo {
+pub(crate) fn culture(options: &GameOptions) -> AdvanceGroupInfo {
     advance_group_builder(
         AdvanceGroup::Culture,
         "Culture",
+        options,
         vec![arts(), sports(), monuments(), theaters()],
     )
 }

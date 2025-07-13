@@ -46,6 +46,20 @@ impl CivSetupOption {
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Default)]
+pub enum PatchOption {
+    #[default]
+    Standard,
+    BalancePatch,
+}
+
+impl PatchOption {
+    #[must_use]
+    pub fn is_default(&self) -> bool {
+        self == &PatchOption::Standard
+    }
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Default)]
 pub enum UndoOption {
     // prevent undoing when secret information is revealed (default)
     #[default]
@@ -69,6 +83,9 @@ pub struct GameOptions {
     #[serde(default)]
     #[serde(skip_serializing_if = "CivSetupOption::is_default")]
     pub civilization: CivSetupOption,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "PatchOption::is_default")]
+    pub patch: PatchOption,
 }
 
 impl GameOptions {
@@ -87,7 +104,7 @@ pub enum GameContext {
 
 pub struct Game {
     pub cache: Cache,
-    pub context: GameContext, // trasient
+    pub context: GameContext, // transient
     pub options: GameOptions,
     pub version: u16, // JSON schema version
     pub state: GameState,
@@ -420,19 +437,23 @@ impl Game {
     /// # Panics
     /// Panics if the player is not human
     #[must_use]
-    pub fn human_players(&self, first: usize) -> Vec<usize> {
-        let mut all = self
-            .players
-            .iter()
-            .enumerate()
-            .filter_map(|(i, p)| self.is_active_human(i, p))
-            .collect_vec();
+    pub fn human_players_sorted(&self, first: usize) -> Vec<usize> {
+        let mut all = self.human_player_ids();
         let i = all
             .iter()
             .position(|&p| p == first)
             .expect("player should exist");
         all.rotate_left(i);
         all
+    }
+
+    #[must_use]
+    pub fn human_player_ids(&self) -> Vec<usize> {
+        self.players
+            .iter()
+            .enumerate()
+            .filter_map(|(i, p)| self.is_active_human(i, p))
+            .collect_vec()
     }
 
     fn is_active_human(&self, i: usize, p: &Player) -> Option<usize> {
@@ -547,6 +568,11 @@ impl Game {
             })
             .cloned()
             .collect_vec()
+    }
+
+    #[must_use]
+    pub fn is_update_patch(&self) -> bool {
+        matches!(self.options.patch, PatchOption::BalancePatch)
     }
 }
 

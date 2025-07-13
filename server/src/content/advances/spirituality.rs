@@ -5,14 +5,16 @@ use crate::city_pieces::Building::Temple;
 use crate::content::ability::Ability;
 use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::content::persistent_events::ResourceRewardRequest;
+use crate::game::GameOptions;
 use crate::payment::PaymentConversion;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 
-pub(crate) fn spirituality() -> AdvanceGroupInfo {
+pub(crate) fn spirituality(options: &GameOptions) -> AdvanceGroupInfo {
     advance_group_builder(
         AdvanceGroup::Spirituality,
         "Spirituality",
+        options,
         vec![myths(), rituals(), priesthood(), state_religion()],
     )
 }

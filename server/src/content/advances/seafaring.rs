@@ -4,15 +4,16 @@ use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
 use crate::city_pieces::Building::Port;
 use crate::content::ability::Ability;
 use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
-use crate::game::Game;
+use crate::game::{Game, GameOptions};
 use crate::position::Position;
 use crate::resource_pile::ResourcePile;
 use std::collections::HashSet;
 
-pub(crate) fn seafaring() -> AdvanceGroupInfo {
+pub(crate) fn seafaring(options: &GameOptions) -> AdvanceGroupInfo {
     advance_group_builder(
         AdvanceGroup::Seafaring,
         "Seafaring",
+        options,
         vec![fishing(), navigation(), war_ships(), cartography()],
     )
 }

@@ -6,7 +6,6 @@ use crate::player::Player;
 use crate::position::Position;
 use crate::tactics_card::CombatRole;
 use crate::unit::{UnitType, Units};
-use crate::utils;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
@@ -82,7 +81,7 @@ pub struct CombatStats {
     pub round: u32, //starts with one,
     pub battleground: Battleground,
     #[serde(default)]
-    #[serde(skip_serializing_if = "utils::is_false")]
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub disembarked: bool,
     pub attacker: CombatPlayerStats,
     pub defender: CombatPlayerStats,
