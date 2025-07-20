@@ -13,6 +13,7 @@ use server::profiling::start_profiling;
 use std::fs::File;
 use std::io::BufReader;
 use std::{env, vec};
+use server::cache::Cache;
 
 #[derive(PartialEq)]
 enum Mode {
@@ -107,7 +108,7 @@ async fn run(mut game: Game, features: &mut Features) {
                 sync_result = GameSyncResult::Update;
             }
             GameSyncRequest::Import => {
-                game = import(game);
+                game = import();
                 state.show_player = game.active_player();
                 sync_result = GameSyncResult::Update;
             }
@@ -157,11 +158,12 @@ fn ai_autoplay(mut game: Game, f: &mut Features, state: &mut State) -> Game {
 
 const EXPORT_FILE: &str = "game.json";
 
-fn import(game: Game) -> Game {
+fn import() -> Game {
     let file = File::open(EXPORT_FILE).expect("Failed to open export file");
     let reader = BufReader::new(file);
     let data: GameData = serde_json::from_reader(reader).expect("Failed to read export file");
-    Game::from_data(data, game.cache, GameContext::Play)
+    let cache = Cache::new(&data.options);
+    Game::from_data(data, cache, GameContext::Play)
 }
 
 fn export(game: &Game) {
