@@ -6,6 +6,7 @@ use macroquad::miniquad::window::set_window_size;
 use macroquad::prelude::{next_frame, screen_width, vec2};
 use macroquad::window::screen_height;
 use server::action::execute_action;
+use server::cache::Cache;
 use server::game::{CivSetupOption, Game, GameContext, GameOptions, PatchOption, UndoOption};
 use server::game_data::GameData;
 use server::game_setup::{GameSetupBuilder, setup_game};
@@ -107,7 +108,7 @@ async fn run(mut game: Game, features: &mut Features) {
                 sync_result = GameSyncResult::Update;
             }
             GameSyncRequest::Import => {
-                game = import(game);
+                game = import();
                 state.show_player = game.active_player();
                 sync_result = GameSyncResult::Update;
             }
@@ -157,11 +158,12 @@ fn ai_autoplay(mut game: Game, f: &mut Features, state: &mut State) -> Game {
 
 const EXPORT_FILE: &str = "game.json";
 
-fn import(game: Game) -> Game {
+fn import() -> Game {
     let file = File::open(EXPORT_FILE).expect("Failed to open export file");
     let reader = BufReader::new(file);
     let data: GameData = serde_json::from_reader(reader).expect("Failed to read export file");
-    Game::from_data(data, game.cache, GameContext::Play)
+    let cache = Cache::new(&data.options);
+    Game::from_data(data, cache, GameContext::Play)
 }
 
 fn export(game: &Game) {

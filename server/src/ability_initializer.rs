@@ -1085,10 +1085,11 @@ where
     };
     let deinitializer = move |game: &mut Game, p: &EventPlayer| {
         let e = deinitialize_event(&mut p.get_mut(game).events);
-        e.inner
-            .as_mut()
-            .unwrap_or_else(|| panic!("event {} should be set: {:?}", e.name, p.origin))
-            .remove_listener_mut_by_key(&p.origin);
+        if let Some(inner) = &mut e.inner {
+            inner.remove_listener_mut_by_key(&p.origin);
+        } else {
+            e.deleted = Some(p.origin.clone());
+        }
     };
     setup
         .add_initializer(initializer)
