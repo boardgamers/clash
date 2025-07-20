@@ -4,7 +4,7 @@ use playing_actions::PlayingActionType;
 use server::card::HandCard;
 use server::collect::PositionCollection;
 use server::content::persistent_events::{EventResponse, SelectedStructure};
-use server::game::{CivSetupOption, GameOptions, UndoOption};
+use server::game::{CivSetupOption, GameOptions, PatchOption, UndoOption};
 use server::game_setup::{GameSetupBuilder, setup_game};
 use server::leader::Leader;
 use server::structure::Structure;
@@ -36,6 +36,7 @@ fn new_game() {
             .options(GameOptions {
                 civilization: CivSetupOption::ChooseCivilization,
                 undo: UndoOption::SamePlayer,
+                patch: PatchOption::Standard,
             })
             .build(),
     );

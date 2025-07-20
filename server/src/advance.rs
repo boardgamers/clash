@@ -91,6 +91,12 @@ pub enum Advance {
     Devotion = 45,
     Conversion = 46,
     Fanaticism = 47,
+
+    // Update patch Replacements
+    CityPlanning = 48,
+    WelfareState = 49,
+    ForcedMarch = 50,
+    MilitaryState = 51,
 }
 
 impl Advance {
@@ -122,6 +128,7 @@ pub struct AdvanceInfo {
     pub government: Option<String>,
     pub leading_government: bool,
     pub listeners: AbilityListeners,
+    pub replaces: Option<Advance>,
 }
 
 impl AdvanceInfo {
@@ -147,6 +154,7 @@ pub(crate) struct AdvanceBuilder {
     unlocked_building: Option<Building>,
     government: Option<String>,
     leading_government: bool,
+    pub(crate) replaces: Option<Advance>,
     builder: AbilityInitializerBuilder,
 }
 
@@ -162,6 +170,7 @@ impl AdvanceBuilder {
             unlocked_building: None,
             government: None,
             leading_government: false,
+            replaces: None,
             builder: AbilityInitializerBuilder::new(),
         }
     }
@@ -169,6 +178,11 @@ impl AdvanceBuilder {
     #[must_use]
     pub fn with_advance_bonus(mut self, advance_bonus: Bonus) -> Self {
         self.advance_bonus = Some(advance_bonus);
+        self
+    }
+
+    pub(crate) fn replaces(mut self, base: Advance) -> Self {
+        self.replaces = Some(base);
         self
     }
 
@@ -209,6 +223,7 @@ impl AdvanceBuilder {
             unlocked_building: self.unlocked_building,
             government: self.government,
             leading_government: self.leading_government,
+            replaces: self.replaces,
             listeners: self.builder.build(),
         }
     }

@@ -26,6 +26,7 @@ use crate::content::advances::seafaring::seafaring;
 use crate::content::advances::spirituality::spirituality;
 use crate::content::advances::theocracy::theocracy;
 use crate::content::advances::warfare::warfare;
+use crate::game::GameOptions;
 use itertools::Itertools;
 use std::fmt::Display;
 use std::vec;
@@ -98,35 +99,36 @@ pub struct AdvanceGroupInfo {
 }
 
 #[must_use]
-pub(crate) fn get_all_uncached() -> Vec<AdvanceInfo> {
-    get_groups_uncached()
+pub(crate) fn get_all_uncached(options: &GameOptions) -> Vec<AdvanceInfo> {
+    get_groups_uncached(options)
         .into_iter()
         .flat_map(|g| g.advances)
         .collect()
 }
 
 #[must_use]
-pub fn get_groups_uncached() -> Vec<AdvanceGroupInfo> {
+pub fn get_groups_uncached(options: &GameOptions) -> Vec<AdvanceGroupInfo> {
     vec![
-        agriculture(),
-        construction(),
-        seafaring(),
-        education(),
-        warfare(),
-        spirituality(),
+        agriculture(options),
+        construction(options),
+        seafaring(options),
+        education(options),
+        warfare(options),
+        spirituality(options),
         // second half of the advances
-        economy(),
-        culture(),
-        science(),
-        democracy(),
-        autocracy(),
-        theocracy(),
+        economy(options),
+        culture(options),
+        science(options),
+        democracy(options),
+        autocracy(options),
+        theocracy(options),
     ]
 }
 
 pub(crate) fn advance_group_builder(
     advance_group: AdvanceGroup,
     name: &str,
+    options: &GameOptions,
     advances: Vec<AdvanceBuilder>,
 ) -> AdvanceGroupInfo {
     let first = advances[0].advance;
@@ -160,14 +162,30 @@ pub(crate) fn advance_group_builder(
     AdvanceGroupInfo {
         advance_group,
         name: name.to_string(),
-        advances: a,
+        advances: remove_replaced(a, options),
         government: government.map(|i| i.name.to_string()),
     }
 }
 
+fn remove_replaced(advances: Vec<AdvanceInfo>, options: &GameOptions) -> Vec<AdvanceInfo> {
+    if options.patch.is_default() {
+        return advances
+            .into_iter()
+            .filter(|a| a.replaces.is_none())
+            .collect_vec();
+    }
+
+    // Remove advances that are replaced by others
+    let replaced: Vec<Advance> = advances.iter().filter_map(|a| a.replaces).collect();
+    advances
+        .into_iter()
+        .filter(|a| a.replaces.is_some() || !replaced.contains(&a.advance))
+        .collect_vec()
+}
+
 #[must_use]
 pub fn get_governments_uncached() -> Vec<AdvanceGroupInfo> {
-    get_groups_uncached()
+    get_groups_uncached(&GameOptions::default())
         .into_iter()
         .filter(|g| g.government.is_some())
         .collect()
@@ -176,29 +194,10 @@ pub fn get_governments_uncached() -> Vec<AdvanceGroupInfo> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::cache::Cache;
-
-    #[test]
-    fn test_get_all() {
-        let cache = Cache::new();
-        let all = cache.get_advances();
-        assert!(!all.is_empty());
-        let unsorted = all.iter().map(|a| a.advance).collect_vec();
-
-        let sorted = unsorted
-            .clone()
-            .into_iter()
-            .sorted_by_key(|a| *a as usize)
-            .collect_vec();
-        assert_eq!(sorted, unsorted);
-        for advance in all {
-            assert_eq!(cache.get_advance(advance.advance).advance, advance.advance);
-        }
-    }
 
     #[test]
     fn test_get_groups() {
-        let groups = get_groups_uncached();
+        let groups = get_groups_uncached(&GameOptions::default());
         assert!(!groups.is_empty());
         assert_eq!(groups.len(), 12);
         assert_eq!(groups[0].name, "Agriculture");

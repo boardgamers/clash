@@ -18,7 +18,6 @@ use crate::position::Position;
 use crate::resource::ResourceType;
 use crate::resource_pile::ResourcePile;
 use crate::unit::{UnitType, Units};
-use crate::utils;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
@@ -32,7 +31,7 @@ pub struct BarbariansMoveRequest {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct BarbariansEventState {
     #[serde(default)]
-    #[serde(skip_serializing_if = "utils::is_false")]
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub move_units: bool,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
@@ -184,7 +183,7 @@ where
 pub(crate) fn on_stop_barbarian_movement(game: &mut Game, movable: Vec<Position>) {
     let old_movable = movable.clone();
     match game.trigger_persistent_event(
-        &game.human_players(0),
+        &game.human_player_ids(),
         |events| &mut events.stop_barbarian_movement,
         movable,
         PersistentEventType::StopBarbarianMovement,

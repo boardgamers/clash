@@ -21,7 +21,7 @@ use crate::recruit::Recruit;
 use crate::resource::pay_cost;
 use crate::status_phase::StatusPhaseState;
 use crate::unit::Units;
-use crate::utils;
+use crate::victory_points::SpecialVictoryPoints;
 use crate::wonder::{DrawWonderCard, WonderBuildInfo, WonderCardInfo};
 use crate::{
     city::City, city_pieces::Building, player::Player, position::Position,
@@ -66,6 +66,8 @@ pub(crate) struct TransientEvents {
     pub collect_total: Event<CollectInfo, Game, Vec<PositionCollection>>,
 
     pub general_payment_conversions: Event<Vec<PaymentConversion>>,
+    pub after_action: Event<Game>,
+    pub dynamic_victory_points: Event<Vec<SpecialVictoryPoints>, Game>,
 }
 
 impl TransientEvents {
@@ -88,6 +90,8 @@ impl TransientEvents {
             collect_total: Event::new("collect_total"),
 
             general_payment_conversions: Event::new("payment_conversions"),
+            after_action: Event::new("after_action"),
+            dynamic_victory_points: Event::new("dynamic_victory_points"),
         }
     }
 }
@@ -248,7 +252,7 @@ pub struct IncidentInfo {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub passed: Option<PassedIncident>,
     #[serde(default)]
-    #[serde(skip_serializing_if = "utils::is_false")]
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub consumed: bool,
 
     #[serde(default)]
@@ -376,5 +380,20 @@ pub(crate) fn trigger_event_with_game_value<U, V, W>(
 {
     let e = event(&mut game.players[player_index].events).take();
     e.trigger(game, info, details, extra_value);
+    event(&mut game.players[player_index].events).set(e);
+}
+
+pub(crate) fn trigger_event_with_game_info<U: Clone + PartialEq, V, W>(
+    game: &mut Game,
+    player_index: usize,
+    event: impl Fn(&mut PlayerEvents) -> &mut Event<U, Game, V, W>,
+    info: &mut U,
+    details: &V,
+    extra_value: &mut W,
+) where
+    W: Clone + PartialEq,
+{
+    let e = event(&mut game.players[player_index].events).take();
+    e.trigger(info, game, details, extra_value);
     event(&mut game.players[player_index].events).set(e);
 }

@@ -1,22 +1,26 @@
 use crate::ability_initializer::AbilityInitializerSetup;
 use crate::action::Action;
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
-use crate::city::MoodState;
+use crate::city::{self, MoodState};
 use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
 use crate::content::custom_actions::CustomActionType::{
-    CivilLiberties, FreeEconomyCollect, VotingIncreaseHappiness,
+    self, CivilLiberties, FreeEconomyCollect, VotingIncreaseHappiness,
 };
+use crate::content::persistent_events::PositionRequest;
+use crate::game::GameOptions;
 use crate::log::current_player_turn_log;
 use crate::playing_actions::{PlayingAction, PlayingActionType};
 use crate::resource_pile::ResourcePile;
 
-pub(crate) fn democracy() -> AdvanceGroupInfo {
+pub(crate) fn democracy(options: &GameOptions) -> AdvanceGroupInfo {
     advance_group_builder(
         AdvanceGroup::Democracy,
         "Democracy",
+        options,
         vec![
             voting(),
             separation_of_power(),
+            welfare_state(), // balance
             civil_liberties(),
             free_economy(),
         ],
@@ -120,6 +124,49 @@ fn free_economy() -> AdvanceBuilder {
                     Err("Cannot use Free Economy Collect when Collect was used".to_string());
             }
             _ => {}
+        },
+    )
+}
+
+fn welfare_state() -> AdvanceBuilder {
+    AdvanceInfo::builder(
+        Advance::WelfareState,
+        "Welfare State",
+        "As an action, you may spend 2 mood tokens to gain 5 resources of your choice.",
+    )
+    .replaces(Advance::SeparationOfPower)
+    .add_custom_action(
+        CustomActionType::WelfareState,
+        |cost| {
+            cost.any_times()
+                .free_action()
+                .resources(ResourcePile::mood_tokens(1))
+        },
+        |ability| {
+            ability.add_position_request(
+                |event| &mut event.custom_action,
+                0,
+                |game, event_player, _| {
+                    Some(PositionRequest::new(
+                        event_player
+                            .get(game)
+                            .cities
+                            .iter()
+                            .filter(|city| matches!(city.mood_state, MoodState::Happy))
+                            .map(|city| city.position)
+                            .collect(),
+                        1..=1,
+                        "Choose a happy city to activate",
+                    ))
+                },
+                |game, select, _| city::activate_city(select.choice[0], game, &select.origin),
+            )
+        },
+        |_, player| {
+            player
+                .cities
+                .iter()
+                .any(|city| matches!(city.mood_state, MoodState::Happy))
         },
     )
 }

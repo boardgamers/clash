@@ -11,17 +11,18 @@ use crate::content::civilizations::vikings::add_raid_bonus;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::custom_actions::CustomActionType::Taxes;
 use crate::content::persistent_events::{HandCardsRequest, ResourceRewardRequest};
-use crate::game::Game;
+use crate::game::{Game, GameOptions};
 use crate::player_events::{PersistentEvent, PersistentEvents};
 use crate::resource::{ResourceType, gain_resources};
 use crate::resource_pile::ResourcePile;
 use crate::special_advance::SpecialAdvance;
 use itertools::Itertools;
 
-pub(crate) fn economy() -> AdvanceGroupInfo {
+pub(crate) fn economy(options: &GameOptions) -> AdvanceGroupInfo {
     advance_group_builder(
         AdvanceGroup::Economy,
         "Economy",
+        options,
         vec![bartering(), trade_routes(), taxes(), currency()],
     )
 }

@@ -128,6 +128,14 @@ pub enum CustomActionType {
     Taxes,
     Theaters,
 
+    // Update patch Advances
+    CityPlanning,
+    Philosophy,
+    WelfareState,
+    ForcedMarch,
+    MilitaryState,
+    Totalitarianism,
+
     // Wonders
     GreatLibrary,
     GreatLighthouse,

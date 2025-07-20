@@ -10,7 +10,7 @@ use crate::content::advances::economy::use_taxes;
 use crate::content::advances::trade_routes::TradeRoute;
 use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::{PaymentRequest, PositionRequest, UnitsRequest};
-use crate::events::{EventOrigin, EventPlayer};
+use crate::events::EventOrigin;
 use crate::game::Game;
 use crate::leader::{Leader, LeaderInfo, leader_position};
 use crate::leader_ability::{LeaderAbility, activate_leader_city, can_activate_leader_city};
@@ -23,7 +23,7 @@ use crate::resource_pile::ResourcePile;
 use crate::special_advance::{SpecialAdvance, SpecialAdvanceInfo, SpecialAdvanceRequirement};
 use crate::unit::{Unit, UnitType, Units, carried_units};
 use crate::victory_points::{
-    VictoryPointAttribution, set_special_victory_points, update_special_victory_points,
+    SpecialVictoryPoints, VictoryPointAttribution, add_special_victory_points,
 };
 use itertools::Itertools;
 use std::ops::RangeInclusive;
@@ -325,43 +325,24 @@ fn ruler_of_the_north() -> LeaderAbility {
         "Ruler of the North",
         "Knut is worth half a point per distance to your capital",
     )
-    .add_initializer(move |game, p, _| {
-        set_knut_points(game, p, None);
-    })
-    .add_deinitializer(move |game, p| {
-        set_knut_points(game, p, None);
-    })
     .add_transient_event_listener(
-        |event| &mut event.before_move,
-        1,
-        move |game, i, (), p| {
-            if i.units
-                .iter()
-                .any(|&id| p.get(game).get_unit(id).is_leader())
-            {
-                set_knut_points(game, p, Some(i.to));
-            }
+        |event| &mut event.dynamic_victory_points,
+        0,
+        move |s, game, (), player| {
+            let p = player.get(game);
+            let points = if p.active_leader().is_some_and(|l| l == Leader::Knut) {
+                leader_position(p).distance(capital_city_position(game, p)) as f32 / 2.0
+            } else {
+                0_f32
+            };
+            s.push(SpecialVictoryPoints::new(
+                points,
+                player.origin.clone(),
+                VictoryPointAttribution::Events,
+            ));
         },
     )
     .build()
-}
-
-fn set_knut_points(game: &mut Game, player: &EventPlayer, position: Option<Position>) {
-    let p = player.get(game);
-    let points = if p.active_leader().is_some_and(|l| l == Leader::Knut) {
-        position
-            .unwrap_or_else(|| leader_position(p))
-            .distance(capital_city_position(game, p)) as f32
-            / 2.0
-    } else {
-        0_f32
-    };
-    set_special_victory_points(
-        player.get_mut(game),
-        points,
-        &player.origin,
-        VictoryPointAttribution::Events,
-    );
 }
 
 fn erik() -> LeaderInfo {
@@ -453,15 +434,7 @@ fn use_legendary_explorer(b: AbilityBuilder) -> AbilityBuilder {
             let player = p.get_mut(game);
             let position = leader_position(player);
 
-            update_special_victory_points(
-                player,
-                &p.origin,
-                VictoryPointAttribution::Objectives,
-                |mut v| {
-                    v += 1.0;
-                    v
-                },
-            );
+            add_special_victory_points(player, 1.0, &p.origin, VictoryPointAttribution::Objectives);
 
             player
                 .custom_data

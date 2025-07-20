@@ -2,23 +2,30 @@ use crate::ability_initializer::{AbilityInitializerSetup, once_per_turn_ability}
 use crate::action_card::gain_action_card_from_pile;
 use crate::advance::Bonus::{CultureToken, MoodToken};
 use crate::advance::{Advance, AdvanceBuilder, AdvanceInfo};
+use crate::card::HandCardLocation;
 use crate::city_pieces::Building;
 use crate::content::ability::Ability;
 use crate::content::advances::{AdvanceGroup, AdvanceGroupInfo, advance_group_builder};
+use crate::content::custom_actions::CustomActionType;
 use crate::content::persistent_events::PaymentRequest;
+use crate::game::GameOptions;
+use crate::log::{self, ActionLogEntry};
 use crate::objective_card::draw_objective_card_from_pile;
+use crate::playing_actions::PlayingActionType;
 use crate::resource::gain_resources;
 use crate::resource_pile::ResourcePile;
 
-pub(crate) fn education() -> AdvanceGroupInfo {
+pub(crate) fn education(options: &GameOptions) -> AdvanceGroupInfo {
     advance_group_builder(
         AdvanceGroup::Education,
         "Education",
+        options,
         vec![
             writing(),
             public_education(),
             free_education(),
             philosophy(),
+            philosophy_patched(),
         ],
     )
 }
@@ -32,11 +39,35 @@ fn writing() -> AdvanceBuilder {
     .with_advance_bonus(CultureToken)
     .with_unlocked_building(Building::Academy)
     .add_once_initializer(move |game, player| {
-        gain_action_card_from_pile(game, player);
+        if !game.is_update_patch() {
+            gain_action_card_from_pile(game, player);
+        }
         // can't gain objective card directly, because the "combat_end" listener might
         // currently being processed ("teach us now")
         player.get_mut(game).gained_objective = draw_objective_card_from_pile(game, player);
     })
+    .add_transient_event_listener(
+        |event| &mut event.after_action,
+        1,
+        |game, (), (), p| {
+            if game.is_update_patch() {
+                let count = log::current_log_action_mut(game)
+                    .items
+                    .iter()
+                    .filter(|item| {
+                        matches!(
+                            item.entry,
+                            ActionLogEntry::HandCard {
+                                to: HandCardLocation::CompleteObjective(_),
+                                ..
+                            }
+                        )
+                    })
+                    .count();
+                p.gain_resources(game, ResourcePile::ideas(count as u8));
+            }
+        },
+    )
 }
 
 pub(crate) fn use_academy() -> Ability {
@@ -147,6 +178,25 @@ fn philosophy() -> AdvanceBuilder {
                 p.gain_resources(game, ResourcePile::ideas(1));
             }
         },
+    )
+    .with_advance_bonus(MoodToken)
+}
+
+fn philosophy_patched() -> AdvanceBuilder {
+    AdvanceInfo::builder(
+        Advance::Philosophy,
+        "Philosophy",
+        "As a free action, you may pay 3 ideas to get a free advance action",
+    )
+    .replaces(Advance::Philosophy)
+    .add_action_modifier(
+        CustomActionType::Philosophy,
+        |cost| {
+            cost.any_times()
+                .free_action()
+                .resources(ResourcePile::ideas(3))
+        },
+        PlayingActionType::Advance,
     )
     .with_advance_bonus(MoodToken)
 }

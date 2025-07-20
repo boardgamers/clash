@@ -28,6 +28,7 @@ use crate::resource::check_for_waste;
 use crate::status_phase::play_status_phase;
 use crate::undo::{clean_patch, redo, to_serde_value, undo};
 use crate::unit::units_killed;
+use crate::victory_points::add_dynamic_victory_points;
 use crate::wonder::{on_draw_wonder_card, on_play_wonder_card};
 use serde::{Deserialize, Serialize};
 
@@ -195,6 +196,16 @@ pub(crate) fn after_action(game: &mut Game, player_index: usize) {
     }
     if let Some(pos) = city {
         on_city_activation_mood_decreased(game, player_index, pos);
+    }
+
+    game.trigger_transient_event_with_game_value(
+        player_index,
+        |event| &mut event.after_action,
+        &(),
+        &(),
+    );
+    for p in game.human_player_ids() {
+        add_dynamic_victory_points(game, p);
     }
 }
 
