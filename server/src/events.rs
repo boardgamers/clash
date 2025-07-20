@@ -247,6 +247,7 @@ where
 pub struct Event<T, U = (), V = (), W = ()> {
     pub name: String,
     pub inner: Option<EventMut<T, U, V, W>>,
+    pub deleted: Option<EventOrigin>,
 }
 
 impl<T, U, V, W> Event<T, U, V, W> {
@@ -259,6 +260,7 @@ impl<T, U, V, W> Event<T, U, V, W> {
         Self {
             name: name.to_string(),
             inner: Some(EventMut::new(name)),
+            deleted: None,
         }
     }
 
@@ -270,8 +272,16 @@ impl<T, U, V, W> Event<T, U, V, W> {
         self.inner.take().expect("Event should be initialized")
     }
 
-    pub(crate) fn set(&mut self, event: EventMut<T, U, V, W>) {
-        self.inner = Some(event);
+    pub(crate) fn set(&mut self, mut event: EventMut<T, U, V, W>)
+    where
+        T: Clone + PartialEq,
+        W: Clone + PartialEq,
+    {
+        if let Some(o) = &self.deleted.take() {
+            event.remove_listener_mut_by_key(o);
+        } else {
+            self.inner = Some(event);
+        }
     }
 }
 

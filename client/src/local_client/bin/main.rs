@@ -6,6 +6,7 @@ use macroquad::miniquad::window::set_window_size;
 use macroquad::prelude::{next_frame, screen_width, vec2};
 use macroquad::window::screen_height;
 use server::action::execute_action;
+use server::cache::Cache;
 use server::game::{CivSetupOption, Game, GameContext, GameOptions, PatchOption, UndoOption};
 use server::game_data::GameData;
 use server::game_setup::{GameSetupBuilder, setup_game};
@@ -13,7 +14,6 @@ use server::profiling::start_profiling;
 use std::fs::File;
 use std::io::BufReader;
 use std::{env, vec};
-use server::cache::Cache;
 
 #[derive(PartialEq)]
 enum Mode {
