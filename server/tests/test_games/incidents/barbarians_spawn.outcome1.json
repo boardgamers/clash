@@ -5,36 +5,34 @@
       "event_type": {
         "StatusPhase": "FreeAdvance"
       },
-      "player": 0,
-      "last_priority_used": 0
-    },
-    {
-      "event_type": {
-        "Incident": {
-          "incident_id": 9,
-          "active_player": 0,
-          "barbarians": {
-            "selected_position": "B3"
-          }
-        }
-      },
-      "player": 0,
-      "last_priority_used": 100,
+      "players_used": [
+        0
+      ],
+      "player": 1,
+      "last_priority_used": 0,
       "handler": {
-        "priority": 100,
+        "priority": 0,
         "request": {
-          "SelectUnitType": {
+          "SelectAdvance": {
             "choices": [
-              "Infantry",
-              "Cavalry",
-              "Elephant"
-            ],
-            "player_index": 2,
-            "description": "Select a unit to reinforce the barbarians at B3"
+              "Storage",
+              "Irrigation",
+              "Husbandry",
+              "Engineering",
+              "Sanitation",
+              "Roads",
+              "Fishing",
+              "Writing",
+              "Tactics",
+              "Myths",
+              "Bartering",
+              "Arts",
+              "Math"
+            ]
           }
         },
         "origin": {
-          "Incident": 9
+          "Ability": "Free Advance"
         }
       }
     }
@@ -43,7 +41,7 @@
     {
       "id": 0,
       "resources": {
-        "food": 1,
+        "food": 2,
         "wood": 6,
         "ore": 6,
         "ideas": 5,
@@ -148,17 +146,17 @@
       "cities": [
         {
           "mood_state": "Angry",
-          "position": "C1"
+          "position": "C4"
         }
       ],
       "units": [
         {
-          "position": "C1",
+          "position": "C4",
           "unit_type": "Infantry",
           "id": 0
         },
         {
-          "position": "C1",
+          "position": "C4",
           "unit_type": "Infantry",
           "id": 1
         }
@@ -183,19 +181,24 @@
       "cities": [
         {
           "mood_state": "Neutral",
-          "position": "B3"
+          "position": "A3"
         }
       ],
       "units": [
         {
-          "position": "B3",
+          "position": "A3",
           "unit_type": "Infantry",
           "id": 0
+        },
+        {
+          "position": "A3",
+          "unit_type": "Elephant",
+          "id": 1
         }
       ],
       "civilization": "Barbarians",
       "incident_tokens": 3,
-      "next_unit_id": 1
+      "next_unit_id": 2
     }
   ],
   "map": {
@@ -225,16 +228,16 @@
         "Fertile"
       ],
       [
-        "C1",
-        "Barren"
-      ],
-      [
         "C2",
         "Forest"
       ],
       [
         "C3",
         "Water"
+      ],
+      [
+        "C4",
+        "Barren"
       ],
       [
         "D2",
@@ -283,24 +286,13 @@
                       "origin": {
                         "Ability": "Free Advance"
                       }
-                    }
-                  ]
-                },
-                {
-                  "action": {
-                    "Response": {
-                      "SelectPositions": [
-                        "B3"
-                      ]
-                    }
-                  },
-                  "items": [
+                    },
                     {
                       "player": 2,
                       "Structure": {
                         "structure": "CityCenter",
                         "balance": "Gain",
-                        "position": "B3"
+                        "position": "A3"
                       },
                       "origin": {
                         "Incident": 9
@@ -317,23 +309,45 @@
                       "origin": {
                         "Incident": 9
                       }
-                    },
+                    }
+                  ]
+                },
+                {
+                  "action": {
+                    "Response": {
+                      "SelectUnitType": "Elephant"
+                    }
+                  },
+                  "items": [
                     {
                       "player": 2,
-                      "Structure": {
-                        "structure": "CityCenter",
-                        "balance": "Gain",
-                        "position": "B3"
+                      "Units": {
+                        "units": {
+                          "elephants": 1
+                        },
+                        "balance": "Gain"
                       },
                       "origin": {
                         "Incident": 9
                       }
                     },
                     {
-                      "player": 2,
-                      "Units": {
-                        "units": {
-                          "infantry": 1
+                      "player": 0,
+                      "Resources": {
+                        "resources": {
+                          "food": 1
+                        },
+                        "balance": "Gain"
+                      },
+                      "origin": {
+                        "Incident": 9
+                      }
+                    },
+                    {
+                      "player": 1,
+                      "Resources": {
+                        "resources": {
+                          "food": 1
                         },
                         "balance": "Gain"
                       },
@@ -358,13 +372,17 @@
     ],
     [
       "A new game event has been triggered: A good year",
-      "Player1: A good year: Base effect: Barbarians spawn"
+      "Player1: A good year: Base effect: Barbarians spawn",
+      "Barbarians: A good year: Gain city A3, Gain 1 infantry at A3"
     ],
     [
-      "Barbarians: A good year: Gain city B3, Gain 1 infantry at B3"
+      "Barbarians: A good year: Gain 1 elephant at A3",
+      "Player1: A good year: Gain 1 food",
+      "Player2: A good year: Gain 1 food",
+      "Player2: Waste: Could not store 1 food"
     ]
   ],
-  "undo_limit": 1,
+  "undo_limit": 2,
   "actions_left": 3,
   "round": 1,
   "age": 1,

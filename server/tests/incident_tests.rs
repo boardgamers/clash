@@ -27,13 +27,8 @@ fn test_barbarians_spawn() {
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::SelectAdvance(Advance::Storage)),
-            ),
-            TestAction::undoable(
-                0,
-                Action::Response(EventResponse::SelectPositions(vec![Position::from_offset(
-                    "B3",
-                )])),
-            ),
+            )
+            .skip_json(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::SelectUnitType(UnitType::Elephant)),

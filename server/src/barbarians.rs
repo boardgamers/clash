@@ -512,7 +512,7 @@ fn is_base_barbarian_spawn_pos(game: &Game, pos: Position, player: &Player) -> b
     game.map.get(pos).is_some_and(|t| {
         t.is_land() && !matches!(t, Terrain::Barren) && !matches!(t, Terrain::Exhausted(_))
     }) && !anything_present(game, pos)
-        && cities_in_land_range(game, |p| p.index != player.index, pos, 2).is_empty()
+        && cities_in_land_range(game, |p| p.index != player.index, pos, 1).is_empty()
 }
 
 fn anything_present(game: &Game, pos: Position) -> bool {
