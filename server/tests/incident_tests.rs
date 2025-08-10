@@ -27,7 +27,8 @@ fn test_barbarians_spawn() {
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::SelectAdvance(Advance::Storage)),
-            ).skip_json(),
+            )
+            .skip_json(),
             TestAction::not_undoable(
                 0,
                 Action::Response(EventResponse::SelectUnitType(UnitType::Elephant)),
