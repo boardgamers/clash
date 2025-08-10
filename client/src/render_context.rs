@@ -76,14 +76,14 @@ impl RenderContext<'_> {
         update
     }
 
-    pub(crate) fn no_icon_background(&self) -> RenderContext {
+    pub(crate) fn no_icon_background(&self) -> RenderContext<'_> {
         RenderContext {
             icon_background: IconBackground::None,
             ..self.clone()
         }
     }
 
-    pub(crate) fn small_background(&self) -> RenderContext {
+    pub(crate) fn small_background(&self) -> RenderContext<'_> {
         RenderContext {
             icon_background: IconBackground::SmallCircle,
             ..self.clone()

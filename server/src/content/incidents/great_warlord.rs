@@ -44,10 +44,10 @@ pub(crate) fn use_great_warlord() -> Ability {
             |event| &mut event.combat_start,
             9,
             |game, _player_index, c| {
-                if let Movement(m) = &mut game.state {
-                    if mem::replace(&mut m.great_warlord_used, false) {
-                        c.modifiers.push(CombatModifier::GreatWarlord);
-                    }
+                if let Movement(m) = &mut game.state
+                    && mem::replace(&mut m.great_warlord_used, false)
+                {
+                    c.modifiers.push(CombatModifier::GreatWarlord);
                 }
             },
         )

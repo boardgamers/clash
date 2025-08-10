@@ -81,13 +81,14 @@ fn monuments() -> AdvanceBuilder {
         |event| &mut event.on_influence_culture_attempt,
         1,
         |r, city, _, _| {
-            if let Ok(info) = r {
-                if info.is_defender && !city.pieces.wonders.is_empty() {
-                    *r = Err(
-                        "Monuments prevent influence culture attempts on cities with wonders"
-                            .to_string(),
-                    );
-                }
+            if let Ok(info) = r
+                && info.is_defender
+                && !city.pieces.wonders.is_empty()
+            {
+                *r = Err(
+                    "Monuments prevent influence culture attempts on cities with wonders"
+                        .to_string(),
+                );
             }
         },
     )

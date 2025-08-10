@@ -117,19 +117,19 @@ pub(crate) fn on_recruit(game: &mut Game, player_index: usize, r: Recruit) {
             .filter(|unit| unit.is_ship())
             .map(|unit| unit.id)
             .collect::<Vec<_>>();
-        if !ships.is_empty() {
-            if let Some(defender) = game.enemy_player(player_index, port_position) {
-                for ship in game
-                    .player(player_index)
-                    .get_units(port_position)
-                    .iter()
-                    .map(|unit| unit.id)
-                    .collect_vec()
-                {
-                    set_unit_position(player_index, ship, city_position, game);
-                }
-                combat::initiate_combat(game, defender, port_position, player_index, ships, false);
+        if !ships.is_empty()
+            && let Some(defender) = game.enemy_player(player_index, port_position)
+        {
+            for ship in game
+                .player(player_index)
+                .get_units(port_position)
+                .iter()
+                .map(|unit| unit.id)
+                .collect_vec()
+            {
+                set_unit_position(player_index, ship, city_position, game);
             }
+            combat::initiate_combat(game, defender, port_position, player_index, ships, false);
         }
     }
 }
@@ -234,10 +234,10 @@ pub fn recruit_cost_without_replaced(
         return Err("Too many units in stack".to_string());
     }
 
-    if let Some(l) = units.leader {
-        if !player.available_leaders.contains(&l) {
-            return Err(format!("Leader {l:?} not available"));
-        }
+    if let Some(l) = units.leader
+        && !player.available_leaders.contains(&l)
+    {
+        return Err(format!("Leader {l:?} not available"));
     }
 
     Ok(cost)

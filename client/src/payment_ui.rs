@@ -15,6 +15,7 @@ use macroquad::math::{bool, vec2};
 use server::payment::{PaymentOptions, ResourceReward};
 use server::resource::ResourceType;
 use server::resource_pile::ResourcePile;
+use std::slice;
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub(crate) struct ResourcePayment {
@@ -116,7 +117,7 @@ pub(crate) fn payment_dialog<T: Clone>(
 ) -> RenderResult {
     multi_payment_dialog(
         rc,
-        &[payment.clone()],
+        slice::from_ref(payment),
         |v| to_dialog(v[0].clone()),
         may_cancel,
         |v| execute_action(v[0].clone()),

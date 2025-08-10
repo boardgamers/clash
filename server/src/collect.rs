@@ -290,10 +290,10 @@ pub fn possible_resource_collections(
         .into_iter()
         .chain(iter::once(city_pos))
         .filter_map(|pos| {
-            if let Some(t) = game.map.get(pos) {
-                if let Some(option) = terrain_options.get(t) {
-                    return Some((pos, option.clone()));
-                }
+            if let Some(t) = game.map.get(pos)
+                && let Some(option) = terrain_options.get(t)
+            {
+                return Some((pos, option.clone()));
             }
             None
         })

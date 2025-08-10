@@ -319,35 +319,35 @@ where
             has_paid(v).then_some(PersistentEventRequest::ChangeGovernment)
         },
         move |game, p, action, request, _| {
-            if let PersistentEventRequest::ChangeGovernment = &request {
-                if let EventResponse::ChangeGovernmentType(c) = action {
-                    p.log(
-                        game,
-                        &format!(
-                            "{p} changed their government from {} to {}",
-                            p.get(game)
-                                .government(game)
-                                .expect("player should have a government before changing it"),
-                            c.new_government
-                        ),
-                    );
-                    p.log(
-                        game,
-                        &format!(
-                            "Additional advances: {}",
-                            if c.additional_advances.is_empty() {
-                                "none".to_string()
-                            } else {
-                                c.additional_advances
-                                    .iter()
-                                    .map(|a| a.name(game))
-                                    .join(", ")
-                            }
-                        ),
-                    );
-                    change_government_type(game, p, &c);
-                    return;
-                }
+            if let PersistentEventRequest::ChangeGovernment = &request
+                && let EventResponse::ChangeGovernmentType(c) = action
+            {
+                p.log(
+                    game,
+                    &format!(
+                        "{p} changed their government from {} to {}",
+                        p.get(game)
+                            .government(game)
+                            .expect("player should have a government before changing it"),
+                        c.new_government
+                    ),
+                );
+                p.log(
+                    game,
+                    &format!(
+                        "Additional advances: {}",
+                        if c.additional_advances.is_empty() {
+                            "none".to_string()
+                        } else {
+                            c.additional_advances
+                                .iter()
+                                .map(|a| a.name(game))
+                                .join(", ")
+                        }
+                    ),
+                );
+                change_government_type(game, p, &c);
+                return;
             }
             panic!("Illegal action")
         },

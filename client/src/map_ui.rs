@@ -223,10 +223,11 @@ fn highlight_if(b: bool) -> Color {
 }
 
 pub(crate) fn show_tile_menu(rc: &RenderContext, pos: Position) -> RenderResult {
-    if let Some(city) = rc.game.try_get_any_city(pos) {
-        if rc.can_control_shown_player() && rc.shown_player.index == city.player_index {
-            return show_city_menu(rc, city);
-        }
+    if let Some(city) = rc.game.try_get_any_city(pos)
+        && rc.can_control_shown_player()
+        && rc.shown_player.index == city.player_index
+    {
+        return show_city_menu(rc, city);
     }
 
     let mut icons = move_units_buttons(rc, pos);

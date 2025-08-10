@@ -165,16 +165,16 @@ pub(crate) fn play_action_card(game: &mut Game, player_index: usize, id: u8) {
 
     let mut satisfying_action: Option<usize> = None;
     let civil_card_target = card.target;
-    if let Some(r) = &card.combat_requirement {
-        if let Some(action_log_index) = combat_requirement_met(game, player_index, id, r) {
-            satisfying_action = Some(action_log_index);
-            current_player_turn_log_mut(game).actions[action_log_index]
-                .combat_stats
-                .as_mut()
-                .expect("combat stats")
-                .claimed_action_cards
-                .push(id);
-        }
+    if let Some(r) = &card.combat_requirement
+        && let Some(action_log_index) = combat_requirement_met(game, player_index, id, r)
+    {
+        satisfying_action = Some(action_log_index);
+        current_player_turn_log_mut(game).actions[action_log_index]
+            .combat_stats
+            .as_mut()
+            .expect("combat stats")
+            .claimed_action_cards
+            .push(id);
     }
     on_play_action_card(
         game,
@@ -323,12 +323,11 @@ pub fn combat_requirement_met(
     };
 
     current_player_turn_log(game).actions.iter().position(|a| {
-        if let Some(stats) = &a.combat_stats {
-            if requirement(stats, game.player(player))
-                && !stats.claimed_action_cards.contains(&sister_card)
-            {
-                return true;
-            }
+        if let Some(stats) = &a.combat_stats
+            && requirement(stats, game.player(player))
+            && !stats.claimed_action_cards.contains(&sister_card)
+        {
+            return true;
         }
         false
     })

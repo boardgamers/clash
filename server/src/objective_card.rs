@@ -396,25 +396,25 @@ pub(crate) fn draw_objective_card_from_pile(game: &mut Game, player: &EventPlaye
 fn draw_great_seer_card(game: &mut Game, player: &EventPlayer) -> Option<u8> {
     let mut remove_great_seer = false;
     let mut result = None;
-    if let Some(great_seer) = find_great_seer(game) {
-        if let Some(o) = great_seer.assigned_objectives.iter().find_map(|o| {
+    if let Some(great_seer) = find_great_seer(game)
+        && let Some(o) = great_seer.assigned_objectives.iter().find_map(|o| {
             if o.player == player.index {
                 Some(o.clone())
             } else {
                 None
             }
-        }) {
-            remove_element(&mut great_seer.assigned_objectives, &o)
-                .unwrap_or_else(|| panic!("should be able to remove objective card {o:?}"));
-            remove_great_seer = great_seer.assigned_objectives.is_empty();
-            result = Some(o.objective_card);
-            log_gain_objective_card(
-                game,
-                player,
-                o.objective_card,
-                HandCardLocation::GreatSeer(player.index),
-            );
-        }
+        })
+    {
+        remove_element(&mut great_seer.assigned_objectives, &o)
+            .unwrap_or_else(|| panic!("should be able to remove objective card {o:?}"));
+        remove_great_seer = great_seer.assigned_objectives.is_empty();
+        result = Some(o.objective_card);
+        log_gain_objective_card(
+            game,
+            player,
+            o.objective_card,
+            HandCardLocation::GreatSeer(player.index),
+        );
     }
 
     if remove_great_seer {

@@ -387,10 +387,10 @@ pub(crate) fn can_construct_wonder(
     if !player.can_use_advance(Advance::Engineering) {
         return Err("Engineering advance missing".to_string());
     }
-    if let Some(placement_requirement) = &info.placement_requirement {
-        if !placement_requirement(city.position, game) {
-            return Err("Placement requirement not met".to_string());
-        }
+    if let Some(placement_requirement) = &info.placement_requirement
+        && !placement_requirement(city.position, game)
+    {
+        return Err("Placement requirement not met".to_string());
     }
     let cost = player.trigger_cost_event(
         |e| &e.wonder_cost,

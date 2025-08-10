@@ -323,13 +323,12 @@ fn has_any_moves_left(game: &mut Game) -> bool {
     if let Movement(state) = &game.state {
         let p = game.player(game.current_player_index);
 
-        if let CurrentMove::Fleet { units } = &state.current_move {
-            if !possible_move_destinations(game, p.index, units, p.get_unit(units[0]).position)
+        if let CurrentMove::Fleet { units } = &state.current_move
+            && !possible_move_destinations(game, p.index, units, p.get_unit(units[0]).position)
                 .list
                 .is_empty()
-            {
-                return true;
-            }
+        {
+            return true;
         }
 
         p.units.iter().any(|unit| {

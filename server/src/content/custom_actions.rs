@@ -226,16 +226,16 @@ pub(crate) fn can_play_custom_action(
     }
 
     let info = p.custom_action_info(c);
-    if let Some(key) = info.cost.once_per_turn {
-        if p.played_once_per_turn_actions.contains(&key) {
-            return Err("Custom action already played this turn".to_string());
-        }
+    if let Some(key) = info.cost.once_per_turn
+        && p.played_once_per_turn_actions.contains(&key)
+    {
+        return Err("Custom action already played this turn".to_string());
     }
 
-    if let CustomActionExecution::Action(e) = &info.execution {
-        if !(e.checker)(game, p) {
-            return Err("Custom action cannot be played".to_string());
-        }
+    if let CustomActionExecution::Action(e) = &info.execution
+        && !(e.checker)(game, p)
+    {
+        return Err("Custom action cannot be played".to_string());
     }
     Ok(())
 }

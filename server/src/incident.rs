@@ -742,15 +742,15 @@ pub fn is_active(
         return play_base_effect(i);
     }
     // protection advance does not protect against base effects
-    if let Some(advance) = protection_advance {
-        if game.player(player).can_use_advance(*advance) {
-            return false;
-        }
+    if let Some(advance) = protection_advance
+        && game.player(player).can_use_advance(*advance)
+    {
+        return false;
     }
-    if let Some(advance) = protection_special_advance {
-        if game.player(player).has_special_advance(*advance) {
-            return false;
-        }
+    if let Some(advance) = protection_special_advance
+        && game.player(player).has_special_advance(*advance)
+    {
+        return false;
     }
     true
 }

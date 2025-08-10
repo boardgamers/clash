@@ -238,11 +238,11 @@ pub(crate) fn show_top_left(rc: &RenderContext, painter: &mut ColumnLabelPainter
         }
     }
 
-    if rc.shown_player_is_active() {
-        if let Some(u) = &rc.state.pending_update {
-            for m in &u.info {
-                painter.label(m);
-            }
+    if rc.shown_player_is_active()
+        && let Some(u) = &rc.state.pending_update
+    {
+        for m in &u.info {
+            painter.label(m);
         }
     }
 
@@ -379,10 +379,10 @@ pub(crate) fn show_global_controls(rc: &RenderContext, features: &Features) -> R
     let can_control = rc.can_control_shown_player();
     if can_control {
         let game = rc.game;
-        if let Some(tooltip) = can_end_move(game) {
-            if bottom_right_texture(rc, &assets.end_turn, icon_pos(-4, -1), tooltip) {
-                return end_move(game);
-            }
+        if let Some(tooltip) = can_end_move(game)
+            && bottom_right_texture(rc, &assets.end_turn, icon_pos(-4, -1), tooltip)
+        {
+            return end_move(game);
         }
         if game.can_redo() && bottom_right_texture(rc, &assets.redo, icon_pos(-5, -1), "Redo") {
             return StateUpdate::execute(Action::Redo);

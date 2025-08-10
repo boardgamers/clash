@@ -263,12 +263,12 @@ pub(crate) fn unit_selection_click<T: UnitSelection + Clone>(
     on_change: impl Fn(T) -> RenderResult,
 ) -> RenderResult {
     let p = rc.game.player(sel.player_index());
-    if let Some(unit_id) = click_unit(rc, pos, mouse_pos, p, true) {
-        if sel.can_select(rc.game, p.get_unit(unit_id)) {
-            let mut new = sel.clone();
-            unit_selection_clicked(unit_id, new.selected_units_mut());
-            return on_change(new);
-        }
+    if let Some(unit_id) = click_unit(rc, pos, mouse_pos, p, true)
+        && sel.can_select(rc.game, p.get_unit(unit_id))
+    {
+        let mut new = sel.clone();
+        unit_selection_clicked(unit_id, new.selected_units_mut());
+        return on_change(new);
     }
     NO_UPDATE
 }
