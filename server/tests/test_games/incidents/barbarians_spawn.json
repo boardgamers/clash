@@ -131,17 +131,17 @@
       "cities": [
         {
           "mood_state": "Angry",
-          "position": "C1"
+          "position": "C4"
         }
       ],
       "units": [
         {
-          "position": "C1",
+          "position": "C4",
           "unit_type": "Infantry",
           "id": 0
         },
         {
-          "position": "C1",
+          "position": "C4",
           "unit_type": "Infantry",
           "id": 1
         }
@@ -195,7 +195,7 @@
         "Fertile"
       ],
       [
-        "C1",
+        "C4",
         "Barren"
       ],
       [
