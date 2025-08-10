@@ -262,14 +262,13 @@ pub(crate) fn log_round(game: &mut Game, c: &Combat) {
 pub(crate) fn start_combat(game: &mut Game, combat: Combat) {
     stop_current_move(game);
 
-    let c = match game.trigger_persistent_event(
+    let Some(c) = game.trigger_persistent_event(
         &combat.players(),
         |events| &mut events.combat_start,
         combat,
         PersistentEventType::CombatStart,
-    ) {
-        None => return,
-        Some(c) => c,
+    ) else {
+        return;
     };
 
     combat_loop(game, CombatRoundStart::new(c));

@@ -303,24 +303,23 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             priority,
             move |game, _i, (), details, p| {
                 if let Some(mut phase) = game.events.pop() {
-                    if let Some(ref c) = phase.player.handler {
-                        if let Some(ref action) = c.response {
-                            if c.priority == priority {
-                                let mut current = phase.clone();
-                                current
-                                    .player
-                                    .handler
-                                    .as_mut()
-                                    .expect("current missing")
-                                    .response = None;
-                                let r = c.request.clone();
-                                let a = action.clone();
-                                phase.player.handler = None;
-                                game.events.push(phase);
-                                end_custom_phase.clone()(game, p, a, r, details);
-                                return;
-                            }
-                        }
+                    if let Some(ref c) = phase.player.handler
+                        && let Some(ref action) = c.response
+                        && c.priority == priority
+                    {
+                        let mut current = phase.clone();
+                        current
+                            .player
+                            .handler
+                            .as_mut()
+                            .expect("current missing")
+                            .response = None;
+                        let r = c.request.clone();
+                        let a = action.clone();
+                        phase.player.handler = None;
+                        game.events.push(phase);
+                        end_custom_phase.clone()(game, p, a, r, details);
+                        return;
                     }
                     let is_current = phase.player.handler.is_some();
                     game.events.push(phase);
@@ -406,19 +405,19 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                     .map(PersistentEventRequest::Payment)
             },
             move |game, p, action, request, details| {
-                if let PersistentEventRequest::Payment(requests) = &request {
-                    if let EventResponse::Payment(payments) = action {
-                        assert_eq!(requests.len(), payments.len());
-                        for (request, payment) in requests.iter().zip(payments.iter()) {
-                            pay_cost(game, p.index, request, payment);
-                        }
-                        gain_reward(
-                            game,
-                            &SelectedWithoutChoices::new(p, true, (), payments),
-                            details,
-                        );
-                        return;
+                if let PersistentEventRequest::Payment(requests) = &request
+                    && let EventResponse::Payment(payments) = action
+                {
+                    assert_eq!(requests.len(), payments.len());
+                    for (request, payment) in requests.iter().zip(payments.iter()) {
+                        pay_cost(game, p.index, request, payment);
                     }
+                    gain_reward(
+                        game,
+                        &SelectedWithoutChoices::new(p, true, (), payments),
+                        details,
+                    );
+                    return;
                 }
                 panic!("Expected payment response");
             },
@@ -467,35 +466,35 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             priority,
             move |game, player, details| {
                 let req = request(game, player, details);
-                if let Some(r) = &req {
-                    if r.reward.payment_options.possible_resource_types().len() == 1 {
-                        let pile = r.reward.payment_options.default_payment();
-                        response2(
-                            game,
-                            &r.reward.selected_choice(player, pile.clone(), false),
-                            details,
-                        );
-                        player.gain_resources(game, pile);
-                        return None;
-                    }
+                if let Some(r) = &req
+                    && r.reward.payment_options.possible_resource_types().len() == 1
+                {
+                    let pile = r.reward.payment_options.default_payment();
+                    response2(
+                        game,
+                        &r.reward.selected_choice(player, pile.clone(), false),
+                        details,
+                    );
+                    player.gain_resources(game, pile);
+                    return None;
                 }
                 req.map(PersistentEventRequest::ResourceReward)
             },
             move |game, player, action, request, details| {
-                if let PersistentEventRequest::ResourceReward(request) = &request {
-                    if let EventResponse::ResourceReward(reward) = action {
-                        assert!(
-                            request.reward.payment_options.is_valid_payment(&reward),
-                            "Invalid reward"
-                        );
-                        response(
-                            game,
-                            &request.reward.selected_choice(player, reward.clone(), true),
-                            details,
-                        );
-                        player.gain_resources(game, reward);
-                        return;
-                    }
+                if let PersistentEventRequest::ResourceReward(request) = &request
+                    && let EventResponse::ResourceReward(reward) = action
+                {
+                    assert!(
+                        request.reward.payment_options.is_valid_payment(&reward),
+                        "Invalid reward"
+                    );
+                    response(
+                        game,
+                        &request.reward.selected_choice(player, reward.clone(), true),
+                        details,
+                    );
+                    player.gain_resources(game, reward);
+                    return;
                 }
                 panic!("Expected resource reward response");
             },
@@ -528,15 +527,15 @@ pub(crate) trait AbilityInitializerSetup: Sized {
                 request(game, p, details).map(PersistentEventRequest::BoolRequest)
             },
             move |game, p, action, request, details| {
-                if let PersistentEventRequest::BoolRequest(_) = &request {
-                    if let EventResponse::Bool(reward) = action {
-                        gain_reward(
-                            game,
-                            &SelectedWithoutChoices::new(p, true, (), reward),
-                            details,
-                        );
-                        return;
-                    }
+                if let PersistentEventRequest::BoolRequest(_) = &request
+                    && let EventResponse::Bool(reward) = action
+                {
+                    gain_reward(
+                        game,
+                        &SelectedWithoutChoices::new(p, true, (), reward),
+                        details,
+                    );
+                    return;
                 }
                 panic!("Boolean request expected");
             },
@@ -568,10 +567,10 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             |r| &r.choices,
             PersistentEventRequest::SelectAdvance,
             |request, action| {
-                if let PersistentEventRequest::SelectAdvance(request) = &request {
-                    if let EventResponse::SelectAdvance(reward) = action {
-                        return (request.choices.clone(), reward);
-                    }
+                if let PersistentEventRequest::SelectAdvance(request) = &request
+                    && let EventResponse::SelectAdvance(reward) = action
+                {
+                    return (request.choices.clone(), reward);
                 }
                 panic!("Advance request expected");
             },
@@ -605,10 +604,10 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             |r| r,
             PersistentEventRequest::SelectPositions,
             |request, action| {
-                if let PersistentEventRequest::SelectPositions(request) = &request {
-                    if let EventResponse::SelectPositions(reward) = action {
-                        return (request.choices.clone(), reward, request.needed.clone());
-                    }
+                if let PersistentEventRequest::SelectPositions(request) = &request
+                    && let EventResponse::SelectPositions(reward) = action
+                {
+                    return (request.choices.clone(), reward, request.needed.clone());
                 }
                 panic!("Position request expected");
             },
@@ -642,10 +641,10 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             |r| &r.choices,
             PersistentEventRequest::SelectPlayer,
             |request, action| {
-                if let PersistentEventRequest::SelectPlayer(request) = &request {
-                    if let EventResponse::SelectPlayer(reward) = action {
-                        return (request.choices.clone(), reward);
-                    }
+                if let PersistentEventRequest::SelectPlayer(request) = &request
+                    && let EventResponse::SelectPlayer(reward) = action
+                {
+                    return (request.choices.clone(), reward);
                 }
                 panic!("Player request expected");
             },
@@ -679,10 +678,10 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             |r| &r.choices,
             PersistentEventRequest::SelectUnitType,
             |request, action| {
-                if let PersistentEventRequest::SelectUnitType(request) = &request {
-                    if let EventResponse::SelectUnitType(reward) = action {
-                        return (request.choices.clone(), reward);
-                    }
+                if let PersistentEventRequest::SelectUnitType(request) = &request
+                    && let EventResponse::SelectUnitType(reward) = action
+                {
+                    return (request.choices.clone(), reward);
                 }
                 panic!("Unit type request expected");
             },
@@ -716,10 +715,10 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             |r| r,
             PersistentEventRequest::SelectHandCards,
             |request, action| {
-                if let PersistentEventRequest::SelectHandCards(request) = &request {
-                    if let EventResponse::SelectHandCards(choices) = action {
-                        return (request.choices.clone(), choices, request.needed.clone());
-                    }
+                if let PersistentEventRequest::SelectHandCards(request) = &request
+                    && let EventResponse::SelectHandCards(choices) = action
+                {
+                    return (request.choices.clone(), choices, request.needed.clone());
                 }
                 panic!("Hand Cards request expected");
             },
@@ -757,14 +756,14 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             |r| &r.request,
             PersistentEventRequest::SelectUnits,
             |request, action| {
-                if let PersistentEventRequest::SelectUnits(request) = &request {
-                    if let EventResponse::SelectUnits(choices) = action {
-                        return (
-                            request.request.choices.clone(),
-                            choices,
-                            request.request.needed.clone(),
-                        );
-                    }
+                if let PersistentEventRequest::SelectUnits(request) = &request
+                    && let EventResponse::SelectUnits(choices) = action
+                {
+                    return (
+                        request.request.choices.clone(),
+                        choices,
+                        request.request.needed.clone(),
+                    );
                 }
                 panic!("Units request expected");
             },
@@ -806,10 +805,10 @@ pub(crate) trait AbilityInitializerSetup: Sized {
             |r| r,
             PersistentEventRequest::SelectStructures,
             |request, action| {
-                if let PersistentEventRequest::SelectStructures(request) = &request {
-                    if let EventResponse::SelectStructures(choices) = action {
-                        return (request.choices.clone(), choices, request.needed.clone());
-                    }
+                if let PersistentEventRequest::SelectStructures(request) = &request
+                    && let EventResponse::SelectStructures(choices) = action
+                {
+                    return (request.choices.clone(), choices, request.needed.clone());
                 }
                 panic!("Structures request expected");
             },

@@ -227,10 +227,10 @@ impl Player {
         if self.has_advance(advance) {
             return false;
         }
-        if let Some(required_advance) = advance.info(game).required {
-            if !self.has_advance(required_advance) {
-                return false;
-            }
+        if let Some(required_advance) = advance.info(game).required
+            && !self.has_advance(required_advance)
+        {
+            return false;
         }
         true
     }

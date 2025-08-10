@@ -171,10 +171,10 @@ pub(crate) fn draw_resource_collect_tile(rc: &RenderContext, pos: Position) -> R
         let pile_collect = tile_collects.iter().find(|r| &r.pile == pile);
         let color = if pile_collect.is_some() { BLACK } else { WHITE };
         rc.draw_circle(center, radius, color);
-        if let Some(p) = mouse_pressed_position(rc) {
-            if is_in_circle(p, center, radius) {
-                return click_collect_option(rc, collect, pos, pile);
-            }
+        if let Some(p) = mouse_pressed_position(rc)
+            && is_in_circle(p, center, radius)
+        {
+            return click_collect_option(rc, collect, pos, pile);
         }
 
         let map = new_resource_map(pile);

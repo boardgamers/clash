@@ -646,10 +646,10 @@ fn kill_unit(game: &mut Game, unit_id: u32, player_index: usize, killer: Option<
             game.players[killer].captured_leaders.push(leader);
         }
     }
-    if let GameState::Movement(m) = &mut game.state {
-        if let CurrentMove::Fleet { units } = &mut m.current_move {
-            units.retain(|&id| id != unit_id);
-        }
+    if let GameState::Movement(m) = &mut game.state
+        && let CurrentMove::Fleet { units } = &mut m.current_move
+    {
+        units.retain(|&id| id != unit_id);
     }
 }
 

@@ -221,10 +221,10 @@ impl Cache {
             .map_or_else(
                 || {
                     for c in game.player(game.active_player()).custom_actions.values() {
-                        if let CustomActionExecution::Action(e) = &c.execution {
-                            if e.ability.name == name {
-                                return Some(t(&e.ability));
-                            }
+                        if let CustomActionExecution::Action(e) = &c.execution
+                            && e.ability.name == name
+                        {
+                            return Some(t(&e.ability));
                         }
                     }
 

@@ -131,10 +131,10 @@ fn render_ui(rc: &RenderContext, features: &Features) -> RenderResult {
         return StateUpdate::of(StateUpdate::ToggleShowPermanentEffects);
     }
 
-    if let Some(pos) = state.focused_tile {
-        if matches!(state.active_dialog, ActiveDialog::None) {
-            show_tile_menu(rc, pos)?;
-        }
+    if let Some(pos) = state.focused_tile
+        && matches!(state.active_dialog, ActiveDialog::None)
+    {
+        show_tile_menu(rc, pos)?;
     }
     NO_UPDATE
 }

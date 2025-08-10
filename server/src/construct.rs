@@ -222,16 +222,15 @@ pub(crate) fn on_construct(game: &mut Game, player_index: usize, info: Construct
         |e| &mut e.construct,
         info,
         PersistentEventType::Construct,
-    ) {
-        if let Some(b) = i.gained_advance {
-            gain_advance_without_payment(
-                game,
-                b.advance,
-                &EventPlayer::from_player(player_index, game, b.origin),
-                ResourcePile::empty(),
-                true,
-            );
-        }
+    ) && let Some(b) = i.gained_advance
+    {
+        gain_advance_without_payment(
+            game,
+            b.advance,
+            &EventPlayer::from_player(player_index, game, b.origin),
+            ResourcePile::empty(),
+            true,
+        );
     }
 }
 

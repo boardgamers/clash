@@ -418,14 +418,13 @@ pub(crate) fn gain_advance_without_payment(
 }
 
 pub(crate) fn on_advance(game: &mut Game, player_index: usize, info: OnAdvanceInfo) {
-    let info = match game.trigger_persistent_event(
+    let Some(info) = game.trigger_persistent_event(
         &[player_index],
         |e| &mut e.advance,
         info,
         PersistentEventType::Advance,
-    ) {
-        None => return,
-        Some(i) => i,
+    ) else {
+        return;
     };
 
     if info.take_incident_token {

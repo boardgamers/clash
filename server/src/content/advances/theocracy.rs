@@ -77,10 +77,11 @@ fn devotion() -> AdvanceBuilder {
         |event| &mut event.on_influence_culture_attempt,
         4,
         |r, city, _, _| {
-            if let Ok(info) = r {
-                if info.is_defender && city.pieces.temple.is_some() {
-                    info.set_no_boost();
-                }
+            if let Ok(info) = r
+                && info.is_defender
+                && city.pieces.temple.is_some()
+            {
+                info.set_no_boost();
             }
         },
     )
@@ -97,14 +98,14 @@ fn conversion() -> AdvanceBuilder {
         |event| &mut event.on_influence_culture_attempt,
         3,
         |r, _, _, p| {
-            if let Ok(info) = r {
-                if !info.is_defender {
-                    info.roll_boost += 1;
-                    info.info.add_log(
-                        p,
-                        "Gain +1 to Influence Culture roll for Conversion Advance",
-                    );
-                }
+            if let Ok(info) = r
+                && !info.is_defender
+            {
+                info.roll_boost += 1;
+                info.info.add_log(
+                    p,
+                    "Gain +1 to Influence Culture roll for Conversion Advance",
+                );
             }
         },
     )

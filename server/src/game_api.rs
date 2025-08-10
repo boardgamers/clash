@@ -113,11 +113,11 @@ pub fn civilizations(game: Game) -> Vec<String> {
 #[must_use]
 pub fn strip_secret(mut game: Game, player_index: Option<usize>) -> Game {
     for e in &mut game.permanent_effects {
-        if let PermanentEffect::GreatSeer(g) = e {
-            if player_index != Some(g.player) {
-                // player shouldn't see other player's great seer
-                g.strip_secret();
-            }
+        if let PermanentEffect::GreatSeer(g) = e
+            && player_index != Some(g.player)
+        {
+            // player shouldn't see other player's great seer
+            g.strip_secret();
         }
     }
     game.incidents_left.shuffle(&mut game.rng);
@@ -160,13 +160,13 @@ fn strip_action(action: &mut ActionLogAction, player_index: Option<usize>) {
     }
 
     for item in &mut action.items {
-        if let ActionLogEntry::HandCard { card, from, to } = &mut item.entry {
-            if is_visible_card_info(player_index, from, to) {
-                match &card {
-                    HandCard::ActionCard(_) => *card = HandCard::ActionCard(0),
-                    HandCard::ObjectiveCard(_) => *card = HandCard::ObjectiveCard(0),
-                    HandCard::Wonder(_) => *card = HandCard::Wonder(Wonder::Hidden),
-                }
+        if let ActionLogEntry::HandCard { card, from, to } = &mut item.entry
+            && is_visible_card_info(player_index, from, to)
+        {
+            match &card {
+                HandCard::ActionCard(_) => *card = HandCard::ActionCard(0),
+                HandCard::ObjectiveCard(_) => *card = HandCard::ObjectiveCard(0),
+                HandCard::Wonder(_) => *card = HandCard::Wonder(Wonder::Hidden),
             }
         }
     }
@@ -195,25 +195,25 @@ fn strip_events(game: &mut Game, player_index: Option<usize>) {
             PersistentEventType::SelectObjectives(o) if Some(s.player.index) != player_index => {
                 // player shouldn't see other player's objectives
                 o.strip_secret();
-                if let Some(handler) = &mut s.player.handler {
-                    if let PersistentEventRequest::SelectHandCards(c) = &mut handler.request {
-                        c.description = "Complete an objective card".to_string();
-                    }
+                if let Some(handler) = &mut s.player.handler
+                    && let PersistentEventRequest::SelectHandCards(c) = &mut handler.request
+                {
+                    c.description = "Complete an objective card".to_string();
                 }
             }
             _ => {}
         }
         let current_event_player = &mut s.player;
-        if player_index != Some(current_event_player.index) {
-            if let Some(handler) = &mut current_event_player.handler {
-                if let PersistentEventRequest::SelectHandCards(c) = &mut handler.request {
-                    // player shouldn't see other player's hand cards
-                    c.choices.clear();
-                }
-                if let Some(EventResponse::SelectHandCards(c)) = &mut handler.response {
-                    // player shouldn't see other player's hand cards
-                    c.clear();
-                }
+        if player_index != Some(current_event_player.index)
+            && let Some(handler) = &mut current_event_player.handler
+        {
+            if let PersistentEventRequest::SelectHandCards(c) = &mut handler.request {
+                // player shouldn't see other player's hand cards
+                c.choices.clear();
+            }
+            if let Some(EventResponse::SelectHandCards(c)) = &mut handler.response {
+                // player shouldn't see other player's hand cards
+                c.clear();
             }
         }
     }

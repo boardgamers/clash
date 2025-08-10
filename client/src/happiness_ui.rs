@@ -95,15 +95,15 @@ pub(crate) fn add_increase_happiness(
         .iter()
         .map(|(p, steps)| {
             let old_steps = *steps;
-            if *p == city.position {
-                if let Some(r) = increase_happiness_steps(
+            if *p == city.position
+                && let Some(r) = increase_happiness_steps(
                     rc,
                     city,
                     old_steps,
                     &increase_happiness.custom.action_type,
-                ) {
-                    return (*p, r);
-                }
+                )
+            {
+                return (*p, r);
             }
             (*p, old_steps)
         })

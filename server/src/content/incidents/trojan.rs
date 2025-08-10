@@ -111,23 +111,23 @@ pub(crate) fn solar_eclipse_end_combat() -> Ability {
                     .permanent_effects
                     .iter()
                     .position(|e| matches!(e, PermanentEffect::SolarEclipse))
+                    && r.combat.first_round()
+                    && r.combat.is_land_battle(game)
                 {
-                    if r.combat.first_round() && r.combat.is_land_battle(game) {
-                        game.permanent_effects.remove(p);
-                        r.combat.retreat = CombatRetreatState::EndAfterCurrentRound;
+                    game.permanent_effects.remove(p);
+                    r.combat.retreat = CombatRetreatState::EndAfterCurrentRound;
 
-                        let winner = match &r.final_result {
-                            Some(CombatResult::AttackerWins) => r.combat.attacker(),
-                            _ => r.combat.defender(),
-                        };
-                        game.player_mut(winner)
-                            .gain_event_victory_points(1_f32, &EventOrigin::Incident(41));
-                        game.log(
-                            winner,
-                            &player.origin,
-                            "Gain 1 victory point for the Solar Eclipse",
-                        );
-                    }
+                    let winner = match &r.final_result {
+                        Some(CombatResult::AttackerWins) => r.combat.attacker(),
+                        _ => r.combat.defender(),
+                    };
+                    game.player_mut(winner)
+                        .gain_event_victory_points(1_f32, &EventOrigin::Incident(41));
+                    game.log(
+                        winner,
+                        &player.origin,
+                        "Gain 1 victory point for the Solar Eclipse",
+                    );
                 }
             },
         )
@@ -292,10 +292,10 @@ fn anarchy() -> Incident {
             remove_advance(game, a, p);
         }
 
-        if game.player(player_index).government(game).is_some() {
-            if let Some(special_advance) = find_government_special_advance(game, player_index) {
-                undo_unlock_special_advance(game, special_advance, player_index);
-            }
+        if game.player(player_index).government(game).is_some()
+            && let Some(special_advance) = find_government_special_advance(game, player_index)
+        {
+            undo_unlock_special_advance(game, special_advance, player_index);
         }
 
         let player = game.player_mut(player_index);
@@ -336,20 +336,19 @@ pub(crate) fn anarchy_advance() -> Ability {
                     } else {
                         None
                     }
-                }) {
-                    if p.index == a.player {
-                        p.log(
-                            game,
-                            "Gain a government advance, taking a game event token \
+                }) && p.index == a.player
+                {
+                    p.log(
+                        game,
+                        "Gain a government advance, taking a game event token \
                             instead of triggering a game event (and losing 1 victory point)",
-                        );
-                        let p = p.get_mut(game);
-                        p.incident_tokens += 1;
-                        p.gain_event_victory_points(-1_f32, &EventOrigin::Incident(44));
-                        a.advances_lost -= 1;
-                        if a.advances_lost > 0 {
-                            game.permanent_effects.push(PermanentEffect::Anarchy(a));
-                        }
+                    );
+                    let p = p.get_mut(game);
+                    p.incident_tokens += 1;
+                    p.gain_event_victory_points(-1_f32, &EventOrigin::Incident(44));
+                    a.advances_lost -= 1;
+                    if a.advances_lost > 0 {
+                        game.permanent_effects.push(PermanentEffect::Anarchy(a));
                     }
                 }
             },

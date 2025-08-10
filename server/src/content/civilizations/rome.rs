@@ -330,13 +330,13 @@ fn sulla() -> LeaderInfo {
                 |event| &mut event.on_influence_culture_attempt,
                 6,
                 |r, city, game, _| {
-                    if let Ok(info) = r {
-                        if info.is_defender
-                            && leader_position(game.player(city.player_index)) == city.position
-                        {
-                            *r = Err("Sulla prevents influence culture attempts in this city"
+                    if let Ok(info) = r
+                        && info.is_defender
+                        && leader_position(game.player(city.player_index)) == city.position
+                    {
+                        *r =
+                            Err("Sulla prevents influence culture attempts in this city"
                                 .to_string());
-                        }
                     }
                 },
             ),

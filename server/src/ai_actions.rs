@@ -144,13 +144,13 @@ fn base_actions(ai: &mut AiActions, game: &Game) -> Vec<(ActionType, Vec<Action>
 
     // IncreaseHappiness
     let happiness = available_happiness_actions(game, p.index);
-    if !happiness.is_empty() {
-        if let Some(h) = calculate_increase_happiness(p, &prefer_custom_action(&happiness), game) {
-            actions.push((
-                ActionType::Playing(PlayingActionType::IncreaseHappiness),
-                vec![Action::Playing(PlayingAction::IncreaseHappiness(h))],
-            ));
-        }
+    if !happiness.is_empty()
+        && let Some(h) = calculate_increase_happiness(p, &prefer_custom_action(&happiness), game)
+    {
+        actions.push((
+            ActionType::Playing(PlayingActionType::IncreaseHappiness),
+            vec![Action::Playing(PlayingAction::IncreaseHappiness(h))],
+        ));
     }
 
     // InfluenceCultureAttempt,
