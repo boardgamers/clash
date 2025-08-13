@@ -237,12 +237,14 @@ fn next_road_step(
 #[must_use]
 fn reachable_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<MoveRoute> {
     let ship = units.iter().find_map(|&id| {
-        let unit = player.get_unit(id);
-        if unit.is_ship() {
-            Some(unit.position)
-        } else {
-            None
-        }
+        player
+            .get_unit(id)
+            .is_ship()
+            .then_some(player.get_unit(id).position)
+            .filter(|p| {
+                // need at least one neighbor that is outside the map
+                p.neighbors().iter().any(|n| map.is_outside(*n))
+            })
     });
     if let Some(ship) = ship {
         let perimeter = find_perimeter(map, ship);
