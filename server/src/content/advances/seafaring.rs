@@ -54,28 +54,46 @@ fn war_ships() -> AdvanceBuilder {
 }
 
 fn cartography() -> AdvanceBuilder {
-    AdvanceInfo::builder(
+    let mut b = AdvanceInfo::builder(
         Advance::Cartography,
         "Cartography",
         "Gain 1 idea after a move action where you moved a Ship. \
         If you used navigation, gain an additional 1 culture token.",
     )
-    .with_advance_bonus(CultureToken)
-    .add_transient_event_listener(
+    .with_advance_bonus(CultureToken);
+    b = add_cartography_bonus(b, 0, "Cartography", |_| true, ResourcePile::ideas(1));
+    b = add_cartography_bonus(
+        b,
+        1,
+        "Cartography-navigation",
+        |navigation| navigation,
+        ResourcePile::culture_tokens(1),
+    );
+    b
+}
+
+fn add_cartography_bonus(
+    b: AdvanceBuilder,
+    priority: i32,
+    key: &'static str,
+    pred: impl Fn(bool) -> bool + Sync + Clone + Send + 'static,
+    bonus: ResourcePile,
+) -> AdvanceBuilder {
+    b.add_transient_event_listener(
         |event| &mut event.before_move,
-        0,
-        |game, i, (), p| {
+        priority,
+        move |game, i, (), p| {
             if game.map.is_land(i.from) {
                 // ship construction (or no ship at all)
                 return;
             }
 
             // info is the action that we last used this ability for
-            let key = game.actions_left.to_string();
+            let val = game.actions_left.to_string();
             if p.get(game)
                 .event_info
-                .get("Cartography")
-                .is_some_and(|info| info == &key)
+                .get(key)
+                .is_some_and(|info| info == &val)
             {
                 return;
             }
@@ -90,14 +108,10 @@ fn cartography() -> AdvanceBuilder {
                     }
                 }
             }
-            if ship {
-                p.get_mut(game)
-                    .event_info
-                    .insert("Cartography".to_string(), key);
-                p.gain_resources(game, ResourcePile::ideas(1));
-                if navigation {
-                    p.gain_resources(game, ResourcePile::culture_tokens(1));
-                }
+
+            if ship && pred(navigation) {
+                p.get_mut(game).event_info.insert(key.to_string(), val);
+                p.gain_resources(game, bonus.clone());
             }
         },
     )
