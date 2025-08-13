@@ -245,7 +245,7 @@ fn reachable_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<M
         }
     });
     if let Some(ship) = ship {
-        let mut perimeter = find_perimeter(map, ship);
+        let perimeter = find_perimeter(map, ship);
         let can_navigate = |p: &Position| *p != ship && (map.is_sea(*p) || map.is_unexplored(*p));
         // skip the first position as it is the ship's current position
         let first = perimeter.iter().skip(1).copied().find(can_navigate);
@@ -266,7 +266,6 @@ fn reachable_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<M
     }
     vec![]
 }
-use std::collections::HashSet;
 
 pub fn find_perimeter(map: &Map, start_tile: Position) -> Vec<Position> {
     let is_inside = |pos: Position| map.is_inside(pos);
@@ -283,14 +282,9 @@ pub fn find_perimeter(map: &Map, start_tile: Position) -> Vec<Position> {
 
     let mut path = Vec::new();
     let mut tile = start_tile;
-    let mut visited = HashSet::new();
 
     loop {
         path.push(tile);
-
-        if !visited.insert((tile, facing)) {
-            break; // back to same tile & facing
-        }
 
         let neighs = tile.neighbors();
 
@@ -299,30 +293,25 @@ pub fn find_perimeter(map: &Map, start_tile: Position) -> Vec<Position> {
         if is_inside(neighs[right_dir]) {
             tile = neighs[right_dir];
             facing = right_dir;
-            continue;
         }
-
         // Try going straight
-        if is_inside(neighs[facing]) {
+        else if is_inside(neighs[facing]) {
             tile = neighs[facing];
-            continue;
         }
-
         // Turn left until we find an inside tile
-        let mut found = false;
-        let mut new_facing = facing;
-        for _ in 1..6 {
-            new_facing = (new_facing + 1) % 6;
-            if is_inside(neighs[new_facing]) {
-                tile = neighs[new_facing];
-                facing = new_facing;
-                found = true;
-                break;
+        else {
+            for _ in 1..6 {
+                facing = (facing + 1) % 6;
+                if is_inside(neighs[facing]) {
+                    tile = neighs[facing];
+                    break;
+                }
             }
         }
 
-        if !found {
-            break; // safety stop
+        // Stop when back at starting state
+        if tile == start_tile {
+            break;
         }
     }
 
