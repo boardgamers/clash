@@ -107,9 +107,9 @@ fn reachable_with_roads(
         }
 
         let roman_roads = player.has_special_advance(SpecialAdvance::RomanRoads);
-        let mut routes: Vec<MoveRoute> = next_road_step(player, game, start, stack_size)
+        let mut routes: Vec<MoveRoute> = next_road_step(player, game, start, stack_size, |_| false)
             .into_iter()
-            .flat_map(|middle| next_road_step(player, game, middle, stack_size))
+            .flat_map(|middle| next_road_step(player, game, middle, stack_size, |_| true))
             .unique()
             .filter_map(|destination| {
                 road_route(
@@ -156,7 +156,7 @@ fn roman_roads_routes(
             let len = astar(
                 &start,
                 |p| {
-                    next_road_step(player, game, *p, stack_size)
+                    next_road_step(player, game, *p, stack_size, |p| *p == dst)
                         .iter()
                         .map(|&n| (n, 1))
                         .collect_vec()
@@ -217,6 +217,7 @@ fn next_road_step(
     game: &Game,
     from: Position,
     stack_size: usize,
+    allow_enemy: impl Fn(&Position) -> bool,
 ) -> Vec<Position> {
     // don't move over enemy units or cities
     from.neighbors()
@@ -228,7 +229,7 @@ fn next_road_step(
                 .filter(|unit| unit.is_army_unit())
                 .count();
             game.map.is_land(*to)
-                && game.enemy_player(player.index, *to).is_none()
+                && (allow_enemy(to) || game.enemy_player(player.index, *to).is_none())
                 && on_target + stack_size <= STACK_LIMIT
         })
         .collect_vec()
