@@ -41,7 +41,10 @@ fn read_game_str() -> String {
     let g = "game.json";
     let e = "escaped-game.json";
     if modified(g) > modified(e) {
-        return fs::read_to_string(g).expect("Failed to read export file");
+        let val = fs::read_to_string(g).expect("Failed to read export file");
+        let escaped = serde_json::to_string(val.as_str()).expect("Failed to serialize export file");
+        fs::write(e, &escaped).expect("Failed to write export file");
+        return val;
     }
     let val: String =
         serde_json::from_str(&fs::read_to_string(e).expect("Failed to read export file"))

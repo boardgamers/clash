@@ -237,67 +237,85 @@ fn next_road_step(
 #[must_use]
 fn reachable_with_navigation(player: &Player, units: &[u32], map: &Map) -> Vec<MoveRoute> {
     let ship = units.iter().find_map(|&id| {
-        let unit = player.get_unit(id);
-        if unit.is_ship() {
-            Some(unit.position)
-        } else {
-            None
-        }
+        player
+            .get_unit(id)
+            .is_ship()
+            .then_some(player.get_unit(id).position)
+            .filter(|p| {
+                // need at least one neighbor that is outside the map
+                p.neighbors().iter().any(|n| map.is_outside(*n))
+            })
     });
     if let Some(ship) = ship {
-        let start = ship.neighbors().into_iter().find(|n| {
-            // otherwise we might have the ship position as only neighbor
-            map.is_outside(*n)
-                && n.neighbors()
-                    .iter()
-                    .filter(|nn| map.is_inside(**nn))
-                    .count()
-                    > 1
-        });
-        if let Some(start) = start {
-            let mut perimeter = vec![ship];
+        let perimeter = find_perimeter(map, ship);
+        let can_navigate = |p: &Position| *p != ship && (map.is_sea(*p) || map.is_unexplored(*p));
+        // skip the first position as it is the ship's current position
+        let first = perimeter.iter().skip(1).copied().find(can_navigate);
+        let last = perimeter.iter().skip(1).copied().rfind(can_navigate);
 
-            add_perimeter(map, start, &mut perimeter);
-            let can_navigate =
-                |p: &Position| *p != ship && (map.is_sea(*p) || map.is_unexplored(*p));
-            let first = perimeter.iter().copied().find(can_navigate);
-            let last = perimeter.iter().copied().rfind(can_navigate);
-
-            return vec![first, last]
-                .into_iter()
-                .flatten()
-                .map(|destination| {
-                    MoveRoute::new(
-                        destination,
-                        player,
-                        ResourcePile::empty(),
-                        vec![EventOrigin::Advance(Advance::Navigation)],
-                    )
-                })
-                .collect();
-        }
+        return vec![first, last]
+            .into_iter()
+            .flatten()
+            .map(|destination| {
+                MoveRoute::new(
+                    destination,
+                    player,
+                    ResourcePile::empty(),
+                    vec![EventOrigin::Advance(Advance::Navigation)],
+                )
+            })
+            .collect();
     }
     vec![]
 }
 
-fn add_perimeter(map: &Map, start: Position, perimeter: &mut Vec<Position>) {
-    if perimeter.contains(&start) {
-        return;
-    }
-    perimeter.push(start);
+pub fn find_perimeter(map: &Map, start_tile: Position) -> Vec<Position> {
+    let is_inside = |pos: Position| map.is_inside(pos);
 
-    let option = &start
-        .neighbors()
-        .into_iter()
-        .filter(|n| {
-            !perimeter.contains(n)
-                && (map.is_inside(*n) && n.neighbors().iter().any(|n| map.is_outside(*n)))
-        })
-        // take with most outside neighbors first
-        .sorted_by_key(|n| n.neighbors().iter().filter(|n| map.is_inside(**n)).count())
-        .next();
-
-    if let Some(n) = option {
-        add_perimeter(map, *n, perimeter);
+    // 1. Find initial facing so that right side is outside
+    let mut facing = 0;
+    for (dir_idx, nb) in start_tile.neighbors().iter().enumerate() {
+        if !is_inside(*nb) {
+            // Turn left so right side is outside
+            facing = (dir_idx + 1) % 6;
+            break;
+        }
     }
+
+    let mut path = Vec::new();
+    let mut tile = start_tile;
+
+    loop {
+        path.push(tile);
+
+        let neighs = tile.neighbors();
+
+        // Try turning right
+        let right_dir = (facing + 5) % 6;
+        if is_inside(neighs[right_dir]) {
+            tile = neighs[right_dir];
+            facing = right_dir;
+        }
+        // Try going straight
+        else if is_inside(neighs[facing]) {
+            tile = neighs[facing];
+        }
+        // Turn left until we find an inside tile
+        else {
+            for _ in 1..6 {
+                facing = (facing + 1) % 6;
+                if is_inside(neighs[facing]) {
+                    tile = neighs[facing];
+                    break;
+                }
+            }
+        }
+
+        // Stop when back at starting state
+        if tile == start_tile {
+            break;
+        }
+    }
+
+    path
 }
