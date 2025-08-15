@@ -3,7 +3,7 @@ use crate::combat_stats::Battleground;
 use crate::content::advances::AdvanceGroup;
 use crate::content::advances::trade_routes::find_trade_route_for_unit;
 use crate::game::Game;
-use crate::log::current_player_turn_log;
+use crate::log::current_player_turn_log_without_redo;
 use crate::objective_card::{Objective, objective_is_ready};
 use crate::player::Player;
 use crate::unit::{Unit, UnitType};
@@ -41,7 +41,8 @@ pub(crate) fn warmonger() -> Objective {
         |event| &mut event.combat_end,
         2,
         |game, player, _e| {
-            let stat = current_player_turn_log(game)
+            let log = current_player_turn_log_without_redo(game);
+            let stat = log
                 .actions
                 .iter()
                 .filter_map(|i| i.combat_stats.as_ref().filter(|s| s.battleground.is_land()))
@@ -411,7 +412,7 @@ pub(crate) fn sea_cleansing() -> Objective {
             16,
             |game, p, _e| {
                 let player = p.index;
-                let battles = current_player_turn_log(game)
+                let battles = current_player_turn_log_without_redo(game)
                     .actions
                     .iter()
                     .filter_map(|i| {
