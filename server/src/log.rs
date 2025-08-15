@@ -234,12 +234,16 @@ pub(crate) fn linear_action_log(game: &Game) -> Vec<Action> {
 pub(crate) fn add_log_action(game: &mut Game, item: Action) {
     let i = game.action_log_index;
     let l = &mut current_player_turn_log_mut(game).actions;
-    if i < l.len() {
-        // remove items from undo
-        l.drain(i..);
-    }
+    remove_redo_actions(l, i);
     l.push(ActionLogAction::new(item));
     game.action_log_index += 1;
+}
+
+fn remove_redo_actions(l: &mut Vec<ActionLogAction>, action_log_index: usize) {
+    if action_log_index < l.len() {
+        // remove items from undo
+        l.drain(action_log_index..);
+    }
 }
 
 pub(crate) fn add_action_log_item(
@@ -262,7 +266,17 @@ pub(crate) fn add_action_log_item(
 /// # Panics
 /// Panics if the log entry does not exist
 #[must_use]
-pub fn current_player_turn_log(game: &Game) -> &ActionLogPlayer {
+pub(crate) fn current_player_turn_log_without_redo(game: &Game) -> ActionLogPlayer {
+    let mut log = current_player_turn_log(game).clone();
+    remove_redo_actions(&mut log.actions, game.action_log_index);
+    log
+}
+
+///
+/// # Panics
+/// Panics if the log entry does not exist
+#[must_use]
+pub(crate) fn current_player_turn_log(game: &Game) -> &ActionLogPlayer {
     game.action_log
         .last()
         .expect("state should exist")

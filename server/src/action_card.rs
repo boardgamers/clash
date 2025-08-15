@@ -13,7 +13,7 @@ use crate::content::persistent_events::{
 use crate::content::tactics_cards::TacticsCardFactory;
 use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
-use crate::log::{current_player_turn_log, current_player_turn_log_mut};
+use crate::log::{current_player_turn_log_mut, current_player_turn_log_without_redo};
 use crate::player::Player;
 use crate::position::Position;
 use crate::tactics_card::TacticsCard;
@@ -322,15 +322,18 @@ pub fn combat_requirement_met(
         action_card_id + 1
     };
 
-    current_player_turn_log(game).actions.iter().position(|a| {
-        if let Some(stats) = &a.combat_stats
-            && requirement(stats, game.player(player))
-            && !stats.claimed_action_cards.contains(&sister_card)
-        {
-            return true;
-        }
-        false
-    })
+    current_player_turn_log_without_redo(game)
+        .actions
+        .iter()
+        .position(|a| {
+            if let Some(stats) = &a.combat_stats
+                && requirement(stats, game.player(player))
+                && !stats.claimed_action_cards.contains(&sister_card)
+            {
+                return true;
+            }
+            false
+        })
 }
 
 pub(crate) fn can_play_civil_card(game: &Game, p: &Player, id: u8) -> Result<(), String> {
