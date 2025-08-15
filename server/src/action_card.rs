@@ -13,9 +13,7 @@ use crate::content::persistent_events::{
 use crate::content::tactics_cards::TacticsCardFactory;
 use crate::events::{EventOrigin, EventPlayer};
 use crate::game::Game;
-use crate::log::{
-    current_player_turn_log_mut, current_player_turn_log_without_redo,
-};
+use crate::log::{current_player_turn_log_mut, current_player_turn_log_without_redo};
 use crate::player::Player;
 use crate::position::Position;
 use crate::tactics_card::TacticsCard;
