@@ -9,7 +9,7 @@ use crate::dialog_ui::BaseOrCustomDialog;
 use crate::event_ui::{custom_phase_event_help, custom_phase_event_origin, event_help, pay_help};
 use crate::happiness_ui::IncreaseHappinessConfig;
 use crate::layout_ui::{FONT_SIZE, IconBackground};
-use crate::log_ui::{LogDialog, get_log_end};
+use crate::log_ui::{LogDialog};
 use crate::map_ui::ExploreResolutionConfig;
 use crate::move_ui::{MoveIntent, MovePayment, MoveSelection};
 use crate::payment_ui::{Payment, new_gain};
@@ -430,10 +430,7 @@ impl State {
                     GameSyncRequest::None
                 }
             }
-            StateUpdate::OpenDialog(mut dialog) => {
-                if let ActiveDialog::Log(d) = &mut dialog {
-                    d.log_scroll = get_log_end(game, self, self.screen_size.y);
-                }
+            StateUpdate::OpenDialog(dialog) => {
                 let d = self.game_state_dialog(game);
                 if matches!(dialog, ActiveDialog::AdvanceMenu) && d.is_advance() {
                     self.set_dialog(d);

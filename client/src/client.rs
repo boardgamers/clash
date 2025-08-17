@@ -8,7 +8,7 @@ use server::position::Position;
 use crate::advance_ui::{pay_advance_dialog, show_paid_advance_menu};
 use crate::cards_ui::show_cards;
 use crate::client_state::{
-    ActiveDialog, CameraMode, DialogChooser, NO_UPDATE, RenderResult, State, StateUpdate,
+    ActiveDialog, CameraMode, DialogChooser, RenderResult, State, StateUpdate, NO_UPDATE,
 };
 use crate::collect_ui::collect_dialog;
 use crate::construct_ui::pay_construction_dialog;
@@ -16,15 +16,12 @@ use crate::dialog_ui::cancel_button_with_tooltip;
 use crate::event_ui::{custom_phase_event_origin, event_help_tooltip};
 use crate::happiness_ui::{increase_happiness_click, increase_happiness_menu};
 use crate::hex_ui::pixel_to_coordinate;
-use crate::info_ui::{InfoDialog, show_info_dialog};
-use crate::layout_ui::{
-    ICON_SIZE, bottom_center_anchor, bottom_centered_text_with_offset,
-    draw_scaled_icon_with_tooltip, icon_pos, is_mouse_pressed, top_right_texture,
-};
-use crate::log_ui::{LogDialog, MultilineText, show_log};
+use crate::info_ui::{show_info_dialog, InfoDialog};
+use crate::layout_ui::{bottom_center_anchor, bottom_centered_text_with_offset, draw_scaled_icon_with_tooltip, icon_pos, is_mouse_pressed, top_right_texture, ICON_SIZE};
+use crate::log_ui::{show_log, LogDialog, MultilineText};
 use crate::map_ui::{draw_map, explore_dialog, show_tile_menu};
 use crate::player_ui::{
-    ColumnLabelPainter, player_select, show_global_controls, show_top_center, show_top_left,
+    player_select, show_global_controls, show_top_center, show_top_left, ColumnLabelPainter,
 };
 use crate::render_context::{RenderContext, RenderStage};
 use crate::unit_ui::unit_selection_click;
@@ -37,9 +34,6 @@ fn render_with_mutable_state(game: &Game, state: &mut State, features: &Features
     tooltip::update(state);
     if !state.active_dialog.is_modal() {
         map_ui::pan_and_zoom(state);
-    }
-    if let ActiveDialog::Log(d) = &mut state.active_dialog {
-        d.log_scroll += mouse_wheel_speed() * 25.;
     }
 
     set_y_zoom(state);
@@ -145,7 +139,7 @@ fn show_modal_dialog_toggles(rc: &RenderContext) -> RenderResult {
         if let ActiveDialog::Log(_) = state.active_dialog {
             return StateUpdate::close_dialog();
         }
-        return StateUpdate::open_dialog(ActiveDialog::Log(LogDialog::new()));
+        return StateUpdate::open_dialog(ActiveDialog::Log(LogDialog::new(rc)));
     }
     if top_right_texture(rc, &rc.assets().advances, icon_pos(-2, 0), "Show advances") {
         if state.active_dialog.is_advance() {
