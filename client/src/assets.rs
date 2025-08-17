@@ -92,8 +92,12 @@ impl Assets {
             // UI
             redo: load_png(include_bytes!("../assets/redo-svgrepo-com.png")),
             undo: load_png(include_bytes!("../assets/undo-svgrepo-com.png")),
-            start: load_png(include_bytes!("../assets/arrow-bend-double-up-left-bold-svgrepo-com.png")),
-            end: load_png(include_bytes!("../assets/arrow-bend-double-up-right-bold-svgrepo-com.png")),
+            start: load_png(include_bytes!(
+                "../assets/arrow-bend-double-up-left-bold-svgrepo-com.png"
+            )),
+            end: load_png(include_bytes!(
+                "../assets/arrow-bend-double-up-right-bold-svgrepo-com.png"
+            )),
             plus: load_png(include_bytes!("../assets/plus-circle-svgrepo-com.png")),
             minus: load_png(include_bytes!("../assets/minus-circle-svgrepo-com.png")),
             ok: load_png(include_bytes!("../assets/ok-circle-svgrepo-com.png")),

@@ -1,7 +1,7 @@
-use crate::client_state::{ActiveDialog, RenderResult, State, StateUpdate, NO_UPDATE};
+use crate::client_state::{ActiveDialog, NO_UPDATE, RenderResult, State, StateUpdate};
+use crate::layout_ui::bottom_center_texture;
 use crate::render_context::RenderContext;
 use macroquad::math::vec2;
-use crate::layout_ui::bottom_center_texture;
 
 #[derive(Clone, Debug)]
 pub(crate) struct LogDialog {
@@ -20,9 +20,14 @@ impl LogDialog {
 
         for l in &rc.game.log {
             for e in l {
-                multiline_label(&rc.state, e, rc.state.screen_size.x - 100., |label: &str| {
-                    flattened_log.push(label.to_string());
-                });
+                multiline_label(
+                    rc.state,
+                    e,
+                    rc.state.screen_size.x - 100.,
+                    |label: &str| {
+                        flattened_log.push(label.to_string());
+                    },
+                );
             }
         }
 
@@ -30,7 +35,7 @@ impl LogDialog {
         let pages = if total_lines == 0 {
             1
         } else {
-            (total_lines + lines_per_page - 1) / lines_per_page
+            total_lines.div_ceil(lines_per_page)
         };
 
         LogDialog {
@@ -62,11 +67,19 @@ pub(crate) fn show_log(rc: &RenderContext, d: &LogDialog) -> RenderResult {
     let last_offset = vec2(112., -30.);
     let page_text = format!("Page {} / {}", d.current_page + 1, d.pages);
     // Use bottom_center_texture for navigation buttons
-    let first_clicked = d.current_page > 0 && bottom_center_texture(rc, &rc.assets().start, first_offset, "First page");
-    let prev_clicked = d.current_page > 0 && bottom_center_texture(rc, &rc.assets().undo, prev_offset, "Previous page");
-    let next_clicked = d.current_page < d.pages - 1 && bottom_center_texture(rc, &rc.assets().redo, next_offset, "Next page");
-    let last_clicked = d.current_page < d.pages - 1 && bottom_center_texture(rc, &rc.assets().end, last_offset, "Last page");
-    rc.draw_text(&page_text, state.screen_size.x / 2. - 40., state.screen_size.y - 60.);
+    let first_clicked = d.current_page > 0
+        && bottom_center_texture(rc, &rc.assets().start, first_offset, "First page");
+    let prev_clicked = d.current_page > 0
+        && bottom_center_texture(rc, &rc.assets().undo, prev_offset, "Previous page");
+    let next_clicked = d.current_page < d.pages - 1
+        && bottom_center_texture(rc, &rc.assets().redo, next_offset, "Next page");
+    let last_clicked = d.current_page < d.pages - 1
+        && bottom_center_texture(rc, &rc.assets().end, last_offset, "Last page");
+    rc.draw_text(
+        &page_text,
+        state.screen_size.x / 2. - 40.,
+        state.screen_size.y - 60.,
+    );
     // Handle clicks
     if first_clicked {
         let mut new_dialog = d.clone();

@@ -9,7 +9,7 @@ use crate::dialog_ui::BaseOrCustomDialog;
 use crate::event_ui::{custom_phase_event_help, custom_phase_event_origin, event_help, pay_help};
 use crate::happiness_ui::IncreaseHappinessConfig;
 use crate::layout_ui::{FONT_SIZE, IconBackground};
-use crate::log_ui::{LogDialog};
+use crate::log_ui::LogDialog;
 use crate::map_ui::ExploreResolutionConfig;
 use crate::move_ui::{MoveIntent, MovePayment, MoveSelection};
 use crate::payment_ui::{Payment, new_gain};
