@@ -214,6 +214,7 @@ impl<T> Shuffle<T> for Vec<T> {
 /// # Panics
 ///
 /// Panics if the probability distribution is empty or if all probabilities are zero.
+#[cfg(not(target_arch = "wasm32"))] // only for AI
 pub(crate) fn weighted_random_selection(probability_distribution: &[f64], rng: &mut Rng) -> usize {
     if probability_distribution.len() == 1 {
         return 0;
