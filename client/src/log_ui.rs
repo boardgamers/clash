@@ -20,14 +20,9 @@ impl LogDialog {
 
         for l in &rc.game.log {
             for e in l {
-                multiline_label(
-                    rc.state,
-                    e,
-                    rc.state.screen_size.x - 100.,
-                    |label: &str| {
-                        flattened_log.push(label.to_string());
-                    },
-                );
+                multiline_label(rc.state, e, rc.state.screen_size.x - 100., |label: &str| {
+                    flattened_log.push(label.to_string());
+                });
             }
         }
 
