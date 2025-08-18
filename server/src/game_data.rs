@@ -18,6 +18,7 @@ use crate::player_events::PlayerEvents;
 use crate::resource_pile::ResourcePile;
 use crate::unit::{Unit, UnitData};
 use crate::utils::Rng;
+use crate::utils::sorted_map;
 use crate::victory_points::SpecialVictoryPoints;
 use crate::wonder::{Wonder, init_wonder};
 use enumset::EnumSet;
@@ -26,7 +27,6 @@ use num::Zero;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::mem;
-use crate::utils::sorted_map;
 
 #[derive(Serialize, Deserialize, PartialEq)]
 pub struct GameData {

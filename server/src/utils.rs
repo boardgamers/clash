@@ -214,7 +214,7 @@ impl<T> Shuffle<T> for Vec<T> {
 /// # Panics
 ///
 /// Panics if the probability distribution is empty or if all probabilities are zero.
-pub fn weighted_random_selection(probability_distribution: &[f64], rng: &mut Rng) -> usize {
+pub(crate) fn weighted_random_selection(probability_distribution: &[f64], rng: &mut Rng) -> usize {
     if probability_distribution.len() == 1 {
         return 0;
     }
@@ -232,6 +232,17 @@ pub fn weighted_random_selection(probability_distribution: &[f64], rng: &mut Rng
         sum -= p;
     }
     unreachable!();
+}
+
+pub(crate) fn sorted_map<S: Serializer, K: Serialize + Ord, V: Serialize>(
+    value: &HashMap<K, V>,
+    serializer: S,
+) -> Result<S::Ok, S::Error> {
+    value
+        .iter()
+        .sorted_by_key(|v| v.0)
+        .collect::<BTreeMap<_, _>>()
+        .serialize(serializer)
 }
 
 #[cfg(test)]
@@ -361,15 +372,4 @@ pub mod tests {
             )
         }
     }
-}
-
-pub fn sorted_map<S: Serializer, K: Serialize + Ord, V: Serialize>(
-    value: &HashMap<K, V>,
-    serializer: S,
-) -> Result<S::Ok, S::Error> {
-    value
-        .iter()
-        .sorted_by_key(|v| v.0)
-        .collect::<BTreeMap<_, _>>()
-        .serialize(serializer)
 }
