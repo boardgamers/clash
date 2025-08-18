@@ -1,6 +1,8 @@
+use std::collections::{BTreeMap, HashMap};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use itertools::Itertools;
+use serde::{Serialize, Serializer};
 
 #[must_use]
 pub(crate) fn a_or_an(word: &str) -> String {
@@ -359,4 +361,15 @@ pub mod tests {
             )
         }
     }
+}
+
+pub fn sorted_map<S: Serializer, K: Serialize + Ord, V: Serialize>(
+    value: &HashMap<K, V>,
+    serializer: S,
+) -> Result<S::Ok, S::Error> {
+    value
+        .iter()
+        .sorted_by_key(|v| v.0)
+        .collect::<BTreeMap<_, _>>()
+        .serialize(serializer)
 }

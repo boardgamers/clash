@@ -26,6 +26,7 @@ use num::Zero;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::mem;
+use crate::utils::sorted_map;
 
 #[derive(Serialize, Deserialize, PartialEq)]
 pub struct GameData {
@@ -288,6 +289,7 @@ pub struct PlayerData {
     played_once_per_turn_actions: Vec<CustomActionType>,
     #[serde(default)]
     #[serde(skip_serializing_if = "HashMap::is_empty")]
+    #[serde(serialize_with = "sorted_map")]
     event_info: HashMap<String, String>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
