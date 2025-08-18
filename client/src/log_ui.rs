@@ -56,36 +56,45 @@ impl LogDialog {
                 || message.contains("Play as ") // Setup round civilization messages
         }
 
+        // Helper function to process log entries for a given range
+        let mut process_log_entries = |start_index: usize,
+                                       end_index: usize,
+                                       age: u32,
+                                       round: u32,
+                                       player_name: &str| {
+            for log_index in start_index..end_index {
+                if let Some(log_entries_for_turn) = rc.game.log.get(log_index) {
+                    for message in log_entries_for_turn {
+                        // Simulate multiline labels to get accurate line count
+                        multiline_label(
+                            rc.state,
+                            message,
+                            Self::max_width(rc),
+                            |label: &str| {
+                                log_entries.push(LogEntry {
+                                    age,
+                                    round,
+                                    player_name: if should_skip_player_name(label) {
+                                        String::new()
+                                    } else {
+                                        player_name.to_string()
+                                    },
+                                    message: label.to_string(),
+                                });
+                            },
+                        );
+                    }
+                }
+            }
+        };
+
         // Handle log entries before the first player turn (age 0)
         let first_player_log_index = player_log_ranges
             .first()
             .map(|(_, _, _, log_index)| *log_index)
             .unwrap_or(rc.game.log.len());
 
-        for log_index in 0..first_player_log_index {
-            if let Some(log_entries_for_turn) = rc.game.log.get(log_index) {
-                for message in log_entries_for_turn {
-                    // Simulate multiline labels to get accurate line count
-                    multiline_label(
-                        rc.state,
-                        message,
-                        Self::max_width(rc),
-                        |label: &str| {
-                            log_entries.push(LogEntry {
-                                age: 0,
-                                round: 0,
-                                player_name: if should_skip_player_name(label) {
-                                    String::new()
-                                } else {
-                                    "Setup".to_string()
-                                },
-                                message: label.to_string(),
-                            });
-                        },
-                    );
-                }
-            }
-        }
+        process_log_entries(0, first_player_log_index, 0, 0, "Setup");
 
         // Process each player's log range
         for i in 0..player_log_ranges.len() {
@@ -108,33 +117,7 @@ impl LogDialog {
             };
 
             let player_name = rc.game.player(player_index).get_name();
-
-            // Get all log entries for this player's range
-            // Note: The range is [start_log_index, end_log_index) - exclusive end
-            for log_index in start_log_index..end_log_index {
-                if let Some(log_entries_for_turn) = rc.game.log.get(log_index) {
-                    for message in log_entries_for_turn {
-                        // Simulate multiline labels to get accurate line count
-                        multiline_label(
-                            rc.state,
-                            message,
-                            Self::max_width(rc),
-                            |label: &str| {
-                                log_entries.push(LogEntry {
-                                    age,
-                                    round,
-                                    player_name: if should_skip_player_name(label) {
-                                        String::new()
-                                    } else {
-                                        player_name.clone()
-                                    },
-                                    message: label.to_string(),
-                                });
-                            },
-                        );
-                    }
-                }
-            }
+            process_log_entries(start_log_index, end_log_index, age, round, &player_name);
         }
 
         let total_lines = log_entries.len();
