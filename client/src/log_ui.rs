@@ -4,29 +4,82 @@ use crate::render_context::RenderContext;
 use macroquad::math::vec2;
 
 #[derive(Clone, Debug)]
+pub(crate) struct LogEntry {
+    pub age: u32,
+    pub round: u32,
+    pub player_name: String,
+    pub message: String,
+}
+
+#[derive(Clone, Debug)]
 pub(crate) struct LogDialog {
     pub lines_per_page: usize,
     pub pages: usize,
     pub current_page: usize,
-    pub flattened_log: Vec<String>,
+    pub log_entries: Vec<LogEntry>,
 }
 
 impl LogDialog {
     pub(crate) fn new(rc: &RenderContext) -> Self {
         let lines_per_page = (rc.state.screen_size.y - 100.) as usize / 25;
 
-        // Flatten and simulate multiline labels to get accurate line count
-        let mut flattened_log = Vec::new();
+        // Build structured log entries with age, round, player, and message
+        let mut log_entries = Vec::new();
 
-        for l in &rc.game.log {
-            for e in l {
-                multiline_label(rc.state, e, rc.state.screen_size.x - 100., |label: &str| {
-                    flattened_log.push(label.to_string());
-                });
+        // Create a list of all player log entries with their ranges
+        let mut player_log_ranges = Vec::new();
+
+        // Iterate over action log to collect all player entries and their log ranges
+        for action_log_age in &rc.game.action_log {
+            for action_log_round in &action_log_age.rounds {
+                for action_log_player in &action_log_round.players {
+                    player_log_ranges.push((
+                        action_log_age.age,
+                        action_log_round.round,
+                        action_log_player.index,
+                        action_log_player.log_index,
+                    ));
+                }
             }
         }
 
-        let total_lines = flattened_log.len();
+        // Process each player's log range
+        for i in 0..player_log_ranges.len() {
+            let (age, round, player_index, start_log_index) = player_log_ranges[i];
+
+            // Find the end index (start of next player's turn or end of log)
+            let end_log_index = if i + 1 < player_log_ranges.len() {
+                player_log_ranges[i + 1].3 // Next player's log_index
+            } else {
+                rc.game.log.len() // End of log
+            };
+
+            let player_name = rc.game.player(player_index).get_name();
+
+            // Get all log entries for this player's range
+            for log_index in start_log_index..end_log_index {
+                if let Some(log_entries_for_turn) = rc.game.log.get(log_index) {
+                    for message in log_entries_for_turn {
+                        // Simulate multiline labels to get accurate line count
+                        multiline_label(
+                            rc.state,
+                            message,
+                            rc.state.screen_size.x - 200.,
+                            |label: &str| {
+                                log_entries.push(LogEntry {
+                                    age,
+                                    round,
+                                    player_name: player_name.clone(),
+                                    message: label.to_string(),
+                                });
+                            },
+                        );
+                    }
+                }
+            }
+        }
+
+        let total_lines = log_entries.len();
         let pages = if total_lines == 0 {
             1
         } else {
@@ -37,7 +90,7 @@ impl LogDialog {
             lines_per_page,
             pages,
             current_page: pages - 1,
-            flattened_log,
+            log_entries,
         }
     }
 }
@@ -45,14 +98,42 @@ impl LogDialog {
 pub(crate) fn show_log(rc: &RenderContext, d: &LogDialog) -> RenderResult {
     let state = &rc.state;
 
-    // Use the pre-calculated flattened log
+    // Use the pre-calculated log entries
     let start = d.current_page * d.lines_per_page;
-    let end = usize::min(start + d.lines_per_page, d.flattened_log.len());
+    let end = usize::min(start + d.lines_per_page, d.log_entries.len());
     let mut y = 0.;
 
-    for line in &d.flattened_log[start..end] {
-        let p = vec2(30., y * 25. + 20.);
-        rc.draw_text(line, p.x, p.y);
+    // Draw column headers
+    let age_pos = vec2(30., 20.);
+    let round_pos = vec2(80., 20.);
+    let player_pos = vec2(140., 20.);
+    let message_pos = vec2(280., 20.);
+
+    rc.draw_text("Age", age_pos.x, age_pos.y);
+    rc.draw_text("Round", round_pos.x, round_pos.y);
+    rc.draw_text("Player", player_pos.x, player_pos.y);
+    rc.draw_text("Message", message_pos.x, message_pos.y);
+
+    y += 1.5; // Add some space after headers
+
+    for entry in &d.log_entries[start..end] {
+        let age_text = entry.age.to_string();
+        let round_text = entry.round.to_string();
+        let player_text = &entry.player_name;
+        let message_text = &entry.message;
+
+        // Calculate positions for each column
+        let age_pos = vec2(30., y * 25. + 20.);
+        let round_pos = vec2(80., y * 25. + 20.);
+        let player_pos = vec2(140., y * 25. + 20.);
+        let message_pos = vec2(280., y * 25. + 20.);
+
+        // Draw each column
+        rc.draw_text(&age_text, age_pos.x, age_pos.y);
+        rc.draw_text(&round_text, round_pos.x, round_pos.y);
+        rc.draw_text(player_text, player_pos.x, player_pos.y);
+        rc.draw_text(message_text, message_pos.x, message_pos.y);
+
         y += 1.;
     }
     // Bottom center navigation
