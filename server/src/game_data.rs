@@ -18,6 +18,7 @@ use crate::player_events::PlayerEvents;
 use crate::resource_pile::ResourcePile;
 use crate::unit::{Unit, UnitData};
 use crate::utils::Rng;
+use crate::utils::sorted_map;
 use crate::victory_points::SpecialVictoryPoints;
 use crate::wonder::{Wonder, init_wonder};
 use enumset::EnumSet;
@@ -288,6 +289,7 @@ pub struct PlayerData {
     played_once_per_turn_actions: Vec<CustomActionType>,
     #[serde(default)]
     #[serde(skip_serializing_if = "HashMap::is_empty")]
+    #[serde(serialize_with = "sorted_map")]
     event_info: HashMap<String, String>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]

@@ -11,7 +11,7 @@
 
 ### Run remote with boardgamers-mono web client locally
 
-- `./scripts/build-remote-client.sh`
+- `mise run build-remote-client`
 - `cd client/js/dist && basic-http-server .`
 - `google-chrome --js-flags='--stack-trace-limit 100' --disable-web-security --user-data-dir=/tmp http://localhost:8612`
 

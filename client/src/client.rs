@@ -38,9 +38,6 @@ fn render_with_mutable_state(game: &Game, state: &mut State, features: &Features
     if !state.active_dialog.is_modal() {
         map_ui::pan_and_zoom(state);
     }
-    if let ActiveDialog::Log(d) = &mut state.active_dialog {
-        d.log_scroll += mouse_wheel_speed() * 25.;
-    }
 
     set_y_zoom(state);
     clear_background(WHITE);
@@ -145,7 +142,7 @@ fn show_modal_dialog_toggles(rc: &RenderContext) -> RenderResult {
         if let ActiveDialog::Log(_) = state.active_dialog {
             return StateUpdate::close_dialog();
         }
-        return StateUpdate::open_dialog(ActiveDialog::Log(LogDialog::new()));
+        return StateUpdate::open_dialog(ActiveDialog::Log(LogDialog::new(rc)));
     }
     if top_right_texture(rc, &rc.assets().advances, icon_pos(-2, 0), "Show advances") {
         if state.active_dialog.is_advance() {
