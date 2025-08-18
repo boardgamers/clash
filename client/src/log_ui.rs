@@ -89,18 +89,28 @@ impl LogDialog {
 
         // Process each player's log range
         for i in 0..player_log_ranges.len() {
-            let (age, round, player_index, start_log_index) = player_log_ranges[i];
+            let (age, round, player_index, log_index_before_turn) = player_log_ranges[i];
 
-            // Find the end index (start of next player's turn or end of log)
+            // The log_index from server represents the last log entry BEFORE this player's turn starts
+            // So the actual start of this player's entries is log_index + 1
+            let start_log_index = log_index_before_turn + 1;
+
+            // Find the end index - this should be the start of the NEXT player's turn
             let end_log_index = if i + 1 < player_log_ranges.len() {
-                player_log_ranges[i + 1].3 // Next player's log_index
+                // The next player's log_index is also the last entry before their turn
+                // So their turn starts at next_log_index + 1
+                // Which means current player's entries end at next_log_index + 1 (exclusive)
+                let next_log_index_before_turn = player_log_ranges[i + 1].3;
+                next_log_index_before_turn + 1
             } else {
-                rc.game.log.len() // End of log
+                // This is the last player, so include everything to the end
+                rc.game.log.len()
             };
 
             let player_name = rc.game.player(player_index).get_name();
 
             // Get all log entries for this player's range
+            // Note: The range is [start_log_index, end_log_index) - exclusive end
             for log_index in start_log_index..end_log_index {
                 if let Some(log_entries_for_turn) = rc.game.log.get(log_index) {
                     for message in log_entries_for_turn {
