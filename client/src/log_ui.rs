@@ -21,7 +21,7 @@ pub(crate) struct LogDialog {
 
 impl LogDialog {
     pub(crate) fn new(rc: &RenderContext) -> Self {
-        let lines_per_page = (rc.state.screen_size.y - 100.) as usize / 25;
+        let lines_per_page = (rc.state.screen_size.y - 150.) as usize / 25;
 
         // Build structured log entries with age, round, player, and message
         let mut log_entries = Vec::new();
@@ -39,6 +39,50 @@ impl LogDialog {
                         action_log_player.index,
                         action_log_player.log_index,
                     ));
+                }
+            }
+        }
+
+        // Sort by log_index to ensure proper ordering
+        player_log_ranges.sort_by_key(|(_, _, _, log_index)| *log_index);
+
+        // Helper function to determine if a message should skip player name
+        fn should_skip_player_name(message: &str) -> bool {
+            message.starts_with("Age ") && message.contains(" has started")
+                || message == "The game has started"
+                || message.starts_with("Round ") && message.contains("/3")
+                || message.starts_with( "The game has entered")
+                || message.starts_with( " ") // multi-line messages
+                || message.contains("Play as ") // Setup round civilization messages
+        }
+
+        // Handle log entries before the first player turn (age 0)
+        let first_player_log_index = player_log_ranges
+            .first()
+            .map(|(_, _, _, log_index)| *log_index)
+            .unwrap_or(rc.game.log.len());
+
+        for log_index in 0..first_player_log_index {
+            if let Some(log_entries_for_turn) = rc.game.log.get(log_index) {
+                for message in log_entries_for_turn {
+                    // Simulate multiline labels to get accurate line count
+                    multiline_label(
+                        rc.state,
+                        message,
+                        Self::max_width(rc),
+                        |label: &str| {
+                            log_entries.push(LogEntry {
+                                age: 0,
+                                round: 0,
+                                player_name: if should_skip_player_name(label) {
+                                    String::new()
+                                } else {
+                                    "Setup".to_string()
+                                },
+                                message: label.to_string(),
+                            });
+                        },
+                    );
                 }
             }
         }
@@ -64,12 +108,16 @@ impl LogDialog {
                         multiline_label(
                             rc.state,
                             message,
-                            rc.state.screen_size.x - 200.,
+                            Self::max_width(rc),
                             |label: &str| {
                                 log_entries.push(LogEntry {
                                     age,
                                     round,
-                                    player_name: player_name.clone(),
+                                    player_name: if should_skip_player_name(label) {
+                                        String::new()
+                                    } else {
+                                        player_name.clone()
+                                    },
                                     message: label.to_string(),
                                 });
                             },
@@ -92,6 +140,10 @@ impl LogDialog {
             current_page: pages - 1,
             log_entries,
         }
+    }
+
+    fn max_width(rc: &RenderContext) -> f32 {
+        rc.state.screen_size.x - 300.
     }
 }
 
