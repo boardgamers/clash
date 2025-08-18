@@ -46,6 +46,7 @@ impl ActionLogRound {
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct ActionLogPlayer {
     pub index: usize,
+    pub log_index: usize,
     #[serde(default)]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub actions: Vec<ActionLogAction>,
@@ -53,10 +54,11 @@ pub struct ActionLogPlayer {
 
 impl ActionLogPlayer {
     #[must_use]
-    pub(crate) fn new(player: usize) -> Self {
+    pub(crate) fn new(player: usize, log_index: usize) -> Self {
         Self {
             actions: Vec::new(),
             index: player,
+            log_index,
         }
     }
 
@@ -262,9 +264,6 @@ pub(crate) fn add_action_log_item(
         .push(ActionLogItem::new(player, entry, origin, modifiers));
 }
 
-///
-/// # Panics
-/// Panics if the log entry does not exist
 #[must_use]
 pub(crate) fn current_player_turn_log_without_redo(game: &Game) -> ActionLogPlayer {
     let mut log = current_player_turn_log(game).clone();
@@ -326,5 +325,5 @@ pub(crate) fn add_player_log(game: &mut Game, player: usize) {
         .last_mut()
         .expect("round should exist")
         .players
-        .push(ActionLogPlayer::new(player));
+        .push(ActionLogPlayer::new(player, game.log.len() - 1));
 }
