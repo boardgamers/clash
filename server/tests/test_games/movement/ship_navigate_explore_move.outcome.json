@@ -279,15 +279,13 @@
   },
   "starting_player_index": 1,
   "current_player_index": 1,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
-            {
-              "index": 0,
+          "turns": [ { "turn_type": { "Player": 0 }
               "actions": [
                 {
                   "action": {
@@ -308,7 +306,7 @@
       ]
     }
   ],
-  "action_log_index": 1,
+  "log_index": 1,
   "log": [
     [
       "Player2: Move: sailed 1 ship from B3 to F2, Explored tiles E3=Fertile, F2=Forest, F3=Forest, G3=Water, Teleported ship from F2 to G3"

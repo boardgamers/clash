@@ -189,15 +189,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -229,6 +231,9 @@
                         "Ability": "Civil Liberties"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Civil Liberties: Pay 1 action, Start action, Gain 3 mood tokens"
                   ]
                 },
                 {
@@ -283,45 +288,11 @@
                       "origin": {
                         "Ability": "Recruit"
                       }
-                    },
-                    {
-                      "player": 0,
-                      "Action": {
-                        "balance": "Loss"
-                      },
-                      "origin": {
-                        "Ability": "Recruit"
-                      }
-                    },
-                    {
-                      "player": 0,
-                      "Resources": {
-                        "resources": {
-                          "mood_tokens": 2
-                        },
-                        "balance": "Loss"
-                      },
-                      "origin": {
-                        "Ability": "Recruit"
-                      },
-                      "modifiers": [
-                        {
-                          "Advance": "Draft"
-                        }
-                      ]
-                    },
-                    {
-                      "player": 0,
-                      "Units": {
-                        "units": {
-                          "infantry": 1
-                        },
-                        "balance": "Gain"
-                      },
-                      "origin": {
-                        "Ability": "Recruit"
-                      }
                     }
+                  ],
+                  "log": [
+                    "Player1: Recruit: Pay 1 action, Pay 2 mood tokens with Draft, Gain 1 infantry at A1",
+                    "Player1: Draft: Reduce the cost of 1 Infantry to 1 mood token"
                   ]
                 }
               ]
@@ -331,16 +302,7 @@
       ]
     }
   ],
-  "action_log_index": 2,
-  "log": [
-    [
-      "Player1: Civil Liberties: Pay 1 action, Start action, Gain 3 mood tokens"
-    ],
-    [
-      "Player1: Recruit: Pay 1 action, Pay 2 mood tokens with Draft, Gain 1 infantry at A1",
-      "Player1: Draft: Reduce the cost of 1 Infantry to 1 mood token"
-    ]
-  ],
+  "log_index": 2,
   "undo_limit": 0,
   "actions_left": 1,
   "round": 2,

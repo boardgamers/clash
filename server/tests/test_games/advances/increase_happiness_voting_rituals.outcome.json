@@ -241,15 +241,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -318,6 +320,10 @@
                         }
                       ]
                     }
+                  ],
+                  "log": [
+                    "Player1: Voting: Pay 1 mood token, City C2 became Neutral, City B3 became Happy, Pay 1 food, 1 ore, 3 ideas and 1 gold with Rituals",
+                    "Player1: Rituals: Can pay with any resource"
                   ]
                 }
               ]
@@ -327,13 +333,7 @@
       ]
     }
   ],
-  "action_log_index": 1,
-  "log": [
-    [
-      "Player1: Voting: Pay 1 mood token, City C2 became Neutral, City B3 became Happy, Pay 1 food, 1 ore, 3 ideas and 1 gold with Rituals",
-      "Player1: Rituals: Can pay with any resource"
-    ]
-  ],
+  "log_index": 1,
   "undo_limit": 0,
   "actions_left": 3,
   "round": 6,

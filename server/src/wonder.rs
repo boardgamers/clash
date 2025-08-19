@@ -9,7 +9,7 @@ use crate::content::ability::Ability;
 use crate::content::effects::PermanentEffect;
 use crate::content::persistent_events::{PaymentRequest, PersistentEventType, PositionRequest};
 use crate::events::{EventOrigin, EventPlayer};
-use crate::log::ActionLogBalance;
+use crate::log::{add_start_turn_action_if_needed, ActionLogBalance};
 use crate::payment::PaymentOptions;
 use crate::player::{CostTrigger, Player};
 use crate::player_events::CostInfo;
@@ -655,6 +655,7 @@ pub(crate) fn use_draw_replacement_wonder() -> Ability {
         |game, p, ()| {
             let player = p.get_mut(game);
             if player.event_info.remove(DRAW_REPLACEMENT_WONDER).is_some() {
+                add_start_turn_action_if_needed(game);
                 p.log(game, "Draw a replacement wonder card");
                 draw_wonder_card(game, p);
             }

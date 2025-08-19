@@ -27,6 +27,7 @@ use crate::victory_points::{
 };
 use itertools::Itertools;
 use std::ops::RangeInclusive;
+use crate::log::add_start_turn_action_if_needed;
 
 pub(crate) fn vikings() -> Civilization {
     Civilization::new(
@@ -222,6 +223,7 @@ pub(crate) fn lose_raid_resource() -> Ability {
                 .then_some(vec![PaymentRequest::mandatory(c, "Pay 1 resource")])
         },
         |game, s, ()| {
+            add_start_turn_action_if_needed(game);
             s.log(game, &format!("Lose {}", s.choice[0]));
         },
     )

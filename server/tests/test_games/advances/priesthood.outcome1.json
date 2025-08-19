@@ -273,15 +273,17 @@
   },
   "starting_player_index": 1,
   "current_player_index": 1,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -352,6 +354,12 @@
                         "Advance": "Philosophy"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player2: Advance: Pay 1 action, Pay nothing with Priesthood, Gain Math and take an event token (2 left)",
+                    "Player2: Priesthood: Reduce the cost to 0",
+                    "Player2: Math: Gain 1 culture token",
+                    "Player2: Philosophy: Gain 1 idea"
                   ]
                 },
                 {
@@ -421,63 +429,12 @@
                       "origin": {
                         "Advance": "Philosophy"
                       }
-                    },
-                    {
-                      "player": 1,
-                      "Action": {
-                        "balance": "Loss"
-                      },
-                      "origin": {
-                        "Ability": "Advance"
-                      }
-                    },
-                    {
-                      "player": 1,
-                      "Resources": {
-                        "resources": {
-                          "gold": 2
-                        },
-                        "balance": "Loss"
-                      },
-                      "origin": {
-                        "Ability": "Advance"
-                      }
-                    },
-                    {
-                      "player": 1,
-                      "Resources": {
-                        "resources": {
-                          "culture_tokens": 1
-                        },
-                        "balance": "Gain"
-                      },
-                      "origin": {
-                        "Advance": "Astronomy"
-                      }
-                    },
-                    {
-                      "player": 1,
-                      "Advance": {
-                        "advance": "Astronomy",
-                        "take_incident_token": true,
-                        "balance": "Gain"
-                      },
-                      "origin": {
-                        "Ability": "Advance"
-                      }
-                    },
-                    {
-                      "player": 1,
-                      "Resources": {
-                        "resources": {
-                          "ideas": 1
-                        },
-                        "balance": "Gain"
-                      },
-                      "origin": {
-                        "Advance": "Philosophy"
-                      }
                     }
+                  ],
+                  "log": [
+                    "Player2: Advance: Pay 1 action, Pay 2 gold, Gain Astronomy and take an event token (1 left)",
+                    "Player2: Astronomy: Gain 1 culture token",
+                    "Player2: Philosophy: Gain 1 idea"
                   ]
                 }
               ]
@@ -487,20 +444,7 @@
       ]
     }
   ],
-  "action_log_index": 2,
-  "log": [
-    [
-      "Player2: Advance: Pay 1 action, Pay nothing with Priesthood, Gain Math and take an event token (2 left)",
-      "Player2: Priesthood: Reduce the cost to 0",
-      "Player2: Math: Gain 1 culture token",
-      "Player2: Philosophy: Gain 1 idea"
-    ],
-    [
-      "Player2: Advance: Pay 1 action, Pay 2 gold, Gain Astronomy and take an event token (1 left)",
-      "Player2: Astronomy: Gain 1 culture token",
-      "Player2: Philosophy: Gain 1 idea"
-    ]
-  ],
+  "log_index": 2,
   "undo_limit": 0,
   "actions_left": 0,
   "round": 1,

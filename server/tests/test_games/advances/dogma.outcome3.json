@@ -282,15 +282,17 @@
   },
   "starting_player_index": 1,
   "current_player_index": 1,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -336,6 +338,11 @@
                         "Ability": "Advance"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player2: Advance: Pay 1 action, Pay 2 ideas, Unlock Provinces, Gain Dogma and take an event token (1 left)",
+                    "Player2: Dogma: Ideas limit reduced to 2",
+                    "Player2: Waste: Could not store 2 ideas"
                   ]
                 },
                 {
@@ -393,6 +400,10 @@
                         "Ability": "Construct Building"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player2: Construct Building: Pay 1 action, Pay 1 wood and 1 ore with State Religion, Gain Temple at C1",
+                    "Player2: State Religion: Reduce the food cost to 0"
                   ]
                 },
                 {
@@ -416,6 +427,9 @@
                         "Ability": "Temple"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player2: Temple: Gain 1 culture token"
                   ]
                 },
                 {
@@ -458,6 +472,11 @@
                         "Incident": 44
                       }
                     }
+                  ],
+                  "log": [
+                    "Player2: Dogma: Gain Fanaticism and take an event token (triggering an incident)",
+                    "A new game event has been triggered: Anarchy",
+                    "Player2: Anarchy: Lose 2 government advances due to Anarchy - adding 2 victory points"
                   ]
                 }
               ]
@@ -467,28 +486,7 @@
       ]
     }
   ],
-  "action_log_index": 4,
-  "log": [
-    [
-      "Player2: Advance: Pay 1 action, Pay 2 ideas, Unlock Provinces, Gain Dogma and take an event token (1 left)",
-      "Player2: Dogma: Ideas limit reduced to 2",
-      "Player2: Waste: Could not store 2 ideas"
-    ],
-    [
-      "Player2: Construct Building: Pay 1 action, Pay 1 wood and 1 ore with State Religion, Gain Temple at C1",
-      "Player2: State Religion: Reduce the food cost to 0"
-    ],
-    [
-      "Player2: Temple: Gain 1 culture token"
-    ],
-    [
-      "Player2: Dogma: Gain Fanaticism and take an event token (triggering an incident)"
-    ],
-    [
-      "A new game event has been triggered: Anarchy",
-      "Player2: Anarchy: Lose 2 government advances due to Anarchy - adding 2 victory points"
-    ]
-  ],
+  "log_index": 4,
   "undo_limit": 4,
   "actions_left": 1,
   "round": 1,

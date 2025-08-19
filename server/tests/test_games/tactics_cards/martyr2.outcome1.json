@@ -486,15 +486,13 @@
   },
   "starting_player_index": 1,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
-            {
-              "index": 0,
+          "turns": [ { "turn_type": { "Player": 0 }
               "actions": [
                 {
                   "action": {
@@ -707,7 +705,7 @@
       ]
     }
   ],
-  "action_log_index": 10,
+  "log_index": 10,
   "log": [
     [
       "The game has started"

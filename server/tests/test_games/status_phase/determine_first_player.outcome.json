@@ -186,15 +186,13 @@
   },
   "starting_player_index": 1,
   "current_player_index": 1,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
-            {
-              "index": 0,
+          "turns": [ { "turn_type": { "Player": 0 }
               "actions": [
                 {
                   "action": {
@@ -214,16 +212,14 @@
       "rounds": [
         {
           "round": 1,
-          "players": [
-            {
-              "index": 1
+          "turns": [ { "turn_type": { "Player": 1 }
             }
           ]
         }
       ]
     }
   ],
-  "action_log_index": 0,
+  "log_index": 0,
   "log": [
     [
       "Player1: Determine First Player: Player1 choose Player2 as the new starting player"

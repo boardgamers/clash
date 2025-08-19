@@ -264,15 +264,17 @@
   },
   "starting_player_index": 0,
   "current_player_index": 0,
-  "action_log": [
+  "log": [
     {
       "age": 1,
       "rounds": [
         {
           "round": 1,
-          "players": [
+          "turns": [
             {
-              "index": 0,
+              "turn_type": {
+                "Player": 0
+              },
               "actions": [
                 {
                   "action": {
@@ -292,6 +294,9 @@
                         "Advance": "Taxes"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Taxes: Pay 1 action, Start action, Pay 1 mood token"
                   ]
                 },
                 {
@@ -317,6 +322,9 @@
                         "Advance": "Taxes"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Taxes: Pay 1 mood token"
                   ]
                 },
                 {
@@ -346,6 +354,10 @@
                         "Ability": "Taxes"
                       }
                     }
+                  ],
+                  "log": [
+                    "Player1: Taxes: Gain 1 food, 1 wood, 1 ore and 1 gold",
+                    "Player1: Waste: Could not store 1 food"
                   ]
                 }
               ]
@@ -355,19 +367,7 @@
       ]
     }
   ],
-  "action_log_index": 3,
-  "log": [
-    [
-      "Player1: Taxes: Pay 1 action, Start action, Pay 1 mood token"
-    ],
-    [
-      "Player1: Taxes: Pay 1 mood token"
-    ],
-    [
-      "Player1: Taxes: Gain 1 food, 1 wood, 1 ore and 1 gold",
-      "Player1: Waste: Could not store 1 food"
-    ]
-  ],
+  "log_index": 3,
   "undo_limit": 0,
   "actions_left": 0,
   "round": 6,
