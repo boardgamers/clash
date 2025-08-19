@@ -10,7 +10,10 @@ use crate::content::persistent_events::{
 };
 use crate::events::{Event, EventOrigin, EventPlayer};
 use crate::game_data::GameData;
-use crate::log::{ActionLogAge, TurnType, add_round_log, add_turn_log, current_turn_log, current_turn_log_mut, current_action_log_mut};
+use crate::log::{
+    ActionLogAge, TurnType, add_round_log, add_turn_log, current_action_log_mut, current_turn_log,
+    current_turn_log_mut,
+};
 use crate::movement::MoveState;
 use crate::pirates::get_pirates_player;
 use crate::player::{CostTrigger, end_turn};
@@ -307,8 +310,7 @@ impl Game {
 
     #[must_use]
     pub fn can_redo(&self) -> bool {
-        self.context != GameContext::AI
-            && self.log_index < current_turn_log(self).actions.len()
+        self.context != GameContext::AI && self.log_index < current_turn_log(self).actions.len()
     }
 
     pub(crate) fn is_pirate_zone(&self, position: Position) -> bool {

@@ -123,7 +123,7 @@ pub(crate) fn show_log(rc: &RenderContext, d: &LogDialog) -> RenderResult {
     let mut prev_round: Option<String> = None;
     let mut prev_name: Option<String> = None;
 
-    for entry in d.log_entries[start..end].iter() {
+    for entry in &d.log_entries[start..end] {
         let message_text = &entry.message;
 
         // Calculate positions for each column
@@ -133,11 +133,15 @@ pub(crate) fn show_log(rc: &RenderContext, d: &LogDialog) -> RenderResult {
         let message_pos = vec2(280., y * 25. + 20.);
 
         // Draw each column
-        if let Some(age) = &entry.age && entry.age != prev_age {
-            rc.draw_text(&age, age_pos.x, age_pos.y);
+        if let Some(age) = &entry.age
+            && entry.age != prev_age
+        {
+            rc.draw_text(age, age_pos.x, age_pos.y);
         }
-        if let Some(round) = &entry.round && entry.round != prev_round {
-            rc.draw_text(&round, round_pos.x, round_pos.y);
+        if let Some(round) = &entry.round
+            && entry.round != prev_round
+        {
+            rc.draw_text(round, round_pos.x, round_pos.y);
         }
         if Some(&entry.name) != prev_name.as_ref() {
             rc.draw_text(&entry.name, player_pos.x, player_pos.y);
@@ -145,8 +149,8 @@ pub(crate) fn show_log(rc: &RenderContext, d: &LogDialog) -> RenderResult {
         rc.draw_text(message_text, message_pos.x, message_pos.y);
 
         // Update previous values
-        prev_age = entry.age.clone();
-        prev_round = entry.round.clone();
+        prev_age.clone_from(&entry.age);
+        prev_round.clone_from(&entry.round);
         prev_name = Some(entry.name.clone());
 
         y += 1.;
